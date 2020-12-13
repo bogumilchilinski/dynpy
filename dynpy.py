@@ -334,6 +334,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                 for q_tmp in self.q
             }
 
+        self.q_0=static_disp_dict
+            
         return self.governing_equations.subs(static_disp_dict)
 
     def external_forces(self):
@@ -341,31 +343,39 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             {gen_coord: 0
              for gen_coord in self.Y}).doit()
 
-    def critical_points(self, static_disp_dict=None):
+    def _op_points(self,hint=[], static_disp_dict=None,dict=True,*args,**kwargs):
+
+
         '''
         Provides the interface for critical points evaluation (solves the equlibrium conditions and returns its roots).
         '''
-        if static_disp_dict is None:
-            static_disp_dict = {
-                q_tmp:
-                Symbol(str(q_tmp).replace('(' + str(self.ivar) + ')', '_0'))
-                for q_tmp in self.q
-            }
 
+        eqns_to_solve=self.equilibrium_equation(static_disp_dict=static_disp_dict).doit()
+#         display(args,kwargs)
         roots = solve(
-            self.equilibrium_equation(static_disp_dict).doit(),
-            list(static_disp_dict.values()))
+            list(eqns_to_solve)+list(flatten([hint])),
+            list(self.q_0.values()),dict=dict)
 
-        if type(roots) is dict:
-            roots = list(roots.values())
+#         if type(roots) is dict:
+#             roots = list(roots.values())
 
-        #print(roots)
-        roots = list(Matrix(roots).doit())
+#         #print(roots)
+#         roots = list(Matrix(roots).doit())
+
+        return roots
+
+    def critical_points(self,hint=None ,static_disp_dict=None,dict=True):
+        '''
+        Provides the interface for critical points evaluation (solves the equlibrium conditions and returns its roots).
+        '''
+        
+
+        roots_list = self._op_points(hint=hint,static_disp_dict= static_disp_dict,dict=dict)
 
         return [
-            Eq(list(static_disp_dict.values())[no], root)
-            for no, root in enumerate(roots)
-        ]
+                [Eq(coord,solution) for coord,solution in root_dict.items()]
+                for no, root_dict in enumerate(roots_list)
+               ]
 
     def inertia_matrix(self):
         '''
@@ -873,7 +883,7 @@ class WeakNonlinearOscillator(HarmonicOscillator):
             for q_tmp in self.q
         }
         print(subscripts_dict)
-        print()
+        print(self.args)
         return HarmonicOscillator(
             Lagrangian=self.linearized().lagrangian().subs(self.eps, 0).subs(subscripts_dict).doit(),
             qs=self.q.subs(subscripts_dict),
