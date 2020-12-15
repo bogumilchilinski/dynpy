@@ -848,13 +848,15 @@ class WeakNonlinearOscillator(HarmonicOscillator):
         lin_lagrangian = nonlinear_system.linearized().lagrangian().subs(
             stationary_subs_dict).doit()
 
-        nonlin_lagrangian = nonlinear_system.approximated(
-            order).lagrangian() - lin_lagrangian
+        nonlin_lagrangian = ((nonlinear_system.approximated(
+            order).lagrangian() - lin_lagrangian)/eps).doit()
 
         #display(nonlin_lagrangian)
 
+        self._eps = Symbol(latex(eps),positive=True)
+        
         super().__init__(
-            Lagrangian=lin_lagrangian - eps * nonlin_lagrangian,
+            Lagrangian=lin_lagrangian - self._eps * nonlin_lagrangian,
             qs=nonlinear_system.q,
             forcelist=nonlinear_system.forcelist,
             bodies=nonlinear_system.bodies,
@@ -864,9 +866,13 @@ class WeakNonlinearOscillator(HarmonicOscillator):
                 nonlinear_system.coneqs)[len((nonlinear_system._hol_coneqs)):],
             ivar=ivar)
 
-        self.eps = eps
+        
         self.order = order
 
+    @property
+    def eps(self):
+        return self._eps
+        
     def __str__(self):
         return str(self.order) + '-order approximated ' + super().__str__()
 
