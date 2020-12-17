@@ -249,7 +249,37 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self.Y = list(self.q) + list(self.u)
 
         #LM=me.LagrangesMethod(Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs)
-
+    def _kwargs(self):
+        return {'bodies':self.bodies,
+                'frame':self.frame,
+                'forcelist':self.forcelist,
+                'hol_coneqs':self._hol_coneqs,
+                'nonhol_coneqs':list(self.coneqs)[len((self._hol_coneqs)):],
+                'qs':self.q,
+                'Lagrangian':self.lagrangian(),
+                'label':self._label,
+                'ivar':self.ivar,
+               }
+        
+    def __add__(self,other):
+        
+        self_dict=self._kwargs()
+        other_dict=other._kwargs()
+        
+        
+        self_dict['Lagrangian']=self_dict['Lagrangian']+other_dict['Lagrangian']
+        
+        self_dict['qs']=list(self_dict['qs'])+list(other_dict['qs'])
+        
+        print(self_dict['qs'])
+        
+        list_build = lambda x: flatten([x]) if x else []
+        
+        self_dict['forcelist']=list_build(self_dict['forcelist'])+list_build(other_dict['forcelist'])
+        self_dict['bodies']=list_build(self_dict['bodies'])+list_build(other_dict['bodies'])
+        
+        return LagrangesDynamicSystem(**self_dict)
+    
     def __call__(self, label=None):
         self._label = label
 
@@ -257,6 +287,29 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     def subs(self, *args, **kwargs):
 
+        if 'method' in kwargs.keys():
+            method=kwargs['method']
+        else:
+            method='as_constrains'
+            
+        print(method)
+        
+        if method == 'as_constrains':
+            if len(args)==2:
+                args=([(args[0],args[1])]),
+                
+            elif len(args)==1:
+                if isinstance(args[0],dict):
+                    print(args[0])
+                    args=list(args[0].items()),
+        
+            print(args)
+            constrains=[lhs-rhs  for lhs,rhs  in args[0] if  any (coord in  (lhs-rhs ).atoms(Function) for coord  in self.q) ]
+            args=([(lhs,rhs)  for lhs,rhs  in args[0] if not  any (coord in  (lhs-rhs ).atoms(Function) for coord  in self.q) ],)
+            
+        print(constrains)
+        print(args)
+        
         old_points = [point for point, force in self.forcelist]
         new_forces = [
             force.subs(*args, **kwargs) for point, force in self.forcelist
