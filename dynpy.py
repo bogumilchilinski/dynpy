@@ -456,7 +456,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         '''
         params = self.system_parameters(parameter_values=parameter_values)
         return {
-            'odes_system': self.rhs,
+            'odes_system': self.rhs(),
             'ivar': self.ivar,
             'dvars': self.Y,
             'params': params
