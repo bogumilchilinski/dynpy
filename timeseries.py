@@ -3,6 +3,7 @@ from numpy import (fft)
 import numpy as np
 from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, Plot, Figure , Alignat, Package,Quantity, Command
 from pylatex.utils import italic,NoEscape
+from sympy.physics.mechanics import vlatex
 
 
 default_colors=['red','blue','orange','teal','black','green']
@@ -20,7 +21,7 @@ class DataMethods:
         doc.packages.append(Package('float'))
 
         
-        labels_list=['$'+label+'$' for label in self.columns]
+        labels_list=['$'+vlatex(label)+'$' for label in self.columns]
 
         data_for_plot_list=[zip(self.index,plot_data)  for label,plot_data in list(self.items())]
 
