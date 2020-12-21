@@ -1,8 +1,67 @@
 from pandas import (Series,DataFrame)
 from numpy import (fft)
 import numpy as np
+from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, Plot, Figure , Alignat, Package,Quantity, Command
+from pylatex.utils import italic,NoEscape
 
-class SpectralMethods:
+
+default_colors=['red','blue','orange','teal','black','green']
+
+class DataMethods:
+    def to_tikz_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'6cm'), width=NoEscape(r'15cm'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False):
+
+        
+        geometry_options ={"margin": "0cm",}
+        doc = Document(documentclass='standalone',geometry_options=None,document_options=["tikz"])
+        #doc=Document(documentclass='subfiles',document_options=NoEscape('bch_r4.tex'))
+        doc.append(Command('usepgfplotslibrary',arguments='units'))
+        doc.packages.append(Package('siunitx'))
+        doc.packages.append(Package('amsmath'))
+        doc.packages.append(Package('float'))
+
+        
+        labels_list=['$'+label+'$' for label in self.columns]
+
+        data_for_plot_list=[zip(self.index,plot_data)  for label,plot_data in list(self.items())]
+
+        plots_no=len(data_for_plot_list)
+        
+        colors_multiplicator=np.ceil(plots_no/len(colors_list))
+
+        plot_options = NoEscape('anchor=north west,ymajorgrids=true,xmajorgrids=true,grid style=dashed,legend style={font=\small},'+y_axis_description)+NoEscape(',height=')+height+NoEscape(',width=')+width
+        
+        #with doc.create(Figure(position='!htb')) as fig:
+
+        plot_options_list=[plot_options+NoEscape(',xticklabels=\empty,')]*(plots_no-1)
+        plot_options_list.append( plot_options+NoEscape(x_axis_description) )
+        
+        with doc.create(TikZ()) as tikzpicture:
+            if subplots==False:
+
+                with tikzpicture.create(Axis(options=plot_options_list[-1])) as plot:
+
+                    for data_for_plot,label,color in zip(data_for_plot_list,labels_list,colors_list*int(colors_multiplicator)) :
+                        coordinates = data_for_plot
+
+                        plot.append(Plot(name=NoEscape(NoEscape(r'\tiny '+label)), coordinates=coordinates,options='color='+color+',solid'))
+
+            else:
+                at_option=NoEscape('')
+                for no,combined_plot_data in enumerate(zip(data_for_plot_list,labels_list,colors_list*int(colors_multiplicator))):
+                    data_for_plot,label,color = combined_plot_data
+                    plot_name=NoEscape(',name=plot'+str(no)+',')
+                    with tikzpicture.create(Axis(options=plot_options_list[no]+plot_name+at_option )) as plot:
+                        coordinates = data_for_plot
+                        plot.append(Plot(name=NoEscape(NoEscape(r'\tiny '+label)), coordinates=coordinates,options='color='+color+',solid'))
+                        #at_option=NoEscape('at=(plot'+str(no)+'.below south west),')
+                        at_option=NoEscape('at=(plot'+str(no)+'.south west),')
+                        
+
+        doc.generate_tex(filename)
+        return doc.dumps()
+
+
+class SpectralMethods(DataMethods):
 
     def is_uniformly_distributed(self):
 
@@ -52,7 +111,7 @@ class SpectralMethods:
 
 #         return TimeDataFrame(data=spectrum_shifted_ss,index=f_span_shifted_ss)
 
-class TimeDomainMethods:
+class TimeDomainMethods(DataMethods):
 
     def is_uniformly_distributed(self):
 
@@ -186,6 +245,16 @@ class TimeSeries(Series,TimeDomainMethods):
 #         spectrum={name:(fft.fft(data)) for name,data in self.items()}
 #         f_span=fft.fftfreq(len(self.index),d=self.index[1]-self.index[0])
 #         return SpectrumSeries(data=spectrum,index=(f_span))
+
+    def to_tikz_plot(self,filename,labels_list=None,colors_list=['red','blue','orange'],x_axis_description='xlabel={$t$},x unit=\si{\second},',y_axis_description=None):
+        
+        if y_axis_description == None:
+            y_axis_description='ylabel=$'+self.name+'$,'
+        
+        
+        aux_dataframe=TimeDataFrame(data=self,index=self.index)
+        dumped_tex=aux_dataframe.to_tikz_plot(filename=filename,labels_list=labels_list,colors_list=colors_list,x_axis_description=x_axis_description,y_axis_description=y_axis_description)
+        return dumped_tex
 
 class TimeDataFrame(DataFrame,TimeDomainMethods):
 
