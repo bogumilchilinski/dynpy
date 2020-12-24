@@ -90,7 +90,8 @@ class OdeComputationalCase:
                  t_span=[],
                  params=[],
                  params_values={},
-                 ic_point={}):
+                 ic_point={},
+                 evaluate=False):
         '''
         Supply the following arguments for the initialization of OdeComputationalCase:
         
@@ -121,7 +122,11 @@ class OdeComputationalCase:
             self.params_values = params_values
 
         self.t_span = t_span
-        self.__numerical_odes = None
+        
+        if evaluate:
+            self.form_numerical_rhs()
+        else:
+            self.__numerical_odes = None
 
     def __fortran_odes_rhs(self):
         '''
