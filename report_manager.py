@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, Plot, Figure, Alignat, Package, Quantity, Command, Label, Ref, Marker
+from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, Plot, Figure, Alignat, Package, Quantity, Command, Label, Ref, Marker, NewPage
 from pylatex.section import Chapter
 from pylatex.utils import italic, NoEscape
 
@@ -102,12 +102,43 @@ class ReportModelAnalysis:
         return doc
 
 
+    
+class RandomDescription:
+    
+
+    def __init__(self,*args,random_or_order=None,**kwargs):
+        
+        self.pool_list=args
+        self.random_or_order=random_or_order
+        
+
+    def to_string(self):
+        
+        if hasattr(self.random_or_order, '__contains__'):
+            self.order=list(random_or_order)
+        else:
+            self.selected_sentences=[random.choice(pool)  for pool in self.pool_list]
+        
+        
+        
+        
+        return ' '.join(self.selected_sentences)
+    
+    def __str__(self):
+        
+        
+        return self.to_string()
+    
+    def __repr__(self):
+        return self.__class__.__name__+': '+self.to_string()
+    
 class ReportSimulationsAnalysis:
     def __init__(self,
                  results_frame,
                  analysis_key,
                  analysis_name='dynamics',
-                 results_col_name='simulations'):
+                 results_col_name='simulations',
+                 preview=True):
         geometry_options = {
             "margin": "1cm",
         }
@@ -122,6 +153,7 @@ class ReportSimulationsAnalysis:
         doc.packages.append(Package('amsmath'))
         doc.packages.append(Package('float'))
         doc.packages.append(Package('tikz'))
+        doc.packages.append(Package('booktabs'))
         doc.packages.append(Package('pgfplots'))
         doc.packages.append(Package('polski', options=["MeX"]))
         doc.packages.append(Command('usepgfplotslibrary', arguments='units'))
@@ -130,13 +162,16 @@ class ReportSimulationsAnalysis:
         self.analysis_key = analysis_key
         self.analysis_name = analysis_name
         self.sims_name = results_col_name
-
+        self.preview=preview
         
         #self.model= model
         
+        
+        
+        
        
         
-        self.introduction_bank_1=[
+        self.sec_introduction_bank_1=[
             'Wykorzystując przygotowany model dynamiczny, przeprowadzono serię symulacji mających na celu ocenę wrażliwości modelu na zmiany wybranych parametrów. ',
             'Przeprowadzenie analizy numerycznej wymaga znajomości modelu dynamicznego oraz zdeterminowania parametrów oddziałujących na zachowanie układu wskutek ich zmian. ',
             'Wykorzystując przygotowane środowisko obliczeniowe, wykonano szereg symulacji, opracowano dane numeryczne i przedstawiono je w postaci następujących wykresów. ',
@@ -144,20 +179,48 @@ class ReportSimulationsAnalysis:
             'W oparciu o wybrany model dynamiczny wózka, wykonano analizy numeryczne zaprezentowane na kolejnych wykresach. '
             ]
         
-        self.introduction_bank_2=[
-            'Na wykresie {nr_rys} przedstawiano zmiany wielkości dynamicznych charakteryzujących ruch wózka. Po przeanalizowaniu można zanotować wzajemną zależność poszczególnych wielkości dynamicznych. ',
-            'Charakter przebiegu wartości dynamicznych wózka został przedstawiony na rysunku {nr_rys}. ',
-            'Wykres {nr_rys} pokazuje zmienność parametrów dynamicznych wózka w trakcie symulownego przejazdu. ',
-            'Po przeanalizowaniu wykresu {nr_rys} można zanotować wzajemną zależność poszczególnych wielkości dynamicznych. Dodatkowo wielkości modelu stabilizują się w czasie. '
-        ]
-        
-        
-        self.introduction_bank_3=[
+        self.sec_introduction_bank_2=[
             'Na podstawie spostrzeżeń wynikających z obserwacji odpowiedzi czasowych analizowanego układu możliwe będzie wprowadzenie zmian, które wpłyną na poprawę działania modelu. ',
             'Charakter zmian przebiegów poszczególnch współrzędnych może posłużyć do opracowania wniosków, na podstawie których możliwe będzie ulepszenie funkcjonowania rozważanego układu. ',
             'Zaprezentowane wykresy przedstawiające odpowiedzi czasowe układu maja na celu ułatwienie analizy zachowania modelu dynamicznego oraz wprowadzenie ewentualnych poprawek na podstawie dokonanych obserwacji i spostrzeżeń. ',
             'Dostrzegając wzajemne zależności między dynamicznymi parametrami wózka możliwe będzie wprowadzenie takich zmian, które w korzystny sposób wpłyną na odpowiedź układu. '
         ]
+        
+        
+        self.sec_introduction_bank_3=[
+            'Na podstawie spostrzeżeń wynikających z obserwacji odpowiedzi czasowych analizowanego układu możliwe będzie wprowadzenie zmian, które wpłyną na poprawę działania modelu. ',
+            'Charakter zmian przebiegów poszczególnch współrzędnych może posłużyć do opracowania wniosków, na podstawie których możliwe będzie ulepszenie funkcjonowania rozważanego układu. ',
+            'Zaprezentowane wykresy przedstawiające odpowiedzi czasowe układu maja na celu ułatwienie analizy zachowania modelu dynamicznego oraz wprowadzenie ewentualnych poprawek na podstawie dokonanych obserwacji i spostrzeżeń. ',
+            'Dostrzegając wzajemne zależności między dynamicznymi parametrami wózka możliwe będzie wprowadzenie takich zmian, które w korzystny sposób wpłyną na odpowiedź układu. '
+        ]        
+        
+        self.sec_intro_bank=[str(RandomDescription(self.sec_introduction_bank_1,self.sec_introduction_bank_2,self.sec_introduction_bank_3)) for obj in range(30)  ]        
+        
+        self.introduction_bank_1=[
+            'Na wykresie {nr_rys} przedstawiano zmiany wielkości dynamicznych charakteryzujących ruch wózka. Po przeanalizowaniu można zanotować wzajemną zależność poszczególnych wielkości dynamicznych.',
+            'Charakter przebiegu wartości dynamicznych wózka został przedstawiony na rysunku {nr_rys}.',
+            'Wykres {nr_rys} pokazuje zmienność parametrów dynamicznych wózka w trakcie symulownego przejazdu.',
+            'Rysunek {nr_rys} prezentuje wykres opisujący zmienność parametrów dynamicznych wózka w trakcie jazdy po zamodelowanym torze.',
+        ]
+        
+        self.introduction_bank_2=[
+            'Symulacja została przeprowadzona dla następujących danych: {given_data}.',
+            'Zaprezentowane wyniki numeryczne otrzymano dla danych równych:{given_data}.',
+            'Eksperyment numeryczny został przeprowadzona dla następujących danych:{given_data}.',
+            'Wyniki stmulacji numerycznych otrzymano dla:{given_data}.',
+        ]
+        
+
+        
+        self.introduction_bank_3=[
+            'Na podstawie spostrzeżeń wynikających z obserwacji odpowiedzi czasowych analizowanego układu stwierdza się oscylacyjny charakter odpowiedzi układu. Dynamika systemu ma stabilny charakter',
+            'Charakter zmian przebiegów poszczególnch współrzędnych jest stabilny. Otrzymane sygnały mieszczą się w zakresie dopuszczalnych uwarunkowaniami fizycznymi.',
+            'Zaprezentowane wykresy przedstawiające odpowiedzi czasowe układu mają drganiowy charakter i są zgodne z oczekiwaniami.',
+            'Bazując na otrzymanych wynikach można stwierdzić wzajemną zależność poszczególnych wielkości dynamicznych. Dodatkowo wielkości modelu stabilizują się w czasie. '
+        ]
+        
+        
+        self.intro_bank=[str(RandomDescription(self.introduction_bank_1,self.introduction_bank_2,self.introduction_bank_3)) for obj in range(30)  ]
         
         
         
@@ -180,7 +243,7 @@ class ReportSimulationsAnalysis:
         
         self.time_domain_summary_3 = [ 
             'Wyniki symulacji pokazują, że wartość maksymalna dla współrzędnej uogólnionej \({varphi(t)}\) wynosi {varphi(t)_max}. ',
-            'Analizowane sygnały reprezentujące odpowiedż czasową układu charakteryzują się wartością maksymalną równą {varphi(t)_max} dla współrzędnej \({varphi(t)}\).'
+            'Analizowane sygnały reprezentujące odpowiedż czasową układu charakteryzują się wartością maksymalną równą {varphi(t)_max} dla współrzędnej \({varphi(t)}\). '
             'Wartość minimalna przebiegu współrzędnej \({varphi(t)}\) jest równa {varphi(t)_min}. ',
             'Przeprowadzone badania numeryczne pozwalają stwierdzić, że odpowiedź czasowa \({varphi(t)}\) nie przekracza {varphi(t)_max} i jest ograniczona z dołu przez {varphi(t)_min}. ',
             'Bazując na analizie przeprowadzonych badań zaobserwowano, że współrzędna \({varphi(t)}\) nie przekraczaa wartości {varphi(t)_max}, a wartość mininalna wynosi {varphi(t)_min}. ',
@@ -189,7 +252,7 @@ class ReportSimulationsAnalysis:
 
         self.time_domain_summary_4 = [ 
             'Wyniki symulacji pokazują, że wartość maksymalna dla współrzędnej uogólnionej \({z(t)}\) wynosi {z(t)_max}. ',
-            'Analizowane sygnały reprezentujące odpowiedż czasową układu charakteryzują się wartością maksymalną równą {z(t)_max} dla współrzędnej \({z(t)}\).'
+            'Analizowane sygnały reprezentujące odpowiedż czasową układu charakteryzują się wartością maksymalną równą {z(t)_max} dla współrzędnej \({z(t)}\). '
             'Wartość minimalna przebiegu współrzędnej \({z(t)}\) jest równa {z(t)_min}. ',
             'Przeprowadzone badania numeryczne pozwalają stwierdzić, że odpowiedź czasowa \({z(t)}\) nie przekracza {z(t)_max} i jest ograniczona z dołu przez {z(t)_min}. ',
             'Bazując na analizie przeprowadzonych badań zaobserwowano, że współrzędna \({z(t)}\) nie przekraczaa wartości {z(t)_max}, a wartość mininalna wynosi {z(t)_min}. ',
@@ -204,7 +267,16 @@ class ReportSimulationsAnalysis:
             'Bazując na analizie przeprowadzonych badań zaobserwowano, że współrzędna \({varphi_RC(t)}\) nie przekraczaa wartości {varphi_RC(t)_max}, a wartość mininalna wynosi {varphi_RC(t)_min}. ',
         ]        
         
-        self.time_domain_summary_4 = [
+        
+        self.summary_bank=[str(RandomDescription(
+                    self.time_domain_summary_1,
+                    self.time_domain_summary_2,
+                    self.time_domain_summary_3,
+                    self.time_domain_summary_4,
+                    self.time_domain_summary_5,
+                        )) for obj in range(30)  ]
+        
+        self.time_domain_summary_7 = [
             'Zaobserwowane odczyty wynikające z wpływu \({param_name}\) występują w konketrnym czasie ruchu {t_val}. ',
             'Odczytana maksymalna wartość amplitudy {max_val} wynika z działania \({param_name}\) wystąpiła konkretnie w czasie {t_val}. '
             'Minimalny zaobserwowany wynik amplitudy {min_val} miał miejsce w {t_val} czasu trwania pomiaru. ',
@@ -218,6 +290,8 @@ class ReportSimulationsAnalysis:
             'Bazując na analizie przeprowadzonych badań zaobserwowano, że współrzędna \({varphi(t)}\) nie przekraczaa wartości {varphi(t)_max}, a wartość mininalna wynosi {varphi(t)_min}. ',
         ]
         
+        
+       
         self.freq_domain_summary =[
            'Ponadto sprawdzono własności spektralne otrzymanych wyników symulacyjnych.',
            'Według przeprowadzonych badań modelowych struktura częstotliwościowa nie zawiera komonentów większych niż {max_val_spec}.',
@@ -270,10 +344,29 @@ class ReportSimulationsAnalysis:
 
             simulation_results_frame = self.results_frame
 
+            random_sec_intro=random.choice(self.sec_intro_bank)
+            print('\n',random_sec_intro,'\n')
             
+            
+            
+            doc.append(
+                NoEscape(
+                     random_sec_intro.format(
+                         **strings_dict)+'\n'*2
+                ))
+            
+            symbols_df=pd.DataFrame(data=[
+                        {'Zmienna':'$ {eq}  $'.format(eq=vlatex(key)),
+                         'Liczba przypadków':len(simulation_results_frame[key].unique()),
+                         'Wartość minimalna':simulation_results_frame[key].min(),
+                         'Wartość maksymalna':simulation_results_frame[key].max() } for key in  simulation_results_frame.columns if isinstance(key,Symbol)  ]).round(2)
+            doc.append(NoEscape( symbols_df.to_latex(index=False,escape=False))  )
+            
+            doc.append(NewPage())
             
             for no, row in enumerate(simulation_results_frame.iterrows()):
                 
+                model=row[1]['model']
                 
                 ref_name=self.analysis_name+'_'+ str(self.analysis_key)+'_'+ str(no)
                 fig_name='./plots/'+ref_name
@@ -287,30 +380,45 @@ class ReportSimulationsAnalysis:
              
                 strings_dict_max['max_val_list']=', '.join([ '\( {coord} \) - \( {coord_max} \)'.format(**{'coord':vlatex(coord),'coord_max':str(summary_frame_max[coord][row[1][self.analysis_key]])})   for coord in column_names])
             
+            
+                
+            
                 strings_dict_max={**strings_dict_max,**strings_dict_min}
+            
+            
+                
+            
             
                 #print([ '\( {coord} \) - \( {coord_max} \)'.format(**{'coord':str(coord),'coord_max':str(summary_frame_max[coord][row[1][self.analysis_key]])})   for coord in column_names])
                 
             
-                display(strings_dict_max)
+                #display(strings_dict_max)
                 #display(simulation_results_frame)
 
                 solution_tmp = row[1]['simulations']
 
-                tmp_dict = row[1].to_dict()
+                tmp_dict = {key:row[1].to_dict()[key]  for key in  model.system_parameters()  }
+                strings_dict_max['given_data']='$' +'$, $'.join([vlatex(Eq(lhs, rhs))for lhs, rhs in tmp_dict.items()]) + '$.'
 
-                tmp_dict.pop('simulations')
-                tmp_dict.pop('model')
+#                 tmp_dict.pop('simulations')
+#                 model=tmp_dict.pop('model')
+#                 tmp_dict.pop('num_model')
 
                 n = random.randint(0, 99)
 
                 #mrk = Marker(self.analysis_name + str(no), prefix='fig')
 
+        
+                random_intro=random.choice(self.intro_bank)
+                print('\n',random_intro,'\n')
+        
                 doc.append(
                     NoEscape(
-                        (random.choice(self.introduction_bank_1)+random.choice(self.introduction_bank_2)+random.choice(self.introduction_bank_3)).format(
+                         random_intro.format(
                              **strings_dict,**strings_dict_max)+'\n'*2
                     ))
+                
+            
                 with doc.create(Figure(position='H')) as fig:
                     #                 kitten_pic.add_image(image_filename, width='120px')
                     #                 kitten_pic.add_caption('Look it\'s on its back')
@@ -338,21 +446,22 @@ class ReportSimulationsAnalysis:
                     fig.add_image(fig_name,width=NoEscape('20cm'))
                     plt.show()
                     fig.add_caption(
-                        NoEscape('Przebiegi czasowe modelu dla danych: $' +
-                                 '$, $'.join([
-                                     vlatex(Eq(lhs, rhs))
-                                     for lhs, rhs in tmp_dict.items()
-                                 ]) + '$.'))
+                        NoEscape('Przebiegi czasowe modelu dla danych: {given_data}'.format(**strings_dict,**strings_dict_max))  )
                     fig.append(Label(mrk))
                     #fig.add_caption(NoEscape('Przebiegi czasowe zmiennej zależnej')) #$'+vlatex(coord) + '$ dla parametru $'+vlatex(param_label)+'$'))
 
                 n = random.randint(0, 99)
+                
+                random_summary=random.choice(self.summary_bank)
+                print('\n',random_summary,'\n')
+                
                 doc.append(
                     NoEscape(
-                        (random.choice(self.time_domain_summary_1)+random.choice(self.time_domain_summary_2)+random.choice(self.time_domain_summary_3)+random.choice(self.time_domain_summary_3)+random.choice(self.time_domain_summary_5)).format(
+                        random_summary.format(
                              **strings_dict,**strings_dict_max)+'\n'*2
                         ))
-
+                
+                doc.append(NewPage())
             
 
         with doc.create(
