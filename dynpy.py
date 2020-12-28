@@ -8,6 +8,8 @@ import itertools as itools
 import scipy.integrate as solver
 from timeseries import *
 
+from IPython.display import display
+
 import sympy.physics.mechanics as me
 
 
@@ -91,12 +93,20 @@ class OdeComputationalCase:
                  params=[],
                  params_values={},
                  ic_point={},
-                 evaluate=False):
+                 evaluate=False,
+                 label=None):
         '''
         Supply the following arguments for the initialization of OdeComputationalCase:
         
         Args:
         '''
+        
+        #if label==None:
+            
+
+        
+        
+        
         self.odes_system = odes_system
         self.ivar = ivar
         self.dvars = dvars
@@ -127,7 +137,27 @@ class OdeComputationalCase:
             self.form_numerical_rhs()
         else:
             self.__numerical_odes = None
+            
+        if label==None:    
+            label=self._label = self.__class__.__name__ + ' with ' + str(len(self.dvars)) + ' equations'
+        self._label=label
 
+    def __call__(self,label=None):
+        
+        self._label=label
+        return self
+        
+    def __str__(self):
+#         if self._label==None:
+#             self._label = self.__class__.__name__ + ' with ' + str(len(self.dvars)) + ' equations'
+        #self._label = self.__class__.__name__ + ' with ' + str(len(self.dvars)) + ' equations'
+
+        return self._label
+
+    def __repr__(self):
+
+        return self.__str__()
+            
     def __fortran_odes_rhs(self):
         '''
         Generates the bininary code related to symbolical expresions declered in the __init__ method. The function object is returned where the all arguments create a tuple.
@@ -219,7 +249,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         Supply the following for the initialization of DynamicSystem in the same way as LagrangesMethod
         """
+        
 
+        
         if isinstance(Lagrangian, me.LagrangesMethod):
             bodies = Lagrangian._bodies
             frame = Lagrangian.inertial
@@ -230,7 +262,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             qs = Lagrangian.q
             Lagrangian = sum(Lagrangian._L)
 
-        self._label = label
+
         self.ivar = ivar
         #         self.forcelist=forcelist
         self.frame = frame
@@ -253,6 +285,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self.governing_equations = self.__governing_equations
         self.Y = list(self.q) + list(self.u)
 
+        if label==None:
+            label = self.__class__.__name__ + ' with ' + str(len(self.q)) + 'DOF' 
+            
+        self._label = label
+        
         #LM=me.LagrangesMethod(Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs)
     def _kwargs(self):
         return {'bodies':self.bodies,
@@ -285,11 +322,24 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         return LagrangesDynamicSystem(**self_dict)
     
-    def __call__(self, label=None):
-        self._label = label
+    def shranked(self,*args):
+        self_dict=self._kwargs()
+        self_dict['qs']=flatten(args)
+        
+        return LagrangesDynamicSystem(**self_dict)
+        
 
-        return self
+    def remove(self,*args):
+        
+        bounded_coordinates=flatten(args)
+        
+        self_dict=self._kwargs()
+        self_dict['qs']=[coord for coord in self.q if coord not in bounded_coordinates]
+        
+        return LagrangesDynamicSystem(**self_dict)
 
+    
+    
     def subs(self, *args, **kwargs):
 
         if 'method' in kwargs.keys():
@@ -297,7 +347,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         else:
             method='as_constrains'
             
-        print(method)
+        
         
         if method == 'as_constrains':
             if len(args)==2:
@@ -308,12 +358,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                     print(args[0])
                     args=list(args[0].items()),
         
-            print(args)
+            
             constrains=[lhs-rhs  for lhs,rhs  in args[0] if  any (coord in  (lhs-rhs ).atoms(Function) for coord  in self.q) ]
             args=([(lhs,rhs)  for lhs,rhs  in args[0] if not  any (coord in  (lhs-rhs ).atoms(Function) for coord  in self.q) ],)
             
-        print(constrains)
-        print(args)
+#         print(constrains)
+#         print(args)
         
         old_points = [point for point, force in self.forcelist]
         new_forces = [
@@ -332,8 +382,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         forces_subs = list(zip(new_points, new_forces))
 
-        print(forces_subs)
-        print(self.forcelist)
+#         print(forces_subs)
+#         print(self.forcelist)
 
         return LagrangesDynamicSystem(
             Lagrangian=lagrangian_subs,
@@ -356,9 +406,15 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         Private method which processes preview printing. The method is or isn't used depending on user's bool 'preview' input.
         '''
 
+    def __call__(self, label=None):
+        self._label = label
+
+        return self
+        
     def __str__(self):
 
-        return self.__class__.__name__ + ' with ' + str(len(self.q)) + 'DOF'
+            
+        return self._label
 
     def __repr__(self):
 
@@ -461,10 +517,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         '''
         params = self.system_parameters(parameter_values=parameter_values)
         return {
-            'odes_system': self.rhs(),
+            'odes_system': self.rhs().doit(),
             'ivar': self.ivar,
             'dvars': self.Y,
-            'params': params
+            'params': params,
+            'label': 'Numerical model of '+self.__str__(),
         }
 
     def solution(self, initial_conditions=None):
