@@ -355,7 +355,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                 
             elif len(args)==1:
                 if isinstance(args[0],dict):
-                    print(args[0])
+                    #print(args[0])
                     args=list(args[0].items()),
         
             
