@@ -11,13 +11,10 @@ from pylatex.package import Package
 import os
 
 from sympy.physics.vector.printing import vpprint, vlatex
-
 import sympy.physics.mechanics as me
 
 import matplotlib.pyplot as plt
-
 import random
-
 from sympy import *
 
 
@@ -42,6 +39,13 @@ class DMath(Environment):
 #     packages = [Package('breqn'), Package('flexisym')]
 #     escape = False
 #     content_separator = " "
+Z1_02_models_intro_ex1=['Na Rysunku {nr_rys} zaprezentowano koncpecję układu o {n}. ','Rysunek {nr_rys} przedstawia model o {n}. ','Model o {n} pokazano na Rysunku {nr_rys}. ']
+Z1_02_models_intro_ex2=['Na jego podstawie wyznaczono wzory na energie kinetyczną oraz potencjalną. ','Posłużył on do wyznaczenia zależnośći na energię kinetyczną i potencjalną. ','Został on wykorzystany do wyznaczenia równań na energię kinetyczną i potencjalną. ']
+Z1_02_models_intro_itemize=['Koncepcja zakłada więc sumę następujących składników:','Należy więc dokonać sumowania poszczególnych elementów:','''Zgodnie z mechaniką Lagrange'a należy zsumować wartości:''']
+Z1_02_models_intro_aspect_list=[]
+mrk1=Marker('2dof',prefix='fig')
+chair_dofs=['dwóch stopniach swobody','trzech stopniach swobody z obrotem','trzech stopniach swobody bez obrotu', 'pięciu stopniach swobody']
+
 
 class ReportModelAnalysis:
     
@@ -73,7 +77,7 @@ class ReportModelAnalysis:
         
         self.chapter_name= type(self).chapter_name
 
-    def static(self):
+    def lagranges(self):
 
         doc = self.doc
 
@@ -81,15 +85,44 @@ class ReportModelAnalysis:
         
         #musisz też dopisać o jednym stopniu - to będzie ten indeks
         with doc.create(Chapter(self.chapter_name)):
-            doc.append(
-                '''Na Rysunku''' 
-#                 \\ref{fig:2dof} zaprezentowano najprostszą kocncepcję układu. Zaproponowano dwa stopnie swobody - przemieszczenie pionowe oraz poziome całego wózka inwalidzkiego. Model ten zakłada więc sumę następujących składników energii:
-            )
+            doc.append(for i,val in enumerate(chair_dofs):
+    Z1_02_models_intro_aspect=str(random.choice(Z1_02_models_intro_ex1)).format(**{'n':val,'nr_rys':(Ref(mrk1)).dumps()})+str(random.choice(Z1_02_models_intro_ex2))+str(random.choice(Z1_02_models_intro_itemize))
+    Z1_02_models_intro_aspect_list.append(Z1_02_models_intro_aspect))
+            with doc.create(DMath()):
+                doc.append('T=')
 
-#             with doc.create(Ref()):
-#                 mrk=Marker('nazwa',prefix='fig)
-#                 doc.append('L=')
+                doc.append(vlatex(model.lagrangian() +model.lagrangian().subs({vel:0  for vel  in model.u})))
+            with doc.create(DMath()):
+                doc.append('V=')
 
+                doc.append(vlatex(-self.model.lagrangian().subs({vel:0  for vel  in model.u})))
+
+    
+
+            with doc.create(DMath()):
+                doc.append('L=')
+
+                doc.append(vlatex(self.model.lagrangian()))
+        return doc
+    def stat_and_dyn(self):
+        doc = self.doc
+
+        model = self.model
+
+        with doc.create(Chapter(self.chapter_name)):
+
+            for i in range(len(model.q)):
+                with doc.create(DMath()):
+                    doc.append(vlatex(self.model.equilibrium_equation().doit()[i]))
+            for lhs,rhs in zip(symbols('k_1:{ndof}_1:{ndof}'.format(ndof=len(model.q)+1)),(list(model.linearized().stiffness_matrix()))):
+                with doc.create(DMath()):
+                    doc.append(vlatex([Eq(lhs,rhs)]))  
+            for i in range(len(model.q)):
+                with doc.create(DMath()):
+                    doc.append(vlatex(self.model._eoms[i]))
+            for lhs,rhs in zip(symbols('m_1:{ndof}_1:{ndof}'.format(ndof=len(model.q)+1)),(list(model.inertia_matrix()))):
+                with doc.create(DMath()):
+                    doc.append(vlatex([Eq(lhs,rhs)]))  
         return doc
 
 

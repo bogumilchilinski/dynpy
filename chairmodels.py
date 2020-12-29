@@ -265,7 +265,6 @@ class Chair5DOF(dyn.LagrangesDynamicSystem):
         
         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
                  hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar)
-
 class RapidChair3DOF(dyn.LagrangesDynamicSystem):
     def __init__(self, Lagrangian=L_rc_3dof, qs=qs_rc_3dof, forcelist=FL_rapidchair3dof, bodies=None, frame=N,
                    hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t')):
@@ -282,8 +281,9 @@ class Chair5DOFwithRC3DOF(dyn.LagrangesDynamicSystem):
 
 
 chair_5dof = Chair5DOF()('Chair 5DOF model')
-chair_3dof = chair_5dof.subs(dof3_rev,method='direct').remove([phi,z_fr])('Chair 3DOF model with revolution')
-chair_3dof = chair_5dof.subs(dof3_norev,method='direct').remove([z_rear,z_fr])('Chair 3DOF model without revolution')       
+chair_5dof_lin=chair_5dof.linearized()('Chair linearized 5DOF model')
+chair_3dof_rev = chair_5dof.subs(dof3_rev,method='direct').remove([phi,z_fr])('Chair 3DOF model with revolution')
+chair_3dof_norev = chair_5dof.subs(dof3_norev,method='direct').remove([z_rear,z_fr])('Chair 3DOF model without revolution')       
 chair_2dof = chair_5dof.subs(dof2,method='direct').remove([z_rear,z_fr,phi])('Chair 2DOF model')
 
 rapidchair_3dof = RapidChair3DOF()('RapidChair 3DOF model')
@@ -293,6 +293,9 @@ rapidchair_1dof=rapidchair_3dof.subs(rcdof1,method='direct').remove([z_wrc,theta
 
 chair5dof_rc3dof=Chair5DOFwithRC3DOF()
 
+T_chair_3dof_rev =T_chair5dof.subs(dof3_rev,method='direct')
+T_chair_3dof_norev =T_chair5dof.subs(dof3_norev,method='direct')
+T_chair_2dof=T_chair5dof.subs(dof2,method='direct')
 
 # class Chair3dof(dyn.LagrangesDynamicSystem):
 #     def __init__(self, Lagrangian=L_default_3dof, qs=qs_3dof, forcelist=FL, bodies=None, frame=N,
