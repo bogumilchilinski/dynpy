@@ -334,7 +334,18 @@ class ReportSimulationsAnalysis:
                     )) for obj in range(30)  ]
 
     
-    
+    conclusion_bank=[str(RandomDescription(
+#                 ['{varp(t)_max} dla argumentu {x(t)_idmax} 1'+str(i) for i in range(5)],
+#                 ['{x(t)_max} dla argumentu {x(t)_idmax} 2'+str(i) for i in range(5)],
+#                 ['{x(t)_max} dla argumentu {x(t)_idmax} 3'+str(i) for i in range(5)],
+#                 ['{x(t)_max} dla argumentu {x(t)_idmax} 4'+str(i) for i in range(5)],
+#                 ['{x(t)_max} dla argumentu {x(t)_idmax} 5'+str(i) for i in range(5)],
+                ['Conclusion 1'+str(i) for i in range(5)],
+                ['Conclusion 2'+str(i) for i in range(5)],
+                ['Concluison 3'+str(i) for i in range(5)],
+                ['Conclusion 4'+str(i) for i in range(5)],
+                ['Conclusion 5'+str(i) for i in range(5)],
+                    )) for obj in range(30)  ]
     
     
     def __init__(self,
@@ -378,6 +389,7 @@ class ReportSimulationsAnalysis:
         
        
         self.summary_bank=type(self).summary_bank
+        self.conclusion_bank=type(self).conclusion_bank
         
 
         
@@ -577,15 +589,17 @@ class ReportSimulationsAnalysis:
                     a.max()
                     for a in simulation_results_frame['simulations'].values
                 ],
-                index=[str(elem) for elem in simulation_results_frame[self.analysis_key]]
+                index=[str(elem) for elem in simulation_results_frame[self.analysis_key].round(2)]
                 )
             
             column_names=summary_frame.columns
             
             step_key_max_dict={str(name)+'_max':summary_frame[name].max() for name   in column_names}
             step_key_min_dict={str(name)+'_min':summary_frame[name].min() for name   in column_names}
+            step_key_idmax_dict={str(name)+'_idmax':summary_frame[name].idxmax() for name   in column_names}
+            step_key_idmin_dict={str(name)+'_idmin':summary_frame[name].idxmin() for name   in column_names}
             
-            self.step_key_dict={**self.step_key_dict,**step_key_max_dict,**step_key_min_dict}
+            self.step_key_dict={**self.step_key_dict,**step_key_max_dict,**step_key_min_dict,**step_key_idmax_dict,**step_key_idmin_dict}
             
             doc.append(
                 NoEscape(
@@ -626,10 +640,13 @@ class ReportSimulationsAnalysis:
             
             self.step_key_dict={**self.step_key_dict,**step_key_max_dict,**step_key_min_dict}
             
+            random_conclusions=random.choice(self.conclusion_bank)
+            print('\n',random_conclusions,'\n')
+            
             summary_description=next((simulation_results_frame['description']).items())[1]
             #print({**self.key_dict,**self.step_key_dict})
             doc.append(NoEscape(
-                summary_description.format(**{**self.key_dict,**self.step_key_dict})
+                random_conclusions.format(**{**self.key_dict,**self.step_key_dict})
                 )
             )
         return doc

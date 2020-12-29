@@ -5,6 +5,7 @@ from sympy.physics.vector import dynamicsymbols
 from sympy import *
 from sympy.physics.mechanics import *
 import sympy as sym
+import numpy as np
 
 mechanics_printing()
 
@@ -14,7 +15,7 @@ t=Symbol('t') #independent variable - time
 
 ### system parametes
 m_fr, m_rear,m_3, k_r, k_rt, k_f, k_ft = symbols('m_fr, m_r, M, k_r, k_rt, k_f, k_ft',positive=True)
-m,k,g,F_1,F_2,Omega,F,R,v0,u0= symbols('m,k,g,F_1,F_2,Omega, F_ R, v_0,u_0',positive=True)
+m,k,g,F_1,F_2,Omega,F,R,v0,u0= symbols('m,k,g,F_1,F_2,Omega, F_0 R, v_0,u_0',positive=True)
 I_ch, I_w , z_c3,l_fr,l_rear= symbols('I_chair, I_wheel, z_c3, l_fr, l_r',positive=True)
 m_RC, I_RC, l_RC, k_RC, phi0 = symbols('m_RC, I_RC, l_RC, k_RC, varphi_0',positive=True)
 m_w, I_wrc, r_w, k_w, k_fix,k_tire = symbols('m_w, I_wRC, R_w, k_w, k_fix, k_t',positive=True)
@@ -65,7 +66,7 @@ t0 = symbols('t_0')
 
 # generalized coordinates
 x,z_fr,z_rear,z, phi,phi_rc,theta,z_wrc = dynamicsymbols('x,z_fr,z_r,z, varphi,varphi_RC, theta, z_wrc')
-dx,dz_fr,dz_rear,dz,dphi,dphi_rc,dtheta,dz_wrc = dynamicsymbols('x,z_fr,z_r,z, varphi,varphi_RC, theta, dz_wrc', 1)
+dx,dz_fr,dz_rear,dz,dphi,dphi_rc,dtheta,dz_wrc = dynamicsymbols('x,z_fr,z_r,z, varphi,varphi_RC, theta, z_wrc', 1)
 
 var_dynamic = {x:'przemieszczenie poziome wózka',
                z_fr:'przemieszczenie pionowe koła przedniego wózka',
@@ -178,7 +179,7 @@ V_fr = S.One/2*k_ft*(z_fr-u_rf)**2  + S.One/2*k_f*(u_fr)**2       # Ep przednich
 
 
 V_rc_g=-m_RC*g*z_RC
-V_rc_fix =  S.One/2 * k_fix * phi_rc**2 + S.One/2 *k_tire * (l_RC*phi_rc)**2 
+V_rc_fix =  S.One/2 * k_fix * phi_rc**2 + S.One/2 *k_tire * (z_wrc)**2 
 V_rc_w = m_w*g*z_wrc
 
 V_RC_3dof=V_rc_fix+V_rc_g+V_rc_w
@@ -199,13 +200,21 @@ rcdof1={z_wrc:0,theta:0} #RC 2dof
 rcdof2={z_wrc:0}
 
 
-D=c_mu*T_5dof
+D_chair5dof=(c_mu*T_chair5dof).doit().expand()
+
+D_rapidchair3dof=(c_mu*T_RC_3dof).doit().expand()
+
+
+D_chair5dof_rc3dof=(c_mu*T_chair5dof_rc3dof).doit().expand()
+
 # D+= c_lam* + S.One/2*k_r*(((z+R*(phi)-z_rear)**2 ).diff(t))**2
 
 # D+= c_lam* S.One/2*k_f*(((z-R*(phi)-z_fr)**2 ).diff(t))**2
 
-D=D.doit().expand()
 
+qs_5dof = x, z_rear, z_fr, z, phi
+qs_rc_3dof=z_wrc,theta,phi_rc
+qs_chair5dof_rc_3dof=qs_5dof+qs_rc_3dof
 
 N = ReferenceFrame('N')
 Pl = Point('P_l')
@@ -214,12 +223,16 @@ Pl.set_vel(N, (u[0]+u[1]*R*sin(Omega*t).diff(t)) * N.x+(u[2]*R*cos(Omega*t).diff
 Pr.set_vel(N, u[0] * N.x)
 
 
-points_list=[Point('P_'+str(no))  for no,vel in enumerate(u)]
-[points_list[no].set_vel(N,vel*N.x)  for no,vel in enumerate(u)]
+points_list=[Point('P_'+str(no))  for no,vel in enumerate(Matrix(qs_chair5dof_rc_3dof).diff(t))]
+[points_list[no].set_vel(N,vel*N.x)  for no,vel in enumerate(Matrix(qs_chair5dof_rc_3dof).diff(t))]
 
-FL = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*F*(cos(Omega*t)) * N.x+sin(Omega*t) * N.y)]+[(points_list[no],-D.diff(vel)*N.x)  for no,vel in enumerate(u)]   #,(Pr, R*F*cos(Omega*t) * N.x)]
-FL = [(Pl, 2*F*N.x)]+[(points_list[no],-D.diff(vel)*N.x)  for no,vel in enumerate(u)]
+# FL = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*F*(cos(Omega*t)) * N.x+sin(Omega*t) * N.y)]+[(points_list[no],-D_chair5dof.diff(vel)*N.x)  for no,vel in enumerate(u)]   #,(Pr, R*F*cos(Omega*t) * N.x)]
+FL_chair5dof = [(Pl, 2*F*N.x)]+[(points_list[no],-D_chair5dof.diff(vel)*N.x)  for no,vel in enumerate(Matrix(qs_5dof).diff(t))]
 
+FL_rapidchair3dof = [(Pl, 2*F*N.x)]+[(points_list[no],-D_rapidchair3dof.diff(vel)*N.x)  for no,vel in enumerate(Matrix(qs_rc_3dof).diff(t))]
+
+
+FL_chair5dof_rc3dof = [(Pl, 2*F*N.x)]+[(points_list[no],-D_chair5dof_rc3dof.diff(vel)*N.x)  for no,vel in enumerate(Matrix(qs_chair5dof_rc_3dof).diff(t))]
 
 L_chair5dof = T_chair5dof - V_chair5dof
 # L_5dof=
@@ -237,31 +250,31 @@ L_chair5dof_rc3dof=T_chair5dof_rc3dof-V_chair5dof_rc3dof
 
 
 
-qs_5dof = x, z_rear, z_fr, z, phi
-qs_rc_3dof=z_wrc,theta,phi_rc
-qs_chair5dof_rc_3dof=qs_5dof+qs_rc_3dof
+
 # qs_3dof = x, z, phi
 # qs_2dof = x, z
 
 
 
 
+
+
 class Chair5DOF(dyn.LagrangesDynamicSystem):
-    def __init__(self, Lagrangian=L_default_5dof, qs=qs_5dof, forcelist=FL, bodies=None, frame=N,
+    def __init__(self, Lagrangian=L_default_5dof, qs=qs_5dof, forcelist=FL_chair5dof, bodies=None, frame=N,
                        hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t')):
         
         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
                  hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar)
 
 class RapidChair3DOF(dyn.LagrangesDynamicSystem):
-    def __init__(self, Lagrangian=L_rc_3dof, qs=qs_rc_3dof, forcelist=FL, bodies=None, frame=N,
+    def __init__(self, Lagrangian=L_rc_3dof, qs=qs_rc_3dof, forcelist=FL_rapidchair3dof, bodies=None, frame=N,
                    hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t')):
 
         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
              hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar)
 
 class Chair5DOFwithRC3DOF(dyn.LagrangesDynamicSystem):
-    def __init__(self, Lagrangian=L_rc_3dof, qs=qs_rc_3dof, forcelist=FL, bodies=None, frame=N,
+    def __init__(self, Lagrangian=L_chair5dof_rc3dof, qs=qs_chair5dof_rc_3dof, forcelist=FL_chair5dof_rc3dof, bodies=None, frame=N,
                    hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t')):
 
         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
@@ -279,6 +292,8 @@ rapidchair_1dof=rapidchair_3dof.subs(rcdof1,method='direct').remove([z_wrc,theta
 
 
 chair5dof_rc3dof=Chair5DOFwithRC3DOF()
+
+
 # class Chair3dof(dyn.LagrangesDynamicSystem):
 #     def __init__(self, Lagrangian=L_default_3dof, qs=qs_3dof, forcelist=FL, bodies=None, frame=N,
 #                        hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t')):
@@ -294,5 +309,6 @@ chair5dof_rc3dof=Chair5DOFwithRC3DOF()
 #         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
 #                  hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar)
         
+
 
 
