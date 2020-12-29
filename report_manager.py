@@ -306,6 +306,8 @@ class ReportSimulationsAnalysis:
     chapter_name='Analiza wrażliwości dla parametru \({param_name}\)'
     summary_sec_name='Spostrzeżenia i wnioski z analizy wpływu parametru  \({param_name}\)'
     
+    sensitivity_level={0.02:'znikomy wpływ',0.1:'mały wpływ',0.5:'średni wpływ',0.7:'średni wpływ',0.9:'istotny wpływ'}
+    
     sec_intro_bank= [str(RandomDescription(
                 ['Section description 1'+str(i) for i in range(5)],
                 ['Section description 2'+str(i) for i in range(5)],
@@ -390,7 +392,7 @@ class ReportSimulationsAnalysis:
        
         self.summary_bank=type(self).summary_bank
         self.conclusion_bank=type(self).conclusion_bank
-        
+        self.sensitivity_level=type(self).sensitivity_level
 
         
         self.caption='Przebiegi czasowe modelu dla danych: {given_data}'
@@ -492,7 +494,23 @@ class ReportSimulationsAnalysis:
         doc.append(NewPage())
         
         return doc
+
+    def influeance_level(self,data):
         
+
+        indicator=round(2*float(
+                            abs((data.abs().max()-data.abs().min())/(0.001+data.abs().max()+data.abs().min()))
+                            ),1)/2
+            
+        select=self.sensitivity_level
+
+        a=np.asarray(list(select.keys()))
+
+        print('indicator: ',indicator)
+        print(select[a.flat[np.abs(a - indicator).argmin()]])
+        print(select[a.flat[np.abs(a - indicator).argmin()]])
+
+        return select[a.flat[np.abs(a - indicator).argmin()]]
         
     def doit(self):
 
@@ -594,12 +612,28 @@ class ReportSimulationsAnalysis:
             
             column_names=summary_frame.columns
             
-            step_key_max_dict={str(name)+'_max':summary_frame[name].max() for name   in column_names}
-            step_key_min_dict={str(name)+'_min':summary_frame[name].min() for name   in column_names}
-            step_key_idmax_dict={str(name)+'_idmax':summary_frame[name].idxmax() for name   in column_names}
-            step_key_idmin_dict={str(name)+'_idmin':summary_frame[name].idxmin() for name   in column_names}
+            step_key_max_dict={str(name)+'_max':summary_frame[name].abs().max() for name   in column_names}
+            step_key_min_dict={str(name)+'_min':summary_frame[name].abs().min() for name   in column_names}
+            step_key_idmax_dict={str(name)+'_idmax':summary_frame[name].abs().idxmax() for name   in column_names}
+            step_key_idmin_dict={str(name)+'_idmin':summary_frame[name].abs().idxmin() for name   in column_names}
             
-            self.step_key_dict={**self.step_key_dict,**step_key_max_dict,**step_key_min_dict,**step_key_idmax_dict,**step_key_idmin_dict}
+#             def i
+#                         indicator=round(2*float(
+#                             ((summary_frame[name].abs().max()-summary_frame[name].abs().min())/(summary_frame[name].abs().max()+summary_frame[name].abs().min()).abs())
+#                             ),1)/2
+            
+#             select=self.sensitivity_level
+
+#             a=np.asarray(list(select.keys()))
+
+#             print(select[a.flat[np.abs(a - indicator).argmin()]])
+#             print(select[a.flat[np.abs(a - indicator).argmin()]])
+#             print(select[a.flat[np.abs(a - indicator).argmin()]])
+            
+            step_key_influence_dict={str(name)+'_inf':self.influeance_level(summary_frame[name]) for name   in column_names}
+            
+            print(step_key_influence_dict)
+            self.step_key_dict={**self.step_key_dict,**step_key_max_dict,**step_key_min_dict,**step_key_idmax_dict,**step_key_idmin_dict,**step_key_influence_dict}
             
             doc.append(
                 NoEscape(
@@ -637,6 +671,7 @@ class ReportSimulationsAnalysis:
             
 
 
+            
             
             self.step_key_dict={**self.step_key_dict,**step_key_max_dict,**step_key_min_dict}
             
