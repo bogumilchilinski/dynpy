@@ -6,6 +6,8 @@ from sympy import *
 from sympy.physics.mechanics import *
 import sympy as sym
 import numpy as np
+import pylatex
+from pylatex import Command, NoEscape
 
 mechanics_printing()
 
@@ -72,6 +74,7 @@ var_dynamic = {x:'przemieszczenie poziome wózka',
                z_fr:'przemieszczenie pionowe koła przedniego wózka',
                z_rear:'przemieszczenie pionowe koła tylnego wózka',
                z:'przemieszczenie pionowe punktu mocowania koła wózka',
+               z_wrc:'przemieszczenie pionowe koła napędu RapidChair',
                phi:'przemieszczenie kątowe wahacza wózka',
                phi_rc:'przemieszczenie kątowe napędu RapidChair',
                theta:'przemieszczenie kątowe koła napędu RapidChair',
@@ -79,9 +82,76 @@ var_dynamic = {x:'przemieszczenie poziome wózka',
                dz_fr:'prędkość liniowa koła przedniego wózka',
                dz_rear:'prędkość liniowa koła tylnego wózka',
                dz:'prędkość liniowa wózka',
+               dz_wrc:'prędkość liniowa koła napędu RapidChair',
                dphi:'prędkość kątowa wahacza wózka',
                dphi_rc:'prędkość kątowa napędu RapidChair',
-               dtheta:'prędkość kątowa koła napędu RapidChair'}
+               dtheta:'prędkość kątowa koła napędu RapidChair',
+              }
+
+
+
+units_dict={
+            c:Command('si',NoEscape('\\kilo\\gram\\per\\second')),
+            c_mu:Command('si',NoEscape('\\per\\second')),
+            c_lam:Command('si',NoEscape('\\second')),
+            m_3:Command('si',NoEscape('\\kilo\\gram')),    
+            m_w:Command('si',NoEscape('\\kilo\\gram')),
+            m_fr:Command('si',NoEscape('\\kilo\\gram')),
+            m_rear:Command('si',NoEscape('\\kilo\\gram')),
+            m:Command('si',NoEscape('\\kilo\\gram')),
+            m_RC:Command('si',NoEscape('\\kilo\\gram')),
+            k_r:Command('si',NoEscape('\\newton\\per\\meter')),
+            k_rt:Command('si',NoEscape('\\newton\\per\\meter')),
+            k_f:Command('si',NoEscape('\\newton\\per\\meter')),
+            k_w:Command('si',NoEscape('\\newton\\per\\meter')),
+            k_fix:Command('si',NoEscape('\\newton\\per\\meter')),
+            k_tire:Command('si',NoEscape('\\newton\\per\\meter')),
+            k_ft:Command('si',NoEscape('\\newton\\per\\meter')),
+            k:Command('si',NoEscape('\\newton\\per\\meter')),
+            k_RC: Command('si', NoEscape('\\newton\\per\\meter')),
+            g:Command('si',NoEscape('\\meter\\per\\second\\squared')),
+            F_1:Command('si',NoEscape('\\newton')),
+            F_2:Command('si',NoEscape('\\newton')),
+            F:Command('si',NoEscape('\\newton')),
+            u0:Command('si',NoEscape('\\meter')),
+            Omega:Command('si',NoEscape('\\radian')),
+            R:Command('si',NoEscape('\\meter')),
+            r_w:Command('si',NoEscape('\\meter')),
+            v0:Command('si',NoEscape('\\meter\\per\\second')),
+            I_ch:Command('si',NoEscape('\\kilo\\gram\\meter\\squared')),
+            I_w:Command('si',NoEscape('\\kilo\\gram\\meter\\squared')),
+            I_RC:Command('si',NoEscape('\\kilo\\gram\\meter\\squared')),
+            I_wrc:Command('si',NoEscape('\\kilo\\gram\\meter\\squared')),
+            dphi:Command('si',NoEscape('\\radian\\per\\second')),
+            dphi_rc:Command('si',NoEscape('\\radian\\per\\second')),
+            z_c3:Command('si',NoEscape('\\meter')),
+            z_fr:Command('si',NoEscape('\\meter')),
+            l_fr:Command('si',NoEscape('\\meter')),
+            l_rear:Command('si',NoEscape('\\meter')),
+            l_RC:Command('si',NoEscape('\\meter')),
+            phi0:Command('si',NoEscape('\\radian')),
+            x:Command('si',NoEscape('\\meter')),
+            z:Command('si',NoEscape('\\meter')),
+            z_rear:Command('si',NoEscape('\\meter')),
+            z_fr:Command('si',NoEscape('\\meter')),
+            z_wrc:Command('si',NoEscape('\\meter')),
+            phi:Command('si',NoEscape('\\radian')),
+            phi_rc:Command('si',NoEscape('\\radian')),
+            theta:Command('si',NoEscape('\\radian')),
+            dx:Command('si',NoEscape('\\meter\\per\\second')),
+            dz_fr:Command('si',NoEscape('\\meter\\per\\second')),
+            dz_rear:Command('si',NoEscape('\\meter\\per\\second')),
+            dz:Command('si',NoEscape('\\meter\\per\\second')),
+            dtheta:Command('si',NoEscape('\\radian\\per\\second')),
+            dz_wrc:Command('si',NoEscape('\\meter\\per\\second')),
+            pm:Command('si',NoEscape('-')),
+            t_l:Command('si',NoEscape('\\second')),
+    delta_t:Command('si',NoEscape('\\second')),
+    l_ramp:Command('si',NoEscape('\\meter')),
+    l_bumps:Command('si',NoEscape('\\meter')),
+    t0:Command('si',NoEscape('\\second')),
+           
+           }
 
 q=[x,phi,z,z_fr,z_rear,phi_rc]
 u=[dx,dphi,dz,dz_fr,dz_rear,dphi_rc]
@@ -144,7 +214,7 @@ u_rf=u_rr.subs(x,x+2*R) #road profile given in time domain
 
 x_m3=x+z_c3*phi
 x_RC=x+l_RC/2*cos(phi0+phi_rc)
-z_RC=z+R*phi+l_RC/2*sin(phi0+phi_rc)
+z_RC=z+0.1*R*phi+l_RC/2*sin(phi0+phi_rc)
 
 
 # Dynamic description of the chair
@@ -227,12 +297,18 @@ points_list=[Point('P_'+str(no))  for no,vel in enumerate(Matrix(qs_chair5dof_rc
 [points_list[no].set_vel(N,vel*N.x)  for no,vel in enumerate(Matrix(qs_chair5dof_rc_3dof).diff(t))]
 
 # FL = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*F*(cos(Omega*t)) * N.x+sin(Omega*t) * N.y)]+[(points_list[no],-D_chair5dof.diff(vel)*N.x)  for no,vel in enumerate(u)]   #,(Pr, R*F*cos(Omega*t) * N.x)]
-FL_chair5dof = [(Pl, 2*F*N.x)]+[(points_list[no],-D_chair5dof.diff(vel)*N.x)  for no,vel in enumerate(Matrix(qs_5dof).diff(t))]
-
-FL_rapidchair3dof = [(Pl, 2*F*N.x)]+[(points_list[no],-D_rapidchair3dof.diff(vel)*N.x)  for no,vel in enumerate(Matrix(qs_rc_3dof).diff(t))]
+FL_chair5dof = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*2*F*N.x)]+[(points_list[no],-D_chair5dof.diff(vel)*N.x)  for no,vel in enumerate(Matrix(qs_5dof).diff(t))]
 
 
-FL_chair5dof_rc3dof = [(Pl, 2*F*N.x)]+[(points_list[no],-D_chair5dof_rc3dof.diff(vel)*N.x)  for no,vel in enumerate(Matrix(qs_chair5dof_rc_3dof).diff(t))]
+FL_rapidchair3dof = [(points_list[no],-D_rapidchair3dof.diff(vel)*N.x)  for no,vel in enumerate(Matrix(qs_rc_3dof).diff(t))]
+
+
+FL_rapidchair3dof = [(points_list[no],-D_rapidchair3dof.diff(vel)*N.x)  for no,vel in enumerate(Matrix(qs_rc_3dof).diff(t))]
+
+
+FL_chair5dof_rc3dof = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*2*F*N.x)]+[(points_list[no],-D_chair5dof_rc3dof.diff(vel)*N.x)  for no,vel in enumerate(Matrix(qs_chair5dof_rc_3dof).diff(t))]
+
+FL_chair5dof_rc3dof = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*2*F*N.x)]+[(points_list[no],-D_chair5dof_rc3dof.diff(vel)*N.x)  for no,vel in enumerate(Matrix(qs_chair5dof_rc_3dof).diff(t))]
 
 L_chair5dof = T_chair5dof - V_chair5dof
 # L_5dof=
@@ -293,9 +369,12 @@ rapidchair_1dof=rapidchair_3dof.subs(rcdof1,method='direct').remove([z_wrc,theta
 
 chair5dof_rc3dof=Chair5DOFwithRC3DOF()
 
+
 T_chair_3dof_rev =T_chair5dof.subs(dof3_rev,method='direct')
 T_chair_3dof_norev =T_chair5dof.subs(dof3_norev,method='direct')
 T_chair_2dof=T_chair5dof.subs(dof2,method='direct')
+
+
 
 # class Chair3dof(dyn.LagrangesDynamicSystem):
 #     def __init__(self, Lagrangian=L_default_3dof, qs=qs_3dof, forcelist=FL, bodies=None, frame=N,

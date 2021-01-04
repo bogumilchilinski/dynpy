@@ -39,13 +39,6 @@ class DMath(Environment):
 #     packages = [Package('breqn'), Package('flexisym')]
 #     escape = False
 #     content_separator = " "
-Z1_02_models_intro_ex1=['Na Rysunku {nr_rys} zaprezentowano koncpecję układu o {n}. ','Rysunek {nr_rys} przedstawia model o {n}. ','Model o {n} pokazano na Rysunku {nr_rys}. ']
-Z1_02_models_intro_ex2=['Na jego podstawie wyznaczono wzory na energie kinetyczną oraz potencjalną. ','Posłużył on do wyznaczenia zależnośći na energię kinetyczną i potencjalną. ','Został on wykorzystany do wyznaczenia równań na energię kinetyczną i potencjalną. ']
-Z1_02_models_intro_itemize=['Koncepcja zakłada więc sumę następujących składników:','Należy więc dokonać sumowania poszczególnych elementów:','''Zgodnie z mechaniką Lagrange'a należy zsumować wartości:''']
-Z1_02_models_intro_aspect_list=[]
-mrk1=Marker('2dof',prefix='fig')
-chair_dofs=['dwóch stopniach swobody','trzech stopniach swobody z obrotem','trzech stopniach swobody bez obrotu', 'pięciu stopniach swobody']
-
 
 class ReportModelAnalysis:
     
@@ -85,9 +78,7 @@ class ReportModelAnalysis:
         
         #musisz też dopisać o jednym stopniu - to będzie ten indeks
         with doc.create(Chapter(self.chapter_name)):
-            doc.append(for i,val in enumerate(chair_dofs):
-    Z1_02_models_intro_aspect=str(random.choice(Z1_02_models_intro_ex1)).format(**{'n':val,'nr_rys':(Ref(mrk1)).dumps()})+str(random.choice(Z1_02_models_intro_ex2))+str(random.choice(Z1_02_models_intro_itemize))
-    Z1_02_models_intro_aspect_list.append(Z1_02_models_intro_aspect))
+
             with doc.create(DMath()):
                 doc.append('T=')
 
@@ -333,11 +324,63 @@ introduction_bank_3=[
 intro_bank_composed_model=[str(RandomDescription(introduction_bank_1,introduction_bank_2,introduction_bank_3)) for obj in range(30)  ]
 
 
+class PlottedData(Figure):
+    def __init__(self,numerical_data,*, position=None, **kwargs):
+        super().__init__(position=position, **kwargs)
+        
+        self._numerical_data
+        self._latex_name=super()._latex_name
+        
+    def add_data_plot(self,numerical_data=None):
+            numerical_data=self._numerical_data
+        
+            ax = numerical_result.plot(subplots=True, figsize=(10, 7))
+            #ax=solution_tmp.plot(subplots=True)
+            ([
+                ax_tmp.legend(['$' + vlatex(sym) + '$'])
+                for ax_tmp, sym in zip(ax, numerical_result.columns)
+            ])
+
+            plt.savefig(fig_name+'.png')
+            self.add_image(fig_name,width=NoEscape('15cm'))
+            
+            if self.preview:
+                plt.show()
+                
+            plt.close()
+            
+            
+            self.add_caption(
+                NoEscape(self.caption.format(**{**self.key_dict,**self.step_key_dict}))  )
+            self.append(Label(marker))
+
+
+class ReportSection(Chapter):
+    
+    _latex_name='section'
+    
+    def __init__(self,
+                 results_frame,
+                 analysis_key,
+                 analysis_name='dynamics',
+                 results_col_name='simulations',
+                 preview=True):
+        
+        self.analysis_key = analysis_key
+        self.analysis_name = analysis_name
+        self.sims_name = results_col_name
+        self.preview=preview
+        
+
 
 class ReportSimulationsAnalysis:
 
     chapter_name='Analiza wrażliwości dla parametru \({param_name}\)'
     summary_sec_name='Spostrzeżenia i wnioski z analizy wpływu parametru  \({param_name}\)'
+    
+    sensitivity_level={0.02:'znikomy wpływ',0.1:'mały wpływ',0.5:'średni wpływ',0.7:'średni wpływ',0.9:'istotny wpływ'}
+    
+    units_dict={}
     
     sec_intro_bank= [str(RandomDescription(
                 ['Section description 1'+str(i) for i in range(5)],
@@ -379,6 +422,19 @@ class ReportSimulationsAnalysis:
                 ['Conclusion 4'+str(i) for i in range(5)],
                 ['Conclusion 5'+str(i) for i in range(5)],
                     )) for obj in range(30)  ]
+    
+    optimization_desc_bank=[str(RandomDescription(
+#                 ['{varp(t)_max} dla argumentu {x(t)_idmax} 1'+str(i) for i in range(5)],
+#                 ['{x(t)_max} dla argumentu {x(t)_idmax} 2'+str(i) for i in range(5)],
+#                 ['{x(t)_max} dla argumentu {x(t)_idmax} 3'+str(i) for i in range(5)],
+#                 ['{x(t)_max} dla argumentu {x(t)_idmax} 4'+str(i) for i in range(5)],
+#                 ['{x(t)_max} dla argumentu {x(t)_idmax} 5'+str(i) for i in range(5)],
+                ['Opti 1'+str(i) for i in range(5)],
+                ['Opti 2'+str(i) for i in range(5)],
+                ['Opti 3'+str(i) for i in range(5)],
+                ['Opti 4'+str(i) for i in range(5)],
+                ['Opti 5'+str(i) for i in range(5)],
+                    )) for obj in range(30)  ]    
     
     
     def __init__(self,
@@ -423,7 +479,11 @@ class ReportSimulationsAnalysis:
        
         self.summary_bank=type(self).summary_bank
         self.conclusion_bank=type(self).conclusion_bank
+
+        self.sensitivity_level=type(self).sensitivity_level
+
         
+
 
         
         self.caption='Przebiegi czasowe modelu dla danych: {given_data}'
@@ -440,10 +500,12 @@ class ReportSimulationsAnalysis:
         
         self.step_key_dict= {}
         
-        self.preview=True
+        self.preview=preview
         
         self.chapter_name=type(self).chapter_name
         self.summary_sec_name=type(self).summary_sec_name
+        self.optimization_desc_bank=type(self). optimization_desc_bank
+        self.units_dict=type(self).units_dict
 
     def content_preview(self,content=','):
         
@@ -463,8 +525,8 @@ class ReportSimulationsAnalysis:
 
 
 
-        step_key_max_dict={str(name)+'_max':numerical_result[name].max() for name   in column_names}
-        step_key_min_dict={str(name)+'_min':numerical_result[name].min() for name   in column_names}
+        step_key_max_dict={str(name)+'_max':numerical_result[name].round(1).max() for name   in column_names}
+        step_key_min_dict={str(name)+'_min':numerical_result[name].round(1).min() for name   in column_names}
         
         self.step_key_dict['nr_rys']=Ref(marker).dumps()
         self.step_key_dict={**self.step_key_dict,**step_key_min_dict,**step_key_max_dict,**format_dict}
@@ -499,7 +561,7 @@ class ReportSimulationsAnalysis:
             ])
 
             plt.savefig(fig_name+'.png')
-            fig.add_image(fig_name,width=NoEscape('20cm'))
+            fig.add_image(fig_name,width=NoEscape('15cm'))
             
             if self.preview:
                 plt.show()
@@ -525,7 +587,29 @@ class ReportSimulationsAnalysis:
         doc.append(NewPage())
         
         return doc
+
+    def influeance_level(self,data):
         
+
+        indicator=round(2*float(
+                            abs((data.abs().max()-data.abs().min())/(0.001+data.abs().max()+data.abs().min()))
+                            ),1)/2
+            
+        select=self.sensitivity_level
+
+        a=np.asarray(list(select.keys()))
+
+        print('indicator: ',indicator)
+        print(select[a.flat[np.abs(a - indicator).argmin()]])
+        print(select[a.flat[np.abs(a - indicator).argmin()]])
+
+        return select[a.flat[np.abs(a - indicator).argmin()]]
+    
+    def cost_val(self, result_frame,key='cost_val'):
+        
+        cost_val=result_frame[key]
+        
+        return cost_val
         
     def doit(self):
 
@@ -538,14 +622,14 @@ class ReportSimulationsAnalysis:
         
         summary_frame_max = pd.DataFrame(
                 data=[
-                    a.max()
+                    a.round(1).max()
                     for a in simulation_results_frame['simulations'].values
                 ],
                 index=simulation_results_frame[self.analysis_key]).round(2)
 
         summary_frame_min = pd.DataFrame(
                 data=[
-                    a.min()
+                    a.round(1).min()
                     for a in simulation_results_frame['simulations'].values
                 ],
                 index=simulation_results_frame[self.analysis_key]).round(2)
@@ -584,7 +668,10 @@ class ReportSimulationsAnalysis:
                         {'Zmienna':'$ {eq}  $'.format(eq=vlatex(key)),
                          'Liczba przypadków':len(simulation_results_frame[key].unique()),
                          'Wartość minimalna':simulation_results_frame[key].min(),
-                         'Wartość maksymalna':simulation_results_frame[key].max() } for key in  simulation_results_frame.columns if isinstance(key,Symbol)  ]).round(2)
+                         'Wartość maksymalna':simulation_results_frame[key].max(),
+                         'Jednostka': '$ {unit}  $'.format(unit=(self.units_dict[key]).dumps() ),
+                        } for key in  simulation_results_frame.columns if isinstance(key,Symbol)  ]).round(2)
+                         
             doc.append(NoEscape( symbols_df.to_latex(index=False,escape=False))  )
             
             doc.append(NewPage())
@@ -602,7 +689,7 @@ class ReportSimulationsAnalysis:
                 coordinates_names_dict={str(coord):vlatex(coord)   for coord in model.Y}
                 
                 step_vals_dict = {key:row[1].to_dict()[key]  for key in  model.system_parameters()  }
-                given_data_str='$' +'$, $'.join([vlatex(Eq(lhs, rhs,evaluate=False)) for lhs, rhs in step_vals_dict.items()]) + '$.'
+                given_data_str='$' +'$, $'.join([vlatex(Eq(lhs, np.round(rhs,1),evaluate=False))+self.units_dict[lhs].dumps() for lhs, rhs in step_vals_dict.items()]) + '$.'
                 
                 self.step_key_dict={**self.step_key_dict,'given_data':given_data_str,**step_vals_dict,**coordinates_names_dict}
                 
@@ -627,12 +714,37 @@ class ReportSimulationsAnalysis:
             
             column_names=summary_frame.columns
             
-            step_key_max_dict={str(name)+'_max':summary_frame[name].max() for name   in column_names}
-            step_key_min_dict={str(name)+'_min':summary_frame[name].min() for name   in column_names}
-            step_key_idmax_dict={str(name)+'_idmax':summary_frame[name].idxmax() for name   in column_names}
-            step_key_idmin_dict={str(name)+'_idmin':summary_frame[name].idxmin() for name   in column_names}
+
+            step_key_max_dict={str(name)+'_max':summary_frame[name].round(1).abs().max() for name   in column_names}
+            step_key_min_dict={str(name)+'_min':summary_frame[name].round(1).abs().min() for name   in column_names}
+            step_key_idmax_dict={str(name)+'_idmax':summary_frame[name].round(1).abs().idxmax() for name   in column_names}
+            step_key_idmin_dict={str(name)+'_idmin':summary_frame[name].round(1).abs().idxmin() for name   in column_names}
+            
+#             def i
+#                         indicator=round(2*float(
+#                             ((summary_frame[name].abs().max()-summary_frame[name].abs().min())/(summary_frame[name].abs().max()+summary_frame[name].abs().min()).abs())
+#                             ),1)/2
+            
+#             select=self.sensitivity_level
+
+#             a=np.asarray(list(select.keys()))
+
+#             print(select[a.flat[np.abs(a - indicator).argmin()]])
+#             print(select[a.flat[np.abs(a - indicator).argmin()]])
+#             print(select[a.flat[np.abs(a - indicator).argmin()]])
+            
+            step_key_influence_dict={str(name)+'_inf':self.influeance_level(summary_frame[name]) for name   in column_names}
+            
+            print(step_key_influence_dict)
+            self.step_key_dict={**self.step_key_dict,**step_key_max_dict,**step_key_min_dict,**step_key_idmax_dict,**step_key_idmin_dict,**step_key_influence_dict}
+
+            step_key_max_dict={str(name)+'_max':summary_frame[name].round(1).max() for name   in column_names}
+            step_key_min_dict={str(name)+'_min':summary_frame[name].round(1).min() for name   in column_names}
+            step_key_idmax_dict={str(name)+'_idmax':summary_frame[name].round(1).idxmax() for name   in column_names}
+            step_key_idmin_dict={str(name)+'_idmin':summary_frame[name].round(1).idxmin() for name   in column_names}
             
             self.step_key_dict={**self.step_key_dict,**step_key_max_dict,**step_key_min_dict,**step_key_idmax_dict,**step_key_idmin_dict}
+
             
             doc.append(
                 NoEscape(
@@ -658,7 +770,7 @@ class ReportSimulationsAnalysis:
                 
                 
                 plt.savefig(summary_fig_name)
-                fig.add_image(summary_fig_name,width=NoEscape('20cm'))
+                fig.add_image(summary_fig_name,width=NoEscape('15cm'))
                 plt.show()
                 fig.add_caption(
                     NoEscape(
@@ -670,6 +782,7 @@ class ReportSimulationsAnalysis:
             
 
 
+            
             
             self.step_key_dict={**self.step_key_dict,**step_key_max_dict,**step_key_min_dict}
             
