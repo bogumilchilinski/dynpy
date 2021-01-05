@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, Plot, Figure, Alignat, Package, Quantity, Command, Label, Ref, Marker, NewPage, Eqref
+from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, Plot, Figure, Alignat, Package, Quantity, Command, Label, Ref, Marker, NewPage, Eqref, Table
 from pylatex.section import Chapter
 from pylatex.utils import italic, NoEscape
 
@@ -325,34 +325,36 @@ intro_bank_composed_model=[str(RandomDescription(introduction_bank_1,introductio
 
 
 class PlottedData(Figure):
-    def __init__(self,numerical_data,*, position=None, **kwargs):
+    
+    _latex_name='figure'
+    
+    def __init__(self,numerical_data,fig_name,*, preview=False, position=None, **kwargs):
         super().__init__(position=position, **kwargs)
+
+        self._numerical_data=numerical_data
+        self.fig_name=str(fig_name)
+        #self._latex_name='figure' #super()._latex_name
+        self.preview=preview
+
+
         
-        self._numerical_data
-        self._latex_name=super()._latex_name
         
     def add_data_plot(self,numerical_data=None):
             numerical_data=self._numerical_data
         
-            ax = numerical_result.plot(subplots=True, figsize=(10, 7))
+            ax = numerical_data.plot(subplots=True, figsize=(10, 7))
             #ax=solution_tmp.plot(subplots=True)
             ([
                 ax_tmp.legend(['$' + vlatex(sym) + '$'])
-                for ax_tmp, sym in zip(ax, numerical_result.columns)
+                for ax_tmp, sym in zip(ax, numerical_data.columns)
             ])
-
-            plt.savefig(fig_name+'.png')
-            self.add_image(fig_name,width=NoEscape('15cm'))
+            plt.savefig(self.fig_name+'.png')
+            self.add_image(self.fig_name,width=NoEscape('15cm'))
             
-            if self.preview:
+            if self.preview==True:
                 plt.show()
                 
             plt.close()
-            
-            
-            self.add_caption(
-                NoEscape(self.caption.format(**{**self.key_dict,**self.step_key_dict}))  )
-            self.append(Label(marker))
 
 
 class ReportSection(Chapter):
@@ -796,3 +798,16 @@ class ReportSimulationsAnalysis:
                 )
             )
         return doc
+    
+class DataTable(Table):
+    _latex_name='table'
+    def __init__(self,numerical_data,position=None):
+        super().__init__(position=position)
+        print(numerical_data)
+        self._numerical_data = numerical_data
+        self.position = position
+        
+    def build(self):
+        
+        tab =  self._numerical_data
+        self.append(NoEscape(tab.to_latex(index=False,escape=False)))
