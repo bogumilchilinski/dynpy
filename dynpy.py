@@ -557,7 +557,15 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     @property
     def _eoms(self):
         return self.governing_equations
-
+    
+    def numerized(self,parameter_values=None):
+        '''
+        Takes values of parameters, substitute it into the list of parameters and changes list it into a Tuple. Returns instance of class OdeComputationalCase.
+        '''
+        data_Tuple = Tuple(*self.system_parameters()).subs(parameter_values)
+        computed_case = self.computational_case(parameter_values=data_Tuple)
+        
+        return OdeComputationalCase(**computed_case)
 
 class LinearDynamicSystem(LagrangesDynamicSystem):
     def stiffness_matrix(self):

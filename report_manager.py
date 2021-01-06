@@ -340,21 +340,23 @@ class PlottedData(Figure):
         
         
     def add_data_plot(self,numerical_data=None):
-            numerical_data=self._numerical_data
+        numerical_data=self._numerical_data
+
+        ax = numerical_data.plot(subplots=True, figsize=(10, 7))
+        #ax=solution_tmp.plot(subplots=True)
+        ([
+            ax_tmp.legend(['$' + vlatex(sym) + '$'])
+            for ax_tmp, sym in zip(ax, numerical_data.columns)
+        ])
+        plt.savefig(self.fig_name+'.png')
+        self.add_image(self.fig_name,width=NoEscape('15cm'))
+
+        if self.preview==True:
+            plt.show()
+
+        plt.close()
         
-            ax = numerical_data.plot(subplots=True, figsize=(10, 7))
-            #ax=solution_tmp.plot(subplots=True)
-            ([
-                ax_tmp.legend(['$' + vlatex(sym) + '$'])
-                for ax_tmp, sym in zip(ax, numerical_data.columns)
-            ])
-            plt.savefig(self.fig_name+'.png')
-            self.add_image(self.fig_name,width=NoEscape('15cm'))
-            
-            if self.preview==True:
-                plt.show()
-                
-            plt.close()
+
 
 
 class ReportSection(Chapter):
@@ -372,7 +374,6 @@ class ReportSection(Chapter):
         self.analysis_name = analysis_name
         self.sims_name = results_col_name
         self.preview=preview
-        
 
 
 class ReportSimulationsAnalysis:
@@ -807,7 +808,10 @@ class DataTable(Table):
         self._numerical_data = numerical_data
         self.position = position
         
-    def build(self):
+    def add_table(self,numerical_data=None):
+        
+        if numerical_data!=None:
+            self._numerical_data=numerical_data
         
         tab =  self._numerical_data
         self.append(NoEscape(tab.to_latex(index=False,escape=False)))
