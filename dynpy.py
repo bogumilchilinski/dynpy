@@ -565,7 +565,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         data_Tuple = Tuple(*self.system_parameters()).subs(parameter_values)
         computed_case = self.computational_case(parameter_values=data_Tuple)
         
-        return OdeComputationalCase(**computed_case)
+        return OdeComputationalCase(**computed_case,evaluate=True)
 
 class LinearDynamicSystem(LagrangesDynamicSystem):
     def stiffness_matrix(self):

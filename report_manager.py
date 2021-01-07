@@ -804,14 +804,14 @@ class DataTable(Table):
     _latex_name='table'
     def __init__(self,numerical_data,position=None):
         super().__init__(position=position)
-        print(numerical_data)
+        #print(numerical_data)
         self._numerical_data = numerical_data
         self.position = position
         
     def add_table(self,numerical_data=None):
         
-        if numerical_data!=None:
-            self._numerical_data=numerical_data
+#         if numerical_data!=None:
+#             self._numerical_data=numerical_data
         
         tab =  self._numerical_data
         self.append(NoEscape(tab.to_latex(index=False,escape=False)))
