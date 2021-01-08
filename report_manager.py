@@ -355,8 +355,24 @@ class PlottedData(Figure):
             plt.show()
 
         plt.close()
-        
 
+        
+        
+class DataTable(Table):
+    _latex_name='table'
+    def __init__(self,numerical_data,position=None):
+        super().__init__(position=position)
+        #print(numerical_data)
+        self._numerical_data = numerical_data
+        self.position = position
+        
+    def add_table(self,numerical_data=None):
+        
+#         if numerical_data!=None:
+#             self._numerical_data=numerical_data
+        
+        tab =  self._numerical_data
+        self.append(NoEscape(tab.to_latex(index=False,escape=False)))
 
 
 class ReportSection(Chapter):
@@ -364,8 +380,9 @@ class ReportSection(Chapter):
     _latex_name='section'
     
     def __init__(self,
-                 results_frame,
-                 analysis_key,
+                 title,
+                 results_frame=None,
+                 analysis_key='',
                  analysis_name='dynamics',
                  results_col_name='simulations',
                  preview=True):
@@ -374,6 +391,30 @@ class ReportSection(Chapter):
         self.analysis_name = analysis_name
         self.sims_name = results_col_name
         self.preview=preview
+        super().__init__(title)
+
+    def match_units_with_data(self,given_data=None,units_dict=None):
+        return {name:str(float(given_data[name]))+units_dict[name].dumps() for name in given_data.columns}
+        
+    def get_feature_dict(self,numerical_data=None,given_data_dict=None):
+        
+        feature_dict={}
+
+        
+        if type(numerical_data)!=type(None):
+            column_names=numerical_data.columns
+            feature_dict.update({str(name)+'_max':numerical_data[name].round(1).max() for name   in column_names})
+            feature_dict.update({str(name)+'_min':numerical_data[name].round(1).min() for name   in column_names})
+            feature_dict.update({str(name)+'_idmax':numerical_data[name].round(1).abs().idxmax() for name   in column_names})
+            feature_dict.update({str(name)+'_idmin':numerical_data[name].round(1).abs().idxmin() for name   in column_names})
+        
+        if type(given_data_dict)!=type(None):
+            feature_dict.update({'given_data': '\(' +'$, $'.join([vlatex(lhs)+'='+rhs  for lhs, rhs in given_data_dict.items()]) + '\).'})
+
+            
+        return feature_dict        
+#    def get_case_data(self,case_data):
+                        
 
 
 class ReportSimulationsAnalysis:
@@ -773,6 +814,7 @@ class ReportSimulationsAnalysis:
                 
                 
                 plt.savefig(summary_fig_name)
+                
                 fig.add_image(summary_fig_name,width=NoEscape('15cm'))
                 plt.show()
                 fig.add_caption(
@@ -800,18 +842,3 @@ class ReportSimulationsAnalysis:
             )
         return doc
     
-class DataTable(Table):
-    _latex_name='table'
-    def __init__(self,numerical_data,position=None):
-        super().__init__(position=position)
-        #print(numerical_data)
-        self._numerical_data = numerical_data
-        self.position = position
-        
-    def add_table(self,numerical_data=None):
-        
-#         if numerical_data!=None:
-#             self._numerical_data=numerical_data
-        
-        tab =  self._numerical_data
-        self.append(NoEscape(tab.to_latex(index=False,escape=False)))

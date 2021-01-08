@@ -311,7 +311,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         self_dict['Lagrangian']=self_dict['Lagrangian']+other_dict['Lagrangian']
         
-        self_dict['qs']=list(self_dict['qs'])+list(other_dict['qs'])
+        self_dict['qs']=list(self_dict['qs'])+list(coord for coord in other_dict['qs'] if not coord in self_dict['qs'])
         
         print(self_dict['qs'])
         
