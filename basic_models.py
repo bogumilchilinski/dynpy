@@ -1,5 +1,6 @@
-from sympy import S, Symbol
+from sympy import S, Symbol, diff
 from .dynpy import LagrangesDynamicSystem
+from sympy.physics.mechanics import ReferenceFrame,Point
 
 
 class MaterialPoint(LagrangesDynamicSystem):
@@ -18,7 +19,7 @@ class Spring(LagrangesDynamicSystem):
     """
     Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s), which analytically display the dynamics of displacing spring after       cummulating PE.
     """
-    def __init__(self, stiffness, pos1, pos2=0, qs=None, ivar=sym.Symbol('t')):
+    def __init__(self, stiffness, pos1, pos2=0, qs=None, ivar=Symbol('t')):
         self.stiffness = stiffness
         if qs == None:
             qs = [pos1]
@@ -35,12 +36,10 @@ class Disk(LagrangesDynamicSystem):
     Creates a singular model, after inputing correct values of moment of inertia - I and rotational general coordinate, which analytically displays the dynamics of a             rotating wheel.
     """
     def __init__(self,
-                 m,
-                 r,
                  I,
                  pos1,
                  qs=None,
-                 ivar=sym.Symbol('t'),
+                 ivar=Symbol('t'),
                  evaluate=True):
 
         if qs == None:
@@ -48,7 +47,6 @@ class Disk(LagrangesDynamicSystem):
         else:
             qs = qs
 
-        I = S.One / 2 * m * r**2
         Lagrangian = (S.One / 2 * (I * (pos1.diff(ivar))**2))
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
@@ -62,7 +60,7 @@ class RigidBody2d(LagrangesDynamicSystem):
                  I,
                  pos_lin,
                  pos_rot,
-                 ivar=sym.Symbol('t'),
+                 ivar=Symbol('t'),
                  evaluate=True):
 
         qs = [pos_lin, pos_rot]
@@ -80,22 +78,22 @@ class Damper(LagrangesDynamicSystem):
                  pos1,
                  pos2=0,
                  qs=None,
-                 ivar=sym.Symbol('t'),
-                 frame=N):
+                 ivar=Symbol('t'),
+                 frame=ReferenceFrame('N')):
 
         if qs == None:
             qs = [pos1]
         else:
             qs = [pos1, pos2]
 
-        dpos1 = diff(pos1, t)
-        dpos2 = diff(pos2, t)
-        N = ReferenceFrame('N')
+        dpos1 = diff(pos1, ivar)
+        dpos2 = diff(pos2, ivar)
+
         P = Point('P')
-        P.set_vel(N, (dpos1 - dpos2) * N.x)
+        P.set_vel(frame, (dpos1 - dpos2) * frame.x)
         Lagrangian = 0
         forcelist = [
-            (P, -((S.One / 2) * c * (dpos1 - dpos2)**2).diff(dpos1) * N.x)
+            (P, -((S.One / 2) * c * (dpos1 - dpos2)**2).diff(dpos1) * frame.x)
         ]
 
-        super().__init__(0, qs=qs, forcelist=forcelist, frame=N, ivar=ivar)
+        super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
