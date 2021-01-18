@@ -235,6 +235,70 @@ class OdeComputationalCase:
 
 
 class LagrangesDynamicSystem(me.LagrangesMethod):
+    '''
+    Arguments
+    =========
+    Lagrangian: object
+        
+    
+    qs (optional): object: Symbols
+        
+    
+    forcelist (optional): list(object)
+        
+    
+    bodies (optional):
+    
+    
+    frame (optional):
+    
+    
+    hol_coneqs (optional):
+    
+    
+    nonhol_coneqs (optional):
+    
+    
+    label (optional):
+    
+    
+    ivar (optional):
+    
+    
+    evaluate (optional):
+    
+    Example
+    =======
+    
+    Rod propped up with spring on the right side - constant k2 and spring and dumper on the left side - constants k and c.
+    
+    >>>t = symbols('t')
+    >>>g,k,m1,m2,l,c = symbols('g k m1 m2 l c')
+    >>>x1,x2 = dynamicsymbols('x_1 x_2')    # Generalized coordinates
+    >>>val = {g:9.81,k:20,m1:2,m2:2,c:10}    # Assumed values for constants to performe numerical calculation
+    >>>m = m1 + m2    # Mass of rod determination
+    >>>h = (x1+x2)/2    # High determination for potential energy
+    >>>phi = (x1-x2)/l    # Angle determination of rod rotation
+    >>>I = S.One/12 *m*l**2    # Moment of inertia of rod determination
+    >>>x = (x1+x2)/2    # Rod vertical displacement determination
+    >>>T = S.Half*m*x.diff(t)**2 + S.Half*I*phi.diff(t)**2     # Kinetic Energy equation
+    >>>V = S.Half*k*x1**2 + S.Half*2*k*x2**2 + m*g*h    # Potential Energy equation
+    >>>L = T - V    # Lagrangian calculation
+    >>>N=ReferenceFrame('N')    # Defining of reference frame for coordinate system
+    >>>P1=Point('P_1')    # Defining point in space
+    >>>P2=Point('P_2')
+    >>>P1.set_vel(N,x1.diff(t)*N.x)    # Set velocity of point P1 in reference system N on axis x
+    >>>P2.set_vel(N,x2.diff(t)*N.x)
+    >>>forcelist = [(P1,-c*x1.diff(t)*N.x)]    # External forces determination and seting reference frame N and axis x
+    >>>rod = dyn.LagrangesDynamicSystem(L,qs=[x1,x2],forcelist=forcelist,frame=N)    # Inicjalization of LagrangesDynamicSystem instance
+    >>>rod_numerical = rod.numerized(parameter_values=val)
+    
+    Firstly there are defined symbols with SymPy Symbol class and generalized coordinates which are defined with dynamicsymbols method. Next the mass m, hight h, angle phi, and moment of inertia I are determined to make use of it in energys equations. 
+    Subsequently potential energy V and kinetic enetgy T are evaluated and defined to calcualte Lagrangian L. When it has been done, one can start to create ReferenceFrame N. In the frame points P1 and P2 are created where there will be applied velocity on x axis in above case. Additonali external forces are assined to the variable forcelist - it is necessery to chose the point and axies. 
+    Finaly one can define instance rod of class LagrangesDynamicSystem by making use of calculation and variables made previously. In addition there is possibility to create instant of class OdeComputationalCase (rod_numerical) that allows to perform numerical operations on the EOM
+    
+    '''
+    
     def __init__(self,
                  Lagrangian,
                  qs=None,
@@ -568,6 +632,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return OdeComputationalCase(**computed_case,evaluate=True)
 
 class LinearDynamicSystem(LagrangesDynamicSystem):
+    '''
+
+    '''
     def stiffness_matrix(self):
         '''
         Returns the system stiffness matrix, which is based on the equations of motion of the Lagrange's system. Matrix is obtained from jacobian which is called with system's generalized coordinates vector.

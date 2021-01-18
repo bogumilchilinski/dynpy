@@ -68,6 +68,9 @@ var_static = {m_fr:'masa koło przednie wózka',
 t_l, delta_t,l_ramp,l_bumps = symbols('t_l,dt,l_ramp, l_bumps',positive=True)
 t0 = symbols('t_0')
 
+
+
+
 # generalized coordinates
 x,z_fr,z_rear,z, phi,phi_rc,theta,z_wrc = dynamicsymbols('x,z_fr,z_r,z, varphi,varphi_RC, theta, z_wrc')
 dx,dz_fr,dz_rear,dz,dphi,dphi_rc,dtheta,dz_wrc = dynamicsymbols('x,z_fr,z_r,z, varphi,varphi_RC, theta, z_wrc', 1)
@@ -151,6 +154,23 @@ units_dict={
             l_ramp:ureg.meter,
             l_bumps:ureg.meter,
             t0:ureg.second,
+            'dimensionless':ureg.meter/ureg.meter,
+            ao_x_max:ureg.gram,
+            ao_x_min:ureg.gram,
+            ao_x_idmax:ureg.second,
+            ao_x_idmin:ureg.second,
+            ao_z_max:ureg.gram,
+            ao_z_min:ureg.gram,
+            ao_z_idmax:ureg.second,
+            ao_z_idmin:ureg.second,
+            ao_rx_max:ureg.gram,
+            ao_rx_min:ureg.gram,
+            ao_rx_idmax:ureg.second,
+            ao_rx_idmin:ureg.second,
+            ao_rz_max:ureg.gram,
+            ao_rz_min:ureg.gram,
+            ao_rz_idmax:ureg.second,
+            ao_rz_idmin:ureg.second
            }
 
 q=[x,phi,z,z_fr,z_rear,phi_rc]
@@ -181,15 +201,6 @@ u_rr=u_road(x-2*R)
 u_rr=u0*(sin(x-2*R))  #road profile given in time domain
 u_rf=u_rr.subs(x,x+2*R) #road profile given in time domain
 #
-
-
-
-
-
-
-
-
-
 
 
 
