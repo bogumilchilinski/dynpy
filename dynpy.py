@@ -6,7 +6,7 @@ from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
 import itertools as itools
 import scipy.integrate as solver
-from .timeseries import *
+from timeseries import *
 
 from IPython.display import display
 
@@ -144,6 +144,14 @@ class OdeComputationalCase:
 
     def __call__(self,label=None):
         
+#         if len(args)>0:
+#             if isinstance(args[0],str):
+#                 label=args[0]
+#             else:
+#                 q=args
+                    
+        
+#         self.qs=
         self._label=label
         return self
         

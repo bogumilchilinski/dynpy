@@ -24,6 +24,7 @@ I_ch, I_w , z_c3,l_fr,l_rear= symbols('I_chair, I_wheel, z_c3, l_fr, l_r',positi
 m_RC, I_RC, l_RC, k_RC, phi0 = symbols('m_RC, I_RC, l_RC, k_RC, varphi_0',positive=True)
 m_w, I_wrc, r_w, k_w, k_fix,k_tire = symbols('m_w, I_wRC, R_w, k_w, k_fix, k_t',positive=True)
 c,c_mu,c_lam= symbols('c,c_mu, c_lambda',positive=True)
+ao_x, ao_z, ao_rx ,ao_rz=symbols('ao_x, ao_z, ao_rx ,ao_rz')
 
 pm=symbols('PM')
 
@@ -155,22 +156,26 @@ units_dict={
             l_bumps:ureg.meter,
             t0:ureg.second,
             'dimensionless':ureg.meter/ureg.meter,
-            ao_x_max:ureg.gram,
-            ao_x_min:ureg.gram,
-            ao_x_idmax:ureg.second,
-            ao_x_idmin:ureg.second,
-            ao_z_max:ureg.gram,
-            ao_z_min:ureg.gram,
-            ao_z_idmax:ureg.second,
-            ao_z_idmin:ureg.second,
-            ao_rx_max:ureg.gram,
-            ao_rx_min:ureg.gram,
-            ao_rx_idmax:ureg.second,
-            ao_rx_idmin:ureg.second,
-            ao_rz_max:ureg.gram,
-            ao_rz_min:ureg.gram,
-            ao_rz_idmax:ureg.second,
-            ao_rz_idmin:ureg.second
+#             ao_x_max:ureg.gram,
+            ao_x:ureg.gram,
+#             ao_x_min:ureg.gram,
+#             ao_x_idmax:ureg.second,
+#             ao_x_idmin:ureg.second,
+#             ao_z_max:ureg.gram,
+            ao_z:ureg.gram,
+#             ao_z_min:ureg.gram,
+#             ao_z_idmax:ureg.second,
+#             ao_z_idmin:ureg.second,
+#             ao_rx_max:ureg.gram,
+#             ao_rx_min:ureg.gram,
+#             ao_rx_idmax:ureg.second,
+#             ao_rx_idmin:ureg.second,
+#             ao_rz_max:ureg.gram,
+#             ao_rz_min:ureg.gram,
+#             ao_rz_idmax:ureg.second,
+#             ao_rz_idmin:ureg.second,
+            ao_rz:ureg.gram,
+                ao_rx:ureg.gram,
            }
 
 q=[x,phi,z,z_fr,z_rear,phi_rc]
