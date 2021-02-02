@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, Plot, Figure, Alignat, Package, Quantity, Command, Label, Ref, Marker, NewPage, Eqref, Table
+from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, Plot, Figure, Alignat, Package, Quantity, Command, Label, Ref, Marker, NewPage, NewLine, Eqref, Table
 from pylatex.section import Chapter
 from pylatex.utils import italic, NoEscape
 
@@ -18,36 +18,7 @@ import random
 from sympy import *
 import pint
 
-import datetime  as dtime
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+import datetime as dtime
 
 
 class Equation(Environment):
@@ -226,8 +197,6 @@ class RandomDescription:
         return self.__class__.__name__ + ': ' + self.to_string()
 
 
-    
-    
 time_domain_summary_1 = [
     'Przedstawione wyniki pokazują wpływ zmian badanego parametru \({param_name}\) na dynamikę wózka. ',
     'Opracowane wykresy porównawcze pozwoliły na oszacowanie wpływu zmiennej \({param_name}\) na dynamikę rozpatrywanego układu. ',
@@ -289,13 +258,59 @@ freq_domain_summary = [
     'Na podstawie analizy widmowej minimalna wartość częstotliwości rozpatrywanego parametru wynosi {min_val_spec}.',
 ]
 
-summary_bank_composed_model = [
+summary_bank_composed_model_gen = RandomDescription(
+    time_domain_summary_1,
+    time_domain_summary_2,
+    time_domain_summary_3,
+    time_domain_summary_4,
+    time_domain_summary_5,
+)
+
+
+summary_bank_chair_model_gen = RandomDescription(
+    time_domain_summary_1,
+    time_domain_summary_2,
+    time_domain_summary_3,
+    time_domain_summary_4,
+#    time_domain_summary_5,
+)
+
+
+summary_bank_chair_model_gen = RandomDescription(
+    time_domain_summary_1,
+    time_domain_summary_2,
+    time_domain_summary_3,
+    time_domain_summary_4,
+#    time_domain_summary_5,
+)
+
+
+summary_bank_drive_model_gen = RandomDescription(
+    time_domain_summary_1,
+#     time_domain_summary_2,
+#     time_domain_summary_3,
+#     time_domain_summary_4,
+    time_domain_summary_5,
+)
+
+
+
+
+summary_bank_chair_move_model_gen = RandomDescription(
+    time_domain_summary_1,
+    time_domain_summary_2,
+    time_domain_summary_3,
+#     time_domain_summary_4,
+ #   time_domain_summary_5,
+)
+
+summary_bank_drive_model = [
     str(
         RandomDescription(
             time_domain_summary_1,
-            time_domain_summary_2,
-            time_domain_summary_3,
-            time_domain_summary_4,
+#             time_domain_summary_2,
+#             time_domain_summary_3,
+#             time_domain_summary_4,
             time_domain_summary_5,
         )) for obj in range(30)
 ]
@@ -309,45 +324,45 @@ measurement_summary_1 = [
 ]
 
 measurement_summary_2 = [
-    'Zaobserwowano wpływ badanego parametru \({x(t)}\) na drgania wózka, których maksymalna wartość amplitudy porecntu (%) przyśpieszenia ziemskiego wyniosła {ao_x_max}. ',
-    'Analizowany przebieg parametru \({x(t)}\) osiąga wartość maksymalną równą {ao_x_max}. '
-    'Minimalna wartość dla przebiegu \({x(t)}\) jest równa {ao_x_min}. '
-    'Na podstawie przeprowadzonych badań numerycznych można stwierdzić, że w analizowanym przebiegu parametru \({x(t)}\) nie występują amplitudy o wartości mniejszej niż {ao_x_min} oraz większej niż {ao_x_max}. '
-    'Dokonując analizy wyników symulacji dla parametru \({x(t)}\) stwierdza się, że amplitudy przyśpieszeń nie przekraczają wartości {ao_x_max}, a wartość mininalna wynosi {ao_x_min}.'
-    'Przeprowadzone badania pomiarowe pozwalają stwierdzić, że odpowiedź czasowa \({x(t)}\) nie przekracza {ao_x_idmax} i jest ograniczona z dołu przez {ao_x_idmin}. ',
-    'Bazując na analizie przeprowadzonych badań zaobserwowano, że współrzędna \({x(t)}\) nie przekraczaa wartości {ao_x_idmax}, a wartość mininalna wynosi {ao_x_idmin}. ',
+    'Zaobserwowano wpływ badanego parametru \({a_ox}\) na drgania wózka, których maksymalna wartość amplitudy porecntu (%) przyśpieszenia ziemskiego wyniosła {a_ox_max}. ',
+    'Analizowany przebieg parametru \({a_ox}\) osiąga wartość maksymalną równą {a_ox_max}. ',
+    'Minimalna wartość dla przebiegu \({a_ox}\) jest równa {a_ox_min}. ',
+    'Na podstawie przeprowadzonych badań numerycznych można stwierdzić, że w analizowanym przebiegu parametru \({a_ox}\) nie występują amplitudy o wartości mniejszej niż {a_ox_min} oraz większej niż {a_ox_max}. ',
+    'Dokonując analizy wyników symulacji dla parametru \({a_ox}\) stwierdza się, że amplitudy przyśpieszeń nie przekraczają wartości {a_ox_max}, a wartość mininalna wynosi {a_ox_min}.',
+    'Przeprowadzone badania pomiarowe pozwalają stwierdzić, że odpowiedź czasowa \({a_ox}\) nie przekracza {a_ox_idmax} i jest ograniczona z dołu przez {a_ox_idmin}. ',
+    'Bazując na analizie przeprowadzonych badań zaobserwowano, że współrzędna \({a_ox}\) nie przekraczaa wartości {a_ox_idmax}, a wartość mininalna wynosi {a_ox_idmin}. ',
 ]
 
 measurement_summary_3 = [
-    'Zaobserwowano wpływ badanego parametru \({z(t)}\) na drgania wózka, których maksymalna wartość amplitudy porecntu (%) przyśpieszenia ziemskiego wyniosła {ao_z_max}. ',
-    'Analizowany przebieg parametru \({z(t)}\) osiąga wartość maksymalną równą {ao_z_max}. '
-    'Minimalna wartość dla przebiegu \({z(t)}\) jest równa {ao_z_min}. '
-    'Na podstawie przeprowadzonych badań numerycznych można stwierdzić, że w analizowanym przebiegu parametru \({z(t)}\) nie występują amplitudy o wartości mniejszej niż {ao_z_min} oraz większej niż {ao_z_max}. '
-    'Dokonując analizy wyników symulacji dla parametru \({z(t)}\) stwierdza się, że amplitudy przyśpieszeń nie przekraczają wartości {ao_z_max}, a wartość mininalna wynosi {ao_x_min}.'
-    'Przeprowadzone badania pomiarowe pozwalają stwierdzić, że odpowiedź czasowa \({z(t)}\) nie przekracza {ao_z_idmax} i jest ograniczona z dołu przez {ao_z_idmin}. ',
-    'Bazując na analizie przeprowadzonych badań zaobserwowano, że współrzędna \({z(t)}\) nie przekraczaa wartości {ao_z_idmax}, a wartość mininalna wynosi {ao_z_idmin}. ',
+    'Zaobserwowano wpływ badanego parametru \({a_oz}\) na drgania wózka, których maksymalna wartość amplitudy porecntu (%) przyśpieszenia ziemskiego wyniosła {a_oz_max}. ',
+    'Analizowany przebieg parametru \({a_oz}\) osiąga wartość maksymalną równą {a_oz_max}. ',
+    'Minimalna wartość dla przebiegu \({a_oz}\) jest równa {a_oz_min}. ',
+    'Na podstawie przeprowadzonych badań numerycznych można stwierdzić, że w analizowanym przebiegu parametru \({a_oz}\) nie występują amplitudy o wartości mniejszej niż {a_oz_min} oraz większej niż {a_oz_max}. ',
+    'Dokonując analizy wyników symulacji dla parametru \({a_oz}\) stwierdza się, że amplitudy przyśpieszeń nie przekraczają wartości {a_oz_max}, a wartość mininalna wynosi {a_oz_min}.',
+    'Przeprowadzone badania pomiarowe pozwalają stwierdzić, że odpowiedź czasowa \({a_oz}\) nie przekracza {a_oz_idmax} i jest ograniczona z dołu przez {a_oz_idmin}. ',
+    'Bazując na analizie przeprowadzonych badań zaobserwowano, że współrzędna \({a_oz}\) nie przekraczaa wartości {a_oz_idmax}, a wartość mininalna wynosi {a_oz_idmin}. ',
 ]
 
 measurement_summary_4 = [
-    'Zaobserwowano wpływ badanego parametru \({x(t)}\) na drgania wózka, których maksymalna wartość amplitudy porecntu (%) przyśpieszenia ziemskiego wyniosła {ao_rx_max}. ',
-    'Analizowany przebieg parametru \({x(t)}\) osiąga wartość maksymalną równą {ao_rx_max}. '
-    'Minimalna wartość dla przebiegu \({x(t)}\) jest równa {ao_rx_min}. '
-    'Na podstawie przeprowadzonych badań numerycznych można stwierdzić, że w analizowanym przebiegu parametru \({x(t)}\) nie występują amplitudy o wartości mniejszej niż {ao_rx_min} oraz większej niż {ao_rx_max}. '
-    'Dokonując analizy wyników symulacji dla parametru \({x(t)}\) stwierdza się, że amplitudy przyśpieszeń nie przekraczają wartości {ao_rx_max}, a wartość mininalna wynosi {ao_rx_min}.'
-    'Przeprowadzone badania pomiarowe pozwalają stwierdzić, że odpowiedź czasowa \({x(t)}\) nie przekracza {ao_rx_idmax} i jest ograniczona z dołu przez {ao_rx_idmin}. ',
-    'Bazując na analizie przeprowadzonych badań zaobserwowano, że współrzędna \({x(t)}\) nie przekraczaa wartości {ao_rx_idmax}, a wartość mininalna wynosi {ao_rx_idmin}. ',
+    'Zaobserwowano wpływ badanego parametru \({a_rx}\) na drgania wózka, których maksymalna wartość amplitudy porecntu (%) przyśpieszenia ziemskiego wyniosła {a_rx_max}. ',
+    'Analizowany przebieg parametru \({a_rx}\) osiąga wartość maksymalną równą {a_rx_max}. ',
+    'Minimalna wartość dla przebiegu \({a_rx}\) jest równa {a_rx_min}. ',
+    'Na podstawie przeprowadzonych badań numerycznych można stwierdzić, że w analizowanym przebiegu parametru \({a_rx}\) nie występują amplitudy o wartości mniejszej niż {a_rx_min} oraz większej niż {a_rx_max}. ',
+    'Dokonując analizy wyników symulacji dla parametru \({a_rx}\) stwierdza się, że amplitudy przyśpieszeń nie przekraczają wartości {a_rx_max}, a wartość mininalna wynosi {a_rx_min}.',
+    'Przeprowadzone badania pomiarowe pozwalają stwierdzić, że odpowiedź czasowa \({a_rx}\) nie przekracza {a_rx_idmax} i jest ograniczona z dołu przez {a_rx_idmin}. ',
+    'Bazując na analizie przeprowadzonych badań zaobserwowano, że współrzędna \({a_rx}\) nie przekraczaa wartości {a_rx_idmax}, a wartość mininalna wynosi {a_rx_idmin}. ',
 ]
-    
+
 measurement_summary_5 = [
-    'Zaobserwowano wpływ badanego parametru \({z(t)}\) na drgania wózka, których maksymalna wartość amplitudy porecntu (%) przyśpieszenia ziemskiego wyniosła {ao_rz_max}. ',
-    'Analizowany przebieg parametru \({z(t)}\) osiąga wartość maksymalną równą {ao_x_max}. '
-    'Minimalna wartość dla przebiegu \({z(t)}\) jest równa {ao_x_min}. '
-    'Na podstawie przeprowadzonych badań numerycznych można stwierdzić, że w analizowanym przebiegu parametru \({z(t)}\) nie występują amplitudy o wartości mniejszej niż {ao_rz_min} oraz większej niż {ao_rz_max}. '
-    'Dokonując analizy wyników symulacji dla parametru \({z(t)}\) stwierdza się, że amplitudy przyśpieszeń nie przekraczają wartości {ao_rz_max}, a wartość mininalna wynosi {ao_x_min}.'
-    'Przeprowadzone badania pomiarowe pozwalają stwierdzić, że odpowiedź czasowa \({z(t)}\) nie przekracza {ao_rz_idmax} i jest ograniczona z dołu przez {ao_rz_idmin}. ',
-    'Bazując na analizie przeprowadzonych badań zaobserwowano, że współrzędna \({z(t)}\) nie przekraczaa wartości {ao_rz_idmax}, a wartość mininalna wynosi {ao_rz_idmin}. ',
+    'Zaobserwowano wpływ badanego parametru \({a_rz}\) na drgania wózka, których maksymalna wartość przyśpieszenia wyniosła {a_rz_max}. ',
+    'Analizowany przebieg parametru \({a_rz}\) osiąga wartość maksymalną równą {a_rz_max}. ',
+    'Minimalna wartość dla przebiegu \({a_rz}\) jest równa {a_ox_min}. ',
+    'Na podstawie przeprowadzonych badań numerycznych można stwierdzić, że w analizowanym przebiegu parametru \({a_rz}\) nie występują amplitudy o wartości mniejszej niż {a_rz_min} oraz większej niż {a_rz_max}. ',
+    'Dokonując analizy wyników symulacji dla parametru \({a_rz}\) stwierdza się, że amplitudy przyśpieszeń nie przekraczają wartości {a_rz_max}, a wartość mininalna wynosi {a_rz_min}.',
+    'Przeprowadzone badania pomiarowe pozwalają stwierdzić, że odpowiedź czasowa \({a_rz}\) nie przekracza {a_rz_idmax} i jest ograniczona z dołu przez {a_rz_idmin}. ',
+    'Bazując na analizie przeprowadzonych badań zaobserwowano, że współrzędna \({a_rz}\) nie przekraczaa wartości {a_rz_idmax}, a wartość mininalna wynosi {a_rz_idmin}. ',
 ]
-    
+
 summary_bank_composed_model_measurements = [
     str(
         RandomDescription(
@@ -356,7 +371,6 @@ summary_bank_composed_model_measurements = [
             measurement_summary_3,
             measurement_summary_4,
             measurement_summary_5,
-                
         )) for obj in range(30)
 ]
 
@@ -365,7 +379,7 @@ sec_introduction_bank_1 = [
     'Przeprowadzenie analizy numerycznej wymaga znajomości modelu dynamicznego oraz zdeterminowania parametrów oddziałujących na zachowanie układu wskutek ich zmian. ',
     'Wykorzystując przygotowane środowisko obliczeniowe, wykonano szereg symulacji, opracowano dane numeryczne i przedstawiono je w postaci następujących wykresów. ',
     'Celem zbadania i oceny dynamiki rozpatrywanego systemu przeprowadzono symulacje numeryczne przedstawijące przebiegi zmiennych układu w funkcji czasu. '
-    'W oparciu o wybrany model dynamiczny wózka, wykonano analizy numeryczne zaprezentowane na kolejnych wykresach. '
+    'W oparciu o wybrany model dynamiczny obiektu, wykonano analizy numeryczne zaprezentowane na kolejnych wykresach. '
 ]
 
 sec_introduction_bank_2 = [
@@ -382,24 +396,42 @@ sec_introduction_bank_3 = [
     'Dostrzegając wzajemne zależności między dynamicznymi parametrami wózka możliwe będzie wprowadzenie takich zmian, które w korzystny sposób wpłyną na odpowiedź układu. '
 ]
 
+sec_intro_composed_model_gen = RandomDescription(sec_introduction_bank_1,
+                                                 sec_introduction_bank_2,
+                                                 sec_introduction_bank_3)
+
 sec_intro_composed_model = [
     str(
         RandomDescription(sec_introduction_bank_1, sec_introduction_bank_2,
                           sec_introduction_bank_3)) for obj in range(30)
 ]
 
-introduction_bank_1 = [
-    'Na wykresie {nr_rys} przedstawiano zmiany wielkości dynamicznych charakteryzujących ruch wózka. Po przeanalizowaniu można zanotować wzajemną zależność poszczególnych wielkości dynamicznych.',
-    'Charakter przebiegu wartości dynamicznych wózka został przedstawiony na rysunku {nr_rys}.',
-    'Wykres {nr_rys} pokazuje zmienność parametrów dynamicznych wózka w trakcie symulownego przejazdu.',
-    'Rysunek {nr_rys} prezentuje wykres opisujący zmienność parametrów dynamicznych wózka w trakcie jazdy po zamodelowanym torze.',
-]
-
-introduction_bank_meas_1 = [ #poprawione
+introduction_bank_meas_1 = [  #poprawione
     'Na wykresie {nr_rys} przedstawiano zmiany wielkości dynamicznych charakteryzujących ruch wózka. Po przeanalizowaniu można zanotować wzajemną zależność poszczególnych wielkości dynamicznych.',
     'Charakter przebiegu wartości dynamicznych wózka został przedstawiony na rysunku {nr_rys}.',
     'Wykres {nr_rys} pokazuje zmienność parametrów dynamicznych wózka w trakcie przejazdu pomiarowego.',
     'Rysunek {nr_rys} prezentuje wykres opisujący zmienność parametrów dynamicznych wózka w trakcie jazdy pomiarowej po torze.',
+]
+
+introduction_bank_meas_2 = [  #poprawione
+    'Pomiar został przeprowadzony dla następujących danych: {given_data}.',
+    'Zaprezentowane wyniki pomiarowe otrzymano dla danych równych:{given_data}.',
+    'Badanie pomiarowe zostało przeprowadzone dla następujących danych:{given_data}.',
+    'Wyniki pomiaru otrzymano dla:{given_data}.',
+]
+
+introduction_bank_meas_3 = [  #poprawione (nie trzeba zmieniać zdań)
+    'Na podstawie spostrzeżeń wynikających z obserwacji odpowiedzi czasowych analizowanego układu stwierdza się oscylacyjny charakter odpowiedzi układu. Dynamika systemu ma stabilny charakter',
+    'Charakter zmian przebiegów poszczególnch współrzędnych jest stabilny. Otrzymane sygnały mieszczą się w zakresie dopuszczalnych uwarunkowaniami fizycznymi.',
+    'Zaprezentowane wykresy przedstawiające odpowiedzi czasowe układu mają drganiowy charakter i są zgodne z oczekiwaniami.',
+    'Bazując na otrzymanych wynikach można stwierdzić wzajemną zależność poszczególnych wielkości dynamicznych. Dodatkowo wielkości modelu stabilizują się w czasie. '
+]
+
+introduction_bank_1 = [
+    'Na wykresie {nr_rys} przedstawiano zmiany wielkości dynamicznych charakteryzujących ruch obiektu. Po przeanalizowaniu można zanotować wzajemną zależność poszczególnych wielkości dynamicznych.',
+    'Charakter przebiegu wartości dynamicznych układu został przedstawiony na rysunku {nr_rys}.',
+    'Wykres {nr_rys} pokazuje zmienność parametrów dynamicznych wózka w trakcie symulownego przejazdu.',
+    'Rysunek {nr_rys} prezentuje wykres opisujący zmienność parametrów dynamicznych obiektu w trakcie jazdy po zamodelowanym torze.',
 ]
 
 introduction_bank_2 = [
@@ -409,13 +441,6 @@ introduction_bank_2 = [
     'Wyniki stmulacji numerycznych otrzymano dla:{given_data}.',
 ]
 
-introduction_bank_meas_2 = [ #poprawione
-    'Pomiar został przeprowadzony dla następujących danych: {given_data}.',
-    'Zaprezentowane wyniki pomiarowe otrzymano dla danych równych:{given_data}.',
-    'Badanie pomiarowe zostało przeprowadzone dla następujących danych:{given_data}.',
-    'Wyniki pomiaru otrzymano dla:{given_data}.',
-]
-
 introduction_bank_3 = [
     'Na podstawie spostrzeżeń wynikających z obserwacji odpowiedzi czasowych analizowanego układu stwierdza się oscylacyjny charakter odpowiedzi układu. Dynamika systemu ma stabilny charakter',
     'Charakter zmian przebiegów poszczególnch współrzędnych jest stabilny. Otrzymane sygnały mieszczą się w zakresie dopuszczalnych uwarunkowaniami fizycznymi.',
@@ -423,12 +448,9 @@ introduction_bank_3 = [
     'Bazując na otrzymanych wynikach można stwierdzić wzajemną zależność poszczególnych wielkości dynamicznych. Dodatkowo wielkości modelu stabilizują się w czasie. '
 ]
 
-introduction_bank_meas_3 = [ #poprawione (nie trzeba zmieniać zdań)
-    'Na podstawie spostrzeżeń wynikających z obserwacji odpowiedzi czasowych analizowanego układu stwierdza się oscylacyjny charakter odpowiedzi układu. Dynamika systemu ma stabilny charakter',
-    'Charakter zmian przebiegów poszczególnch współrzędnych jest stabilny. Otrzymane sygnały mieszczą się w zakresie dopuszczalnych uwarunkowaniami fizycznymi.',
-    'Zaprezentowane wykresy przedstawiające odpowiedzi czasowe układu mają drganiowy charakter i są zgodne z oczekiwaniami.',
-    'Bazując na otrzymanych wynikach można stwierdzić wzajemną zależność poszczególnych wielkości dynamicznych. Dodatkowo wielkości modelu stabilizują się w czasie. '
-]
+intro_bank_composed_model_gen = RandomDescription(introduction_bank_1,
+                                                  introduction_bank_2,
+                                                  introduction_bank_3)
 
 intro_bank_composed_model = [
     str(
@@ -443,15 +465,15 @@ conclusion_bank_x = [
 ]
 
 measurement_conclusion_bank_x = [
-    'Zauważa się {ao_x_inf} zmienności parametru \({param_name}\) dla współrzędnej \({x(t)}\) oraz odpowiadającej temu przemieszczniu prędkości. Stwierdzono wpływ mierzonego parametru, gdzie maksymalne wartości dla wymienionych współrzędnych przyjmują odpowiednio {ao_x_max} oraz {Derivative(ao_x, t)_max} dla {ao_x_idmax} i {Derivative(ao_x, t)_idmax}. ',
-    'Zaobserwowano {ao_x_inf} parametru \({param_name}\) na maksymalną wartość pokonanej drogi oraz osiąganą wartość prędkości. Maksymalne wartości dla wymienionych współrzędnych przyjmują odpowiednio {ao_x_max} oraz {Derivative(ao_x, t)_max} dla maksymalnej wartości mierzonego parametru równej {ao_x_idmax}. ',
-    'Zmianę dynamiki pod wpływem zmienności parametru \({param_name}\) obserwuje się dla \({x(t)}\), gdzie największa wartość pokonanej drogi to {ao_x_max}. W konsekwencji zaobserwowano {ao_x_inf} analizowanej zmiennej na wartość prędkości liniowej \({Derivative(ao_x, t)}\), dla której minimalna wartość wynosi {Derivative(ao_x, t)_min}, a największą osiąganą wartością jest {Derivative(ao_x, t)_max} odpowiednio dla wartości parmametru: {Derivative(ao_x, t)_idmin} oraz {Derivative(ao_x, t)_idmax}. ',
+    'Zauważa się {a_ox_inf} zmienności parametru \({param_name}\) dla współrzędnej \({a_ox}\) oraz odpowiadającej temu przemieszczniu prędkości. Stwierdzono wpływ mierzonego parametru, gdzie maksymalne wartości dla wymienionych współrzędnych przyjmują odpowiednio {a_ox_max} dla {a_ox_idmax}. ',
+    'Zaobserwowano {a_ox_inf} parametru \({param_name}\) na maksymalną wartość pokonanej drogi oraz osiąganą wartość prędkości. Maksymalne wartości dla wymienionych współrzędnych przyjmują odpowiednio {a_ox_max} dla maksymalnej wartości mierzonego parametru równej {a_ox_idmax}. ',
+    #'Zmianę dynamiki pod wpływem zmienności parametru \({param_name}\) obserwuje się dla \({a_ox}\), gdzie największa wartość zmierzonego przyspieszenia to {a_ox_max}. W konsekwencji zaobserwowano {a_ox_inf} analizowanej zmiennej na wartość prędkości liniowej \({Derivative(a_ox, t)}\), dla której minimalna wartość wynosi {Derivative(a_ox, t)_min}, a największą osiąganą wartością jest {Derivative(a_ox, t)_max} odpowiednio dla wartości parmametru: {Derivative(a_ox, t)_idmin} oraz {Derivative(a_ox, t)_idmax}. ',
 ]
 
 measurement_conclusion_bank_x_rc = [
-    'Zauważa się {ao_rx_inf} zmienności parametru \({param_name}\) dla współrzędnej \({x(t)}\) oraz odpowiadającej temu przemieszczniu prędkości. Stwierdzono wpływ mierzonego parametru, gdzie maksymalne wartości dla wymienionych współrzędnych przyjmują odpowiednio {ao_rx_max} oraz {Derivative(ao_rx, t)_max} dla {ao_rx_idmax} i {Derivative(ao_rx, t)_idmax}. ',
-    'Zaobserwowano {ao_rx_inf} parametru \({param_name}\) na maksymalną wartość pokonanej drogi oraz osiąganą wartość prędkości. Maksymalne wartości dla wymienionych współrzędnych przyjmują odpowiednio {ao_rx_max} oraz {Derivative(ao_rx, t)_max} dla maksymalnej wartości mierzonego parametru równej {ao_rx_idmax}. ',
-    'Zmianę dynamiki pod wpływem zmienności parametru \({param_name}\) obserwuje się dla \({x(t)}\), gdzie największa wartość pokonanej drogi to {ao_rx_max}. W konsekwencji zaobserwowano {ao_rx_inf} analizowanej zmiennej na wartość prędkości liniowej \({Derivative(ao_rx, t)}\), dla której minimalna wartość wynosi {Derivative(ao_rx, t)_min}, a największą osiąganą wartością jest {Derivative(ao_rx, t)_max} odpowiednio dla wartości parmametru: {Derivative(ao_rx, t)_idmin} oraz {Derivative(ao_rx, t)_idmax}. ',
+    'Zauważa się {a_rx_inf} zmienności parametru \({param_name}\) dla współrzędnej \({a_rx}\) oraz odpowiadającej temu przemieszczniu prędkości. Stwierdzono wpływ mierzonego parametru, gdzie maksymalne wartości dla wymienionych współrzędnych przyjmują odpowiednio {a_rx_max} dla {a_rx_idmax}. ',
+    'Zaobserwowano {a_rx_inf} parametru \({param_name}\) na maksymalną wartość pokonanej drogi oraz osiąganą wartość prędkości. Maksymalne wartości dla wymienionych współrzędnych przyjmują odpowiednio {a_rx_max} dla maksymalnej wartości mierzonego parametru równej {a_rx_idmax}. ',
+    #'Zmianę dynamiki pod wpływem zmienności parametru \({param_name}\) obserwuje się dla \({a_rx}\), gdzie największa wartość pokonanej drogi to {a_rx_max}. W konsekwencji zaobserwowano {a_rx_inf} analizowanej zmiennej na wartość prędkości liniowej \({Derivative(a_rx, t)}\), dla której minimalna wartość wynosi {Derivative(a_rx, t)_min}, a największą osiąganą wartością jest {Derivative(a_rx, t)_max} odpowiednio dla wartości parmametru: {Derivative(a_rx, t)_idmin} oraz {Derivative(a_rx, t)_idmax}. ',
 ]
 
 conclusion_bank_varphi_rc = [
@@ -474,20 +496,20 @@ conclusion_bank_phi = [
 
 conclusion_bank_z = [
     'Zmianę dynamiki pod wpływem zmienności parametru \({param_name}\) obserwuje się dla \({z(t)}\), gdzie największa wartość amplitudy to {z(t)_max}, a najmniejsza {z(t)_min}. W konsekwencji zaobserwowano {z(t)_inf} analizowanej zmiennej na wartość drgań prędkości drgań pionowych, dla których minimalna wartość amplitudy to {Derivative(z(t), t)_min}, a największą osiąganą wartością jest {Derivative(z(t), t)_max} odpowiednio dla wartości parmametru: {Derivative(z(t), t)_idmin} oraz {Derivative(z(t), t)_idmax}. ',
-    'Zauważa się {z(t)_inf} zmienności parametru \({param_name}\) dla współrzędnej \({z(t)}\) oraz odpowiadającej temu przemieszczniu prędkości. Stwierdzono wpływ badanego parametru, gdzie maksymalne wartości dla wymienionych współrzędnych przyjmują odpowiednio {z(t)_max} oraz {Derivative(z(t), t)_max} dla {z(t)_idmax} i {Derivative(z(t), t)_idmax}. '
-    'Zaobserwowano {z(t)_inf} parametru \({param_name}\) na maksymalną wartość drgań pionowych wózka oraz osiąganą wartość ich prędkości. Maksymalne wartości dla wymienionych współrzędnych przyjmują odpowiednio {z(t)_max} oraz {Derivative(z(t), t)_max} dla maksymalnej wartości badanego parametru równej {z(t)_idmax}. '
+    'Zauważa się {z(t)_inf} zmienności parametru \({param_name}\) dla współrzędnej \({z(t)}\) oraz odpowiadającej temu przemieszczniu prędkości. Stwierdzono wpływ badanego parametru, gdzie maksymalne wartości dla wymienionych współrzędnych przyjmują odpowiednio {z(t)_max} oraz {Derivative(z(t), t)_max} dla {z(t)_idmax} i {Derivative(z(t), t)_idmax}. ',
+    'Zaobserwowano {z(t)_inf} parametru \({param_name}\) na maksymalną wartość drgań pionowych wózka oraz osiąganą wartość ich prędkości. Maksymalne wartości dla wymienionych współrzędnych przyjmują odpowiednio {z(t)_max} oraz {Derivative(z(t), t)_max} dla maksymalnej wartości badanego parametru równej {z(t)_idmax}. ',
 ]
 
 measurement_conclusion_bank_z = [
-    'Zmianę dynamiki pod wpływem zmienności parametru \({param_name}\) obserwuje się dla \({z(t)}\), gdzie największa wartość amplitudy to {ao_z_max}, a najmniejsza {ao_z_min}. W konsekwencji zaobserwowano {ao_z_inf} analizowanej zmiennej na wartość drgań prędkości drgań pionowych, dla których minimalna wartość amplitudy to {Derivative(ao_z, t)_min}, a największą osiąganą wartością jest {Derivative(ao_z, t)_max} odpowiednio dla wartości parmametru: {Derivative(ao_z, t)_idmin} oraz {Derivative(ao_z, t)_idmax}. ',
-    'Zauważa się {ao_z_inf} zmienności parametru \({param_name}\) dla współrzędnej \({z(t)}\) oraz odpowiadającej temu przemieszczniu prędkości. Stwierdzono wpływ badanego parametru, gdzie maksymalne wartości dla wymienionych współrzędnych przyjmują odpowiednio {ao_z_max} oraz {Derivative(ao_z, t)_max} dla {ao_z_idmax} i {Derivative(ao_z, t)_idmax}. '
-    'Zaobserwowano {ao_z_inf} parametru \({param_name}\) na maksymalną wartość drgań pionowych wózka oraz osiąganą wartość ich prędkości. Maksymalne wartości dla wymienionych współrzędnych przyjmują odpowiednio {ao_z_max} oraz {Derivative(ao_z, t)_max} dla maksymalnej wartości badanego parametru równej {ao_z_idmax}. '
+    'Zmianę dynamiki pod wpływem zmienności parametru \({param_name}\) obserwuje się dla \({a_oz}\), gdzie największa wartość amplitudy to {a_oz_max}, a najmniejsza {a_oz_min}.',
+    'Zauważa się {a_oz_inf} zmienności parametru \({param_name}\) dla współrzędnej \({a_oz}\) oraz odpowiadającej temu przemieszczniu prędkości.',
+    'Zaobserwowano {a_oz_inf} parametru \({param_name}\) na maksymalną wartość drgań pionowych wózka oraz osiąganą wartość ich prędkości.'
 ]
 
 measurement_conclusion_bank_z_rc = [
-    'Zmianę dynamiki pod wpływem zmienności parametru \({param_name}\) obserwuje się dla \({z(t)}\), gdzie największa wartość amplitudy to {ao_rz_max}, a najmniejsza {ao_rz_min}. W konsekwencji zaobserwowano {ao_rz_inf} analizowanej zmiennej na wartość drgań prędkości drgań pionowych, dla których minimalna wartość amplitudy to {Derivative(ao_rz, t)_min}, a największą osiąganą wartością jest {Derivative(ao_rz, t)_max} odpowiednio dla wartości parmametru: {Derivative(ao_rz, t)_idmin} oraz {Derivative(ao_rz, t)_idmax}. ',
-    'Zauważa się {ao_rz_inf} zmienności parametru \({param_name}\) dla współrzędnej \({z(t)}\) oraz odpowiadającej temu przemieszczniu prędkości. Stwierdzono wpływ badanego parametru, gdzie maksymalne wartości dla wymienionych współrzędnych przyjmują odpowiednio {ao_rz_max} oraz {Derivative(ao_rz, t)_max} dla {ao_rz_idmax} i {Derivative(ao_rz, t)_idmax}. '
-    'Zaobserwowano {ao_rz_inf} parametru \({param_name}\) na maksymalną wartość drgań pionowych wózka oraz osiąganą wartość ich prędkości. Maksymalne wartości dla wymienionych współrzędnych przyjmują odpowiednio {ao_rz_max} oraz {Derivative(ao_rz, t)_max} dla maksymalnej wartości badanego parametru równej {ao_rz_idmax}. '
+    'Zmianę dynamiki pod wpływem zmienności parametru \({param_name}\) obserwuje się dla \({a_rz}\), gdzie największa wartość amplitudy to {a_rz_max}, a najmniejsza {a_rz_min}.',
+    'Zauważa się {a_rz_inf} zmienności parametru \({param_name}\) dla współrzędnej \({a_rz}\) oraz odpowiadającej temu przemieszczniu prędkości.',
+    'Zaobserwowano {a_rz_inf} parametru \({param_name}\) na maksymalną wartość drgań pionowych wózka oraz osiąganą wartość ich prędkości.',
 ]
 
 conclusion_bank_no_impact = [
@@ -504,6 +526,14 @@ measurement_conclusion_bank_no_impact = [
     'Badany wózek nie wykazuje szczególnej wrażlowości na zmiany innych analizowanych parametrów. ',
 ]
 
+measurement_conclusion_bank_summary = [
+    'Dla rozważanego modelu dynamicznego wózka inwalidzkiego wraz z napędem RC przedstawiono efekty pomiarów. Dla uzyskanych danych liczbowych, przygotowano wykresy przedstawiające maksymalne wartości osiąganych amplitud w funkcji analizowanego parametru dla współrzędnych uogólnionych modelu oraz ich pierwszych pochodnych (przemieszczeń i prędkości). Opracowane wykresy porównawcze pozwoliły na określenie wpływu badanych parametrów na dynamikę rozpatrywanego wózka. Bazując na wynikach przerprowadzonych symulacji przygotowano zestawienie dla parametru \({param_name}\).'
+]
+
+conclusion_bank_composed_model_gen = RandomDescription(
+    conclusion_bank_varphi_rc, conclusion_bank_x, conclusion_bank_z,
+    conclusion_bank_phi, conclusion_bank_no_impact)
+
 conclusion_bank_composed_model = [
     str(
         RandomDescription(conclusion_bank_varphi_rc, conclusion_bank_x,
@@ -513,10 +543,24 @@ conclusion_bank_composed_model = [
 
 measurement_conclusion_bank_composed_model = [
     str(
-        RandomDescription(measurement_conclusion_bank_x_rc, measurement_conclusion_bank_x,
-                          measurement_conclusion_bank_z, measurement_conclusion_bank_z_rc,
-                          measurement_conclusion_bank_no_impact, )) for obj in range(30)
+        RandomDescription(
+            measurement_conclusion_bank_x_rc,
+            measurement_conclusion_bank_x,
+            measurement_conclusion_bank_z,
+            measurement_conclusion_bank_z_rc,
+            measurement_conclusion_bank_no_impact,
+        )) for obj in range(30)
 ]
+
+conclusion_bank_chair_model_gen = RandomDescription(conclusion_bank_x,
+                                                    conclusion_bank_z,
+                                                    conclusion_bank_phi,
+                                                    conclusion_bank_no_impact)
+
+
+conclusion_bank_chair_move_model_gen = RandomDescription(conclusion_bank_x,
+                                                    conclusion_bank_phi,
+                                                    conclusion_bank_no_impact)
 
 conclusion_bank_chair_model = [
     str(
@@ -527,28 +571,33 @@ conclusion_bank_chair_model = [
 
 measurement_conclusion_bank_chair_model = [
     str(
-        RandomDescription(measurement_conclusion_bank_x,measurement_conclusion_bank_x_rc,
-                          measurement_conclusion_bank_z,measurement_conclusion_bank_z_rc,
+        RandomDescription(measurement_conclusion_bank_x,
+                          measurement_conclusion_bank_x_rc,
+                          measurement_conclusion_bank_z,
+                          measurement_conclusion_bank_z_rc,
                           measurement_conclusion_bank_no_impact))
     for obj in range(30)
 ]
 
+conclusion_bank_drive_model_gen = RandomDescription(conclusion_bank_varphi_rc,
+                                                    conclusion_bank_no_impact)
+
 conclusion_bank_drive_model = [
     str(RandomDescription(conclusion_bank_varphi_rc,
                           conclusion_bank_no_impact)) for obj in range(30)
-]    
-    
-measurement_conclusion_bank_drive_model = [
-    str(RandomDescription(measurement_conclusion_bank_x_rc,
-                          measurement_conclusion_bank_no_impact)) for obj in range(30)
-]    
-    
-    
-    
+]
 
-    
-    
-    
+measurement_conclusion_bank_drive_model = [
+    str(
+        RandomDescription(measurement_conclusion_bank_x_rc,
+                          measurement_conclusion_bank_no_impact))
+    for obj in range(30)
+]
+
+analysis_intro_ending = '''Tabela {nr_rys} przedstawia zakres parametrów przyjętych do wykonania symulacji numerycznych. Oceniono, że przyjęty zakres badnia odpowiada możliwym do uzyskania w praktyce wartością i przeprowadzone symulacje będę dobrze reprezentować dynamikę układu.
+'''
+
+simulations_summary_str = ''' Dla rozważanego modelu dynamicznego wózka inwalidzkiego wraz z napędem RC przedstawiono efekty symulacji numerycznych. Dla uzyskanych danych symulacyjnych, przygotowano wykresy przedstawiające maksymalne wartości osiąganych amplitud w funkcji analizowanego parametru dla współrzędnych uogólnionych modelu oraz ich pierwszych pochodnych (przemieszczeń i prędkości). Opracowane wykresy porównawcze pozwoliły na określenie wpływu badanych parametrów na dynamikę rozpatrywanego układu. Bazując na wynikach przerprowadzonych symulacji przygotowano zestawienie dla parametru \({param_name}\).  '''
 
 
 class PlottedData(Figure):
@@ -668,8 +717,8 @@ class ReportSection(Section):
             feature_dict.update({'nr_rys': Ref(marker).dumps()})
 
         if type(numerical_data) != type(None):
-            
-            column_names=numerical_data.columns
+
+            column_names = numerical_data.columns
             feature_dict.update(
                 {str(name): vlatex(name)
                  for name in column_names})
@@ -720,19 +769,18 @@ class ReportSection(Section):
         return feature_dict
 
     def add_introduction(
-        self,
-        title='Zakres prowadzonej analizy',
-        numerical_data=None,
-        units_dict={},
-        initial_description='Initial description',#random.choice(sec_intro_composed_model)
-        ending_summary='Ending summary', # random.choice(sec_intro_composed_model)
+            self,
+            title='Zakres prowadzonej analizy',
+            numerical_data=None,
+            units_dict={},
+            initial_description='Initial description',  #random.choice(sec_intro_composed_model)
+            ending_summary='Ending summary',  # random.choice(sec_intro_composed_model)
     ):
 
-        with self.create(Subsection(title)) as subsec:
-        
-            subsec.append(NoEscape(initial_description))
+        with self.create(Subsection(NoEscape(title))) as subsec:
 
-            tab_mrk = Marker('given_data_'+str(self.analysis_name) + '_' + str(self.analysis_key),
+            tab_mrk = Marker('given_data_' + str(self.analysis_name) + '_' +
+                             str(self.analysis_key),
                              prefix='tab')
 
             symbols_df = pd.DataFrame(data=[
@@ -743,15 +791,15 @@ class ReportSection(Section):
                     'Wartość maksymalna': column.round(2).max(),
                     'Jednostka': '$ {unit:~Lx}  $'.format(
                         unit=units_dict[key]),
-                } for key, column in
-                numerical_data.items()
+                } for key, column in numerical_data.items()
             ])
 
-            format_dict = (self.get_feature_dict(
-                numerical_data=None,
-                given_data_dict=None,
-                units_dict=units_dict,
-                marker=tab_mrk))
+            format_dict = (self.get_feature_dict(numerical_data=None,
+                                                 given_data_dict=None,
+                                                 units_dict=units_dict,
+                                                 marker=tab_mrk))
+
+            subsec.append(NoEscape(initial_description.format(**format_dict)))
 
             with subsec.create(DataTable(symbols_df, position='H')) as table:
 
@@ -760,79 +808,69 @@ class ReportSection(Section):
                         'Zestawienie parametrów modelu'.format(**format_dict)))
                 table.add_table(numerical_data.T)
 
-            subsec.append(NoEscape(ending_summary))
+            subsec.append(NoEscape(ending_summary.format(**format_dict)))
 
-            subsec.append(NewPage())
+            #subsec.append(NewPage())
+            subsec.append(NewLine())
 
     def add_simulational_results(
-        self,
-        title='Wyniki symulacji numerycznych',
-        numerical_data=None,
-        units_dict={},
-        initial_description='Initial description',#random.choice(intro_bank_composed_model)
-        ending_summary='Ending summary', #random.choice(summary_bank_composed_model)
+            self,
+            title='Wyniki symulacji numerycznych',
+            numerical_data=None,
+            units_dict={},
+            initial_description='Initial description',  #random.choice(intro_bank_composed_model)
+            ending_summary='Ending summary',  #random.choice(summary_bank_composed_model)
     ):
-        
+
         with self.create(Subsection(title)) as subsec:
-            
-            simulation_results_frame=numerical_data
-            
-            for key,row in simulation_results_frame.iterrows():
 
+            simulation_results_frame = numerical_data
 
-                data_with_units={parameter:value for parameter,value in row.items() if isinstance(parameter,Symbol)}
+            for key, row in simulation_results_frame.iterrows():
 
+                data_with_units = {
+                    parameter: value
+                    for parameter, value in row.items()
+                    if isinstance(parameter, Symbol)
+                }
 
-                current_time=dtime.datetime.now().timestamp()
-                current_fig_mrk = Marker('data_plot_'+str(self.analysis_key)+'_'+str(current_time), prefix='fig')
+                current_time = dtime.datetime.now().timestamp()
+                current_fig_mrk = Marker('data_plot_' +
+                                         str(self.analysis_key) + '_' +
+                                         str(current_time),
+                                         prefix='fig')
 
-                format_dict={
-                    **(self.get_feature_dict(numerical_data=row['simulations'],given_data_dict=data_with_units ,units_dict=units_dict,marker= current_fig_mrk )),
+                format_dict = {
+                    **(self.get_feature_dict(numerical_data=row['simulations'],
+                                             given_data_dict=data_with_units,
+                                             units_dict=units_dict,
+                                             marker=current_fig_mrk)),
                     #**{str(name):vlatex(name) for name in row['simulations'].columns}
                 }
 
-                subsec.append(NoEscape(
-                        initial_description.format(**format_dict)
-                    ))
+                subsec.append(
+                    NoEscape(initial_description.format(**format_dict)))
 
-                with subsec.create(PlottedData(row['simulations'],'./plots/fig_'+str(current_time),position='H' ,preview=True )) as fig:
+                with subsec.create(
+                        PlottedData(row['simulations'],
+                                    './plots/fig_' + str(current_time),
+                                    position='H',
+                                    preview=self.preview)) as fig:
                     fig.add_data_plot(row['simulations'])
-                    fig.add_caption(NoEscape(
-                                    #'Przebiegi czasowe modelu dla danych: {given_data}.'.format(**format_dict)
-                                    'Przebiegi czasowe modelu dla rozważanego zakresu danych.'.format(**format_dict)
-                                   ))
+                    fig.add_caption(
+                        NoEscape(
+                            #'Przebiegi czasowe modelu dla danych: {given_data}.'.format(**format_dict)
+                            'Przebiegi czasowe modelu dla rozważanego zakresu danych.'
+                            .format(**format_dict)))
                     fig.append(Label(current_fig_mrk))
 
+                subsec.append(NoEscape(ending_summary.format(**format_dict)))
 
-                subsec.append(NoEscape(
-                        ending_summary.format(**format_dict) 
-                            ))
+                #subsec.append(NewPage())
+                subsec.append(NewLine())
 
-                subsec.append(NewPage())
-
-
-                
-    def add_summary(
-        self,
-        title='Analiza otrzymanych wyników',
-        numerical_data=None,
-        units_dict={},
-        initial_description='Initial description',    
-        ending_summary='Ending summary', # random.choice(conclusion_bank_composed_model)
-    ):
-
-        ''' Dla rozważanego modelu dynamicznego wózka inwalidzkiego wraz z napędem RC przedstawiono efekty symulacji numerycznych. Dla uzyskanych danych symulacyjnych, przygotowano wykresy przedstawiające maksymalne wartości osiąganych amplitud w funkcji analizowanego parametru dla współrzędnych uogólnionych modelu oraz ich pierwszych pochodnych (przemieszczeń i prędkości). Opracowane wykresy porównawcze pozwoliły na określenie wpływu badanych parametrów na dynamikę rozpatrywanego układu. Bazując na wynikach przerprowadzonych symulacji przygotowano zestawienie dla parametru \({param_name}\).  '''
-        
-        simulation_results_frame= numerical_data
-        with self.create(Subsection(title)) as subsec:
-            
-            current_time=dtime.datetime.now().timestamp()
-            summary_mrk = Marker('summary_'+str(self.analysis_key), prefix='fig')
-
-
-            
-
-            summary_frame = pd.DataFrame(
+    def prepare_summary_data(self,simulation_results_frame):
+        summary_frame = pd.DataFrame(
                 data=[
                     a.max()
                     for a in simulation_results_frame['simulations'].values
@@ -841,57 +879,117 @@ class ReportSection(Section):
                     str(elem) for elem in simulation_results_frame[
                         self.analysis_key].round(2)
                 ])
+        return summary_frame
+
+    
+    def add_summary(
+            self,
+            title='Analiza otrzymanych wyników',
+            numerical_data=None,
+            units_dict={},
+            initial_description='Initial description',
+            ending_summary='Ending summary',  # random.choice(conclusion_bank_composed_model)
+    ):
+        ''' Dla rozważanego modelu dynamicznego wózka inwalidzkiego wraz z napędem RC przedstawiono efekty symulacji numerycznych. Dla uzyskanych danych symulacyjnych, przygotowano wykresy przedstawiające maksymalne wartości osiąganych amplitud w funkcji analizowanego parametru dla współrzędnych uogólnionych modelu oraz ich pierwszych pochodnych (przemieszczeń i prędkości). Opracowane wykresy porównawcze pozwoliły na określenie wpływu badanych parametrów na dynamikę rozpatrywanego układu. Bazując na wynikach przerprowadzonych symulacji przygotowano zestawienie dla parametru \({param_name}\).  '''
+
+        summary_frame = numerical_data
+        with self.create(Subsection(title)) as subsec:
+
+            current_time = dtime.datetime.now().timestamp()
+            summary_mrk = Marker('summary_' + str(self.analysis_name) + '_' +
+                                 str(self.analysis_key),
+                                 prefix='fig')
             
-            format_dict=(self.get_feature_dict(numerical_data=None,given_data_dict=None ,units_dict=units_dict,marker=summary_mrk ))            
-
-            subsec.append(
-                        NoEscape(
-                        initial_description.format(**format_dict )))
-
-
-
             
-            format_dict=(self.get_feature_dict(numerical_data=summary_frame,given_data_dict=None ,units_dict=units_dict,marker=summary_mrk ))
+
+#             summary_frame = pd.DataFrame(
+#                 data=[
+#                     a.max()
+#                     for a in simulation_results_frame['simulations'].values
+#                 ],
+#                 index=[
+#                     str(elem) for elem in simulation_results_frame[
+#                         self.analysis_key].round(2)
+#                 ])
+
+            format_dict = (self.get_feature_dict(numerical_data=summary_frame,
+                                                 given_data_dict=None,
+                                                 units_dict=units_dict,
+                                                 marker=summary_mrk))
+
+            print(format_dict)
+
+            subsec.append(NoEscape(initial_description.format(**format_dict)))
 
             step_key_influence_dict = {
                 str(name) + '_inf': self.influeance_level(summary_frame[name])
                 for name in summary_frame.columns
             }
 
-            with subsec.create(PlottedData(summary_frame,'./plots/fig_summary_'+str(current_time),position='H' ,preview=True )) as fig:
-                    fig.add_data_plot(summary_frame)
-                    fig.add_caption(NoEscape(
-                                    'Wpływ zmiany rozważanego parametru na dynamikę układu.'.format(**format_dict)
-                                   ))
-                    fig.append(Label(summary_mrk))
+            print(step_key_influence_dict)
 
-            subsec.append(NoEscape(ending_summary.format(**{
-                                    **format_dict,
+            with subsec.create(
+                    PlottedData(summary_frame,
+                                './plots/fig_summary_' + str(current_time),
+                                position='H',
+                                preview=True)) as fig:
+                fig.add_data_plot(summary_frame)
+                fig.add_caption(
+                    NoEscape(
+                        'Zestawienie wyników przeprowadzonej analizy.'
+                        .format(**format_dict)))
+                fig.append(Label(summary_mrk))
+
+            subsec.append(
+                NoEscape(
+                    ending_summary.format(
+                        **{
+                            **format_dict,
                             **step_key_influence_dict,
                             #**{str(name):vlatex(name) for name in row['simulations'].columns}
-                                })))
+                        })))
 
-            subsec.append(NewPage())
+            #subsec.append(NewPage())
+            subsec.append(NewLine())
+
+    def add_optimization_result(
+            self,
+            title='Wyniki optymalizacji jednokryterialnej',
+            numerical_data=None,
+            units_dict={},
+            initial_description='Initial description',
+            ending_summary='Ending summary',  # random.choice(conclusion_bank_composed_model)
+    ):
+        
+        
+        
+        self.add_summary(
+            title=title,
+            numerical_data=numerical_data,
+            units_dict=units_dict,
+            initial_description=initial_description,
+            ending_summary=
+            'Ending summary',  # random.choice(conclusion_bank_composed_model)
+        )
 
     def add_measurement_summary(
-        self,
-        title='Analiza otrzymanych wyników pomiarów',
-        numerical_data=None,
-        units_dict={},
-        initial_description='Initial description',    
-        ending_summary='Ending summary', # random.choice(conclusion_bank_composed_model)
+            self,
+            title='Analiza otrzymanych wyników pomiarów',
+            numerical_data=None,
+            units_dict={},
+            initial_description='Initial description',
+            ending_summary='Ending summary',  # random.choice(conclusion_bank_composed_model)
     ):
-
         ''' Dla rozważanego modelu dynamicznego wózka inwalidzkiego wraz z napędem RC przedstawiono efekty pomiarów. Dla uzyskanych danych liczbowych, przygotowano wykresy przedstawiające maksymalne wartości osiąganych amplitud w funkcji analizowanego parametru dla współrzędnych uogólnionych modelu oraz ich pierwszych pochodnych (przemieszczeń i prędkości). Opracowane wykresy porównawcze pozwoliły na określenie wpływu badanych parametrów na dynamikę rozpatrywanego wózka. Bazując na wynikach przerprowadzonych symulacji przygotowano zestawienie dla parametru \({param_name}\).  '''
-        
-        simulation_results_frame= numerical_data
+
+        simulation_results_frame = numerical_data
         with self.create(Subsection(title)) as subsec:
-            
-            current_time=dtime.datetime.now().timestamp()
-            summary_mrk = Marker('summary_'+str(self.analysis_key), prefix='fig')
 
-
-            
+            current_time = dtime.datetime.now().timestamp()
+            summary_mrk = Marker('measurment_summary_' +
+                                 str(self.analysis_name) +
+                                 str(self.analysis_key),
+                                 prefix='fig')
 
             summary_frame = pd.DataFrame(
                 data=[
@@ -902,35 +1000,43 @@ class ReportSection(Section):
                     str(elem) for elem in simulation_results_frame[
                         self.analysis_key].round(2)
                 ])
-            
-            format_dict=(self.get_feature_dict(numerical_data=None,given_data_dict=None ,units_dict=units_dict,marker=summary_mrk ))            
 
-            subsec.append(
-                        NoEscape(
-                        initial_description.format(**format_dict )))
+            format_dict = (self.get_feature_dict(numerical_data=None,
+                                                 given_data_dict=None,
+                                                 units_dict=units_dict,
+                                                 marker=summary_mrk))
 
+            subsec.append(NoEscape(initial_description.format(**format_dict)))
 
-
-            
-            format_dict=(self.get_feature_dict(numerical_data=summary_frame,given_data_dict=None ,units_dict=units_dict,marker=summary_mrk ))
+            format_dict = (self.get_feature_dict(numerical_data=summary_frame,
+                                                 given_data_dict=None,
+                                                 units_dict=units_dict,
+                                                 marker=summary_mrk))
 
             step_key_influence_dict = {
                 str(name) + '_inf': self.influeance_level(summary_frame[name])
                 for name in summary_frame.columns
             }
 
-            with subsec.create(PlottedData(summary_frame,'./plots/fig_summary_'+str(current_time),position='H' ,preview=True )) as fig:
-                    fig.add_data_plot(summary_frame)
-                    fig.add_caption(NoEscape(
-                                    'Wpływ zmiany rozważanego parametru na dynamikę układu.'.format(**format_dict)
-                                   ))
-                    fig.append(Label(summary_mrk))
+            with subsec.create(
+                    PlottedData(summary_frame,
+                                './plots/fig_summary_' + str(current_time),
+                                position='H',
+                                preview=True)) as fig:
+                fig.add_data_plot(summary_frame)
+                fig.add_caption(
+                    NoEscape(
+                        'Wpływ zmiany rozważanego parametru na dynamikę układu.'
+                        .format(**format_dict)))
+                fig.append(Label(summary_mrk))
 
-            subsec.append(NoEscape(ending_summary.format(**{
-                                    **format_dict,
+            subsec.append(
+                NoEscape(
+                    ending_summary.format(
+                        **{
+                            **format_dict,
                             **step_key_influence_dict,
                             #**{str(name):vlatex(name) for name in row['simulations'].columns}
-                                })))
+                        })))
 
             subsec.append(NewPage())
-

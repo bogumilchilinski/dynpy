@@ -24,27 +24,28 @@ I_ch, I_w , z_c3,l_fr,l_rear= symbols('I_chair, I_wheel, z_c3, l_fr, l_r',positi
 m_RC, I_RC, l_RC, k_RC, phi0 = symbols('m_RC, I_RC, l_RC, k_RC, varphi_0',positive=True)
 m_w, I_wrc, r_w, k_w, k_fix,k_tire = symbols('m_w, I_wRC, R_w, k_w, k_fix, k_t',positive=True)
 c,c_mu,c_lam= symbols('c,c_mu, c_lambda',positive=True)
-ao_x, ao_z, ao_rx ,ao_rz=symbols('ao_x, ao_z, ao_rx ,ao_rz')
+a_ox, a_oz, a_rx ,a_rz=symbols('a_ox, a_oz, a_rx ,a_rz')
 
 pm=symbols('PM')
 
-var_static = {m_fr:'masa koło przednie wózka',
-              m_rear:'masa koło tylne wózka',
-              m_3:'???',
-              k_r:'sztywność koła tylnego wózka',
-              k_rt:'sztywność ogumienia koła tylnego wózka',
-              k_f:'sztywność koła przedniego wózka',
-              k_ft:'sztywność ogumienia koła przedniego wózka',
+var_static = {
+              m_fr:'masa przedniego koła wózka',
+              m_rear:'masa tylnego koła wózka',
+              m_3:'masa konstrukcji wózka wraz z niepełnosprawnym',
+              k_r:'sztywność tylnego koła wózka',
+              k_rt:'sztywność ogumienia tylnego koła wózka',
+              k_f:'sztywność przedniego koła wózka',
+              k_ft:'sztywność ogumienia przedniego koła wózka',
               m:'masa wózka',
               k:'sztywność wózka',
               g:'przyspieszenie ziemskie',
-              F_1:'siła ???',
-              F_2:'siła ???',
-              Omega:'???',
-              F:'siła ???',
+              F_1:'siła wymuszająca',
+              F_2:'siła wymuszająca',
+              Omega:'częstość wymuszenia',
+              F:'siła przykładana do wózka przez niepełnosprawnego',
               R:'promień tylnego koła wózka',
               v0:'prędkość początkowa wózka',
-              u0:'???',
+              u0:'ammplituda profilu drogi',
               I_ch:'moment bezwładności wózka',
               I_w:'moment bezwładności koła',
               z_c3:'pionowa odległość środka ciężkości od środka obrotu wózka',
@@ -64,7 +65,8 @@ var_static = {m_fr:'masa koło przednie wózka',
               c:'???',
               c_mu:'???',
               c_lam:'???',
-              pm:'???'}
+              pm:'czas działania siły na wózek',
+             }
 
 t_l, delta_t,l_ramp,l_bumps = symbols('t_l,dt,l_ramp, l_bumps',positive=True)
 t0 = symbols('t_0')
@@ -95,88 +97,8 @@ var_dynamic = {x:'przemieszczenie poziome wózka',
               }
 
 
-units_dict={
-            c:ureg.kilogram/ureg.second,
-            c_mu:1/ureg.second,
-            c_lam:ureg.second,
-            m_3:ureg.kilogram,    
-            m_w:ureg.kilogram,
-            m_fr:ureg.kilogram,
-            m_rear:ureg.kilogram,
-            m:ureg.kilogram,
-            m_RC:ureg.kilogram,
-            k_r:ureg.newton/ureg.meter,
-            k_rt:ureg.newton/ureg.meter,
-            k_f:ureg.newton/ureg.meter,
-            k_w:ureg.newton/ureg.meter,
-            k_fix:ureg.newton/ureg.meter,
-            k_tire:ureg.newton/ureg.meter,
-            k_ft:ureg.newton/ureg.meter,
-            k:ureg.newton/ureg.meter,
-            k_RC:ureg.newton/ureg.meter,
-            g:ureg.meter/ureg.second**2,
-            F_1:ureg.newton,
-            F_2:ureg.newton,
-            F:ureg.newton,
-            u0:ureg.meter,
-            Omega:ureg.radian,
-            R:ureg.meter,
-            r_w:ureg.meter,
-            v0:ureg.meter/ureg.second,
-            I_ch:ureg.kilogram*ureg.meter**2,
-            I_w:ureg.kilogram*ureg.meter**2,
-            I_RC:ureg.kilogram*ureg.meter**2,
-            I_wrc:ureg.kilogram*ureg.meter**2,
-            dphi:ureg.radian/ureg.second,
-            dphi_rc:ureg.radian/ureg.second,
-            z_c3:ureg.meter,
-            z_fr:ureg.meter,
-            l_fr:ureg.meter,
-            l_rear:ureg.meter,
-            l_RC:ureg.meter,
-            phi0:ureg.radian,
-            x:ureg.meter,
-            z:ureg.meter,
-            z_rear:ureg.meter,
-            z_fr:ureg.meter,
-            z_wrc:ureg.meter,
-            phi:ureg.radian,
-            phi_rc:ureg.radian,
-            theta:ureg.radian,
-            dx:ureg.meter/ureg.second,
-            dz_fr:ureg.meter/ureg.second,
-            dz_rear:ureg.meter/ureg.second,
-            dz:ureg.meter/ureg.second,
-            dtheta:ureg.radian/ureg.second,
-            dz_wrc:ureg.meter/ureg.second,
-            pm:ureg.m/ureg.m,
-            t_l:ureg.second,
-            delta_t:ureg.second,
-            l_ramp:ureg.meter,
-            l_bumps:ureg.meter,
-            t0:ureg.second,
-            'dimensionless':ureg.meter/ureg.meter,
-#             ao_x_max:ureg.gram,
-            ao_x:ureg.gram,
-#             ao_x_min:ureg.gram,
-#             ao_x_idmax:ureg.second,
-#             ao_x_idmin:ureg.second,
-#             ao_z_max:ureg.gram,
-            ao_z:ureg.gram,
-#             ao_z_min:ureg.gram,
-#             ao_z_idmax:ureg.second,
-#             ao_z_idmin:ureg.second,
-#             ao_rx_max:ureg.gram,
-#             ao_rx_min:ureg.gram,
-#             ao_rx_idmax:ureg.second,
-#             ao_rx_idmin:ureg.second,
-#             ao_rz_max:ureg.gram,
-#             ao_rz_min:ureg.gram,
-#             ao_rz_idmax:ureg.second,
-#             ao_rz_idmin:ureg.second,
-            ao_rz:ureg.gram,
-                ao_rx:ureg.gram,
-           }
+symbols_description={**var_static,**var_dynamic}
+
 
 q=[x,phi,z,z_fr,z_rear,phi_rc]
 u=[dx,dphi,dz,dz_fr,dz_rear,dphi_rc]
@@ -205,10 +127,9 @@ u_rr=u_road(x-2*R)
 
 u_rr=u0*(sin(x-2*R))  #road profile given in time domain
 u_rf=u_rr.subs(x,x+2*R) #road profile given in time domain
+
+
 #
-
-
-
 #u_fr=Function('u_fr')(phi,z_fr)
 
 # u_fr=u_fr_expr
@@ -217,9 +138,6 @@ u_rf=u_rr.subs(x,x+2*R) #road profile given in time domain
 # #u_rear=Function('u_rear')(phi,z_fr)
 
 # u_rear=u_rear_expr
-
-
-
 # D=S.One/2*c*2*(dx**2) + c/2*sum(vel**2 for vel in u)
 
 
@@ -250,13 +168,16 @@ T_RC_3dof=T_RC_arm+T_RC_wheel_z+T_RC_wheel_rev
 
 V_chair_g=m_fr*g*z_fr + m_rear*g*z_rear + m_3 * g*(z + z_c3*(cos(phi))) # EPG wózka względem punktu cięzkości wózka
 
+
 # nonlinear springs deflection
 u_rear=sqrt((z+R*sin(phi)+l_rear-z_rear)**2 + (R-R*cos(phi))**2)-l_rear#
 u_fr=sqrt((z-R*sin(phi)+l_fr-z_fr)**2 + (R-R*cos(phi))**2)-l_fr
 
+
 # linear springs deflection
 u_rear=((z+R*phi+l_rear -z_rear)**2 )-l_rear#
 u_fr=  ((z-R*phi+l_fr   -z_fr)**2  )-l_fr
+
 
 # spring potentials
 V_rear = S.One/2*k_rt*(z_rear-u_rr)**2  + S.One/2*k_r*(u_rear)**2 # Ep tylnich prętów ramy względem ich sprężystości
@@ -409,4 +330,179 @@ T_chair_2dof=T_chair5dof.subs(dof2,method='direct')
         
 
 
+m_fr, m_rear,m_3, k_r, k_rt, k_f, k_ft = symbols('m_fr, m_r, M, k_r, k_rt, k_f, k_ft',positive=True)
+m,k,g,F_1,F_2,Omega,F,R,v0,u0= symbols('m,k,g,F_1,F_2,Omega, F_0, R, v_0,u_0',positive=True)
+I_ch, I_w , z_c3,l_fr,l_rear,R_curve,= symbols('I_chair, I_wheel, z_c3, l_fr, l_r, R_curve',positive=True)
 
+t_l, delta_t,l_ramp,l_bumps = symbols('t_l,dt,l_ramp, l_bumps',positive=True)
+t0 = symbols('t_0')
+
+pm=symbols('PM')
+c,c_mu,c_lam= symbols('c,c_mu, c_lambda',positive=True)
+L_sym=symbols('L')
+
+
+x,y,alpha = dynamicsymbols('x,y,alpha')
+dx,dy,dalpha = dynamicsymbols('x,y,alpha', 1)
+
+x_r=dynamicsymbols('x_r')
+y_r=dynamicsymbols('y_r')
+
+q=[x,y, phi,alpha]
+u=[dx,dy, dphi,dalpha]
+Y = q + u
+nDOF=len(q)
+
+
+
+
+T_rocker =  S.One/2 *m_w*  ((x+x_r+ l_rear * cos(phi+alpha) ).diff(t)**2 +(y+y_r + l_rear * sin(phi+alpha) ).diff(t)**2)
+T_chair_top = S.One/2 * m_3 * ((x+x_r ).diff(t)**2 +(y+y_r ).diff(t)**2)+ S.One/2 * I_ch * dphi**2 + S.One/2 * I_w * (dphi+dalpha)**2 
+
+T=T_chair_top + T_rocker
+
+
+V_5dof = S.One /2 * k * alpha **2 +  S.One /2 * k_r * (x**2+y**2 ) +  S.One /2 * k_r * (y + l_rear * sin(phi+alpha)) **2
+V=V_5dof.expand()
+
+
+
+
+D=D=c_mu*sum(Matrix(u)*Matrix(u).T)
+D=D.doit().expand()
+
+
+L=(T-V).doit().expand()#.subs({l_fr:0,l_rear:0}).doit()
+#display(L.simplify())
+Eq(L_sym,L)
+
+
+op_point={item:0  for item in reversed(Y)}
+
+
+N = ReferenceFrame('N')
+Pl = Point('P_l')
+Pr = Point('P_r')
+Pl.set_vel(N, (dx * N.x+dy * N.y))
+Pr.set_vel(N, dx*(1-cos(alpha)) * N.x+dy*(1+sin(alpha)) * N.y)
+
+
+points_list=[Point('P_'+str(no))  for no,vel in enumerate(u)]
+[points_list[no].set_vel(N,vel*N.x)  for no,vel in enumerate(u)]
+
+#FL = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*F*(cos(Omega*t)) * N.x+sin(Omega*t) * N.y)]+[(points_list[no],-D.diff(vel)*N.x)  for no,vel in enumerate(u)]   #,(Pr, R*F*cos(Omega*t) * N.x)]
+FL = [(Pr, F*(N.x+N.y))]+[(Pl, 2*F*N.x)]+[(points_list[no],-D.diff(vel)*N.x)  for no,vel in enumerate(u)]
+
+#L_linearized = multivariable_taylor_series(L,args=Y,n=2,x0=op_point).expand().doit()
+
+L_dict={'full_nonlin':L.expand(),
+        #'linearized':L_linearized,
+        'full_nonlin_circle':L.expand().doit().subs({x_r:R_curve*cos(Omega*t),y_r:R_curve*sin(Omega*t)}).doit().expand(),
+        'full_nonlin_sin':L.expand().doit().subs({x_r:v0*t,y_r:R_curve*sin(Omega*t)}).doit().expand(),
+#         'linearized_bump':L_linearized.subs({u_road(x):u_rf_bump,u_road(x-2*R):u_rr_bump}).doit().expand(),
+#         'full_nonlin_bumps':L.subs({u_road(x):u_rf_mul_bumps,u_road(x-2*R):u_rr_mul_bumps}).doit().expand(),
+#         'linearized_bumps':L_linearized.subs({u_road(x):u_rf_mul_bumps,u_road(x-2*R):u_rr_mul_bumps}).doit().expand(),
+#         'full_nonlin_ramp':L.subs({u_road(x):u_rf_ramp,u_road(x-2*R):u_rr_ramp}).doit().expand(),
+#         'linearized_ramp':L_linearized.subs({u_road(x):u_rf_ramp,u_road(x-2*R):u_rr_ramp}).doit().expand(),
+        }
+
+chair_dict={key: dyn.HarmonicOscillator(LagrangesMethod(L_tmp ,q,forcelist=FL,frame=N)) for key,L_tmp in L_dict.items()}
+
+chair_circle=chair_dict['full_nonlin_circle']
+chair_sin=chair_dict['full_nonlin_sin']
+
+units_dict={
+            c:ureg.kilogram/ureg.second,
+            c_mu:1/ureg.second,
+            c_lam:ureg.second,
+            m_3:ureg.kilogram,    
+            m_w:ureg.kilogram,
+            m_fr:ureg.kilogram,
+            m_rear:ureg.kilogram,
+            m:ureg.kilogram,
+            m_RC:ureg.kilogram,
+            k_r:ureg.newton/ureg.meter,
+            k_rt:ureg.newton/ureg.meter,
+            k_f:ureg.newton/ureg.meter,
+            k_w:ureg.newton/ureg.meter,
+            k_fix:ureg.newton/ureg.meter,
+            k_tire:ureg.newton/ureg.meter,
+            k_ft:ureg.newton/ureg.meter,
+            k:ureg.newton/ureg.meter,
+            k_RC:ureg.newton/ureg.meter,
+            g:ureg.meter/ureg.second**2,
+            F_1:ureg.newton,
+            F_2:ureg.newton,
+            F:ureg.newton,
+            u0:ureg.meter,
+            Omega:ureg.radian,
+            R:ureg.meter,
+            R_curve:ureg.meter,
+            r_w:ureg.meter,
+            v0:ureg.meter/ureg.second,
+            I_ch:ureg.kilogram*ureg.meter**2,
+            I_w:ureg.kilogram*ureg.meter**2,
+            I_RC:ureg.kilogram*ureg.meter**2,
+            I_wrc:ureg.kilogram*ureg.meter**2,
+            dphi:ureg.radian/ureg.second,
+            dphi_rc:ureg.radian/ureg.second,
+            z_c3:ureg.meter,
+            z_fr:ureg.meter,
+            l_fr:ureg.meter,
+            l_rear:ureg.meter,
+            l_RC:ureg.meter,
+            phi0:ureg.radian,
+            x:ureg.meter,
+            z:ureg.meter,
+            z_rear:ureg.meter,
+            z_fr:ureg.meter,
+            z_wrc:ureg.meter,
+            phi:ureg.radian,
+            phi_rc:ureg.radian,
+            theta:ureg.radian,
+            dx:ureg.meter/ureg.second,
+            dz_fr:ureg.meter/ureg.second,
+            dz_rear:ureg.meter/ureg.second,
+            dz:ureg.meter/ureg.second,
+            dtheta:ureg.radian/ureg.second,
+            dz_wrc:ureg.meter/ureg.second,
+            pm:ureg.m/ureg.m,
+            t_l:ureg.second,
+            delta_t:ureg.second,
+            l_ramp:ureg.meter,
+            l_bumps:ureg.meter,
+            t0:ureg.second,
+            'dimensionless':ureg.meter/ureg.meter,
+#             ao_x_max:ureg.gram,
+            a_ox:ureg.gram,
+#             ao_x_min:ureg.gram,
+#             ao_x_idmax:ureg.second,
+#             ao_x_idmin:ureg.second,
+#             ao_z_max:ureg.gram,
+            a_oz:ureg.gram,
+#             ao_z_min:ureg.gram,
+#             ao_z_idmax:ureg.second,
+#             ao_z_idmin:ureg.second,
+#             ao_rx_max:ureg.gram,
+#             ao_rx_min:ureg.gram,
+#             ao_rx_idmax:ureg.second,
+#             ao_rx_idmin:ureg.second,
+#             ao_rz_max:ureg.gram,
+#             ao_rz_min:ureg.gram,
+#             ao_rz_idmax:ureg.second,
+#             ao_rz_idmin:ureg.second,
+            a_rz:ureg.gram,
+                a_rx:ureg.gram,
+           }
+
+model_names_dict={
+    chair_2dof:'chair_model_2dof',
+    chair_3dof_norev:'chair_model_3dof_norev',
+    chair_3dof_rev:'chair_model_3dof_rev',
+    chair_5dof:'chair_model_5dof',
+    chair_5dof_lin:'chair_model_5dof',
+    rapidchair_1dof:'rapidchair_model_1dof',
+    rapidchair_2dof:'rapidchair_model_2dof',
+    rapidchair_3dof:'rapidchair_model_3dof',
+    chair5dof_rc3dof:'chair_and_rapidchair_model'
+    }
