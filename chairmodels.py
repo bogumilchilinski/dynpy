@@ -506,3 +506,13 @@ model_names_dict={
     rapidchair_3dof:'rapidchair_model_3dof',
     chair5dof_rc3dof:'chair_and_rapidchair_model'
     }
+dof_names_dict={chair_2dof:'o dwóch stopniach swobody',
+                chair_3dof_norev:'o trzech stopniach swobody bez obrotu',
+                chair_3dof_rev:'o trzech stopniach swobody z obrotem',
+                chair_5dof:'o pięciu stopniach swobody (nieliniowy)',
+                chair_5dof_lin:'o pięciu stopniach swobody (zlinearyzowany)',
+                rapidchair_1dof:'o jednym stopniu swobody',
+                rapidchair_2dof:'o dwóch stopniach swobody',
+                rapidchair_3dof:'o trzech stopniach swobody',
+                chair5dof_rc3dof:'o ośmiu stopniach swobody'
+               }

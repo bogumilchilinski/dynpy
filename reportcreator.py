@@ -324,7 +324,7 @@ measurement_summary_1 = [
 ]
 
 measurement_summary_2 = [
-    'Zaobserwowano wpływ badanego parametru \({a_ox}\) na drgania wózka, których maksymalna wartość amplitudy porecntu (%) przyśpieszenia ziemskiego wyniosła {a_ox_max}. ',
+    'Zaobserwowano wpływ badanego parametru \({a_ox}\) na drgania wózka, których maksymalna wartość amplitudy procentu (%) przyśpieszenia ziemskiego wyniosła {a_ox_max}. ',
     'Analizowany przebieg parametru \({a_ox}\) osiąga wartość maksymalną równą {a_ox_max}. ',
     'Minimalna wartość dla przebiegu \({a_ox}\) jest równa {a_ox_min}. ',
     'Na podstawie przeprowadzonych badań numerycznych można stwierdzić, że w analizowanym przebiegu parametru \({a_ox}\) nie występują amplitudy o wartości mniejszej niż {a_ox_min} oraz większej niż {a_ox_max}. ',
@@ -374,6 +374,7 @@ summary_bank_composed_model_measurements = [
         )) for obj in range(30)
 ]
 
+sec_introduction_bank_0={'Zaprezentowane symulacje wykonano dla następujących danych: {given_data}.','Do wykonania symulacji użyto danych jak następuje: {given_data}','Zakres danych użytych do procesu symulacji jest następujący: {given_data}.','Do opracowania wyników symulacyjnych posłużono się niniejszymi danymi: {given_data}.'}
 sec_introduction_bank_1 = [
     'Wykorzystując przygotowany model dynamiczny, przeprowadzono serię symulacji mających na celu ocenę wrażliwości modelu na zmiany wybranych parametrów. ',
     'Przeprowadzenie analizy numerycznej wymaga znajomości modelu dynamicznego oraz zdeterminowania parametrów oddziałujących na zachowanie układu wskutek ich zmian. ',
@@ -398,7 +399,8 @@ sec_introduction_bank_3 = [
 
 sec_intro_composed_model_gen = RandomDescription(sec_introduction_bank_1,
                                                  sec_introduction_bank_2,
-                                                 sec_introduction_bank_3)
+                                                 sec_introduction_bank_3,
+                                                sec_introduction_bank_0)
 
 sec_intro_composed_model = [
     str(
@@ -811,8 +813,9 @@ class ReportSection(Section):
             subsec.append(NoEscape(ending_summary.format(**format_dict)))
 
             #subsec.append(NewPage())
-            subsec.append(NewLine())
-
+            #subsec.append(NoEscape('\\'))
+            subsec.append(NoEscape('\par'))
+            
     def add_simulational_results(
             self,
             title='Wyniki symulacji numerycznych',
@@ -867,7 +870,8 @@ class ReportSection(Section):
                 subsec.append(NoEscape(ending_summary.format(**format_dict)))
 
                 #subsec.append(NewPage())
-                subsec.append(NewLine())
+                #subsec.append(NoEscape('\\'))
+                subsec.append(NoEscape('\par'))
 
     def prepare_summary_data(self,simulation_results_frame):
         summary_frame = pd.DataFrame(
@@ -950,7 +954,8 @@ class ReportSection(Section):
                         })))
 
             #subsec.append(NewPage())
-            subsec.append(NewLine())
+            #subsec.append(NoEscape('\\'))
+            subsec.append(NoEscape('\par'))
 
     def add_optimization_result(
             self,
