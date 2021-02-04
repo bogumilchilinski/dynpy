@@ -374,7 +374,7 @@ summary_bank_composed_model_measurements = [
         )) for obj in range(30)
 ]
 
-sec_introduction_bank_0={'Zaprezentowane symulacje wykonano dla następujących danych: {given_data}.','Do wykonania symulacji użyto danych jak następuje: {given_data}','Zakres danych użytych do procesu symulacji jest następujący: {given_data}.','Do opracowania wyników symulacyjnych posłużono się niniejszymi danymi: {given_data}.'}
+sec_introduction_bank_0=['Zaprezentowane symulacje wykonano dla następujących danych: {given_data}.','Do wykonania symulacji użyto danych jak następuje: {given_data}','Zakres danych użytych do procesu symulacji jest następujący: {given_data}.','Do opracowania wyników symulacyjnych posłużono się niniejszymi danymi: {given_data}.']
 sec_introduction_bank_1 = [
     'Wykorzystując przygotowany model dynamiczny, przeprowadzono serię symulacji mających na celu ocenę wrażliwości modelu na zmiany wybranych parametrów. ',
     'Przeprowadzenie analizy numerycznej wymaga znajomości modelu dynamicznego oraz zdeterminowania parametrów oddziałujących na zachowanie układu wskutek ich zmian. ',
@@ -400,7 +400,8 @@ sec_introduction_bank_3 = [
 sec_intro_composed_model_gen = RandomDescription(sec_introduction_bank_1,
                                                  sec_introduction_bank_2,
                                                  sec_introduction_bank_3,
-                                                sec_introduction_bank_0)
+                                                #sec_introduction_bank_0
+                                                )
 
 sec_intro_composed_model = [
     str(
