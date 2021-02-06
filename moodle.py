@@ -1,5 +1,6 @@
 import sympy as sym
 import sympy.physics.mechanics as mech
+import base64
 
 class EmbeddedAnswer:
     
@@ -51,7 +52,7 @@ class EmbeddedShortAnswer(EmbeddedAnswer):
 
     
 class EmbeddedMultichoiceAnswer(EmbeddedAnswer):    
-    def __init__(self,correct_answers,wrong_answers=None,score=1):
+    def __init__(self,correct_answers,wrong_answers=None,score=1,**kwargs):
         super().__init__(value=correct_answers,error=0.1,relative_error=True,precision=4,score=1,question_str='MULTICHOICE_VS')
         self.correct_answers=correct_answers
         self.wrong_answers=wrong_answers
@@ -65,12 +66,46 @@ class EmbeddedMultichoiceAnswer(EmbeddedAnswer):
     
         return answer_string
     
+class EmbeddedGraphics:
+    def __init__(self,path_to_file):
+        self.filepath=path_to_file
+        self.filename=path_to_file.split('/')[-1]
+        
+    def to_string(self):
+        
+        figure_str='''
+                    <img src="@@PLUGINFILE@@/{figure_name}" />
+                    '''.format(figure_name=self.filename)
     
+        return figure_str
+    
+    def to_base64(self):
+        with open(self.filepath, "rb") as image_file:
+            encoded_pic= base64.b64encode(image_file.read()).decode('utf-8')
+            
+        return encoded_pic
+
+    
+    def to_base64_entry(self):
+        
+        figure_str='''
+        <file name="{filename}" path="/" encoding="base64">
+        {graphics}
+        </file>
+        '''.format(filename=self.filename,graphics=self.to_base64())
+
+        return figure_str
+    
+    def __str__(self):
+        return self.to_string()
+    
+    def __repr__(self):
+        return 'Moodle'+ self.__class__.__name__ +self.to_string()
     
 class EmbeddedMultichoiceMathAnswer(EmbeddedMultichoiceAnswer):    
 
-    def __init__(self,correct_answers,wrong_answers=None,score=1,backend=mech.vlatex):
-        super().__init__(correct_answers=correct_answers,wrong_answers=wrong_answers,score=score)
+    def __init__(self,correct_answers,wrong_answers=None,score=1,backend=mech.vlatex,**kwargs):
+        super().__init__(correct_answers=correct_answers,wrong_answers=wrong_answers,score=score,**kwargs)
         
         self.backend=backend
     
@@ -86,21 +121,27 @@ class EmbeddedMultichoiceMathAnswer(EmbeddedMultichoiceAnswer):
     
         return answer_string    
     
-        
+    
+#class 
         
 class Question:
     
-    def __init__(self,question,id=1,title='Cloze_question',question_type='cloze'):
+    def __init__(self,entries_list,id=1,figure='',title='Cloze_question',question_type='cloze'):
         
-        self.question_str=question
+        if not isinstance(entries_list,list):
+            entries_list=[entries_list]
+        
+        self.entries_list=entries_list
         self.question_type=question_type
         self.title=title
         self.number=id
+        self.figure=figure
         
     def to_string(self):
         question_name=self.title+"_"+str(self.number)
         
         xml_string_pre="""<!-- question: {q_no}  -->
+          
           <question type="cloze">
             <name>
               <text>{q_name}</text>
@@ -108,13 +149,16 @@ class Question:
             <questiontext format="html">
             <text>
             <![CDATA[
-            """.format(q_no=self.number,q_name=question_name)
+            """.format(q_no=self.number,q_name=question_name,graphics=self.figure)
 
-        question_string=self.question_str
+        question_string='\n'.join([str(entry)  for entry in self.entries_list])
 
         xml_string_post="""]]>
+        
         </text>
+        {graphics}
         </questiontext>
+        
             <generalfeedback format="html">
               <text></text>
             </generalfeedback>
@@ -122,20 +166,38 @@ class Question:
             <hidden>0</hidden>
             <idnumber></idnumber>
           </question>
-        """
+        """.format(graphics=self.figure)
+        
         return xml_string_pre+question_string+xml_string_post
     
     def __str__(self):
         return self.to_string()
     
     def __repr__(self):
-        return 'MoodleQuestion('+self.question_str+')'
+        return 'MoodleQuestion('+self.entries+')'
 
-class Category:
-    def __init__(self,name,questions,id=0):
+class Paragraph:
+    def __init__(self,element):
+        self.elem=element
         
     def to_string(self):
-        question_name=self.title+"_"+str(self.number)
+        return "<p> {obj}  </p> ".format(obj=str(self.elem))
+    
+    def __str__(self):
+        return self.to_string()
+    
+    def __repr__(self):
+        return 'MoodleParagraph('+str(self.elem)+')'
+    
+class Category:
+    def __init__(self,name,questions,id=0):
+        self.id=id
+        self.name=name
+        self.questions=questions
+        
+        
+    def to_string(self):
+        question_name=self.name+"_"+str(self.id)
         
         begin_string="""<?xml version="1.0" encoding="UTF-8"?>
                         <quiz>"""
@@ -153,8 +215,16 @@ class Category:
             <idnumber></idnumber>
           </question>
 
-        """.format(cat=name)
+        """.format(cat=self.name)
 
         end_string="</quiz>"
 
-        return (begin_string+ cat_string +''.join(question_set)+end_string)
+        
+        
+        return (begin_string+ cat_string +'\n'.join(self.questions)+end_string)
+    
+    def __str__(self):
+        return self.to_string()
+    
+    def __repr__(self):
+        return 'MoodleCategory('+self.question_str+')'
