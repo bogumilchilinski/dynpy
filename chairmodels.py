@@ -17,6 +17,8 @@ mechanics_printing()
 
 t=Symbol('t') #independent variable - time
 
+
+
 ### system parametes
 m_fr, m_rear,m_3, k_r, k_rt, k_f, k_ft = symbols('m_fr, m_r, M, k_r, k_rt, k_f, k_ft',positive=True)
 m,k,g,F_1,F_2,Omega,F,R,v0,u0= symbols('m,k,g,F_1,F_2,Omega, F_0 R, v_0,u_0',positive=True)
@@ -27,6 +29,12 @@ c,c_mu,c_lam= symbols('c,c_mu, c_lambda',positive=True)
 a_ox, a_oz, a_rx ,a_rz=symbols('a_ox, a_oz, a_rx ,a_rz')
 
 pm=symbols('PM')
+
+t_l, delta_t,l_ramp,l_bumps = symbols('t_l,dt,l_ramp, l_bumps',positive=True)
+t0 = symbols('t_0')
+
+
+
 
 var_static = {
               m_fr:'masa przedniego koła wózka',
@@ -68,8 +76,9 @@ var_static = {
               pm:'czas działania siły na wózek',
              }
 
-t_l, delta_t,l_ramp,l_bumps = symbols('t_l,dt,l_ramp, l_bumps',positive=True)
-t0 = symbols('t_0')
+
+
+
 
 
 
@@ -77,6 +86,9 @@ t0 = symbols('t_0')
 # generalized coordinates
 x,z_fr,z_rear,z, phi,phi_rc,theta,z_wrc = dynamicsymbols('x,z_fr,z_r,z, varphi,varphi_RC, theta, z_wrc')
 dx,dz_fr,dz_rear,dz,dphi,dphi_rc,dtheta,dz_wrc = dynamicsymbols('x,z_fr,z_r,z, varphi,varphi_RC, theta, z_wrc', 1)
+
+
+
 
 var_dynamic = {x:'przemieszczenie poziome wózka',
                z_fr:'przemieszczenie pionowe koła przedniego wózka',
@@ -143,9 +155,6 @@ u_rf=u_rr.subs(x,x+2*R) #road profile given in time domain
 
 
 
-
-
-
 x_m3=x+z_c3*phi
 x_RC=x+l_RC/2*cos(phi0+phi_rc)
 z_RC=z+0.1*R*phi+l_RC/2*sin(phi0+phi_rc)
@@ -158,6 +167,8 @@ T_rear = S.One/2 * m_rear* dz_rear**2 + S.One/2 * m_rear * dx**2    # Ek tylnieg
 T_fr = S.One/2 * m_fr* dz_fr**2 + S.One/2 * m_fr * dx**2    # Ek przedniego koła If (mf)
 T_wheel = S.One/2 * I_w * (dx/R)**2
 
+
+
 # Dynamic description of the drive attachment
 # T_RC = S.One/2 * m_RC* (x_RC.diff(t)**2+z_RC.diff(t)**2) #RC drive kinetic energy
 T_RC_arm=S.One/2 * m_RC* (x_RC.diff(t)**2+z_RC.diff(t)**2)
@@ -166,7 +177,13 @@ T_RC_wheel_rev=S.One/2 * I_wrc * dtheta**2
 
 T_RC_3dof=T_RC_arm+T_RC_wheel_z+T_RC_wheel_rev
 
+
+
+
+
 V_chair_g=m_fr*g*z_fr + m_rear*g*z_rear + m_3 * g*(z + z_c3*(cos(phi))) # EPG wózka względem punktu cięzkości wózka
+
+
 
 
 # nonlinear springs deflection
@@ -177,6 +194,8 @@ u_fr=sqrt((z-R*sin(phi)+l_fr-z_fr)**2 + (R-R*cos(phi))**2)-l_fr
 # linear springs deflection
 u_rear=((z+R*phi+l_rear -z_rear)**2 )-l_rear#
 u_fr=  ((z-R*phi+l_fr   -z_fr)**2  )-l_fr
+
+
 
 
 # spring potentials
@@ -198,7 +217,7 @@ V_chair5dof = V_chair_g + V_rear + V_fr
 T_chair5dof_rc3dof = T_chair5dof + T_RC_3dof
 V_chair5dof_rc3dof = V_chair5dof + V_RC_3dof
 
-
+    
 dof2 = {z_rear:z,z_fr:z,phi:0} # 2DoF chair
 dof3_norev = {z_rear:z,z_fr:z} # 3 DoF w/o rev chair
 dof3_rev={z_fr:z,phi:0} #3 DoF w/rev chair
@@ -223,6 +242,9 @@ qs_5dof = x, z_rear, z_fr, z, phi
 qs_rc_3dof=z_wrc,theta,phi_rc
 qs_chair5dof_rc_3dof=qs_5dof+qs_rc_3dof
 
+
+
+
 N = ReferenceFrame('N')
 Pl = Point('P_l')
 Pr = Point('P_r')
@@ -230,8 +252,12 @@ Pl.set_vel(N, (u[0]+u[1]*R*sin(Omega*t).diff(t)) * N.x+(u[2]*R*cos(Omega*t).diff
 Pr.set_vel(N, u[0] * N.x)
 
 
+
+
 points_list=[Point('P_'+str(no))  for no,vel in enumerate(Matrix(qs_chair5dof_rc_3dof).diff(t))]
 [points_list[no].set_vel(N,vel*N.x)  for no,vel in enumerate(Matrix(qs_chair5dof_rc_3dof).diff(t))]
+
+
 
 # FL = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*F*(cos(Omega*t)) * N.x+sin(Omega*t) * N.y)]+[(points_list[no],-D_chair5dof.diff(vel)*N.x)  for no,vel in enumerate(u)]   #,(Pr, R*F*cos(Omega*t) * N.x)]
 FL_chair5dof = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*2*F*N.x)]+[(points_list[no],-D_chair5dof.diff(vel)*N.x)  for no,vel in enumerate(Matrix(qs_5dof).diff(t))]
@@ -246,6 +272,9 @@ FL_rapidchair3dof = [(points_list[no],-D_rapidchair3dof.diff(vel)*N.x)  for no,v
 FL_chair5dof_rc3dof = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*2*F*N.x)]+[(points_list[no],-D_chair5dof_rc3dof.diff(vel)*N.x)  for no,vel in enumerate(Matrix(qs_chair5dof_rc_3dof).diff(t))]
 
 FL_chair5dof_rc3dof = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*2*F*N.x)]+[(points_list[no],-D_chair5dof_rc3dof.diff(vel)*N.x)  for no,vel in enumerate(Matrix(qs_chair5dof_rc_3dof).diff(t))]
+
+
+
 
 L_chair5dof = T_chair5dof - V_chair5dof
 # L_5dof=
@@ -278,6 +307,10 @@ class Chair5DOF(dyn.LagrangesDynamicSystem):
         
         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
                  hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar)
+        
+        
+        
+        
 class RapidChair3DOF(dyn.LagrangesDynamicSystem):
     def __init__(self, Lagrangian=L_rc_3dof, qs=qs_rc_3dof, forcelist=FL_rapidchair3dof, bodies=None, frame=N,
                    hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t')):
@@ -285,6 +318,9 @@ class RapidChair3DOF(dyn.LagrangesDynamicSystem):
         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
              hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar)
 
+        
+        
+        
 class Chair5DOFwithRC3DOF(dyn.LagrangesDynamicSystem):
     def __init__(self, Lagrangian=L_chair5dof_rc3dof, qs=qs_chair5dof_rc_3dof, forcelist=FL_chair5dof_rc3dof, bodies=None, frame=N,
                    hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t')):
@@ -299,12 +335,22 @@ chair_3dof_rev = chair_5dof.subs(dof3_rev,method='direct').remove([phi,z_fr])('C
 chair_3dof_norev = chair_5dof.subs(dof3_norev,method='direct').remove([z_rear,z_fr])('Chair 3DOF model without revolution')       
 chair_2dof = chair_5dof.subs(dof2,method='direct').remove([z_rear,z_fr,phi])('Chair 2DOF model')
 
+
+
+
+
 rapidchair_3dof = RapidChair3DOF()('RapidChair 3DOF model')
 rapidchair_2dof=rapidchair_3dof.subs(rcdof2,method='direct').remove([z_wrc])('RapidChair 2DOF model')
 rapidchair_1dof=rapidchair_3dof.subs(rcdof1,method='direct').remove([z_wrc,theta])('RapidChair 1DOF model')
 
 
+
+
+
 chair5dof_rc3dof=Chair5DOFwithRC3DOF()
+
+
+
 
 
 T_chair_3dof_rev =T_chair5dof.subs(dof3_rev,method='direct')
@@ -333,6 +379,9 @@ T_chair_2dof=T_chair5dof.subs(dof2,method='direct')
 m_fr, m_rear,m_3, k_r, k_rt, k_f, k_ft = symbols('m_fr, m_r, M, k_r, k_rt, k_f, k_ft',positive=True)
 m,k,g,F_1,F_2,Omega,F,R,v0,u0= symbols('m,k,g,F_1,F_2,Omega, F_0, R, v_0,u_0',positive=True)
 I_ch, I_w , z_c3,l_fr,l_rear,R_curve,= symbols('I_chair, I_wheel, z_c3, l_fr, l_r, R_curve',positive=True)
+
+
+
 
 t_l, delta_t,l_ramp,l_bumps = symbols('t_l,dt,l_ramp, l_bumps',positive=True)
 t0 = symbols('t_0')
@@ -390,8 +439,12 @@ Pr.set_vel(N, dx*(1-cos(alpha)) * N.x+dy*(1+sin(alpha)) * N.y)
 points_list=[Point('P_'+str(no))  for no,vel in enumerate(u)]
 [points_list[no].set_vel(N,vel*N.x)  for no,vel in enumerate(u)]
 
+
+
 #FL = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*F*(cos(Omega*t)) * N.x+sin(Omega*t) * N.y)]+[(points_list[no],-D.diff(vel)*N.x)  for no,vel in enumerate(u)]   #,(Pr, R*F*cos(Omega*t) * N.x)]
 FL = [(Pr, F*(N.x+N.y))]+[(Pl, 2*F*N.x)]+[(points_list[no],-D.diff(vel)*N.x)  for no,vel in enumerate(u)]
+
+
 
 #L_linearized = multivariable_taylor_series(L,args=Y,n=2,x0=op_point).expand().doit()
 
@@ -408,8 +461,12 @@ L_dict={'full_nonlin':L.expand(),
 
 chair_dict={key: dyn.HarmonicOscillator(LagrangesMethod(L_tmp ,q,forcelist=FL,frame=N)) for key,L_tmp in L_dict.items()}
 
+
+
 chair_circle=chair_dict['full_nonlin_circle']
 chair_sin=chair_dict['full_nonlin_sin']
+
+
 
 units_dict={
             c:ureg.kilogram/ureg.second,
@@ -495,6 +552,8 @@ units_dict={
                 a_rx:ureg.gram,
            }
 
+
+
 model_names_dict={
     chair_2dof:'chair_model_2dof',
     chair_3dof_norev:'chair_model_3dof_norev',
@@ -506,6 +565,11 @@ model_names_dict={
     rapidchair_3dof:'rapidchair_model_3dof',
     chair5dof_rc3dof:'chair_and_rapidchair_model'
     }
+
+
+
+
+
 dof_names_dict={chair_2dof:'o dwóch stopniach swobody',
                 chair_3dof_norev:'o trzech stopniach swobody bez obrotu',
                 chair_3dof_rev:'o trzech stopniach swobody z obrotem',

@@ -14,6 +14,7 @@ from sympy.physics.vector.printing import vpprint, vlatex
 import sympy.physics.mechanics as me
 
 import matplotlib.pyplot as plt
+import matplotlib.ticker as plticker
 import random
 from sympy import *
 import pint
@@ -621,15 +622,17 @@ class PlottedData(Figure):
         #self._latex_name='figure' #super()._latex_name
         self.preview = preview
 
-    def add_data_plot(self, numerical_data=None):
+    def add_data_plot(self, numerical_data=None,ylabel=None,grid=True,subplots=True,yticks=None):
         numerical_data = self._numerical_data
-
-        ax = numerical_data.plot(subplots=True, figsize=(10, 7))
+        
+        ax = numerical_data.plot(subplots=subplots, figsize=(10, 7),ylabel=ylabel,grid=grid,yticks=yticks)
         #ax=solution_tmp.plot(subplots=True)
         ([
             ax_tmp.legend(['$' + vlatex(sym) + '$'])
             for ax_tmp, sym in zip(ax, numerical_data.columns)
         ])
+        
+
         plt.savefig(self.fig_name + '.png')
         self.add_image(self.fig_name, width=NoEscape('15cm'))
 
@@ -654,7 +657,7 @@ class DataTable(Table):
         #             self._numerical_data=numerical_data
 
         tab = self._numerical_data
-        self.append(NoEscape(tab.to_latex(index=False, escape=False)))
+        self.append(NoEscape(tab.to_latex(index=False, escape=False,longtable=False)))
 
 
 class ReportSection(Section):
@@ -810,6 +813,7 @@ class ReportSection(Section):
                     NoEscape(
                         'Zestawienie parametrów modelu'.format(**format_dict)))
                 table.add_table(numerical_data.T)
+                table.append(tab_mrk)
 
             subsec.append(NoEscape(ending_summary.format(**format_dict)))
 
@@ -824,6 +828,10 @@ class ReportSection(Section):
             units_dict={},
             initial_description='Initial description',  #random.choice(intro_bank_composed_model)
             ending_summary='Ending summary',  #random.choice(summary_bank_composed_model)
+            ylabel='',
+            subplots=True,
+            grid=True,
+            yticks=None
     ):
 
         with self.create(Subsection(title)) as subsec:
@@ -832,6 +840,7 @@ class ReportSection(Section):
 
             for key, row in simulation_results_frame.iterrows():
 
+                    
                 data_with_units = {
                     parameter: value
                     for parameter, value in row.items()
@@ -860,7 +869,7 @@ class ReportSection(Section):
                                     './plots/fig_' + str(current_time),
                                     position='H',
                                     preview=self.preview)) as fig:
-                    fig.add_data_plot(row['simulations'])
+                    fig.add_data_plot(row['simulations'],ylabel=ylabel,subplots=subplots,grid=grid,yticks=yticks)
                     fig.add_caption(
                         NoEscape(
                             #'Przebiegi czasowe modelu dla danych: {given_data}.'.format(**format_dict)

@@ -236,10 +236,14 @@ class OdeComputationalCase:
                                    params_values=params_values,
                                    method=method))
 
-        return TimeDataFrame(
+        solution_tdf = TimeDataFrame(
             data={key: solution.y[no, :]
                   for no, key in enumerate(self.dvars)},
             index=t_span)
+        
+        solution_tdf.index.name='t'
+        
+        return solution_tdf
 
 
 class LagrangesDynamicSystem(me.LagrangesMethod):
@@ -701,7 +705,7 @@ class HarmonicOscillator(LinearDynamicSystem):
     ivar (optional) : obj:Symbol
         This argument lets user to change the default 't' symbol for time derivative to other, for compatibility with LagrangesSystem expressions.
 
-For first step, LagrangesMethod object has to be formulated. For its proper definition check the Sympy LagrangesMethod documentation.
+    For first step, LagrangesMethod object has to be formulated. For its proper definition check the Sympy LagrangesMethod documentation.
 
     Example
 
@@ -822,6 +826,9 @@ For first step, LagrangesMethod object has to be formulated. For its proper defi
         return sum(solution, Matrix([0] * len(Y_mat)))
 
     def steady_solution(self, initial_conditions=None):
+        """
+        
+        """
 
         ext_forces = self.external_forces()
 
