@@ -8,6 +8,8 @@ import itertools as itools
 import scipy.integrate as solver
 from timeseries import *
 
+from IPython.display import display
+
 import sympy.physics.mechanics as me
 
 
@@ -90,12 +92,21 @@ class OdeComputationalCase:
                  t_span=[],
                  params=[],
                  params_values={},
-                 ic_point={}):
+                 ic_point={},
+                 evaluate=False,
+                 label=None):
         '''
         Supply the following arguments for the initialization of OdeComputationalCase:
         
         Args:
         '''
+        
+        #if label==None:
+            
+
+        
+        
+        
         self.odes_system = odes_system
         self.ivar = ivar
         self.dvars = dvars
@@ -121,8 +132,40 @@ class OdeComputationalCase:
             self.params_values = params_values
 
         self.t_span = t_span
-        self.__numerical_odes = None
+        
+        if evaluate:
+            self.form_numerical_rhs()
+        else:
+            self.__numerical_odes = None
+            
+        if label==None:    
+            label=self._label = self.__class__.__name__ + ' with ' + str(len(self.dvars)) + ' equations'
+        self._label=label
 
+    def __call__(self,label=None):
+        
+#         if len(args)>0:
+#             if isinstance(args[0],str):
+#                 label=args[0]
+#             else:
+#                 q=args
+                    
+        
+#         self.qs=
+        self._label=label
+        return self
+        
+    def __str__(self):
+#         if self._label==None:
+#             self._label = self.__class__.__name__ + ' with ' + str(len(self.dvars)) + ' equations'
+        #self._label = self.__class__.__name__ + ' with ' + str(len(self.dvars)) + ' equations'
+
+        return self._label
+
+    def __repr__(self):
+
+        return self.__str__()
+            
     def __fortran_odes_rhs(self):
         '''
         Generates the bininary code related to symbolical expresions declered in the __init__ method. The function object is returned where the all arguments create a tuple.
@@ -200,6 +243,70 @@ class OdeComputationalCase:
 
 
 class LagrangesDynamicSystem(me.LagrangesMethod):
+    '''
+    Arguments
+    =========
+    Lagrangian: object
+        
+    
+    qs (optional): object: Symbols
+        
+    
+    forcelist (optional): list(object)
+        
+    
+    bodies (optional):
+    
+    
+    frame (optional):
+    
+    
+    hol_coneqs (optional):
+    
+    
+    nonhol_coneqs (optional):
+    
+    
+    label (optional):
+    
+    
+    ivar (optional):
+    
+    
+    evaluate (optional):
+    
+    Example
+    =======
+    
+    Rod propped up with spring on the right side - constant k2 and spring and dumper on the left side - constants k and c.
+    
+    >>>t = symbols('t')
+    >>>g,k,m1,m2,l,c = symbols('g k m1 m2 l c')
+    >>>x1,x2 = dynamicsymbols('x_1 x_2')    # Generalized coordinates
+    >>>val = {g:9.81,k:20,m1:2,m2:2,c:10}    # Assumed values for constants to performe numerical calculation
+    >>>m = m1 + m2    # Mass of rod determination
+    >>>h = (x1+x2)/2    # High determination for potential energy
+    >>>phi = (x1-x2)/l    # Angle determination of rod rotation
+    >>>I = S.One/12 *m*l**2    # Moment of inertia of rod determination
+    >>>x = (x1+x2)/2    # Rod vertical displacement determination
+    >>>T = S.Half*m*x.diff(t)**2 + S.Half*I*phi.diff(t)**2     # Kinetic Energy equation
+    >>>V = S.Half*k*x1**2 + S.Half*2*k*x2**2 + m*g*h    # Potential Energy equation
+    >>>L = T - V    # Lagrangian calculation
+    >>>N=ReferenceFrame('N')    # Defining of reference frame for coordinate system
+    >>>P1=Point('P_1')    # Defining point in space
+    >>>P2=Point('P_2')
+    >>>P1.set_vel(N,x1.diff(t)*N.x)    # Set velocity of point P1 in reference system N on axis x
+    >>>P2.set_vel(N,x2.diff(t)*N.x)
+    >>>forcelist = [(P1,-c*x1.diff(t)*N.x)]    # External forces determination and seting reference frame N and axis x
+    >>>rod = dyn.LagrangesDynamicSystem(L,qs=[x1,x2],forcelist=forcelist,frame=N)    # Inicjalization of LagrangesDynamicSystem instance
+    >>>rod_numerical = rod.numerized(parameter_values=val)
+    
+    Firstly there are defined symbols with SymPy Symbol class and generalized coordinates which are defined with dynamicsymbols method. Next the mass m, hight h, angle phi, and moment of inertia I are determined to make use of it in energys equations. 
+    Subsequently potential energy V and kinetic enetgy T are evaluated and defined to calcualte Lagrangian L. When it has been done, one can start to create ReferenceFrame N. In the frame points P1 and P2 are created where there will be applied velocity on x axis in above case. Additonali external forces are assined to the variable forcelist - it is necessery to chose the point and axies. 
+    Finaly one can define instance rod of class LagrangesDynamicSystem by making use of calculation and variables made previously. In addition there is possibility to create instant of class OdeComputationalCase (rod_numerical) that allows to perform numerical operations on the EOM
+    
+    '''
+    
     def __init__(self,
                  Lagrangian,
                  qs=None,
@@ -214,7 +321,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         Supply the following for the initialization of DynamicSystem in the same way as LagrangesMethod
         """
+        
 
+        
         if isinstance(Lagrangian, me.LagrangesMethod):
             bodies = Lagrangian._bodies
             frame = Lagrangian.inertial
@@ -225,7 +334,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             qs = Lagrangian.q
             Lagrangian = sum(Lagrangian._L)
 
-        self._label = label
+
         self.ivar = ivar
         #         self.forcelist=forcelist
         self.frame = frame
@@ -248,15 +357,86 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self.governing_equations = self.__governing_equations
         self.Y = list(self.q) + list(self.u)
 
-        #LM=me.LagrangesMethod(Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs)
-
-    def __call__(self, label=None):
+        if label==None:
+            label = self.__class__.__name__ + ' with ' + str(len(self.q)) + 'DOF' 
+            
         self._label = label
+        
+        #LM=me.LagrangesMethod(Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs)
+    def _kwargs(self):
+        return {'bodies':self.bodies,
+                'frame':self.frame,
+                'forcelist':self.forcelist,
+                'hol_coneqs':self._hol_coneqs,
+                'nonhol_coneqs':list(self.coneqs)[len((self._hol_coneqs)):],
+                'qs':self.q,
+                'Lagrangian':self.lagrangian(),
+                'label':self._label,
+                'ivar':self.ivar,
+               }
+        
+    def __add__(self,other):
+        
+        self_dict=self._kwargs()
+        other_dict=other._kwargs()
+        
+        
+        self_dict['Lagrangian']=self_dict['Lagrangian']+other_dict['Lagrangian']
+        
+        self_dict['qs']=list(self_dict['qs'])+list(coord for coord in other_dict['qs'] if not coord in self_dict['qs'])
+        
+        print(self_dict['qs'])
+        
+        list_build = lambda x: flatten([x]) if x else []
+        
+        self_dict['forcelist']=list_build(self_dict['forcelist'])+list_build(other_dict['forcelist'])
+        self_dict['bodies']=list_build(self_dict['bodies'])+list_build(other_dict['bodies'])
+        
+        return LagrangesDynamicSystem(**self_dict)
+    
+    def shranked(self,*args):
+        self_dict=self._kwargs()
+        self_dict['qs']=flatten(args)
+        
+        return LagrangesDynamicSystem(**self_dict)
+        
 
-        return self
+    def remove(self,*args):
+        
+        bounded_coordinates=flatten(args)
+        
+        self_dict=self._kwargs()
+        self_dict['qs']=[coord for coord in self.q if coord not in bounded_coordinates]
+        
+        return LagrangesDynamicSystem(**self_dict)
 
+    
+    
     def subs(self, *args, **kwargs):
 
+        if 'method' in kwargs.keys():
+            method=kwargs['method']
+        else:
+            method='as_constrains'
+            
+        
+        
+        if method == 'as_constrains':
+            if len(args)==2:
+                args=([(args[0],args[1])]),
+                
+            elif len(args)==1:
+                if isinstance(args[0],dict):
+                    #print(args[0])
+                    args=list(args[0].items()),
+        
+            
+            constrains=[lhs-rhs  for lhs,rhs  in args[0] if  any (coord in  (lhs-rhs ).atoms(Function) for coord  in self.q) ]
+            args=([(lhs,rhs)  for lhs,rhs  in args[0] if not  any (coord in  (lhs-rhs ).atoms(Function) for coord  in self.q) ],)
+            
+#         print(constrains)
+#         print(args)
+        
         old_points = [point for point, force in self.forcelist]
         new_forces = [
             force.subs(*args, **kwargs) for point, force in self.forcelist
@@ -274,8 +454,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         forces_subs = list(zip(new_points, new_forces))
 
-        print(forces_subs)
-        print(self.forcelist)
+#         print(forces_subs)
+#         print(self.forcelist)
 
         return LagrangesDynamicSystem(
             Lagrangian=lagrangian_subs,
@@ -298,9 +478,15 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         Private method which processes preview printing. The method is or isn't used depending on user's bool 'preview' input.
         '''
 
+    def __call__(self, label=None):
+        self._label = label
+
+        return self
+        
     def __str__(self):
 
-        return self.__class__.__name__ + ' with ' + str(len(self.q)) + 'DOF'
+            
+        return self._label
 
     def __repr__(self):
 
@@ -334,6 +520,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                 for q_tmp in self.q
             }
 
+        self.q_0=static_disp_dict
+            
         return self.governing_equations.subs(static_disp_dict)
 
     def external_forces(self):
@@ -341,31 +529,39 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             {gen_coord: 0
              for gen_coord in self.Y}).doit()
 
-    def critical_points(self, static_disp_dict=None):
+    def _op_points(self,hint=[], static_disp_dict=None,dict=True,*args,**kwargs):
+
+
         '''
         Provides the interface for critical points evaluation (solves the equlibrium conditions and returns its roots).
         '''
-        if static_disp_dict is None:
-            static_disp_dict = {
-                q_tmp:
-                Symbol(str(q_tmp).replace('(' + str(self.ivar) + ')', '_0'))
-                for q_tmp in self.q
-            }
 
+        eqns_to_solve=self.equilibrium_equation(static_disp_dict=static_disp_dict).doit()
+#         display(args,kwargs)
         roots = solve(
-            self.equilibrium_equation(static_disp_dict).doit(),
-            list(static_disp_dict.values()))
+            list(eqns_to_solve)+list(flatten([hint])),
+            list(self.q_0.values()),dict=dict)
 
-        if type(roots) is dict:
-            roots = list(roots.values())
+#         if type(roots) is dict:
+#             roots = list(roots.values())
 
-        #print(roots)
-        roots = list(Matrix(roots).doit())
+#         #print(roots)
+#         roots = list(Matrix(roots).doit())
+
+        return roots
+
+    def critical_points(self,hint=None ,static_disp_dict=None,dict=True):
+        '''
+        Provides the interface for critical points evaluation (solves the equlibrium conditions and returns its roots).
+        '''
+        
+
+        roots_list = self._op_points(hint=hint,static_disp_dict= static_disp_dict,dict=dict)
 
         return [
-            Eq(list(static_disp_dict.values())[no], root)
-            for no, root in enumerate(roots)
-        ]
+                [Eq(coord,solution) for coord,solution in root_dict.items()]
+                for no, root_dict in enumerate(roots_list)
+               ]
 
     def inertia_matrix(self):
         '''
@@ -393,10 +589,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         '''
         params = self.system_parameters(parameter_values=parameter_values)
         return {
-            'odes_system': self.rhs,
+            'odes_system': self.rhs().doit(),
             'ivar': self.ivar,
             'dvars': self.Y,
-            'params': params
+            'params': params,
+            'label': 'Numerical model of '+self.__str__(),
         }
 
     def solution(self, initial_conditions=None):
@@ -432,9 +629,20 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     @property
     def _eoms(self):
         return self.governing_equations
-
+    
+    def numerized(self,parameter_values=None):
+        '''
+        Takes values of parameters, substitute it into the list of parameters and changes list it into a Tuple. Returns instance of class OdeComputationalCase.
+        '''
+        data_Tuple = Tuple(*self.system_parameters()).subs(parameter_values)
+        computed_case = self.computational_case(parameter_values=data_Tuple)
+        
+        return OdeComputationalCase(**computed_case,evaluate=True)
 
 class LinearDynamicSystem(LagrangesDynamicSystem):
+    '''
+
+    '''
     def stiffness_matrix(self):
         '''
         Returns the system stiffness matrix, which is based on the equations of motion of the Lagrange's system. Matrix is obtained from jacobian which is called with system's generalized coordinates vector.
@@ -838,13 +1046,15 @@ class WeakNonlinearOscillator(HarmonicOscillator):
         lin_lagrangian = nonlinear_system.linearized().lagrangian().subs(
             stationary_subs_dict).doit()
 
-        nonlin_lagrangian = nonlinear_system.approximated(
-            order).lagrangian() - lin_lagrangian
+        nonlin_lagrangian = ((nonlinear_system.approximated(
+            order).lagrangian() - lin_lagrangian)/eps).doit()
 
         #display(nonlin_lagrangian)
 
+        self._eps = Symbol(latex(eps),positive=True)
+        
         super().__init__(
-            Lagrangian=lin_lagrangian - eps * nonlin_lagrangian,
+            Lagrangian=lin_lagrangian - self._eps * nonlin_lagrangian,
             qs=nonlinear_system.q,
             forcelist=nonlinear_system.forcelist,
             bodies=nonlinear_system.bodies,
@@ -854,9 +1064,13 @@ class WeakNonlinearOscillator(HarmonicOscillator):
                 nonlinear_system.coneqs)[len((nonlinear_system._hol_coneqs)):],
             ivar=ivar)
 
-        self.eps = eps
+        
         self.order = order
 
+    @property
+    def eps(self):
+        return self._eps
+        
     def __str__(self):
         return str(self.order) + '-order approximated ' + super().__str__()
 
@@ -873,7 +1087,7 @@ class WeakNonlinearOscillator(HarmonicOscillator):
             for q_tmp in self.q
         }
         print(subscripts_dict)
-        print()
+        print(self.args)
         return HarmonicOscillator(
             Lagrangian=self.linearized().lagrangian().subs(self.eps, 0).subs(subscripts_dict).doit(),
             qs=self.q.subs(subscripts_dict),
