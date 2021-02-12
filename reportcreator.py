@@ -622,10 +622,20 @@ class PlottedData(Figure):
         #self._latex_name='figure' #super()._latex_name
         self.preview = preview
 
-    def add_data_plot(self, numerical_data=None,ylabel=None,grid=True,subplots=True,yticks=None):
+    def add_data_plot(self, numerical_data=None,ylabel=None,grid=True,subplots=True,num_yticks=None):
         numerical_data = self._numerical_data
         
-        ax = numerical_data.plot(subplots=subplots, figsize=(10, 7),ylabel=ylabel,grid=grid,yticks=yticks)
+        ax = numerical_data.plot(subplots=subplots, figsize=(10, 7),ylabel=ylabel,grid=grid)
+        
+        if num_yticks != None:
+            ticks_no=num_yticks
+            for axl in ax:
+
+                ylimit=axl.set_ylim(bottom=round(np.floor(axl.get_ylim()[0])), top=round(np.ceil(axl.get_ylim()[1])))
+
+                axl.set_yticks(np.linspace(ylimit[0],ylimit[1],ticks_no))
+
+                axl.plot()
         #ax=solution_tmp.plot(subplots=True)
         ([
             ax_tmp.legend(['$' + vlatex(sym) + '$'])
@@ -831,7 +841,7 @@ class ReportSection(Section):
             ylabel='',
             subplots=True,
             grid=True,
-            yticks=None
+            num_yticks=None
     ):
 
         with self.create(Subsection(title)) as subsec:
@@ -869,7 +879,7 @@ class ReportSection(Section):
                                     './plots/fig_' + str(current_time),
                                     position='H',
                                     preview=self.preview)) as fig:
-                    fig.add_data_plot(row['simulations'],ylabel=ylabel,subplots=subplots,grid=grid,yticks=yticks)
+                    fig.add_data_plot(row['simulations'],ylabel=ylabel,subplots=subplots,grid=grid,num_yticks=num_yticks)
                     fig.add_caption(
                         NoEscape(
                             #'Przebiegi czasowe modelu dla danych: {given_data}.'.format(**format_dict)
