@@ -1,1 +1,1 @@
-# dynpy
+# DynPy
