@@ -63,7 +63,7 @@ class EmbeddedShortAnswer(EmbeddedAnswer):
     
     Parameters:
     ============
-    value: string
+    value: str
         The user's answer.
     
     score: int
@@ -90,10 +90,10 @@ class EmbeddedMultichoiceAnswer(EmbeddedAnswer):
     
     Parameters:
     ============
-    correct_answers: string
+    correct_answers: str
         contains correct answers.
     
-    wrong_answers: string
+    wrong_answers: str
         contains wrong answers.
     
     score: int
@@ -114,6 +114,15 @@ class EmbeddedMultichoiceAnswer(EmbeddedAnswer):
         return answer_string
     
 class EmbeddedGraphics:
+    """
+    Class EmbeddedGraphics allows input graphics inside the question.
+    
+    Parameters:
+    ============
+    path_to_file: str
+        Path to graphics
+    
+    """
     def __init__(self,path_to_file):
         self.filepath=path_to_file
         self.filename=path_to_file.split('/')[-1]
@@ -156,16 +165,16 @@ class EmbeddedMultichoiceMathAnswer(EmbeddedMultichoiceAnswer):
     Parameters:
     ============
     
-    correct_answers: string
+    correct_answers: str
         Correct answer
    
-    wrong_answer: string
+    wrong_answer: str
        Wrong answer
    
     score: int
        Score for correct answer
    
-    backend: string
+    backend: str
         The way of displaying equations
     """
 
@@ -196,16 +205,16 @@ class Question:
     Parameters:
     ============
     
-    question: string
+    question: str
         Question content
    
     id=1: int
        Number of question
    
-    title='Cloze_question': string
+    title='Cloze_question': str
        Title of question
    
-    question_type='cloze': string
+    question_type='cloze': str
        Defines type of question
     """
     def __init__(self,entries_list,id=1,figure='',title='Cloze_question',question_type='cloze'):
@@ -259,6 +268,16 @@ class Question:
         return 'MoodleQuestion('+self.entries+')'
 
 class Paragraph:
+    """
+    Object of this class wraps up question string with HTML paragraphs.
+    
+    Parameters
+    ==========
+    
+    element : str
+        Text to wrap with paragraphs
+    
+    """
     def __init__(self,element):
         self.elem=element
         
@@ -272,6 +291,21 @@ class Paragraph:
         return 'MoodleParagraph('+str(self.elem)+')'
     
 class Category:
+    """
+    Object of this class creates and represents document file of type xml which contains question list of specific category.
+    
+    Parameters:
+    ============
+    
+    name: str
+        Name of category of questions
+   
+    questions: str
+       Question list
+   
+    id: int
+       Number id of first question
+    """
     def __init__(self,name,questions,id=0):
         self.id=id
         self.name=name
