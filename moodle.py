@@ -3,7 +3,27 @@ import sympy.physics.mechanics as mech
 import base64
 
 class EmbeddedAnswer:
+    """ Class EmeddedAnswer allows to create a space for numerical answer.
     
+    Class EmbeddedAnswer contains answer's value, error, possible inaccuracy, score and precision of decimal place.
+    
+    Parameters:
+    ============
+    value: float
+        The user's answer.
+    
+    error: float
+        value of allowed inaccuracy.
+    
+    relative_error: bool
+        Gives oportunity to make an uncertainty in negative and positive way.
+    
+    precision: int
+        Value of precision of decimal place.
+    
+    score: int
+        Value of question score.
+    """
     def __init__(self,value,error=0.1,relative_error=True,precision=4,score=1,question_str='NUMERICAL'):
         
         self.value=value
@@ -37,6 +57,18 @@ class EmbeddedAnswer:
         return answer_string
 
 class EmbeddedShortAnswer(EmbeddedAnswer):    
+    """ Class EmeddedShortAnswer allows to create a space for short answer. It inherits from class EmbeddedAnswer and creates blank place for string type variable.
+    
+    Class EmbeddedShortAnswer contains answer's string and score.
+    
+    Parameters:
+    ============
+    value: string
+        The user's answer.
+    
+    score: int
+        Value of question score.
+    """
     def __init__(self,answer,score=1):
         super().__init__(value=answer,error=0.1,relative_error=True,precision=4,score=1,question_str='SHORTANSWER')
 
@@ -52,6 +84,21 @@ class EmbeddedShortAnswer(EmbeddedAnswer):
 
     
 class EmbeddedMultichoiceAnswer(EmbeddedAnswer):    
+    """ Class EmeddedMultichoiceAnswer allows to create an answear with more than one correct value. It inherits from class EmbeddedAnswer and creates space for multichoice answer.
+    
+    Class EmbeddedMultichoiceAnswer contains correct answer's value,wrong answer's value and error.
+    
+    Parameters:
+    ============
+    correct_answers: string
+        contains correct answers.
+    
+    wrong_answers: string
+        contains wrong answers.
+    
+    score: int
+        Value of question score.
+    """
     def __init__(self,correct_answers,wrong_answers=None,score=1,**kwargs):
         super().__init__(value=correct_answers,error=0.1,relative_error=True,precision=4,score=1,question_str='MULTICHOICE_VS')
         self.correct_answers=correct_answers
@@ -103,6 +150,24 @@ class EmbeddedGraphics:
         return 'Moodle'+ self.__class__.__name__ +self.to_string()
     
 class EmbeddedMultichoiceMathAnswer(EmbeddedMultichoiceAnswer):    
+    """
+    Class EmeddedMultichoiceMathAnswer allows to create an answear with more than one correct value. It inherits from class EmbeddedMultichoiceAnswer and creates space for multichoice answer.
+    
+    Parameters:
+    ============
+    
+    correct_answers: string
+        Correct answer
+   
+    wrong_answer: string
+       Wrong answer
+   
+    score: int
+       Score for correct answer
+   
+    backend: string
+        The way of displaying equations
+    """
 
     def __init__(self,correct_answers,wrong_answers=None,score=1,backend=mech.vlatex,**kwargs):
         super().__init__(correct_answers=correct_answers,wrong_answers=wrong_answers,score=score,**kwargs)
@@ -125,7 +190,24 @@ class EmbeddedMultichoiceMathAnswer(EmbeddedMultichoiceAnswer):
 #class 
         
 class Question:
+    """
+    Instance of this class creates complete question with answers within it. Additionaly it wraps question with needed xml commends.
     
+    Parameters:
+    ============
+    
+    question: string
+        Question content
+   
+    id=1: int
+       Number of question
+   
+    title='Cloze_question': string
+       Title of question
+   
+    question_type='cloze': string
+       Defines type of question
+    """
     def __init__(self,entries_list,id=1,figure='',title='Cloze_question',question_type='cloze'):
         
         if not isinstance(entries_list,list):
