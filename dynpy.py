@@ -6,7 +6,7 @@ from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
 import itertools as itools
 import scipy.integrate as solver
-from timeseries import *
+from .timeseries import *
 
 from IPython.display import display
 
