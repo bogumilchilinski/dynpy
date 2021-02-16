@@ -100,13 +100,9 @@ class OdeComputationalCase:
         
         Args:
         '''
-        
-        #if label==None:
-            
 
-        
-        
-        
+        #if label==None:
+
         self.odes_system = odes_system
         self.ivar = ivar
         self.dvars = dvars
@@ -132,32 +128,32 @@ class OdeComputationalCase:
             self.params_values = params_values
 
         self.t_span = t_span
-        
+
         if evaluate:
             self.form_numerical_rhs()
         else:
             self.__numerical_odes = None
-            
-        if label==None:    
-            label=self._label = self.__class__.__name__ + ' with ' + str(len(self.dvars)) + ' equations'
-        self._label=label
 
-    def __call__(self,label=None):
-        
-#         if len(args)>0:
-#             if isinstance(args[0],str):
-#                 label=args[0]
-#             else:
-#                 q=args
-                    
-        
-#         self.qs=
-        self._label=label
+        if label == None:
+            label = self._label = self.__class__.__name__ + ' with ' + str(
+                len(self.dvars)) + ' equations'
+        self._label = label
+
+    def __call__(self, label=None):
+
+        #         if len(args)>0:
+        #             if isinstance(args[0],str):
+        #                 label=args[0]
+        #             else:
+        #                 q=args
+
+        #         self.qs=
+        self._label = label
         return self
-        
+
     def __str__(self):
-#         if self._label==None:
-#             self._label = self.__class__.__name__ + ' with ' + str(len(self.dvars)) + ' equations'
+        #         if self._label==None:
+        #             self._label = self.__class__.__name__ + ' with ' + str(len(self.dvars)) + ' equations'
         #self._label = self.__class__.__name__ + ' with ' + str(len(self.dvars)) + ' equations'
 
         return self._label
@@ -165,7 +161,7 @@ class OdeComputationalCase:
     def __repr__(self):
 
         return self.__str__()
-            
+
     def __fortran_odes_rhs(self):
         '''
         Generates the bininary code related to symbolical expresions declered in the __init__ method. The function object is returned where the all arguments create a tuple.
@@ -240,10 +236,176 @@ class OdeComputationalCase:
             data={key: solution.y[no, :]
                   for no, key in enumerate(self.dvars)},
             index=t_span)
-        
-        solution_tdf.index.name='t'
-        
+
+        solution_tdf.index.name = 't'
+
         return solution_tdf
+
+
+class LinearODESolution:
+    def __init__(self,
+                 odes_system,
+                 ivar=Symbol('t'),
+                 dvars=[],
+                 t_span=[],
+                 params=[],
+                 params_values={},
+                 ic_point={},
+                 equation_type=None):
+        '''
+        Supply the following arguments for the initialization of OdeComputationalCase:
+        
+        Args:
+        '''
+        if isinstance(odes_system, LinearDynamicSystem):
+            odes_system = odes_system._eoms
+
+        self.odes_system = odes_system
+
+        self.governing_equations = self.odes_system
+        self.ivar = ivar
+        self.dvars = dvars
+        self.ic_point = ic_point
+
+        if isinstance(params, dict):
+            self.params_values = params
+            self.params = list(self.params_values.keys())
+
+        elif (all(isinstance(elem, Symbol) for elem in params)):
+            self.params = params
+            self.params_values = params_values
+
+        elif (all(
+                isinstance(elem, tuple) and len(elem) == 2
+                for elem in params)):
+            self.params_values = {var: value for var, value in params}
+            self.params = list(self.params_values.keys())
+
+        else:
+            self.params = self.odes_system.free_symbols
+            self.params.remove(self.ivar)
+            self.params_values = params_values
+
+        self.t_span = t_span
+        self.__numerical_odes = None
+
+        self.eq_type = equation_type
+
+        
+
+    def stiffness_matrix(self):
+        '''
+        Returns the system stiffness matrix, which is based on the equations of motion of the Lagrange's system. Matrix is obtained from jacobian which is called with system's generalized coordinates vector.
+        '''
+        return self.governing_equations.jacobian(self.dvars)
+
+    def inertia_matrix(self):
+        '''
+        Returns the system inertia matrix which is based on the equations of motion of the Lagrange's system. mass_matrix is an argument of sympy.physics.mechanics.lagrange module.
+        '''
+        dvars_ddot = list(sym.Matrix(self.dvars).diff(self.ivar, 2))
+
+        return self.governing_equations.jacobian(dvars_ddot)
+
+    def damping_matrix(self):
+        '''
+        Returns the system damping matrix which is based on the equations of motion of the Lagrange's system. mass_matrix is an argument of sympy.physics.mechanics.lagrange module.
+        '''
+        dvars_dot = list(sym.Matrix(self.dvars).diff(self.ivar, 1))
+
+        return self.governing_equations.jacobian(dvars_dot)
+
+    def external_forces(self):
+        return self.odes_system.subs(
+            {gen_coord: 0
+             for gen_coord in self.dvars}).doit()
+
+    def general_solution(self, initial_conditions=None):
+        '''
+        Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
+        '''
+        C = numbered_symbols('C', start=1)
+
+        modes, eigs = ((self.inertia_matrix().inv() *
+                        self.stiffness_matrix()).diagonalize())
+
+        Y_mat = Matrix(self.dvars)
+
+        diff_eqs = Y_mat.diff(self.ivar, 2) + eigs * Y_mat
+
+        t_sol = self.ivar
+
+        solution = [
+            next(C) * modes[:, i] * sin(sym.sqrt(eigs[i, i]) * t_sol) +
+            next(C) * modes[:, i] * cos(sym.sqrt(eigs[i, i]) * t_sol)
+            for i, coord in enumerate(self.dvars)
+        ]
+
+        return sum(solution, Matrix([0] * len(Y_mat)))
+
+    def steady_solution(self, initial_conditions=None):
+
+        ext_forces = self.external_forces()
+
+        #         sin_components=ext_forces.atoms(sin)
+        #         cos_components=ext_forces.atoms(cos)
+        components = ext_forces.atoms(sin, cos)
+
+        display(components)
+
+        steady_sol = Matrix([0 for gen_coord in self.dvars])
+
+        for comp in components:
+
+            omg = (comp.args[0].diff(self.ivar)).doit()
+            display(omg)
+            amp_vector = Matrix([row.coeff(comp) for row in ext_forces])
+
+            #display(amp_vector)
+
+            fund_mat = -self.inertia_matrix(
+            ) * omg**2 + sym.I * omg * self.damping_matrix(
+            ) + self.stiffness_matrix()
+
+            steady_sol += (fund_mat.inv() * amp_vector) * comp
+
+            ext_forces -= amp_vector * comp
+        #print(ext_forces.doit().expand())
+        if ext_forces.doit().expand() != sym.Matrix(
+            [0 for gen_coord in self.dvars]):
+            steady_sol += sym.dsolve(
+                (self.governing_equations - self.external_forces() +
+                 ext_forces).expand().doit(), self.dvars)
+
+        return steady_sol
+
+    def solution(self, initial_conditions=None):
+        return self.general_solution(
+            initial_conditions=initial_conditions) + self.steady_solution(
+                initial_conditions=initial_conditions)
+
+
+class WeakNonlinearProblemSolution(LinearODESolution):
+    def __init__(self,
+                 odes_system,
+                 ivar=Symbol('t'),
+                 dvars=[],
+                 eps=Symbol('varepsilon'),
+                 t_span=[],
+                 params=[],
+                 params_values={},
+                 ic_point={},
+                 equation_type=None):
+
+        super().__init__(odes_system=odes_system,
+                         ivar=ivar,
+                         dvars=dvars,
+                         t_span=t_span,
+                         params=params,
+                         params_values=params_values,
+                         ic_point=ic_point,
+                         equation_type=equation_type)
+        self.eps = eps
 
 
 class LagrangesDynamicSystem(me.LagrangesMethod):
@@ -310,7 +472,6 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     Finaly one can define instance rod of class LagrangesDynamicSystem by making use of calculation and variables made previously. In addition there is possibility to create instant of class OdeComputationalCase (rod_numerical) that allows to perform numerical operations on the EOM
     
     '''
-    
     def __init__(self,
                  Lagrangian,
                  qs=None,
@@ -325,9 +486,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         Supply the following for the initialization of DynamicSystem in the same way as LagrangesMethod
         """
-        
 
-        
         if isinstance(Lagrangian, me.LagrangesMethod):
             bodies = Lagrangian._bodies
             frame = Lagrangian.inertial
@@ -337,7 +496,6 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                 Lagrangian.coneqs)[len((Lagrangian._hol_coneqs)):]
             qs = Lagrangian.q
             Lagrangian = sum(Lagrangian._L)
-
 
         self.ivar = ivar
         #         self.forcelist=forcelist
@@ -361,86 +519,93 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self.governing_equations = self.__governing_equations
         self.Y = list(self.q) + list(self.u)
 
-        if label==None:
-            label = self.__class__.__name__ + ' with ' + str(len(self.q)) + 'DOF' 
-            
+        if label == None:
+            label = self.__class__.__name__ + ' with ' + str(len(
+                self.q)) + 'DOF'
+
         self._label = label
-        
+
         #LM=me.LagrangesMethod(Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs)
     def _kwargs(self):
-        return {'bodies':self.bodies,
-                'frame':self.frame,
-                'forcelist':self.forcelist,
-                'hol_coneqs':self._hol_coneqs,
-                'nonhol_coneqs':list(self.coneqs)[len((self._hol_coneqs)):],
-                'qs':self.q,
-                'Lagrangian':self.lagrangian(),
-                'label':self._label,
-                'ivar':self.ivar,
-               }
-        
-    def __add__(self,other):
-        
-        self_dict=self._kwargs()
-        other_dict=other._kwargs()
-        
-        
-        self_dict['Lagrangian']=self_dict['Lagrangian']+other_dict['Lagrangian']
-        
-        self_dict['qs']=list(self_dict['qs'])+list(coord for coord in other_dict['qs'] if not coord in self_dict['qs'])
-        
+        return {
+            'bodies': self.bodies,
+            'frame': self.frame,
+            'forcelist': self.forcelist,
+            'hol_coneqs': self._hol_coneqs,
+            'nonhol_coneqs': list(self.coneqs)[len((self._hol_coneqs)):],
+            'qs': self.q,
+            'Lagrangian': self.lagrangian(),
+            'label': self._label,
+            'ivar': self.ivar,
+        }
+
+    def __add__(self, other):
+
+        self_dict = self._kwargs()
+        other_dict = other._kwargs()
+
+        self_dict[
+            'Lagrangian'] = self_dict['Lagrangian'] + other_dict['Lagrangian']
+
+        self_dict['qs'] = list(self_dict['qs']) + list(
+            coord
+            for coord in other_dict['qs'] if not coord in self_dict['qs'])
+
         print(self_dict['qs'])
-        
+
         list_build = lambda x: flatten([x]) if x else []
-        
-        self_dict['forcelist']=list_build(self_dict['forcelist'])+list_build(other_dict['forcelist'])
-        self_dict['bodies']=list_build(self_dict['bodies'])+list_build(other_dict['bodies'])
-        
-        return LagrangesDynamicSystem(**self_dict)
-    
-    def shranked(self,*args):
-        self_dict=self._kwargs()
-        self_dict['qs']=flatten(args)
-        
-        return LagrangesDynamicSystem(**self_dict)
-        
 
-    def remove(self,*args):
-        
-        bounded_coordinates=flatten(args)
-        
-        self_dict=self._kwargs()
-        self_dict['qs']=[coord for coord in self.q if coord not in bounded_coordinates]
-        
+        self_dict['forcelist'] = list_build(
+            self_dict['forcelist']) + list_build(other_dict['forcelist'])
+        self_dict['bodies'] = list_build(self_dict['bodies']) + list_build(
+            other_dict['bodies'])
+
         return LagrangesDynamicSystem(**self_dict)
 
-    
-    
+    def shranked(self, *args):
+        self_dict = self._kwargs()
+        self_dict['qs'] = flatten(args)
+
+        return LagrangesDynamicSystem(**self_dict)
+
+    def remove(self, *args):
+
+        bounded_coordinates = flatten(args)
+
+        self_dict = self._kwargs()
+        self_dict['qs'] = [
+            coord for coord in self.q if coord not in bounded_coordinates
+        ]
+
+        return LagrangesDynamicSystem(**self_dict)
+
     def subs(self, *args, **kwargs):
 
         if 'method' in kwargs.keys():
-            method=kwargs['method']
+            method = kwargs['method']
         else:
-            method='as_constrains'
-            
-        
-        
+            method = 'as_constrains'
+
         if method == 'as_constrains':
-            if len(args)==2:
-                args=([(args[0],args[1])]),
-                
-            elif len(args)==1:
-                if isinstance(args[0],dict):
+            if len(args) == 2:
+                args = ([(args[0], args[1])]),
+
+            elif len(args) == 1:
+                if isinstance(args[0], dict):
                     #print(args[0])
-                    args=list(args[0].items()),
-        
-            
-            constrains=[lhs-rhs  for lhs,rhs  in args[0] if  any (coord in  (lhs-rhs ).atoms(Function) for coord  in self.q) ]
-            args=([(lhs,rhs)  for lhs,rhs  in args[0] if not  any (coord in  (lhs-rhs ).atoms(Function) for coord  in self.q) ],)
-            
+                    args = list(args[0].items()),
+
+            constrains = [
+                lhs - rhs for lhs, rhs in args[0] if any(
+                    coord in (lhs - rhs).atoms(Function) for coord in self.q)
+            ]
+            args = ([(lhs, rhs) for lhs, rhs in args[0]
+                     if not any(coord in (lhs - rhs).atoms(Function)
+                                for coord in self.q)], )
+
 #         print(constrains)
 #         print(args)
-        
+
         old_points = [point for point, force in self.forcelist]
         new_forces = [
             force.subs(*args, **kwargs) for point, force in self.forcelist
@@ -458,10 +623,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         forces_subs = list(zip(new_points, new_forces))
 
-#         print(forces_subs)
-#         print(self.forcelist)
+        #         print(forces_subs)
+        #         print(self.forcelist)
 
-        return LagrangesDynamicSystem(
+        return type(self)(
             Lagrangian=lagrangian_subs,
             qs=self.q,
             forcelist=forces_subs,
@@ -486,10 +651,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self._label = label
 
         return self
-        
+
     def __str__(self):
 
-            
         return self._label
 
     def __repr__(self):
@@ -524,8 +688,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                 for q_tmp in self.q
             }
 
-        self.q_0=static_disp_dict
-            
+        self.q_0 = static_disp_dict
+
         return self.governing_equations.subs(static_disp_dict)
 
     def external_forces(self):
@@ -533,39 +697,42 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             {gen_coord: 0
              for gen_coord in self.Y}).doit()
 
-    def _op_points(self,hint=[], static_disp_dict=None,dict=True,*args,**kwargs):
-
-
+    def _op_points(self,
+                   hint=[],
+                   static_disp_dict=None,
+                   dict=True,
+                   *args,
+                   **kwargs):
         '''
         Provides the interface for critical points evaluation (solves the equlibrium conditions and returns its roots).
         '''
 
-        eqns_to_solve=self.equilibrium_equation(static_disp_dict=static_disp_dict).doit()
-#         display(args,kwargs)
-        roots = solve(
-            list(eqns_to_solve)+list(flatten([hint])),
-            list(self.q_0.values()),dict=dict)
+        eqns_to_solve = self.equilibrium_equation(
+            static_disp_dict=static_disp_dict).doit()
+        #         display(args,kwargs)
+        roots = solve(list(eqns_to_solve) + list(flatten([hint])),
+                      list(self.q_0.values()),
+                      dict=dict)
 
-#         if type(roots) is dict:
-#             roots = list(roots.values())
+        #         if type(roots) is dict:
+        #             roots = list(roots.values())
 
-#         #print(roots)
-#         roots = list(Matrix(roots).doit())
+        #         #print(roots)
+        #         roots = list(Matrix(roots).doit())
 
         return roots
 
-    def critical_points(self,hint=None ,static_disp_dict=None,dict=True):
+    def critical_points(self, hint=None, static_disp_dict=None, dict=True):
         '''
         Provides the interface for critical points evaluation (solves the equlibrium conditions and returns its roots).
         '''
-        
 
-        roots_list = self._op_points(hint=hint,static_disp_dict= static_disp_dict,dict=dict)
+        roots_list = self._op_points(hint=hint,
+                                     static_disp_dict=static_disp_dict,
+                                     dict=dict)
 
-        return [
-                [Eq(coord,solution) for coord,solution in root_dict.items()]
-                for no, root_dict in enumerate(roots_list)
-               ]
+        return [[Eq(coord, solution) for coord, solution in root_dict.items()]
+                for no, root_dict in enumerate(roots_list)]
 
     def inertia_matrix(self):
         '''
@@ -597,7 +764,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             'ivar': self.ivar,
             'dvars': self.Y,
             'params': params,
-            'label': 'Numerical model of '+self.__str__(),
+            'label': 'Numerical model of ' + self.__str__(),
         }
 
     def solution(self, initial_conditions=None):
@@ -633,15 +800,16 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     @property
     def _eoms(self):
         return self.governing_equations
-    
-    def numerized(self,parameter_values=None):
+
+    def numerized(self, parameter_values=None):
         '''
         Takes values of parameters, substitute it into the list of parameters and changes list it into a Tuple. Returns instance of class OdeComputationalCase.
         '''
         data_Tuple = Tuple(*self.system_parameters()).subs(parameter_values)
         computed_case = self.computational_case(parameter_values=data_Tuple)
-        
-        return OdeComputationalCase(**computed_case,evaluate=True)
+
+        return OdeComputationalCase(**computed_case, evaluate=True)
+
 
 class LinearDynamicSystem(LagrangesDynamicSystem):
     '''
@@ -1053,13 +1221,14 @@ class WeakNonlinearOscillator(HarmonicOscillator):
         lin_lagrangian = nonlinear_system.linearized().lagrangian().subs(
             stationary_subs_dict).doit()
 
-        nonlin_lagrangian = ((nonlinear_system.approximated(
-            order).lagrangian() - lin_lagrangian)/eps).doit()
+        nonlin_lagrangian = (
+            (nonlinear_system.approximated(order).lagrangian() -
+             lin_lagrangian) / eps).doit()
 
         #display(nonlin_lagrangian)
 
-        self._eps = Symbol(latex(eps),positive=True)
-        
+        self._eps = Symbol(latex(eps), positive=True)
+
         super().__init__(
             Lagrangian=lin_lagrangian - self._eps * nonlin_lagrangian,
             qs=nonlinear_system.q,
@@ -1071,13 +1240,12 @@ class WeakNonlinearOscillator(HarmonicOscillator):
                 nonlinear_system.coneqs)[len((nonlinear_system._hol_coneqs)):],
             ivar=ivar)
 
-        
         self.order = order
 
     @property
     def eps(self):
         return self._eps
-        
+
     def __str__(self):
         return str(self.order) + '-order approximated ' + super().__str__()
 
@@ -1096,7 +1264,8 @@ class WeakNonlinearOscillator(HarmonicOscillator):
         print(subscripts_dict)
         print(self.args)
         return HarmonicOscillator(
-            Lagrangian=self.linearized().lagrangian().subs(self.eps, 0).subs(subscripts_dict).doit(),
+            Lagrangian=self.linearized().lagrangian().subs(
+                self.eps, 0).subs(subscripts_dict).doit(),
             qs=self.q.subs(subscripts_dict),
             forcelist=self.forcelist,
             bodies=self._bodies,
