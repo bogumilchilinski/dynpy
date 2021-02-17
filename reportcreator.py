@@ -267,51 +267,45 @@ summary_bank_composed_model_gen = RandomDescription(
     time_domain_summary_5,
 )
 
+summary_bank_chair_model_gen = RandomDescription(
+    time_domain_summary_1,
+    time_domain_summary_2,
+    time_domain_summary_3,
+    time_domain_summary_4,
+    #    time_domain_summary_5,
+)
 
 summary_bank_chair_model_gen = RandomDescription(
     time_domain_summary_1,
     time_domain_summary_2,
     time_domain_summary_3,
     time_domain_summary_4,
-#    time_domain_summary_5,
+    #    time_domain_summary_5,
 )
-
-
-summary_bank_chair_model_gen = RandomDescription(
-    time_domain_summary_1,
-    time_domain_summary_2,
-    time_domain_summary_3,
-    time_domain_summary_4,
-#    time_domain_summary_5,
-)
-
 
 summary_bank_drive_model_gen = RandomDescription(
     time_domain_summary_1,
-#     time_domain_summary_2,
-#     time_domain_summary_3,
-#     time_domain_summary_4,
+    #     time_domain_summary_2,
+    #     time_domain_summary_3,
+    #     time_domain_summary_4,
     time_domain_summary_5,
 )
-
-
-
 
 summary_bank_chair_move_model_gen = RandomDescription(
     time_domain_summary_1,
     time_domain_summary_2,
     time_domain_summary_3,
-#     time_domain_summary_4,
- #   time_domain_summary_5,
+    #     time_domain_summary_4,
+    #   time_domain_summary_5,
 )
 
 summary_bank_drive_model = [
     str(
         RandomDescription(
             time_domain_summary_1,
-#             time_domain_summary_2,
-#             time_domain_summary_3,
-#             time_domain_summary_4,
+            #             time_domain_summary_2,
+            #             time_domain_summary_3,
+            #             time_domain_summary_4,
             time_domain_summary_5,
         )) for obj in range(30)
 ]
@@ -375,7 +369,12 @@ summary_bank_composed_model_measurements = [
         )) for obj in range(30)
 ]
 
-sec_introduction_bank_0=['Zaprezentowane symulacje wykonano dla następujących danych: {given_data}.','Do wykonania symulacji użyto danych jak następuje: {given_data}','Zakres danych użytych do procesu symulacji jest następujący: {given_data}.','Do opracowania wyników symulacyjnych posłużono się niniejszymi danymi: {given_data}.']
+sec_introduction_bank_0 = [
+    'Zaprezentowane symulacje wykonano dla następujących danych: {given_data}.',
+    'Do wykonania symulacji użyto danych jak następuje: {given_data}',
+    'Zakres danych użytych do procesu symulacji jest następujący: {given_data}.',
+    'Do opracowania wyników symulacyjnych posłużono się niniejszymi danymi: {given_data}.'
+]
 sec_introduction_bank_1 = [
     'Wykorzystując przygotowany model dynamiczny, przeprowadzono serię symulacji mających na celu ocenę wrażliwości modelu na zmiany wybranych parametrów. ',
     'Przeprowadzenie analizy numerycznej wymaga znajomości modelu dynamicznego oraz zdeterminowania parametrów oddziałujących na zachowanie układu wskutek ich zmian. ',
@@ -398,11 +397,12 @@ sec_introduction_bank_3 = [
     'Dostrzegając wzajemne zależności między dynamicznymi parametrami wózka możliwe będzie wprowadzenie takich zmian, które w korzystny sposób wpłyną na odpowiedź układu. '
 ]
 
-sec_intro_composed_model_gen = RandomDescription(sec_introduction_bank_1,
-                                                 sec_introduction_bank_2,
-                                                 sec_introduction_bank_3,
-                                                #sec_introduction_bank_0
-                                                )
+sec_intro_composed_model_gen = RandomDescription(
+    sec_introduction_bank_1,
+    sec_introduction_bank_2,
+    sec_introduction_bank_3,
+    #sec_introduction_bank_0
+)
 
 sec_intro_composed_model = [
     str(
@@ -410,27 +410,93 @@ sec_intro_composed_model = [
                           sec_introduction_bank_3)) for obj in range(30)
 ]
 
-introduction_bank_meas_1 = [  #poprawione
-    'Na wykresie {nr_rys} przedstawiano zmiany wielkości dynamicznych charakteryzujących ruch wózka. Po przeanalizowaniu można zanotować wzajemną zależność poszczególnych wielkości dynamicznych.',
-    'Charakter przebiegu wartości dynamicznych wózka został przedstawiony na rysunku {nr_rys}.',
-    'Wykres {nr_rys} pokazuje zmienność parametrów dynamicznych wózka w trakcie przejazdu pomiarowego.',
-    'Rysunek {nr_rys} prezentuje wykres opisujący zmienność parametrów dynamicznych wózka w trakcie jazdy pomiarowej po torze.',
-]
-
 introduction_bank_meas_2 = [  #poprawione
+    'W Tabeli {nr_rys} przedstawiano zakres zmienności parametrów, dla których przeprowadzono pomiary drgań struktury wózka.',
+    'Zestwienie parametrów, co do których założono potencjalny wpływ na drgania wózka, wraz z zakresami zmiennosci przedstawiono w Tabeli {nr_rys}.',
+    'W Tabeli {nr_rys} pokazano parametry układu wózek-pasażer, których zmienność założono jako potencjalnie wpływającą na charakter drgań.',
+    'Tabela {nr_rys} stanowi zestawienie zakresu wartości parametrów przyjętych jako potencjalnie wpływających na drgania wózka.',
+]
+
+introduction_bank_meas_1 = [  #poprawione
+    'W niniejszym podrozdziale opisano próbę {string}. ',
+    'Opisane w dalszej kolejności testy dotyczą {string}. ',
+    'Następujące próby wykonano dla przypadku {string}. ',
+    'Przedmiotem próby opisywanej w tym podrozdziale jest przypadek {string}. ',
+]
+
+introduction_bank_meas_3 = [  #poprawione
+    'Pomiary wykonano z uwzględnieniem napędu RapidChair w formie wahacza wleczonego. ',
+    'Do wózka inwalidzkiego dołączono napęd RapidChair w formie wahacza wleczonego. ',
+    'Badany układ stanowił wózek inwalidzki z dołączonym wahaczem wleczonym RapidChair. ',
+    'Pomiary wykonywano na układzie wózka inwalidzkiego z dołączonym wahaczem wleczonym RapidChair. ',
+]
+
+introduction_bank_meas_4 = [  #poprawione (nie trzeba zmieniać zdań)
+    'Łącznie wykonano {entries_no} przejazdów. ',
+    'Odcinek testowy został pokanany {entries_no} razy. ',
+    'Zespół badawczy zarejestrował {entries_no} przejazdów testowych. ',
+    'Łącznie na odcinku testowym zarejestrowano {entries_no} przejazdów. '
+]
+
+meas_intro_composed_model = [
+    str(
+        RandomDescription(introduction_bank_meas_1, introduction_bank_meas_2,
+                          introduction_bank_meas_3, introduction_bank_meas_4))
+    for obj in range(30)
+]
+
+ending_bank_meas_1 = [  #poprawione
+    'Dla każdego przypadku masy układu przeprowadzono co najmniej trzy przejazdy, dzięki czemu zmniejszono ryzyko uwzględnienia losowych błędów. ',
+    'Zgodnie z założeniami metodyki badawczej, aby zminimalizować losowe błędy, dla każdej masy wykonano co najmniej trzy próby. ',
+    'W celu zminimalizowania wpływu losowych błędów, wykonano co najmniej trzy przjeazdy testowe dla każdego przypadku masy układu. ',
+    'Pomiary wykonywano co najmniej trzykrotnie dla każdej przewidzianej masy, aby zminimalizować wpływ błędów losowych podczas analizy wyników. ',
+]
+
+ending_bank_meas_2 = [  #poprawione
+    'Rozróżnienie wyników zapewniono poprzez uwzględnienie w nazewnictwie indeksu z numerem próby.',
+    'Wyodrębnienie poszczególnych przypadków umożliwiono stosując w nazwach indeksy z numerami prób.',
+    'Stąd indeks liczbowy przy nazwie próby oznacza kolejny przejazd z daną masą.',
+    'Kolejne przejazdy z daną masą rozróżnia się dzięki zastosowaniu indeksu liczbowego.',
+]
+
+ending_bank_meas_3 = [  #poprawione (nie trzeba zmieniać zdań)
+    'Przebiegi czasowe zestawiono w kolejnej sekcji dokumentu.',
+    'Zestawienie wykresów czasowych zaprezentowano w następnym podrozdziale.',
+    'Wyniki przeprowadzonych testów w postaci wykresów czasowych znajdują się w kolejnym podrozdziale.',
+    'Zestawienie przebiegów czasowych zamieszczono w następnej sekcji dokumentu.'
+]
+
+meas_ending_composed_model = [
+    str(RandomDescription(ending_bank_meas_1, ending_bank_meas_3))
+    for obj in range(30)
+]
+
+intro_bank_meas_1 = [  #poprawione
+    'Na wykresie {nr_rys} przedstawiano zmiany wartości przyspieszeń drgań charakteryzujących ruch wózka.',
+    'Charakter przebiegu amplitud przyspieszeń drgan wózka został przedstawiony na rysunku {nr_rys}.',
+    'Wykres {nr_rys} pokazuje zmienność wartości przyspieszeń drgań wózka w trakcie przejazdu pomiarowego.',
+    'Rysunek {nr_rys} prezentuje wykres opisujący zmienność amplitudy przyspieszeń drgań wózka w trakcie jazdy pomiarowej.',
+]
+
+intro_bank_meas_2 = [  #poprawione
     'Pomiar został przeprowadzony dla następujących danych: {given_data}.',
-    'Zaprezentowane wyniki pomiarowe otrzymano dla danych równych:{given_data}.',
-    'Badanie pomiarowe zostało przeprowadzone dla następujących danych:{given_data}.',
-    'Wyniki pomiaru otrzymano dla:{given_data}.',
+    'Zaprezentowane wyniki pomiarowe otrzymano dla danych równych: {given_data}.',
+    'Badanie pomiarowe zostało przeprowadzone dla następujących danych: {given_data}.',
+    'Wyniki pomiaru otrzymano dla: {given_data}.',
 ]
 
-introduction_bank_meas_3 = [  #poprawione (nie trzeba zmieniać zdań)
-    'Na podstawie spostrzeżeń wynikających z obserwacji odpowiedzi czasowych analizowanego układu stwierdza się oscylacyjny charakter odpowiedzi układu. Dynamika systemu ma stabilny charakter',
-    'Charakter zmian przebiegów poszczególnch współrzędnych jest stabilny. Otrzymane sygnały mieszczą się w zakresie dopuszczalnych uwarunkowaniami fizycznymi.',
-    'Zaprezentowane wykresy przedstawiające odpowiedzi czasowe układu mają drganiowy charakter i są zgodne z oczekiwaniami.',
-    'Bazując na otrzymanych wynikach można stwierdzić wzajemną zależność poszczególnych wielkości dynamicznych. Dodatkowo wielkości modelu stabilizują się w czasie. '
+intro_bank_meas_3 = [  #poprawione (nie trzeba zmieniać zdań)
+    'Zarejestrowane sygnały pochodzą z czujników umieszczonych w osi wózka (gdzie \({a_ox}\) - przyspieszenia wzdłużne, \({a_oz}\) - pionowe), na podnóżku (kierunek pionowy, \({a_rz}\)) oraz w wahaczu napędu RapidChair \({a_rcz}\).',
+    'Przebiegi uzyskano z akcelereometrów zamontowanych kolejno w osi wózka (gdzie \({a_ox}\) - przyspieszenia wzdłużne, \({a_oz}\)) - pionowe), na podnóżku (kierunek pionowy, \({a_rz}\))) oraz w wahaczu napędu RapidChair \({a_rcz}\)).',
+    'Oznaczenia \({a_ox}\), \({a_oz}\), \({a_rz}\) oraz \({a_rcz}\) odnoszą się odpowiednio do sygnałów z czujników w osi wózka (kolejno wzdłużne i pionowe), na podnóżku oraz w wahaczu RapidChar.',
+    'Przyjęto następujące oznaczenia: \({a_ox}\) - przyspieszenia wzdłużne czujnika umieszcoznego w osi wózka, \({a_oz}\) - przyspieszenia pionowe czujnika umieszcoznego w osi wózka, \({a_rz}\) - przyspieszenia pionowe czujnika na podnóżku oraz \({a_rcz}\) - przyspieszenia pionowe czujnika w wahaczu RapidChair.',
 ]
 
+intro_bank_meas_composed_model = [
+    str(
+        RandomDescription(intro_bank_meas_1, intro_bank_meas_2,
+                          intro_bank_meas_3)) for obj in range(30)
+]
 introduction_bank_1 = [
     'Na wykresie {nr_rys} przedstawiano zmiany wielkości dynamicznych charakteryzujących ruch obiektu. Po przeanalizowaniu można zanotować wzajemną zależność poszczególnych wielkości dynamicznych.',
     'Charakter przebiegu wartości dynamicznych układu został przedstawiony na rysunku {nr_rys}.',
@@ -561,10 +627,8 @@ conclusion_bank_chair_model_gen = RandomDescription(conclusion_bank_x,
                                                     conclusion_bank_phi,
                                                     conclusion_bank_no_impact)
 
-
-conclusion_bank_chair_move_model_gen = RandomDescription(conclusion_bank_x,
-                                                    conclusion_bank_phi,
-                                                    conclusion_bank_no_impact)
+conclusion_bank_chair_move_model_gen = RandomDescription(
+    conclusion_bank_x, conclusion_bank_phi, conclusion_bank_no_impact)
 
 conclusion_bank_chair_model = [
     str(
@@ -622,18 +686,30 @@ class PlottedData(Figure):
         #self._latex_name='figure' #super()._latex_name
         self.preview = preview
 
-    def add_data_plot(self, numerical_data=None,ylabel=None,grid=True,subplots=True,num_yticks=None):
+    def add_data_plot(self,
+                      numerical_data=None,
+                      ylabel=None,
+                      grid=True,
+                      subplots=True,
+                      num_yticks=None,
+                      fontsize=None):
         numerical_data = self._numerical_data
-        
-        ax = numerical_data.plot(subplots=subplots, figsize=(10, 7),ylabel=ylabel,grid=grid)
-        
+
+        ax = numerical_data.plot(subplots=subplots,
+                                 figsize=(10, 7),
+                                 ylabel=ylabel,
+                                 grid=grid,
+                                 fontsize=fontsize)
+
         if num_yticks != None:
-            ticks_no=num_yticks
+            ticks_no = num_yticks
             for axl in ax:
 
-                ylimit=axl.set_ylim(bottom=round(np.floor(axl.get_ylim()[0])), top=round(np.ceil(axl.get_ylim()[1])))
+                ylimit = axl.set_ylim(bottom=round(np.floor(
+                    axl.get_ylim()[0])),
+                                      top=round(np.ceil(axl.get_ylim()[1])))
 
-                axl.set_yticks(np.linspace(ylimit[0],ylimit[1],ticks_no))
+                axl.set_yticks(np.linspace(ylimit[0], ylimit[1], ticks_no))
 
                 axl.plot()
         #ax=solution_tmp.plot(subplots=True)
@@ -641,7 +717,6 @@ class PlottedData(Figure):
             ax_tmp.legend(['$' + vlatex(sym) + '$'])
             for ax_tmp, sym in zip(ax, numerical_data.columns)
         ])
-        
 
         plt.savefig(self.fig_name + '.png')
         self.add_image(self.fig_name, width=NoEscape('15cm'))
@@ -667,7 +742,8 @@ class DataTable(Table):
         #             self._numerical_data=numerical_data
 
         tab = self._numerical_data
-        self.append(NoEscape(tab.to_latex(index=False, escape=False,longtable=False)))
+        self.append(
+            NoEscape(tab.to_latex(index=False, escape=False, longtable=False)))
 
 
 class ReportSection(Section):
@@ -724,10 +800,12 @@ class ReportSection(Section):
                          numerical_data=None,
                          given_data_dict=None,
                          units_dict={},
-                         marker=None):
+                         marker=None,
+                         string=None):
 
         feature_dict = {
             'param_name': vlatex(self.analysis_key),
+            'string': string,
         }
         if marker:
             feature_dict.update({'nr_rys': Ref(marker).dumps()})
@@ -770,6 +848,7 @@ class ReportSection(Section):
                     units_dict=units_dict))
                 for name in column_names
             })
+            feature_dict.update({'entries_no': len(numerical_data)})
 
         if type(given_data_dict) != type(None):
             feature_dict.update({
@@ -785,12 +864,14 @@ class ReportSection(Section):
         return feature_dict
 
     def add_introduction(
-            self,
-            title='Zakres prowadzonej analizy',
-            numerical_data=None,
-            units_dict={},
-            initial_description='Initial description',  #random.choice(sec_intro_composed_model)
-            ending_summary='Ending summary',  # random.choice(sec_intro_composed_model)
+        self,
+        title='Zakres prowadzonej analizy',
+        numerical_data=None,
+        units_dict={},
+        initial_description='Initial description',  #random.choice(sec_intro_composed_model)
+        ending_summary='Ending summary',
+        string=None,
+        # random.choice(sec_intro_composed_model)
     ):
 
         with self.create(Subsection(NoEscape(title))) as subsec:
@@ -810,12 +891,16 @@ class ReportSection(Section):
                 } for key, column in numerical_data.items()
             ])
 
-            format_dict = (self.get_feature_dict(numerical_data=None,
-                                                 given_data_dict=None,
-                                                 units_dict=units_dict,
-                                                 marker=tab_mrk))
+            format_dict = (self.get_feature_dict(
+                numerical_data=None,
+                given_data_dict=None,
+                units_dict=units_dict,
+                marker=tab_mrk,
+                string=string,
+            ))
 
-            subsec.append(NoEscape(initial_description.format(**format_dict)))
+            subsec.append(
+                NoEscape(str(initial_description).format(**format_dict)))
 
             with subsec.create(DataTable(symbols_df, position='H')) as table:
 
@@ -823,14 +908,14 @@ class ReportSection(Section):
                     NoEscape(
                         'Zestawienie parametrów modelu'.format(**format_dict)))
                 table.add_table(numerical_data.T)
-                table.append(tab_mrk)
+                table.append(Label(tab_mrk))
 
-            subsec.append(NoEscape(ending_summary.format(**format_dict)))
+            subsec.append(NoEscape(str(ending_summary).format(**format_dict)))
 
             #subsec.append(NewPage())
             #subsec.append(NoEscape('\\'))
             subsec.append(NoEscape('\par'))
-            
+
     def add_simulational_results(
             self,
             title='Wyniki symulacji numerycznych',
@@ -841,8 +926,9 @@ class ReportSection(Section):
             ylabel='',
             subplots=True,
             grid=True,
-            num_yticks=None
-    ):
+            num_yticks=10,
+            fontsize=None,
+            caption='Przebiegi czasowe modelu dla rozważanego zakresu danych'):
 
         with self.create(Subsection(title)) as subsec:
 
@@ -850,7 +936,6 @@ class ReportSection(Section):
 
             for key, row in simulation_results_frame.iterrows():
 
-                    
                 data_with_units = {
                     parameter: value
                     for parameter, value in row.items()
@@ -872,40 +957,45 @@ class ReportSection(Section):
                 }
 
                 subsec.append(
-                    NoEscape(initial_description.format(**format_dict)))
+                    NoEscape(str(initial_description).format(**format_dict)))
 
                 with subsec.create(
                         PlottedData(row['simulations'],
                                     './plots/fig_' + str(current_time),
                                     position='H',
                                     preview=self.preview)) as fig:
-                    fig.add_data_plot(row['simulations'],ylabel=ylabel,subplots=subplots,grid=grid,num_yticks=num_yticks)
+                    fig.add_data_plot(row['simulations'],
+                                      ylabel=ylabel,
+                                      subplots=subplots,
+                                      grid=grid,
+                                      num_yticks=num_yticks,
+                                      fontsize=fontsize)
                     fig.add_caption(
                         NoEscape(
                             #'Przebiegi czasowe modelu dla danych: {given_data}.'.format(**format_dict)
-                            'Przebiegi czasowe modelu dla rozważanego zakresu danych.'
-                            .format(**format_dict)))
+                            caption.format(**format_dict)))
                     fig.append(Label(current_fig_mrk))
 
-                subsec.append(NoEscape(ending_summary.format(**format_dict)))
+                
+                subsec.append(
+                    NoEscape(str(ending_summary)  .format(**format_dict)
+                             ))
 
                 #subsec.append(NewPage())
                 #subsec.append(NoEscape('\\'))
                 subsec.append(NoEscape('\par'))
 
-    def prepare_summary_data(self,simulation_results_frame):
-        summary_frame = pd.DataFrame(
-                data=[
-                    a.max()
-                    for a in simulation_results_frame['simulations'].values
-                ],
-                index=[
-                    str(elem) for elem in simulation_results_frame[
-                        self.analysis_key].round(2)
-                ])
+    def prepare_summary_data(self, simulation_results_frame):
+        summary_frame = pd.DataFrame(data=[
+            a.max() for a in simulation_results_frame['simulations'].values
+        ],
+                                     index=[
+                                         str(elem)
+                                         for elem in simulation_results_frame[
+                                             self.analysis_key].round(2)
+                                     ])
         return summary_frame
 
-    
     def add_summary(
             self,
             title='Analiza otrzymanych wyników',
@@ -923,18 +1013,16 @@ class ReportSection(Section):
             summary_mrk = Marker('summary_' + str(self.analysis_name) + '_' +
                                  str(self.analysis_key),
                                  prefix='fig')
-            
-            
 
-#             summary_frame = pd.DataFrame(
-#                 data=[
-#                     a.max()
-#                     for a in simulation_results_frame['simulations'].values
-#                 ],
-#                 index=[
-#                     str(elem) for elem in simulation_results_frame[
-#                         self.analysis_key].round(2)
-#                 ])
+            #             summary_frame = pd.DataFrame(
+            #                 data=[
+            #                     a.max()
+            #                     for a in simulation_results_frame['simulations'].values
+            #                 ],
+            #                 index=[
+            #                     str(elem) for elem in simulation_results_frame[
+            #                         self.analysis_key].round(2)
+            #                 ])
 
             format_dict = (self.get_feature_dict(numerical_data=summary_frame,
                                                  given_data_dict=None,
@@ -943,7 +1031,8 @@ class ReportSection(Section):
 
             print(format_dict)
 
-            subsec.append(NoEscape(initial_description.format(**format_dict)))
+            subsec.append(
+                NoEscape(str(initial_description).format(**format_dict)))
 
             step_key_influence_dict = {
                 str(name) + '_inf': self.influeance_level(summary_frame[name])
@@ -960,13 +1049,13 @@ class ReportSection(Section):
                 fig.add_data_plot(summary_frame)
                 fig.add_caption(
                     NoEscape(
-                        'Zestawienie wyników przeprowadzonej analizy.'
-                        .format(**format_dict)))
+                        'Zestawienie wyników przeprowadzonej analizy.'.format(
+                            **format_dict)))
                 fig.append(Label(summary_mrk))
 
             subsec.append(
                 NoEscape(
-                    ending_summary.format(
+                    str(ending_summary).format(
                         **{
                             **format_dict,
                             **step_key_influence_dict,
@@ -985,9 +1074,7 @@ class ReportSection(Section):
             initial_description='Initial description',
             ending_summary='Ending summary',  # random.choice(conclusion_bank_composed_model)
     ):
-        
-        
-        
+
         self.add_summary(
             title=title,
             numerical_data=numerical_data,
@@ -1031,7 +1118,8 @@ class ReportSection(Section):
                                                  units_dict=units_dict,
                                                  marker=summary_mrk))
 
-            subsec.append(NoEscape(initial_description.format(**format_dict)))
+            subsec.append(
+                NoEscape(str(initial_description).format(**format_dict)))
 
             format_dict = (self.get_feature_dict(numerical_data=summary_frame,
                                                  given_data_dict=None,
@@ -1057,7 +1145,7 @@ class ReportSection(Section):
 
             subsec.append(
                 NoEscape(
-                    ending_summary.format(
+                    str(ending_summary).format(
                         **{
                             **format_dict,
                             **step_key_influence_dict,
