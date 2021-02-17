@@ -291,8 +291,6 @@ class LinearODESolution:
 
         self.eq_type = equation_type
 
-        
-
     def stiffness_matrix(self):
         '''
         Returns the system stiffness matrix, which is based on the equations of motion of the Lagrange's system. Matrix is obtained from jacobian which is called with system's generalized coordinates vector.
@@ -406,6 +404,37 @@ class WeakNonlinearProblemSolution(LinearODESolution):
                          ic_point=ic_point,
                          equation_type=equation_type)
         self.eps = eps
+
+    def approximation_function(self, order):
+
+        dvars_no = len(self.dvars)
+
+        return Matrix([
+            me.dynamicsymbols('Y_' + str(dvar_no) + str(order))
+            for dvar_no, dvar in enumerate(self.dvars)
+        ])
+
+    def predicted_solution(self, components_no=3):
+
+        dvars_no = len(self.dvars)
+
+        return sum((self.approximation_function(comp_ord) * self.eps**comp_ord
+                    for comp_ord in range(components_no)),
+                   sym.zeros(dvars_no, 1))
+    
+    def zeroth_approximation(self,dict=False,equation=False):
+        
+        eoms=Matrix(self.odes_system).subs(self.eps,0)
+        
+        solution=LinearODESolution(eoms,ivar=self.ivar,dvars=self.dvars).solution()
+        
+        if equation:
+            solution=Matrix([Eq(lhs,rhs) for lhs,rhs in zip(self.approximation_function(order=0),list(solution))])
+            
+        if dict:
+            solution={lhs:rhs for lhs,rhs in zip(self.approximation_function(order=0),list(solution))}
+            
+        return solution
 
 
 class LagrangesDynamicSystem(me.LagrangesMethod):
@@ -626,15 +655,15 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         #         print(forces_subs)
         #         print(self.forcelist)
 
-        return type(self)(
-            Lagrangian=lagrangian_subs,
-            qs=self.q,
-            forcelist=forces_subs,
-            bodies=self._bodies,
-            frame=self.frame,
-            hol_coneqs=self._hol_coneqs,
-            nonhol_coneqs=list(self.coneqs)[len((self._hol_coneqs)):],
-            ivar=self.ivar)
+        return type(self)(Lagrangian=lagrangian_subs,
+                          qs=self.q,
+                          forcelist=forces_subs,
+                          bodies=self._bodies,
+                          frame=self.frame,
+                          hol_coneqs=self._hol_coneqs,
+                          nonhol_coneqs=list(
+                              self.coneqs)[len((self._hol_coneqs)):],
+                          ivar=self.ivar)
 
 
 #     def rhs(self):
