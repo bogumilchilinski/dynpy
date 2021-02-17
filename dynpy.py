@@ -12,6 +12,7 @@ from IPython.display import display
 
 import sympy.physics.mechanics as me
 
+from sympy.simplify.fu import TR8,TR10,TR7
 
 def multivariable_taylor_series(expr, args, n=2, x0=None):
     '''
@@ -414,13 +415,23 @@ class WeakNonlinearProblemSolution(LinearODESolution):
             for dvar_no, dvar in enumerate(self.dvars)
         ])
 
-    def predicted_solution(self, components_no=3):
+    def predicted_solution(self, components_no=3,dict=False,equation=False):
 
         dvars_no = len(self.dvars)
 
-        return sum((self.approximation_function(comp_ord) * self.eps**comp_ord
+        solution=sum((self.approximation_function(comp_ord) * self.eps**comp_ord
                     for comp_ord in range(components_no)),
                    sym.zeros(dvars_no, 1))
+
+        if equation:
+            solution=Matrix([Eq(lhs,rhs) for lhs,rhs in zip(self.dvars,list(solution))])
+            
+        if dict:
+            solution={lhs:rhs for lhs,rhs in zip(self.dvars,list(solution))}
+            
+        return solution
+        
+        return 
     
     def zeroth_approximation(self,dict=False,equation=False):
         
@@ -437,6 +448,24 @@ class WeakNonlinearProblemSolution(LinearODESolution):
         return solution
 
 
+    def first_approximation(self,dict=False,equation=False):
+        
+        eoms=Matrix(self.odes_system).subs(self.predicted_solution(2,dict=True)).diff(self.eps).subs(self.eps,0).expand()
+        
+        eoms=(  eoms.subs(self.zeroth_approximation(dict=True)).expand() ).applyfunc(lambda eqn:  TR10(TR8(TR10( eqn ).expand()).expand()).expand())
+        
+        display(eoms)
+        
+        solution=LinearODESolution(eoms,ivar=self.ivar,dvars=self.approximation_function(order=1)).solution()
+        
+        if equation:
+            solution=Matrix([Eq(lhs,rhs) for lhs,rhs in zip(self.approximation_function(order=0),list(solution))])
+            
+        if dict:
+            solution={lhs:rhs for lhs,rhs in zip(self.approximation_function(order=0),list(solution))}
+            
+        return solution
+    
 class LagrangesDynamicSystem(me.LagrangesMethod):
     '''
     Arguments
