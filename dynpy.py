@@ -12,7 +12,8 @@ from IPython.display import display
 
 import sympy.physics.mechanics as me
 
-from sympy.simplify.fu import TR8,TR10,TR7
+from sympy.simplify.fu import TR8, TR10, TR7
+
 
 def multivariable_taylor_series(expr, args, n=2, x0=None):
     '''
@@ -406,6 +407,9 @@ class WeakNonlinearProblemSolution(LinearODESolution):
                          equation_type=equation_type)
         self.eps = eps
 
+    
+    
+    
     def approximation_function(self, order):
 
         dvars_no = len(self.dvars)
@@ -415,57 +419,90 @@ class WeakNonlinearProblemSolution(LinearODESolution):
             for dvar_no, dvar in enumerate(self.dvars)
         ])
 
-    def predicted_solution(self, components_no=3,dict=False,equation=False):
+    def predicted_solution(self, components_no=3, dict=False, equation=False):
 
         dvars_no = len(self.dvars)
 
-        solution=sum((self.approximation_function(comp_ord) * self.eps**comp_ord
-                    for comp_ord in range(components_no)),
-                   sym.zeros(dvars_no, 1))
+        solution = sum(
+            (self.approximation_function(comp_ord) * self.eps**comp_ord
+             for comp_ord in range(components_no)), sym.zeros(dvars_no, 1))
 
         if equation:
-            solution=Matrix([Eq(lhs,rhs) for lhs,rhs in zip(self.dvars,list(solution))])
-            
+            solution = Matrix(
+                [Eq(lhs, rhs) for lhs, rhs in zip(self.dvars, list(solution))])
+
         if dict:
-            solution={lhs:rhs for lhs,rhs in zip(self.dvars,list(solution))}
-            
+            solution = {
+                lhs: rhs
+                for lhs, rhs in zip(self.dvars, list(solution))
+            }
+
         return solution
-        
-        return 
+
+        return
+
     
-    def zeroth_approximation(self,dict=False,equation=False):
-        
-        eoms=Matrix(self.odes_system).subs(self.eps,0)
-        
-        solution=LinearODESolution(eoms,ivar=self.ivar,dvars=self.dvars).solution()
-        
+    
+    
+    
+    def zeroth_approximation(self, dict=False, equation=False):
+
+        eoms = Matrix(self.odes_system).subs(self.eps, 0)
+
+        solution = LinearODESolution(eoms, ivar=self.ivar,
+                                     dvars=self.dvars).solution()
+
         if equation:
-            solution=Matrix([Eq(lhs,rhs) for lhs,rhs in zip(self.approximation_function(order=0),list(solution))])
-            
+            solution = Matrix([
+                Eq(lhs, rhs)
+                for lhs, rhs in zip(self.approximation_function(
+                    order=0), list(solution))
+            ])
+
         if dict:
-            solution={lhs:rhs for lhs,rhs in zip(self.approximation_function(order=0),list(solution))}
-            
+            solution = {
+                lhs: rhs
+                for lhs, rhs in zip(self.approximation_function(
+                    order=0), list(solution))
+            }
+
         return solution
 
+    def first_approximation(self, dict=False, equation=False):
 
-    def first_approximation(self,dict=False,equation=False):
-        
-        eoms=Matrix(self.odes_system).subs(self.predicted_solution(2,dict=True)).diff(self.eps).subs(self.eps,0).expand()
-        
-        eoms=(  eoms.subs(self.zeroth_approximation(dict=True)).expand() ).applyfunc(lambda eqn:  TR10(TR8(TR10( eqn ).expand()).expand()).expand())
-        
+        eoms = Matrix(self.odes_system).subs(
+            self.predicted_solution(2, dict=True)).diff(self.eps).subs(
+                self.eps, 0).expand()
+
+        zeroth_approximation = self.zeroth_approximation(dict=True)
+        secular_comps=sum(zeroth_approximation.values()).atoms(Function)
+
+        eoms = (eoms.subs(zeroth_approximation).expand()).applyfunc(
+            lambda eqn: TR10(TR8(TR10(eqn).expand()).expand()).expand()).subs({comp:0  for comp  in  secular_comps})
+
         display(eoms)
-        
-        solution=LinearODESolution(eoms,ivar=self.ivar,dvars=self.approximation_function(order=1)).solution()
-        
+
+        solution = LinearODESolution(
+            eoms, ivar=self.ivar,
+            dvars=self.approximation_function(order=1)).solution()
+
         if equation:
-            solution=Matrix([Eq(lhs,rhs) for lhs,rhs in zip(self.approximation_function(order=0),list(solution))])
-            
+            solution = Matrix([
+                Eq(lhs, rhs)
+                for lhs, rhs in zip(self.approximation_function(
+                    order=0), list(solution))
+            ])
+
         if dict:
-            solution={lhs:rhs for lhs,rhs in zip(self.approximation_function(order=0),list(solution))}
-            
+            solution = {
+                lhs: rhs
+                for lhs, rhs in zip(self.approximation_function(
+                    order=0), list(solution))
+            }
+
         return solution
-    
+
+
 class LagrangesDynamicSystem(me.LagrangesMethod):
     '''
     Arguments
