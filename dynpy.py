@@ -454,8 +454,8 @@ class WeakNonlinearProblemSolution(LinearODESolution):
         else:
             nth_order_solution_fun = lambdify(self.ivar,self.nth_order_solution(order).subs(self.params_values),'numpy')
             
-#            return nth_order_solution_fun(time)
-            return TimeDataFrame(index=time,data={'solution':nth_order_solution_fun(time)})
+            #return nth_order_solution_fun(time)
+            return TimeDataFrame(data={dvar:data[0] for dvar,data  in  zip(self.dvars,nth_order_solution_fun(time))},index=time)
 
     def _format_solution(self, dvars, solution, dict=False, equation=False):
 
@@ -1049,7 +1049,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     def approximated(self, n=3, x0=None, label=None):
 
         lagrangian_approx = multivariable_taylor_series(
-            self.lagrangian(), self.Y, n=n, x0={coord: 0
+            self.lagrangian(), self.Y, n=n+1, x0={coord: 0
                                                 for coord in self.Y})
 
         return LagrangesDynamicSystem(lagrangian_approx,
@@ -1061,7 +1061,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     def linearized(self, x0=None, label=None):
 
-        linearized_sys = self.approximated(n=2, x0=x0)
+        linearized_sys = self.approximated(n=1, x0=x0)
 
         return LinearDynamicSystem(linearized_sys.lagrangian(),
                                    self.q,
