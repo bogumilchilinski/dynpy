@@ -444,18 +444,25 @@ class WeakNonlinearProblemSolution(LinearODESolution):
             
 #        display(self.omega)
         
-    def __call__(self,time,order=1,params_values=None):
+    def __call__(self,ivar,order=1,params_values=None):
 
         if params_values:
             self.params_values=params_values
         
-        if isinstance(time,Symbol):
-            return self.nth_order_solution(order).subs(self.ivar,time).subs(self.params_values)
+        
+        solution=self.nth_order_solution(order).subs(self.params_values)
+        
+        if isinstance(ivar,Symbol):
+            return   solution.subs(self.ivar,ivar)
         else:
-            nth_order_solution_fun = lambdify(self.ivar,self.nth_order_solution(order).subs(self.params_values),'numpy')
+            #display(solution)
+            #display(solution[1])
+            nth_order_solution_fun = lambdify(self.ivar,(solution),'numpy')
             
-            #return nth_order_solution_fun(time)
-            return TimeDataFrame(data={dvar:data[0] for dvar,data  in  zip(self.dvars,nth_order_solution_fun(time))},index=time)
+            
+            
+            #return nth_order_solution_fun(ivar)
+            return TimeDataFrame(data={dvar:data[0] for dvar,data  in  zip(self.dvars,nth_order_solution_fun(ivar))},index=ivar)
 
     def _format_solution(self, dvars, solution, dict=False, equation=False):
 
@@ -589,7 +596,7 @@ class WeakNonlinearProblemSolution(LinearODESolution):
             approx_dict.update(nth_solution)
 
             
-        return Matrix(list(approx_dict.values()))
+        return Matrix(self.predicted_solution(order=order).values()).subs(approx_dict)
     
     def zeroth_approximation(self, dict=False, equation=False):
 
