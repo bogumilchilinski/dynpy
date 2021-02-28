@@ -303,7 +303,9 @@ class LinearODESolution:
         '''
         Returns the system stiffness matrix, which is based on the equations of motion of the Lagrange's system. Matrix is obtained from jacobian which is called with system's generalized coordinates vector.
         '''
-        return self.governing_equations.jacobian(self.dvars).subs({coord:0 for coord  in self.dvars}).doit()
+        return self.governing_equations.jacobian(self.dvars).subs(
+            {coord: 0
+             for coord in self.dvars}).doit()
 
     def inertia_matrix(self):
         '''
@@ -311,7 +313,9 @@ class LinearODESolution:
         '''
         dvars_ddot = list(sym.Matrix(self.dvars).diff(self.ivar, 2))
 
-        return self.governing_equations.jacobian(dvars_ddot).subs({coord:0 for coord  in self.dvars}).doit()
+        return self.governing_equations.jacobian(dvars_ddot).subs(
+            {coord: 0
+             for coord in self.dvars}).doit()
 
     def damping_matrix(self):
         '''
@@ -319,7 +323,9 @@ class LinearODESolution:
         '''
         dvars_dot = list(sym.Matrix(self.dvars).diff(self.ivar, 1))
 
-        return self.governing_equations.jacobian(dvars_dot).subs({coord:0 for coord  in self.dvars}).doit()
+        return self.governing_equations.jacobian(dvars_dot).subs(
+            {coord: 0
+             for coord in self.dvars}).doit()
 
     def external_forces(self):
         return self.odes_system.subs(
@@ -354,22 +360,23 @@ class LinearODESolution:
 
     def steady_solution(self, initial_conditions=None):
 
-        ext_forces = self.external_forces().expand().applyfunc(lambda row: (TR8(row).expand())  )
+        ext_forces = self.external_forces().expand().applyfunc(
+            lambda row: (TR8(row).expand()))
 
         #         sin_components=ext_forces.atoms(sin)
         #         cos_components=ext_forces.atoms(cos)
-        
-#        display('sin cos reco',)
+
+        #        display('sin cos reco',)
         components = ext_forces.atoms(sin, cos)
 
-#        display('ext_forces',ext_forces)
+        #        display('ext_forces',ext_forces)
 
         steady_sol = Matrix([0 for gen_coord in self.dvars])
 
         for comp in components:
 
             omg = (comp.args[0].diff(self.ivar)).doit()
-#            display(omg)
+            #            display(omg)
             amp_vector = Matrix([row.coeff(comp) for row in ext_forces])
 
             #display(amp_vector)
@@ -382,22 +389,26 @@ class LinearODESolution:
 
             ext_forces -= (amp_vector * comp).expand()
         #print(ext_forces.doit().expand())
-        
-        const_mat=Matrix([sum((expr for expr in comp.expand().args if not expr.has(self.ivar)),0)  for  comp in ext_forces.doit()])
-        
-#        display('const',const_mat)
-        
+
+        const_mat = Matrix([
+            sum((expr
+                 for expr in comp.expand().args if not expr.has(self.ivar)), 0)
+            for comp in ext_forces.doit()
+        ])
+
+        #        display('const',const_mat)
+
         steady_sol += (self.stiffness_matrix().inv() * const_mat).doit()
-        
-        ext_forces -=const_mat
-        
-#        display('res',ext_forces)
-        
+
+        ext_forces -= const_mat
+
+        #        display('res',ext_forces)
+
         if ext_forces.doit().expand() != sym.Matrix(
             [0 for gen_coord in self.dvars]):
-#             print('o tu')
-#             display((self.governing_equations - self.external_forces() +
-#                      ext_forces).expand().doit())
+            #             print('o tu')
+            #             display((self.governing_equations - self.external_forces() +
+            #                      ext_forces).expand().doit())
             steady_sol += sym.dsolve(
                 (self.governing_equations - self.external_forces() +
                  ext_forces).expand().doit(), self.dvars)
@@ -436,33 +447,35 @@ class WeakNonlinearProblemSolution(LinearODESolution):
                          ic_point=ic_point,
                          equation_type=equation_type)
         self.eps = eps
-        
-#        display(omega)
-        self.omega=1
+
+        #        display(omega)
+        self.omega = 1
         if omega:
             self.omega = omega
-            
+
+
 #        display(self.omega)
-        
-    def __call__(self,ivar,order=1,params_values=None):
+
+    def __call__(self, ivar, order=1, params_values=None):
 
         if params_values:
-            self.params_values=params_values
-        
-        
-        solution=self.nth_order_solution(order).subs(self.params_values)
-        
-        if isinstance(ivar,Symbol):
-            return   solution.subs(self.ivar,ivar)
+            self.params_values = params_values
+
+        solution = self.nth_order_solution(order).subs(self.params_values)
+
+        if isinstance(ivar, Symbol):
+            return solution.subs(self.ivar, ivar)
         else:
             #display(solution)
             #display(solution[1])
-            nth_order_solution_fun = lambdify(self.ivar,(solution),'numpy')
-            
-            
-            
+            nth_order_solution_fun = lambdify(self.ivar, (solution), 'numpy')
+
             #return nth_order_solution_fun(ivar)
-            return TimeDataFrame(data={dvar:data[0] for dvar,data  in  zip(self.dvars,nth_order_solution_fun(ivar))},index=ivar)
+            return TimeDataFrame(data={
+                dvar: data[0]
+                for dvar, data in zip(self.dvars, nth_order_solution_fun(ivar))
+            },
+                                 index=ivar)
 
     def _format_solution(self, dvars, solution, dict=False, equation=False):
 
@@ -497,114 +510,137 @@ class WeakNonlinearProblemSolution(LinearODESolution):
                                      dict=dict,
                                      equation=equation)
 
-
     def eigenvalues(self):
         modes, eigs = ((self.inertia_matrix().inv() *
                         self.stiffness_matrix()).diagonalize())
 
-        return [eig for eig in eigs if eig!=0]
+        return [eig for eig in eigs if eig != 0]
 
-    
-    
-    def eigenvalue_approximation(self,order=1,eigenvalue=None,eigenvalue_no=None,eigenvalue_symbol=Symbol('omega'),series_coefficients=None):
-        
+    def eigenvalue_approximation(self,
+                                 order=1,
+                                 eigenvalue=None,
+                                 eigenvalue_no=None,
+                                 eigenvalue_symbol=Symbol('omega'),
+                                 series_coefficients=None):
+
         if not eigenvalue:
-            eigenvalue=self.omega
-        self.omega=eigenvalue
-            
+            eigenvalue = self.omega
+        self.omega = eigenvalue
 
         if not series_coefficients:
-            series_coefficients=[symbols('A_{}{}_1:{}'.format(eom_no,no,order+1))  for eom_no,eom in enumerate(self.dvars)  for no,coord in enumerate(self.dvars)]
+            series_coefficients = [
+                symbols('A_{}{}_1:{}'.format(eom_no, no, order + 1))
+                for eom_no, eom in enumerate(self.dvars)
+                for no, coord in enumerate(self.dvars)
+            ]
 
         #approximation={eigenvalue:eigenvalue_symbol**2 - sum(coeff**(eps_ord+1)  for eps_ord,coeff  in enumerate(series_coefficients) )}
-        approximations = [eigenvalue**2 - sum([coeff*self.eps**(eps_ord+1)  for eps_ord,coeff  in enumerate(coeffs)]) for coeffs in series_coefficients ]
+        approximations = [
+            eigenvalue**2 - sum([
+                coeff * self.eps**(eps_ord + 1)
+                for eps_ord, coeff in enumerate(coeffs)
+            ]) for coeffs in series_coefficients
+        ]
         return approximations
 
-    def eoms_approximation(self, order=3,odes_system=None):
-        
+    def eoms_approximation(self, order=3, odes_system=None):
+
         if not odes_system:
-            odes_system=self.odes_system
+            odes_system = self.odes_system
 
-            
-        stiffness_mat=(self.stiffness_matrix())
-        
-        eps_stiffness_mat=Matrix( *stiffness_mat.shape ,[stiff_comp*approx  for stiff_comp,approx in zip(stiffness_mat,self.eigenvalue_approximation(order=order))])
-        
-        odes_system=odes_system + (eps_stiffness_mat - stiffness_mat)*Matrix(self.dvars)
+        stiffness_mat = (self.stiffness_matrix())
 
-        
-        
+        eps_stiffness_mat = Matrix(*stiffness_mat.shape, [
+            stiff_comp * approx for stiff_comp, approx in zip(
+                stiffness_mat, self.eigenvalue_approximation(order=order))
+        ])
+
+        odes_system = odes_system + (eps_stiffness_mat -
+                                     stiffness_mat) * Matrix(self.dvars)
+
         eoms_approximated = Matrix(odes_system).subs(
             self.predicted_solution(order, dict=True))
 
         return eoms_approximated
 
-    def eoms_approximation_list(self, max_order=3,min_order=0,odes_system=None):
-        
-        
-        
-        eoms_approximated = self.eoms_approximation(order=max_order,odes_system=odes_system).expand()
-        
-        
-        return [eoms_approximated.applyfunc( lambda obj: obj.diff(self.eps, order)/factorial(order)).subs(self.eps, 0).doit()  for order in range(min_order,max_order+1)]
-        
-    
+    def eoms_approximation_list(self,
+                                max_order=3,
+                                min_order=0,
+                                odes_system=None):
+
+        eoms_approximated = self.eoms_approximation(
+            order=max_order, odes_system=odes_system).expand()
+
+        return [
+            eoms_approximated.applyfunc(
+                lambda obj: obj.diff(self.eps, order) / factorial(order)).subs(
+                    self.eps, 0).doit()
+            for order in range(min_order, max_order + 1)
+        ]
+
     def nth_eoms_approximation(self, order=3):
 
-        eoms_approximated = self.eoms_approximation_list(max_order=order,min_order=order)
+        eoms_approximated = self.eoms_approximation_list(max_order=order,
+                                                         min_order=order)
 
         return eoms_approximated[0]
 
-    def _determine_secular_terms(self,zeroth_approx):
-        
-        sol_zeroth=self._find_nth_solution(zeroth_approx,order=0,secular_comps={})
-        
+    def _determine_secular_terms(self, zeroth_approx):
+
+        sol_zeroth = self._find_nth_solution(zeroth_approx,
+                                             order=0,
+                                             secular_comps={})
+
         #eig_min=sqrt(self.eigenvalues()[0])
-        
+
         #secular_comps = {sin(eig_min*self.ivar),cos(eig_min*self.ivar)}
-        secular_comps = sum(sol_zeroth).atoms(sin,cos)
-        
+        secular_comps = sum(sol_zeroth).atoms(sin, cos)
+
         return secular_comps
-    
-    def nth_order_solution(self,order=3):
-        
 
-        
-        eoms_list=self.eoms_approximation_list(max_order=order)
-        
-        stiffness_mat=(self.stiffness_matrix())
-        
-        eps_stiffness_mat=Matrix( *stiffness_mat.shape ,[stiff_comp*approx  for stiff_comp,approx in zip(stiffness_mat,self.eigenvalue_approximation(order=order))])
-        
+    def nth_order_solution(self, order=3):
 
-        
-        
-        
-        
-        secular_components={comp:0 for comp  in  self._determine_secular_terms(zeroth_approx=eoms_list[0])}
-#        display('secular comps',secular_components)
-        approx_dict={}
-        
-        solution=[]
-        
-        for comp_ord,eoms_nth in  enumerate(eoms_list):
-            
-#            display('trutututu',eoms_nth)
-            
-            nth_solution=self._find_nth_solution(eoms_nth.subs(approx_dict).doit().expand(),order=comp_ord,secular_comps=secular_components,dict=True)
-#            display(nth_solution)
+        eoms_list = self.eoms_approximation_list(max_order=order)
+
+        stiffness_mat = (self.stiffness_matrix())
+
+        eps_stiffness_mat = Matrix(*stiffness_mat.shape, [
+            stiff_comp * approx for stiff_comp, approx in zip(
+                stiffness_mat, self.eigenvalue_approximation(order=order))
+        ])
+
+        secular_components = {
+            comp: 0
+            for comp in self._determine_secular_terms(
+                zeroth_approx=eoms_list[0])
+        }
+        #        display('secular comps',secular_components)
+        approx_dict = {}
+
+        solution = []
+
+        for comp_ord, eoms_nth in enumerate(eoms_list):
+
+            #            display('trutututu',eoms_nth)
+
+            nth_solution = self._find_nth_solution(
+                eoms_nth.subs(approx_dict).doit().expand(),
+                order=comp_ord,
+                secular_comps=secular_components,
+                dict=True)
+            #            display(nth_solution)
             approx_dict.update(nth_solution)
 
-            
-        return Matrix(self.predicted_solution(order=order).values()).subs(approx_dict)
-    
+        return Matrix(
+            self.predicted_solution(order=order).values()).subs(approx_dict)
+
     def zeroth_approximation(self, dict=False, equation=False):
 
         #eoms = Matrix(self.odes_system).subs(self.eps, 0)
 
         eoms = (self.nth_eoms_approximation(0))
 
-#        display(eoms, self.approximation_function(order=0))
+        #        display(eoms, self.approximation_function(order=0))
 
         solution = LinearODESolution(
             eoms, ivar=self.ivar,
@@ -630,34 +666,36 @@ class WeakNonlinearProblemSolution(LinearODESolution):
             dict=dict,
             equation=equation)
 
-    def _find_nth_solution(self,eoms_nth,order,secular_comps, dict=False, equation=False):
-        
-        eoms=eoms_nth
+    def _find_nth_solution(self,
+                           eoms_nth,
+                           order,
+                           secular_comps,
+                           dict=False,
+                           equation=False):
+
+        eoms = eoms_nth
         eoms = (eoms.expand()).applyfunc(
             lambda eqn: TR10(TR8(TR10(eqn).expand()).expand()).expand())
-        
-#         print('='*100)
-#         display(*[row.coeff(comp)  for row in eoms  for comp in secular_comps])
-#         print('='*100)
-        
-        eoms=eoms.subs(
-                {comp: 0
-                 for comp in secular_comps})
 
-#        display(eoms)
+        #         print('='*100)
+        #         display(*[row.coeff(comp)  for row in eoms  for comp in secular_comps])
+        #         print('='*100)
+
+        eoms = eoms.subs({comp: 0 for comp in secular_comps})
+
+        #        display(eoms)
 
         solution = LinearODESolution(
-            eoms, ivar=self.ivar,
+            eoms,
+            ivar=self.ivar,
             dvars=self.approximation_function(order=order)).solution()
-
-
 
         return self._format_solution(
             dvars=self.approximation_function(order=order),
             solution=solution,
             dict=dict,
             equation=equation)
-    
+
     def nth_approximation(self, order=1, dict=False, equation=False):
 
         #         eoms = Matrix(self.odes_system).subs(
@@ -668,7 +706,7 @@ class WeakNonlinearProblemSolution(LinearODESolution):
 
         zeroth_approximation = self.zeroth_approximation(dict=True)
 
-        secular_comps = sum(zeroth_approximation.values()).atoms(cos,sin)
+        secular_comps = sum(zeroth_approximation.values()).atoms(cos, sin)
 
         approx = [zeroth_approximation] + [
             self.nth_approximation(order=i, dict=True)
@@ -677,12 +715,336 @@ class WeakNonlinearProblemSolution(LinearODESolution):
 
         approx_dict = type({})(ChainMap(*approx))
 
-#        display('abc',approx_dict)
-        
-        
-        
-        return self._find_nth_solution(eoms.subs(approx_dict),order,secular_comps, dict=dict, equation=equation)
+        #        display('abc',approx_dict)
 
+        return self._find_nth_solution(eoms.subs(approx_dict),
+                                       order,
+                                       secular_comps,
+                                       dict=dict,
+                                       equation=equation)
+
+    def first_approximation(self, dict=False, equation=False):
+        return self.nth_approximation(order=1, dict=dict, equation=equation)
+
+
+class MultiTimeScaleMethod(LinearODESolution):
+    def __init__(self,
+                 odes_system,
+                 ivar=Symbol('t'),
+                 dvars=[],
+                 eps=Symbol('varepsilon'),
+                 omega=None,
+                 t_span=[],
+                 params=[],
+                 params_values={},
+                 ic_point={},
+                 equation_type=None):
+
+        super().__init__(odes_system=odes_system,
+                         ivar=ivar,
+                         dvars=dvars,
+                         t_span=t_span,
+                         params=params,
+                         params_values=params_values,
+                         ic_point=ic_point,
+                         equation_type=equation_type)
+        self.eps = eps
+
+        #        display(omega)
+        self.omega = 1
+        if omega:
+            self.omega = omega
+
+
+#        display(self.omega)
+
+    def __call__(self, ivar, order=1, params_values=None):
+
+        if params_values:
+            self.params_values = params_values
+
+        solution = self.nth_order_solution(order).subs(self.params_values)
+
+        if isinstance(ivar, Symbol):
+            return solution.subs(self.ivar, ivar)
+        else:
+            #display(solution)
+            #display(solution[1])
+            nth_order_solution_fun = lambdify(self.ivar, (solution), 'numpy')
+
+            #return nth_order_solution_fun(ivar)
+            return TimeDataFrame(data={
+                dvar: data[0]
+                for dvar, data in zip(self.dvars, nth_order_solution_fun(ivar))
+            },
+                                 index=ivar)
+
+    def _format_solution(self, dvars, solution, dict=False, equation=False):
+
+        if equation:
+            solution = Matrix(
+                [Eq(lhs, rhs) for lhs, rhs in zip(dvars, list(solution))])
+
+        if dict:
+            solution = {lhs: rhs for lhs, rhs in zip(dvars, list(solution))}
+
+        return solution
+
+    def approximation_function(self, order):
+
+        dvars_no = len(self.dvars)
+
+        return Matrix([
+            me.dynamicsymbols('Y_' + str(dvar_no) + str(order))
+            for dvar_no, dvar in enumerate(self.dvars)
+        ])
+
+    def predicted_solution(self, order=1, dict=False, equation=False):
+
+        dvars_no = len(self.dvars)
+
+        solution = sum(
+            (self.approximation_function(comp_ord) * self.eps**comp_ord
+             for comp_ord in range(order + 1)), sym.zeros(dvars_no, 1))
+
+        return self._format_solution(dvars=self.dvars,
+                                     solution=solution,
+                                     dict=dict,
+                                     equation=equation)
+
+    def eigenvalues(self):
+        modes, eigs = ((self.inertia_matrix().inv() *
+                        self.stiffness_matrix()).diagonalize())
+
+        return [eig for eig in eigs if eig != 0]
+
+    def eigenvalue_approximation(self,
+                                 order=1,
+                                 eigenvalue=None,
+                                 eigenvalue_no=None,
+                                 eigenvalue_symbol=Symbol('omega'),
+                                 series_coefficients=None):
+
+        if not eigenvalue:
+            eigenvalue = self.omega
+        self.omega = eigenvalue
+
+        if not series_coefficients:
+            series_coefficients = [
+                symbols('A_{}{}_1:{}'.format(eom_no, no, order + 1))
+                for eom_no, eom in enumerate(self.dvars)
+                for no, coord in enumerate(self.dvars)
+            ]
+
+        #approximation={eigenvalue:eigenvalue_symbol**2 - sum(coeff**(eps_ord+1)  for eps_ord,coeff  in enumerate(series_coefficients) )}
+        approximations = [
+            eigenvalue**2 - sum([
+                coeff * self.eps**(eps_ord + 1)
+                for eps_ord, coeff in enumerate(coeffs)
+            ]) for coeffs in series_coefficients
+        ]
+        return approximations
+
+    def eoms_approximation(self, order=3, odes_system=None):
+
+        if not odes_system:
+            odes_system = self.odes_system
+
+        stiffness_mat = (self.stiffness_matrix())
+
+        eps_stiffness_mat = Matrix(*stiffness_mat.shape, [
+            stiff_comp * approx for stiff_comp, approx in zip(
+                stiffness_mat, self.eigenvalue_approximation(order=order))
+        ])
+        
+        
+        odes_system = odes_system.subs({
+            coord.diff(self.ivar,
+                       1): sqrt(self.eigenvalue_approximation(order=order)[0]) *
+            coord.diff(self.ivar, 1)
+            for coord in self.dvars
+        })
+        
+
+        odes_system = odes_system.subs({
+            coord.diff(self.ivar,
+                       2): self.eigenvalue_approximation(order=order)[0] *
+            coord.diff(self.ivar, 2)
+            for coord in self.dvars
+        })
+        
+        odes_system = odes_system.subs({
+            coord.diff(self.ivar,
+                       1): sqrt(self.eigenvalue_approximation(order=order)[0]) *
+            coord.diff(self.ivar, 1)
+            for coord in self.dvars
+        })
+        
+
+        eoms_approximated = Matrix(odes_system).subs(
+            self.predicted_solution(order, dict=True))
+
+        return eoms_approximated
+
+    def eoms_approximation_list(self,
+                                max_order=3,
+                                min_order=0,
+                                odes_system=None):
+
+        eoms_approximated = self.eoms_approximation(
+            order=max_order, odes_system=odes_system).expand()
+
+        return [
+            eoms_approximated.applyfunc(
+                lambda obj: obj.diff(self.eps, order) / factorial(order)).subs(
+                    self.eps, 0).doit()
+            for order in range(min_order, max_order + 1)
+        ]
+
+    def nth_eoms_approximation(self, order=3):
+
+        eoms_approximated = self.eoms_approximation_list(max_order=order,
+                                                         min_order=order)
+
+        return eoms_approximated[0]
+
+    def _determine_secular_terms(self, zeroth_approx):
+
+        sol_zeroth = self._find_nth_solution(zeroth_approx,
+                                             order=0,
+                                             secular_comps={})
+
+        #eig_min=sqrt(self.eigenvalues()[0])
+
+        #secular_comps = {sin(eig_min*self.ivar),cos(eig_min*self.ivar)}
+        secular_comps = sum(sol_zeroth).atoms(sin, cos)
+
+        return secular_comps
+
+    def nth_order_solution(self, order=3):
+
+        eoms_list = self.eoms_approximation_list(max_order=order)
+
+        stiffness_mat = (self.stiffness_matrix())
+
+        eps_stiffness_mat = Matrix(*stiffness_mat.shape, [
+            stiff_comp * approx for stiff_comp, approx in zip(
+                stiffness_mat, self.eigenvalue_approximation(order=order))
+        ])
+
+        secular_components = {
+            comp: 0
+            for comp in self._determine_secular_terms(
+                zeroth_approx=eoms_list[0])
+        }
+        #        display('secular comps',secular_components)
+        approx_dict = {}
+
+        solution = []
+
+        for comp_ord, eoms_nth in enumerate(eoms_list):
+
+            #            display('trutututu',eoms_nth)
+
+            nth_solution = self._find_nth_solution(
+                eoms_nth.subs(approx_dict).doit().expand(),
+                order=comp_ord,
+                secular_comps=secular_components,
+                dict=True)
+            #            display(nth_solution)
+            approx_dict.update(nth_solution)
+
+        return Matrix(
+            self.predicted_solution(order=order).values()).subs(approx_dict)
+
+    def zeroth_approximation(self, dict=False, equation=False):
+
+        #eoms = Matrix(self.odes_system).subs(self.eps, 0)
+
+        eoms = (self.nth_eoms_approximation(0))
+
+        #        display(eoms, self.approximation_function(order=0))
+
+        solution = LinearODESolution(
+            eoms, ivar=self.ivar,
+            dvars=self.approximation_function(order=0)).solution()
+
+        #         if equation:
+        #             solution = Matrix([
+        #                 Eq(lhs, rhs)
+        #                 for lhs, rhs in zip(self.approximation_function(
+        #                     order=0), list(solution))
+        #             ])
+
+        #         if dict:
+        #             solution = {
+        #                 lhs: rhs
+        #                 for lhs, rhs in zip(self.approximation_function(
+        #                     order=0), list(solution))
+        #             }
+
+        return self._format_solution(
+            dvars=self.approximation_function(order=0),
+            solution=solution,
+            dict=dict,
+            equation=equation)
+
+    def _find_nth_solution(self,
+                           eoms_nth,
+                           order,
+                           secular_comps,
+                           dict=False,
+                           equation=False):
+
+        eoms = eoms_nth
+        eoms = (eoms.expand()).applyfunc(
+            lambda eqn: TR10(TR8(TR10(eqn).expand()).expand()).expand())
+
+        #         print('='*100)
+        #         display(*[row.coeff(comp)  for row in eoms  for comp in secular_comps])
+        #         print('='*100)
+
+        eoms = eoms.subs({comp: 0 for comp in secular_comps})
+
+        #        display(eoms)
+
+        solution = LinearODESolution(
+            eoms,
+            ivar=self.ivar,
+            dvars=self.approximation_function(order=order)).solution()
+
+        return self._format_solution(
+            dvars=self.approximation_function(order=order),
+            solution=solution,
+            dict=dict,
+            equation=equation)
+
+    def nth_approximation(self, order=1, dict=False, equation=False):
+
+        #         eoms = Matrix(self.odes_system).subs(
+        #             self.predicted_solution(2, dict=True)).diff(self.eps,order).subs(
+        #                 self.eps, 0).expand()
+
+        eoms = self.nth_eoms_approximation(order)
+
+        zeroth_approximation = self.zeroth_approximation(dict=True)
+
+        secular_comps = sum(zeroth_approximation.values()).atoms(cos, sin)
+
+        approx = [zeroth_approximation] + [
+            self.nth_approximation(order=i, dict=True)
+            for i in range(1, order)
+        ]
+
+        approx_dict = type({})(ChainMap(*approx))
+
+        #        display('abc',approx_dict)
+
+        return self._find_nth_solution(eoms.subs(approx_dict),
+                                       order,
+                                       secular_comps,
+                                       dict=dict,
+                                       equation=equation)
 
     def first_approximation(self, dict=False, equation=False):
         return self.nth_approximation(order=1, dict=dict, equation=equation)
@@ -839,9 +1201,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             self_dict['forcelist']) + list_build(other_dict['forcelist'])
         self_dict['bodies'] = list_build(self_dict['bodies']) + list_build(
             other_dict['bodies'])
-        
+
         if not self.frame:
-            self_dict['frame']=other_dict['frame']
+            self_dict['frame'] = other_dict['frame']
 
         return LagrangesDynamicSystem(**self_dict)
 
@@ -1059,8 +1421,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     def approximated(self, n=3, x0=None, label=None):
 
         lagrangian_approx = multivariable_taylor_series(
-            self.lagrangian(), self.Y, n=n+1, x0={coord: 0
-                                                for coord in self.Y})
+            self.lagrangian(),
+            self.Y,
+            n=n + 1,
+            x0={coord: 0
+                for coord in self.Y})
 
         return LagrangesDynamicSystem(lagrangian_approx,
                                       self.q,
