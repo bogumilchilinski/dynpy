@@ -262,7 +262,10 @@ class LinearODESolution:
         Args:
         '''
         if isinstance(odes_system, LinearDynamicSystem):
+            self.dvars=odes_system.q
             odes_system = odes_system._eoms
+
+            
 
         self.odes_system = odes_system
 
@@ -272,7 +275,10 @@ class LinearODESolution:
 
         self.governing_equations = self.odes_system
         self.ivar = ivar
-        self.dvars = dvars
+        
+        if len(dvars)>0:
+            self.dvars = dvars
+            
         self.ic_point = ic_point
 
         if isinstance(params, dict):
@@ -390,9 +396,11 @@ class LinearODESolution:
             ext_forces -= (amp_vector * comp).expand()
         #print(ext_forces.doit().expand())
 
+        const_elems=lambda expr: [expr for expr in comp.expand().args if not expr.has(self.ivar) if isinstance(comp,Add)]
+        
         const_mat = Matrix([
             sum((expr
-                 for expr in comp.expand().args if not expr.has(self.ivar)), 0)
+                 for expr in comp.expand().args if not expr.has(self.ivar) if isinstance(comp,Add)), 0)
             for comp in ext_forces.doit()
         ])
 
@@ -402,16 +410,22 @@ class LinearODESolution:
 
         ext_forces -= const_mat
 
-        #        display('res',ext_forces)
+        display('res',ext_forces)
 
         if ext_forces.doit().expand() != sym.Matrix(
             [0 for gen_coord in self.dvars]):
             #             print('o tu')
             #             display((self.governing_equations - self.external_forces() +
             #                      ext_forces).expand().doit())
-            steady_sol += sym.dsolve(
-                (self.governing_equations - self.external_forces() +
-                 ext_forces).expand().doit(), self.dvars)
+            
+            eqns_res=(self.governing_equations - self.external_forces() +
+                     ext_forces).expand().doit()
+            
+            if len(self.dvars)==1:
+                steady_sol += Matrix([sym.dsolve(eqns_res[0], self.dvars[0]).rhs])
+            else:
+                steady_sol += sym.dsolve(
+                    eqns_res, self.dvars)
 
 
 #         print('o tu')
@@ -1622,66 +1636,17 @@ class HarmonicOscillator(LinearDynamicSystem):
         '''
         Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
         '''
-        C = numbered_symbols('C', start=1)
 
-        modes, eigs = ((self.inertia_matrix().inv() *
-                        self.stiffness_matrix()).diagonalize())
-
-        Y_mat = Matrix(self.q)
-
-        diff_eqs = Y_mat.diff(self.ivar, 2) + eigs * Y_mat
-
-        t_sol = self.ivar
-
-        solution = [
-            next(C) * modes[:, i] * sin(sym.sqrt(eigs[i, i]) * t_sol) +
-            next(C) * modes[:, i] * cos(sym.sqrt(eigs[i, i]) * t_sol)
-            for i, coord in enumerate(self.q)
-        ]
-
-        return sum(solution, Matrix([0] * len(Y_mat)))
+        return LinearODESolution(self).general_solution(initial_conditions=initial_conditions)
 
     def steady_solution(self, initial_conditions=None):
         """
         
         """
-
-        ext_forces = self.external_forces()
-
-        #         sin_components=ext_forces.atoms(sin)
-        #         cos_components=ext_forces.atoms(cos)
-        components = ext_forces.atoms(sin, cos)
-
-        display(components)
-
-        steady_sol = Matrix([0 for gen_coord in self.q])
-
-        for comp in components:
-
-            omg = (comp.args[0].diff(self.ivar)).doit()
-            display(omg)
-            amp_vector = Matrix([row.coeff(comp) for row in ext_forces])
-
-            #display(amp_vector)
-
-            fund_mat = -self.inertia_matrix(
-            ) * omg**2 + sym.I * omg * self.damping_matrix(
-            ) + self.stiffness_matrix()
-
-            steady_sol += (fund_mat.inv() * amp_vector) * comp
-
-            ext_forces -= amp_vector * comp
-        #print(ext_forces.doit().expand())
-        if ext_forces.doit().expand() != sym.Matrix(
-            [0 for gen_coord in self.q]):
-            steady_sol += sym.dsolve(
-                (self.governing_equations - self.external_forces() +
-                 ext_forces).expand().doit(), self.q)
-
-        return steady_sol
+        return LinearODESolution(self).steady_solution(initial_conditions=initial_conditions)
 
     def solution(self, initial_conditions=None):
-        return self.general_solution(initial_conditions=initial_conditions)
+        return LinearODESolution(self).solution(initial_conditions=initial_conditions)
 
 
 #     def solution(self, initial_conditions=None):
