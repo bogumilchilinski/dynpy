@@ -87,7 +87,10 @@ def scalar_fun_quadratic_form(expr, coordinates, op_point):
 
 class OdeComputationalCase:
     '''
-    This object allows for a fully numerical investigation on the dynamic system - by supplying methods such as formation of numerical right-hand sides of ordinary differential equations, preparing the input for scipy 'solve_ivp' integration function returned as a dictionary of numerical odes, initial conditions and integration method used, the object provides a comprehansive tool that can be utilised to determine mechanical system's behaviour numerically. Other methods are discussed in details further in this document.
+    This object allows for a fully numerical investigation on the dynamic system - by supplying methods such as formation of numerical 
+    right-hand sides of ordinary differential equations, preparing the input for scipy 'solve_ivp' integration function returned as a 
+    dictionary of numerical odes, initial conditions and integration method used, the object provides a comprehansive tool that can be 
+    utilised to determine mechanical system's behaviour numerically. Other methods are discussed in details further in this document.
     '''
     def __init__(self,
                  odes_system=[],
@@ -770,7 +773,7 @@ class MultiTimeScaleMethod(LinearODESolution):
             self.omega = omega
 
 
-#        display(self.omega)
+       # display(self.omega)
 
     def __call__(self, ivar, order=1, params_values=None):
 
@@ -1183,6 +1186,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         #LM=me.LagrangesMethod(Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs)
     def _kwargs(self):
+        """
+        Returns all key words arguments that an instance has
+        """
         return {
             'bodies': self.bodies,
             'frame': self.frame,
@@ -1196,7 +1202,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         }
 
     def __add__(self, other):
-
+        """
+        Returns the sum given of class instances in form of one class instance
+        """
         self_dict = self._kwargs()
         other_dict = other._kwargs()
 
@@ -1222,13 +1230,18 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return LagrangesDynamicSystem(**self_dict)
 
     def shranked(self, *args):
+        """
+        Returnes class instance with reduced Degrees of Freedom
+        """
         self_dict = self._kwargs()
         self_dict['qs'] = flatten(args)
 
         return LagrangesDynamicSystem(**self_dict)
 
     def remove(self, *args):
-
+        """
+        Retur
+        """
         bounded_coordinates = flatten(args)
 
         self_dict = self._kwargs()
@@ -1239,7 +1252,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return LagrangesDynamicSystem(**self_dict)
 
     def subs(self, *args, **kwargs):
-
+        """
+        Returns class instance with substituted numerical values
+        """
         if 'method' in kwargs.keys():
             method = kwargs['method']
         else:
@@ -1300,11 +1315,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 #         return self.rhs
 
     def __preview(self, expr, preview=None, preview_mode=None):
-        display(expr)
-        pass
         '''
         Private method which processes preview printing. The method is or isn't used depending on user's bool 'preview' input.
         '''
+        display(expr)
+        pass
 
     def __call__(self, label=None):
         self._label = label
@@ -1352,6 +1367,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return self.governing_equations.subs(static_disp_dict)
 
     def external_forces(self):
+        """
+        
+        """
         return self.governing_equations.subs(
             {gen_coord: 0
              for gen_coord in self.Y}).doit()
