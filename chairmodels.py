@@ -28,7 +28,7 @@ I_ch, I_w , z_c3,l_fr,l_rear= symbols('I_chair, I_wheel, z_c3, l_fr, l_r',positi
 m_RC, I_RC, l_RC, k_RC, phi0 = symbols('m_RC, I_RC, l_RC, k_RC, varphi_0',positive=True)
 m_w, I_wrc, r_w, k_w, k_fix,k_tire = symbols('m_w, I_wRC, R_w, k_w, k_fix, k_t',positive=True)
 c,c_mu,c_lam= symbols('c,c_mu, c_lambda',positive=True)
-a_ox, a_oz, a_rx ,a_rz=symbols('a_ox, a_oz, a_rx ,a_rz')
+a_ox, a_oz, a_rz ,a_rcz=symbols('a_ox, a_oz, a_rz ,a_rcz')
 
 pm=symbols('PM')
 
@@ -551,7 +551,7 @@ units_dict={
 #             ao_rz_idmax:ureg.second,
 #             ao_rz_idmin:ureg.second,
             a_rz:ureg.gram,
-                a_rx:ureg.gram,
+            a_rcz:ureg.gram,
            }
 
 

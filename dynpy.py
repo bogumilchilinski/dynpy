@@ -262,10 +262,8 @@ class LinearODESolution:
         Args:
         '''
         if isinstance(odes_system, LinearDynamicSystem):
-            self.dvars=odes_system.q
+            self.dvars = odes_system.q
             odes_system = odes_system._eoms
-
-            
 
         self.odes_system = odes_system
 
@@ -275,10 +273,10 @@ class LinearODESolution:
 
         self.governing_equations = self.odes_system
         self.ivar = ivar
-        
-        if len(dvars)>0:
+
+        if len(dvars) > 0:
             self.dvars = dvars
-            
+
         self.ic_point = ic_point
 
         if isinstance(params, dict):
@@ -366,22 +364,23 @@ class LinearODESolution:
 
     def steady_solution(self, initial_conditions=None):
 
-        ext_forces = self.external_forces().expand().applyfunc(lambda row: (TR8(row).expand())  )
+        ext_forces = self.external_forces().expand().applyfunc(
+            lambda row: (TR8(row).expand()))
 
         #         sin_components=ext_forces.atoms(sin)
         #         cos_components=ext_forces.atoms(cos)
-        
-#        display('sin cos reco',)
+
+        #        display('sin cos reco',)
         components = ext_forces.atoms(sin, cos)
 
-#        display('ext_forces',ext_forces)
+        #        display('ext_forces',ext_forces)
 
         steady_sol = Matrix([0 for gen_coord in self.dvars])
 
         for comp in components:
 
             omg = (comp.args[0].diff(self.ivar)).doit()
-#            display(omg)
+            #            display(omg)
             amp_vector = Matrix([row.coeff(comp) for row in ext_forces])
 
             #display(amp_vector)
@@ -394,38 +393,44 @@ class LinearODESolution:
 
             ext_forces -= (amp_vector * comp).expand()
         #print(ext_forces.doit().expand())
-        
-        const_elems=lambda expr: [expr for expr in comp.expand().args if not expr.has(self.ivar) if isinstance(comp,Add)]
-        
+
+        const_elems = lambda expr: [
+            expr for expr in comp.expand().args if not expr.has(self.ivar)
+            if isinstance(comp, Add)
+        ]
+
         const_mat = Matrix([
-            sum((expr
-                 for expr in comp.expand().args if not expr.has(self.ivar) if isinstance(comp,Add)), 0)
-            for comp in ext_forces.doit()
+            sum((expr for expr in comp.expand().args if not expr.has(self.ivar)
+                 if isinstance(comp, Add)), 0) for comp in ext_forces.doit()
         ])
-        
-#        display('const',const_mat)
-        
+
+        #        display('const',const_mat)
+
         steady_sol += (self.stiffness_matrix().inv() * const_mat).doit()
-        
-        ext_forces -=const_mat
-        
-#        display('res',ext_forces)
-        
+
+        ext_forces -= const_mat
+
+        #        display('res',ext_forces)
+
         if ext_forces.doit().expand() != sym.Matrix(
             [0 for gen_coord in self.dvars]):
-#             print('o tu')
-#             display((self.governing_equations - self.external_forces() +
-#                      ext_forces).expand().doit())
-            eqns_res=(self.governing_equations - self.external_forces() +
-                     ext_forces).expand().doit()
-            
-            
-            
-            if len(self.dvars)==1:
-                steady_sol += Matrix([sym.dsolve(eqns_res[0], self.dvars[0]).rhs.subs({Symbol('C1'):0,Symbol('C2'):0})])
+            #             print('o tu')
+            #             display((self.governing_equations - self.external_forces() +
+            #                      ext_forces).expand().doit())
+            eqns_res = (self.governing_equations - self.external_forces() +
+                        ext_forces).expand().doit()
+
+            if len(self.dvars) == 1:
+                steady_sol += Matrix([
+                    sym.dsolve(eqns_res[0], self.dvars[0]).rhs.subs({
+                        Symbol('C1'):
+                        0,
+                        Symbol('C2'):
+                        0
+                    })
+                ])
             else:
-                steady_sol += sym.dsolve(
-                    eqns_res, self.dvars)
+                steady_sol += sym.dsolve(eqns_res, self.dvars)
 
         return steady_sol
 
@@ -457,26 +462,32 @@ class WeakNonlinearProblemSolution(LinearODESolution):
                          ic_point=ic_point,
                          equation_type=equation_type)
         self.eps = eps
-        
-#        display(omega)
-        self.omega=1
+
+        #        display(omega)
+        self.omega = 1
         if omega:
             self.omega = omega
-            
+
+
 #        display(self.omega)
-        
-    def __call__(self,time,order=1,params_values=None):
+
+    def __call__(self, time, order=1, params_values=None):
 
         if params_values:
-            self.params_values=params_values
-        
-        if isinstance(time,Symbol):
-            return self.nth_order_solution(order).subs(self.ivar,time).subs(self.params_values)
+            self.params_values = params_values
+
+        if isinstance(time, Symbol):
+            return self.nth_order_solution(order).subs(self.ivar, time).subs(
+                self.params_values)
         else:
-            nth_order_solution_fun = lambdify(self.ivar,self.nth_order_solution(order).subs(self.params_values),'numpy')
-            
-#            return nth_order_solution_fun(time)
-            return TimeDataFrame(index=time,data={'solution':nth_order_solution_fun(time)})
+            nth_order_solution_fun = lambdify(
+                self.ivar,
+                self.nth_order_solution(order).subs(self.params_values),
+                'numpy')
+
+            #            return nth_order_solution_fun(time)
+            return TimeDataFrame(
+                index=time, data={'solution': nth_order_solution_fun(time)})
 
     def _format_solution(self, dvars, solution, dict=False, equation=False):
 
@@ -511,114 +522,136 @@ class WeakNonlinearProblemSolution(LinearODESolution):
                                      dict=dict,
                                      equation=equation)
 
-
     def eigenvalues(self):
         modes, eigs = ((self.inertia_matrix().inv() *
                         self.stiffness_matrix()).diagonalize())
 
-        return [eig for eig in eigs if eig!=0]
+        return [eig for eig in eigs if eig != 0]
 
-    
-    
-    def eigenvalue_approximation(self,order=1,eigenvalue=None,eigenvalue_no=None,eigenvalue_symbol=Symbol('omega'),series_coefficients=None):
-        
+    def eigenvalue_approximation(self,
+                                 order=1,
+                                 eigenvalue=None,
+                                 eigenvalue_no=None,
+                                 eigenvalue_symbol=Symbol('omega'),
+                                 series_coefficients=None):
+
         if not eigenvalue:
-            eigenvalue=self.omega
-        self.omega=eigenvalue
-            
+            eigenvalue = self.omega
+        self.omega = eigenvalue
 
         if not series_coefficients:
-            series_coefficients=[symbols('A_{}{}_1:{}'.format(eom_no,no,order+1))  for eom_no,eom in enumerate(self.dvars)  for no,coord in enumerate(self.dvars)]
+            series_coefficients = [
+                symbols('A_{}{}_1:{}'.format(eom_no, no, order + 1))
+                for eom_no, eom in enumerate(self.dvars)
+                for no, coord in enumerate(self.dvars)
+            ]
 
         #approximation={eigenvalue:eigenvalue_symbol**2 - sum(coeff**(eps_ord+1)  for eps_ord,coeff  in enumerate(series_coefficients) )}
-        approximations = [eigenvalue**2 - sum([coeff*self.eps**(eps_ord+1)  for eps_ord,coeff  in enumerate(coeffs)]) for coeffs in series_coefficients ]
+        approximations = [
+            eigenvalue**2 - sum([
+                coeff * self.eps**(eps_ord + 1)
+                for eps_ord, coeff in enumerate(coeffs)
+            ]) for coeffs in series_coefficients
+        ]
         return approximations
 
-    def eoms_approximation(self, order=3,odes_system=None):
-        
+    def eoms_approximation(self, order=3, odes_system=None):
+
         if not odes_system:
-            odes_system=self.odes_system
+            odes_system = self.odes_system
 
-            
-        stiffness_mat=(self.stiffness_matrix())
-        
-        eps_stiffness_mat=Matrix( *stiffness_mat.shape ,[stiff_comp*approx  for stiff_comp,approx in zip(stiffness_mat,self.eigenvalue_approximation(order=order))])
-        
-        odes_system=odes_system + (eps_stiffness_mat - stiffness_mat)*Matrix(self.dvars)
+        stiffness_mat = (self.stiffness_matrix())
 
-        
-        
+        eps_stiffness_mat = Matrix(*stiffness_mat.shape, [
+            stiff_comp * approx for stiff_comp, approx in zip(
+                stiffness_mat, self.eigenvalue_approximation(order=order))
+        ])
+
+        odes_system = odes_system + (eps_stiffness_mat -
+                                     stiffness_mat) * Matrix(self.dvars)
+
         eoms_approximated = Matrix(odes_system).subs(
             self.predicted_solution(order, dict=True))
 
         return eoms_approximated
 
-    def eoms_approximation_list(self, max_order=3,min_order=0,odes_system=None):
-        
-        
-        
-        eoms_approximated = self.eoms_approximation(order=max_order,odes_system=odes_system).expand()
-        
-        
-        return [eoms_approximated.applyfunc( lambda obj: obj.diff(self.eps, order)/factorial(order)).subs(self.eps, 0).doit()  for order in range(min_order,max_order+1)]
-        
-    
+    def eoms_approximation_list(self,
+                                max_order=3,
+                                min_order=0,
+                                odes_system=None):
+
+        eoms_approximated = self.eoms_approximation(
+            order=max_order, odes_system=odes_system).expand()
+
+        return [
+            eoms_approximated.applyfunc(
+                lambda obj: obj.diff(self.eps, order) / factorial(order)).subs(
+                    self.eps, 0).doit()
+            for order in range(min_order, max_order + 1)
+        ]
+
     def nth_eoms_approximation(self, order=3):
 
-        eoms_approximated = self.eoms_approximation_list(max_order=order,min_order=order)
+        eoms_approximated = self.eoms_approximation_list(max_order=order,
+                                                         min_order=order)
 
         return eoms_approximated[0]
 
-    def _determine_secular_terms(self,zeroth_approx):
-        
-        sol_zeroth=self._find_nth_solution(zeroth_approx,order=0,secular_comps={})
-        
+    def _determine_secular_terms(self, zeroth_approx):
+
+        sol_zeroth = self._find_nth_solution(zeroth_approx,
+                                             order=0,
+                                             secular_comps={})
+
         #eig_min=sqrt(self.eigenvalues()[0])
-        
+
         #secular_comps = {sin(eig_min*self.ivar),cos(eig_min*self.ivar)}
-        secular_comps = sum(sol_zeroth).atoms(sin,cos)
-        
+        secular_comps = sum(sol_zeroth).atoms(sin, cos)
+
         return secular_comps
-    
-    def nth_order_solution(self,order=3):
-        
 
-        
-        eoms_list=self.eoms_approximation_list(max_order=order)
-        
-        stiffness_mat=(self.stiffness_matrix())
-        
-        eps_stiffness_mat=Matrix( *stiffness_mat.shape ,[stiff_comp*approx  for stiff_comp,approx in zip(stiffness_mat,self.eigenvalue_approximation(order=order))])
-        
+    def nth_order_solution(self, order=3):
 
-        
-        
-        
-        
-        secular_components={comp:0 for comp  in  self._determine_secular_terms(zeroth_approx=eoms_list[0])}
-#        display('secular comps',secular_components)
-        approx_dict={}
-        
-        solution=[]
-        
-        for comp_ord,eoms_nth in  enumerate(eoms_list):
-            
-#            display('trutututu',eoms_nth)
-            
-            nth_solution=self._find_nth_solution(eoms_nth.subs(approx_dict).doit().expand(),order=comp_ord,secular_comps=secular_components,dict=True)
-#            display(nth_solution)
+        eoms_list = self.eoms_approximation_list(max_order=order)
+
+        stiffness_mat = (self.stiffness_matrix())
+
+        eps_stiffness_mat = Matrix(*stiffness_mat.shape, [
+            stiff_comp * approx for stiff_comp, approx in zip(
+                stiffness_mat, self.eigenvalue_approximation(order=order))
+        ])
+
+        secular_components = {
+            comp: 0
+            for comp in self._determine_secular_terms(
+                zeroth_approx=eoms_list[0])
+        }
+        #        display('secular comps',secular_components)
+        approx_dict = {}
+
+        solution = []
+
+        for comp_ord, eoms_nth in enumerate(eoms_list):
+
+            #            display('trutututu',eoms_nth)
+
+            nth_solution = self._find_nth_solution(
+                eoms_nth.subs(approx_dict).doit().expand(),
+                order=comp_ord,
+                secular_comps=secular_components,
+                dict=True)
+            #            display(nth_solution)
             approx_dict.update(nth_solution)
 
-            
         return Matrix(list(approx_dict.values()))
-    
+
     def zeroth_approximation(self, dict=False, equation=False):
 
         #eoms = Matrix(self.odes_system).subs(self.eps, 0)
 
         eoms = (self.nth_eoms_approximation(0))
 
-#        display(eoms, self.approximation_function(order=0))
+        #        display(eoms, self.approximation_function(order=0))
 
         solution = LinearODESolution(
             eoms, ivar=self.ivar,
@@ -644,34 +677,36 @@ class WeakNonlinearProblemSolution(LinearODESolution):
             dict=dict,
             equation=equation)
 
-    def _find_nth_solution(self,eoms_nth,order,secular_comps, dict=False, equation=False):
-        
-        eoms=eoms_nth
+    def _find_nth_solution(self,
+                           eoms_nth,
+                           order,
+                           secular_comps,
+                           dict=False,
+                           equation=False):
+
+        eoms = eoms_nth
         eoms = (eoms.expand()).applyfunc(
             lambda eqn: TR10(TR8(TR10(eqn).expand()).expand()).expand())
-        
-#         print('='*100)
-#         display(*[row.coeff(comp)  for row in eoms  for comp in secular_comps])
-#         print('='*100)
-        
-        eoms=eoms.subs(
-                {comp: 0
-                 for comp in secular_comps})
 
-#        display(eoms)
+        #         print('='*100)
+        #         display(*[row.coeff(comp)  for row in eoms  for comp in secular_comps])
+        #         print('='*100)
+
+        eoms = eoms.subs({comp: 0 for comp in secular_comps})
+
+        #        display(eoms)
 
         solution = LinearODESolution(
-            eoms, ivar=self.ivar,
+            eoms,
+            ivar=self.ivar,
             dvars=self.approximation_function(order=order)).solution()
-
-
 
         return self._format_solution(
             dvars=self.approximation_function(order=order),
             solution=solution,
             dict=dict,
             equation=equation)
-    
+
     def nth_approximation(self, order=1, dict=False, equation=False):
 
         #         eoms = Matrix(self.odes_system).subs(
@@ -682,7 +717,7 @@ class WeakNonlinearProblemSolution(LinearODESolution):
 
         zeroth_approximation = self.zeroth_approximation(dict=True)
 
-        secular_comps = sum(zeroth_approximation.values()).atoms(cos,sin)
+        secular_comps = sum(zeroth_approximation.values()).atoms(cos, sin)
 
         approx = [zeroth_approximation] + [
             self.nth_approximation(order=i, dict=True)
@@ -691,12 +726,13 @@ class WeakNonlinearProblemSolution(LinearODESolution):
 
         approx_dict = type({})(ChainMap(*approx))
 
-#        display('abc',approx_dict)
-        
-        
-        
-        return self._find_nth_solution(eoms.subs(approx_dict),order,secular_comps, dict=dict, equation=equation)
+        #        display('abc',approx_dict)
 
+        return self._find_nth_solution(eoms.subs(approx_dict),
+                                       order,
+                                       secular_comps,
+                                       dict=dict,
+                                       equation=equation)
 
     def first_approximation(self, dict=False, equation=False):
         return self.nth_approximation(order=1, dict=dict, equation=equation)
@@ -811,7 +847,6 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             self.__governing_equations = None
 
         self.governing_equations = self.__governing_equations
-        self.Y = list(self.q) + list(self.u)
 
         if label == None:
             label = self.__class__.__name__ + ' with ' + str(len(
@@ -820,6 +855,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self._label = label
 
         #LM=me.LagrangesMethod(Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs)
+    @property
+    def Y(self):
+        return Matrix(list(self.q) + list(self.q.diff(self.ivar)))
+
     def _kwargs(self):
         return {
             'bodies': self.bodies,
@@ -967,8 +1006,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         '''
 
         return Matrix([
-            Eq(comp, self.rhs()[no], evaluate=False) for no, comp in enumerate(
-                list(self.q.diff(self.ivar)) + list(self.q.diff(self.ivar, 2)))
+            Eq(comp, self.rhs()[no], evaluate=False)
+            for no, comp in enumerate(list(self.Y))
         ])
 
     def equilibrium_equation(self, static_disp_dict=None):
@@ -1008,9 +1047,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         roots = solve(list(eqns_to_solve) + list(flatten([hint])),
                       list(self.q_0.values()),
                       dict=dict)
-        
+
         if subs:
-            roots=[ {lhs:rhs for lhs,rhs  in  zip(self.q,root_dict.values()) }   for root_dict  in roots]
+            roots = [{
+                lhs: rhs
+                for lhs, rhs in zip(self.q, root_dict.values())
+            } for root_dict in roots]
 
         #         if type(roots) is dict:
         #             roots = list(roots.values())
@@ -1071,20 +1113,19 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         '''
         pass
 
-    def approximated(self, n=3, x0=None,op_point=False,hint=[], label=None):
+    def approximated(self, n=3, x0=None, op_point=False, hint=[], label=None):
 
         #print('x0',x0)
         if not x0:
-            x0={coord: 0 for coord in self.Y}
-        
-        
+            x0 = {coord: 0 for coord in self.Y}
+
         if op_point:
-            x0.update(self._op_points(hint=hint,subs=True)[0])
-            
-            
-        
-        lagrangian_approx = multivariable_taylor_series(
-            self.lagrangian(), self.Y, n=n+1, x0=x0)
+            x0.update(self._op_points(hint=hint, subs=True)[0])
+
+        lagrangian_approx = multivariable_taylor_series(self.lagrangian(),
+                                                        self.Y,
+                                                        n=n + 1,
+                                                        x0=x0)
 
         return LagrangesDynamicSystem(lagrangian_approx,
                                       self.q,
@@ -1093,9 +1134,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                                       label=label,
                                       ivar=self.ivar)
 
-    def linearized(self, x0=None,op_point=False,hint=[], label=None):
+    def linearized(self, x0=None, op_point=False, hint=[], label=None):
 
-        linearized_sys = self.approximated(n=1,op_point=op_point,hint=hint, x0=x0)
+        linearized_sys = self.approximated(n=1,
+                                           op_point=op_point,
+                                           hint=hint,
+                                           x0=x0)
 
         return LinearDynamicSystem(linearized_sys.lagrangian(),
                                    self.q,
@@ -1147,15 +1191,21 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
         '''
         Determines the system eigenvalues matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
         '''
-        return ((self.inertia_matrix().inv() *
-                 self.stiffness_matrix()).diagonalize()[1])
+
+        main_matrix = self.rhs().jacobian(self.Y)
+
+        return (main_matrix).diagonalize()[1]
 
     def modes(self):
         '''
         Determines the system vibration modes matrix (eigenmodes) based on the system free vibration frequencies.
         '''
-        return (((self.inertia_matrix().inv() *
-                  self.stiffness_matrix()).diagonalize()[0]))
+        #         return (((self.inertia_matrix().inv() *
+        #                   self.stiffness_matrix()).diagonalize()[0]))
+
+        main_matrix = self.rhs().jacobian(self.Y)
+
+        return (main_matrix).diagonalize()[0][len(self.q):,:]
 
 
 class HarmonicOscillator(LinearDynamicSystem):
@@ -1282,16 +1332,19 @@ class HarmonicOscillator(LinearDynamicSystem):
         Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
         '''
 
-        return LinearODESolution(self).general_solution(initial_conditions=initial_conditions)
+        return LinearODESolution(self).general_solution(
+            initial_conditions=initial_conditions)
 
     def steady_solution(self, initial_conditions=None):
         """
         
         """
-        return LinearODESolution(self).steady_solution(initial_conditions=initial_conditions)
+        return LinearODESolution(self).steady_solution(
+            initial_conditions=initial_conditions)
 
     def solution(self, initial_conditions=None):
-        return LinearODESolution(self).solution(initial_conditions=initial_conditions)
+        return LinearODESolution(self).solution(
+            initial_conditions=initial_conditions)
 
 
 #     def solution(self, initial_conditions=None):
@@ -1322,7 +1375,6 @@ class HarmonicOscillator(LinearDynamicSystem):
 #         =initial_conditions
 #         C1_comp=solution.coeff(exp**(imag*omega0*t))
 #         C2_comp=solution.coeff(exp**(-imag*omega0*t))
-
 
 #     def solution(self, initial_conditions=None):
 #         '''
@@ -1572,4 +1624,16 @@ class DampedHarmonicOscillator(HarmonicOscillator):
 
 
 class UndampedHarmonicOscillator(HarmonicOscillator):
-    pass
+    def natural_frequencies(self):
+        '''
+        Determines the system natural frequencies matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
+        '''
+        return (((self.inertia_matrix().inv() *
+                  self.stiffness_matrix()).diagonalize()[1])).applyfunc(sqrt)
+
+    def vibration_modes(self):
+        '''
+        Determines the system vibration modes matrix (eigenmodes) based on the system free vibration frequencies.
+        '''
+        return (((self.inertia_matrix().inv() *
+                  self.stiffness_matrix()).diagonalize()[0]))
