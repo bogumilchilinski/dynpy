@@ -65,7 +65,7 @@ def multivariable_taylor_series(expr, args, n=2, x0=None):
     #print(diff_orders_list)
 
     return (sum([
-        expr.diff(*args_tmp).subs(op_point).expand().doit() * poly
+        expr.diff(*args_tmp).subs(op_point).doit() * poly
         for args_tmp, poly in diff_orders_dict.items()
     ]) + expr.subs(op_point)).doit()
 
@@ -262,7 +262,10 @@ class LinearODESolution:
         Args:
         '''
         if isinstance(odes_system, LinearDynamicSystem):
+            self.dvars=odes_system.q
             odes_system = odes_system._eoms
+
+            
 
         self.odes_system = odes_system
 
@@ -272,7 +275,10 @@ class LinearODESolution:
 
         self.governing_equations = self.odes_system
         self.ivar = ivar
-        self.dvars = dvars
+        
+        if len(dvars)>0:
+            self.dvars = dvars
+            
         self.ic_point = ic_point
 
         if isinstance(params, dict):
@@ -303,7 +309,9 @@ class LinearODESolution:
         '''
         Returns the system stiffness matrix, which is based on the equations of motion of the Lagrange's system. Matrix is obtained from jacobian which is called with system's generalized coordinates vector.
         '''
-        return self.governing_equations.jacobian(self.dvars).subs({coord:0 for coord  in self.dvars}).doit()
+        return self.governing_equations.jacobian(self.dvars).subs(
+            {coord: 0
+             for coord in self.dvars}).doit()
 
     def inertia_matrix(self):
         '''
@@ -311,7 +319,9 @@ class LinearODESolution:
         '''
         dvars_ddot = list(sym.Matrix(self.dvars).diff(self.ivar, 2))
 
-        return self.governing_equations.jacobian(dvars_ddot).subs({coord:0 for coord  in self.dvars}).doit()
+        return self.governing_equations.jacobian(dvars_ddot).subs(
+            {coord: 0
+             for coord in self.dvars}).doit()
 
     def damping_matrix(self):
         '''
@@ -319,7 +329,9 @@ class LinearODESolution:
         '''
         dvars_dot = list(sym.Matrix(self.dvars).diff(self.ivar, 1))
 
-        return self.governing_equations.jacobian(dvars_dot).subs({coord:0 for coord  in self.dvars}).doit()
+        return self.governing_equations.jacobian(dvars_dot).subs(
+            {coord: 0
+             for coord in self.dvars}).doit()
 
     def external_forces(self):
         return self.odes_system.subs(
@@ -383,7 +395,13 @@ class LinearODESolution:
             ext_forces -= (amp_vector * comp).expand()
         #print(ext_forces.doit().expand())
         
-        const_mat=Matrix([sum((expr for expr in comp.expand().args if not expr.has(self.ivar)),0)  for  comp in ext_forces.doit()])
+        const_elems=lambda expr: [expr for expr in comp.expand().args if not expr.has(self.ivar) if isinstance(comp,Add)]
+        
+        const_mat = Matrix([
+            sum((expr
+                 for expr in comp.expand().args if not expr.has(self.ivar) if isinstance(comp,Add)), 0)
+            for comp in ext_forces.doit()
+        ])
         
 #        display('const',const_mat)
         
@@ -398,13 +416,16 @@ class LinearODESolution:
 #             print('o tu')
 #             display((self.governing_equations - self.external_forces() +
 #                      ext_forces).expand().doit())
-            steady_sol += sym.dsolve(
-                (self.governing_equations - self.external_forces() +
-                 ext_forces).expand().doit(), self.dvars)
-
-
-#         print('o tu')
-#         display()
+            eqns_res=(self.governing_equations - self.external_forces() +
+                     ext_forces).expand().doit()
+            
+            
+            
+            if len(self.dvars)==1:
+                steady_sol += Matrix([sym.dsolve(eqns_res[0], self.dvars[0]).rhs.subs({Symbol('C1'):0,Symbol('C2'):0})])
+            else:
+                steady_sol += sym.dsolve(
+                    eqns_res, self.dvars)
 
         return steady_sol
 
@@ -971,9 +992,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
              for gen_coord in self.Y}).doit()
 
     def _op_points(self,
-                   hint=[],
                    static_disp_dict=None,
                    dict=True,
+                   subs=False,
+                   hint=[],
                    *args,
                    **kwargs):
         '''
@@ -986,6 +1008,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         roots = solve(list(eqns_to_solve) + list(flatten([hint])),
                       list(self.q_0.values()),
                       dict=dict)
+        
+        if subs:
+            roots=[ {lhs:rhs for lhs,rhs  in  zip(self.q,root_dict.values()) }   for root_dict  in roots]
 
         #         if type(roots) is dict:
         #             roots = list(roots.values())
@@ -1046,11 +1071,20 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         '''
         pass
 
-    def approximated(self, n=3, x0=None, label=None):
+    def approximated(self, n=3, x0=None,op_point=False,hint=[], label=None):
 
+        #print('x0',x0)
+        if not x0:
+            x0={coord: 0 for coord in self.Y}
+        
+        
+        if op_point:
+            x0.update(self._op_points(hint=hint,subs=True)[0])
+            
+            
+        
         lagrangian_approx = multivariable_taylor_series(
-            self.lagrangian(), self.Y, n=n, x0={coord: 0
-                                                for coord in self.Y})
+            self.lagrangian(), self.Y, n=n+1, x0=x0)
 
         return LagrangesDynamicSystem(lagrangian_approx,
                                       self.q,
@@ -1059,9 +1093,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                                       label=label,
                                       ivar=self.ivar)
 
-    def linearized(self, x0=None, label=None):
+    def linearized(self, x0=None,op_point=False,hint=[], label=None):
 
-        linearized_sys = self.approximated(n=2, x0=x0)
+        linearized_sys = self.approximated(n=1,op_point=op_point,hint=hint, x0=x0)
 
         return LinearDynamicSystem(linearized_sys.lagrangian(),
                                    self.q,
@@ -1247,66 +1281,47 @@ class HarmonicOscillator(LinearDynamicSystem):
         '''
         Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
         '''
-        C = numbered_symbols('C', start=1)
 
-        modes, eigs = ((self.inertia_matrix().inv() *
-                        self.stiffness_matrix()).diagonalize())
-
-        Y_mat = Matrix(self.q)
-
-        diff_eqs = Y_mat.diff(self.ivar, 2) + eigs * Y_mat
-
-        t_sol = self.ivar
-
-        solution = [
-            next(C) * modes[:, i] * sin(sym.sqrt(eigs[i, i]) * t_sol) +
-            next(C) * modes[:, i] * cos(sym.sqrt(eigs[i, i]) * t_sol)
-            for i, coord in enumerate(self.q)
-        ]
-
-        return sum(solution, Matrix([0] * len(Y_mat)))
+        return LinearODESolution(self).general_solution(initial_conditions=initial_conditions)
 
     def steady_solution(self, initial_conditions=None):
         """
         
         """
-
-        ext_forces = self.external_forces()
-
-        #         sin_components=ext_forces.atoms(sin)
-        #         cos_components=ext_forces.atoms(cos)
-        components = ext_forces.atoms(sin, cos)
-
-        display(components)
-
-        steady_sol = Matrix([0 for gen_coord in self.q])
-
-        for comp in components:
-
-            omg = (comp.args[0].diff(self.ivar)).doit()
-            display(omg)
-            amp_vector = Matrix([row.coeff(comp) for row in ext_forces])
-
-            #display(amp_vector)
-
-            fund_mat = -self.inertia_matrix(
-            ) * omg**2 + sym.I * omg * self.damping_matrix(
-            ) + self.stiffness_matrix()
-
-            steady_sol += (fund_mat.inv() * amp_vector) * comp
-
-            ext_forces -= amp_vector * comp
-        #print(ext_forces.doit().expand())
-        if ext_forces.doit().expand() != sym.Matrix(
-            [0 for gen_coord in self.q]):
-            steady_sol += sym.dsolve(
-                (self.governing_equations - self.external_forces() +
-                 ext_forces).expand().doit(), self.q)
-
-        return steady_sol
+        return LinearODESolution(self).steady_solution(initial_conditions=initial_conditions)
 
     def solution(self, initial_conditions=None):
-        return self.general_solution(initial_conditions=initial_conditions)
+        return LinearODESolution(self).solution(initial_conditions=initial_conditions)
+
+
+#     def solution(self, initial_conditions=None):
+#         '''
+#         Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
+#         '''
+
+#         if initial_conditions == None:
+#             if self.__general_solution == None:
+#                 self.__general_solution = self.__solve()
+
+#             solution = self.__general_solution
+
+#         else:
+#             if self.__particular_solution == None:
+#                 self.__particular_solution = self.__solve(
+#                     initial_conditions=initial_conditions)
+
+#             solution = self.__particular_solution
+
+#         return solution
+
+#     def integration_constants(self,natural_freq=None,initial_conditions=None):
+#         if natural_freq==None:
+#             self.omega0=Symbol('omega_0',positive=True)
+
+#         solution=self.solution(initial_conditions=initial_conditions).rhs
+#         =initial_conditions
+#         C1_comp=solution.coeff(exp**(imag*omega0*t))
+#         C2_comp=solution.coeff(exp**(-imag*omega0*t))
 
 
 #     def solution(self, initial_conditions=None):
