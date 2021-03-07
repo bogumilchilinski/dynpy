@@ -50,6 +50,27 @@ class Disk(LagrangesDynamicSystem):
         Lagrangian = (S.One / 2 * (I * (pos1.diff(ivar))**2))
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
+        
+class Pendulum(LagrangesDynamicSystem):
+    """
+    Creates a singular model, after inputing correct values of moment of inertia - I and rotational general coordinate, which analytically displays the dynamics of a             rotating wheel.
+    """
+    def __init__(self,
+                 m,
+                 l,
+                 pos1,
+                 g=Symbol('g',positive=True),
+                 qs=None,
+                 ivar=Symbol('t'),
+                 evaluate=True):
+
+        if qs == None:
+            qs = [pos1]
+        else:
+            qs = qs
+
+        Lagrangian = (S.One / 2 * (m*l**2 * (pos1.diff(ivar))**2)) - m*g*l*cos(pos1)
+        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
 class RigidBody2d(LagrangesDynamicSystem):
     """
