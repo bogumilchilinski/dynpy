@@ -88,6 +88,37 @@ def scalar_fun_quadratic_form(expr, coordinates, op_point):
 class OdeComputationalCase:
     '''
     This object allows for a fully numerical investigation on the dynamic system - by supplying methods such as formation of numerical right-hand sides of ordinary differential equations, preparing the input for scipy 'solve_ivp' integration function returned as a dictionary of numerical odes, initial conditions and integration method used, the object provides a comprehansive tool that can be utilised to determine mechanical system's behaviour numerically. Other methods are discussed in details further in this document.
+    
+    Arguments
+    =========
+    
+    odes_system: Symbol object
+        Ordinary differential equation in symbolic form
+    
+    ivar=None (optional): Symbol object
+        Independent variable
+    
+    dvars: Symbol object
+        Derivative symbol
+    
+    t_span: TimeSeries object
+        Time span
+    
+    params: Symbol object
+        
+    
+    params_values: float
+        
+    
+    ic_point:
+        
+    
+    evaluate=False (optional): bool
+        Evaluate the ODE equation, False as a default
+    
+    label=None (optional): string
+        Labels the instance. The default label is: '{Class name} with {length of dvars} equations'
+    
     '''
     def __init__(self,
                  odes_system=[],
@@ -99,11 +130,7 @@ class OdeComputationalCase:
                  ic_point={},
                  evaluate=False,
                  label=None):
-        '''
-        Supply the following arguments for the initialization of OdeComputationalCase:
-        
-        Args:
-        '''
+
 
         #if label==None:
 
@@ -741,37 +768,41 @@ class WeakNonlinearProblemSolution(LinearODESolution):
 
 
 class LagrangesDynamicSystem(me.LagrangesMethod):
-    '''
+    '''Lagrange's method object
+    
+    The object generates equation of motion after passing Lagrangian and generalized coordinates. After initialization it can be performed several operations on the object to find desired answers.
+    
     Arguments
     =========
-    Lagrangian: object
-        
+    Lagrangian: Symbol object
+        The lagrangian equation - subtraction of potential and kinematic energy
     
-    qs (optional): object: Symbols
-        
+    qs=None (optional): dynamicsymbol object
+        Generalized coordinates
     
-    forcelist (optional): list(object)
-        
+    forcelist=None (optional): (tuples) (Point,Vector) object, (ReferenceFrame,Vector) object
+        Forces acting on the dynamic system
     
-    bodies (optional):
+    bodies=None (optional): Point object, RigitBody object
+        Bodies represented as points or rigit bodies in reference frame
     
+    frame=None (optional): ReferenceFrame object
+        Reference frame of the dinamic system
     
-    frame (optional):
+    hol_coneqs=None (optional): array-like
+        The holonomic constraint equations
     
+    nonhol_coneqs=None (optional): array-like
+        The nonholonomic constraint equations
     
-    hol_coneqs (optional):
+    label=None (optional): string
+        Label of the class instance. Default label: '{Class name} with {length of qs} DOF'
     
+    ivar=None (optional): Symbol object
+        Independent variable
     
-    nonhol_coneqs (optional):
-    
-    
-    label (optional):
-    
-    
-    ivar (optional):
-    
-    
-    evaluate (optional):
+    evaluate=True (optional):
+        Evaluates the dinamic system
     
     Example
     =======
@@ -862,6 +893,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return Matrix(list(self.q) + list(self.q.diff(self.ivar)))
 
     def _kwargs(self):
+        """
+        Returns all key words arguments that an instance has
+        """
         return {
             'bodies': self.bodies,
             'frame': self.frame,
@@ -875,7 +909,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         }
 
     def __add__(self, other):
-
+        """
+        Returns the sum of provided instances in form of one class instance
+        """
         self_dict = self._kwargs()
         other_dict = other._kwargs()
 
@@ -898,6 +934,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return LagrangesDynamicSystem(**self_dict)
 
     def shranked(self, *args):
+        """
+        Returns class instance with reduced Degrees of Freedom
+        """
         self_dict = self._kwargs()
         self_dict['qs'] = flatten(args)
 
@@ -915,6 +954,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return LagrangesDynamicSystem(**self_dict)
 
     def subs(self, *args, **kwargs):
+        """
+        Returns class instance with substituted numerical values
+        """
 
         if 'method' in kwargs.keys():
             method = kwargs['method']
@@ -983,6 +1025,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         '''
 
     def __call__(self, label=None):
+        """
+        Returns a label of the object
+        """
         self._label = label
 
         return self
