@@ -14,7 +14,7 @@ from IPython.display import display
 
 import sympy.physics.mechanics as me
 
-from sympy.simplify.fu import TR8, TR10, TR7
+from sympy.simplify.fu import TR8, TR10, TR7, TR3
 
 
 def multivariable_taylor_series(expr, args, n=2, x0=None):
@@ -389,7 +389,9 @@ class LinearODESolution:
             ) * omg**2 + sym.I * omg * self.damping_matrix(
             ) + self.stiffness_matrix()
 
-            steady_sol += (fund_mat.inv() * amp_vector) * comp
+            steady_sol += (sym.re(fund_mat.inv()).doit() * amp_vector) * comp + (sym.im(fund_mat.inv()).doit() * amp_vector) * TR3(comp.subs(omg*self.ivar,omg*self.ivar-pi/2))
+            
+            #steady_sol += ((fund_mat.inv()) * amp_vector) * comp 
 
             ext_forces -= (amp_vector * comp).expand()
         #print(ext_forces.doit().expand())
