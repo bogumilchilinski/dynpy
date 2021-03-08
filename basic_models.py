@@ -1,4 +1,4 @@
-from sympy import S, Symbol, diff
+from sympy import S, Symbol, diff,cos,sin
 from .dynpy import LagrangesDynamicSystem
 from sympy.physics.mechanics import ReferenceFrame,Point
 
