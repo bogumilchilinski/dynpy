@@ -1018,11 +1018,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 #         return self.rhs
 
     def __preview(self, expr, preview=None, preview_mode=None):
-        display(expr)
-        pass
         '''
         Private method which processes preview printing. The method is or isn't used depending on user's bool 'preview' input.
         '''
+        display(expr)
+        pass
+        
 
     def __call__(self, label=None):
         """
@@ -1041,16 +1042,16 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return self.__str__()
 
     def lagrangian(self):
-        '''
+        """
         Returns the system Lagrange function defined within LagrangeMethod instance. Defined as self._L = Matrix([sympify(Lagrangian)]) in Sympy documentation.
-        '''
+        """
 
         return sum(self.L)
 
     def rhs_eq(self):
-        '''
+        """
         Returns the right-hand side of the equations of motion in the form of equations matrix. Output is provided basing on LagrangesMethod object.
-        '''
+        """
 
         return Matrix([
             Eq(comp, self.rhs()[no], evaluate=False)
@@ -1058,9 +1059,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         ])
 
     def equilibrium_equation(self, static_disp_dict=None):
-        '''
+        """
         Finds the equilibrium conditions of the considered problem based on the system governing equations stated in the class instance.
-        '''
+        """
         if static_disp_dict is None:
             static_disp_dict = {
                 q_tmp:
@@ -1073,6 +1074,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return self.governing_equations.subs(static_disp_dict)
 
     def external_forces(self):
+        """
+        Returns Matrix with external forces
+        """
         return self.governing_equations.subs(
             {gen_coord: 0
              for gen_coord in self.Y}).doit()
@@ -1084,9 +1088,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                    hint=[],
                    *args,
                    **kwargs):
-        '''
+        """
         Provides the interface for critical points evaluation (solves the equlibrium conditions and returns its roots).
-        '''
+        """
 
         eqns_to_solve = self.equilibrium_equation(
             static_disp_dict=static_disp_dict).doit()
@@ -1161,6 +1165,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         pass
 
     def approximated(self, n=3, x0=None, op_point=False, hint=[], label=None):
+        """
+        Returns approximated N-th order function calculated with Taylor series method as an instance of the class
+        """
 
         #print('x0',x0)
         if not x0:
@@ -1182,6 +1189,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                                       ivar=self.ivar)
 
     def linearized(self, x0=None, op_point=False, hint=[], label=None):
+        """
+        Returns the same result as def approximated() but only for first order functions
+        """
 
         linearized_sys = self.approximated(n=1,
                                            op_point=op_point,
@@ -1197,6 +1207,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     @property
     def _eoms(self):
+        """
+        Returns Equations of Motion of the system
+        """
         return self.governing_equations
 
     def numerized(self, parameter_values=None):
