@@ -1333,21 +1333,23 @@ class HarmonicOscillator(LinearDynamicSystem):
         '''
         Determines the system natural frequencies matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
         '''
-        return (((self.inertia_matrix().inv() *
-                  self.stiffness_matrix()).diagonalize()[1])).applyfunc(sqrt)
+        
+        natural_freqs=list({(sqrt(abs(eigen**2))) for eigen  in self.eigenvalues() if not eigen==0 })
+        
+        return diag(*natural_freqs)
 
-    def vibration_modes(self):
-        '''
-        Determines the system vibration modes matrix (eigenmodes) based on the system free vibration frequencies.
-        '''
-        return (((self.inertia_matrix().inv() *
-                  self.stiffness_matrix()).diagonalize()[0]))
+#     def vibration_modes(self):
+#         '''
+#         Determines the system vibration modes matrix (eigenmodes) based on the system free vibration frequencies.
+#         '''
+#         return (((self.inertia_matrix().inv() *
+#                   self.stiffness_matrix()).diagonalize()[0]))
 
     def natural_frequency(self):
         '''
         Determines the expression representing the system natural frequency (working correctly for single degree of freedom systems).
         '''
-        return sqrt(sum(self.stiffness_matrix()) / sum(self.inertia_matrix()))
+        return self.natural_frequencies()[0]
 
     def canonical_governing_equation(
         self,
