@@ -69,7 +69,7 @@ class Pendulum(LagrangesDynamicSystem):
         else:
             qs = qs
 
-        Lagrangian = (S.One / 2 * (m*l**2 * (pos1.diff(ivar))**2)) - m*g*l*cos(pos1)
+        Lagrangian = (S.One / 2 * (m*l**2 * (pos1.diff(ivar))**2)) + m*g*l*cos(pos1)
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
 class RigidBody2d(LagrangesDynamicSystem):

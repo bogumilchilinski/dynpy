@@ -1501,28 +1501,39 @@ class HarmonicOscillator(LinearDynamicSystem):
 
         self.Omega = excitation_freq
 
-        general_solution = self.solution().rhs
+        general_solution = self.steady_solution()[0]
+        
+        comp_sin = general_solution.coeff(sin(excitation_freq * self.ivar)) 
+        comp_cos = general_solution.coeff(cos(excitation_freq * self.ivar))        
 
-        n, d = fraction(general_solution)
-        comp_sin = n.expand().coeff(sin(excitation_freq * self.ivar)) / d
-        comp_cos = n.expand().coeff(cos(excitation_freq * self.ivar)) / d
+        n_sin, d = fraction(comp_sin)
+        n_cos, d = fraction(comp_cos)
 
-        frf_expr = (sqrt((comp_sin**2 + comp_cos**2).simplify()))
+
+#         print(n_sin)
+#         print(n_cos)
+#         print(d)
+        
+        frf_expr = ((sqrt((n_sin**2 + n_cos**2).simplify())) /d.doit()).simplify()
 
         return frf_expr
 
     def dynamic_amplification_factor(self,
                                      excitation_amp=None,
-                                     excitation_freq=None):
+                                     excitation_freq=Symbol('Omega',positive=True)):
         '''
         Returns the Dynamic Amplification Factor of the system for the given excitation amplitude (working correctly for single degree of freedom systems).
         '''
         frf = self.frequency_response_function(excitation_freq=excitation_freq)
-        eom = sum(self.governing_equations)
+        
+        display(self.external_forces())
+        
+        sin_comp = self.external_forces()[0].coeff(sin(excitation_freq * self.ivar))
+        cos_comp = self.external_forces()[0].coeff(cos(excitation_freq * self.ivar))
 
-        sin_comp = eom.expand().coeff(sin(excitation_freq * self.ivar))
-        cos_comp = eom.expand().coeff(cos(excitation_freq * self.ivar))
-
+        display(sin_comp)
+        
+        
         maximal_force = sqrt(sin_comp**2 + cos_comp**2).subs(
             excitation_freq, 1).simplify()
 
@@ -1536,6 +1547,9 @@ class HarmonicOscillator(LinearDynamicSystem):
                static_def).simplify().subs(_dummy, excitation_freq / nat_freq)
 
         return daf
+    
+
+    
 
     def critical_frequencies(self, excitation_freq=None):
         '''
