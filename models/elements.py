@@ -1,5 +1,5 @@
 from sympy import *  # S, Symbol, diff
-from ...dynamics import LagrangesDynamicSystem
+from dynamics import LagrangesDynamicSystem
 from sympy.physics.mechanics import *
 from sympy.physics.vector import *
 
@@ -160,7 +160,7 @@ class Pendulum(LagrangesDynamicSystem):
     def __init__(self, m,  g, l, pos1=0, trig=0, pos_c=0, qs=None, ivar=Symbol('t')):
 
         
-        if trig ==0:
+        if trig == 0:
             
             self.qs = [pos_c]
             
@@ -268,8 +268,9 @@ class Excitation(LagrangesDynamicSystem):
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
         
-######################################################################################################################################
+
 class Force(LagrangesDynamicSystem):
+    " Creates an enforcment."
     def __init__(self,
                  F,
                  pos1 = None,
@@ -282,7 +283,7 @@ class Force(LagrangesDynamicSystem):
         else:
             qs = qs
 
-        if isinstance(pos1,me.Point) 
+        if isinstance(pos1, me.Point) 
             P = pos1
 
         else:
@@ -292,8 +293,6 @@ class Force(LagrangesDynamicSystem):
             P.set_vel(frame, dpos1 * frame.x)
 
 
-            
-            
         if not isinstance(pos1, type(P)):
             forcelist = [(P, F * frame.x)]
         else:
@@ -325,4 +324,3 @@ class Particle_Frame_Spring(LagrangesDynamicSystem):
         
         super().__init__(Lagrangian=L, qs=qs, frame=frame, ivar=ivar)
 
-#####################################################################################################################################
