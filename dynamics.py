@@ -1257,7 +1257,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         print(self_dict['qs'])
 
-        list_build = lambda x: flatten([x]) if x else []
+        list_build = lambda x: [x] if x else []
 
         self_dict['forcelist'] = list_build(
             self_dict['forcelist']) + list_build(other_dict['forcelist'])
@@ -1291,6 +1291,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         Returns class instance with substituted numerical values
         """
 
+        hol_coneqs=list(self._hol_coneqs)
+        
         if 'method' in kwargs.keys():
             method = kwargs['method']
         else:
@@ -1312,8 +1314,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             args = ([(lhs, rhs) for lhs, rhs in args[0]
                      if not any(coord in (lhs - rhs).atoms(Function)
                                 for coord in self.q)], )
+            
+            hol_coneqs=hol_coneqs+constrains
+            
+            
 
-#         print(constrains)
+#         print(hol_coneqs)
 #         print(args)
 
         old_points = [point for point, force in self.forcelist]
@@ -1336,12 +1342,16 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         #         print(forces_subs)
         #         print(self.forcelist)
 
+        #print(type(self))
+        
+        
+        
         return type(self)(Lagrangian=lagrangian_subs,
                           qs=self.q,
                           forcelist=forces_subs,
                           bodies=self._bodies,
                           frame=self.frame,
-                          hol_coneqs=self._hol_coneqs,
+                          hol_coneqs=hol_coneqs,
                           nonhol_coneqs=list(
                               self.coneqs)[len((self._hol_coneqs)):],
                           ivar=self.ivar)
@@ -1387,7 +1397,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
 
         return Matrix([
-            Eq(comp, self.rhs()[no], evaluate=False)
+            Eq(comp.diff(self.ivar), self.rhs()[no], evaluate=False)
             for no, comp in enumerate(list(self.Y))
         ])
 
@@ -1413,7 +1423,27 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return self.governing_equations.subs(
             {gen_coord: 0
              for gen_coord in self.Y}).doit()
+    
+    def reactions(self):
+        multipliers=self.solve_multipliers()
+        
+        return [self._eoms.jacobian([lam])*value for lam,value  in multipliers.items()] 
+        
+        
+    def generalized_momentum(self,dict=True):
+        
 
+
+        if dict:
+            momentum_dict = {
+                q_tmp:
+                Symbol('p_'+str(q_tmp).replace('(' + str(self.ivar) + ')', ''))
+                for q_tmp in self.q
+                }
+
+            return {momentum_sym:self.lagrangian().diff(coord) for coord,momentum_sym  in momentum_dict.items()}
+        
+        
     def _op_points(self,
                    static_disp_dict=None,
                    dict=True,
