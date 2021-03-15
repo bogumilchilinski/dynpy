@@ -1,5 +1,5 @@
 from sympy import *  # S, Symbol, diff
-from modules.dynpy import LagrangesDynamicSystem
+from ...dynamics import LagrangesDynamicSystem
 from sympy.physics.mechanics import *
 from sympy.physics.vector import *
 
