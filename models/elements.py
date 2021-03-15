@@ -1,5 +1,5 @@
 from sympy import *  # S, Symbol, diff
-from ...dynamics import LagrangesDynamicSystem
+from ..dynamics import LagrangesDynamicSystem
 from sympy.physics.mechanics import *
 from sympy.physics.vector import *
 
@@ -151,7 +151,7 @@ class RigidBody2D(LagrangesDynamicSystem):
             print(str('YOU CANNOT APPLY BOTH METHODS AT ONCE'))
         
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
-        
+  
         
 class Pendulum(LagrangesDynamicSystem):
     """
@@ -282,7 +282,7 @@ class Force(LagrangesDynamicSystem):
         else:
             qs = qs
 
-        if isinstance(pos1,me.Point) 
+        if isinstance(pos1,me.Point):
             P = pos1
 
         else:
