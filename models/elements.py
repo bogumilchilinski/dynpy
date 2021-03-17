@@ -1,9 +1,7 @@
 from sympy import *  # S, Symbol, diff
-<<<<<<< HEAD
-from dynamics import LagrangesDynamicSystem
-=======
+
 from ..dynamics import LagrangesDynamicSystem
->>>>>>> 23b3203dd953fa3867db922b5cb77ec6203508e9
+
 from sympy.physics.mechanics import *
 from sympy.physics.vector import *
 
