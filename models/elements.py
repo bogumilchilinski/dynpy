@@ -274,13 +274,16 @@ class Excitation(LagrangesDynamicSystem):
         
 
 class Force(LagrangesDynamicSystem):
-    " Creates an enforcment."
+    """
+    Creates enforcement.
+    """
     def __init__(self,
                  F,
                  pos1 = None,
                  qs = None,
+                 velocity= None,
                  ivar=Symbol('t'),
-                 frame=ReferenceFrame("N")):
+                 frame=None):
 
         if qs == None:
             qs = [pos1]
@@ -289,42 +292,40 @@ class Force(LagrangesDynamicSystem):
 
         if isinstance(pos1, Point):
             P = pos1
-
+            P.set_vel(frame, pos1.vel(frame))
+            
         else:
+            frame=ReferenceFrame("N")
             P = Point('P')
             pos1 = pos1        
             dpos1 = diff(pos1, ivar)
             P.set_vel(frame, dpos1 * frame.x)
 
-
-        if not isinstance(pos1, type(P)):
-            forcelist = [(P, F * frame.x)]
-        else:
-            forcelist = [(P, F * frame.x), (P, F * frame.y), (P, F * frame.z)]
+        forcelist = [(P, F* frame.x), (P, F * frame.y), (P, F*frame.z)]
 
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
 
 ######################################################################################################################################
 
-class Particle_Frame_Spring(LagrangesDynamicSystem):
-    
+class SpringFrame(LagrangesDynamicSystem):
     """
     Model of a Spring based on a Particle & Frame instances
     """
-    
-    def __init__(self, k, pos1, pos2=0, qs=None, ivar=Symbol('t'),frame=ReferenceFrame('N')):
 
+    def __init__(self, k, pos1, pos2, qs=None, ivar=Symbol('t'), frame=ReferenceFrame('N')):
+        
         if qs == None:
             qs = [pos1]
         else:
-            qs = [pos1,pos2]
-
-        Ps = Point('Ps')
-        Ps.set_vel(frame, (1) * frame.x)
+            qs = [pos1, pos2]
         
-        Pa = Particle('Pa', Ps, 1)
-        Pa.potential_energy = S.Half * k * (pos1-pos2)**2
+        P = Point('P')
+        P.set_vel(frame, (1) * frame.x)
+        
+        Pa = Particle('Pa', P, 1)
+        
+        Pa.potential_energy = S.Half * k * pos1.pos_from(pos2).magnitude()**2
         L = Lagrangian(frame, Pa)
-        
+
         super().__init__(Lagrangian=L, qs=qs, frame=frame, ivar=ivar)
 
