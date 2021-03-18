@@ -108,13 +108,33 @@ class LinearODESolution:
             {gen_coord: 0
              for gen_coord in self.dvars}).doit()
 
+    def eigenvalues(self):
+        '''
+        Determines the system eigenvalues matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
+        '''
+        
+        q_dot=(Matrix(self.dvars).diff(self.ivar))
+
+
+        
+        
+        ode_sys=Matrix([q_dot,self.inertia_matrix().inv()*(-self.stiffness_matrix() *Matrix(self.dvars) - self.damping_matrix()*q_dot  )])
+        
+        display(ode_sys)
+        
+        main_matrix = ode_sys.jacobian(list(self.dvars)+list(q_dot))
+
+        display(main_matrix)
+        
+        return (main_matrix).diagonalize()[1]
+    
     
     def damped_natural_frequencies(self):
         '''
         Determines the system natural frequencies matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
         '''
         
-        natural_freqs=list({(sqrt(abs(eigen**2))) for eigen  in self.eigenvalues() if not eigen==0 })
+        natural_freqs=list({(im((eigen))).doit() for eigen  in self.eigenvalues() if not eigen==0 })
         
         return diag(*natural_freqs)
     
@@ -131,17 +151,17 @@ class LinearODESolution:
         modes, eigs = ((self.inertia_matrix().inv() *
                         self.stiffness_matrix()).diagonalize())
         
-#         eigs=self.damped_natural_frequencies()
+        eigs=self.damped_natural_frequencies()
 
         Y_mat = Matrix(self.dvars)
 
-        diff_eqs = Y_mat.diff(self.ivar, 2) + eigs * Y_mat
+        #diff_eqs = Y_mat.diff(self.ivar, 2) + eigs * Y_mat
 
         t_sol = self.ivar
 
         solution = [
-            next(C) * modes[:, i] * sin(sym.sqrt(eigs[i, i]) * t_sol) +
-            next(C) * modes[:, i] * cos(sym.sqrt(eigs[i, i]) * t_sol)
+            next(C) * modes[:, i] * sin((eigs[i, i]) * t_sol) +
+            next(C) * modes[:, i] * cos((eigs[i, i]) * t_sol)
             for i, coord in enumerate(self.dvars)
         ]
 

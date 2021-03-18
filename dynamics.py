@@ -897,7 +897,7 @@ class HarmonicOscillator(LinearDynamicSystem):
         '''
         frf = self.frequency_response_function(excitation_freq=excitation_freq)
         
-        display(self.external_forces())
+#         display(self.external_forces())
         
         sin_comp = self.external_forces()[0].coeff(sin(excitation_freq * self.ivar))
         cos_comp = self.external_forces()[0].coeff(cos(excitation_freq * self.ivar))
@@ -912,7 +912,7 @@ class HarmonicOscillator(LinearDynamicSystem):
 
         _dummy = symbols('_dummy', positive=True)
 
-        nat_freq = self.natural_frequency()
+        nat_freq = self.natural_frequencies()[0]
 
         daf = (frf.subs(excitation_freq, _dummy * nat_freq) /
                static_def).simplify().subs(_dummy, excitation_freq / nat_freq)
