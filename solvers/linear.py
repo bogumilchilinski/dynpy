@@ -89,9 +89,20 @@ class LinearODESolution:
         '''
         dvars_ddot = list(sym.Matrix(self.dvars).diff(self.ivar, 2))
 
-        return self.governing_equations.jacobian(dvars_ddot).subs(
+        result = self.governing_equations.jacobian(dvars_ddot).subs(
             {coord: 0
              for coord in self.dvars}).doit()
+        
+        print('------------------- linear mat ------------------')
+        display(self.odes_system,self.dvars,dvars_ddot,result)
+        
+        
+        
+        
+        print('------------------- linear mat ------------------')
+        
+        
+        return result
 
     def damping_matrix(self):
         '''
@@ -145,6 +156,14 @@ class LinearODESolution:
         '''
         Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
         '''
+        
+        print('------------------- linear ------------------')
+        display(self.odes_system,self.dvars)
+        
+        display(self.inertia_matrix(),self.stiffness_matrix())
+        print('------------------- linear ------------------')
+        
+        
         C = numbered_symbols('C', start=1)
 
         #         print('o tu')

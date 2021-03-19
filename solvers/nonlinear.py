@@ -505,7 +505,7 @@ class MultiTimeScaleMethod(LinearODESolution):
 
         return eoms_approximated[0]
 
-    def _determine_secular_terms(self, zeroth_approx,ivar=None):
+    def _determine_secular_terms(self, zeroth_approx,order,ivar=None):
         
         display(*zeroth_approx)
         
@@ -544,7 +544,7 @@ class MultiTimeScaleMethod(LinearODESolution):
         secular_components = {
             comp: 0
             for comp in self._determine_secular_terms(
-                zeroth_approx=eoms_list[0])
+                zeroth_approx=eoms_list[0],order=order)
         }
         #        display('secular comps',secular_components)
         approx_dict = {}
@@ -559,7 +559,7 @@ class MultiTimeScaleMethod(LinearODESolution):
                 eoms_nth.subs(approx_dict).doit().expand(),
                 order=comp_ord,
                 secular_comps=secular_components,
-                dict=True)
+                dict=True,ivar=self.t_list[0])
             #            display(nth_solution)
             approx_dict.update(nth_solution)
 
@@ -576,7 +576,7 @@ class MultiTimeScaleMethod(LinearODESolution):
 
         solution = LinearODESolution(
             eoms, ivar=self.ivar,
-            dvars=self.approximation_function(order=0)).solution()
+            dvars=self.approximation_function(order=len(self.t_list))).solution()
 
         #         if equation:
         #             solution = Matrix([
@@ -622,6 +622,7 @@ class MultiTimeScaleMethod(LinearODESolution):
         print('='*100)
         display(eoms)
         display(self.approximation_function(order=order))
+        display(ivar)
         print('='*100)
 
         
@@ -646,7 +647,7 @@ class MultiTimeScaleMethod(LinearODESolution):
 
         eoms = self.nth_eoms_approximation(order)
 
-        zeroth_approximation = self.zeroth_approximation(dict=True)
+        zeroth_approximation = self.zeroth_approximation(dict=True,order=order)
 
         secular_comps = sum(zeroth_approximation.values()).atoms(cos, sin)
 
