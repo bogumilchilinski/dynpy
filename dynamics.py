@@ -777,16 +777,19 @@ class HarmonicOscillator(LinearDynamicSystem):
 
     def solution(self, initial_conditions=None):
         
-        eoms = self._eoms
-        subs_dict={}
-        if len(self.q)==1:
-            eoms = eoms-self.stiffness_matrix()*Matrix(self.q)+ ((Symbol('omega_h',positive=True)**2+(self.damping_coefficient()[0]/2)**2)*self.inertia_matrix()*Matrix(self.q) )
-            subs_dict={Symbol('omega_h',positive=True):sqrt(self.natural_frequencies()[0]**2-(self.damping_coefficient()[0]/2)**2)}
-            print('len',len(self.q))
-            display(subs_dict)
+        return self.general_solution(initial_conditions)+self.steady_solution(initial_conditions)
+        
+#         eoms = self._eoms
+#         subs_dict={}
+#         if len(self.q)==1:
+#             eoms = eoms-self.stiffness_matrix()*Matrix(self.q)+ ((Symbol('omega_h',positive=True)**2+(self.damping_coefficient()[0]/2)**2)*self.inertia_matrix()*Matrix(self.q) )
+#             subs_dict={Symbol('omega_h',positive=True):sqrt(self.natural_frequencies()[0]**2-(self.damping_coefficient()[0]/2)**2)}
+#             print('len',len(self.q))
+#             display(subs_dict)
                     
-        return LinearODESolution(eoms,ivar=self.ivar,dvars=self.q).solution(
-            initial_conditions=initial_conditions).subs(subs_dict).doit()
+#         return LinearODESolution(eoms,ivar=self.ivar,dvars=self.q).genral_solution(
+#             initial_conditions=initial_conditions).subs(subs_dict).doit()
+
 
 
     def steady_solution_amp(
