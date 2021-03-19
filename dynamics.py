@@ -693,12 +693,18 @@ class HarmonicOscillator(LinearDynamicSystem):
         '''
         Determines the system damped natural frequencies matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
         '''
+        damped_freqs = [sqrt(nat_freq**2 - (self.damping_coefficient()[0]/2)**2) for nat_freq in self.natural_frequencies()]
+
+        return diag(*damped_freqs)
+    
+    def im_eigenvals(self):
+        '''
+        Determines the system damped natural frequencies matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
+        '''
         
         natural_freqs=list({(im((eigen).doit())) for eigen  in self.eigenvalues() if not eigen==0 })
         
         return diag(*natural_freqs)
-  
-
 
 
     def natural_frequencies(self):
@@ -713,6 +719,11 @@ class HarmonicOscillator(LinearDynamicSystem):
         return ((self.inertia_matrix().inv() *
                   self.damping_matrix()))
     
+    def logarithmic_decrement(self):
+        
+        log_dec = [(2*pi*self.damping_coefficient()[0]/2) / damp_freq for damp_freq in self.damped_natural_frequencies()]
+        
+        return log_dec
     
     def canonical_governing_equation(
         self,
@@ -762,8 +773,8 @@ class HarmonicOscillator(LinearDynamicSystem):
         if len(self.q)==1:
             eoms = eoms-self.stiffness_matrix()*Matrix(self.q)+ ((Symbol('omega_h',positive=True)**2+(self.damping_coefficient()[0]/2)**2)*self.inertia_matrix()*Matrix(self.q) )
             subs_dict={Symbol('omega_h',positive=True):sqrt(self.natural_frequencies()[0]**2-(self.damping_coefficient()[0]/2)**2)}
-            print('len',len(self.q))
-            display(subs_dict)
+#             print('len',len(self.q))
+#             display(subs_dict)
                     
         return LinearODESolution(eoms,ivar=self.ivar,dvars=self.q).general_solution(
             initial_conditions=initial_conditions).subs(subs_dict).doit()
@@ -856,7 +867,7 @@ class HarmonicOscillator(LinearDynamicSystem):
         sin_comp = self.external_forces()[0].coeff(sin(excitation_freq * self.ivar))
         cos_comp = self.external_forces()[0].coeff(cos(excitation_freq * self.ivar))
 
-        display(sin_comp)
+#         display(sin_comp)
         
         
         maximal_force = sqrt(sin_comp**2 + cos_comp**2).subs(

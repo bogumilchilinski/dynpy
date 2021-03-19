@@ -113,7 +113,7 @@ class LinearODESolution:
         Determines the system eigenvalues matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
         '''
         
-        display(self.governing_equations)
+#         display(self.governing_equations)
         
         q_dot=(Matrix(self.dvars).diff(self.ivar))
 
@@ -122,11 +122,11 @@ class LinearODESolution:
         
         ode_sys=Matrix([q_dot,self.inertia_matrix().inv()*(-self.stiffness_matrix() *Matrix(self.dvars) - self.damping_matrix()*q_dot  )])
         
-        display(ode_sys)
+#         display(ode_sys)
         
         main_matrix = ode_sys.jacobian(list(self.dvars)+list(q_dot))
 
-        display(main_matrix)
+#         display(main_matrix)
         
         return (main_matrix).diagonalize()[1]
     
