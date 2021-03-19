@@ -93,13 +93,13 @@ class LinearODESolution:
             {coord: 0
              for coord in self.dvars}).doit()
         
-        print('------------------- linear mat ------------------')
-        display(self.odes_system,self.dvars,dvars_ddot,result)
+#         print('------------------- linear mat ------------------')
+#         display(self.odes_system,self.dvars,dvars_ddot,result)
         
         
         
         
-        print('------------------- linear mat ------------------')
+#         print('------------------- linear mat ------------------')
         
         
         return result
@@ -124,7 +124,7 @@ class LinearODESolution:
         Determines the system eigenvalues matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
         '''
         
-        display(self.governing_equations)
+#         display(self.governing_equations)
         
         q_dot=(Matrix(self.dvars).diff(self.ivar))
 
@@ -133,11 +133,11 @@ class LinearODESolution:
         
         ode_sys=Matrix([q_dot,self.inertia_matrix().inv()*(-self.stiffness_matrix() *Matrix(self.dvars) - self.damping_matrix()*q_dot  )])
         
-        display(ode_sys)
+#         display(ode_sys)
         
         main_matrix = ode_sys.jacobian(list(self.dvars)+list(q_dot))
 
-        display(main_matrix)
+#         display(main_matrix)
         
         return (main_matrix).diagonalize()[1]
     
@@ -157,11 +157,11 @@ class LinearODESolution:
         Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
         '''
         
-        print('------------------- linear ------------------')
-        display(self.odes_system,self.dvars)
+#         print('------------------- linear gen sol ------------------')
+#         display(self.odes_system,self.dvars)
         
-        display(self.inertia_matrix(),self.stiffness_matrix())
-        print('------------------- linear ------------------')
+#         display(self.inertia_matrix(),self.stiffness_matrix())
+#         print('------------------- linear gen sol ------------------')
         
         
         C = numbered_symbols('C', start=1)
@@ -184,8 +184,8 @@ class LinearODESolution:
 
         solution = [
             (
-             next(C) * modes[:, i] * sin(im(eigs[i, i]).doit() * t_sol) +
-            next(C) * modes[:, i] * cos(im(eigs[i, i]).doit() * t_sol)
+             next(C) * modes[:, i] * sin(im(eigs[2*i+1, 2*i+1]).doit() * t_sol) +
+            next(C) * modes[:, i] * cos(im(eigs[2*i+1, 2*i+1]).doit() * t_sol)
              )*exp(re(eigs[i, i]).doit()*t_sol)
             for i, coord in enumerate(self.dvars)
         ]
