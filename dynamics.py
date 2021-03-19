@@ -691,28 +691,14 @@ class HarmonicOscillator(LinearDynamicSystem):
     '''
     def damped_natural_frequencies(self):
         '''
-        Determines the system natural frequencies matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
+        Determines the system damped natural frequencies matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
         '''
         
-        natural_freqs=list({(sqrt(abs(eigen**2))) for eigen  in self.eigenvalues() if not eigen==0 })
+        natural_freqs=list({(im((eigen).doit())) for eigen  in self.eigenvalues() if not eigen==0 })
         
         return diag(*natural_freqs)
+  
 
-#     def vibration_modes(self):
-#         '''
-#         Determines the system vibration modes matrix (eigenmodes) based on the system free vibration frequencies.
-#         '''
-#         return (((self.inertia_matrix().inv() *
-#                   self.stiffness_matrix()).diagonalize()[0]))
-
-    def damped_natural_frequencies(self):
-        '''
-        Determines the system natural frequencies matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
-        '''
-        
-        natural_freqs=list({(sqrt(abs(eigen**2))) for eigen  in self.eigenvalues() if not eigen==0 })
-        
-        return diag(*natural_freqs)
 
 
     def natural_frequencies(self):
@@ -722,6 +708,12 @@ class HarmonicOscillator(LinearDynamicSystem):
         return (((self.inertia_matrix().inv() *
                   self.stiffness_matrix()).diagonalize()[1])).applyfunc(sqrt)
 
+    def damping_coefficient(self):
+        
+        return ((self.inertia_matrix().inv() *
+                  self.damping_matrix()))
+    
+    
     def canonical_governing_equation(
         self,
         natural_freq=None,
@@ -765,8 +757,16 @@ class HarmonicOscillator(LinearDynamicSystem):
         Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
         '''
 
-        return LinearODESolution(self._eoms,ivar=self.ivar,dvars=self.q).general_solution(
-            initial_conditions=initial_conditions)
+        eoms = self._eoms
+        subs_dict={}
+        if len(self.q)==1:
+            eoms = eoms-self.stiffness_matrix()*Matrix(self.q)+ ((Symbol('omega_h',positive=True)**2+(self.damping_coefficient()[0]/2)**2)*self.inertia_matrix()*Matrix(self.q) )
+            subs_dict={Symbol('omega_h',positive=True):sqrt(self.natural_frequencies()[0]**2-(self.damping_coefficient()[0]/2)**2)}
+            print('len',len(self.q))
+            display(subs_dict)
+                    
+        return LinearODESolution(eoms,ivar=self.ivar,dvars=self.q).general_solution(
+            initial_conditions=initial_conditions).subs(subs_dict).doit()
 
     def steady_solution(self, initial_conditions=None):
         """
@@ -776,67 +776,18 @@ class HarmonicOscillator(LinearDynamicSystem):
             initial_conditions=initial_conditions)
 
     def solution(self, initial_conditions=None):
-        return LinearODESolution(self._eoms,ivar=self.ivar,dvars=self.q).solution(
-            initial_conditions=initial_conditions)
+        
+        eoms = self._eoms
+        subs_dict={}
+        if len(self.q)==1:
+            eoms = eoms-self.stiffness_matrix()*Matrix(self.q)+ ((Symbol('omega_h',positive=True)**2+(self.damping_coefficient()[0]/2)**2)*self.inertia_matrix()*Matrix(self.q) )
+            subs_dict={Symbol('omega_h',positive=True):sqrt(self.natural_frequencies()[0]**2-(self.damping_coefficient()[0]/2)**2)}
+            print('len',len(self.q))
+            display(subs_dict)
+                    
+        return LinearODESolution(eoms,ivar=self.ivar,dvars=self.q).solution(
+            initial_conditions=initial_conditions).subs(subs_dict).doit()
 
-
-#     def solution(self, initial_conditions=None):
-#         '''
-#         Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
-#         '''
-
-#         if initial_conditions == None:
-#             if self.__general_solution == None:
-#                 self.__general_solution = self.__solve()
-
-#             solution = self.__general_solution
-
-#         else:
-#             if self.__particular_solution == None:
-#                 self.__particular_solution = self.__solve(
-#                     initial_conditions=initial_conditions)
-
-#             solution = self.__particular_solution
-
-#         return solution
-
-#     def integration_constants(self,natural_freq=None,initial_conditions=None):
-#         if natural_freq==None:
-#             self.omega0=Symbol('omega_0',positive=True)
-
-#         solution=self.solution(initial_conditions=initial_conditions).rhs
-#         =initial_conditions
-#         C1_comp=solution.coeff(exp**(imag*omega0*t))
-#         C2_comp=solution.coeff(exp**(-imag*omega0*t))
-
-#     def solution(self, initial_conditions=None):
-#         '''
-#         Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
-#         '''
-
-#         if initial_conditions == None:
-#             if self.__general_solution == None:
-#                 self.__general_solution = self.__solve()
-
-#             solution = self.__general_solution
-
-#         else:
-#             if self.__particular_solution == None:
-#                 self.__particular_solution = self.__solve(
-#                     initial_conditions=initial_conditions)
-
-#             solution = self.__particular_solution
-
-#         return solution
-
-#     def integration_constants(self,natural_freq=None,initial_conditions=None):
-#         if natural_freq==None:
-#             self.omega0=Symbol('omega_0',positive=True)
-
-#         solution=self.solution(initial_conditions=initial_conditions).rhs
-#         =initial_conditions
-#         C1_comp=solution.coeff(exp**(imag*omega0*t))
-#         C2_comp=solution.coeff(exp**(-imag*omega0*t))
 
     def steady_solution_amp(
             self,
@@ -897,7 +848,7 @@ class HarmonicOscillator(LinearDynamicSystem):
         '''
         frf = self.frequency_response_function(excitation_freq=excitation_freq)
         
-        display(self.external_forces())
+#         display(self.external_forces())
         
         sin_comp = self.external_forces()[0].coeff(sin(excitation_freq * self.ivar))
         cos_comp = self.external_forces()[0].coeff(cos(excitation_freq * self.ivar))
@@ -912,7 +863,7 @@ class HarmonicOscillator(LinearDynamicSystem):
 
         _dummy = symbols('_dummy', positive=True)
 
-        nat_freq = self.natural_frequency()
+        nat_freq = self.natural_frequencies()[0]
 
         daf = (frf.subs(excitation_freq, _dummy * nat_freq) /
                static_def).simplify().subs(_dummy, excitation_freq / nat_freq)
@@ -971,6 +922,31 @@ class HarmonicOscillator(LinearDynamicSystem):
 
         return spring_stiffness * spring_position * solution
 
+    
+class DampedHarmonicOscillator(HarmonicOscillator):
+    def solution(self, initial_conditions=None):
+        '''
+        Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
+        '''
+        pass
+
+
+class UndampedHarmonicOscillator(HarmonicOscillator):
+    def natural_frequencies(self):
+        '''
+        Determines the system natural frequencies matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
+        '''
+        return (((self.inertia_matrix().inv() *
+                  self.stiffness_matrix()).diagonalize()[1])).applyfunc(sqrt)
+
+    def vibration_modes(self):
+        '''
+        Determines the system vibration modes matrix (eigenmodes) based on the system free vibration frequencies.
+        '''
+        return (((self.inertia_matrix().inv() *
+                  self.stiffness_matrix()).diagonalize()[0]))
+    
+    
 
 class WeakNonlinearOscillator(HarmonicOscillator):
     def __init__(self,
@@ -1062,25 +1038,4 @@ class WeakNonlinearOscillator(HarmonicOscillator):
             ivar=self.ivar)
 
 
-class DampedHarmonicOscillator(HarmonicOscillator):
-    def solution(self, initial_conditions=None):
-        '''
-        Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
-        '''
-        pass
 
-
-class UndampedHarmonicOscillator(HarmonicOscillator):
-    def natural_frequencies(self):
-        '''
-        Determines the system natural frequencies matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
-        '''
-        return (((self.inertia_matrix().inv() *
-                  self.stiffness_matrix()).diagonalize()[1])).applyfunc(sqrt)
-
-    def vibration_modes(self):
-        '''
-        Determines the system vibration modes matrix (eigenmodes) based on the system free vibration frequencies.
-        '''
-        return (((self.inertia_matrix().inv() *
-                  self.stiffness_matrix()).diagonalize()[0]))
