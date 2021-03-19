@@ -113,6 +113,8 @@ class LinearODESolution:
         Determines the system eigenvalues matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
         '''
         
+        display(self.governing_equations)
+        
         q_dot=(Matrix(self.dvars).diff(self.ivar))
 
 
@@ -151,8 +153,10 @@ class LinearODESolution:
         modes, eigs = ((self.inertia_matrix().inv() *
                         self.stiffness_matrix()).diagonalize())
         
-        eigs=self.damped_natural_frequencies()
+        eigs=self.eigenvalues()
 
+        
+        
         Y_mat = Matrix(self.dvars)
 
         #diff_eqs = Y_mat.diff(self.ivar, 2) + eigs * Y_mat
@@ -160,8 +164,10 @@ class LinearODESolution:
         t_sol = self.ivar
 
         solution = [
-            next(C) * modes[:, i] * sin((eigs[i, i]) * t_sol) +
-            next(C) * modes[:, i] * cos((eigs[i, i]) * t_sol)
+            (
+             next(C) * modes[:, i] * sin(im(eigs[i, i]).doit() * t_sol) +
+            next(C) * modes[:, i] * cos(im(eigs[i, i]).doit() * t_sol)
+             )*exp(re(eigs[i, i]).doit()*t_sol)
             for i, coord in enumerate(self.dvars)
         ]
 
