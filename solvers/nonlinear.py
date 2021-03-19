@@ -516,7 +516,7 @@ class MultiTimeScaleMethod(LinearODESolution):
             
         print('===')
         sol_zeroth = self._find_nth_solution(zeroth_approx,
-                                             order=order,
+                                             order=0,
                                              secular_comps={},ivar=ivar)
 
         print('+++')
@@ -559,7 +559,7 @@ class MultiTimeScaleMethod(LinearODESolution):
                 eoms_nth.subs(approx_dict).doit().expand(),
                 order=comp_ord,
                 secular_comps=secular_components,
-                dict=True)
+                dict=True,ivar=self.t_list[0])
             #            display(nth_solution)
             approx_dict.update(nth_solution)
 
@@ -622,6 +622,7 @@ class MultiTimeScaleMethod(LinearODESolution):
         print('='*100)
         display(eoms)
         display(self.approximation_function(order=order))
+        display(ivar)
         print('='*100)
 
         

@@ -89,9 +89,20 @@ class LinearODESolution:
         '''
         dvars_ddot = list(sym.Matrix(self.dvars).diff(self.ivar, 2))
 
-        return self.governing_equations.jacobian(dvars_ddot).subs(
+        result = self.governing_equations.jacobian(dvars_ddot).subs(
             {coord: 0
              for coord in self.dvars}).doit()
+        
+        print('------------------- linear mat ------------------')
+        display(self.odes_system,self.dvars,dvars_ddot,result)
+        
+        
+        
+        
+        print('------------------- linear mat ------------------')
+        
+        
+        return result
 
     def damping_matrix(self):
         '''
