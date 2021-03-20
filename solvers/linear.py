@@ -165,7 +165,23 @@ class LinearODESolution:
         
         
         C = numbered_symbols('C', start=1)
+        
+        C_list=[]
+        
+        
+        for i in range(len(self.dvars)*2):
+            
 
+            C_list+=[next(C)]
+
+        args_list=self.dvars[0].args
+            
+        if len(self.dvars[0].args)>1:
+            
+            params={*args_list}-{self.ivar}
+            
+            C_list=[ Function(str(C_tmp))( *params )  for C_tmp in C_list]
+            
         #         print('o tu')
         #         display(self.odes_system)
 
@@ -184,8 +200,8 @@ class LinearODESolution:
 
         solution = [
             (
-             next(C) * modes[:, i] * sin(im(eigs[2*i+1, 2*i+1]).doit() * t_sol) +
-            next(C) * modes[:, i] * cos(im(eigs[2*i+1, 2*i+1]).doit() * t_sol)
+             C_list[2*i] * modes[:, i] * sin(im(eigs[2*i+1, 2*i+1]).doit() * t_sol) +
+            C_list[2*i+1] * modes[:, i] * cos(im(eigs[2*i+1, 2*i+1]).doit() * t_sol)
              )*exp(re(eigs[i, i]).doit()*t_sol)
             for i, coord in enumerate(self.dvars)
         ]
