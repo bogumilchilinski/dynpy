@@ -1,4 +1,5 @@
-from sympy import *  
+from sympy import *
+from sympy.physics.mechanics import *
 
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
 
@@ -9,7 +10,7 @@ class SDOFHarmonicOscillator(HarmonicOscillator):
     """Ready to use sample Single Degree of Freedom System with mass on spring
     
     """
-    def __init__(self,qs , m=Symbol('m',positive=True), k=Symbol('k',positive=True), ivar=Symbol('t')):
+    def __init__(self,qs=[z=dynamicsymbols('z')] , m=Symbol('m',positive=True), k=Symbol('k',positive=True), ivar=Symbol('t')):
         
         self.m = m
         self.k = k
