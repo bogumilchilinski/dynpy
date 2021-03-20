@@ -5,6 +5,8 @@ from ..dynamics import LagrangesDynamicSystem
 from sympy.physics.mechanics import *
 from sympy.physics.vector import *
 
+base_frame=ReferenceFrame('N')
+
 class MaterialPoint(LagrangesDynamicSystem):
     """
     Model of a Material point with changing point of mass:
@@ -100,7 +102,9 @@ class Centroid(LagrangesDynamicSystem):
 class Disk(LagrangesDynamicSystem):
     """
     Model of a Disk:
+    Creates a singular model, after inputing correct values of moment of inertia - I and rotational general coordinate, which analytically displays the dynamics of a rotating wheel.
     """
+
     def __init__(self, I, pos1=0, pos_c=0, qs=None, ivar=Symbol('t')):
         
         if pos1 == 0:
@@ -115,9 +119,7 @@ class Disk(LagrangesDynamicSystem):
             
             Lagrangian = S.Half * I * diff(pos1,ivar)**2
             
-            """
-            Creates a singular model, after inputing correct values of moment of inertia - I and rotational general coordinate, which analytically displays the dynamics of a                 rotating wheel.
-            """
+
         else:
             
             Lagrangian = 0
@@ -203,7 +205,7 @@ class Damper(LagrangesDynamicSystem):
 
     Creates a singular model, after inputing correct values of the damping coefficient - c and general coordinates, which establishes a damping force directly proportional to the velocity, in time, of an inertial virbating element.
     """
-    def __init__(self, c, pos1, pos2=0, qs=None, ivar=Symbol('t'), frame=ReferenceFrame('N')):
+    def __init__(self, c, pos1, pos2=0, qs=None, ivar=Symbol('t'), frame=base_frame):
         
 
         if qs == None:
@@ -230,7 +232,7 @@ class PID(LagrangesDynamicSystem):
 
 Creates a model of a PID controller (proportional , integral , derivative) which initates a smoother control over delivered system oscillatory system in form of Lagrange method. Taking into account that a PID regulator is ment for a SISO system the model is built for sDoF system, hence in case of building a mDoF the process will require using two PIDs.
     """
-    def __init__(self, kp, ki, kd, pos1, qs=None, ivar=Symbol('t'), frame=ReferenceFrame('N')):
+    def __init__(self, kp, ki, kd, pos1, qs=None, ivar=Symbol('t'), frame=base_frame):
 
         if qs == None:
             qs = [pos1]
@@ -276,30 +278,31 @@ class Force(LagrangesDynamicSystem):
     Creates enforcement.
     """
     def __init__(self,
-                 F,
+                 force,
                  pos1 = None,
                  qs = None,
-                 velocity= None,
                  ivar=Symbol('t'),
-                 frame=None):
+                 frame=base_frame):
 
-        if qs == None:
+        if not qs == None:
             qs = [pos1]
         else:
             qs = qs
-
+    
         if isinstance(pos1, Point):
             P = pos1
-            P.set_vel(frame, pos1.vel(frame))
-            
+            if not qs:
+                diffs=P.vel(frame).atoms(Derivative)
+                
+                qs=[deriv.args[0] for deriv in diffs]
+                print(qs)
         else:
-            frame=ReferenceFrame("N")
             P = Point('P')
-            pos1 = pos1        
-            dpos1 = diff(pos1, ivar)
-            P.set_vel(frame, dpos1 * frame.x)
+            P.set_vel(frame,pos1.diff(ivar)*frame.x)
+            force=force*frame.x
 
-        forcelist = [(P, F* frame.x), (P, F * frame.y), (P, F*frame.z)]
+
+        forcelist = [(P, force)]
 
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
 
