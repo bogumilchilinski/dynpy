@@ -11,6 +11,8 @@ class MaterialPoint(LagrangesDynamicSystem):
     """
     Model of a Material point with changing point of mass:
     """
+            """Creates a material point of an inertial body, after inputing correct values of mass -m and general coordinates, which follows a linear motion.
+            """
     def __init__(self, m, pos1=0, pos2=0, pos_c=0, qs=None,  ivar=Symbol('t')):
         
         if pos1 == 0 and pos2 == 0:
@@ -28,8 +30,6 @@ class MaterialPoint(LagrangesDynamicSystem):
             
             Lagrangian = S.Half * m * (diff(pos1,ivar) + diff(pos2,ivar))**2
             
-            """Creates a material point of an inertial body, after inputing correct values of mass -m and general coordinates, which follows a linear motion.
-            """
         else:
             
             Lagrangian = 0
@@ -42,6 +42,9 @@ class Spring(LagrangesDynamicSystem):
     """
     Model of a Spring:
     """
+            """
+            Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s), which analytically display the dynamics of displacing spring after            cummulating PE.
+            """
     def __init__(self, k, pos1=0, pos2=0, pos_c=0, qs=None, ivar=Symbol('t')):
             
         if pos1 == 0 and pos2 == 0:
@@ -59,9 +62,6 @@ class Spring(LagrangesDynamicSystem):
             
             Lagrangian = -S.Half * k * (pos1 - pos2)**2
             
-            """
-            Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s), which analytically display the dynamics of displacing spring after            cummulating PE.
-            """
         else:
             
             Lagrangian = 0
@@ -74,6 +74,10 @@ class Centroid(LagrangesDynamicSystem):
     """
     Model of a changing centroid for potential energy:
     """
+
+            """
+            Creates a singular model, after inputing correct values of gravity field - g, mass of - m as well as additionaly the general coordiante
+            """
     def __init__(self, m, g, pos1=0, pos_c=0, qs=None, ivar=Symbol('t')):
         
         if pos1 == 0:
@@ -87,10 +91,7 @@ class Centroid(LagrangesDynamicSystem):
             qs = [pos1]
             
             Lagrangian = -(m * g * (pos1))
-            
-            """
-            Creates a singular model, after inputing correct values of gravity field - g, mass of - m as well as additionaly the general coordiante
-            """
+
         else:
             
             Lagrangian = 0
@@ -132,6 +133,9 @@ class RigidBody2D(LagrangesDynamicSystem):
     """
     Model of a 2DoF Rigid body:
     """
+            """
+    Creates a singular model, after inputing correct values of moment of inertia - I for rotational element and mass - m for linear element and general coordinates, which             analytically display the dynamics of rotating and propeling object: beam.
+            """
     def __init__(self, m, I, pos_lin=0, pos_rot=0, pos_lin_c=0, pos_rot_c=0, qs=None, ivar=Symbol('t')):
         
         if pos_lin == 0 and pos_rot == 0:
@@ -146,9 +150,6 @@ class RigidBody2D(LagrangesDynamicSystem):
             
             Lagrangian = S.Half * m * diff(pos_lin,ivar)**2 + S.Half * I * diff(pos_rot,ivar)**2
             
-            """
-                Creates a singular model, after inputing correct values of moment of inertia - I for rotational element and mass - m for linear element and general coordinates, which             analytically display the dynamics of rotating and propeling object: beam.
-            """
         else:
             
             Lagrangian = 0
@@ -161,6 +162,9 @@ class Pendulum(LagrangesDynamicSystem):
     """
     Model of a sDoF mathematical Pendulum:
     """
+            """
+            Creates a singular model, after inputing correct values of mass - m , gravitational field - g, length of a strong - l and general coordinate which estabilshes an analytical display of a mathematical model of a sDoF pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
+            """
     def __init__(self, m,  g, l, pos1=0, trig=0, pos_c=0, qs=None, ivar=Symbol('t')):
 
         
@@ -187,10 +191,7 @@ class Pendulum(LagrangesDynamicSystem):
                 Lagrangian = 0
             
             Lagrangian = S.Half * m * l**2 * diff(pos1,ivar)**2 - m * g * l * (1-trig)
-            
-            """
-            Creates a singular model, after inputing correct values of mass - m , gravitational field - g, length of a strong - l and general coordinate which estabilshes an analytical display of a mathematical model of a sDoF pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
-            """
+
         else:
             
             Lagrangian = 0
@@ -282,7 +283,7 @@ class Force(LagrangesDynamicSystem):
                  pos1 = None,
                  qs = None,
                  ivar=Symbol('t'),
-                 frame=base_frame):
+                 frame = base_frame):
 
         if not qs == None:
             qs = [pos1]
@@ -292,9 +293,9 @@ class Force(LagrangesDynamicSystem):
         if isinstance(pos1, Point):
             P = pos1
             if not qs:
-                diffs=P.vel(frame).atoms(Derivative)
+                diffs=P.vel(frame).magnitude().atoms(Derivative)
                 
-                qs=[deriv.args[0] for deriv in diffs]
+                qs= [deriv.args[0] for deriv in diffs]
                 print(qs)
         else:
             P = Point('P')
@@ -303,30 +304,10 @@ class Force(LagrangesDynamicSystem):
 
 
         forcelist = [(P, force)]
-
+        
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
+        
 
 ######################################################################################################################################
 
-class SpringFrame(LagrangesDynamicSystem):
-    """
-    Model of a Spring based on a Particle & Frame instances
-    """
-
-    def __init__(self, k, pos1, pos2, qs=None, ivar=Symbol('t'), frame=ReferenceFrame('N')):
-        
-        if qs == None:
-            qs = [pos1]
-        else:
-            qs = [pos1, pos2]
-        
-        P = Point('P')
-        P.set_vel(frame, (1) * frame.x)
-        
-        Pa = Particle('Pa', P, 1)
-        
-        Pa.potential_energy = S.Half * k * pos1.pos_from(pos2).magnitude()**2
-        L = Lagrangian(frame, Pa)
-
-        super().__init__(Lagrangian=L, qs=qs, frame=frame, ivar=ivar)
 
