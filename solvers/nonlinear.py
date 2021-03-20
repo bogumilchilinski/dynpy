@@ -505,28 +505,30 @@ class MultiTimeScaleMethod(LinearODESolution):
 
         return eoms_approximated[0]
 
-    def _determine_secular_terms(self, zeroth_approx,ivar=None):
+    def _determine_secular_terms(self, zeroth_approx,order,ivar=None):
         
-        display(*zeroth_approx)
+#         print('zeroth approx')
+#         display(*zeroth_approx)
         
         
         if not ivar:
             ivar=self.t_list[0]
 
             
-        print('===')
+#         print('===')
         sol_zeroth = self._find_nth_solution(zeroth_approx,
                                              order=0,
                                              secular_comps={},ivar=ivar)
 
-        print('+++')
-        display('+'*100,sol_zeroth,'+'*100)
-        #eig_min=sqrt(self.eigenvalues()[0])
+#         print('+++ sol of zeroth')
+#         display('+'*100,sol_zeroth,'+'*100)
+#         print('+++ sol of zeroth')
+#         #eig_min=sqrt(self.eigenvalues()[0])
 
-        #secular_comps = {sin(eig_min*self.ivar),cos(eig_min*self.ivar)}
+#         #secular_comps = {sin(eig_min*self.ivar),cos(eig_min*self.ivar)}
         secular_comps = sum(sol_zeroth).atoms(sin, cos)
 
-        display('+'*100,secular_comps,'+'*100)
+#         display('+'*100,secular_comps,'+'*100)
         
         return secular_comps
 
@@ -544,7 +546,7 @@ class MultiTimeScaleMethod(LinearODESolution):
         secular_components = {
             comp: 0
             for comp in self._determine_secular_terms(
-                zeroth_approx=eoms_list[0])
+                zeroth_approx=eoms_list[0],order=order)
         }
         #        display('secular comps',secular_components)
         approx_dict = {}
@@ -559,7 +561,7 @@ class MultiTimeScaleMethod(LinearODESolution):
                 eoms_nth.subs(approx_dict).doit().expand(),
                 order=comp_ord,
                 secular_comps=secular_components,
-                dict=True)
+                dict=True,ivar=self.t_list[0])
             #            display(nth_solution)
             approx_dict.update(nth_solution)
 
@@ -576,7 +578,7 @@ class MultiTimeScaleMethod(LinearODESolution):
 
         solution = LinearODESolution(
             eoms, ivar=self.ivar,
-            dvars=self.approximation_function(order=0)).solution()
+            dvars=self.approximation_function(order=len(self.t_list))).solution()
 
         #         if equation:
         #             solution = Matrix([
@@ -613,16 +615,17 @@ class MultiTimeScaleMethod(LinearODESolution):
         eoms = (eoms.expand()).applyfunc(
             lambda eqn: TR10(TR8(TR10(eqn).expand()).expand()).expand())
 
-        #         print('='*100)
-        #         display(*[row.coeff(comp)  for row in eoms  for comp in secular_comps])
-        #         print('='*100)
+        print('='*100)
+        display(*[row.coeff(comp)  for row in eoms  for comp in secular_comps])
+        print('='*100)
 
         eoms = eoms.subs({comp: 0 for comp in secular_comps})
 
-        print('='*100)
-        display(eoms)
-        display(self.approximation_function(order=order))
-        print('='*100)
+#         print('='*100)
+#         display(eoms)
+#         display(self.approximation_function(order=order))
+#         display(ivar)
+#         print('='*100)
 
         
         
@@ -632,6 +635,12 @@ class MultiTimeScaleMethod(LinearODESolution):
             ivar=ivar,
             dvars=self.approximation_function(order=order)).solution()
 
+#         print('=eoms and its sol'*100)
+#         display(eoms)
+#         display(solution)
+
+#         print('=eoms and its sol'*100)
+        
         return self._format_solution(
             dvars=self.approximation_function(order=order),
             solution=solution,
@@ -646,7 +655,7 @@ class MultiTimeScaleMethod(LinearODESolution):
 
         eoms = self.nth_eoms_approximation(order)
 
-        zeroth_approximation = self.zeroth_approximation(dict=True)
+        zeroth_approximation = self.zeroth_approximation(dict=True,order=order)
 
         secular_comps = sum(zeroth_approximation.values()).atoms(cos, sin)
 
