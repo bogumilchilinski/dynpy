@@ -260,6 +260,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             self_dict['forcelist']) + list_build(other_dict['forcelist'])
         self_dict['bodies'] = list_build(self_dict['bodies']) + list_build(
             other_dict['bodies'])
+        
+        if not self_dict['frame']:
+            self_dict['frame']=other_dict['frame']
 
         return LagrangesDynamicSystem(**self_dict)
 
@@ -859,12 +862,14 @@ class HarmonicOscillator(LinearDynamicSystem):
         n_sin, d = fraction(comp_sin)
         n_cos, d = fraction(comp_cos)
 
-
 #         print(n_sin)
 #         print(n_cos)
 #         print(d)
-        
-        frf_expr = ((sqrt((n_sin**2 + n_cos**2).simplify())) /d.doit()).simplify()
+
+        if len(self.q) == 1:  # if single degree of freedom
+            frf_expr = ((sqrt((n_sin**2 + n_cos**2).simplify())) /d.doit()).simplify()   # sDoF
+        else: # DoF > 1
+            frf_expr = inv( stiffness_matrix() - excitation_freq**2 * inertia_matrix() ) # mDoF
 
         return frf_expr
 

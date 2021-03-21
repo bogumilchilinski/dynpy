@@ -507,26 +507,28 @@ class MultiTimeScaleMethod(LinearODESolution):
 
     def _determine_secular_terms(self, zeroth_approx,order,ivar=None):
         
-        display(*zeroth_approx)
+#         print('zeroth approx')
+#         display(*zeroth_approx)
         
         
         if not ivar:
             ivar=self.t_list[0]
 
             
-        print('===')
+#         print('===')
         sol_zeroth = self._find_nth_solution(zeroth_approx,
                                              order=0,
                                              secular_comps={},ivar=ivar)
 
-        print('+++')
-        display('+'*100,sol_zeroth,'+'*100)
-        #eig_min=sqrt(self.eigenvalues()[0])
+#         print('+++ sol of zeroth')
+#         display('+'*100,sol_zeroth,'+'*100)
+#         print('+++ sol of zeroth')
+#         #eig_min=sqrt(self.eigenvalues()[0])
 
-        #secular_comps = {sin(eig_min*self.ivar),cos(eig_min*self.ivar)}
+#         #secular_comps = {sin(eig_min*self.ivar),cos(eig_min*self.ivar)}
         secular_comps = sum(sol_zeroth).atoms(sin, cos)
 
-        display('+'*100,secular_comps,'+'*100)
+#         display('+'*100,secular_comps,'+'*100)
         
         return secular_comps
 
@@ -613,17 +615,17 @@ class MultiTimeScaleMethod(LinearODESolution):
         eoms = (eoms.expand()).applyfunc(
             lambda eqn: TR10(TR8(TR10(eqn).expand()).expand()).expand())
 
-        #         print('='*100)
-        #         display(*[row.coeff(comp)  for row in eoms  for comp in secular_comps])
-        #         print('='*100)
+        print('='*100)
+        display(*[row.coeff(comp)  for row in eoms  for comp in secular_comps])
+        print('='*100)
 
         eoms = eoms.subs({comp: 0 for comp in secular_comps})
 
-        print('='*100)
-        display(eoms)
-        display(self.approximation_function(order=order))
-        display(ivar)
-        print('='*100)
+#         print('='*100)
+#         display(eoms)
+#         display(self.approximation_function(order=order))
+#         display(ivar)
+#         print('='*100)
 
         
         
@@ -633,6 +635,12 @@ class MultiTimeScaleMethod(LinearODESolution):
             ivar=ivar,
             dvars=self.approximation_function(order=order)).solution()
 
+#         print('=eoms and its sol'*100)
+#         display(eoms)
+#         display(solution)
+
+#         print('=eoms and its sol'*100)
+        
         return self._format_solution(
             dvars=self.approximation_function(order=order),
             solution=solution,
