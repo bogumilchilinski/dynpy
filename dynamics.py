@@ -16,9 +16,6 @@ import sympy.physics.mechanics as me
 
 from sympy.simplify.fu import TR8, TR10, TR7, TR3
 
-
-
-
 from .solvers.numerical import OdeComputationalCase
 
 from .solvers.linear import LinearODESolution
@@ -427,9 +424,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     def reactions(self):
         multipliers=self.solve_multipliers()
         
-        return [self._eoms.jacobian([lam])*value for lam,value  in multipliers.items()] 
-        
-        
+        return [self._eoms.jacobian([lam])*value for lam,value  in multipliers.items()]
+    
     def generalized_momentum(self,dict=True):
         
 
@@ -441,8 +437,23 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                 for q_tmp in self.q
                 }
 
-            return {momentum_sym:self.lagrangian().diff(coord) for coord,momentum_sym  in momentum_dict.items()}
+            return {momentum_sym:self.lagrangian().diff(coord.diff(self.ivar)) for coord,momentum_sym  in momentum_dict.items()}
+    
+    def hamiltonian(self,dict=True):
         
+        if dict:
+            momentum_dict = {
+                q_tmp:
+                Symbol('p_'+str(q_tmp).replace('(' + str(self.ivar) + ')', ''))
+                for q_tmp in self.q
+                }
+        
+#         ham_dict = {coord.diff(self.ivar) * self.generalized_momentum()[momentum_sym] - self.lagrangian() for coord,momentum_sym in momentum_dict.items()}
+#         return {ham_dict.subs(solve([Eq(momentum_sym,self.lagrangian().diff(coord.diff(self.ivar)))],coord.diff(self.ivar))) for coord,momentum_sym in momentum_dict.items()}
+
+        ham = self.q.diff(self.ivar) * self.lagrangian().diff(self.q.diff(self.ivar)) - self.lagrangian()
+        
+        return {ham.subs(solve([Eq(momentum_sym,self.lagrangian().diff(coord.diff(self.ivar)))],coord.diff(self.ivar))) for coord,momentum_sym in momentum_dict.items()}
         
     def _op_points(self,
                    static_disp_dict=None,
