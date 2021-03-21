@@ -11,6 +11,11 @@ import base64
 import IPython as IP
 
 
+import os
+print('getcwd dynamics:      ', os.getcwd())
+print('__file__:    ', __file__)
+
+
 class SDoFHarmonicOscillator(HarmonicOscillator):
     """Ready to use sample Single Degree of Freedom System with mass on spring
         Arguments:
@@ -69,7 +74,7 @@ class SDoFHarmonicOscillator(HarmonicOscillator):
 
         return IP.display.Image(base64.b64decode(encoded_string))
         
-class MDoFVehicleSuspension(HarmonicOscillator):
+class DDoFVehicleSuspension(HarmonicOscillator):
     
     def __init__(self,
                  m=Symbol('m',positive=True),
@@ -81,9 +86,9 @@ class MDoFVehicleSuspension(HarmonicOscillator):
                  k_r=Symbol('k_r',positive=True),
                  ivar=Symbol('t'),
                  qs=dynamicsymbols('z, varphi') ):
-        
+
         z,phi=qs
-        
+
         self.m = m #mass of a rod
         self.l_l = l_l #offset of left spring
         self.l_r = l_r #offset of right spring
@@ -92,10 +97,10 @@ class MDoFVehicleSuspension(HarmonicOscillator):
         self.k_r = l_r #right spring
         self.I = I #moment of inertia of a rod
         self.qs = qs
-        
+
         self.body = RigidBody2D(m, I, pos_lin=z, pos_rot=phi, qs=qs) #rod ----> 
         self.spring_1 = Spring(k_l,pos1=z+phi*l_l,qs=qs) #left spring
         self.spring_2 = Spring(k_r,pos1=z-phi*l_r,qs=qs) # right spring
         system =self.body+ self.spring_1 + self.spring_2
-        
+
         super().__init__(system)
