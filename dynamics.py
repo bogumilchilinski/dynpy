@@ -97,6 +97,7 @@ def scalar_fun_quadratic_form(expr, coordinates, op_point):
 
 
 
+
 class LagrangesDynamicSystem(me.LagrangesMethod):
     '''Lagrange's method object
     
@@ -436,7 +437,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         if dict:
             momentum_dict = {
                 q_tmp:
-                Symbol('p_'+str(q_tmp).replace('(' + str(self.ivar) + ')', ''))
+                Symbol('p_{'+str(q_tmp).replace('(' + str(self.ivar) + ')', '')+'}')
                 for q_tmp in self.q
                 }
 
@@ -445,18 +446,15 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     def hamiltonian(self,dict=True):
         
         if dict:
-            momentum_dict = {
-                q_tmp:
-                Symbol('p_'+str(q_tmp).replace('(' + str(self.ivar) + ')', ''))
-                for q_tmp in self.q
-                }
-        
-#         ham_dict = {coord.diff(self.ivar) * self.generalized_momentum()[momentum_sym] - self.lagrangian() for coord,momentum_sym in momentum_dict.items()}
-#         return {ham_dict.subs(solve([Eq(momentum_sym,self.lagrangian().diff(coord.diff(self.ivar)))],coord.diff(self.ivar))) for coord,momentum_sym in momentum_dict.items()}
+            momentum_dict = self.generalized_momentum()
+        print(momentum_dict)
+        ham_dict = {Symbol('H_'+str(momentum_sym)):coord.diff(self.ivar) * self.generalized_momentum()[coord] - self.lagrangian() for coord,momentum_sym in momentum_dict.items()}
+        print(ham_dict)
+        return {Symbol('H'):ham_dict.subs(solve([Eq(momentum_sym,self.lagrangian().diff(coord.diff(self.ivar)))],coord.diff(self.ivar))) for coord,momentum_sym in momentum_dict.items()}
 
-        ham = self.q.diff(self.ivar) * self.lagrangian().diff(self.q.diff(self.ivar)) - self.lagrangian()
+#         ham = self.q.diff(self.ivar) * self.lagrangian().diff(self.q.diff(self.ivar)) - self.lagrangian()
         
-        return {ham.subs(solve([Eq(momentum_sym,self.lagrangian().diff(coord.diff(self.ivar)))],coord.diff(self.ivar))) for coord,momentum_sym in momentum_dict.items()}
+#         return {Symbol('H'):ham.subs(solve([Eq(momentum_sym,self.lagrangian().diff(coord.diff(self.ivar)))],coord.diff(self.ivar))) for coord,momentum_sym in momentum_dict.items()}
         
     def _op_points(self,
                    static_disp_dict=None,
