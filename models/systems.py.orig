@@ -93,9 +93,16 @@ class MDoFVehicleSuspension(HarmonicOscillator):
         self.I = I #moment of inertia of a rod
         self.qs = qs
         
+<<<<<<< HEAD
+#         self.RigidBody2d = RigidBody2d(m, I, pos_lin = qs, pos_rot = ... ) #rod ----> nie wiem jak zorbic jego pozycje...
+        self.spring_1 = Spring_2(k_l,pos1=qs) #left spring
+        self.spring_2 = Spring_2(k_r,pos2=qs) # right spring
+        system = self.spring_1 + self.spring_2 + self.RigidBody2d
+=======
         self.body = RigidBody2D(m, I, pos_lin=z, pos_rot=phi, qs=qs) #rod ----> 
         self.spring_1 = Spring(k_l,pos1=z+phi*l_l,qs=qs) #left spring
         self.spring_2 = Spring(k_r,pos1=z-phi*l_r,qs=qs) # right spring
         system =self.body+ self.spring_1 + self.spring_2
+>>>>>>> fb97840a7f703c119ee723923c3ad3dfd2955f25
         
         super().__init__(system)
