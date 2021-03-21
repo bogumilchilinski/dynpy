@@ -91,7 +91,7 @@ class SDOFcar(HarmonicOscillator):
         self.I = I #moment of inertia of a rod
         self.qs = qs
         
-#         self.RigidBody2d = RigidBody2d(m, I, pos1 =....) #rod ----> nie wiem jak zorbic jego pozycje...
+#         self.RigidBody2d = RigidBody2d(m, I, pos_lin = qs, pos_rot = ... ) #rod ----> nie wiem jak zorbic jego pozycje...
         self.spring_1 = Spring_2(k_l,pos1=qs) #left spring
         self.spring_2 = Spring_2(k_r,pos2=qs) # right spring
         system = self.spring_1 + self.spring_2 + self.RigidBody2d

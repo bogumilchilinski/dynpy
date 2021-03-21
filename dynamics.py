@@ -260,6 +260,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             self_dict['forcelist']) + list_build(other_dict['forcelist'])
         self_dict['bodies'] = list_build(self_dict['bodies']) + list_build(
             other_dict['bodies'])
+        
+        if not self_dict['frame']:
+            self_dict['frame']=other_dict['frame']
 
         return LagrangesDynamicSystem(**self_dict)
 
