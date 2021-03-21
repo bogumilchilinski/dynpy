@@ -2,6 +2,7 @@ from sympy import *
 from sympy.physics.mechanics import *
 
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
+from .elements import MaterialPoint, Spring
 
 from sympy.physics.mechanics import *
 from sympy.physics.vector import *
@@ -9,12 +10,6 @@ from sympy.physics.vector import *
 import base64
 import IPython as IP
 
-def preview(img):
-    with open(f'{img}', "rb") as image_file:
-        encoded_string = base64.b64encode(image_file.read())
-    image_file.close()
-    
-    return IP.display.Image(base64.b64decode(encoded_string))
 
 class SDOFHarmonicOscillator(HarmonicOscillator):
     """Ready to use sample Single Degree of Freedom System with mass on spring
@@ -66,9 +61,26 @@ class SDOFHarmonicOscillator(HarmonicOscillator):
         
         super().__init__(system)
         
+    @classmethod
+    def preview(cls, img):
+        with open(f'{img}', "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+        image_file.close()
+
+        return IP.display.Image(base64.b64decode(encoded_string))
+        
 class SDOFcar(HarmonicOscillator):
     
-    def __init__(self, m=Symbol('m',positive=True), l_l=Symbol('l_l',positive=True), l_r=Symbol('l_r',positive=True), l_rod=Symbol('l_rod',positive=True), k_l=Symbol('k_l',positive=True), k_r=Symbol('k_r',positive=True), I=Symbol('I',positive=True), ivar=Symbol('t'), qs=dynamicsymbols('z') ):
+    def __init__(self,
+                 m=Symbol('m',positive=True),
+                 l_l=Symbol('l_l',positive=True),
+                 l_r=Symbol('l_r',positive=True),
+                 l_rod=Symbol('l_rod',positive=True),
+                 k_l=Symbol('k_l',positive=True),
+                 k_r=Symbol('k_r',positive=True),
+                 I=Symbol('I',positive=True),
+                 ivar=Symbol('t'),
+                 qs=dynamicsymbols('z') ):
         
         self.m = m #mass of a rod
         self.l_l = l_l #length of left spring
@@ -79,11 +91,9 @@ class SDOFcar(HarmonicOscillator):
         self.I = I #moment of inertia of a rod
         self.qs = qs
         
-        self.RigidBody2d = RigidBody2d(m, I, pos1 =....) #rod ----> nie wiem jak zorbic jego pozycje...
+#         self.RigidBody2d = RigidBody2d(m, I, pos1 =....) #rod ----> nie wiem jak zorbic jego pozycje...
         self.spring_1 = Spring_2(k_l,pos1=qs) #left spring
         self.spring_2 = Spring_2(k_r,pos2=qs) # right spring
         system = self.spring_1 + self.spring_2 + self.RigidBody2d
         
         super().__init__(system)
-        
-    def 

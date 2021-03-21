@@ -11,8 +11,8 @@ class MaterialPoint(LagrangesDynamicSystem):
     """
     Model of a Material point with changing point of mass:
     """
-            """Creates a material point of an inertial body, after inputing correct values of mass -m and general coordinates, which follows a linear motion.
-            """
+    """Creates a material point of an inertial body, after inputing correct values of mass -m and general coordinates, which follows a linear motion.
+    """
     def __init__(self, m, pos1=0, pos2=0, pos_c=0, qs=None,  ivar=Symbol('t')):
         
         if pos1 == 0 and pos2 == 0:
@@ -42,9 +42,9 @@ class Spring(LagrangesDynamicSystem):
     """
     Model of a Spring:
     """
-            """
-            Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s), which analytically display the dynamics of displacing spring after            cummulating PE.
-            """
+    """
+    Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s), which analytically display the dynamics of displacing spring after            cummulating PE.
+    """
     def __init__(self, k, pos1=0, pos2=0, pos_c=0, qs=None, ivar=Symbol('t')):
             
         if pos1 == 0 and pos2 == 0:
@@ -75,9 +75,9 @@ class Centroid(LagrangesDynamicSystem):
     Model of a changing centroid for potential energy:
     """
 
-            """
-            Creates a singular model, after inputing correct values of gravity field - g, mass of - m as well as additionaly the general coordiante
-            """
+    """
+    Creates a singular model, after inputing correct values of gravity field - g, mass of - m as well as additionaly the general coordiante
+    """
     def __init__(self, m, g, pos1=0, pos_c=0, qs=None, ivar=Symbol('t')):
         
         if pos1 == 0:
@@ -133,9 +133,9 @@ class RigidBody2D(LagrangesDynamicSystem):
     """
     Model of a 2DoF Rigid body:
     """
-            """
+    """
     Creates a singular model, after inputing correct values of moment of inertia - I for rotational element and mass - m for linear element and general coordinates, which             analytically display the dynamics of rotating and propeling object: beam.
-            """
+    """
     def __init__(self, m, I, pos_lin=0, pos_rot=0, pos_lin_c=0, pos_rot_c=0, qs=None, ivar=Symbol('t')):
         
         if pos_lin == 0 and pos_rot == 0:
@@ -162,9 +162,9 @@ class Pendulum(LagrangesDynamicSystem):
     """
     Model of a sDoF mathematical Pendulum:
     """
-            """
+    """
             Creates a singular model, after inputing correct values of mass - m , gravitational field - g, length of a strong - l and general coordinate which estabilshes an analytical display of a mathematical model of a sDoF pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
-            """
+    """
     def __init__(self, m,  g, l, pos1=0, trig=0, pos_c=0, qs=None, ivar=Symbol('t')):
 
         
