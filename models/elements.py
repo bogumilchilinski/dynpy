@@ -45,29 +45,17 @@ class Spring(LagrangesDynamicSystem):
     """
     Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s), which analytically display the dynamics of displacing spring after            cummulating PE.
     """
-    def __init__(self, k, pos1=0, pos2=0, pos_c=0, qs=None, ivar=Symbol('t')):
-            
-        if pos1 == 0 and pos2 == 0:
-            
-            self.qs = [pos_c]
-
-            Lagrangian = -S.Half * k * (pos_c)**2
-        
-        elif pos_c == 0:
-            
-            if qs == qs:
-                qs = [pos1]
-            else:
-                qs = [pos1, pos2]
-            
-            Lagrangian = -S.Half * k * (pos1 - pos2)**2
-            
+    def __init__(self, stiffness, pos1, pos2=0, qs=None, ivar=Symbol('t')):
+        self.stiffness = stiffness
+        if qs == None:
+            qs = [pos1]
         else:
-            
-            Lagrangian = 0
-            print(str('YOU CANNOT APPLY BOTH METHODS AT ONCE'))
+            qs = qs
+
+        Lagrangian = -(S.One / 2 * (stiffness * (pos1 - pos2)**2))
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
+
 
 
 class Centroid(LagrangesDynamicSystem):
@@ -165,37 +153,18 @@ class Pendulum(LagrangesDynamicSystem):
     """
             Creates a singular model, after inputing correct values of mass - m , gravitational field - g, length of a strong - l and general coordinate which estabilshes an analytical display of a mathematical model of a sDoF pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
     """
-    def __init__(self, m,  g, l, pos1=0, trig=0, pos_c=0, qs=None, ivar=Symbol('t')):
+    def __init__(self, m,  g, l, angle=0, qs=None, ivar=Symbol('t')):
 
-        
-        if trig == 0:
-            
-            self.qs = [pos_c]
-            
-            if pos1 == 0:
-                P = pos_c
-            else:
-                P = pos1
 
-            Lagrangian = S.Half * m * l**2 * diff(P,ivar)**2 - m * g * l * (pos_c)
-        
-        elif pos_c == 0:
-            
-            qs = [pos1]
-            
-            if trig == cos(pos1):
-                trig = cos(pos1)
-            elif trig == sin(pos1):
-                trig = sin(pos1)
-            else:
-                Lagrangian = 0
-            
-            Lagrangian = S.Half * m * l**2 * diff(pos1,ivar)**2 - m * g * l * (1-trig)
-
+        if qs == None:
+            qs = [angle]
         else:
-            
-            Lagrangian = 0
-            print(str('YOU CANNOT APPLY BOTH METHODS AT ONCE'))
+            qs = qs
+
+
+        Lagrangian = S.Half * m * l**2 * diff(angle,ivar)**2 - m * g * l * (1-cos(angle))
+
+
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
