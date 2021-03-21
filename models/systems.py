@@ -71,6 +71,8 @@ class SDoFHarmonicOscillator(HarmonicOscillator):
         
 class MDoFVehicleSuspension(HarmonicOscillator):
     
+    
+    
     def __init__(self,
                  m=Symbol('m',positive=True),
                  I=Symbol('I',positive=True),
