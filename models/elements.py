@@ -5,23 +5,24 @@ from ..dynamics import LagrangesDynamicSystem
 from sympy.physics.mechanics import *
 from sympy.physics.vector import *
 
+import base64
+import IPython as IP
+
 base_frame=ReferenceFrame('N')
 
 class Elements(LagrangesDynamicSystem):
     """Base class for all elements
-    
     """
-
     @classmethod
     def preview(cls,real=False):
         if real:
-            path = __file__.replace('.py', '/') + str('images/') + cls.real_name
+            path = __file__.replace('elements.py', 'images/') + cls.real_name
             with open(f"{path}", "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read())
             image_file.close()
             
         else:
-            path = __file__.replace('systems.py', 'images/') + cls.scheme_name
+            path = __file__.replace('elements.py', 'images/') + cls.scheme_name
             with open(f"{path}", "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read())
             image_file.close()
@@ -34,6 +35,8 @@ class MaterialPoint(Elements):
     """
     """Creates a material point of an inertial body, after inputing correct values of mass -m and general coordinates, which follows a linear motion.
     """
+    scheme_name = 'pendulum.png'
+    real_name = 'pendulum.png'
     def __init__(self, m, pos1=0, pos2=0, pos_c=0, qs=None,  ivar=Symbol('t')):
         
         if pos1 == 0 and pos2 == 0:
@@ -66,6 +69,8 @@ class Spring(Elements):
     """
     Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s), which analytically display the dynamics of displacing spring after            cummulating PE.
     """
+    scheme_name = 'pendulum.png'
+    real_name = 'pendulum.png'
     def __init__(self, stiffness, pos1, pos2=0, qs=None, ivar=Symbol('t')):
         self.stiffness = stiffness
         if qs == None:
@@ -87,6 +92,8 @@ class Centroid(Elements):
     """
     Creates a singular model, after inputing correct values of gravity field - g, mass of - m as well as additionaly the general coordiante
     """
+    scheme_name = 'pendulum.png'
+    real_name = 'pendulum.png'
     def __init__(self, m, g, pos1=0, pos_c=0, qs=None, ivar=Symbol('t')):
         
         if pos1 == 0:
@@ -114,7 +121,8 @@ class Disk(Elements):
     Model of a Disk:
     Creates a singular model, after inputing correct values of moment of inertia - I and rotational general coordinate, which analytically displays the dynamics of a rotating wheel.
     """
-
+    scheme_name = 'pendulum.png'
+    real_name = 'pendulum.png'
     def __init__(self, I, pos1=0, pos_c=0, qs=None, ivar=Symbol('t')):
         
         if pos1 == 0:
@@ -145,6 +153,8 @@ class RigidBody2D(Elements):
     """
     Creates a singular model, after inputing correct values of moment of inertia - I for rotational element and mass - m for linear element and general coordinates, which             analytically display the dynamics of rotating and propeling object: beam.
     """
+    scheme_name = 'pendulum.png'
+    real_name = 'pendulum.png'
     def __init__(self, m, I, pos_lin=0, pos_rot=0, pos_lin_c=0, pos_rot_c=0, qs=None, ivar=Symbol('t')):
         
         if pos_lin == 0 and pos_rot == 0:
@@ -176,6 +186,8 @@ class Damper(Elements):
 
     Creates a singular model, after inputing correct values of the damping coefficient - c and general coordinates, which establishes a damping force directly proportional to the velocity, in time, of an inertial virbating element.
     """
+    scheme_name = 'pendulum.png'
+    real_name = 'pendulum.png'
     def __init__(self, c, pos1, pos2=0, qs=None, ivar=Symbol('t'), frame=base_frame):
         
 
@@ -203,6 +215,8 @@ class PID(Elements):
 
 Creates a model of a PID controller (proportional , integral , derivative) which initates a smoother control over delivered system oscillatory system in form of Lagrange method. Taking into account that a PID regulator is ment for a SISO system the model is built for sDoF system, hence in case of building a mDoF the process will require using two PIDs.
     """
+    scheme_name = 'pendulum.png'
+    real_name = 'pendulum.png'
     def __init__(self, kp, ki, kd, pos1, qs=None, ivar=Symbol('t'), frame=base_frame):
 
         if qs == None:
@@ -227,6 +241,8 @@ class Excitation(Elements):
     """
     Model of a harmonic extorsion applied onto the elemnt:
     """
+    scheme_name = 'pendulum.png'
+    real_name = 'pendulum.png'
     def __init__(self, f, pos_rot, ivar=Symbol('t'), frame=base_frame):
         
         qs = [pos_rot]
@@ -248,6 +264,8 @@ class Force(LagrangesDynamicSystem):
     """
     Creates enforcement.
     """
+    scheme_name = 'pendulum.png'
+    real_name = 'pendulum.png'
     def __init__(self,
                  force,
                  pos1 = None,

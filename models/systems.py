@@ -71,6 +71,9 @@ class SDoFHarmonicOscillator(ComposedSystem):
         -external forces assigned 
         -finally we determine the instance of the system using class LagrangeDynamicSystem
     """
+    scheme_name = '???.png'
+    real_name = '???.png'
+        
     def __init__(self,
                  m=Symbol('m', positive=True),
                  k=Symbol('k', positive=True),
@@ -85,13 +88,12 @@ class SDoFHarmonicOscillator(ComposedSystem):
         self.spring = Spring(k, pos1=qs)
         system = self.mass + self.spring
         
-        scheme_name = '???.png'
-        real_name = '???.png'
-        
         super().__init__(system)
 
 
 class DDoFVehicleSuspension(ComposedSystem):
+    scheme_name = '???.png'
+    real_name = '???.png'
     def __init__(self,
                  m=Symbol('m', positive=True),
                  I=Symbol('I', positive=True),
@@ -119,9 +121,6 @@ class DDoFVehicleSuspension(ComposedSystem):
         self.spring_1 = Spring(k_l, pos1=z + phi * l_l, qs=qs)  #left spring
         self.spring_2 = Spring(k_r, pos1=z - phi * l_r, qs=qs)  # right spring
         system = self.body + self.spring_1 + self.spring_2
-
-        scheme_name = '???.png'
-        real_name = '???.png'
         
         super().__init__(system)
 
@@ -132,6 +131,8 @@ class Pendulum(ComposedSystem):
 
             Creates a singular model, after inputing correct values of mass - m , gravitational field - g, length of a strong - l and general coordinate which estabilshes an analytical display of a mathematical model of a sDoF pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
     """
+    scheme_name = 'pendulum.png'
+    real_name = '???'
     def __init__(self,
                  m=Symbol('m', positive=True),
                  g=Symbol('g', positive=True),
@@ -147,13 +148,12 @@ class Pendulum(ComposedSystem):
 
         Lagrangian = S.Half * m * l**2 * diff(angle, ivar)**2 - m * g * l * (1 - cos(angle))
         
-        scheme_name = 'pendulum.png'
-        real_name = '???'
-        
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
 
 class SDoFPendulum(ComposedSystem):
+    scheme_name = '???.png'
+    real_name = '???.png'
     def __init__(self,
                  m=Symbol('m', positive=True),
                  g=Symbol('g', positive=True),
@@ -166,14 +166,13 @@ class SDoFPendulum(ComposedSystem):
         self.pendulum = Pendulum(m, g, l, qs=qs)
         self.force = Force(F, pos1=phi, qs=qs)
         system = self.pendulum + self.force
-
-        scheme_name = '???.png'
-        real_name = '???.png'
         
         super().__init__(system)
 
 
 class DDoFDoublePendulum(ComposedSystem):
+    scheme_name = '???.png'
+    real_name = '???.png'
     def __init__(self,
                  m=Symbol('m', positive=True),
                  g=Symbol('g', positive=True),
@@ -188,9 +187,6 @@ class DDoFDoublePendulum(ComposedSystem):
         self.pendulum_1 = Pendulum(m, g, l, angle=phi, qs=qs)
         self.pendulum_2 = Pendulum(m, g, l, angle=phi2, qs=qs)
         system = self.spring + self.pendulum_1 + self.pendulum_2
-
-        scheme_name = '???.png'
-        real_name = '???.png'
         
         super().__init__(system)
 
