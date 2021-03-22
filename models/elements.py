@@ -7,7 +7,28 @@ from sympy.physics.vector import *
 
 base_frame=ReferenceFrame('N')
 
-class MaterialPoint(LagrangesDynamicSystem):
+class Elements(LagrangesDynamicSystem):
+    """Base class for all elements
+    
+    """
+
+    @classmethod
+    def preview(cls,real=False):
+        if real:
+            path = __file__.replace('.py', '/') + str('images/') + cls.real_name
+            with open(f"{path}", "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read())
+            image_file.close()
+            
+        else:
+            path = __file__.replace('systems.py', 'images/') + cls.scheme_name
+            with open(f"{path}", "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read())
+            image_file.close()
+
+        return IP.display.Image(base64.b64decode(encoded_string))
+
+class MaterialPoint(Elements):
     """
     Model of a Material point with changing point of mass:
     """
@@ -38,7 +59,7 @@ class MaterialPoint(LagrangesDynamicSystem):
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
 
-class Spring(LagrangesDynamicSystem):
+class Spring(Elements):
     """
     Model of a Spring:
     """
@@ -58,7 +79,7 @@ class Spring(LagrangesDynamicSystem):
 
 
 
-class Centroid(LagrangesDynamicSystem):
+class Centroid(Elements):
     """
     Model of a changing centroid for potential energy:
     """
@@ -88,7 +109,7 @@ class Centroid(LagrangesDynamicSystem):
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
 
-class Disk(LagrangesDynamicSystem):
+class Disk(Elements):
     """
     Model of a Disk:
     Creates a singular model, after inputing correct values of moment of inertia - I and rotational general coordinate, which analytically displays the dynamics of a rotating wheel.
@@ -117,7 +138,7 @@ class Disk(LagrangesDynamicSystem):
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
         
-class RigidBody2D(LagrangesDynamicSystem):
+class RigidBody2D(Elements):
     """
     Model of a 2DoF Rigid body:
     """
@@ -146,30 +167,10 @@ class RigidBody2D(LagrangesDynamicSystem):
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
   
         
-class Pendulum(LagrangesDynamicSystem):
-    """
-    Model of a sDoF mathematical Pendulum:
-    """
-    """
-            Creates a singular model, after inputing correct values of mass - m , gravitational field - g, length of a strong - l and general coordinate which estabilshes an analytical display of a mathematical model of a sDoF pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
-    """
-    def __init__(self, m,  g, l, angle=0, qs=None, ivar=Symbol('t')):
 
-
-        if qs == None:
-            qs = [angle]
-        else:
-            qs = qs
-
-
-        Lagrangian = S.Half * m * l**2 * diff(angle,ivar)**2 - m * g * l * (1-cos(angle))
-
-
-
-        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
         
-class Damper(LagrangesDynamicSystem):
+class Damper(Elements):
     """
     Model of a Damper:
 
@@ -196,7 +197,7 @@ class Damper(LagrangesDynamicSystem):
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
 
         
-class PID(LagrangesDynamicSystem):
+class PID(Elements):
     """
     Model of a PID controller:
 
@@ -222,7 +223,7 @@ Creates a model of a PID controller (proportional , integral , derivative) which
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
 
         
-class Excitation(LagrangesDynamicSystem):
+class Excitation(Elements):
     """
     Model of a harmonic extorsion applied onto the elemnt:
     """
