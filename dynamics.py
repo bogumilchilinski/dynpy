@@ -440,18 +440,32 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
             return {momentum_sym:self.lagrangian().diff(coord.diff(self.ivar)) for coord,momentum_sym  in momentum_dict.items()}
     
-    def hamiltonian(self,dict=True):
+    def qdot_from_p(self,dict=True):
+        
+        if dict:
+            qdot=self.q.diff(self.ivar)
+
+            mom_subs=solve( [lhs-rhs  for lhs,rhs in self.generalized_momentum().items()],list(qdot),dict=True)
+            
+        return mom_subs
+    
+    
+    def hamiltonian(self):
         
         if dict:
             momentum_dict = self.generalized_momentum()
-        print(momentum_dict)
-        ham_dict = {Symbol('H_'+str(momentum_sym)):coord.diff(self.ivar) * self.generalized_momentum()[coord] - self.lagrangian() for coord,momentum_sym in momentum_dict.items()}
-        print(ham_dict)
-        return {Symbol('H'):ham_dict.subs(solve([Eq(momentum_sym,self.lagrangian().diff(coord.diff(self.ivar)))],coord.diff(self.ivar))) for coord,momentum_sym in momentum_dict.items()}
 
-#         ham = self.q.diff(self.ivar) * self.lagrangian().diff(self.q.diff(self.ivar)) - self.lagrangian()
         
-#         return {Symbol('H'):ham.subs(solve([Eq(momentum_sym,self.lagrangian().diff(coord.diff(self.ivar)))],coord.diff(self.ivar))) for coord,momentum_sym in momentum_dict.items()}
+        qdot=self.q.diff(self.ivar)
+        
+        mom_subs=self.qdot_from_p()
+
+        
+        ham_sum=sum( [coord*mom for coord,mom  in  zip(qdot,momentum_dict.keys())]   )
+        
+        return Eq(Symbol('H'),(ham_sum-self.lagrangian()).subs(mom_subs[0]))
+
+
         
     def _op_points(self,
                    static_disp_dict=None,
