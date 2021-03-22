@@ -1,0 +1,73 @@
+\documentclass[a4paper,class=article,border=10pt,tikz]{standalone}
+
+%mypackages
+\usepackage{pythontex}
+\usepackage{pgfplots}
+\usepackage{amsmath}
+\usepackage{titlesec}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{positioning}
+\usetikzlibrary{snakes,calc,positioning,patterns,angles,quotes,decorations.pathmorphing,decorations.markings}
+% \titleformat{<command>}[<shape>]{<format>}{<label>}{<sep>}{<before-code>}[<after-code>]
+%\titleformat{\section}{\normalfont\Large\bfseries}{\thesection.}{10pt}{}
+% \titlespacing{<command>}{<left>}{<before-sep>}{<after-sep>}
+%\titlespacing{\section}{0pt}{14pt}{7pt}
+
+%\titleformat{\subsection}{\normalfont\itshape}{\thesubsection.}{10pt}{}
+%\titlespacing{\subsection}{0pt}{12pt}{6pt}
+% set font encoding for PDFLaTeX, XeLaTeX, or LuaTeX
+\usepackage{ifxetex,ifluatex}
+\if\ifxetex T\else\ifluatex T\else F\fi\fi T%
+  \usepackage{fontspec}
+\else
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{lmodern}
+\fi
+
+\usepackage{hyperref}
+
+
+\title{Title of Document}
+\author{Name of Author}
+
+% Enable SageTeX to run SageMath code right inside this LaTeX file.
+% http://doc.sagemath.org/html/en/tutorial/sagetex.html
+% \usepackage{sagetex}
+
+% Enable PythonTeX to run Python – https://ctan.org/pkg/pythontex
+% \usepackage{pythontex}
+
+\begin{document}
+
+\begin{tikzpicture}[scale=1.5, every node/.style={scale=1.5},point/.style = {draw, circle, fill=black, minimum size=3pt, inner sep=0.5pt},]
+ [
+   scale=1,
+   point/.style = {draw, circle, fill=black, minimum size=3pt, inner sep=0.5pt},
+ ]
+
+% x, y axis
+  \draw[->] (-4,0) -- (5,0) node[right] {$x$};
+  \draw[->] (0,-4) -- (0,5) node[above] {$y$};
+ % Origin
+  \coordinate (O) at (0,0);
+
+  \def\rad{2.5cm}
+  \node (O) at (0,0) {};
+  \node [above left] at (0,0) {$C_0$};
+  \draw (O) circle (\rad);
+  \node (P)  at +(25:\rad)  [point]{};
+  \node (P_label) at ($(P.north)+(9pt,3pt)$) {$A$};
+
+% tangent line
+  \draw [thick,black] (P) -- ($(P)!2.25!90:(O)$) coordinate (bob) node[near end, right]{$m_{1}$, $l_{1}$};
+  \draw [thick,gray,dashed] (P) -- ++(-90:4) coordinate (line);
+  \fill (bob) circle (0.2);
+
+  \pic [draw, ->, "$\varphi$", angle eccentricity=1.6] {angle = line--P--bob};
+\draw[<->,line width=1.5pt] (-0.5,0)--(0.5,0) node[midway,below,xshift=0.6cm]{$x_{{C0}}(t)$};
+\fill[black] (O) circle (0.05);
+\end{tikzpicture}
+\end{document}
+% \draw[<->,line width=1.5pt] (-0.5,0)--(0.5,0) node[midway,above]{$x_{e}(t)$};
