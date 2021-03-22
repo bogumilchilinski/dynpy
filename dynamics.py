@@ -364,6 +364,15 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         '''
         display(expr)
         pass
+    
+    
+    @classmethod
+    def preview(cls):
+        with open(f'{img}', "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+        image_file.close()
+
+        return IP.display.Image(base64.b64decode(encoded_string))
         
 
     def __call__(self, label=None):

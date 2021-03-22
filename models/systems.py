@@ -11,12 +11,24 @@ import base64
 import IPython as IP
 
 
-import os
-print('getcwd dynamics:      ', os.getcwd())
-print('__file__:    ', __file__)
 
 
-class SDoFHarmonicOscillator(HarmonicOscillator):
+class ComposedSystem(HarmonicOscillator):
+
+    scheme_name='pendulum.png'
+    
+    @classmethod
+    def preview(cls):
+        return __file__.replace('.py','/')+str('images/')+cls.scheme_name
+        
+#         with open(f'{img}', "rb") as image_file:
+#             encoded_string = base64.b64encode(image_file.read())
+#         image_file.close()
+
+#         return IP.display.Image(base64.b64decode(encoded_string))
+
+
+class SDoFHarmonicOscillator(ComposedSystem):
     """Ready to use sample Single Degree of Freedom System with mass on spring
         Arguments:
         =========
@@ -66,15 +78,9 @@ class SDoFHarmonicOscillator(HarmonicOscillator):
         
         super().__init__(system)
         
-    @classmethod
-    def preview(cls, img):
-        with open(f'{img}', "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read())
-        image_file.close()
 
-        return IP.display.Image(base64.b64decode(encoded_string))
         
-class DDoFVehicleSuspension(HarmonicOscillator):
+class DDoFVehicleSuspension(ComposedSystem):
     
     
     
@@ -108,7 +114,7 @@ class DDoFVehicleSuspension(HarmonicOscillator):
         super().__init__(system)
         
         
-class DDoFDoublePendulum(HarmonicOscillator):
+class DDoFDoublePendulum(ComposedSystem):
     
     def __init__(self,
                  m=Symbol('m', positive=True),
@@ -128,7 +134,7 @@ class DDoFDoublePendulum(HarmonicOscillator):
         
         super().__init__(system)
         
-class SDoFPendulum(HarmonicOscillator):
+class SDoFPendulum(ComposedSystem):
     def __init__(self,
                  m=Symbol('m', positive=True),
                  g=Symbol('g', positive=True),
