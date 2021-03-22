@@ -253,9 +253,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         print(self_dict['qs'])
 
         list_build = lambda x: [x] if x else []
+        
+        forcelist_build = lambda x: x if x else []
 
-        self_dict['forcelist'] = list_build(
-            self_dict['forcelist']) + list_build(other_dict['forcelist'])
+        self_dict['forcelist'] = forcelist_build(
+            self_dict['forcelist']) + forcelist_build(other_dict['forcelist'])
+        
         self_dict['bodies'] = list_build(self_dict['bodies']) + list_build(
             other_dict['bodies'])
         
@@ -313,7 +316,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                      if not any(coord in (lhs - rhs).atoms(Function)
                                 for coord in self.q)], )
             
-            hol_coneqs=hol_coneqs+constrains
+            hol_coneqs = hol_coneqs + constrains
             
             
 
@@ -336,6 +339,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                               old_point.vel(frame).subs(*args, **kwargs))
 
         forces_subs = list(zip(new_points, new_forces))
+        
+        nonhol_coneqs_subs = list(self.coneqs)[len((self._hol_coneqs)):] #,ivar=self.ivar
 
         #         print(forces_subs)
         #         print(self.forcelist)
@@ -350,9 +355,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                           bodies=self._bodies,
                           frame=self.frame,
                           hol_coneqs=hol_coneqs,
-                          nonhol_coneqs=list(
-                              self.coneqs)[len((self._hol_coneqs)):],
-                          ivar=self.ivar)
+                          nonhol_coneqs= nonhol_coneqs_subs
+               )
 
 
 #     def rhs(self):
@@ -615,6 +619,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         computed_case = self.computational_case(parameter_values=data_Tuple)
 
         return OdeComputationalCase(**computed_case, evaluate=True)
+    
+    @classmethod
+    def
 
 
 class LinearDynamicSystem(LagrangesDynamicSystem):

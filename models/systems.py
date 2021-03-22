@@ -11,21 +11,26 @@ import base64
 import IPython as IP
 
 
-
-
 class ComposedSystem(HarmonicOscillator):
-
-    scheme_name='pendulum.png'
+    """Base class for all systems
     
-    @classmethod
-    def preview(cls):
-        return __file__.replace('.py','/')+str('images/')+cls.scheme_name
-        
-#         with open(f'{img}', "rb") as image_file:
-#             encoded_string = base64.b64encode(image_file.read())
-#         image_file.close()
+    """
 
-#         return IP.display.Image(base64.b64decode(encoded_string))
+    @classmethod
+    def preview(cls,real=False):
+        if real:
+            path = __file__.replace('.py', '/') + str('images/') + cls.real_name
+            with open(f"{path}", "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read())
+            image_file.close()
+            
+        else:
+            path = __file__.replace('systems.py', 'images/') + cls.scheme_name
+            with open(f"{path}", "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read())
+            image_file.close()
+
+        return IP.display.Image(base64.b64decode(encoded_string))
 
 
 class SDoFHarmonicOscillator(ComposedSystem):
@@ -66,87 +71,122 @@ class SDoFHarmonicOscillator(ComposedSystem):
         -external forces assigned 
         -finally we determine the instance of the system using class LagrangeDynamicSystem
     """
-    def __init__(self, m=Symbol('m',positive=True), k=Symbol('k',positive=True), ivar=Symbol('t'), qs=dynamicsymbols('z') ):
+    scheme_name = '???.png'
+    real_name = '???.png'
         
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 k=Symbol('k', positive=True),
+                 ivar=Symbol('t'),
+                 qs=dynamicsymbols('z')):
+
         self.m = m
         self.k = k
         self.qs = qs
-        
-        self.mass = MaterialPoint(m,pos1=qs)
-        self.spring = Spring(k,pos1=qs)
+
+        self.mass = MaterialPoint(m, pos1=qs)
+        self.spring = Spring(k, pos1=qs)
         system = self.mass + self.spring
         
         super().__init__(system)
-        
 
-        
+
 class DDoFVehicleSuspension(ComposedSystem):
-    
-    
-    
+    scheme_name = '???.png'
+    real_name = '???.png'
     def __init__(self,
-                 m=Symbol('m',positive=True),
-                 I=Symbol('I',positive=True),
-                 l_rod=Symbol('l_rod',positive=True),
-                 l_l=Symbol('l_l',positive=True),
-                 l_r=Symbol('l_r',positive=True),
-                 k_l=Symbol('k_l',positive=True),
-                 k_r=Symbol('k_r',positive=True),
+                 m=Symbol('m', positive=True),
+                 I=Symbol('I', positive=True),
+                 l_rod=Symbol('l_rod', positive=True),
+                 l_l=Symbol('l_l', positive=True),
+                 l_r=Symbol('l_r', positive=True),
+                 k_l=Symbol('k_l', positive=True),
+                 k_r=Symbol('k_r', positive=True),
                  ivar=Symbol('t'),
-                 qs=dynamicsymbols('z, varphi') ):
+                 qs=dynamicsymbols('z, varphi')):
 
         z, phi = qs
 
-        self.m = m #mass of a rod
-        self.l_l = l_l #offset of left spring
-        self.l_r = l_r #offset of right spring
-        self.l_rod = l_rod #length of a rod
-        self.k_l = k_l #left spring 
-        self.k_r = l_r #right spring
-        self.I = I #moment of inertia of a rod
+        self.m = m  #mass of a rod
+        self.l_l = l_l  #offset of left spring
+        self.l_r = l_r  #offset of right spring
+        self.l_rod = l_rod  #length of a rod
+        self.k_l = k_l  #left spring
+        self.k_r = l_r  #right spring
+        self.I = I  #moment of inertia of a rod
         self.qs = qs
 
-        self.body = RigidBody2D(m, I, pos_lin=z, pos_rot=phi, qs=qs) #rod ----> 
-        self.spring_1 = Spring(k_l,pos1=z+phi*l_l,qs=qs) #left spring
-        self.spring_2 = Spring(k_r,pos1=z-phi*l_r,qs=qs) # right spring
-        system =self.body+ self.spring_1 + self.spring_2
-
+        self.body = RigidBody2D(m, I, pos_lin=z, pos_rot=phi,
+                                qs=qs)  #rod ---->
+        self.spring_1 = Spring(k_l, pos1=z + phi * l_l, qs=qs)  #left spring
+        self.spring_2 = Spring(k_r, pos1=z - phi * l_r, qs=qs)  # right spring
+        system = self.body + self.spring_1 + self.spring_2
+        
         super().__init__(system)
-        
-        
-class DDoFDoublePendulum(ComposedSystem):
-    
+
+
+class Pendulum(ComposedSystem):
+    """
+    Model of a sDoF mathematical Pendulum:
+
+            Creates a singular model, after inputing correct values of mass - m , gravitational field - g, length of a strong - l and general coordinate which estabilshes an analytical display of a mathematical model of a sDoF pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
+    """
+    scheme_name = 'pendulum.png'
+    real_name = '???'
     def __init__(self,
                  m=Symbol('m', positive=True),
                  g=Symbol('g', positive=True),
                  l=Symbol('l', positive=True),
-                 k=Symbol('k', positive=True),
-                 ivar=Symbol('t'),
-                 qs=dynamicsymbols('varphi, varphi2') ):
-    
-        phi, phi2 = qs
-    
-    
-        self.spring = Spring(k,pos1=phi*l, pos2=phi2*l, qs=qs)
-        self.pendulum_1 = Pendulum(m, g, l, angle=phi, qs=qs)
-        self.pendulum_2 = Pendulum(m, g, l, angle=phi2, qs=qs)
-        system =self.spring+ self.pendulum_1 + self.pendulum_2
+                 angle=dynamicsymbols('varphi'),
+                 qs=None,
+                 ivar=Symbol('t')):
+
+        if qs == None:
+            qs = [angle]
+        else:
+            qs = qs
+
+        Lagrangian = S.Half * m * l**2 * diff(angle, ivar)**2 - m * g * l * (1 - cos(angle))
         
-        super().__init__(system)
-        
+        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
+
+
 class SDoFPendulum(ComposedSystem):
+    scheme_name = '???.png'
+    real_name = '???.png'
     def __init__(self,
                  m=Symbol('m', positive=True),
                  g=Symbol('g', positive=True),
                  l=Symbol('l', positive=True),
                  F=Symbol('F', positive=True),
                  ivar=Symbol('t'),
-                 qs=dynamicsymbols('varphi') ):
+                 qs=[dynamicsymbols('varphi')]):
         phi = qs
-        
-        self.pendulum = Pendulum(m, g, l, angle=phi, qs = qs)
-        self.force = Force(F, pos1=phi, qs = qs)
+
+        self.pendulum = Pendulum(m, g, l, qs=qs)
+        self.force = Force(F, pos1=phi, qs=qs)
         system = self.pendulum + self.force
         
         super().__init__(system)
+
+
+class DDoFDoublePendulum(ComposedSystem):
+    scheme_name = '???.png'
+    real_name = '???.png'
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 g=Symbol('g', positive=True),
+                 l=Symbol('l', positive=True),
+                 k=Symbol('k', positive=True),
+                 ivar=Symbol('t'),
+                 qs=dynamicsymbols('varphi, varphi2')):
+
+        phi, phi2 = qs
+
+        self.spring = Spring(k, pos1=phi * l, pos2=phi2 * l, qs=qs)
+        self.pendulum_1 = Pendulum(m, g, l, angle=phi, qs=qs)
+        self.pendulum_2 = Pendulum(m, g, l, angle=phi2, qs=qs)
+        system = self.spring + self.pendulum_1 + self.pendulum_2
         
+        super().__init__(system)
+
