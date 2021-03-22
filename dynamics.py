@@ -621,7 +621,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return OdeComputationalCase(**computed_case, evaluate=True)
     
     @classmethod
-    def
+    def from_system(cls, system):
+        
+        return cls(system)
 
 
 class LinearDynamicSystem(LagrangesDynamicSystem):
