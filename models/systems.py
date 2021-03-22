@@ -2,7 +2,7 @@ from sympy import *
 from sympy.physics.mechanics import *
 
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
-from .elements import MaterialPoint, Spring, RigidBody2D
+from .elements import MaterialPoint, Spring, RigidBody2D, Force
 
 from sympy.physics.mechanics import *
 from sympy.physics.vector import *
@@ -11,12 +11,24 @@ import base64
 import IPython as IP
 
 
-import os
-print('getcwd dynamics:      ', os.getcwd())
-print('__file__:    ', __file__)
 
 
-class SDoFHarmonicOscillator(HarmonicOscillator):
+class ComposedSystem(HarmonicOscillator):
+
+    scheme_name='pendulum.png'
+    
+    @classmethod
+    def preview(cls):
+        return __file__.replace('.py','/')+str('images/')+cls.scheme_name
+        
+#         with open(f'{img}', "rb") as image_file:
+#             encoded_string = base64.b64encode(image_file.read())
+#         image_file.close()
+
+#         return IP.display.Image(base64.b64decode(encoded_string))
+
+
+class SDoFHarmonicOscillator(ComposedSystem):
     """Ready to use sample Single Degree of Freedom System with mass on spring
         Arguments:
         =========
@@ -66,15 +78,9 @@ class SDoFHarmonicOscillator(HarmonicOscillator):
         
         super().__init__(system)
         
-    @classmethod
-    def preview(cls, img):
-        with open(f'{img}', "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read())
-        image_file.close()
 
-        return IP.display.Image(base64.b64decode(encoded_string))
         
-class DDoFVehicleSuspension(HarmonicOscillator):
+class DDoFVehicleSuspension(ComposedSystem):
     
     
     
@@ -89,7 +95,7 @@ class DDoFVehicleSuspension(HarmonicOscillator):
                  ivar=Symbol('t'),
                  qs=dynamicsymbols('z, varphi') ):
 
-        z,phi=qs
+        z, phi = qs
 
         self.m = m #mass of a rod
         self.l_l = l_l #offset of left spring
@@ -106,3 +112,41 @@ class DDoFVehicleSuspension(HarmonicOscillator):
         system =self.body+ self.spring_1 + self.spring_2
 
         super().__init__(system)
+        
+        
+class DDoFDoublePendulum(ComposedSystem):
+    
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 g=Symbol('g', positive=True),
+                 l=Symbol('l', positive=True),
+                 k=Symbol('k', positive=True),
+                 ivar=Symbol('t'),
+                 qs=dynamicsymbols('varphi, varphi2') ):
+    
+        phi, phi2 = qs
+    
+    
+        self.spring = Spring(k,pos1=phi*l, pos2=phi2*l, qs=qs)
+        self.pendulum_1 = Pendulum(m, g, l, angle=phi, qs=qs)
+        self.pendulum_2 = Pendulum(m, g, l, angle=phi2, qs=qs)
+        system =self.spring+ self.pendulum_1 + self.pendulum_2
+        
+        super().__init__(system)
+        
+class SDoFPendulum(ComposedSystem):
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 g=Symbol('g', positive=True),
+                 l=Symbol('l', positive=True),
+                 F=Symbol('F', positive=True),
+                 ivar=Symbol('t'),
+                 qs=dynamicsymbols('varphi') ):
+        phi = qs
+        
+        self.pendulum = Pendulum(m, g, l, angle=phi, qs = qs)
+        self.force = Force(F, pos1=phi, qs = qs)
+        system = self.pendulum + self.force
+        
+        super().__init__(system)
+        
