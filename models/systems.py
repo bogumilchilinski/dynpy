@@ -2,7 +2,7 @@ from sympy import *
 from sympy.physics.mechanics import *
 
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
-from .elements import MaterialPoint, Spring, RigidBody2D
+from .elements import MaterialPoint, Spring, RigidBody2D, Force
 
 from sympy.physics.mechanics import *
 from sympy.physics.vector import *
@@ -87,7 +87,7 @@ class DDoFVehicleSuspension(HarmonicOscillator):
                  ivar=Symbol('t'),
                  qs=dynamicsymbols('z, varphi') ):
 
-        z,phi=qs
+        z, phi = qs
 
         self.m = m #mass of a rod
         self.l_l = l_l #offset of left spring
@@ -104,3 +104,41 @@ class DDoFVehicleSuspension(HarmonicOscillator):
         system =self.body+ self.spring_1 + self.spring_2
 
         super().__init__(system)
+        
+        
+class DDoFDoublePendulum(HarmonicOscillator):
+    
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 g=Symbol('g', positive=True),
+                 l=Symbol('l', positive=True),
+                 k=Symbol('k', positive=True),
+                 ivar=Symbol('t'),
+                 qs=dynamicsymbols('varphi, varphi2') ):
+    
+        phi, phi2 = qs
+    
+    
+        self.spring = Spring(k,pos1=phi*l, pos2=phi2*l, qs=qs)
+        self.pendulum_1 = Pendulum(m, g, l, angle=phi, qs=qs)
+        self.pendulum_2 = Pendulum(m, g, l, angle=phi2, qs=qs)
+        system =self.spring+ self.pendulum_1 + self.pendulum_2
+        
+        super().__init__(system)
+        
+class SDoFPendulum(HarmonicOscillator):
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 g=Symbol('g', positive=True),
+                 l=Symbol('l', positive=True),
+                 F=Symbol('F', positive=True),
+                 ivar=Symbol('t'),
+                 qs=dynamicsymbols('varphi') ):
+        phi = qs
+        
+        self.pendulum = Pendulum(m, g, l, angle=phi, qs = qs)
+        self.force = Force(F, pos1=phi, qs = qs)
+        system = self.pendulum + self.force
+        
+        super().__init__(system)
+        

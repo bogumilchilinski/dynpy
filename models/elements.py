@@ -186,12 +186,12 @@ class Damper(LagrangesDynamicSystem):
         dpos1 = diff(pos1, ivar)
         dpos2 = diff(pos2, ivar)
         
-        Pd = Point('Pd')
-        Pd.set_vel(frame, (dpos1 - dpos2) * frame.x)
+        P = Point('P')
+        P.set_vel(frame, (dpos1 - dpos2) * frame.x)
         
         D = (((S.Half) * c * (dpos1 - dpos2)**2).diff(dpos1))
         
-        forcelist = [(Pd, -D*frame.x)]
+        forcelist = [(P, -D*frame.x)]
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
 
@@ -210,14 +210,14 @@ Creates a model of a PID controller (proportional , integral , derivative) which
         dpos1 = diff(pos1, ivar)
         d2pos1 = diff(dpos1, ivar)
         
-        Pp = Point('Pp')
-        Pp.set_vel(frame, dpos1 * frame.x)
+        P = Point('P')
+        P.set_vel(frame, dpos1 * frame.x)
         
         In = pos1  # In - error
         u = pos1*ki + dpos1*kp + d2pos1*kd
         G = In - u
         
-        forcelist = [(Pp, G*frame.x)]
+        forcelist = [(P, G*frame.x)]
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
 
@@ -226,19 +226,19 @@ class Excitation(LagrangesDynamicSystem):
     """
     Model of a harmonic extorsion applied onto the elemnt:
     """
-    def __init__(self, f, pos_rot, ivar=Symbol('t'), frame=ReferenceFrame('N')):
+    def __init__(self, f, pos_rot, ivar=Symbol('t'), frame=base_frame):
         
         qs = [pos_rot]
         
         dpos_rot = diff(pos_rot,ivar)
         
-        Pe = Point('Pe')
-        Pe.set_vel(frame, dpos_rot * frame.x)
-        Pe.vel(frame)
+        P = Point('P')
+        P.set_vel(frame, dpos_rot * frame.x)
+        P.vel(frame)
 
         F = f * cos(dpos_rot*ivar) + f * sin(dpos_rot*ivar)
         
-        forcelist = [(Pe, F*frame.x)]
+        forcelist = [(P, F*frame.x)]
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
         
@@ -278,5 +278,3 @@ class Force(LagrangesDynamicSystem):
         
 
 ######################################################################################################################################
-
-
