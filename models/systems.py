@@ -15,20 +15,38 @@ class ComposedSystem(HarmonicOscillator):
     """Base class for all systems
     
     """
-
+    scheme_name = 'engine.png'
+    real_name = 'engine_real.PNG'
+    
+    
     @classmethod
-    def preview(cls,real=False):
-        if real:
-            path = __file__.replace('.py', '/') + str('images/') + cls.real_name
-            with open(f"{path}", "rb") as image_file:
-                encoded_string = base64.b64encode(image_file.read())
-            image_file.close()
-            
+    def _scheme(cls):
+        
+        path = __file__.replace('systems.py', 'images/') + cls.scheme_name
+
+        
+        return path
+    
+    @classmethod
+    def _real_example(cls):
+        
+        path = __file__.replace('systems.py', 'images/') + cls.real_name
+
+        
+        return path
+    
+    @classmethod
+    def preview(cls,example=False):
+        if example:
+            path=cls._real_example()
+             
         else:
-            path = __file__.replace('systems.py', 'images/') + cls.scheme_name
-            with open(f"{path}", "rb") as image_file:
-                encoded_string = base64.b64encode(image_file.read())
-            image_file.close()
+            path=cls._scheme()
+            
+        with open(f"{path}", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+        image_file.close()
+
 
         return IP.display.Image(base64.b64decode(encoded_string))
 
@@ -71,7 +89,7 @@ class SDoFHarmonicOscillator(ComposedSystem):
         -external forces assigned 
         -finally we determine the instance of the system using class LagrangeDynamicSystem
     """
-    scheme_name = '???.png'
+    scheme_name = 'engine.png'
     real_name = '???.png'
         
     def __init__(self,
@@ -152,8 +170,8 @@ class Pendulum(ComposedSystem):
 
 
 class SDoFPendulum(ComposedSystem):
-    scheme_name = '???.png'
-    real_name = '???.png'
+    scheme_name = 'pendulum.png'
+    real_name = 'pendulum.png'
     def __init__(self,
                  m=Symbol('m', positive=True),
                  g=Symbol('g', positive=True),
@@ -161,10 +179,10 @@ class SDoFPendulum(ComposedSystem):
                  F=Symbol('F', positive=True),
                  ivar=Symbol('t'),
                  qs=[dynamicsymbols('varphi')]):
-        phi = qs
+        phi = qs[0]
 
         self.pendulum = Pendulum(m, g, l, qs=qs)
-        self.force = Force(F, pos1=phi, qs=qs)
+        self.force = Force(F, pos1=phi,qs=[phi])
         system = self.pendulum + self.force
         
         super().__init__(system)

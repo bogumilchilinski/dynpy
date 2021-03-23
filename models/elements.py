@@ -1,10 +1,7 @@
-from sympy import *  # S, Symbol, diff
-
+from sympy import *
 from ..dynamics import LagrangesDynamicSystem
-
 from sympy.physics.mechanics import *
 from sympy.physics.vector import *
-
 import base64
 import IPython as IP
 
@@ -35,8 +32,8 @@ class MaterialPoint(Elements):
     """
     """Creates a material point of an inertial body, after inputing correct values of mass -m and general coordinates, which follows a linear motion.
     """
-    scheme_name = 'pendulum.png'
-    real_name = 'pendulum.png'
+    scheme_name = 'material_point.png'
+    real_name = 'material_point.png'
     def __init__(self, m, pos1=0, pos2=0, pos_c=0, qs=None,  ivar=Symbol('t')):
         
         if pos1 == 0 and pos2 == 0:
@@ -69,10 +66,11 @@ class Spring(Elements):
     """
     Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s), which analytically display the dynamics of displacing spring after            cummulating PE.
     """
-    scheme_name = 'pendulum.png'
-    real_name = 'pendulum.png'
-    def __init__(self, stiffness, pos1, pos2=0, qs=None, ivar=Symbol('t')):
+    scheme_name = 'spring.png'
+    real_name = 'spring.png'
+    def __init__(self, stiffness, pos1, pos2=0, qs=None, l_0=Symbol('l_0', positive=True), ivar=Symbol('t')):
         self.stiffness = stiffness
+        self.l_0 = l_0
         if qs == None:
             qs = [pos1]
         else:
@@ -84,11 +82,10 @@ class Spring(Elements):
 
 
 
-class Centroid(Elements):
+class GravitationalForce(Elements):
     """
     Model of a changing centroid for potential energy:
     """
-
     """
     Creates a singular model, after inputing correct values of gravity field - g, mass of - m as well as additionaly the general coordiante
     """
@@ -153,8 +150,8 @@ class RigidBody2D(Elements):
     """
     Creates a singular model, after inputing correct values of moment of inertia - I for rotational element and mass - m for linear element and general coordinates, which             analytically display the dynamics of rotating and propeling object: beam.
     """
-    scheme_name = 'pendulum.png'
-    real_name = 'pendulum.png'
+    scheme_name = 'rigid_body2D.png'
+    real_name = 'rigid_body2D.png'
     def __init__(self, m, I, pos_lin=0, pos_rot=0, pos_lin_c=0, pos_rot_c=0, qs=None, ivar=Symbol('t')):
         
         if pos_lin == 0 and pos_rot == 0:
@@ -177,17 +174,14 @@ class RigidBody2D(Elements):
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
   
         
-
-
-        
 class Damper(Elements):
     """
     Model of a Damper:
 
     Creates a singular model, after inputing correct values of the damping coefficient - c and general coordinates, which establishes a damping force directly proportional to the velocity, in time, of an inertial virbating element.
     """
-    scheme_name = 'pendulum.png'
-    real_name = 'pendulum.png'
+    scheme_name = 'damper.png'
+    real_name = 'damper.png'
     def __init__(self, c, pos1, pos2=0, qs=None, ivar=Symbol('t'), frame=base_frame):
         
 
