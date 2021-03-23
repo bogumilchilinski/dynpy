@@ -1,0 +1,82 @@
+=>PYTHONTEX#py#default#default#0#code#####47#
+left_end=0
+length=0
+left_sup=0
+right_sup=2
+mass_point=-1
+vibr_point=10
+
+list=[left_end,left_sup,right_sup,mass_point,vibr_point,length]
+
+max=max(list)
+min=min(list)
+height=max-min
+=>PYTHONTEX#py#default#default#1#sub#####62#
+\begin{tikzpicture}
+\tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.3cm,post length=0.3cm,segment length=0.3cm}]
+\tikzstyle{ground}=[fill,pattern=north east lines,draw=none,minimum width=0.75cm,minimum height=0.3cm]
+
+\coordinate (origo) at (0,0);
+\coordinate (left_end) at (!{min}cm,0cm);
+
+\node (cantilever) [fill=gray,draw,outer sep=0pt,thick,minimum width=!{max-min}cm, minimum height=!{0.01*(max)}cm,xshift=!{0.5*(max-min)}cm] at (left_end) {};
+\coordinate (left_sup) at (!{left_sup}cm,0cm);
+\coordinate (right_sup) at (!{right_sup}cm,0cm);
+\coordinate (vibr_point) at (!{vibr_point}cm,0cm);
+% \node[thick,regular polygon,regular polygon sides=3, draw,anchor=north,yshift=!{-0.005*max}cm] at (left_sup);
+\node[thick,regular polygon,regular polygon sides=3, draw,anchor=north,yshift=!{-0.005*max}cm] (polygon) at (right_sup) {};
+
+% \draw[ultra thick,<-,anchor=south,yshift=!{0.005*max}cm] (!{mass_point}cm,0cm)--(!{mass_point}cm,1.5cm);
+% \node[draw,circle,fill=red] (vibration_point) at (vibr_point);
+\draw [spring,anchor=south]  (!{min}cm,!{-0.01*(max)}cm) ++ (0cm,!{0.005*height}cm) -- (!{min}cm,-1.5cm) node[left,midway] (left_spring) {$k_r$};
+\draw [spring]  (!{max}cm,!{-0.01*(max)}cm) ++ (0cm,!{0.005*height}cm) -- (!{max}cm,-1.5cm) node[left,midway] (right_spring)  {$k_c$};
+\node[draw,circle,fill=red,label={[yshift=0.4cm,xshift=-0cm]:$\varphi_r$}] (rocker_rot_point) at (right_sup) {};
+
+\node (ground1) [ground,anchor=north west,xshift=-0.5cm,yshift=-0cm,minimum width=1cm] at (polygon.south) {};
+\node (ground2) [ground,anchor=north,xshift=0.3cm,yshift=-0.75cm,minimum width=1cm] at (left_spring) {};
+\draw (ground1.north west) --(ground1.north east);
+\draw (ground2.north west) --(ground2.north east);
+
+\node[draw,circle,minimum size=6cm,yshift=-1.5cm,anchor=north] (cam) at (vibr_point) {};
+\node[draw,circle,fill=black,xshift=-0.5cm,yshift=0.75cm,label={[yshift=0.4cm,xshift=-0cm]:$\varphi_c$}] (cam_rot_point) at (cam) {};
+
+\node[thick,regular polygon,regular polygon sides=3, draw,anchor=north] (cam_support) at (cam_rot_point) {};
+\node (ground3) [ground,anchor=north,xshift=0cm,yshift=-0.2cm,minimum width=1cm] at (cam_support) {};
+\draw[] (ground3.north west) --(ground3.north east);
+\draw[thick, ->,] (cam_rot_point)[xshift=0.4cm,yshift=-0.2cm] arc (-35:215:0.5cm) ;
+\draw[thick, <-,] (rocker_rot_point)[xshift=0.4cm,yshift=-0.2cm] arc (-35:215:0.5cm) ;
+\draw (cantilever.west)--++(0cm,1.5cm) node (long_line_left) {};
+\draw (cantilever.east)--++(0cm,1.5cm) node (long_line_right) {};
+\draw[<->,transform canvas={yshift=-0.3cm}] (long_line_left.north)--(long_line_right.north) node[midway,above] {$L$};
+
+
+\draw (ground2.south)--++(0cm,-1cm) node (short_line_left) {};
+\node (short_line_right) at (ground1|-short_line_left.south) {};
+\draw(ground1.south)--(short_line_right);
+\draw[<->,transform canvas={yshift=0.3cm}] (short_line_left.south)--(short_line_right.center) node[midway,above] {$L_1$};
+\end{tikzpicture}
+=>PYTHONTEX:SETTINGS#
+version=0.17
+outputdir=pythontex-files-BELKA
+workingdir=.
+workingdirset=false
+gobble=none
+rerun=default
+hashdependencies=default
+makestderr=false
+stderrfilename=full
+keeptemps=none
+pyfuture=default
+pyconfuture=none
+pygments=true
+pygglobal=:GLOBAL||
+fvextfile=-1
+pyconbanner=none
+pyconfilename=stdin
+depythontex=false
+pygfamily=py|python3|
+pygfamily=pycon|pycon|
+pygfamily=sympy|python3|
+pygfamily=sympycon|pycon|
+pygfamily=pylab|python3|
+pygfamily=pylabcon|pycon|

@@ -89,7 +89,7 @@ class SDoFHarmonicOscillator(ComposedSystem):
         -external forces assigned 
         -finally we determine the instance of the system using class LagrangeDynamicSystem
     """
-    scheme_name = '???.png'
+    scheme_name = 'engine.png'
     real_name = '???.png'
         
     def __init__(self,
