@@ -1,5 +1,8 @@
 import sympy as sym
+from sympy import *
 import sympy.physics.mechanics as mech
+from .dynamics import *
+
 import base64
 
 class EmbeddedAnswer:
@@ -344,3 +347,476 @@ class Category:
     
     def __repr__(self):
         return 'MoodleCategory('+self.question_str+')'
+    
+    
+import base64
+
+class MechanicalSystemAnswer(EmbeddedMultichoiceMathAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator,
+                 title='test',
+                 **kwargs):
+        self.title = title
+        self._correct_answers = [answer_generator(system) for system in sym.flatten([correct_system])]
+        self._other_answers = [answer_generator(system) for system in other_systems]
+        
+        super().__init__(self._correct_answers, self._other_answers, **kwargs)
+   
+    def to_string(self):
+        return self.title + '\n' + super().to_string()
+
+    def preview(self, backend=None):
+        print(self.title)
+        print('=' * 100)
+        display(*self._correct_answers)
+        print('=' * 100)
+        print('x' * 100)
+        display(*self._other_answers)
+        print('x' * 100)
+
+        
+        
+########################### MDOF ########################
+
+
+class GoverningEquationMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: (Eq(obj._eoms.doit().expand().applyfunc(simplify).expand(),Matrix([0]*len(obj.q)),evaluate=False)),
+                 **kwargs):
+
+        self.title = 'Podaj równiania ruchu układu:'
+        self.title = 'Determine equation of motion of the system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+        
+
+class SDoFGoverningEquationMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: (Eq(obj._eoms.doit().expand().applyfunc(simplify).expand()[0],0,evaluate=False)),
+                 **kwargs):
+
+        self.title = 'Podaj równiania ruchu układu:'
+        self.title = 'Determine equation of motion of the system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)       
+        
+        
+        
+        
+class CriticalPointsMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Matrix(obj.critical_points()[0:2]),#
+                 **kwargs):
+
+        self.title = 'Określ punkty równowagi rozważanego układu:'
+        self.title = 'Determine the equilibrium points of the considered system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)        
+        
+        
+class LinearizedGoverningEquationMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj:(Eq( HarmonicOscillator(obj.linearized(op_point=True))._eoms.doit(),Matrix([0]*len(obj.q)),evaluate=False)),
+                 **kwargs):
+
+        self.title = 'Liniowe równania ruchu dla układu przedstawionego na rysunku można wyrazić następującym układem równań:'
+        self.title = 'Linear equations of motion for the system presented on a picture might be expressed as following system of equations:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+        
+
+class LagrangianMCA(MechanicalSystemAnswer):
+    def __init__(
+            self,
+            correct_system,
+            other_systems,
+            answer_generator=lambda obj: Eq(Symbol('L'), obj.lagrangian()),
+            **kwargs):
+
+        self.title = 'Wskaż zależność określającą Lagrangian rozpatrywanego układu:'
+        self.title = 'Choose corect dependance which determines Lagrangian of the considered system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+
+class LinearizedLagrangianMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(
+                     Symbol('L'),
+                     HarmonicOscillator(obj.linearized(op_point=True)).lagrangian()),
+                 **kwargs):
+
+        self.title = 'Lagrangian dla małych drgań układu można wyrazić następującym równaniem:'
+        self.title = 'Lagrangian for small vibrations of the system can be expressed as:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+
+class OmegaMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: [
+                     (eig_val) for eig_val in HarmonicOscillator(
+                         obj.linearized(op_point=True)).natural_frequencies() if eig_val != 0
+                 ],
+                 **kwargs):
+
+        self.title = 'Określ częstości drgań swobodnych występujących w układzie:'
+        self.title = 'Determine the frequency of the free vibrations occuring in the system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+class SDoFOmegaMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: [
+                     (eig_val) for eig_val in HarmonicOscillator(
+                         obj.linearized(op_point=True)).natural_frequencies() if eig_val != 0
+                 ][0],
+                 **kwargs):
+
+        self.title = 'Określ częstości drgań swobodnych występujących w układzie:'
+        self.title = 'Determine the frequency of the free vibrations occuring in the system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+        
+        
+
+class FirstModeMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: HarmonicOscillator(
+                     obj.linearized()).modes()[:, 0].n(3),
+                 **kwargs):
+
+        self.title = 'Określ pierwszą postać drgań układu:'
+        self.title = 'Provide a first mode of a system'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+
+class SecondModeMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: HarmonicOscillator(
+                     obj.linearized()).modes()[:, 1].n(3),
+                 **kwargs):
+
+        self.title = 'Określ drugą postać drgań układu:'
+        self.title = 'Provide a second mode of a system'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+
+class SolutionMCA(MechanicalSystemAnswer):
+    def __init__(
+            self,
+            correct_system,
+            other_systems,
+            answer_generator=lambda obj: Eq(Symbol('X'),
+                                            HarmonicOscillator(obj.linearized(op_point=True
+                                            )).general_solution().n(3),
+                                            evaluate=False),
+            **kwargs):
+
+        self.title = 'Wyznacz rozwiązanie ogólne dla rozważanego układu:'
+        self.title = 'Determine a general solution of ODE for provided system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+
+class SteadySolutionMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(
+                     Symbol('X_s'),
+                     HarmonicOscillator(obj.linearized(op_point=True)).steady_solution().n(3),
+                     evaluate=False),
+                 **kwargs):
+
+        self.title = 'Wyznacz rozwiązanie szczególne dla rozważanego układu:'
+        self.title = 'Determine a particular solution of ODE for provided system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+
+class InertiaMatrixMCA(MechanicalSystemAnswer):
+    def __init__(
+            self,
+            correct_system,
+            other_systems,
+            answer_generator=lambda obj: Eq(Symbol('M'), (HarmonicOscillator(
+                obj.linearized(op_point=True)).inertia_matrix()),
+                                            evaluate=False),
+            **kwargs):
+        self.title = 'Określ macierz bezwładności układu:'
+        self.title = 'Determine the inertia matrix:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+
+class StiffnessMatrixMCA(MechanicalSystemAnswer):
+    def __init__(
+        
+            self,
+            correct_system,
+            other_systems,
+            answer_generator=lambda obj: Eq(Symbol('K'), (HarmonicOscillator(
+                obj.linearized(op_point=True)).stiffness_matrix()),
+                                            evaluate=False),
+            **kwargs):
+        self.title = 'Określ macierz sztywności układu:'
+        self.title = 'Determine the stiffness matrix of our system'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+
+class LeftSpringForceMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda
+                 obj: Eq(Symbol('F_sl'),
+                         ((HarmonicOscillator(obj.linearized()).stiffness_matrix()[0] + HarmonicOscillator(obj.linearized()).stiffness_matrix()[
+                             1])) * HarmonicOscillator(obj.linearized()).general_solution().n(3)[0],
+                         evaluate=False),
+                 **kwargs):
+        self.title = 'Podaj wartość siły dynamicznej w lewej sprężynie:'
+        self.title = 'Specify a value of dynamic force in the left spring:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+
+class RightSpringForceMCA(MechanicalSystemAnswer):
+    def __init__(
+            self,
+            correct_system,
+            other_systems,
+            answer_generator=lambda obj: Eq(Symbol('F_sr'),
+                                            (-HarmonicOscillator(obj.linearized()).stiffness_matrix()[1] *
+                                             (HarmonicOscillator(obj.linearized()).general_solution().n(3)[0] -
+                                              HarmonicOscillator(obj.linearized()).general_solution().n(3)[1])),
+                                            evaluate=False),
+            **kwargs):
+        self.title = 'Podaj wartość siły dynamicznej w prawej sprężynie:'
+        self.title = 'Specify a value of dynamic force in the right spring:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+    
+class PeriodMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: [
+                     2*pi / ((freq_val))
+                     for freq_val in HarmonicOscillator(obj.linearized()).natural_frequencies() if freq_val != 0
+                 ][0],
+                 **kwargs):
+        self.title = 'Podaj wartość okresu:'
+        self.title = 'Specify the value of a period:'
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+
+class FrequencyResponseFunctionMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Symbol(
+                     'FRF'), HarmonicOscillator(obj.linearized()).frequency_response_function(),
+                                            evaluate=False),
+                 **kwargs):
+        self.title = 'Podaj wartość FRF:'
+        self.title = 'Calculate the FRF:'
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+FRFMCA=FrequencyResponseFunctionMCA
+
+
+class FRFforOmega0(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Symbol(
+                     'FRF(\omega_0)'), HarmonicOscillator(obj.linearized()).frequency_response_function().subs(Omega,sqrt(obj.stiffness_matrix()[0]/obj.inertia_matrix()[0])),
+                                            evaluate=False),
+                 **kwargs):
+        self.title = 'Wyznaczać wartość FRF dla częstości drgań swobodnych nietłumionych:'
+        self.title = 'Determine the FRF value for undamped natural frequency:'
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+class DynamicAmplificationFactorMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+#                  answer_generator=lambda obj: Eq(Symbol(
+#                      'DAF'),HarmonicOscillator(obj.linearized()).stiffness_matrix()[0]/(HarmonicOscillator(obj.linearized()).stiffness_matrix()[0]-Omega**2*HarmonicOscillator(obj.linearized()).inertia_matrix()[0]),
+#                                                  evaluate=False),
+                 answer_generator=lambda obj: Eq(Symbol(
+                      'DAF'),obj.dynamic_amplification_factor(),evaluate=False),
+                 **kwargs):
+        self.title = 'Podaj wartość DAF:'
+        self.title = 'Calculate the DAF:'
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)        
+DAFMCA=DynamicAmplificationFactorMCA        
+
+class PotentialEnergyMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Symbol('V'), -obj.lagrangian().subs({ coord:0 for coord in Matrix(obj.q).diff(t)}),
+                                                 evaluate=False),
+                 **kwargs):
+        self.title = 'Podaj wartość energi potencjalnej:'
+        self.title = 'Estimate value of the potential energy:'
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)        
+        
+        
+class KineticEnergyMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Symbol('T'),obj.lagrangian() -obj.lagrangian().subs({ coord:0 for coord in Matrix(obj.q).diff(t)}),
+                                                 evaluate=False),
+                 **kwargs):
+        self.title = 'Podaj wartość energi kinetycznej:'
+        self.title = 'Estimate value of the kinetic energy:'
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)        
+        
+class DampingFactorMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Symbol('c'), obj.damping_matrix()[0]   ,
+                                                 evaluate=False),
+                 **kwargs):
+        self.title = 'Podaj wartość współczynnika tłumienia układa:'
+        self.title = 'What is the value of a damping factor?'
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)                
+
+class SDoFDampedOmegaMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Symbol('omega_h'),[
+                     sqrt(eig_val-(obj.damping_matrix()[0]/2/obj.inertia_matrix()[0])**2)
+                     for eig_val in obj.eigenvalues() if eig_val != 0
+                 ][0]),
+                 **kwargs):
+
+        self.title = 'Określ częstość tłumionych drgań swobodnych występujących w układzie:'
+        self.title = 'Determine the system natural frequency of damped vibration:'
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs) 
