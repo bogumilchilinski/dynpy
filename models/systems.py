@@ -110,16 +110,16 @@ class SDoFHarmonicOscillator(ComposedSystem):
 
 
 class DDoFVehicleSuspension(ComposedSystem):
-    scheme_name = '???.png'
-    real_name = '???.png'
+    scheme_name = 'car.png'
+    real_name = 'car_real.jpg'
     def __init__(self,
                  m=Symbol('m', positive=True),
                  I=Symbol('I', positive=True),
                  l_rod=Symbol('l_rod', positive=True),
                  l_l=Symbol('l_l', positive=True),
                  l_r=Symbol('l_r', positive=True),
-                 k_l=Symbol('k_l', positive=True),
-                 k_r=Symbol('k_r', positive=True),
+                 k_l=Symbol('k_2', positive=True),
+                 k_r=Symbol('k_1', positive=True),
                  ivar=Symbol('t'),
                  qs=dynamicsymbols('z, varphi')):
 
