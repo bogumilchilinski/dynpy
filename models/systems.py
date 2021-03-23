@@ -179,7 +179,7 @@ class SDoFPendulum(ComposedSystem):
                  F=Symbol('F', positive=True),
                  ivar=Symbol('t'),
                  qs=[dynamicsymbols('varphi')]):
-        phi = qs
+        phi = qs[0]
 
         self.pendulum = Pendulum(m, g, l, qs=qs)
         self.force = Force(F, pos1=phi, qs=qs)
