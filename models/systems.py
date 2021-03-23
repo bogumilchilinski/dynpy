@@ -170,8 +170,8 @@ class Pendulum(ComposedSystem):
 
 
 class SDoFPendulum(ComposedSystem):
-    scheme_name = '???.png'
-    real_name = '???.png'
+    scheme_name = 'pendulum.png'
+    real_name = 'pendulum.png'
     def __init__(self,
                  m=Symbol('m', positive=True),
                  g=Symbol('g', positive=True),
@@ -182,7 +182,7 @@ class SDoFPendulum(ComposedSystem):
         phi = qs[0]
 
         self.pendulum = Pendulum(m, g, l, qs=qs)
-        self.force = Force(F, pos1=phi, qs=qs)
+        self.force = Force(F, pos1=phi,qs=[phi])
         system = self.pendulum + self.force
         
         super().__init__(system)
