@@ -481,7 +481,13 @@ class MultiTimeScaleMethod(LinearODESolution):
         eoms_approximated = Matrix(odes_system).subs(
             self.predicted_solution(order, dict=True)).subs(sec_ord_subs).doit().subs(first_ord_subs)
 
-        return eoms_approximated
+        t_fun_subs_dict=({
+                expr_tmp:expr_tmp.subs(self.ivar,self.t_list[0]) for expr_tmp in
+                (eoms_approximated.atoms(Function) -  {*self.t_list} - { *sum([list(self.approximation_function(ord_tmp,order)) for ord_tmp in range(order+1)],[])  })
+            
+            })
+        
+        return eoms_approximated.subs(t_fun_subs_dict)
 
     def eoms_approximation_list(self,
                                 max_order=3,
