@@ -612,9 +612,18 @@ class MultiTimeScaleMethod(LinearODESolution):
             ivar=self.ivar
 
         eoms = eoms_nth
+        
+        print('='*100,'eoms_nth for solve')
+        display(eoms )
+        print('='*100,'eoms_nth for solve')
+        
         eoms = (eoms.expand()).applyfunc(
-            lambda eqn: TR10(TR8(TR10(eqn).expand()).expand()).expand())
+            lambda eqn: TR8(TR10(TR8(TR10(eqn).expand()).expand()).expand()))
 
+        print('='*100,'eoms_nth for solve')
+        display(eoms )
+        print('='*100,'eoms_nth for solve')
+        
         print('='*100)
         display(*[row.coeff(comp)  for row in eoms  for comp in secular_comps])
         print('='*100)
