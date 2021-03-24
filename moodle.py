@@ -414,7 +414,22 @@ class SDoFGoverningEquationMCA(MechanicalSystemAnswer):
                          answer_generator=answer_generator,
                          title=self.title,
                          **kwargs)       
-        
+
+class SDoFLinearizedGoverningEquationMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: (Eq(obj.linearized()._eoms.doit().expand().applyfunc(simplify).expand()[0],0,evaluate=False)),
+                 **kwargs):
+
+        self.title = 'Podaj równiania ruchu układu:'
+        self.title = 'Determine equation of motion of the system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)      
         
         
         
@@ -439,7 +454,7 @@ class LinearizedGoverningEquationMCA(MechanicalSystemAnswer):
     def __init__(self,
                  correct_system,
                  other_systems,
-                 answer_generator=lambda obj:(Eq( HarmonicOscillator(obj.linearized(op_point=True))._eoms.doit(),Matrix([0]*len(obj.q)),evaluate=False)),
+                 answer_generator=lambda obj:(Eq( HarmonicOscillator(obj.linearized(op_point=False))._eoms.doit(),Matrix([0]*len(obj.q)),evaluate=False)),
                  **kwargs):
 
         self.title = 'Liniowe równania ruchu dla układu przedstawionego na rysunku można wyrazić następującym układem równań:'
@@ -514,7 +529,7 @@ class SDoFOmegaMCA(MechanicalSystemAnswer):
                  other_systems,
                  answer_generator=lambda obj: [
                      (eig_val) for eig_val in HarmonicOscillator(
-                         obj.linearized(op_point=True)).natural_frequencies() if eig_val != 0
+                         obj.linearized(op_point=False)).natural_frequencies() if eig_val != 0
                  ][0],
                  **kwargs):
 
