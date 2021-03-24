@@ -454,7 +454,7 @@ class LinearizedGoverningEquationMCA(MechanicalSystemAnswer):
     def __init__(self,
                  correct_system,
                  other_systems,
-                 answer_generator=lambda obj:(Eq( HarmonicOscillator(obj.linearized(op_point=False))._eoms.doit(),Matrix([0]*len(obj.q)),evaluate=False)),
+                 answer_generator=lambda obj:(Eq( HarmonicOscillator(obj.linearized())._eoms.doit(),Matrix([0]*len(obj.q)),evaluate=False)),
                  **kwargs):
 
         self.title = 'Liniowe równania ruchu dla układu przedstawionego na rysunku można wyrazić następującym układem równań:'
@@ -491,7 +491,7 @@ class LinearizedLagrangianMCA(MechanicalSystemAnswer):
                  other_systems,
                  answer_generator=lambda obj: Eq(
                      Symbol('L'),
-                     HarmonicOscillator(obj.linearized(op_point=True)).lagrangian()),
+                     HarmonicOscillator(obj.linearized()).lagrangian()), # op_point to remove | True or False - doesn't matter
                  **kwargs):
 
         self.title = 'Lagrangian dla małych drgań układu można wyrazić następującym równaniem:'
@@ -510,7 +510,7 @@ class OmegaMCA(MechanicalSystemAnswer):
                  other_systems,
                  answer_generator=lambda obj: [
                      (eig_val) for eig_val in HarmonicOscillator(
-                         obj.linearized(op_point=True)).natural_frequencies() if eig_val != 0
+                         obj.linearized()).natural_frequencies() if eig_val != 0
                  ],
                  **kwargs):
 
@@ -529,7 +529,7 @@ class SDoFOmegaMCA(MechanicalSystemAnswer):
                  other_systems,
                  answer_generator=lambda obj: [
                      (eig_val) for eig_val in HarmonicOscillator(
-                         obj.linearized(op_point=False)).natural_frequencies() if eig_val != 0
+                         obj.linearized()).natural_frequencies() if eig_val != 0
                  ][0],
                  **kwargs):
 
@@ -586,7 +586,7 @@ class SolutionMCA(MechanicalSystemAnswer):
             correct_system,
             other_systems,
             answer_generator=lambda obj: Eq(Symbol('X'),
-                                            HarmonicOscillator(obj.linearized(op_point=True
+                                            HarmonicOscillator(obj.linearized(
                                             )).general_solution().n(3),
                                             evaluate=False),
             **kwargs):
@@ -607,7 +607,7 @@ class SteadySolutionMCA(MechanicalSystemAnswer):
                  other_systems,
                  answer_generator=lambda obj: Eq(
                      Symbol('X_s'),
-                     HarmonicOscillator(obj.linearized(op_point=True)).steady_solution().n(3),
+                     HarmonicOscillator(obj.linearized()).steady_solution().n(3),
                      evaluate=False),
                  **kwargs):
 
@@ -627,7 +627,7 @@ class InertiaMatrixMCA(MechanicalSystemAnswer):
             correct_system,
             other_systems,
             answer_generator=lambda obj: Eq(Symbol('M'), (HarmonicOscillator(
-                obj.linearized(op_point=True)).inertia_matrix()),
+                obj.linearized()).inertia_matrix()),
                                             evaluate=False),
             **kwargs):
         self.title = 'Określ macierz bezwładności układu:'
@@ -647,7 +647,7 @@ class StiffnessMatrixMCA(MechanicalSystemAnswer):
             correct_system,
             other_systems,
             answer_generator=lambda obj: Eq(Symbol('K'), (HarmonicOscillator(
-                obj.linearized(op_point=True)).stiffness_matrix()),
+                obj.linearized()).stiffness_matrix()),
                                             evaluate=False),
             **kwargs):
         self.title = 'Określ macierz sztywności układu:'

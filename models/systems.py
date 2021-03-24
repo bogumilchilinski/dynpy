@@ -117,11 +117,11 @@ class DDoFVehicleSuspension(ComposedSystem):
     def __init__(self,
                  m=Symbol('m', positive=True),
                  I=Symbol('I', positive=True),
-                 l_rod=Symbol('l_rod', positive=True),
-                 l_l=Symbol('l_l', positive=True),
-                 l_r=Symbol('l_r', positive=True),
-                 k_l=Symbol('k_2', positive=True),
-                 k_r=Symbol('k_1', positive=True),
+                 l_rod=Symbol('2l', positive=True),
+                 l_l=Symbol('l', positive=True),
+                 l_r=Symbol('l', positive=True),
+                 k_2=Symbol('k_2', positive=True),
+                 k_1=Symbol('k_1', positive=True),
                  ivar=Symbol('t'),
                  qs=dynamicsymbols('z, varphi')):
 
@@ -131,15 +131,15 @@ class DDoFVehicleSuspension(ComposedSystem):
         self.l_l = l_l  #offset of left spring
         self.l_r = l_r  #offset of right spring
         self.l_rod = l_rod  #length of a rod
-        self.k_l = k_l  #left spring
-        self.k_r = l_r  #right spring
+        self.k_2 = k_2  #left spring
+        self.k_1 = k_1  #right spring
         self.I = I  #moment of inertia of a rod
         self.qs = qs
 
         self.body = RigidBody2D(m, I, pos_lin=z, pos_rot=phi,
                                 qs=qs)  #rod ---->
-        self.spring_1 = Spring(k_l, pos1=z + phi * l_l, qs=qs)  #left spring
-        self.spring_2 = Spring(k_r, pos1=z - phi * l_r, qs=qs)  # right spring
+        self.spring_1 = Spring(k_2, pos1=z + phi * l_l, qs=qs)  #left spring
+        self.spring_2 = Spring(k_1, pos1=z - phi * l_r, qs=qs)  # right spring
         system = self.body + self.spring_1 + self.spring_2
         
         super().__init__(system)
