@@ -188,7 +188,7 @@ class SDoFPendulum(ComposedSystem):
         phi = angle
 
         self.pendulum = Pendulum(m1, g, l1, angle=angle)
-        self.force = Force(-F*l*cos(phi), pos1=phi,qs=[phi])
+        self.force = Force(-F*l1*cos(phi), pos1=phi,qs=[phi])
         system = self.pendulum + self.force
         
         super().__init__(system)
