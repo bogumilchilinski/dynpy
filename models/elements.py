@@ -68,17 +68,33 @@ class Spring(Elements):
     """
     scheme_name = 'spring.png'
     real_name = 'spring.png'
-    def __init__(self, stiffness, pos1, pos2=0, qs=None, l_0=Symbol('l_0', positive=True), ivar=Symbol('t')):
-        self.stiffness = stiffness
-        self.l_0 = l_0
-        if qs == None:
+    def __init__(self, stiffness, pos1, pos2=0, qs=None, ivar=Symbol('t'), frame = base_frame):
+        if not qs:
             qs = [pos1]
         else:
             qs = qs
 
-        Lagrangian = -(S.One / 2 * (stiffness * (pos1 - pos2)**2))
+        if isinstance(pos1, Point): 
+            P1 = pos1
+            P2 = pos2
+            if not qs:
+                diffs = P1.vel(frame).magnitude().atoms(Derivative)
+                diffs2 = P2.vel(frame).magnitude().atoms(Derivative)
+                
+                qs= [deriv.args[0] for deriv in diffs]
+                qs = np.append(qs, [deriv.args[0] for deriv in diffs2])
+                print(qs)
 
-        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
+            Pa = Particle('Pa', P1, 1)
+            Pa.potential_energy = S.Half * k * P1.pos_from(P2).magnitude()**2
+
+            L = Lagrangian(frame, Pa)
+
+        else:
+            L = -S.Half * stiffness * (pos1 - pos2)**2
+
+
+        super().__init__(Lagrangian=L, qs=qs, ivar=ivar)
 
 
 
@@ -118,8 +134,8 @@ class Disk(Elements):
     Model of a Disk:
     Creates a singular model, after inputing correct values of moment of inertia - I and rotational general coordinate, which analytically displays the dynamics of a rotating wheel.
     """
-    scheme_name = 'pendulum.png'
-    real_name = 'pendulum.png'
+    scheme_name = 'disk.png'
+    real_name = 'disk.png'
     def __init__(self, I, pos1=0, pos_c=0, qs=None, ivar=Symbol('t')):
         
         if pos1 == 0:
@@ -188,7 +204,7 @@ class Damper(Elements):
         if qs == None:
             qs = [pos1]
         else:
-            qs = [pos1, pos2]
+            qs = qs
         
         dpos1 = diff(pos1, ivar)
         dpos2 = diff(pos2, ivar)

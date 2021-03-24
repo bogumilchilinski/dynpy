@@ -110,8 +110,8 @@ class SDoFHarmonicOscillator(ComposedSystem):
 
 
 class DDoFVehicleSuspension(ComposedSystem):
-    scheme_name = '???.png'
-    real_name = '???.png'
+    scheme_name = 'mdof_car.png'
+    real_name = 'mdof_car_real.png'
     def __init__(self,
                  m=Symbol('m', positive=True),
                  I=Symbol('I', positive=True),
@@ -150,7 +150,7 @@ class Pendulum(ComposedSystem):
             Creates a singular model, after inputing correct values of mass - m , gravitational field - g, length of a strong - l and general coordinate which estabilshes an analytical display of a mathematical model of a sDoF pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
     """
     scheme_name = 'pendulum.png'
-    real_name = '???'
+    real_name = 'pendulum.png'
     def __init__(self,
                  m=Symbol('m', positive=True),
                  g=Symbol('g', positive=True),
@@ -177,20 +177,21 @@ class SDoFPendulum(ComposedSystem):
                  g=Symbol('g', positive=True),
                  l=Symbol('l', positive=True),
                  F=Symbol('F', positive=True),
+                 Omega=Symbol('Omega', poitive=True),
                  ivar=Symbol('t'),
                  qs=[dynamicsymbols('varphi')]):
         phi = qs[0]
 
         self.pendulum = Pendulum(m, g, l, qs=qs)
-        self.force = Force(F, pos1=phi,qs=[phi])
+        self.force = Force(F*l*cos(phi), pos1=phi,qs=qs)
         system = self.pendulum + self.force
         
         super().__init__(system)
 
 
 class DDoFDoublePendulum(ComposedSystem):
-    scheme_name = '???.png'
-    real_name = '???.png'
+    scheme_name = 'mdof_dpendulum.png'
+    real_name = 'mdof_dpendulum_real.png'
     def __init__(self,
                  m=Symbol('m', positive=True),
                  g=Symbol('g', positive=True),
