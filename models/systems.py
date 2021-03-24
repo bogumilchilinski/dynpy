@@ -122,6 +122,7 @@ class DDoFVehicleSuspension(ComposedSystem):
                  l_r=Symbol('l', positive=True),
                  k_2=Symbol('k_2', positive=True),
                  k_1=Symbol('k_1', positive=True),
+                 F_engine=Symbol('F_{engine}', positive=True),
                  ivar=Symbol('t'),
                  qs=dynamicsymbols('z, varphi')):
 
@@ -134,13 +135,15 @@ class DDoFVehicleSuspension(ComposedSystem):
         self.k_2 = k_2  #left spring
         self.k_1 = k_1  #right spring
         self.I = I  #moment of inertia of a rod
+        self.F_engine = F_engine
         self.qs = qs
 
         self.body = RigidBody2D(m, I, pos_lin=z, pos_rot=phi,
                                 qs=qs)  #rod ---->
         self.spring_1 = Spring(k_2, pos1=z + phi * l_l, qs=qs)  #left spring
         self.spring_2 = Spring(k_1, pos1=z - phi * l_r, qs=qs)  # right spring
-        system = self.body + self.spring_1 + self.spring_2
+        self.force = Force(F_engine, pos1=z-l_r*phi,qs=qs)
+        system = self.body + self.spring_1 + self.spring_2+self.force
         
         super().__init__(system)
 
@@ -193,6 +196,28 @@ class SDoFPendulum(ComposedSystem):
         
         super().__init__(system)
 
+        
+class SDoFDampedPendulum(ComposedSystem):
+    scheme_name = 'damped_pendulum.png'
+    real_name = 'pendulum2_real.jpg'
+    def __init__(self,
+                 m1=Symbol('m_1', positive=True),
+                 g=Symbol('g', positive=True),
+                 l1=Symbol('l_1', positive=True),
+                 c=Symbol('c', positive=True),
+                 angle=dynamicsymbols('varphi_1'),
+                 qs=None,
+                 ivar=Symbol('t'),
+                ):
+        phi = angle
+
+        self.pendulum = Pendulum(m1, g, l1, angle=angle)
+        self.force = Force(-c*diff(angle,ivar), pos1=phi,qs=[phi])
+        system = self.pendulum + self.force
+        
+        super().__init__(system)
+        
+        
 
 class DDoFDoublePendulum(ComposedSystem):
     scheme_name = 'mdof_dpendulum.png'

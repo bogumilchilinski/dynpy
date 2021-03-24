@@ -283,14 +283,15 @@ class Force(LagrangesDynamicSystem):
                  ivar=Symbol('t'),
                  frame = base_frame):
 
-        if not qs == None:
+        if qs == None:
             qs = [pos1]
+            
         else:
             qs = qs
     
         if isinstance(pos1, Point):
             P = pos1
-            if not qs:
+            if qs==None:
                 diffs=P.vel(frame).magnitude().atoms(Derivative)
                 
                 qs= [deriv.args[0] for deriv in diffs]
@@ -300,8 +301,7 @@ class Force(LagrangesDynamicSystem):
             P.set_vel(frame,pos1.diff(ivar)*frame.x)
             force=force*frame.x
 
-
-        forcelist = [(P, force)]
+        forcelist=[(P,force)]
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
         
