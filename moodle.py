@@ -4,6 +4,7 @@ import sympy.physics.mechanics as mech
 from .dynamics import *
 
 import base64
+t=Symbol('t')
 
 class EmbeddedAnswer:
     """ Class EmeddedAnswer allows to create a space for numerical answer.
@@ -454,7 +455,7 @@ class LinearizedGoverningEquationMCA(MechanicalSystemAnswer):
     def __init__(self,
                  correct_system,
                  other_systems,
-                 answer_generator=lambda obj:(Eq( HarmonicOscillator(obj.linearized(op_point=False))._eoms.doit(),Matrix([0]*len(obj.q)),evaluate=False)),
+                 answer_generator=lambda obj:(Eq( HarmonicOscillator(obj.linearized())._eoms.doit(),Matrix([0]*len(obj.q)),evaluate=False)),
                  **kwargs):
 
         self.title = 'Liniowe równania ruchu dla układu przedstawionego na rysunku można wyrazić następującym układem równań:'
@@ -484,14 +485,31 @@ class LagrangianMCA(MechanicalSystemAnswer):
                          title=self.title,
                          **kwargs)
 
+class ExternalForcesMCA(MechanicalSystemAnswer):
+    def __init__(
+            self,
+            correct_system,
+            other_systems,
+            answer_generator=lambda obj: Eq(Symbol('F'), obj.external_forces(),evaluate=False),
+            **kwargs):
 
+        self.title = 'Określ wektor sił w układzie:'
+        self.title = 'Specify a forcing vector of the system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+        
 class LinearizedLagrangianMCA(MechanicalSystemAnswer):
     def __init__(self,
                  correct_system,
                  other_systems,
                  answer_generator=lambda obj: Eq(
                      Symbol('L'),
-                     HarmonicOscillator(obj.linearized(op_point=True)).lagrangian()),
+                     HarmonicOscillator(obj.linearized()).lagrangian()), # op_point to remove | True or False - doesn't matter
                  **kwargs):
 
         self.title = 'Lagrangian dla małych drgań układu można wyrazić następującym równaniem:'
@@ -510,7 +528,7 @@ class OmegaMCA(MechanicalSystemAnswer):
                  other_systems,
                  answer_generator=lambda obj: [
                      (eig_val) for eig_val in HarmonicOscillator(
-                         obj.linearized(op_point=True)).natural_frequencies() if eig_val != 0
+                         obj.linearized()).natural_frequencies() if eig_val != 0
                  ],
                  **kwargs):
 
@@ -529,7 +547,7 @@ class SDoFOmegaMCA(MechanicalSystemAnswer):
                  other_systems,
                  answer_generator=lambda obj: [
                      (eig_val) for eig_val in HarmonicOscillator(
-                         obj.linearized(op_point=False)).natural_frequencies() if eig_val != 0
+                         obj.linearized()).natural_frequencies() if eig_val != 0
                  ][0],
                  **kwargs):
 
@@ -586,7 +604,7 @@ class SolutionMCA(MechanicalSystemAnswer):
             correct_system,
             other_systems,
             answer_generator=lambda obj: Eq(Symbol('X'),
-                                            HarmonicOscillator(obj.linearized(op_point=True
+                                            HarmonicOscillator(obj.linearized(
                                             )).general_solution().n(3),
                                             evaluate=False),
             **kwargs):
@@ -607,7 +625,7 @@ class SteadySolutionMCA(MechanicalSystemAnswer):
                  other_systems,
                  answer_generator=lambda obj: Eq(
                      Symbol('X_s'),
-                     HarmonicOscillator(obj.linearized(op_point=True)).steady_solution().n(3),
+                     HarmonicOscillator(obj.linearized()).steady_solution().n(3),
                      evaluate=False),
                  **kwargs):
 
@@ -627,7 +645,7 @@ class InertiaMatrixMCA(MechanicalSystemAnswer):
             correct_system,
             other_systems,
             answer_generator=lambda obj: Eq(Symbol('M'), (HarmonicOscillator(
-                obj.linearized(op_point=True)).inertia_matrix()),
+                obj.linearized()).inertia_matrix()),
                                             evaluate=False),
             **kwargs):
         self.title = 'Określ macierz bezwładności układu:'
@@ -647,7 +665,7 @@ class StiffnessMatrixMCA(MechanicalSystemAnswer):
             correct_system,
             other_systems,
             answer_generator=lambda obj: Eq(Symbol('K'), (HarmonicOscillator(
-                obj.linearized(op_point=True)).stiffness_matrix()),
+                obj.linearized()).stiffness_matrix()),
                                             evaluate=False),
             **kwargs):
         self.title = 'Określ macierz sztywności układu:'
@@ -822,10 +840,7 @@ class SDoFDampedOmegaMCA(MechanicalSystemAnswer):
     def __init__(self,
                  correct_system,
                  other_systems,
-                 answer_generator=lambda obj: Eq(Symbol('omega_h'),[
-                     sqrt(eig_val-(obj.damping_matrix()[0]/2/obj.inertia_matrix()[0])**2)
-                     for eig_val in obj.eigenvalues() if eig_val != 0
-                 ][0]),
+                 answer_generator=lambda obj: Eq(Symbol('omega_h'),list(HarmonicOscillator(obj.linearized()).damped_natural_frequencies())[0]),
                  **kwargs):
 
         self.title = 'Określ częstość tłumionych drgań swobodnych występujących w układzie:'

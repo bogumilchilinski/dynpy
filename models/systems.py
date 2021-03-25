@@ -17,36 +17,32 @@ class ComposedSystem(HarmonicOscillator):
     """
     scheme_name = 'engine.png'
     real_name = 'engine_real.PNG'
-    
-    
+
     @classmethod
     def _scheme(cls):
-        
+
         path = __file__.replace('systems.py', 'images/') + cls.scheme_name
 
-        
         return path
-    
+
     @classmethod
     def _real_example(cls):
-        
+
         path = __file__.replace('systems.py', 'images/') + cls.real_name
 
-        
         return path
-    
+
     @classmethod
-    def preview(cls,example=False):
+    def preview(cls, example=False):
         if example:
-            path=cls._real_example()
-             
+            path = cls._real_example()
+
         else:
-            path=cls._scheme()
-            
+            path = cls._scheme()
+
         with open(f"{path}", "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read())
         image_file.close()
-
 
         return IP.display.Image(base64.b64decode(encoded_string))
 
@@ -91,7 +87,7 @@ class SDoFHarmonicOscillator(ComposedSystem):
     """
     scheme_name = 'engine.png'
     real_name = '???.png'
-        
+
     def __init__(self,
                  m=Symbol('m', positive=True),
                  k=Symbol('k', positive=True),
@@ -105,7 +101,7 @@ class SDoFHarmonicOscillator(ComposedSystem):
         self.mass = MaterialPoint(m, pos1=qs)
         self.spring = Spring(k, pos1=qs)
         system = self.mass + self.spring
-        
+
         super().__init__(system)
 
 
@@ -117,11 +113,12 @@ class DDoFVehicleSuspension(ComposedSystem):
     def __init__(self,
                  m=Symbol('m', positive=True),
                  I=Symbol('I', positive=True),
-                 l_rod=Symbol('l_rod', positive=True),
-                 l_l=Symbol('l_l', positive=True),
-                 l_r=Symbol('l_r', positive=True),
-                 k_l=Symbol('k_2', positive=True),
-                 k_r=Symbol('k_1', positive=True),
+                 l_rod=Symbol('2l', positive=True),
+                 l_l=Symbol('l', positive=True),
+                 l_r=Symbol('l', positive=True),
+                 k_2=Symbol('k_2', positive=True),
+                 k_1=Symbol('k_1', positive=True),
+                 F_engine=Symbol('F_{engine}', positive=True),
                  ivar=Symbol('t'),
                  qs=dynamicsymbols('z, varphi')):
 
@@ -131,17 +128,19 @@ class DDoFVehicleSuspension(ComposedSystem):
         self.l_l = l_l  #offset of left spring
         self.l_r = l_r  #offset of right spring
         self.l_rod = l_rod  #length of a rod
-        self.k_l = k_l  #left spring
-        self.k_r = l_r  #right spring
+        self.k_2 = k_2  #left spring
+        self.k_1 = k_1  #right spring
         self.I = I  #moment of inertia of a rod
+        self.F_engine = F_engine
         self.qs = qs
 
         self.body = RigidBody2D(m, I, pos_lin=z, pos_rot=phi,
                                 qs=qs)  #rod ---->
-        self.spring_1 = Spring(k_l, pos1=z + phi * l_l, qs=qs)  #left spring
-        self.spring_2 = Spring(k_r, pos1=z - phi * l_r, qs=qs)  # right spring
-        system = self.body + self.spring_1 + self.spring_2
-        
+        self.spring_1 = Spring(k_2, pos1=z + phi * l_l, qs=qs)  #left spring
+        self.spring_2 = Spring(k_1, pos1=z - phi * l_r, qs=qs)  # right spring
+        self.force = Force(F_engine, pos1=z - l_r * phi, qs=qs)
+        system = self.body + self.spring_1 + self.spring_2 + self.force
+
         super().__init__(system)
 
 
@@ -153,6 +152,7 @@ class Pendulum(ComposedSystem):
     """
     scheme_name = 'pendulum.png'
     real_name = 'pendulum.png'
+
     def __init__(self,
                  m=Symbol('m', positive=True),
                  g=Symbol('g', positive=True),
@@ -166,37 +166,62 @@ class Pendulum(ComposedSystem):
         else:
             qs = qs
 
-        Lagrangian = S.Half * m * l**2 * diff(angle, ivar)**2 - m * g * l * (1 - cos(angle))
-        
+        Lagrangian = S.Half * m * l**2 * diff(
+            angle, ivar)**2 - m * g * l * (1 - cos(angle))
+
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
 
 class SDoFPendulum(ComposedSystem):
     scheme_name = 'horizontal_forced_pendulum.png'
     real_name = 'pendulum2_real.jpg'
-    def __init__(self,
-                 m1=Symbol('m_1', positive=True),
-                 g=Symbol('g', positive=True),
-                 l1=Symbol('l_1', positive=True),
-                 F=Symbol('F', positive=True),
-                 
-                 
-                angle=dynamicsymbols('varphi_1'),
-                 qs=None,
-                 ivar=Symbol('t'),
-                ):
+
+    def __init__(
+            self,
+            m1=Symbol('m_1', positive=True),
+            g=Symbol('g', positive=True),
+            l1=Symbol('l_1', positive=True),
+            F=Symbol('F', positive=True),
+            angle=dynamicsymbols('varphi_1'),
+            qs=None,
+            ivar=Symbol('t'),
+    ):
         phi = angle
 
         self.pendulum = Pendulum(m1, g, l1, angle=angle)
-        self.force = Force(-F*l1*cos(phi), pos1=phi,qs=[phi])
+        self.force = Force(-F * l1 * cos(phi), pos1=phi, qs=[phi])
         system = self.pendulum + self.force
-        
+
+        super().__init__(system)
+
+
+class SDoFDampedPendulum(ComposedSystem):
+    scheme_name = 'damped_pendulum.png'
+    real_name = 'pendulum2_real.jpg'
+
+    def __init__(
+            self,
+            m1=Symbol('m_1', positive=True),
+            g=Symbol('g', positive=True),
+            l1=Symbol('l_1', positive=True),
+            c=Symbol('c', positive=True),
+            angle=dynamicsymbols('varphi_1'),
+            qs=None,
+            ivar=Symbol('t'),
+    ):
+        phi = angle
+
+        self.pendulum = Pendulum(m1, g, l1, angle=angle)
+        self.force = Force(-c * diff(angle, ivar), pos1=phi, qs=[phi])
+        system = self.pendulum + self.force
+
         super().__init__(system)
 
 
 class DDoFDoublePendulum(ComposedSystem):
     scheme_name = 'mdof_dpendulum.png'
     real_name = 'mdof_dpendulum_real.png'
+
     def __init__(self,
                  m=Symbol('m', positive=True),
                  g=Symbol('g', positive=True),
@@ -211,6 +236,31 @@ class DDoFDoublePendulum(ComposedSystem):
         self.pendulum_1 = Pendulum(m, g, l, angle=phi, qs=qs)
         self.pendulum_2 = Pendulum(m, g, l, angle=phi2, qs=qs)
         system = self.spring + self.pendulum_1 + self.pendulum_2
-        
+
         super().__init__(system)
 
+
+class SDoFEngine(ComposedSystem):
+    scheme_name = 'engine.png'
+    real_name = 'engine_real.PNG'
+
+    def __init__(self, system=None,ivar=Symbol('t')):
+
+        t=ivar
+        
+        m, m_0, k, M, k_m, g, F_1, F_2, Omega, F, R, e, m_e, J, k_m, beta, k_m = symbols(
+            'm,m_0,k,M,k_v,g,F_1,F_2,Omega, F_0, R, e, m_e, J, k_m, beta, k_m',
+            positive=True)
+
+        x_1, x_2, z, phi, theta = dynamicsymbols('x_1,x_2,z, varphi,theta')
+        dx_1, dx_2, dz = dynamicsymbols('x_1,x_2,z', 1)
+
+        T = S.Half * M * dz**2 + S.Half * m_e * (z + e * cos(phi)).diff(t)**2
+
+        V = S.Half * 2 * k_m * z**2
+
+        L_engine = (T - V)
+
+        engine_base = HarmonicOscillator(L_engine, qs=[z])
+
+        super().__init__(engine_base)
