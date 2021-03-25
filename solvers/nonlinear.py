@@ -632,7 +632,7 @@ class MultiTimeScaleMethod(LinearODESolution):
         display(eoms )
         print('='*100,'eoms_nth for solve')
         
-        self.secular_eq+=[row.coeff(comp)  for row in eoms  for comp in secular_comps]
+        self.secular_eq+=[row.coeff(comp)  for row in eoms  for comp in secular_comps] #test
 
         print('='*100)
         display(*self.secular_eq)
