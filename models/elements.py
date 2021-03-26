@@ -74,25 +74,12 @@ class Spring(Elements):
         else:
             qs = qs
 
-        if isinstance(pos1, Point): 
-            P1 = pos1
-            P2 = pos2
-            if not qs:
-                diffs = P1.vel(frame).magnitude().atoms(Derivative)
-                diffs2 = P2.vel(frame).magnitude().atoms(Derivative)
-                
-                qs= [deriv.args[0] for deriv in diffs]
-                qs = np.append(qs, [deriv.args[0] for deriv in diffs2])
-                print(qs)
-
-            Pa = Particle('Pa', P1, 1)
-            Pa.potential_energy = S.Half * k * P1.pos_from(P2).magnitude()**2
-
-            L = Lagrangian(frame, Pa)
-
+        if not isinstance(type(pos1), type(Point)): 
+            u = pos1.pos_from(pos2).magnitude()
+            L = S.Half * stiffness * u**2
+            
         else:
-            L = -S.Half * stiffness * (pos1 - pos2)**2
-
+            L = S.Half * stiffness * (pos1 - pos2)**2
 
         super().__init__(Lagrangian=L, qs=qs, ivar=ivar)
 

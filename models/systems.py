@@ -240,27 +240,111 @@ class DDoFDoublePendulum(ComposedSystem):
         super().__init__(system)
 
 
+# class SDoFEngine(ComposedSystem):
+#     scheme_name = 'engine.png'
+#     real_name = 'engine_real.PNG'
+
+#     def __init__(self, system=None,ivar=Symbol('t')):
+
+#         t=ivar
+        
+#         m, m_0, k, M, k_m, g, F_1, F_2, Omega, F, R, e, m_e, J, k_m, beta, k_m = symbols(
+#             'm,m_0,k,M,k_v,g,F_1,F_2,Omega, F_0, R, e, m_e, J, k_m, beta, k_m',
+#             positive=True)
+
+#         x_1, x_2, z, phi, theta = dynamicsymbols('x_1,x_2,z, varphi,theta')
+#         dx_1, dx_2, dz = dynamicsymbols('x_1,x_2,z', 1)
+
+#         T = S.Half * M * dz**2 + S.Half * m_e * (z + e * cos(phi)).diff(t)**2
+
+#         V = S.Half * 2 * k_m * z**2
+
+#         L_engine = (T - V)
+
+#         engine_base = HarmonicOscillator(L_engine, qs=[z])
+
+#         super().__init__(engine_base)
+
 class SDoFEngine(ComposedSystem):
     scheme_name = 'engine.png'
     real_name = 'engine_real.PNG'
 
-    def __init__(self, system=None,ivar=Symbol('t')):
-
-        t=ivar
+    def __init__(self,
+                 M=Symbol('M' ,positive=True),
+                 k_m=Symbol('k_m' ,positive=True),
+                 m_e=Symbol('m_e' ,positive=True),
+                 e=Symbol('e' ,positive=True),
+                 dz=dynamicsymbols('dz'),
+                 z=dynamicsymbols('z'),
+                 phi=dynamicsymbols('phi'),
+                 ivar=Symbol('t', positive=True),
+                 system=None):
+                
+        self.MaterialPoint_1 = MaterialPoint(M,pos_c=z, qs=[z])
+        self.MaterialPoint_2 = MaterialPoint(m_e, pos1=z, pos2=e*cos(phi), qs=[z])
+        self.Spring = Spring(2*k_m, pos1=z, qs=[z])
         
-        m, m_0, k, M, k_m, g, F_1, F_2, Omega, F, R, e, m_e, J, k_m, beta, k_m = symbols(
-            'm,m_0,k,M,k_v,g,F_1,F_2,Omega, F_0, R, e, m_e, J, k_m, beta, k_m',
-            positive=True)
+        system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2
 
-        x_1, x_2, z, phi, theta = dynamicsymbols('x_1,x_2,z, varphi,theta')
-        dx_1, dx_2, dz = dynamicsymbols('x_1,x_2,z', 1)
+        super().__init__(system)
 
-        T = S.Half * M * dz**2 + S.Half * m_e * (z + e * cos(phi)).diff(t)**2
+class SDoFNonlinearEngine(ComposedSystem):
+    scheme_name = 'engine.png'
+    real_name = 'engine_real.PNG'
 
-        V = S.Half * 2 * k_m * z**2
+    def __init__(self,
+                 M=Symbol('M' ,positive=True),
+                 k_m=Symbol('k_m' ,positive=True),
+                 m_e=Symbol('m_e' ,positive=True),
+                 e=Symbol('e' ,positive=True),
+                 beta=Symbol('beta',positive=True),
+                 lo = Symbol('l_0',positive=True),
+                 dz=dynamicsymbols('dz'),
+                 z=dynamicsymbols('z'),
+                 phi=dynamicsymbols('phi'),
+                 ivar=Symbol('t', positive=True),
+                 system=None):        
+        
+        self.N = ReferenceFrame('N')
+        self.O = Point('O')
+        
+        self.P1 = Point('P1')
+        self.P1.set_pos(self.O, 0*self.N.x + 0*self.N.y)
+        
+        self.P2 = Point('P2')
+        self.P2.set_pos(self.O, lo*sin(beta)*self.N.x + lo*cos(beta)*self.N.y)
+        
+        self.MaterialPoint_1 = MaterialPoint(M,pos_c=z, qs=[z])
+        self.MaterialPoint_2 = MaterialPoint(m_e, pos1=z, pos2=e*cos(phi), qs=[z])
+        self.Spring = Spring(k_m, pos1=z, qs=[z])
+        
+        system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2
 
-        L_engine = (T - V)
+        super().__init__(system)
+        
+        
+        
+class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
+    #scheme_name = ''
+    #real_nanme = ''
 
-        engine_base = HarmonicOscillator(L_engine, qs=[z])
+    def __init__(self,m=Symbol('m', positive=True),
+                 k=Symbol('k', positive=True),
+                 l=Symbol('l_0',positive=True),
+                 ivar=Symbol('t', positive = True),
+                 F=Symbol('F_0', positive=True),
+                 x = dynamicsymbols('x'),
+                 Omega=Symbol('Omega' , positive = True),
+                 system=None):
+                
+        Non_linear_spring_trolley = (MaterialPoint(m,x) + 
+        Spring(k, pos1=(sqrt(x**2 + l**2) - l), qs=[x]) + 
+        Force(-F * cos(Omega*ivar), pos1=x, qs=[x]))
 
-        super().__init__(engine_base)
+        super().__init__(Non_linear_spring_trolley)
+        
+        
+        
+        
+        
+        
