@@ -982,6 +982,9 @@ class HarmonicOscillator(LinearDynamicSystem):
 
         return spring_stiffness * spring_position * solution
 
+    def small_parameter(self,order=3):
+
+         return self._eoms[0].diff(self.q[0],order).subs(self.q[0],0)/factorial(order)
     
 class DampedHarmonicOscillator(HarmonicOscillator):
     def solution(self, initial_conditions=None):
