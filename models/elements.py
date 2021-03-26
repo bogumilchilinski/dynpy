@@ -34,27 +34,15 @@ class MaterialPoint(Elements):
     """
     scheme_name = 'material_point.png'
     real_name = 'material_point.png'
-    def __init__(self, m, pos1=0, pos2=0, pos_c=0, qs=None,  ivar=Symbol('t')):
+    def __init__(self, m, pos1, qs=None,  ivar=Symbol('t')):
         
-        if pos1 == 0 and pos2 == 0:
+        if not qs:
             
-            self.qs = [pos_c]
+            self.qs = [pos_1]
 
-            Lagrangian = S.Half * m * (diff(pos_c,ivar))**2
-        
-        elif pos_c == 0:
-            
-            if qs == qs:
-                qs = [pos1]
-            else:
-                qs = [pos1, pos2]
-            
-            Lagrangian = S.Half * m * (diff(pos1,ivar) + diff(pos2,ivar))**2
-            
-        else:
-            
-            Lagrangian = 0
-            print(str('YOU CANNOT APPLY BOTH METHODS AT ONCE'))
+        Lagrangian = S.Half * m * (diff(pos1,ivar))**2
+                    
+
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
@@ -68,14 +56,15 @@ class Spring(Elements):
     """
     scheme_name = 'spring.png'
     real_name = 'spring.png'
-    def __init__(self, stiffness, pos1, pos2=0, qs=None, ivar=Symbol('t'), frame = base_frame):
+    def __init__(self, stiffness, pos1, pos2=0,  qs=None, l0 = 0, ivar=Symbol('t'), frame = base_frame):
         if not qs:
             qs = [pos1]
         else:
             qs = qs
 
-        if not isinstance(type(pos1), type(Point)):  
-            u = pos1.pos_from(pos2).magnitude()
+        if isinstance(pos1,Point):  
+            u = pos1.pos_from(pos2).magnitude()-l0
+            
             L = S.Half * stiffness * u**2
             
         else:

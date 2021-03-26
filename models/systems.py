@@ -281,7 +281,7 @@ class SDoFEngine(ComposedSystem):
                  system=None):
                 
         self.MaterialPoint_1 = MaterialPoint(M,pos_c=z, qs=[z])
-        self.MaterialPoint_2 = MaterialPoint(m_e, pos1=z, pos2=e*cos(phi), qs=[z])
+        self.MaterialPoint_2 = MaterialPoint(m_e, pos1=z+e*cos(phi), qs=[z])
         self.Spring = Spring(2*k_m, pos1=z, qs=[z])
         
         system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2
@@ -298,7 +298,7 @@ class SDoFNonlinearEngine(ComposedSystem):
                  m_e=Symbol('m_e' ,positive=True),
                  e=Symbol('e' ,positive=True),
                  beta=Symbol('beta',positive=True),
-                 lo = Symbol('l_0',positive=True),
+                 l0 = Symbol('l_0',positive=True),
                  dz=dynamicsymbols('dz'),
                  z=dynamicsymbols('z'),
                  phi=dynamicsymbols('phi'),
@@ -312,11 +312,11 @@ class SDoFNonlinearEngine(ComposedSystem):
         P1.set_pos(O, 0*N.x + 0*N.y)
         
         P2 = Point('P2')
-        P2.set_pos(O, lo*sin(beta)*N.x + lo*cos(beta)*N.y)
+        P2.set_pos(O, l0*sin(beta)*N.x + (z + l0*cos(beta))*N.y)
         
-        self.MaterialPoint_1 = MaterialPoint(M,pos_c=z, qs=[z])
-        self.MaterialPoint_2 = MaterialPoint(m_e, pos1=z, pos2=e*cos(phi), qs=[z])
-        self.Spring = Spring(k_m, pos1=P1, pos2=P2, qs=[z])
+        self.MaterialPoint_1 = MaterialPoint(M,z, qs=[z])
+        self.MaterialPoint_2 = MaterialPoint(m_e, z+e*cos(phi), qs=[z])
+        self.Spring = Spring(2*k_m, pos1=P1, pos2=P2,l0=l0, qs=[z])
         
         system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2
 
