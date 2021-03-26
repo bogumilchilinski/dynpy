@@ -208,6 +208,7 @@ class FirstOrderODE:
             for i, coord in enumerate(self.dvars)
         ]
 
+        display(solution)
         return sum(solution, Matrix([0] * len(Y_mat)))
 
     def steady_solution(self, initial_conditions=None):
