@@ -18,7 +18,7 @@ from sympy.simplify.fu import TR8, TR10, TR7, TR3
 
 from .solvers.numerical import OdeComputationalCase
 
-from .solvers.linear import LinearODESolution
+from .solvers.linear import LinearODESolution,FirstOrderODE
 
 from .solvers.nonlinear import WeakNonlinearProblemSolution, MultiTimeScaleMethod
 
