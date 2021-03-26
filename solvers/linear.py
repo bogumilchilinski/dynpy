@@ -157,11 +157,11 @@ class LinearODESolution:
         Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
         '''
         
-#         print('------------------- linear gen sol ------------------')
+#         print('------------------- linear gen sol ----------------')
 #         display(self.odes_system,self.dvars)
         
 #         display(self.inertia_matrix(),self.stiffness_matrix())
-#         print('------------------- linear gen sol ------------------')
+#         print('------------------- linear gen sol ----------------')
         
         
         C = numbered_symbols('C', start=1)

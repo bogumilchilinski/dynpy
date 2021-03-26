@@ -74,7 +74,7 @@ class Spring(Elements):
         else:
             qs = qs
 
-        if not isinstance(type(pos1), type(Point)): 
+        if not isinstance(type(pos1), type(Point)):  
             u = pos1.pos_from(pos2).magnitude()
             L = S.Half * stiffness * u**2
             

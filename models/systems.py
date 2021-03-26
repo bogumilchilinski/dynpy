@@ -2,7 +2,7 @@ from sympy import *
 from sympy.physics.mechanics import *
 
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
-from .elements import MaterialPoint, Spring, RigidBody2D, Force
+from .elements import *
 
 from sympy.physics.mechanics import *
 from sympy.physics.vector import *
@@ -305,18 +305,18 @@ class SDoFNonlinearEngine(ComposedSystem):
                  ivar=Symbol('t', positive=True),
                  system=None):        
         
-        self.N = ReferenceFrame('N')
-        self.O = Point('O')
+        N = ReferenceFrame('N')
+        O = Point('O')
         
-        self.P1 = Point('P1')
-        self.P1.set_pos(self.O, 0*self.N.x + 0*self.N.y)
+        P1 = Point('P1')
+        P1.set_pos(O, 0*N.x + 0*N.y)
         
-        self.P2 = Point('P2')
-        self.P2.set_pos(self.O, lo*sin(beta)*self.N.x + lo*cos(beta)*self.N.y)
+        P2 = Point('P2')
+        P2.set_pos(O, lo*sin(beta)*N.x + lo*cos(beta)*N.y)
         
         self.MaterialPoint_1 = MaterialPoint(M,pos_c=z, qs=[z])
         self.MaterialPoint_2 = MaterialPoint(m_e, pos1=z, pos2=e*cos(phi), qs=[z])
-        self.Spring = Spring(k_m, pos1=z, qs=[z])
+        self.Spring = Spring(k_m, pos1=P1, pos2=P2, qs=[z])
         
         system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2
 
