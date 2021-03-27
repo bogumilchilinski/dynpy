@@ -18,7 +18,7 @@ from sympy.simplify.fu import TR8, TR10, TR7, TR3
 
 from .solvers.numerical import OdeComputationalCase
 
-from .solvers.linear import LinearODESolution
+from .solvers.linear import LinearODESolution,FirstOrderODE
 
 from .solvers.nonlinear import WeakNonlinearProblemSolution, MultiTimeScaleMethod
 
@@ -982,6 +982,9 @@ class HarmonicOscillator(LinearDynamicSystem):
 
         return spring_stiffness * spring_position * solution
 
+    def small_parameter(self,order=3):
+
+         return self._eoms[0].diff(self.q[0],order).subs(self.q[0],0)/factorial(order)
     
 class DampedHarmonicOscillator(HarmonicOscillator):
     def solution(self, initial_conditions=None):

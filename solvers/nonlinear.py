@@ -343,6 +343,8 @@ class MultiTimeScaleMethod(LinearODESolution):
                          equation_type=equation_type)
         self.eps = eps
 
+        self.secular_eq=[]
+
         #        display(omega)
         self.omega = 1
         if omega:
@@ -630,9 +632,14 @@ class MultiTimeScaleMethod(LinearODESolution):
         display(eoms )
         print('='*100,'eoms_nth for solve')
         
+        self.secular_eq+=[row.coeff(comp)  for row in eoms  for comp in secular_comps] #test
+
         print('='*100)
-        display(*[row.coeff(comp)  for row in eoms  for comp in secular_comps])
+        display(*self.secular_eq)
         print('='*100)
+
+       
+        
 
         eoms = eoms.subs({comp: 0 for comp in secular_comps})
 
