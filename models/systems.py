@@ -136,8 +136,8 @@ class DDoFVehicleSuspension(ComposedSystem):
 
         self.body = RigidBody2D(m, I, pos_lin=z, pos_rot=phi,
                                 qs=qs)  #rod ---->
-        self.spring_1 = Spring(k_2, pos1=z + phi * l_l, qs=qs)  #left spring
-        self.spring_2 = Spring(k_1, pos1=z - phi * l_r, qs=qs)  # right spring
+        self.spring_1 = Spring(k_1, pos1=z + phi * l_l, qs=qs)  #left spring
+        self.spring_2 = Spring(k_2, pos1=z - phi * l_r, qs=qs)  # right spring
         self.force = Force(F_engine, pos1=z - l_r * phi, qs=qs)
         system = self.body + self.spring_1 + self.spring_2 + self.force
 
@@ -234,7 +234,8 @@ class Pendulum(ComposedSystem):
             angle, ivar)**2 - m * g * l * (1 - cos(angle))
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
-
+# wymienić obrazek na taki, gdzie nie ma wymuszenia i symbole na obrazku będą zgodne z tymi w klasie
+# jeśli jest układ sdof, to nie indeksujemy parametrów
 
 class SDoFPendulum(ComposedSystem):
     scheme_name = 'horizontal_forced_pendulum.png'
@@ -257,7 +258,8 @@ class SDoFPendulum(ComposedSystem):
         system = self.pendulum + self.force
 
         super().__init__(system)
-
+# usunąć indeksy parametrów, zarówno w klasie jak i na rysunkach
+# ujednolicić zmienną (angle albo phi)
 
 class SDoFDampedPendulum(ComposedSystem):
     scheme_name = 'damped_pendulum.png'
@@ -280,11 +282,15 @@ class SDoFDampedPendulum(ComposedSystem):
         system = self.pendulum + self.force
 
         super().__init__(system)
+<<<<<<< HEAD
+# to samo co w poprzedniej klasie
+=======
 
         
         
 
         
+>>>>>>> be29a885fcf09e598880e29c3598596ee2ec17d6
 
 class DDoFCouplePendulum(ComposedSystem):
     scheme_name = 'mdof_dpendulum.png'
@@ -306,6 +312,9 @@ class DDoFCouplePendulum(ComposedSystem):
         system = self.spring + self.pendulum_1 + self.pendulum_2
 
         super().__init__(system)
+<<<<<<< HEAD
+# konsekwentnie używać indeksów dla mdofów - poprawić phi na phi1 (zgodnie z obrazkiem)
+=======
 
 class CoupledPendulum(ComposedSystem):
     scheme_name = 'mdof_dpendulum.png'
@@ -328,6 +337,7 @@ class CoupledPendulum(ComposedSystem):
 
         super().__init__(system)
         
+>>>>>>> be29a885fcf09e598880e29c3598596ee2ec17d6
 
 # class SDoFEngine(ComposedSystem):
 #     scheme_name = 'engine.png'
@@ -456,12 +466,17 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
                  system=None):
                 
 <<<<<<< HEAD
+        Non_linear_spring_trolley = (MaterialPoint(m,x) + 
+        Spring(k, pos1=(sqrt(x**2 + l**2) - l_0), qs=[x]) + 
+=======
+<<<<<<< HEAD
         Non_linear_spring_trolley = ( MaterialPoint(m,x,qs=[x]) +
         NonlinSpring__RefFrme_Pt(k,l_0,pos1=x,pos2=l,qs=[x]) +
         Force(-F * cos(Omega*ivar), pos1=x, qs=[x]) )
 =======
         non_linear_spring_trolley = (MaterialPoint(m,x) + 
         Spring(k, pos1=(sqrt(x**2 + l**2) - l), qs=[x]) + 
+>>>>>>> be29a885fcf09e598880e29c3598596ee2ec17d6
         Force(-F * cos(Omega*ivar), pos1=x, qs=[x]))
 >>>>>>> 34dc8c1df5540cc8ddc64108d2ba7892848df69f
 

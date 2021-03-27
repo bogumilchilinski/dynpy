@@ -5,8 +5,13 @@ This module provides basic tools for dynamic analysis of mechanical systems
 #<<<<<<< HEAD
 #import importlib
 
+<<<<<<< HEAD
+# import dynpy.dynamics as dyn
+# importlib.reload(dyn)
+=======
 #import dynpy.dynamics as dyn
 #importlib.reload(dyn)
+>>>>>>> be29a885fcf09e598880e29c3598596ee2ec17d6
 
 #from .dynamics import *
 #=======
