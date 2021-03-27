@@ -264,3 +264,53 @@ class SDoFEngine(ComposedSystem):
         engine_base = HarmonicOscillator(L_engine, qs=[z])
 
         super().__init__(engine_base)
+
+        
+        
+class MDoFTMD(ComposedSystem):
+    scheme_name = '...'
+    real_name = '...'
+    
+    def __init__(self, system=None,ivar=Symbol('t')):
+    
+        t=ivar
+    
+    xb, xe, z = dynamicsymbols('xb,xe,z')
+    m_0,m, me, k_0, k, ke, F= symbols('m_0, m, m_e, k_0, k, k_e, F', positive=True)
+
+    T = S.Half * m *xb.diff(t)**2 + S.Half * m/10 *xe.diff(t)**2
+    V = S.Half * k * xb**2 + S.Half * ke * (xe - xb)**2
+
+    L_TMD = (T - V)
+
+
+    tmd_base = HarmonicOscillator(L_TMD, qs=[xb, xe], forcelist=[], frame=N)
+
+    
+    super().__init__(TMD_base)
+    
+    
+   
+    
+class MDoFShaft(ComposedSystem):
+    scheme_name = '...'
+    real_name = '...'
+    
+    def __init__(self, system=None,ivar=Symbol('t')):
+    
+        t=ivar
+        
+        m, m_0, k, M, k_m, g, F_1, F_2, Omega, F, R, e, m_e, J, k_m, beta, k_m = symbols(
+            'm,m_0,k,M,k_v,g,F_1,F_2,Omega, F_0, R, e, m_e, J, k_m, beta, k_m',
+            positive=True)
+        
+    
+    T=
+    V=
+    
+    L_Shaft = (T - V)
+    
+    shaft_base = HarmonicOscillator(L_shaft, qs=[xb, xe], forcelist=[], frame=N)
+
+    
+    super().__init__(shaft_base)
