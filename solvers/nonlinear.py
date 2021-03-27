@@ -638,6 +638,7 @@ class MultiTimeScaleMethod(LinearODESolution):
         display(*self.secular_eq)
         print('='*100)
 
+       
         
 
         eoms = eoms.subs({comp: 0 for comp in secular_comps})

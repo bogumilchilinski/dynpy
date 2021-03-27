@@ -124,18 +124,11 @@ class FirstOrderODE:
             {gen_coord: 0
              for gen_coord in self.dvars}).doit()
 
-    def eigenvalues(self):
+    def diagonalize(self):
         '''
         Determines the system eigenvalues matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
         '''
-        
-#         display(self.governing_equations)
-        
-        q_dot=(Matrix(self.dvars).diff(self.ivar))
 
-
-        
-        
         ode_sys=self.odes_system
         
 #         display(ode_sys)
@@ -144,7 +137,25 @@ class FirstOrderODE:
 
 #         display(main_matrix)
         
-        return (main_matrix).diagonalize()[1]
+        return (main_matrix).diagonalize()
+
+
+
+    def eigenvalues(self):
+        '''
+        Determines the system eigenvalues matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
+        '''
+        
+        
+        return self.diagonalize()[1]
+
+    def eigenmodes(self):
+        '''
+        Determines the system eigenmodes matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
+        '''
+        
+        
+        return self.diagonalize()[0]
     
     
     def damped_natural_frequencies(self):
@@ -190,9 +201,9 @@ class FirstOrderODE:
         #         print('o tu')
         #         display(self.odes_system)
 
-        modes = self.eigenvalues()
+        modes,eigs = self.diagonalize()
         
-        eigs=self.eigenvalues()
+        
 
         
         
@@ -203,7 +214,7 @@ class FirstOrderODE:
         t_sol = self.ivar
 
         solution = [
-            C_list[i]*exp(eigs[i,i]*self.ivar)
+            C_list[i]*modes[:,i]*exp(eigs[i,i]*self.ivar)
              
             for i, coord in enumerate(self.dvars)
         ]
