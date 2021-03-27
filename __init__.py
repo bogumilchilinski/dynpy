@@ -2,24 +2,20 @@
 This module provides basic tools for dynamic analysis of mechanical systems
 """
 
-import importlib
+#<<<<<<< HEAD
+#import importlib
 
+<<<<<<< HEAD
 # import dynpy.dynamics as dyn
 # importlib.reload(dyn)
+=======
+#import dynpy.dynamics as dyn
+#importlib.reload(dyn)
+>>>>>>> be29a885fcf09e598880e29c3598596ee2ec17d6
 
+#from .dynamics import *
+#=======
 from .dynamics import *
+#>>>>>>> 34dc8c1df5540cc8ddc64108d2ba7892848df69f
 
-# import dynpy.solvers.linear as lin
-# importlib.reload(lin)
-# import dynpy.solvers.nonlinear as nonl
-# importlib.reload(nonl)
-# import dynpy.solvers.numerical as num
-# importlib.reload(num)
 
-# import dynpy.models.elements as elem
-# importlib.reload(elem)
-# import dynpy.models.systems as sys
-# importlib.reload(sys)
-
-# import dynpy.utilities.timeseries as ts
-# importlib.reload(ts)

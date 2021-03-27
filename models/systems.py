@@ -68,7 +68,7 @@ class SDoFHarmonicOscillator(ComposedSystem):
         A mass oscillating up and down while being held up by a spring with a spring constant k
         
         >>> t = symbols('t')
-        >>> m, k = symbols('m k')
+        >>> m, k = symbols('m, k')
         >>> qs = dynamicsymbols('z') # Generalized Coordinates 
         >>> T = S.Half*m*z.diff(t)**2 # Kinetic Energy 
         >>> V = S.Half*k*z**2 # Potential Energy 
@@ -144,6 +144,70 @@ class DDoFVehicleSuspension(ComposedSystem):
         super().__init__(system)
 
 
+class DDoFShaft(ComposedSystem):
+    """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
+        =========
+
+            k = Spring coefficient
+                -Spring carrying the system
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+                
+        Example
+        =======
+        A mass oscillating up and down while being held up by a spring with a spring constant k
+        
+        >>> t = symbols('t')
+        >>> m, k = symbols('m, k')
+        >>> qs = dynamicsymbols('z') # Generalized Coordinates 
+        >>> DDoFShaft()
+        
+        -defines the symbols and dynamicsymbols
+        -finally determines the instance of the system using class DDoFShaft
+    """
+    
+    
+    scheme_name = 'mdof_shaft_vibration.png'
+    real_name = 'tandem_lift.jpg'
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 I=Symbol('I', positive=True),
+                 l_rod=Symbol('2l', positive=True),
+                 l_l=Symbol('l', positive=True),
+                 l_r=Symbol('l', positive=True),
+                 k_2=Symbol('k_2', positive=True),
+                 k_1=Symbol('k_1', positive=True),
+                 input_disp=dynamicsymbols('theta'),
+                 ivar=Symbol('t'),
+                 qs=dynamicsymbols('z, varphi')):
+
+        z, phi = qs
+
+        self.m = m  #mass of a rod
+        self.l_l = l_l  #offset of left spring
+        self.l_r = l_r  #offset of right spring
+        self.l_rod = l_rod  #length of a rod
+        self.k_2 = k_2  #left spring
+        self.k_1 = k_1  #right spring
+        self.I = I  #moment of inertia of a rod
+        self.input_display = theta
+        self.qs = qs
+
+        self.disc_1 = Disk(I, pos1=phi, qs=qs)  
+        self.spring_1 = Spring(k_2, phi1,phi2, qs=qs)  #left spring
+        self.disc_2 = Disk(I, pos1=phi2, qs=qs)  
+        self.spring_2 = Spring(k_1, pos1=phi2, pos2=theta, qs=qs)  # right spring
+        system = self.disc_1 +self.disc_2 + self.spring_1 + self.spring_2 + self.force
+
+        super().__init__(system)
+        
+        
+        
 class Pendulum(ComposedSystem):
     """
     Model of a sDoF mathematical Pendulum:
@@ -218,11 +282,19 @@ class SDoFDampedPendulum(ComposedSystem):
         system = self.pendulum + self.force
 
         super().__init__(system)
+<<<<<<< HEAD
 # to samo co w poprzedniej klasie
+=======
 
-class DDoFDoublePendulum(ComposedSystem):
+        
+        
+
+        
+>>>>>>> be29a885fcf09e598880e29c3598596ee2ec17d6
+
+class DDoFCouplePendulum(ComposedSystem):
     scheme_name = 'mdof_dpendulum.png'
-    real_name = 'mdof_dpendulum_real.png'
+    real_name = 'tandem_lift.jpg'
 
     def __init__(self,
                  m=Symbol('m', positive=True),
@@ -230,7 +302,7 @@ class DDoFDoublePendulum(ComposedSystem):
                  l=Symbol('l', positive=True),
                  k=Symbol('k', positive=True),
                  ivar=Symbol('t'),
-                 qs=dynamicsymbols('varphi, varphi2')):
+                 qs=dynamicsymbols('varphi1, varphi2')):
 
         phi, phi2 = qs
 
@@ -240,7 +312,32 @@ class DDoFDoublePendulum(ComposedSystem):
         system = self.spring + self.pendulum_1 + self.pendulum_2
 
         super().__init__(system)
+<<<<<<< HEAD
 # konsekwentnie używać indeksów dla mdofów - poprawić phi na phi1 (zgodnie z obrazkiem)
+=======
+
+class CoupledPendulum(ComposedSystem):
+    scheme_name = 'mdof_dpendulum.png'
+    real_name = 'tandem_lift.jpg'
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 g=Symbol('g', positive=True),
+                 l=Symbol('l', positive=True),
+                 k=Symbol('k', positive=True),
+                 ivar=Symbol('t'),
+                 qs=dynamicsymbols('varphi1, varphi2')):
+
+        phi, phi2 = qs
+
+        self.spring = Spring(k, pos1=phi * l, pos2=phi2 * l, qs=qs)
+        self.pendulum_1 = Pendulum(m, g, l, angle=phi, qs=qs)
+        self.pendulum_2 = Pendulum(m, g, l, angle=phi2, qs=qs)
+        system = self.spring + self.pendulum_1 + self.pendulum_2
+
+        super().__init__(system)
+        
+>>>>>>> be29a885fcf09e598880e29c3598596ee2ec17d6
 
 # class SDoFEngine(ComposedSystem):
 #     scheme_name = 'engine.png'
@@ -290,6 +387,34 @@ class SDoFEngine(ComposedSystem):
 
         super().__init__(system)
 
+class DDoFEngine(ComposedSystem):
+    scheme_name = 'engine.png'
+    real_name = 'engine_real.PNG'
+
+    def __init__(self,
+                 M=Symbol('M' ,positive=True),
+                 k_m=Symbol('k_m' ,positive=True),
+                 k_TMD=Symbol('k_TMD' ,positive=True),
+                 m_e=Symbol('m_e' ,positive=True),
+                 m_TMD=Symbol('m_TMD' ,positive=True),
+                 e=Symbol('e' ,positive=True),
+                 dz=dynamicsymbols('dz'),
+                 z=dynamicsymbols('z'),
+                 z_TMD=dynamicsymbols('z_TMD'),
+                 phi=dynamicsymbols('phi'),
+                 ivar=Symbol('t', positive=True),
+                 system=None):
+                
+        self.MaterialPoint_1 = MaterialPoint(M,pos_c=z, qs=[z])
+        self.MaterialPoint_2 = MaterialPoint(m_e, pos1=z+e*cos(phi), qs=[z])
+        self.MaterialPoint_3 = MaterialPoint(m_TMD, pos1=z_TMD, qs=[z_TMD])
+        self.Spring_1 = Spring(2*k_m, pos1=z, qs=[z])
+        self.Spring_2 = Spring(k_TMD, pos2=z_TMD, qs=[z_TMD])
+        
+        system = self.Spring_1 + self.Spring_2 + self.MaterialPoint_1 + self.MaterialPoint_2 + self.MaterialPoint_3
+
+        super().__init__(system)
+        
 class SDoFNonlinearEngine(ComposedSystem):
     scheme_name = 'engine.png'
     real_name = 'engine_real.PNG'
@@ -332,21 +457,82 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
 
     def __init__(self,m=Symbol('m', positive=True),
                  k=Symbol('k', positive=True),
-                 l=Symbol('l_0',positive=True),
+                 l=Symbol('l',positive=True),
+                 l_0=Symbol('l_0' , positive=True),
                  ivar=Symbol('t', positive = True),
                  F=Symbol('F_0', positive=True),
                  x = dynamicsymbols('x'),
                  Omega=Symbol('Omega' , positive = True),
                  system=None):
                 
+<<<<<<< HEAD
         Non_linear_spring_trolley = (MaterialPoint(m,x) + 
         Spring(k, pos1=(sqrt(x**2 + l**2) - l_0), qs=[x]) + 
+=======
+<<<<<<< HEAD
+        Non_linear_spring_trolley = ( MaterialPoint(m,x,qs=[x]) +
+        NonlinSpring__RefFrme_Pt(k,l_0,pos1=x,pos2=l,qs=[x]) +
+        Force(-F * cos(Omega*ivar), pos1=x, qs=[x]) )
+=======
+        non_linear_spring_trolley = (MaterialPoint(m,x) + 
+        Spring(k, pos1=(sqrt(x**2 + l**2) - l), qs=[x]) + 
+>>>>>>> be29a885fcf09e598880e29c3598596ee2ec17d6
         Force(-F * cos(Omega*ivar), pos1=x, qs=[x]))
+>>>>>>> 34dc8c1df5540cc8ddc64108d2ba7892848df69f
 
-        super().__init__(Non_linear_spring_trolley)
+        super().__init__(non_linear_spring_trolley)
+
+
         
         
+<<<<<<< HEAD
+=======
+class MDoFTMD(ComposedSystem):
+    scheme_name = '...'
+    real_name = '...'
+    
+    def __init__(self, system=None,ivar=Symbol('t')):
+    
+        t=ivar
+    
+        xb, xe, z = dynamicsymbols('xb,xe,z')
+        m_0,m, me, k_0, k, ke, F= symbols('m_0, m, m_e, k_0, k, k_e, F', positive=True)
+
+        T = S.Half * m *xb.diff(t)**2 + S.Half * m/10 *xe.diff(t)**2
+        V = S.Half * k * xb**2 + S.Half * ke * (xe - xb)**2
+
+        L_TMD = (T - V)
+
+
+        tmd_base = HarmonicOscillator(L_TMD, qs=[xb, xe], forcelist=[], frame=N)
+
+
+        super().__init__(TMD_base)
+    
+    
+   
+    
+class MDoFShaft(ComposedSystem):
+    scheme_name = '...'
+    real_name = '...'
+    
+    def __init__(self, system=None,ivar=Symbol('t')):
+    
+        t=ivar
         
+        m, m_0, k, M, k_m, g, F_1, F_2, Omega, F, R, e, m_e, J, k_m, beta, k_m = symbols(
+            'm,m_0,k,M,k_v,g,F_1,F_2,Omega, F_0, R, e, m_e, J, k_m, beta, k_m',
+            positive=True)
         
-        
-        
+    
+        T=0
+        V=0
+
+        L_Shaft = (T - V)
+
+        shaft_base = HarmonicOscillator(L_shaft, qs=[xb, xe], forcelist=[], frame=N)
+
+
+        super().__init__(shaft_base)
+
+>>>>>>> 34dc8c1df5540cc8ddc64108d2ba7892848df69f

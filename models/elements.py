@@ -38,7 +38,7 @@ class MaterialPoint(Elements):
         
         if not qs:
             
-            self.qs = [pos_1]
+            self.qs = [pos1]
 
         Lagrangian = S.Half * m * (diff(pos1,ivar))**2
                     
@@ -62,7 +62,7 @@ class Spring(Elements):
         else:
             qs = qs
 
-        if isinstance(pos1,Point):  
+        if isinstance(pos1,Point):
             u = pos1.pos_from(pos2).magnitude()-l0
             
             L = -S.Half * stiffness * (u**2).expand().simplify()
@@ -72,8 +72,38 @@ class Spring(Elements):
 
         super().__init__(Lagrangian=L, qs=qs, ivar=ivar)
 
+        
+class NonlinSpring__RefFrme_Pt(Elements):
+    """
+    Model of a Nonlinear Spring with whole ReferenceFrame, Point packed in the class  -- Please Advise! ... qs = [ ] must be supplied in the calling sequence:
+    """
+    """
+    Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s), which analytically display the dynamics of displacing spring after            cummulating PE. The class work in two modes. In coordinate mode and Point mode where the Point mode may be supplemented with parameter.
+    """
 
+    def __init__(self, k, l_0, pos1, pos2=0, qs=None, ivar=Symbol('t'), frame=base_frame):
 
+        if pos1 == qs or pos2 == qs:
+
+            if qs == None:
+                self.qs = [pos1]
+            elif not pos2 == 0:
+                qs = [pos1,pos2]
+
+        else:
+            pos1 is type(Point) or pos2 is type(Point)
+
+        P1 = Point('P1')
+        P1.set_pos(P1 , frame.x*pos1)
+
+        P2 = Point('P2')
+        P2.set_pos(P1, frame.x*pos1 + frame.y*pos2)
+
+        L = - S.Half * k *  (P1.pos_from(P2).magnitude()-l_0)**2
+
+        super().__init__(Lagrangian=L, qs=qs, ivar=ivar, frame=frame)
+
+        
 class GravitationalForce(Elements):
     """
     Model of a changing centroid for potential energy:
