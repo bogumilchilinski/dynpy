@@ -455,12 +455,69 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
                  Omega=Symbol('Omega' , positive = True),
                  system=None):
                 
+<<<<<<< HEAD
         Non_linear_spring_trolley = ( MaterialPoint(m,x,qs=[x]) +
         NonlinSpring__RefFrme_Pt(k,l_0,pos1=x,pos2=l,qs=[x]) +
         Force(-F * cos(Omega*ivar), pos1=x, qs=[x]) )
+=======
+        non_linear_spring_trolley = (MaterialPoint(m,x) + 
+        Spring(k, pos1=(sqrt(x**2 + l**2) - l), qs=[x]) + 
+        Force(-F * cos(Omega*ivar), pos1=x, qs=[x]))
+>>>>>>> 34dc8c1df5540cc8ddc64108d2ba7892848df69f
 
-        super().__init__(Non_linear_spring_trolley)
+        super().__init__(non_linear_spring_trolley)
+
+
         
         
+<<<<<<< HEAD
+=======
+class MDoFTMD(ComposedSystem):
+    scheme_name = '...'
+    real_name = '...'
+    
+    def __init__(self, system=None,ivar=Symbol('t')):
+    
+        t=ivar
+    
+        xb, xe, z = dynamicsymbols('xb,xe,z')
+        m_0,m, me, k_0, k, ke, F= symbols('m_0, m, m_e, k_0, k, k_e, F', positive=True)
+
+        T = S.Half * m *xb.diff(t)**2 + S.Half * m/10 *xe.diff(t)**2
+        V = S.Half * k * xb**2 + S.Half * ke * (xe - xb)**2
+
+        L_TMD = (T - V)
+
+
+        tmd_base = HarmonicOscillator(L_TMD, qs=[xb, xe], forcelist=[], frame=N)
+
+
+        super().__init__(TMD_base)
+    
+    
+   
+    
+class MDoFShaft(ComposedSystem):
+    scheme_name = '...'
+    real_name = '...'
+    
+    def __init__(self, system=None,ivar=Symbol('t')):
+    
+        t=ivar
         
+        m, m_0, k, M, k_m, g, F_1, F_2, Omega, F, R, e, m_e, J, k_m, beta, k_m = symbols(
+            'm,m_0,k,M,k_v,g,F_1,F_2,Omega, F_0, R, e, m_e, J, k_m, beta, k_m',
+            positive=True)
         
+    
+        T=0
+        V=0
+
+        L_Shaft = (T - V)
+
+        shaft_base = HarmonicOscillator(L_shaft, qs=[xb, xe], forcelist=[], frame=N)
+
+
+        super().__init__(shaft_base)
+
+>>>>>>> 34dc8c1df5540cc8ddc64108d2ba7892848df69f
