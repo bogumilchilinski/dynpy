@@ -137,12 +137,21 @@ class FirstOrderODE:
 
 #         display(main_matrix)
         
-        if rhs in main_matrix*sym.Matrix(self.dvars) = 0:
-            
-        if rhs in main_matrix*sym.Matrix(self.dvars) != 0:
-            
+        linear_odes=main_matrix*sym.Matrix(self.dvars)
     
-        return (main_matrix).diagonalize()
+        const_odes_list=[]
+        regular_odes_list=[]
+    
+        for  no,ode  in enumerate(linear_odes): 
+            if ode==0:
+                const_odes_list+=[no]
+            else:
+                regular_odes_list+=[no]
+            
+        regular_main_matrix= Matrix([linear_odes  for no in  regular_odes_list]).jacobian([self.dvars[no]  for no in regular_odes_list])
+        singular_odes=[linear_odes  for no in  const_odes_list]
+    
+        return (regular_main_matrix).diagonalize(),singular_odes
 
 
 
