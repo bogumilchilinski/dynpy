@@ -137,6 +137,11 @@ class FirstOrderODE:
 
 #         display(main_matrix)
         
+        if rhs in main_matrix*sym.Matrix(self.dvars) = 0:
+            
+        if rhs in main_matrix*sym.Matrix(self.dvars) != 0:
+            
+    
         return (main_matrix).diagonalize()
 
 
