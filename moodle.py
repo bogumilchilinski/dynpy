@@ -353,18 +353,34 @@ class Category:
 import base64
 
 class MechanicalSystemAnswer(EmbeddedMultichoiceMathAnswer):
+    
+    question=None
+    
     def __init__(self,
                  correct_system,
                  other_systems,
-                 answer_generator,
-                 title='test',
+                 answer_generator=None,
+                 title=None,
                  **kwargs):
-        self.title = title
+        
+        if title:
+            self.title = title
+        else:
+            self.title=type(self).question
+            
+        if not answer_generator:
+            answer_generator= self.answer_entry
+        
         self._correct_answers = [answer_generator(system) for system in sym.flatten([correct_system])]
         self._other_answers = [answer_generator(system) for system in other_systems]
         
         super().__init__(self._correct_answers, self._other_answers, **kwargs)
    
+    def answer_entry(self,system):
+        return system
+        
+        
+    
     def to_string(self):
         return self.title + '\n' + super().to_string()
 
@@ -407,8 +423,8 @@ class SDoFGoverningEquationMCA(MechanicalSystemAnswer):
                  answer_generator=lambda obj: (Eq(obj._eoms.doit().expand().applyfunc(simplify).expand()[0],0,evaluate=False)),
                  **kwargs):
 
-        self.title = 'Podaj równiania ruchu układu:'
-        self.title = 'Determine equation of motion of the system:'
+        self.title = 'Równanie ruchu dla układu przedstawionego na rysunku wyraża następujący wzór:'
+#         self.title = 'Determine equation of motion of the system:'
 
         super().__init__(correct_system,
                          other_systems,
@@ -423,17 +439,30 @@ class SDoFLinearizedGoverningEquationMCA(MechanicalSystemAnswer):
                  answer_generator=lambda obj: (Eq(obj.linearized()._eoms.doit().expand().applyfunc(simplify).expand()[0],0,evaluate=False)),
                  **kwargs):
 
-        self.title = 'Podaj równiania ruchu układu:'
-        self.title = 'Determine equation of motion of the system:'
+        self.title = 'Małe drgania układu opisuje równanie:'
+#         self.title = 'Determine equation of motion of the system:'
 
         super().__init__(correct_system,
                          other_systems,
                          answer_generator=answer_generator,
                          title=self.title,
-                         **kwargs)      
-        
-        
-        
+                         **kwargs)
+
+class SDoFApproximatedGoverningEquationMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(HarmonicOscillator(obj.approximated())._eoms[0].doit().expand(),0,evaluate=False),
+                 **kwargs):
+
+        self.title = 'Nieliniowe przybliżone równanie ruchu opisuje nastęujący wzór:'
+        #self.title = 'Determine equation of motion of the system:'
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
 class CriticalPointsMCA(MechanicalSystemAnswer):
     def __init__(self,
                  correct_system,
@@ -469,6 +498,7 @@ class LinearizedGoverningEquationMCA(MechanicalSystemAnswer):
         
 
 class LagrangianMCA(MechanicalSystemAnswer):
+    question= 'Choose corect dependance which determines Lagrangian of the considered system:'
     def __init__(
             self,
             correct_system,
@@ -476,15 +506,19 @@ class LagrangianMCA(MechanicalSystemAnswer):
             answer_generator=lambda obj: Eq(Symbol('L'), obj.lagrangian()),
             **kwargs):
 
-        self.title = 'Wskaż zależność określającą Lagrangian rozpatrywanego układu:'
-        self.title = 'Choose corect dependance which determines Lagrangian of the considered system:'
+        self.title = 'Lagrangian dla rozważanego układu można wyrazić następującym równaniem:'
+#         self.title = 'Choose corect dependance which determines Lagrangian of the considered system:'
 
         super().__init__(correct_system,
                          other_systems,
                          answer_generator=answer_generator,
-                         title=self.title,
+                         title=None,
                          **kwargs)
 
+
+class LagrangianMCAPL(LagrangianMCA):
+    question= 'Wskaż zależność określającą Lagrangian rozpatrywanego układu:'        
+        
 class ExternalForcesMCA(MechanicalSystemAnswer):
     def __init__(
             self,
@@ -850,3 +884,33 @@ class SDoFDampedOmegaMCA(MechanicalSystemAnswer):
                          answer_generator=answer_generator,
                          title=self.title,
                          **kwargs) 
+
+class SmallParameterMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Symbol('varepsilon'),(obj.small_parameter()/obj.inertia_matrix()[0]).simplify()),
+                 **kwargs):
+
+        self.title = 'Mały parametr układu wyraża się wzorem:'
+        #self.title = '''Find the formula that represents the system's Lagrangian:'''
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+class ResonanceCurveMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Symbol('omega')**2,(HarmonicOscillator(obj.linearized()).natural_frequencies()[0]**2+S('3')/4*obj.small_parameter()/obj.inertia_matrix()[0]*Symbol('a')**2).expand()),
+                 **kwargs):
+
+        self.title = 'Zależność pomiędzy amplitudą a częstością drgań własnych dla drgań swobodnych rozważanego układu wyraża wzór:'
+        #self.title = '''Find the formula that represents the system's Lagrangian:'''
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
