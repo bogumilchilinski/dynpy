@@ -181,7 +181,7 @@ class DDoFShaft(ComposedSystem):
                  l_r=Symbol('l', positive=True),
                  k_2=Symbol('k_2', positive=True),
                  k_1=Symbol('k_1', positive=True),
-                 input_disp=dynamicsymbols('theta'),
+                 input_disp=dynamicsymbols('theta', positive=True),
                  ivar=Symbol('t'),
                  qs=dynamicsymbols('z, varphi')):
 
