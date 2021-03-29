@@ -353,18 +353,34 @@ class Category:
 import base64
 
 class MechanicalSystemAnswer(EmbeddedMultichoiceMathAnswer):
+    
+    question=None
+    
     def __init__(self,
                  correct_system,
                  other_systems,
-                 answer_generator,
-                 title='test',
+                 answer_generator=None,
+                 title=None,
                  **kwargs):
-        self.title = title
+        
+        if title:
+            self.title = title
+        else:
+            self.title=type(self).question
+            
+        if not answer_generator:
+            answer_generator= self.answer_entry
+        
         self._correct_answers = [answer_generator(system) for system in sym.flatten([correct_system])]
         self._other_answers = [answer_generator(system) for system in other_systems]
         
         super().__init__(self._correct_answers, self._other_answers, **kwargs)
    
+    def answer_entry(self,system):
+        return system
+        
+        
+    
     def to_string(self):
         return self.title + '\n' + super().to_string()
 
@@ -482,6 +498,7 @@ class LinearizedGoverningEquationMCA(MechanicalSystemAnswer):
         
 
 class LagrangianMCA(MechanicalSystemAnswer):
+    question= 'Choose corect dependance which determines Lagrangian of the considered system:'
     def __init__(
             self,
             correct_system,
@@ -495,9 +512,13 @@ class LagrangianMCA(MechanicalSystemAnswer):
         super().__init__(correct_system,
                          other_systems,
                          answer_generator=answer_generator,
-                         title=self.title,
+                         title=None,
                          **kwargs)
 
+
+class LagrangianMCAPL(LagrangianMCA):
+    question= 'Wskaż zależność określającą Lagrangian rozpatrywanego układu:'        
+        
 class ExternalForcesMCA(MechanicalSystemAnswer):
     def __init__(
             self,
