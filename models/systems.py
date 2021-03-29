@@ -237,7 +237,28 @@ class Pendulum(ComposedSystem):
 # jeśli jest układ sdof, to nie indeksujemy parametrów
 
 
-class SDoFPendulum(ComposedSystem):
+class SDoFFreePendulum(ComposedSystem):
+    scheme_name = 'free_sdof_pendulum.png'
+    real_name = 'free_sdof_pendulum.png'
+
+    def __init__(
+            self,
+            m=Symbol('m', positive=True),
+            g=Symbol('g', positive=True),
+            l=Symbol('l', positive=True),
+            angle=dynamicsymbols('varphi'),
+            qs=None,
+            ivar=Symbol('t'),
+    ):
+
+        self.pendulum = Pendulum(m, g, l, angle=angle)
+        system = self.pendulum
+
+        super().__init__(system)
+# usunąć indeksy parametrów, zarówno w klasie jak i na rysunkach
+# ujednolicić zmienną (angle albo phi)
+
+class SDoFExcitedPendulum(ComposedSystem):
     scheme_name = 'horizontal_forced_pendulum.png'
     real_name = 'pendulum2_real.jpg'
 
