@@ -106,6 +106,61 @@ class SDoFHarmonicOscillator(ComposedSystem):
 
 
 class DDoFVehicleSuspension(ComposedSystem):
+    """Ready to use sample Double Degree of Freedom System represents kinematically excited beam with two springs.
+        Arguments:
+        =========
+            m = Mass
+                -Mass of system on spring
+
+            I = Moment of inertia
+                -Moment of inertia of a rod
+
+            l_rod = lenght of a rod
+                -Dimension of a rod imitating vehicle's floor plate
+
+            l_r = offset of right spring
+                -Dimension of a right spring's offset
+
+            l_l = offset of left spring
+                -Dimension of a left spring's offset
+
+            k_1 =Right spring coefficient
+                -Right spring carrying the system
+
+            k_2 =Left spring coefficient
+                -Left spring carrying the system
+
+            F_engine = thrust of an engine
+                -Force made by engine, which allows vehicle to move forward
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+        Example ### Do wymyślenia
+        =======
+        A mass oscillating up and down while being held up by a spring with a spring constant kinematicly 
+
+        >>> t = symbols('t')
+        >>> m, k = symbols('m, k')
+        >>> qs = dynamicsymbols('z') # Generalized Coordinates 
+        >>> T = S.Half*m*z.diff(t)**2 # Kinetic Energy 
+        >>> V = S.Half*k*z**2 # Potential Energy 
+        >>> L = T - V # Lagrangian Calculation
+        >>> N = ReferenceFrame('N') # Defining of reference frame for coordinate system
+        >>> P = Point('P') # Defining point in space
+        >>> P.set_vel(N, z.diff(t)*N.y) # Set velocity of point P in reference system N on axis z
+        >>> Forcelist = [(P,f*sin(omega*t)*N.y)] # external forces on the system 
+        >>> mass = dyn.HarmonicOscillator(dyn.LagrangesDynamicSystem(L, qs=[z], frame=N)) # Initialization of LagrangesDynamicSystem instance
+
+        -We define the symbols and dynamicsymbols
+        -Kinetic energy T and potential energy v are evaluated to calculate the lagrangian L
+        -Reference frame was created with point P defining the position and the velocity determined on the z axis
+        -external forces assigned 
+        -finally we determine the instance of the system using class LagrangeDynamicSystem
+    """
 
     scheme_name = 'car.png'
     real_name = 'car_real.jpg'
@@ -264,9 +319,9 @@ class SDoFExcitedPendulum(ComposedSystem):
 
     def __init__(
             self,
-            m1=Symbol('m_1', positive=True),
+            m_1=Symbol('m_1', positive=True),
             g=Symbol('g', positive=True),
-            l1=Symbol('l_1', positive=True),
+            l_1=Symbol('l_1', positive=True),
             F=Symbol('F', positive=True),
             angle=dynamicsymbols('varphi_1'),
             qs=None,
@@ -274,8 +329,8 @@ class SDoFExcitedPendulum(ComposedSystem):
     ):
         phi = angle
 
-        self.pendulum = Pendulum(m1, g, l1, angle=angle)
-        self.force = Force(-F * l1 * cos(phi), pos1=phi, qs=[phi])
+        self.pendulum = Pendulum(m_1, g, l_1, angle=angle)
+        self.force = Force(-F * l_1 * cos(phi), pos1=phi, qs=[phi])
         system = self.pendulum + self.force
 
         super().__init__(system)
