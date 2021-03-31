@@ -753,7 +753,6 @@ class DataPlot(Figure):
     _latex_name = 'figure'
 
     def __init__(self,
-                 numerical_data,
                  fig_name,
                  *,
                  preview=False,
@@ -761,7 +760,7 @@ class DataPlot(Figure):
                  **kwargs):
         super().__init__(position=position, **kwargs)
 
-        self._numerical_data = numerical_data
+    
         self.fig_name = str(fig_name)
         #self._latex_name='figure' #super()._latex_name
         self.preview = preview
@@ -773,15 +772,17 @@ class DataPlot(Figure):
 
         if not filename:
             current_time = dtime.datetime.now().timestamp()
-            filename=f'autoadded_figure_{current_time}'
+            filename=f'autoadded_figure_{current_time}.png'
 
-        plt.savefig(*args,filename=filename,**kwargs)
+        plt.savefig(filename,*args,**kwargs)
+        self.add_image(filename, width=NoEscape('15cm'))
+
 
 
         if self.preview == True:
             plt.show()
 
-        plt.close()
+        
 
     
 
