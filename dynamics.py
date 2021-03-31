@@ -219,7 +219,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     def _kwargs(self):
         """
-        Returns all key words arguments that an instance has
+        Returns all keyword arguments that an instance has
         """
         return {
             'bodies': self.bodies,
@@ -258,6 +258,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         self_dict['bodies'] = list_build(self_dict['bodies']) + list_build(
             other_dict['bodies'])
+        
+        
+        if not self_dict['frame']:
+            self_dict['frame']=other_dict['frame']
 
         if not self_dict['frame']:
             self_dict['frame'] = other_dict['frame']
