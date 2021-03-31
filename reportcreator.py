@@ -1,25 +1,22 @@
-import numpy as np
-import pandas as pd
-
-from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, Plot, Figure, Alignat, Package, Quantity, Command, Label, Ref, Marker, NewPage, NewLine, Eqref, Table
-from pylatex.section import Chapter
-from pylatex.utils import italic, NoEscape
-
-from pylatex.base_classes import Environment
-from pylatex.package import Package
-
+import datetime as dtime
 import os
-
-from sympy.physics.vector.printing import vpprint, vlatex
-import sympy.physics.mechanics as me
+import random
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as plticker
-import random
-from sympy import *
+import numpy as np
+import pandas as pd
 import pint
-
-import datetime as dtime
+import sympy.physics.mechanics as me
+from pylatex import (Alignat, Axis, Command, Document, Eqref, Figure, Label,
+                     Marker, Math, NewLine, NewPage, Package, Plot, Quantity,
+                     Ref, Section, Subsection, Table, Tabular, TikZ)
+from pylatex.base_classes import Environment
+from pylatex.package import Package
+from pylatex.section import Chapter
+from pylatex.utils import NoEscape, italic
+from sympy import *
+from sympy.physics.vector.printing import vlatex, vpprint
 
 
 class Equation(Environment):
@@ -753,6 +750,44 @@ class PlottedData(Figure):
 
         plt.close()
 
+
+class DataPlot(Figure):
+
+    _latex_name = 'figure'
+
+    def __init__(self,
+                 fig_name,
+                 *,
+                 preview=False,
+                 position=None,
+                 **kwargs):
+        super().__init__(position=position, **kwargs)
+
+    
+        self.fig_name = str(fig_name)
+        #self._latex_name='figure' #super()._latex_name
+        self.preview = preview
+
+    def add_data_plot(self,*args,filename=None,**kwargs):
+
+        
+        import matplotlib.pyplot as plt
+
+        if not filename:
+            current_time = dtime.datetime.now().timestamp()
+            filename=f'autoadded_figure_{current_time}.png'
+
+        plt.savefig(filename,*args,**kwargs)
+        self.add_image(filename, width=NoEscape('15cm'))
+
+
+
+        if self.preview == True:
+            plt.show()
+
+        
+
+    
 
 class DataTable(Table):
     _latex_name = 'table'

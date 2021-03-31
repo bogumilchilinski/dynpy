@@ -1,7 +1,7 @@
 import importlib
-from . import dynpy as dyn
+from . import dynamics as dyn
 importlib.reload(dyn)
-from . import dynpy as dyn
+from . import dynamics as dyn
 
 from sympy.physics.vector import dynamicsymbols
 from sympy import *
