@@ -6,11 +6,7 @@ from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
 import itertools as itools
 import scipy.integrate as solver
-<<<<<<< HEAD:dynpy.py
-from timeseries import *
-=======
 from .utilities.timeseries import *
->>>>>>> ec3facece3cf80cf4948e5bd9e0f7779c51a2303:dynamics.py
 
 from collections import ChainMap
 
@@ -253,16 +249,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         print(self_dict['qs'])
 
-<<<<<<< HEAD:dynpy.py
-        list_build = lambda x: x if x else []
-=======
         def list_build(x): return [x] if x else []
 
         def forcelist_build(x): return x if x else []
 
         self_dict['forcelist'] = forcelist_build(
             self_dict['forcelist']) + forcelist_build(other_dict['forcelist'])
->>>>>>> ec3facece3cf80cf4948e5bd9e0f7779c51a2303:dynamics.py
 
         self_dict['bodies'] = list_build(self_dict['bodies']) + list_build(
             other_dict['bodies'])
