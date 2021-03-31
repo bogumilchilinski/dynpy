@@ -720,7 +720,7 @@ class PlottedData(Figure):
         numerical_data = self._numerical_data
 
         ax = numerical_data.plot(subplots=subplots,
-                                 figsize=(10, 7),
+                                 figsize=(10, 4),
                                  ylabel=ylabel,
                                  grid=grid,
                                  fontsize=fontsize)
@@ -737,10 +737,13 @@ class PlottedData(Figure):
 
                 axl.plot()
         #ax=solution_tmp.plot(subplots=True)
-        ([
-            ax_tmp.legend(['$' + vlatex(sym) + '$'])
-            for ax_tmp, sym in zip(ax, numerical_data.columns)
-        ])
+        if subplots:
+            ([
+                ax_tmp.legend(['$' + vlatex(sym) + '$'])
+                for ax_tmp, sym in zip(ax, numerical_data.columns)
+            ])
+        else:
+            ax.legend([f'${vlatex(sym)}$' for sym in numerical_data.columns])
 
         plt.savefig(self.fig_name + '.png')
         self.add_image(self.fig_name, width=NoEscape('15cm'))
@@ -953,7 +956,8 @@ class ReportSection(Section):
             grid=True,
             num_yticks=10,
             fontsize=None,
-            caption='Przebiegi czasowe modelu dla rozważanego zakresu danych'):
+            caption='Przebiegi czasowe modelu dla rozważanego zakresu danych',
+            plots_no=1):
 
         with self.create(Subsection(title)) as subsec:
 
@@ -966,6 +970,7 @@ class ReportSection(Section):
                     for parameter, value in row.items()
                     if isinstance(parameter, Symbol)
                 }
+                
 
                 current_time = dtime.datetime.now().timestamp()
                 current_fig_mrk = Marker('data_plot_' +
@@ -981,25 +986,49 @@ class ReportSection(Section):
                     #**{str(name):vlatex(name) for name in row['simulations'].columns}
                 }
 
+                
                 subsec.append(
                     NoEscape(str(initial_description).format(**format_dict)))
+                
+                print(
+                np.array_split(range(len(row['simulations'].columns)),plots_no )    
+                )
 
-                with subsec.create(
-                        PlottedData(row['simulations'],
-                                    './plots/fig_' + str(current_time),
-                                    position='H',
-                                    preview=self.preview)) as fig:
-                    fig.add_data_plot(row['simulations'],
-                                      ylabel=ylabel,
-                                      subplots=subplots,
-                                      grid=grid,
-                                      num_yticks=num_yticks,
-                                      fontsize=fontsize)
-                    fig.add_caption(
-                        NoEscape(
-                            #'Przebiegi czasowe modelu dla danych: {given_data}.'.format(**format_dict)
-                            caption.format(**format_dict)))
-                    fig.append(Label(current_fig_mrk))
+                for no,control_list in enumerate(np.array_split(range(len(row['simulations'].columns)),plots_no )):
+                
+                    #print(row['simulations'].iloc[:,int(control_list[0]):int(control_list[-1]+1)])
+                    print('control list',control_list)
+                    
+                    current_time = dtime.datetime.now().timestamp()
+                    current_fig_mrk = Marker('data_plot_' +
+                                             str(self.analysis_key) + '_' +
+                                             str(current_time),
+                                             prefix='fig')
+
+                    format_dict = {
+                        **(self.get_feature_dict(numerical_data=row['simulations'],
+                                                 given_data_dict=data_with_units,
+                                                 units_dict=units_dict,
+                                                 marker=current_fig_mrk)),
+                        #**{str(name):vlatex(name) for name in row['simulations'].columns}
+                    }
+                
+                    with subsec.create(
+                            PlottedData(row['simulations'].iloc[:,int(control_list[0]):int(control_list[-1]+1)],
+                                        './plots/fig_' + str(current_time)+'_'+str(no),
+                                        position='H',
+                                        preview=self.preview)) as fig:
+                        fig.add_data_plot(None,
+                                          ylabel=ylabel,
+                                          subplots=subplots,
+                                          grid=grid,
+                                          num_yticks=num_yticks,
+                                          fontsize=fontsize)
+                        fig.add_caption(
+                            NoEscape(
+                                #'Przebiegi czasowe modelu dla danych: {given_data}.'.format(**format_dict)
+                                caption.format(**format_dict)))
+                        fig.append(Label(current_fig_mrk))
 
                 
                 subsec.append(
