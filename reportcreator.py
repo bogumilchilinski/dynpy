@@ -18,6 +18,30 @@ from pylatex.utils import NoEscape, italic
 from sympy import *
 from sympy.physics.vector.printing import vlatex, vpprint
 
+class InlineMath(Math):
+    """A class representing a inline math environment."""
+
+
+
+    def __init__(self, formula, escape=False,backend=vlatex):
+        r"""
+        Args
+        ----
+        data: list
+            Content of the math container.
+        inline: bool
+            If the math should be displayed inline or not.
+        escape : bool
+            if True, will escape strings
+        """
+
+
+        self.escape = escape
+        self.formula = vlatex(formula)
+        self.backend=backend
+        
+        super().__init__(inline=True, data=backend(formula), escape=escape)
+
 
 class Equation(Environment):
     """A class to wrap LaTeX's alltt environment."""
