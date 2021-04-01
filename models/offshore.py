@@ -37,3 +37,6 @@ class DDoFVessel(ComposedSystem):
         super().__init__(Lagrangian=T-V,qs=qs)
 
 
+class TDoFCompensatedPayload(ComposedSystem):
+    pass
+
