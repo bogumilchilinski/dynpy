@@ -18,25 +18,24 @@ from sympy.simplify.fu import TR8, TR10, TR7, TR3
 
 from .solvers.numerical import OdeComputationalCase
 
-from .solvers.linear import LinearODESolution,FirstOrderODE
+from .solvers.linear import LinearODESolution, FirstOrderODE
 
 from .solvers.nonlinear import WeakNonlinearProblemSolution, MultiTimeScaleMethod
-
 
 
 def multivariable_taylor_series(expr, args, n=2, x0=None):
     '''
     Computes the multivariable Taylor series of expresion expr for the given order n in the neighbourhood of x0 point.
-    
+
     Args:
         expr (:obj:Expr): Expresion describing the function under consideration.
         args (array_like): Set of the arguments.
         to be continued ...
 
-    
+
     Examples:
         Taylor series expansion of the second order for the function $y+x**2$ is as follows:
-        
+
         >>> multivariable_taylor_series(y+x**2,args=[x,y],n=2,x0=[0,0])
         y+x**2
     '''
@@ -49,7 +48,7 @@ def multivariable_taylor_series(expr, args, n=2, x0=None):
         for arg, arg_shift in op_point.items()
     }
 
-    diff_orders = lambda var_list, order_arg: [
+    def diff_orders(var_list, order_arg): return [
         args for tmp in range(order_arg)
     ]
 
@@ -69,7 +68,7 @@ def multivariable_taylor_series(expr, args, n=2, x0=None):
         for comp in diff_orders_list
     }
 
-    #print(diff_orders_list)
+    # print(diff_orders_list)
 
     return (sum([
         expr.diff(*args_tmp).subs(op_point).doit() * poly
@@ -92,51 +91,48 @@ def scalar_fun_quadratic_form(expr, coordinates, op_point):
     return constant_term + linear_term + quad_tem
 
 
-
-
-
 class LagrangesDynamicSystem(me.LagrangesMethod):
     '''Lagrange's method object
-    
+
     The object generates equation of motion after passing Lagrangian and generalized coordinates. After initialization it can be performed several operations on the object to find desired answers.
-    
+
     Arguments
     =========
     Lagrangian: Symbol object
         The lagrangian equation - subtraction of potential and kinematic energy
-    
+
     qs=None (optional): dynamicsymbol object
         Generalized coordinates
-    
+
     forcelist=None (optional): (tuples) (Point,Vector) object, (ReferenceFrame,Vector) object
         Forces acting on the dynamic system
-    
+
     bodies=None (optional): Point object, RigitBody object
         Bodies represented as points or rigit bodies in reference frame
-    
+
     frame=None (optional): ReferenceFrame object
         Reference frame of the dinamic system
-    
+
     hol_coneqs=None (optional): array-like
         The holonomic constraint equations
-    
+
     nonhol_coneqs=None (optional): array-like
         The nonholonomic constraint equations
-    
+
     label=None (optional): string
         Label of the class instance. Default label: '{Class name} with {length of qs} DOF'
-    
+
     ivar=None (optional): Symbol object
         Independent variable
-    
+
     evaluate=True (optional):
         Evaluates the dinamic system
-    
+
     Example
     =======
-    
+
     Rod propped up with spring on the right side - constant k2 and spring and dumper on the left side - constants k and c.
-    
+
     >>>t = symbols('t')
     >>>g,k,m1,m2,l,c = symbols('g k m1 m2 l c')
     >>>x1,x2 = dynamicsymbols('x_1 x_2')    # Generalized coordinates
@@ -157,12 +153,13 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     >>>forcelist = [(P1,-c*x1.diff(t)*N.x)]    # External forces determination and seting reference frame N and axis x
     >>>rod = dyn.LagrangesDynamicSystem(L,qs=[x1,x2],forcelist=forcelist,frame=N)    # Inicjalization of LagrangesDynamicSystem instance
     >>>rod_numerical = rod.numerized(parameter_values=val)
-    
+
     Firstly there are defined symbols with SymPy Symbol class and generalized coordinates which are defined with dynamicsymbols method. Next the mass m, hight h, angle phi, and moment of inertia I are determined to make use of it in energys equations. 
     Subsequently potential energy V and kinetic enetgy T are evaluated and defined to calcualte Lagrangian L. When it has been done, one can start to create ReferenceFrame N. In the frame points P1 and P2 are created where there will be applied velocity on x axis in above case. Additonali external forces are assined to the variable forcelist - it is necessery to chose the point and axies. 
     Finaly one can define instance rod of class LagrangesDynamicSystem by making use of calculation and variables made previously. In addition there is possibility to create instant of class OdeComputationalCase (rod_numerical) that allows to perform numerical operations on the EOM
-    
+
     '''
+
     def __init__(self,
                  Lagrangian,
                  qs=None,
@@ -222,7 +219,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     def _kwargs(self):
         """
-        Returns all key words arguments that an instance has
+        Returns all keyword arguments that an instance has
         """
         return {
             'bodies': self.bodies,
@@ -252,18 +249,22 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         print(self_dict['qs'])
 
-        list_build = lambda x: [x] if x else []
-        
-        forcelist_build = lambda x: x if x else []
+        def list_build(x): return [x] if x else []
+
+        def forcelist_build(x): return x if x else []
 
         self_dict['forcelist'] = forcelist_build(
             self_dict['forcelist']) + forcelist_build(other_dict['forcelist'])
-        
+
         self_dict['bodies'] = list_build(self_dict['bodies']) + list_build(
             other_dict['bodies'])
         
+        
         if not self_dict['frame']:
             self_dict['frame']=other_dict['frame']
+
+        if not self_dict['frame']:
+            self_dict['frame'] = other_dict['frame']
 
         return LagrangesDynamicSystem(**self_dict)
 
@@ -273,6 +274,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         self_dict = self._kwargs()
         self_dict['qs'] = flatten(args)
+        
+        print(flatten(args))
 
         return LagrangesDynamicSystem(**self_dict)
 
@@ -292,8 +295,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         Returns class instance with substituted numerical values
         """
 
-        hol_coneqs=list(self._hol_coneqs)
-        
+        hol_coneqs = list(self._hol_coneqs)
+
         if 'method' in kwargs.keys():
             method = kwargs['method']
         else:
@@ -305,7 +308,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
             elif len(args) == 1:
                 if isinstance(args[0], dict):
-                    #print(args[0])
+                    # print(args[0])
                     args = list(args[0].items()),
 
             constrains = [
@@ -315,10 +318,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             args = ([(lhs, rhs) for lhs, rhs in args[0]
                      if not any(coord in (lhs - rhs).atoms(Function)
                                 for coord in self.q)], )
-            
+
             hol_coneqs = hol_coneqs + constrains
-            
-            
+
 
 #         print(hol_coneqs)
 #         print(args)
@@ -339,24 +341,23 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                               old_point.vel(frame).subs(*args, **kwargs))
 
         forces_subs = list(zip(new_points, new_forces))
-        
-        nonhol_coneqs_subs = list(self.coneqs)[len((self._hol_coneqs)):] #,ivar=self.ivar
+
+        nonhol_coneqs_subs = list(self.coneqs)[len(
+            (self._hol_coneqs)):]  # ,ivar=self.ivar
 
         #         print(forces_subs)
         #         print(self.forcelist)
 
-        #print(type(self))
-        
-        
-        
+        # print(type(self))
+
         return type(self)(Lagrangian=lagrangian_subs,
                           qs=self.q,
                           forcelist=forces_subs,
                           bodies=self._bodies,
                           frame=self.frame,
                           hol_coneqs=hol_coneqs,
-                          nonhol_coneqs= nonhol_coneqs_subs
-               )
+                          nonhol_coneqs=nonhol_coneqs_subs
+                          )
 
 
 #     def rhs(self):
@@ -368,8 +369,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         '''
         display(expr)
         pass
-    
-    
+
     @classmethod
     def preview(cls):
         with open(f'{img}', "rb") as image_file:
@@ -377,15 +377,25 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         image_file.close()
 
         return IP.display.Image(base64.b64decode(encoded_string))
+
+    def __call__(self, *args, label=None):
+        """
+        Returns the label of the object or class instance with reduced Degrees of Freedom.
+        """
         
+        if isinstance(args[0], str):
+            if  == None:
+                self._label=args[0]
+            else:
+                self._label=label
+                
+            return self
+        
+        else:
+            print(flatten(*args))
+            return self.shranked(*args)
+            
 
-    def __call__(self, label=None):
-        """
-        Returns a label of the object
-        """
-        self._label = label
-
-        return self
 
     def __str__(self):
 
@@ -434,52 +444,48 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return self.governing_equations.subs(
             {gen_coord: 0
              for gen_coord in self.Y}).doit()
-    
-    def reactions(self):
-        multipliers=self.solve_multipliers()
-        
-        return [self._eoms.jacobian([lam])*value for lam,value  in multipliers.items()]
-    
-    def generalized_momentum(self,dict=True):
-        
 
+    def reactions(self):
+        multipliers = self.solve_multipliers()
+
+        return [self._eoms.jacobian([lam])*value for lam, value in multipliers.items()]
+
+    def generalized_momentum(self, dict=True):
 
         if dict:
             momentum_dict = {
                 q_tmp:
-                Symbol('p_{'+str(q_tmp).replace('(' + str(self.ivar) + ')', '')+'}')
+                Symbol(
+                    'p_{'+str(q_tmp).replace('(' + str(self.ivar) + ')', '')+'}')
                 for q_tmp in self.q
-                }
+            }
 
-            return {momentum_sym:self.lagrangian().diff(coord.diff(self.ivar)) for coord,momentum_sym  in momentum_dict.items()}
-    
-    def qdot_from_p(self,dict=True):
-        
+            return {momentum_sym: self.lagrangian().diff(coord.diff(self.ivar)) for coord, momentum_sym in momentum_dict.items()}
+
+    def qdot_from_p(self, dict=True):
+
         if dict:
-            qdot=self.q.diff(self.ivar)
+            qdot = self.q.diff(self.ivar)
 
-            mom_subs=solve( [lhs-rhs  for lhs,rhs in self.generalized_momentum().items()],list(qdot),dict=True)
-            
+            mom_subs = solve(
+                [lhs-rhs for lhs, rhs in self.generalized_momentum().items()], list(qdot), dict=True)
+
         return mom_subs
-    
-    
+
     def hamiltonian(self):
-        
+
         if dict:
             momentum_dict = self.generalized_momentum()
 
-        
-        qdot=self.q.diff(self.ivar)
-        
-        mom_subs=self.qdot_from_p()
+        qdot = self.q.diff(self.ivar)
 
-        
-        ham_sum=sum( [coord*mom for coord,mom  in  zip(qdot,momentum_dict.keys())]   )
-        
-        return Eq(Symbol('H'),(ham_sum-self.lagrangian()).subs(mom_subs[0]))
+        mom_subs = self.qdot_from_p()
 
+        ham_sum = sum(
+            [coord*mom for coord, mom in zip(qdot, momentum_dict.keys())])
 
-        
+        return Eq(Symbol('H'), (ham_sum-self.lagrangian()).subs(mom_subs[0]))
+
     def _op_points(self,
                    static_disp_dict=None,
                    dict=True,
@@ -568,7 +574,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         Returns approximated N-th order function calculated with Taylor series method as an instance of the class
         """
 
-        #print('x0',x0)
+        # print('x0',x0)
         if not x0:
             x0 = {coord: 0 for coord in self.Y}
 
@@ -619,10 +625,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         computed_case = self.computational_case(parameter_values=data_Tuple)
 
         return OdeComputationalCase(**computed_case, evaluate=True)
-    
+
     @classmethod
     def from_system(cls, system):
-        
+
         return cls(system)
 
 
@@ -630,6 +636,7 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
     '''
 
     '''
+
     def stiffness_matrix(self):
         '''
         Returns the system stiffness matrix, which is based on the equations of motion of the Lagrange's system. Matrix is obtained from jacobian which is called with system's generalized coordinates vector.
@@ -669,7 +676,7 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
 
         main_matrix = self.rhs().jacobian(self.Y)
 
-        return (main_matrix).diagonalize()[0][len(self.q):,:]
+        return (main_matrix).diagonalize()[0][len(self.q):, :]
 
 
 class HarmonicOscillator(LinearDynamicSystem):
@@ -733,23 +740,25 @@ class HarmonicOscillator(LinearDynamicSystem):
     >>>instance_one=HarmonicOscillator(lall)
 
     '''
+
     def damped_natural_frequencies(self):
         '''
         Determines the system damped natural frequencies matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
         '''
-        damped_freqs = [sqrt(nat_freq**2 - (self.damping_coefficient()[0]/2)**2) for nat_freq in self.natural_frequencies()]
+        damped_freqs = [sqrt(nat_freq**2 - (self.damping_coefficient()[0]/2)**2)
+                        for nat_freq in self.natural_frequencies()]
 
         return diag(*damped_freqs)
-    
+
     def im_eigenvals(self):
         '''
         Determines the system damped natural frequencies matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
         '''
-        
-        natural_freqs=list({(im((eigen).doit())) for eigen  in self.eigenvalues() if not eigen==0 })
-        
-        return diag(*natural_freqs)
 
+        natural_freqs = list({(im((eigen).doit()))
+                             for eigen in self.eigenvalues() if not eigen == 0})
+
+        return diag(*natural_freqs)
 
     def natural_frequencies(self):
         '''
@@ -759,16 +768,17 @@ class HarmonicOscillator(LinearDynamicSystem):
                   self.stiffness_matrix()).diagonalize()[1])).applyfunc(sqrt)
 
     def damping_coefficient(self):
-        
+
         return ((self.inertia_matrix().inv() *
-                  self.damping_matrix()))
-    
+                 self.damping_matrix()))
+
     def logarithmic_decrement(self):
-        
-        log_dec = [(2*pi*self.damping_coefficient()[0]/2) / damp_freq for damp_freq in self.damped_natural_frequencies()]
-        
+
+        log_dec = [(2*pi*self.damping_coefficient()[0]/2) /
+                   damp_freq for damp_freq in self.damped_natural_frequencies()]
+
         return log_dec
-    
+
     def canonical_governing_equation(
         self,
         natural_freq=None,
@@ -813,27 +823,29 @@ class HarmonicOscillator(LinearDynamicSystem):
         '''
 
         eoms = self._eoms
-        subs_dict={}
-        if len(self.q)==1:
-            eoms = eoms-self.stiffness_matrix()*Matrix(self.q)+ ((Symbol('omega_h',positive=True)**2+(self.damping_coefficient()[0]/2)**2)*self.inertia_matrix()*Matrix(self.q) )
-            subs_dict={Symbol('omega_h',positive=True):sqrt(self.natural_frequencies()[0]**2-(self.damping_coefficient()[0]/2)**2)}
+        subs_dict = {}
+        if len(self.q) == 1:
+            eoms = eoms-self.stiffness_matrix()*Matrix(self.q) + ((Symbol('omega_h', positive=True)
+                                                                   ** 2+(self.damping_coefficient()[0]/2)**2)*self.inertia_matrix()*Matrix(self.q))
+            subs_dict = {Symbol('omega_h', positive=True): sqrt(
+                self.natural_frequencies()[0]**2-(self.damping_coefficient()[0]/2)**2)}
 #             print('len',len(self.q))
 #             display(subs_dict)
-                    
-        return LinearODESolution(eoms,ivar=self.ivar,dvars=self.q).general_solution(
+
+        return LinearODESolution(eoms, ivar=self.ivar, dvars=self.q).general_solution(
             initial_conditions=initial_conditions).subs(subs_dict).doit()
 
     def steady_solution(self, initial_conditions=None):
         """
-        
+
         """
-        return LinearODESolution(self._eoms,ivar=self.ivar,dvars=self.q).steady_solution(
+        return LinearODESolution(self._eoms, ivar=self.ivar, dvars=self.q).steady_solution(
             initial_conditions=initial_conditions)
 
     def solution(self, initial_conditions=None):
-        
+
         return self.general_solution(initial_conditions)+self.steady_solution(initial_conditions)
-        
+
 #         eoms = self._eoms
 #         subs_dict={}
 #         if len(self.q)==1:
@@ -841,11 +853,9 @@ class HarmonicOscillator(LinearDynamicSystem):
 #             subs_dict={Symbol('omega_h',positive=True):sqrt(self.natural_frequencies()[0]**2-(self.damping_coefficient()[0]/2)**2)}
 #             print('len',len(self.q))
 #             display(subs_dict)
-                    
+
 #         return LinearODESolution(eoms,ivar=self.ivar,dvars=self.q).genral_solution(
 #             initial_conditions=initial_conditions).subs(subs_dict).doit()
-
-
 
     def steady_solution_amp(
             self,
@@ -882,9 +892,9 @@ class HarmonicOscillator(LinearDynamicSystem):
         self.Omega = excitation_freq
 
         general_solution = self.steady_solution()[0]
-        
-        comp_sin = general_solution.coeff(sin(excitation_freq * self.ivar)) 
-        comp_cos = general_solution.coeff(cos(excitation_freq * self.ivar))        
+
+        comp_sin = general_solution.coeff(sin(excitation_freq * self.ivar))
+        comp_cos = general_solution.coeff(cos(excitation_freq * self.ivar))
 
         n_sin, d = fraction(comp_sin)
         n_cos, d = fraction(comp_cos)
@@ -894,28 +904,31 @@ class HarmonicOscillator(LinearDynamicSystem):
 #         print(d)
 
         if len(self.q) == 1:  # if single degree of freedom
-            frf_expr = ((sqrt((n_sin**2 + n_cos**2).simplify())) /d.doit()).simplify()   # sDoF
-        else: # DoF > 1
-            frf_expr = inv( stiffness_matrix() - excitation_freq**2 * inertia_matrix() ) # mDoF
+            frf_expr = ((sqrt((n_sin**2 + n_cos**2).simplify())) /
+                        d.doit()).simplify()   # sDoF
+        else:  # DoF > 1
+            frf_expr = inv(stiffness_matrix() - excitation_freq **
+                           2 * inertia_matrix())  # mDoF
 
         return frf_expr
 
     def dynamic_amplification_factor(self,
                                      excitation_amp=None,
-                                     excitation_freq=Symbol('Omega',positive=True)):
+                                     excitation_freq=Symbol('Omega', positive=True)):
         '''
         Returns the Dynamic Amplification Factor of the system for the given excitation amplitude (working correctly for single degree of freedom systems).
         '''
         frf = self.frequency_response_function(excitation_freq=excitation_freq)
-        
+
 #         display(self.external_forces())
-        
-        sin_comp = self.external_forces()[0].coeff(sin(excitation_freq * self.ivar))
-        cos_comp = self.external_forces()[0].coeff(cos(excitation_freq * self.ivar))
+
+        sin_comp = self.external_forces()[0].coeff(
+            sin(excitation_freq * self.ivar))
+        cos_comp = self.external_forces()[0].coeff(
+            cos(excitation_freq * self.ivar))
 
 #         display(sin_comp)
-        
-        
+
         maximal_force = sqrt(sin_comp**2 + cos_comp**2).subs(
             excitation_freq, 1).simplify()
 
@@ -929,9 +942,6 @@ class HarmonicOscillator(LinearDynamicSystem):
                static_def).simplify().subs(_dummy, excitation_freq / nat_freq)
 
         return daf
-    
-
-    
 
     def critical_frequencies(self, excitation_freq=None):
         '''
@@ -939,7 +949,7 @@ class HarmonicOscillator(LinearDynamicSystem):
         '''
         frf_max_cond = (self.frequency_response_function(
             excitation_freq=excitation_freq)**2).diff(excitation_freq)
-        #display(frf_max_cond)
+        # display(frf_max_cond)
 
         return solve(frf_max_cond, excitation_freq)
 
@@ -982,10 +992,11 @@ class HarmonicOscillator(LinearDynamicSystem):
 
         return spring_stiffness * spring_position * solution
 
-    def small_parameter(self,order=3):
+    def small_parameter(self, order=3):
 
-         return self._eoms[0].diff(self.q[0],order).subs(self.q[0],0)/factorial(order)
-    
+        return self._eoms[0].diff(self.q[0], order).subs(self.q[0], 0)/factorial(order)
+
+
 class DampedHarmonicOscillator(HarmonicOscillator):
     def solution(self, initial_conditions=None):
         '''
@@ -1008,8 +1019,7 @@ class UndampedHarmonicOscillator(HarmonicOscillator):
         '''
         return (((self.inertia_matrix().inv() *
                   self.stiffness_matrix()).diagonalize()[0]))
-    
-    
+
 
 class WeakNonlinearOscillator(HarmonicOscillator):
     def __init__(self,
@@ -1036,7 +1046,7 @@ class WeakNonlinearOscillator(HarmonicOscillator):
                                                   ivar=ivar,
                                                   evaluate=False)
 
-        #display(list(nonlinear_system.linearized().lagrangian().atoms(Function)))
+        # display(list(nonlinear_system.linearized().lagrangian().atoms(Function)))
 
         stationary_subs_dict = {
             func: 0
@@ -1051,7 +1061,7 @@ class WeakNonlinearOscillator(HarmonicOscillator):
             (nonlinear_system.approximated(order).lagrangian() -
              lin_lagrangian) / eps).doit()
 
-        #display(nonlin_lagrangian)
+        # display(nonlin_lagrangian)
 
         self._eps = Symbol(latex(eps), positive=True)
 
@@ -1099,6 +1109,3 @@ class WeakNonlinearOscillator(HarmonicOscillator):
             hol_coneqs=self._hol_coneqs,
             nonhol_coneqs=list(self.coneqs)[len((self._hol_coneqs)):],
             ivar=self.ivar)
-
-
-

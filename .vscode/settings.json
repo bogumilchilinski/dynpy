@@ -1,3 +1,5 @@
 {
-    "jupyter.jupyterServerType": "local"
+    "projectManager.git.baseFolders": [
+        "modules"
+    ]
 }

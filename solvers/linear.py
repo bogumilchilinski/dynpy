@@ -139,6 +139,8 @@ class FirstOrderODE:
         
         linear_odes=main_matrix*sym.Matrix(self.dvars)
     
+        display(main_matrix)
+
         const_odes_list=[]
         regular_odes_list=[]
     
@@ -148,7 +150,7 @@ class FirstOrderODE:
             else:
                 regular_odes_list+=[no]
             
-        regular_main_matrix= Matrix([linear_odes  for no in  regular_odes_list]).jacobian([self.dvars[no]  for no in regular_odes_list])
+        regular_main_matrix= Matrix([linear_odes[no]  for no in  regular_odes_list]).jacobian([self.dvars[no]  for no in regular_odes_list])
         singular_odes=[linear_odes  for no in  const_odes_list]
     
         return (regular_main_matrix).diagonalize(),singular_odes
@@ -161,7 +163,7 @@ class FirstOrderODE:
         '''
         
         
-        return self.diagonalize()[1]
+        return self.diagonalize()[0][1]
 
     def eigenmodes(self):
         '''
@@ -169,7 +171,7 @@ class FirstOrderODE:
         '''
         
         
-        return self.diagonalize()[0]
+        return self.diagonalize()[0][0]
     
     
     def damped_natural_frequencies(self):
@@ -215,7 +217,7 @@ class FirstOrderODE:
         #         print('o tu')
         #         display(self.odes_system)
 
-        modes,eigs = self.diagonalize()
+        modes,eigs = self.diagonalize()[0]
         
         
 
@@ -227,14 +229,15 @@ class FirstOrderODE:
 
         t_sol = self.ivar
 
+        display(modes,eigs)
         solution = [
-            C_list[i]*modes[:,i]*exp(eigs[i,i]*self.ivar)
+            C_list[i]*modes[:,i]*exp(eigv*self.ivar)
              
-            for i, coord in enumerate(self.dvars)
+            for i, eigv in enumerate([eigv for eigv in eigs if not eigv==0])
         ]
-
+        
         display(solution)
-        return sum(solution, Matrix([0] * len(Y_mat)))
+        return solution #sum(solution, Matrix([0] * len(Y_mat)))
 
     def steady_solution(self, initial_conditions=None):
 
