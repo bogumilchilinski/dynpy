@@ -30,13 +30,17 @@ class DDoFVessel(ComposedSystem):
         dq=q.diff(self.ivar)
         
         # lagrangian components definition
-        T = 1/2 * sum(dq.T * M_matrix * dq)
-        V = 1/2 * sum(Matrix(qs).T * K_matrix *  Matrix(qs))
+        self.T = 1/2 * sum(dq.T * M_matrix * dq)
+        self.V = 1/2 * sum(Matrix(qs).T * K_matrix *  Matrix(qs))
 
 
-        super().__init__(Lagrangian=T-V,qs=qs)
+        super().__init__(Lagrangian=self.T-self.V,qs=qs)
 
 
 class TDoFCompensatedPayload(ComposedSystem):
-    pass
+
+    def __init__(self,qs):
+        self.T = 1/2*m_p*v**2 + 1/2*m_c*v_c**2
+        self.V = 1/2*k_w*(h_c+h_c_eq)**2 + 1/2*k_c*(h+h_eq-(h_c+h_c_eq))**2 - m_p*g*z - m_c*g*z_c 
+        super().__init__(self.T-self.V,qs=qs)
 
