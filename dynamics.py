@@ -384,15 +384,16 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         
         if isinstance(args[0], str):
-            if  == None:
-                self._label=args[0]
-            else:
+            if label:
                 self._label=label
+            else:
+                self._label=args[0]
+                
                 
             return self
         
         else:
-            print(flatten(*args))
+            #print(flatten(*args))
             return self.shranked(*args)
             
 
