@@ -736,8 +736,72 @@ class SDoFNonlinearEngine(ComposedSystem):
         system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2
 
         super().__init__(system)
+        
+        
+class MDoFTMD(ComposedSystem):
+    scheme_name = 'mdof_tmd.png'
+    real_name = 'mdof_tmd_real.png' # trzeba dodać zdjecie rela tmd bo nie mamy
 
+    
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 me=Symbol('me', positive=True),
+                 k=Symbol('k', positive=True),
+                 ke=Symbol('ke', positive=True),
+                 l0=Symbol('l_0', positive=True),
+                 F=Symbol('F', positive=True),
+                 xe=dynamicsymbols('xe'),
+                 xb=dynamicsymbols('xb'),
+                 angle=dynamicsymbols('Omega'),
+                 ivar=Symbol('t', positive=True),
+                 system=None):
+    
+    
+        self.MaterialPoint_1 = MaterialPoint(m, pos1 = xe, qs=[xe])
+        self.MaterialPoint_2 = MaterialPoint(me, pos1 = xb, qs=[xb])
+        self.Spring_1 = Spring(k, pos1=xe,  qs=[xe])
+        self.Spring_2 = Spring(ke, pos1=xe, pos2=xb, qs=[xe, xb])
+        self.force = Force(F * sin(angle * ivar), pos1=xe, qs=[xe])
+        
+        
+        system = self.Spring_1 + self.Spring_2 + self.MaterialPoint_1 + self.MaterialPoint_2 + self.Force
 
+        super().__init__(system)
+        
+
+class MDoFWinch(ComposedSystem):
+    #scheme_name = 'mdof_winch.png'
+    #real_name = 'mdof_winch_real.png' # tez nei mam yzdjecia real wincha
+
+    
+    def __init__(self,
+                 M=Symbol('M', positive=True),
+                 M_engine=Symbol('M_{engine}', positive=True),
+                 I = Symbol('I', positive=True),
+                 k = Symbol('k', positive=True),
+                 r = Symbol('r', positive=True),
+                 l = Symbol('l', positive=True),
+                 m = Symbol('m', positive=True),
+                 g = Symbol('g', positive=True),
+                 theta=dynamicsymbols('theta'),
+                 phi=dynamicsymbols('phi'),
+                 system=None):
+        
+        x = r*cos(theta) + l*sin(phi)
+        y = r*sin(theta) - l*cos(phi)
+        F = m*g*r
+        
+        
+        self.disc_1 = Disk(I, pos_c = theta, qs=[phi, theta])
+        self.Spring = Spring(k, theta, qs = [phi, theta])
+        self.MaterialPoint_1 = MaterialPoint(m, x, qs=[phi, theta])
+        self.MaterialPoint_2 = MaterialPoint(m, y, qs=[phi, theta])
+        self.M_engine = Force(F, theta, qs = [phi, theta])
+        
+        system = self.MaterialPoint_1 + self.MaterialPoint_2 + self.disc_1 + self.Spring  + self.M_engine
+
+        super().__init__(system.linearized())
+        
 class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
     #scheme_name = ''
     #real_nanme = ''
@@ -760,8 +824,8 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
 
 
 class MDoFTMD(ComposedSystem):
-    scheme_name = '...'
-    real_name = '...'
+    #scheme_name = '...'
+    #real_name = '...'
 
     def __init__(self, system=None, ivar=Symbol('t')):
 
@@ -777,9 +841,9 @@ class MDoFTMD(ComposedSystem):
         L_TMD = (T - V)
 
         tmd_base = HarmonicOscillator(
-            L_TMD, qs=[xb, xe], forcelist=[], frame=N)
+            L_TMD, qs=[xb, xe], forcelist=[])
 
-        super().__init__(TMD_base)
+        super().__init__(tmd_base)
 
 
 class MDoFShaft(ComposedSystem):
