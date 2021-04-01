@@ -10,7 +10,7 @@ import pint
 import sympy.physics.mechanics as me
 from pylatex import (Alignat, Axis, Command, Document, Eqref, Figure, Label,
                      Marker, Math, NewLine, NewPage, Package, Plot, Quantity,
-                     Ref, Section, Subsection, Table, Tabular, TikZ)
+                     Ref, Section, Subsection, Table, Tabular, TikZ, Description)
 from pylatex.base_classes import Environment
 from pylatex.package import Package
 from pylatex.section import Chapter
@@ -41,6 +41,18 @@ class InlineMath(Math):
         self.backend=backend
         
         super().__init__(inline=True, data=backend(formula), escape=escape)
+
+
+class RCDescription(Description):
+    """A class representing LaTeX description environment."""
+    _latex_name ='description'
+    def __init__(self,description_dict=None,options=None,arguments=None,start_arguments=None,**kwargs):
+        self.description_dict=description_dict
+        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
+    def add_items(self,descritpion_dict)
+    if not description_dict == None:
+        for label, entry in self.description_dict.items():
+            self.add_item(NoEscape(vlatex(label)),str(entry))
 
 
 class Equation(Environment):

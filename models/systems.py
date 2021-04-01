@@ -311,11 +311,12 @@ class DDoFShaft(ComposedSystem):
                  l_r=Symbol('l', positive=True),
                  k_2=Symbol('k_2', positive=True),
                  k_1=Symbol('k_1', positive=True),
-                 input_disp=dynamicsymbols('theta', positive=True),
+                 input_displacement=dynamicsymbols('theta', positive=True),
                  ivar=Symbol('t'),
                  qs=dynamicsymbols('z, varphi')):
 
         z, phi = qs
+        theta=input_displacement
 
         self.m = m  # mass of a rod
         self.l_l = l_l  # offset of left spring
@@ -324,7 +325,7 @@ class DDoFShaft(ComposedSystem):
         self.k_2 = k_2  # left spring
         self.k_1 = k_1  # right spring
         self.I = I  # moment of inertia of a rod
-        self.input_display = theta
+        self.input_displacement = input_displacement
         self.qs = qs
 
         self.disc_1 = Disk(I, pos1=phi, qs=qs)
