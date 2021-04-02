@@ -1,12 +1,12 @@
 from .systems import ComposedSystem
 from sympy.physics.mechanics import dynamicsymbols
-from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt,S)
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S)
 
 
 class DDoFVessel(ComposedSystem):
     def __init__(self,
-                 m_vessel,
-                 I_5,
+                 m_vessel=Symbol('M_vessel'),
+                 I_5=Symbol('I_5'),
                  qs=dynamicsymbols('H, Phi'),
                  wave_level=dynamicsymbols('W'),
                  wave_slope=dynamicsymbols('S'),
@@ -44,28 +44,31 @@ class TDoFCompensatedPayload(ComposedSystem):
                  k_w=Symbol('k_w'),
                  l_0=Symbol('l_0'),
                  qs=dynamicsymbols('varphi h h_c'),
+                 y_e=dynamicsymbols('y_e'),
+                 z_e=dynamicsymbols('z_e'),
                  m_c=Symbol('m_c'),
                  k_c=Symbol('k_c'),
                  l_c=Symbol('l_c'),
-                 g=Symbol('g',positive=True),
+                 g=Symbol('g', positive=True),
+                 h_eq=Symbol('h_eq'),
+                 h_c_eq=Symbol('h_ceq'),
                  ivar=Symbol('t')
                  ):
 
-        
-        phi,h,h_c=qs
+        phi, h, h_c = qs
 
-        y=(h+h_eq+l_0+l_c)*sin(phi)+y_e
-        z=(h+h_eq+l_0+l_c)*cos(phi)+z_e
-        v=sqrt(diff(y,ivar)**2+diff(z,ivar)**2)
+        y = (h+h_eq+l_0+l_c)*sin(phi)+y_e
+        z = (h+h_eq+l_0+l_c)*cos(phi)+z_e
+        v = sqrt(diff(y, ivar)**2+diff(z, ivar)**2)
 
-        y_c=(h_c+h_c_eq+l_0)*sin(phi)+y_e
-        z_c=(h_c+h_c_eq+l_0)*cos(phi)+z_e
-        v_c=sqrt(diff(y_c,ivar)**2+diff(z_c,ivar)**2)
-
-
+        y_c = (h_c+h_c_eq+l_0)*sin(phi)+y_e
+        z_c = (h_c+h_c_eq+l_0)*cos(phi)+z_e
+        v_c = sqrt(diff(y_c, ivar)**2+diff(z_c, ivar)**2)
 
         self.T = S.One/2*m_p*v**2 + S.One/2*m_c*v_c**2
 
-        self.V = S.One/2*k_w*(h_c+h_c_eq)**2 + 1/2*k_c * \
-            (h+h_eq-(h_c+h_c_eq))**2 - m_p*g*z - m_c*g*z_c
+        self.V = (S.One/2*k_w*(h_c+h_c_eq)**2 +
+                  1/2*k_c * (h+h_eq-(h_c+h_c_eq))**2
+                  - m_p*g*z - m_c*g*z_c)
+
         super().__init__(self.T-self.V, qs=qs)
