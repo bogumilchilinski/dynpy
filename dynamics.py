@@ -274,6 +274,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         self_dict = self._kwargs()
         self_dict['qs'] = flatten(args)
+        
+        print(flatten(args))
 
         return LagrangesDynamicSystem(**self_dict)
 
@@ -376,13 +378,25 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return IP.display.Image(base64.b64decode(encoded_string))
 
-    def __call__(self, label=None):
+    def __call__(self, *args, label=None):
         """
-        Returns a label of the object
+        Returns the label of the object or class instance with reduced Degrees of Freedom.
         """
-        self._label = label
+        
+        if isinstance(args[0], str):
+            if label:
+                self._label=label
+            else:
+                self._label=args[0]
+                
+                
+            return self
+        
+        else:
+            #print(flatten(*args))
+            return self.shranked(*args)
+            
 
-        return self
 
     def __str__(self):
 

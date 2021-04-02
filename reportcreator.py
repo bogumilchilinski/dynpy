@@ -10,13 +10,53 @@ import pint
 import sympy.physics.mechanics as me
 from pylatex import (Alignat, Axis, Command, Document, Eqref, Figure, Label,
                      Marker, Math, NewLine, NewPage, Package, Plot, Quantity,
-                     Ref, Section, Subsection, Table, Tabular, TikZ)
+                     Ref, Section, Subsection, Table, Tabular, TikZ, Description)
 from pylatex.base_classes import Environment
 from pylatex.package import Package
 from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
 from sympy import *
 from sympy.physics.vector.printing import vlatex, vpprint
+
+class InlineMath(Math):
+    """A class representing a inline math environment."""
+
+
+
+    def __init__(self, formula, escape=False,backend=vlatex):
+        r"""
+        Args
+        ----
+        data: list
+            Content of the math container.
+        inline: bool
+            If the math should be displayed inline or not.
+        escape : bool
+            if True, will escape strings
+        """
+
+
+        self.escape = escape
+        self.formula = vlatex(formula)
+        self.backend=backend
+        
+        super().__init__(inline=True, data=backend(formula), escape=escape)
+
+
+class Description(Description):
+    """A class representing LaTeX description environment."""
+    _latex_name ='description'
+    def __init__(self,description_dict=None,options=None,arguments=None,start_arguments=None,**kwargs):
+        self.description_dict=description_dict
+        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
+        
+        if description_dict:
+            self.add_items(description_dict)
+            
+    def add_items(self,description_dict):
+        
+        for label, entry in description_dict.items():
+            self.add_item(NoEscape(vlatex(label)),str(entry))
 
 
 class Equation(Environment):
