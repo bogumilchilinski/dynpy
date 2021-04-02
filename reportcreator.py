@@ -56,7 +56,8 @@ class SymbolsDescription(Description):
     def add_items(self,description_dict):
         
         for label, entry in description_dict.items():
-            self.add_item(NoEscape(vlatex(label)),str(entry))
+            
+            self.add_item(NoEscape(InlineMath(vlatex(label)).dumps()),str(entry))
 
 
 class Equation(Environment):
