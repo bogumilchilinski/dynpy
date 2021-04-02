@@ -28,13 +28,13 @@ class DDoFVessel(ComposedSystem):
 
         # generalized displacements and velocities
         q = Matrix(qs)+Matrix([wave_level, wave_slope])
-        dq = q.diff(self.ivar)
+        dq = q.diff(ivar)
 
         # lagrangian components definition
         self.T = 1/2 * sum(dq.T * M_matrix * dq)
         self.V = 1/2 * sum(Matrix(qs).T * K_matrix * Matrix(qs))
 
-        super().__init__(Lagrangian=self.T-self.V, qs=qs)
+        super().__init__(Lagrangian=self.T-self.V, qs=qs,ivar=ivar)
 
 
 class TDoFCompensatedPayload(ComposedSystem):
@@ -71,4 +71,6 @@ class TDoFCompensatedPayload(ComposedSystem):
                   1/2*k_c * (h+h_eq-(h_c+h_c_eq))**2
                   - m_p*g*z - m_c*g*z_c)
 
-        super().__init__(self.T-self.V, qs=qs)
+        super().__init__(self.T-self.V, qs=qs,ivar=ivar)
+
+        
