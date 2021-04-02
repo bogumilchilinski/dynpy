@@ -43,7 +43,7 @@ class InlineMath(Math):
         super().__init__(inline=True, data=backend(formula), escape=escape)
 
 
-class Description(Description):
+class SymbolsDescription(Description):
     """A class representing LaTeX description environment."""
     _latex_name ='description'
     def __init__(self,description_dict=None,options=None,arguments=None,start_arguments=None,**kwargs):
