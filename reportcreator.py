@@ -15,8 +15,17 @@ from pylatex.base_classes import Environment
 from pylatex.package import Package
 from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
-from sympy import *
+from sympy import Matrix
 from sympy.physics.vector.printing import vlatex, vpprint
+
+
+class CompoundMatrix(Matrix):
+
+    def symbolic_form(self,symbol_str):
+        list(self)
+        pass
+
+
 
 class InlineMath(Math):
     """A class representing a inline math environment."""
@@ -43,16 +52,21 @@ class InlineMath(Math):
         super().__init__(inline=True, data=backend(formula), escape=escape)
 
 
-class RCDescription(Description):
+class SymbolsDescription(Description):
     """A class representing LaTeX description environment."""
     _latex_name ='description'
     def __init__(self,description_dict=None,options=None,arguments=None,start_arguments=None,**kwargs):
         self.description_dict=description_dict
         super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
-    def add_items(self,descritpion_dict)
-    if not description_dict == None:
-        for label, entry in self.description_dict.items():
-            self.add_item(NoEscape(vlatex(label)),str(entry))
+        
+        if description_dict:
+            self.add_items(description_dict)
+            
+    def add_items(self,description_dict):
+        
+        for label, entry in description_dict.items():
+            
+            self.add_item(NoEscape(InlineMath(vlatex(label)).dumps()),str(entry))
 
 
 class Equation(Environment):
