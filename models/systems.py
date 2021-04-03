@@ -801,11 +801,11 @@ class MDoFWinch(ComposedSystem):
         
         system = self.MaterialPoint_1 + self.MaterialPoint_2 + self.disc_1 + self.Spring  + self.M_engine
 
-        super().__init__(system.linearized())
+        super().__init__(system)
         
 class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
-    #scheme_name = ''
-    #real_nanme = ''
+    scheme_name = '...'
+    real_nanme = '...'
 
     def __init__(self, m=Symbol('m', positive=True),
                  k=Symbol('k', positive=True),
@@ -825,8 +825,8 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
 
 
 class MDoFTMD(ComposedSystem):
-    #scheme_name = '...'
-    #real_name = '...'
+    scheme_name = '...'
+    real_name = '...'
 
     def __init__(self, system=None, ivar=Symbol('t')):
 
