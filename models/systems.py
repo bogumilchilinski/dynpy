@@ -770,7 +770,7 @@ class MDoFTMD(ComposedSystem):
         
 
 class MDoFWinch(ComposedSystem):
-    #scheme_name = 'mdof_winch.png'
+    scheme_name = 'mdof_winch.png'
     #real_name = 'mdof_winch_real.png' # tez nei mam yzdjecia real wincha
 
     
