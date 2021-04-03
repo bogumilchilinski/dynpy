@@ -4,6 +4,7 @@ from sympy.physics.mechanics import *
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
 from .elements import *
 
+
 from sympy.physics.mechanics import *
 from sympy.physics.vector import *
 

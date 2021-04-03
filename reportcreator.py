@@ -15,15 +15,18 @@ from pylatex.base_classes import Environment
 from pylatex.package import Package
 from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
-from sympy import Matrix
+from sympy import Matrix,symbols,Symbol
+s
 from sympy.physics.vector.printing import vlatex, vpprint
 
 
 class CompoundMatrix(Matrix):
 
     def symbolic_form(self,symbol_str):
-        list(self)
-        pass
+        
+        nrows,ncols=self.shape
+        
+        matrix_filling=symbols()
 
 
 
