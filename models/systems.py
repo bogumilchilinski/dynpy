@@ -675,7 +675,7 @@ class SDoFEngine(ComposedSystem):
         super().__init__(system)
 
 
-class DDoFEngine(ComposedSystem):
+class EngineWithTMD(ComposedSystem):
     scheme_name = 'engine.png'
     real_name = 'engine_real.PNG'
 
@@ -848,24 +848,24 @@ class MDoFTMD(ComposedSystem):
         super().__init__(tmd_base)
 
 
-class MDoFShaft(ComposedSystem):
-    scheme_name = '...'
-    real_name = '...'
+# class MDoFShaft(ComposedSystem):
+#     scheme_name = '...'
+#     real_name = '...'
 
-    def __init__(self, system=None, ivar=Symbol('t')):
+#     def __init__(self, system=None, ivar=Symbol('t')):
 
-        t = ivar
+#         t = ivar
 
-        m, m_0, k, M, k_m, g, F_1, F_2, Omega, F, R, e, m_e, J, k_m, beta, k_m = symbols(
-            'm,m_0,k,M,k_v,g,F_1,F_2,Omega, F_0, R, e, m_e, J, k_m, beta, k_m',
-            positive=True)
+#         m, m_0, k, M, k_m, g, F_1, F_2, Omega, F, R, e, m_e, J, k_m, beta, k_m = symbols(
+#             'm,m_0,k,M,k_v,g,F_1,F_2,Omega, F_0, R, e, m_e, J, k_m, beta, k_m',
+#             positive=True)
 
-        T = 0
-        V = 0
+#         T = 0
+#         V = 0
 
-        L_Shaft = (T - V)
+#         L_Shaft = (T - V)
 
-        shaft_base = HarmonicOscillator(
-            L_shaft, qs=[xb, xe], forcelist=[], frame=N)
+#         shaft_base = HarmonicOscillator(
+#             L_shaft, qs=[xb, xe], forcelist=[], frame=N)
 
-        super().__init__(shaft_base)
+#         super().__init__(shaft_base)
