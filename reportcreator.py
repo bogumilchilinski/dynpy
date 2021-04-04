@@ -16,7 +16,7 @@ from pylatex.package import Package
 from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
 from sympy import Matrix,symbols,Symbol
-s
+
 from sympy.physics.vector.printing import vlatex, vpprint
 
 
