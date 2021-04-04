@@ -13,7 +13,7 @@ IDEA_STATUS =(
 class Idea(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField() 
-    status = models.CharField(choices=STATUS, default='pending')
+    status = models.CharField(choices=IDEA_STATUS, max_length = 30, default='pending')
 
 
 class Vote(models.Model):
