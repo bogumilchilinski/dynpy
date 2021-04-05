@@ -567,9 +567,9 @@ class SDoFDampedPendulum(ComposedSystem):
 # to samo co w poprzedniej klasie
 
 
-class DDoFCouplePendulum(ComposedSystem):
+class DDoFCoupledPendulum(ComposedSystem):
     """
-    Model of a DDoF Couple Pendulum.
+    Model of a DDoF Coupled Pendulum.
 
         Arguments:
         =========
@@ -682,25 +682,24 @@ class EngineWithTMD(ComposedSystem):
     def __init__(self,
                  M=Symbol('M', positive=True),
                  k_m=Symbol('k_m', positive=True),
-                 k_TMD=Symbol('k_TMD', positive=True),
+                 k_TMD=Symbol('k_{TMD}', positive=True),
                  m_e=Symbol('m_e', positive=True),
-                 m_TMD=Symbol('m_TMD', positive=True),
+                 m_TMD=Symbol('m_{TMD}', positive=True),
                  e=Symbol('e', positive=True),
                  dz=dynamicsymbols('dz'),
                  z=dynamicsymbols('z'),
-                 z_TMD=dynamicsymbols('z_TMD'),
+                 z_TMD=dynamicsymbols('z_{TMD}'),
                  phi=dynamicsymbols('phi'),
                  ivar=Symbol('t', positive=True),
                  system=None):
 
-        self.MaterialPoint_1 = MaterialPoint(M, pos_c=z, qs=[z])
+        self.MaterialPoint_1 = MaterialPoint(M, pos1=z, qs=[z])
         self.MaterialPoint_2 = MaterialPoint(m_e, pos1=z+e*cos(phi), qs=[z])
         self.MaterialPoint_3 = MaterialPoint(m_TMD, pos1=z_TMD, qs=[z_TMD])
         self.Spring_1 = Spring(2*k_m, pos1=z, qs=[z])
-        self.Spring_2 = Spring(k_TMD, pos2=z_TMD, qs=[z_TMD])
+        self.Spring_2 = Spring(k_TMD,pos1=z, pos2=z_TMD, qs=[z_TMD])
 
-        system = self.Spring_1 + self.Spring_2 + self.MaterialPoint_1 + \
-            self.MaterialPoint_2 + self.MaterialPoint_3
+        system = self.Spring_1 + self.Spring_2 + self.MaterialPoint_1 + self.MaterialPoint_2 + self.MaterialPoint_3
 
         super().__init__(system)
 
@@ -766,7 +765,7 @@ class MDoFTMD(ComposedSystem):
         self.force = Force(F * sin(angle * ivar), pos1=xe, qs=[xe])
         
         
-        system = self.Spring_1 + self.Spring_2 + self.MaterialPoint_1 + self.MaterialPoint_2 + self.Force
+        system = self.Spring_1 + self.Spring_2 + self.MaterialPoint_1 + self.MaterialPoint_2 + self.force
 
         super().__init__(system)
         
