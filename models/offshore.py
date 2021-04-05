@@ -49,19 +49,19 @@ class DDoFVessel(ComposedSystem):
         super().__init__(Lagrangian=self.T-self.V, qs=qs, ivar=ivar)
 
     def symbols_description(self):
-        self.sym_desc_dict = {self.m_vessel: 'mass of vessel \si{[\kilogram]}',
-                              self.I_5: 'moment of inertia of \num{5}-th degree (with respect to \(y\) axis, determined by the radius of gyration) \si{[\kilo\gram\metre\squared]}',
-                              self.q: 'generalized coordinates',
-                              self.wave_level: '???',
-                              self.wave_slope: '???',
-                              self.rho: 'fluid density \si{[\kilo\gram/\cubic\metre]}',
-                              self.g: 'acceleration of gravity \si{[\metre/\second\squared]}',
-                              self.A_wl: 'wetted area \si{[\metre\squared]}',
-                              self.V: 'submerged volume of the vessel \si{[\cubic\metre]}',
-                              self.GM_L: 'longitudinal metacentric height \si{[\metre]}',
-                              self.CoB: 'centre of buoyancy \si{[\metre]}',
-                              self.CoF: 'centre of floatation \si{[\metre]}',
-                              self.ivar: 'independent time variable',
+        self.sym_desc_dict = {self.m_vessel: r'mass of vessel \si{[\kilogram]}',
+                              self.I_5: r'moment of inertia of \num{5}-th degree (with respect to \(y\) axis, determined by the radius of gyration) \si{[\kilo\gram\metre\squared]}',
+                              self.q: r'generalized coordinates',
+                              self.wave_level: r'???',
+                              self.wave_slope: r'???',
+                              self.rho: r'fluid density \si{[\kilo\gram/\cubic\metre]}',
+                              self.g: r'acceleration of gravity \si{[\metre/\second\squared]}',
+                              self.A_wl: r'wetted area \si{[\metre\squared]}',
+                              self.V: r'submerged volume of the vessel \si{[\cubic\metre]}',
+                              self.GM_L: r'longitudinal metacentric height \si{[\metre]}',
+                              self.CoB: r'centre of buoyancy \si{[\metre]}',
+                              self.CoF: r'centre of floatation \si{[\metre]}',
+                              self.ivar: r'independent time variable',
                               }
 
         return self.sym_desc_dict
