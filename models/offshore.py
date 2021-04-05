@@ -53,22 +53,42 @@ class DDoFVessel(ComposedSystem):
                          qs=qs,
                          ivar=ivar)
 
+#     def symbols_description(self):
+#         self.sym_desc_dict = {
+#             self.m_vessel: r'mass of vessel \si{[\kilogram]},',
+#             self.I_5:
+#             r'moment of inertia of \num{5}-th degree (with respect to \(y\) axis, determined by the radius of gyration) \si{[\kilo\gram\metre\squared]},',
+#             tuple(self.q): r'generalized coordinates,',
+#             self.wave_level: r'???,',
+#             self.wave_slope: r'???,',
+#             self.rho: r'fluid density \si{[\kilo\gram/\cubic\metre]},',
+#             self.g: r'acceleration of gravity \si{[\metre/\second\squared]},',
+#             self.A_wl: r'wetted area \si{[\metre\squared]},',
+#             self.V: r'submerged volume of the vessel \si{[\cubic\metre]},',
+#             self.GM_L: r'longitudinal metacentric height \si{[\metre]},',
+#             self.CoB: r'centre of buoyancy \si{[\metre]},',
+#             self.CoF: r'centre of floatation \si{[\metre]},',
+#             self.ivar: r'independent time variable.',
+#         }
+
+#         return self.sym_desc_dict
+
     def symbols_description(self):
         self.sym_desc_dict = {
-            self.m_vessel: r'mass of vessel \si{[\kilogram]}',
+            self.m_vessel: r'mass of vessel,',
             self.I_5:
-            r'moment of inertia of \num{5}-th degree (with respect to \(y\) axis, determined by the radius of gyration) \si{[\kilo\gram\metre\squared]}',
-            tuple(self.q): r'generalized coordinates',
-            self.wave_level: r'???',
-            self.wave_slope: r'???',
-            self.rho: r'fluid density \si{[\kilo\gram/\cubic\metre]}',
-            self.g: r'acceleration of gravity \si{[\metre/\second\squared]}',
-            self.A_wl: r'wetted area \si{[\metre\squared]}',
-            self.V: r'submerged volume of the vessel \si{[\cubic\metre]}',
-            self.GM_L: r'longitudinal metacentric height \si{[\metre]}',
-            self.CoB: r'centre of buoyancy \si{[\metre]}',
-            self.CoF: r'centre of floatation \si{[\metre]}',
-            self.ivar: r'independent time variable',
+            r'moment of inertia of 5-th degree (with respect to y axis, determined by the radius of gyration),',
+            tuple(self.q): r'generalized coordinates,',
+            self.wave_level: r'wave level,',
+            self.wave_slope: r'wave slope,',
+            self.rho: r'fluid density,',
+            self.g: r'acceleration of gravity,',
+            self.A_wl: r'wetted area,',
+            self.V: r'submerged volume of the vessel,',
+            self.GM_L: r'longitudinal metacentric height,',
+            self.CoB: r'centre of buoyancy,',
+            self.CoF: r'centre of floatation.',
+#             self.ivar: r'independent time variable.',
         }
 
         return self.sym_desc_dict
@@ -134,25 +154,48 @@ class TDoFCompensatedPayload(ComposedSystem):
                          qs=qs,
                          ivar=ivar)
 
+#     def symbols_description(self):
+#         self.sym_desc_dict = {
+#             self.m_p: r'mass of payload \si{[\kilogram]}',
+#             self.k_w: r'wire stiffness \si{[\newton\per\meter]}',
+#             self.l_0: r'length of the lifting cable \si{[\metre]}',
+#             tuple(self.q): r'generalized coordinates',
+#             self.y_e:
+#             r'lateral displacement at crane tip obtained from RAOs (a regular wave excitation) \si{[\metre]}',
+#             self.z_e:
+#             r'vertical displacement at crane tip obtained from RAOs (a regular wave excitation) \si{[\metre]}',
+#             self.m_c: r'mass of compensator \si{[\kilogram]}',
+#             self.k_c:
+#             r'stiffness of heave compensator \si{[\newton\per\meter]}',
+#             self.l_c:
+#             r'length of the attached compensating element \si{[\metre]}',
+#             self.g: r'acceleration of gravity \si{[\metre/\second\squared]}',
+#             self.h_eq: r'equilibrium point of payload \si{[\metre]}',
+#             self.h_ceq: r'equilibrium point of compensator \si{[\metre]}',
+#             self.ivar: r'independent time variable',
+#         }
+
+#         return self.sym_desc_dict
+
     def symbols_description(self):
         self.sym_desc_dict = {
-            self.m_p: r'mass of payload \si{[\kilogram]}',
-            self.k_w: r'wire stiffness \si{[\newton\per\meter]}',
-            self.l_0: r'length of the lifting cable \si{[\metre]}',
-            tuple(self.q): r'generalized coordinates',
+            self.m_p: r'mass of payload,',
+            self.k_w: r'wire stiffness,',
+            self.l_0: r'length of the lifting cable,',
+            tuple(self.q): r'generalized coordinates,',
             self.y_e:
-            r'lateral displacement at crane tip obtained from RAOs (a regular wave excitation) \si{[\metre]}',
+            r'lateral displacement at crane tip obtained from RAOs (a regular wave excitation),',
             self.z_e:
-            r'vertical displacement at crane tip obtained from RAOs (a regular wave excitation) \si{[\metre]}',
-            self.m_c: r'mass of compensator \si{[\kilogram]}',
+            r'vertical displacement at crane tip obtained from RAOs (a regular wave excitation),',
+            self.m_c: r'mass of compensator,',
             self.k_c:
-            r'stiffness of heave compensator \si{[\newton\per\meter]}',
+            r'stiffness of heave compensator,',
             self.l_c:
-            r'length of the attached compensating element \si{[\metre]}',
-            self.g: r'acceleration of gravity \si{[\metre/\second\squared]}',
-            self.h_eq: r'equilibrium point of payload \si{[\metre]}',
-            self.h_ceq: r'equilibrium point of compensator \si{[\metre]}',
-            self.ivar: r'independent time variable',
+            r'length of the attached compensating element,',
+            self.g: r'acceleration of gravity,',
+            self.h_eq: r'equilibrium point of payload,',
+            self.h_ceq: r'equilibrium point of compensator,',
+            self.ivar: r'independent time variable,',
         }
 
         return self.sym_desc_dict
