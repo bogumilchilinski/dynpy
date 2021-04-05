@@ -136,23 +136,23 @@ class TDoFCompensatedPayload(ComposedSystem):
 
     def symbols_description(self):
         self.sym_desc_dict = {
-            self.m_p: 'mass of payload \si{[\kilogram]}',
-            self.k_w: 'wire stiffness \si{[\newton\per\meter]}',
-            self.l_0: 'length of the lifting cable \si{[\metre]}',
-            tuple(self.q): 'generalized coordinates',
+            self.m_p: r'mass of payload \si{[\kilogram]}',
+            self.k_w: r'wire stiffness \si{[\newton\per\meter]}',
+            self.l_0: r'length of the lifting cable \si{[\metre]}',
+            tuple(self.q): r'generalized coordinates',
             self.y_e:
-            'lateral displacement at crane tip obtained from RAOs (a regular wave excitation) \si{[\metre]}',
+            r'lateral displacement at crane tip obtained from RAOs (a regular wave excitation) \si{[\metre]}',
             self.z_e:
-            'vertical displacement at crane tip obtained from RAOs (a regular wave excitation) \si{[\metre]}',
-            self.m_c: 'mass of compensator \si{[\kilogram]}',
+            r'vertical displacement at crane tip obtained from RAOs (a regular wave excitation) \si{[\metre]}',
+            self.m_c: r'mass of compensator \si{[\kilogram]}',
             self.k_c:
-            'stiffness of heave compensator \si{[\newton\per\meter]}',
+            r'stiffness of heave compensator \si{[\newton\per\meter]}',
             self.l_c:
-            'length of the attached compensating element \si{[\metre]}',
-            self.g: 'acceleration of gravity \si{[\metre/\second\squared]}',
-            self.h_eq: 'equilibrium point of payload \si{[\metre]}',
-            self.h_ceq: 'equilibrium point of compensator \si{[\metre]}',
-            self.ivar: 'independent time variable',
+            r'length of the attached compensating element \si{[\metre]}',
+            self.g: r'acceleration of gravity \si{[\metre/\second\squared]}',
+            self.h_eq: r'equilibrium point of payload \si{[\metre]}',
+            self.h_ceq: r'equilibrium point of compensator \si{[\metre]}',
+            self.ivar: r'independent time variable',
         }
 
         return self.sym_desc_dict
