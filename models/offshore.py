@@ -113,7 +113,6 @@ class TDoFCompensatedPayload(ComposedSystem):
         self.m_p = m_p
         self.k_w = k_w
         self.l_0 = l_0
-        self.qs = qs
         self.y_e = y_e
         self.z_e = z_e
         self.m_c = m_c
