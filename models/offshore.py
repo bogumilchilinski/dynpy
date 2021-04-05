@@ -20,6 +20,18 @@ class DDoFVessel(ComposedSystem):
                  ivar=Symbol('t')
                  ):
 
+        self.m_vessel = m_vessel
+        self.I_5 = I_5q
+        self.wave_level = wave_level
+        self.wave_slope = wave_slope
+        self.rho = rho
+        self.g = g
+        self.A_wl = A_wl
+        self.V = V
+        self.GM_L = GM_L
+        self.CoB = CoB
+        self.CoF = CoF
+
         # vessel mass and stiffness matrix
         M_matrix = Matrix([[m_vessel, 0], [0, I_5]])
 
@@ -33,24 +45,24 @@ class DDoFVessel(ComposedSystem):
         # lagrangian components definition
         self.T = 1/2 * sum(dq.T * M_matrix * dq)
         self.V = 1/2 * sum(Matrix(qs).T * K_matrix * Matrix(qs))
-        
-        self.sym_desc_dict={                 
-                    m_vessel:'mass of vessel \si{[\kilogram]}',
-                 I_5:'moment of inertia of \num{5}-th degree (with respect to \(y\) axis, determined by the radius of gyration) \si{[\kilo\gram\metre\squared]}',
-                 qs:'generalized coordinates',
-                 wave_level:'???',
-                 wave_slope:'???',
-                 rho:'fluid density \si{[\kilo\gram/\cubic\metre]}',
-                 g:'acceleration of gravity \si{[\metre/\second\squared]}',
-                 A_wl:'wetted area \si{[\metre\squared]}',
-                 V:'submerged volume of the vessel \si{[\cubic\metre]}',
-                 GM_L:'longitudinal metacentric height \si{[\metre]}',
-                 CoB:'centre of buoyancy \si{[\metre]}',
-                 CoF:'centre of floatation \si{[\metre]}',
-                 ivar:'independent variable',
-              }
 
-        super().__init__(Lagrangian=self.T-self.V, qs=qs,ivar=ivar)
+        super().__init__(Lagrangian=self.T-self.V, qs=qs, ivar=ivar)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {self.m_vessel: 'mass of vessel \si{[\kilogram]}',
+                              self.I_5: 'moment of inertia of \num{5}-th degree (with respect to \(y\) axis, determined by the radius of gyration) \si{[\kilo\gram\metre\squared]}',
+                              self.q: 'generalized coordinates',
+                              self.wave_level: '???',
+                              self.wave_slope: '???',
+                              self.rho: 'fluid density \si{[\kilo\gram/\cubic\metre]}',
+                              self.g: 'acceleration of gravity \si{[\metre/\second\squared]}',
+                              self.A_wl: 'wetted area \si{[\metre\squared]}',
+                              self.V: 'submerged volume of the vessel \si{[\cubic\metre]}',
+                              self.GM_L: 'longitudinal metacentric height \si{[\metre]}',
+                              self.CoB: 'centre of buoyancy \si{[\metre]}',
+                              self.CoF: 'centre of floatation \si{[\metre]}',
+                              self.ivar: 'independent time variable',
+                              }
 
 
 class TDoFCompensatedPayload(ComposedSystem):
@@ -87,6 +99,4 @@ class TDoFCompensatedPayload(ComposedSystem):
                   1/2*k_c * (h+h_eq-(h_c+h_c_eq))**2
                   - m_p*g*z - m_c*g*z_c)
 
-        super().__init__(self.T-self.V, qs=qs,ivar=ivar)
-
-        
+        super().__init__(self.T-self.V, qs=qs, ivar=ivar)
