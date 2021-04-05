@@ -1002,3 +1002,18 @@ class GeneralizedMomentumsMCA(MechanicalSystemAnswer):
                          answer_generator=answer_generator,
                          title=self.title,
                          **kwargs)
+
+class EquilibriumEquationsMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(obj.equilibrium_equation().doit(),Matrix([0]*len(obj.q))),
+                 **kwargs):
+
+        self.title = 'What are equilibrium equations of the considered system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
