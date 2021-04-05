@@ -2,6 +2,7 @@ import sympy as sym
 from sympy import *
 import sympy.physics.mechanics as mech
 
+from dynpy import HarmonicOscillator
 
 import base64
 t = Symbol('t')
@@ -427,7 +428,6 @@ class GoverningEquationMCA(MechanicalSystemAnswer):
                          answer_generator=answer_generator,
                          title=self.title,
                          **kwargs)
-
 
 class SDoFGoverningEquationMCA(MechanicalSystemAnswer):
     def __init__(self,
@@ -947,6 +947,56 @@ class ResonanceCurveMCA(MechanicalSystemAnswer):
 
         self.title = 'Zależność pomiędzy amplitudą a częstością drgań własnych dla drgań swobodnych rozważanego układu wyraża wzór:'
         #self.title = '''Find the formula that represents the system's Lagrangian:'''
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+class FundamentalMatrixMCA(MechanicalSystemAnswer):
+    def __init__(
+            self,
+            correct_system,
+            other_systems,
+            answer_generator=lambda obj: Eq(Symbol('A'), (HarmonicOscillator(
+                obj.linearized()).fundamental_matrix()),
+                                            evaluate=False),
+            **kwargs):
+        self.title = 'A fundamental matrix for the system under consideration is given by:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+class FundamentalMatrixDeterminantMCA(MechanicalSystemAnswer):
+    def __init__(
+            self,
+            correct_system,
+            other_systems,
+            answer_generator=lambda obj: Eq(Symbol('\Delta'), (HarmonicOscillator(
+                obj.linearized()).fundamental_matrix().det()),
+                                            evaluate=False),
+            **kwargs):
+        self.title = 'Determine the characteristic polynomial for the considered system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+class GeneralizedMomentumsMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Symbol('p'),
+                                                 obj.generalized_momentum() ),
+                 **kwargs):
+
+        self.title = 'What are generalised momentums of the considered system:'
+
         super().__init__(correct_system,
                          other_systems,
                          answer_generator=answer_generator,
