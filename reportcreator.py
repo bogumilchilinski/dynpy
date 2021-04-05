@@ -15,8 +15,20 @@ from pylatex.base_classes import Environment
 from pylatex.package import Package
 from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
-from sympy import *
+from sympy import Matrix,symbols,Symbol
+
 from sympy.physics.vector.printing import vlatex, vpprint
+
+
+class CompoundMatrix(Matrix):
+
+    def symbolic_form(self,symbol_str):
+        
+        nrows,ncols=self.shape
+        
+        matrix_filling=symbols()
+
+
 
 class InlineMath(Math):
     """A class representing a inline math environment."""

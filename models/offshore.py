@@ -5,18 +5,18 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S)
 
 class DDoFVessel(ComposedSystem):
     def __init__(self,
-                 m_vessel=Symbol('M_vessel'),
-                 I_5=Symbol('I_5'),
+                 m_vessel=Symbol('M_vessel', positive=True),
+                 I_5=Symbol('I_5', positive=True),
                  qs=dynamicsymbols('H, Phi'),
                  wave_level=dynamicsymbols('W'),
                  wave_slope=dynamicsymbols('S'),
-                 rho=Symbol('rho'),
-                 g=Symbol('g'),
-                 A_wl=Symbol('A_wl'),
-                 V=Symbol('V'),
-                 GM_L=Symbol('GM_L'),
-                 CoB=Symbol('CoB'),
-                 CoF=Symbol('CoF'),
+                 rho=Symbol('rho', positive=True),
+                 g=Symbol('g', positive=True),
+                 A_wl=Symbol('A_wl'), positive=True,
+                 V=Symbol('V', positive=True),
+                 GM_L=Symbol('GM_L', positive=True),
+                 CoB=Symbol('CoB', positive=True),
+                 CoF=Symbol('CoF', positive=True),
                  ivar=Symbol('t')
                  ):
 
@@ -40,18 +40,18 @@ class DDoFVessel(ComposedSystem):
 class TDoFCompensatedPayload(ComposedSystem):
 
     def __init__(self,
-                 m_p=Symbol('m_p'),
-                 k_w=Symbol('k_w'),
-                 l_0=Symbol('l_0'),
+                 m_p=Symbol('m_p', positive=True),
+                 k_w=Symbol('k_w', positive=True),
+                 l_0=Symbol('l_0', positive=True),
                  qs=dynamicsymbols('varphi h h_c'),
                  y_e=dynamicsymbols('y_e'),
                  z_e=dynamicsymbols('z_e'),
-                 m_c=Symbol('m_c'),
-                 k_c=Symbol('k_c'),
-                 l_c=Symbol('l_c'),
+                 m_c=Symbol('m_c', positive=True),
+                 k_c=Symbol('k_c', positive=True),
+                 l_c=Symbol('l_c', positive=True),
                  g=Symbol('g', positive=True),
-                 h_eq=Symbol('h_eq'),
-                 h_c_eq=Symbol('h_ceq'),
+                 h_eq=Symbol('h_eq', positive=True),
+                 h_c_eq=Symbol('h_ceq', positive=True),
                  ivar=Symbol('t')
                  ):
 

@@ -4,6 +4,7 @@ from sympy.physics.mechanics import *
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
 from .elements import *
 
+
 from sympy.physics.mechanics import *
 from sympy.physics.vector import *
 
@@ -592,7 +593,7 @@ class DDoFCoupledPendulum(ComposedSystem):
 
         Example
         =======
-        A mass oscillating up and down while being held up by a spring with a spring constant kinematicly 
+        A mass oscillating up and down while being held up by a spring with a spring constant kinematicly
 
         >>> t = symbols('t')
         >>> m, g, l, k = symbols('m, g, l, k')
@@ -610,17 +611,18 @@ class DDoFCoupledPendulum(ComposedSystem):
                  g=Symbol('g', positive=True),
                  l=Symbol('l', positive=True),
                  k=Symbol('k', positive=True),
-                 ivar=Symbol('t'),
-                 qs=dynamicsymbols('varphi_1, varphi_2')):
+                 qs=dynamicsymbols('phi_1, phi_2')):
+        
+        phi1, phi2 = qs
 
-        phi_1, phi_2 = qs
-
-        self.spring = Spring(k, pos1=phi_1 * l, pos2=phi_2 * l, qs=qs)
-        self.pendulum_1 = Pendulum(m, g, l, angle=phi_1, qs=qs)
-        self.pendulum_2 = Pendulum(m, g, l, angle=phi_2, qs=qs)
-        system = self.spring + self.pendulum_1 + self.pendulum_2
+        self.spring = Spring(k, pos1 = (phi1 * (l)) , pos2 = (phi2 * (l)) , qs=[qs])
+        self.pendulum_1 = Pendulum(m, g, l, angle=phi1, qs=[qs])
+        self.pendulum_2 = Pendulum(m, g, l, angle=phi2, qs=[qs])
+        
+        system = self.pendulum_1 + self.spring  + self.pendulum_2
 
         super().__init__(system)
+        
 # konsekwentnie używać indeksów dla mdofów - poprawić phi na phi1 (zgodnie z obrazkiem)
 
 # class SDoFEngine(ComposedSystem):
@@ -673,7 +675,7 @@ class SDoFEngine(ComposedSystem):
         super().__init__(system)
 
 
-class DDoFEngine(ComposedSystem):
+class EngineWithTMD(ComposedSystem):
     scheme_name = 'engine.png'
     real_name = 'engine_real.PNG'
 
@@ -769,7 +771,7 @@ class MDoFTMD(ComposedSystem):
         
 
 class MDoFWinch(ComposedSystem):
-    #scheme_name = 'mdof_winch.png'
+    scheme_name = 'mdof_winch.png'
     #real_name = 'mdof_winch_real.png' # tez nei mam yzdjecia real wincha
 
     
@@ -799,11 +801,11 @@ class MDoFWinch(ComposedSystem):
         
         system = self.MaterialPoint_1 + self.MaterialPoint_2 + self.disc_1 + self.Spring  + self.M_engine
 
-        super().__init__(system.linearized())
+        super().__init__(system)
         
 class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
-    #scheme_name = ''
-    #real_nanme = ''
+    scheme_name = '...'
+    real_nanme = '...'
 
     def __init__(self, m=Symbol('m', positive=True),
                  k=Symbol('k', positive=True),
@@ -823,8 +825,8 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
 
 
 class MDoFTMD(ComposedSystem):
-    #scheme_name = '...'
-    #real_name = '...'
+    scheme_name = '...'
+    real_name = '...'
 
     def __init__(self, system=None, ivar=Symbol('t')):
 
@@ -845,24 +847,24 @@ class MDoFTMD(ComposedSystem):
         super().__init__(tmd_base)
 
 
-class MDoFShaft(ComposedSystem):
-    scheme_name = '...'
-    real_name = '...'
+# class MDoFShaft(ComposedSystem):
+#     scheme_name = '...'
+#     real_name = '...'
 
-    def __init__(self, system=None, ivar=Symbol('t')):
+#     def __init__(self, system=None, ivar=Symbol('t')):
 
-        t = ivar
+#         t = ivar
 
-        m, m_0, k, M, k_m, g, F_1, F_2, Omega, F, R, e, m_e, J, k_m, beta, k_m = symbols(
-            'm,m_0,k,M,k_v,g,F_1,F_2,Omega, F_0, R, e, m_e, J, k_m, beta, k_m',
-            positive=True)
+#         m, m_0, k, M, k_m, g, F_1, F_2, Omega, F, R, e, m_e, J, k_m, beta, k_m = symbols(
+#             'm,m_0,k,M,k_v,g,F_1,F_2,Omega, F_0, R, e, m_e, J, k_m, beta, k_m',
+#             positive=True)
 
-        T = 0
-        V = 0
+#         T = 0
+#         V = 0
 
-        L_Shaft = (T - V)
+#         L_Shaft = (T - V)
 
-        shaft_base = HarmonicOscillator(
-            L_shaft, qs=[xb, xe], forcelist=[], frame=N)
+#         shaft_base = HarmonicOscillator(
+#             L_shaft, qs=[xb, xe], forcelist=[], frame=N)
 
-        super().__init__(shaft_base)
+#         super().__init__(shaft_base)
