@@ -64,6 +64,8 @@ class DDoFVessel(ComposedSystem):
                               self.ivar: 'independent time variable',
                               }
 
+        return self.sym_desc_dict
+
 
 class TDoFCompensatedPayload(ComposedSystem):
 
@@ -83,6 +85,20 @@ class TDoFCompensatedPayload(ComposedSystem):
                  ivar=Symbol('t')
                  ):
 
+        self.m_p = m_p
+        self.k_w = k_w
+        self.l_0 = l_0
+        self.qs = qs
+        self.y_e = y_e
+        self.z_e = z_e
+        self.m_c = m_c
+        self.k_c = k_c
+        self.l_c = l_c
+        self.g = g
+        self.h_eq = h_eq
+        self.h_c_eq = h_c_eq
+        self.ivar = ivar
+
         phi, h, h_c = qs
 
         y = (h+h_eq+l_0+l_c)*sin(phi)+y_e
@@ -100,3 +116,21 @@ class TDoFCompensatedPayload(ComposedSystem):
                   - m_p*g*z - m_c*g*z_c)
 
         super().__init__(self.T-self.V, qs=qs, ivar=ivar)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {self.m_p = '???',
+                              self.k_w = '???',
+                              self.l_0 = '???',
+                              self.q: 'generalized coordinates',
+                              self.y_e = '???',
+                              self.z_e = '???',
+                              self.m_c = '???',
+                              self.k_c = '???',
+                              self.l_c = '???',
+                              self.g = '???',
+                              self.h_eq = '???',
+                              self.h_c_eq ='???',
+                              self.ivar: 'independent time variable',
+                              }
+
+        return self.sym_desc_dict
