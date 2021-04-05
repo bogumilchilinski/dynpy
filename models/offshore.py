@@ -21,7 +21,7 @@ class DDoFVessel(ComposedSystem):
                  ):
 
         self.m_vessel = m_vessel
-        self.I_5 = I_5q
+        self.I_5 = I_5
         self.wave_level = wave_level
         self.wave_slope = wave_slope
         self.rho = rho
