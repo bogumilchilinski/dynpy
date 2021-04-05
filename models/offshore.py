@@ -12,13 +12,13 @@ class DDoFVessel(ComposedSystem):
                  wave_slope=dynamicsymbols('S'),
                  rho=Symbol('rho', positive=True),
                  g=Symbol('g', positive=True),
-                 A_wl=Symbol('A_wl'), positive=True,
+                 A_wl=Symbol('A_wl'),
+                 positive=True,
                  V=Symbol('V', positive=True),
                  GM_L=Symbol('GM_L', positive=True),
                  CoB=Symbol('CoB', positive=True),
                  CoF=Symbol('CoF', positive=True),
-                 ivar=Symbol('t')
-                 ):
+                 ivar=Symbol('t')):
 
         self.m_vessel = m_vessel
         self.I_5 = I_5
@@ -35,40 +35,46 @@ class DDoFVessel(ComposedSystem):
         # vessel mass and stiffness matrix
         M_matrix = Matrix([[m_vessel, 0], [0, I_5]])
 
-        K_matrix = Matrix([[rho*g*A_wl, -rho*g*A_wl*(CoF - CoB)],
-                          [-rho*g*A_wl*(CoF - CoB), rho*g*V*GM_L]])
+        K_matrix = Matrix([[rho * g * A_wl, -rho * g * A_wl * (CoF - CoB)],
+                           [-rho * g * A_wl * (CoF - CoB),
+                            rho * g * V * GM_L]])
 
         # generalized displacements and velocities
-        q = Matrix(qs)+Matrix([wave_level, wave_slope])
+        q = Matrix(qs) + Matrix([wave_level, wave_slope])
         dq = q.diff(ivar)
 
         # lagrangian components definition
-        self.T = 1/2 * sum(dq.T * M_matrix * dq)
-        self.V = 1/2 * sum(Matrix(qs).T * K_matrix * Matrix(qs))
+        self.kinetic_energy = S.Half * sum(dq.T * M_matrix * dq)
+        self.potential_energy = S.Half * sum(
+            Matrix(qs).T * K_matrix * Matrix(qs))
 
-        super().__init__(Lagrangian=self.T-self.V, qs=qs, ivar=ivar)
+        super().__init__(Lagrangian=self.kinetic_energy -
+                         self.potential_energy,
+                         qs=qs,
+                         ivar=ivar)
 
     def symbols_description(self):
-        self.sym_desc_dict = {self.m_vessel: r'mass of vessel \si{[\kilogram]}',
-                              self.I_5: r'moment of inertia of \num{5}-th degree (with respect to \(y\) axis, determined by the radius of gyration) \si{[\kilo\gram\metre\squared]}',
-                              self.q: r'generalized coordinates',
-                              self.wave_level: r'???',
-                              self.wave_slope: r'???',
-                              self.rho: r'fluid density \si{[\kilo\gram/\cubic\metre]}',
-                              self.g: r'acceleration of gravity \si{[\metre/\second\squared]}',
-                              self.A_wl: r'wetted area \si{[\metre\squared]}',
-                              self.V: r'submerged volume of the vessel \si{[\cubic\metre]}',
-                              self.GM_L: r'longitudinal metacentric height \si{[\metre]}',
-                              self.CoB: r'centre of buoyancy \si{[\metre]}',
-                              self.CoF: r'centre of floatation \si{[\metre]}',
-                              self.ivar: r'independent time variable',
-                              }
+        self.sym_desc_dict = {
+            self.m_vessel: r'mass of vessel \si{[\kilogram]}',
+            self.I_5:
+            r'moment of inertia of \num{5}-th degree (with respect to \(y\) axis, determined by the radius of gyration) \si{[\kilo\gram\metre\squared]}',
+            tuple(self.q): r'generalized coordinates',
+            self.wave_level: r'???',
+            self.wave_slope: r'???',
+            self.rho: r'fluid density \si{[\kilo\gram/\cubic\metre]}',
+            self.g: r'acceleration of gravity \si{[\metre/\second\squared]}',
+            self.A_wl: r'wetted area \si{[\metre\squared]}',
+            self.V: r'submerged volume of the vessel \si{[\cubic\metre]}',
+            self.GM_L: r'longitudinal metacentric height \si{[\metre]}',
+            self.CoB: r'centre of buoyancy \si{[\metre]}',
+            self.CoF: r'centre of floatation \si{[\metre]}',
+            self.ivar: r'independent time variable',
+        }
 
         return self.sym_desc_dict
 
 
 class TDoFCompensatedPayload(ComposedSystem):
-
     def __init__(self,
                  m_p=Symbol('m_p', positive=True),
                  k_w=Symbol('k_w', positive=True),
@@ -81,9 +87,8 @@ class TDoFCompensatedPayload(ComposedSystem):
                  l_c=Symbol('l_c', positive=True),
                  g=Symbol('g', positive=True),
                  h_eq=Symbol('h_eq', positive=True),
-                 h_c_eq=Symbol('h_ceq', positive=True),
-                 ivar=Symbol('t')
-                 ):
+                 h_ceq=Symbol('h_ceq', positive=True),
+                 ivar=Symbol('t')):
 
         self.m_p = m_p
         self.k_w = k_w
@@ -96,41 +101,58 @@ class TDoFCompensatedPayload(ComposedSystem):
         self.l_c = l_c
         self.g = g
         self.h_eq = h_eq
-        self.h_c_eq = h_c_eq
+        self.h_ceq = h_ceq
         self.ivar = ivar
 
         phi, h, h_c = qs
 
-        y = (h+h_eq+l_0+l_c)*sin(phi)+y_e
-        z = (h+h_eq+l_0+l_c)*cos(phi)+z_e
-        v = sqrt(diff(y, ivar)**2+diff(z, ivar)**2)
+        y = (h + h_eq + l_0 + l_c) * sin(phi) + y_e
+        z = (h + h_eq + l_0 + l_c) * cos(phi) + z_e
 
-        y_c = (h_c+h_c_eq+l_0)*sin(phi)+y_e
-        z_c = (h_c+h_c_eq+l_0)*cos(phi)+z_e
-        v_c = sqrt(diff(y_c, ivar)**2+diff(z_c, ivar)**2)
+        y_c = (h_c + h_ceq + l_0) * sin(phi) + y_e
+        z_c = (h_c + h_ceq + l_0) * cos(phi) + z_e
 
-        self.T = S.One/2*m_p*v**2 + S.One/2*m_c*v_c**2
+        y, z, y_c, z_c = dynamicsymbols('y_{p},z_{p},y_c,z_c')
 
-        self.V = (S.One/2*k_w*(h_c+h_c_eq)**2 +
-                  1/2*k_c * (h+h_eq-(h_c+h_c_eq))**2
-                  - m_p*g*z - m_c*g*z_c)
+        v_c = sqrt(diff(y_c, ivar)**2 + diff(z_c, ivar)**2)
+        v = sqrt(diff(y, ivar)**2 + diff(z, ivar)**2)
 
-        super().__init__(self.T-self.V, qs=qs, ivar=ivar)
+        positions_dict = {
+            y: (h + h_eq + l_0 + l_c) * sin(phi) + y_e,
+            z: (h + h_eq + l_0 + l_c) * cos(phi) + z_e,
+            y_c: (h_c + h_ceq + l_0) * sin(phi) + y_e,
+            z_c: (h_c + h_ceq + l_0) * cos(phi) + z_e,
+        }
+
+        self.kinetic_energy = S.Half * m_p * v**2 + S.Half * m_c * v_c**2
+
+        self.potential_energy = (S.Half * k_w * (h_c + h_ceq)**2 +
+                                 S.Half* k_c * (h + h_eq - (h_c + h_ceq))**2 -
+                                 m_p * g * z - m_c * g * z_c)
+
+        super().__init__((self.kinetic_energy - self.potential_energy).subs(positions_dict).doit(),
+                         qs=qs,
+                         ivar=ivar)
 
     def symbols_description(self):
-        self.sym_desc_dict = {self.m_p: '???',
-                              self.k_w: '???',
-                              self.l_0: '???',
-                              self.q:   'generalized coordinates',
-                              self.y_e: '???',
-                              self.z_e: '???',
-                              self.m_c: '???',
-                              self.k_c: '???',
-                              self.l_c: '???',
-                              self.g:   '???',
-                              self.h_eq:   '???',
-                              self.h_c_eq: '???',
-                              self.ivar:   'independent time variable',
-                              }
+        self.sym_desc_dict = {
+            self.m_p: 'mass of payload \si{[\kilogram]}',
+            self.k_w: 'wire stiffness \si{[\newton\per\meter]}',
+            self.l_0: 'length of the lifting cable \si{[\metre]}',
+            tuple(self.q): 'generalized coordinates',
+            self.y_e:
+            'lateral displacement at crane tip obtained from RAOs (a regular wave excitation) \si{[\metre]}',
+            self.z_e:
+            'vertical displacement at crane tip obtained from RAOs (a regular wave excitation) \si{[\metre]}',
+            self.m_c: 'mass of compensator \si{[\kilogram]}',
+            self.k_c:
+            'stiffness of heave compensator \si{[\newton\per\meter]}',
+            self.l_c:
+            'length of the attached compensating element \si{[\metre]}',
+            self.g: 'acceleration of gravity \si{[\metre/\second\squared]}',
+            self.h_eq: 'equilibrium point of payload \si{[\metre]}',
+            self.h_ceq: 'equilibrium point of compensator \si{[\metre]}',
+            self.ivar: 'independent time variable',
+        }
 
         return self.sym_desc_dict
