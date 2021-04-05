@@ -118,19 +118,19 @@ class TDoFCompensatedPayload(ComposedSystem):
         super().__init__(self.T-self.V, qs=qs, ivar=ivar)
 
     def symbols_description(self):
-        self.sym_desc_dict = {self.m_p = '???',
-                              self.k_w = '???',
-                              self.l_0 = '???',
-                              self.q: 'generalized coordinates',
-                              self.y_e = '???',
-                              self.z_e = '???',
-                              self.m_c = '???',
-                              self.k_c = '???',
-                              self.l_c = '???',
-                              self.g = '???',
-                              self.h_eq = '???',
-                              self.h_c_eq ='???',
-                              self.ivar: 'independent time variable',
+        self.sym_desc_dict = {self.m_p: '???',
+                              self.k_w: '???',
+                              self.l_0: '???',
+                              self.q:   'generalized coordinates',
+                              self.y_e: '???',
+                              self.z_e: '???',
+                              self.m_c: '???',
+                              self.k_c: '???',
+                              self.l_c: '???',
+                              self.g:   '???',
+                              self.h_eq:   '???',
+                              self.h_c_eq: '???',
+                              self.ivar:   'independent time variable',
                               }
 
         return self.sym_desc_dict
