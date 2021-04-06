@@ -676,7 +676,7 @@ class SDoFEngine(ComposedSystem):
 
 
 class EngineWithTMD(ComposedSystem):
-    scheme_name = 'engine.png'
+    scheme_name = 'engine_TMD.png'
     real_name = 'engine_real.PNG'
 
     def __init__(self,
