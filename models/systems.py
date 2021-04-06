@@ -159,7 +159,7 @@ class DDoFSimplifyVehicleSuspension(ComposedSystem):
     def __init__(self,
                  m=Symbol('m', positive=True),
                  I=Symbol('I', positive=True),
-                 l_rod=Symbol('2l', positive=True),
+                 l_rod=Symbol('l', positive=True),
                  l_l=Symbol('l', positive=True),
                  l_r=Symbol('l', positive=True),
                  k_2=Symbol('k_2', positive=True),
@@ -180,7 +180,7 @@ class DDoFSimplifyVehicleSuspension(ComposedSystem):
         self.F_engine = F_engine
         self.qs = qs
 
-        self.body = RigidBody2D(m, I, pos_lin=z, pos_rot=phi,
+        self.body = RigidBody2D(m, (m/12)*(2*l_rod)**2, pos_lin=z, pos_rot=phi,
                                 qs=qs)  # rod ---->
         self.spring_1 = Spring(k_1, pos1=z + phi * l_l, qs=qs)  # left spring
         self.spring_2 = Spring(k_2, pos1=z - phi * l_r, qs=qs)  # right spring
@@ -611,7 +611,7 @@ class DDoFCoupledPendulum(ComposedSystem):
                  g=Symbol('g', positive=True),
                  l=Symbol('l', positive=True),
                  k=Symbol('k', positive=True),
-                 qs=dynamicsymbols('phi_1, phi_2')):
+                 qs=dynamicsymbols('varphi_1, varphi_2')):
         
         phi1, phi2 = qs
 
@@ -689,7 +689,7 @@ class EngineWithTMD(ComposedSystem):
                  dz=dynamicsymbols('dz'),
                  z=dynamicsymbols('z'),
                  z_TMD=dynamicsymbols('z_{TMD}'),
-                 phi=dynamicsymbols('phi'),
+                 phi=dynamicsymbols('varphi'),
                  ivar=Symbol('t', positive=True),
                  system=None):
 
