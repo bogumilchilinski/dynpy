@@ -69,7 +69,7 @@ class SymbolsDescription(Description):
         
         for label, entry in description_dict.items():
             
-            self.add_item(NoEscape(InlineMath(vlatex(label)).dumps()),str(entry))
+            self.add_item(NoEscape(InlineMath(vlatex(label)).dumps()),'- '+str(entry))
 
 
 class Equation(Environment):

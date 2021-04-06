@@ -676,7 +676,7 @@ class SDoFEngine(ComposedSystem):
 
 
 class EngineWithTMD(ComposedSystem):
-    scheme_name = 'engine.png'
+    scheme_name = 'engine_TMD.PNG'
     real_name = 'engine_real.PNG'
 
     def __init__(self,
@@ -765,7 +765,7 @@ class MDoFTMD(ComposedSystem):
         self.force = Force(F * sin(angle * ivar), pos1=xe, qs=[xe])
         
         
-        system = self.Spring_1 + self.Spring_2 + self.MaterialPoint_1 + self.MaterialPoint_2 + self.Force
+        system = self.Spring_1 + self.Spring_2 + self.MaterialPoint_1 + self.MaterialPoint_2 + self.force
 
         super().__init__(system)
         
