@@ -277,28 +277,28 @@ class DDoFVehicleSuspension(ComposedSystem):
 
 class DDoFShaft(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
-        =========
+    =========
 
-            k = Spring coefficient
-                -Spring carrying the system
+        k = Spring coefficient
+            -Spring carrying the system
 
-            ivar = symbol object
-                -Independant time variable
+        ivar = symbol object
+            -Independant time variable
 
-            qs = dynamicsymbol object
-                -Generalized coordinates
+        qs = dynamicsymbol object
+            -Generalized coordinates
 
-        Example
-        =======
-        A mass oscillating up and down while being held up by a spring with a spring constant k
+    Example
+    =======
+    A mass oscillating up and down while being held up by a spring with a spring constant k
 
-        >>> t = symbols('t')
-        >>> m, k = symbols('m, k')
-        >>> qs = dynamicsymbols('z') # Generalized Coordinates 
-        >>> DDoFShaft()
+    >>> t = symbols('t')
+    >>> m, k = symbols('m, k')
+    >>> qs = dynamicsymbols('z') # Generalized Coordinates 
+    >>> DDoFShaft()
 
-        -defines the symbols and dynamicsymbols
-        -finally determines the instance of the system using class DDoFShaft
+    -defines the symbols and dynamicsymbols
+    -finally determines the instance of the system using class DDoFShaft
     """
 
     scheme_name = 'ddof_shaft.png'
@@ -312,7 +312,7 @@ class DDoFShaft(ComposedSystem):
                  l_r=Symbol('l', positive=True),
                  k_2=Symbol('k_2', positive=True),
                  k_1=Symbol('k_1', positive=True),
-                 input_displacement=dynamicsymbols('theta', positive=True),
+                 input_displacement=dynamicsymbols('theta'),
                  ivar=Symbol('t'),
                  qs=dynamicsymbols('varphi_1, varphi_2')):
 
@@ -701,6 +701,9 @@ class EngineWithTMD(ComposedSystem):
         system = self.Spring_1 + self.Spring_2 + self.MaterialPoint_1 + self.MaterialPoint_2 + self.MaterialPoint_3
 
         super().__init__(system)
+        
+    def equilibrium_equation(self, static_disp_dict={self.z:Symbol('z_0',positive=True),self.z_TMD:Symbol('z_{TMD0}',positive=True)}):
+        return super().equilibrium_equation(static_disp_dict=static_disp_dict)
 
 
 class SDoFNonlinearEngine(ComposedSystem):
