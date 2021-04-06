@@ -785,7 +785,7 @@ class PeriodMCA(MechanicalSystemAnswer):
                  answer_generator=lambda obj: [
                      2*pi / ((freq_val))
                      for freq_val in HarmonicOscillator(obj.linearized()).natural_frequencies() if freq_val != 0
-                 ][0],
+                 ],
                  **kwargs):
         self.title = 'Podaj wartość okresu:'
         self.title = 'Specify the value of a period:'
@@ -1010,7 +1010,7 @@ class EquilibriumEquationsMCA(MechanicalSystemAnswer):
                  answer_generator=lambda obj: Eq(obj.equilibrium_equation().doit(),Matrix([0]*len(obj.q))),
                  **kwargs):
 
-        self.title = 'What are equilibrium equations of the considered system:'
+        self.title = 'What are equilibrium equations for the considered system:'
 
         super().__init__(correct_system,
                          other_systems,
