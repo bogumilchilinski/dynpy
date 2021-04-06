@@ -702,7 +702,10 @@ class EngineWithTMD(ComposedSystem):
 
         super().__init__(system)
         
-    def equilibrium_equation(self, static_disp_dict={self.z:Symbol('z_0',positive=True),self.z_TMD:Symbol('z_{TMD0}',positive=True)}):
+    def equilibrium_equation(self, static_disp_dict=None):
+        if not static_disp_dict:
+            static_disp_dict={self.z:Symbol('z_0',positive=True),self.z_TMD:Symbol('z_{TMD0}',positive=True)}
+        
         return super().equilibrium_equation(static_disp_dict=static_disp_dict)
 
 

@@ -435,8 +435,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             }
 
         self.q_0 = static_disp_dict
+        
+        eq_eqns=self.governing_equations.subs(static_disp_dict)
+        trig_comps=eq_eqns.atoms(sin,cos)
 
-        return self.governing_equations.subs(static_disp_dict)
+        return self.governing_equations.subs(static_disp_dict).subs({comp:0 for comp  in trig_comps})
 
     def external_forces(self):
         """
