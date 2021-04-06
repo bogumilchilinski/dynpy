@@ -301,8 +301,8 @@ class DDoFShaft(ComposedSystem):
         -finally determines the instance of the system using class DDoFShaft
     """
 
-    scheme_name = 'mdof_shaft_vibration.png'
-    real_name = 'tandem_lift.jpg'
+    scheme_name = 'ddof_shaft.png'
+    real_name = 'ddof_shaft_real.png'
 
     def __init__(self,
                  m=Symbol('m', positive=True),
@@ -314,9 +314,9 @@ class DDoFShaft(ComposedSystem):
                  k_1=Symbol('k_1', positive=True),
                  input_displacement=dynamicsymbols('theta', positive=True),
                  ivar=Symbol('t'),
-                 qs=dynamicsymbols('z, varphi')):
+                 qs=dynamicsymbols('varphi_1, varphi_2')):
 
-        z, phi = qs
+        phi1, phi2 = qs
         theta=input_displacement
 
         self.m = m  # mass of a rod
@@ -329,12 +329,11 @@ class DDoFShaft(ComposedSystem):
         self.input_displacement = input_displacement
         self.qs = qs
 
-        self.disc_1 = Disk(I, pos1=phi, qs=qs)
+        self.disc_1 = Disk(I, pos1=phi1, qs=qs)
         self.spring_1 = Spring(k_2, phi1, phi2, qs=qs)  # left spring
         self.disc_2 = Disk(I, pos1=phi2, qs=qs)
-        self.spring_2 = Spring(
-            k_1, pos1=phi2, pos2=theta, qs=qs)  # right spring
-        system = self.disc_1 + self.disc_2 + self.spring_1 + self.spring_2 + self.force
+        self.spring_2 = Spring(k_1, pos1=phi2, pos2=theta, qs=qs)  # right spring
+        system = self.disc_1 + self.disc_2 + self.spring_1 + self.spring_2
 
         super().__init__(system)
 
