@@ -166,7 +166,7 @@ class DDoFSimplifyVehicleSuspension(ComposedSystem):
                  k_1=Symbol('k_1', positive=True),
                  F_engine=Symbol('F_{engine}', positive=True),
                  ivar=Symbol('t'),
-                 qs=dynamicsymbols('z, varphi')):
+                 qs=dynamicsymbols('z, phi')):
 
         z, phi = qs
 
@@ -603,14 +603,14 @@ class DDoFCoupledPendulum(ComposedSystem):
         -determine the instance of the pendulum by using class SDoFCouplePendulum()
     """
     scheme_name = 'mdof_dpendulum.png'
-    real_name = 'tandem_lift.jpg'
+    real_name = 'lifting_tandem.png'
 
     def __init__(self,
                  m=Symbol('m', positive=True),
                  g=Symbol('g', positive=True),
                  l=Symbol('l', positive=True),
                  k=Symbol('k', positive=True),
-                 qs=dynamicsymbols('varphi_1, varphi_2')):
+                 qs=dynamicsymbols('phi_1, phi_2')):
         
         phi1, phi2 = qs
 
@@ -703,8 +703,7 @@ class EngineWithTMD(ComposedSystem):
         super().__init__(system)
         
     def equilibrium_equation(self, static_disp_dict=None):
-        if not static_disp_dict:
-            static_disp_dict={self.z:Symbol('z_0',positive=True),self.z_TMD:Symbol('z_{TMD0}',positive=True)}
+        static_disp_dict={self.z:Symbol('z_0',positive=True),self.z_TMD:Symbol('z_{TMD0}',positive=True)}
         
         return super().equilibrium_equation(static_disp_dict=static_disp_dict)
 

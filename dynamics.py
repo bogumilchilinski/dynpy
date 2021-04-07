@@ -430,7 +430,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         if static_disp_dict is None:
             static_disp_dict = {
                 q_tmp:
-                Symbol(str(q_tmp).replace('(' + str(self.ivar) + ')', '_0'))
+                Symbol(
+                    str(q_tmp).replace('(' + str(self.ivar) + ')', '{^s}')
+                )
                 for q_tmp in self.q
             }
 
