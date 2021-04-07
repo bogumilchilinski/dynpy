@@ -2,7 +2,10 @@ import sympy as sym
 from sympy import *
 import sympy.physics.mechanics as mech
 
+import dynpy
 from dynpy import HarmonicOscillator
+
+
 
 import base64
 t = Symbol('t')
@@ -429,6 +432,7 @@ class GoverningEquationMCA(MechanicalSystemAnswer):
                          title=self.title,
                          **kwargs)
 
+
 class SDoFGoverningEquationMCA(MechanicalSystemAnswer):
     def __init__(self,
                  correct_system,
@@ -786,6 +790,7 @@ class PeriodMCA(MechanicalSystemAnswer):
                      2*pi / ((freq_val))
                      for freq_val in HarmonicOscillator(obj.linearized()).natural_frequencies() if freq_val != 0
                  ]),
+
                  **kwargs):
         self.title = 'Podaj wartość okresu:'
         self.title = 'Specify the value of a period for the first natural frequency of vibrations:'
@@ -953,6 +958,7 @@ class ResonanceCurveMCA(MechanicalSystemAnswer):
                          title=self.title,
                          **kwargs)
 
+
 class FundamentalMatrixMCA(MechanicalSystemAnswer):
     def __init__(
             self,
@@ -1017,3 +1023,4 @@ class EquilibriumEquationsMCA(MechanicalSystemAnswer):
                          answer_generator=answer_generator,
                          title=self.title,
                          **kwargs)
+

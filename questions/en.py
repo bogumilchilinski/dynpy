@@ -178,7 +178,7 @@ class OmegaMCA(MechanicalSystemAnswer):
                  other_systems,
                  answer_generator=lambda obj: [
                      (eig_val) for eig_val in HarmonicOscillator(
-                         obj.linearized()).natural_frequencies() if eig_val != 0
+                         obj.linearized()).natural_frequencies().doit().expand() if eig_val != 0
                  ],
                  **kwargs):
 
