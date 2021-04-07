@@ -78,7 +78,7 @@ class DDoFVessel(ComposedSystem):
             self.m_vessel: r'mass of vessel,',
             self.I_5:
             r'moment of inertia of 5-th degree (with respect to y axis, determined by the radius of gyration),',
-            tuple(self.q): r'generalized coordinates,',
+            tuple(self.q): r'vessel generalized coordinates,',
             self.wave_level: r'wave level,',
             self.wave_slope: r'wave slope,',
             self.rho: r'fluid density,',
@@ -181,7 +181,7 @@ class TDoFCompensatedPayload(ComposedSystem):
             self.m_p: r'mass of payload,',
             self.k_w: r'wire stiffness,',
             self.l_0: r'length of the lifting cable,',
-            tuple(self.q): r'generalized coordinates,',
+            tuple(self.q): r'payload generalized coordinates,',
             self.y_e:
             r'lateral displacement at crane tip obtained from RAOs (a regular wave excitation),',
             self.z_e:
