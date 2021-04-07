@@ -708,7 +708,7 @@ class InertiaMatrixMCA(MechanicalSystemAnswer):
                 evaluate=False),
             **kwargs):
         self.title = 'Określ macierz bezwładności układu:'
-        self.title = 'Determine the inertia matrix:'
+        self.title = 'For the system under consideration determine the inertia matrix:'
 
         super().__init__(correct_system,
                          other_systems,
@@ -728,7 +728,7 @@ class StiffnessMatrixMCA(MechanicalSystemAnswer):
                 evaluate=False),
             **kwargs):
         self.title = 'Określ macierz sztywności układu:'
-        self.title = 'Determine the stiffness matrix of our system'
+        self.title = 'Determine the stiffness matrix for the system under consideration:'
 
         super().__init__(correct_system,
                          other_systems,
@@ -782,13 +782,13 @@ class PeriodMCA(MechanicalSystemAnswer):
     def __init__(self,
                  correct_system,
                  other_systems,
-                 answer_generator=lambda obj: [
+                 answer_generator=lambda obj: Eq(Symbol('T'),[
                      2*pi / ((freq_val))
                      for freq_val in HarmonicOscillator(obj.linearized()).natural_frequencies() if freq_val != 0
-                 ],
+                 ]),
                  **kwargs):
         self.title = 'Podaj wartość okresu:'
-        self.title = 'Specify the value of a period:'
+        self.title = 'Specify the value of a period for the first natural frequency of vibrations:'
         super().__init__(correct_system,
                          other_systems,
                          answer_generator=answer_generator,
