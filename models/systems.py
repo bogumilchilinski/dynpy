@@ -689,8 +689,16 @@ class EngineWithTMD(ComposedSystem):
                  z=dynamicsymbols('z'),
                  z_TMD=dynamicsymbols('z_{TMD}'),
                  phi=dynamicsymbols('varphi'),
-                 ivar=Symbol('t', positive=True),
+                 ivar=Symbol('t'),
                  system=None):
+        self.M=M
+        self.k_m=k_m
+        self.k_TMD=k_TMD
+        self.m_e=m_e
+        self.m_TMD=m_TMD
+        self.e=e
+        self.dz=dz
+        self.phi=phi
 
         self.MaterialPoint_1 = MaterialPoint(M, pos1=z, qs=[z])
         self.MaterialPoint_2 = MaterialPoint(m_e, pos1=z+e*cos(phi), qs=[z])
