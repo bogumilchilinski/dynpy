@@ -279,14 +279,14 @@ class DDoFShaft(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
     =========
 
-        k = Spring coefficient
-            -Spring carrying the system
+    k = Spring coefficient
+        -Spring carrying the system
 
-        ivar = symbol object
-            -Independant time variable
+    ivar = symbol object
+        -Independant time variable
 
-        qs = dynamicsymbol object
-            -Generalized coordinates
+    qs = dynamicsymbol object
+        -Generalized coordinates
 
     Example
     =======
@@ -382,6 +382,8 @@ class Pendulum(ComposedSystem):
                  qs=None,
                  ivar=Symbol('t')):
 
+        self
+        
         if qs == None:
             qs = [angle]
         else:
@@ -817,7 +819,7 @@ class MDoFWinch(ComposedSystem):
         
 class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
     scheme_name = '...'
-    real_nanme = '...'
+    real_name = '...'
 
     def __init__(self, m=Symbol('m', positive=True),
                  k=Symbol('k', positive=True),
@@ -829,34 +831,36 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
                  Omega=Symbol('Omega', positive=True),
                  system=None):
 
-        non_linear_spring_trolley = (MaterialPoint(m, x) +
-                                     Spring(k, pos1=(sqrt(x**2 + l**2) - l_0), qs=[x]) + 
-                                     Force(-F * cos(Omega*ivar), pos1=x, qs=[x]))
+        
+        self.MaterialPoint = MaterialPoint(m, x)
+        self.Spring = Spring(k, pos1=(sqrt(x**2 + l**2) - l_0, qs=[x])
+        self.Force = Force
 
+        non_linear_spring_trolley = self.MaterialPoint + self.Spring + Force(-F * cos(Omega*ivar), pos1=x, qs=[x]
         super().__init__(non_linear_spring_trolley)
 
 
-class MDoFTMD(ComposedSystem):
-    scheme_name = '...'
-    real_name = '...'
+#class MDoFTMD(ComposedSystem):
+    #scheme_name = '...'
+    #real_name = '...'
 
-    def __init__(self, system=None, ivar=Symbol('t')):
+    #def __init__(self, system=None, ivar=Symbol('t')):
 
-        t = ivar
+        #t = ivar
 
-        xb, xe, z = dynamicsymbols('xb,xe,z')
-        m_0, m, me, k_0, k, ke, F = symbols(
-            'm_0, m, m_e, k_0, k, k_e, F', positive=True)
+        #xb, xe, z = dynamicsymbols('xb,xe,z')
+        #m_0, m, me, k_0, k, ke, F = symbols(
+            #'m_0, m, m_e, k_0, k, k_e, F', positive=True)
 
-        T = S.Half * m * xb.diff(t)**2 + S.Half * m/10 * xe.diff(t)**2
-        V = S.Half * k * xb**2 + S.Half * ke * (xe - xb)**2
+        #T = S.Half * m * xb.diff(t)**2 + S.Half * m/10 * xe.diff(t)**2
+        #V = S.Half * k * xb**2 + S.Half * ke * (xe - xb)**2
 
-        L_TMD = (T - V)
+        #L_TMD = (T - V)
 
-        tmd_base = HarmonicOscillator(
-            L_TMD, qs=[xb, xe], forcelist=[])
+        #tmd_base = HarmonicOscillator(
+            #L_TMD, qs=[xb, xe], forcelist=[])
 
-        super().__init__(tmd_base)
+        #super().__init__(tmd_base)
 
 
 # class MDoFShaft(ComposedSystem):
