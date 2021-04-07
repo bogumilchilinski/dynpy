@@ -1,6 +1,8 @@
 import sympy as sym
 from sympy import *
 import sympy.physics.mechanics as mech
+import dynpy
+from dynpy import HarmonicOscillator
 
 
 import base64
