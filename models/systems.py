@@ -976,7 +976,7 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
         self.F=F
 
         self.MaterialPoint = MaterialPoint(m, x)
-        self.Spring = Spring(k, pos1=(sqrt(x**2 + l**2) - l_0, qs=[x])
+        self.Spring = Spring(k, pos1=(sqrt(x**2 + l**2) - l_0), qs=[x])
         self.Force = Force(-F * cos(Omega*ivar), pos1=x, qs=[x])
 
         system = self.MaterialPoint + self.Spring + self.Force
