@@ -786,10 +786,10 @@ class PeriodMCA(MechanicalSystemAnswer):
     def __init__(self,
                  correct_system,
                  other_systems,
-                 answer_generator=lambda obj: Eq(Symbol('T'),[
-                     2*pi / ((freq_val))
+                 answer_generator=lambda obj:[  Eq(Symbol('T'),
+                     2*pi / ((freq_val)),evaluate=False)
                      for freq_val in HarmonicOscillator(obj.linearized()).natural_frequencies() if freq_val != 0
-                 ]),
+                 ],
 
                  **kwargs):
         self.title = 'Podaj wartość okresu:'
