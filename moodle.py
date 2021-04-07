@@ -1,8 +1,10 @@
 import sympy as sym
 from sympy import *
 import sympy.physics.mechanics as mech
+
 import dynpy
 from dynpy import HarmonicOscillator
+
 
 
 import base64
@@ -786,8 +788,8 @@ class PeriodMCA(MechanicalSystemAnswer):
                  other_systems,
                  answer_generator=lambda obj: [
                      2*pi / ((freq_val))
-                     for freq_val in HarmonicOscillator(obj.linearized()).natural_frequencies() if freq_val != 0
-                 ][0],
+                     for freq_val in HarmonicOscillator(obj.linearized()).natural_frequencies() if freq_val != 0 
+                    ],
                  **kwargs):
         self.title = 'Podaj wartość okresu:'
         self.title = 'Specify the value of a period:'
@@ -954,3 +956,70 @@ class ResonanceCurveMCA(MechanicalSystemAnswer):
                          answer_generator=answer_generator,
                          title=self.title,
                          **kwargs)
+
+
+class FundamentalMatrixMCA(MechanicalSystemAnswer):
+    def __init__(
+            self,
+            correct_system,
+            other_systems,
+            answer_generator=lambda obj: Eq(Symbol('A'), (HarmonicOscillator(
+                obj.linearized()).fundamental_matrix()),
+                                            evaluate=False),
+            **kwargs):
+        self.title = 'A fundamental matrix for the system under consideration is given by:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+class FundamentalMatrixDeterminantMCA(MechanicalSystemAnswer):
+    def __init__(
+            self,
+            correct_system,
+            other_systems,
+            answer_generator=lambda obj: Eq(Symbol('\Delta'), (HarmonicOscillator(
+                obj.linearized()).fundamental_matrix().det()),
+                                            evaluate=False),
+            **kwargs):
+        self.title = 'Determine the characteristic polynomial for the considered system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+class GeneralizedMomentumsMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Symbol('p'),
+                                                 obj.generalized_momentum() ),
+                 **kwargs):
+
+        self.title = 'What are generalised momentums of the considered system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+class EquilibriumEquationsMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(obj.equilibrium_equation().doit(),Matrix([0]*len(obj.q))),
+                 **kwargs):
+
+        self.title = 'What are equilibrium equations for the considered system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
