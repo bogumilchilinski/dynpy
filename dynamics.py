@@ -1,12 +1,12 @@
-from sympy import *
-from sympy.physics.mechanics import *
+from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag
+from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 import sympy as sym
 from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
 import itertools as itools
 import scipy.integrate as solver
-from .utilities.timeseries import *
+from .utilities.timeseries import DataMethods, SpectralMethods, TimeDomainMethods, SpectrumSeries, SpectrumFrame, TimeSeries, TimeDataFrame
 
 from collections import ChainMap
 
@@ -62,8 +62,8 @@ def multivariable_taylor_series(expr, args, n=2, x0=None):
         for order in range(1, order_max + 1, 1)
     ], [])
     diff_orders_dict = {
-        comp: (Mul(*comp).subs(args_shifted) / Mul(*[
-            factorial(elem) for elem in Poly(Mul(*comp), *args).terms()[0][0]
+        comp: (sym.Mul(*comp).subs(args_shifted) / sym.Mul(*[
+            sym.factorial(elem) for elem in sym.Poly(sym.Mul(*comp), *args).terms()[0][0]
         ])).doit()
         for comp in diff_orders_list
     }
@@ -281,7 +281,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     def remove(self, *args):
 
-        bounded_coordinates = flatten(args)
+        bounded_coordinates = sym.flatten(args)
 
         self_dict = self._kwargs()
         self_dict['qs'] = [
