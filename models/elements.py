@@ -1,5 +1,5 @@
-from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, ReferenceFrame
-from sympy.physics.mechanics import dynamicsymbols
+from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq
+from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
