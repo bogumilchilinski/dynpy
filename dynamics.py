@@ -815,10 +815,10 @@ class HarmonicOscillator(LinearDynamicSystem):
         '''
         if len(self.q) == 1:
             solution = dsolve(sum(self.__governing_equations),
-                              sum(q),
+                              sum(self.q),
                               ics=initial_conditions)
         else:
-            solution = dsolve((self.__governing_equations), (q),
+            solution = dsolve((self.__governing_equations), (self.q),
                               ics=initial_conditions)
 
         return solution

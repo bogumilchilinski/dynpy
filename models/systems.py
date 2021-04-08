@@ -4,7 +4,6 @@ from sympy.physics.mechanics import *
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
 from .elements import *
 
-
 from sympy.physics.mechanics import *
 from sympy.physics.vector import *
 
@@ -736,6 +735,7 @@ class EngineWithTMD(ComposedSystem):
         self.m_TMD=m_TMD
         self.e=e
         self.z=z
+        self.z_TMD=z_TMD
         self.dz=dz
         self.phi=phi
 
