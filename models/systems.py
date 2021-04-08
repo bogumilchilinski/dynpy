@@ -664,7 +664,7 @@ class SDoFEngine(ComposedSystem):
         self.m_e=m_e
         self.e=e
 
-        self.MaterialPoint_1 = MaterialPoint(M, pos_c=z, qs=[z])
+        self.MaterialPoint_1 = MaterialPoint(M, pos1=z, qs=[z])
         self.MaterialPoint_2 = MaterialPoint(m_e, pos1=z+e*cos(phi), qs=[z])
         self.Spring = Spring(2*k_m, pos1=z, qs=[z])
 
@@ -735,6 +735,7 @@ class EngineWithTMD(ComposedSystem):
         self.m_e=m_e
         self.m_TMD=m_TMD
         self.e=e
+        self.z=z
         self.dz=dz
         self.phi=phi
 
