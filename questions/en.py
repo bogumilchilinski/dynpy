@@ -22,7 +22,7 @@ class GoverningEquationMCA(MechanicalSystemAnswer):
                  **kwargs):
 
         self.title = 'Podaj równiania ruchu układu:'
-        self.title = 'Determine equation of motion of the system:'
+        self.title = 'Determine the system of equations of motion for the analysed system:'
 
         super().__init__(correct_system,
                          other_systems,
@@ -106,7 +106,7 @@ class LinearizedGoverningEquationMCA(MechanicalSystemAnswer):
                  **kwargs):
 
         self.title = 'Liniowe równania ruchu dla układu przedstawionego na rysunku można wyrazić następującym układem równań:'
-        self.title = 'Linear equations of motion for the system presented on a picture might be expressed as following system of equations:'
+        self.title = 'Linear equations of motion for the system presented might be expressed as the following system of equations:'
 
         super().__init__(correct_system,
                          other_systems,
@@ -116,7 +116,7 @@ class LinearizedGoverningEquationMCA(MechanicalSystemAnswer):
         
 
 class LagrangianMCA(MechanicalSystemAnswer):
-    question = 'Choose corect dependance which determines Lagrangian of the considered system:'
+    question = 'Choose the relation which describes the Lagrangian for the considered system:'
     def __init__(
             self,
             correct_system,
@@ -183,7 +183,7 @@ class OmegaMCA(MechanicalSystemAnswer):
                  **kwargs):
 
         self.title = 'Określ częstości drgań swobodnych występujących w układzie:'
-        self.title = 'Determine the frequency of the free vibrations occuring in the system:'
+        self.title = 'Determine the frequencies of free vibrations occuring in the system:'
 
         super().__init__(correct_system,
                          other_systems,
@@ -260,7 +260,7 @@ class SolutionMCA(MechanicalSystemAnswer):
             **kwargs):
 
         self.title = 'Wyznacz rozwiązanie ogólne dla rozważanego układu:'
-        self.title = 'Determine a general solution of ODE for provided system:'
+        self.title = 'Determine a general solution of ODEs for the investigated system:'
 
         super().__init__(correct_system,
                          other_systems,
@@ -280,7 +280,7 @@ class SteadySolutionMCA(MechanicalSystemAnswer):
                  **kwargs):
 
         self.title = 'Wyznacz rozwiązanie szczególne dla rozważanego układu:'
-        self.title = 'Determine a particular solution of ODE for provided system:'
+        self.title = 'Determine a particular solution of ODEs for the system under investigation:'
 
         super().__init__(correct_system,
                          other_systems,
@@ -299,7 +299,7 @@ class InertiaMatrixMCA(MechanicalSystemAnswer):
                                             evaluate=False),
             **kwargs):
         self.title = 'Określ macierz bezwładności układu:'
-        self.title = 'Determine the inertia matrix:'
+        self.title = 'For the system under consideration determine the inertia matrix:'
 
         super().__init__(correct_system,
                          other_systems,
@@ -319,7 +319,7 @@ class StiffnessMatrixMCA(MechanicalSystemAnswer):
                                             evaluate=False),
             **kwargs):
         self.title = 'Określ macierz sztywności układu:'
-        self.title = 'Determine the stiffness matrix of our system'
+        self.title = 'For the system under consideration determine the stiffness matrix:'
 
         super().__init__(correct_system,
                          other_systems,
@@ -375,10 +375,10 @@ class PeriodMCA(MechanicalSystemAnswer):
                  answer_generator=lambda obj: [
                      2*pi / ((freq_val))
                      for freq_val in HarmonicOscillator(obj.linearized()).natural_frequencies() if freq_val != 0
-                 ][0],
+                 ],
                  **kwargs):
         self.title = 'Podaj wartość okresu:'
-        self.title = 'Specify the value of a period:'
+        self.title = 'Specify the value of natural periods of vibrations:'
         super().__init__(correct_system,
                          other_systems,
                          answer_generator=answer_generator,
@@ -532,3 +532,69 @@ class ResonanceCurveMCA(MechanicalSystemAnswer):
                          answer_generator=answer_generator,
                          title=None,
                          **kwargs)
+
+class FundamentalMatrixMCA(MechanicalSystemAnswer):
+    def __init__(
+            self,
+            correct_system,
+            other_systems,
+            answer_generator=lambda obj: Eq(Symbol('A'), (HarmonicOscillator(
+                obj.linearized()).fundamental_matrix()),
+                                            evaluate=False),
+            **kwargs):
+        self.title = 'A fundamental matrix for the system under consideration is given by:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+class FundamentalMatrixDeterminantMCA(MechanicalSystemAnswer):
+    def __init__(
+            self,
+            correct_system,
+            other_systems,
+            answer_generator=lambda obj: Eq(Symbol('\Delta'), (HarmonicOscillator(
+                obj.linearized()).fundamental_matrix().det()),
+                                            evaluate=False),
+            **kwargs):
+        self.title = 'Determine the characteristic polynomial for the considered system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+class GeneralizedMomentumsMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Symbol('p'),
+                                                 obj.generalized_momentum() ),
+                 **kwargs):
+
+        self.title = 'What are generalised momentums of the considered system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+class EquilibriumEquationsMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(obj.equilibrium_equation().doit(),Matrix([0]*len(obj.q))),
+                 **kwargs):
+
+        self.title = 'What are equilibrium equations for the considered system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
