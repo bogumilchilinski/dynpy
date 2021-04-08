@@ -68,14 +68,7 @@ class SDoFHarmonicOscillator(ComposedSystem):
         >>> t = symbols('t')
         >>> m, k = symbols('m, k')
         >>> qs = dynamicsymbols('z') # Generalized Coordinates 
-        >>> T = S.Half*m*z.diff(t)**2 # Kinetic Energy 
-        >>> V = S.Half*k*z**2 # Potential Energy 
-        >>> L = T - V # Lagrangian Calculation
-        >>> N = ReferenceFrame('N') # Defining of reference frame for coordinate system
-        >>> P = Point('P') # Defining point in space
-        >>> P.set_vel(N, z.diff(t)*N.y) # Set velocity of point P in reference system N on axis z
-        >>> Forcelist = [(P,f*sin(omega*t)*N.y)] # external forces on the system 
-        >>> mass = dyn.HarmonicOscillator(dyn.LagrangesDynamicSystem(L, qs=[z], frame=N)) # Initialization of LagrangesDynamicSystem instance
+        >>> mass = SDoFHarmonicOscillator(m,k, qs=[z],) # Initialization of LagrangesDynamicSystem instance
 
         -We define the symbols and dynamicsymbols
         -Kinetic energy T and potential energy v are evaluated to calculate the lagrangian L
