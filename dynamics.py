@@ -322,8 +322,6 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             hol_coneqs = hol_coneqs + constrains
 
 
-#         print(hol_coneqs)
-#         print(args)
 
         old_points = [point for point, force in self.forcelist]
         new_forces = [
@@ -360,8 +358,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                           )
 
 
-#     def rhs(self):
-#         return self.rhs
+
 
     def __preview(self, expr, preview=None, preview_mode=None):
         '''
@@ -686,66 +683,65 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
 
 
 class HarmonicOscillator(LinearDynamicSystem):
-    '''
+    """
     This object allows for a determination of any dynamic system by providing methods that serve to generate the equations of motion, solution, 
     natural frequencies, eigenmodes, FRF of the mechanical system and many others that are discussed further within the documentation. 
     For the initialization of HarmonicOscillator at least one argument is neccessary.
-    '''
-    '''
-
+    
     Arguments
-    ==========
-    LagrangesSystem : obj 
-        Formerly prepared LagrangesMethod object as explained in Sympy's 'Lagrange’s Method in Physics/Mechanics' module.
+    =========
+    Lagrangian: Symbol object
+        The lagrangian equation - subtraction of potential and kinematic energy
 
-    preview (optional) : bool
-        False by default. Allows user to display the provided formula, e.g. for checking its correctness.
+    qs=None (optional): dynamicsymbol object
+        Generalized coordinates
 
-    preview_mode (optional) : str
-        Functional with 'preview' set as True. Lets user to choose the method of rendering expressions. Set to LaTeX by default.
+    forcelist=None (optional): (tuples) (Point,Vector) object, (ReferenceFrame,Vector) object
+        Forces acting on the dynamic system
 
-    ivar (optional) : obj:Symbol
-        This argument lets user to change the default 't' symbol for time derivative to other, for compatibility with LagrangesSystem expressions.
+    bodies=None (optional): Point object, RigitBody object
+        Bodies represented as points or rigit bodies in reference frame
 
-    For first step, LagrangesMethod object has to be formulated. For its proper definition check the Sympy LagrangesMethod documentation.
+    frame=None (optional): ReferenceFrame object
+        Reference frame of the dinamic system
+
+    hol_coneqs=None (optional): array-like
+        The holonomic constraint equations
+
+    nonhol_coneqs=None (optional): array-like
+        The nonholonomic constraint equations
+
+    label=None (optional): string
+        Label of the class instance. Default label: '{Class name} with {length of qs} DOF'
+
+    ivar=None (optional): Symbol object
+        Independent variable
+
+    evaluate=True (optional):
+        Evaluates the dinamic system
 
     Example
+    =======
+    A mass oscillating up and down while being held up by a spring with a spring constant k
 
-    ==========
+    >>> t = symbols('t')
+    >>> m, k = symbols('m, k')
+    >>> qs = dynamicsymbols('z') # Generalized Coordinates 
+    >>> T = S.Half*m*z.diff(t)**2 # Kinetic Energy 
+    >>> V = S.Half*k*z**2 # Potential Energy 
+    >>> L = T - V # Lagrangian Calculation
+    >>> N = ReferenceFrame('N') # Defining of reference frame for coordinate system
+    >>> P = Point('P') # Defining point in space
+    >>> P.set_vel(N, z.diff(t)*N.y) # Set velocity of point P in reference system N on axis z
+    >>> Forcelist = [(P,f*sin(omega*t)*N.y)] # external forces on the system 
+    >>> mass = dyn.HarmonicOscillator(dyn.LagrangesDynamicSystem(L, qs=[z], frame=N)) # Initialization of LagrangesDynamicSystem instance
 
-    >>>import sympy as sym
-    >>>from sympy import *
-    >>>from sympy.physics.vector import dynamicsymbols
-    >>>from sympy.physics.mechanics import *
-    >>>t, m1, m2, k1, k2, c1, c2, F= symbols('t m1 m2 k1 k2 c1 c2 F(s)')
-    >>>x1, x2 =dynamicsymbols('x1 x2')
-    >>>dx1,dx2=dynamicsymbols('x1 x2', 1)
-    >>>N1=ReferenceFrame('N1')
-    >>>P1=Point('P1')
-    >>>P2=Point('P2')
-    >>>P1.set_vel(N1, dx1 * N1.x)
-    >>>P2.set_vel(N1, dx2 * N1.x)
-    >>>R1=1/2*c2*(dx1-dx2)**2
-    >>>R2=1/2*c1*dx2**2
-    >>>R=R1+R2
-    >>>dR1=R.diff(dx1)
-    >>>dR2=R.diff(dx2)
-    >>>Pa1 = Particle('Pa1', P1, m1)
-    >>>Pa2 = Particle('Pa2', P2, m2)
-    >>>Pa2.potential_energy=1/2*k1*x2**2+1/2*k2*(x1-x2)**2
-    >>>Pa1.potential_energy=1/2*k2*(x1-x2)**2
-    >>>V=Pa2.potential_energy+Pa1.potential_energy
-    >>>L1 = Lagrangian(N1,Pa1)
-    >>>L2 = Lagrangian(N1,Pa2)
-    >>>L=L1+L2
-    >>>FL = [(P2, -dR2*N1.x),(P1, -dR1*N1.x)]
-    >>>lall=LagrangesMethod(L,[x1,x2],forcelist=FL,frame=N1)
-
-    At this point we will work only using the defined class. Below an instance called instance_one is created. From now on the instance name can and should be used to call any desired method.
-
-    >>>instance_one=HarmonicOscillator(lall)
-
-    '''
+    -We define the symbols and dynamicsymbols
+    -Kinetic energy T and potential energy v are evaluated to calculate the lagrangian L
+    -Reference frame was created with point P defining the position and the velocity determined on the z axis
+    -external forces assigned 
+    -finally we determine the instance of the system using class LagrangeDynamicSystem
+    """
 
     def damped_natural_frequencies(self):
         '''
