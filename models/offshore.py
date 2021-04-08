@@ -1,6 +1,6 @@
 from .systems import ComposedSystem
 from sympy.physics.mechanics import dynamicsymbols
-from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S)
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, Eq)
 
 
 class DDoFVessel(ComposedSystem):
