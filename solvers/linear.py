@@ -1,4 +1,7 @@
-from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
+                    hessian, Function, flatten, Tuple, im, re, pi, latex,dsolve,solve,
+                    fraction,factorial,Add,Mul,exp,numbered_symbols, integrate)
+
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 import sympy as sym
@@ -6,7 +9,7 @@ from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
 import itertools as itools
 import scipy.integrate as solver
-from ..utilities.timeseries import DataMethods, SpectralMethods, TimeDomainMethods, SpectrumSeries, SpectrumFrame, TimeSeries, TimeDataFrame
+from ..utilities.timeseries import TimeSeries, TimeDataFrame
 
 from collections import ChainMap
 
@@ -199,7 +202,6 @@ class FirstOrderODE:
         
         C_list=[]
         
-        
         for i in range(len(self.dvars)*2):
             
 
@@ -211,29 +213,30 @@ class FirstOrderODE:
             
             params={*args_list}-{self.ivar}
             
-            C_list=[ Function(str(C_tmp))( *params )  for C_tmp in C_list]
+            C_list=[ Function(str(C_tmp))  for C_tmp in C_list]
             
         #         print('o tu')
         #         display(self.odes_system)
 
         modes,eigs = self.diagonalize()[0]
+        const_part = self.diagonalize()[1]
         
         
 
         
         
-        Y_mat = Matrix(self.dvars)
+        #Y_mat = Matrix(self.dvars)
 
         #diff_eqs = Y_mat.diff(self.ivar, 2) + eigs * Y_mat
 
-        t_sol = self.ivar
+        # t_sol = self.ivar
 
         display(modes,eigs)
         solution = [
-            C_list[i]*modes[:,i]*exp(eigv*self.ivar)
+            C_list[i]( *params )*modes[:,i]*exp(eigv*self.ivar)
              
             for i, eigv in enumerate([eigv for eigv in eigs if not eigv==0])
-        ]
+        ]+Matrix([integrate(eqn_const,self.ivar) for eqn_const in const_part])
         
         display(solution)
         return solution #sum(solution, Matrix([0] * len(Y_mat)))
@@ -272,10 +275,10 @@ class FirstOrderODE:
             ext_forces -= (amp_vector * comp).expand()
         #print(ext_forces.doit().expand())
 
-        const_elems = lambda expr: [
-            expr for expr in comp.expand().args if not expr.has(self.ivar)
-            if isinstance(comp, Add)
-        ]
+        # const_elems = lambda expr: [
+        #     expr for expr in comp.expand().args if not expr.has(self.ivar)
+        #     if isinstance(comp, Add)
+        # ]
 
         const_mat = Matrix([
             sum((expr for expr in comp.expand().args if not expr.has(self.ivar)
@@ -482,7 +485,7 @@ class LinearODESolution:
             
             params={*args_list}-{self.ivar}
             
-            C_list=[ Function(str(C_tmp))( *params )  for C_tmp in C_list]
+            C_list=[ Function(str(C_tmp))  for C_tmp in C_list]
             
         #         print('o tu')
         #         display(self.odes_system)
@@ -502,8 +505,8 @@ class LinearODESolution:
 
         solution = [
             (
-             C_list[2*i] * modes[:, i] * sin(im(eigs[2*i+1, 2*i+1]).doit() * t_sol) +
-            C_list[2*i+1] * modes[:, i] * cos(im(eigs[2*i+1, 2*i+1]).doit() * t_sol)
+             C_list[2*i]( *params ) * modes[:, i] * sin(im(eigs[2*i+1, 2*i+1]).doit() * t_sol) +
+            C_list[2*i+1]( *params ) * modes[:, i] * cos(im(eigs[2*i+1, 2*i+1]).doit() * t_sol)
              )*exp(re(eigs[i, i]).doit()*t_sol)
             for i, coord in enumerate(self.dvars)
         ]
@@ -544,10 +547,10 @@ class LinearODESolution:
             ext_forces -= (amp_vector * comp).expand()
         #print(ext_forces.doit().expand())
 
-        const_elems = lambda expr: [
-            expr for expr in comp.expand().args if not expr.has(self.ivar)
-            if isinstance(comp, Add)
-        ]
+        # const_elems = lambda expr: [
+        #     expr for expr in comp.expand().args if not expr.has(self.ivar)
+        #     if isinstance(comp, Add)
+        # ]
 
         const_mat = Matrix([
             sum((expr for expr in comp.expand().args if not expr.has(self.ivar)

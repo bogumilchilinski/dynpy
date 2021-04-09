@@ -1,4 +1,7 @@
-from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
+                    hessian, Function, flatten, Tuple, im, pi, latex,dsolve,solve,
+                    fraction,factorial)
+
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 import sympy as sym
@@ -10,7 +13,8 @@ from .utilities.timeseries import TimeSeries, TimeDataFrame
 
 from collections import ChainMap
 
-from IPython.display import display
+from IPython.display import display, Image
+import base64
 
 import sympy.physics.mechanics as me
 
@@ -48,9 +52,9 @@ def multivariable_taylor_series(expr, args, n=2, x0=None):
         for arg, arg_shift in op_point.items()
     }
 
-    def diff_orders(var_list, order_arg): return [
-        args for tmp in range(order_arg)
-    ]
+    # def diff_orders(var_list, order_arg): return [
+    #     args for tmp in range(order_arg)
+    # ]
 
     #     term_tmp_list=sum([list(itools.combinations_with_replacement(var_list,ord_tmp)) for ord_tmp in range(1,4)],[])
 
@@ -367,13 +371,36 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         display(expr)
         pass
 
+    scheme_name = 'engine.png'
+    real_name = 'engine_real.PNG'
+
     @classmethod
-    def preview(cls):
-        with open(f'{img}', "rb") as image_file:
+    def _scheme(cls):
+
+        path = __file__.replace('systems.py', 'images/') + cls.scheme_name
+
+        return path
+
+    @classmethod
+    def _real_example(cls):
+
+        path = __file__.replace('systems.py', 'images/') + cls.real_name
+
+        return path
+
+    @classmethod
+    def preview(cls, example=False):
+        if example:
+            path = cls._real_example()
+
+        else:
+            path = cls._scheme()
+
+        with open(f"{path}", "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read())
         image_file.close()
 
-        return IP.display.Image(base64.b64decode(encoded_string))
+        return Image(base64.b64decode(encoded_string))
 
     def __call__(self, *args, label=None):
         """
@@ -647,13 +674,14 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
         return self.governing_equations.jacobian(self.q)
 
     def fundamental_matrix(self, freq=Symbol('omega', positive=True)):
-        return -freq**2 * self.inertia_matrix() + self.stiffness_matrix()
         '''
         Method returns a fundamental matrix of the system built from inertia and stiffness matrices. Takes one optional argument.
         
         Args:
             freq (optional, obj:Symbol): This argument lets user to choose a symbol for frequency representation. Set to 'omega' by default, 'positive=True' ensures its affiliation to real numbers domain.
         '''
+        return -freq**2 * self.inertia_matrix() + self.stiffness_matrix()
+
 
     def damping_matrix(self):
         '''
@@ -798,12 +826,12 @@ class HarmonicOscillator(LinearDynamicSystem):
 
         if damped_freq == None:
             self.omegah = Symbol('omega_h', positive=True)
-
-        self._canonical_governing_equation = Matrix(u).diff(
-            self.ivar) + 2 * self.h * Matrix(u) + (self.omegah**2 +
-                                                   self.h**2) * Matrix(q)
+        
+        self._canonical_governing_equation = Matrix(self.u).diff(
+            self.ivar) + 2 * self.h * Matrix(self.u) + (self.omegah**2 +
+                                                   self.h**2) * Matrix(self.q)
         print('Done')
-        return self.__governing_equation
+        return self.__governing_equations
 
     def __solve(self, initial_conditions=None):
         '''
@@ -909,8 +937,8 @@ class HarmonicOscillator(LinearDynamicSystem):
             frf_expr = ((sqrt((n_sin**2 + n_cos**2).simplify())) /
                         d.doit()).simplify()   # sDoF
         else:  # DoF > 1
-            frf_expr = inv(stiffness_matrix() - excitation_freq **
-                           2 * inertia_matrix())  # mDoF
+            frf_expr = (self.stiffness_matrix().inv() - excitation_freq **
+                           2 * self.inertia_matrix())  # mDoF
 
         return frf_expr
 
@@ -975,7 +1003,7 @@ class HarmonicOscillator(LinearDynamicSystem):
 
         self.A = steady_vib_amp
 
-        general_solution = self.solution().rhs
+        #general_solution = self.solution().rhs
 
         exct_amp = (solve(
             self.frequency_response_function(excitation_freq=excitation_freq) -
@@ -1100,7 +1128,7 @@ class WeakNonlinearOscillator(HarmonicOscillator):
             for q_tmp in self.q
         }
         print(subscripts_dict)
-        print(self.args)
+        
         return HarmonicOscillator(
             Lagrangian=self.linearized().lagrangian().subs(
                 self.eps, 0).subs(subscripts_dict).doit(),
