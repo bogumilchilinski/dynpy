@@ -1,0 +1,110 @@
+\usepackage{ifxetex,ifluatex}
+\if\ifxetex T\else\ifluatex T\else F\fi\fi T%
+  \usepackage{fontspec}
+\else
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{lmodern}
+\fi
+
+\usepackage{mathtools}
+\usepackage{indentfirst}
+\usepackage{lmodern}
+\usepackage{standalone}
+\usepackage{float}
+\usepackage[english]{babel}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{siunitx}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\setlist{nosep}
+\definecolor{header_gray}{RGB}{118,113,113}
+\frenchspacing
+\pgfplotsset{compat=newest,every tick label/.append style={font=\tiny}}
+\usepgfplotslibrary{units}
+\renewcommand*\familydefault{\sfdefault}
+% Custom penalties
+\hyphenpenalty = 100 % Dzielenie wyrazow
+\uchyph=1 % Blokowanie przenoszenia wyrazow zaczynajacych sie wielka litera
+\doublehyphendemerits=1000 % Przeniesienie w nastepujacych po sobie wierszach
+\lefthyphenmin=3	% Minimalna liczna liter na końcu linii dzielonego wyrazu
+\brokenpenalty=1000 % Przelamanie wyrazu miedzy strony
+\widowpenalty=1000 % Pojedynczy wiersz na koncu strony
+\clubpenalty=1000 % Pojedynczy wiersz na poczatku strony
+\hfuzz=1pt % dopuszczalne przekroczenie prawego marginesu
+\usetikzlibrary{calc,positioning,patterns,angles,quotes,decorations.pathmorphing,decorations.markings,through}
+\usetikzlibrary{arrows,decorations,decorations.text}
+% \usepackage[backend=bibtex, sorting=none]{biblatex}
+% \bibliography{bibliography.bib}
+\sisetup{mode=text,range-phrase = {\text{~-~}}}
+% % ---------------------------------- Marginesy, akapity, interlinia --------------------------------
+
+\usepackage[includeheadfoot,lmargin=25mm, rmargin=25mm,  top=-10mm, bmargin=25mm, headheight=20mm]{geometry}
+
+
+\usepackage{graphicx}
+
+\usepackage{fancyhdr}
+
+
+\usepackage[colorinlistoftodos]{todonotes}
+\setlength{\marginparwidth}{2cm}
+
+% -------------------------------------- Nagłówki rozdziałów ---------------------------------------
+
+
+\titleformat{\chapter}%[display]
+  {\normalfont\Large \bfseries}
+  {\thechapter}{1ex}{\Large}
+
+
+\titleformat{\chapter}{\normalfont\Large\bfseries}{\thechapter.}{10pt}{}
+%\titleformat{\chapter}{\normalfont\Large\bfseries}{\thesection.}{10pt}{}
+
+\titlespacing{\chapter}{0pt}{14pt}{7pt}
+
+\titleformat{\subsection}{\normalfont}{\thesection.}{10pt}{}
+\titlespacing{\subsection}{0pt}{12pt}{6pt}
+
+% --------------------------------------------- CONTENTS -------------------------------------------
+
+
+% kropki dla chapterów
+% \usepackage{etoolbox}
+% \makeatletter
+% \patchcmd{\l@chapter}
+%   {\hfil}
+%   {\leaders\hbox{\normalfont$\m@th\mkern \@dotsep mu\hbox{.}\mkern \@dotsep mu$}\hfill}
+%   {}{}
+\makeatother
+
+
+\newcounter{counter:aspects}
+\stepcounter{counter:aspects}
+
+\newcommand{\aspect}[1]
+{
+\par
+\addcontentsline{toc}{paragraph}{\arabic{counter:aspects} #1}
+\stepcounter{counter:aspects}
+}
+
+
+% ------------------------------------ TITLE PAGE -----------------------------------------
+
+\setcounter{tocdepth}{2}
+\setcounter{secnumdepth}{2}
+\selectlanguage{polish}
+
+%%%%%%%%%%%%%DO PGFa%%%%%%%%%%%
+\usepackage{xparse}
+
+
+% Parameters
+
+\def\height{2}
+\def\width{3}
+\def\numpoints{1000}
+\def\maxpointwidth{2}
