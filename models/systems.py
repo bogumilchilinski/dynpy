@@ -99,7 +99,8 @@ class SDoFHarmonicOscillator(ComposedSystem):
 
 
 class DDoFSimplifyVehicleSuspension(ComposedSystem):
-    """Ready to use sample Double Degree of Freedom System represents symmetrical kinematically excited beam with two springs.
+    """
+    Ready to use sample Double Degree of Freedom System represents symmetrical kinematically excited beam with two springs.
         Arguments:
         =========
             m = Mass
@@ -688,7 +689,7 @@ class SDoFEngine(ComposedSystem):
 
         Example
         =======
-        A mass oscillating up and down while being held up by a two springs with a spring constants
+        A SDoF engine oscillating up and down while being held up by a two springs with the given stiffness
 
         >>> t = symbols('t')
         >>> M, me, e, km = symbols('M, m_e, e, k_m')
@@ -990,7 +991,7 @@ class MDoFWinch(ComposedSystem):
 
         Example
         =======
-        A mass m pendulating on cable l_0 which is wounded  on the cylinder with the radius R.
+        A mass m pendulating on cable l_0 which is wounded on the cylinder with the radius R.
 
         >>> t = symbols('t')
         >>> R,l_0 = symbols('R, l_0',positive=True)
@@ -1054,7 +1055,7 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
                  Omega=Symbol('Omega', positive=True),
                  system=None):
         """
-    Model of Single Degree of Freedom Trolley with nonlinear spring (type of inverted pendulum)
+        Model of Single Degree of Freedom Trolley with nonlinear spring (type of inverted pendulum)
 
         Arguments:
         =========
@@ -1086,7 +1087,7 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
         >>> t = symbols('t')
         >>> m, l, l_0, k, F = symbols('m, l, l_0, k, F')
         >>> qs = dynamicsymbols('x') # Generalized Coordinate
-        >>> Omega = dynamicsymbols('Omega')
+        >>> Omega = symbols('Omega')
         >>> SDoFTrolleyWithNonlinearSpring()
 
         -We define the symbols and dynamicsymbols

@@ -769,6 +769,18 @@ class HarmonicOscillator(LinearDynamicSystem):
     -Reference frame was created with point P defining the position and the velocity determined on the z axis
     -external forces assigned 
     -finally we determine the instance of the system using class LagrangeDynamicSystem
+    
+    -damped natural frequencies, im eigenvals, and natual frequencies determine the system damped natural frequencies matrix, output is obtained from inertia matrix and stiffness matrix.
+    -__solve solves the problem in a symbolic way. 
+    -general solution gives the symbolic general solution and returns the matrix of the solution. 
+    -steady solution computes the steady solution amplitude for the system defined in the instance of this class.
+    -frequency response function returns the FRF of the system for the given excitation amplitude
+    -dynamic amplification factor returns the DAF of the system for the given excitation amplitude
+    -critical frequencies determines the critical frequency of the system
+    -cycles numer determines the cycles number fopr the given time
+    -exitation amplitude computes the excitation amplitude causing steady solution of the system with the given level of vibration
+    -spring force determines the force in the elastic connector with the utilization of the analytical solution (it has to be done first)
+    -DampedHarmonicOscillator solves the natrual frequency and vibration modes matrix
     """
 
     def damped_natural_frequencies(self):
@@ -849,7 +861,7 @@ class HarmonicOscillator(LinearDynamicSystem):
 
     def general_solution(self, initial_conditions=None):
         '''
-        Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
+        Solves the problem in the symbolic way and returns matrix of solution (in the form of equations (objects of Eq class)).
         '''
 
         eoms = self._eoms
