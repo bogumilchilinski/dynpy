@@ -70,7 +70,7 @@ class SDoFHarmonicOscillator(ComposedSystem):
 
         >>> t = symbols('t')
         >>> m, k = symbols('m, k')
-        >>> qs = dynamicsymbols('z') # Generalized Coordinates 
+        >>> qs = dynamicsymbols('z') # Generalized Coordinates
         >>> mass = SDoFHarmonicOscillator(m,k, qs=[z],) # Initialization of LagrangesDynamicSystem instance
 
         -We define the symbols and dynamicsymbols
@@ -99,7 +99,8 @@ class SDoFHarmonicOscillator(ComposedSystem):
 
 
 class DDoFSimplifyVehicleSuspension(ComposedSystem):
-    """Ready to use sample Double Degree of Freedom System represents symmetrical kinematically excited beam with two springs.
+    """
+    Ready to use sample Double Degree of Freedom System represents symmetrical kinematically excited beam with two springs.
         Arguments:
         =========
             m = Mass
@@ -268,23 +269,28 @@ class DDoFVehicleSuspension(ComposedSystem):
 class DDoFShaft(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
     =========
+            I = Moment of Inertia
+                -Moment of Inertia in case of both disc
+                
+            k_1 =Right spring coefficient
+                -Right spring carrying the system
 
-    k = Spring coefficient
-        -Spring carrying the system
+            k_2 =Left spring coefficient
+                -Left spring carrying the system
 
-    ivar = symbol object
-        -Independant time variable
+            ivar = symbol object
+                -Independant time variable
 
-    qs = dynamicsymbol object
-        -Generalized coordinates
+            qs = dynamicsymbol object
+                -Generalized coordinates
 
     Example
     =======
     A mass oscillating up and down while being held up by a spring with a spring constant k
 
     >>> t = symbols('t')
-    >>> m, k = symbols('m, k')
-    >>> qs = dynamicsymbols('z') # Generalized Coordinates 
+    >>> I, k1, k2 = symbols('I, k_1, k_2')
+    >>> qs = dynamicsymbols('phi_1, phi_2') # Generalized Coordinates
     >>> DDoFShaft()
 
     -defines the symbols and dynamicsymbols
@@ -295,11 +301,7 @@ class DDoFShaft(ComposedSystem):
     real_name = 'ddof_shaft_real.png'
 
     def __init__(self,
-                 m=Symbol('m', positive=True),
                  I=Symbol('I', positive=True),
-                 l_rod=Symbol('2l', positive=True),
-                 l_l=Symbol('l', positive=True),
-                 l_r=Symbol('l', positive=True),
                  k_2=Symbol('k_2', positive=True),
                  k_1=Symbol('k_1', positive=True),
                  input_displacement=dynamicsymbols('theta'),
@@ -309,10 +311,6 @@ class DDoFShaft(ComposedSystem):
         phi1, phi2 = qs
         theta = input_displacement
 
-        self.m = m  # mass of a rod
-        self.l_l = l_l  # offset of left spring
-        self.l_r = l_r  # offset of right spring
-        self.l_rod = l_rod  # length of a rod
         self.k_2 = k_2  # left spring
         self.k_1 = k_1  # right spring
         self.I = I  # moment of inertia of a rod
@@ -358,8 +356,9 @@ class Pendulum(ComposedSystem):
         >>> m, g, l = symbols('m, g, l')
         >>> qs = dynamicsymbols('varphi') # Generalized Coordinates
         >>> Pendulum()
-
+        
         -We define the symbols and dynamicsymbols
+        -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
         -determine the instance of the pendulum by using class Pendulum()
     """
     scheme_name = 'pendulum.png'
@@ -418,6 +417,7 @@ class SDoFFreePendulum(ComposedSystem):
         >>> SDOFFreePendulum()
 
         -We define the symbols and dynamicsymbols
+        -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
         -determine the instance of the pendulum by using class SFoDFreePendulum()
     """
     scheme_name = 'free_sdof_pendulum.png'
@@ -471,6 +471,7 @@ class SDoFExcitedPendulum(ComposedSystem):
         >>> SDoFExcitedPendulum()
 
         -We define the symbols and dynamicsymbols
+        -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
         -determine the instance of the pendulum by using class SDoFExcitedPendulum()
     """
     scheme_name = 'horizontal_forced_pendulum.png'
@@ -478,25 +479,31 @@ class SDoFExcitedPendulum(ComposedSystem):
 
     def __init__(
             self,
-            m_1=Symbol('m_1', positive=True),
+            m=Symbol('m', positive=True),
             g=Symbol('g', positive=True),
-            l_1=Symbol('l_1', positive=True),
+            l=Symbol('l', positive=True),
             F=Symbol('F', positive=True),
-            angle=dynamicsymbols('varphi_1'),
+            angle=dynamicsymbols('varphi'),
             qs=None,
             ivar=Symbol('t'),
     ):
         phi = angle
 
-        self.pendulum = Pendulum(m_1, g, l_1, angle=angle)
-        self.force = Force(-F * l_1 * cos(phi), pos1=phi, qs=[phi])
+        if qs == None:
+            qs = [angle]
+        else:
+            qs = qs
+            
+        self.m = m
+        self.g = g
+        self.l = l
+        self.F = F
+        
+        self.pendulum = Pendulum(m, g, l, angle=phi)
+        self.force = Force(-F * l * cos(phi), pos1=phi, qs=qs)
         system = self.pendulum + self.force
 
         super().__init__(system)
-
-
-# usunąć indeksy parametrów, zarówno w klasie jak i na rysunkach
-# ujednolicić zmienną (angle albo phi)
 
 
 class SDoFDampedPendulum(ComposedSystem):
@@ -540,19 +547,29 @@ class SDoFDampedPendulum(ComposedSystem):
 
     def __init__(
             self,
-            m1=Symbol('m_1', positive=True),
+            m=Symbol('m', positive=True),
             g=Symbol('g', positive=True),
-            l1=Symbol('l_1', positive=True),
+            l=Symbol('l', positive=True),
             c=Symbol('c', positive=True),
-            angle=dynamicsymbols('varphi_1'),
+            angle=dynamicsymbols('varphi'),
             qs=None,
             ivar=Symbol('t'),
     ):
         phi = angle
+        
+        if qs == None:
+            qs = [angle]
+        else:
+            qs = qs
 
-        self.pendulum = Pendulum(m1, g, l1, angle=angle)
-        self.force = Force(-c * diff(angle, ivar), pos1=phi, qs=[phi])
-        system = self.pendulum + self.force
+        self.m = m
+        self.g = g
+        self.l = l
+        self.c = c
+        
+        self.Pendulum = Pendulum(m, g, l, angle=phi)
+        self.Force = Force(-c * diff(phi, ivar), pos1=phi, qs=qs)
+        system = self.Pendulum + self.Force
 
         super().__init__(system)
 
@@ -604,12 +621,17 @@ class DDoFCoupledPendulum(ComposedSystem):
                  qs=dynamicsymbols('phi_1, phi_2')):
 
         phi1, phi2 = qs
-
+        
+        self.m = m
+        self.g = g
+        self.l = l
+        self.k = k
+        
         self.spring = Spring(k, pos1=(phi1 * (l)), pos2=(phi2 * (l)), qs=[qs])
         self.pendulum_1 = Pendulum(m, g, l, angle=phi1, qs=[qs])
         self.pendulum_2 = Pendulum(m, g, l, angle=phi2, qs=[qs])
 
-        system = self.pendulum_1 + self.spring + self.pendulum_2
+        system = self.pendulum_1 + self.pendulum_2 + self.spring  
         super().__init__(system)
 
 
@@ -667,11 +689,12 @@ class SDoFEngine(ComposedSystem):
 
         Example
         =======
-        A mass oscillating up and down while being held up by a two springs with a spring constants
+        A SDoF engine oscillating up and down while being held up by a two springs with the given stiffness
 
         >>> t = symbols('t')
-        >>> M, me, km = symbols('M, m_e, k_m')
-        >>> qs = dynamicsymbols(dz, z)
+        >>> M, me, e, km = symbols('M, m_e, e, k_m')
+        >>  phi = dynamicsymbosl('phi')
+        >>> qs = dynamicsymbols('z') #Generalized coordinate
         >>> SDoFEngine()
 
     """
@@ -680,7 +703,6 @@ class SDoFEngine(ComposedSystem):
                  k_m=Symbol('k_m', positive=True),
                  m_e=Symbol('m_e', positive=True),
                  e=Symbol('e', positive=True),
-                 dz=dynamicsymbols('dz'),
                  z=dynamicsymbols('z'),
                  phi=dynamicsymbols('phi'),
                  ivar=Symbol('t', positive=True),
@@ -698,7 +720,6 @@ class SDoFEngine(ComposedSystem):
         self.Spring = Spring(2 * k_m, pos1=z, qs=[z])
 
         system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2
-
         super().__init__(system)
 
 
@@ -708,16 +729,22 @@ class EngineWithTMD(ComposedSystem):
 
         Arguments:
         =========
-            m = Mass
+            M = Mass
                 -Mass of system on spring
 
-            g = gravitional field
-                -value of gravitional field acceleration
+            m_e = mass
+                -value of particle mass
 
-            l = lenght
-                -Dimension of pendulum strong
+            m_TMD = mass
+                -value of TMD mass
 
-            k = spring coefficient
+            e = distance
+                -motion radius of a particle
+
+            k_m = spring coefficient
+                -value of spring coefficient
+
+            k_TMD = spring coefficient
                 -value of spring coefficient
 
             ivar = symbol object
@@ -731,8 +758,8 @@ class EngineWithTMD(ComposedSystem):
         A mass oscillating up and down while being held up by a spring with a spring constant kinematicly
 
         >>> t = symbols('t')
-        >>> m, g, l, k = symbols('m, g, l, k')
-        >>> qs = dynamicsymbols('varphi_1, varphi_2') # Generalized Coordinates
+        >>> M, m_e, m_TMD, e, k_m, k_TMD = symbols('M, m_e, m_TMD, e, k_m, k_TMD')
+        >>> qs = dynamicsymbols('z, z_TMD') # Generalized Coordinates
         >>> DDoFCouplePendulum()
 
         -We define the symbols and dynamicsymbols
@@ -749,12 +776,12 @@ class EngineWithTMD(ComposedSystem):
                  m_e=Symbol('m_e', positive=True),
                  m_TMD=Symbol('m_{TMD}', positive=True),
                  e=Symbol('e', positive=True),
-                 dz=dynamicsymbols('dz'),
                  z=dynamicsymbols('z'),
                  z_TMD=dynamicsymbols('z_{TMD}'),
                  phi=dynamicsymbols('varphi'),
                  ivar=Symbol('t', positive=True),
                  system=None):
+        
         self.M = M
         self.k_m = k_m
         self.k_TMD = k_TMD
@@ -763,7 +790,6 @@ class EngineWithTMD(ComposedSystem):
         self.e = e
         self.z = z
         self.z_TMD = z_TMD
-        self.dz = dz
         self.phi = phi
 
         self.MaterialPoint_1 = MaterialPoint(M, pos1=z, qs=[z])
@@ -832,11 +858,18 @@ class SDoFNonlinearEngine(ComposedSystem):
                  e=Symbol('e', positive=True),
                  beta=Symbol('beta', positive=True),
                  l0=Symbol('l_0', positive=True),
-                 dz=dynamicsymbols('dz'),
                  z=dynamicsymbols('z'),
                  phi=dynamicsymbols('phi'),
                  ivar=Symbol('t', positive=True),
                  system=None):
+
+        self.M = M
+        self.k_m = k_m
+        self.m_e = m_e
+        self.beta = beta
+        self.l0 = l0
+        self.z= z
+        self.phi = phi
 
         N = ReferenceFrame('N')
         O = Point('O')
@@ -852,7 +885,6 @@ class SDoFNonlinearEngine(ComposedSystem):
         self.Spring = Spring(2 * k_m, pos1=P1, pos2=P2, l0=l0, qs=[z])
 
         system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2
-
         super().__init__(system)
 
 
@@ -898,7 +930,6 @@ class MDoFTMD(ComposedSystem):
                  me=Symbol('me', positive=True),
                  k=Symbol('k', positive=True),
                  ke=Symbol('ke', positive=True),
-                 l0=Symbol('l_0', positive=True),
                  F=Symbol('F', positive=True),
                  xe=dynamicsymbols('xe'),
                  xb=dynamicsymbols('xb'),
@@ -906,20 +937,19 @@ class MDoFTMD(ComposedSystem):
                  ivar=Symbol('t', positive=True),
                  system=None):
 
-        self.m = m,
+        self.m = m
         self.me = me
         self.k = k
         self.ke = ke
-        self.l0 = l0
         self.F = F
 
         self.MaterialPoint_1 = MaterialPoint(m, pos1=xe, qs=[xe])
         self.MaterialPoint_2 = MaterialPoint(me, pos1=xb, qs=[xb])
         self.Spring_1 = Spring(k, pos1=xe, qs=[xe])
         self.Spring_2 = Spring(ke, pos1=xe, pos2=xb, qs=[xe, xb])
-        self.force = Force(F * sin(angle * ivar), pos1=xe, qs=[xe])
+        self.Force = Force(F * sin(angle * ivar), pos1=xe, qs=[xe])
 
-        system = self.Spring_1 + self.Spring_2 + self.MaterialPoint_1 + self.MaterialPoint_2 + self.force
+        system = self.Spring_1 + self.Spring_2 + self.MaterialPoint_1 + self.MaterialPoint_2 + self.Force
         super().__init__(system)
 
 
@@ -961,7 +991,7 @@ class MDoFWinch(ComposedSystem):
 
         Example
         =======
-        A mass m pendulating on cable l_0 which is wounded  on the cylinder with the radius R.
+        A mass m pendulating on cable l_0 which is wounded on the cylinder with the radius R.
 
         >>> t = symbols('t')
         >>> R,l_0 = symbols('R, l_0',positive=True)
@@ -1025,25 +1055,25 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
                  Omega=Symbol('Omega', positive=True),
                  system=None):
         """
-    Model of Single Degree of Freedom Trolley with nonlinear spring (type of inverted pendulum)
+        Model of Single Degree of Freedom Trolley with nonlinear spring (type of inverted pendulum)
 
         Arguments:
         =========
             m = Mass
                 -Mass of system on spring
-
-            g = gravitional field
-                -value of gravitional field acceleration
                 
             l = length
-                -
+                -actual length of the non-linear spring
 
             l_0 = lenght
-                -Dimension of pendulum strong
+                -Initial length of non-linear spring
 
             k = spring coefficient
                 -value of spring coefficient
 
+            F = Force
+                -Trolley's exciting force
+                
             ivar = symbol object
                 -Independant time variable
 
@@ -1055,14 +1085,16 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
         A mass oscillating up and down while being held up by a spring with a spring constant kinematicly
 
         >>> t = symbols('t')
-        >>> m, g, l, k = symbols('m, g, l, k')
-        >>> qs = dynamicsymbols('varphi_1, varphi_2') # Generalized Coordinates
-        >>> DDoFCouplePendulum()
+        >>> m, l, l_0, k, F = symbols('m, l, l_0, k, F')
+        >>> qs = dynamicsymbols('x') # Generalized Coordinate
+        >>> Omega = symbols('Omega')
+        >>> SDoFTrolleyWithNonlinearSpring()
 
         -We define the symbols and dynamicsymbols
-        -determine the instance of the pendulum by using class SDoFCouplePendulum()
+        -determine the instance of the pendulum by using class SDoFTrolleyWithNonlinearSpring()
     """
 
+        self.m = m
         self.k = k
         self.l = l
         self.l_0 = l_0
@@ -1076,27 +1108,7 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
         super().__init__(system)
 
 
-#class MDoFTMD(ComposedSystem):
-#scheme_name = '...'
-#real_name = '...'
 
-#def __init__(self, system=None, ivar=Symbol('t')):
-
-#t = ivar
-
-#xb, xe, z = dynamicsymbols('xb,xe,z')
-#m_0, m, me, k_0, k, ke, F = symbols(
-#'m_0, m, m_e, k_0, k, k_e, F', positive=True)
-
-#T = S.Half * m * xb.diff(t)**2 + S.Half * m/10 * xe.diff(t)**2
-#V = S.Half * k * xb**2 + S.Half * ke * (xe - xb)**2
-
-#L_TMD = (T - V)
-
-#tmd_base = HarmonicOscillator(
-#L_TMD, qs=[xb, xe], forcelist=[])
-
-#super().__init__(tmd_base)
 
 # class MDoFShaft(ComposedSystem):
 #     scheme_name = '...'

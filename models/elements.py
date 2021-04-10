@@ -1,4 +1,4 @@
-from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Point, Derivative)
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 
