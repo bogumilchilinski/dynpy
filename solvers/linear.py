@@ -140,8 +140,14 @@ class FirstOrderODE:
 #         display(main_matrix)
         
         linear_odes=main_matrix*sym.Matrix(self.dvars)
-    
-        display(main_matrix)
+
+
+        if isinstance(self.ivar,Function):
+            regular_vars=linear_odes.atoms(Function) -{self.ivar}
+        else:
+            regular_vars=linear_odes.atoms(Function)
+
+        display(regular_vars)  
 
         const_odes_list=[]
         regular_odes_list=[]
@@ -152,10 +158,13 @@ class FirstOrderODE:
             else:
                 regular_odes_list+=[no]
             
-        regular_main_matrix= Matrix([linear_odes[no]  for no in  regular_odes_list]).jacobian([self.dvars[no]  for no in regular_odes_list])
-        singular_odes=[linear_odes  for no in  const_odes_list]
+        #display( row  if row  in Matrix(regular_odes_list).rows  ) 
+        display( Matrix(regular_odes_list) )    
+        regular_main_matrix= Matrix(linear_odes).jacobian( list(regular_vars) )
+        #singular_odes=[no  for no in  const_odes_list]
+        display(regular_main_matrix)
     
-        return (regular_main_matrix).diagonalize(),singular_odes
+        return (regular_main_matrix).diagonalize(),const_odes_list
 
 
 
@@ -214,6 +223,7 @@ class FirstOrderODE:
             params={*args_list}-{self.ivar}
             
             C_list=[ Function(str(C_tmp))  for C_tmp in C_list]
+            C_list=[ (C_tmp)( *params )  for C_tmp in C_list]
             
         #         print('o tu')
         #         display(self.odes_system)
@@ -233,12 +243,13 @@ class FirstOrderODE:
 
         display(modes,eigs)
         solution = [
-            C_list[i]( *params )*modes[:,i]*exp(eigv*self.ivar)
+            C_list[i]*modes[:,i]*exp(eigv*self.ivar)
              
             for i, eigv in enumerate([eigv for eigv in eigs if not eigv==0])
-        ]+Matrix([integrate(eqn_const,self.ivar) for eqn_const in const_part])
-        
+        ]#+([integrate(eqn_const,self.ivar) for eqn_const in const_part])
+        print('sol')
         display(solution)
+        print('sol')
         return solution #sum(solution, Matrix([0] * len(Y_mat)))
 
     def steady_solution(self, initial_conditions=None):
@@ -485,7 +496,8 @@ class LinearODESolution:
             
             params={*args_list}-{self.ivar}
             
-            C_list=[ Function(str(C_tmp))  for C_tmp in C_list]
+            C_list=[ Function(str(C_tmp))   for C_tmp in C_list]
+            C_list=[ (C_tmp)( *params )  for C_tmp in C_list]
             
         #         print('o tu')
         #         display(self.odes_system)
@@ -505,8 +517,8 @@ class LinearODESolution:
 
         solution = [
             (
-             C_list[2*i]( *params ) * modes[:, i] * sin(im(eigs[2*i+1, 2*i+1]).doit() * t_sol) +
-            C_list[2*i+1]( *params ) * modes[:, i] * cos(im(eigs[2*i+1, 2*i+1]).doit() * t_sol)
+             C_list[2*i]* modes[:, i] * sin(im(eigs[2*i+1, 2*i+1]).doit() * t_sol) +
+            C_list[2*i+1] * modes[:, i] * cos(im(eigs[2*i+1, 2*i+1]).doit() * t_sol)
              )*exp(re(eigs[i, i]).doit()*t_sol)
             for i, coord in enumerate(self.dvars)
         ]
