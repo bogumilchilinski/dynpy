@@ -1,7 +1,9 @@
-from sympy import *
-from ..dynamics import LagrangesDynamicSystem
-from sympy.physics.mechanics import *
-from sympy.physics.vector import *
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Point, Derivative)
+from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
+from sympy.physics.vector import vpprint, vlatex
+
+from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
+
 import base64
 import IPython as IP
 

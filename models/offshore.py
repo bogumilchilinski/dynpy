@@ -1,6 +1,6 @@
 from .systems import ComposedSystem
 from sympy.physics.mechanics import dynamicsymbols
-from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S)
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, Eq)
 
 
 class DDoFVessel(ComposedSystem):
@@ -205,6 +205,7 @@ class TDoFCompensatedPayload(ComposedSystem):
 
         return self.sym_desc_dict
 
+
 # class PayloadVesselSystem(ComposedSystem):
     
 #     def __init__(self,
@@ -223,4 +224,5 @@ class TDoFCompensatedPayload(ComposedSystem):
 #         system = self.payload + self.vessel
         
 #         super().__init__(system)
+
 
