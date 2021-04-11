@@ -1,12 +1,13 @@
 import sympy as sym
 from sympy import *
 import sympy.physics.mechanics as mech
-
+from sympy.physics.vector.printing import vpprint, vlatex
 import dynpy
 from dynpy import HarmonicOscillator
-
-
-
+import dynpy.models.systems as sys
+import random as rand
+from random import *
+import IPython as IP
 import base64
 t = Symbol('t')
 
@@ -412,3 +413,120 @@ class MechanicalSystemAnswer(EmbeddedMultichoiceMathAnswer):
         print('x' * 100)
 
 
+class QuizOn(sys.ComposedSystem):
+    
+    def __init__(self,*args,**kwargs):
+       
+        self.system=HarmonicOscillator(args[0])
+        
+        
+        self._scheme_path=args[0]._scheme()
+        self._real_example_path=args[0]._real_example()
+        super().__init__(*args,**kwargs)
+        
+
+    def generate_dict(self,param_range={}):
+        sys_par=self.system_parameters()
+        self.param_range=param_range
+        sym_list=[]
+
+        for caseno in [0,1,2,3,4]:
+            sym_dict={}
+            temp_dict={}
+            for num,sym in enumerate(sys_par):
+                split_name_default=str(sys_par[num]).split('_',1)
+                
+                sym_dict[sym]=Symbol(str(rand.randrange(1,20,1))+split_name_default[0]+'_0')
+
+            for key,val in param_range.items(): 
+                if isinstance(val,list)==True:
+                    for elem in val:
+                        if isinstance(elem,Expr):
+                            sym_dict[key]=rand.choice(val)
+                        else:
+                            split_name_dict=str(key).split('_',1)
+                            sym_dict[key]=Symbol(str(rand.choice(self.param_range[key])))
+                else:
+                    split_name_dict=str(key).split('_',1)
+                    sym_dict[key]=Symbol(str(rand.randrange(val[0],val[1],val[2]))+split_name_dict[0]+'_0')
+
+            sym_list.append(sym_dict)   
+            
+        return sym_list
+#         for num,sym in enumerate(symbols_list):
+#             sym_dict={symbols_list[sym]:'a'}
+    def preview(self,example=False):
+        if example:
+            path=self._real_example_path
+             
+        else:
+            path=self._scheme_path
+            
+        with open(f"{path}", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+        image_file.close()
+
+
+        return IP.display.Image(base64.b64decode(encoded_string))
+
+        
+    def prepare_quiz(self,question_list,subs_dict,preview=True):
+        self.question_list=question_list
+        self.title=str(self)
+        self.preview=preview
+        self.ds_list=[HarmonicOscillator(self.system.subs(subs)) for subs in subs_dict]
+        ds_list=self.ds_list
+        self.subs_dict=subs_dict
+        question_cat=self.title
+        preview_on=self.preview
+
+        subs_dicts_list=self.subs_dict
+
+        question_set=[]
+        for case_no in [0,1,2,3,4]:
+            case = 'case'+str(case_no)
+
+            fig=EmbeddedGraphics(self._scheme_path)
+            pic=EmbeddedGraphics(self._real_example_path)
+
+
+
+            question_string = '\n \n'
+            question_string += '<p>'+self.title+'</p>  \n \n'
+
+            question_string+=str(pic)
+
+            question_string +='<p> Based on the model presented, study the dynamics of the considered system. Perform the analysis for the following data.  \(' + '\),\('.join([vlatex(Eq(lhs,rhs,evaluate=False) ) for lhs,rhs in                 self.subs_dict[case_no].items()]) + '\). Compute:</p> \n \n'
+            
+            question_string+=str(fig)
+
+            for no,question in enumerate(self.question_list):
+
+                counter=no
+                question_name=question_cat+"_zestaw_"+case#+str(counter+1001)
+
+
+
+                question_string+=str(Paragraph("{q_no}.".format(q_no=str(counter+1))))
+                question_string+="<p>"+ (str(question(ds_list[case_no],ds_list[0:case_no]+ds_list[case_no+1:],score=2))) +  " </p> \n"
+
+                question_string+='\n \n'
+
+
+
+            question_set.append(str(Question([question_string],id=counter+1000,figure=fig.to_base64_entry()+pic.to_base64_entry(),title=question_name)))
+
+
+        dump=(Category(name=question_cat,questions=question_set)).to_string()
+
+        with open(question_cat+'_questions.xml', 'w+') as q_file:
+            q_file.write(dump)
+
+        if preview:
+            for no,question in enumerate(self.question_list):
+
+                qs = question(ds_list[0:1], ds_list[1:])
+
+                qs.preview()
+
+                print(str(qs))
