@@ -466,14 +466,13 @@ class QuizOn(sys.ComposedSystem):
             encoded_string = base64.b64encode(image_file.read())
         image_file.close()
 
-
         return IP.display.Image(base64.b64decode(encoded_string))
 
         
     def prepare_quiz(self,question_list,subs_dict,preview=True):
         self.question_list=question_list
         self.title=str(self)
-        self.preview=preview
+        self._preview=preview
         self.ds_list=[HarmonicOscillator(self.system.subs(subs)) for subs in subs_dict]
         ds_list=self.ds_list
         self.subs_dict=subs_dict
@@ -522,7 +521,7 @@ class QuizOn(sys.ComposedSystem):
         with open(question_cat+'_questions.xml', 'w+') as q_file:
             q_file.write(dump)
 
-        if preview:
+        if self._preview:
             for no,question in enumerate(self.question_list):
 
                 qs = question(ds_list[0:1], ds_list[1:])
