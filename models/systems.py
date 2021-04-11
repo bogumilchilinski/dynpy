@@ -688,7 +688,7 @@ class EngineWithTMD(ComposedSystem):
                  dz=dynamicsymbols('dz'),
                  z=dynamicsymbols('z'),
                  z_TMD=dynamicsymbols('z_{TMD}'),
-                 phi=dynamicsymbols('varphi'),
+                 phi=dynamicsymbols('phi'),
                  ivar=Symbol('t'),
                  system=None):
         self.M=M
