@@ -1,9 +1,12 @@
 from .systems import ComposedSystem
 from sympy.physics.mechanics import dynamicsymbols
-from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S)
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, Eq)
 
 
 class DDoFVessel(ComposedSystem):
+
+    scheme_name = 'vessel.jpg'
+
     def __init__(self,
                  m_vessel=Symbol('M_vessel', positive=True),
                  I_5=Symbol('I_5', positive=True),
@@ -95,6 +98,9 @@ class DDoFVessel(ComposedSystem):
 
 
 class TDoFCompensatedPayload(ComposedSystem):
+
+    scheme_name = '3dofs_new.PNG'
+
     def __init__(self,
                  m_p=Symbol('m_p', positive=True),
                  k_w=Symbol('k_w', positive=True),
@@ -198,3 +204,25 @@ class TDoFCompensatedPayload(ComposedSystem):
         }
 
         return self.sym_desc_dict
+
+
+# class PayloadVesselSystem(ComposedSystem):
+    
+#     def __init__(self,
+#                  y_e=dynamicsymbols('y_e'),
+#                  z_e=dynamicsymbols('z_e'),
+#                  wave_level=dynamicsymbols('W'),
+#                  wave_slope=dynamicsymbols('S'),
+# #                  payload=TDoFCompensatedPayload(),
+# #                  vessel=DDoFVessel(),
+#                  system=None
+#                 ):
+        
+#         self.payload = TDoFCompensatedPayload(y_e,z_e)
+#         self.vessel = DDofVessel(wave_level,wave_slope)
+        
+#         system = self.payload + self.vessel
+        
+#         super().__init__(system)
+
+

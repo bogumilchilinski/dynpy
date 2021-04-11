@@ -1,12 +1,12 @@
-from sympy import *
-from sympy.physics.mechanics import *
+from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq
+from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 import sympy as sym
 from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
 import itertools as itools
 import scipy.integrate as solver
-from ..utilities.timeseries import *
+from ..utilities.timeseries import TimeSeries, TimeDataFrame
 
 from collections import ChainMap
 
