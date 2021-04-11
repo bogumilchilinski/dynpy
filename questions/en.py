@@ -81,6 +81,22 @@ class SDoFApproximatedGoverningEquationMCA(MechanicalSystemAnswer):
                          title=None,
                          **kwargs)
 
+class SDoFFreeGalerkinGoverningEquationIntegralMCA(MechanicalSystemAnswer):
+    question = 'Determine equation of motion of the system:'
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Integral(((HarmonicOscillator(obj.approximated())._eoms[0].subs(obj.q[0],Symbol('a')*sin(Symbol('omega')*t)).doit().expand()))*sin(Symbol('omega')*t),(t,0,Symbol('T'))),0),
+                 **kwargs):
+
+#         self.title = 'Nieliniowe przybliżone równanie ruchu opisuje nastęujący wzór:'
+        #self.title = 'Determine equation of motion of the system:'
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=None,
+                         **kwargs)
+
 class CriticalPointsMCA(MechanicalSystemAnswer):
     def __init__(self,
                  correct_system,

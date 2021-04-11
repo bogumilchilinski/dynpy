@@ -14,3 +14,7 @@ class SmallParameterMCA(en.SmallParameterMCA):
     
 class ResonanceCurveMCA(en.ResonanceCurveMCA):
     question = 'Zależność pomiędzy amplitudą a częstością drgań własnych dla drgań swobodnych rozważanego układu wyraża wzór:'
+
+class SDoFFreeGalerkinGoverningEquationIntegralMCA(en.SDoFFreeGalerkinGoverningEquationIntegralMCA):
+    question = 'Całka:'
+    
