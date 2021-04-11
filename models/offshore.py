@@ -198,3 +198,5 @@ class TDoFCompensatedPayload(ComposedSystem):
         }
 
         return self.sym_desc_dict
+
+

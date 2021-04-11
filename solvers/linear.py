@@ -142,29 +142,31 @@ class FirstOrderODE:
         linear_odes=main_matrix*sym.Matrix(self.dvars)
 
 
-        if isinstance(self.ivar,Function):
-            regular_vars=linear_odes.atoms(Function) -{self.ivar}
-        else:
-            regular_vars=linear_odes.atoms(Function)
 
-        display(regular_vars)  
+
+       
 
         const_odes_list=[]
         regular_odes_list=[]
     
         for  no,ode  in enumerate(linear_odes): 
             if ode==0:
-                const_odes_list+=[no]
+                const_odes_list+=[ode]
             else:
-                regular_odes_list+=[no]
-            
+                regular_odes_list+=[ode]
+
+        if isinstance(self.ivar,Function):
+            regular_vars=Matrix(regular_odes_list).atoms(Function) -{self.ivar}
+        else:
+            regular_vars=Matrix(regular_odes_list).atoms(Function)
+
         #display( row  if row  in Matrix(regular_odes_list).rows  ) 
         display( Matrix(regular_odes_list) )    
-        regular_main_matrix= Matrix(linear_odes).jacobian( list(regular_vars) )
+        regular_main_matrix= Matrix(regular_odes_list).jacobian( list(regular_vars) )
         #singular_odes=[no  for no in  const_odes_list]
         display(regular_main_matrix)
     
-        return (regular_main_matrix).diagonalize(),const_odes_list
+        return (regular_main_matrix).diagonalize(),list(linear_odes.atoms(Function) - regular_vars  )
 
 
 
@@ -246,11 +248,11 @@ class FirstOrderODE:
             C_list[i]*modes[:,i]*exp(eigv*self.ivar)
              
             for i, eigv in enumerate([eigv for eigv in eigs if not eigv==0])
-        ]#+([integrate(eqn_const,self.ivar) for eqn_const in const_part])
+        ] 
         print('sol')
         display(solution)
         print('sol')
-        return solution #sum(solution, Matrix([0] * len(Y_mat)))
+        return  Matrix(const_part)+sum(solution, Matrix([0] * len(solution[0])))
 
     def steady_solution(self, initial_conditions=None):
 
