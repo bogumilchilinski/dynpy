@@ -155,16 +155,21 @@ class SDoFBeamBridge(ComposedSystem):
                  k_beam=Symbol('k_beam', positive=True),
                  ivar=Symbol('t'),
                  g=Symbol('g', positive=True),
+                 Omega=Symbol('Omega', positive=True),
+                 F_0=Symbol('F_0', positive=True),
                  z=dynamicsymbols('z')):
 
         self.m = m
         self.k_beam = k_beam
         self.g=g
+        self.Omega=Omega
+        self.F_0=F_0
         
         self.mass = MaterialPoint(m, z, qs=[z])
         self.spring = Spring(k_beam, z, qs=[z])
         self.gravity_force= GravitationalForce(self.m,self.g,z)
-        system = self.mass + self.spring+self.gravity_force
+        self.force = Force(-F_0*sin(Omega*ivar), pos1=z)
+        system = self.mass + self.spring+self.gravity_force+self.force
 
         super().__init__(system)
 
