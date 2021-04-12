@@ -211,7 +211,7 @@ class OmegaMCA(MechanicalSystemAnswer):
                  other_systems,
                  answer_generator=lambda obj: [
                      (eig_val) for eig_val in HarmonicOscillator(
-                         obj.linearized()).natural_frequencies().doit().expand() if eig_val != 0
+                         obj.linearized()).natural_frequencies().doit().expand().doit() if eig_val != 0
                  ],
                  **kwargs):
 
@@ -281,7 +281,7 @@ class SecondModeMCA(MechanicalSystemAnswer):
                          **kwargs)
 
 
-class SolutionMCA(MechanicalSystemAnswer):
+class GeneralSolutionMCA(MechanicalSystemAnswer):
     def __init__(
             self,
             correct_system,
@@ -289,6 +289,27 @@ class SolutionMCA(MechanicalSystemAnswer):
             answer_generator=lambda obj: Eq(Symbol('X'),
                                             HarmonicOscillator(obj.linearized(
                                             )).general_solution().n(3),
+                                            evaluate=False),
+            **kwargs):
+
+        self.title = 'Wyznacz rozwiązanie ogólne dla rozważanego układu:'
+        self.title = 'Determine a general solution of ODEs for the investigated system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+        
+class SDoFGeneralSolutionMCA(MechanicalSystemAnswer):
+    def __init__(
+            self,
+            correct_system,
+            other_systems,
+            answer_generator=lambda obj: Eq(obj.q[0],
+                                            HarmonicOscillator(obj.linearized(
+                                            )).general_solution().n(3)[0],
                                             evaluate=False),
             **kwargs):
 
@@ -321,6 +342,25 @@ class SteadySolutionMCA(MechanicalSystemAnswer):
                          title=self.title,
                          **kwargs)
 
+class SDoFSteadySolutionMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(
+                     obj.q[0],
+                     HarmonicOscillator(obj.linearized()).steady_solution().n(3)[0],
+                     evaluate=False),
+                 **kwargs):
+
+        self.title = 'Wyznacz rozwiązanie szczególne dla rozważanego układu:'
+        self.title = 'Determine a particular solution of ODEs for the system under investigation:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+        
 
 class InertiaMatrixMCA(MechanicalSystemAnswer):
     def __init__(

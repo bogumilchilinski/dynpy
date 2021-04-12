@@ -425,32 +425,51 @@ class QuizOn(sys.ComposedSystem):
         super().__init__(*args,**kwargs)
         
 
-    def generate_dict(self,param_range={}):
+    def generate_dict(self,param_range=None):
         sys_par=self.system_parameters()
         self.param_range=param_range
         sym_list=[]
+        
+        if self.param_range==None:
 
-        for caseno in [0,1,2,3,4]:
-            sym_dict={}
-            temp_dict={}
-            for num,sym in enumerate(sys_par):
-                split_name_default=str(sys_par[num]).split('_',1)
-                
-                sym_dict[sym]=Symbol(str(rand.randrange(1,20,1))+split_name_default[0]+'_0')
+            for caseno in [0,1,2,3,4]:
+                sym_dict={}
+                temp_dict={}
+                for num,sym in enumerate(sys_par):
+                    split_name_default=str(sys_par[num]).split('_',1)
 
-            for key,val in param_range.items(): 
-                if isinstance(val,list)==True:
-                    for elem in val:
-                        if isinstance(elem,Expr):
-                            sym_dict[key]=rand.choice(val)
+                    sym_dict[sym]=Symbol(str(rand.randrange(1,20,1))+split_name_default[0]+'_0',positive=True)
+
+#                 for key,val in param_range.items(): 
+#                     if isinstance(val,list)==True:
+#                         for elem in val:
+#                             if isinstance(elem,Expr):
+#                                 sym_dict[key]=rand.choice(val)
+#                             else:
+#                                 split_name_dict=str(key).split('_',1)
+#                                 sym_dict[key]=Symbol(str(rand.choice(self.param_range[key])))
+#                     else:
+#                         split_name_dict=str(key).split('_',1)
+#                         sym_dict[key]=Symbol(str(rand.randrange(val[0],val[1],val[2]))+split_name_dict[0]+'_0')
+
+                sym_list.append(sym_dict)   
+        else: 
+            for caseno in [0,1,2,3,4]:
+                sym_dict={}
+                temp_dict={}
+                for key,val in param_range.items(): 
+                        if isinstance(val,list)==True:
+                            for elem in val:
+                                if isinstance(elem,Expr):
+                                    sym_dict[key]=rand.choice(val)
+                                else:
+                                    split_name_dict=str(key).split('_',1)
+                                    sym_dict[key]=Symbol(str(rand.choice(self.param_range[key])),positive=True)
                         else:
                             split_name_dict=str(key).split('_',1)
-                            sym_dict[key]=Symbol(str(rand.choice(self.param_range[key])))
-                else:
-                    split_name_dict=str(key).split('_',1)
-                    sym_dict[key]=Symbol(str(rand.randrange(val[0],val[1],val[2]))+split_name_dict[0]+'_0')
+                            sym_dict[key]=Symbol(str(rand.randrange(val[0],val[1],val[2]))+split_name_dict[0]+'_0',positive=True)
 
-            sym_list.append(sym_dict)   
+                sym_list.append(sym_dict)   
             
         return sym_list
 #         for num,sym in enumerate(symbols_list):
