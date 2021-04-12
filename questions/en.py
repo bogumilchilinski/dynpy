@@ -1,6 +1,7 @@
 import sympy as sym
 from sympy import *
 import sympy.physics.mechanics as mech
+from sympy.simplify.fu import TR8
 
 from dynpy import HarmonicOscillator
 
@@ -86,7 +87,23 @@ class SDoFFreeGalerkinGoverningEquationIntegralMCA(MechanicalSystemAnswer):
     def __init__(self,
                  correct_system,
                  other_systems,
-                 answer_generator=lambda obj: Eq(Integral(((HarmonicOscillator(obj.approximated())._eoms[0].subs(obj.q[0],Symbol('a')*sin(Symbol('omega')*t)).doit().expand()))*sin(Symbol('omega')*t),(t,0,Symbol('T'))),0),
+                 answer_generator=lambda obj: Eq(Integral(((HarmonicOscillator(obj.approximated())._eoms[0].subs(obj.q[0],Symbol('b',positive=True)*sin(Symbol('omega')*t)).doit().expand())).ratsimp()*sin(Symbol('omega')*t),(t,0,Symbol('T'))),0),
+                 **kwargs):
+
+#         self.title = 'Nieliniowe przybliżone równanie ruchu opisuje nastęujący wzór:'
+        #self.title = 'Determine equation of motion of the system:'
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=None,
+                         **kwargs)
+
+class SDoFFreeGalerkinGoverningEquationIntegralTR8MCA(MechanicalSystemAnswer):
+    question = 'Determine equation of motion of the system:'
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Integral(((TR8((HarmonicOscillator(obj.approximated())._eoms[0].subs(obj.q[0],Symbol('b',positive=True)*sin(Symbol('omega')*t)).doit().expand()))).ratsimp().doit().expand())*sin(Symbol('omega')*t),(t,0,Symbol('T'))),0),
                  **kwargs):
 
 #         self.title = 'Nieliniowe przybliżone równanie ruchu opisuje nastęujący wzór:'
@@ -538,7 +555,7 @@ class ResonanceCurveMCA(MechanicalSystemAnswer):
     def __init__(self,
                  correct_system,
                  other_systems,
-                 answer_generator=lambda obj: Eq(Symbol('omega')**2,(HarmonicOscillator(obj.linearized()).natural_frequencies()[0]**2+S('3')/4*obj.small_parameter()/obj.inertia_matrix()[0]*Symbol('a')**2).expand()),
+                 answer_generator=lambda obj: Eq(Symbol('omega')**2,(HarmonicOscillator(obj.linearized()).natural_frequencies()[0]**2+S('3')/4*obj.small_parameter()/obj.inertia_matrix()[0]*Symbol('b')**2).expand()),
                  **kwargs):
 
 #         self.title = 'Zależność pomiędzy amplitudą a częstością drgań własnych dla drgań swobodnych rozważanego układu wyraża wzór:'

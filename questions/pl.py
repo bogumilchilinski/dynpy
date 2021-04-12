@@ -16,5 +16,7 @@ class ResonanceCurveMCA(en.ResonanceCurveMCA):
     question = 'Zależność pomiędzy amplitudą a częstością drgań własnych dla drgań swobodnych rozważanego układu wyraża wzór:'
 
 class SDoFFreeGalerkinGoverningEquationIntegralMCA(en.SDoFFreeGalerkinGoverningEquationIntegralMCA):
-    question = 'Całka:'
+    question = 'Wyrażenie przedstawiające szereg pozwalajacy na określenie częstości własnych badanego układu to:'
     
+class SDoFFreeGalerkinGoverningEquationIntegralTR8MCA(en.SDoFFreeGalerkinGoverningEquationIntegralTR8MCA):
+    question = 'Odpowiednie tożsamości trygonometryczne zostały zastosowane w równaniu:'
