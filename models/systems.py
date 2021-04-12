@@ -109,6 +109,74 @@ class SDoFHarmonicOscillator(ComposedSystem):
 
         return self.sym_desc_dict
     
+class SDoFBeamBridge(ComposedSystem):
+    """Ready to use model of bridge represented by the mass supported by elastic beam.
+        Arguments:
+        =========
+            m = Symbol object
+                -Mass embedded on beam.
+
+            k = Symbol object
+                -Bending stiffness of the beam
+
+            g = Symbol object
+                -Gravitational field acceleration
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+        Example
+        =======
+        A mass hanged on the elastic beam with the stiffness k in the gravitational field
+
+        >>> t = symbols('t')
+        >>> m, k = symbols('m, k')
+        >>> qs = dynamicsymbols('z') # Generalized Coordinates
+        >>> mass = SDoFHarmonicOscillator(m,k, qs=[z],) # Initialization of LagrangesDynamicSystem instance
+
+        -We define the symbols and dynamicsymbols
+        -Kinetic energy T and potential energy v are evaluated to calculate the lagrangian L
+        -Reference frame was created with point P defining the position and the velocity determined on the z axis
+        -external forces assigned
+        -Next we determine the instance of the system using class LagrangeDynamicSystem
+        -We call out the instance of the class
+        -If necessary assign values for the default arguments
+        
+        
+    """
+    scheme_name = 'beam_bridge.PNG'
+    real_name = 'beam_bridge_real.PNG'
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 k_beam=Symbol('k_beam', positive=True),
+                 ivar=Symbol('t'),
+                 g=Symbol('g', positive=True),
+                 z=dynamicsymbols('z')):
+
+        self.m = m
+        self.k_beam = k_beam
+        self.g=g
+        
+        self.mass = MaterialPoint(m, z, qs=[z])
+        self.spring = Spring(k_beam, z, qs=[z])
+        self.gravity_force= GravitationalForce(self.m,self.g,z)
+        system = self.mass + self.spring+self.gravity_force
+
+        super().__init__(system)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'mass of system on the spring',
+            self.k_beam: r'Beam stiffness',
+            self.g:r'gravitational field acceleration'
+        }
+
+        return self.sym_desc_dict
+    
 
     
 #Nie ruszać ;)
