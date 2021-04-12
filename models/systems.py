@@ -163,7 +163,7 @@ class SDoFBeamBridge(ComposedSystem):
         
         self.mass = MaterialPoint(m, z, qs=[z])
         self.spring = Spring(k_beam, z, qs=[z])
-        self.gravity_force= GravitationalForce(self.m,self.g,z)
+        self.gravity_force= GravitationalForce(self.m,-self.g,z)
         system = self.mass + self.spring+self.gravity_force
 
         super().__init__(system)
