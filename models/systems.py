@@ -989,12 +989,12 @@ class MDoFTMD(ComposedSystem):
     """
     def __init__(self,
                  m=Symbol('m', positive=True),
-                 me=Symbol('me', positive=True),
+                 me=Symbol('m_e', positive=True),
                  k=Symbol('k', positive=True),
-                 ke=Symbol('ke', positive=True),
+                 ke=Symbol('k_e', positive=True),
                  F=Symbol('F', positive=True),
-                 xe=dynamicsymbols('xe'),
-                 xb=dynamicsymbols('xb'),
+                 xe=dynamicsymbols('x_e'),
+                 xb=dynamicsymbols('x_b'),
                  angle=dynamicsymbols('Omega'),
                  ivar=Symbol('t', positive=True),
                  system=None):
