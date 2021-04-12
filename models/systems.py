@@ -76,8 +76,12 @@ class SDoFHarmonicOscillator(ComposedSystem):
         -We define the symbols and dynamicsymbols
         -Kinetic energy T and potential energy v are evaluated to calculate the lagrangian L
         -Reference frame was created with point P defining the position and the velocity determined on the z axis
-        -external forces assigned 
-        -finally we determine the instance of the system using class LagrangeDynamicSystem
+        -external forces assigned
+        -Next we determine the instance of the system using class LagrangeDynamicSystem
+        -We call out the instance of the class
+        -If necessary assign values for the default arguments
+        
+        
     """
     scheme_name = 'engine.png'
     real_name = 'engine_real.PNG'
@@ -86,17 +90,27 @@ class SDoFHarmonicOscillator(ComposedSystem):
                  m=Symbol('m', positive=True),
                  k=Symbol('k', positive=True),
                  ivar=Symbol('t'),
-                 qs=dynamicsymbols('z')):
+                 z=dynamicsymbols('z')):
 
         self.m = m
         self.k = k
-
-        self.mass = MaterialPoint(m, pos1=qs)
-        self.spring = Spring(k, pos1=qs)
+        
+        self.mass = MaterialPoint(m, z, qs=[z])
+        self.spring = Spring(k, z, qs=[z])
         system = self.mass + self.spring
 
         super().__init__(system)
-        
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'mass of system on the spring',
+            self.k: r'Spring coefficient ',
+        }
+
+        return self.sym_desc_dict
+    
+
+    
 #Nie ruszać ;)
 # class SDoFDampedHarmonicOscillator(ComposedSystem):
 #     """Ready to use sample Single Degree of Freedom System with damped mass on spring
@@ -245,7 +259,21 @@ class DDoFSimplifyVehicleSuspension(ComposedSystem):
 
         super().__init__(system)
 
-
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'mass of system on the spring',
+            self.I: r'Moment of Inertia',
+            self.l_rod: r'Length of the rod',
+            self.l_l: r'offset of left spring',
+            self.l_r: r'offset of right spring',
+            self.k_1: r'Right spring stiffness coefficient',
+            self.k_2: r'Left spring stiffness coefficient',
+            self.F_engine: r'Force',
+        }
+        return self.sym_desc_dict
+    
+    
+    
 class DDoFVehicleSuspension(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents kinematically excited beam with two springs.
         Arguments:
@@ -327,7 +355,22 @@ class DDoFVehicleSuspension(ComposedSystem):
 
         super().__init__(system)
 
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'mass of system on the spring',
+            self.I: r'Moment of Inertia',
+            self.l_rod: r'Length of the rod',
+            self.l_l: r'offset of left spring',
+            self.l_r: r'offset of right spring',
+            self.k_1: r'Right spring stiffness coefficient',
+            self.k_2: r'Left spring stiffness coefficient',
+            self.F_engine: r'Force',
+        }
+        return self.sym_desc_dict
 
+    
+    
+    
 class DDoFShaft(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
     =========
@@ -388,7 +431,17 @@ class DDoFShaft(ComposedSystem):
 
         super().__init__(system)
 
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.I: r'Moment of Inertia',
+            self.k_1: r'',
+            self.k_2: r'',
+        }
+        return self.sym_desc_dict
 
+    
+    
+    
 class Pendulum(ComposedSystem):
     """
     Model of a sDoF mathematical Pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
@@ -438,12 +491,23 @@ class Pendulum(ComposedSystem):
             qs = [angle]
         else:
             qs = qs
-
+            
+        self.m = m
+        self.g = g
+        self.l = l
+        
         Lagrangian = S.Half * m * l**2 * diff(
             angle, ivar)**2 - m * g * l * (1 - cos(angle))
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass of pendulum',
+            self.g: r'Gravity constant',
+            self.l: r'Pendulum length',
+        }
+        return self.sym_desc_dict
 
 # wymienić obrazek na taki, gdzie nie ma wymuszenia i symbole na obrazku będą zgodne z tymi w klasie
 
@@ -493,11 +557,22 @@ class SDoFFreePendulum(ComposedSystem):
                  qs=None,
                  ivar=Symbol('t')):
 
+        self.m = m
+        self.g = g
+        self.l = l
+        
         self.pendulum = Pendulum(m, g, l, angle=angle)
         system = self.pendulum
 
         super().__init__(system)
-
+        
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass of pendulum',
+            self.g: r'Gravity constant',
+            self.l: r'Pendulum length',
+        }
+        return self.sym_desc_dict
 
 class SDoFExcitedPendulum(ComposedSystem):
     """
@@ -566,7 +641,18 @@ class SDoFExcitedPendulum(ComposedSystem):
         system = self.pendulum + self.force
 
         super().__init__(system)
-
+                         
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass of pendulum',
+            self.g: r'Gravity constant',
+            self.l: r'Pendulum length',
+            self.F: r'Force',
+        }
+        return self.sym_desc_dict
+    
+    
+    
 
 class SDoFDampedPendulum(ComposedSystem):
     """
@@ -635,7 +721,16 @@ class SDoFDampedPendulum(ComposedSystem):
 
         super().__init__(system)
 
-
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass of pendulum',
+            self.g: r'Gravity constant',
+            self.l: r'Pendulum length',
+            self.c: r'Damping coefficient',
+        }
+        return self.sym_desc_dict
+                         
+                         
 class DDoFCoupledPendulum(ComposedSystem):
     """
     Model of a DDoF Coupled Pendulum.
@@ -696,7 +791,17 @@ class DDoFCoupledPendulum(ComposedSystem):
         system = self.pendulum_1 + self.pendulum_2 + self.spring  
         super().__init__(system)
 
-
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass of pendulum',
+            self.g: r'Gravity constant',
+            self.l: r'Pendulum length',
+            self.k: r'Stifness coefficient',
+        }
+        return self.sym_desc_dict
+                         
+                         
+                         
 # class SDoFEngine(ComposedSystem):
 #     scheme_name = 'engine.png'
 #     real_name = 'engine_real.PNG'
@@ -784,7 +889,17 @@ class SDoFEngine(ComposedSystem):
         system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2
         super().__init__(system)
 
-
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.M: r'Mass of engine block',
+            self.k_m: r'Spring stiffness coefficient',
+            self.m_e: r'',    
+            self.e: r'',
+        }
+        return self.sym_desc_dict
+                         
+                         
+                         
 class EngineWithTMD(ComposedSystem):
     """
     Model of a DDoF Coupled Pendulum.
@@ -873,7 +988,17 @@ class EngineWithTMD(ComposedSystem):
 
         return super().equilibrium_equation(static_disp_dict=static_disp_dict)
 
-
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.M: r'Mass of engine block',
+            self.k_m: r'Spring stiffness coefficient',
+            self.m_e: r'',    
+            self.e: r'',
+        }
+        return self.sym_desc_dict
+                         
+                         
+                         
 class SDoFNonlinearEngine(ComposedSystem):
     scheme_name = 'engine.png'
     real_name = 'engine_real.PNG'
@@ -929,6 +1054,7 @@ class SDoFNonlinearEngine(ComposedSystem):
         self.k_m = k_m
         self.m_e = m_e
         self.beta = beta
+        self.e = e
         self.l0 = l0
         self.z= z
         self.phi = phi
@@ -949,7 +1075,18 @@ class SDoFNonlinearEngine(ComposedSystem):
         system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2
         super().__init__(system)
 
-
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.M: r'Mass of engine block',
+            self.k_m: r'Spring stiffness coefficient',
+            self.m_e: r'',    
+            self.e: r'',
+            self.beta: r'',
+        }
+        return self.sym_desc_dict
+                         
+                         
+                         
 class MDoFTMD(ComposedSystem):
     scheme_name = 'mdof_tmd.png'
     real_name = 'mdof_tmd_real.png'
@@ -1014,7 +1151,18 @@ class MDoFTMD(ComposedSystem):
         system = self.Spring_1 + self.Spring_2 + self.MaterialPoint_1 + self.MaterialPoint_2 + self.Force
         super().__init__(system)
 
-
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass of main object',
+            self.me: r'Mass of the TMD',    
+            self.k: r'Stiffness coefficient',
+            self.ke: r'Stiffness coefficient',
+            self.F: r'Force',
+        }
+        return self.sym_desc_dict
+                         
+                         
+                         
 class MDoFWinch(ComposedSystem):
     """
     Model of a Double Degree of Freedom Involute Pendulum (Winch)
@@ -1101,7 +1249,19 @@ class MDoFWinch(ComposedSystem):
 
         super().__init__(system)
 
-
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.I: r'Moment of Inertia of the winch',
+            self.k: r'Spring stiffness',
+            self.r: r'Winch radius',
+            self.l: r'Winch length',
+            self.m: r'Mass',
+            self.g: 'Gravity constant',
+        }
+        return self.sym_desc_dict
+                         
+                         
+                         
 class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
     scheme_name = 'troleywithnonlinspring.PNG'
     real_name = 'trolleywithnonlinearspring_real.png'
@@ -1162,14 +1322,22 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
         self.l_0 = l_0
         self.F = F
 
-        self.MaterialPoint = MaterialPoint(m, x)
+        self.MaterialPoint = MaterialPoint(m, x, qs=[x])
         self.Spring = Spring(k, pos1=(sqrt(x**2 + l**2) - l_0), qs=[x])
         self.Force = Force(-F * cos(Omega * ivar), pos1=x, qs=[x])
 
         system = self.MaterialPoint + self.Spring + self.Force
         super().__init__(system)
 
-
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass',
+            self.k: 'Spring Stiffness',
+            self.l: r'length',
+            self.l_0: r'length',
+            self.F: r'Force',
+        }
+        return self.sym_desc_dict
 
 
 # class MDoFShaft(ComposedSystem):

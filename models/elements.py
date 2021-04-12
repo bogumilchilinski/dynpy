@@ -113,8 +113,8 @@ class GravitationalForce(Elements):
     """
     Creates a singular model, after inputing correct values of gravity field - g, mass of - m as well as additionaly the general coordiante
     """
-    scheme_name = 'pendulum.png'
-    real_name = 'pendulum.png'
+    scheme_name = ''
+    real_name = ''
     def __init__(self, m, g, pos1=0, pos_c=0, qs=None, ivar=Symbol('t')):
         
         if pos1 == 0:
@@ -233,8 +233,8 @@ class PID(Elements):
 
 Creates a model of a PID controller (proportional , integral , derivative) which initates a smoother control over delivered system oscillatory system in form of Lagrange method. Taking into account that a PID regulator is ment for a SISO system the model is built for sDoF system, hence in case of building a mDoF the process will require using two PIDs.
     """
-    scheme_name = 'pendulum.png'
-    real_name = 'pendulum.png'
+    scheme_name = ''
+    real_name = ''
     def __init__(self, kp, ki, kd, pos1, qs=None, ivar=Symbol('t'), frame=base_frame):
 
         if qs == None:
@@ -259,8 +259,8 @@ class Excitation(Elements):
     """
     Model of a harmonic extorsion applied onto the elemnt:
     """
-    scheme_name = 'pendulum.png'
-    real_name = 'pendulum.png'
+    scheme_name = ''
+    real_name = ''
     def __init__(self, f, pos_rot, ivar=Symbol('t'), frame=base_frame):
         
         qs = [pos_rot]
@@ -282,8 +282,8 @@ class Force(LagrangesDynamicSystem):
     """
     Creates enforcement.
     """
-    scheme_name = 'pendulum.png'
-    real_name = 'pendulum.png'
+    scheme_name = ''
+    real_name = ''
     def __init__(self,
                  force,
                  pos1 = None,
