@@ -671,3 +671,48 @@ class EquilibriumEquationsMCA(MechanicalSystemAnswer):
                          title=self.title,
                          **kwargs)
 
+class SDoFEquilibriumEquationsMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(obj.equilibrium_equation().doit()[0], 0 ),
+                 **kwargs):
+
+        self.title = 'What are equilibrium equations for the considered system:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+class InputAmplitudeMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Symbol('F_0'), Symbol('z_0')/(obj.stiffness_matrix()[0]/(obj.stiffness_matrix()[0]-Omega**2*obj.inertia_matrix()[0]))   ,
+                                                 evaluate=False),
+                 **kwargs):
+        self.title = 'Jaka musi być amplituda wejścia, aby układ drgał z amplitudą \(z_{0} \)?'
+        self.title = 'Determine the value of an input amplitude ensuring the system vibrations of the \(\z_{0}\) amplitude:'
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+class SpringForceMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Symbol('F'), (
+                     (obj.stiffness_matrix()[0]) * obj.steady_solution().n(3)[0]),
+                                                 evaluate=False),
+                 **kwargs):
+        self.title = 'Podaj wartość siły dynamicznej w jednej ze sprężyn:'
+        self.title = 'Determine the value of a dynamic force occurring in the spring:'
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
