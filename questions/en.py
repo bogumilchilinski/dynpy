@@ -154,7 +154,7 @@ class LagrangianMCA(MechanicalSystemAnswer):
             self,
             correct_system,
             other_systems,
-            answer_generator=lambda obj: Eq(Symbol('L'), obj.lagrangian()),
+            answer_generator=lambda obj: Eq(Symbol('L'), obj.lagrangian().doit()),
             **kwargs):
 
 #         self.title = 'Lagrangian dla rozważanego układu można wyrazić następującym równaniem:'
