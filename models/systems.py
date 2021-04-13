@@ -1040,8 +1040,8 @@ class SDoFDampedEngine(ComposedSystem):
         self.sym_desc_dict = {
             self.M: r'Mass of engine block',
             self.k_m: r'Spring stiffness coefficient',
-            self.m_e: r'',    
-            self.e: r'',
+            self.m_e: r'unbalanced rotating mass',    
+            self.e: r'radius of rotation',
         }
         return self.sym_desc_dict
                          
