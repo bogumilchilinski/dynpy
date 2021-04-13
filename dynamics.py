@@ -943,14 +943,14 @@ class HarmonicOscillator(LinearDynamicSystem):
         n_sin, d_sin = fraction(comp_sin)
         n_cos, d_cos = fraction(comp_cos)
 
-        print(d_sin)
-        print(d_cos)
+        # print(d_sin)
+        # print(d_cos)
         if d_cos==S.One:
             d=d_sin
         else:
             d=d_cos
 
-        print(d)
+        # print(d)
 
         if len(self.q) == 1:  # if single degree of freedom
             frf_expr = ((sqrt((n_sin**2 + n_cos**2).simplify())) /
