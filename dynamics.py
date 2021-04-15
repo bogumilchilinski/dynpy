@@ -217,6 +217,17 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self._label = label
 
         #LM=me.LagrangesMethod(Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs)
+    
+    def symbols_description(self):
+        self.sym_desc_dict = {
+
+            tuple(self.q): r'generalized coordinates of the system,',
+            self.ivar: r'independent variable (time),',
+        }
+
+        return self.sym_desc_dict
+    
+    
     @property
     def Y(self):
         return Matrix(list(self.q) + list(self.q.diff(self.ivar)))

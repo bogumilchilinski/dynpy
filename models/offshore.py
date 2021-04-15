@@ -183,7 +183,10 @@ class TDoFCompensatedPayload(ComposedSystem):
 #         return self.sym_desc_dict
 
     def symbols_description(self):
-        self.sym_desc_dict = {
+
+        parent_symbols_dict=super().symbols_description()
+
+        self.sym_desc_dict = parent_symbols_dict | {
             self.m_p: r'mass of payload,',
             self.k_w: r'wire stiffness,',
             self.l_0: r'length of the lifting cable,',
@@ -199,8 +202,7 @@ class TDoFCompensatedPayload(ComposedSystem):
             r'length of the attached compensating element,',
             self.g: r'acceleration of gravity,',
             self.h_eq: r'equilibrium point of payload,',
-            self.h_ceq: r'equilibrium point of compensator,',
-            self.ivar: r'independent time variable,',
+            self.h_ceq: r'equilibrium point of compensator,'
         }
 
         return self.sym_desc_dict
