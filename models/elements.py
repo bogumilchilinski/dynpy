@@ -9,7 +9,7 @@ import IPython as IP
 
 base_frame=ReferenceFrame('N')
 
-class Elements(LagrangesDynamicSystem):
+class Element(LagrangesDynamicSystem):
     """Base class for all elements
     """
     @classmethod
@@ -28,7 +28,7 @@ class Elements(LagrangesDynamicSystem):
 
         return IP.display.Image(base64.b64decode(encoded_string))
 
-class MaterialPoint(Elements):
+class MaterialPoint(Element):
     """
     Model of a Material point with changing point of mass:
     """
@@ -49,7 +49,7 @@ class MaterialPoint(Elements):
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
 
-class Spring(Elements):
+class Spring(Element):
     """
     Model of a Spring:
     """
@@ -75,7 +75,7 @@ class Spring(Elements):
         super().__init__(Lagrangian=L, qs=qs, ivar=ivar)
 
         
-class NonlinSpring__RefFrme_Pt(Elements):
+class NonlinSpring__RefFrme_Pt(Element):
     """
     Model of a Nonlinear Spring with whole ReferenceFrame, Point packed in the class  -- Please Advise! ... qs = [ ] must be supplied in the calling sequence:
     """
@@ -106,7 +106,7 @@ class NonlinSpring__RefFrme_Pt(Elements):
         super().__init__(Lagrangian=L, qs=qs, ivar=ivar, frame=frame)
 
         
-class GravitationalForce(Elements):
+class GravitationalForce(Element):
     """
     Model of a changing centroid for potential energy:
     """
@@ -137,7 +137,7 @@ class GravitationalForce(Elements):
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
 
-class Disk(Elements):
+class Disk(Element):
     """
     Model of a Disk:
     Creates a singular model, after inputing correct values of moment of inertia - I and rotational general coordinate, which analytically displays the dynamics of a rotating wheel.
@@ -167,7 +167,7 @@ class Disk(Elements):
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
         
-class RigidBody2D(Elements):
+class RigidBody2D(Element):
     """
     Model of a 2DoF Rigid body:
     """
@@ -198,7 +198,7 @@ class RigidBody2D(Elements):
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
   
         
-class Damper(Elements):
+class Damper(Element):
     """
     Model of a Damper:
 
@@ -227,7 +227,7 @@ class Damper(Elements):
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
 
         
-class PID(Elements):
+class PID(Element):
     """
     Model of a PID controller:
 
@@ -255,7 +255,7 @@ Creates a model of a PID controller (proportional , integral , derivative) which
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
 
         
-class Excitation(Elements):
+class Excitation(Element):
     """
     Model of a harmonic extorsion applied onto the elemnt:
     """
