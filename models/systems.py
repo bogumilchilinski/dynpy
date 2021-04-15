@@ -185,65 +185,27 @@ class SDoFBeamBridge(ComposedSystem):
 
     
 #Nie ruszać ;)
-# class SDoFDampedHarmonicOscillator(ComposedSystem):
-#     """Ready to use sample Single Degree of Freedom System with damped mass on spring
-#         Arguments:
-#         =========
-#             m = Mass
-#                 -Mass of system on spring
+class SDoFDampedHarmonicOscillator(ComposedSystem):
 
-#             k = Spring coefficient
-#                 -Spring carrying the system
+    scheme_name = '???'
+    real_name = 'engine_real.PNG'
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 k=Symbol('k', positive=True),
+                 c=Symbol('c',positive=True),
+                 ivar=Symbol('t'),
+                 z=dynamicsymbols('z')):
 
-#             c = Damper coefficient
-#                 -Characterizes the Rayleigh damping of the system
+        self.m = m
+        self.k = k
+        self.c = c
+        self.mass = MaterialPoint(m, z, qs=[z])
+        self.spring = Spring(k, z, qs=[z])
+        self.damper=Damper(c,z)
+        system = self.mass + self.spring + self.damper
 
-#             ivar = symbol object
-#                 -Independant time variable
+        super().__init__(system)
 
-#             qs = dynamicsymbol object
-#                 -Generalized coordinates
-
-#         Example
-#         =======
-#         A mass oscillating up and down while being held up by a spring with a spring constant k and damped by a damper with a damping coefficient c
-
-#         >>> t = symbols('t')
-#         >>> m, k, c = symbols('m, k c')
-#         >>> qs = dynamicsymbols('z') # Generalized Coordinates 
-#         >>> T = S.Half*m*z.diff(t)**2 # Kinetic Energy 
-#         >>> V = S.Half*k*z**2 # Potential Energy 
-#         >>> D = S.Half*c*z.diff(t)**2
-#         >>> L = T - V # Lagrangian Calculation
-#         >>> N = ReferenceFrame('N') # Defining of reference frame for coordinate system
-#         >>> P = Point('P') # Defining point in space
-#         >>> P.set_vel(N, z.diff(t)*N.y) # Set velocity of point P in reference system N on axis z
-#         >>> Forcelist = [(P,f*sin(omega*t)*N.y)] # external forces on the system 
-#         >>> mass = dyn.HarmonicOscillator(dyn.LagrangesDynamicSystem(L, qs=[z], frame=N)) # Initialization of LagrangesDynamicSystem instance
-
-#         -We define the symbols and dynamicsymbols
-#         -Kinetic energy T and potential energy v are evaluated to calculate the lagrangian L
-#         -Reference frame was created with point P defining the position and the velocity determined on the z axis
-#         -external forces assigned 
-#         -finally we determine the instance of the system using class LagrangeDynamicSystem
-#     """
-#     scheme_name = 'engine.png'
-#     real_name = 'engine_real.PNG'
-
-#     def __init__(self,
-#                  m=Symbol('m', positive=True),
-#                  k=Symbol('k', positive=True),
-#                  ivar=Symbol('t'),
-#                  qs=dynamicsymbols('z')):
-
-#         self.m = m
-#         self.k = k
-
-#         self.mass = MaterialPoint(m, pos1=qs)
-#         self.spring = Spring(k, pos1=qs)
-#         system = self.mass + self.spring
-
-#         super().__init__(system)
 
 
 
