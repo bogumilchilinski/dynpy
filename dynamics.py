@@ -217,6 +217,17 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self._label = label
 
         #LM=me.LagrangesMethod(Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs)
+    
+    def symbols_description(self):
+        self.sym_desc_dict = {
+
+            tuple(self.q): r'generalized coordinates of the system,',
+            self.ivar: r'independent variable (time),',
+        }
+
+        return self.sym_desc_dict
+    
+    
     @property
     def Y(self):
         return Matrix(list(self.q) + list(self.q.diff(self.ivar)))
@@ -933,17 +944,24 @@ class HarmonicOscillator(LinearDynamicSystem):
 
         self.Omega = excitation_freq
 
-        general_solution = self.steady_solution()[0]
+        solution = self.steady_solution()[0].expand()
 
-        comp_sin = general_solution.coeff(sin(excitation_freq * self.ivar))
-        comp_cos = general_solution.coeff(cos(excitation_freq * self.ivar))
+        # print(solution)
 
-        n_sin, d = fraction(comp_sin)
-        n_cos, d = fraction(comp_cos)
+        comp_sin = solution.coeff(sin(excitation_freq * self.ivar))
+        comp_cos = solution.coeff(cos(excitation_freq * self.ivar))
 
-#         print(n_sin)
-#         print(n_cos)
-#         print(d)
+        n_sin, d_sin = fraction(comp_sin)
+        n_cos, d_cos = fraction(comp_cos)
+
+        # print(d_sin)
+        # print(d_cos)
+        if d_cos==S.One:
+            d=d_sin
+        else:
+            d=d_cos
+
+        # print(d)
 
         if len(self.q) == 1:  # if single degree of freedom
             frf_expr = ((sqrt((n_sin**2 + n_cos**2).simplify())) /

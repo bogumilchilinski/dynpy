@@ -971,7 +971,81 @@ class SDoFEngine(ComposedSystem):
         }
         return self.sym_desc_dict
                          
+class SDoFDampedEngine(ComposedSystem):
+    scheme_name = 'engine_with_damper.png'
+    real_name = 'engine_real.PNG'
+    """
+    Model of a SDoF engine.
+
+        Arguments:
+        =========
+            M = Mass
+                -Mass of system (engine block) on spring
+
+            me = Mass
+                -Mass of particle
+
+            e = distance
+                -motion radius of a particle
+
+            k_m = spring coefficient
+                -value of spring coefficient that tuned mass damper is mounted
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+        Example
+        =======
+        A SDoF engine oscillating up and down while being held up by a two springs with the given stiffness
+
+        >>> t = symbols('t')
+        >>> M, me, e, km = symbols('M, m_e, e, k_m')
+        >>  phi = dynamicsymbosl('phi')
+        >>> qs = dynamicsymbols('z') #Generalized coordinate
+        >>> SDoFEngine()
+
+    """
+    def __init__(self,
+                 M=Symbol('M', positive=True),
+                 k_m=Symbol('k_m', positive=True),
+                 c_m=Symbol('c_m', positive=True),
+                 m_e=Symbol('m_e', positive=True),
+                 e=Symbol('e', positive=True),
+                 z=dynamicsymbols('z'),
+                 phi=dynamicsymbols('phi'),
+                 ivar=Symbol('t', positive=True),
+                 system=None):
+
+        self.M = M
+        self.k_m = k_m
+        self.c_m = c_m
+        self.m_e = m_e
+        self.e = e
+        self.phi=phi
+
+        self.MaterialPoint_1 = MaterialPoint(M, pos1=z, qs=[z])
+        self.MaterialPoint_2 = MaterialPoint(m_e,
+                                             pos1=z + e * cos(phi),
+                                             qs=[z])
+        self.Spring = Spring(2 * k_m, pos1=z, qs=[z])
+        self.damper=Damper(2* c_m,pos1=z)
+
+        system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2 + self.damper
+        super().__init__(system)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.M: r'Mass of engine block',
+            self.k_m: r'Spring stiffness coefficient',
+            self.m_e: r'unbalanced rotating mass',    
+            self.e: r'radius of rotation',
+        }
+        return self.sym_desc_dict
                          
+                                 
                          
 class EngineWithTMD(ComposedSystem):
     """
