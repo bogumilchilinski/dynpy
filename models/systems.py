@@ -1332,8 +1332,40 @@ class MDoFWinch(ComposedSystem):
             self.g: 'Gravity constant',
         }
         return self.sym_desc_dict
+    
+    
                          
-                         
+class Inverted_Pendulum(HarmonicOscillator):
+    def __init__(self,
+                  M = symbols('M' , positive=True),
+                  m = symbols('m' , positive=True),
+                  I = symbols('I' , positive=True),
+                  g = symbols('g' , positive=True),
+                  b = symbols('b' , positive=True),
+                  l = symbols('l' , positive=True),
+                  F = symbols('F' , positive=True),
+                  var = dynamicsymbols('x, phi'),
+                  ivar=Symbol('t'),
+                  system = None):
+
+        x,phi = var
+
+        self.rod = (RigidBody2D(m,I,pos_lin=0, pos_rot=0,
+                                pos_lin_c=(x + l*sin(phi)), pos_rot_c=phi, qs=[x,phi])
+        + MaterialPoint(m,l*cos(phi),qs=[phi])
+        + GravitationalForce(m,g,pos1=0,pos_c=l*cos(phi), qs=[phi]))
+
+        self.cart = MaterialPoint(M,x,qs=[x])
+
+        self.force = Force(F,x)
+
+        self.friction = Damper(b,x)
+
+        system = self.rod + self.cart + self.friction + self.force
+
+        super().__init__(system)
+        
+        
                          
 class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
     scheme_name = 'troleywithnonlinspring.PNG'

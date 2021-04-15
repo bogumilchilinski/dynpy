@@ -307,7 +307,7 @@ class Force(LagrangesDynamicSystem):
         else:
             P = Point('P')
             P.set_vel(frame,pos1.diff(ivar)*frame.x)
-            force=force*frame.x
+            force=-force*frame.x
 
         forcelist=[(P,force)]
         
