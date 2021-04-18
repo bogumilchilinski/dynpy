@@ -183,8 +183,7 @@ class SDoFBeamBridge(ComposedSystem):
         return self.sym_desc_dict
     
 
-    
-#Nie ruszać ;)
+
 class SDoFDampedHarmonicOscillator(ComposedSystem):
 
     scheme_name = '???'
@@ -403,8 +402,40 @@ class DDoFVehicleSuspension(ComposedSystem):
         }
         return self.sym_desc_dict
 
-    
-    
+#WORK IN PROGRESS
+class DDoFDampedVehicleSuspension(ComposedSystem):
+
+
+    scheme_name = '???'
+    real_name = 'car_real.jpg'
+
+    def __init__(self,
+                 non_damped_system,
+                 c=Symbol('c', positive=True),
+                 l_cl=Symbol('l_{cl}', positive=True),
+                 l_cr=Symbol('l_{cr}', positive=True),
+                 qs=dynamicsymbols('z, varphi')):
+        z, phi = qs
+        self.c = c
+        self.nds=non_damped_system
+        self.damper_l = Damper(c=c,pos1=z + phi * l_cl,qs=qs)  # left damper
+        self.damper_r = Damper(c=c,pos1=z - phi * l_cr,qs=qs)  # right damper
+        system = self.nds + self.damper_l + self.damper_r
+
+        super().__init__(system)
+
+#     def symbols_description(self):
+#         self.sym_desc_dict = {
+#             self.m: r'mass of system on the spring',
+#             self.I: r'Moment of Inertia',
+#             self.l_rod: r'Length of the rod',
+#             self.l_l: r'offset of left spring',
+#             self.l_r: r'offset of right spring',
+#             self.k_1: r'Right spring stiffness coefficient',
+#             self.k_2: r'Left spring stiffness coefficient',
+#             self.F_engine: r'Force',
+#         }
+#         return self.sym_desc_dict
     
 class DDoFShaft(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
