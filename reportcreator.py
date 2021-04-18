@@ -116,7 +116,7 @@ class ReportModelAnalysis:
         doc.packages.append(Package('float'))
         doc.packages.append(Package('tikz'))
         doc.packages.append(Package('pgfplots'))
-        #doc.packages.append(Package('preamble'))
+        doc.packages.append(Package('preamble'))
         doc.packages.append(Package('polski', options=["MeX"]))
         doc.packages.append(Command('usepgfplotslibrary', arguments='units'))
         #         doc.packages.append(Package('preamble'))
@@ -809,8 +809,8 @@ class DataPlot(Figure):
     _latex_name = 'figure'
 
     def __init__(self,
-                 fig_name,
-                 *,
+                 fig_name = 'Name',
+                 *args,
                  preview=False,
                  position=None,
                  **kwargs):
@@ -832,8 +832,6 @@ class DataPlot(Figure):
 
         plt.savefig(filename,*args,**kwargs)
         self.add_image(filename, width=NoEscape('15cm'))
-
-
 
         if self.preview == True:
             plt.show()

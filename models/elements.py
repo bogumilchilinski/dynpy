@@ -9,6 +9,34 @@ import IPython as IP
 
 base_frame=ReferenceFrame('N')
 
+
+class GeometryOfPoint:
+    def __init__(self, *args, frame=base_frame , ivar=Symbol('t')):
+
+        if isinstance(args[0],Point):
+            self._point=args[0]
+
+        if isinstance(args[0],Number) or isinstance(args[0],Expr):
+            P = Point('P')
+            P.set_pos(P, frame.x*args[0])
+            P.set_vel(frame, frame.x*diff(args[0], ivar))
+            self._point=P
+
+        else:
+            print('Unsupported data type')
+            P = Point('P')
+            P.set_pos(P, frame.x*0)
+            P.set_vel(frame, frame.x*diff(0, ivar))
+            self._point=P
+            
+
+
+    def get_point(self):
+
+        return self._point
+
+
+
 class Element(LagrangesDynamicSystem):
     """Base class for all elements
     """
@@ -19,7 +47,7 @@ class Element(LagrangesDynamicSystem):
             with open(f"{path}", "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read())
             image_file.close()
-            
+
         else:
             path = __file__.replace('elements.py', 'images/') + cls.scheme_name
             with open(f"{path}", "rb") as image_file:
@@ -42,8 +70,7 @@ class MaterialPoint(Element):
             
             self.qs = [pos1]
 
-        Lagrangian = S.Half * m * (diff(pos1,ivar))**2
-                    
+        Lagrangian = S.Half * m * (pos1.diff(ivar))**2
 
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
@@ -61,8 +88,9 @@ class Spring(Element):
     def __init__(self, stiffness, pos1, pos2=0,  qs=None, l0 = 0, ivar=Symbol('t'), frame = base_frame):
         if not qs:
             qs = [pos1]
-        else:
-            qs = qs
+
+        pos1=GeometryOfPoint(pos1)
+        pos2=GeometryOfPoint(pos2)
 
         if isinstance(pos1,Point):
             u = pos1.pos_from(pos2).magnitude()-l0
@@ -218,11 +246,13 @@ class Damper(Element):
         dpos2 = diff(pos2, ivar)
         
         P = Point('P')
-        P.set_vel(frame, (dpos1 - dpos2) * frame.x)
+        P.set_vel(frame, 1 * frame.x)
         
-        D = (((S.Half) * c * (dpos1 - dpos2)**2).diff(dpos1))
+        D = (((S.Half) * c * (dpos1 - dpos2)**2)
         
-        forcelist = [(P, -D*frame.x)]
+        
+             
+        forcelist = [(P, -D.diff(ivar)*frame.x)]
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
 
