@@ -1,4 +1,5 @@
-from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Point, Derivative, Number, Expr)
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Point, Derivative, Expr)
+from numbers import Number
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 
@@ -90,8 +91,7 @@ class Spring(Element):
         if not qs:
             qs = [pos1]
 
-        pos1=GeometryOfPoint(pos1).get_point()
-        pos2=GeometryOfPoint(pos2).get_point()
+
 
         if isinstance(pos1,Point):
             u = pos1.pos_from(pos2).magnitude()-l0
@@ -246,14 +246,22 @@ class Damper(Element):
         dpos1 = diff(pos1, ivar)
         dpos2 = diff(pos2, ivar)
         
-        P = Point('P')
-        P.set_vel(frame, 1 * frame.x)
+        
+        points_dict={}
+        for coord in qs:
+            
+            coord_vel=diff(coord,ivar)
+            
+            P_tmp = Point(f'P_{str(coord)}')
+            P_tmp.set_vel(frame, coord_vel * frame.x)
+            points_dict[coord_vel]=P_tmp
         
         D = ((S.Half) * c * (dpos1 - dpos2)**2)
         
         
              
-        forcelist = [(P, sum(-D.diff(diff(coord,ivar))  for coord in qs)*frame.x)]
+        forcelist = [ (point_dmp,-diff(D,coord_vel)*frame.x)  for coord_vel,point_dmp in points_dict.items()]
+        #print(forcelist)
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
 
