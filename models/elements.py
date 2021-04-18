@@ -1,4 +1,4 @@
-from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Point, Derivative)
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Point, Derivative, Number, Expr)
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 
@@ -8,6 +8,7 @@ import base64
 import IPython as IP
 
 base_frame=ReferenceFrame('N')
+base_origin=Point('O')
 
 
 class GeometryOfPoint:
@@ -18,14 +19,14 @@ class GeometryOfPoint:
 
         if isinstance(args[0],Number) or isinstance(args[0],Expr):
             P = Point('P')
-            P.set_pos(P, frame.x*args[0])
+            P.set_pos(base_origin, frame.x*args[0])
             P.set_vel(frame, frame.x*diff(args[0], ivar))
             self._point=P
 
         else:
             print('Unsupported data type')
             P = Point('P')
-            P.set_pos(P, frame.x*0)
+            P.set_pos(base_origin, frame.x*0)
             P.set_vel(frame, frame.x*diff(0, ivar))
             self._point=P
             
@@ -89,8 +90,8 @@ class Spring(Element):
         if not qs:
             qs = [pos1]
 
-        pos1=GeometryOfPoint(pos1)
-        pos2=GeometryOfPoint(pos2)
+        pos1=GeometryOfPoint(pos1).get_point()
+        pos2=GeometryOfPoint(pos2).get_point()
 
         if isinstance(pos1,Point):
             u = pos1.pos_from(pos2).magnitude()-l0
@@ -248,7 +249,7 @@ class Damper(Element):
         P = Point('P')
         P.set_vel(frame, 1 * frame.x)
         
-        D = (((S.Half) * c * (dpos1 - dpos2)**2)
+        D = ((S.Half) * c * (dpos1 - dpos2)**2)
         
         
              
