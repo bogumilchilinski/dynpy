@@ -252,7 +252,7 @@ class Damper(Element):
         
         
              
-        forcelist = [(P, -D.diff(ivar)*frame.x)]
+        forcelist = [(P, sum(-D.diff(diff(coord,ivar))  for coord in qs)*frame.x)]
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
 
