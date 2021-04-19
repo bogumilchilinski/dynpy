@@ -183,6 +183,51 @@ class SDoFBeamBridge(ComposedSystem):
         return self.sym_desc_dict
     
 
+class BeamBridgeTMD(ComposedSystem):
+
+    scheme_name = 'beam_bridge.PNG'
+    real_name = 'beam_bridge_real.PNG'
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 m_TMD=Symbol('m_TMD', positive=True),
+                 k_beam=Symbol('k_beam', positive=True),
+                 k_TMD=Symbol('k_TMD', positive=True),
+                 ivar=Symbol('t'),
+                 g=Symbol('g', positive=True),
+                 Omega=Symbol('Omega', positive=True),
+                 F_0=Symbol('F_0', positive=True),
+                 z=dynamicsymbols('z'),
+                 z_TMD=dynamicsymbols('z_TMD')):
+
+        self.m = m
+        self.k_beam = k_beam
+        self.g=g
+        self.Omega=Omega
+        self.F_0=F_0
+        self.m_TMD=m_TMD
+        self.k_TMD=k_TMD
+        
+        self.mass = MaterialPoint(m, z, qs=[z])
+        self.spring = Spring(k_beam, z, qs=[z])
+        self.gravity_force= GravitationalForce(self.m,self.g,z)
+        self.gravity_TMD= GravitationalForce(self.m_TMD,self.g,z_TMD)
+        self.force = Force(-F_0*sin(Omega*ivar), pos1=z)
+        self.TMD=MaterialPoint(m_TMD, pos1=z_TMD, qs=[z_TMD])
+        self.spring_TMD = Spring(k_TMD, z,z_TMD, qs=[z,z_TMD])
+        system = self.mass + self.spring+self.gravity_force+self.force+self.TMD+self.spring_TMD+self.gravity_TMD
+
+        super().__init__(system)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'mass of system on the spring',
+            self.k_beam: r'Beam stiffness',
+            self.g:r'gravitational field acceleration'
+        }
+
+        return self.sym_desc_dict
+    
 
 class SDoFDampedHarmonicOscillator(ComposedSystem):
 
@@ -406,20 +451,32 @@ class DDoFVehicleSuspension(ComposedSystem):
 class DDoFDampedVehicleSuspension(ComposedSystem):
 
 
-    scheme_name = '???'
+    scheme_name = 'car_real.jpg'
     real_name = 'car_real.jpg'
 
     def __init__(self,
                  non_damped_system,
-                 c=Symbol('c', positive=True),
+                 c_l=Symbol('c_l', positive=True),
+                 c_r=Symbol('c_r', positive=True),
                  l_cl=Symbol('l_{cl}', positive=True),
                  l_cr=Symbol('l_{cr}', positive=True),
+                 k_1=DDoFVehicleSuspension().k_1,
+                 k_2=DDoFVehicleSuspension().k_2,
+                 l_l=DDoFVehicleSuspension().l_l,
+                 l_r=DDoFVehicleSuspension().l_r,
                  qs=dynamicsymbols('z, varphi')):
         z, phi = qs
-        self.c = c
+        self.k_1=k_1
+        self.k_2=k_2
+        self.c_l = c_l
+        self.c_r= c_r
+        self.l_cl=l_cl
+        self.l_cr=l_cr
+        self.l_l=l_l
+        self.l_r=l_r
         self.nds=non_damped_system
-        self.damper_l = Damper(c=c,pos1=z + phi * l_cl,qs=qs)  # left damper
-        self.damper_r = Damper(c=c,pos1=z - phi * l_cr,qs=qs)  # right damper
+        self.damper_l = Damper(c=c_l,pos1=z + phi * l_cl,qs=qs)  # left damper
+        self.damper_r = Damper(c=c_r,pos1=z - phi * l_cr,qs=qs)  # right damper
         system = self.nds + self.damper_l + self.damper_r
 
         super().__init__(system)

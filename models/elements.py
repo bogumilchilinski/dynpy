@@ -101,7 +101,7 @@ class Spring(Element):
         if isinstance(pos1,Point):
             u = pos1.pos_from(pos2).magnitude()-l0
             
-            L = -S.Half * stiffness * (u**2).expand().simplify()
+            L = -S.Half * stiffness * (u**2).doit()
             
         else:
             L = -S.Half * stiffness * (pos1 - pos2)**2
