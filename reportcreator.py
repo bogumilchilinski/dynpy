@@ -750,6 +750,7 @@ class PlottedData(Figure):
                  numerical_data,
                  fig_name,
                  *,
+                 units_dict=None,
                  preview=False,
                  position=None,
                  **kwargs):
@@ -759,9 +760,11 @@ class PlottedData(Figure):
         self.fig_name = str(fig_name)
         #self._latex_name='figure' #super()._latex_name
         self.preview = preview
+        self._units_dict=units_dict
 
     def add_data_plot(self,
                       numerical_data=None,
+                      xlabel=None,
                       ylabel=None,
                       grid=True,
                       subplots=True,
@@ -772,6 +775,7 @@ class PlottedData(Figure):
         ax = numerical_data.plot(subplots=subplots,
                                  figsize=(10, 4),
                                  ylabel=ylabel,
+                                 xlabel=xlabel,
                                  grid=grid,
                                  fontsize=fontsize)
 
@@ -787,13 +791,20 @@ class PlottedData(Figure):
 
                 axl.plot()
         #ax=solution_tmp.plot(subplots=True)
+        
+        if self._units_dict:
+            label_formatter=lambda sym: '$' + vlatex(sym) + '$' + r'[${val:~L}$]'.format(val=self._units_dict[sym])
+        else:
+            label_formatter=lambda sym: '$' + vlatex(sym) + '$' 
+            
+        
         if subplots:
             ([
-                ax_tmp.legend(['$' + vlatex(sym) + '$'])
+                ax_tmp.legend([label_formatter(sym)])
                 for ax_tmp, sym in zip(ax, numerical_data.columns)
             ])
         else:
-            ax.legend([f'${vlatex(sym)}$' for sym in numerical_data.columns])
+            ax.legend([[label_formatter(sym)] for sym in numerical_data.columns])
 
         plt.savefig(self.fig_name + '.png')
         self.add_image(self.fig_name, width=NoEscape('15cm'))
@@ -821,7 +832,7 @@ class DataPlot(Figure):
         #self._latex_name='figure' #super()._latex_name
         self.preview = preview
 
-    def add_data_plot(self,*args,filename=None,**kwargs):
+    def add_data_plot(self,*args,filename=None,width='15cm',**kwargs):
 
         
         import matplotlib.pyplot as plt
@@ -831,7 +842,7 @@ class DataPlot(Figure):
             filename=f'autoadded_figure_{current_time}.png'
 
         plt.savefig(filename,*args,**kwargs)
-        self.add_image(filename, width=NoEscape('15cm'))
+        self.add_image(filename, width=NoEscape(width))
 
         if self.preview == True:
             plt.show()
@@ -1038,6 +1049,7 @@ class ReportSection(Section):
             initial_description='Initial description',  #random.choice(intro_bank_composed_model)
             ending_summary='Ending summary',  #random.choice(summary_bank_composed_model)
             ylabel='',
+            xlabel='',
             subplots=True,
             grid=True,
             num_yticks=10,
@@ -1103,10 +1115,12 @@ class ReportSection(Section):
                             PlottedData(row['simulations'].iloc[:,int(control_list[0]):int(control_list[-1]+1)],
                                         './plots/fig_' + str(current_time)+'_'+str(no),
                                         position='H',
+                                        units_dict=units_dict,
                                         preview=self.preview)) as fig:
                         fig.add_data_plot(None,
                                           ylabel=ylabel,
                                           subplots=subplots,
+                                          xlabel=xlabel,
                                           grid=grid,
                                           num_yticks=num_yticks,
                                           fontsize=fontsize)

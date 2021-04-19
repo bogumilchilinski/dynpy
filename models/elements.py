@@ -11,7 +11,6 @@ import IPython as IP
 base_frame=ReferenceFrame('N')
 base_origin=Point('O')
 
-
 class GeometryOfPoint:
     def __init__(self, *args, frame=base_frame , ivar=Symbol('t')):
 
@@ -22,6 +21,7 @@ class GeometryOfPoint:
             P = Point('P')
             P.set_pos(base_origin, frame.x*args[0])
             P.set_vel(frame, frame.x*diff(args[0], ivar))
+            P.vel(frame)
             self._point=P
 
         else:
@@ -29,14 +29,13 @@ class GeometryOfPoint:
             P = Point('P')
             P.set_pos(base_origin, frame.x*0)
             P.set_vel(frame, frame.x*diff(0, ivar))
+            P.vel(frame)
             self._point=P
-            
 
 
     def get_point(self):
 
         return self._point
-
 
 
 class Element(LagrangesDynamicSystem):
@@ -66,16 +65,20 @@ class MaterialPoint(Element):
     """
     scheme_name = 'material_point.png'
     real_name = 'material_point.png'
-    def __init__(self, m, pos1, qs=None,  ivar=Symbol('t')):
+    def __init__(self, m, pos1, qs=None, frame=base_frame, ivar=Symbol('t')):
         
         if not qs:
             
             self.qs = [pos1]
+        if isinstance(pos1, Point):
+            Lagrangian = S.Half * m * diff(pos1,ivar).magnitude() **2
+        else:
+            Lagrangian = S.Half * m * (diff(pos1,ivar))**2
+        
+        
 
-        Lagrangian = S.Half * m * (pos1.diff(ivar))**2
 
-
-        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
+        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar,frame=frame)
 
 
 class Spring(Element):
@@ -139,10 +142,8 @@ class NonlinSpring__RefFrme_Pt(Element):
         
 class GravitationalForce(Element):
     """
-    Model of a changing centroid for potential energy:
-    """
-    """
-    Creates a singular model, after inputing correct values of gravity field - g, mass of - m as well as additionaly the general coordiante
+    Model of a changing centroid for potential energy. Creates a singular model, after inputing correct values of gravity field - g,
+     mass of - m as well as additionaly the general coordiante
     """
     scheme_name = ''
     real_name = ''
@@ -262,7 +263,7 @@ class Damper(Element):
         
         
              
-        forcelist = [ (point_dmp,-diff(D,coord_vel)*frame.x)  for coord_vel,point_dmp in points_dict.items()]
+        forcelist = [ (point_dmp,-diff(D,coord_vel)*frame.x)  for coord_vel,point_dmp in points_dict.items() ]
         #print(forcelist)
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
