@@ -108,10 +108,8 @@ class NonlinSpring__RefFrme_Pt(Element):
         
 class GravitationalForce(Element):
     """
-    Model of a changing centroid for potential energy:
-    """
-    """
-    Creates a singular model, after inputing correct values of gravity field - g, mass of - m as well as additionaly the general coordiante
+    Model of a changing centroid for potential energy. Creates a singular model, after inputing correct values of gravity field - g,
+     mass of - m as well as additionaly the general coordiante
     """
     scheme_name = ''
     real_name = ''
