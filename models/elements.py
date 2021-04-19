@@ -92,6 +92,8 @@ class Spring(Element):
             qs = [pos1]
 
 
+        pos1=GeometryOfPoint(pos1).get_point()
+        pos2=GeometryOfPoint(pos2).get_point()
 
         if isinstance(pos1,Point):
             u = pos1.pos_from(pos2).magnitude()-l0
