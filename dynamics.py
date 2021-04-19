@@ -531,7 +531,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                    static_disp_dict=None,
                    dict=True,
                    subs=False,
-                   hint=[],
+                   hint=[], 
                    *args,
                    **kwargs):
         """
@@ -799,7 +799,7 @@ class HarmonicOscillator(LinearDynamicSystem):
         Determines the system damped natural frequencies matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
         '''
         damped_freqs = [sqrt(nat_freq**2 - (self.damping_coefficient()[0]/2)**2)
-                        for nat_freq in self.natural_frequencies()]
+                        for nat_freq in self.natural_frequencies() if nat_freq]
 
         return diag(*damped_freqs)
 
