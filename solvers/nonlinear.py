@@ -1,12 +1,12 @@
-from sympy import *
-from sympy.physics.mechanics import *
+from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Function, lambdify, factorial
+from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 import sympy as sym
 from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
 import itertools as itools
 import scipy.integrate as solver
-from ..utilities.timeseries import *
+from ..utilities.timeseries import DataMethods, SpectralMethods, TimeDomainMethods, SpectrumSeries, SpectrumFrame, TimeSeries, TimeDataFrame
 
 from collections import ChainMap
 
@@ -15,8 +15,6 @@ from IPython.display import display
 import sympy.physics.mechanics as me
 
 from sympy.simplify.fu import TR8, TR10, TR7, TR3
-
-
 
 from .linear import LinearODESolution
 
@@ -49,7 +47,7 @@ class WeakNonlinearProblemSolution(LinearODESolution):
             self.omega = omega
 
 
-#        display(self.omega)
+
 
     def __call__(self, time, order=1, params_values=None):
 
@@ -351,7 +349,7 @@ class MultiTimeScaleMethod(LinearODESolution):
             self.omega = omega
 
 
-#        display(self.omega)
+
 
     def __call__(self, ivar, order=1, params_values=None):
 
@@ -541,6 +539,10 @@ class MultiTimeScaleMethod(LinearODESolution):
         return secular_comps
 
     def nth_order_solution(self, order=3):
+
+        t_list=[t_i(self.ivar) for t_i in symbols(f't_0:{order+1}',cls=Function)]
+        self.t_list=t_list
+
 
         eoms_list = self.eoms_approximation_list(max_order=order)
 

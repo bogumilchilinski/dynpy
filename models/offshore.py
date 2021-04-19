@@ -1,9 +1,12 @@
 from .systems import ComposedSystem
 from sympy.physics.mechanics import dynamicsymbols
-from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S)
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, Eq)
 
 
 class DDoFVessel(ComposedSystem):
+
+    scheme_name = 'vessel.jpg'
+
     def __init__(self,
                  m_vessel=Symbol('M_vessel', positive=True),
                  I_5=Symbol('I_5', positive=True),
@@ -78,7 +81,7 @@ class DDoFVessel(ComposedSystem):
             self.m_vessel: r'mass of vessel,',
             self.I_5:
             r'moment of inertia of 5-th degree (with respect to y axis, determined by the radius of gyration),',
-            tuple(self.q): r'generalized coordinates,',
+            tuple(self.q): r'vessel generalized coordinates,',
             self.wave_level: r'wave level,',
             self.wave_slope: r'wave slope,',
             self.rho: r'fluid density,',
@@ -95,6 +98,9 @@ class DDoFVessel(ComposedSystem):
 
 
 class TDoFCompensatedPayload(ComposedSystem):
+
+    scheme_name = '3dofs_new.PNG'
+
     def __init__(self,
                  m_p=Symbol('m_p', positive=True),
                  k_w=Symbol('k_w', positive=True),
@@ -177,11 +183,14 @@ class TDoFCompensatedPayload(ComposedSystem):
 #         return self.sym_desc_dict
 
     def symbols_description(self):
-        self.sym_desc_dict = {
+
+        parent_symbols_dict=super().symbols_description()
+
+        self.sym_desc_dict = parent_symbols_dict | {
             self.m_p: r'mass of payload,',
             self.k_w: r'wire stiffness,',
             self.l_0: r'length of the lifting cable,',
-            tuple(self.q): r'generalized coordinates,',
+            tuple(self.q): r'payload generalized coordinates,',
             self.y_e:
             r'lateral displacement at crane tip obtained from RAOs (a regular wave excitation),',
             self.z_e:
@@ -193,8 +202,29 @@ class TDoFCompensatedPayload(ComposedSystem):
             r'length of the attached compensating element,',
             self.g: r'acceleration of gravity,',
             self.h_eq: r'equilibrium point of payload,',
-            self.h_ceq: r'equilibrium point of compensator,',
-            self.ivar: r'independent time variable,',
+            self.h_ceq: r'equilibrium point of compensator,'
         }
 
         return self.sym_desc_dict
+
+
+# class PayloadVesselSystem(ComposedSystem):
+    
+#     def __init__(self,
+#                  y_e=dynamicsymbols('y_e'),
+#                  z_e=dynamicsymbols('z_e'),
+#                  wave_level=dynamicsymbols('W'),
+#                  wave_slope=dynamicsymbols('S'),
+# #                  payload=TDoFCompensatedPayload(),
+# #                  vessel=DDoFVessel(),
+#                  system=None
+#                 ):
+        
+#         self.payload = TDoFCompensatedPayload(y_e,z_e)
+#         self.vessel = DDofVessel(wave_level,wave_slope)
+        
+#         system = self.payload + self.vessel
+        
+#         super().__init__(system)
+
+
