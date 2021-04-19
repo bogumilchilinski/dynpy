@@ -1,4 +1,5 @@
-from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Point, Derivative)
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Point, Derivative, Expr)
+from numbers import Number
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 
@@ -8,6 +9,34 @@ import base64
 import IPython as IP
 
 base_frame=ReferenceFrame('N')
+base_origin=Point('O')
+
+class GeometryOfPoint:
+    def __init__(self, *args, frame=base_frame , ivar=Symbol('t')):
+
+        if isinstance(args[0],Point):
+            self._point=args[0]
+
+        if isinstance(args[0],Number) or isinstance(args[0],Expr):
+            P = Point('P')
+            P.set_pos(base_origin, frame.x*args[0])
+            P.set_vel(frame, frame.x*diff(args[0], ivar))
+            P.vel(frame)
+            self._point=P
+
+        else:
+            print('Unsupported data type')
+            P = Point('P')
+            P.set_pos(base_origin, frame.x*0)
+            P.set_vel(frame, frame.x*diff(0, ivar))
+            P.vel(frame)
+            self._point=P
+
+
+    def get_point(self):
+
+        return self._point
+
 
 class Element(LagrangesDynamicSystem):
     """Base class for all elements
@@ -19,7 +48,7 @@ class Element(LagrangesDynamicSystem):
             with open(f"{path}", "rb") as image_file:
                 encoded_string = base64.b64encode(image_file.read())
             image_file.close()
-            
+
         else:
             path = __file__.replace('elements.py', 'images/') + cls.scheme_name
             with open(f"{path}", "rb") as image_file:
@@ -36,17 +65,20 @@ class MaterialPoint(Element):
     """
     scheme_name = 'material_point.png'
     real_name = 'material_point.png'
-    def __init__(self, m, pos1, qs=None,  ivar=Symbol('t')):
+    def __init__(self, m, pos1, qs=None, frame=base_frame, ivar=Symbol('t')):
         
         if not qs:
             
             self.qs = [pos1]
+        if isinstance(pos1, Point):
+            Lagrangian = S.Half * m * diff(pos1,ivar).magnitude() **2
+        else:
+            Lagrangian = S.Half * m * (diff(pos1,ivar))**2
+        
+        
 
-        Lagrangian = S.Half * m * (diff(pos1,ivar))**2
-                    
 
-
-        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
+        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar,frame=frame)
 
 
 class Spring(Element):
@@ -61,8 +93,8 @@ class Spring(Element):
     def __init__(self, stiffness, pos1, pos2=0,  qs=None, l0 = 0, ivar=Symbol('t'), frame = base_frame):
         if not qs:
             qs = [pos1]
-        else:
-            qs = qs
+
+
 
         if isinstance(pos1,Point):
             u = pos1.pos_from(pos2).magnitude()-l0
@@ -215,12 +247,22 @@ class Damper(Element):
         dpos1 = diff(pos1, ivar)
         dpos2 = diff(pos2, ivar)
         
-        P = Point('P')
-        P.set_vel(frame, (dpos1 - dpos2) * frame.x)
         
-        D = (((S.Half) * c * (dpos1 - dpos2)**2).diff(dpos1))
+        points_dict={}
+        for coord in qs:
+            
+            coord_vel=diff(coord,ivar)
+            
+            P_tmp = Point(f'P_{str(coord)}')
+            P_tmp.set_vel(frame, coord_vel * frame.x)
+            points_dict[coord_vel]=P_tmp
         
-        forcelist = [(P, -D*frame.x)]
+        D = ((S.Half) * c * (dpos1 - dpos2)**2)
+        
+        
+             
+        forcelist = [ (point_dmp,-diff(D,coord_vel)*frame.x)  for coord_vel,point_dmp in points_dict.items() ]
+        #print(forcelist)
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
 
