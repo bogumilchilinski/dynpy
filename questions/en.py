@@ -400,6 +400,24 @@ class StiffnessMatrixMCA(MechanicalSystemAnswer):
                          title=self.title,
                          **kwargs)
 
+class DampingMatrixMCA(MechanicalSystemAnswer):
+    def __init__(
+        
+            self,
+            correct_system,
+            other_systems,
+            answer_generator=lambda obj: Eq(Symbol('C'), (HarmonicOscillator(
+                obj.linearized()).damping_matrix()),
+                                            evaluate=False),
+            **kwargs):
+        self.title = 'Określ macierz tłumienia układu:'
+        self.title = 'For the system under consideration determine the damping matrix:'
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
 
 class LeftSpringForceMCA(MechanicalSystemAnswer):
     def __init__(self,
@@ -574,6 +592,21 @@ class SDoFDampedOmegaMCA(MechanicalSystemAnswer):
                          title=self.title,
                          **kwargs) 
 
+class DampedOmegaMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: [Eq(Symbol('omega_h'),om_eq) for om_eq in list(HarmonicOscillator(obj.linearized()).damped_natural_frequencies()) if om_eq ],
+                 **kwargs):
+
+        self.title = 'Określ częstości tłumionych drgań swobodnych występujących w układzie:'
+        self.title = 'Determine the system natural frequencies of damped vibration:'
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs) 
+        
 class SmallParameterMCA(MechanicalSystemAnswer):
     question = 'Small parameter for the cosidered system is expressed as:'
     def __init__(self,
