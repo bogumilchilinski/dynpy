@@ -21,7 +21,6 @@ class GeometryOfPoint:
             P = Point('P')
             P.set_pos(base_origin, frame.x*args[0])
             P.set_vel(frame, frame.x*diff(args[0], ivar))
-            P.vel(frame)
             self._point=P
 
         else:
@@ -29,7 +28,6 @@ class GeometryOfPoint:
             P = Point('P')
             P.set_pos(base_origin, frame.x*0)
             P.set_vel(frame, frame.x*diff(0, ivar))
-            P.vel(frame)
             self._point=P
 
 
@@ -70,9 +68,10 @@ class MaterialPoint(Element):
         if not qs:
             self.qs = [pos1]
             
-        pos1=GeometryOfPoint(pos1).get_point()
+        pos1=GeometryOfPoint(pos1).get_point().vel(frame)
+        
         if isinstance(pos1, Point):
-            Lagrangian = S.Half * m * (pos1.vel(frame).magnitude() **2).doit()
+            Lagrangian = S.Half * m * (pos1.vel(frame).magnitude()**2).doit()  # pos1.vel(frame).magntidue() behaves as diff(pos1,ivar)
         else:
             Lagrangian = S.Half * m * (diff(pos1,ivar))**2
         
