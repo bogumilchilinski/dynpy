@@ -451,7 +451,7 @@ class DDoFVehicleSuspension(ComposedSystem):
 class DDoFDampedVehicleSuspension(ComposedSystem):
 
 
-    scheme_name = 'car_real.jpg'
+    scheme_name = 'damped_car.png'
     real_name = 'car_real.jpg'
 
     def __init__(self,
