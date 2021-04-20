@@ -749,3 +749,20 @@ class SpringForceMCA(MechanicalSystemAnswer):
                          answer_generator=answer_generator,
                          title=self.title,
                          **kwargs)
+
+class EigenvalsMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Symbol('lambda'), [
+                     eig_val for eig_val in obj.eigenvalues() if eig_val != 0
+                 ]),
+                 **kwargs):
+
+        self.title = 'Określ częstość drgań swobodnych występujących w układzie:'
+        self.title = 'Determine the eigenvalues for the considered system:'
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
