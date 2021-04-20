@@ -1,4 +1,4 @@
-from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Point, Derivative, Expr)
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Derivative, Expr)
 from numbers import Number
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
@@ -13,11 +13,20 @@ base_origin=Point('O')
 
 class GeometryOfPoint:
     def __init__(self, *args, frame=base_frame , ivar=Symbol('t')):
+        
+        print('--')
+        print(args[0],type(args[0]),Point)
+        print('--')
 
-        if isinstance(args[0],Point):
+        print(args)
+
+        print(  type(args[0]),(Point) , 'is')
+        print(  type(args[0])==(Point) , 'is')
+
+        if type(args[0])==(Point):
             self._point=args[0]
 
-        if isinstance(args[0],Number) or isinstance(args[0],Expr):
+        elif isinstance(args[0],Number) or isinstance(args[0],Expr):
             P = Point('P')
             P.set_pos(base_origin, frame.x*args[0])
             P.set_vel(frame, frame.x*diff(args[0], ivar))
@@ -69,8 +78,10 @@ class MaterialPoint(Element):
         
         if not qs:
             self.qs = [pos1]
-            
-        pos1=GeometryOfPoint(pos1).get_point()
+
+        print(pos1.vel(frame),'MP')    
+        pos1=GeometryOfPoint(pos1,frame=frame).get_point()
+
         if isinstance(pos1, Point):
             Lagrangian = S.Half * m * (pos1.vel(frame).magnitude() **2).doit()
         else:
@@ -96,8 +107,8 @@ class Spring(Element):
             qs = [pos1]
 
 
-        pos1=GeometryOfPoint(pos1).get_point()
-        pos2=GeometryOfPoint(pos2).get_point()
+        pos1=GeometryOfPoint(pos1,frame=frame).get_point()
+        pos2=GeometryOfPoint(pos2,frame=frame).get_point()
 
         if isinstance(pos1,Point):
             u = pos1.pos_from(pos2).magnitude()-l0

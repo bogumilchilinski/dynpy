@@ -1418,7 +1418,7 @@ class MDoFWinch(ComposedSystem):
                  l=Symbol('l', positive=True),
                  m=Symbol('m', positive=True),
                  g=Symbol('g', positive=True),
-                 ivar=Symbol('t', positive=True),
+                 ivar=Symbol('t'),
                  theta=dynamicsymbols('theta'),
                  phi=dynamicsymbols('phi'),
                  system=None):
@@ -1514,7 +1514,7 @@ class MDoFElasticPendulum(ComposedSystem):
                  l=Symbol('l', positive=True),
                  m=Symbol('m', positive=True),
                  g=Symbol('g', positive=True),
-                 ivar=Symbol('t', positive=True),
+                 ivar=Symbol('t'),
                  z=dynamicsymbols('z'),
                  phi=dynamicsymbols('varphi'),
                  system=None):
@@ -1531,14 +1531,20 @@ class MDoFElasticPendulum(ComposedSystem):
         x = (l+z)* sin(phi)
         y = (l+z)* cos(phi)
         
+        frame=ReferenceFrame('N')
 
+        payload=Point('payload')
+        payload.set_vel(frame,(sqrt((diff(x,ivar)**2 + diff(y,ivar)**2).simplify()))*frame.x)
+        payload.set_vel(frame,sqrt(diff(z,ivar)**2+(diff(phi,ivar)*(l+z))**2    )*frame.x)
+
+        print(payload,'try',type(payload))
 
         self.spring = Spring(k, z, qs=[phi, z])
-        self.material_point_1 = MaterialPoint(m, x, qs=[phi, z])
-        self.material_point_2 = MaterialPoint(m, y, qs=[phi, z])
+        self.material_point_1 = MaterialPoint(m, payload, qs=[phi, z],frame=frame)
+        # self.material_point_2 = MaterialPoint(m, y, qs=[phi, z])
         #self.M_engine = Force(F, theta, qs=[phi, z])
         self.gravity=GravitationalForce(m,g,pos1=-y, qs=[phi,z])
-        system = self.material_point_1 + self.material_point_2  + self.spring  + self.gravity
+        system =   self.spring  + self.gravity + self.material_point_1 #+ self.material_point_2
 
         super().__init__(system)
 
