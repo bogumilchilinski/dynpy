@@ -68,10 +68,11 @@ class MaterialPoint(Element):
     def __init__(self, m, pos1, qs=None, frame=base_frame, ivar=Symbol('t')):
         
         if not qs:
-            
             self.qs = [pos1]
+            
+        pos1=GeometryOfPoint(pos1).get_point()
         if isinstance(pos1, Point):
-            Lagrangian = S.Half * m * diff(pos1,ivar).magnitude() **2
+            Lagrangian = S.Half * m * (pos1.vel(frame).magnitude() **2).doit()
         else:
             Lagrangian = S.Half * m * (diff(pos1,ivar))**2
         
@@ -148,23 +149,23 @@ class GravitationalForce(Element):
     scheme_name = ''
     real_name = ''
     def __init__(self, m, g, pos1=0, pos_c=0, qs=None, ivar=Symbol('t')):
+
+        if not qs:
+            qs=[pos1]
         
         if pos1 == 0:
             
-            self.qs = [pos_c]
+
 
             Lagrangian = -(m * g * (pos_c))
         
         elif pos_c == 0:
             
-            qs = [pos1]
+
             
             Lagrangian = -(m * g * (pos1))
 
-        else:
-            
-            Lagrangian = 0
-            print(str('YOU CANNOT APPLY BOTH METHODS AT ONCE'))
+
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
