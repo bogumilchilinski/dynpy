@@ -242,14 +242,17 @@ class Damper(Element):
     real_name = 'damper.png'
     def __init__(self, c, pos1, pos2=0, qs=None, ivar=Symbol('t'), frame=base_frame):
         
+        if not qs:
+            self.qs = [pos1]
 
-        if qs == None:
-            qs = [pos1]
-        else:
-            qs = qs
+           
+        pos1=GeometryOfPoint(pos1,frame=frame).get_point()
+        pos2=GeometryOfPoint(pos2,frame=frame).get_point()
         
-        dpos1 = diff(pos1, ivar)
-        dpos2 = diff(pos2, ivar)
+        if isinstance(pos1, Point):
+            D = S.Half * c * ((pos1.vel(frame)-pos2.vel(frame)).magnitude()**2).doit()  # pos1.vel(frame).magntidue() behaves as diff(pos1,ivar)
+        else:
+            D = S.Half * c * (diff(pos1-pos2,ivar))**2
         
         
         points_dict={}
@@ -261,7 +264,7 @@ class Damper(Element):
             P_tmp.set_vel(frame, coord_vel * frame.x)
             points_dict[coord_vel]=P_tmp
         
-        D = ((S.Half) * c * (dpos1 - dpos2)**2)
+        
         
         
              
@@ -270,6 +273,8 @@ class Damper(Element):
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
 
+
+        
         
 class PID(Element):
     """
