@@ -432,7 +432,7 @@ class DDoFVehicleSuspension(ComposedSystem):
                  k_1=Symbol('k_1', positive=True),
                  F_engine=Symbol('F_{engine}', positive=True),
                  ivar=Symbol('t', positive=True),
-                 qs=dynamicsymbols('z, varphi')):
+                 qs=dynamicsymbols('z, \\varphi')):
 
         z, phi = qs
 
@@ -482,8 +482,12 @@ class DDoFDampedVehicleSuspension(ComposedSystem):
                  k_2=DDoFVehicleSuspension().k_2,
                  l_l=DDoFVehicleSuspension().l_l,
                  l_r=DDoFVehicleSuspension().l_r,
+<<<<<<< HEAD
                  
                  qs=dynamicsymbols('z, varphi')):
+=======
+                 qs=dynamicsymbols('z, \\varphi')):
+>>>>>>> 119a5f279da82b83312d1652e1b751d9946b4406
         z, phi = qs
         
         self.k_1 = k_1
@@ -1571,8 +1575,8 @@ class MDoFElasticPendulum(ComposedSystem):
         #self.payload.set_vel(
         #     frame, (sqrt((diff(x, ivar)**2 + diff(y, ivar)**2).simplify()))*frame.x)
         self.payload.set_vel(
-            frame,
-            sqrt(diff(z, ivar)**2 + (diff(phi, ivar) * (l + z))**2) * frame.x)
+            self.frame,
+            sqrt(diff(z, ivar)**2 + (diff(phi, ivar) * (l + z))**2) * self.frame.x)
 
         #print(payload, 'try', type(payload))
 
@@ -1674,6 +1678,8 @@ class MDoFDampedElasticPendulum(ComposedSystem):
                              qs=[phi, z],
                              frame=self.undamped.frame)
 
+        display(self.damper._eoms)
+        
         system = self.undamped + self.damper
 
         super().__init__(system)
