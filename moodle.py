@@ -417,6 +417,8 @@ class QuizOn(sys.ComposedSystem):
     
     def __init__(self,*args,**kwargs):
        
+        self.default_data_dict=args[0].get_default_data()
+        print(self.default_data_dict)
         self.system=HarmonicOscillator(args[0])
         
         
@@ -431,8 +433,13 @@ class QuizOn(sys.ComposedSystem):
         sym_list=[]
         
         if self.param_range==None:
+            self.param_range=self.default_data_dict
+
+
+        if self.param_range==None:
 
             for caseno in [0,1,2,3,4]:
+                print('jestes tu :(')
                 sym_dict={}
                 temp_dict={}
                 for num,sym in enumerate(sys_par):
