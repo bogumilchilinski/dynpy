@@ -1437,12 +1437,13 @@ class MDoFWinch(ComposedSystem):
         F = m * g * r
 
         self.disc_1 = Disk(I, pos_c=theta, qs=[phi, theta])
-        self.Spring = Spring(k, theta, qs=[phi, theta])
-        self.MaterialPoint_1 = MaterialPoint(m, x, qs=[phi, theta])
-        self.MaterialPoint_2 = MaterialPoint(m, y, qs=[phi, theta])
+        self.spring = Spring(k, theta, qs=[phi, theta])
+        self.material_point_1 = MaterialPoint(m, x, qs=[phi, theta])
+        self.material_point_2 = MaterialPoint(m, y, qs=[phi, theta])
         self.M_engine = Force(F, theta, qs=[phi, theta])
+        self.gravity=GravitationalForce(m,g,pos1=-y, qs=[phi])
 
-        system = self.MaterialPoint_1 + self.MaterialPoint_2 + self.disc_1 + self.Spring + self.M_engine
+        system = self.material_point_1 + self.material_point_2 + self.disc_1 + self.spring + self.M_engine + self.gravity
 
         super().__init__(system)
 
@@ -1457,7 +1458,99 @@ class MDoFWinch(ComposedSystem):
         }
         return self.sym_desc_dict
     
-    
+class MDoFElasticPendulum(ComposedSystem):
+    """
+    Model of a Double Degree of Freedom Involute Pendulum (Winch)
+
+        Arguments:
+        =========
+            m = Mass
+                -Mass of the payload
+                
+            I = Moment of Inertia
+                -disc moment of inertia
+
+            g = gravitional field
+                -value of gravitional field acceleration
+
+            l = lenght
+                -initial length of the cable
+
+            r = lenght
+                -radius of the cylinder
+
+            k = torsional stiffness coefficient
+                -value of torsional spring coefficient
+
+            ivar = symbol object
+                -Independant time variable
+                
+            phi = dynamicsymbol object
+                -pendulation angle of the mass m
+                
+            theta = dynamicsymbol object
+                -oscillation angle of the cylinder
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+        Example
+        =======
+        A mass m pendulating on cable l_0 which is wounded on the cylinder with the radius R.
+
+        >>> t = symbols('t')
+        >>> R,l_0 = symbols('R, l_0',positive=True)
+        >>> MDoFWinch(r=R,l=l_0)
+
+        -We define the symbols and dynamicsymbols
+        -determine the instance of the pendulum by using class SDoFCouplePendulum()
+    """
+
+    scheme_name = 'mdof_winch.png'
+    real_name = 'mdof_winch_real.png'
+
+    def __init__(self,
+                 k=Symbol('k', positive=True),
+                 l=Symbol('l', positive=True),
+                 m=Symbol('m', positive=True),
+                 g=Symbol('g', positive=True),
+                 ivar=Symbol('t', positive=True),
+                 z=dynamicsymbols('z'),
+                 phi=dynamicsymbols('varphi'),
+                 system=None):
+
+
+        self.k = k
+
+        self.l = l
+        self.m = m
+        self.g = g
+        self.phi = phi
+        self.z = z
+
+        x = (l+z)* sin(phi)
+        y = (l+z)* cos(phi)
+        
+
+
+        self.spring = Spring(k, z, qs=[phi, z])
+        self.material_point_1 = MaterialPoint(m, x, qs=[phi, z])
+        self.material_point_2 = MaterialPoint(m, y, qs=[phi, z])
+        #self.M_engine = Force(F, theta, qs=[phi, z])
+        self.gravity=GravitationalForce(m,g,pos1=-y, qs=[phi,z])
+        system = self.material_point_1 + self.material_point_2  + self.spring  + self.gravity
+
+        super().__init__(system)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+ 
+            self.k: r'Spring stiffness',
+            self.l: r'Winch length',
+            self.m: r'Mass',
+            self.g: 'Gravity constant',
+        }
+        return self.sym_desc_dict
                          
 class Inverted_Pendulum(HarmonicOscillator):
     def __init__(self,
