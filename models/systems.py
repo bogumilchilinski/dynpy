@@ -1,6 +1,6 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
-                   hessian, Function, flatten, Tuple, im, pi, latex, dsolve, solve,
-                   fraction, factorial)
+                   hessian, Function, flatten, Tuple, im, pi, latex, dsolve,
+                   solve, fraction, factorial)
 
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
@@ -171,8 +171,8 @@ class SDoFBeamBridge(ComposedSystem):
         self.mass = MaterialPoint(m, z, qs=[z])
         self.spring = Spring(k_beam, z, qs=[z])
         self.gravity_force = GravitationalForce(self.m, self.g, z)
-        self.force = Force(-F_0*sin(Omega*ivar), pos1=z)
-        system = self.mass + self.spring+self.gravity_force+self.force
+        self.force = Force(-F_0 * sin(Omega * ivar), pos1=z)
+        system = self.mass + self.spring + self.gravity_force + self.force
 
         super().__init__(system)
 
@@ -215,11 +215,11 @@ class BeamBridgeTMD(ComposedSystem):
         self.spring = Spring(k_beam, z, qs=[z])
         self.gravity_force = GravitationalForce(self.m, self.g, z)
         self.gravity_TMD = GravitationalForce(self.m_TMD, self.g, z_TMD)
-        self.force = Force(-F_0*sin(Omega*ivar), pos1=z)
+        self.force = Force(-F_0 * sin(Omega * ivar), pos1=z)
         self.TMD = MaterialPoint(m_TMD, pos1=z_TMD, qs=[z_TMD])
         self.spring_TMD = Spring(k_TMD, z, z_TMD, qs=[z, z_TMD])
-        system = self.mass + self.spring+self.gravity_force + \
-            self.force+self.TMD+self.spring_TMD+self.gravity_TMD
+        system = (self.mass + self.spring + self.gravity_force + self.force +
+                  self.TMD + self.spring_TMD + self.gravity_TMD)
 
         super().__init__(system)
 
@@ -231,6 +231,23 @@ class BeamBridgeTMD(ComposedSystem):
         }
 
         return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        E, I, l, m0, k0 = symbols('E I l_beam m_0 k_0', positive=True)
+
+        default_data_dict = {
+            self.m: [20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0],
+            self.k_beam: [
+                2 * 48 * E * I / l**3, 3 * 48 * E * I / l**3,
+                4 * 48 * E * I / l**3, 5 * 48 * E * I / l**3,
+                6 * 48 * E * I / l**3
+            ],
+            self.m_TMD: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
+            self.k_TMD: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0]
+        }
+
+        return default_data_dict
 
 
 class SDoFDampedHarmonicOscillator(ComposedSystem):
@@ -476,24 +493,26 @@ class DDoFDampedVehicleSuspension(ComposedSystem):
         self.l_l = l_l
         self.l_r = l_r
         self.nds = non_damped_system
-        self.damper_l = Damper(c=c_l, pos1=z + phi *
-                               l_cl, qs=qs)  # left damper
-        self.damper_r = Damper(c=c_r, pos1=z - phi *
-                               l_cr, qs=qs)  # right damper
+        self.damper_l = Damper(c=c_l, pos1=z + phi * l_cl,
+                               qs=qs)  # left damper
+        self.damper_r = Damper(c=c_r, pos1=z - phi * l_cr,
+                               qs=qs)  # right damper
         system = self.nds + self.damper_l + self.damper_r
 
         super().__init__(system)
 
     def get_default_data(self):
 
-        c0, k_0, l_l0 = symbols(
-            'c_0 k_0 l_0', positive=True)
+        c0, k_0, l_l0 = symbols('c_0 k_0 l_0', positive=True)
 
-        default_data_dict = {self.c_l: [2*c0, 3*c0, 4*c0, 5*c0, 6*c0],
-                             self.k_1: [2*k_0, 3*k_0, 4*k_0, 5*k_0, 6*k_0],
-                             self.l_l: [2*l_l0, 3*l_l0, 4*l_l0, 5*l_l0, 6*l_l0]}
+        default_data_dict = {
+            self.c_l: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0],
+            self.k_1: [2 * k_0, 3 * k_0, 4 * k_0, 5 * k_0, 6 * k_0],
+            self.l_l: [2 * l_l0, 3 * l_l0, 4 * l_l0, 5 * l_l0, 6 * l_l0]
+        }
 
-        return  default_data_dict
+        return default_data_dict
+
 
 #     def symbols_description(self):
 #         self.sym_desc_dict = {
@@ -644,6 +663,7 @@ class Pendulum(ComposedSystem):
             self.l: r'Pendulum length',
         }
         return self.sym_desc_dict
+
 
 # wymienić obrazek na taki, gdzie nie ma wymuszenia i symbole na obrazku będą zgodne z tymi w klasie
 
@@ -999,7 +1019,6 @@ class SDoFEngine(ComposedSystem):
         >>> SDoFEngine()
 
     """
-
     def __init__(self,
                  M=Symbol('M', positive=True),
                  k_m=Symbol('k_m', positive=True),
@@ -1071,7 +1090,6 @@ class SDoFDampedEngine(ComposedSystem):
         >>> SDoFEngine()
 
     """
-
     def __init__(self,
                  M=Symbol('M', positive=True),
                  k_m=Symbol('k_m', positive=True),
@@ -1248,7 +1266,6 @@ class SDoFNonlinearEngine(ComposedSystem):
         >>> qs = dynamicsymbols('z') 
         >>> SDoFNonlinearEngine()
     """
-
     def __init__(self,
                  M=Symbol('M', positive=True),
                  k_m=Symbol('k_m', positive=True),
@@ -1334,7 +1351,6 @@ class MDoFTMD(ComposedSystem):
         
         
     """
-
     def __init__(self,
                  m=Symbol('m', positive=True),
                  me=Symbol('m_e', positive=True),
@@ -1543,33 +1559,124 @@ class MDoFElasticPendulum(ComposedSystem):
         self.phi = phi
         self.z = z
 
-        x = (l+z) * sin(phi)
-        y = (l+z) * cos(phi)
+        x = (l + z) * sin(phi)
+        y = (l + z) * cos(phi)
 
-        frame = ReferenceFrame('N')
+        self.frame = ReferenceFrame('N')
 
-        payload = Point('payload')
-        payload.set_vel(
-            frame, (sqrt((diff(x, ivar)**2 + diff(y, ivar)**2).simplify()))*frame.x)
-        payload.set_vel(frame, sqrt(diff(z, ivar)**2 +
-                        (diff(phi, ivar)*(l+z))**2)*frame.x)
+        self.payload = Point('payload')
+        #self.payload.set_vel(
+        #     frame, (sqrt((diff(x, ivar)**2 + diff(y, ivar)**2).simplify()))*frame.x)
+        self.payload.set_vel(
+            frame,
+            sqrt(diff(z, ivar)**2 + (diff(phi, ivar) * (l + z))**2) * frame.x)
 
-        print(payload, 'try', type(payload))
+        #print(payload, 'try', type(payload))
 
         self.spring = Spring(k, z, qs=[phi, z])
-        self.material_point_1 = MaterialPoint(
-            m, payload, qs=[phi, z], frame=frame)
+        self.material_point_1 = MaterialPoint(m,
+                                              self.payload,
+                                              qs=[phi, z],
+                                              frame=self.frame)
         # self.material_point_2 = MaterialPoint(m, y, qs=[phi, z])
         #self.M_engine = Force(F, theta, qs=[phi, z])
         self.gravity = GravitationalForce(m, g, pos1=-y, qs=[phi, z])
-        system = self.spring + self.gravity + \
-            self.material_point_1  # + self.material_point_2
+        system = (self.spring + self.gravity + self.material_point_1
+                  )  # + self.material_point_2
 
         super().__init__(system)
 
     def symbols_description(self):
         self.sym_desc_dict = {
+            self.k: r'Spring stiffness',
+            self.l: r'Winch length',
+            self.m: r'Mass',
+            self.g: 'Gravity constant',
+        }
+        return self.sym_desc_dict
 
+
+class MDoFDampedElasticPendulum(ComposedSystem):
+    """
+    Model of a Double Degree of Freedom Involute Pendulum (Winch)
+
+        Arguments:
+        =========
+            m = Mass
+                -Mass of the payload
+
+            I = Moment of Inertia
+                -disc moment of inertia
+
+            g = gravitional field
+                -value of gravitional field acceleration
+
+            l = lenght
+                -initial length of the cable
+
+            r = lenght
+                -radius of the cylinder
+
+            k = torsional stiffness coefficient
+                -value of torsional spring coefficient
+
+            ivar = symbol object
+                -Independant time variable
+
+            phi = dynamicsymbol object
+                -pendulation angle of the mass m
+
+            theta = dynamicsymbol object
+                -oscillation angle of the cylinder
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+        Example
+        =======
+        A mass m pendulating on cable l_0 which is wounded on the cylinder with the radius R.
+
+        >>> t = symbols('t')
+        >>> R,l_0 = symbols('R, l_0',positive=True)
+        >>> MDoFWinch(r=R,l=l_0)
+
+        -We define the symbols and dynamicsymbols
+        -determine the instance of the pendulum by using class SDoFCouplePendulum()
+    """
+
+    scheme_name = 'mdof_winch.png'
+    real_name = 'mdof_winch_real.png'
+
+    def __init__(self,
+                 undamped_system,
+                 c=Symbol('c', positive=True),
+                 k=Symbol('k', positive=True),
+                 l=Symbol('l', positive=True),
+                 m=Symbol('m', positive=True),
+                 g=Symbol('g', positive=True),
+                 ivar=Symbol('t'),
+                 z=dynamicsymbols('z'),
+                 phi=dynamicsymbols('varphi')):
+
+        self.c = c
+        self.k = k
+        self.l = l
+        self.m = m
+        self.g = g
+        self.phi = phi
+        self.z = z
+        self.undamped = undamped_system
+        self.damper = Damper(c=c,
+                             pos1=self.undamped.payload,
+                             qs=[phi, z],
+                             frame=self.undamped.frame)
+
+        system = self.undamped + self.damper
+
+        super().__init__(system)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
             self.k: r'Spring stiffness',
             self.l: r'Winch length',
             self.m: r'Mass',
@@ -1593,10 +1700,16 @@ class Inverted_Pendulum(HarmonicOscillator):
 
         x, phi = var
 
-        self.rod = (RigidBody2D(m, I, pos_lin=0, pos_rot=0,
-                                pos_lin_c=(x + l*sin(phi)), pos_rot_c=phi, qs=[x, phi])
-                    + MaterialPoint(m, l*cos(phi), qs=[phi])
-                    + GravitationalForce(m, g, pos1=0, pos_c=l*cos(phi), qs=[phi]))
+        self.rod = (
+            RigidBody2D(m,
+                        I,
+                        pos_lin=0,
+                        pos_rot=0,
+                        pos_lin_c=(x + l * sin(phi)),
+                        pos_rot_c=phi,
+                        qs=[x, phi]) +
+            MaterialPoint(m, l * cos(phi), qs=[phi]) +
+            GravitationalForce(m, g, pos1=0, pos_c=l * cos(phi), qs=[phi]))
 
         self.cart = MaterialPoint(M, x, qs=[x])
 
