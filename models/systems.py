@@ -188,7 +188,7 @@ class SDoFBeamBridge(ComposedSystem):
 
 class BeamBridgeTMD(ComposedSystem):
 
-    scheme_name = 'beam_bridge.PNG'
+    scheme_name = 'bridge_tmd.png'
     real_name = 'beam_bridge_real.PNG'
 
     def __init__(self,
@@ -482,8 +482,14 @@ class DDoFDampedVehicleSuspension(ComposedSystem):
                  k_2=DDoFVehicleSuspension().k_2,
                  l_l=DDoFVehicleSuspension().l_l,
                  l_r=DDoFVehicleSuspension().l_r,
+<<<<<<< HEAD
+                 
+                 qs=dynamicsymbols('z, varphi')):
+=======
                  qs=dynamicsymbols('z, \\varphi')):
+>>>>>>> 119a5f279da82b83312d1652e1b751d9946b4406
         z, phi = qs
+        
         self.k_1 = k_1
         self.k_2 = k_2
         self.c_l = c_l
@@ -503,12 +509,13 @@ class DDoFDampedVehicleSuspension(ComposedSystem):
 
     def get_default_data(self):
 
-        c0, k_0, l_l0 = symbols('c_0 k_0 l_0', positive=True)
+        c0, k_0, l_l0,omega,F_0= symbols('c_0 k_0 l_0 omega F_0', positive=True)
 
         default_data_dict = {
             self.c_l: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0],
             self.k_1: [2 * k_0, 3 * k_0, 4 * k_0, 5 * k_0, 6 * k_0],
-            self.l_l: [2 * l_l0, 3 * l_l0, 4 * l_l0, 5 * l_l0, 6 * l_l0]
+            self.l_l: [2 * l_l0, 3 * l_l0, 4 * l_l0, 5 * l_l0, 6 * l_l0],
+            self.nds.F_engine: [2 * F_0*sin(omega*self.nds.ivar), 3 * F_0*sin(omega*self.nds.ivar), 4 * F_0*sin(omega*self.nds.ivar), 5 * F_0*sin(omega*self.nds.ivar), 6 * F_0*sin(omega*self.nds.ivar)]
         }
 
         return default_data_dict
