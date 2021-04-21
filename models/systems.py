@@ -15,8 +15,8 @@ class ComposedSystem(HarmonicOscillator):
     """Base class for all systems
 
     """
-    scheme_name = 'engine.png'
-    real_name = 'engine_real.PNG'
+    scheme_name = 'damped_car_new.PNG'
+    real_name = 'car_real.jpg'
 
     @classmethod
     def _scheme(cls):
@@ -419,13 +419,13 @@ class DDoFVehicleSuspension(ComposedSystem):
         -and then we determine the instance of the system using class DDoFVehicleSuspension()
     """
 
-    scheme_name = 'car.png'
+    scheme_name = 'car.PNG'
     real_name = 'car_real.jpg'
 
     def __init__(self,
                  m=Symbol('m', positive=True),
                  I=Symbol('I', positive=True),
-                 l_rod=Symbol('l_rod', positive=True),
+                 l_rod=Symbol('l_{rod}', positive=True),
                  l_l=Symbol('l_l', positive=True),
                  l_r=Symbol('l_r', positive=True),
                  k_2=Symbol('k_2', positive=True),
@@ -482,11 +482,10 @@ class DDoFDampedVehicleSuspension(ComposedSystem):
                  k_2=DDoFVehicleSuspension().k_2,
                  l_l=DDoFVehicleSuspension().l_l,
                  l_r=DDoFVehicleSuspension().l_r,
-
                  qs=dynamicsymbols('z, \\varphi')):
 
         z, phi = qs
-        
+
         self.k_1 = k_1
         self.k_2 = k_2
         self.c_l = c_l
@@ -509,6 +508,12 @@ class DDoFDampedVehicleSuspension(ComposedSystem):
         c0, k_0, l_l0,omega,F_0= symbols('c_0 k_0 l_0 omega F_0', positive=True)
 
         default_data_dict = {
+            
+            self.c_r:[self.c_l],
+            self.k_2:[self.k_1],
+            self.l_r:[self.l_l],
+            self.l_cr:[self.l_l],
+            self.l_cl:[self.l_l],
             self.c_l: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0],
             self.k_1: [2 * k_0, 3 * k_0, 4 * k_0, 5 * k_0, 6 * k_0],
             self.l_l: [2 * l_l0, 3 * l_l0, 4 * l_l0, 5 * l_l0, 6 * l_l0],
@@ -572,7 +577,7 @@ class DDoFShaft(ComposedSystem):
                  k_1=Symbol('k_1', positive=True),
                  input_displacement=dynamicsymbols('theta'),
                  ivar=Symbol('t'),
-                 qs=dynamicsymbols('varphi_1, varphi_2')):
+                 qs=dynamicsymbols('\\varphi_1, \\varphi_2')):
 
         phi1, phi2 = qs
         theta = input_displacement
@@ -1542,8 +1547,8 @@ class MDoFElasticPendulum(ComposedSystem):
         -determine the instance of the pendulum by using class SDoFCouplePendulum()
     """
 
-    scheme_name = 'mdof_winch.png'
-    real_name = 'mdof_winch_real.png'
+    scheme_name = 'damped_elastic_pendulum.PNG'
+    real_name = 'elastic_pendulum_real.PNG'
 
     def __init__(self,
                  k=Symbol('k', positive=True),
@@ -1552,7 +1557,7 @@ class MDoFElasticPendulum(ComposedSystem):
                  g=Symbol('g', positive=True),
                  ivar=Symbol('t'),
                  z=dynamicsymbols('z'),
-                 phi=dynamicsymbols('varphi'),
+                 phi=dynamicsymbols('\\varphi'),
                  system=None):
 
         self.k = k
@@ -1648,8 +1653,8 @@ class MDoFDampedElasticPendulum(ComposedSystem):
         -determine the instance of the pendulum by using class SDoFCouplePendulum()
     """
 
-    scheme_name = 'mdof_winch.png'
-    real_name = 'mdof_winch_real.png'
+    scheme_name = 'damped_elastic_pendulum.PNG'
+    real_name = 'elastic_pendulum_real.PNG'
 
     def __init__(self,
                  undamped_system,
@@ -1660,7 +1665,7 @@ class MDoFDampedElasticPendulum(ComposedSystem):
                  g=Symbol('g', positive=True),
                  ivar=Symbol('t'),
                  z=dynamicsymbols('z'),
-                 phi=dynamicsymbols('varphi')):
+                 phi=dynamicsymbols('\\varphi')):
 
         self.c = c
         self.k = k
@@ -1675,7 +1680,7 @@ class MDoFDampedElasticPendulum(ComposedSystem):
                              qs=[phi, z],
                              frame=self.undamped.frame)
 
-        display(self.damper._eoms)
+#         display(self.damper._eoms)
         
         system = self.undamped + self.damper
 
