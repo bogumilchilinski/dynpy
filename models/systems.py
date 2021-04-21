@@ -482,12 +482,9 @@ class DDoFDampedVehicleSuspension(ComposedSystem):
                  k_2=DDoFVehicleSuspension().k_2,
                  l_l=DDoFVehicleSuspension().l_l,
                  l_r=DDoFVehicleSuspension().l_r,
-<<<<<<< HEAD
-                 
-                 qs=dynamicsymbols('z, varphi')):
-=======
+
                  qs=dynamicsymbols('z, \\varphi')):
->>>>>>> 119a5f279da82b83312d1652e1b751d9946b4406
+
         z, phi = qs
         
         self.k_1 = k_1
