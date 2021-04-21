@@ -15,8 +15,8 @@ class ComposedSystem(HarmonicOscillator):
     """Base class for all systems
 
     """
-    scheme_name = 'engine.png'
-    real_name = 'engine_real.PNG'
+    scheme_name = 'damped_car_new.PNG'
+    real_name = 'car_real.jpg'
 
     @classmethod
     def _scheme(cls):
