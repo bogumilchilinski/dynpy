@@ -1,4 +1,4 @@
-from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Point, Derivative, Expr)
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Derivative, Expr)
 from numbers import Number
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
@@ -13,11 +13,12 @@ base_origin=Point('O')
 
 class GeometryOfPoint:
     def __init__(self, *args, frame=base_frame , ivar=Symbol('t')):
+        
 
-        if isinstance(args[0],Point):
+        if type(args[0])==(Point):
             self._point=args[0]
 
-        if isinstance(args[0],Number) or isinstance(args[0],Expr):
+        elif isinstance(args[0],Number) or isinstance(args[0],Expr):
             P = Point('P')
             P.set_pos(base_origin, frame.x*args[0])
             P.set_vel(frame, frame.x*diff(args[0], ivar))
@@ -67,9 +68,12 @@ class MaterialPoint(Element):
         
         if not qs:
             self.qs = [pos1]
-            
-        pos1=GeometryOfPoint(pos1).get_point()
-        
+
+
+      
+        pos1=GeometryOfPoint(pos1,frame=frame).get_point()
+
+
         if isinstance(pos1, Point):
             Lagrangian = S.Half * m * (pos1.vel(frame).magnitude()**2).doit()  # pos1.vel(frame).magntidue() behaves as diff(pos1,ivar)
         else:
@@ -95,8 +99,8 @@ class Spring(Element):
             qs = [pos1]
 
 
-        pos1=GeometryOfPoint(pos1).get_point()
-        pos2=GeometryOfPoint(pos2).get_point()
+        pos1=GeometryOfPoint(pos1,frame=frame).get_point()
+        pos2=GeometryOfPoint(pos2,frame=frame).get_point()
 
         if isinstance(pos1,Point):
             u = pos1.pos_from(pos2).magnitude()-l0
@@ -240,14 +244,17 @@ class Damper(Element):
     real_name = 'damper.png'
     def __init__(self, c, pos1, pos2=0, qs=None, ivar=Symbol('t'), frame=base_frame):
         
+        if not qs:
+            self.qs = [pos1]
 
-        if qs == None:
-            qs = [pos1]
-        else:
-            qs = qs
+           
+        pos1=GeometryOfPoint(pos1,frame=frame).get_point()
+        pos2=GeometryOfPoint(pos2,frame=frame).get_point()
         
-        dpos1 = diff(pos1, ivar)
-        dpos2 = diff(pos2, ivar)
+        if isinstance(pos1, Point):
+            D = S.Half * c * ((pos1.vel(frame)-pos2.vel(frame)).magnitude()**2).doit()  # pos1.vel(frame).magntidue() behaves as diff(pos1,ivar)
+        else:
+            D = S.Half * c * (diff(pos1-pos2,ivar))**2
         
         
         points_dict={}
@@ -259,7 +266,7 @@ class Damper(Element):
             P_tmp.set_vel(frame, coord_vel * frame.x)
             points_dict[coord_vel]=P_tmp
         
-        D = ((S.Half) * c * (dpos1 - dpos2)**2)
+        
         
         
              
@@ -268,6 +275,8 @@ class Damper(Element):
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
 
+
+        
         
 class PID(Element):
     """

@@ -262,7 +262,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             coord
             for coord in other_dict['qs'] if not coord in self_dict['qs'])
 
-        print(self_dict['qs'])
+#         print(self_dict['qs'])
 
         def list_build(x): return [x] if x else []
 
