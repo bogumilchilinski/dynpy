@@ -428,8 +428,8 @@ class DDoFVehicleSuspension(ComposedSystem):
                  l_rod=Symbol('l_{rod}', positive=True),
                  l_l=Symbol('l_l', positive=True),
                  l_r=Symbol('l_r', positive=True),
-                 k_2=Symbol('k_2', positive=True),
-                 k_1=Symbol('k_1', positive=True),
+                 k_2=Symbol('k_r', positive=True),
+                 k_1=Symbol('k_l', positive=True),
                  F_engine=Symbol('F_{engine}', positive=True),
                  ivar=Symbol('t', positive=True),
                  qs=dynamicsymbols('z, \\varphi')):
