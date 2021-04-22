@@ -753,7 +753,7 @@ class EigenvalsMCA(MechanicalSystemAnswer):
     def __init__(self,
                  correct_system,
                  other_systems,
-                 answer_generator=lambda obj: [Eq(Symbol('lambda'),eig_val) for eig_val in obj.eigenvalues() if eig_val != 0],
+                 answer_generator=lambda obj: [Eq(Symbol('lambda'),eig_val) for eig_val in (HarmonicOscillator(obj.linearized())).eigenvalues() if eig_val != 0],
                  **kwargs):
 
         self.title = 'Określ częstość drgań swobodnych występujących w układzie:'
