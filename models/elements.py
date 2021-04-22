@@ -68,7 +68,7 @@ class MaterialPoint(Element):
         if not qs:
             self.qs = [pos1]
             
-        pos1=GeometryOfPoint(pos1).get_point().vel(frame)
+        pos1=GeometryOfPoint(pos1).get_point()
         
         if isinstance(pos1, Point):
             Lagrangian = S.Half * m * (pos1.vel(frame).magnitude()**2).doit()  # pos1.vel(frame).magntidue() behaves as diff(pos1,ivar)
