@@ -79,9 +79,9 @@
 
     \draw[thick]  (ground.west) ++ (0cm,0.8cm) --  ([xshift=1cm,yshift=0.8cm]ground.west) node[midway, below] {$$};
 
-    \draw [spring] ([yshift=0.8cm]ground.west) node (ground_fix_L) {} -- ([xshift=-0.5cm,yshift=-0.8cm]M.west) node [midway,left,xshift=-0.2cm] {$k_1, l$};
+    \draw [spring] ([yshift=0.8cm]ground.west) node (ground_fix_L) {} -- ([xshift=-0.5cm,yshift=-0.8cm]M.west) node [midway,left,xshift=-0.2cm] {$k_l, l_l$};
 
-    \draw [damper] ([xshift=1cm,yshift=0.8cm]ground.west) node (ground_fix_L) {} -- ([xshift=0.5cm,yshift=-0.8cm]M.west) node at (1cm,0) [midway,left,xshift=-0.3cm] {$c_1$};
+    \draw [damper] ([xshift=1cm,yshift=0.8cm]ground.west) node (ground_fix_L) {} -- ([xshift=0.5cm,yshift=-0.8cm]M.west) node at (1cm,0) [midway,right,xshift=0.3cm] {$c_l, l_{cl}$};
 
     \draw[thick]  (M.east) --++ (0,-0.8cm) node[midway, below] {$$};
 
@@ -91,9 +91,9 @@
 
     \draw[thick]  (ground.east) ++ (0cm,0.8cm) --  ([xshift=-1cm,yshift=0.8cm]ground.east) node[midway, below] {$$};
 
-    \draw [spring] ([xshift=-1cm,yshift=0.8cm]ground.east) node (ground_fix_L) {} -- ([xshift=-0.5cm,yshift=-0.8cm]M.east) node [midway,left,xshift=-0.2cm] {$k_2, l$};
+    \draw [spring] ([xshift=-1cm,yshift=0.8cm]ground.east) node (ground_fix_L) {} -- ([xshift=-0.5cm,yshift=-0.8cm]M.east) node [midway,left,xshift=-0.2cm] {$k_r, l_r$};
 
-    \draw [damper] ([yshift=0.8cm]ground.east) node (ground_fix_L) {} -- ([xshift=0.5cm,yshift=-0.8cm]M.east) node at (1cm,0) [midway,left,xshift=-0.3cm] {$c_2$};
+    \draw [damper] ([yshift=0.8cm]ground.east) node (ground_fix_L) {} -- ([xshift=0.5cm,yshift=-0.8cm]M.east) node at (1cm,0) [midway,right,xshift=0.3cm] {$c_r, l_{cr}$};
 
 
 %     \draw [spring] (ground.north west) ++ (0.5,0) node (ground_fix_L) {} -- (M.west) node [midway,right] {$k_2, l$};
@@ -109,8 +109,8 @@
     \fill [black] (M.west) circle (0.05);
 
 
-    \draw[thick,|-|]  (M.south west) ++ (0cm,1.5cm) --  ([yshift=1.5cm]M.south east)  node[midway, below] {$2l$};
-    \draw[thin] (M.east)--++(1cm,0) node (force_point){};
+    \draw[thick,|-|]  (M.south west) ++ (0cm,1.5cm) --  ([yshift=1.5cm]M.south east)  node[midway, below] {$l_{rod}$};
+    \draw[thin] (M.east)--++(1.9cm,0) node (force_point){};
     \draw[->](force_point.center)--++(0,-2cm) node[midway,right] {$F_{engine}$};
 
 

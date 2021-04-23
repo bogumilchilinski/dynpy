@@ -1,1 +1,1 @@
-{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-output-directory=/tmp/84971f42521e4cf518eea6a4845e476a1c4644d7","-interaction=nonstopmode","car_TMD.tex"]}
+{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-interaction=nonstopmode","car_TMD.tex"]}
