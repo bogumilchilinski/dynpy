@@ -20,3 +20,6 @@ class SDoFFreeGalerkinGoverningEquationIntegralMCA(en.SDoFFreeGalerkinGoverningE
     
 class SDoFFreeGalerkinGoverningEquationIntegralTR8MCA(en.SDoFFreeGalerkinGoverningEquationIntegralTR8MCA):
     question = 'Odpowiednie tożsamości trygonometryczne zostały zastosowane w równaniu:'
+
+class SmallParameterNMSA(en.SmallParameterNMSA):
+    question = 'Mały parametr układu:'

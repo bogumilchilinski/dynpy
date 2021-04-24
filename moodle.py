@@ -98,6 +98,24 @@ class EmbeddedShortAnswer(EmbeddedAnswer):
 
         return answer_string
 
+class EmbeddedNumericalAnswer(EmbeddedAnswer):
+    """ Class EmeddedNumericalAnswer allows to create a space for numerical answer. It inherits from class EmbeddedAnswer and creates blank place for string type variable.
+
+    Class EmbeddedShortAnswer contains answer's string and score.
+
+    Parameters:
+    ============
+    value: str
+        The user's answer.
+
+    score: int
+        Value of question score.
+    """
+
+    def __init__(self, answer, score=1):
+        super().__init__(value=answer, error=0.1, relative_error=True,
+                         precision=4, score=1, question_str='NUMERICAL')
+
 
 class EmbeddedMultichoiceAnswer(EmbeddedAnswer):
     """ Class EmeddedMultichoiceAnswer allows to create an answear with more than one correct value. It inherits from class EmbeddedAnswer and creates space for multichoice answer.
@@ -412,6 +430,36 @@ class MechanicalSystemAnswer(EmbeddedMultichoiceMathAnswer):
         display(*self._other_answers)
         print('x' * 100)
 
+class TitledNumericalAnswerForMechanicalSystem(EmbeddedNumericalAnswer):
+
+    question = None
+
+    def __init__(self,
+                 correct_system,
+                 answer_generator=None,
+                 title=None,
+                 **kwargs):
+        print('hello')
+
+        if title:
+            self.title = title
+        else:
+            self.title = type(self).question
+
+        if not answer_generator:
+            answer_generator = self.answer_entry
+
+        self._correct_answers =answer_generator(correct_system)
+
+        super().__init__(self._correct_answers, **kwargs)
+
+    def preview(self, backend=None):
+        print(self.title)
+        print('=' * 100)
+        display(self._correct_answers)
+        print('=' * 100)
+
+        
 
 class QuizOn(sys.ComposedSystem):
     

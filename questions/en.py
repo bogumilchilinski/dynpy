@@ -763,3 +763,17 @@ class EigenvalsMCA(MechanicalSystemAnswer):
                          answer_generator=answer_generator,
                          title=self.title,
                          **kwargs)
+        
+class SmallParameterNMSA(TitledNumericalAnswerForMechanicalSystem):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: ((obj.inertia_matrix()[0]/obj.inertia_matrix()[0]).simplify()).subs({Symbol('k',positive=True):300,Symbol('m',positive=True):500,Symbol('l',positive=True):0.5,Symbol('l_0',positive=True):0.3}).n(3),
+                 **kwargs):
+
+        self.title = 'Określ wartość małego parametru dla następujących danych \(m=500\) \(kg\), \(k=300 \\frac{N}{m}\), \(l=0.5\) \(m\), \(l_0=0.3\) \(m\):'
+        self.title = 'Determine the eigenvalues for the considered system:'
+        super().__init__(correct_system[0],
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
