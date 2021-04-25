@@ -1675,6 +1675,8 @@ class MDoFDampedElasticPendulum(ComposedSystem):
         self.phi = phi
         self.z = z
         self.undamped = undamped_system
+
+
         self.damper = Damper(c=c,
                              pos1=self.undamped.payload,
                              qs=[phi, z],
