@@ -439,7 +439,7 @@ class TitledNumericalAnswerForMechanicalSystem(EmbeddedNumericalAnswer):
                  answer_generator=None,
                  title=None,
                  **kwargs):
-        print('hello')
+#         print('hello')
 
         if title:
             self.title = title
@@ -449,7 +449,7 @@ class TitledNumericalAnswerForMechanicalSystem(EmbeddedNumericalAnswer):
         if not answer_generator:
             answer_generator = self.answer_entry
 
-        self._correct_answers =answer_generator(correct_system)
+        self._correct_answers = answer_generator(correct_system)
 
         super().__init__(self._correct_answers, **kwargs)
 
