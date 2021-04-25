@@ -769,11 +769,12 @@ class PlottedData(Figure):
                       grid=True,
                       subplots=True,
                       num_yticks=None,
-                      fontsize=None):
+                      fontsize=None,
+                      figsize=(10, 4)):
         numerical_data = self._numerical_data
 
         ax = numerical_data.plot(subplots=subplots,
-                                 figsize=(10, 4),
+                                 figsize=figsize,
                                  ylabel=ylabel,
                                  xlabel=xlabel,
                                  grid=grid,
@@ -801,8 +802,14 @@ class PlottedData(Figure):
         if subplots:
             ([
                 ax_tmp.legend([label_formatter(sym)])
-                for ax_tmp, sym in zip(ax, numerical_data.columns)
+                for ax_tmp, sym in zip(ax, numerical_data.columns)        
             ])
+            
+            ([
+                ax_tmp.ylabel([label_formatter(sym)])
+                for ax_tmp, sym in zip(ax, numerical_data.columns)        
+            ])
+            
         else:
             ax.legend([[label_formatter(sym)] for sym in numerical_data.columns])
 
@@ -1054,6 +1061,7 @@ class ReportSection(Section):
             grid=True,
             num_yticks=10,
             fontsize=None,
+            figsize=(10, 4),
             caption='Przebiegi czasowe modelu dla rozważanego zakresu danych',
             plots_no=1):
 
@@ -1122,6 +1130,7 @@ class ReportSection(Section):
                                           subplots=subplots,
                                           xlabel=xlabel,
                                           grid=grid,
+                                          figsize=figsize,
                                           num_yticks=num_yticks,
                                           fontsize=fontsize)
                         fig.add_caption(
@@ -1156,6 +1165,7 @@ class ReportSection(Section):
             title='Analiza otrzymanych wyników',
             numerical_data=None,
             units_dict={},
+            figsize=(10,4),
             initial_description='Initial description',
             ending_summary='Ending summary',  # random.choice(conclusion_bank_composed_model)
     ):
@@ -1202,7 +1212,7 @@ class ReportSection(Section):
                                 './plots/fig_summary_' + str(current_time),
                                 position='H',
                                 preview=True)) as fig:
-                fig.add_data_plot(summary_frame)
+                fig.add_data_plot(summary_frame,figsize=figsize)
                 fig.add_caption(
                     NoEscape(
                         'Zestawienie wyników przeprowadzonej analizy.'.format(
@@ -1227,6 +1237,7 @@ class ReportSection(Section):
             title='Wyniki optymalizacji jednokryterialnej',
             numerical_data=None,
             units_dict={},
+            figsize=(10,4),
             initial_description='Initial description',
             ending_summary='Ending summary',  # random.choice(conclusion_bank_composed_model)
     ):
@@ -1236,6 +1247,7 @@ class ReportSection(Section):
             numerical_data=numerical_data,
             units_dict=units_dict,
             initial_description=initial_description,
+            figsize=figsize,
             ending_summary=
             'Ending summary',  # random.choice(conclusion_bank_composed_model)
         )
