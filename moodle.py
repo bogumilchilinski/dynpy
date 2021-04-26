@@ -400,6 +400,8 @@ class MechanicalSystemAnswer(EmbeddedMultichoiceMathAnswer):
                  title=None,
                  **kwargs):
 
+        
+
         if title:
             self.title = title
         else:
@@ -408,6 +410,7 @@ class MechanicalSystemAnswer(EmbeddedMultichoiceMathAnswer):
         if not answer_generator:
             answer_generator = self.answer_entry
 
+        self.answer_generator=answer_generator
         self._correct_answers = [answer_generator(
             system) for system in sym.flatten([correct_system])]
         self._other_answers = [answer_generator(
@@ -453,6 +456,9 @@ class TitledNumericalAnswerForMechanicalSystem(EmbeddedNumericalAnswer):
 
         super().__init__(self._correct_answers, **kwargs)
 
+    def to_string(self):
+        return self.title + '\n' + super().to_string()
+
     def preview(self, backend=None):
         print(self.title)
         print('=' * 100)
@@ -475,7 +481,7 @@ class QuizOn(sys.ComposedSystem):
         super().__init__(*args,**kwargs)
         
 
-    def generate_dict(self,param_range=None):
+    def generate_dict(self,cases_no=5,param_range=None):
         sys_par=self.system_parameters()
         self.param_range=param_range
         sym_list=[]
@@ -486,7 +492,7 @@ class QuizOn(sys.ComposedSystem):
 
         if self.param_range==None:
 
-            for caseno in [0,1,2,3,4]:
+            for caseno in range(cases_no):
                 print('jestes tu :(')
                 sym_dict={}
                 temp_dict={}
@@ -509,7 +515,7 @@ class QuizOn(sys.ComposedSystem):
 
                 sym_list.append(sym_dict)   
         else: 
-            for caseno in [0,1,2,3,4]:
+            for caseno in range(cases_no):
                 sym_dict={}
                 temp_dict={}
                 for key,val in param_range.items(): 
@@ -526,9 +532,38 @@ class QuizOn(sys.ComposedSystem):
 
                 sym_list.append(sym_dict)   
             
+        
+
+
+        
         return sym_list
 #         for num,sym in enumerate(symbols_list):
 #             sym_dict={symbols_list[sym]:'a'}
+
+    def generate_cases_data(self,cases_no=5,param_range=None,question_list=None):
+
+        if question_list:
+            unique_sym_list=[],
+            data_dict_list=[]
+
+            while len(unique_sym_list)<=cases_no:
+                data_dict=self.generate_dict(cases_no=1, param_range=param_range )[0]
+                case_sys=self.system.subs(data_dict)
+                for qs in question_list:
+                
+                    
+
+                    answer_formula=qs.answer_genrator(case_sys)
+                    if not answer_formula in unique_sym_list:
+                        unique_sym_list.append(answer_formula)
+                        data_dict_list.append(data_dict)
+            
+            return data_dict_list
+
+        else:
+            return self.generate_dict(cases_no=cases_no, param_range=param_range )
+
+
     def preview(self,example=False):
         if example:
             path=self._real_example_path
@@ -555,8 +590,11 @@ class QuizOn(sys.ComposedSystem):
 
         subs_dicts_list=self.subs_dict
 
+        cases_no
+
+
         question_set=[]
-        for case_no in [0,1,2,3,4]:
+        for case_no in range(len(ds_list)):
             case = 'case'+str(case_no)
 
             fig=EmbeddedGraphics(self._scheme_path)
