@@ -883,14 +883,15 @@ class SmallParameterNMSA(TitledNumericalAnswerForMechanicalSystem):
                  answer_generator=lambda obj:
                  ((obj.small_parameter() / obj.inertia_matrix()[0]).simplify()
                   ).subs({
-                      Symbol('k', positive=True): 300,
-                      Symbol('m', positive=True): 500,
+                      Symbol('k_0', positive=True): 300,
+                      Symbol('m_0', positive=True): 500,
                       Symbol('d', positive=True): 0.5,
                       Symbol('l_0', positive=True): 0.3
                   }).n(3),
                  **kwargs):
 
-        super().__init__(correct_system[0],
+        super().__init__(correct_system,
+                         other_systems,
                          answer_generator=answer_generator,
                          title=None,
                          **kwargs)
@@ -907,15 +908,16 @@ class FrequencyForAmplitudeNMSA(TitledNumericalAnswerForMechanicalSystem):
                 (HarmonicOscillator(obj.linearized()).natural_frequencies()[0]
                  **2 + S('3') / 4 * obj.small_parameter() / obj.inertia_matrix(
                  )[0] * Symbol('a')**2).subs({
-                     Symbol('k', positive=True): 300,
-                     Symbol('m', positive=True): 500,
+                     Symbol('k_0', positive=True): 300,
+                     Symbol('m_0', positive=True): 500,
                      Symbol('d', positive=True): 0.5,
                      Symbol('l_0', positive=True): 0.3,
                      Symbol('a'): 0.1
                  }) - Symbol('omega')**2, Symbol('omega')))[1].n(3),
             **kwargs):
 
-        super().__init__(correct_system[0],
+        super().__init__(correct_system,
+                         other_systems,
                          answer_generator=answer_generator,
                          title=None,
                          **kwargs)
@@ -933,15 +935,16 @@ class NonLinLowerAmplitudeValueNMSA(TitledNumericalAnswerForMechanicalSystem):
                  **2 + S('3') / 4 * obj.small_parameter() / obj.inertia_matrix(
                  )[0] * Symbol('a')**2) - Symbol('omega', positive=True)**2,
                 Symbol('a')))[0].subs({
-                    Symbol('k', positive=True): 300,
-                    Symbol('m', positive=True): 500,
+                    Symbol('k_0', positive=True): 300,
+                    Symbol('m_0', positive=True): 500,
                     Symbol('d', positive=True): 0.5,
                     Symbol('l_0', positive=True): 0.3,
                     Symbol('omega', positive=True): 3.5
                 }).n(3),
             **kwargs):
 
-        super().__init__(correct_system[0],
+        super().__init__(correct_system,
+                         other_systems,
                          answer_generator=answer_generator,
                          title=None,
                          **kwargs)
@@ -959,15 +962,16 @@ class NonLinHigherAmplitudeValueNMSA(TitledNumericalAnswerForMechanicalSystem):
                  **2 + S('3') / 4 * obj.small_parameter() / obj.inertia_matrix(
                  )[0] * Symbol('a')**2) - Symbol('omega', positive=True)**2,
                 Symbol('a')))[1].subs({
-                    Symbol('k', positive=True): 300,
-                    Symbol('m', positive=True): 500,
+                    Symbol('k_0', positive=True): 300,
+                    Symbol('m_0', positive=True): 500,
                     Symbol('d', positive=True): 0.5,
                     Symbol('l_0', positive=True): 0.3,
                     Symbol('omega', positive=True): 3.5
                 }).n(3),
             **kwargs):
 
-        super().__init__(correct_system[0],
+        super().__init__(correct_system,
+                         other_systems,
                          answer_generator=answer_generator,
                          title=None,
                          **kwargs)
@@ -979,9 +983,9 @@ class SystemResponseAmplitudeC2MCA(MechanicalSystemAnswer):
     def __init__(self,
                  correct_system,
                  other_systems,
-                 answer_generator=lambda obj: (list(
+                 answer_generator=lambda obj: [Eq(Symbol('C2'),(list(
                      obj.steady_solution_amp(obj.external_forces().subs(
-                         t, 0), Matrix([0, 0]))[0])[1]).simplify(),
+                         t, 0), Matrix([0, 0]))[0])[1]).simplify())],
                  **kwargs):
 
         super().__init__(correct_system,
@@ -1006,7 +1010,8 @@ class LowerNaturalFreqValueNMSA(TitledNumericalAnswerForMechanicalSystem):
                  ]),
                  **kwargs):
 
-        super().__init__(correct_system[0],
+        super().__init__(correct_system,
+                         other_systems,
                          answer_generator=answer_generator,
                          title=None,
                          **kwargs)
@@ -1027,7 +1032,8 @@ class HigherNaturalFreqValueNMSA(TitledNumericalAnswerForMechanicalSystem):
                  ]),
                  **kwargs):
 
-        super().__init__(correct_system[0],
+        super().__init__(correct_system,
+                         other_systems,
                          answer_generator=answer_generator,
                          title=None,
                          **kwargs)
@@ -1040,19 +1046,62 @@ class SteadyAmplitudesRatioNMSA(TitledNumericalAnswerForMechanicalSystem):
             self,
             correct_system,
             other_systems,
-            answer_generator=lambda obj: abs((list(
+            answer_generator=lambda obj: (abs((list(
                 obj.steady_solution_amp(obj.external_forces(
                 ).subs(t, 0), Matrix([0, 0]))[0])[0]).simplify() / (list(
                     obj.steady_solution_amp(obj.external_forces().subs(t, 0),
                                             Matrix([0, 0]))[0]
-                )[1]).simplify()).subs({
+                )[1]).simplify())).subs({
                     Symbol('k', positive=True): 900,
                     Symbol('m', positive=True): 500,
                     Symbol('Omega', positive=True): 15
                 }).n(3),
             **kwargs):
 
-        super().__init__(correct_system[0],
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=None,
+                         **kwargs)
+
+
+class SecondModeFirstComponentValueNMSA(TitledNumericalAnswerForMechanicalSystem):
+    question = 'Find the value of the first component of the second mode of vibration for the given parameters \(m=150 kg\), \(k=900 \\frac{N}{m}\):'
+
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: (HarmonicOscillator(
+                     obj.linearized()).modes()[:,1]).subs({Symbol('k', positive=True): 900,
+                    Symbol('m', positive=True): 500,}).applyfunc(lambda comp: round(comp.n(),3))[0],
+                 **kwargs):
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=None,
+                         **kwargs)
+
+class Test(MechanicalSystemAnswer):
+    question = 'Determine the \(C2\) amplitude of a steady solution:'
+
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: (abs((list(
+                obj.steady_solution_amp(obj.external_forces(
+                ).subs(t, 0), Matrix([0, 0]))[0])[0]).simplify() / (list(
+                    obj.steady_solution_amp(obj.external_forces().subs(t, 0),
+                                            Matrix([0, 0]))[0]
+                )[1]).simplify())).subs({
+                    Symbol('k', positive=True): 900,
+                    Symbol('m', positive=True): 500,
+                    Symbol('Omega', positive=True): 15
+                }).n(3),
+                 **kwargs):
+
+        super().__init__(correct_system,
+                         other_systems,
                          answer_generator=answer_generator,
                          title=None,
                          **kwargs)
