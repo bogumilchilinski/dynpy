@@ -880,8 +880,8 @@ class SDoFDampedPendulum(ComposedSystem):
         self.c = c
 
         self.Pendulum = Pendulum(m, g, l, angle=phi)
-        self.Force = Force(-c * diff(phi, ivar), pos1=phi, qs=qs)
-        system = self.Pendulum + self.Force
+        self.Damper = Damper(c, l*phi, qs=qs)
+        system = self.Pendulum + self.Damper
 
         super().__init__(system)
 
@@ -894,6 +894,53 @@ class SDoFDampedPendulum(ComposedSystem):
         }
         return self.sym_desc_dict
 
+
+class SDoFExcitedDampedPendulum(ComposedSystem):
+
+    scheme_name = 'damped_pendulum.png'
+    real_name = 'pendulum2_real.jpg'
+
+    def __init__(
+            self,
+            m=Symbol('m', positive=True),
+            g=Symbol('g', positive=True),
+            l=Symbol('l', positive=True),
+            c=Symbol('c', positive=True),
+            F=Symbol('F', positive=True),
+            Omega=Symbol('Omega', positive=True),
+            angle=dynamicsymbols('varphi'),
+            qs=None,
+            ivar=Symbol('t'),
+    ):
+        phi = angle
+
+        if qs == None:
+            qs = [angle]
+        else:
+            qs = qs
+
+        self.m = m
+        self.g = g
+        self.l = l
+        self.c = c
+        self.F = F
+        self.Omega = Omega
+
+        self.Pendulum = Pendulum(m, g, l, angle=phi)
+        self.Damper = Damper(c, l*phi, qs=qs)
+        self.Force = Force(-F * sin(Omega * ivar), pos1=phi, qs=[phi])
+        system = self.Pendulum + self.Damper + self.Force
+
+        super().__init__(system)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass of pendulum',
+            self.g: r'Gravity constant',
+            self.l: r'Pendulum length',
+            self.c: r'Damping coefficient',
+        }
+        return self.sym_desc_dict
 
 class DDoFCoupledPendulum(ComposedSystem):
     """
@@ -1837,7 +1884,7 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
 
 class DDoFTwoNonLinearTrolleys(ComposedSystem):
     scheme_name = 'ddof_nonlin_trolleys.PNG'
-    real_name = 'trolleywithnonlinearspring_real.png'
+    real_name = 'dwa_wozki_XD.PNG'
 
     def __init__(self,
                  m1=Symbol('m_1', positive=True),
@@ -1850,6 +1897,7 @@ class DDoFTwoNonLinearTrolleys(ComposedSystem):
                  ivar=Symbol('t'),
                  x1=dynamicsymbols('x1'),
                  x2=dynamicsymbols('x2'),
+                 qs=dynamicsymbols('x1, x2'),
                  system=None):
 
         self.m1 = m1
@@ -1867,7 +1915,7 @@ class DDoFTwoNonLinearTrolleys(ComposedSystem):
         self.Spring = Spring(k3,x1,x2)
 
         system = self.Trolley1 + self.Spring + self.Trolley2
-        super().__init__(system)
+        super().__init__(system(qs))
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -1883,7 +1931,7 @@ class DDoFTwoNonLinearTrolleys(ComposedSystem):
 
 class MDoFForcedTrolleysWithSprings(ComposedSystem):
     scheme_name = 'mdof_three_trolleys.PNG'
-    real_name = 'trolleywithnonlinearspring_real.png'
+    real_name = 'three_carriages.PNG'
 
     def __init__(self,
                  x_l = dynamicsymbols('x_l'),
@@ -1905,6 +1953,7 @@ class MDoFForcedTrolleysWithSprings(ComposedSystem):
                  k_cr = Symbol('k_cr', positive=True),
                  F = Symbol('F', positive=True),
                  Omega = Symbol('Omega', positive=True),
+                 qs = dynamicsymbols('x_l x_c x_r'),
                  ivar=Symbol('t'),
                  system=None):
 
@@ -1925,10 +1974,11 @@ class MDoFForcedTrolleysWithSprings(ComposedSystem):
         self.x_1 = x_1
         self.x_2 = x_2
         self.x_3 = x_3
+        self.Omega = Omega
 
         self.Trolley_1 = MaterialPoint(m1,x_l,qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[x_l]) + Spring(k_cl, pos1=x_l, qs=[x_l]) + Force(-F * cos(Omega * ivar), pos1=x_l, qs=[x_l])
         self.Trolley_2 = MaterialPoint(m2,x_c,qs=[x_c]) + Spring(k_12,x_l,x_c) + Spring(k_12,x_l,x_c) + Spring(k_23,x_c,x_r) + Spring(k_23,x_c,x_r) + Spring(k_c12,x_l,x_c) + Spring(k_c23,x_c,x_r)
         self.Trolley_3 = MaterialPoint(m3,x_r,qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_cr, pos1=x_r, qs=[x_r]) + Force(-2*F * cos(Omega * ivar), pos1=x_r, qs=[x_r])
 
         system = self.Trolley_1 + self.Trolley_2  + self.Trolley_3
-        super().__init__(system)
+        super().__init__(system(qs))
