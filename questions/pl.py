@@ -53,3 +53,10 @@ class HigherNaturalFreqValueNMSA(en.HigherNaturalFreqValueNMSA):
 
 class SteadyAmplitudesRatioNMSA(en.SteadyAmplitudesRatioNMSA):
     question = 'Ile razy amplituda drgań ustalonych pierwszego wózka jest większa od amplitudy drgań ustalonych drugiego wózka przy zadanych parametrach: \(m=150 kg\), \(k=900 \\frac{N}{m}\), \(\\omega=15 \\frac{rad}{s}\):'
+
+class Test(en.Test):
+    question = 'Test:'
+    
+class SecondModeFirstComponentValueNMSA(en.SecondModeFirstComponentValueNMSA):
+    question = 'Wyznacz wartość pierwszej składowej drugiej postaci drgań dla zadanych parametrów \(m=150 kg\), \(k=900 \\frac{N}{m}\):'
+    

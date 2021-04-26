@@ -439,6 +439,7 @@ class TitledNumericalAnswerForMechanicalSystem(EmbeddedNumericalAnswer):
 
     def __init__(self,
                  correct_system,
+                 other_systems,
                  answer_generator=None,
                  title=None,
                  **kwargs):
@@ -452,9 +453,12 @@ class TitledNumericalAnswerForMechanicalSystem(EmbeddedNumericalAnswer):
         if not answer_generator:
             answer_generator = self.answer_entry
 
-        self._correct_answers = answer_generator(correct_system)
+        self._correct_answers = [answer_generator(
+            system) for system in sym.flatten([correct_system])]
+        self._other_answers = [answer_generator(
+            system) for system in other_systems]
 
-        super().__init__(self._correct_answers, **kwargs)
+        super().__init__(self._correct_answers[0], **kwargs)
 
     def to_string(self):
         return self.title + '\n' + super().to_string()
@@ -462,8 +466,11 @@ class TitledNumericalAnswerForMechanicalSystem(EmbeddedNumericalAnswer):
     def preview(self, backend=None):
         print(self.title)
         print('=' * 100)
-        display(self._correct_answers)
+        display(*self._correct_answers)
         print('=' * 100)
+        print('x' * 100)
+        display(*self._other_answers)
+        print('x' * 100)
 
         
 
@@ -582,7 +589,7 @@ class QuizOn(sys.ComposedSystem):
         self.question_list=question_list
         self.title=str(self)
         self._preview=preview
-        self.ds_list=[HarmonicOscillator(self.system.subs(subs)) for subs in subs_dict]
+        self.ds_list=[HarmonicOscillator(self.system.subs(subs,method='direct')) for subs in subs_dict]
         ds_list=self.ds_list
         self.subs_dict=subs_dict
         question_cat=self.title
@@ -636,7 +643,7 @@ class QuizOn(sys.ComposedSystem):
         if self._preview:
             for no,question in enumerate(self.question_list):
 
-                qs = question(ds_list[0:1], ds_list[1:])
+                qs = question(ds_list[0], ds_list[1:])
 
                 qs.preview()
 
