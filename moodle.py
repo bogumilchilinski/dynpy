@@ -547,28 +547,28 @@ class QuizOn(sys.ComposedSystem):
 #         for num,sym in enumerate(symbols_list):
 #             sym_dict={symbols_list[sym]:'a'}
 
-    def generate_cases_data(self,cases_no=5,param_range=None,question_list=None):
+    # def generate_cases_data(self,cases_no=5,param_range=None,question_list=None):
 
-        if question_list:
-            unique_sym_list=[],
-            data_dict_list=[]
+    #     if question_list:
+    #         unique_sym_list=[],
+    #         data_dict_list=[]
 
-            while len(unique_sym_list)<=cases_no:
-                data_dict=self.generate_dict(cases_no=1, param_range=param_range )[0]
-                case_sys=self.system.subs(data_dict)
-                for qs in question_list:
+    #         while len(unique_sym_list)<=cases_no:
+    #             data_dict=self.generate_dict(cases_no=1, param_range=param_range )[0]
+    #             case_sys=self.system.subs(data_dict)
+    #             for qs in question_list:
                 
                     
 
-                    answer_formula=qs.answer_genrator(case_sys)
-                    if not answer_formula in unique_sym_list:
-                        unique_sym_list.append(answer_formula)
-                        data_dict_list.append(data_dict)
+    #                 answer_formula=qs.answer_genrator(case_sys)
+    #                 if not answer_formula in unique_sym_list:
+    #                     unique_sym_list.append(answer_formula)
+    #                     data_dict_list.append(data_dict)
             
-            return data_dict_list
+    #         return data_dict_list
 
-        else:
-            return self.generate_dict(cases_no=cases_no, param_range=param_range )
+    #     else:
+    #         return self.generate_dict(cases_no=cases_no, param_range=param_range )
 
 
     def preview(self,example=False):
