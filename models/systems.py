@@ -210,7 +210,9 @@ class BeamBridgeTMD(ComposedSystem):
         self.F_0 = F_0
         self.m_TMD = m_TMD
         self.k_TMD = k_TMD
-
+        self.z_TMD=z_TMD
+        self.z=z
+        
         self.mass = MaterialPoint(m, z, qs=[z])
         self.spring = Spring(k_beam, z, qs=[z])
         self.gravity_force = GravitationalForce(self.m, self.g, z)
@@ -245,6 +247,59 @@ class BeamBridgeTMD(ComposedSystem):
             ],
             self.m_TMD: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
             self.k_TMD: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0]
+        }
+
+        return default_data_dict
+
+class BeamBridgeDampedTMD(ComposedSystem):
+
+    scheme_name = 'bridge_tmd_dmp.png'
+    real_name = 'beam_bridge_real.PNG'
+
+    def __init__(self,
+                 non_damped_system,
+                 c_TMD=Symbol('c_TMD', positive=True),
+                 c=Symbol('c', positive=True),
+                 z_TMD=BeamBridgeTMD().z_TMD,
+                 z=BeamBridgeTMD().z
+                 ):
+        qs=z,z_TMD
+        self.nds = non_damped_system
+        self.c = c
+        self.c_TMD = c_TMD
+
+        self.damper_TMD=Damper(c=c_TMD, pos1=z-z_TMD,qs=qs)  # left damper
+        self.damper=Damper(c=c, pos1=z,qs=qs)
+        system = (self.nds + self.damper + self.damper_TMD)
+
+        super().__init__(system)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'mass of system on the spring',
+            self.k_beam: r'Beam stiffness',
+            self.g: r'gravitational field acceleration'
+        }
+
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        E, I, l, m0, k0, lamb = symbols('E I l_beam m_0 k_0 lambda', positive=True)
+
+        default_data_dict = {
+            self.nds.m: [20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0],
+            self.c: [lamb * self.nds.k_beam],
+            self.nds.k_beam: [
+                2 * 48 * E * I / l**3, 3 * 48 * E * I / l**3,
+                4 * 48 * E * I / l**3, 5 * 48 * E * I / l**3,
+                6 * 48 * E * I / l**3
+            ],
+            self.c_TMD: [lamb * self.nds.k_TMD],
+            
+            self.nds.m_TMD: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
+            self.nds.k_TMD: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
+            
         }
 
         return default_data_dict
@@ -664,6 +719,15 @@ class Pendulum(ComposedSystem):
             angle, ivar)**2 - m * g * l * (1 - cos(angle))
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
+    def get_default_data(self):
+
+        m0, l0= symbols('m_0 l_0', positive=True)
+
+        default_data_dict = {
+            
+            self.m: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
+            self.l: [2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0],
+}
 
     def symbols_description(self):
         self.sym_desc_dict = {
