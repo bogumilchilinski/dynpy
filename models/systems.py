@@ -897,8 +897,8 @@ class SDoFDampedPendulum(ComposedSystem):
 
 class SDoFExcitedDampedPendulum(ComposedSystem):
 
-    scheme_name = 'damped_pendulum.png'
-    real_name = 'pendulum2_real.jpg'
+    scheme_name = 'damped_excited_pendulum.PNG'
+    real_name = 'elastic_pendulum_real.PNG'
 
     def __init__(
             self,
@@ -1897,6 +1897,7 @@ class DDoFTwoNonLinearTrolleys(ComposedSystem):
                  ivar=Symbol('t'),
                  x1=dynamicsymbols('x1'),
                  x2=dynamicsymbols('x2'),
+                 x=dynamicsymbols('x'),
                  qs=dynamicsymbols('x1, x2'),
                  system=None):
 
@@ -1909,6 +1910,7 @@ class DDoFTwoNonLinearTrolleys(ComposedSystem):
         self.l_0 = l_0
         self.x1 = x1
         self.x2 = x2
+        self.x = x
 
         self.Trolley1 = MaterialPoint(m1,x1,qs=[x1]) + Spring(k1, pos1=(sqrt(x1**2 + d**2) - l_0), qs=[x1])
         self.Trolley2 = MaterialPoint(m2,x2,qs=[x2]) + Spring(k2, pos1=(sqrt(x2**2 + d**2) - l_0), qs=[x2])
@@ -1916,6 +1918,23 @@ class DDoFTwoNonLinearTrolleys(ComposedSystem):
 
         system = self.Trolley1 + self.Spring + self.Trolley2
         super().__init__(system(qs))
+
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
+            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.d: [1 * l0, 2 * l0, S.Half * l0, 3*S.Half * l0, 1 *l0],
+            self.k1: [S.Half * k0, S.Half * k0, 1 * k0, 3*S.Half * k0, 2 * k0],
+            self.k2: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k3: [S.Half * k0, 1 * k0, 3*S.Half * k0, 2 * k0, 5*S.Half * k0],
+            self.x1: [self.x, 0],
+            self.x2: [self.x,S.Zero],
+        }
+
+        return default_data_dict
 
     def symbols_description(self):
         self.sym_desc_dict = {
