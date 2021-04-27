@@ -46,16 +46,13 @@ class SystemResponseAmplitudeC2MCA(en.SystemResponseAmplitudeC2MCA):
     question = 'Wyznacz amplitudę C2 drgań ustalonych rozważanego układu:'
     
 class LowerNaturalFreqValueNMSA(en.LowerNaturalFreqValueNMSA):
-    question = 'Wyznacz wartość niższej częstości drgań własnych układu dla zadanych parametrów: \(m=150 kg\), \(k=900 \\frac{N}{m}\) (wartość zaokrąglić do drugiego miejsca po przecinku):'
+    question = 'Wyznacz wartość niższej częstości drgań własnych układu dla zadanych parametrów \(m=150 kg\), \(k=900 \\frac{N}{m}\) (wartość zaokrąglić do drugiego miejsca po przecinku):'
 
 class HigherNaturalFreqValueNMSA(en.HigherNaturalFreqValueNMSA):
-    question = 'Wyznacz wartość wyższej częstości drgań własnych układu dla zadanych parametrów: \(m=150 kg\), \(k=900 \\frac{N}{m}\) (wartość zaokrąglić do drugiego miejsca po przecinku):'
+    question = 'Wyznacz wartość wyższej częstości drgań własnych układu dla zadanych parametrów \(m=150 kg\), \(k=900 \\frac{N}{m}\) (wartość zaokrąglić do drugiego miejsca po przecinku):'
 
 class SteadyAmplitudesRatioNMSA(en.SteadyAmplitudesRatioNMSA):
-    question = 'Ile razy amplituda drgań ustalonych pierwszego wózka jest większa od amplitudy drgań ustalonych drugiego wózka przy zadanych parametrach: \(m=150 kg\), \(k=900 \\frac{N}{m}\), \(\\omega=15 \\frac{rad}{s}\):'
-
-class Test(en.Test):
-    question = 'Test:'
+    question = 'Ile razy amplituda drgań ustalonych pierwszego wózka jest większa od amplitudy drgań ustalonych drugiego wózka przy zadanych parametrach \(m=150 kg\), \(k=900 \\frac{N}{m}\), \(\\Omega=15 \\frac{rad}{s}\):'
     
 class SecondModeFirstComponentValueNMSA(en.SecondModeFirstComponentValueNMSA):
     question = 'Wyznacz wartość pierwszej składowej drugiej postaci drgań dla zadanych parametrów \(m=150 kg\), \(k=900 \\frac{N}{m}\):'

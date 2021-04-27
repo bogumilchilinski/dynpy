@@ -11,6 +11,7 @@ import IPython as IP
 import base64
 t = Symbol('t')
 
+import itertools as itt
 
 class EmbeddedAnswer:
     """ Class EmeddedAnswer allows to create a space for numerical answer.
@@ -432,7 +433,59 @@ class MechanicalSystemAnswer(EmbeddedMultichoiceMathAnswer):
         print('x' * 100)
         display(*self._other_answers)
         print('x' * 100)
+        
+        print('@' * 40+ 'uniqueness' + '@' * 40)
+        display(self.is_unique())
+        print('@' * 100)
+        
+    def is_unique(self,answers=None):
+        
+        
+        if answers:
+            all_answers=answers
+        else:
+            all_answers=self._correct_answers+self._other_answers
+        
+        
+        #ans_field=itt.product(all_answers,all_answers)
+        
+        #return not any([all_answers[ans2] is all_answers[ans1]  for ans2 in range(len(all_answers))  for ans1 in range(ans2+1,len(all_answers))])
+        return not any([ans2 == ans1  for no2,ans2 in enumerate(all_answers) for no1,ans1 in enumerate(all_answers) if no1>no2  ])
 
+    def add_other_system(self,other_system):
+        new_answer=[self.answer_generator(other_system)]
+        
+        all_answers=self._correct_answers+self._other_answers+new_answer
+        
+        uniqueness_check = self.is_unique(all_answers)
+        
+        if uniqueness_check:
+            self._other_answers=self._other_answers+new_answer
+        
+        
+        return uniqueness_check
+    
+    
+    def change_questions_order(self,no=1):
+        if no==1:
+            correct_slice=self._correct_answers[1:]
+            other_slice=self._other_answers[1:]
+            
+            correct_first=self._correct_answers[0]
+            other_first=self._other_answers[0]
+            
+            self._correct_answers=correct_slice+[other_first]
+            self._other_answers=other_slice+[correct_first]
+            
+        else:
+            for i in range(no):
+                self.change_questions_order(no=1)
+
+
+        super().__init__(self._correct_answers, self._other_answers)
+        
+        return self
+    
 class TitledNumericalAnswerForMechanicalSystem(EmbeddedNumericalAnswer):
 
     question = None
@@ -472,8 +525,51 @@ class TitledNumericalAnswerForMechanicalSystem(EmbeddedNumericalAnswer):
         display(*self._other_answers)
         print('x' * 100)
 
+        print('@' * 40+ 'uniqueness' + '@' * 40)
+        display(self.is_unique())
+        print('@' * 100)
         
+        
+    def is_unique(self):
+        all_answers=self._correct_answers+self._other_answers
+        
+        #ans_field=itt.product(all_answers,all_answers)
+        
+        return not any([ans2 == ans1  for no2,ans2 in enumerate(all_answers) for no1,ans1 in enumerate(all_answers) if no1>no2  ])
 
+    def add_other_system(self,other_system):
+        new_answer=[answer_generator(other_system)]
+        
+        all_answers=self._correct_answers+self._other_answers+new_answer
+        
+        uniqueness_check = self.is_unique(all_answers)
+        
+        if uniqueness_check:
+            self._other_answers=self._other_answers+new_answer
+        
+        
+        return uniqueness_check
+    
+    def change_questions_order(self,no=1):
+        if no==1:
+            correct_slice=self._correct_answers[1:]
+            other_slice=self._other_answers[1:]
+            
+            correct_first=self._correct_answers[0]
+            other_first=self._other_answers[0]
+            
+            self._correct_answers=correct_slice+[other_first]
+            self._other_answers=other_slice+[correct_first]
+            
+        else:
+            for i in range(no):
+                self.change_questions_order(no=1)
+
+
+        super().__init__(self._correct_answers[0])
+        
+        return self
+    
 class QuizOn(sys.ComposedSystem):
     
     def __init__(self,*args,**kwargs):
@@ -493,6 +589,8 @@ class QuizOn(sys.ComposedSystem):
         self.param_range=param_range
         sym_list=[]
         
+        
+        print(self.default_data_dict)
         if self.param_range==None:
             self.param_range=self.default_data_dict
 
@@ -525,7 +623,7 @@ class QuizOn(sys.ComposedSystem):
             for caseno in range(cases_no):
                 sym_dict={}
                 temp_dict={}
-                for key,val in param_range.items(): 
+                for key,val in self.default_data_dict.items(): 
                         if isinstance(val,list)==True:
                             for elem in val:
                                 if isinstance(elem,Expr):
@@ -585,23 +683,65 @@ class QuizOn(sys.ComposedSystem):
         return IP.display.Image(base64.b64decode(encoded_string))
 
         
-    def prepare_quiz(self,question_list,subs_dict,preview=True):
+    def prepare_quiz(self,question_list,subs_dict={},language='pl',preview=True):
         self.question_list=question_list
         self.title=str(self)
         self._preview=preview
-        self.ds_list=[HarmonicOscillator(self.system.subs(subs,method='direct')) for subs in subs_dict]
-        ds_list=self.ds_list
+
         self.subs_dict=subs_dict
         question_cat=self.title
         preview_on=self.preview
 
         subs_dicts_list=self.subs_dict
 
-        cases_no
-
-
+        if language=='pl':
+            main_question='<p> Na podstawie zaprezentowanego modelu uproszczonego układu, zbadać jego ruch. Analizy dokonać przyjmując następujące dane: \(', '\). </p> \n \n'
+            
+        elif language=='en':
+            main_question='<p> Based on the model presented, study the dynamics of the considered system. Perform the analysis for the following data: \(', '\). Compute:</p> \n \n'
+            
+        
+        if subs_dict!= {}:
+            self.ds_list=[HarmonicOscillator(self.system.subs(subs,method='direct')) for subs in subs_dict]
+            ds_list=self.ds_list
+            base_questions=[question(ds_list[0], ds_list[1:],score=2) for question in self.question_list]
+            
+            
+            
+        else:
+            generated_data=self.generate_dict(cases_no=1)
+            print(generated_data)
+            base_system=HarmonicOscillator(self.system.subs(generated_data[0],method='direct'))
+            ds_list=[base_system]
+            
+            generated_base=[question(base_system, [],score=2) for question in self.question_list]
+            
+            while len(generated_data)!=5:
+                new_data=self.generate_dict(cases_no=1)
+                new_system=HarmonicOscillator(self.system.subs(new_data[0],method='direct'))
+                
+                
+                if all([question.add_other_system(new_system) for question in generated_base]):
+                    generated_data+=new_data
+                    ds_list+=[new_system]
+                
+            base_questions=generated_base
+            self.subs_dict=generated_data
+        
+        
         question_set=[]
+        
+        if self._preview==True:
+            for no,qs in enumerate(base_questions):
+
+                qs.preview()
+
+                print(str(qs))        
+        
+        
         for case_no in range(len(ds_list)):
+            
+            
             case = 'case'+str(case_no)
 
             fig=EmbeddedGraphics(self._scheme_path)
@@ -614,11 +754,23 @@ class QuizOn(sys.ComposedSystem):
 
             question_string+=str(pic)
 
-            question_string +='<p> Based on the model presented, study the dynamics of the considered system. Perform the analysis for the following data.  \(' + '\),\('.join([vlatex(Eq(lhs,rhs,evaluate=False) ) for lhs,rhs in                 self.subs_dict[case_no].items()]) + '\). Compute:</p> \n \n'
+            question_string +=main_question[0] + '\),\('.join([vlatex(Eq(lhs,rhs,evaluate=False) ) for lhs,rhs in                 self.subs_dict[case_no].items()]) + main_question[1]
             
             question_string+=str(fig)
 
-            for no,question in enumerate(self.question_list):
+            prepared_questions=[question.change_questions_order(case_no) for question in base_questions]
+           
+            
+            if self._preview=='detailed':
+                for no,qs in enumerate(prepared_questions):
+
+                    print(f'------------case no {case_no}----')
+
+                    qs.preview()
+
+                    print(f'------------case no {case_no}----')
+        
+            for no,pre_question in enumerate( prepared_questions):
 
                 counter=no
                 question_name=question_cat+"_zestaw_"+case#+str(counter+1001)
@@ -626,7 +778,7 @@ class QuizOn(sys.ComposedSystem):
 
 
                 question_string+=str(Paragraph("{q_no}.".format(q_no=str(counter+1))))
-                question_string+="<p>"+ (str(question(ds_list[case_no],ds_list[0:case_no]+ds_list[case_no+1:],score=2))) +  " </p> \n"
+                question_string+="<p>"+ (str(pre_question)) +  " </p> \n"
 
                 question_string+='\n \n'
 
@@ -640,11 +792,3 @@ class QuizOn(sys.ComposedSystem):
         with open(question_cat+'_questions.xml', 'w+') as q_file:
             q_file.write(dump)
 
-        if self._preview:
-            for no,question in enumerate(self.question_list):
-
-                qs = question(ds_list[0], ds_list[1:])
-
-                qs.preview()
-
-                print(str(qs))

@@ -14,6 +14,8 @@ t = Symbol('t')
 
 
 class GoverningEquationMCA(MechanicalSystemAnswer):
+    question = 'Determine the system of equations of motion for the analysed system:'
+
     def __init__(self,
                  correct_system,
                  other_systems,
@@ -23,13 +25,10 @@ class GoverningEquationMCA(MechanicalSystemAnswer):
                      evaluate=False)),
                  **kwargs):
 
-        self.title = 'Podaj równiania ruchu układu:'
-        self.title = 'Determine the system of equations of motion for the analysed system:'
-
         super().__init__(correct_system,
                          other_systems,
                          answer_generator=answer_generator,
-                         title=self.title,
+                         title=None,
                          **kwargs)
 
 
@@ -244,6 +243,8 @@ class LinearizedLagrangianMCA(MechanicalSystemAnswer):
 
 
 class OmegaMCA(MechanicalSystemAnswer):
+    question = 'Determine the frequencies of free vibrations occuring in the system:'
+
     def __init__(self,
                  correct_system,
                  other_systems,
@@ -255,13 +256,10 @@ class OmegaMCA(MechanicalSystemAnswer):
                  ],
                  **kwargs):
 
-        self.title = 'Określ częstości drgań swobodnych występujących w układzie:'
-        self.title = 'Determine the frequencies of free vibrations occuring in the system:'
-
         super().__init__(correct_system,
                          other_systems,
                          answer_generator=answer_generator,
-                         title=self.title,
+                         title=None,
                          **kwargs)
 
 
@@ -269,9 +267,9 @@ class SDoFOmegaMCA(MechanicalSystemAnswer):
     def __init__(self,
                  correct_system,
                  other_systems,
-                 answer_generator=lambda obj: [(
+                 answer_generator=lambda obj: Eq(Symbol('omega_0'),[(
                      eig_val) for eig_val in HarmonicOscillator(obj.linearized(
-                     )).natural_frequencies() if eig_val != 0][0],
+                     )).natural_frequencies() if eig_val != 0][0]),
                  **kwargs):
 
         self.title = 'Określ częstości drgań swobodnych występujących w układzie:'
@@ -283,6 +281,21 @@ class SDoFOmegaMCA(MechanicalSystemAnswer):
                          title=self.title,
                          **kwargs)
 
+class SDoFLogarithmicDecrementMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Symbol('delta'),(obj.damping_matrix()[0]/(2*obj.inertia_matrix()[0]))*[
+                     2*pi / damp_freq for damp_freq in HarmonicOscillator(obj.linearized()).damped_natural_frequencies() if damp_freq != 0
+                 ][0]),
+                 **kwargs):
+        self.title = 'Wyznacz logarytmiczny dekrement tłumienia:'
+        self.title = 'Determine a logarithmic decrement for the assigned problem:'
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
 
 class FirstModeMCA(MechanicalSystemAnswer):
     def __init__(self,
@@ -726,6 +739,8 @@ class ResonanceCurveMCA(MechanicalSystemAnswer):
 
 
 class FundamentalMatrixMCA(MechanicalSystemAnswer):
+    question = 'A fundamental matrix for the system under consideration is given by:'
+
     def __init__(
             self,
             correct_system,
@@ -735,12 +750,11 @@ class FundamentalMatrixMCA(MechanicalSystemAnswer):
                                             )).fundamental_matrix()),
                                             evaluate=False),
             **kwargs):
-        self.title = 'A fundamental matrix for the system under consideration is given by:'
 
         super().__init__(correct_system,
                          other_systems,
                          answer_generator=answer_generator,
-                         title=self.title,
+                         title=None,
                          **kwargs)
 
 
@@ -1074,30 +1088,6 @@ class SecondModeFirstComponentValueNMSA(TitledNumericalAnswerForMechanicalSystem
                  answer_generator=lambda obj: (HarmonicOscillator(
                      obj.linearized()).modes()[:,1]).subs({Symbol('k', positive=True): 900,
                     Symbol('m', positive=True): 500,}).applyfunc(lambda comp: round(comp.n(),3))[0],
-                 **kwargs):
-
-        super().__init__(correct_system,
-                         other_systems,
-                         answer_generator=answer_generator,
-                         title=None,
-                         **kwargs)
-
-class Test(MechanicalSystemAnswer):
-    question = 'Determine the \(C2\) amplitude of a steady solution:'
-
-    def __init__(self,
-                 correct_system,
-                 other_systems,
-                 answer_generator=lambda obj: (abs((list(
-                obj.steady_solution_amp(obj.external_forces(
-                ).subs(t, 0), Matrix([0, 0]))[0])[0]).simplify() / (list(
-                    obj.steady_solution_amp(obj.external_forces().subs(t, 0),
-                                            Matrix([0, 0]))[0]
-                )[1]).simplify())).subs({
-                    Symbol('k', positive=True): 900,
-                    Symbol('m', positive=True): 500,
-                    Symbol('Omega', positive=True): 15
-                }).n(3),
                  **kwargs):
 
         super().__init__(correct_system,
