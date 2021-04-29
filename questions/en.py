@@ -64,8 +64,8 @@ class SDoFLinearizedGoverningEquationMCA(MechanicalSystemAnswer):
                                                   evaluate=False)),
                  **kwargs):
 
-        self.title = 'Małe drgania układu opisuje równanie:'
-        #         self.title = 'Determine equation of motion of the system:'
+#         self.title = 'Małe drgania układu opisuje równanie:'
+        self.title = 'Determine linearized equation of motion of the system:'
 
         super().__init__(correct_system,
                          other_systems,
@@ -243,7 +243,7 @@ class LinearizedLagrangianMCA(MechanicalSystemAnswer):
 
 
 class OmegaMCA(MechanicalSystemAnswer):
-    question = 'Determine the frequencies of free vibrations occuring in the system:'
+    question = 'Determine the frequencies of free undamped vibrations occuring in the system:'
 
     def __init__(self,
                  correct_system,

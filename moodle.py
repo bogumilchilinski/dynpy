@@ -9,6 +9,7 @@ import random as rand
 from random import *
 import IPython as IP
 import base64
+import copy
 t = Symbol('t')
 
 import itertools as itt
@@ -530,10 +531,13 @@ class TitledNumericalAnswerForMechanicalSystem(EmbeddedNumericalAnswer):
         print('@' * 100)
         
         
-    def is_unique(self):
-        all_answers=self._correct_answers+self._other_answers
+    def is_unique(self,answers=None):
         
-        #ans_field=itt.product(all_answers,all_answers)
+        
+        if answers:
+            all_answers=answers
+        else:
+            all_answers=self._correct_answers+self._other_answers
         
         return not any([ans2 == ans1  for no2,ans2 in enumerate(all_answers) for no1,ans1 in enumerate(all_answers) if no1>no2  ])
 
@@ -549,6 +553,11 @@ class TitledNumericalAnswerForMechanicalSystem(EmbeddedNumericalAnswer):
         
         
         return uniqueness_check
+    
+
+    def remove_other_system(self,other_system=None):
+        return self._other_answers.pop(-1)
+    
     
     def change_questions_order(self,no=1):
         if no==1:
@@ -718,12 +727,16 @@ class QuizOn(sys.ComposedSystem):
             
             while len(generated_data)!=5:
                 new_data=self.generate_dict(cases_no=1)
+                print(new_data)
                 new_system=HarmonicOscillator(self.system.subs(new_data[0],method='direct'))
                 
+                generated_base_copy=list(map(copy.copy,generated_base))
+                #print(generated_base_copy)
                 
-                if all([question.add_other_system(new_system) for question in generated_base]):
+                if all([question.add_other_system(new_system) for question in generated_base_copy]):
                     generated_data+=new_data
                     ds_list+=[new_system]
+                    generated_base=generated_base_copy
                 
             base_questions=generated_base
             self.subs_dict=generated_data
@@ -733,11 +746,15 @@ class QuizOn(sys.ComposedSystem):
         
         if self._preview==True:
             for no,qs in enumerate(base_questions):
+                
+                print(self.subs_dict[0])
 
                 qs.preview()
 
                 print(str(qs))        
         
+        
+        [question.change_questions_order(0) for question in base_questions]
         
         for case_no in range(len(ds_list)):
             
@@ -758,11 +775,15 @@ class QuizOn(sys.ComposedSystem):
             
             question_string+=str(fig)
 
-            prepared_questions=[question.change_questions_order(case_no) for question in base_questions]
+            prepared_questions=base_questions
            
             
             if self._preview=='detailed':
                 for no,qs in enumerate(prepared_questions):
+                    
+                    print(f'------------subs case no {case_no}----')
+                    
+                    print(self.subs_dict[case_no])
 
                     print(f'------------case no {case_no}----')
 
@@ -773,7 +794,7 @@ class QuizOn(sys.ComposedSystem):
             for no,pre_question in enumerate( prepared_questions):
 
                 counter=no
-                question_name=question_cat+"_zestaw_"+case#+str(counter+1001)
+
 
 
 
@@ -784,7 +805,12 @@ class QuizOn(sys.ComposedSystem):
 
 
 
+            counter=case_no
+            question_name=question_cat+"_zestaw_"+case#+str(counter+1001)
             question_set.append(str(Question([question_string],id=counter+1000,figure=fig.to_base64_entry()+pic.to_base64_entry(),title=question_name)))
+            
+            
+            [question.change_questions_order() for question in base_questions]
 
 
         dump=(Category(name=question_cat,questions=question_set)).to_string()
