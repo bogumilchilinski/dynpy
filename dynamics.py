@@ -174,7 +174,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                  nonhol_coneqs=None,
                  label=None,
                  ivar=sym.Symbol('t'),
-                 evaluate=True):
+                 evaluate=True,
+                 system = None):
         """
         Supply the following for the initialization of DynamicSystem in the same way as LagrangesMethod
         """
@@ -191,6 +192,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         self.ivar = ivar
         #         self.forcelist=forcelist
+        self.system = system
         self.frame = frame
 
         super().__init__(Lagrangian=Lagrangian,
@@ -201,6 +203,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                          hol_coneqs=hol_coneqs,
                          nonhol_coneqs=nonhol_coneqs)
 
+            
         self.L = self._L
 
         if evaluate == True:
@@ -246,6 +249,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             'Lagrangian': self.lagrangian(),
             'label': self._label,
             'ivar': self.ivar,
+            'system': self.system,
         }
 
     def __add__(self, other):
@@ -666,7 +670,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         computed_case = self.computational_case(parameter_values=data_Tuple)
 
         return OdeComputationalCase(**computed_case, evaluate=True)
-
+    
+    
     @classmethod
     def from_system(cls, system):
 

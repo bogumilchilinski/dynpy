@@ -1281,7 +1281,7 @@ class SDoFNonlinearEngine(ComposedSystem):
                  m_e=Symbol('m_e', positive=True),
                  e=Symbol('e', positive=True),
                  beta=Symbol('beta', positive=True),
-                 l0=Symbol('l_0', positive=True),
+                 l_0=Symbol('l_0', positive=True),
                  z=dynamicsymbols('z'),
                  phi=dynamicsymbols('phi'),
                  ivar=Symbol('t', positive=True),
@@ -1292,7 +1292,7 @@ class SDoFNonlinearEngine(ComposedSystem):
         self.m_e = m_e
         self.beta = beta
         self.e = e
-        self.l0 = l0
+        self.l_0 = l_0
         self.z = z
         self.phi = phi
 
@@ -1303,11 +1303,11 @@ class SDoFNonlinearEngine(ComposedSystem):
         P1.set_pos(O, 0 * N.x + 0 * N.y)
 
         P2 = Point('P2')
-        P2.set_pos(O, l0 * sin(beta) * N.x + (z + l0 * cos(beta)) * N.y)
+        P2.set_pos(O, l_0 * sin(beta) * N.x + (z + l_0 * cos(beta)) * N.y)
 
         self.MaterialPoint_1 = MaterialPoint(M, z, qs=[z])
         self.MaterialPoint_2 = MaterialPoint(m_e, z + e * cos(phi), qs=[z])
-        self.Spring = Spring(2 * k_m, pos1=P1, pos2=P2, l0=l0, qs=[z])
+        self.Spring = Spring(2 * k_m, pos1=P1, pos2=P2, l_0=l_0, qs=[z])
 
         system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2
         super().__init__(system)
@@ -1318,6 +1318,7 @@ class SDoFNonlinearEngine(ComposedSystem):
             self.k_m: r'Spring stiffness coefficient',
             self.m_e: r'',
             self.e: r'',
+            self.l_0: r'',
             self.beta: r'',
         }
         return self.sym_desc_dict

@@ -14,7 +14,6 @@ base_origin=Point('O')
 class GeometryOfPoint:
     def __init__(self, *args, frame=base_frame , ivar=Symbol('t')):
         
-
         if type(args[0])==(Point):
             self._point=args[0]
 
