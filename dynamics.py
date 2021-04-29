@@ -919,13 +919,11 @@ class HarmonicOscillator(LinearDynamicSystem):
             self,
             cos_amp=None,
             sin_amp=None,
-            excitation_freq=Symbol('Omega'),
+            excitation_freq=Symbol('Omega', positive=True),
     ):
         ''''
         Computes the steady solution amplitude for the system defined in the instance of this class.
         '''
-        if excitation_freq == None:
-            excitation_freq = Symbol('Omega', positive=True)
 
         self.Omega = excitation_freq
         omg = excitation_freq
@@ -944,8 +942,7 @@ class HarmonicOscillator(LinearDynamicSystem):
         '''
         Returns the Frequency Response Function of the system for the given excitation amplitude (working correctly for single degree of freedom systems).
         '''
-        if excitation_freq == None:
-            excitation_freq = Symbol('Omega', positive=True)
+
 
         self.Omega = excitation_freq
 
