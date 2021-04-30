@@ -1,0 +1,209 @@
+\documentclass[a4paper,14pt,twoside]{extreport}
+%\usepackage{./Preambly}
+\usepackage{graphicx}
+\usepackage{pythontex}
+\usepackage{amsmath}
+\usepackage[rawfloats=true]{floatrow} 
+\begin{pycode}
+from sympy import *
+
+F, m, g, f, A, c, v, rho, P, E, t  = symbols('F, m , g, f, A, c, v, \rho, P, E, t')
+
+\end{pycode}
+\mathcode`\*=\number\cdot
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\begin{titlepage}
+\centering
+
+\includegraphics[width=\textwidth]{simrname.png} 
+
+\vspace{8cm}
+{\Large \bfseries Project on Electric and Hybrid Drives}
+
+\vspace{2cm}
+{\large \textit{Daniel Ruszczyk 297580}}
+
+
+\vspace{6cm}
+April 13, 2020
+\end{titlepage}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tableofcontents
+\setcounter{chapter}{-1}
+\chapter{Glossary}
+\begin{description}%
+\item[$m$]%
+Vehile mass%
+\item[$r_{d}$]%
+dynamic radius%
+\item[$A$]%
+Front area of the vehicle%
+\item[$c_{x}$]%
+Shape coefficient%
+\item[$f_{r}$]%
+Friction coefficient%
+\item[$g$]%
+Gravity%
+\item[$v$]%
+Vehicle velocity%
+\item[$i$]%
+Current%
+\item[$\eta$]%
+Efficiency%
+\item[$\phi$]%
+Flux%
+\item[$R$]%
+Resistance%
+\end{description}%
+% -----------------------------------------
+\chapter{Introduction}
+The goal of that work is to examine the electric vehicle performance based on driving cycle. The scrutiny was performed using Matlab/Simulink Software.
+\section{Driving cycle}
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{driving_cycle.png}} 
+  \caption{Driving cycle as time function}
+\end{figure}
+\section{Vehicle data}
+Vehicle:
+\begin{itemize}
+    \item Vehicle weight $M = 1420 ~ kg$
+    %\item Gross vehicle weight rating  $GVMR = 1680 kg$
+    \item Dynamic radius $r_{d} =  0.313 ~ m$
+    \item Frontal area $A =2.42  ~ m^2$
+    \item Air drag coefficient $c_{x} = ~ 0.35$
+    \item Rolling resistance $f_{r} = 0.01$
+\end{itemize}
+% -------------------------------- Simulink
+\chapter{Simulink model}
+\section{Resistance Force}
+\begin{center}
+\underline{Inertial resistance} \\
+Inertial resistance is function of velocity change in time.\\
+\begin{equation}
+\large{ F_{inert} = m *\frac{dv}{dt} }
+\end{equation}
+
+
+\underline{Rolling resistance} \\
+Rolling resistance is a function of speed. \\
+\begin{equation}
+\large{F_t = m*g*f_t}
+\end{equation}
+$f_t = f_0(1+k_vv^2)$ , where $k_v = 5 \cdot 10^{-5}$
+
+\normalsize
+\bigskip
+\underline{Air drag resistance} \\
+Aerodynamic drag defined as the function of speed. \\
+\begin{equation}
+\large{F_{drag} = \frac{1}{2}*\rho*A*c_x*v^2}
+\end{equation}
+
+\normalsize
+\bigskip
+\underline{Resistance Force} \\\
+The resistance force is defined as the sum of rolling resistance and the aerodynamic drag.\\
+\begin{equation}
+\large{F_{op} = F_{inert} + F_t + F_{drag} }
+\end{equation}
+
+\normalsize
+\bigskip
+Finally the total resistance power is equal
+\begin{equation}
+\large{P_{wheel} = F_{op}*v }
+\end{equation}
+\end{center}
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{partial_resistances.png}} 
+  \caption{Partial resistance forces as time function}
+\end{figure}
+
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{total_resistance.png}} 
+  \caption{Total resistance force and power as time function}
+\end{figure}
+
+\textbf{}
+% ----------------------------------- Energetical point of view
+\section{Energy}
+\textbf{\underline{Energy in driving cycle related to the wheel}}
+\begin{equation}
+E_{wheel} = \int_{0}^{t_{end}} P_{wheel}*dt
+\end{equation}
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{Energy.png}} 
+  \caption{Energy related to the wheels as time function}
+\end{figure}
+
+
+\section{Wheel / Motor}
+\begin{equation}
+\omega_{wheel} = \frac{V_{vehicle}}{r_d}
+\end{equation}
+
+\begin{equation}
+M_{wheel} = F_{drive}*r_d
+\end{equation}
+
+\begin{equation}
+\omega_{motor} = k*\omega_{wheel}
+\end{equation}
+
+
+\[\begin{equation}
+    M_{motor}= 
+\begin{dcases}
+    \frac{M_{wheel}}{k}\eta^{-1},&  M_{wheel}*\omega_{wheel} > 0\\
+    \frac{M_{wheel}}{k}\eta,&         M_{wheel}*\omega_{wheel} < 0
+\end{dcases}
+\end{equation}\]
+
+
+\begin{equation}
+i = \frac{M + (c_2*\omega^2 + c_1*\omega + c_0)}{c*\phi}
+\end{equation}
+
+\begin{equation}
+U_{motor} = R*i + c*\phi*\omega
+\end{equation}
+
+\begin{figure}[H]
+  \centerline{\includegraphics[width=\textwidth]{motor_results.png}} 
+  \caption{Motor results}
+\end{figure}
+
+% ---------------------------------------------------------------
+\textbf{\underline{Model of inverter}}
+
+\[\begin{equation}
+    P_{battery}= 
+\begin{dcases}
+    U_{motor}*i*\eta^{-1},&  i > 0\\
+    U_{motor}*i*\eta,&        i < 0
+\end{dcases}
+\end{equation}\]
+
+
+\begin{equation}
+duty = \frac{U_{motor}}{U_{battery}}
+\end{equation}
+
+\section{Model of battery}
+\begin{figure}[H]
+  \centerline{\includegraphics{battery_model.PNG}} 
+  \caption{Battery model}
+\end{figure}
+
+\begin{equation}
+E_{bat} = U_{bat} - R_{wew}*I_{bat}
+\end{equation}
+
+
+
+
+\end{document}
