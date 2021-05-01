@@ -1026,7 +1026,59 @@ class SDoFExcitedDampedPendulum(ComposedSystem):
         }
         return self.sym_desc_dict
 
+class SDoFWinch(ComposedSystem):
 
+    scheme_name = 'mdof_winch.png'
+    real_name = 'mdof_winch_real.png'
+
+    def __init__(self,
+                 r=Symbol('r', positive=True),
+                 l=Symbol('l', positive=True),
+                 m=Symbol('m', positive=True),
+                 g=Symbol('g', positive=True),
+                 ivar=Symbol('t'),
+                 phi=dynamicsymbols('\\varphi'),
+                 system=None):
+
+        self.r = r
+        self.l = l
+        self.m = m
+        self.g = g
+        self.phi = phi
+
+        x = r * cos(phi) + (l + r * phi) * sin(phi)
+        y = - r * sin(phi) + (l + r * phi) * cos(phi)
+
+        self.material_point_1 = MaterialPoint(m, x, qs=[phi])
+        self.material_point_2 = MaterialPoint(m, y, qs=[phi])
+        self.gravity = GravitationalForce(m, g, pos1=-y, qs=[phi])
+
+        system = self.material_point_1 + self.material_point_2 + self.gravity
+
+        super().__init__(system)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.r: r'Winch radius',
+            self.l: r'Winch length',
+            self.m: r'Mass',
+            self.g: 'Gravity constant',
+        }
+        return self.sym_desc_dict
+
+    
+    def get_default_data(self):
+
+        m0, l0 = symbols('m_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.r:[l0,2*l0,4*l0],
+            self.m: [2 * m0, S.Half * m0, 4 * m0,  m0, S.Half**2 * m0],
+            
+            self.l: [2 * l0, S.Half * l0, 4 * l0, S.Half**2 * l0],
+        }
+        return default_data_dict
+    
 class DDoFCoupledPendulum(ComposedSystem):
     """
     Model of a DDoF Coupled Pendulum.
