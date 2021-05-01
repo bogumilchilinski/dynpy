@@ -842,6 +842,51 @@ class SDoFEquilibriumEquationsMCA(MechanicalSystemAnswer):
                          title=self.title,
                          **kwargs)
 
+class SDoFEquivalentStiffnessMCA(MechanicalSystemAnswer):
+    question = 'Determine an equivalent stiffness of the system in the neighbourhood of the critical point:'
+
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Symbol('k_{eq}'),
+                    HarmonicOscillator(obj.linearized()).stiffness_matrix()[0],evaluate=False),
+                 **kwargs):
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=None,
+                         **kwargs)
+
+class SDoFFirstOrderSystemOfEqnsMCA(MechanicalSystemAnswer):
+    question = 'Determine the corresponding first order system of governing equations:'
+
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: HarmonicOscillator(obj.linearized()).rhs_eq(),
+                 **kwargs):
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=None,
+                         **kwargs)
+
+class SDoFPhasePortraitMCA(MechanicalSystemAnswer):
+    question = 'Determine the phase portrait of the linearized system:'
+
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(Symbol('E_m'),(HarmonicOscillator(obj.linearized())._eoms[0]*obj.q[0].diff(t)).expand().integrate(obj.ivar).doit()),
+                 **kwargs):
+
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=None,
+                         **kwargs)
 
 class InputAmplitudeMCA(MechanicalSystemAnswer):
     def __init__(
