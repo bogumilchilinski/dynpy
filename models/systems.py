@@ -957,6 +957,17 @@ class SDoFDampedPendulum(ComposedSystem):
         system = self.Pendulum + self.Damper
 
         super().__init__(system)
+        
+    def get_default_data(self):
+
+        m0, l0, c0 = symbols('m_0 l_0 c_0', positive=True)
+
+        default_data_dict = {
+            self.m: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
+            self.l: [2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0],
+            self.c: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0]
+        }
+        return default_data_dict
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -1607,6 +1618,19 @@ class MDoFWinch(ComposedSystem):
             self.disc_1 + self.spring + self.M_engine + self.gravity
 
         super().__init__(system)
+
+    def get_default_data(self):
+
+        m0, l0, I0, k0, r0 = symbols('m_0 l_0 I_0 k_0 r_0', positive=True)
+
+        default_data_dict = {
+            self.m: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
+            self.l: [2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0],
+            self.I: [2 * I0, 3 * I0, 4 * I0, 5 * I0, 6 * I0],
+            self.k: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
+            self.r: [2 * r0, 3 * r0, 4 * r0, 5 * r0, 6 * r0],
+        }
+        return default_data_dict
 
     def symbols_description(self):
         self.sym_desc_dict = {
