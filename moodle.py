@@ -586,7 +586,8 @@ class QuizOn(sys.ComposedSystem):
         self.default_data_dict=args[0].get_default_data()
         
         print(self.default_data_dict)
-        self.system=HarmonicOscillator(args[0])
+        
+        self.system=args[0]
         
         
         self._scheme_path=args[0]._scheme()
@@ -595,7 +596,9 @@ class QuizOn(sys.ComposedSystem):
         
 
     def generate_dict(self,cases_no=5,param_range=None):
-        sys_par=self.system_parameters()
+        display(self._eoms)
+        
+        
         self.param_range=param_range
         sym_list=[]
         
@@ -610,11 +613,13 @@ class QuizOn(sys.ComposedSystem):
 
 
         if self.param_range==None:
+            
 
             for caseno in range(cases_no):
                 print('jestes tu :(')
                 sym_dict={}
                 temp_dict={}
+                sys_par=self.system_parameters()
                 for num,sym in enumerate(sys_par):
                     split_name_default=str(sys_par[num]).split('_',1)
 
@@ -636,12 +641,14 @@ class QuizOn(sys.ComposedSystem):
         
         
         elif random_params:
+            print('random params')
             for caseno in range(cases_no):
                 sym_dict=self.system.get_random_parameters()
                 sym_list.append(sym_dict)  
         
         
         else: 
+            print('list of params')
             for caseno in range(cases_no):
                 sym_dict={}
                 temp_dict={}
@@ -736,7 +743,7 @@ class QuizOn(sys.ComposedSystem):
         else:
             generated_data=self.generate_dict(cases_no=1)
             print(generated_data)
-            base_system=HarmonicOscillator(self.system.subs(generated_data[0],method='direct'))
+            base_system=HarmonicOscillator(self.system).subs(generated_data[0],method='direct')
             ds_list=[base_system]
             
             generated_base=[question(base_system, [],score=2) for question in self.question_list]
@@ -744,7 +751,7 @@ class QuizOn(sys.ComposedSystem):
             while len(generated_data)!=5:
                 new_data=self.generate_dict(cases_no=1)
                 print(new_data)
-                new_system=HarmonicOscillator(self.system.subs(new_data[0],method='direct'))
+                new_system=HarmonicOscillator(self.system).subs(new_data[0],method='direct')
                 
                 generated_base_copy=list(map(copy.copy,generated_base))
                 #print(generated_base_copy)
@@ -762,13 +769,13 @@ class QuizOn(sys.ComposedSystem):
         
         if self._preview==True:
             for no,qs in enumerate(base_questions):
-                print(f'------------subs case no {case_no}----')
+                print(f'------------subs case no 0----')
                 
                 print(self.subs_dict[0])
-                print(f'------------case no {case_no}----')
+                print(f'------------case no 0----')
 
                 qs.preview()
-                print(f'------------case no {case_no}----')
+                print(f'------------case no 0----')
                 print(str(qs))        
         
         
