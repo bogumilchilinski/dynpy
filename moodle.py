@@ -584,6 +584,7 @@ class QuizOn(sys.ComposedSystem):
     def __init__(self,*args,**kwargs):
        
         self.default_data_dict=args[0].get_default_data()
+        
         print(self.default_data_dict)
         self.system=HarmonicOscillator(args[0])
         
@@ -602,6 +603,10 @@ class QuizOn(sys.ComposedSystem):
         print(self.default_data_dict)
         if self.param_range==None:
             self.param_range=self.default_data_dict
+            
+        random_params=self.system.get_random_parameters()
+        
+        print(random_params)
 
 
         if self.param_range==None:
@@ -628,10 +633,21 @@ class QuizOn(sys.ComposedSystem):
 #                         sym_dict[key]=Symbol(str(rand.randrange(val[0],val[1],val[2]))+split_name_dict[0]+'_0')
 
                 sym_list.append(sym_dict)   
+        
+        
+        elif random_params:
+            for caseno in range(cases_no):
+                sym_dict=self.system.get_random_parameters()
+                sym_list.append(sym_dict)  
+        
+        
         else: 
             for caseno in range(cases_no):
                 sym_dict={}
                 temp_dict={}
+                
+                
+                
                 for key,val in self.default_data_dict.items(): 
                         if isinstance(val,list)==True:
                             for elem in val:
@@ -746,11 +762,13 @@ class QuizOn(sys.ComposedSystem):
         
         if self._preview==True:
             for no,qs in enumerate(base_questions):
+                print(f'------------subs case no {case_no}----')
                 
                 print(self.subs_dict[0])
+                print(f'------------case no {case_no}----')
 
                 qs.preview()
-
+                print(f'------------case no {case_no}----')
                 print(str(qs))        
         
         

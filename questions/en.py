@@ -556,7 +556,7 @@ class FrequencyResponseFunctionMCA(MechanicalSystemAnswer):
 FRFMCA = FrequencyResponseFunctionMCA
 
 
-class FRFforOmega0(MechanicalSystemAnswer):
+class FRFfor (MechanicalSystemAnswer):
     def __init__(
             self,
             correct_system,
@@ -647,7 +647,7 @@ class DampingFactorMCA(MechanicalSystemAnswer):
                  answer_generator=lambda obj: Eq(
                      Symbol('c'), obj.damping_matrix()[0], evaluate=False),
                  **kwargs):
-        self.title = 'Podaj wartość współczynnika tłumienia układa:'
+        self.title = 'Podaj wartość współczynnika tłumienia - c [N/(m/s)] - układa:'
         self.title = 'What is the value of a damping factor?'
         super().__init__(correct_system,
                          other_systems,
@@ -655,6 +655,20 @@ class DampingFactorMCA(MechanicalSystemAnswer):
                          title=self.title,
                          **kwargs)
 
+class DampingRatioMCA(MechanicalSystemAnswer):
+    def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: Eq(
+                     Symbol('zeta'), (obj.damping_matrix()[0] / (2*sqrt(obj.inertia_matrix()[0] * obj.stiffenes_matrix()[0]))), evaluate=False),
+                 **kwargs):
+        self.title = 'Podaj wartość współczynnika tłumienia - zeta [-] - układa:'
+        self.title = 'What is the value of a damping ratio?'
+        super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
 
 class SDoFDampedOmegaMCA(MechanicalSystemAnswer):
     def __init__(self,
@@ -1009,6 +1023,43 @@ class SystemResponseAmplitudeC2MCA(MechanicalSystemAnswer):
                          **kwargs)
 
 
+class IntegralMCA(MechanicalSystemAnswer):
+        def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: HarmonicOscillator(
+                    obj[0]).integrate(obj.q[0]),
+                 **kwargs):
+
+            self.title = 'Podaj wartość całki:'
+            self.title = 'Determine the integral value:'
+
+            super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+
+class RHSMCA(MechanicalSystemAnswer):
+        def __init__(self,
+                 correct_system,
+                 other_systems,
+                 answer_generator=lambda obj: HarmonicOscillator(
+                    obj.linearized()[0]).rhs_eq(),
+                 **kwargs):
+
+            self.title = 'Podaj prawą stronę równiania (rhs):'
+            self.title = 'Determine the right hand side (rhs) of the equation:'
+
+            super().__init__(correct_system,
+                         other_systems,
+                         answer_generator=answer_generator,
+                         title=self.title,
+                         **kwargs)
+
+
+
 class LowerNaturalFreqValueNMSA(TitledNumericalAnswerForMechanicalSystem):
     question = 'Find the value of the lower natural frequency of the system for the given parameters \(m=150 kg\), \(k=900 \\frac{N}{m}\:'
 
@@ -1095,3 +1146,5 @@ class SecondModeFirstComponentValueNMSA(TitledNumericalAnswerForMechanicalSystem
                          answer_generator=answer_generator,
                          title=None,
                          **kwargs)
+
+        
