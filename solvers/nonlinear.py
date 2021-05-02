@@ -325,6 +325,7 @@ class MultiTimeScaleMethod(LinearODESolution):
                  dvars=[],
                  eps=Symbol('varepsilon'),
                  omega=None,
+                 order=1,
                  t_span=[],
                  params=[],
                  params_values={},
@@ -340,6 +341,7 @@ class MultiTimeScaleMethod(LinearODESolution):
                          ic_point=ic_point,
                          equation_type=equation_type)
         self.eps = eps
+        self._order=order
 
         self.secular_eq=[]
 
@@ -348,7 +350,30 @@ class MultiTimeScaleMethod(LinearODESolution):
         if omega:
             self.omega = omega
 
+                
+    def set_solution_order(self,order=1):
 
+        self._order=order
+
+    @property
+    def order(self):
+
+        return self._order
+
+    @order.setter
+    def order(self,order):
+        self._order=order
+
+
+
+    @property
+    def t_list(self):
+        r"""
+        Returns the list of time domanin slow varying function
+        """
+
+        self._t_list=[t_i(self.ivar) for t_i in symbols(f't_0:{self._order}',cls=Function)]
+        return self._t_list
 
 
     def __call__(self, ivar, order=1, params_values=None):
@@ -390,8 +415,8 @@ class MultiTimeScaleMethod(LinearODESolution):
         dvars_no = len(self.dvars)
 
         
-        t_list=[t_i(self.ivar) for t_i in symbols(f't_0:{max_order+1}',cls=Function)]
-        self.t_list=t_list
+        t_list=self.t_list
+        
 
 # Function('X')(t0(t),t1(t),t2(t)).diff(t,2).subs({t0(t).diff(t,1):1,t1(t).diff(t,1):eps,t2(t).diff(t,1):eps**2}).doit().expand().subs(Function('X')(t0(t),t1(t),t2(t)) ,Function('X0')(t0(t),t1(t),t2(t)) + Function('X1')(t0(t),t1(t),t2(t))*eps + Function('X2')(t0(t),t1(t),t2(t))  *eps**2 ).doit().expand().coeff(eps)
         
@@ -540,8 +565,7 @@ class MultiTimeScaleMethod(LinearODESolution):
 
     def nth_order_solution(self, order=3):
 
-        t_list=[t_i(self.ivar) for t_i in symbols(f't_0:{order+1}',cls=Function)]
-        self.t_list=t_list
+        t_list=self.t_list
 
 
         eoms_list = self.eoms_approximation_list(max_order=order)
@@ -645,11 +669,11 @@ class MultiTimeScaleMethod(LinearODESolution):
 
         eoms = eoms.subs({comp: 0 for comp in secular_comps})
 
-#         print('='*100)
-#         display(eoms)
-#         display(self.approximation_function(order=order))
-#         display(ivar)
-#         print('='*100)
+        print('='*100)
+        display(eoms)
+        display(self.approximation_function(order=order))
+        display(ivar)
+        print('='*100)
 
         
         
