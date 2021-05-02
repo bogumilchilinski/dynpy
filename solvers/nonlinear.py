@@ -372,7 +372,7 @@ class MultiTimeScaleMethod(LinearODESolution):
         Returns the list of time domanin slow varying function
         """
 
-        self._t_list=[t_i(self.ivar) for t_i in symbols(f't_0:{self._order}',cls=Function)]
+        self._t_list=[t_i(self.ivar) for t_i in symbols(f't_0:{self._order+1}',cls=Function)]
         return self._t_list
 
 
@@ -611,7 +611,8 @@ class MultiTimeScaleMethod(LinearODESolution):
         #        display(eoms, self.approximation_function(order=0))
 
         solution = LinearODESolution(
-            eoms, ivar=self.ivar,
+            eoms,
+            ivar=self.ivar,
             dvars=self.approximation_function(order=len(self.t_list))).solution()
 
         #         if equation:
@@ -647,16 +648,16 @@ class MultiTimeScaleMethod(LinearODESolution):
 
         eoms = eoms_nth
         
-        print('='*100,'eoms_nth for solve')
-        display(eoms )
-        print('='*100,'eoms_nth for solve')
+        # print('='*100,'eoms_nth for solve')
+        # display(eoms )
+        # print('='*100,'eoms_nth for solve')
         
         eoms = (eoms.expand()).applyfunc(
             lambda eqn: TR8(TR10(TR8(TR10(eqn).expand()).expand()).expand()))
 
-        print('='*100,'eoms_nth for solve')
-        display(eoms )
-        print('='*100,'eoms_nth for solve')
+        # print('='*100,'eoms_nth for solve')
+        # display(eoms )
+        # print('='*100,'eoms_nth for solve')
         
         self.secular_eq+=[row.coeff(comp)  for row in eoms  for comp in secular_comps] #test
 
@@ -669,11 +670,11 @@ class MultiTimeScaleMethod(LinearODESolution):
 
         eoms = eoms.subs({comp: 0 for comp in secular_comps})
 
-        print('='*100)
-        display(eoms)
-        display(self.approximation_function(order=order))
-        display(ivar)
-        print('='*100)
+        # print('='*100)
+        # display(eoms)
+        # display(self.approximation_function(order=order))
+        # display(ivar)
+        # print('='*100)
 
         
         
