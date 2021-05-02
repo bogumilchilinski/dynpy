@@ -8,6 +8,7 @@ from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
 from .elements import MaterialPoint, Spring, NonlinSpring__RefFrme_Pt, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force
 
 import base64
+import random
 import IPython as IP
 
 
@@ -47,6 +48,9 @@ class ComposedSystem(HarmonicOscillator):
         return IP.display.Image(base64.b64decode(encoded_string))
 
     def get_default_data(self):
+        return None
+
+    def get_random_parameters(self):
         return None
 
 
@@ -738,6 +742,7 @@ class Pendulum(ComposedSystem):
             self.l: [2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0],
         }
         return default_data_dict
+
     def symbols_description(self):
         self.sym_desc_dict = {
             self.m: r'Mass of pendulum',
@@ -957,7 +962,7 @@ class SDoFDampedPendulum(ComposedSystem):
         system = self.Pendulum + self.Damper
 
         super().__init__(system)
-        
+
     def get_default_data(self):
 
         m0, l0, c0 = symbols('m_0 l_0 c_0', positive=True)
@@ -1026,6 +1031,7 @@ class SDoFExcitedDampedPendulum(ComposedSystem):
         }
         return self.sym_desc_dict
 
+
 class SDoFWinch(ComposedSystem):
 
     scheme_name = 'mdof_winch.png'
@@ -1047,7 +1053,7 @@ class SDoFWinch(ComposedSystem):
         self.phi = phi
 
         x = r * cos(phi) + (l + r * phi) * sin(phi)
-        y = - r * sin(phi) + (l + r * phi) * cos(phi)
+        y = -r * sin(phi) + (l + r * phi) * cos(phi)
 
         self.material_point_1 = MaterialPoint(m, x, qs=[phi])
         self.material_point_2 = MaterialPoint(m, y, qs=[phi])
@@ -1066,19 +1072,31 @@ class SDoFWinch(ComposedSystem):
         }
         return self.sym_desc_dict
 
-    
     def get_default_data(self):
 
         m0, l0 = symbols('m_0 l_0', positive=True)
 
         default_data_dict = {
-            self.r:[l0,2*l0,4*l0],
-            self.m: [2 * m0, S.Half * m0, 4 * m0,  m0, S.Half**2 * m0],
-            
-            self.l: [2 * l0, S.Half * l0, 4 * l0, S.Half**2 * l0],
+            self.r: [l0, 2 * l0, 4 * l0,l0,8*l0],
+            self.m: [2 * m0, S.Half * m0, 4 * m0, m0, S.Half**2 * m0,8*m0,16*m0],
+            self.l: [2 * l0, S.Half * l0, 4 * l0, S.Half**2 * l0,3 * l0,3* S.Half * l0, 9 * l0, 3*S.Half**2 * l0],
         }
         return default_data_dict
+
+    def get_random_parameters(self):
+
+
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+            }
+          
+        return parameters_dict
     
+
 class DDoFCoupledPendulum(ComposedSystem):
     """
     Model of a DDoF Coupled Pendulum.
@@ -2091,6 +2109,22 @@ class DDoFTwoNonLinearTrolleys(ComposedSystem):
 
         return default_data_dict
 
+    def get_random_parameters(self):
+
+
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.x1] == S.Zero:
+            parameters_dict[self.x2] = self.x
+
+        return parameters_dict
+
     def symbols_description(self):
         self.sym_desc_dict = {
             self.m1: r'Trolley Mass',
@@ -2168,3 +2202,50 @@ class MDoFForcedTrolleysWithSprings(ComposedSystem):
 
         system = self.Trolley_1 + self.Trolley_2 + self.Trolley_3
         super().__init__(system(qs))
+
+        
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
+            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.k_l : [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_cl : [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_12 : [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_c12 : [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_23 : [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_c23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_r : [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_cr : [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+
+            self.x_l : [self.x_1, 0],
+            self.x_c : [self.x_1,self.x_2, 0],
+            self.x_r : [self.x_2, 0],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.x_l] != self.x_1 or parameters_dict[self.x_c] != self.x_1 :
+
+            parameters_dict[self.x_l] = self.x_1
+
+        if parameters_dict[self.x_c] != self.x_2 or parameters_dict[self.x_r] != self.x_2:
+
+            parameters_dict[self.x_r] = self.x_2
+            
+        return parameters_dict
+        
