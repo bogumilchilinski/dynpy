@@ -1324,7 +1324,7 @@ class SDoFDampedEngine(ComposedSystem):
                                              pos1=z + e * cos(phi),
                                              qs=[z])
         self.Spring = Spring(2 * k_m, pos1=z, qs=[z])
-        self.damper = Damper(2 * c_m, pos1=z)
+        self.damper = Damper(2 * c_m, pos1=z, qs=[z])
 
         system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2 + self.damper
         super().__init__(system)
