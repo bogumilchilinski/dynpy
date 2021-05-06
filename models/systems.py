@@ -674,6 +674,79 @@ class DDoFShaft(ComposedSystem):
         return self.sym_desc_dict
 
 
+class DDoFDampedShaft(ComposedSystem):
+
+
+    scheme_name = 'ddof_damped_shaft.png'
+    real_name = 'ddof_shaft_real.png'
+
+    def __init__(self,
+                 I=Symbol('I', positive=True),
+                 k_2=Symbol('k_2', positive=True),
+                 k_1=Symbol('k_1', positive=True),
+                 c_1=Symbol('c_1', positive=True),
+                 c_2=Symbol('c_1', positive=True),
+                 input_displacement=dynamicsymbols('theta'),
+                 ivar=Symbol('t'),
+                 qs=dynamicsymbols('\\varphi_1, \\varphi_2')):
+
+        phi1, phi2 = qs
+        theta = input_displacement
+
+        self.k_2 = k_2  # left spring
+        self.k_1 = k_1  # right spring
+        self.c_1 = c_1  # right spring
+        self.c_2 = c_2  # right spring
+        self.I = I  # moment of inertia of a rod
+        self.input_displacement = input_displacement
+        self.qs = qs
+
+        self.disc_1 = Disk(I, pos1=phi1, qs=qs)
+        self.spring_1 = Spring(k_2, phi1, phi2, qs=qs)  # left spring
+        self.disc_2 = Disk(I, pos1=phi2, qs=qs)
+        self.spring_2 = Spring(k_1, pos1=phi2, pos2=theta,
+                               qs=qs)  # right spring
+        self.damper_1 = Damper(c_2, phi1, phi2, qs=qs)  # left spring
+        self.damper_2 = Damper(c_1, pos1=phi2, pos2=theta,
+                               qs=qs)  # right spring
+        system = self.disc_1 + self.disc_2 + self.spring_1 + self.spring_2 + self.damper_1 + self.damper_2
+
+        super().__init__(system)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.I: r'Moment of Inertia',
+            self.k_1: r'',
+            self.k_2: r'',
+        }
+        return self.sym_desc_dict
+    def get_default_data(self):
+
+        I0, k0, lamb = symbols('I_0 k_0 lambda', positive=True)
+
+        default_data_dict = {
+            self.k_2: [2 * k0, 4 * k0,6*k0,8*k0,10*k0],
+            self.k_1: [k0, 3 * k0,5*k0,7*k0,9*k0],
+            self.I: [2 * I0, S.Half * I0, 4 * I0, S.Half**2 * I0,3 * I0,3* S.Half * I0, 9 * I0, 3*S.Half**2 * I0],
+            self.c_1: [lamb * self.k_1],
+            self.c_2: [lamb * self.k_2],
+        }
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+            }
+          
+        return parameters_dict
+    
+    
 class Pendulum(ComposedSystem):
     """
     Model of a sDoF mathematical Pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
@@ -708,7 +781,7 @@ class Pendulum(ComposedSystem):
         -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
         -determine the instance of the pendulum by using class Pendulum()
     """
-    scheme_name = 'pendulum.png'
+    scheme_name = 'undamped_pendulum.png'
     real_name = 'pendulum_real.jpg'
 
     def __init__(self,
@@ -1034,7 +1107,7 @@ class SDoFExcitedDampedPendulum(ComposedSystem):
 
 class SDoFWinch(ComposedSystem):
 
-    scheme_name = 'mdof_winch.png'
+    scheme_name = 'sdof_winch.png'
     real_name = 'mdof_winch_real.png'
 
     def __init__(self,
