@@ -298,31 +298,55 @@ class BeamBridgeDampedTMD(ComposedSystem):
 
         return self.sym_desc_dict
 
-    def get_default_data(self):
+    def get_default_data(self,real=False):
 
         E, I, l, m0, k0, lamb = symbols('E I l_beam m_0 k_0 lambda',
                                         positive=True)
 
-        default_data_dict = {
-            self.nds.m: [20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0],
-            self.c: [lamb * self.nds.k_beam],
-            self.nds.k_beam: [
-                20 * 48 * E * I / l**3, 30 * 48 * E * I / l**3,
-                40 * 48 * E * I / l**3, 50 * 48 * E * I / l**3,
-                60 * 48 * E * I / l**3
-            ],
-            self.c_TMD: [lamb * self.nds.k_TMD],
-            self.nds.m_TMD: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
-            self.nds.k_TMD: [
-                1 * 48 * E * I / l**3, 3 * 48 * E * I / l**3,
-                3 * 48 * E * I / l**3, 5 * 48 * E * I / l**3,
-                5 * 48 * E * I / l**3
-            ],
-        }
+        if real is False:
+            
+            default_data_dict = {
+                self.nds.m: [20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0],
+                self.c: [lamb * self.nds.k_beam],
+                self.nds.k_beam: [
+                    20 * 48 * E * I / l**3, 30 * 48 * E * I / l**3,
+                    40 * 48 * E * I / l**3, 50 * 48 * E * I / l**3,
+                    60 * 48 * E * I / l**3
+                ],
+                self.c_TMD: [lamb * self.nds.k_TMD],
+                self.nds.m_TMD: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
+                self.nds.k_TMD: [
+                    1 * 48 * E * I / l**3, 3 * 48 * E * I / l**3,
+                    3 * 48 * E * I / l**3, 5 * 48 * E * I / l**3,
+                    5 * 48 * E * I / l**3
+                ],
+            }
+        else:
+            numerized_dict = {m0:100 , lamb:2 , E:200000, I:0.48, l:3 }
+            default_data_dict = {
+                self.nds.m: [(20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0).subs(numerized_dict)],
+                self.c: [(lamb * self.nds.k_beam).subs(numerized_dict)],
+                self.nds.k_beam: [(
+                    20 * 48 * E * I / l**3, 30 * 48 * E * I / l**3,
+                    40 * 48 * E * I / l**3, 50 * 48 * E * I / l**3,
+                    60 * 48 * E * I / l**3
+                ).subs(numerized_dict)],
+                self.c_TMD: [(lamb * self.nds.k_TMD).subs(numerized_dict)],
+                self.nds.m_TMD: [(2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0).subs(numerized_dict)],
+                self.nds.k_TMD: [(
+                    1 * 48 * E * I / l**3, 3 * 48 * E * I / l**3,
+                    3 * 48 * E * I / l**3, 5 * 48 * E * I / l**3,
+                    5 * 48 * E * I / l**3
+                ).subs(numerized_dict)],
+            }
 
         return default_data_dict
 
 
+    def get_real_data(self):
+        
+        return self.get_default_data(True)
+    
 class SDoFDampedHarmonicOscillator(ComposedSystem):
 
     scheme_name = '???'
