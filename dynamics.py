@@ -174,10 +174,13 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                  nonhol_coneqs=None,
                  label=None,
                  ivar=sym.Symbol('t'),
-                 evaluate=True):
+                 evaluate=True,
+                 system=None):
         """
         Supply the following for the initialization of DynamicSystem in the same way as LagrangesMethod
         """
+        if system:
+            Lagrangian=system
 
         if isinstance(Lagrangian, me.LagrangesMethod):
             bodies = Lagrangian._bodies
@@ -363,7 +366,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         # print(type(self))
 
-        return type(self)(Lagrangian=lagrangian_subs,
+        new_system=LagrangesDynamicSystem(Lagrangian=lagrangian_subs,
                           qs=self.q,
                           forcelist=forces_subs,
                           bodies=self._bodies,
@@ -371,6 +374,17 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                           hol_coneqs=hol_coneqs,
                           nonhol_coneqs=nonhol_coneqs_subs
                           )
+
+        return type(self)(0,system=new_system)
+
+        # return type(self)(Lagrangian=lagrangian_subs,
+        #                   qs=self.q,
+        #                   forcelist=forces_subs,
+        #                   bodies=self._bodies,
+        #                   frame=self.frame,
+        #                   hol_coneqs=hol_coneqs,
+        #                   nonhol_coneqs=nonhol_coneqs_subs
+        #                   )
 
 
 

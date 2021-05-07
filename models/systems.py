@@ -107,16 +107,18 @@ class SDoFHarmonicOscillator(ComposedSystem):
                  m=Symbol('m', positive=True),
                  k=Symbol('k', positive=True),
                  ivar=Symbol('t'),
-                 z=dynamicsymbols('z')):
+                 z=dynamicsymbols('z'),
+                 **kwargs
+                 ):
 
         self.m = m
         self.k = k
 
         self.mass = MaterialPoint(m, z, qs=[z])
         self.spring = Spring(k, z, qs=[z])
-        system = self.mass + self.spring
+        composed_system = self.mass + self.spring
 
-        super().__init__(system)
+        super().__init__(composed_system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -175,7 +177,8 @@ class SDoFBeamBridge(ComposedSystem):
                  g=Symbol('g', positive=True),
                  Omega=Symbol('Omega', positive=True),
                  F_0=Symbol('F_0', positive=True),
-                 z=dynamicsymbols('z')):
+                 z=dynamicsymbols('z'),
+                 **kwargs):
 
         self.m = m
         self.k_beam = k_beam
@@ -187,9 +190,10 @@ class SDoFBeamBridge(ComposedSystem):
         self.spring = Spring(k_beam, z, qs=[z])
         self.gravity_force = GravitationalForce(self.m, self.g, z)
         self.force = Force(-F_0 * sin(Omega * ivar), pos1=z)
-        system = self.mass + self.spring + self.gravity_force + self.force
+        composed_system = self.mass + self.spring + self.gravity_force + self.force
 
-        super().__init__(system)
+        super().__init__(composed_system,**kwargs)
+
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -216,7 +220,8 @@ class BeamBridgeTMD(ComposedSystem):
                  Omega=Symbol('Omega', positive=True),
                  F_0=Symbol('F_0', positive=True),
                  z=dynamicsymbols('z'),
-                 z_TMD=dynamicsymbols('z_TMD')):
+                 z_TMD=dynamicsymbols('z_TMD'),
+                 **kwargs):
 
         self.m = m
         self.k_beam = k_beam
@@ -235,10 +240,12 @@ class BeamBridgeTMD(ComposedSystem):
         self.force = Force(-F_0 * sin(Omega * ivar), pos1=z)
         self.TMD = MaterialPoint(m_TMD, pos1=z_TMD, qs=[z_TMD])
         self.spring_TMD = Spring(k_TMD, z, z_TMD, qs=[z, z_TMD])
-        system = (self.mass + self.spring + self.gravity_force + self.force +
+        composed_system = (self.mass + self.spring + self.gravity_force + self.force +
                   self.TMD + self.spring_TMD + self.gravity_TMD)
 
-        super().__init__(system)
+        super().__init__(composed_system,**kwargs)
+
+
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -277,7 +284,8 @@ class BeamBridgeDampedTMD(ComposedSystem):
                  c_TMD=Symbol('c_TMD', positive=True),
                  c=Symbol('c', positive=True),
                  z_TMD=BeamBridgeTMD().z_TMD,
-                 z=BeamBridgeTMD().z):
+                 z=BeamBridgeTMD().z,
+                 **kwargs):
         qs = z, z_TMD
         self.nds = non_damped_system
         self.c = c
@@ -287,7 +295,7 @@ class BeamBridgeDampedTMD(ComposedSystem):
         self.damper = Damper(c=c, pos1=z, qs=qs)
         system = (self.nds + self.damper + self.damper_TMD)
 
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -357,7 +365,9 @@ class SDoFDampedHarmonicOscillator(ComposedSystem):
                  k=Symbol('k', positive=True),
                  c=Symbol('c', positive=True),
                  ivar=Symbol('t'),
-                 z=dynamicsymbols('z')):
+                 z=dynamicsymbols('z'),
+                 **kwargs
+                 ):
 
         self.m = m
         self.k = k
@@ -367,7 +377,7 @@ class SDoFDampedHarmonicOscillator(ComposedSystem):
         self.damper = Damper(c, z)
         system = self.mass + self.spring + self.damper
 
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
 
 class DDoFSimplifyVehicleSuspension(ComposedSystem):
@@ -431,7 +441,8 @@ class DDoFSimplifyVehicleSuspension(ComposedSystem):
                  k_1=Symbol('k_1', positive=True),
                  F_engine=Symbol('F_{engine}', positive=True),
                  ivar=Symbol('t', positive=True),
-                 qs=dynamicsymbols('z, phi')):
+                 qs=dynamicsymbols('z, phi'),
+                 **kwargs):
 
         z, phi = qs
 
@@ -453,7 +464,7 @@ class DDoFSimplifyVehicleSuspension(ComposedSystem):
         self.force = Force(F_engine, pos1=z - l_r * phi, qs=qs)
         system = self.body + self.spring_1 + self.spring_2 + self.force
 
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -529,7 +540,8 @@ class DDoFVehicleSuspension(ComposedSystem):
                  k_1=Symbol('k_l', positive=True),
                  F_engine=Symbol('F_{engine}', positive=True),
                  ivar=Symbol('t', positive=True),
-                 qs=dynamicsymbols('z, \\varphi')):
+                 qs=dynamicsymbols('z, \\varphi'),
+                 **kwargs):
 
         z, phi = qs
 
@@ -548,7 +560,7 @@ class DDoFVehicleSuspension(ComposedSystem):
         self.force = Force(F_engine, pos1=z - l_r * phi, qs=qs)
         system = self.body + self.spring_1 + self.spring_2 + self.force
 
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -579,7 +591,8 @@ class DDoFDampedVehicleSuspension(ComposedSystem):
                  k_2=DDoFVehicleSuspension().k_2,
                  l_l=DDoFVehicleSuspension().l_l,
                  l_r=DDoFVehicleSuspension().l_r,
-                 qs=dynamicsymbols('z, \\varphi')):
+                 qs=dynamicsymbols('z, \\varphi'),
+                 **kwargs):
 
         z, phi = qs
 
@@ -598,7 +611,7 @@ class DDoFDampedVehicleSuspension(ComposedSystem):
                                qs=qs)  # right damper
         system = self.nds + self.damper_l + self.damper_r
 
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def get_default_data(self):
 
@@ -680,7 +693,8 @@ class DDoFShaft(ComposedSystem):
                  k_1=Symbol('k_1', positive=True),
                  input_displacement=dynamicsymbols('theta'),
                  ivar=Symbol('t'),
-                 qs=dynamicsymbols('\\varphi_1, \\varphi_2')):
+                 qs=dynamicsymbols('\\varphi_1, \\varphi_2'),
+                 **kwargs):
 
         phi1, phi2 = qs
         theta = input_displacement
@@ -698,7 +712,7 @@ class DDoFShaft(ComposedSystem):
                                qs=qs)  # right spring
         system = self.disc_1 + self.disc_2 + self.spring_1 + self.spring_2
 
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -825,7 +839,8 @@ class Pendulum(ComposedSystem):
                  l=Symbol('l', positive=True),
                  angle=dynamicsymbols('varphi'),
                  qs=None,
-                 ivar=Symbol('t')):
+                 ivar=Symbol('t'),
+                 **kwargs):
 
         if qs == None:
             qs = [angle]
@@ -906,7 +921,8 @@ class SDoFFreePendulum(ComposedSystem):
                  l=Symbol('l', positive=True),
                  angle=dynamicsymbols('varphi'),
                  qs=None,
-                 ivar=Symbol('t')):
+                 ivar=Symbol('t'),
+                 **kwargs):
 
         self.m = m
         self.g = g
@@ -915,7 +931,7 @@ class SDoFFreePendulum(ComposedSystem):
         self.pendulum = Pendulum(m, g, l, angle=angle)
         system = self.pendulum
 
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -975,6 +991,7 @@ class SDoFExcitedPendulum(ComposedSystem):
             angle=dynamicsymbols('varphi'),
             qs=None,
             ivar=Symbol('t'),
+            **kwargs
     ):
         phi = angle
 
@@ -992,7 +1009,7 @@ class SDoFExcitedPendulum(ComposedSystem):
         self.force = Force(-F * l * cos(phi), pos1=phi, qs=qs)
         system = self.pendulum + self.force
 
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -1052,6 +1069,7 @@ class SDoFDampedPendulum(ComposedSystem):
             angle=dynamicsymbols('varphi'),
             qs=None,
             ivar=Symbol('t'),
+            **kwargs
     ):
         phi = angle
 
@@ -1069,7 +1087,7 @@ class SDoFDampedPendulum(ComposedSystem):
         self.Damper = Damper(c, l * phi, qs=qs)
         system = self.Pendulum + self.Damper
 
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def get_default_data(self):
 
@@ -1108,6 +1126,7 @@ class SDoFExcitedDampedPendulum(ComposedSystem):
             angle=dynamicsymbols('varphi'),
             qs=None,
             ivar=Symbol('t'),
+            **kwargs
     ):
         phi = angle
 
@@ -1128,7 +1147,7 @@ class SDoFExcitedDampedPendulum(ComposedSystem):
         self.Force = Force(-F * sin(Omega * ivar), pos1=phi, qs=[phi])
         system = self.Pendulum + self.Damper + self.Force
 
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -1152,7 +1171,7 @@ class SDoFPendulumKinematicExct(ComposedSystem):
                  ivar=Symbol('t'),
                  phi=dynamicsymbols('\\varphi'),
                  x_e=dynamicsymbols('x_e'),
-                 system=None):
+                 **kwargs):
 
         self.l = l
         self.m = m
@@ -1169,7 +1188,7 @@ class SDoFPendulumKinematicExct(ComposedSystem):
 
         system = self.material_point_1 + self.material_point_2 + self.gravity
 
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -1203,7 +1222,7 @@ class SDoFWinch(ComposedSystem):
                  g=Symbol('g', positive=True),
                  ivar=Symbol('t'),
                  phi=dynamicsymbols('\\varphi'),
-                 system=None):
+                 **kwargs):
 
         self.r = r
         self.l = l
@@ -1220,7 +1239,7 @@ class SDoFWinch(ComposedSystem):
 
         system = self.material_point_1 + self.material_point_2 + self.gravity
 
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -1287,7 +1306,8 @@ class DDoFCoupledPendulum(ComposedSystem):
                  g=Symbol('g', positive=True),
                  l=Symbol('l', positive=True),
                  k=Symbol('k', positive=True),
-                 qs=dynamicsymbols('phi_1, phi_2')):
+                 qs=dynamicsymbols('phi_1, phi_2'),
+                 **kwargs):
 
         phi1, phi2 = qs
 
@@ -1301,7 +1321,7 @@ class DDoFCoupledPendulum(ComposedSystem):
         self.pendulum_2 = Pendulum(m, g, l, angle=phi2, qs=[qs])
 
         system = self.pendulum_1 + self.pendulum_2 + self.spring
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -1385,7 +1405,7 @@ class SDoFEngine(ComposedSystem):
                  z=dynamicsymbols('z'),
                  phi=dynamicsymbols('phi'),
                  ivar=Symbol('t', positive=True),
-                 system=None):
+                 **kwargs):
 
         self.M = M
         self.k_m = k_m
@@ -1399,7 +1419,7 @@ class SDoFEngine(ComposedSystem):
         self.Spring = Spring(2 * k_m, pos1=z, qs=[z])
 
         system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -1458,7 +1478,7 @@ class SDoFDampedEngine(ComposedSystem):
                  z=dynamicsymbols('z'),
                  phi=dynamicsymbols('phi'),
                  ivar=Symbol('t', positive=True),
-                 system=None):
+                 **kwargs):
 
         self.M = M
         self.k_m = k_m
@@ -1475,7 +1495,7 @@ class SDoFDampedEngine(ComposedSystem):
         self.damper = Damper(2 * c_m, pos1=z, qs=[z])
 
         system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2 + self.damper
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -1544,7 +1564,7 @@ class EngineWithTMD(ComposedSystem):
                  z_TMD=dynamicsymbols('z_{TMD}'),
                  phi=dynamicsymbols('varphi'),
                  ivar=Symbol('t'),
-                 system=None):
+                 **kwargs):
 
         self.M = M
         self.k_m = k_m
@@ -1566,7 +1586,7 @@ class EngineWithTMD(ComposedSystem):
 
         system = self.Spring_1 + self.Spring_2 + self.MaterialPoint_1 + \
             self.MaterialPoint_2 + self.MaterialPoint_3
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def equilibrium_equation(self, static_disp_dict=None):
         static_disp_dict = {
@@ -1636,7 +1656,7 @@ class SDoFNonlinearEngine(ComposedSystem):
                  z=dynamicsymbols('z'),
                  phi=dynamicsymbols('phi'),
                  ivar=Symbol('t', positive=True),
-                 system=None):
+                 **kwargs):
 
         self.M = M
         self.k_m = k_m
@@ -1661,7 +1681,7 @@ class SDoFNonlinearEngine(ComposedSystem):
         self.Spring = Spring(2 * k_m, pos1=P1, pos2=P2, l0=l0, qs=[z])
 
         system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -1722,7 +1742,7 @@ class MDoFTMD(ComposedSystem):
                  xb=dynamicsymbols('x_b'),
                  angle=dynamicsymbols('Omega'),
                  ivar=Symbol('t', positive=True),
-                 system=None):
+                 **kwargs):
 
         self.m = m
         self.me = me
@@ -1738,7 +1758,7 @@ class MDoFTMD(ComposedSystem):
 
         system = self.Spring_1 + self.Spring_2 + \
             self.MaterialPoint_1 + self.MaterialPoint_2 + self.Force
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -1812,7 +1832,7 @@ class MDoFWinch(ComposedSystem):
                  ivar=Symbol('t'),
                  theta=dynamicsymbols('theta'),
                  phi=dynamicsymbols('phi'),
-                 system=None):
+                 **kwargs):
 
         self.I = I
         self.k = k
@@ -1837,7 +1857,7 @@ class MDoFWinch(ComposedSystem):
         system = self.material_point_1 + self.material_point_2 + \
             self.disc_1 + self.spring + self.M_engine + self.gravity
 
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def get_default_data(self):
 
@@ -1923,7 +1943,7 @@ class MDoFElasticPendulum(ComposedSystem):
                  ivar=Symbol('t'),
                  z=dynamicsymbols('z'),
                  phi=dynamicsymbols('\\varphi'),
-                 system=None):
+                 **kwargs):
 
         self.k = k
 
@@ -1959,7 +1979,7 @@ class MDoFElasticPendulum(ComposedSystem):
         system = (self.spring + self.gravity + self.material_point_1
                   )  # + self.material_point_2
 
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -2051,7 +2071,7 @@ class MDoFDampedElasticPendulum(ComposedSystem):
 
         system = self.undamped + self.damper
 
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -2074,7 +2094,7 @@ class Inverted_Pendulum(HarmonicOscillator):
                  F=symbols('F', positive=True),
                  var=dynamicsymbols('x, phi'),
                  ivar=Symbol('t'),
-                 system=None):
+                 **kwargs):
 
         x, phi = var
 
@@ -2097,7 +2117,7 @@ class Inverted_Pendulum(HarmonicOscillator):
 
         system = self.rod + self.cart + self.friction + self.force
 
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
 
 class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
@@ -2113,7 +2133,7 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
                  F=Symbol('F_0', positive=True),
                  x=dynamicsymbols('x'),
                  Omega=Symbol('Omega', positive=True),
-                 system=None):
+                 **kwargs):
         """
         Model of Single Degree of Freedom Trolley with nonlinear spring (type of inverted pendulum)
 
@@ -2165,7 +2185,7 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
         self.Force = Force(-F * cos(Omega * ivar), pos1=x, qs=[x])
 
         system = self.MaterialPoint + self.Spring + self.Force
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -2218,7 +2238,7 @@ class DDoFTwoNonLinearTrolleys(ComposedSystem):
                  x2=dynamicsymbols('x2'),
                  x=dynamicsymbols('x'),
                  qs=dynamicsymbols('x1, x2'),
-                 system=None):
+                 **kwargs):
 
         self.m1 = m1
         self.m2 = m2
@@ -2312,7 +2332,7 @@ class MDoFForcedTrolleysWithSprings(ComposedSystem):
                  Omega=Symbol('Omega', positive=True),
                  qs=dynamicsymbols('x_l x_c x_r'),
                  ivar=Symbol('t'),
-                 system=None):
+                 **kwargs):
 
         self.m1 = m1
         self.m2 = m2
