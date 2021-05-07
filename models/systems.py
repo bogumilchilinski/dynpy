@@ -1033,8 +1033,8 @@ class SDoFExcitedDampedPendulum(ComposedSystem):
 
 class SDoFPendulumKinematicExct(ComposedSystem):
 
-    scheme_name = 'mdof_winch.png'
-    real_name = 'mdof_winch_real.png'
+    scheme_name = 'kin_exct_pendulum.PNG'
+    real_name = 'pendulum_real.jpg'
 
     def __init__(self,
                  l=Symbol('l', positive=True),
@@ -1083,8 +1083,8 @@ class SDoFPendulumKinematicExct(ComposedSystem):
 
 class SDoFWinch(ComposedSystem):
 
-    scheme_name = 'mdof_winch.png'
-    real_name = 'mdof_winch_real.png'
+    scheme_name = 'sdof_winch.PNG'
+    real_name = 'winch_mechanism_real.PNG'
 
     def __init__(self,
                  r=Symbol('r', positive=True),
@@ -2101,7 +2101,7 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
 
 
 class DDoFTwoNonLinearTrolleys(ComposedSystem):
-    scheme_name = 'ddof_nonlin_trolleys.PNG'
+    scheme_name = 'nonlin_trolley.PNG'
     real_name = 'dwa_wozki_XD.PNG'
 
     def __init__(self,
@@ -2186,6 +2186,68 @@ class DDoFTwoNonLinearTrolleys(ComposedSystem):
         }
         return self.sym_desc_dict
 
+class SDoFNonLinearTrolley(ComposedSystem):
+
+    scheme_name = 'nonlin_trolley.PNG'
+    real_name = 'nonlin_trolley_real.PNG'
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 k=Symbol('k', positive=True),
+                 d=Symbol('d', positive=True),
+                 l_0=Symbol('l_0', positive=True),
+                 ivar=Symbol('t'),
+                 x=dynamicsymbols('x'),
+                 qs=dynamicsymbols('x'),
+                 system=None):
+
+        self.m = m
+        self.k = k
+        self.d = d
+        self.l_0 = l_0
+        self.x = x
+
+        self.Trolley = MaterialPoint(m, x, qs=[x]) + Spring(
+            k, pos1=(sqrt(x**2 + d**2) - l_0), qs=[x])
+
+        system = self.Trolley
+        super().__init__(system(qs))
+
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
+            self.d: [1 * l0, 2 * l0, S.Half * l0, 3 * S.Half * l0, 1 * l0],
+            self.k:
+            [S.Half * k0, S.Half * k0, 1 * k0, 3 * S.Half * k0, 2 * k0],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.x1] == S.Zero:
+            parameters_dict[self.x2] = self.x
+
+        return parameters_dict
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Trolley Mass',
+            self.k: 'Spring Stiffness',
+            self.d: r'length',
+            self.l_0: r'length',
+        }
+        return self.sym_desc_dict
 
 class MDoFForcedTrolleysWithSprings(ComposedSystem):
     scheme_name = 'mdof_three_trolleys.PNG'

@@ -888,6 +888,8 @@ class HarmonicOscillator(LinearDynamicSystem):
         return LinearODESolution(eoms, ivar=self.ivar, dvars=self.q).general_solution(
             initial_conditions=initial_conditions).subs(subs_dict).doit()
 
+
+
     def steady_solution(self, initial_conditions=None):
         """
 
