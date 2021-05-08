@@ -12,6 +12,7 @@ base_frame=ReferenceFrame('N')
 base_origin=Point('O')
 
 class GeometryOfPoint:
+<<<<<<< HEAD
     def __init__(self, *args , frame=base_frame , ivar=Symbol('t')):
 
         if isinstance(args, Point):
@@ -44,6 +45,19 @@ class GeometryOfPoint:
                     P_na.set_pos(base_origin, frame.x*0)
                     P_na.set_vel(frame, frame.x*diff(0, ivar))
                     self.Point = P_na
+=======
+    def __init__(self, *args, frame=base_frame , ivar=Symbol('t')):
+        
+        
+        if type(args[0])==(Point):
+            self._point=args[0]
+
+        elif isinstance(args[0],Number) or isinstance(args[0],Expr):
+            P = Point('P')
+            P.set_pos(base_origin, frame.x*args[0])
+            P.set_vel(frame, frame.x*diff(args[0], ivar))
+            self._point=P
+>>>>>>> cbe00b03b26b0e0a8512f1292e0299cfb267cae7
 
         else:
             print('Unsupported data type: Please change the method of the input')

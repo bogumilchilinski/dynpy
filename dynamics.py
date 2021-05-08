@@ -179,6 +179,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         Supply the following for the initialization of DynamicSystem in the same way as LagrangesMethod
         """
+        if system:
+            Lagrangian=system
 
         if isinstance(Lagrangian, me.LagrangesMethod):
             bodies = Lagrangian._bodies
@@ -214,8 +216,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self.governing_equations = self.__governing_equations
 
         if label == None:
-            label = self.__class__.__name__ + ' with ' + str(len(
-                self.q)) + 'DOF'
+            label = self.__class__.__name__ + ' with ' + str(len(self.q)) + 'DOF'
 
         self._label = label
 
@@ -367,7 +368,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         # print(type(self))
 
-        return type(self)(Lagrangian=lagrangian_subs,
+        new_system=LagrangesDynamicSystem(Lagrangian=lagrangian_subs,
                           qs=self.q,
                           forcelist=forces_subs,
                           bodies=self._bodies,
@@ -375,6 +376,17 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                           hol_coneqs=hol_coneqs,
                           nonhol_coneqs=nonhol_coneqs_subs
                           )
+
+        return type(self)(0,system=new_system)
+
+        # return type(self)(Lagrangian=lagrangian_subs,
+        #                   qs=self.q,
+        #                   forcelist=forces_subs,
+        #                   bodies=self._bodies,
+        #                   frame=self.frame,
+        #                   hol_coneqs=hol_coneqs,
+        #                   nonhol_coneqs=nonhol_coneqs_subs
+        #                   )
 
 
 
@@ -892,6 +904,8 @@ class HarmonicOscillator(LinearDynamicSystem):
 
         return LinearODESolution(eoms, ivar=self.ivar, dvars=self.q).general_solution(
             initial_conditions=initial_conditions).subs(subs_dict).doit()
+
+
 
     def steady_solution(self, initial_conditions=None):
         """
