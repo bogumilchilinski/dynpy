@@ -6,12 +6,13 @@ from sympy.physics.vector.printing import vpprint, vlatex
 
 class ContinuousSystem:
 
-    def __init__(self, L, q, t_var=Symbol('t'), spatial_var=Symbol('x'), derivative_order=2,label=None):
+    def __init__(self, L, q,bc_dict=None, t_var=Symbol('t'), spatial_var=Symbol('x'), derivative_order=2,label=None):
         self.t = t_var
         self.L = L
         self.q = q
         self.r = flatten((spatial_var,))
         self.diff_ord = derivative_order
+        self.bc_dict=bc_dict
 
 
         if label == None:
@@ -96,7 +97,12 @@ class ContinuousSystem:
 
         return dsolve(spatial_ode, spatial_comp)
 
-    def fundamental_matrix(self, bc_dict, sep_expr, spatial_comp=Function('X')(Symbol('x'))):
+    def fundamental_matrix(self, bc_dict=None, sep_expr, spatial_comp=Function('X')(Symbol('x'))):
+
+        if bc_dict:
+            self.bc_dict=bc_dict
+        else:
+            bc_dict=self.bc_dict
 
         spatial_sol = self.spatial_general_solution(
             sep_expr=sep_expr, spatial_comp=spatial_comp)
@@ -120,11 +126,21 @@ class ContinuousSystem:
         return fun_eqns.jacobian(symbols('C1:'+str(len(bc_dict)+1)))
 
 
-    def char_poly(self, bc_dict, sep_expr, spatial_comp=Function('X')(Symbol('x'))):
+    def char_poly(self, bc_dict=None, sep_expr, spatial_comp=Function('X')(Symbol('x'))):
+
+        if bc_dict:
+            self.bc_dict=bc_dict
+        else:
+            bc_dict=self.bc_dict
 
         return self.fundamental_matrix(bc_dict, sep_expr, spatial_comp).det().simplify()
 
-    def eigenvalues(self, bc_dict, sep_expr, arg, spatial_comp=Function('X')(Symbol('x')), index=Symbol('n', integer=True, positive=True)):
+    def eigenvalues(self, bc_dict=None, sep_expr, arg, spatial_comp=Function('X')(Symbol('x')), index=Symbol('n', integer=True, positive=True)):
+        
+        if bc_dict:
+            self.bc_dict=bc_dict
+        else:
+            bc_dict=self.bc_dict
 
         root = solve(self.char_poly(bc_dict, sep_expr, spatial_comp), arg)[0]
 
@@ -132,7 +148,12 @@ class ContinuousSystem:
 
         return SeqFormula(root+(index-1)/spatial_span*pi, (index, 0, oo))
 
-    def eigenmodes(self, mode_no, bc_dict, sep_expr, arg, spatial_comp=Function('X')(Symbol('x')), index=Symbol('n', integer=True, positive=True)):
+    def eigenmodes(self, mode_no, bc_dict=None, sep_expr, arg, spatial_comp=Function('X')(Symbol('x')), index=Symbol('n', integer=True, positive=True)):
+
+        if bc_dict:
+            self.bc_dict=bc_dict
+        else:
+            bc_dict=self.bc_dict
 
         C_list = list(symbols('C1:'+str(len(bc_dict)+1)))
 
