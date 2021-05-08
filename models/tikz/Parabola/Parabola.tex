@@ -24,12 +24,13 @@
     \fill[black] (origo) circle (0.05);
     \draw[thick,gray,->] (origo) -- ++(2,0) node[black,right] {$x$};
     \draw[thick,gray,->] (origo) -- ++(0,4) node (mary) [black,above right] {$y$};
-    \draw[thick,<-] (-3,1.5) -- (-3,3) node[midway, right] {$\vec{g}$};
+    \draw[thick,<-] (-2.2,1.5) -- (-2.2,3) node[midway, right] {$\vec{g}$};
     
     
     
     %\draw ($(origo)+(-2,4)$) parabola bend (origo) ($(origo)+(2,4)$) node[below right] {$a \cdot x^2$};
-    \draw[black]   plot[smooth,domain=-2:2] (\x, {3*(sin(\x r))^2}) node[below right] {$a \cdot \sin^2 x$};
+    \draw[black]   plot[smooth,domain=-1.8:0] (\x, {-\x^2}) node[below right] {};
+    \draw[black]   plot[smooth,domain=0:1.8] (\x, {\x^2}) node[below right] {};
 
  
 
@@ -42,7 +43,7 @@
 
     %\node (bob1)  at ($(origo) +(2cm,4cm)$) [near end, right] {$m$};
     %\node (l1_label) at ($(origo)+(310:1.5cm)$)   {$l$};
-    \fill (1, 2.13) circle (0.2) node[below right=0.25cm] {$m$};
+    \fill (1.5, 2.25) circle (0.2) node[below right=0.25cm] {$m$};
 
  
 

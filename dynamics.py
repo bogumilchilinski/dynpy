@@ -969,8 +969,7 @@ class HarmonicOscillator(LinearDynamicSystem):
             frf_expr = ((sqrt((n_sin**2 + n_cos**2).simplify())) /
                         d.doit()).simplify()   # sDoF
         else:  # DoF > 1
-            frf_expr = (self.stiffness_matrix().inv() - excitation_freq **
-                           2 * self.inertia_matrix())  # mDoF
+            frf_expr = self.fundamental_matrix().inv() * self.rhs().coeff(sin(excitation_freq * self.ivar)).coeff(cos(excitation_freq * self.ivar))  # mDoF
 
         return frf_expr
 

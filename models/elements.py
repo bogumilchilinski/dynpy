@@ -12,28 +12,45 @@ base_frame=ReferenceFrame('N')
 base_origin=Point('O')
 
 class GeometryOfPoint:
-    def __init__(self, *args, frame=base_frame , ivar=Symbol('t')):
-        
-        if type(args[0])==(Point):
-            self._point=args[0]
+    def __init__(self, *args , frame=base_frame , ivar=Symbol('t')):
 
-        elif isinstance(args[0],Number) or isinstance(args[0],Expr):
-            P = Point('P')
-            P.set_pos(base_origin, frame.x*args[0])
-            P.set_vel(frame, frame.x*diff(args[0], ivar))
-            self._point=P
+        if isinstance(args, Point):
+            self.Point = P
+
+        elif isinstance(args[0], Expr):
+            self.Point = args[0]
+            print('Expression based on the generalized coordinate')
+
+        elif isinstance(args, tuple):
+            tuplelist = [x for x in args]
+            for args in tuplelist:
+                if args is args[0:2]:
+                    P1 = Point('P1')
+                    P1.set_pos(base_origin, frame.x*args[0] + frame.y*args[1])
+                    P1.set_vel(frame, frame.x*diff(args[0], ivar) + frame.y*diff(args[1], ivar))
+                    self.Point = P1
+                    print(self.Point)
+
+                elif args is args[0:3]:
+                    P2 = Point('P2')
+                    P2.set_pos(base_origin, frame.x*args[0] + frame.y*args[1] + frame.z*args[2])
+                    P2.set_vel(frame, frame.x*diff(args[0], ivar) + frame.y*diff(args[1], ivar) + frame.z*diff(args[2], ivar))
+                    self.Point = P2
+                    print(self.Point)
+
+                else:
+                    print('Tuple out of range')
+                    P_na = Point('P_na')
+                    P_na.set_pos(base_origin, frame.x*0)
+                    P_na.set_vel(frame, frame.x*diff(0, ivar))
+                    self.Point = P_na
 
         else:
-            print('Unsupported data type')
-            P = Point('P')
-            P.set_pos(base_origin, frame.x*0)
-            P.set_vel(frame, frame.x*diff(0, ivar))
-            self._point=P
-
+            print('Unsupported data type: Please change the method of the input')
+            self.Point = 0
 
     def get_point(self):
-
-        return self._point
+        return self.Point
 
 
 class Element(LagrangesDynamicSystem):
@@ -63,26 +80,21 @@ class MaterialPoint(Element):
     """
     scheme_name = 'material_point.png'
     real_name = 'material_point.png'
-    def __init__(self, m, pos1, qs=None, frame=base_frame, ivar=Symbol('t')):
+    def __init__(self, m, pos1 , qs=None, frame=base_frame, ivar=Symbol('t')):
         
         if not qs:
             self.qs = [pos1]
-
-
-      
-        pos1=GeometryOfPoint(pos1,frame=frame).get_point()
-
-
+            
+        pos1=GeometryOfPoint(pos1).get_point()
+        
         if isinstance(pos1, Point):
-            Lagrangian = S.Half * m * (pos1.vel(frame).magnitude()**2).doit()  # pos1.vel(frame).magntidue() behaves as diff(pos1,ivar)
+            Lagrangian = S.Half * m * ((base_origin.pos_from(pos1).diff(ivar,frame).magnitude())**2)
+            
         else:
-            Lagrangian = S.Half * m * (diff(pos1,ivar))**2
-        
-        
+            Lagrangian = S.Half * m * diff(pos1,ivar)**2
 
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar,frame=frame)
-
 
 class Spring(Element):
     """
@@ -93,56 +105,27 @@ class Spring(Element):
     """
     scheme_name = 'spring.png'
     real_name = 'spring.png'
-    def __init__(self, stiffness, pos1, pos2=0,  qs=None, l0 = 0, ivar=Symbol('t'), frame = base_frame):
-        if not qs:
-            qs = [pos1]
-
-
-        pos1=GeometryOfPoint(pos1,frame=frame).get_point()
-        pos2=GeometryOfPoint(pos2,frame=frame).get_point()
+    def __init__(self, stiffness, pos1, pos2=0,  qs=None, ivar=Symbol('t'), frame = base_frame):
+        
+        self.qs = [pos1 , pos2]
+        
+        if not pos2==0:
+            pos1=GeometryOfPoint(pos1).get_point()
+            pos2=GeometryOfPoint(pos2).get_point()
+        else:
+            pos1=GeometryOfPoint(pos1).get_point()
 
         if isinstance(pos1,Point):
-            u = pos1.pos_from(pos2).magnitude()-l0
-            
-            L = -S.Half * stiffness * (u**2).doit()
-            
+
+            Lagrangian = -S.Half * stiffness * ((base_origin.pos_from(pos1) - base_origin.pos_from(pos2)).magnitude()**2)
         else:
-            L = -S.Half * stiffness * (pos1 - pos2)**2
+            Lagrangian = -S.Half * stiffness * (pos1 - pos2)**2
 
-        super().__init__(Lagrangian=L, qs=qs, ivar=ivar)
-
+            #print(str('YOU CANNOT APPLY BOTH METHODS AT ONCE'))
         
-class NonlinSpring__RefFrme_Pt(Element):
-    """
-    Model of a Nonlinear Spring with whole ReferenceFrame, Point packed in the class  -- Please Advise! ... qs = [ ] must be supplied in the calling sequence:
-    """
-    """
-    Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s), which analytically display the dynamics of displacing spring after            cummulating PE. The class work in two modes. In coordinate mode and Point mode where the Point mode may be supplemented with parameter.
-    """
+        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, frame=frame)
 
-    def __init__(self, k, l_0, pos1, pos2=0, qs=None, ivar=Symbol('t'), frame=base_frame):
 
-        if pos1 == qs or pos2 == qs:
-
-            if qs == None:
-                self.qs = [pos1]
-            elif not pos2 == 0:
-                qs = [pos1,pos2]
-
-        else:
-            pos1 is type(Point) or pos2 is type(Point)
-
-        P1 = Point('P1')
-        P1.set_pos(P1 , frame.x*pos1)
-
-        P2 = Point('P2')
-        P2.set_pos(P1, frame.x*pos1 + frame.y*pos2)
-
-        L = - S.Half * k *  (P1.pos_from(P2).magnitude()-l_0)**2
-
-        super().__init__(Lagrangian=L, qs=qs, ivar=ivar, frame=frame)
-
-        
 class GravitationalForce(Element):
     """
     Model of a changing centroid for potential energy. Creates a singular model, after inputing correct values of gravity field - g,
@@ -179,27 +162,21 @@ class Disk(Element):
     """
     scheme_name = 'disk.png'
     real_name = 'disk.png'
-    def __init__(self, I, pos1=0, pos_c=0, qs=None, ivar=Symbol('t')):
+    def __init__(self, I, pos1 , qs=None, frame=base_frame, ivar=Symbol('t')):
         
-        if pos1 == 0:
-            
-            self.qs = [pos_c]
+        if not qs:
+            self.qs = [pos1]
 
-            Lagrangian = S.Half * I * diff(pos_c,ivar)**2
-        
-        elif pos_c == 0:
-            
-            qs = [pos1]
-            
-            Lagrangian = S.Half * I * diff(pos1,ivar)**2
-            
+        pos1=GeometryOfPoint(pos1).get_point()
 
+        if isinstance(pos1, Point):
+            Lagrangian = S.Half * I * ((base_origin.pos_from(pos1).diff(ivar,frame).magnitude())**2)
+                
         else:
-            
-            Lagrangian = 0
-            print(str('YOU CANNOT APPLY BOTH METHODS AT ONCE'))
-        
-        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
+            Lagrangian = S.Half * I * diff(pos1,ivar)**2
+
+
+        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, frame=frame)
 
         
 class RigidBody2D(Element):
@@ -211,26 +188,19 @@ class RigidBody2D(Element):
     """
     scheme_name = 'rigid_body2D.png'
     real_name = 'rigid_body2D.png'
-    def __init__(self, m, I, pos_lin=0, pos_rot=0, pos_lin_c=0, pos_rot_c=0, qs=None, ivar=Symbol('t')):
+    def __init__(self, m, I, pos_lin=0, pos_rot=0, qs=None, frame=base_frame, ivar=Symbol('t')):
         
         if pos_lin == 0 and pos_rot == 0:
-            
-            self.qs = [pos_lin_c, pos_rot_c]
+            self.qs = [pos_lin, pos_rot]
 
-            Lagrangian = S.Half * m * diff(pos_lin_c,ivar)**2 + S.Half * I * diff(pos_rot_c,ivar)**2
+        if isinstance(pos_lin, Point) and isinstance(pos_rot, Point):
+            Lagrangian = S.Half * m * ((base_origin.pos_from(pos_lin).diff(ivar,frame).magnitude())**2) + S.Half * I *((base_origin.pos_from(pos_rot).diff(ivar,frame).magnitude())**2)
         
-        elif pos_lin_c == 0 and pos_rot_c == 0:
-            
-            qs = [pos_lin, pos_rot]
-            
-            Lagrangian = S.Half * m * diff(pos_lin,ivar)**2 + S.Half * I * diff(pos_rot,ivar)**2
-            
         else:
-            
-            Lagrangian = 0
-            print(str('YOU CANNOT APPLY BOTH METHODS AT ONCE'))
+            Lagrangian = S.Half * m * diff(pos_lin,ivar)**2 + S.Half * I * diff(pos_rot,ivar)**2
+
         
-        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
+        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, frame=frame)
   
         
 class Damper(Element):
@@ -246,7 +216,6 @@ class Damper(Element):
         if not qs:
             self.qs = [pos1]
 
-           
         pos1=GeometryOfPoint(pos1,frame=frame).get_point()
         pos2=GeometryOfPoint(pos2,frame=frame).get_point()
         
@@ -254,8 +223,7 @@ class Damper(Element):
             D = S.Half * c * ((pos1.vel(frame)-pos2.vel(frame)).magnitude()**2).doit()  # pos1.vel(frame).magntidue() behaves as diff(pos1,ivar)
         else:
             D = S.Half * c * (diff(pos1-pos2,ivar))**2
-        
-        
+
         points_dict={}
         for coord in qs:
             
@@ -264,18 +232,13 @@ class Damper(Element):
             P_tmp = Point(f'P_{str(coord)}')
             P_tmp.set_vel(frame, coord_vel * frame.x)
             points_dict[coord_vel]=P_tmp
-        
-        
-        
-        
-             
+
+    
         forcelist = [ (point_dmp,-diff(D,coord_vel)*frame.x)  for coord_vel,point_dmp in points_dict.items() ]
         #print(forcelist)
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
 
-
-        
         
 class PID(Element):
     """
@@ -287,20 +250,34 @@ Creates a model of a PID controller (proportional , integral , derivative) which
     real_name = ''
     def __init__(self, kp, ki, kd, pos1, qs=None, ivar=Symbol('t'), frame=base_frame):
 
-        if qs == None:
+        if qs:
             qs = [pos1]
 
         dpos1 = diff(pos1, ivar)
-        d2pos1 = diff(dpos1, ivar)
-        
-        P = Point('P')
-        P.set_vel(frame, dpos1 * frame.x)
-        
+
         In = pos1  # In - error
         u = pos1*ki + dpos1*kp + d2pos1*kd
         G = In - u
         
         forcelist = [(P, G*frame.x)]
+        
+        pos1=GeometryOfPoint(pos1,frame=frame).get_point()
+        
+        if isinstance(pos1, Point):
+            D = S.Half * c * ((pos1.vel(frame)-pos2.vel(frame)).magnitude()**2).doit()  #pos1*ki + pos1.vel(frame)*kp + d2pos1*kd
+        else:
+            D = S.Half * c * (diff(pos1-pos2,ivar))**2
+
+        points_dict={}
+        for coord in qs:
+            
+            coord_vel=diff(coord,ivar)
+            
+            P_tmp = Point(f'P_{str(coord)}')
+            P_tmp.set_vel(frame, coord_vel * frame.x)
+            points_dict[coord_vel]=P_tmp
+
+        forcelist = [ (point_dmp,-diff(G,coord_vel)*frame.x)  for coord_vel,point_dmp in points_dict.items() ]
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
 
@@ -314,6 +291,8 @@ class Excitation(Element):
     def __init__(self, f, pos_rot, ivar=Symbol('t'), frame=base_frame):
         
         qs = [pos_rot]
+        
+        pos_rot = GeometryOfPoint(pos_rot).get_point()
         
         dpos_rot = diff(pos_rot,ivar)
         
@@ -364,4 +343,37 @@ class Force(LagrangesDynamicSystem):
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
         
 
+        
 ###################################################################################################################################
+
+
+        
+#class NonlinSpring__RefFrme_Pt(Element):
+   # """
+    #Model of a Nonlinear Spring with whole ReferenceFrame, Point packed in the class  -- Please Advise! ... qs = [ ] must be supplied in the calling sequence:
+    #"""
+    #"""
+    #Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s), which analytically display the dynamics of displacing spring after            cummulating PE. The class work in two modes. In coordinate mode and Point mode where the Point mode may be supplemented with parameter.
+    #"""
+
+    #def __init__(self, k, l_0, pos1, pos2=0, qs=None, ivar=Symbol('t'), frame=base_frame):
+
+        #if pos1 == qs or pos2 == qs:
+
+            #if qs == None:
+                #self.qs = [pos1]
+            #elif not pos2 == 0:
+                #qs = [pos1,pos2]
+
+        #else:
+            #pos1 is type(Point) or pos2 is type(Point)
+
+        #P1 = Point('P1')
+        #P1.set_pos(P1 , frame.x*pos1)
+
+        #P2 = Point('P2')
+        #P2.set_pos(P1, frame.x*pos1 + frame.y*pos2)
+
+        #L = - S.Half * k *  (P1.pos_from(P2).magnitude()-l_0)**2
+
+        #super().__init__(Lagrangian=L, qs=qs, ivar=ivar, frame=frame)

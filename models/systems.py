@@ -5,8 +5,8 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
-from .elements import MaterialPoint, Spring, NonlinSpring__RefFrme_Pt, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force
-
+#from .elements import MaterialPoint, Spring, NonlinSpring__RefFrme_Pt, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force
+from .elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force
 import base64
 import random
 import IPython as IP
