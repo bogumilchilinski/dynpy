@@ -43,7 +43,11 @@ class ContinuousSystem:
 
         return self.__str__()
 
+    def subs(self,*args):
+        L_new=self.L.subs(*args)
+        q_new=self.L.subs(*args)
 
+        return type(self)( L=L_new, q=q_new,bc_dict=self.bc_dict, t_var=self.t, spatial_var=self.r, derivative_order=self.diff_ord,label=self._label)
 
 
     def inertia_force(self):
@@ -97,7 +101,7 @@ class ContinuousSystem:
 
         return dsolve(spatial_ode, spatial_comp)
 
-    def fundamental_matrix(self, bc_dict=None, sep_expr, spatial_comp=Function('X')(Symbol('x'))):
+    def fundamental_matrix(self, bc_dict=None, sep_expr=Symbol('k'), spatial_comp=Function('X')(Symbol('x'))):
 
         if bc_dict:
             self.bc_dict=bc_dict
@@ -126,7 +130,7 @@ class ContinuousSystem:
         return fun_eqns.jacobian(symbols('C1:'+str(len(bc_dict)+1)))
 
 
-    def char_poly(self, bc_dict=None, sep_expr, spatial_comp=Function('X')(Symbol('x'))):
+    def char_poly(self, bc_dict=None, sep_expr=Symbol('k'), spatial_comp=Function('X')(Symbol('x'))):
 
         if bc_dict:
             self.bc_dict=bc_dict
@@ -135,7 +139,7 @@ class ContinuousSystem:
 
         return self.fundamental_matrix(bc_dict, sep_expr, spatial_comp).det().simplify()
 
-    def eigenvalues(self, bc_dict=None, sep_expr, arg, spatial_comp=Function('X')(Symbol('x')), index=Symbol('n', integer=True, positive=True)):
+    def eigenvalues(self, bc_dict=None, sep_exp=Symbol('k'), arg=Symbol('k'), spatial_comp=Function('X')(Symbol('x')), index=Symbol('n', integer=True, positive=True)):
         
         if bc_dict:
             self.bc_dict=bc_dict
@@ -148,7 +152,7 @@ class ContinuousSystem:
 
         return SeqFormula(root+(index-1)/spatial_span*pi, (index, 0, oo))
 
-    def eigenmodes(self, mode_no, bc_dict=None, sep_expr, arg, spatial_comp=Function('X')(Symbol('x')), index=Symbol('n', integer=True, positive=True)):
+    def eigenmodes(self, mode_no, bc_dict=None, sep_expr=Symbol('k'), arg=Symbol('k'), spatial_comp=Function('X')(Symbol('x')), index=Symbol('n', integer=True, positive=True)):
 
         if bc_dict:
             self.bc_dict=bc_dict
