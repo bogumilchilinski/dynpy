@@ -1,17 +1,49 @@
 from sympy import (flatten, SeqFormula, Function,
                    Symbol, symbols, Eq, Matrix, S, oo, dsolve)
-                   
+
 from sympy.physics.vector.printing import vpprint, vlatex
 
 
 class ContinuousSystem:
 
-    def __init__(self, L, q, t_var=Symbol('t'), spatial_var=Symbol('x'), derivative_order=2):
+    def __init__(self, L, q, t_var=Symbol('t'), spatial_var=Symbol('x'), derivative_order=2,label=None):
         self.t = t_var
         self.L = L
         self.q = q
         self.r = flatten((spatial_var,))
         self.diff_ord = derivative_order
+
+
+        if label == None:
+            label = self.__class__.__name__ + ' on ' + str(self.q)
+
+        self._label = label
+
+    def __call__(self, *args, label=None):
+        """
+        Returns the label of the object or class instance with reduced Degrees of Freedom.
+        """
+        
+        if isinstance(args[0], str):
+            if label:
+                self._label=label
+            else:
+                self._label=args[0]
+                
+                
+            return self
+
+
+    def __str__(self):
+
+        return self._label
+
+    def __repr__(self):
+
+        return self.__str__()
+
+
+
 
     def inertia_force(self):
         q = self.q

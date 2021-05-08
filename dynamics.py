@@ -214,8 +214,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self.governing_equations = self.__governing_equations
 
         if label == None:
-            label = self.__class__.__name__ + ' with ' + str(len(
-                self.q)) + 'DOF'
+            label = self.__class__.__name__ + ' with ' + str(len(self.q)) + 'DOF'
 
         self._label = label
 
