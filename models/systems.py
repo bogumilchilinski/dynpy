@@ -1213,8 +1213,8 @@ class SDoFPendulumKinematicExct(ComposedSystem):
 class SDoFWinch(ComposedSystem):
 
 
-    scheme_name = 'sdof_winch.png'
-    real_name = 'mdof_winch_real.png'
+    scheme_name = 'sdof_winch.PNG'
+    real_name = 'winch_mechanism_real.PNG'
 
     def __init__(self,
                  r=Symbol('r', positive=True),

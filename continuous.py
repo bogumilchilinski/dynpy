@@ -109,4 +109,4 @@ class ContinuousSystem:
         
         mode_subs=solve(mode_eqn[:-1],C_list)
         
-        return self.spatial_general_solution(sep_expr=sep_expr, spatial_comp=spatial_comp ).rhs.subs(mode_subs).subs(k,eig_value).subs({c_var:1 for c_var in C_list}).subs(index,mode_no)
+        return self.spatial_general_solution(sep_expr=sep_expr, spatial_comp=spatial_comp ).rhs.subs(mode_subs).subs(k,eig_value).subs({c_var:1 for c_var in C_list}).subs(index,mode_no) 
