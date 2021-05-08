@@ -45,7 +45,7 @@ class ContinuousSystem:
 
     def subs(self,*args):
         L_new=self.L.subs(*args)
-        q_new=self.L.subs(*args)
+        q_new=self.q.subs(*args)
 
         return type(self)( L=L_new, q=q_new,bc_dict=self.bc_dict, t_var=self.t, spatial_var=self.r, derivative_order=self.diff_ord,label=self._label)
 
