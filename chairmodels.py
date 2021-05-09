@@ -328,7 +328,7 @@ class Chair5DOFwithRC3DOF(dyn.LagrangesDynamicSystem):
                    hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t'),**kwargs):
 
         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
-             hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs)
+             hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs,**kwargs)
 
 
 chair_5dof = Chair5DOF()('Chair 5DOF model')
