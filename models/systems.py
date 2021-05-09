@@ -2593,6 +2593,7 @@ class CSBeam(ContinuousSystem):
                 bc_dict=None,
                 time=Symbol('t'),
                 loc=Symbol('x'),
+                **kwargs
                 ):
 
         self.E = E
@@ -2606,7 +2607,7 @@ class CSBeam(ContinuousSystem):
 
         L_beam=S.One/2*(A*rho*(self.w.diff(self.time))**2-E*I*(self.w.diff(self.loc,2))**2)
 
-        super().__init__(L_beam,q=self.w,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc)
+        super().__init__(L_beam,q=self.w,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
