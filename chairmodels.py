@@ -305,30 +305,30 @@ L_chair5dof_rc3dof=T_chair5dof_rc3dof-V_chair5dof_rc3dof
 
 class Chair5DOF(dyn.LagrangesDynamicSystem):
     def __init__(self, Lagrangian=L_default_5dof, qs=qs_5dof, forcelist=FL_chair5dof, bodies=None, frame=N,
-                       hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t')):
+                       hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t'),**kwargs):
         
         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
-                 hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar)
+                 hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs)
         
         
         
         
 class RapidChair3DOF(dyn.LagrangesDynamicSystem):
     def __init__(self, Lagrangian=L_rc_3dof, qs=qs_rc_3dof, forcelist=FL_rapidchair3dof, bodies=None, frame=N,
-                   hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t')):
+                   hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t'),**kwargs):
 
         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
-             hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar)
+             hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs)
 
         
         
         
 class Chair5DOFwithRC3DOF(dyn.LagrangesDynamicSystem):
     def __init__(self, Lagrangian=L_chair5dof_rc3dof, qs=qs_chair5dof_rc_3dof, forcelist=FL_chair5dof_rc3dof, bodies=None, frame=N,
-                   hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t')):
+                   hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t'),**kwargs):
 
         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
-             hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar)
+             hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs)
 
 
 chair_5dof = Chair5DOF()('Chair 5DOF model')
