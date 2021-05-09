@@ -5,6 +5,7 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
+from ..continuous import ContinuousSystem
 from .elements import MaterialPoint, Spring, NonlinSpring__RefFrme_Pt, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force
 
 import base64
@@ -63,6 +64,59 @@ class ComposedSystem(HarmonicOscillator):
             parameters_dict=None
 
         return parameters_dict
+
+
+class ContinuousSystem(ContinuousSystem):
+    """Base class for all systems
+
+    """
+    scheme_name = 'damped_car_new.PNG'
+    real_name = 'car_real.jpg'
+
+    @classmethod
+    def _scheme(cls):
+
+        path = __file__.replace('systems.py', 'images/') + cls.scheme_name
+
+        return path
+
+    @classmethod
+    def _real_example(cls):
+
+        path = __file__.replace('systems.py', 'images/') + cls.real_name
+
+        return path
+
+    @classmethod
+    def preview(cls, example=False):
+        if example:
+            path = cls._real_example()
+
+        else:
+            path = cls._scheme()
+
+        with open(f"{path}", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+        image_file.close()
+
+        return IP.display.Image(base64.b64decode(encoded_string))
+
+    def get_default_data(self):
+        return None
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        if default_data_dict:
+            parameters_dict = {
+                key: random.choice(items_list)
+                for key, items_list in default_data_dict.items()
+            }
+        else:
+            parameters_dict=None
+
+        return parameters_dict    
 
 
 class SDoFHarmonicOscillator(ComposedSystem):
@@ -2076,7 +2130,8 @@ class MDoFDampedElasticPendulum(ComposedSystem):
                  g=Symbol('g', positive=True),
                  ivar=Symbol('t'),
                  z=dynamicsymbols('z'),
-                 phi=dynamicsymbols('\\varphi')):
+                 phi=dynamicsymbols('\\varphi'),
+                 **kwargs):
 
         self.c = c
         self.k = k
@@ -2500,3 +2555,65 @@ class MDoFForcedTrolleysWithSprings(ComposedSystem):
             parameters_dict[self.x_r] = self.x_2
 
         return parameters_dict
+
+
+
+class CSBeam(ContinuousSystem):
+    """
+    Model of a Continuous Beam
+
+        Arguments:
+        =========
+            m = Mass
+                -Mass of the payload
+
+
+
+        Example
+        =======
+        A vibrating beam for given Young modulus and moment of inertia can be created in the following way.
+
+        >>> t = symbols('t')
+        >>> R,l_0 = symbols('R, l_0',positive=True)
+        >>> MDoFWinch(r=R,l=l_0)
+
+        -define the symbols and dynamicsymbols
+        -determine the instance of the beam by using class CSBeam()
+    """
+
+    scheme_name = '???.PNG'
+    real_name = '???.PNG'
+
+    def __init__(self,
+                E=Symbol('E',positive=True),
+                A=Symbol('A',positive=True),
+                I=Symbol('I',positive=True),
+                rho=Symbol('\\rho',positive=True),
+                w=Function('w'),
+                bc_dict=None,
+                time=Symbol('t'),
+                loc=Symbol('x'),
+                ):
+
+        self.E = E
+        self.A = A
+        self.I = I
+        self.rho = rho
+        self.w=w(time,loc)
+        self.time=time
+        self.loc=loc
+        
+
+        L_beam=S.One/2*(A*rho*(self.w.diff(self.time))**2-E*I*(self.w.diff(self.loc,2))**2)
+
+        super().__init__(L_beam,q=self.w,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.k: r'Spring stiffness',
+            self.l: r'Winch length',
+            self.m: r'Mass',
+            self.g: 'Gravity constant',
+        }
+        return self.sym_desc_dict
+
