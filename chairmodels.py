@@ -124,9 +124,9 @@ nDOF=len(q)
 # u_rf=u0/2*(1+(Heaviside(x-t0,0.5) - Heaviside(x-t0-delta_t,0.5) ))#road profile given in time domain
 
 # u_rf_bump=u0/2*(1+2/pi*atan(5*(x-t0)))-u0/2*(1+2/pi*atan(5*(x-t0-t_l)))
-u_rf_bump=0
+u_rf_bump=S.Zero
 # u_rr_bump=u_rf_bump.subs(x,x-2*R) 
-u_rr_bump=0#road profile given in time domain
+u_rr_bump=S.Zero#road profile given in time domain
  #road profile given in time domain
 
 # u_rf_mul_bumps=sum(u_rf_bump.subs(x,x-ii*l_bumps) for ii in range(5))
@@ -137,20 +137,20 @@ u_rr_mul_bumps=0#road profile given in time domain
     
     
 # u_rf_ramp=u0/l_ramp*x
-u_rf_ramp=0
+u_rf_ramp=S.Zero
 # u_rr_ramp=u_rf_ramp.subs(x,x-2*R)
-u_rr_ramp=0
+u_rr_ramp=S.Zero
 
 u_road=Function('u_r')
 # u_rf=u_road(x)
-u_rf=0
+u_rf=S.Zero
 # u_rr=u_road(x-2*R)
-u_rr=0
+u_rr=S.Zero
 
 # u_rr=u0*(sin(x-2*R))  #road profile given in time domain
-u_rr=0
+u_rr=S.Zero
 # u_rf=u_rr.subs(x,x+2*R) #road profile given in time domain
-u_rf=0
+u_rf=S.Zero
 
 #
 #u_fr=Function('u_fr')(phi,z_fr)
@@ -340,22 +340,22 @@ class Chair5DOFwithRC3DOF(dyn.LagrangesDynamicSystem):
                    hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t'),**kwargs):
 
         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
-             hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs,**kwargs)
+             hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs)
 
 
 chair_5dof = Chair5DOF()('Chair 5DOF model')
 chair_5dof_lin=chair_5dof.linearized()('Chair linearized 5DOF model')
-chair_3dof_rev = chair_5dof.subs(dof3_rev,method='direct').remove([phi,z_fr])('Chair 3DOF model with revolution')
-chair_3dof_norev = chair_5dof.subs(dof3_norev,method='direct').remove([z_rear,z_fr])('Chair 3DOF model without revolution')       
-chair_2dof = chair_5dof.subs(dof2,method='direct').remove([z_rear,z_fr,phi])('Chair 2DOF model')
+chair_3dof_rev = chair_5dof.subs(dof3_rev,method='direct').shranked(x, z_rear, z)('Chair 3DOF model with revolution')
+chair_3dof_norev = chair_5dof.subs(dof3_norev,method='direct').shranked(x, z, phi)('Chair 3DOF model without revolution')       
+chair_2dof = chair_5dof.subs(dof2,method='direct').shranked(x, z)('Chair 2DOF model')
 
 
 
 
 
 rapidchair_3dof = RapidChair3DOF()('RapidChair 3DOF model')
-rapidchair_2dof=rapidchair_3dof.subs(rcdof2,method='direct').remove([z_wrc])('RapidChair 2DOF model')
-rapidchair_1dof=rapidchair_3dof.subs(rcdof1,method='direct').remove([z_wrc,theta])('RapidChair 1DOF model')
+rapidchair_2dof=rapidchair_3dof.subs(rcdof2,method='direct').shranked(theta,phi_rc)('RapidChair 2DOF model')
+rapidchair_1dof=rapidchair_3dof.subs(rcdof1,method='direct').shranked([phi_rc])('RapidChair 1DOF model')
 
 
 
@@ -524,6 +524,7 @@ units_dict={
             l_RC:ureg.meter,
             phi0:ureg.radian,
             x:ureg.meter,
+            y:ureg.meter,
             z:ureg.meter,
             z_rear:ureg.meter,
             z_fr:ureg.meter,
@@ -532,6 +533,7 @@ units_dict={
             phi_rc:ureg.radian,
             theta:ureg.radian,
             dx:ureg.meter/ureg.second,
+            dy:ureg.meter/ureg.second,
             dz_fr:ureg.meter/ureg.second,
             dz_rear:ureg.meter/ureg.second,
             dz:ureg.meter/ureg.second,
