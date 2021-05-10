@@ -175,7 +175,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                  label=None,
                  ivar=sym.Symbol('t'),
                  evaluate=True,
-                 system=None):
+                 system = None):
         """
         Supply the following for the initialization of DynamicSystem in the same way as LagrangesMethod
         """
@@ -194,6 +194,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         self.ivar = ivar
         #         self.forcelist=forcelist
+        self.system = system
         self.frame = frame
 
         super().__init__(Lagrangian=Lagrangian,
@@ -204,6 +205,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                          hol_coneqs=hol_coneqs,
                          nonhol_coneqs=nonhol_coneqs)
 
+            
         self.L = self._L
 
         if evaluate == True:
@@ -248,6 +250,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             'Lagrangian': self.lagrangian(),
             'label': self._label,
             'ivar': self.ivar,
+            'system': self.system,
         }
 
     def __add__(self, other):
@@ -617,6 +620,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             'label': 'Numerical model of ' + self.__str__(),
         }
 
+    
+    
+    
     def solution(self, initial_conditions=None):
         '''
         Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
@@ -671,14 +677,18 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         return self.governing_equations
 
-    def numerized(self, parameter_values=None):
+    def numerized(self, parameter_values=None, FFT = None):
         '''
         Takes values of parameters, substitute it into the list of parameters and changes list it into a Tuple. Returns instance of class OdeComputationalCase.
         '''
-        data_Tuple = Tuple(*self.system_parameters()).subs(parameter_values)
-        computed_case = self.computational_case(parameter_values=data_Tuple)
+        if not FFT:
+            data_Tuple = Tuple(*self.system_parameters()).subs(parameter_values)
+            computed_case = self.computational_case(parameter_values=data_Tuple)
 
-        return OdeComputationalCase(**computed_case, evaluate=True)
+            return OdeComputationalCase(**computed_case, evaluate=True)
+    
+    
+    
 
     @classmethod
     def from_system(cls, system):
@@ -979,8 +989,7 @@ class HarmonicOscillator(LinearDynamicSystem):
             frf_expr = ((sqrt((n_sin**2 + n_cos**2).simplify())) /
                         d.doit()).simplify()   # sDoF
         else:  # DoF > 1
-            frf_expr = (self.stiffness_matrix().inv() - excitation_freq **
-                           2 * self.inertia_matrix())  # mDoF
+            frf_expr = self.fundamental_matrix().inv() * self.rhs().coeff(sin(excitation_freq * self.ivar)).coeff(cos(excitation_freq * self.ivar))  # mDoF
 
         return frf_expr
 
