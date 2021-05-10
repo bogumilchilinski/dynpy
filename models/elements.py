@@ -61,10 +61,10 @@ class GeometryOfPoint:
 
         else:
             print('Unsupported data type: Please change the method of the input')
-            self.Point = 0
+            self._point = 0
 
     def get_point(self):
-        return self.Point
+        return self._point
 
 
 class Element(LagrangesDynamicSystem):
@@ -94,7 +94,7 @@ class MaterialPoint(Element):
     """
     scheme_name = 'material_point.png'
     real_name = 'material_point.png'
-    def __init__(self, m, pos1 , qs=None, frame=base_frame,l_0=0, ivar=Symbol('t')):
+    def __init__(self, m, pos1 , qs=None, frame=base_frame, ivar=Symbol('t')):
         
         if not qs:
             self.qs = [pos1]
@@ -118,7 +118,7 @@ class Spring(Element):
     """
     scheme_name = 'spring.png'
     real_name = 'spring.png'
-    def __init__(self, stiffness, pos1, pos2=0,  qs=None, ivar=Symbol('t'), frame = base_frame):
+    def __init__(self, stiffness, pos1, pos2=0,l_0=0 ,  qs=None,ivar=Symbol('t'), frame = base_frame):
         
         if not qs:
             self.qs = [pos1]
@@ -128,7 +128,7 @@ class Spring(Element):
         pos2=GeometryOfPoint(pos2).get_point()
 
                 
-        Lagrangian = -S.Half * stiffness * (pos2.pos_from(pos1)).magnitude()**2)
+        Lagrangian = -S.Half * stiffness * ((pos2.pos_from(pos1)).magnitude()**2 - l_0)
             
             
 
