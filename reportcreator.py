@@ -20,6 +20,14 @@ from sympy import Matrix,symbols,Symbol
 from sympy.physics.vector.printing import vlatex, vpprint
 
 
+def plots_no():
+    num = 0
+    while True:
+        yield num
+        num += 1
+
+plots_no_gen= plots_no()
+
 class CompoundMatrix(Matrix):
 
     def symbolic_form(self,symbol_str):
@@ -779,10 +787,14 @@ class PlottedData(Figure):
                                  xlabel=xlabel,
                                  grid=grid,
                                  fontsize=fontsize)
+        
+        #plt.xlim(numerical_data.index[0],numerical_data.index[-1])
 
         if num_yticks != None:
             ticks_no = num_yticks
             for axl in ax:
+                
+                
 
                 ylimit = axl.set_ylim(bottom=round(np.floor(
                     axl.get_ylim()[0])),
@@ -794,25 +806,30 @@ class PlottedData(Figure):
         #ax=solution_tmp.plot(subplots=True)
         
         if self._units_dict:
-            label_formatter=lambda sym: '$' + vlatex(sym) + '$' + r'[${val:~L}$]'.format(val=self._units_dict[sym])
+            label_formatter=lambda sym: '$' + vlatex(sym) + '$' + '[${val:~L}$]'.format(val=self._units_dict[sym])
         else:
             label_formatter=lambda sym: '$' + vlatex(sym) + '$' 
             
+        label_formatter_without_SI=lambda sym: '$' + vlatex(sym) + '$' 
         
         if subplots:
             ([
-                ax_tmp.legend([label_formatter(sym)])
+                ax_tmp.legend([label_formatter(sym)],loc='lower right')
                 for ax_tmp, sym in zip(ax, numerical_data.columns)        
             ])
             
             ([
-                ax_tmp.ylabel([label_formatter(sym)])
+                
+                ax_tmp.set_ylabel(label_formatter_without_SI(sym)#.replace( r'\ ' ,' ' ).replace( '\\' ,' ' ) 
+                                   )
                 for ax_tmp, sym in zip(ax, numerical_data.columns)        
             ])
             
         else:
-            ax.legend([[label_formatter(sym)] for sym in numerical_data.columns])
-
+            ax.legend([[label_formatter(sym)] for sym in numerical_data.columns],loc='lower right')
+            
+            
+        #plt.legend(loc='lower right')
         plt.savefig(self.fig_name + '.png')
         self.add_image(self.fig_name, width=NoEscape('15cm'))
 
@@ -1068,8 +1085,10 @@ class ReportSection(Section):
         with self.create(Subsection(title)) as subsec:
 
             simulation_results_frame = numerical_data
-
+            
             for key, row in simulation_results_frame.iterrows():
+                
+                
 
                 data_with_units = {
                     parameter: value
@@ -1079,9 +1098,8 @@ class ReportSection(Section):
                 
 
                 current_time = dtime.datetime.now().timestamp()
-                current_fig_mrk = Marker('data_plot_' +
-                                         str(self.analysis_key) + '_' +
-                                         str(current_time),
+                current_fig_mrk = Marker(('data_plot_' +
+                                             str(self.analysis_key) + '_' + str(1+next(plots_no_gen))),
                                          prefix='fig')
 
                 format_dict = {
@@ -1106,9 +1124,8 @@ class ReportSection(Section):
                     print('control list',control_list)
                     
                     current_time = dtime.datetime.now().timestamp()
-                    current_fig_mrk = Marker('data_plot_' +
-                                             str(self.analysis_key) + '_' +
-                                             str(current_time),
+                    current_fig_mrk = Marker(('data_plot_' +
+                                             str(self.analysis_key) + '_' + str(next(plots_no_gen))),
                                              prefix='fig')
 
                     format_dict = {
@@ -1165,6 +1182,7 @@ class ReportSection(Section):
             title='Analiza otrzymanych wyników',
             numerical_data=None,
             units_dict={},
+            xlabel=' ',
             figsize=(10,4),
             initial_description='Initial description',
             ending_summary='Ending summary',  # random.choice(conclusion_bank_composed_model)
@@ -1211,8 +1229,9 @@ class ReportSection(Section):
                     PlottedData(summary_frame,
                                 './plots/fig_summary_' + str(current_time),
                                 position='H',
+                                units_dict=units_dict,
                                 preview=True)) as fig:
-                fig.add_data_plot(summary_frame,figsize=figsize)
+                fig.add_data_plot(summary_frame,xlabel=xlabel,figsize=figsize)
                 fig.add_caption(
                     NoEscape(
                         'Zestawienie wyników przeprowadzonej analizy.'.format(
@@ -1237,6 +1256,7 @@ class ReportSection(Section):
             title='Wyniki optymalizacji jednokryterialnej',
             numerical_data=None,
             units_dict={},
+            xlabel=' ',
             figsize=(10,4),
             initial_description='Initial description',
             ending_summary='Ending summary',  # random.choice(conclusion_bank_composed_model)
@@ -1247,6 +1267,7 @@ class ReportSection(Section):
             numerical_data=numerical_data,
             units_dict=units_dict,
             initial_description=initial_description,
+            xlabel=xlabel,
             figsize=figsize,
             ending_summary=
             'Ending summary',  # random.choice(conclusion_bank_composed_model)
