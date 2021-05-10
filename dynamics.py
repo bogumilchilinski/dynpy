@@ -179,10 +179,16 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         Supply the following for the initialization of DynamicSystem in the same way as LagrangesMethod
         """
+
+        
         if system:
+#             print('init form system for ' ,system , 'with q = ' ,system.q)
             Lagrangian=system
+            system=None
 
         if isinstance(Lagrangian, me.LagrangesMethod):
+#             print('standart init')
+            
             bodies = Lagrangian._bodies
             frame = Lagrangian.inertial
             forcelist = Lagrangian.forcelist
@@ -292,12 +298,29 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         Returns class instance with reduced Degrees of Freedom
         """
+        
+        #print('L @', str(self))
+        #print(self.lagrangian())
+        
+        #print(self.q)
+        
         self_dict = self._kwargs()
         self_dict['qs'] = flatten(args)
         
-        print(flatten(args))
+        #print(self_dict)
+        
+        #print(flatten(args))
 
-        return LagrangesDynamicSystem(**self_dict)
+        new_sys=LagrangesDynamicSystem(**self_dict)
+        
+        #print('new L @', str(new_sys))
+        #print(new_sys.lagrangian())
+        
+        #new_sys._q=Matrix(flatten(args)).T
+        #print(new_sys.q)
+        
+        
+        return new_sys
 
     def remove(self, *args):
 
@@ -320,7 +343,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         if 'method' in kwargs.keys():
             method = kwargs['method']
         else:
-            method = 'as_constrains'
+            method = 'direct'
 
         if method == 'as_constrains':
             if len(args) == 2:
@@ -597,6 +620,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         '''
         Recognises system parameters as symbols which are not independent variable or its relations and returns the Tuple (Sympy object) containing these elements. It does not take into account undefined functions (instances of Function class) of independent variable.
         '''
+        print('system parameters @')
+        print(self)
+        
+        print(self.lagrangian())
+        print(self.q)
+        
         params = self.rhs().free_symbols
         params.remove(self.ivar)
         if parameter_values == None:
