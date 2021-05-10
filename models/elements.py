@@ -128,7 +128,7 @@ class Spring(Element):
         pos2=GeometryOfPoint(pos2).get_point()
 
                 
-        Lagrangian = -S.Half * stiffness * ((pos2.pos_from(pos1)).magnitude()**2 - l_0)
+        Lagrangian = (-S.Half * stiffness * ((pos2.pos_from(pos1)).magnitude() -l_0  )**2 )
             
             
 
