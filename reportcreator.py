@@ -820,7 +820,7 @@ class PlottedData(Figure):
             ([
 
                 
-                ax_tmp.set_ylabel(label_formatter_without_SI(sym)#.replace( r'\ ' ,' ' ).replace( '\\' ,' ' ) 
+                ax_tmp.set_ylabel(label_formatter_without_SI(sym)#.replace(r '\' , ' ')#.replace( '\\' ,' ' ) 
                                    )
 
                 for ax_tmp, sym in zip(ax, numerical_data.columns)        
