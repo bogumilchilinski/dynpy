@@ -5,8 +5,14 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
+#<<<<<<< HEAD
 #from .elements import MaterialPoint, Spring, NonlinSpring__RefFrme_Pt, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force
 from .elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force
+#=======
+from ..continuous import ContinuousSystem
+#from .elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force
+
+>>>>>>> 2b755210de3592877c3217d7f6a5e0a5d12a0b1a
 import base64
 import random
 import IPython as IP
@@ -63,6 +69,59 @@ class ComposedSystem(HarmonicOscillator):
             parameters_dict=None
 
         return parameters_dict
+
+
+class ContinuousSystem(ContinuousSystem):
+    """Base class for all systems
+
+    """
+    scheme_name = 'damped_car_new.PNG'
+    real_name = 'car_real.jpg'
+
+    @classmethod
+    def _scheme(cls):
+
+        path = __file__.replace('systems.py', 'images/') + cls.scheme_name
+
+        return path
+
+    @classmethod
+    def _real_example(cls):
+
+        path = __file__.replace('systems.py', 'images/') + cls.real_name
+
+        return path
+
+    @classmethod
+    def preview(cls, example=False):
+        if example:
+            path = cls._real_example()
+
+        else:
+            path = cls._scheme()
+
+        with open(f"{path}", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+        image_file.close()
+
+        return IP.display.Image(base64.b64decode(encoded_string))
+
+    def get_default_data(self):
+        return None
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        if default_data_dict:
+            parameters_dict = {
+                key: random.choice(items_list)
+                for key, items_list in default_data_dict.items()
+            }
+        else:
+            parameters_dict=None
+
+        return parameters_dict    
 
 
 class SDoFHarmonicOscillator(ComposedSystem):
@@ -737,7 +796,8 @@ class DDoFDampedShaft(ComposedSystem):
                  c_2=Symbol('c_1', positive=True),
                  input_displacement=dynamicsymbols('theta'),
                  ivar=Symbol('t'),
-                 qs=dynamicsymbols('\\varphi_1, \\varphi_2')):
+                 qs=dynamicsymbols('\\varphi_1, \\varphi_2'),
+                 **kwargs):
 
         phi1, phi2 = qs
         theta = input_displacement
@@ -760,7 +820,7 @@ class DDoFDampedShaft(ComposedSystem):
                                qs=qs)  # right spring
         system = self.disc_1 + self.disc_2 + self.spring_1 + self.spring_2 + self.damper_1 + self.damper_2
 
-        super().__init__(system)
+        super().__init__(system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -1694,7 +1754,30 @@ class SDoFNonlinearEngine(ComposedSystem):
             self.beta: r'',
         }
         return self.sym_desc_dict
+    def get_default_data(self):
 
+        m0, k0, e0 = symbols('m_0 k_0 e_0', positive=True)
+
+        default_data_dict = {
+            self.M: [100*m0,300*m0,500*m0,700*m0,900*m0,200 * m0, 400 * m0,600*m0,800*m0],
+            self.m_e: [m0,3*m0,5*m0,7*m0,9*m0,2 * m0, 4 * m0,6*m0,8*m0],
+            self.k_m: [k0,2*k0,4*k0,6*k0,8*k0, 3 * k0,5*k0,7*k0,9*k0],
+            self.e: [2 * e0, S.Half * e0, 4 * e0, S.Half**2 * e0,3 * e0,3* S.Half * e0, 9 * e0, 3*S.Half**2 * e0],
+        }
+        return default_data_dict
+
+#     def get_random_parameters(self):
+
+
+
+#         default_data_dict = self.get_default_data()
+
+#         parameters_dict = {
+#             key: random.choice(items_list)
+#             for key, items_list in default_data_dict.items()
+#             }
+          
+#         return parameters_dict
 
 class MDoFTMD(ComposedSystem):
     scheme_name = 'mdof_tmd.png'
@@ -2053,7 +2136,8 @@ class MDoFDampedElasticPendulum(ComposedSystem):
                  g=Symbol('g', positive=True),
                  ivar=Symbol('t'),
                  z=dynamicsymbols('z'),
-                 phi=dynamicsymbols('\\varphi')):
+                 phi=dynamicsymbols('\\varphi'),
+                 **kwargs):
 
         self.c = c
         self.k = k
@@ -2477,3 +2561,66 @@ class MDoFForcedTrolleysWithSprings(ComposedSystem):
             parameters_dict[self.x_r] = self.x_2
 
         return parameters_dict
+
+
+
+class CSBeam(ContinuousSystem):
+    """
+    Model of a Continuous Beam
+
+        Arguments:
+        =========
+            m = Mass
+                -Mass of the payload
+
+
+
+        Example
+        =======
+        A vibrating beam for given Young modulus and moment of inertia can be created in the following way.
+
+        >>> t = symbols('t')
+        >>> R,l_0 = symbols('R, l_0',positive=True)
+        >>> MDoFWinch(r=R,l=l_0)
+
+        -define the symbols and dynamicsymbols
+        -determine the instance of the beam by using class CSBeam()
+    """
+
+    scheme_name = '???.PNG'
+    real_name = '???.PNG'
+
+    def __init__(self,
+                E=Symbol('E',positive=True),
+                A=Symbol('A',positive=True),
+                I=Symbol('I',positive=True),
+                rho=Symbol('\\rho',positive=True),
+                w=Function('w'),
+                bc_dict=None,
+                time=Symbol('t'),
+                loc=Symbol('x'),
+                **kwargs
+                ):
+
+        self.E = E
+        self.A = A
+        self.I = I
+        self.rho = rho
+        self.w=w(time,loc)
+        self.time=time
+        self.loc=loc
+        
+
+        L_beam=S.One/2*(A*rho*(self.w.diff(self.time))**2-E*I*(self.w.diff(self.loc,2))**2)
+
+        super().__init__(L_beam,q=self.w,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc,**kwargs)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.k: r'Spring stiffness',
+            self.l: r'Winch length',
+            self.m: r'Mass',
+            self.g: 'Gravity constant',
+        }
+        return self.sym_desc_dict
+

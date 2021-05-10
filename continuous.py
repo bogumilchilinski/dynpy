@@ -6,20 +6,36 @@ from sympy.physics.vector.printing import vpprint, vlatex
 
 class ContinuousSystem:
 
-    def __init__(self, L, q,bc_dict=None, t_var=Symbol('t'), spatial_var=Symbol('x'), derivative_order=2,label=None):
+    def __init__(self, L, q,bc_dict=None, t_var=Symbol('t'), spatial_var=Symbol('x'), derivative_order=2,label=None,system=None,**kwargs):
+        
+        
+        if system:
+            t_var=system.t
+            L=system.L
+            q=system.q
+            spatial_var=system.r
+            derivative_order=system.diff_ord
+            bc_dict=system.bc_dict
+
         self.t = t_var
         self.L = L
         self.q = q
         self.r = flatten((spatial_var,))
         self.diff_ord = derivative_order
         self.bc_dict=bc_dict
+        self._bc=Symbol('BC')
 
 
         if label == None:
             label = self.__class__.__name__ + ' on ' + str(self.q)
 
         self._label = label
+    
+    @property
+    def BC(self):
+        return self._bc
 
+    
     def __call__(self, *args, label=None):
         """
         Returns the label of the object or class instance with reduced Degrees of Freedom.
@@ -47,7 +63,14 @@ class ContinuousSystem:
         L_new=self.L.subs(*args)
         q_new=self.q.subs(*args)
 
-        return type(self)( L=L_new, q=q_new,bc_dict=self.bc_dict, t_var=self.t, spatial_var=self.r, derivative_order=self.diff_ord,label=self._label)
+        bc_trap=self.BC.subs(*args)
+
+        if bc_trap==self.BC:
+            bc_trap=self.bc_dict
+
+        new_system=ContinuousSystem( L=L_new, q=q_new,bc_dict=bc_trap, t_var=self.t, spatial_var=self.r, derivative_order=self.diff_ord,label=self._label)
+
+        return type(self)(0,q_new,system=new_system)
 
 
     def inertia_force(self):

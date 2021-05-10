@@ -12,7 +12,7 @@ base_frame=ReferenceFrame('N')
 base_origin=Point('O')
 
 class GeometryOfPoint:
-<<<<<<< HEAD
+#<<<<<<< HEAD
     def __init__(self, *args , frame=base_frame , ivar=Symbol('t')):
 
         if isinstance(args, Point):
@@ -45,7 +45,7 @@ class GeometryOfPoint:
                     P_na.set_pos(base_origin, frame.x*0)
                     P_na.set_vel(frame, frame.x*diff(0, ivar))
                     self.Point = P_na
-=======
+#=======
     def __init__(self, *args, frame=base_frame , ivar=Symbol('t')):
         
         
@@ -57,7 +57,7 @@ class GeometryOfPoint:
             P.set_pos(base_origin, frame.x*args[0])
             P.set_vel(frame, frame.x*diff(args[0], ivar))
             self._point=P
->>>>>>> cbe00b03b26b0e0a8512f1292e0299cfb267cae7
+#>>>>>>> cbe00b03b26b0e0a8512f1292e0299cfb267cae7
 
         else:
             print('Unsupported data type: Please change the method of the input')
@@ -99,9 +99,8 @@ class MaterialPoint(Element):
         if not qs:
             self.qs = [pos1]
             
-        pos1=GeometryOfPoint(pos1).get_point()
-        
         if isinstance(pos1, Point):
+            pos1=GeometryOfPoint(pos1).get_point()
             Lagrangian = S.Half * m * ((base_origin.pos_from(pos1).diff(ivar,frame).magnitude())**2)
             
         else:
@@ -123,19 +122,20 @@ class Spring(Element):
         
         self.qs = [pos1 , pos2]
         
-        if not pos2==0:
-            pos1=GeometryOfPoint(pos1).get_point()
-            pos2=GeometryOfPoint(pos2).get_point()
-        else:
-            pos1=GeometryOfPoint(pos1).get_point()
-
         if isinstance(pos1,Point):
-
+            if not pos2==0:
+                pos1=GeometryOfPoint(pos1).get_point()
+                pos2=GeometryOfPoint(pos2).get_point()
+            else:
+                pos1=GeometryOfPoint(pos1).get_point()
+                
             Lagrangian = -S.Half * stiffness * ((base_origin.pos_from(pos1) - base_origin.pos_from(pos2)).magnitude()**2)
+            
+            
         else:
             Lagrangian = -S.Half * stiffness * (pos1 - pos2)**2
 
-            #print(str('YOU CANNOT APPLY BOTH METHODS AT ONCE'))
+
         
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, frame=frame)
 
@@ -229,11 +229,13 @@ class Damper(Element):
         
         if not qs:
             self.qs = [pos1]
-
-        pos1=GeometryOfPoint(pos1,frame=frame).get_point()
-        pos2=GeometryOfPoint(pos2,frame=frame).get_point()
         
         if isinstance(pos1, Point):
+            pos1=GeometryOfPoint(pos1,frame=frame).get_point()
+            pos2=GeometryOfPoint(pos2,frame=frame).get_point()
+            
+            
+            
             D = S.Half * c * ((pos1.vel(frame)-pos2.vel(frame)).magnitude()**2).doit()  # pos1.vel(frame).magntidue() behaves as diff(pos1,ivar)
         else:
             D = S.Half * c * (diff(pos1-pos2,ivar))**2
