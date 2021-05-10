@@ -2611,10 +2611,117 @@ class CSBeam(ContinuousSystem):
 
     def symbols_description(self):
         self.sym_desc_dict = {
-            self.k: r'Spring stiffness',
-            self.l: r'Winch length',
-            self.m: r'Mass',
-            self.g: 'Gravity constant',
+            self.E: r'Young modulus',
+            self.E: r'Young modulus',
+            self.I: r'Cross-section moment of inertia',
+            self.A: r'Area of cross-section',
+            self.rho: r'density',
         }
         return self.sym_desc_dict
 
+    def get_default_data(self):
+
+        E_0, A_0, I_0 = symbols('E_0, A_0, I_0', positive=True)
+
+        default_data_dict = {
+            self.E: [S.Half * E_0, 1 * E_0, 2 * E_0, 1 * E_0, S.Half * E_0],
+            self.A: [1 * A_0, 2 * A_0, S.Half * A_0, 1 * A_0, 2 * A_0],
+            self.I: [1 * I_0, 2 * I_0, S.Half * I_0, 1 * I_0, 2 * I_0],
+
+        }
+
+        return default_data_dict
+    
+    
+class CSRod(ContinuousSystem):
+    """
+    Model of a Continuous Rod
+
+        Arguments:
+        =========
+            E = Young modulus
+                -Young modulus of a rod's material
+            A = Area of cross-section
+
+            rho_L = Linear density of a rod's material
+
+            u = Space-Time function
+                -Allow to describe a rod vibration in two-variable state
+
+        Example
+        =======
+        A vibrating rod for given Young modulus and area of cross-section can be created in the following way.
+
+        >>> t = symbols('t')
+        >>> E,A,rho_L = symbols('E,A,rho_L',positive=True)
+        >>> CSRod()
+
+        -define the symbols and dynamicsymbols
+        -determine the instance of the beam by using class CSRod()
+    """
+
+    scheme_name = 'rod_scheme.PNG'
+    real_name = 'rod_scheme.PNG'
+
+    def __init__(self,
+                E=Symbol('E',positive=True),
+                A=Symbol('A',positive=True),
+                rho_L=Symbol('\\rho_L',positive=True),
+                u=Function('u'),
+                bc_dict=None,
+                time=Symbol('t'),
+                loc=Symbol('x'),
+                **kwargs
+                ):
+
+        self.E = E
+        self.A = A
+        self.rho_L = rho_L
+        self.u=u(time,loc)
+        self.time=time
+        self.loc=loc
+
+        L_rod=S.One/2*(rho_L*(self.u.diff(self.time))**2-A*E*(self.u.diff(self.loc))**2)
+
+        super().__init__(L_rod,q=self.u,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc,**kwargs)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.E: r'Young modulus',
+            self.A: r'Area of cross-section',
+            self.rho_L: r'Linear density',
+            self.u: 'Space-Time function',
+        }
+        return self.sym_desc_dict
+
+
+    def get_default_data(self):
+
+        E_0, A_0, L_0 = symbols('E_0, A_0, L_0', positive=True)
+        
+#         fix_ls=Subs(X.diff(x,0),x,0)
+#         fix_rs=Subs(X.diff(x,0),x,l)
+#         free_ls=Subs(X.diff(x,1),x,0)
+#         free_rs=Subs(X.diff(x,1),x,l)
+
+
+        default_data_dict = {
+            self.E: [2.5*E_0,1.25*E_0,0.75*E_0,1.35*E_0 ],
+            self.A: [1 * A_0, 2 * A_0, S.Half * A_0, 1 * A_0, 2 * A_0],
+            
+            self.BC: []
+#             self.I: [1 * I_0, 2 * I_0, S.Half * I_0, 1 * I_0, 2 * I_0],
+
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+        
+        data_dict=super().get_random_parameters()
+        data_dict[self.A]  = (L_0**2 * random.choice([1/100,1/10,1/1000,1/100000 ,1 ])/ data_dict(self.E)).n(5)
+        
+        return data_dict
+                                                  
+                                                  
+        

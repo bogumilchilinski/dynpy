@@ -1,5 +1,5 @@
 from sympy import (flatten, SeqFormula, Function,
-                   Symbol, symbols, Eq, Matrix, S, oo, dsolve)
+                   Symbol, symbols, Eq, Matrix, S, oo, dsolve, solve, Number, pi)
 
 from sympy.physics.vector.printing import vpprint, vlatex
 
@@ -59,7 +59,7 @@ class ContinuousSystem:
 
         return self.__str__()
 
-    def subs(self,*args):
+    def subs(self,*args,**kwargs):
         L_new=self.L.subs(*args)
         q_new=self.q.subs(*args)
 
@@ -71,6 +71,10 @@ class ContinuousSystem:
         new_system=ContinuousSystem( L=L_new, q=q_new,bc_dict=bc_trap, t_var=self.t, spatial_var=self.r, derivative_order=self.diff_ord,label=self._label)
 
         return type(self)(0,q_new,system=new_system)
+    
+    @property
+    def _eoms(self):
+        return self.governing_equation
 
 
     def inertia_force(self):
@@ -118,13 +122,13 @@ class ContinuousSystem:
 
         return Eq(separated_eqn_lhs, sep_expr)
 
-    def spatial_general_solution(self, sep_expr, spatial_comp=Function('X')(Symbol('x'))):
+    def spatial_general_solution(self, sep_expr=Symbol('k'), spatial_comp=Function('X')(Symbol('x'))):
 
         spatial_ode = self.spatial_eqn(sep_expr, spatial_comp)
 
         return dsolve(spatial_ode, spatial_comp)
 
-    def fundamental_matrix(self, bc_dict=None, sep_expr=Symbol('k'), spatial_comp=Function('X')(Symbol('x'))):
+    def fundamental_matrix(self, bc_dict=None, sep_expr=Symbol('k',positive=True), spatial_comp=Function('X')(Symbol('x'))):
 
         if bc_dict:
             self.bc_dict=bc_dict
@@ -153,7 +157,7 @@ class ContinuousSystem:
         return fun_eqns.jacobian(symbols('C1:'+str(len(bc_dict)+1)))
 
 
-    def char_poly(self, bc_dict=None, sep_expr=Symbol('k'), spatial_comp=Function('X')(Symbol('x'))):
+    def char_poly(self, bc_dict=None, sep_expr=Symbol('k',positive=True), spatial_comp=Function('X')(Symbol('x'))):
 
         if bc_dict:
             self.bc_dict=bc_dict
@@ -162,7 +166,7 @@ class ContinuousSystem:
 
         return self.fundamental_matrix(bc_dict, sep_expr, spatial_comp).det().simplify()
 
-    def eigenvalues(self, bc_dict=None, sep_exp=Symbol('k'), arg=Symbol('k'), spatial_comp=Function('X')(Symbol('x')), index=Symbol('n', integer=True, positive=True)):
+    def eigenvalues(self, bc_dict=None, sep_expr=Symbol('k',positive=True), arg=Symbol('k',positive=True), spatial_comp=Function('X')(Symbol('x')), index=Symbol('n', integer=True, positive=True)):
         
         if bc_dict:
             self.bc_dict=bc_dict
@@ -175,7 +179,7 @@ class ContinuousSystem:
 
         return SeqFormula(root+(index-1)/spatial_span*pi, (index, 0, oo))
 
-    def eigenmodes(self, mode_no, bc_dict=None, sep_expr=Symbol('k'), arg=Symbol('k'), spatial_comp=Function('X')(Symbol('x')), index=Symbol('n', integer=True, positive=True)):
+    def eigenmodes(self, mode_no, bc_dict=None, sep_expr=Symbol('k',positive=True), arg=Symbol('k',positive=True), spatial_comp=Function('X')(Symbol('x')), index=Symbol('n', integer=True, positive=True)):
 
         if bc_dict:
             self.bc_dict=bc_dict
@@ -192,5 +196,5 @@ class ContinuousSystem:
 
         mode_subs = solve(mode_eqn[:-1], C_list)
 
-        return self.spatial_general_solution(sep_expr=sep_expr, spatial_comp=spatial_comp).rhs.subs(mode_subs).subs(k, eig_value).subs({c_var: 1 for c_var in C_list}).subs(index, mode_no)
+        return self.spatial_general_solution(sep_expr=sep_expr, spatial_comp=spatial_comp).rhs.subs(mode_subs).subs(arg, eig_value).subs({c_var: 1 for c_var in C_list}).subs(index, mode_no)
 
