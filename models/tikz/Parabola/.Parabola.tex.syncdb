@@ -1,0 +1,1 @@
+{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-interaction=nonstopmode","-output-directory=/tmp/283ab10d7fc7a06fd0540af1fb0340b215c5ca11","Parabola.tex"]}

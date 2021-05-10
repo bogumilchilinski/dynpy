@@ -123,25 +123,34 @@ nDOF=len(q)
 # u_rr=u0/2*(1+(Heaviside(x-t0-2*R,0.5) - Heaviside(x-t0-delta_t-2*R,0.5) ))#road profile given in time domain
 # u_rf=u0/2*(1+(Heaviside(x-t0,0.5) - Heaviside(x-t0-delta_t,0.5) ))#road profile given in time domain
 
-u_rf_bump=u0/2*(1+2/pi*atan(5*(x-t0)))-u0/2*(1+2/pi*atan(5*(x-t0-t_l)))
-u_rr_bump=u_rf_bump.subs(x,x-2*R) #road profile given in time domain
+# u_rf_bump=u0/2*(1+2/pi*atan(5*(x-t0)))-u0/2*(1+2/pi*atan(5*(x-t0-t_l)))
+u_rf_bump=0
+# u_rr_bump=u_rf_bump.subs(x,x-2*R) 
+u_rr_bump=0#road profile given in time domain
  #road profile given in time domain
 
-u_rf_mul_bumps=sum(u_rf_bump.subs(x,x-ii*l_bumps) for ii in range(5))
-u_rr_mul_bumps=u_rf_mul_bumps.subs(x,x-2*R) #road profile given in time domain
+# u_rf_mul_bumps=sum(u_rf_bump.subs(x,x-ii*l_bumps) for ii in range(5))
+u_rf_mul_bumps=0
+# u_rr_mul_bumps=u_rf_mul_bumps.subs(x,x-2*R)
+u_rr_mul_bumps=0#road profile given in time domain
  #road profile given in time domain
     
     
-u_rf_ramp=u0/l_ramp*x
-u_rr_ramp=u_rf_ramp.subs(x,x-2*R)
+# u_rf_ramp=u0/l_ramp*x
+u_rf_ramp=0
+# u_rr_ramp=u_rf_ramp.subs(x,x-2*R)
+u_rr_ramp=0
 
 u_road=Function('u_r')
-u_rf=u_road(x)
-u_rr=u_road(x-2*R)
+# u_rf=u_road(x)
+u_rf=0
+# u_rr=u_road(x-2*R)
+u_rr=0
 
-u_rr=u0*(sin(x-2*R))  #road profile given in time domain
-u_rf=u_rr.subs(x,x+2*R) #road profile given in time domain
-
+# u_rr=u0*(sin(x-2*R))  #road profile given in time domain
+u_rr=0
+# u_rf=u_rr.subs(x,x+2*R) #road profile given in time domain
+u_rf=0
 
 #
 #u_fr=Function('u_fr')(phi,z_fr)
@@ -189,14 +198,17 @@ V_chair_g=m_fr*g*z_fr + m_rear*g*z_rear + m_3 * g*(z + z_c3*(cos(phi))) # EPG w√
 
 
 # nonlinear springs deflection
-u_rear=sqrt((z+R*sin(phi)+l_rear-z_rear)**2 + (R-R*cos(phi))**2)-l_rear#
-u_fr=sqrt((z-R*sin(phi)+l_fr-z_fr)**2 + (R-R*cos(phi))**2)-l_fr
+# u_rear=sqrt((z+R*sin(phi)+l_rear-z_rear)**2 + (R-R*cos(phi))**2)-l_rear#
+u_rear=0
+# u_fr=sqrt((z-R*sin(phi)+l_fr-z_fr)**2 + (R-R*cos(phi))**2)-l_fr
+u_fr=0
 
 
 # linear springs deflection
-u_rear=((z+R*phi+l_rear -z_rear)**2 )-l_rear#
-u_fr=  ((z-R*phi+l_fr   -z_fr)**2  )-l_fr
-
+# u_rear=((z+R*phi+l_rear -z_rear)**2 )-l_rear#
+u_rear=0
+# u_fr=  ((z-R*phi+l_fr   -z_fr)**2  )-l_fr
+u_fr=0
 
 
 
@@ -305,30 +317,30 @@ L_chair5dof_rc3dof=T_chair5dof_rc3dof-V_chair5dof_rc3dof
 
 class Chair5DOF(dyn.LagrangesDynamicSystem):
     def __init__(self, Lagrangian=L_default_5dof, qs=qs_5dof, forcelist=FL_chair5dof, bodies=None, frame=N,
-                       hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t')):
+                       hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t'),**kwargs):
         
         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
-                 hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar)
+                 hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs)
         
         
         
         
 class RapidChair3DOF(dyn.LagrangesDynamicSystem):
     def __init__(self, Lagrangian=L_rc_3dof, qs=qs_rc_3dof, forcelist=FL_rapidchair3dof, bodies=None, frame=N,
-                   hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t')):
+                   hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t'),**kwargs):
 
         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
-             hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar)
+             hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs)
 
         
         
         
 class Chair5DOFwithRC3DOF(dyn.LagrangesDynamicSystem):
     def __init__(self, Lagrangian=L_chair5dof_rc3dof, qs=qs_chair5dof_rc_3dof, forcelist=FL_chair5dof_rc3dof, bodies=None, frame=N,
-                   hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t')):
+                   hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t'),**kwargs):
 
         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
-             hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar)
+             hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs,**kwargs)
 
 
 chair_5dof = Chair5DOF()('Chair 5DOF model')

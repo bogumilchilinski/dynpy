@@ -1,0 +1,1 @@
+{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-interaction=nonstopmode","-output-directory=/tmp/a1209dd4c768aa860742e20866898d8a0676c3e8","mur_podp_belka.tex"]}

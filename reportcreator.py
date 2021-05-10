@@ -77,7 +77,7 @@ class SymbolsDescription(Description):
         
         for label, entry in description_dict.items():
             
-            self.add_item(NoEscape(InlineMath(vlatex(label)).dumps()),'- '+str(entry))
+            self.add_item(NoEscape(InlineMath(vlatex(label)).dumps()),NoEscape(vlatex(entry)))
 
 
 class Equation(Environment):
@@ -751,13 +751,11 @@ simulations_summary_str = ''' Dla rozważanego modelu dynamicznego wózka inwali
 
 
 class PlottedData(Figure):
-
     _latex_name = 'figure'
-
     def __init__(self,
                  numerical_data,
-                 fig_name,
-                 *,
+                 fig_name ='Name',
+                 *args,
                  units_dict=None,
                  preview=False,
                  position=None,
@@ -819,9 +817,13 @@ class PlottedData(Figure):
             ])
             
             ([
+<<<<<<< HEAD
                 
                 ax_tmp.set_ylabel(label_formatter_without_SI(sym)#.replace( r'\ ' ,' ' ).replace( '\\' ,' ' ) 
                                    )
+=======
+                ax_tmp.set_ylabel([label_formatter(sym)])
+>>>>>>> 521bbd79b83cc2337b748606787b07f2b28446eb
                 for ax_tmp, sym in zip(ax, numerical_data.columns)        
             ])
             
@@ -840,9 +842,7 @@ class PlottedData(Figure):
 
 
 class DataPlot(Figure):
-
     _latex_name = 'figure'
-
     def __init__(self,
                  fig_name = 'Name',
                  *args,
@@ -851,16 +851,13 @@ class DataPlot(Figure):
                  **kwargs):
         super().__init__(position=position, **kwargs)
 
-    
         self.fig_name = str(fig_name)
         #self._latex_name='figure' #super()._latex_name
         self.preview = preview
 
     def add_data_plot(self,*args,filename=None,width='15cm',**kwargs):
 
-        
         import matplotlib.pyplot as plt
-
         if not filename:
             current_time = dtime.datetime.now().timestamp()
             filename=f'autoadded_figure_{current_time}.png'

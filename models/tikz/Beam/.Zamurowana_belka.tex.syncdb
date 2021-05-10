@@ -1,0 +1,1 @@
+{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-interaction=nonstopmode","-output-directory=/tmp/480b268b207284e825b5964f3df001870c9a512a","Zamurowana_belka.tex"]}
