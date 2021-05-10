@@ -1,0 +1,1 @@
+{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-interaction=nonstopmode","-output-directory=/tmp/851cfbfd1c41b57a360cc1ebaab69bfd37463e38","mur_pret.tex"]}

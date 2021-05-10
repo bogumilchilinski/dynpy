@@ -1,1 +1,1 @@
-{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-interaction=nonstopmode","BELKA.tex"]}
+{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-output-directory=/tmp/fe42a0f90e2e10e23d7fb6d57ad82f9ec7a207f1","-interaction=nonstopmode","BELKA.tex"]}
