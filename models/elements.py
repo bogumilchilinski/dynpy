@@ -94,7 +94,7 @@ class MaterialPoint(Element):
     """
     scheme_name = 'material_point.png'
     real_name = 'material_point.png'
-    def __init__(self, m, pos1 , qs=None, frame=base_frame, ivar=Symbol('t')):
+    def __init__(self, m, pos1 , qs=None, frame=base_frame,l_0=0, ivar=Symbol('t')):
         
         if not qs:
             self.qs = [pos1]
@@ -120,20 +120,18 @@ class Spring(Element):
     real_name = 'spring.png'
     def __init__(self, stiffness, pos1, pos2=0,  qs=None, ivar=Symbol('t'), frame = base_frame):
         
-        self.qs = [pos1 , pos2]
+        if not qs:
+            self.qs = [pos1]
         
-        if isinstance(pos1,Point):
-            if not pos2==0:
-                pos1=GeometryOfPoint(pos1).get_point()
-                pos2=GeometryOfPoint(pos2).get_point()
-            else:
-                pos1=GeometryOfPoint(pos1).get_point()
+
+        pos1=GeometryOfPoint(pos1).get_point()
+        pos2=GeometryOfPoint(pos2).get_point()
+
                 
-            Lagrangian = -S.Half * stiffness * ((base_origin.pos_from(pos1) - base_origin.pos_from(pos2)).magnitude()**2)
+        Lagrangian = -S.Half * stiffness * (pos2.pos_from(pos1)).magnitude()**2)
             
             
-        else:
-            Lagrangian = -S.Half * stiffness * (pos1 - pos2)**2
+
 
 
         
