@@ -13,38 +13,38 @@ base_origin=Point('O')
 
 class GeometryOfPoint:
 #<<<<<<< HEAD
-    def __init__(self, *args , frame=base_frame , ivar=Symbol('t')):
+    # def __init__(self, *args , frame=base_frame , ivar=Symbol('t')):
 
-        if isinstance(args, Point):
-            self.Point = P
+    #     if isinstance(args, Point):
+    #         self.Point = P
 
-        elif isinstance(args[0], Expr):
-            self.Point = args[0]
-            print('Expression based on the generalized coordinate')
+    #     elif isinstance(args[0], Expr):
+    #         self.Point = args[0]
+    #         print('Expression based on the generalized coordinate')
 
-        elif isinstance(args, tuple):
-            tuplelist = [x for x in args]
-            for args in tuplelist:
-                if args is args[0:2]:
-                    P1 = Point('P1')
-                    P1.set_pos(base_origin, frame.x*args[0] + frame.y*args[1])
-                    P1.set_vel(frame, frame.x*diff(args[0], ivar) + frame.y*diff(args[1], ivar))
-                    self.Point = P1
-                    print(self.Point)
+    #     elif isinstance(args, tuple):
+    #         tuplelist = [x for x in args]
+    #         for args in tuplelist:
+    #             if args is args[0:2]:
+    #                 P1 = Point('P1')
+    #                 P1.set_pos(base_origin, frame.x*args[0] + frame.y*args[1])
+    #                 P1.set_vel(frame, frame.x*diff(args[0], ivar) + frame.y*diff(args[1], ivar))
+    #                 self.Point = P1
+    #                 print(self.Point)
 
-                elif args is args[0:3]:
-                    P2 = Point('P2')
-                    P2.set_pos(base_origin, frame.x*args[0] + frame.y*args[1] + frame.z*args[2])
-                    P2.set_vel(frame, frame.x*diff(args[0], ivar) + frame.y*diff(args[1], ivar) + frame.z*diff(args[2], ivar))
-                    self.Point = P2
-                    print(self.Point)
+    #             elif args is args[0:3]:
+    #                 P2 = Point('P2')
+    #                 P2.set_pos(base_origin, frame.x*args[0] + frame.y*args[1] + frame.z*args[2])
+    #                 P2.set_vel(frame, frame.x*diff(args[0], ivar) + frame.y*diff(args[1], ivar) + frame.z*diff(args[2], ivar))
+    #                 self.Point = P2
+    #                 print(self.Point)
 
-                else:
-                    print('Tuple out of range')
-                    P_na = Point('P_na')
-                    P_na.set_pos(base_origin, frame.x*0)
-                    P_na.set_vel(frame, frame.x*diff(0, ivar))
-                    self.Point = P_na
+    #             else:
+    #                 print('Tuple out of range')
+    #                 P_na = Point('P_na')
+    #                 P_na.set_pos(base_origin, frame.x*0)
+    #                 P_na.set_vel(frame, frame.x*diff(0, ivar))
+    #                 self.Point = P_na
 #=======
     def __init__(self, *args, frame=base_frame , ivar=Symbol('t')):
         
