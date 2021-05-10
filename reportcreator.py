@@ -756,7 +756,8 @@ class PlottedData(Figure):
 
         self._numerical_data = numerical_data
         self.fig_name = str(fig_name)
-        #self._latex_name='figure' #super()._latex_name
+        self._latex_name='figure' 
+        super()._latex_name
         self.preview = preview
         self._units_dict=units_dict
 
