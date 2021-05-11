@@ -2663,7 +2663,7 @@ class CSRod(ContinuousSystem):
     """
 
     scheme_name = 'rod_scheme.PNG'
-    real_name = 'rod_scheme.PNG'
+    real_name = 'rod_real.PNG'
 
     def __init__(self,
                 E=Symbol('E',positive=True),
