@@ -706,7 +706,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         return self.governing_equations
 
-    def numerized(self, parameter_values=None, FFT = None):
+    def numerized(self, parameter_values={}, FFT = None):
         '''
         Takes values of parameters, substitute it into the list of parameters and changes list it into a Tuple. Returns instance of class OdeComputationalCase.
         '''

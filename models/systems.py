@@ -5,14 +5,10 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
-#<<<<<<< HEAD
-#from .elements import MaterialPoint, Spring, NonlinSpring__RefFrme_Pt, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force
-from .elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force
-#=======
-from ..continuous import ContinuousSystem
-#from .elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force
 
->>>>>>> 2b755210de3592877c3217d7f6a5e0a5d12a0b1a
+from .elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force
+from ..continuous import ContinuousSystem
+
 import base64
 import random
 import IPython as IP
@@ -1765,19 +1761,118 @@ class SDoFNonlinearEngine(ComposedSystem):
             self.e: [2 * e0, S.Half * e0, 4 * e0, S.Half**2 * e0,3 * e0,3* S.Half * e0, 9 * e0, 3*S.Half**2 * e0],
         }
         return default_data_dict
+class SDoFStraightNonlinearEngine(ComposedSystem):
+    scheme_name = 'engine.png'
+    real_name = 'engine_real.PNG'
+    """
+    Model of an exemplary Tuned Mass Damper (TMD) simulated as Double Degree of Freedom of coupled trolleys.
 
-#     def get_random_parameters(self):
+        Arguments:
+        =========
+            M = Mass
+                -Mass of system (engine block) on spring
+
+            me = Mass
+                -Mass of particle
+
+            e = distance
+                -motion radius of a particle
+
+            km = spring coefficient
+                -value of spring coefficient that tuned mass damper is mounted
+
+            beta = angle
+                -angle of springs that hold the system
+
+            l0 = length
+                -Initial length of non-linear springs
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+        Example
+        =======
+        >>> t = symbols('t')
+        >>> M, me, e, km, beta, l0 = symbols('M, m_e, e, k_m, beta, l_0')
+        >>> qs = dynamicsymbols('z') 
+        >>> SDoFNonlinearEngine()
+    """
+
+    def __init__(self,
+                 M=Symbol('M', positive=True),
+                 k_m=Symbol('k_m', positive=True),
+                 m_e=Symbol('m_e', positive=True),
+                 e=Symbol('e', positive=True),
+                 beta=Symbol('beta', positive=True),
+                 l_0=Symbol('l_0', positive=True),
+                 z=dynamicsymbols('z'),
+                 phi=dynamicsymbols('phi'),
+                 ivar=Symbol('t', positive=True),
+                 **kwargs):
+
+        self.M = M
+        self.k_m = k_m
+        self.m_e = m_e
+        self.beta = beta
+        self.e = e
+        self.l_0 = l_0
+        self.z = z
+        self.phi = phi
+
+        N = ReferenceFrame('N')
+        O = Point('O')
+
+        P1 = Point('P1')
+        P1.set_pos(O, 0 * N.x + 0 * N.y)
+
+        P2 = Point('P2')
+        P2.set_pos(O, l_0 * sin(beta) * N.x + (z + l_0 * cos(beta)) * N.y)
+
+        self.MaterialPoint_1 = MaterialPoint(M, z, qs=[z])
+        self.MaterialPoint_2 = MaterialPoint(m_e, z + e * cos(phi), qs=[z])
+        self.Spring = Spring(2 * k_m, pos1=P1, pos2=P2, l_0=l_0, qs=[z])
+
+        system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2
+        super().__init__(system,**kwargs)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.M: r'Mass of engine block',
+            self.k_m: r'Spring stiffness coefficient',
+            self.m_e: r'',
+            self.e: r'',
+            self.l_0: r'',
+            self.beta: r'',
+        }
+        return self.sym_desc_dict
+    def get_default_data(self):
+
+        m0, k0, e0 = symbols('m_0 k_0 e_0', positive=True)
+
+        default_data_dict = {
+            self.M: [100*m0,300*m0,500*m0,700*m0,900*m0,200 * m0, 400 * m0,600*m0,800*m0],
+            self.m_e: [m0,3*m0,5*m0,7*m0,9*m0,2 * m0, 4 * m0,6*m0,8*m0],
+            self.k_m: [k0,2*k0,4*k0,6*k0,8*k0, 3 * k0,5*k0,7*k0,9*k0],
+            self.e: [2 * e0, S.Half * e0, 4 * e0, S.Half**2 * e0,3 * e0,3* S.Half * e0, 9 * e0, 3*S.Half**2 * e0],
+            self.beta:[0]
+        }
+        return default_data_dict
+
+    def get_random_parameters(self):
 
 
 
-#         default_data_dict = self.get_default_data()
+        default_data_dict = self.get_default_data()
 
-#         parameters_dict = {
-#             key: random.choice(items_list)
-#             for key, items_list in default_data_dict.items()
-#             }
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+            }
           
-#         return parameters_dict
+        return parameters_dict
 
 class MDoFTMD(ComposedSystem):
     scheme_name = 'mdof_tmd.png'
@@ -2667,7 +2762,7 @@ class CSRod(ContinuousSystem):
     """
 
     scheme_name = 'rod_scheme.PNG'
-    real_name = 'rod_scheme.PNG'
+    real_name = 'rod_real.PNG'
 
     def __init__(self,
                 E=Symbol('E',positive=True),

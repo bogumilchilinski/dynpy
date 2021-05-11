@@ -764,7 +764,8 @@ class PlottedData(Figure):
 
         self._numerical_data = numerical_data
         self.fig_name = str(fig_name)
-        #self._latex_name='figure' #super()._latex_name
+        self._latex_name='figure' 
+        super()._latex_name
         self.preview = preview
         self._units_dict=units_dict
 
@@ -819,7 +820,7 @@ class PlottedData(Figure):
             ([
 
                 
-                ax_tmp.set_ylabel(label_formatter_without_SI(sym)#.replace( r'\ ' ,' ' ).replace( '\\' ,' ' ) 
+                ax_tmp.set_ylabel(label_formatter_without_SI(sym)#.replace(r '\' , ' ')#.replace( '\\' ,' ' ) 
                                    )
 
                 for ax_tmp, sym in zip(ax, numerical_data.columns)        
