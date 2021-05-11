@@ -163,7 +163,8 @@ class OdeComputationalCase:
         '''
         if type(ic_list) == type(None):
             ic_list = list(Matrix(self.dvars).subs(self.ic_point))
-
+        if len(ic_list) != len(self.dvars):
+            raise IndexError('Number of initial conditions is not correct.')
         if type(t_span) == type(None):
             t_span = self.t_span
 
