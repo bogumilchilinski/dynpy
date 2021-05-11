@@ -1749,6 +1749,7 @@ class SDoFNonlinearEngine(ComposedSystem):
             self.l_0: r'',
             self.beta: r'',
         }
+        
         return self.sym_desc_dict
     def get_default_data(self):
 
