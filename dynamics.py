@@ -620,11 +620,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         '''
         Recognises system parameters as symbols which are not independent variable or its relations and returns the Tuple (Sympy object) containing these elements. It does not take into account undefined functions (instances of Function class) of independent variable.
         '''
-        print('system parameters @')
-        print(self)
+#         print('system parameters @')
+#         print(self)
         
-        print(self.lagrangian())
-        print(self.q)
+#         print(self.lagrangian())
+#         print(self.q)
         
         params = self.rhs().free_symbols
         params.remove(self.ivar)
@@ -706,7 +706,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         return self.governing_equations
 
-    def numerized(self, parameter_values=None, FFT = None):
+    def numerized(self, parameter_values={}, FFT = None):
         '''
         Takes values of parameters, substitute it into the list of parameters and changes list it into a Tuple. Returns instance of class OdeComputationalCase.
         '''

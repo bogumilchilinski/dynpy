@@ -60,7 +60,7 @@ class OdeComputationalCase:
                  t_span=[],
                  params=[],
                  params_values={},
-                 ic_point={},
+                 ic_point=None,
                  evaluate=False,
                  label=None):
 
@@ -71,7 +71,8 @@ class OdeComputationalCase:
         self.ivar = ivar
         self.dvars = dvars
         self.ic_point = ic_point
-
+        if type(ic_point) == type(None):
+            self.ic_point = [0]*len(self.dvars)
         if isinstance(params, dict):
             self.params_values = params
             self.params = list(self.params_values.keys())
@@ -168,6 +169,7 @@ class OdeComputationalCase:
 
         if type(params_values) == type(None):
             params_values = tuple(Matrix(self.params).subs(self.params_values))
+            
 
         case_odes = self.__numerical_odes
 

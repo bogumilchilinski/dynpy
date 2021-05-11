@@ -192,9 +192,15 @@ class ContinuousSystem:
             bc_dict, sep_expr, arg, spatial_comp, index).formula.expand().simplify()
 
         mode_eqn = self.fundamental_matrix(
-            bc_dict, sep_expr, spatial_comp).subs(arg, eig_value)*Matrix(C_list)
+            bc_dict, sep_expr, spatial_comp)*Matrix(C_list)
 
+#         display(mode_eqn)
+#         display(mode_eqn[1:])
+        
         mode_subs = solve(mode_eqn[:-1], C_list)
+#         mode_subs = solve(mode_eqn[1:], C_list)
 
-        return self.spatial_general_solution(sep_expr=sep_expr, spatial_comp=spatial_comp).rhs.subs(mode_subs).subs(arg, eig_value).subs({c_var: 1 for c_var in C_list}).subs(index, mode_no)
+#         display(mode_subs)
+        
+        return self.spatial_general_solution(sep_expr=sep_expr, spatial_comp=spatial_comp).rhs.subs(arg, eig_value).subs(mode_subs).subs(arg, eig_value).subs({c_var: 1 for c_var in C_list}).subs(index, mode_no)
 
