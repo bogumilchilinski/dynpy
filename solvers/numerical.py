@@ -178,7 +178,7 @@ class OdeComputationalCase:
             't_eval': t_eval,
             'method': method,
             'args': params_values
-        }
+            }
 
     def compute_solution(self,
                          t_span=None,
