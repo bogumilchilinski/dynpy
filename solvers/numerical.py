@@ -196,12 +196,11 @@ class OdeComputationalCase:
                                    t_eval=t_eval,
                                    params_values=params_values,
                                    method=method))
-        
-        
+
         solution_tdf = TimeDataFrame(
             data={key: solution.y[no, :]
                   for no, key in enumerate(self.dvars)}, index=t_span)
 
-        
+
         solution_tdf.index.name = 't'
         return solution
