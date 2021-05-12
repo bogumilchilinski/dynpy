@@ -196,31 +196,22 @@ class OdeComputationalCase:
                                    t_eval=t_eval,
                                    params_values=params_values,
                                    method=method))
-
+        
         solution_tdf = TimeDataFrame(
             data={key: solution.y[no, :]
                   for no, key in enumerate(self.dvars)}, index=t_span)
+        
+        velocities = self.dvars[int(len(self.dvars)/2) :]
+        for vel in velocities:
+            solution_tdf[vel].to_numpy()
+            gradient = np.gradient(solution_tdf[vel].to_numpy(),solution_tdf.index)
+            solution_tdf[vel.diff(self.ivar)] = gradient
+
 
 
         solution_tdf.index.name = 't'
-        return solution
+        return solution_tdf
 
-    def compute_gradient(self,
-                         t_span=None,
-                         ic_list=None,
-                         t_eval=None,
-                         params_values=None,
-                         method='RK45'):
 
-        solution = solver.solve_ivp(
-            **self.solve_ivp_input(t_span=t_span,
-                                   ic_list=ic_list,
-                                   t_eval=t_eval,
-                                   params_values=params_values,
-                                   method=method))
-
-        gradient = np.gradient(solution.y[solution_number])
-    
-        return gradient
     
     
