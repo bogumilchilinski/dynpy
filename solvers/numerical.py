@@ -1,13 +1,14 @@
-from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq
+#from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
-import sympy as sym
+from sympy import *
+#import sympy as sym
 from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
 import itertools as itools
 import scipy.integrate as solver
 from ..utilities.timeseries import TimeSeries, TimeDataFrame
-
+from scipy.misc import derivative
 from collections import ChainMap
 
 from IPython.display import display
@@ -21,37 +22,32 @@ from sympy.simplify.fu import TR8, TR10, TR7, TR3
 class OdeComputationalCase:
     '''
     This object allows for a fully numerical investigation on the dynamic system - by supplying methods such as formation of numerical right-hand sides of ordinary differential equations, preparing the input for scipy 'solve_ivp' integration function returned as a dictionary of numerical odes, initial conditions and integration method used, the object provides a comprehansive tool that can be utilised to determine mechanical system's behaviour numerically. Other methods are discussed in details further in this document.
-    
+
     Arguments
     =========
-    
     odes_system: Symbol object
         Ordinary differential equation in symbolic form
-    
+
     ivar=None (optional): Symbol object
         Independent variable
-    
+
     dvars: Symbol object
         Derivative symbol
-    
+
     t_span: TimeSeries object
         Time span
-    
+
     params: Symbol object
-        
-    
+
     params_values: float
-        
-    
+
     ic_point:
-        
-    
+
     evaluate=False (optional): bool
         Evaluate the ODE equation, False as a default
-    
+
     label=None (optional): string
         Labels the instance. The default label is: '{Class name} with {length of dvars} equations'
-    
     '''
     def __init__(self,
                  odes_system=[],
@@ -138,9 +134,11 @@ class OdeComputationalCase:
 
         args_list = [self.ivar] + list(subs_dict.values()) + self.params
 
-        return autowrap((self.odes_system.subs(subs_dict, simultaneous=True)),
+        return autowrap(((self.odes_system).subs(subs_dict, simultaneous=True)),
                         args=args_list)
-        #return autowrap(  (msubs(self.odes_system,subs_dict)),args=args_list)
+
+    
+        # return autowrap(  (msubs(self.odes_system,subs_dict)),args=args_list)
 
     def form_numerical_rhs(self):
         '''
@@ -198,12 +196,12 @@ class OdeComputationalCase:
                                    t_eval=t_eval,
                                    params_values=params_values,
                                    method=method))
-
+        
+        
         solution_tdf = TimeDataFrame(
             data={key: solution.y[no, :]
-                  for no, key in enumerate(self.dvars)},
-            index=t_span)
+                  for no, key in enumerate(self.dvars)}, index=t_span)
 
+        
         solution_tdf.index.name = 't'
-
-        return solution_tdf
+        return solution
