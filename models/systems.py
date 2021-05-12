@@ -1,6 +1,6 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, pi, latex, dsolve,
-                   solve, fraction, factorial,Subs)
+                   solve, fraction, factorial,Subs, Number)
 
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
@@ -2828,7 +2828,7 @@ class CSRod(ContinuousSystem):
     def get_random_parameters(self):
         
         data_dict=super().get_random_parameters()
-        data_dict[self.A]  = (self.l**2 * random.choice([1/100,1/10,1/1000,1/100000 ,1 ])/ data_dict[self.E]).n(2)
+        data_dict[self.A]  = (self.l**2 * random.choice([1/100,1/10,1/1000,1/100000 ,1 ])/ list(data_dict[self.E].atoms(Number))[0] ).n(2)
         
         
         return data_dict

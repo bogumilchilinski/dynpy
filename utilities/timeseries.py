@@ -114,6 +114,12 @@ class SpectralMethods(DataMethods):
 
 class TimeDomainMethods(DataMethods):
 
+    def gradient(self):
+        
+        data_gradient={name:np.gradient(data,self.index ) for name,data in self.items()}
+
+        return type(self)( data=data_gradient,index=self.index,name=self.name  )
+
     def is_uniformly_distributed(self):
 
         sample_length=max(self.index)-min(self.index)/len(self.index)-1
