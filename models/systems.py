@@ -1,6 +1,6 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, pi, latex, dsolve,
-                   solve, fraction, factorial)
+                   solve, fraction, factorial,Subs, Number)
 
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
@@ -2782,6 +2782,9 @@ class CSRod(ContinuousSystem):
         self.u=u(time,loc)
         self.time=time
         self.loc=loc
+        self.l=Symbol('L',positive=True)
+        
+        
 
         L_rod=S.One/2*(rho_L*(self.u.diff(self.time))**2-A*E*(self.u.diff(self.loc))**2)
 
@@ -2801,17 +2804,21 @@ class CSRod(ContinuousSystem):
 
         E_0, A_0, L_0 = symbols('E_0, A_0, L_0', positive=True)
         
-#         fix_ls=Subs(X.diff(x,0),x,0)
-#         fix_rs=Subs(X.diff(x,0),x,l)
-#         free_ls=Subs(X.diff(x,1),x,0)
-#         free_rs=Subs(X.diff(x,1),x,l)
+        x=self.loc
+        l=self.l
+        X=Function('X')(x)
+        
+        fix_ls=Subs(X.diff(x,0),x,0)
+        fix_rs=Subs(X.diff(x,0),x,l)
+        free_ls=Subs(X.diff(x,1),x,0)
+        free_rs=Subs(X.diff(x,1),x,l)
 
 
         default_data_dict = {
             self.E: [2.5*E_0,1.25*E_0,0.75*E_0,1.35*E_0 ],
             self.A: [1 * A_0, 2 * A_0, S.Half * A_0, 1 * A_0, 2 * A_0],
             
-            self.BC: []
+            self.BC: [ {fix_ls:0,free_rs:0},{free_ls:0,free_rs:0},{fix_ls:0,fix_rs:0} ]
 #             self.I: [1 * I_0, 2 * I_0, S.Half * I_0, 1 * I_0, 2 * I_0],
 
         }
@@ -2821,7 +2828,8 @@ class CSRod(ContinuousSystem):
     def get_random_parameters(self):
         
         data_dict=super().get_random_parameters()
-        data_dict[self.A]  = (L_0**2 * random.choice([1/100,1/10,1/1000,1/100000 ,1 ])/ data_dict(self.E)).n(5)
+        data_dict[self.A]  = (self.l**2 * random.choice([1/100,1/10,1/1000,1/100000 ,1 ])/ list(data_dict[self.E].atoms(Number))[0] ).n(2)
+        
         
         return data_dict
                                                   
