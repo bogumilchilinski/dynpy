@@ -113,6 +113,8 @@ class SpectralMethods(DataMethods):
 #         return TimeDataFrame(data=spectrum_shifted_ss,index=f_span_shifted_ss)
 
 class TimeDomainMethods(DataMethods):
+<<<<<<< HEAD
+=======
 
     def gradient(self):
         
@@ -120,8 +122,8 @@ class TimeDomainMethods(DataMethods):
 
         return TimeSeries( data=data_gradient,index=self.index,name=self.name  )
 
+>>>>>>> 353ddf73987a9c12ba679ca443e176a1b3b19643
     def is_uniformly_distributed(self):
-
         sample_length=max(self.index)-min(self.index)/len(self.index)-1
         step_list=[self.index[i+1] - self.index[i] for i in range(len(self.index)-1)]
 
@@ -131,9 +133,7 @@ class TimeDomainMethods(DataMethods):
             return False
 
     def to_frequency_domain(self):
-
         spectrum=(fft.fft(self.to_numpy()))
-
         f_span=fft.fftfreq(len(self.index),d=self.index[1]-self.index[0])
         return SpectrumSeries(data=spectrum,index=(f_span),name=self.name)
 
