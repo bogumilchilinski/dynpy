@@ -2500,7 +2500,7 @@ class SDoFNonLinearTrolley(ComposedSystem):
                  ivar=Symbol('t'),
                  x=dynamicsymbols('x'),
                  qs=dynamicsymbols('x'),
-                 system=None):
+                 **kwargs):
 
         self.m = m
         self.k = k
@@ -2508,11 +2508,11 @@ class SDoFNonLinearTrolley(ComposedSystem):
         self.l_0 = l_0
         self.x = x
 
-        self.Trolley = MaterialPoint(m, x, qs=[x]) + Spring(
+        self.trolley = MaterialPoint(m, x, qs=[x]) + Spring(
             k, pos1=(sqrt(x**2 + d**2) - l_0), qs=[x])
 
-        system = self.Trolley
-        super().__init__(system(qs))
+        
+        super().__init__(self.trolley,**kwargs)
 
     def get_default_data(self):
 
@@ -2536,8 +2536,6 @@ class SDoFNonLinearTrolley(ComposedSystem):
             for key, items_list in default_data_dict.items()
         }
 
-        if parameters_dict[self.x1] == S.Zero:
-            parameters_dict[self.x2] = self.x
 
         return parameters_dict
 
