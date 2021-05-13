@@ -1,6 +1,6 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, pi, latex, dsolve,
-                   solve, fraction, factorial,Subs)
+                   solve, fraction, factorial,Subs, Number)
 
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
@@ -2500,7 +2500,7 @@ class SDoFNonLinearTrolley(ComposedSystem):
                  ivar=Symbol('t'),
                  x=dynamicsymbols('x'),
                  qs=dynamicsymbols('x'),
-                 system=None):
+                 **kwargs):
 
         self.m = m
         self.k = k
@@ -2508,11 +2508,11 @@ class SDoFNonLinearTrolley(ComposedSystem):
         self.l_0 = l_0
         self.x = x
 
-        self.Trolley = MaterialPoint(m, x, qs=[x]) + Spring(
+        self.trolley = MaterialPoint(m, x, qs=[x]) + Spring(
             k, pos1=(sqrt(x**2 + d**2) - l_0), qs=[x])
 
-        system = self.Trolley
-        super().__init__(system(qs))
+        
+        super().__init__(self.trolley,**kwargs)
 
     def get_default_data(self):
 
@@ -2536,8 +2536,6 @@ class SDoFNonLinearTrolley(ComposedSystem):
             for key, items_list in default_data_dict.items()
         }
 
-        if parameters_dict[self.x1] == S.Zero:
-            parameters_dict[self.x2] = self.x
 
         return parameters_dict
 
@@ -2828,7 +2826,7 @@ class CSRod(ContinuousSystem):
     def get_random_parameters(self):
         
         data_dict=super().get_random_parameters()
-        data_dict[self.A]  = (self.l**2 * random.choice([1/100,1/10,1/1000,1/100000 ,1 ])/ data_dict[self.E]).n(2)
+        data_dict[self.A]  = (self.l**2 * random.choice([1/100,1/10,1/1000,1/100000 ,1 ])/ list(data_dict[self.E].atoms(Number))[0] ).n(2)
         
         
         return data_dict

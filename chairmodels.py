@@ -205,10 +205,10 @@ u_fr=0
 
 
 # linear springs deflection
-# u_rear=((z+R*phi+l_rear -z_rear)**2 )-l_rear#
-u_rear=0
-# u_fr=  ((z-R*phi+l_fr   -z_fr)**2  )-l_fr
-u_fr=0
+u_rear=((z+R*phi+l_rear -z_rear)**2 )-l_rear#
+#u_rear=0
+u_fr=  ((z-R*phi+l_fr   -z_fr)**2  )-l_fr
+#u_fr=0
 
 
 

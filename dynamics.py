@@ -180,7 +180,6 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         Supply the following for the initialization of DynamicSystem in the same way as LagrangesMethod
         """
 
-        
         if system:
 #             print('init form system for ' ,system , 'with q = ' ,system.q)
             Lagrangian=system
