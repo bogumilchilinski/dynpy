@@ -201,6 +201,8 @@ class OdeComputationalCase:
             data={key: solution.y[no, :]
                   for no, key in enumerate(self.dvars)}, index=t_span)
         
+
+        
         velocities = self.dvars[int(len(self.dvars)/2) :]
         for vel in velocities:
             solution_tdf[vel].to_numpy()
