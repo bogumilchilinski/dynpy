@@ -12,59 +12,53 @@ base_frame=ReferenceFrame('N')
 base_origin=Point('O')
 
 class GeometryOfPoint:
-#<<<<<<< HEAD
-    # def __init__(self, *args , frame=base_frame , ivar=Symbol('t')):
 
-    #     if isinstance(args, Point):
-    #         self.Point = P
-
-    #     elif isinstance(args[0], Expr):
-    #         self.Point = args[0]
-    #         print('Expression based on the generalized coordinate')
-
-    #     elif isinstance(args, tuple):
-    #         tuplelist = [x for x in args]
-    #         for args in tuplelist:
-    #             if args is args[0:2]:
-    #                 P1 = Point('P1')
-    #                 P1.set_pos(base_origin, frame.x*args[0] + frame.y*args[1])
-    #                 P1.set_vel(frame, frame.x*diff(args[0], ivar) + frame.y*diff(args[1], ivar))
-    #                 self.Point = P1
-    #                 print(self.Point)
-
-    #             elif args is args[0:3]:
-    #                 P2 = Point('P2')
-    #                 P2.set_pos(base_origin, frame.x*args[0] + frame.y*args[1] + frame.z*args[2])
-    #                 P2.set_vel(frame, frame.x*diff(args[0], ivar) + frame.y*diff(args[1], ivar) + frame.z*diff(args[2], ivar))
-    #                 self.Point = P2
-    #                 print(self.Point)
-
-    #             else:
-    #                 print('Tuple out of range')
-    #                 P_na = Point('P_na')
-    #                 P_na.set_pos(base_origin, frame.x*0)
-    #                 P_na.set_vel(frame, frame.x*diff(0, ivar))
-    #                 self.Point = P_na
-#=======
-    def __init__(self, *args, frame=base_frame , ivar=Symbol('t')):
+    def __init__(self, *args , frame=base_frame, base_origin=base_origin , ivar=Symbol('t')):
         
+        #print(type(args),args)
         
-        if type(args[0])==(Point):
-            self._point=args[0]
+        #name = str(args[0])
 
-        elif isinstance(args[0],Number) or isinstance(args[0],Expr):
-            P = Point('P')
-            P.set_pos(base_origin, frame.x*args[0])
-            P.set_vel(frame, frame.x*diff(args[0], ivar))
-            self._point=P
-#>>>>>>> cbe00b03b26b0e0a8512f1292e0299cfb267cae7
+        if isinstance(args[0], Point):
+            self.Point = args[0]
 
-        else:
-            print('Unsupported data type: Please change the method of the input')
-            self._point = 0
+        elif isinstance(args[0], Expr) or isinstance(args[0], Number):
+            P1 = Point('P1')
+            P1.set_pos(base_origin, frame.x*args[0] )
+            P1.set_vel(frame, frame.x*diff(args[0], ivar) )
+
+            self.Point = P1
+            #print(self.Point)
+
+            #print('Expression based on the generalized coordinate')
+
+        elif isinstance(args, tuple):
+
+            if len(args) == 2:
+                P1 = Point('P1')
+                P1.set_pos(base_origin, frame.x*args[0] + frame.y*args[1])
+                P1.set_vel(frame, frame.x*diff(args[0], ivar) + frame.y*diff(args[1], ivar))
+                self.Point = P1
+                #print(self.Point)
+
+            elif len(args) == 3:
+                P2 = Point('P2')
+                P2.set_pos(base_origin, frame.x*args[0] + frame.y*args[1] + frame.z*args[2])
+                P2.set_vel(frame, frame.x*diff(args[0], ivar) + frame.y*diff(args[1], ivar) + frame.z*diff(args[2], ivar))
+                self.Point = P2
+                #print(self.Point)
+
+            else:
+                print('Tuple out of range')
+                P_na = Point('P_na')
+                P_na.set_pos(base_origin, frame.x*0)
+                P_na.set_vel(frame, frame.x*diff(0, ivar))
+                self.Point = P_na
 
     def get_point(self):
-        return self._point
+        return self.Point
+
+
 
 
 class Element(LagrangesDynamicSystem):
