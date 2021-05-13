@@ -1762,11 +1762,9 @@ class SDoFNonlinearEngine(ComposedSystem):
             self.e: [2 * e0, S.Half * e0, 4 * e0, S.Half**2 * e0,3 * e0,3* S.Half * e0, 9 * e0, 3*S.Half**2 * e0],
         }
         return default_data_dict
-class SDoFStraightNonlinearEngine(ComposedSystem):
-    scheme_name = 'engine.png'
-    real_name = 'engine_real.PNG'
+class SDoFStraightNonlinearEngine(SDoFNonlinearEngine):
     """
-    Model of an exemplary Tuned Mass Damper (TMD) simulated as Double Degree of Freedom of coupled trolleys.
+    Model of an exemplary Engine with nonlinear suspension aligned horizontally.
 
         Arguments:
         =========
@@ -1802,53 +1800,7 @@ class SDoFStraightNonlinearEngine(ComposedSystem):
         >>> SDoFNonlinearEngine()
     """
 
-    def __init__(self,
-                 M=Symbol('M', positive=True),
-                 k_m=Symbol('k_m', positive=True),
-                 m_e=Symbol('m_e', positive=True),
-                 e=Symbol('e', positive=True),
-                 beta=Symbol('beta', positive=True),
-                 l_0=Symbol('l_0', positive=True),
-                 z=dynamicsymbols('z'),
-                 phi=dynamicsymbols('phi'),
-                 ivar=Symbol('t', positive=True),
-                 **kwargs):
 
-        self.M = M
-        self.k_m = k_m
-        self.m_e = m_e
-        self.beta = beta
-        self.e = e
-        self.l_0 = l_0
-        self.z = z
-        self.phi = phi
-
-        N = ReferenceFrame('N')
-        O = Point('O')
-
-        P1 = Point('P1')
-        P1.set_pos(O, 0 * N.x + 0 * N.y)
-
-        P2 = Point('P2')
-        P2.set_pos(O, l_0 * sin(beta) * N.x + (z + l_0 * cos(beta)) * N.y)
-
-        self.MaterialPoint_1 = MaterialPoint(M, z, qs=[z])
-        self.MaterialPoint_2 = MaterialPoint(m_e, z + e * cos(phi), qs=[z])
-        self.Spring = Spring(2 * k_m, pos1=P1, pos2=P2, l_0=l_0, qs=[z])
-
-        system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2
-        super().__init__(system,**kwargs)
-
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.M: r'Mass of engine block',
-            self.k_m: r'Spring stiffness coefficient',
-            self.m_e: r'',
-            self.e: r'',
-            self.l_0: r'',
-            self.beta: r'',
-        }
-        return self.sym_desc_dict
     def get_default_data(self):
 
         m0, k0, e0 = symbols('m_0 k_0 e_0', positive=True)
@@ -1862,18 +1814,7 @@ class SDoFStraightNonlinearEngine(ComposedSystem):
         }
         return default_data_dict
 
-    def get_random_parameters(self):
 
-
-
-        default_data_dict = self.get_default_data()
-
-        parameters_dict = {
-            key: random.choice(items_list)
-            for key, items_list in default_data_dict.items()
-            }
-          
-        return parameters_dict
 
 class MDoFTMD(ComposedSystem):
     scheme_name = 'mdof_tmd.png'
