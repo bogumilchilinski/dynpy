@@ -206,7 +206,7 @@ class OdeComputationalCase:
         velocities = self.dvars[int(len(self.dvars)/2) :]
         for vel in velocities:
             solution_tdf[vel].to_numpy()
-            gradient = np.gradient(solution_tdf[vel].to_numpy(),solution_tdf.index)
+            gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
             solution_tdf[vel.diff(self.ivar)] = gradient
 
 
