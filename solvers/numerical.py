@@ -134,6 +134,8 @@ class OdeComputationalCase:
 
         args_list = [self.ivar] + list(subs_dict.values()) + self.params
 
+        print( 'aw',(self.odes_system).subs(subs_dict, simultaneous=True) )
+        
         return autowrap(((self.odes_system).subs(subs_dict, simultaneous=True)),
                         args=args_list)
 
@@ -159,12 +161,12 @@ class OdeComputationalCase:
         '''
         Returns the dictionary containing the necessary argument of solve_ivp integrator from scipy.integrate module.
         '''
-        if type(ic_list) == type(None):
-            ic_list = list(Matrix(self.dvars).subs(self.ic_point))
-        if len(ic_list) != len(self.dvars):
-            raise IndexError('Number of initial conditions is not correct.')
-        if type(t_span) == type(None):
-            t_span = self.t_span
+#         if ic_list == None:
+#             ic_list = list(Matrix(self.dvars).subs(self.ic_point))
+#         if len(ic_list) != len(self.dvars):
+#             raise IndexError('Number of initial conditions is not correct.')
+#         if type(t_span) == type(None):
+#             t_span = self.t_span
 
         if type(params_values) == type(None):
             params_values = tuple(Matrix(self.params).subs(self.params_values))
@@ -203,11 +205,11 @@ class OdeComputationalCase:
         
 
         
-        velocities = self.dvars[int(len(self.dvars)/2) :]
-        for vel in velocities:
-            solution_tdf[vel].to_numpy()
-            gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
-            solution_tdf[vel.diff(self.ivar)] = gradient
+#         velocities = self.dvars[int(len(self.dvars)/2) :]
+#         for vel in velocities:
+#             solution_tdf[vel].to_numpy()
+#             gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
+#             solution_tdf[vel.diff(self.ivar)] = gradient
 
 
 
