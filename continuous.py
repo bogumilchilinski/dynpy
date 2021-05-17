@@ -166,18 +166,36 @@ class ContinuousSystem:
 
         return self.fundamental_matrix(bc_dict, sep_expr, spatial_comp).det().simplify()
 
-    def eigenvalues(self, bc_dict=None, sep_expr=Symbol('k',positive=True), arg=Symbol('k',positive=True), spatial_comp=Function('X')(Symbol('x')), index=Symbol('n', integer=True, positive=True)):
+
+#     def eigenvalues(self, bc_dict=None, sep_expr=Symbol('k',positive=True), arg=Symbol('k',positive=True), spatial_comp=Function('X')(Symbol('x')), index=Symbol('n', integer=True, positive=True)):
         
+#         if bc_dict:
+#             self.bc_dict=bc_dict
+#         else:
+#             bc_dict=self.bc_dict
+
+#         root = solve(self.char_poly(bc_dict, sep_expr, spatial_comp), arg)[0]
+
+#         spatial_span = list(root.free_symbols)[0]
+
+#         return SeqFormula(root+(index-1)/spatial_span*pi, (index, 0, oo))
+
+    def eigenvalues(self, bc_dict=None, sep_expr=Symbol('k',positive=True), arg=Symbol('k',positive=True), spatial_comp=Function('X')(Symbol('x')), index=Symbol('n',integer=True,positive=True)):
+
         if bc_dict:
             self.bc_dict=bc_dict
         else:
             bc_dict=self.bc_dict
 
-        root = solve(self.char_poly(bc_dict, sep_expr, spatial_comp), arg)[0]
+        roots=solve(self.char_poly(bc_dict, sep_expr, spatial_comp ), arg)
+        print(roots)
 
-        spatial_span = list(root.free_symbols)[0]
+        if len(roots)==1:
+            spatial_span=roots[0]
+        else:
+            spatial_span=roots[1]-roots[0]
 
-        return SeqFormula(root+(index-1)/spatial_span*pi, (index, 0, oo))
+        return SeqFormula(roots[0]+(index-1)*spatial_span,(index,0,oo))
 
     def eigenmodes(self, mode_no, bc_dict=None, sep_expr=Symbol('k',positive=True), arg=Symbol('k',positive=True), spatial_comp=Function('X')(Symbol('x')), index=Symbol('n', integer=True, positive=True)):
 
