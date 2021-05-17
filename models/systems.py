@@ -12,7 +12,7 @@ from ..continuous import ContinuousSystem
 import base64
 import random
 import IPython as IP
-
+import numpy as np
 
 class ComposedSystem(HarmonicOscillator):
     """Base class for all systems
@@ -1810,7 +1810,7 @@ class SDoFStraightNonlinearEngine(SDoFNonlinearEngine):
             self.m_e: [m0,3*m0,5*m0,7*m0,9*m0,2 * m0, 4 * m0,6*m0,8*m0],
             self.k_m: [k0,2*k0,4*k0,6*k0,8*k0, 3 * k0,5*k0,7*k0,9*k0],
             self.e: [2 * e0, S.Half * e0, 4 * e0, S.Half**2 * e0,3 * e0,3* S.Half * e0, 9 * e0, 3*S.Half**2 * e0],
-            self.beta:[0]
+            self.beta:[90*np.pi/180]
         }
         return default_data_dict
 
