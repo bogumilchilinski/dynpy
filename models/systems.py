@@ -1674,13 +1674,16 @@ class SDoFNonlinearEngine(ComposedSystem):
             M = Mass
                 -Mass of system (engine block) on spring
 
-            me = Mass
+            m_e = Mass
                 -Mass of particle
 
             e = distance
                 -motion radius of a particle
 
-            km = spring coefficient
+            d = distance
+                -distance between mounting point and engine
+
+            k_m = spring coefficient
                 -value of spring coefficient that tuned mass damper is mounted
 
             beta = angle
@@ -1709,6 +1712,7 @@ class SDoFNonlinearEngine(ComposedSystem):
                  m_e=Symbol('m_e', positive=True),
                  e=Symbol('e', positive=True),
                  beta=Symbol('beta', positive=True),
+                 d=Symbol('d', positive=True),
                  l_0=Symbol('l_0', positive=True),
                  z=dynamicsymbols('z'),
                  phi=dynamicsymbols('phi'),
@@ -1719,6 +1723,7 @@ class SDoFNonlinearEngine(ComposedSystem):
         self.k_m = k_m
         self.m_e = m_e
         self.beta = beta
+        self.d=d
         self.e = e
         self.l_0 = l_0
         self.z = z
@@ -1731,7 +1736,7 @@ class SDoFNonlinearEngine(ComposedSystem):
         P1.set_pos(O, 0 * N.x + 0 * N.y)
 
         P2 = Point('P2')
-        P2.set_pos(O, l_0 * sin(beta) * N.x + (z + l_0 * cos(beta)) * N.y)
+        P2.set_pos(O, d  * N.x + (z ) * N.y)
 
         self.MaterialPoint_1 = MaterialPoint(M, z, qs=[z])
         self.MaterialPoint_2 = MaterialPoint(m_e, z + e * cos(phi), qs=[z])
@@ -1799,19 +1804,21 @@ class SDoFStraightNonlinearEngine(SDoFNonlinearEngine):
         >>> qs = dynamicsymbols('z') 
         >>> SDoFNonlinearEngine()
     """
-
+    scheme_name='non_linear_engine.png'
 
     def get_default_data(self):
 
-        m0, k0, e0, omega = symbols('m_0 k_0 e_0 omega', positive=True)
+        m0, k0, e0, l0, omega = symbols('m_0 k_0 e_0 l_0 Omega', positive=True)
 
         default_data_dict = {
             self.M: [100*m0,300*m0,500*m0,700*m0,900*m0,200 * m0, 400 * m0,600*m0,800*m0],
             self.m_e: [m0,3*m0,5*m0,7*m0,9*m0,2 * m0, 4 * m0,6*m0,8*m0],
             self.k_m: [k0,2*k0,4*k0,6*k0,8*k0, 3 * k0,5*k0,7*k0,9*k0],
             self.e: [2 * e0, S.Half * e0, 4 * e0, S.Half**2 * e0,3 * e0,3* S.Half * e0, 9 * e0, 3*S.Half**2 * e0],
-            self.beta:[90*pi/180],
-            self.phi:[omega*ivar]
+            self.l_0:[S.Half*l0,l0,2*l0],
+            self.d:[4*l0,8*l0],
+            self.beta:[S.Half*pi],
+            self.phi:[omega*self.ivar]
         }
         return default_data_dict
 
