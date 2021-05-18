@@ -1808,15 +1808,15 @@ class SDoFStraightNonlinearEngine(SDoFNonlinearEngine):
 
     def get_default_data(self):
 
-        m0, k0, e0, l0, omega = symbols('m_0 k_0 e_0 l_0 Omega', positive=True)
+        m0, k0, e0, l, omega = symbols('m_0 k_0 e_0 l Omega', positive=True)
 
         default_data_dict = {
             self.M: [100*m0,300*m0,500*m0,700*m0,900*m0,200 * m0, 400 * m0,600*m0,800*m0],
             self.m_e: [m0,3*m0,5*m0,7*m0,9*m0,2 * m0, 4 * m0,6*m0,8*m0],
             self.k_m: [k0,2*k0,4*k0,6*k0,8*k0, 3 * k0,5*k0,7*k0,9*k0],
             self.e: [2 * e0, S.Half * e0, 4 * e0, S.Half**2 * e0,3 * e0,3* S.Half * e0, 9 * e0, 3*S.Half**2 * e0],
-            self.l_0:[S.Half*l0,l0,2*l0],
-            self.d:[4*l0,8*l0],
+            self.l_0:[S.Half*l,l,2*l],
+            self.d:[4*l,8*l],
             self.beta:[S.Half*pi],
             self.phi:[omega*self.ivar]
         }
@@ -2774,8 +2774,10 @@ class CSRod(ContinuousSystem):
 
     def get_random_parameters(self):
         
+        E_0, A_0, L_0 = symbols('E_0, A_0, L_0', positive=True)
+        
         data_dict=super().get_random_parameters()
-        data_dict[self.A]  = (self.l**2 * random.choice([1/100,1/10,1/1000,1/100000 ,1 ])/ list(data_dict[self.E].atoms(Number))[0] ).n(2)
+        data_dict[self.A]  = (L_0**2 * random.choice([0.125, 0.0125, 0.00125, 0.123, 0.0128 ])/ (data_dict[self.E]/E_0) ).n(2)
         
         
         return data_dict
