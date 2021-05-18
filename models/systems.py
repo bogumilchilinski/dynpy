@@ -1803,7 +1803,7 @@ class SDoFStraightNonlinearEngine(SDoFNonlinearEngine):
 
     def get_default_data(self):
 
-        m0, k0, e0, omega = symbols('m_0 k_0 e_0 omega', positive=True)
+        m0, k0, e0, omega, ivar = symbols('m_0 k_0 e_0 Omega t', positive=True)
 
         default_data_dict = {
             self.M: [100*m0,300*m0,500*m0,700*m0,900*m0,200 * m0, 400 * m0,600*m0,800*m0],
