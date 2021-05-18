@@ -1363,7 +1363,7 @@ class DDoFCoupledPendulum(ComposedSystem):
                  g=Symbol('g', positive=True),
                  l=Symbol('l', positive=True),
                  k=Symbol('k', positive=True),
-                 qs=dynamicsymbols('phi_1, phi_2'),
+                 qs=dynamicsymbols('\\varphi_1, \\varphi_2'),
                  **kwargs):
 
         phi1, phi2 = qs
@@ -1373,7 +1373,7 @@ class DDoFCoupledPendulum(ComposedSystem):
         self.l = l
         self.k = k
 
-        self.spring = Spring(k, pos1=(phi1 * (l)), pos2=(phi2 * (l)), qs=[qs])
+        self.spring = Spring(k, pos1=(phi1 * (l/2)), pos2=(phi2 * (l/2)), qs=[qs])
         self.pendulum_1 = Pendulum(m, g, l, angle=phi1, qs=[qs])
         self.pendulum_2 = Pendulum(m, g, l, angle=phi2, qs=[qs])
 
@@ -2657,6 +2657,11 @@ class CSBeam(ContinuousSystem):
         L_beam=S.One/2*(A*rho*(self.w.diff(self.time))**2-E*I*(self.w.diff(self.loc,2))**2)
 
         super().__init__(L_beam,q=self.w,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc,**kwargs)
+        
+        
+        self._sep_expr=2*self.L.subs({self.w.diff(self.time):0,(self.w.diff(self.loc,2)):1}) .doit()  *Symbol('k',positive=True)**4 
+        
+        print(self._sep_expr)
 
     def symbols_description(self):
         self.sym_desc_dict = {
