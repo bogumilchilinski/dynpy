@@ -1363,7 +1363,7 @@ class DDoFCoupledPendulum(ComposedSystem):
                  g=Symbol('g', positive=True),
                  l=Symbol('l', positive=True),
                  k=Symbol('k', positive=True),
-                 qs=dynamicsymbols('phi_1, phi_2'),
+                 qs=dynamicsymbols('\\varphi_1, \\varphi_2'),
                  **kwargs):
 
         phi1, phi2 = qs
@@ -1373,7 +1373,7 @@ class DDoFCoupledPendulum(ComposedSystem):
         self.l = l
         self.k = k
 
-        self.spring = Spring(k, pos1=(phi1 * (l)), pos2=(phi2 * (l)), qs=[qs])
+        self.spring = Spring(k, pos1=(phi1 * (l/2)), pos2=(phi2 * (l/2)), qs=[qs])
         self.pendulum_1 = Pendulum(m, g, l, angle=phi1, qs=[qs])
         self.pendulum_2 = Pendulum(m, g, l, angle=phi2, qs=[qs])
 
@@ -1674,13 +1674,16 @@ class SDoFNonlinearEngine(ComposedSystem):
             M = Mass
                 -Mass of system (engine block) on spring
 
-            me = Mass
+            m_e = Mass
                 -Mass of particle
 
             e = distance
                 -motion radius of a particle
 
-            km = spring coefficient
+            d = distance
+                -distance between mounting point and engine
+
+            k_m = spring coefficient
                 -value of spring coefficient that tuned mass damper is mounted
 
             beta = angle
@@ -1709,6 +1712,7 @@ class SDoFNonlinearEngine(ComposedSystem):
                  m_e=Symbol('m_e', positive=True),
                  e=Symbol('e', positive=True),
                  beta=Symbol('beta', positive=True),
+                 d=Symbol('d', positive=True),
                  l_0=Symbol('l_0', positive=True),
                  z=dynamicsymbols('z'),
                  phi=dynamicsymbols('phi'),
@@ -1719,6 +1723,7 @@ class SDoFNonlinearEngine(ComposedSystem):
         self.k_m = k_m
         self.m_e = m_e
         self.beta = beta
+        self.d=d
         self.e = e
         self.l_0 = l_0
         self.z = z
@@ -1731,7 +1736,7 @@ class SDoFNonlinearEngine(ComposedSystem):
         P1.set_pos(O, 0 * N.x + 0 * N.y)
 
         P2 = Point('P2')
-        P2.set_pos(O, l_0 * sin(beta) * N.x + (z + l_0 * cos(beta)) * N.y)
+        P2.set_pos(O, d  * N.x + (z ) * N.y)
 
         self.MaterialPoint_1 = MaterialPoint(M, z, qs=[z])
         self.MaterialPoint_2 = MaterialPoint(m_e, z + e * cos(phi), qs=[z])
@@ -1799,18 +1804,21 @@ class SDoFStraightNonlinearEngine(SDoFNonlinearEngine):
         >>> qs = dynamicsymbols('z') 
         >>> SDoFNonlinearEngine()
     """
-
+    scheme_name='non_linear_engine.png'
 
     def get_default_data(self):
 
-        m0, k0, e0 = symbols('m_0 k_0 e_0', positive=True)
+        m0, k0, e0, l, omega = symbols('m_0 k_0 e_0 l Omega', positive=True)
 
         default_data_dict = {
             self.M: [100*m0,300*m0,500*m0,700*m0,900*m0,200 * m0, 400 * m0,600*m0,800*m0],
             self.m_e: [m0,3*m0,5*m0,7*m0,9*m0,2 * m0, 4 * m0,6*m0,8*m0],
             self.k_m: [k0,2*k0,4*k0,6*k0,8*k0, 3 * k0,5*k0,7*k0,9*k0],
             self.e: [2 * e0, S.Half * e0, 4 * e0, S.Half**2 * e0,3 * e0,3* S.Half * e0, 9 * e0, 3*S.Half**2 * e0],
-            self.beta:[90*np.pi/180]
+            self.l_0:[S.Half*l,l,2*l],
+            self.d:[4*l,8*l],
+            self.beta:[S.Half*pi],
+            self.phi:[omega*self.ivar]
         }
         return default_data_dict
 
@@ -2649,6 +2657,11 @@ class CSBeam(ContinuousSystem):
         L_beam=S.One/2*(A*rho*(self.w.diff(self.time))**2-E*I*(self.w.diff(self.loc,2))**2)
 
         super().__init__(L_beam,q=self.w,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc,**kwargs)
+        
+        
+        self._sep_expr=2*self.L.subs({self.w.diff(self.time):0,(self.w.diff(self.loc,2)):1}) .doit()  *Symbol('k',positive=True)**4 
+        
+        print(self._sep_expr)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -2766,8 +2779,10 @@ class CSRod(ContinuousSystem):
 
     def get_random_parameters(self):
         
+        E_0, A_0, L_0 = symbols('E_0, A_0, L_0', positive=True)
+        
         data_dict=super().get_random_parameters()
-        data_dict[self.A]  = (self.l**2 * random.choice([1/100,1/10,1/1000,1/100000 ,1 ])/ list(data_dict[self.E].atoms(Number))[0] ).n(2)
+        data_dict[self.A]  = (L_0**2 * random.choice([0.125, 0.0125, 0.00125, 0.123, 0.0128 ])/ (data_dict[self.E]/E_0) ).n(2)
         
         
         return data_dict
