@@ -29,16 +29,19 @@ def plots_no():
 plots_no_gen= plots_no()
 
 
+
 class SystemDynamicsAnalyzer:
     def __init__(self,dynamic_system,reference_data={}):
         self._dynamic_system=dynamic_system
         self._reference_data=reference_data
         
+
         
     def prepare_data(self,parameter,parameter_range=None):
         
         self._parameter=parameter
         self._parameter_range=parameter_range
+        
         if isinstance(self._parameter,dict):
             analysis_span_list=[]
             for key,value in parameter.items():
@@ -50,10 +53,11 @@ class SystemDynamicsAnalyzer:
                         analysis_span={**self._reference_data,**{key:val}}
                         analysis_span_list.append(analysis_span)
                         print(analysis_span_list)
-                    
+                        
                 else: 
                     raise TypeError('Each dictionary value should be a list.')
             self._analysis_span = analysis_span_list
+            self.value=value
         else:
             analysis_span=[{**self._reference_data,**{self._parameter:param_value}} for   param_value in parameter_range]
         
@@ -71,27 +75,83 @@ class SystemDynamicsAnalyzer:
         if not ics_list:
             ics_list=[0]*no_dof
 
-        simulation_result=numerical_system.compute_solution(t_span=t_span,
+        simulation_result=numerical_system.compute_solution(t_span=t_spans,
                              ic_list=[0]*no_dof,
-                             t_eval=t_span
+                             t_eval=t_spans
                              )
         
-        print(type(simulation_result))
-        simulation_result.plot()
+        return self.report_step(simulation_result)
 
-        return simulation_result
     
-    def analyze_system(self,t_span):
+    def analyze_system(self,t_span,container=[]):
+        self._container=container
         
         solution_list=[]
         
+        self.init_report()
+        
         for num,case_data in enumerate(self._analysis_span):
-            
+            self.num=num
             data_for_plot=self.analysis_step(case_data=case_data,t_span=t_span,ics_list=None)
             
             solution_list+=[(case_data,data_for_plot)]
-            
+        
+        self.report_end()
+        
+        self.solution_list=solution_list   
         return solution_list
+    
+    def init_report(self,result_to_report=None):
+        
+
+
+
+        
+        
+        sec=Section('entire section')
+        with sec.create(Subsection('init')) as subsec:
+            subsec.append('init was done xD')
+            subsec.append('head of report should be implemented here')
+
+        self._container.append(sec)
+
+        
+        return self._container
+    
+    
+    def report_step(self,result_to_report,container_type=None):
+        
+        
+#         print(f'it reports the result \n {result_to_report} ')
+#         print('section of report step should be implemented here')
+        
+        
+#         print(f'it reports the result \n {result_to_report} ')
+#         print('subsec of report step should be implemented here')
+        
+        result_to_report.plot()
+        
+        subsec=Subsection('abc')
+        
+        with subsec.create(DataPlot('wykres_nowy',position='H',preview=False)) as ndp:
+            ndp.add_data_plot(filename=f'Wykres_alpha_{next(plots_no_gen)}.png',width='11cm')
+        
+        
+        self._container.append(subsec)
+        self._container.append('step was done xD')
+        
+        return self._container
+
+
+            
+        
+    def report_end(self,result_to_report=None,container_type=None):
+        
+        subsec=Subsection('end')
+        self._container.append(subsec)
+        self._container.append('end was done xD')
+        
+        return self._container
 
 
 
