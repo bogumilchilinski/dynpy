@@ -26,15 +26,20 @@ def plots_no():
         yield num
         num += 1
 
+
 plots_no_gen= plots_no()
 
 
-
 class SystemDynamicsAnalyzer:
+    
+    
+    
     def __init__(self,dynamic_system,reference_data={}):
         self._dynamic_system=dynamic_system
         self._reference_data=reference_data
         
+        
+        self._fig_no=plots_no()
 
         
     def prepare_data(self,parameter,parameter_range=None):
@@ -65,22 +70,7 @@ class SystemDynamicsAnalyzer:
         
         return analysis_span
 
-    def analysis_step(self,case_data,t_span,ics_list=None):
-        
-        
-        numerical_system=self._dynamic_system.numerized(parameter_values=case_data)
-        
-        no_dof=len((numerical_system.dvars))
-        
-        if not ics_list:
-            ics_list=[0]*no_dof
 
-        simulation_result=numerical_system.compute_solution(t_span=t_spans,
-                             ic_list=[0]*no_dof,
-                             t_eval=t_spans
-                             )
-        
-        return self.report_step(simulation_result)
 
     
     def analyze_system(self,t_span,container=[]):
@@ -100,6 +90,25 @@ class SystemDynamicsAnalyzer:
         
         self.solution_list=solution_list   
         return solution_list
+
+    
+    def analysis_step(self,case_data,t_span,ics_list=None):
+        
+        
+        numerical_system=self._dynamic_system.numerized(parameter_values=case_data)
+        
+        no_dof=len((numerical_system.dvars))
+        
+        if not ics_list:
+            ics_list=[0]*no_dof
+
+        simulation_result=numerical_system.compute_solution(t_span=t_span,
+                             ic_list=[0]*no_dof,
+                             t_eval=t_span
+                             )
+        
+        return self.report_step(simulation_result)
+    
     
     def init_report(self,result_to_report=None):
         
@@ -134,7 +143,7 @@ class SystemDynamicsAnalyzer:
         subsec=Subsection('abc')
         
         with subsec.create(DataPlot('wykres_nowy',position='H',preview=False)) as ndp:
-            ndp.add_data_plot(filename=f'Wykres_alpha_{next(plots_no_gen)}.png',width='11cm')
+            ndp.add_data_plot(filename=f'Wykres_alpha_{next(self._fig_no)}.png',width='11cm')
         
         
         self._container.append(subsec)
