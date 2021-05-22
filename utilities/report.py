@@ -94,7 +94,7 @@ class SystemDynamicsAnalyzer:
     
     def analysis_step(self,case_data,t_span,ics_list=None):
         
-        
+        self._current_value=case_data[self._parameter]
         numerical_system=self._dynamic_system.numerized(parameter_values=case_data)
         
         no_dof=len((numerical_system.dvars))
@@ -163,6 +163,9 @@ class SystemDynamicsAnalyzer:
         return self._container
 
 
+    
+    
+    
 
 class CompoundMatrix(Matrix):
 
@@ -197,6 +200,29 @@ class InlineMath(Math):
         self.backend=backend
         
         super().__init__(inline=True, data=backend(formula), escape=escape)
+
+class SymbolsList(NoEscape):
+    def __init__(self, symbols_list, escape=False,backend=vlatex):
+        r"""
+        Args
+        ----
+        data: list
+            Content of the math container.
+        inline: bool
+            If the math should be displayed inline or not.
+        escape : bool
+            if True, will escape strings
+        """
+
+
+        self.escape = escape
+        self.formula = vlatex(formula)
+        self.backend=backend
+        
+        super().__init__(inline=True, data=backend(formula), escape=escape)
+    
+    
+
 
 
 class SymbolsDescription(Description):
