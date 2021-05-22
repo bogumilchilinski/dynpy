@@ -32,8 +32,7 @@ plots_no_gen= plots_no()
 
 class SystemDynamicsAnalyzer:
     
-    
-    
+
     def __init__(self,dynamic_system,reference_data={}):
         self._dynamic_system=dynamic_system
         self._reference_data=reference_data
@@ -202,25 +201,27 @@ class InlineMath(Math):
         super().__init__(inline=True, data=backend(formula), escape=escape)
 
 class SymbolsList(NoEscape):
-    def __init__(self, symbols_list, escape=False,backend=vlatex):
+    
+
+    
+    def __new__(cls, symbols_list, backend=vlatex):
         r"""
         Args
         ----
-        data: list
-            Content of the math container.
-        inline: bool
-            If the math should be displayed inline or not.
+        symbols_list: list
+            List of the Symbol objects to convert and append.
+        backend: function
+            Callable which is used to convert Symbol from list to its latex representation.
         escape : bool
             if True, will escape strings
         """
 
-
-        self.escape = escape
-        self.formula = vlatex(formula)
-        self.backend=backend
         
-        super().__init__(inline=True, data=backend(formula), escape=escape)
-    
+
+        
+        list_str=f', '.join([ f'\\( {backend(sym)} \\)'  for sym in  symbols_list  ]  )
+        
+        return super(SymbolsList,cls).__new__(cls,list_str)
     
 
 
