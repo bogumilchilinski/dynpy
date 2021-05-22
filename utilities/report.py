@@ -17,6 +17,8 @@ from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
 from sympy import Matrix,symbols,Symbol
 
+from sympy import Symbol,Function,Derivative
+
 from sympy.physics.vector.printing import vlatex, vpprint
 
 
@@ -227,11 +229,21 @@ class SymbolsList(NoEscape):
 
 
 class SymbolsDescription(Description):
-    """A class representing LaTeX description environment."""
+    """A class representing LaTeX description environment of Symbols explained in description_dict."""
     _latex_name ='description'
-    def __init__(self,description_dict=None,options=None,arguments=None,start_arguments=None,**kwargs):
+    def __init__(self,description_dict=None,expr=None,options=None,arguments=None,start_arguments=None,**kwargs):
         self.description_dict=description_dict
+        self.expr=expr
         super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
+        
+        
+        if description_dict and expr:
+            
+            symbols_set=expr.atoms(Symbol,Function,Derivative)
+            
+            symbols_to_add={ sym:desc  for  sym,desc in description_dict.items() if sym in symbols_set}
+            
+            self.add_items(symbols_to_add)
         
         if description_dict:
             self.add_items(description_dict)
