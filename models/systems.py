@@ -2742,6 +2742,8 @@ class CSRod(ContinuousSystem):
 
         super().__init__(L_rod,q=self.u,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc,**kwargs)
 
+        self._sep_expr=2*self.L.subs({self.u.diff(self.time):0,(self.u.diff(self.loc)):1}) .doit()  *Symbol('k',positive=True)**2 
+        
     def symbols_description(self):
         self.sym_desc_dict = {
             self.E: r'Young modulus',
@@ -2770,8 +2772,8 @@ class CSRod(ContinuousSystem):
             self.E: [2.5*E_0,1.25*E_0,0.75*E_0,1.35*E_0 ],
             self.A: [1 * A_0, 2 * A_0, S.Half * A_0, 1 * A_0, 2 * A_0],
             
-            self.BC: [ {fix_ls:0,free_rs:0},{free_ls:0,free_rs:0},{fix_ls:0,fix_rs:0} ]
-#             self.I: [1 * I_0, 2 * I_0, S.Half * I_0, 1 * I_0, 2 * I_0],
+           self.BC: [ {fix_ls:0,free_rs:0},{free_ls:0,free_rs:0},{fix_ls:0,fix_rs:0} ],
+           self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 1 * L_0, 2 * L_0],
 
         }
 
@@ -2786,6 +2788,84 @@ class CSRod(ContinuousSystem):
         
         
         return data_dict
-                                                  
+                             
+        
+class CSString(ContinuousSystem):
+
+
+    scheme_name = 'rod_scheme.PNG'
+    real_name = 'rod_real.PNG'
+
+    def __init__(self,
+                T0=Symbol('T_0',positive=True),
+                A=Symbol('A',positive=True),
+                rho=Symbol('\\rho',positive=True),
+                w=Function('w'),
+                bc_dict=None,
+                time=Symbol('t'),
+                loc=Symbol('x'),
+                **kwargs
+                ):
+
+        self.E = E
+        self.A = A
+        self.rho_L = rho_L
+        self.u=u(time,loc)
+        self.time=time
+        self.loc=loc
+        self.l=Symbol('L',positive=True)
+        
+        
+
+        L_rod=S.One/2*((self.w.diff(self.time))**2-T0*E*(self.u.diff(self.loc))**2)
+
+        super().__init__(L_rod,q=self.u,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc,**kwargs)
+
+        self._sep_expr=2*self.L.subs({self.u.diff(self.time):0,(self.u.diff(self.loc)):1}) .doit()  *Symbol('k',positive=True)**2 
+        
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.E: r'Young modulus',
+            self.A: r'Area of cross-section',
+            self.rho_L: r'Linear density',
+            self.u: 'Space-Time function',
+        }
+        return self.sym_desc_dict
+
+
+    def get_default_data(self):
+
+        E_0, A_0, L_0 = symbols('E_0, A_0, L_0', positive=True)
+        
+        x=self.loc
+        l=self.l
+        X=Function('X')(x)
+        
+        fix_ls=Subs(X.diff(x,0),x,0)
+        fix_rs=Subs(X.diff(x,0),x,l)
+        free_ls=Subs(X.diff(x,1),x,0)
+        free_rs=Subs(X.diff(x,1),x,l)
+
+
+        default_data_dict = {
+            self.E: [2.5*E_0,1.25*E_0,0.75*E_0,1.35*E_0 ],
+            self.A: [1 * A_0, 2 * A_0, S.Half * A_0, 1 * A_0, 2 * A_0],
+            
+           self.BC: [ {fix_ls:0,free_rs:0},{free_ls:0,free_rs:0},{fix_ls:0,fix_rs:0} ],
+           self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 1 * L_0, 2 * L_0],
+
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+        
+        E_0, A_0, L_0 = symbols('E_0, A_0, L_0', positive=True)
+        
+        data_dict=super().get_random_parameters()
+        data_dict[self.A]  = (L_0**2 * random.choice([0.125, 0.0125, 0.00125, 0.123, 0.0128 ])/ (data_dict[self.E]/E_0) ).n(2)
+        
+        
+        return data_dict
                                                   
         
