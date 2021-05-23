@@ -2742,6 +2742,8 @@ class CSRod(ContinuousSystem):
 
         super().__init__(L_rod,q=self.u,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc,**kwargs)
 
+        self._sep_expr=2*self.L.subs({self.u.diff(self.time):0,(self.u.diff(self.loc)):1}) .doit()  *Symbol('k',positive=True)**2 
+        
     def symbols_description(self):
         self.sym_desc_dict = {
             self.E: r'Young modulus',
@@ -2770,8 +2772,8 @@ class CSRod(ContinuousSystem):
             self.E: [2.5*E_0,1.25*E_0,0.75*E_0,1.35*E_0 ],
             self.A: [1 * A_0, 2 * A_0, S.Half * A_0, 1 * A_0, 2 * A_0],
             
-            self.BC: [ {fix_ls:0,free_rs:0},{free_ls:0,free_rs:0},{fix_ls:0,fix_rs:0} ]
-#             self.I: [1 * I_0, 2 * I_0, S.Half * I_0, 1 * I_0, 2 * I_0],
+           self.BC: [ {fix_ls:0,free_rs:0},{free_ls:0,free_rs:0},{fix_ls:0,fix_rs:0} ],
+           self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 1 * L_0, 2 * L_0],
 
         }
 
