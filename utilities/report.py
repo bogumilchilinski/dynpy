@@ -17,6 +17,8 @@ from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
 from sympy import Matrix,symbols,Symbol
 
+from sympy import Symbol,Function,Derivative
+
 from sympy.physics.vector.printing import vlatex, vpprint
 
 
@@ -26,19 +28,26 @@ def plots_no():
         yield num
         num += 1
 
+
 plots_no_gen= plots_no()
 
 
 class SystemDynamicsAnalyzer:
+    
+
     def __init__(self,dynamic_system,reference_data={}):
         self._dynamic_system=dynamic_system
         self._reference_data=reference_data
         
         
+        self._fig_no=plots_no()
+
+        
     def prepare_data(self,parameter,parameter_range=None):
         
         self._parameter=parameter
         self._parameter_range=parameter_range
+        
         if isinstance(self._parameter,dict):
             analysis_span_list=[]
             for key,value in parameter.items():
@@ -50,10 +59,11 @@ class SystemDynamicsAnalyzer:
                         analysis_span={**self._reference_data,**{key:val}}
                         analysis_span_list.append(analysis_span)
                         print(analysis_span_list)
-                    
+                        
                 else: 
                     raise TypeError('Each dictionary value should be a list.')
             self._analysis_span = analysis_span_list
+            self.value=value
         else:
             analysis_span=[{**self._reference_data,**{self._parameter:param_value}} for   param_value in parameter_range]
         
@@ -61,9 +71,31 @@ class SystemDynamicsAnalyzer:
         
         return analysis_span
 
+
+
+    
+    def analyze_system(self,t_span,container=[]):
+        self._container=container
+        
+        solution_list=[]
+        
+        self.init_report()
+        
+        for num,case_data in enumerate(self._analysis_span):
+            self.num=num
+            data_for_plot=self.analysis_step(case_data=case_data,t_span=t_span,ics_list=None)
+            
+            solution_list+=[(case_data,data_for_plot)]
+        
+        self.report_end()
+        
+        self.solution_list=solution_list   
+        return solution_list
+
+    
     def analysis_step(self,case_data,t_span,ics_list=None):
         
-        
+        self._current_value=case_data[self._parameter]
         numerical_system=self._dynamic_system.numerized(parameter_values=case_data)
         
         no_dof=len((numerical_system.dvars))
@@ -76,24 +108,65 @@ class SystemDynamicsAnalyzer:
                              t_eval=t_span
                              )
         
-        print(type(simulation_result))
-        simulation_result.plot()
-
-        return simulation_result
+        return self.report_step(simulation_result)
     
-    def analyze_system(self,t_span):
+    
+    def init_report(self,result_to_report=None):
         
-        solution_list=[]
-        
-        for num,case_data in enumerate(self._analysis_span):
-            
-            data_for_plot=self.analysis_step(case_data=case_data,t_span=t_span,ics_list=None)
-            
-            solution_list+=[(case_data,data_for_plot)]
-            
-        return solution_list
 
 
+
+        
+        
+        sec=Section('entire section')
+        with sec.create(Subsection('init')) as subsec:
+            subsec.append('init was done xD')
+            subsec.append('head of report should be implemented here')
+
+        self._container.append(sec)
+
+        
+        return self._container
+    
+    
+    def report_step(self,result_to_report,container_type=None):
+        
+        
+#         print(f'it reports the result \n {result_to_report} ')
+#         print('section of report step should be implemented here')
+        
+        
+#         print(f'it reports the result \n {result_to_report} ')
+#         print('subsec of report step should be implemented here')
+        
+        result_to_report.plot()
+        
+        subsec=Subsection('abc')
+        
+        with subsec.create(DataPlot('wykres_nowy',position='H',preview=False)) as ndp:
+            ndp.add_data_plot(filename=f'Wykres_alpha_{next(self._fig_no)}.png',width='11cm')
+        
+        
+        self._container.append(subsec)
+        self._container.append('step was done xD')
+        
+        return self._container
+
+
+            
+        
+    def report_end(self,result_to_report=None,container_type=None):
+        
+        subsec=Subsection('end')
+        self._container.append(subsec)
+        self._container.append('end was done xD')
+        
+        return self._container
+
+
+    
+    
+    
 
 class CompoundMatrix(Matrix):
 
@@ -129,13 +202,48 @@ class InlineMath(Math):
         
         super().__init__(inline=True, data=backend(formula), escape=escape)
 
+class SymbolsList(NoEscape):
+    
+
+    
+    def __new__(cls, symbols_list, backend=vlatex):
+        r"""
+        Args
+        ----
+        symbols_list: list
+            List of the Symbol objects to convert and append.
+        backend: function
+            Callable which is used to convert Symbol from list to its latex representation.
+        escape : bool
+            if True, will escape strings
+        """
+
+        
+
+        
+        list_str=f', '.join([ f'\\( {backend(sym)} \\)'  for sym in  symbols_list  ]  )
+        
+        return super(SymbolsList,cls).__new__(cls,list_str)
+    
+
+
 
 class SymbolsDescription(Description):
-    """A class representing LaTeX description environment."""
+    """A class representing LaTeX description environment of Symbols explained in description_dict."""
     _latex_name ='description'
-    def __init__(self,description_dict=None,options=None,arguments=None,start_arguments=None,**kwargs):
+    def __init__(self,description_dict=None,expr=None,options=None,arguments=None,start_arguments=None,**kwargs):
         self.description_dict=description_dict
+        self.expr=expr
         super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
+        
+        
+        if description_dict and expr:
+            
+            symbols_set=expr.atoms(Symbol,Function,Derivative)
+            
+            symbols_to_add={ sym:desc  for  sym,desc in description_dict.items() if sym in symbols_set}
+            
+            self.add_items(symbols_to_add)
         
         if description_dict:
             self.add_items(description_dict)
