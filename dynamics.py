@@ -708,15 +708,39 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     def numerized(self, parameter_values={}, FFT = None):
         '''
         Takes values of parameters, substitute it into the list of parameters and changes list it into a Tuple. Returns instance of class OdeComputationalCase.
+        Arguments:
+        =========
+            System = Created system based on symbolical represent of mechanical parts of it
+
+        Example
+        =======
+        Creating the examplary system. A mass oscillating up and down while being held up by a spring with a spring constant k
+
+        >>> t = symbols('t')
+        >>> m, k = symbols('m, k')
+        >>> qs = dynamicsymbols('z') 
+        >>> System = SDoFHarmonicOscillator(m,k, qs=[z]) 
+
+        Defining the list of values to substitute
+        >>> val ={
+                M: 1000,
+                k1: 1000
+            }
+        >>> System numeric = Sytem.numerized(parameters_values = val)
+
+        - In default returned numerized system is in the time domain but can be represented in the frequency domain if it is desired
+        >>> System numeric = Sytem.numerized(parameters_values = val, FFT = True)
+
+        - if necessary the created numerized system can be solved in order to represent displacement, velocity, or acceleration 
         '''
         if not FFT:
             data_Tuple = Tuple(*self.system_parameters()).subs(parameter_values)
             computed_case = self.computational_case(parameter_values=data_Tuple)
 
             return OdeComputationalCase(**computed_case, evaluate=True)
-    
-    
-    
+
+
+
 
     @classmethod
     def from_system(cls, system):
@@ -738,7 +762,7 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
     def fundamental_matrix(self, freq=Symbol('omega', positive=True)):
         '''
         Method returns a fundamental matrix of the system built from inertia and stiffness matrices. Takes one optional argument.
-        
+
         Args:
             freq (optional, obj:Symbol): This argument lets user to choose a symbol for frequency representation. Set to 'omega' by default, 'positive=True' ensures its affiliation to real numbers domain.
         '''
@@ -777,7 +801,7 @@ class HarmonicOscillator(LinearDynamicSystem):
     This object allows for a determination of any dynamic system by providing methods that serve to generate the equations of motion, solution, 
     natural frequencies, eigenmodes, FRF of the mechanical system and many others that are discussed further within the documentation. 
     For the initialization of HarmonicOscillator at least one argument is neccessary.
-    
+
     Arguments
     =========
     Lagrangian: Symbol object

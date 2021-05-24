@@ -15,7 +15,7 @@ from pylatex.base_classes import Environment
 from pylatex.package import Package
 from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
-from sympy import Matrix,symbols,Symbol
+from sympy import Matrix,symbols,Symbol,Eq
 
 from sympy import Symbol,Function,Derivative
 
@@ -32,15 +32,114 @@ def plots_no():
 plots_no_gen= plots_no()
 
 
+
+
+class SimulationalBlock:
+    def __init__(self,t_span,ics_list=None):
+        
+        self._t_span=t_span
+        self._ics_list=ics_list
+        
+    def do_simulation(self,system):
+        
+        case_data=system._current_data
+        
+        numerical_system=system._dynamic_system.numerized(parameter_values=case_data)
+        no_dof=len((numerical_system.dvars))
+        
+        if not self._ics_list:
+            ics_list=[0]*no_dof
+
+
+        simulation_result=numerical_system.compute_solution(t_span=self._t_span,
+                             ic_list=[0]*no_dof,
+                             t_eval=self._t_span
+                             )
+        
+        self._simulation_result=simulation_result
+        
+        return simulation_result
+
+    def simulation_result(self,system):
+        return self._simulation_result
+
+
+    
+class AccelerationComparison:
+    def __init__(self,t_span,parametes_dict,ics_list=None):
+        
+        self._t_span=t_span
+        self._parametes_dict=parametes_dict
+        self._ics_list=ics_list
+        
+    def do_simulations(self,system):
+        
+        case_data=system._current_data
+        
+        numerical_system=system._dynamic_system.numerized(parameter_values=case_data)
+        no_dof=len((numerical_system.dvars))
+        
+        if not self._ics_list:
+            ics_list=[0]*no_dof
+
+        df=pd.DataFrame()
+        
+        
+        
+        for var,value in self._parametes_dict.items():
+            
+            case_data[var]=value
+            
+            print(case_data)
+            numerical_system=system._dynamic_system.numerized(parameter_values=case_data)
+            
+            simulation_result=numerical_system.compute_solution(t_span=self._t_span,
+                                 ic_list=[0]*no_dof,
+                                 t_eval=self._t_span,
+                                 )
+            
+            df[Eq(var,value)]=simulation_result[system._current_value]
+        
+        self._simulation_result=df
+       
+        return df
+
+    def simulation_result(self,system):
+        return self._simulation_result
+
+    
+    def plot_result(self,system):
+        self._simulation_result.plot()
+        plt.show()
+        return self._simulation_result
+    
+
+class ReportEntry:
+    def __init__(self,block_title):
+        self._block_title = block_title
+    
+    def __call__(self,system):
+        sec=Section(self._block_title)
+        
+        system._container.append(sec)
+        
+        return sec
+
 class SystemDynamicsAnalyzer:
     
 
-    def __init__(self,dynamic_system,reference_data={}):
+    def __init__(self,dynamic_system,reference_data={},report_init=[ReportEntry('Report Beginning')],report_step=[SimulationalBlock(np.linspace(0,300,1000)).do_simulation],report_end=[ReportEntry('Report End')]):
         self._dynamic_system=dynamic_system
         self._reference_data=reference_data
         
+        self._init_steps=report_init
+        self._loop_steps=report_step
+        self._end_steps=report_end
+        
         
         self._fig_no=plots_no()
+        
+        self._container=[]
 
         
     def prepare_data(self,parameter,parameter_range=None):
@@ -74,8 +173,10 @@ class SystemDynamicsAnalyzer:
 
 
     
-    def analyze_system(self,t_span,container=[]):
-        self._container=container
+    def analyze_system(self,t_span,container=None):
+        
+        if container:
+            self._container=container
         
         solution_list=[]
         
@@ -96,73 +197,44 @@ class SystemDynamicsAnalyzer:
     def analysis_step(self,case_data,t_span,ics_list=None):
         
         self._current_value=case_data[self._parameter]
-        numerical_system=self._dynamic_system.numerized(parameter_values=case_data)
+        self._current_data=case_data
         
-        no_dof=len((numerical_system.dvars))
+        for action in self._loop_steps:
+            self._current_result=action(self)
         
-        if not ics_list:
-            ics_list=[0]*no_dof
 
-        simulation_result=numerical_system.compute_solution(t_span=t_span,
-                             ic_list=[0]*no_dof,
-                             t_eval=t_span
-                             )
-        
-        return self.report_step(simulation_result)
+        self.report_step(self._current_result)
+    
+    
+        return self._current_result
     
     
     def init_report(self,result_to_report=None):
         
-
-
-
-        
-        
-        sec=Section('entire section')
-        with sec.create(Subsection('init')) as subsec:
-            subsec.append('init was done xD')
-            subsec.append('head of report should be implemented here')
-
-        self._container.append(sec)
+        for action in self._init_steps:
+            self._current_result=action(self)
 
         
-        return self._container
+        return self._current_result
     
     
     def report_step(self,result_to_report,container_type=None):
         
         
-#         print(f'it reports the result \n {result_to_report} ')
-#         print('section of report step should be implemented here')
+
         
-        
-#         print(f'it reports the result \n {result_to_report} ')
-#         print('subsec of report step should be implemented here')
-        
-        result_to_report.plot()
-        
-        subsec=Subsection('abc')
-        
-        with subsec.create(DataPlot('wykres_nowy',position='H',preview=False)) as ndp:
-            ndp.add_data_plot(filename=f'Wykres_alpha_{next(self._fig_no)}.png',width='11cm')
-        
-        
-        self._container.append(subsec)
-        self._container.append('step was done xD')
-        
-        return self._container
+        return self._current_result
 
 
             
         
     def report_end(self,result_to_report=None,container_type=None):
         
-        subsec=Subsection('end')
-        self._container.append(subsec)
-        self._container.append('end was done xD')
-        
-        return self._container
+        for action in self._end_steps:
+            self._current_result=action(self)
 
+        
+        return self._current_result
 
     
     

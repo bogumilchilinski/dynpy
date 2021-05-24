@@ -411,7 +411,6 @@ class BeamBridgeDampedTMD(ComposedSystem):
         return self.get_default_data(True)
     
 class SDoFDampedHarmonicOscillator(ComposedSystem):
-
     scheme_name = '???'
     real_name = 'engine_real.PNG'
 
