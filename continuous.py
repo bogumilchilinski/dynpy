@@ -1,5 +1,5 @@
 from sympy import (flatten, SeqFormula, Function, Symbol, symbols, Eq, Matrix,
-                   S, oo, dsolve, solve, Number, pi, cos, sin, Tuple)
+                   S, oo, dsolve, solve, Number, pi, cos, sin, Tuple, Derivative)
 
 from sympy.physics.vector.printing import vpprint, vlatex
 
@@ -441,8 +441,8 @@ class PlaneStressProblem:
 
     def load_equilibrium(self, volumetric_load):
 
-        return Derivative(self.stress[0] * r,
-                          r) - self.stress[-1] + volumetric_load * r
+        return Derivative(self.stress[0] * self.coords[0],
+                          self.coords[0]) - self.stress[-1] + volumetric_load * self.coords[0]
 
     def equilibrium_eqn(self, volumetric_load, subs_dict=None):
 
