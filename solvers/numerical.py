@@ -169,6 +169,9 @@ class OdeComputationalCase:
         if type(params_values) == type(None):
             params_values = tuple(Matrix(self.params).subs(self.params_values))
             
+        if type(params_values) == type(dict):
+            params_values = tuple(Matrix(self.params).subs(params_values))
+            
 
         case_odes = self.__numerical_odes
 

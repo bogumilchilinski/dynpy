@@ -84,16 +84,21 @@ class AccelerationComparison:
 
         df=pd.DataFrame()
         
+        
+        
         for var,value in self._parametes_dict.items():
             
+            case_data[var]=value
             
+            print(case_data)
+            numerical_system=system._dynamic_system.numerized(parameter_values=case_data)
             
             simulation_result=numerical_system.compute_solution(t_span=self._t_span,
                                  ic_list=[0]*no_dof,
-                                 t_eval=self._t_span
+                                 t_eval=self._t_span,
                                  )
             
-            df[Eq(var,value)]=simulation_result[self._parameter_value]
+            df[Eq(var,value)]=simulation_result[system._current_value]
         
         self._simulation_result=df
        
@@ -105,10 +110,11 @@ class AccelerationComparison:
     
     def plot_result(self,system):
         self._simulation_result.plot()
+        plt.show()
         return self._simulation_result
     
 
-class ReportSection:
+class ReportEntry:
     def __init__(self,block_title):
         self._block_title = block_title
     
@@ -122,7 +128,7 @@ class ReportSection:
 class SystemDynamicsAnalyzer:
     
 
-    def __init__(self,dynamic_system,reference_data={},report_init=[ReportSection('Report Beginning')],report_step=[SimulationalBlock(np.linspace(0,300,1000)).do_simulation],report_end=[ReportSection('Report End')]):
+    def __init__(self,dynamic_system,reference_data={},report_init=[ReportEntry('Report Beginning')],report_step=[SimulationalBlock(np.linspace(0,300,1000)).do_simulation],report_end=[ReportEntry('Report End')]):
         self._dynamic_system=dynamic_system
         self._reference_data=reference_data
         
