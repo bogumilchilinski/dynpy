@@ -683,7 +683,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     def linearized(self, x0=None, op_point=False, hint=[], label=None):
         """
-        Returns the same result as def approximated() but only for first order functions
+        Returns the same result as def approximated() but only for first order functions.
         """
 
         linearized_sys = self.approximated(n=1,
