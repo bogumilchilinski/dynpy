@@ -15,7 +15,7 @@ from pylatex.base_classes import Environment
 from pylatex.package import Package
 from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
-from sympy import Matrix,symbols,Symbol
+from sympy import Matrix,symbols,Symbol,Eq
 
 from sympy import Symbol,Function,Derivative
 
@@ -64,6 +64,49 @@ class SimulationalBlock:
         return self._simulation_result
 
 
+    
+class AccelerationComparison:
+    def __init__(self,t_span,parametes_dict,ics_list=None):
+        
+        self._t_span=t_span
+        self._parametes_dict=parametes_dict
+        self._ics_list=ics_list
+        
+    def do_simulations(self,system):
+        
+        case_data=system._current_data
+        
+        numerical_system=system._dynamic_system.numerized(parameter_values=case_data)
+        no_dof=len((numerical_system.dvars))
+        
+        if not self._ics_list:
+            ics_list=[0]*no_dof
+
+        df=pd.DataFrame()
+        
+        for var,value in self._parametes_dict.items():
+            
+            
+            
+            simulation_result=numerical_system.compute_solution(t_span=self._t_span,
+                                 ic_list=[0]*no_dof,
+                                 t_eval=self._t_span
+                                 )
+            
+            df[Eq(var,value)]=simulation_result[self._parameter_value]
+        
+        self._simulation_result=df
+       
+        return df
+
+    def simulation_result(self,system):
+        return self._simulation_result
+
+    
+    def plot_result(self,system):
+        self._simulation_result.plot()
+        return self._simulation_result
+    
 
 class ReportSection:
     def __init__(self,block_title):
