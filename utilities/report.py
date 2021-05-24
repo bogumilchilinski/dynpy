@@ -128,7 +128,10 @@ class ReportEntry:
 class SystemDynamicsAnalyzer:
     
 
-    def __init__(self,dynamic_system,reference_data={},report_init=[ReportEntry('Report Beginning')],report_step=[SimulationalBlock(np.linspace(0,300,1000)).do_simulation],report_end=[ReportEntry('Report End')]):
+    def __init__(self,dynamic_system,reference_data={},report_init=[ReportEntry('Report Beginning')],report_step=[SimulationalBlock(np.linspace(0,300,1000)).do_simulation],report_end=[ReportEntry('Report End')],*args,**kwargs):
+
+        for key, value in kwargs.items():
+             setattr(self, key, value)
         self._dynamic_system=dynamic_system
         self._reference_data=reference_data
         
