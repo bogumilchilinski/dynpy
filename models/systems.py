@@ -2816,7 +2816,7 @@ class CSString(ContinuousSystem):
         
         
 
-        L_rod=S.One/2*((self.w.diff(self.time))**2-Ty/A/rho*(self.w.diff(self.loc))**2)
+        L_rod=S.One/2*(A*rho*(self.w.diff(self.time))**2-Ty*(self.w.diff(self.loc))**2)
 
         super().__init__(L_rod,q=self.w,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc,**kwargs)
 
