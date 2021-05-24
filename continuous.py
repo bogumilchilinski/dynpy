@@ -1,5 +1,6 @@
 from sympy import (flatten, SeqFormula, Function, Symbol, symbols, Eq, Matrix,
-                   S, oo, dsolve, solve, Number, pi, cos, sin, Tuple, Derivative)
+                   S, oo, dsolve, solve, Number, pi, cos, sin, Tuple,
+                   Derivative)
 
 from sympy.physics.vector.printing import vpprint, vlatex
 
@@ -315,6 +316,7 @@ class PlaneStressProblem:
                  nu=Symbol('\\nu', positive=True),
                  label=None,
                  system=None,
+                 volumetric_load=None,
                  **kwargs):
 
         if system:
@@ -334,11 +336,14 @@ class PlaneStressProblem:
         self._equilibrium_eqn = None
         self._integrantion_cs = None
         self._bc = Symbol('BC')
+        self.bc_dict = bc_dict
+        self.volumetric_load = volumetric_load
 
         if label == None:
             label = self.__class__.__name__ + ' on ' + str(self.coords)
 
         self._label = label
+        self._subs_dict = {}
 
     @property
     def BC(self):
@@ -366,9 +371,9 @@ class PlaneStressProblem:
         return self.__str__()
 
     def subs(self, *args, **kwargs):
-        E_new, nu_new, u_new, stress_new = Tuple(self.E_module, self.poisson,
-                                                 self.u,
-                                                 self.stress).subs(*args)
+        E_new, nu_new, u_new, stress_new, vol_load_new = Tuple(
+            self.E_module, self.poisson, self.u, self.stress,
+            self.volumetric_load).subs(*args)
 
         bc_trap = self.BC.subs(*args)
 
@@ -378,6 +383,7 @@ class PlaneStressProblem:
         new_system = PlaneStressProblem(disp_func=u_new,
                                         stress_tensor=stress_new,
                                         bc_dict=bc_trap,
+                                        volumetric_load=vol_load_new,
                                         coords=self.coords,
                                         E=E_new,
                                         nu=nu_new,
@@ -441,21 +447,35 @@ class PlaneStressProblem:
 
     def load_equilibrium(self, volumetric_load):
 
-        return Derivative(self.stress[0] * self.coords[0],
-                          self.coords[0]) - self.stress[-1] + volumetric_load * self.coords[0]
+        if volumetric_load:
+            self.volumetric_load = volumetric_load
+
+        return Derivative(
+            self.stress[0] * self.coords[0], self.coords[0]
+        ) - self.stress[-1] + volumetric_load * self.coords[0]
 
     def equilibrium_eqn(self, volumetric_load, subs_dict=None):
+
+        if subs_dict:
+            self._subs_dict = subs_dict
+
+        if volumetric_load:
+            self.volumetric_load = volumetric_load
 
         stress_r, stress_phi = list(self.load_strain_equation())
 
         self._equilibrium_eqn = self.load_equilibrium(
             volumetric_load=volumetric_load).doit().subs(
-                self.load_strain_equation(
-                    dict=True)).subs(subs_dict).expand().simplify()
+                self.load_strain_equation(dict=True)).subs(
+                    self._subs_dict).expand().simplify()
 
         return self._equilibrium_eqn
 
     def solution(self, volumetric_load, dvar, ics=None, ivar=Symbol('r')):
+
+        #         display(ics)
+        if volumetric_load:
+            self.volumetric_load = volumetric_load
 
         if ics is None:
             return dsolve(self._equilibrium_eqn, dvar)
@@ -467,6 +487,9 @@ class PlaneStressProblem:
                               dvar,
                               ics,
                               ivar=Symbol('r')):
+
+        if volumetric_load:
+            self.volumetric_load = volumetric_load
 
         sol = self.solution(volumetric_load=volumetric_load, dvar=dvar)
 
@@ -483,11 +506,17 @@ class PlaneStressProblem:
     def particular_solution(self, volumetric_load, dvar, ics,
                             ivar=Symbol('r')):
 
+        if volumetric_load:
+            self.volumetric_load = volumetric_load
+
         sol = self.solution(volumetric_load=volumetric_load, dvar=dvar)
 
         return sol.subs(self._integrantion_cs)
 
     def loads(self, volumetric_load, dvar, ics, ivar=Symbol('r')):
+
+        if volumetric_load:
+            self.volumetric_load = volumetric_load
 
         particular_sol = self.particular_solution(volumetric_load,
                                                   dvar,
