@@ -37,9 +37,9 @@ def plot_double(x,y1,y2):
     ax.tick_params(axis='x', labelsize=20)
     ax.tick_params(axis='y', labelsize=20)
     ax2.tick_params(axis='y', labelsize=20)
-    ax2.set_ylim(0,5)
-    ax.set_ylim(0, 40)
-
+    #ax2.set_ylim(-220,220)
+    #ax.set_ylim(-8, 8)
+    #ax.set_xlim(0, 140000) 
     return ax.plot(x, y1, color=color1) , ax2.plot(x, y2, color=color2) , ax.scatter(x,y1,color=color1), ax2.scatter(x,y2, color=color2)
 
         
