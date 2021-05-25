@@ -249,14 +249,17 @@ class ContinuousSystem:
             bc_dict = self.bc_dict
 
         roots = solve(self.char_poly(bc_dict, sep_expr, spatial_comp), arg)
+        print('+++++++++++++ roots from eigs')
         print(roots)
 
         if len(roots) == 1:
             spatial_span = roots[0]
+            first_root=roots[0]
         else:
             spatial_span = roots[1] - roots[0]
+            first_root=roots[1]
 
-        return SeqFormula(roots[0] + (index - 1) * spatial_span,
+        return SeqFormula(first_root + (index - 1) * spatial_span,
                           (index, 0, oo))
 
     def eigenmodes(self,
@@ -300,7 +303,7 @@ class ContinuousSystem:
 
         #         display(mode_subs)
 
-        return self.spatial_general_solution(sep_expr=sep_expr, spatial_comp=spatial_comp).rhs.subs(arg, eig_value).subs(mode_subs).subs(arg, eig_value).subs({c_var: 1 for c_var in C_list}).subs(index, mode_no).n(2)\
+        return self.spatial_general_solution(sep_expr=sep_expr, spatial_comp=spatial_comp).rhs.subs(arg, eig_value).subs(mode_subs).subs(arg, eig_value).subs({c_var: 1 for c_var in C_list}).subs(index, mode_no).subs(eig_aid).n(2)
 
 
 class PlaneStressProblem:

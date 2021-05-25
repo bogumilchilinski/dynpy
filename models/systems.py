@@ -2911,7 +2911,7 @@ class CSString(ContinuousSystem):
         T0, A_0, L_0 = symbols('T_0, A_0, L_0', positive=True)
         
         data_dict=super().get_random_parameters()
-        data_dict[self.A]  = (L_0**2 * random.choice([0.125, 0.0125, 0.00125, 0.123, 0.0128 ])/ (data_dict[self.Ty]/T0) ).n(2)
+        data_dict[self.A]  = (L_0**2 * random.choice([0.03, 0.031, 0.0031, 0.033, 3.1 ])/ (data_dict[self.Ty]/T0) ).n(2)
         
         
         return data_dict
@@ -2980,7 +2980,7 @@ class CSShaft(ContinuousSystem):
             self.M: [2.5*M_0,1.25*M_0,0.75*M_0,1.35*M_0 ],
             self.I: [1 * I_0, 2 * I_0, S.Half * I_0, 1 * I_0, 2 * I_0],
             
-           self.BC: [{free_ls:0,free_rs:0} ],
+           self.BC: [{fix_ls:0,free_rs:0},{fix_ls:0,fix_rs:0} ],
            self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 3 * L_0, 2 * L_0],
 
         }
@@ -2992,7 +2992,7 @@ class CSShaft(ContinuousSystem):
         M_0, I_0, L_0 = symbols('M_0, I_0, L_0', positive=True)
         
         data_dict=super().get_random_parameters()
-        data_dict[self.I]  = (L_0**2 * random.choice([0.125, 0.0125, 0.00125, 0.123, 0.0128 ])/ (data_dict[self.M]/M_0) ).n(2)
+        data_dict[self.I]  = (L_0**4 * random.choice([0.1, 0.01, 0.011, 0.11, 1.1,11 ])/ (data_dict[self.M]/M_0) )
         
         
         return data_dict
