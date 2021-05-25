@@ -696,7 +696,7 @@ class DDoFDampedVehicleSuspension(ComposedSystem):
                  k_1=DDoFVehicleSuspension().k_1,
                  k_2=DDoFVehicleSuspension().k_2,
                  l_l=DDoFVehicleSuspension().l_l,
-                 l_r=DDoFVehicleSuspension().l_r
+                 l_r=DDoFVehicleSuspension().l_r,
                  qs=dynamicsymbols('z, \\varphi'),
                  **kwargs):
 
@@ -2681,8 +2681,8 @@ class CSBeam(ContinuousSystem):
         -determine the instance of the beam by using class CSBeam()
     """
 
-    scheme_name = '???.PNG'
-    real_name = '???.PNG'
+    scheme_name = 'supported_beam_scheme.PNG'
+    real_name = 'supported_beam_real.PNG'
 
     def __init__(self,
                 E=Symbol('E',positive=True),
@@ -2911,7 +2911,7 @@ class CSString(ContinuousSystem):
         T0, A_0, L_0 = symbols('T_0, A_0, L_0', positive=True)
         
         data_dict=super().get_random_parameters()
-        data_dict[self.A]  = (L_0**2 * random.choice([0.125, 0.0125, 0.00125, 0.123, 0.0128 ])/ (data_dict[self.Ty]/T0) ).n(2)
+        data_dict[self.A]  = (L_0**2 * random.choice([0.03, 0.031, 0.0031, 0.033, 3.1 ])/ (data_dict[self.Ty]/T0) ).n(2)
         
         
         return data_dict
@@ -2920,12 +2920,15 @@ class CSString(ContinuousSystem):
 class CSShaft(ContinuousSystem):
 
 
-    scheme_name = 'rod_scheme.PNG'
-    real_name = 'rod_real.PNG'
+    scheme_name = 'supported_shaft_scheme.PNG'
+    real_name = 'shaft_real.PNG'
 
     def __init__(self,
                 G=Symbol('G',positive=True),
-                
+
+                M=Symbol('M',positive=True),
+                I=Symbol('I',positive=True),
+
                 rho=Symbol('\\rho',positive=True),
                 phi=Function('\\phi'),
                 bc_dict=None,
@@ -2934,8 +2937,11 @@ class CSShaft(ContinuousSystem):
                 **kwargs
                 ):
 
+
+        self.M = M
         self.G = G
-        
+        self.I = I
+
         self.rho = rho
         self.phi=phi(time,loc)
         self.time=time
@@ -2944,7 +2950,9 @@ class CSShaft(ContinuousSystem):
         
         
 
-        L_shaft=S.One/2*(rho*(self.w.diff(self.time))**2-G*(self.w.diff(self.loc))**2)
+
+        L_shaft=S.One/2*(rho*I*(self.phi.diff(self.time))**2-G*I*(self.phi.diff(self.loc))**2)
+
 
         super().__init__(L_shaft,q=self.phi,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc,**kwargs)
 
@@ -2977,9 +2985,10 @@ class CSShaft(ContinuousSystem):
         default_data_dict = {
             self.G: [2.5*G_0,1.25*G_0,0.75*G_0,1.35*G_0 ],
             
-            
-           self.BC: [{free_ls:0,free_rs:0} ],
-           self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 3 * L_0, 2 *0 L_0],
+
+           self.BC: [{fix_ls:0,free_rs:0},{fix_ls:0,fix_rs:0} ],
+           self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 3 * L_0, 2 * L_0],
+
 
         }
 
@@ -2990,7 +2999,9 @@ class CSShaft(ContinuousSystem):
         G_0, L_0 = symbols('G_0, L_0', positive=True)
         
         data_dict=super().get_random_parameters()
-        data_dict[self.I]  = (L_0**2 * random.choice([0.125, 0.0125, 0.00125, 0.123, 0.0128 ])/ (data_dict[self.G]/G_0) ).n(2)
+
+        data_dict[self.I]  = (L_0**4 * random.choice([0.1, 0.01, 0.011, 0.11, 1.1,11 ])/ (data_dict[self.M]/M_0) )
+
         
         
         return data_dict
@@ -3011,10 +3022,11 @@ class CSCylinder(PlaneStressProblem):
                  coords=[Symbol('r'), Symbol('\\varphi')],
                  E=Symbol('E', positive=True),
                  nu=Symbol('\\nu', positive=True),
-                 volumetric_load=None,
+                 volumetric_load=0,
                  **kwargs
                 ):
         
-        super().__init__(disp_func=disp_func,stress_tensor=stress_tensor,bc_dict=bc_dict,coords=coords,E=E,nu=nu,volumetric_load=volumetric_load)
+
+        super().__init__(disp_func=disp_func,stress_tensor=stress_tensor,bc_dict=bc_dict,coords=coords,E=E,nu=nu,volumetric_load=volumetric_load,**kwargs)
         
 
