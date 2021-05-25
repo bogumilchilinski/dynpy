@@ -696,7 +696,7 @@ class DDoFDampedVehicleSuspension(ComposedSystem):
                  k_1=DDoFVehicleSuspension().k_1,
                  k_2=DDoFVehicleSuspension().k_2,
                  l_l=DDoFVehicleSuspension().l_l,
-                 l_r=DDoFVehicleSuspension().l_r
+                 l_r=DDoFVehicleSuspension().l_r,
                  qs=dynamicsymbols('z, \\varphi'),
                  **kwargs):
 
@@ -2681,8 +2681,8 @@ class CSBeam(ContinuousSystem):
         -determine the instance of the beam by using class CSBeam()
     """
 
-    scheme_name = '???.PNG'
-    real_name = '???.PNG'
+    scheme_name = 'supported_beam_scheme.PNG'
+    real_name = 'supported_beam_real.PNG'
 
     def __init__(self,
                 E=Symbol('E',positive=True),
@@ -2920,10 +2920,11 @@ class CSString(ContinuousSystem):
 class CSShaft(ContinuousSystem):
 
 
-    scheme_name = 'rod_scheme.PNG'
-    real_name = 'rod_real.PNG'
+    scheme_name = 'supported_shaft_scheme.PNG'
+    real_name = 'shaft_real.PNG'
 
     def __init__(self,
+                G=Symbol('G',positive=True),
                 M=Symbol('M',positive=True),
                 I=Symbol('I',positive=True),
                 rho=Symbol('\\rho',positive=True),
@@ -2935,6 +2936,7 @@ class CSShaft(ContinuousSystem):
                 ):
 
         self.M = M
+        self.G = G
         self.I = I
         self.rho = rho
         self.phi=phi(time,loc)
@@ -2944,7 +2946,7 @@ class CSShaft(ContinuousSystem):
         
         
 
-        L_shaft=S.One/2*(I*rho*(self.w.diff(self.time))**2-M*(self.w.diff(self.loc))**2)
+        L_shaft=S.One/2*(rho*I*(self.phi.diff(self.time))**2-G*I*(self.phi.diff(self.loc))**2)
 
         super().__init__(L_shaft,q=self.phi,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc,**kwargs)
 
