@@ -7,7 +7,7 @@ from sympy.physics.vector import vpprint, vlatex
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
 
 from .elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force
-from ..continuous import ContinuousSystem
+from ..continuous import ContinuousSystem, PlaneStressProblem
 
 import base64
 import random
@@ -68,6 +68,58 @@ class ComposedSystem(HarmonicOscillator):
 
 
 class ContinuousSystem(ContinuousSystem):
+    """Base class for all systems
+
+    """
+    scheme_name = 'damped_car_new.PNG'
+    real_name = 'car_real.jpg'
+
+    @classmethod
+    def _scheme(cls):
+
+        path = __file__.replace('systems.py', 'images/') + cls.scheme_name
+
+        return path
+
+    @classmethod
+    def _real_example(cls):
+
+        path = __file__.replace('systems.py', 'images/') + cls.real_name
+
+        return path
+
+    @classmethod
+    def preview(cls, example=False):
+        if example:
+            path = cls._real_example()
+
+        else:
+            path = cls._scheme()
+
+        with open(f"{path}", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+        image_file.close()
+
+        return IP.display.Image(base64.b64decode(encoded_string))
+
+    def get_default_data(self):
+        return None
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        if default_data_dict:
+            parameters_dict = {
+                key: random.choice(items_list)
+                for key, items_list in default_data_dict.items()
+            }
+        else:
+            parameters_dict=None
+
+        return parameters_dict    
+    
+class PlaneStressProblem(PlaneStressProblem):
     """Base class for all systems
 
     """
@@ -2773,22 +2825,19 @@ class CSRod(ContinuousSystem):
             
            self.BC: [ {fix_ls:0,free_rs:0},{free_ls:0,free_rs:0},{fix_ls:0,fix_rs:0} ],
            self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 1 * L_0, 2 * L_0],
-
-        }
+            }
 
         return default_data_dict
 
     def get_random_parameters(self):
-        
+
         E_0, A_0, L_0 = symbols('E_0, A_0, L_0', positive=True)
-        
+
         data_dict=super().get_random_parameters()
         data_dict[self.A]  = (L_0**2 * random.choice([0.125, 0.0125, 0.00125, 0.123, 0.0128 ])/ (data_dict[self.E]/E_0) ).n(2)
-        
-        
+
         return data_dict
-                             
-        
+
 class CSString(ContinuousSystem):
 
 
@@ -2866,5 +2915,25 @@ class CSString(ContinuousSystem):
         
         
         return data_dict
-                                                  
+
+class CSCylinder(PlaneStressProblem):
+    
+    scheme_name = 'cylinder_scheme.PNG'
+    real_name = 'cylinder_real_cannon.PNG'
+    
+    def __init__(self,
+                 disp_func=[Function('\\mathit{u}')(Symbol('r')), 0],
+                 stress_tensor=Matrix(2, 2, [
+                     Function('\\sigma_r')(Symbol('r')), 0, 0,
+                     Function('\\sigma_\\varphi')(Symbol('r'))
+                 ]),
+                 bc_dict=None,
+                 coords=[Symbol('r'), Symbol('\\varphi')],
+                 E=Symbol('E', positive=True),
+                 nu=Symbol('\\nu', positive=True),
+                 volumetric_load=None,
+                 **kwargs
+                ):
+        
+        super().__init__(disp_func=disp_func,stress_tensor=stress_tensor,bc_dict=bc_dict,coords=coords,E=E,nu=nu,volumetric_load=volumetric_load)
         
