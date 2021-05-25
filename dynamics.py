@@ -683,9 +683,25 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     def linearized(self, x0=None, op_point=False, hint=[], label=None):
         """
-        Returns the same result as def approximated() but only for first order functions.
-        """
+        Returns approximated first order function calculated with Taylor series method as an instance of the class. It enables us to obtain linearized output.
+        Arguments:
+        =========
+            System = Created system based on symbolical represent of mechanical parts of it
+            op_point - operating points
 
+        Example
+        =======
+        Creating the examplary system. A mass oscillating up and down while being held up by a spring with a spring constant kinematicly 
+
+        >>> t = symbols('t')
+        >>> m, g, l = symbols('m, g, l')
+        >>> qs = dynamicsymbols('varphi') 
+        >>> Pendulum()
+
+        Creating linerized system in symbolic pattern
+        >>> System_linearized = Sytem.linearized()
+
+        """
         linearized_sys = self.approximated(n=1,
                                            op_point=op_point,
                                            hint=hint,
@@ -712,7 +728,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         =========
             System = Created system based on symbolical represent of mechanical parts of it
 
-        Example
+        Example:
         =======
         Creating the examplary system. A mass oscillating up and down while being held up by a spring with a spring constant k
 

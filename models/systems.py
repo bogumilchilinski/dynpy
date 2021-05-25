@@ -644,7 +644,7 @@ class DDoFDampedVehicleSuspension(ComposedSystem):
                  k_1=DDoFVehicleSuspension().k_1,
                  k_2=DDoFVehicleSuspension().k_2,
                  l_l=DDoFVehicleSuspension().l_l,
-                 l_r=DDoFVehicleSuspension().l_r,
+                 l_r=DDoFVehicleSuspension().l_r
                  qs=dynamicsymbols('z, \\varphi'),
                  **kwargs):
 
