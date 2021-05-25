@@ -66,10 +66,11 @@ class SimulationalBlock:
 
     
 class AccelerationComparison:
-    def __init__(self,t_span,parametes_dict,ics_list=None):
+    def __init__(self,t_span,param,param_values,ics_list=None):
         
         self._t_span=t_span
-        self._parametes_dict=parametes_dict
+        self._param_values=param_values
+        self._param=param
         self._ics_list=ics_list
         
     def do_simulations(self,system):
@@ -85,8 +86,8 @@ class AccelerationComparison:
         df=pd.DataFrame()
         
         
-        
-        for var,value in self._parametes_dict.items():
+        var=self._param
+        for value in self._param_values:
             
             case_data[var]=value
             
@@ -111,8 +112,12 @@ class AccelerationComparison:
     def plot_result(self,system):
         self._simulation_result.plot()
         plt.show()
-        return self._simulation_result
+        
+        self._simulation_result.plot(subplots=True)
+        plt.show()
     
+        
+        return self._simulation_result
 
 class ReportEntry:
     def __init__(self,block_title):
@@ -129,6 +134,7 @@ class SystemDynamicsAnalyzer:
     
 
     def __init__(self,dynamic_system,reference_data={},report_init=[ReportEntry('Report Beginning')],report_step=[SimulationalBlock(np.linspace(0,300,1000)).do_simulation],report_end=[ReportEntry('Report End')]):
+
         self._dynamic_system=dynamic_system
         self._reference_data=reference_data
         
@@ -297,7 +303,28 @@ class SymbolsList(NoEscape):
         
         return super(SymbolsList,cls).__new__(cls,list_str)
     
+class NumbersList(NoEscape):
+    
 
+    
+    def __new__(cls, numbers_list, backend=vlatex):
+        r"""
+        Args
+        ----
+        symbols_list: list
+            List of the Symbol objects to convert and append.
+        backend: function
+            Callable which is used to convert Symbol from list to its latex representation.
+        escape : bool
+            if True, will escape strings
+        """
+
+        
+
+        
+        list_str=f', '.join([ f'\\( {sym} \\)'  for sym in  numbers_list  ]  )
+        
+        return list_str
 
 
 class SymbolsDescription(Description):
