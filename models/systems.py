@@ -437,23 +437,31 @@ class BeamBridgeDampedTMD(ComposedSystem):
                 ],
             }
         else:
-            numerized_dict = {m0:100 , lamb:2 , E:200000, I:0.48, l:3 }
+            numerized_dict = {m0:100 , lamb:2 , E:200000, I:0.48, l:3}
             default_data_dict = {
-                self.nds.m: [(20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0).subs(numerized_dict)],
-                self.c: [(lamb * self.nds.k_beam).subs(numerized_dict)],
-                self.nds.k_beam: [(
+                self.nds.m: [20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0],
+                self.c: [lamb * self.nds.k_beam],
+                self.nds.k_beam: [
                     20 * 48 * E * I / l**3, 30 * 48 * E * I / l**3,
                     40 * 48 * E * I / l**3, 50 * 48 * E * I / l**3,
-                    60 * 48 * E * I / l**3
-                ).subs(numerized_dict)],
-                self.c_TMD: [(lamb * self.nds.k_TMD).subs(numerized_dict)],
-                self.nds.m_TMD: [(2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0).subs(numerized_dict)],
-                self.nds.k_TMD: [(
+                    60 * 48 * E * I / l**3],
+                self.c_TMD: [lamb * self.nds.k_TMD],
+                self.nds.m_TMD: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
+                self.nds.k_TMD: [
                     1 * 48 * E * I / l**3, 3 * 48 * E * I / l**3,
                     3 * 48 * E * I / l**3, 5 * 48 * E * I / l**3,
-                    5 * 48 * E * I / l**3
-                ).subs(numerized_dict)],
+                    5 * 48 * E * I / l**3]
             }
+            
+            print(default_data_dict.get(self.nds.m))
+            
+            defa=default_data_dict[self.nds.m]
+            
+            for defa in enumerate(defa):
+                default_data_dict = defa
+
+#             for defa in defa:
+#                 default_data_dict=defa.subs(numerized_dict)
 
         return default_data_dict
 
@@ -696,10 +704,9 @@ class DDoFDampedVehicleSuspension(ComposedSystem):
                  k_1=DDoFVehicleSuspension().k_1,
                  k_2=DDoFVehicleSuspension().k_2,
                  l_l=DDoFVehicleSuspension().l_l,
-                 l_r=DDoFVehicleSuspension().l_r
-                 qs=dynamicsymbols('z, \\varphi'),
-                 **kwargs):
-
+                 l_r=DDoFVehicleSuspension().l_r,
+                 qs=dynamicsymbols('z, phi')):
+                 
         z, phi = qs
 
         self.k_1 = k_1

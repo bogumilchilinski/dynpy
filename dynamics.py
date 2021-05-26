@@ -683,13 +683,21 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     def linearized(self, x0=None, op_point=False, hint=[], label=None):
         """
-        Returns approximated first order function calculated with Taylor series method as an instance of the class. It enables us to obtain linearized output.
+        Returns approximated first order function calculated with Taylor series method as an instance of the class. It enables to obtain linearized output.
         Arguments:
         =========
             System = Created system based on symbolical represent of mechanical parts of it
-            op_point - operating points
+            
+            op_point - boolean, which points out if the operating point will be evaluated
+            
+            x0 - setting operating point
+            
+            hint - (optional) Adds additional equation to equilibrium condition and calculate op_point as equilibrium system.
+            
+            label=None (optional): string
+                Label of the class instance. Default label: '{Class name} with {length of qs} DOF'
 
-        Example
+        Example:
         =======
         Creating the examplary system. A mass oscillating up and down while being held up by a spring with a spring constant kinematicly 
 
