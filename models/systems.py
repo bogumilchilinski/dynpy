@@ -2703,6 +2703,7 @@ class CSBeam(ContinuousSystem):
         self.w=w(time,loc)
         self.time=time
         self.loc=loc
+        self.l=Symbol('L',positive=True)
         
 
         L_beam=S.One/2*(A*rho*(self.w.diff(self.time))**2-E*I*(self.w.diff(self.loc,2))**2)
@@ -2726,16 +2727,47 @@ class CSBeam(ContinuousSystem):
 
     def get_default_data(self):
 
-        E_0, A_0, I_0 = symbols('E_0, A_0, I_0', positive=True)
+        E_0, A_0, I_0, L_0 = symbols('E_0, A_0, I_0, L_0', positive=True)
+        
+        
+        l=self.l
+        x=self.loc
+        X=Function('X')(x)
+        
+        
+        sup_ls=Subs(X.diff(x,0),x,0)
+        sup_rs=Subs(X.diff(x,0),x,l)
+
+        fix_ls=Subs(X.diff(x,1),x,0)
+        fix_rs=Subs(X.diff(x,1),x,l)
+
+        mb_ls=Subs(X.diff(x,2),x,0)
+        mb_rs=Subs(X.diff(x,2),x,l)
+
+        v_ls=Subs(X.diff(x,3),x,0)
+        v_rs=Subs(X.diff(x,3),x,l)
+        
+        
 
         default_data_dict = {
-            self.E: [S.Half * E_0, 1 * E_0, 2 * E_0, 1 * E_0, S.Half * E_0],
+            self.E: [2.5*E_0,1.25*E_0,0.75*E_0,1.35*E_0 ],
             self.A: [1 * A_0, 2 * A_0, S.Half * A_0, 1 * A_0, 2 * A_0],
             self.I: [1 * I_0, 2 * I_0, S.Half * I_0, 1 * I_0, 2 * I_0],
+           self.BC: [ {sup_ls:0,mb_ls:0,sup_rs:0,mb_rs:0},{fix_ls:0,v_ls:0,sup_rs:0,mb_rs:0}, ],
+           self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 1 * L_0, 2 * L_0],
 
         }
 
         return default_data_dict
+
+    def get_random_parameters(self):
+
+        E_0, A_0, I_0, L_0 = symbols('E_0, A_0, I_0, L_0', positive=True)
+
+        data_dict=super().get_random_parameters()
+        data_dict[self.A]  = (L_0**2 * random.choice([0.125, 1.25, 0.0125, 1.23, 0.128 ])/ (data_dict[self.E]/E_0) // (data_dict[self.I]/I_0) )
+
+        return data_dict
     
     
 class CSRod(ContinuousSystem):
