@@ -3000,7 +3000,7 @@ class CSShaft(ContinuousSystem):
         
         data_dict=super().get_random_parameters()
 
-        data_dict[self.I]  = (L_0**4 * random.choice([0.1, 0.01, 0.011, 0.11, 1.1,11 ])/ (data_dict[self.M]/M_0) )
+        data_dict[self.I]  = (L_0**4 * random.choice([0.1, 0.01, 0.011, 0.11, 1.1,11 ])/ (data_dict[self.G]/G_0) )
 
         
         
