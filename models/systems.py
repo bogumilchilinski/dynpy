@@ -2765,7 +2765,7 @@ class CSBeam(ContinuousSystem):
         E_0, A_0, I_0, L_0 = symbols('E_0, A_0, I_0, L_0', positive=True)
 
         data_dict=super().get_random_parameters()
-        data_dict[self.A]  = (L_0**2 * random.choice([0.125, 1.25, 0.0125, 1.23, 0.128 ])/ (data_dict[self.E]/E_0) // (data_dict[self.I]/I_0) )
+        data_dict[self.A]  = (L_0**2 * random.choice([0.125, 1.25, 0.0125, 1.23, 0.128 ])/ (data_dict[self.E]/E_0) / (data_dict[self.I]/I_0) ).n(3)
 
         return data_dict
     
@@ -2866,7 +2866,7 @@ class CSRod(ContinuousSystem):
         E_0, A_0, L_0 = symbols('E_0, A_0, L_0', positive=True)
 
         data_dict=super().get_random_parameters()
-        data_dict[self.A]  = (L_0**2 * random.choice([0.125, 0.0125, 0.00125, 0.123, 0.0128 ])/ (data_dict[self.E]/E_0) ).n(2)
+        data_dict[self.A]  = (L_0**2 * random.choice([0.125, 0.0125, 0.00125, 0.123, 0.0128 ])/ (data_dict[self.E]/E_0) ).n(3)
 
         return data_dict
 
@@ -2943,7 +2943,7 @@ class CSString(ContinuousSystem):
         T0, A_0, L_0 = symbols('T_0, A_0, L_0', positive=True)
         
         data_dict=super().get_random_parameters()
-        data_dict[self.A]  = (L_0**2 * random.choice([0.03, 0.031, 0.0031, 0.033, 3.1 ])/ (data_dict[self.Ty]/T0) ).n(2)
+        data_dict[self.A]  = (L_0**2 * random.choice([0.03, 0.031, 0.0031, 0.033, 3.1 ])/ (data_dict[self.Ty]/T0) ).n(3)
         
         
         return data_dict
@@ -3032,7 +3032,7 @@ class CSShaft(ContinuousSystem):
         
         data_dict=super().get_random_parameters()
 
-        data_dict[self.I]  = (L_0**4 * random.choice([0.1, 0.01, 0.011, 0.11, 1.1,11 ])/ (data_dict[self.G]/G_0) )
+        data_dict[self.I]  = (L_0**4 * random.choice([0.1, 0.01, 0.011, 0.11, 1.1,11 ])/ (data_dict[self.G]/G_0) ).n(3)
 
         
         
