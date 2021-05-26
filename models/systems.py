@@ -2957,8 +2957,10 @@ class CSShaft(ContinuousSystem):
 
     def __init__(self,
                 G=Symbol('G',positive=True),
+
                 M=Symbol('M',positive=True),
                 I=Symbol('I',positive=True),
+
                 rho=Symbol('\\rho',positive=True),
                 phi=Function('\\phi'),
                 bc_dict=None,
@@ -2967,9 +2969,11 @@ class CSShaft(ContinuousSystem):
                 **kwargs
                 ):
 
+
         self.M = M
         self.G = G
         self.I = I
+
         self.rho = rho
         self.phi=phi(time,loc)
         self.time=time
@@ -2978,7 +2982,9 @@ class CSShaft(ContinuousSystem):
         
         
 
+
         L_shaft=S.One/2*(rho*I*(self.phi.diff(self.time))**2-G*I*(self.phi.diff(self.loc))**2)
+
 
         super().__init__(L_shaft,q=self.phi,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc,**kwargs)
 
@@ -2986,8 +2992,8 @@ class CSShaft(ContinuousSystem):
         
     def symbols_description(self):
         self.sym_desc_dict = {
-            self.M: r'Torsional momentum',
-            self.I: r'Geometrical inertia momentum',
+            self.G: r'''Kirchoff's modulus ''',
+            
             self.rho: r'Material density',
             self.phi: 'Space-Time function',
         }
@@ -2996,7 +3002,7 @@ class CSShaft(ContinuousSystem):
 
     def get_default_data(self):
 
-        M_0, I_0, L_0 = symbols('M_0, I_0, L_0', positive=True)
+        G_0, L_0 = symbols('G_0, L_0', positive=True)
         
         x=self.loc
         l=self.l
@@ -3009,11 +3015,12 @@ class CSShaft(ContinuousSystem):
 
 
         default_data_dict = {
-            self.M: [2.5*M_0,1.25*M_0,0.75*M_0,1.35*M_0 ],
-            self.I: [1 * I_0, 2 * I_0, S.Half * I_0, 1 * I_0, 2 * I_0],
+            self.G: [2.5*G_0,1.25*G_0,0.75*G_0,1.35*G_0 ],
             
+
            self.BC: [{fix_ls:0,free_rs:0},{fix_ls:0,fix_rs:0} ],
            self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 3 * L_0, 2 * L_0],
+
 
         }
 
@@ -3021,10 +3028,12 @@ class CSShaft(ContinuousSystem):
 
     def get_random_parameters(self):
         
-        M_0, I_0, L_0 = symbols('M_0, I_0, L_0', positive=True)
+        G_0, L_0 = symbols('G_0, L_0', positive=True)
         
         data_dict=super().get_random_parameters()
+
         data_dict[self.I]  = (L_0**4 * random.choice([0.1, 0.01, 0.011, 0.11, 1.1,11 ])/ (data_dict[self.M]/M_0) )
+
         
         
         return data_dict
