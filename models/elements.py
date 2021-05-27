@@ -126,9 +126,6 @@ class Spring(Element):
             
             
 
-
-
-        
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, frame=frame)
 
 
@@ -139,7 +136,7 @@ class GravitationalForce(Element):
     """
     scheme_name = ''
     real_name = ''
-    def __init__(self, m, g, pos1=0, pos_c=0, qs=None, ivar=Symbol('t')):
+    def __init__(self, m, g, pos1, qs=None, ivar=Symbol('t')):
 
         if not qs:
             qs=[pos1]

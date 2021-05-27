@@ -452,16 +452,14 @@ class BeamBridgeDampedTMD(ComposedSystem):
                     3 * 48 * E * I / l**3, 5 * 48 * E * I / l**3,
                     5 * 48 * E * I / l**3]
             }
-            
-            print(default_data_dict.get(self.nds.m))
-            
-            defa=default_data_dict[self.nds.m]
-            
-            for defa in enumerate(defa):
-                default_data_dict = defa
 
-#             for defa in defa:
-#                 default_data_dict=defa.subs(numerized_dict)
+            values_of_dict = flatten([default_data_dict[self.nds.m], default_data_dict[self.c],
+                                      default_data_dict[self.nds.k_beam], default_data_dict[self.c_TMD],
+                                      default_data_dict[self.nds.m_TMD], default_data_dict[self.nds.k_TMD]
+                                     ])
+
+            for i in range(len(values_of_dict)):
+                    default_data_dict = display(values_of_dict[i].subs(numerized_dict))
 
         return default_data_dict
 
