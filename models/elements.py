@@ -140,18 +140,8 @@ class GravitationalForce(Element):
 
         if not qs:
             qs=[pos1]
-        
-        if pos1 == 0:
-            
 
-
-            Lagrangian = -(m * g * (pos_c))
-        
-        elif pos_c == 0:
-            
-
-            
-            Lagrangian = -(m * g * (pos1))
+        Lagrangian = -(m * g * (pos1))
 
 
 
