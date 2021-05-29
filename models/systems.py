@@ -2756,11 +2756,11 @@ class CSBeam(ContinuousSystem):
         
 
         default_data_dict = {
-            self.E: [2.5*E_0,1.25*E_0,0.75*E_0,1.35*E_0 ],
-            self.A: [1 * A_0, 2 * A_0, S.Half * A_0, 1 * A_0, 2 * A_0],
-            self.I: [1 * I_0, 2 * I_0, S.Half * I_0, 1 * I_0, 2 * I_0],
+            self.E: [2.5*E_0,1.25*E_0,0.75*E_0,1.35*E_0,1*E_0,2*E_0,3*E_0,4*E_0,5*E_0,6*E_0,7*E_0,8*E_0,9*E_0 ],
+            self.A: [1 * A_0, 2 * A_0, S.Half * A_0, 1 * A_0, 2 * A_0,3*A_0,4*A_0,5*A_0,6*A_0,7*A_0,8*A_0,9*A_0,10*A_0,11*A_0],
+            self.I: [1 * I_0, 2 * I_0, S.Half * I_0, 1 * I_0, 2 * I_0,3*I_0,4*I_0,5*I_0,6*I_0,7*I_0,8*I_0,9*I_0,10*I_0,11*I_0],
            self.BC: [ {sup_ls:0,mb_ls:0,sup_rs:0,mb_rs:0},{fix_ls:0,v_ls:0,sup_rs:0,mb_rs:0}, ],
-           self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 1 * L_0, 3 * L_0,4*L_0,5*L_0],
+           self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 1 * L_0, 3 * L_0,4*L_0,5*L_0,6*L_0,7*L_0,8*L_0,9*L_0,10*L_0,11*L_0],
 
         }
 
