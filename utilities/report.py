@@ -66,19 +66,36 @@ class SimulationalBlock:
 
     
 class AccelerationComparison:
-    def __init__(self,t_span,param,param_values,ics_list=None):
+    
+    _story_point=pd.DataFrame()
+    
+    general_t_span=None
+    
+    @classmethod
+    def set_t_span(cls,t_span):
+        
+        cls.general_t_span=t_span
+        
+        return cls
+    
+    def __init__(self,t_span=None,ics_list=None):
         
         self._t_span=t_span
-        self._param_values=param_values
-        self._param=param
         self._ics_list=ics_list
         
-    def do_simulations(self,system):
+        if t_span is not None:
+            self._t_span=t_span
+        else:
+            self._t_span = type(self).general_t_span
         
-        case_data=system._current_data
+    def do_simulation(self,analysis):
         
-        numerical_system=system._dynamic_system.numerized(parameter_values=case_data)
+        case_data=analysis._current_data
+        
+        numerical_system=analysis._dynamic_system.numerized(parameter_values=case_data)
         no_dof=len((numerical_system.dvars))
+        
+        current_coord=numerical_system.dvars[0]
         
         if not self._ics_list:
             ics_list=[0]*no_dof
@@ -86,30 +103,38 @@ class AccelerationComparison:
         df=pd.DataFrame()
         
         
-        var=self._param
-        for value in self._param_values:
-            
-            case_data[var]=value
-            
-            print(case_data)
-            numerical_system=system._dynamic_system.numerized(parameter_values=case_data)
-            
-            simulation_result=numerical_system.compute_solution(t_span=self._t_span,
-                                 ic_list=[0]*no_dof,
-                                 t_eval=self._t_span,
-                                 )
-            
-            df[Eq(var,value)]=simulation_result[system._current_value]
-        
-        self._simulation_result=df
-       
-        return df
+        var=analysis._parameter
 
-    def simulation_result(self,system):
-        return self._simulation_result
+            
+        case_data[var]=10 #analysis._current_value
+        value=10
+        
+        
+        print(case_data)
+        numerical_system=analysis._dynamic_system.numerized(parameter_values=case_data)
+
+        simulation_result=numerical_system.compute_solution(t_span=self._t_span,
+                             ic_list=[0]*no_dof,
+                             t_eval=self._t_span,
+                             )
+
+        single_result=simulation_result[current_coord]
+
+        
+        type(self)._story_point[Eq(var,value)]=single_result
+        
+        self._simulation_result=single_result
+       
+        return single_result
+
+    def simulation_result(self,analysis):
+        return type(self)._story_point
 
     
-    def plot_result(self,system):
+    def plot_result(self,analysis):
+        
+        self._simulation_result=type(self)._story_point
+        
         self._simulation_result.plot()
         plt.show()
         
