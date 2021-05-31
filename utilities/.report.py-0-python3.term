@@ -1,0 +1,523 @@
+Python 3.8.5 (default, Jan 27 2021, 15:41:15) 
+[GCC 9.3.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> [K>>> l[Kim[K[Kimport report
+>>> hel[K[K[Khelp(de[K[Kreport)
+[?1049h[22;0;0t[?1h=Help on module report:
+
+[1mNAME[0m
+    report
+
+[1mCLASSES[0m
+    builtins.object
+        AccelerationComparison
+        DataStorage
+        RandomDescription
+        ReportEntry
+        ReportModelAnalysis
+        SimulationalBlock
+        SystemDynamicsAnalyzer
+    pylatex.base_classes.containers.Environment(pylatex.base_classes.containers.Container)
+        DMath
+        Equation
+    pylatex.figure.Figure(pylatex.base_classes.float.Float)
+        DataPlot
+        PlottedData
+    pylatex.lists.Description(pylatex.lists.List)
+        SymbolsDescription
+    pylatex.math.Math(pylatex.base_classes.containers.Container)
+        InlineMath
+    pylatex.section.Section(pylatex.base_classes.containers.Container)
+        ReportSection
+    pylatex.table.Table(pylatex.base_classes.float.Float)
+        DataTable
+    pylatex.utils.NoEscape(builtins.str)
+        NumbersList
+        SymbolsList
+    sympy.matrices.dense.MutableDenseMatrix(sympy.matrices.dense.DenseMatrix, sympy.matrices.matrices.MatrixBase)
+        CompoundMatrix
+    
+    class [1mAccelerationComparison[0m(builtins.object)
+     |  AccelerationComparison(t_span=None, ics_list=None)
+     |  
+     |  Methods defined here:
+     |  
+     |  [1m__init__[0m(self, t_span=None, ics_list=None)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |  
+     |  [1mdo_simulation[0m(self, analysis)
+     |  
+     |  [1mplot_result[0m(self, analysis)
+     |  
+     |  [1msimulation_result[0m(self, analysis)
+     |  
+:[K[K [KESCESC[KOO[KBB[K     |  ----------------------------------------------------------------------
+:[K[K [KESCESC[KOO[KBB[K     |  Class methods defined here:
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1mreset_storage[0m() from builtins.type
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1mset_t_span[0m(t_span) from builtins.type
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  ----------------------------------------------------------------------
+:[K[K [KESCESC[KOO[KBB[K     |  Readonly properties defined here:
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1mdata_storage[0m
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  ----------------------------------------------------------------------
+:[K[K [KESCESC[KOO[KBB[K     |  Data descriptors defined here:
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1m__dict__[0m
+:[K[K [KESCESC[KOO[KBB[K     |      dictionary for instance variables (if defined)
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1m__weakref__[0m
+:[K[K [KESCESC[KOO[KBB[K     |      list of weak references to the object (if defined)
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  ----------------------------------------------------------------------
+:[K[K [KESCESC[KOO[KBB[K     |  Data and other attributes defined here:
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1mgeneral_t_span[0m = None
+:[K[K [KESCESC[KOO[KBB[K    
+:[K[K [KESCESC[KOO[KBB[K    class [1mCompoundMatrix[0m(sympy.matrices.dense.MutableDenseMatrix)
+:[K[K [KESCESC[KOO[KBB[K     |  CompoundMatrix(*args, **kwargs)
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  Base class for matrix objects.
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  Method resolution order:
+:[K[K [KESCESC[KOO[KBB[K     |      CompoundMatrix
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.dense.MutableDenseMatrix
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.dense.DenseMatrix
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.matrices.MatrixBase
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.matrices.MatrixDeprecated
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.matrices.MatrixCalculus
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.matrices.MatrixEigen
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.matrices.MatrixSubspaces
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.matrices.MatrixReductions
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.matrices.MatrixDeterminant
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.common.MatrixCommon
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.common.MatrixArithmetic
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.common.MatrixOperations
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.common.MatrixProperties
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.common.MatrixSpecial
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.common.MatrixShaping
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.common.MatrixRequired
+:[K[K [KESCESC[KOO[KBB[K     |      builtins.object
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  Methods defined here:
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1msymbolic_form[0m(self, symbol_str)
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  ----------------------------------------------------------------------
+:[K[K [KESCESC[KOO[KBB[K     |  Methods inherited from sympy.matrices.dense.MutableDenseMatrix:
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1m__setitem__[0m(self, key, value)
+:[K[K [KESCESC[KOO[KBB[K     |      Examples
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      >>> from sympy import Matrix, I, zeros, ones
+:[K[K [KESCESC[KOO[KBB[K     |      >>> m = Matrix(((1, 2+I), (3, 4)))
+:[K[K [KESCESC[KOO[KBB[K     |      >>> m
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [1, 2 + I],
+:[K[K [KESCESC[KOO[KBB[K     |      [3,     4]])
+:[K[K [KESCESC[KOO[KBB[K     |      >>> m[1, 0] = 9
+:[K[K [KESCESC[KOO[KBB[K     |      >>> m
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [1, 2 + I],
+:[K[K [KESCESC[KOO[KBB[K     |      [9,     4]])
+:[K[K [KESCESC[KOO[KBB[K     |      >>> m[1, 0] = [[0, 1]]
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      To replace row r you assign to position r*m where m
+:[K[K [KESCESC[KOO[KBB[K     |      is the number of columns:
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M = zeros(4)
+:[K[K [KESCESC[KOO[KBB[K     |      >>> m = M.cols
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M[3*m] = ones(1, m)*2; M
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0, 0, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0, 0, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0, 0, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [2, 2, 2, 2]])
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      And to replace column c you can assign to position c:
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M[2] = ones(m, 1)*4; M
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0, 4, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0, 4, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0, 4, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [2, 2, 4, 2]])
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1mas_mutable[0m(self)
+:[K[K [KESCESC[KOO[KBB[K     |      Returns a mutable version of this matrix
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      Examples
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      >>> from sympy import ImmutableMatrix
+:[K[K [KESCESC[KOO[KBB[K     |      >>> X = ImmutableMatrix([[1, 2], [3, 4]])
+:[K[K [KESCESC[KOO[KBB[K     |      >>> Y = X.as_mutable()
+:[K[K [KESCESC[KOO[KBB[K     |      >>> Y[1, 1] = 5 # Can set values in Y
+:[K[K [KESCESC[KOO[KBB[K     |      >>> Y
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [1, 2],
+:[K[K [KESCESC[KOO[KBB[K     |      [3, 5]])
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1mcol_del[0m(self, i)
+:[K[K [KESCESC[KOO[KBB[K     |      Delete the given column.
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      Examples
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      >>> from sympy.matrices import eye
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M = eye(3)
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M.col_del(1)
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [1, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 1]])
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      See Also
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      col
+:[K[K [KESCESC[KOO[KBB[K     |      row_del
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1mcol_op[0m(self, j, f)
+:[K[K [KESCESC[KOO[KBB[K     |      In-place operation on col j using two-arg functor whose args are
+:[K[K [KESCESC[KOO[KBB[K     |      interpreted as (self[i, j], i).
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      Examples
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      >>> from sympy.matrices import eye
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M = eye(3)
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M.col_op(1, lambda v, i: v + 2*M[i, 0]); M
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [1, 2, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 1, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0, 1]])
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KAA[K[HM     |      
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      Returns a mutable version of this matrix
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  [1mas_mutable[0m(self)
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      [2, 2, 4, 2]])
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      [0, 0, 4, 0],
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      [0, 0, 4, 0],
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      [0, 0, 4, 0],
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      Matrix([
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      >>> M[2] = ones(m, 1)*4; M
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      And to replace column c you can assign to position c:
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      [2, 2, 2, 2]])
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      [0, 0, 0, 0],
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      [0, 0, 0, 0],
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      [0, 0, 0, 0],
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      Matrix([
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      >>> M[3*m] = ones(1, m)*2; M
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      >>> m = M.cols
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      >>> M = zeros(4)
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      is the number of columns:
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      To replace row r you assign to position r*m where m
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      >>> m[1, 0] = [[0, 1]]
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      [9,     4]])
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      [1, 2 + I],
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      Matrix([
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      >>> m
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      >>> m[1, 0] = 9
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      [3,     4]])
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      [1, 2 + I],
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      Matrix([
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      >>> m
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      >>> m = Matrix(((1, 2+I), (3, 4)))
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      >>> from sympy import Matrix, I, zeros, ones
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      ========
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      Examples
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  [1m__setitem__[0m(self, key, value)
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  Methods inherited from sympy.matrices.dense.MutableDenseMatrix:
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  ----------------------------------------------------------------------
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  [1msymbolic_form[0m(self, symbol_str)
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  Methods defined here:
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      builtins.object
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      sympy.matrices.common.MatrixRequired
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      sympy.matrices.common.MatrixShaping
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      sympy.matrices.common.MatrixSpecial
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      sympy.matrices.common.MatrixProperties
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      sympy.matrices.common.MatrixOperations
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      sympy.matrices.common.MatrixArithmetic
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      sympy.matrices.common.MatrixCommon
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      sympy.matrices.matrices.MatrixDeterminant
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      sympy.matrices.matrices.MatrixReductions
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      sympy.matrices.matrices.MatrixSubspaces
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      sympy.matrices.matrices.MatrixEigen
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      sympy.matrices.matrices.MatrixCalculus
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      sympy.matrices.matrices.MatrixDeprecated
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      sympy.matrices.matrices.MatrixBase
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      sympy.matrices.dense.DenseMatrix
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      sympy.matrices.dense.MutableDenseMatrix
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      CompoundMatrix
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  Method resolution order:
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  Base class for matrix objects.
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  CompoundMatrix(*args, **kwargs)
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM    class [1mCompoundMatrix[0m(sympy.matrices.dense.MutableDenseMatrix)
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM    
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  [1mgeneral_t_span[0m = None
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  Data and other attributes defined here:
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  ----------------------------------------------------------------------
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      list of weak references to the object (if defined)
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  [1m__weakref__[0m
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |      dictionary for instance variables (if defined)
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  [1m__dict__[0m
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  Data descriptors defined here:
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  ----------------------------------------------------------------------
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  [1mdata_storage[0m
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  Readonly properties defined here:
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  ----------------------------------------------------------------------
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  [1mset_t_span[0m(t_span) from builtins.type
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  [1mreset_storage[0m() from builtins.type
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  Class methods defined here:
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  ----------------------------------------------------------------------
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  [1msimulation_result[0m(self, analysis)
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  [1mplot_result[0m(self, analysis)
+[49;1H[K:[K[K [KESCESC[KOO[KAA[K[HM     |  
+[49;1H[K:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.common.MatrixArithmetic
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.common.MatrixOperations
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.common.MatrixProperties
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.common.MatrixSpecial
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.common.MatrixShaping
+:[K[K [KESCESC[KOO[KBB[K     |      sympy.matrices.common.MatrixRequired
+:[K[K [KESCESC[KOO[KBB[K     |      builtins.object
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  Methods defined here:
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1msymbolic_form[0m(self, symbol_str)
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  ----------------------------------------------------------------------
+:[K[K [KESCESC[KOO[KBB[K     |  Methods inherited from sympy.matrices.dense.MutableDenseMatrix:
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1m__setitem__[0m(self, key, value)
+:[K[K [KESCESC[KOO[KBB[K     |      Examples
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      >>> from sympy import Matrix, I, zeros, ones
+:[K[K [KESCESC[KOO[KBB[K     |      >>> m = Matrix(((1, 2+I), (3, 4)))
+:[K[K [KESCESC[KOO[KBB[K     |      >>> m
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [1, 2 + I],
+:[K[K [KESCESC[KOO[KBB[K     |      [3,     4]])
+:[K[K [KESCESC[KOO[KBB[K     |      >>> m[1, 0] = 9
+:[K[K [KESCESC[KOO[KBB[K     |      >>> m
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [1, 2 + I],
+:[K[K [KESCESC[KOO[KBB[K     |      [9,     4]])
+:[K[K [KESCESC[KOO[KBB[K     |      >>> m[1, 0] = [[0, 1]]
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      To replace row r you assign to position r*m where m
+:[K[K [KESCESC[KOO[KBB[K     |      is the number of columns:
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M = zeros(4)
+:[K[K [KESCESC[KOO[KBB[K     |      >>> m = M.cols
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M[3*m] = ones(1, m)*2; M
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0, 0, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0, 0, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0, 0, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [2, 2, 2, 2]])
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      And to replace column c you can assign to position c:
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M[2] = ones(m, 1)*4; M
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0, 4, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0, 4, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0, 4, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [2, 2, 4, 2]])
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1mas_mutable[0m(self)
+:[K[K [KESCESC[KOO[KBB[K     |      Returns a mutable version of this matrix
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      Examples
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      >>> from sympy import ImmutableMatrix
+:[K[K [KESCESC[KOO[KBB[K     |      >>> X = ImmutableMatrix([[1, 2], [3, 4]])
+:[K[K [KESCESC[KOO[KBB[K     |      >>> Y = X.as_mutable()
+:[K[K [KESCESC[KOO[KBB[K     |      >>> Y[1, 1] = 5 # Can set values in Y
+:[K[K [KESCESC[KOO[KBB[K     |      >>> Y
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [1, 2],
+:[K[K [KESCESC[KOO[KBB[K     |      [3, 5]])
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1mcol_del[0m(self, i)
+:[K[K [KESCESC[KOO[KBB[K     |      Delete the given column.
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      Examples
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      >>> from sympy.matrices import eye
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M = eye(3)
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M.col_del(1)
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [1, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 1]])
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      See Also
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      col
+:[K[K [KESCESC[KOO[KBB[K     |      row_del
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1mcol_op[0m(self, j, f)
+:[K[K [KESCESC[KOO[KBB[K     |      In-place operation on col j using two-arg functor whose args are
+:[K[K [KESCESC[KOO[KBB[K     |      interpreted as (self[i, j], i).
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      Examples
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      >>> from sympy.matrices import eye
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M = eye(3)
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M.col_op(1, lambda v, i: v + 2*M[i, 0]); M
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [1, 2, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 1, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0, 1]])
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      See Also
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K [KESCESC[KOO[KBB[K     |      col
+:[K[K [KESCESC[KOO[KBB[K     |      row_op
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1mcol_swap[0m(self, i, j)
+:[K[K [KESCESC[KOO[KBB[K     |      Swap the two given columns of the matrix in-place.
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      Examples
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      >>> from sympy.matrices import Matrix
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M = Matrix([[1, 0], [1, 0]])
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [1, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [1, 0]])
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M.col_swap(0, 1)
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 1],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 1]])
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      See Also
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      col
+:[K[K [KESCESC[KOO[KBB[K     |      row_swap
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1mcopyin_list[0m(self, key, value)
+:[K[K [KESCESC[KOO[KBB[K     |      Copy in elements from a list.
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      Parameters
+:[K[K [KESCESC[KOO[KBB[K     |      ==========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      key : slice
+:[K[K [KESCESC[KOO[KBB[K     |          The section of this matrix to replace.
+:[K[K [KESCESC[KOO[KBB[K     |      value : iterable
+:[K[K [KESCESC[KOO[KBB[K     |          The iterable to copy values from.
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      Examples
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      >>> from sympy.matrices import eye
+:[K[K [KESCESC[KOO[KBB[K     |      >>> I = eye(3)
+:[K[K [KESCESC[KOO[KBB[K     |      >>> I[:2, 0] = [1, 2] # col
+:[K[K [KESCESC[KOO[KBB[K     |      >>> I
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [1, 0, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [2, 1, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0, 1]])
+:[K[K [KESCESC[KOO[KBB[K     |      >>> I[1, :2] = [[3, 4]]
+:[K[K [KESCESC[KOO[KBB[K     |      >>> I
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [1, 0, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [3, 4, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0, 1]])
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      See Also
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      copyin_matrix
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1mcopyin_matrix[0m(self, key, value)
+:[K[K [KESCESC[KOO[KBB[K     |      Copy in values from a matrix into the given bounds.
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      Parameters
+:[K[K [KESCESC[KOO[KBB[K     |      ==========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      key : slice
+:[K[K [KESCESC[KOO[KBB[K     |          The section of this matrix to replace.
+:[K[K [KESCESC[KOO[KBB[K     |      value : Matrix
+:[K[K [KESCESC[KOO[KBB[K     |          The matrix to copy values from.
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      Examples
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      >>> from sympy.matrices import Matrix, eye
+:[K[K [KESCESC[KOO[KBB[K     |      >>> M = Matrix([[0, 1], [2, 3], [4, 5]])
+:[K[K [KESCESC[KOO[KBB[K     |      >>> I = eye(3)
+:[K[K [KESCESC[KOO[KBB[K     |      >>> I[:3, :2] = M
+:[K[K [KESCESC[KOO[KBB[K     |      >>> I
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 1, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [2, 3, 0],
+:[K[K [KESCESC[KOO[KBB[K     |      [4, 5, 1]])
+:[K[K [KESCESC[KOO[KBB[K     |      >>> I[0, 1] = M
+:[K[K [KESCESC[KOO[KBB[K     |      >>> I
+:[K[K [KESCESC[KOO[KBB[K     |      Matrix([
+:[K[K [KESCESC[KOO[KBB[K     |      [0, 0, 1],
+:[K[K [KESCESC[KOO[KBB[K     |      [2, 2, 3],
+:[K[K [KESCESC[KOO[KBB[K     |      [4, 4, 5]])
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      See Also
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      copyin_list
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1mfill[0m(self, value)
+:[K[K [KESCESC[KOO[KBB[K     |      Fill the matrix with the scalar value.
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      See Also
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      zeros
+:[K[K [KESCESC[KOO[KBB[K     |      ones
+:[K[K [KESCESC[KOO[KBB[K     |  
+:[K[K [KESCESC[KOO[KBB[K     |  [1mrow_del[0m(self, i)
+:[K[K [KESCESC[KOO[KBB[K     |      Delete the given row.
+:[K[K [KESCESC[KOO[KBB[K     |      
+:[K[K [KESCESC[KOO[KBB[K     |      Examples
+:[K[K [KESCESC[KOO[KBB[K     |      ========
+:[K[K     |      
+:[K[K[?1l>[?1049l[23;0;0t
+>>> help(report)
