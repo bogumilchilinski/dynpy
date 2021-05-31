@@ -18,7 +18,7 @@ mechanics_printing()
 
 
 t=Symbol('t') #independent variable - time
-
+a_sim=Symbol('a_sim',positive=True)
 
 
 ### system parametes
@@ -568,6 +568,7 @@ units_dict={
 #             ao_rz_idmin:ureg.second,
             a_rz:ureg.gram,
             a_rcz:ureg.gram,
+            a_sim:ureg.meter/ureg.second/ureg.second
            }
 
 

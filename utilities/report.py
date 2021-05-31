@@ -35,6 +35,15 @@ plots_no_gen= plots_no()
 
 
 class SimulationalBlock:
+    """
+    The class purpose is to run and plot simulational results for provided dynamic system. 
+    
+    Args
+    ====
+    
+    t_span : iterable
+    ics_list = None
+    """
     def __init__(self,t_span,ics_list=None):
         
         self._t_span=t_span
