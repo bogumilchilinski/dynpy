@@ -151,7 +151,7 @@ class SimulationalBlock:
         numerical_system=analysis._dynamic_system.numerized(parameter_values=case_data)
         no_dof=len((numerical_system.dvars))
         
-        if not self._ics_list:
+        if self._ics_list:
             ics_list=[0]*no_dof
 
 
@@ -305,14 +305,14 @@ class ReportEntry:
 
     
 class ReportText:
-    def __init__(self,text):
-        self._text = text
-    
-    def __call__(self,analysis):
-        
-        
+    def __init__(self,text=None):
         
         self._text=f'Figures {DataStorage.first_marker}-{DataStorage.last_marker}'
+        
+        if text:
+            self._text = text
+    
+    def __call__(self,analysis):
         
         print(self._text)
         
