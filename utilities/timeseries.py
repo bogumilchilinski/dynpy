@@ -116,8 +116,10 @@ class TimeDomainMethods(DataMethods):
 
 
     def gradient(self):
+        
+        
  
-        data_gradient={name:np.gradient(data,self.index ) for name,data in self.items()}
+        data_gradient=np.gradient(self.to_numpy(),(self.index) )
 
         return TimeSeries( data=data_gradient,index=self.index,name=self.name  )
 
