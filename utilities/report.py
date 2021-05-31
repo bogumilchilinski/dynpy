@@ -188,7 +188,20 @@ class SimulationalBlock:
         return None
 
 
-
+class SimulationFFT:
+    def __init__(self,*args):
+        self._args=args
+        
+    @classmethod
+    def plot_fft(cls,analysis):
+        
+        last_result=DataStorage._list[-1]
+        
+        fft_result = last_result.to_frequency_domain().double_sided_rms()
+        
+        fft_result.plot()
+        
+        return fft_result
     
 class AccelerationComparison:
     r'''
@@ -268,6 +281,7 @@ class AccelerationComparison:
         
         for coord, data in data_dict.items():
             data.plot()
+            plt.ylabel(coord)
             plt.show()
 
         return None
