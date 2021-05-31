@@ -15,7 +15,9 @@ from pylatex.base_classes import Environment
 from pylatex.package import Package
 from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
-from sympy import Matrix,symbols,Symbol
+from sympy import Matrix,symbols,Symbol,Eq
+
+from sympy import Symbol,Function,Derivative
 
 from sympy.physics.vector.printing import vlatex, vpprint
 
@@ -26,19 +28,156 @@ def plots_no():
         yield num
         num += 1
 
+
 plots_no_gen= plots_no()
 
 
+
+
+class SimulationalBlock:
+    def __init__(self,t_span,ics_list=None):
+        
+        self._t_span=t_span
+        self._ics_list=ics_list
+        
+    def do_simulation(self,system):
+        
+        case_data=system._current_data
+        
+        numerical_system=system._dynamic_system.numerized(parameter_values=case_data)
+        no_dof=len((numerical_system.dvars))
+        
+        if not self._ics_list:
+            ics_list=[0]*no_dof
+
+
+        simulation_result=numerical_system.compute_solution(t_span=self._t_span,
+                             ic_list=[0]*no_dof,
+                             t_eval=self._t_span
+                             )
+        
+        self._simulation_result=simulation_result
+        
+        return simulation_result
+
+    def simulation_result(self,system):
+        return self._simulation_result
+
+
+    
+class AccelerationComparison:
+    
+    _story_point=pd.DataFrame()
+    
+    general_t_span=None
+    
+    @classmethod
+    def set_t_span(cls,t_span):
+        
+        cls.general_t_span=t_span
+        
+        return cls
+    
+    def __init__(self,t_span=None,ics_list=None):
+        
+        self._t_span=t_span
+        self._ics_list=ics_list
+        
+        if t_span is not None:
+            self._t_span=t_span
+        else:
+            self._t_span = type(self).general_t_span
+        
+    def do_simulation(self,analysis):
+        
+        case_data=analysis._current_data
+        
+        numerical_system=analysis._dynamic_system.numerized(parameter_values=case_data)
+        no_dof=len((numerical_system.dvars))
+        
+        current_coord=numerical_system.dvars[0]
+        
+        if not self._ics_list:
+            ics_list=[0]*no_dof
+
+        df=pd.DataFrame()
+        
+        
+        var=analysis._parameter
+
+            
+        case_data[var]=10 #analysis._current_value
+        value=10
+        
+        
+        print(case_data)
+        numerical_system=analysis._dynamic_system.numerized(parameter_values=case_data)
+
+        simulation_result=numerical_system.compute_solution(t_span=self._t_span,
+                             ic_list=[0]*no_dof,
+                             t_eval=self._t_span,
+                             )
+
+        single_result=simulation_result[current_coord]
+
+        
+        type(self)._story_point[Eq(var,value)]=single_result
+        
+        self._simulation_result=single_result
+       
+        return single_result
+
+    def simulation_result(self,analysis):
+        return type(self)._story_point
+
+    
+    def plot_result(self,analysis):
+        
+        self._simulation_result=type(self)._story_point
+        
+        self._simulation_result.plot()
+        plt.show()
+        
+        self._simulation_result.plot(subplots=True)
+        plt.show()
+    
+        
+        return self._simulation_result
+
+class ReportEntry:
+    def __init__(self,block_title):
+        self._block_title = block_title
+    
+    def __call__(self,system):
+        sec=Section(self._block_title)
+        
+        system._container.append(sec)
+        
+        return sec
+
 class SystemDynamicsAnalyzer:
-    def __init__(self,dynamic_system,reference_data={}):
+    
+
+    def __init__(self,dynamic_system,reference_data={},report_init=[ReportEntry('Report Beginning')],report_step=[SimulationalBlock(np.linspace(0,300,1000)).do_simulation],report_end=[ReportEntry('Report End')]):
+
         self._dynamic_system=dynamic_system
         self._reference_data=reference_data
         
+        self._init_steps=report_init
+        self._loop_steps=report_step
+        self._end_steps=report_end
+        
+        
+        self._fig_no=plots_no()
+        
+        self._container=[]
+
         
     def prepare_data(self,parameter,parameter_range=None):
         
         self._parameter=parameter
         self._parameter_range=parameter_range
+        
         if isinstance(self._parameter,dict):
             analysis_span_list=[]
             for key,value in parameter.items():
@@ -50,10 +189,11 @@ class SystemDynamicsAnalyzer:
                         analysis_span={**self._reference_data,**{key:val}}
                         analysis_span_list.append(analysis_span)
                         print(analysis_span_list)
-                    
+                        
                 else: 
                     raise TypeError('Each dictionary value should be a list.')
             self._analysis_span = analysis_span_list
+            self.value=value
         else:
             analysis_span=[{**self._reference_data,**{self._parameter:param_value}} for   param_value in parameter_range]
         
@@ -61,39 +201,75 @@ class SystemDynamicsAnalyzer:
         
         return analysis_span
 
-    def analysis_step(self,case_data,t_span,ics_list=None):
-        
-        
-        numerical_system=self._dynamic_system.numerized(parameter_values=case_data)
-        
-        no_dof=len((numerical_system.dvars))
-        
-        if not ics_list:
-            ics_list=[0]*no_dof
 
-        simulation_result=numerical_system.compute_solution(t_span=t_span,
-                             ic_list=[0]*no_dof,
-                             t_eval=t_span
-                             )
-        
-        print(type(simulation_result))
-        simulation_result.plot()
 
-        return simulation_result
     
-    def analyze_system(self,t_span):
+    def analyze_system(self,t_span,container=None):
+        
+        if container:
+            self._container=container
         
         solution_list=[]
         
+        self.init_report()
+        
         for num,case_data in enumerate(self._analysis_span):
-            
+            self.num=num
             data_for_plot=self.analysis_step(case_data=case_data,t_span=t_span,ics_list=None)
             
             solution_list+=[(case_data,data_for_plot)]
-            
+        
+        self.report_end()
+        
+        self.solution_list=solution_list   
         return solution_list
 
+    
+    def analysis_step(self,case_data,t_span,ics_list=None):
+        
+        self._current_value=case_data[self._parameter]
+        self._current_data=case_data
+        
+        for action in self._loop_steps:
+            self._current_result=action(self)
+        
 
+        self.report_step(self._current_result)
+    
+    
+        return self._current_result
+    
+    
+    def init_report(self,result_to_report=None):
+        
+        for action in self._init_steps:
+            self._current_result=action(self)
+
+        
+        return self._current_result
+    
+    
+    def report_step(self,result_to_report,container_type=None):
+        
+        
+
+        
+        return self._current_result
+
+
+            
+        
+    def report_end(self,result_to_report=None,container_type=None):
+        
+        for action in self._end_steps:
+            self._current_result=action(self)
+
+        
+        return self._current_result
+
+    
+    
+    
 
 class CompoundMatrix(Matrix):
 
@@ -129,13 +305,69 @@ class InlineMath(Math):
         
         super().__init__(inline=True, data=backend(formula), escape=escape)
 
+class SymbolsList(NoEscape):
+    
+
+    
+    def __new__(cls, symbols_list, backend=vlatex):
+        r"""
+        Args
+        ----
+        symbols_list: list
+            List of the Symbol objects to convert and append.
+        backend: function
+            Callable which is used to convert Symbol from list to its latex representation.
+        escape : bool
+            if True, will escape strings
+        """
+
+        
+
+        
+        list_str=f', '.join([ f'\\( {backend(sym)} \\)'  for sym in  symbols_list  ]  )
+        
+        return super(SymbolsList,cls).__new__(cls,list_str)
+    
+class NumbersList(NoEscape):
+    
+
+    
+    def __new__(cls, numbers_list, backend=vlatex):
+        r"""
+        Args
+        ----
+        symbols_list: list
+            List of the Symbol objects to convert and append.
+        backend: function
+            Callable which is used to convert Symbol from list to its latex representation.
+        escape : bool
+            if True, will escape strings
+        """
+
+        
+
+        
+        list_str=f', '.join([ f'\\( {sym} \\)'  for sym in  numbers_list  ]  )
+        
+        return list_str
+
 
 class SymbolsDescription(Description):
-    """A class representing LaTeX description environment."""
+    """A class representing LaTeX description environment of Symbols explained in description_dict."""
     _latex_name ='description'
-    def __init__(self,description_dict=None,options=None,arguments=None,start_arguments=None,**kwargs):
+    def __init__(self,description_dict=None,expr=None,options=None,arguments=None,start_arguments=None,**kwargs):
         self.description_dict=description_dict
+        self.expr=expr
         super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
+        
+        
+        if description_dict and expr:
+            
+            symbols_set=expr.atoms(Symbol,Function,Derivative)
+            
+            symbols_to_add={ sym:desc  for  sym,desc in description_dict.items() if sym in symbols_set}
+            
+            self.add_items(symbols_to_add)
         
         if description_dict:
             self.add_items(description_dict)

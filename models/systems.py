@@ -7,7 +7,7 @@ from sympy.physics.vector import vpprint, vlatex
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
 
 from .elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force
-from ..continuous import ContinuousSystem
+from ..continuous import ContinuousSystem, PlaneStressProblem
 
 import base64
 import random
@@ -68,6 +68,58 @@ class ComposedSystem(HarmonicOscillator):
 
 
 class ContinuousSystem(ContinuousSystem):
+    """Base class for all systems
+
+    """
+    scheme_name = 'damped_car_new.PNG'
+    real_name = 'car_real.jpg'
+
+    @classmethod
+    def _scheme(cls):
+
+        path = __file__.replace('systems.py', 'images/') + cls.scheme_name
+
+        return path
+
+    @classmethod
+    def _real_example(cls):
+
+        path = __file__.replace('systems.py', 'images/') + cls.real_name
+
+        return path
+
+    @classmethod
+    def preview(cls, example=False):
+        if example:
+            path = cls._real_example()
+
+        else:
+            path = cls._scheme()
+
+        with open(f"{path}", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+        image_file.close()
+
+        return IP.display.Image(base64.b64decode(encoded_string))
+
+    def get_default_data(self):
+        return None
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        if default_data_dict:
+            parameters_dict = {
+                key: random.choice(items_list)
+                for key, items_list in default_data_dict.items()
+            }
+        else:
+            parameters_dict=None
+
+        return parameters_dict    
+    
+class PlaneStressProblem(PlaneStressProblem):
     """Base class for all systems
 
     """
@@ -385,23 +437,29 @@ class BeamBridgeDampedTMD(ComposedSystem):
                 ],
             }
         else:
-            numerized_dict = {m0:100 , lamb:2 , E:200000, I:0.48, l:3 }
+            numerized_dict = {m0:100 , lamb:2 , E:200000, I:0.48, l:3}
             default_data_dict = {
-                self.nds.m: [(20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0).subs(numerized_dict)],
-                self.c: [(lamb * self.nds.k_beam).subs(numerized_dict)],
-                self.nds.k_beam: [(
+                self.nds.m: [20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0],
+                self.c: [lamb * self.nds.k_beam],
+                self.nds.k_beam: [
                     20 * 48 * E * I / l**3, 30 * 48 * E * I / l**3,
                     40 * 48 * E * I / l**3, 50 * 48 * E * I / l**3,
-                    60 * 48 * E * I / l**3
-                ).subs(numerized_dict)],
-                self.c_TMD: [(lamb * self.nds.k_TMD).subs(numerized_dict)],
-                self.nds.m_TMD: [(2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0).subs(numerized_dict)],
-                self.nds.k_TMD: [(
+                    60 * 48 * E * I / l**3],
+                self.c_TMD: [lamb * self.nds.k_TMD],
+                self.nds.m_TMD: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
+                self.nds.k_TMD: [
                     1 * 48 * E * I / l**3, 3 * 48 * E * I / l**3,
                     3 * 48 * E * I / l**3, 5 * 48 * E * I / l**3,
-                    5 * 48 * E * I / l**3
-                ).subs(numerized_dict)],
+                    5 * 48 * E * I / l**3]
             }
+
+            values_of_dict = flatten([default_data_dict[self.nds.m], default_data_dict[self.c],
+                                      default_data_dict[self.nds.k_beam], default_data_dict[self.c_TMD],
+                                      default_data_dict[self.nds.m_TMD], default_data_dict[self.nds.k_TMD]
+                                     ])
+
+            for i in range(len(values_of_dict)):
+                    default_data_dict = display(values_of_dict[i].subs(numerized_dict))
 
         return default_data_dict
 
@@ -411,7 +469,6 @@ class BeamBridgeDampedTMD(ComposedSystem):
         return self.get_default_data(True)
     
 class SDoFDampedHarmonicOscillator(ComposedSystem):
-
     scheme_name = '???'
     real_name = 'engine_real.PNG'
 
@@ -1363,7 +1420,7 @@ class DDoFCoupledPendulum(ComposedSystem):
                  g=Symbol('g', positive=True),
                  l=Symbol('l', positive=True),
                  k=Symbol('k', positive=True),
-                 qs=dynamicsymbols('phi_1, phi_2'),
+                 qs=dynamicsymbols('\\varphi_1, \\varphi_2'),
                  **kwargs):
 
         phi1, phi2 = qs
@@ -1373,7 +1430,7 @@ class DDoFCoupledPendulum(ComposedSystem):
         self.l = l
         self.k = k
 
-        self.spring = Spring(k, pos1=(phi1 * (l)), pos2=(phi2 * (l)), qs=[qs])
+        self.spring = Spring(k, pos1=(phi1 * (l/2)), pos2=(phi2 * (l/2)), qs=[qs])
         self.pendulum_1 = Pendulum(m, g, l, angle=phi1, qs=[qs])
         self.pendulum_2 = Pendulum(m, g, l, angle=phi2, qs=[qs])
 
@@ -1674,13 +1731,16 @@ class SDoFNonlinearEngine(ComposedSystem):
             M = Mass
                 -Mass of system (engine block) on spring
 
-            me = Mass
+            m_e = Mass
                 -Mass of particle
 
             e = distance
                 -motion radius of a particle
 
-            km = spring coefficient
+            d = distance
+                -distance between mounting point and engine
+
+            k_m = spring coefficient
                 -value of spring coefficient that tuned mass damper is mounted
 
             beta = angle
@@ -1709,6 +1769,7 @@ class SDoFNonlinearEngine(ComposedSystem):
                  m_e=Symbol('m_e', positive=True),
                  e=Symbol('e', positive=True),
                  beta=Symbol('beta', positive=True),
+                 d=Symbol('d', positive=True),
                  l_0=Symbol('l_0', positive=True),
                  z=dynamicsymbols('z'),
                  phi=dynamicsymbols('phi'),
@@ -1719,6 +1780,7 @@ class SDoFNonlinearEngine(ComposedSystem):
         self.k_m = k_m
         self.m_e = m_e
         self.beta = beta
+        self.d=d
         self.e = e
         self.l_0 = l_0
         self.z = z
@@ -1731,7 +1793,7 @@ class SDoFNonlinearEngine(ComposedSystem):
         P1.set_pos(O, 0 * N.x + 0 * N.y)
 
         P2 = Point('P2')
-        P2.set_pos(O, l_0 * sin(beta) * N.x + (z + l_0 * cos(beta)) * N.y)
+        P2.set_pos(O, d  * N.x + (z ) * N.y)
 
         self.MaterialPoint_1 = MaterialPoint(M, z, qs=[z])
         self.MaterialPoint_2 = MaterialPoint(m_e, z + e * cos(phi), qs=[z])
@@ -1799,18 +1861,21 @@ class SDoFStraightNonlinearEngine(SDoFNonlinearEngine):
         >>> qs = dynamicsymbols('z') 
         >>> SDoFNonlinearEngine()
     """
-
+    scheme_name='non_linear_engine.png'
 
     def get_default_data(self):
 
-        m0, k0, e0 = symbols('m_0 k_0 e_0', positive=True)
+        m0, k0, e0, l, omega = symbols('m_0 k_0 e_0 l Omega', positive=True)
 
         default_data_dict = {
             self.M: [100*m0,300*m0,500*m0,700*m0,900*m0,200 * m0, 400 * m0,600*m0,800*m0],
             self.m_e: [m0,3*m0,5*m0,7*m0,9*m0,2 * m0, 4 * m0,6*m0,8*m0],
             self.k_m: [k0,2*k0,4*k0,6*k0,8*k0, 3 * k0,5*k0,7*k0,9*k0],
             self.e: [2 * e0, S.Half * e0, 4 * e0, S.Half**2 * e0,3 * e0,3* S.Half * e0, 9 * e0, 3*S.Half**2 * e0],
-            self.beta:[90*np.pi/180]
+            self.l_0:[S.Half*l,l,2*l],
+            self.d:[4*l,8*l],
+            self.beta:[S.Half*pi],
+            self.phi:[omega*self.ivar]
         }
         return default_data_dict
 
@@ -2622,8 +2687,8 @@ class CSBeam(ContinuousSystem):
         -determine the instance of the beam by using class CSBeam()
     """
 
-    scheme_name = '???.PNG'
-    real_name = '???.PNG'
+    scheme_name = 'supported_beam_scheme.PNG'
+    real_name = 'supported_beam_real.PNG'
 
     def __init__(self,
                 E=Symbol('E',positive=True),
@@ -2644,11 +2709,17 @@ class CSBeam(ContinuousSystem):
         self.w=w(time,loc)
         self.time=time
         self.loc=loc
+        self.l=Symbol('L',positive=True)
         
 
         L_beam=S.One/2*(A*rho*(self.w.diff(self.time))**2-E*I*(self.w.diff(self.loc,2))**2)
 
         super().__init__(L_beam,q=self.w,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc,**kwargs)
+        
+        
+        self._sep_expr=2*self.L.subs({self.w.diff(self.time):0,(self.w.diff(self.loc,2)):1}) .doit()  *Symbol('k',positive=True)**4 
+        
+        print(self._sep_expr)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -2662,16 +2733,47 @@ class CSBeam(ContinuousSystem):
 
     def get_default_data(self):
 
-        E_0, A_0, I_0 = symbols('E_0, A_0, I_0', positive=True)
+        E_0, A_0, I_0, L_0 = symbols('E_0, A_0, I_0, L_0', positive=True)
+        
+        
+        l=self.l
+        x=self.loc
+        X=Function('X')(x)
+        
+        
+        sup_ls=Subs(X.diff(x,0),x,0)
+        sup_rs=Subs(X.diff(x,0),x,l)
+
+        fix_ls=Subs(X.diff(x,1),x,0)
+        fix_rs=Subs(X.diff(x,1),x,l)
+
+        mb_ls=Subs(X.diff(x,2),x,0)
+        mb_rs=Subs(X.diff(x,2),x,l)
+
+        v_ls=Subs(X.diff(x,3),x,0)
+        v_rs=Subs(X.diff(x,3),x,l)
+        
+        
 
         default_data_dict = {
-            self.E: [S.Half * E_0, 1 * E_0, 2 * E_0, 1 * E_0, S.Half * E_0],
-            self.A: [1 * A_0, 2 * A_0, S.Half * A_0, 1 * A_0, 2 * A_0],
-            self.I: [1 * I_0, 2 * I_0, S.Half * I_0, 1 * I_0, 2 * I_0],
+            self.E: [2.5*E_0,1.25*E_0,0.75*E_0,1.35*E_0,1*E_0,2*E_0,3*E_0,4*E_0,5*E_0,6*E_0,7*E_0,8*E_0,9*E_0 ],
+            self.A: [1 * A_0, 2 * A_0, S.Half * A_0, 1 * A_0, 2 * A_0,3*A_0,4*A_0,5*A_0,6*A_0,7*A_0,8*A_0,9*A_0,10*A_0,11*A_0],
+            self.I: [1 * I_0, 2 * I_0, S.Half * I_0, 1 * I_0, 2 * I_0,3*I_0,4*I_0,5*I_0,6*I_0,7*I_0,8*I_0,9*I_0,10*I_0,11*I_0],
+           self.BC: [ {sup_ls:0,mb_ls:0,sup_rs:0,mb_rs:0},{fix_ls:0,v_ls:0,sup_rs:0,mb_rs:0}, ],
+           self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 1 * L_0, 3 * L_0,4*L_0,5*L_0,6*L_0,7*L_0,8*L_0,9*L_0,10*L_0,11*L_0],
 
         }
 
         return default_data_dict
+
+    def get_random_parameters(self):
+
+        E_0, A_0, I_0, L_0 = symbols('E_0, A_0, I_0, L_0', positive=True)
+
+        data_dict=super().get_random_parameters()
+        data_dict[self.A]  = (L_0**2 * random.choice([0.125, 1.25, 0.0125, 1.23, 0.128 ])/ (data_dict[self.E]/E_0) / (data_dict[self.I]/I_0) ).n(3)
+
+        return data_dict
     
     
 class CSRod(ContinuousSystem):
@@ -2729,6 +2831,8 @@ class CSRod(ContinuousSystem):
 
         super().__init__(L_rod,q=self.u,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc,**kwargs)
 
+        self._sep_expr=2*self.L.subs({self.u.diff(self.time):0,(self.u.diff(self.loc)):1}) .doit()  *Symbol('k',positive=True)**2 
+        
     def symbols_description(self):
         self.sym_desc_dict = {
             self.E: r'Young modulus',
@@ -2757,8 +2861,84 @@ class CSRod(ContinuousSystem):
             self.E: [2.5*E_0,1.25*E_0,0.75*E_0,1.35*E_0 ],
             self.A: [1 * A_0, 2 * A_0, S.Half * A_0, 1 * A_0, 2 * A_0],
             
-            self.BC: [ {fix_ls:0,free_rs:0},{free_ls:0,free_rs:0},{fix_ls:0,fix_rs:0} ]
-#             self.I: [1 * I_0, 2 * I_0, S.Half * I_0, 1 * I_0, 2 * I_0],
+           self.BC: [ {fix_ls:0,free_rs:0},{free_ls:0,free_rs:0},{fix_ls:0,fix_rs:0} ],
+           self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 1 * L_0, 2 * L_0],
+            }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        E_0, A_0, L_0 = symbols('E_0, A_0, L_0', positive=True)
+
+        data_dict=super().get_random_parameters()
+        data_dict[self.A]  = (L_0**2 * random.choice([0.125, 0.0125, 0.00125, 0.123, 0.0128 ])/ (data_dict[self.E]/E_0) ).n(3)
+
+        return data_dict
+
+class CSString(ContinuousSystem):
+
+
+    scheme_name = 'rod_scheme.PNG'
+    real_name = 'rod_real.PNG'
+
+    def __init__(self,
+                Ty=Symbol('T_y',positive=True),
+                A=Symbol('A',positive=True),
+                rho=Symbol('\\rho',positive=True),
+                w=Function('w'),
+                bc_dict=None,
+                time=Symbol('t'),
+                loc=Symbol('x'),
+                **kwargs
+                ):
+
+        self.Ty = Ty
+        self.A = A
+        self.rho = rho
+        self.w=w(time,loc)
+        self.time=time
+        self.loc=loc
+        self.l=Symbol('L',positive=True)
+        
+        
+
+        L_rod=S.One/2*(A*rho*(self.w.diff(self.time))**2-Ty*(self.w.diff(self.loc))**2)
+
+        super().__init__(L_rod,q=self.w,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc,**kwargs)
+
+        self._sep_expr=2*self.L.subs({self.w.diff(self.time):0,(self.w.diff(self.loc)):1}) .doit()  *Symbol('k',positive=True)**2 
+        
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.Ty: r'Initial tension',
+            self.A: r'Area of cross-section',
+            self.rho: r'Material density',
+            self.w: 'Space-Time function',
+        }
+        return self.sym_desc_dict
+
+
+    def get_default_data(self):
+
+        T0, A_0, L_0 = symbols('T_0, A_0, L_0', positive=True)
+        
+        x=self.loc
+        l=self.l
+        X=Function('X')(x)
+        
+        fix_ls=Subs(X.diff(x,0),x,0)
+        fix_rs=Subs(X.diff(x,0),x,l)
+        free_ls=Subs(X.diff(x,1),x,0)
+        free_rs=Subs(X.diff(x,1),x,l)
+
+
+        default_data_dict = {
+            self.Ty: [2.5*T0,1.25*T0,0.75*T0,1.35*T0 ],
+            self.A: [1 * A_0, 2 * A_0, S.Half * A_0, 1 * A_0, 2 * A_0],
+            
+           self.BC: [{fix_ls:0,fix_rs:0} ],
+           self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 3 * L_0, 2 * L_0,4*L_0,5*L_0,6*L_0,7*L_0,8*L_0,9*L_0],
 
         }
 
@@ -2766,11 +2946,125 @@ class CSRod(ContinuousSystem):
 
     def get_random_parameters(self):
         
+        T0, A_0, L_0 = symbols('T_0, A_0, L_0', positive=True)
+        
         data_dict=super().get_random_parameters()
-        data_dict[self.A]  = (self.l**2 * random.choice([1/100,1/10,1/1000,1/100000 ,1 ])/ list(data_dict[self.E].atoms(Number))[0] ).n(2)
+        data_dict[self.A]  = (L_0**2 * random.choice([0.03, 0.031, 0.0031, 0.033, 3.1 ])/ (data_dict[self.Ty]/T0) ).n(3)
         
         
         return data_dict
+
                                                   
-                                                  
+class CSShaft(ContinuousSystem):
+
+
+    scheme_name = 'supported_shaft_scheme.PNG'
+    real_name = 'shaft_real.PNG'
+
+    def __init__(self,
+                G=Symbol('G',positive=True),
+
+                M=Symbol('M',positive=True),
+                I=Symbol('I',positive=True),
+
+                rho=Symbol('\\rho',positive=True),
+                phi=Function('\\phi'),
+                bc_dict=None,
+                time=Symbol('t'),
+                loc=Symbol('x'),
+                **kwargs
+                ):
+
+
+        self.M = M
+        self.G = G
+        self.I = I
+
+        self.rho = rho
+        self.phi=phi(time,loc)
+        self.time=time
+        self.loc=loc
+        self.l=Symbol('L',positive=True)
         
+        
+
+
+        L_shaft=S.One/2*(rho*I*(self.phi.diff(self.time))**2-G*I*(self.phi.diff(self.loc))**2)
+
+
+        super().__init__(L_shaft,q=self.phi,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc,**kwargs)
+
+        self._sep_expr=2*self.L.subs({self.phi.diff(self.time):0,(self.phi.diff(self.loc)):1}) .doit()  *Symbol('k',positive=True)**2 
+        
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.G: r'''Kirchoff's modulus ''',
+            
+            self.rho: r'Material density',
+            self.phi: 'Space-Time function',
+        }
+        return self.sym_desc_dict
+
+
+    def get_default_data(self):
+
+        G_0, L_0 = symbols('G_0, L_0', positive=True)
+        
+        x=self.loc
+        l=self.l
+        X=Function('X')(x)
+        
+        fix_ls=Subs(X.diff(x,0),x,0)
+        fix_rs=Subs(X.diff(x,0),x,l)
+        free_ls=Subs(X.diff(x,1),x,0)
+        free_rs=Subs(X.diff(x,1),x,l)
+
+
+        default_data_dict = {
+            self.G: [2.5*G_0,1.25*G_0,0.75*G_0,1.35*G_0 ],
+            
+
+           self.BC: [{fix_ls:0,free_rs:0},{fix_ls:0,fix_rs:0} ],
+           self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 3 * L_0, 2 * L_0],
+
+
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+        
+        G_0, L_0 = symbols('G_0, L_0', positive=True)
+        
+        data_dict=super().get_random_parameters()
+
+        data_dict[self.I]  = (L_0**4 * random.choice([0.1, 0.01, 0.011, 0.11, 1.1,11 ])/ (data_dict[self.G]/G_0) ).n(3)
+
+        
+        
+        return data_dict
+
+
+class CSCylinder(PlaneStressProblem):
+    
+    scheme_name = 'cylinder_scheme.PNG'
+    real_name = 'cylinder_real_cannon.PNG'
+    
+    def __init__(self,
+                 disp_func=[Function('\\mathit{u}')(Symbol('r')), 0],
+                 stress_tensor=Matrix(2, 2, [
+                     Function('\\sigma_r')(Symbol('r')), 0, 0,
+                     Function('\\sigma_\\varphi')(Symbol('r'))
+                 ]),
+                 bc_dict=None,
+                 coords=[Symbol('r'), Symbol('\\varphi')],
+                 E=Symbol('E', positive=True),
+                 nu=Symbol('\\nu', positive=True),
+                 volumetric_load=0,
+                 **kwargs
+                ):
+        
+
+        super().__init__(disp_func=disp_func,stress_tensor=stress_tensor,bc_dict=bc_dict,coords=coords,E=E,nu=nu,volumetric_load=volumetric_load,**kwargs)
+        
+

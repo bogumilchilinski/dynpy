@@ -683,9 +683,33 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     def linearized(self, x0=None, op_point=False, hint=[], label=None):
         """
-        Returns the same result as def approximated() but only for first order functions
-        """
+        Returns approximated first order function calculated with Taylor series method as an instance of the class. It enables to obtain linearized output.
+        Arguments:
+        =========
+            System = Created system based on symbolical represent of mechanical parts of it
+            
+            op_point - boolean, which points out if the operating point will be evaluated
+            
+            x0 - setting operating point
+            
+            hint - (optional) Adds additional equation to equilibrium condition and calculate op_point as equilibrium system.
+            
+            label=None (optional): string
+                Label of the class instance. Default label: '{Class name} with {length of qs} DOF'
 
+        Example:
+        =======
+        Creating the examplary system. A mass oscillating up and down while being held up by a spring with a spring constant kinematicly 
+
+        >>> t = symbols('t')
+        >>> m, g, l = symbols('m, g, l')
+        >>> qs = dynamicsymbols('varphi') 
+        >>> Pendulum()
+
+        Creating linerized system in symbolic pattern
+        >>> System_linearized = Sytem.linearized()
+
+        """
         linearized_sys = self.approximated(n=1,
                                            op_point=op_point,
                                            hint=hint,
@@ -708,15 +732,39 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     def numerized(self, parameter_values={}, FFT = None):
         '''
         Takes values of parameters, substitute it into the list of parameters and changes list it into a Tuple. Returns instance of class OdeComputationalCase.
+        Arguments:
+        =========
+            System = Created system based on symbolical represent of mechanical parts of it
+
+        Example:
+        =======
+        Creating the examplary system. A mass oscillating up and down while being held up by a spring with a spring constant k
+
+        >>> t = symbols('t')
+        >>> m, k = symbols('m, k')
+        >>> qs = dynamicsymbols('z') 
+        >>> System = SDoFHarmonicOscillator(m,k, qs=[z]) 
+
+        Defining the list of values to substitute
+        >>> val ={
+                M: 1000,
+                k1: 1000
+            }
+        >>> System numeric = Sytem.numerized(parameters_values = val)
+
+        - In default returned numerized system is in the time domain but can be represented in the frequency domain if it is desired
+        >>> System numeric = Sytem.numerized(parameters_values = val, FFT = True)
+
+        - if necessary the created numerized system can be solved in order to represent displacement, velocity, or acceleration 
         '''
         if not FFT:
             data_Tuple = Tuple(*self.system_parameters()).subs(parameter_values)
             computed_case = self.computational_case(parameter_values=data_Tuple)
 
             return OdeComputationalCase(**computed_case, evaluate=True)
-    
-    
-    
+
+
+
 
     @classmethod
     def from_system(cls, system):
@@ -738,7 +786,7 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
     def fundamental_matrix(self, freq=Symbol('omega', positive=True)):
         '''
         Method returns a fundamental matrix of the system built from inertia and stiffness matrices. Takes one optional argument.
-        
+
         Args:
             freq (optional, obj:Symbol): This argument lets user to choose a symbol for frequency representation. Set to 'omega' by default, 'positive=True' ensures its affiliation to real numbers domain.
         '''
@@ -777,7 +825,7 @@ class HarmonicOscillator(LinearDynamicSystem):
     This object allows for a determination of any dynamic system by providing methods that serve to generate the equations of motion, solution, 
     natural frequencies, eigenmodes, FRF of the mechanical system and many others that are discussed further within the documentation. 
     For the initialization of HarmonicOscillator at least one argument is neccessary.
-    
+
     Arguments
     =========
     Lagrangian: Symbol object
