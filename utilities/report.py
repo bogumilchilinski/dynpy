@@ -32,19 +32,123 @@ def plots_no():
 plots_no_gen= plots_no()
 
 
+class DataStorage:
+    r'''
+    This class represents data collector that stores the results able to obtain within other computational blocks.
+    It ensures ease data transferring in order to do efficient analysis and data processing.
+    '''
+    
+    _storage={}
+    _dict={}
+    _plot_markers_dict={}
+    _subplot_markers_dict={}
+    _list=[]
+    first_marker=None
+    last_marker=None
+  
+    def __init__(self,data_set=None):
+        
+        self._data_set=data_set
+        self._marker_dict={}
+        self._marker_dict_sub={}
+        self._storage={}
+        
+        #type(self)._storage=self._data_set
+        type(self)._story_point=[]
+        
 
+    @classmethod
+    def reset_storage(cls):
+        
+        cls._storage=pd.DataFrame()
+        cls._list=[]
+        
+        return cls
+        
+    def load_result(self,analysis):
+        param=analysis._parameter
+        
+        current_data=TestResults._storage[param]
+        
+        current_data.plot()
+        
+        return current_data
+    
+    @classmethod
+    def set_labeled_storage(cls,data):
+        
+        cls._storage=data
+        
+        return cls
+        
+    @classmethod
+    def set_indexed_storage(cls,data):
+        
+        cls._list=data
+        
+        return cls
+    
+    @property
+    def labeled_storage(self):
+        return type(self)._storage
+    
+    @property
+    def named_storage(self):
+        return type(self)._dict
+    
+    @property
+    def indexed_storage(self):
+        return type(self)._list
+    
+    @property
+    def _ids(self):
+        return self.indexed_storage
+        
+    @property
+    def _lds(self):
+        return self.labeled_storage
+    
+    
+    @property
+    def _nds(self):
+        return self.named_storage
 
 class SimulationalBlock:
-    def __init__(self,t_span,ics_list=None):
+    
+    r'''
+    It is computational module which enables to perform numerical simulations of the dynamic system.
+    Class provides several methods devoted for data processing, ploting and reporting.
+    '''
+    
+    _storage=DataStorage._lds
+    _list=DataStorage._ids
+    _dict=DataStorage._nds
+    general_t_span=[]
+    last_result=[]
+    
+    @classmethod
+    def set_t_span(cls,t_span):
+
+        cls.general_t_span=t_span
+
+        return cls
+    
+    def __init__(self,t_span=None,ics_list=None):
         
         self._t_span=t_span
         self._ics_list=ics_list
         
-    def do_simulation(self,system):
+        if t_span is not None:
+            self._t_span=t_span
+        else:
+            self._t_span = type(self).general_t_span
+
         
-        case_data=system._current_data
+    def do_simulation(self,analysis):
         
-        numerical_system=system._dynamic_system.numerized(parameter_values=case_data)
+        case_data=analysis._current_data
+        
+        numerical_system=analysis._dynamic_system.numerized(parameter_values=case_data)
         no_dof=len((numerical_system.dvars))
         
         if not self._ics_list:
@@ -58,18 +162,45 @@ class SimulationalBlock:
         
         self._simulation_result=simulation_result
         
+        
+        var=analysis._parameter
+        value=analysis._current_value
+        
+        DataStorage._storage[Eq(var,value)]=simulation_result
+        
+        print(DataStorage._list)
+        
+        DataStorage._list+=[simulation_result]
+        
         return simulation_result
 
-    def simulation_result(self,system):
+    def simulation_result(self,analysis):
         return self._simulation_result
+
+    @classmethod
+    def plot_result(cls,analysis):
+        
+        last_result=DataStorage._list[-1]
+        
+        last_result.plot()
+        plt.show()
+        
+        return None
+
 
 
     
 class AccelerationComparison:
+    r'''
+    It is computational block that prepares the comparison of particular coordinates regarding to changes of selected parameter.
+    Class provides several methods devoted for data processing, ploting and reporting.
+    '''
     
     _story_point=pd.DataFrame()
     
     general_t_span=None
+    
+    _data_storage=DataStorage()
     
     @classmethod
     def set_t_span(cls,t_span):
@@ -78,6 +209,20 @@ class AccelerationComparison:
         
         return cls
     
+    @classmethod
+    def reset_storage(cls):
+        
+        DataStorage.set_labeled_storage({})
+        
+        return cls
+    
+    @classmethod
+    def reset_storage(cls):
+        
+        _story_point=pd.DataFrame()
+        
+        return cls
+
     def __init__(self,t_span=None,ics_list=None):
         
         self._t_span=t_span
@@ -87,49 +232,52 @@ class AccelerationComparison:
             self._t_span=t_span
         else:
             self._t_span = type(self).general_t_span
-        
-    def do_simulation(self,analysis):
-        
-        case_data=analysis._current_data
-        
-        numerical_system=analysis._dynamic_system.numerized(parameter_values=case_data)
-        no_dof=len((numerical_system.dvars))
-        
-        current_coord=numerical_system.dvars[0]
-        
-        if not self._ics_list:
-            ics_list=[0]*no_dof
 
-        df=pd.DataFrame()
-        
-        
-        var=analysis._parameter
 
+    def _prepare_data(self):
+        
+        data=DataStorage._storage
+        elements=list((data.values()))[0].columns
+        summaries_dict = {dynsym:pd.DataFrame()  for dynsym  in elements }
+        
+        for key,result in data.items():
+            for coord in elements:
+                summaries_dict[coord][key]  =result[coord]
+                
+        return summaries_dict
+                
+    def prepare_summary(self,analysis): 
+        
+        result=self._prepare_data()
+        
+        elements=result.keys()
+             
+        DataStorage._plot_markers_dict={elem:Marker(f'plot-{str(elem)}-{str(analysis._parameter)}'  ,'fig')   for elem in elements}
+        DataStorage._subplot_markers_dict={elem:Marker(f'subplot-{str(elem)}-{str(analysis._parameter)}'  ,'fig')   for elem in elements}
+        DataStorage.first_marker=list(DataStorage._plot_markers_dict.values())[0]
+        DataStorage.last_marker=list(DataStorage._plot_markers_dict.values())[-1]
+        
+        
+        return result
             
-        case_data[var]=10 #analysis._current_value
-        value=10
+    def plot_summary(self,analysis):
         
+        #coords = analysis._dynamic_system.q
         
-        print(case_data)
-        numerical_system=analysis._dynamic_system.numerized(parameter_values=case_data)
-
-        simulation_result=numerical_system.compute_solution(t_span=self._t_span,
-                             ic_list=[0]*no_dof,
-                             t_eval=self._t_span,
-                             )
-
-        single_result=simulation_result[current_coord]
-
+        data_dict=self._prepare_data()
         
-        type(self)._story_point[Eq(var,value)]=single_result
-        
-        self._simulation_result=single_result
-       
-        return single_result
+        for coord, data in data_dict.items():
+            data.plot()
+            plt.show()
 
+        return None
+        
     def simulation_result(self,analysis):
         return type(self)._story_point
 
+    @property
+    def data_storage(self):
+        return type(self)._data_storage
     
     def plot_result(self,analysis):
         
@@ -155,6 +303,25 @@ class ReportEntry:
         
         return sec
 
+    
+class ReportText:
+    def __init__(self,text):
+        self._text = text
+    
+    def __call__(self,analysis):
+        
+        
+        
+        self._text=f'Figures {DataStorage.first_marker}-{DataStorage.last_marker}'
+        
+        print(self._text)
+        
+        analysis._container.append(NoEscape( self._text  ))
+        
+        return self._text
+    
+    
+    
 class SystemDynamicsAnalyzer:
     
 
