@@ -114,6 +114,7 @@ class DataStorage:
         return self.named_storage
 
 class SimulationalBlock:
+
     
     r'''
     It is computational module which enables to perform numerical simulations of the dynamic system.
@@ -134,6 +135,7 @@ class SimulationalBlock:
         return cls
     
     def __init__(self,t_span=None,ics_list=None):
+
         
         self._t_span=t_span
         self._ics_list=ics_list
