@@ -484,8 +484,8 @@ chair_sin=chair_dict['full_nonlin_sin']
 
 units_dict={
             c:ureg.kilogram/ureg.second,
-            c_mu:1/ureg.second,
-            c_lam:ureg.second,
+            c_mu:S.One/ureg.second,
+            c_lam:S.One/ureg.second,
             m_3:ureg.kilogram,    
             m_w:ureg.kilogram,
             m_fr:ureg.kilogram,
