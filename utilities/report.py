@@ -17,7 +17,7 @@ from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
 from sympy import Matrix,symbols,Symbol,Eq
 
-from sympy import Symbol,Function,Derivative
+from sympy import Symbol,Function,Derivative,latex
 
 from sympy.physics.vector.printing import vlatex, vpprint
 
@@ -158,7 +158,7 @@ class SimulationalBlock:
 
 
         simulation_result=numerical_system.compute_solution(t_span=self._t_span,
-                             ic_list=[0]*no_dof,
+                             ic_list=self._ics_list,
                              t_eval=self._t_span
                              )
         
@@ -168,9 +168,9 @@ class SimulationalBlock:
         var=analysis._parameter
         value=analysis._current_value
         
-        DataStorage._storage[Eq(var,value)]=simulation_result
+        DataStorage._storage[Eq(var,value,evaluate=False)]=simulation_result
         
-        print(DataStorage._list)
+        #print(DataStorage._list)
         
         DataStorage._list+=[simulation_result]
         
@@ -186,6 +186,14 @@ class SimulationalBlock:
         
         last_result.plot()
         plt.show()
+        
+        ndp=DataPlot('wykres_nowy',position='H',preview=False)
+        ndp.add_data_plot(filename=f'Wykres_alpha_{next(plots_no_gen)}.png',width='11cm')
+        ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''))
+        #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
+        #ndp.append(Label(self.marker_dict[coord]))
+        
+        analysis._container.append(ndp)
         
         return None
 
@@ -211,7 +219,7 @@ class AccelerationComparison:
     Class provides several methods devoted for data processing, ploting and reporting.
     '''
     
-    _story_point=pd.DataFrame()
+    _story_point=None
     
     general_t_span=None
     
@@ -258,7 +266,8 @@ class AccelerationComparison:
         for key,result in data.items():
             for coord in elements:
                 summaries_dict[coord][key]  =result[coord]
-                
+        type(self)._story_point=summaries_dict
+        
         return summaries_dict
                 
     def prepare_summary(self,analysis): 
@@ -286,8 +295,71 @@ class AccelerationComparison:
             plt.ylabel(coord)
             plt.show()
 
-        return None
+        ndp=DataPlot('wykres_nowy',position='H',preview=False)
+        ndp.add_data_plot(filename=f'Wykres_summary{next(plots_no_gen)}.png',width='11cm')
+        ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''))
+        #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
+        #ndp.append(Label(self.marker_dict[coord]))
         
+        analysis._container.append(ndp)            
+
+        return None
+
+    def plot_max_summary(self,analysis):
+        
+        if not type(self)._story_point:
+            type(self)._story_point=self._prepare_data()
+        
+        data_dict=type(self)._story_point
+        
+        new_data_dict={key:data.abs().max() for key, data in data_dict.items()}
+
+        df=pd.DataFrame(new_data_dict)
+        df.plot()
+        plt.show()
+        df.plot(subplots=True)
+        plt.show()
+
+        
+        ndp=DataPlot('wykres_nowy1',position='H',preview=False)
+        ndp.add_data_plot(filename=f'Wykres_max_{next(plots_no_gen)}.png',width='11cm')
+        ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''))
+        #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
+        #ndp.append(Label(self.marker_dict[coord]))
+        
+        analysis._container.append(ndp)
+        
+        
+        return None
+    
+    
+    def plot_mean_summary(self,analysis):
+        
+        if not type(self)._story_point:
+            type(self)._story_point=self._prepare_data()
+        
+        data_dict=type(self)._story_point
+        
+        new_data_dict={key:data.abs().mean() for key, data in data_dict.items()}
+
+        df=pd.DataFrame(new_data_dict)
+        df.plot()
+        plt.show()
+        df.plot(subplots=True)
+        plt.show()
+
+        ndp=DataPlot('wykres_nowy2',position='H',preview=False)
+        ndp.add_data_plot(filename=f'Wykres_mean_{next(plots_no_gen)}.png',width='11cm')
+        ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''))
+        #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
+        #ndp.append(Label(self.marker_dict[coord]))
+        
+        
+        analysis._container.append(ndp)
+        
+        return None
+    
+    
     def simulation_result(self,analysis):
         return type(self)._story_point
 
