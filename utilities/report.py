@@ -51,24 +51,31 @@ class DataStorage:
         self._data_set=data_set
         self._marker_dict={}
         self._marker_dict_sub={}
-        self._storage={}
+
         
-        #type(self)._storage=self._data_set
+
+        
+        type(self)._storage=self._data_set
         type(self)._story_point=[]
+        
+        #print(type(self)._storage)
         
 
     @classmethod
     def reset_storage(cls):
         
-        cls._storage=pd.DataFrame()
+        cls._storage={}
+        cls._dict={}
         cls._list=[]
         
         return cls
         
-    def load_result(self,analysis):
-        param=analysis._parameter
+    def load_result(self,analysis=None):
         
-        current_data=TestResults._storage[param]
+        if analysis:
+            param=analysis._parameter
+        
+        current_data=DataStorage._storage[param]
         
         current_data.plot()
         
@@ -88,6 +95,18 @@ class DataStorage:
         
         return cls
     
+    @classmethod
+    def last_result(cls):
+        return cls._list[-1]
+        
+
+    @classmethod
+    def last_result_dict(cls):
+        
+        key,value=list(cls._dict.keys())[-1]
+        
+        return {key:value}
+        
     @property
     def labeled_storage(self):
         return type(self)._storage
@@ -145,7 +164,8 @@ class SimulationalBlock:
         else:
             self._t_span = type(self).general_t_span
 
-        
+            
+
     def do_simulation(self,analysis):
         
         case_data=analysis._current_data
@@ -232,20 +252,20 @@ class AccelerationComparison:
         
         return cls
     
-    @classmethod
-    def reset_storage(cls):
-        
-        DataStorage.set_labeled_storage({})
-        
-        return cls
+
     
     @classmethod
     def reset_storage(cls):
         
-        _story_point=pd.DataFrame()
+        cls._story_point={}
+        cls._data_storage={}
         
         return cls
 
+    
+    
+    
+    
     def __init__(self,t_span=None,ics_list=None):
         
         self._t_span=t_span
@@ -270,21 +290,31 @@ class AccelerationComparison:
         
         return summaries_dict
                 
-    def prepare_summary(self,analysis): 
+    def prepare_summary(self,analysis=None): 
+        
+        if analysis:
+            self._analysis=analysis
         
         result=self._prepare_data()
         
         elements=result.keys()
              
-        DataStorage._plot_markers_dict={elem:Marker(f'plot-{str(elem)}-{str(analysis._parameter)}'  ,'fig')   for elem in elements}
-        DataStorage._subplot_markers_dict={elem:Marker(f'subplot-{str(elem)}-{str(analysis._parameter)}'  ,'fig')   for elem in elements}
+        DataStorage._plot_markers_dict={elem:Marker(f'plot-{str(elem)}-{str(elem)}'  ,'fig')   for elem in elements}
+        DataStorage._subplot_markers_dict={elem:Marker(f'subplot-{str(elem)}-{str(elem)}'  ,'fig')   for elem in elements}
         DataStorage.first_marker=list(DataStorage._plot_markers_dict.values())[0]
         DataStorage.last_marker=list(DataStorage._plot_markers_dict.values())[-1]
         
         
         return result
             
-    def plot_summary(self,analysis):
+    def plot_summary(self,analysis=None):
+        if analysis:
+            self._analysis=analysis
+            self._parameter=analysis._parameter
+        else:
+            self._parameter='which name is missing.'
+        
+            
         
         #coords = analysis._dynamic_system.q
         
@@ -297,11 +327,12 @@ class AccelerationComparison:
 
         ndp=DataPlot('wykres_nowy',position='H',preview=False)
         ndp.add_data_plot(filename=f'Wykres_summary{next(plots_no_gen)}.png',width='11cm')
-        ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''))
+        ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(self._parameter)}\)'''))
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
         #ndp.append(Label(self.marker_dict[coord]))
         
-        analysis._container.append(ndp)            
+        if analysis:
+            analysis._container.append(ndp)        
 
         return None
 
@@ -327,7 +358,8 @@ class AccelerationComparison:
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
         #ndp.append(Label(self.marker_dict[coord]))
         
-        analysis._container.append(ndp)
+        if analysis:
+            analysis._container.append(ndp)
         
         
         return None
@@ -363,6 +395,14 @@ class AccelerationComparison:
     def simulation_result(self,analysis):
         return type(self)._story_point
 
+    @classmethod
+    def get_from_storage(cls,storage=DataStorage):
+        
+        type(self)._story_point=storage._storage
+        
+        return cls
+    
+    
     @property
     def data_storage(self):
         return type(self)._data_storage
