@@ -2879,8 +2879,8 @@ class CSRod(ContinuousSystem):
 class CSString(ContinuousSystem):
 
 
-    scheme_name = 'rod_scheme.PNG'
-    real_name = 'rod_real.PNG'
+    scheme_name = 'string_scheme.png'
+    real_name = 'double_bass_string.jpg'
 
     def __init__(self,
                 Ty=Symbol('T_y',positive=True),
