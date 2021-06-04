@@ -21,6 +21,7 @@ from sympy import Symbol,Function,Derivative,latex
 
 from sympy.physics.vector.printing import vlatex, vpprint
 
+from IPython.display import display, Markdown, Latex
 
 def plots_no():
     num = 0
@@ -62,7 +63,7 @@ class DataStorage:
         
 
     @classmethod
-    def reset_storage(cls):
+    def reset_storage(cls,*args,**kwargs):
         
         cls._storage={}
         cls._dict={}
@@ -167,12 +168,12 @@ class SimulationalBlock:
             
 
     def do_simulation(self,analysis):
-        
+
         case_data=analysis._current_data
-        
+
         numerical_system=analysis._dynamic_system.numerized(parameter_values=case_data)
         no_dof=len((numerical_system.dvars))
-        
+
         if self._ics_list:
             ics_list=[0]*no_dof
 
@@ -181,19 +182,19 @@ class SimulationalBlock:
                              ic_list=self._ics_list,
                              t_eval=self._t_span
                              )
-        
+
         self._simulation_result=simulation_result
-        
-        
+
+
         var=analysis._parameter
         value=analysis._current_value
-        
+
         DataStorage._storage[Eq(var,value,evaluate=False)]=simulation_result
-        
+
         #print(DataStorage._list)
-        
+
         DataStorage._list+=[simulation_result]
-        
+
         return simulation_result
 
     def simulation_result(self,analysis):
@@ -433,12 +434,28 @@ class ReportEntry:
 
     
 class ReportText:
-    def __init__(self,text=None):
+    def __init__(self,text=None,key_dict=DataStorage._dict):
         
-        self._text=f'Figures {DataStorage.first_marker}-{DataStorage.last_marker}'
+        self._text='Figures {first_marker}-{last_marker}'
         
         if text:
             self._text = text
+                
+        try:
+            self._text=self._text.format(**DataStorage._dict)
+
+        except:
+            print('+++++++++++++++++++++')
+
+            print('key are missing')
+            print('+++++++++++++++++++++')
+            print('available keys:')
+            print(list(DataStorage._dict.keys()))
+            print('+++++++++++++++++++++')
+        finally:
+            self._text=self._text
+        
+
     
     def __call__(self,analysis):
         
@@ -447,6 +464,49 @@ class ReportText:
         analysis._container.append(NoEscape( self._text  ))
         
         return self._text
+    
+    def __str__(self):
+        
+
+        return self._text
+
+    def __repr__(self):
+        
+        display(Markdown(self._text))
+
+        return Markdown(self._text)
+
+class PlotTestResult:
+    def __init__(self,*args,keys_map=None,**kwargs):
+        
+        data_to_plot=DataStorage._storage
+        
+        self._keys_map={key:key for key in data_to_plot.keys()}
+
+        
+        if keys_map:
+            self._keys_map=keys_map
+            
+            
+
+        
+        self._data_to_plot=data_to_plot
+
+    
+    def __call__(self,analysis,*args,**kwargs):
+        step_val=analysis._current_value
+        
+        new_key=self._keys_map[step_val]
+        
+        if not 'first_mrk'  in DataStorage._dict.keys():
+            DataStorage._dict['first_mrk']=Marker('first_mrk','fig')
+        
+        DataStorage._dict['last_mrk']=Marker('last_mrk','fig')
+        
+        self._data_to_plot[new_key].plot()
+        plt.show()
+        
+        return self._data_to_plot[new_key]
     
     
     
@@ -503,22 +563,24 @@ class SystemDynamicsAnalyzer:
         
         if container:
             self._container=container
-        
-        solution_list=[]
-        
-        self.init_report()
-        
-        for num,case_data in enumerate(self._analysis_span):
-            self.num=num
-            data_for_plot=self.analysis_step(case_data=case_data,t_span=t_span,ics_list=None)
-            
-            solution_list+=[(case_data,data_for_plot)]
-        
-        self.report_end()
-        
-        self.solution_list=solution_list   
-        return solution_list
+        if self._dynamic_system != None:
+            solution_list=[]
 
+            self.init_report()
+
+            for num,case_data in enumerate(self._analysis_span):
+                self.num=num
+                data_for_plot=self.analysis_step(case_data=case_data,t_span=t_span,ics_list=None)
+
+                solution_list+=[(case_data,data_for_plot)]
+
+            self.report_end()
+
+            self.solution_list=solution_list   
+            return solution_list
+        else:
+            self.init_report()
+            return print(self._analysis_span)
     
     def analysis_step(self,case_data,t_span,ics_list=None):
         
@@ -621,7 +683,8 @@ class SymbolsList(NoEscape):
         
         list_str=f', '.join([ f'\\( {backend(sym)} \\)'  for sym in  symbols_list  ]  )
         
-        return super(SymbolsList,cls).__new__(cls,list_str)
+        #return super(SymbolsList,cls).__new__(cls,list_str)
+        return list_str
     
 class NumbersList(NoEscape):
     
