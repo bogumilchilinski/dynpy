@@ -47,7 +47,7 @@ class DataStorage:
     first_marker=None
     last_marker=None
   
-    def __init__(self,data_set=None):
+    def __init__(self,data_set={}):
         
         self._data_set=data_set
         self._marker_dict={}
@@ -231,7 +231,7 @@ class SimulationFFT:
         fft_result = last_result.to_frequency_domain().double_sided_rms()
         
         fft_result.plot()
-        
+        plt.show()
         return fft_result
     
 class AccelerationComparison:
@@ -278,7 +278,7 @@ class AccelerationComparison:
             self._t_span = type(self).general_t_span
 
 
-    def _prepare_data(self):
+    def _prepare_data(self,coordinate=None):
         
         data=DataStorage._storage
         elements=list((data.values()))[0].columns
@@ -289,9 +289,12 @@ class AccelerationComparison:
                 summaries_dict[coord][key]  =result[coord]
         type(self)._story_point=summaries_dict
         
-        return summaries_dict
+        if coordinate:
+            return summaries_dict[coordinate]
+        else:
+            return summaries_dict
                 
-    def prepare_summary(self,analysis=None): 
+    def prepare_summary(self,analysis=None,coordinate=None): 
         
         if analysis:
             self._analysis=analysis
@@ -308,7 +311,7 @@ class AccelerationComparison:
         
         return result
             
-    def plot_summary(self,analysis=None):
+    def plot_summary(self,analysis=None,coordinate=None):
         if analysis:
             self._analysis=analysis
             self._parameter=analysis._parameter
@@ -317,9 +320,17 @@ class AccelerationComparison:
         
             
         
-        #coords = analysis._dynamic_system.q
+
         
-        data_dict=self._prepare_data()
+        if coordinate:
+            if not isinstance(coordinate,list ):
+                coordinate=[coordinate]
+                
+            data_dict={coord : self._prepare_data()[coord] for coord  in coordinate}
+
+        else:
+            data_dict=self._prepare_data()
+        
         
         for coord, data in data_dict.items():
             data.plot()
@@ -335,7 +346,7 @@ class AccelerationComparison:
         if analysis:
             analysis._container.append(ndp)        
 
-        return None
+        return ndp
 
     def plot_max_summary(self,analysis):
         
@@ -474,7 +485,8 @@ class ReportText:
         
         display(Markdown(self._text))
 
-        return Markdown(self._text)
+        #return (self._text)
+        return ''
 
 class PlotTestResult:
     def __init__(self,*args,keys_map=None,**kwargs):
