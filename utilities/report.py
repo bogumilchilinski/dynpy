@@ -21,6 +21,7 @@ from sympy import Symbol,Function,Derivative,latex
 
 from sympy.physics.vector.printing import vlatex, vpprint
 
+from IPython.display import display, Markdown, Latex
 
 def plots_no():
     num = 0
@@ -51,24 +52,31 @@ class DataStorage:
         self._data_set=data_set
         self._marker_dict={}
         self._marker_dict_sub={}
-        self._storage={}
+
         
-        #type(self)._storage=self._data_set
+
+        
+        type(self)._storage=self._data_set
         type(self)._story_point=[]
+        
+        #print(type(self)._storage)
         
 
     @classmethod
-    def reset_storage(cls):
+    def reset_storage(cls,*args,**kwargs):
         
-        cls._storage=pd.DataFrame()
+        cls._storage={}
+        cls._dict={}
         cls._list=[]
         
         return cls
         
-    def load_result(self,analysis):
-        param=analysis._parameter
+    def load_result(self,analysis=None):
         
-        current_data=TestResults._storage[param]
+        if analysis:
+            param=analysis._parameter
+        
+        current_data=DataStorage._storage[param]
         
         current_data.plot()
         
@@ -88,6 +96,18 @@ class DataStorage:
         
         return cls
     
+    @classmethod
+    def last_result(cls):
+        return cls._list[-1]
+        
+
+    @classmethod
+    def last_result_dict(cls):
+        
+        key,value=list(cls._dict.keys())[-1]
+        
+        return {key:value}
+        
     @property
     def labeled_storage(self):
         return type(self)._storage
@@ -145,14 +165,15 @@ class SimulationalBlock:
         else:
             self._t_span = type(self).general_t_span
 
-        
+            
+
     def do_simulation(self,analysis):
-        
+
         case_data=analysis._current_data
-        
+
         numerical_system=analysis._dynamic_system.numerized(parameter_values=case_data)
         no_dof=len((numerical_system.dvars))
-        
+
         if self._ics_list:
             ics_list=[0]*no_dof
 
@@ -161,19 +182,19 @@ class SimulationalBlock:
                              ic_list=self._ics_list,
                              t_eval=self._t_span
                              )
-        
+
         self._simulation_result=simulation_result
-        
-        
+
+
         var=analysis._parameter
         value=analysis._current_value
-        
+
         DataStorage._storage[Eq(var,value,evaluate=False)]=simulation_result
-        
+
         #print(DataStorage._list)
-        
+
         DataStorage._list+=[simulation_result]
-        
+
         return simulation_result
 
     def simulation_result(self,analysis):
@@ -232,20 +253,20 @@ class AccelerationComparison:
         
         return cls
     
-    @classmethod
-    def reset_storage(cls):
-        
-        DataStorage.set_labeled_storage({})
-        
-        return cls
+
     
     @classmethod
     def reset_storage(cls):
         
-        _story_point=pd.DataFrame()
+        cls._story_point={}
+        cls._data_storage={}
         
         return cls
 
+    
+    
+    
+    
     def __init__(self,t_span=None,ics_list=None):
         
         self._t_span=t_span
@@ -270,21 +291,31 @@ class AccelerationComparison:
         
         return summaries_dict
                 
-    def prepare_summary(self,analysis): 
+    def prepare_summary(self,analysis=None): 
+        
+        if analysis:
+            self._analysis=analysis
         
         result=self._prepare_data()
         
         elements=result.keys()
              
-        DataStorage._plot_markers_dict={elem:Marker(f'plot-{str(elem)}-{str(analysis._parameter)}'  ,'fig')   for elem in elements}
-        DataStorage._subplot_markers_dict={elem:Marker(f'subplot-{str(elem)}-{str(analysis._parameter)}'  ,'fig')   for elem in elements}
+        DataStorage._plot_markers_dict={elem:Marker(f'plot-{str(elem)}-{str(elem)}'  ,'fig')   for elem in elements}
+        DataStorage._subplot_markers_dict={elem:Marker(f'subplot-{str(elem)}-{str(elem)}'  ,'fig')   for elem in elements}
         DataStorage.first_marker=list(DataStorage._plot_markers_dict.values())[0]
         DataStorage.last_marker=list(DataStorage._plot_markers_dict.values())[-1]
         
         
         return result
             
-    def plot_summary(self,analysis):
+    def plot_summary(self,analysis=None):
+        if analysis:
+            self._analysis=analysis
+            self._parameter=analysis._parameter
+        else:
+            self._parameter='which name is missing.'
+        
+            
         
         #coords = analysis._dynamic_system.q
         
@@ -297,11 +328,12 @@ class AccelerationComparison:
 
         ndp=DataPlot('wykres_nowy',position='H',preview=False)
         ndp.add_data_plot(filename=f'Wykres_summary{next(plots_no_gen)}.png',width='11cm')
-        ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''))
+        ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(self._parameter)}\)'''))
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
         #ndp.append(Label(self.marker_dict[coord]))
         
-        analysis._container.append(ndp)            
+        if analysis:
+            analysis._container.append(ndp)        
 
         return None
 
@@ -327,7 +359,8 @@ class AccelerationComparison:
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
         #ndp.append(Label(self.marker_dict[coord]))
         
-        analysis._container.append(ndp)
+        if analysis:
+            analysis._container.append(ndp)
         
         
         return None
@@ -363,6 +396,14 @@ class AccelerationComparison:
     def simulation_result(self,analysis):
         return type(self)._story_point
 
+    @classmethod
+    def get_from_storage(cls,storage=DataStorage):
+        
+        type(self)._story_point=storage._storage
+        
+        return cls
+    
+    
     @property
     def data_storage(self):
         return type(self)._data_storage
@@ -393,12 +434,28 @@ class ReportEntry:
 
     
 class ReportText:
-    def __init__(self,text=None):
+    def __init__(self,text=None,key_dict=DataStorage._dict):
         
-        self._text=f'Figures {DataStorage.first_marker}-{DataStorage.last_marker}'
+        self._text='Figures {first_marker}-{last_marker}'
         
         if text:
             self._text = text
+                
+        try:
+            self._text=self._text.format(**DataStorage._dict)
+
+        except:
+            print('+++++++++++++++++++++')
+
+            print('key are missing')
+            print('+++++++++++++++++++++')
+            print('available keys:')
+            print(list(DataStorage._dict.keys()))
+            print('+++++++++++++++++++++')
+        finally:
+            self._text=self._text
+        
+
     
     def __call__(self,analysis):
         
@@ -407,6 +464,49 @@ class ReportText:
         analysis._container.append(NoEscape( self._text  ))
         
         return self._text
+    
+    def __str__(self):
+        
+
+        return self._text
+
+    def __repr__(self):
+        
+        display(Markdown(self._text))
+
+        return Markdown(self._text)
+
+class PlotTestResult:
+    def __init__(self,*args,keys_map=None,**kwargs):
+        
+        data_to_plot=DataStorage._storage
+        
+        self._keys_map={key:key for key in data_to_plot.keys()}
+
+        
+        if keys_map:
+            self._keys_map=keys_map
+            
+            
+
+        
+        self._data_to_plot=data_to_plot
+
+    
+    def __call__(self,analysis,*args,**kwargs):
+        step_val=analysis._current_value
+        
+        new_key=self._keys_map[step_val]
+        
+        if not 'first_mrk'  in DataStorage._dict.keys():
+            DataStorage._dict['first_mrk']=Marker('first_mrk','fig')
+        
+        DataStorage._dict['last_mrk']=Marker('last_mrk','fig')
+        
+        self._data_to_plot[new_key].plot()
+        plt.show()
+        
+        return self._data_to_plot[new_key]
     
     
     
@@ -463,22 +563,24 @@ class SystemDynamicsAnalyzer:
         
         if container:
             self._container=container
-        
-        solution_list=[]
-        
-        self.init_report()
-        
-        for num,case_data in enumerate(self._analysis_span):
-            self.num=num
-            data_for_plot=self.analysis_step(case_data=case_data,t_span=t_span,ics_list=None)
-            
-            solution_list+=[(case_data,data_for_plot)]
-        
-        self.report_end()
-        
-        self.solution_list=solution_list   
-        return solution_list
+        if self._dynamic_system != None:
+            solution_list=[]
 
+            self.init_report()
+
+            for num,case_data in enumerate(self._analysis_span):
+                self.num=num
+                data_for_plot=self.analysis_step(case_data=case_data,t_span=t_span,ics_list=None)
+
+                solution_list+=[(case_data,data_for_plot)]
+
+            self.report_end()
+
+            self.solution_list=solution_list   
+            return solution_list
+        else:
+            self.init_report()
+            return print(self._analysis_span)
     
     def analysis_step(self,case_data,t_span,ics_list=None):
         
@@ -581,7 +683,8 @@ class SymbolsList(NoEscape):
         
         list_str=f', '.join([ f'\\( {backend(sym)} \\)'  for sym in  symbols_list  ]  )
         
-        return super(SymbolsList,cls).__new__(cls,list_str)
+        #return super(SymbolsList,cls).__new__(cls,list_str)
+        return list_str
     
 class NumbersList(NoEscape):
     
