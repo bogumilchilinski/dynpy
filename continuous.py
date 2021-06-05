@@ -324,7 +324,8 @@ class ContinuousSystem:
 
 class PlaneStressProblem:
     def __init__(self,
-                 disp_func=[Function('\\mathit{u}')(Symbol('r')), 0],
+                 #disp_func=[Function('\\mathit{u}')(Symbol('r')), 0],
+                 disp_func,
                  stress_tensor=Matrix(2, 2, [
                      Function('\\sigma_r')(Symbol('r')), 0, 0,
                      Function('\\sigma_\\varphi')(Symbol('r'))
@@ -333,6 +334,7 @@ class PlaneStressProblem:
                  coords=[Symbol('r'), Symbol('\\varphi')],
                  E=Symbol('E', positive=True),
                  nu=Symbol('\\nu', positive=True),
+                 D=Symbol('D', positive=True),                 
                  label=None,
                  system=None,
                  volumetric_load=None,
@@ -344,14 +346,24 @@ class PlaneStressProblem:
             coords = system.coords
             E = system.E_module
             nu = system.poisson
+            D=system.D
             bc_dict = system.bc_dict
             
-            
+#         print('__init')
+#         print(type(self))
+#         display(disp_func)
 
         self.u = Matrix(disp_func)
+        
+#         print('__init')
+#         print(type(self))
+#         display(self.u)
+        
+        
         self.stress = stress_tensor
         self.E_module = E
         self.poisson = nu
+        self.D = D
         self.coords = coords
         self.dim = max(self.u.shape)
         self._equilibrium_eqn = None
@@ -392,24 +404,29 @@ class PlaneStressProblem:
         return self.__str__()
 
     def subs(self, *args, **kwargs):
-        E_new, nu_new, u_new, stress_new, vol_load_new = Tuple(
+        
+#         print('u_old')
+#         display(self.u)
+        
+        E_new, nu_new, u_new, stress_new, vol_load_new, D_new = Tuple(
             self.E_module, self.poisson, self.u, self.stress,
-            self.volumetric_load).subs(*args)
+            self.volumetric_load,self.D).subs(*args)
 
         bc_trap = self.BC.subs(*args)
 
         if bc_trap == self.BC:
             bc_trap = self.bc_dict
-
-
+#         print('u_new')
+#         display(u_new)
             
-        new_system = PlaneStressProblem(disp_func=u_new,
+        new_system = type(self)(disp_func=u_new,
                                         stress_tensor=stress_new,
                                         bc_dict=bc_trap,
                                         volumetric_load=vol_load_new,
                                         coords=self.coords,
                                         E=E_new,
                                         nu=nu_new,
+                                        D=D_new,
                                         label=self._label,
                                         system=None,
                                         **kwargs)
@@ -513,6 +530,8 @@ class PlaneStressProblem:
                               dvar,
                               ics,
                               ivar=Symbol('r')):
+        
+
 
         if volumetric_load:
             self.volumetric_load = volumetric_load
