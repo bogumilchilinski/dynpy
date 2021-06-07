@@ -1,6 +1,6 @@
 from .systems import ComposedSystem
 from sympy.physics.mechanics import dynamicsymbols
-from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, Eq)
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, Eq, pi)
 
 
 class DDoFVessel(ComposedSystem):
@@ -15,13 +15,17 @@ class DDoFVessel(ComposedSystem):
                  wave_slope=dynamicsymbols('S'),
                  rho=Symbol('rho', positive=True),
                  g=Symbol('g', positive=True),
-                 A_wl=Symbol('A_wl'),
-                 positive=True,
+                 A_wl=Symbol('A_wl',positive=True),
                  V=Symbol('V', positive=True),
                  GM_L=Symbol('GM_L', positive=True),
                  CoB=Symbol('CoB', positive=True),
                  CoF=Symbol('CoF', positive=True),
-                 ivar=Symbol('t')):
+                 A_h=Symbol('A_h',positive=True),
+                 Phi_h=Symbol('Phi_h',positive=True),
+                 omega=Symbol('omega',positive=True),
+                 ivar=Symbol('t'),
+                 **kwargs
+                 ):
 
         self.m_vessel = m_vessel
         self.I_5 = I_5
@@ -34,6 +38,10 @@ class DDoFVessel(ComposedSystem):
         self.GM_L = GM_L
         self.CoB = CoB
         self.CoF = CoF
+        self.A_h = A_h
+        self.Phi_h = Phi_h
+        self.omega = omega
+        
 
         # vessel mass and stiffness matrix
         M_matrix = Matrix([[m_vessel, 0], [0, I_5]])
@@ -43,6 +51,12 @@ class DDoFVessel(ComposedSystem):
                             rho * g * V * GM_L]])
 
         # generalized displacements and velocities
+        
+#         wave_level = A_h*cos(omega*self.ivar + Phi_h)
+#         wave_slope = diff(wave_level,self.ivar)*(omega/g)
+        
+        #dh_wave_slope = diff(wave_level,t,t)*(omega/g)   # TU JEST TEN MAGICZNY FORMUŁ, KTÓRY CHYBA JEDNAK POWINNIŚMY WPROWADZIĆ BO dq go tak nie policzy XD #
+        
         q = Matrix(qs) + Matrix([wave_level, wave_slope])
         dq = q.diff(ivar)
 
@@ -54,7 +68,7 @@ class DDoFVessel(ComposedSystem):
         super().__init__(Lagrangian=self.kinetic_energy -
                          self.potential_energy,
                          qs=qs,
-                         ivar=ivar)
+                         ivar=ivar,**kwargs)
 
 #     def symbols_description(self):
 #         self.sym_desc_dict = {
@@ -91,12 +105,32 @@ class DDoFVessel(ComposedSystem):
             self.GM_L: r'longitudinal metacentric height,',
             self.CoB: r'centre of buoyancy,',
             self.CoF: r'centre of floatation.',
-#             self.ivar: r'independent time variable.',
+
         }
 
         return self.sym_desc_dict
-
-
+    
+    def numerical_data(self):
+        numbers_dict={
+            self.I_5:21*self.m_vessel,
+            self.m_vessel: 1e7,
+            self.wave_level: 0.5 * cos(2/7 * pi * self.ivar),
+            self.wave_slope: 0.5 * cos(2/7 * pi * self.ivar),
+            self.rho:1025,
+            self.g: 9.81,
+            self.A_wl:4025,
+            self.V:25000,
+            self.GM_L:290,
+            self.CoB:3.6,
+            self.CoF:13,
+            self.A_h:0.5,
+            self.Phi_h:0.315,
+        }
+        
+        return numbers_dict    
+    
+    
+    
 class TDoFCompensatedPayload(ComposedSystem):
 
     scheme_name = '3dofs_new.PNG'
@@ -111,10 +145,12 @@ class TDoFCompensatedPayload(ComposedSystem):
                  m_c=Symbol('m_c', positive=True),
                  k_c=Symbol('k_c', positive=True),
                  l_c=Symbol('l_c', positive=True),
+                 l_w=Symbol('l_w', positive=True),
                  g=Symbol('g', positive=True),
                  h_eq=Symbol('h_eq', positive=True),
                  h_ceq=Symbol('h_ceq', positive=True),
-                 ivar=Symbol('t')):
+                 ivar=Symbol('t'),
+                 **kwargs):
 
         self.m_p = m_p
         self.k_w = k_w
@@ -124,6 +160,7 @@ class TDoFCompensatedPayload(ComposedSystem):
         self.m_c = m_c
         self.k_c = k_c
         self.l_c = l_c
+        self.l_w = l_w
         self.g = g
         self.h_eq = h_eq
         self.h_ceq = h_ceq
@@ -157,7 +194,7 @@ class TDoFCompensatedPayload(ComposedSystem):
 
         super().__init__((self.kinetic_energy - self.potential_energy).subs(positions_dict).doit(),
                          qs=qs,
-                         ivar=ivar)
+                         ivar=ivar,**kwargs)
 
 #     def symbols_description(self):
 #         self.sym_desc_dict = {
@@ -190,6 +227,7 @@ class TDoFCompensatedPayload(ComposedSystem):
             self.m_p: r'mass of payload,',
             self.k_w: r'wire stiffness,',
             self.l_0: r'length of the lifting cable,',
+            self.l_w: r'length of the lifting cable-payload system,',
             tuple(self.q): r'payload generalized coordinates,',
             self.y_e:
             r'lateral displacement at crane tip obtained from RAOs (a regular wave excitation),',
@@ -207,6 +245,24 @@ class TDoFCompensatedPayload(ComposedSystem):
 
         return self.sym_desc_dict
 
+    def numerical_data(self):
+        numbers_dict={
+            self.h_eq: ((self.m_c+self.m_p)/self.k_w+(self.m_p)/self.k_c)*self.g,
+            self.h_ceq: self.g*(self.m_c+self.m_p)/self.k_w,
+            self.m_p: 1e5,
+            self.k_w: 4.09e6,
+            self.l_0: self.l_w - self.l_c,
+            self.y_e: 0.5 * cos(2/7 * pi * self.ivar -2.396),
+            self.z_e: 1.5 * cos(2/7 * pi * self.ivar + 0.315),
+            self.m_c: 1e4,
+            self.k_c: 2.5e6,
+            self.l_c:5,
+            self.l_w:48,
+            self.g: 9.81,
+        }
+        
+        return numbers_dict    
+    
 
 # class PayloadVesselSystem(ComposedSystem):
     
