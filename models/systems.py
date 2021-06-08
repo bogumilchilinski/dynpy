@@ -3076,7 +3076,7 @@ class CSCylinder(PlaneStressProblem):
         
 class CSPlate(PlaneStressProblem):
     
-    scheme_name = 'plate_scheme.PNG'
+    scheme_name = 'plate_loaded_scheme.PNG'
     real_name = 'reservoir.jpg'
     
     def __init__(self,
@@ -3091,7 +3091,6 @@ class CSPlate(PlaneStressProblem):
                  nu=Symbol('\\nu', positive=True),      
                  D=Symbol('D_h', positive=True),
                  h=Symbol('h', positive=True),
-
                  volumetric_load=0,
                  **kwargs
                 ):
