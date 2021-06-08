@@ -56,6 +56,8 @@ class ComposedSystem(HarmonicOscillator):
 
         default_data_dict = self.get_default_data()
 
+
+        
         if default_data_dict:
             parameters_dict = {
                 key: random.choice(items_list)
@@ -967,7 +969,7 @@ class Pendulum(ComposedSystem):
         Lagrangian = S.Half * m * l**2 * diff(
             angle, ivar)**2 - m * g * l * (1 - cos(angle))
 
-        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
+        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar,**kwargs)
 
     def get_default_data(self):
 
@@ -975,7 +977,7 @@ class Pendulum(ComposedSystem):
 
         default_data_dict = {
             self.m: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
-            self.l: [2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0],
+            self.l: [2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0,7*l0, 8*l0, 9*l0,10*l0],
         }
         return default_data_dict
 
