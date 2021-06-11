@@ -281,6 +281,7 @@ class AccelerationComparison:
     def _prepare_data(self,coordinate=None):
         
         data=DataStorage._storage
+#         print(data)
         elements=list((data.values()))[0].columns
         summaries_dict = {dynsym:pd.DataFrame()  for dynsym  in elements }
         
@@ -538,7 +539,6 @@ class SystemDynamicsAnalyzer:
         self._fig_no=plots_no()
         
         self._container=[]
-
         
     def prepare_data(self,parameter,parameter_range=None):
         
