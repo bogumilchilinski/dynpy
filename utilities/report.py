@@ -244,7 +244,7 @@ class AccelerationComparison:
     
     general_t_span=None
     
-    _data_storage=DataStorage()
+    _data_storage={}
     
     @classmethod
     def set_t_span(cls,t_span):
@@ -281,7 +281,11 @@ class AccelerationComparison:
     def _prepare_data(self,coordinate=None):
         
         data=DataStorage._storage
-#         print(data)
+        
+        
+        print('_______________test of plot_____________')
+        print(data)
+        print('_______________test of plot_____________')
         elements=list((data.values()))[0].columns
         summaries_dict = {dynsym:pd.DataFrame()  for dynsym  in elements }
         
@@ -575,7 +579,7 @@ class SystemDynamicsAnalyzer:
         
         if container:
             self._container=container
-        if self._dynamic_system != None:
+        if self._dynamic_system:
             solution_list=[]
 
             self.init_report()
@@ -592,7 +596,8 @@ class SystemDynamicsAnalyzer:
             return solution_list
         else:
             self.init_report()
-            return print(self._analysis_span)
+            print(self._analysis_span)
+            return (self._analysis_span)
     
     def analysis_step(self,case_data,t_span,ics_list=None):
         
