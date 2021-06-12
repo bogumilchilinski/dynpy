@@ -206,7 +206,7 @@ class SimulationalBlock:
         last_result=DataStorage._list[-1]
         
         last_result.plot()
-        plt.show()
+        
         
         ndp=DataPlot('wykres_nowy',position='H',preview=False)
         ndp.add_data_plot(filename=f'Wykres_alpha_{next(plots_no_gen)}.png',width='11cm')
@@ -215,6 +215,8 @@ class SimulationalBlock:
         #ndp.append(Label(self.marker_dict[coord]))
         
         analysis._container.append(ndp)
+        
+        plt.show()
         
         return None
 
@@ -283,9 +285,9 @@ class AccelerationComparison:
         data=DataStorage._storage
         
         
-        print('_______________test of plot_____________')
-        print(data)
-        print('_______________test of plot_____________')
+#         print('_______________test of plot_____________')
+#         print(data)
+#         print('_______________test of plot_____________')
         elements=list((data.values()))[0].columns
         summaries_dict = {dynsym:pd.DataFrame()  for dynsym  in elements }
         
@@ -340,17 +342,23 @@ class AccelerationComparison:
         for coord, data in data_dict.items():
             data.plot()
             plt.ylabel(coord)
-            plt.show()
 
-        ndp=DataPlot('wykres_nowy',position='H',preview=False)
-        ndp.add_data_plot(filename=f'Wykres_summary{next(plots_no_gen)}.png',width='11cm')
-        ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(self._parameter)}\)'''))
+
+            ndp=DataPlot('wykres_nowy',position='H',preview=False)
+            ndp.add_data_plot(filename=f'Wykres_summary{next(plots_no_gen)}.png',width='11cm')
+            
+            
+            ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(self._parameter)}\)'''))
+            
+            plt.show()
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
         #ndp.append(Label(self.marker_dict[coord]))
         
-        if analysis:
-            analysis._container.append(ndp)        
+            if analysis:
+                analysis._container.append(ndp)        
 
+        
+            
         return ndp
 
     def plot_max_summary(self,analysis):
@@ -521,7 +529,16 @@ class PlotTestResult:
         DataStorage._dict['last_mrk']=Marker('last_mrk','fig')
         
         self._data_to_plot[new_key].plot()
+        
+        
+        ndp=DataPlot('wykres_nowy',position='H',preview=False)
+        ndp.add_data_plot(filename=f'Wykres_alpha_{next(plots_no_gen)}.png',width='11cm')
+        ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter - pomiary'''))
+        
         plt.show()
+        
+        
+        analysis._container.append(ndp)
         
         return self._data_to_plot[new_key]
     
