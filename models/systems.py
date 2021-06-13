@@ -56,6 +56,8 @@ class ComposedSystem(HarmonicOscillator):
 
         default_data_dict = self.get_default_data()
 
+
+        
         if default_data_dict:
             parameters_dict = {
                 key: random.choice(items_list)
@@ -967,7 +969,7 @@ class Pendulum(ComposedSystem):
         Lagrangian = S.Half * m * l**2 * diff(
             angle, ivar)**2 - m * g * l * (1 - cos(angle))
 
-        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
+        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar,**kwargs)
 
     def get_default_data(self):
 
@@ -975,7 +977,7 @@ class Pendulum(ComposedSystem):
 
         default_data_dict = {
             self.m: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
-            self.l: [2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0],
+            self.l: [2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0,7*l0, 8*l0, 9*l0,10*l0],
         }
         return default_data_dict
 
@@ -2879,8 +2881,8 @@ class CSRod(ContinuousSystem):
 class CSString(ContinuousSystem):
 
 
-    scheme_name = 'rod_scheme.PNG'
-    real_name = 'rod_real.PNG'
+    scheme_name = 'string_scheme.png'
+    real_name = 'double_bass_string.jpg'
 
     def __init__(self,
                 Ty=Symbol('T_y',positive=True),
@@ -3051,21 +3053,49 @@ class CSCylinder(PlaneStressProblem):
     real_name = 'cylinder_real_cannon.PNG'
     
     def __init__(self,
+                 
                  disp_func=[Function('\\mathit{u}')(Symbol('r')), 0],
                  stress_tensor=Matrix(2, 2, [
                      Function('\\sigma_r')(Symbol('r')), 0, 0,
                      Function('\\sigma_\\varphi')(Symbol('r'))
                  ]),
+
                  bc_dict=None,
                  coords=[Symbol('r'), Symbol('\\varphi')],
                  E=Symbol('E', positive=True),
                  nu=Symbol('\\nu', positive=True),
+                 D=Symbol('D', positive=True),
                  volumetric_load=0,
                  **kwargs
                 ):
         
 
-        super().__init__(disp_func=disp_func,stress_tensor=stress_tensor,bc_dict=bc_dict,coords=coords,E=E,nu=nu,volumetric_load=volumetric_load,**kwargs)
+
+        
+        super().__init__(disp_func=disp_func,stress_tensor=stress_tensor,bc_dict=bc_dict,coords=coords,E=E,nu=nu,D=D,volumetric_load=volumetric_load,**kwargs)
+        
+
+        
+class CSPlate(PlaneStressProblem):
+    
+    scheme_name = 'plate_loaded_scheme.PNG'
+    real_name = 'reservoir.jpg'
+    
+    def __init__(self,
+                 disp_func=[Function('\\psi')(Symbol('r')), 0],
+                 stress_tensor=Matrix(2, 2, [
+                     Function('\\mathit{m}_r')(Symbol('r')), 0, 0,
+                     Function('\\mathit{m}_\\varphi')(Symbol('r'))
+                 ]),
+                 bc_dict=None,
+                 coords=[Symbol('r'), Symbol('\\varphi')],
+                 E=Symbol('E', positive=True),
+                 nu=Symbol('\\nu', positive=True),      
+                 D=Symbol('D_h', positive=True),
+                 h=Symbol('h', positive=True),
+                 volumetric_load=0,
+                 **kwargs
+                ):
         
 class MDoFThreePendulumsWithSprings(ComposedSystem):
     scheme_name = 'MDOF_Three_Pendulum_Spring.png'
@@ -3155,6 +3185,7 @@ class MDoFThreePendulumsWithSprings(ComposedSystem):
 
             parameters_dict[self.phi_2] = self.phi_r
 
+<<<<<<< HEAD
         return parameters_dict
 
     
@@ -3293,3 +3324,23 @@ class DDoFTwoNonLinearDisks(ComposedSystem):
             self.l_0: r'initial Spring Length',
         }
         return self.sym_desc_dict
+=======
+#         print('__init')
+#         print(type(self))
+#         display(disp_func)
+        
+        super().__init__(disp_func=disp_func,stress_tensor=stress_tensor,bc_dict=bc_dict,coords=coords,E=E,nu=nu,D=D,volumetric_load=volumetric_load,**kwargs)
+        
+#         print('__init - after super')
+#         print(type(self))
+#         display(self.u)
+        self._h=h
+        
+        self._subs_dict = {E:D*(1-nu**2)*12/(h**3)} 
+        self.E_module=(h**3)/12*E
+#         self.u = Matrix([Function('\\psi')(Symbol('r')), 0])
+        
+#         print('__init - after super')
+#         print(type(self))
+#         display(self.u)
+>>>>>>> 47b93c1414ae2dbff03bf9ddb9bbd24599164635
