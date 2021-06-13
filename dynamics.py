@@ -319,7 +319,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         #print(new_sys.q)
         
         
-        return new_sys
+        return type(self)(0,system=new_sys)
 
     def remove(self, *args):
 

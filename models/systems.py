@@ -2412,7 +2412,7 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
 
 
 class DDoFTwoNonLinearTrolleys(ComposedSystem):
-    scheme_name = 'nonlin_trolley.PNG'
+    scheme_name = 'ddof_nonlin_trolleys.PNG'
     real_name = 'dwa_wozki_XD.PNG'
 
     def __init__(self,
@@ -2445,10 +2445,10 @@ class DDoFTwoNonLinearTrolleys(ComposedSystem):
             k1, pos1=(sqrt(x1**2 + d**2) - l_0), qs=[x1])
         self.Trolley2 = MaterialPoint(m2, x2, qs=[x2]) + Spring(
             k2, pos1=(sqrt(x2**2 + d**2) - l_0), qs=[x2])
-        self.Spring = Spring(k3, x1, x2)
+        self.Spring = Spring(k3, x1, x2,qs=[x1,x2])
 
         system = self.Trolley1 + self.Spring + self.Trolley2
-        super().__init__(system(qs))
+        super().__init__(system(qs),**kwargs)
 
     def get_default_data(self):
 
@@ -2561,12 +2561,7 @@ class MDoFForcedTrolleysWithSprings(ComposedSystem):
     real_name = 'three_carriages.PNG'
 
     def __init__(self,
-                 x_l=dynamicsymbols('x_l'),
-                 x_c=dynamicsymbols('x_c'),
-                 x_r=dynamicsymbols('x_r'),
-                 x_1=dynamicsymbols('x_1'),
-                 x_2=dynamicsymbols('x_2'),
-                 x_3=dynamicsymbols('x_3'),
+
                  m1=Symbol('m_1', positive=True),
                  m2=Symbol('m_2', positive=True),
                  m3=Symbol('m_3', positive=True),
@@ -2580,6 +2575,14 @@ class MDoFForcedTrolleysWithSprings(ComposedSystem):
                  k_cr=Symbol('k_cr', positive=True),
                  F=Symbol('F', positive=True),
                  Omega=Symbol('Omega', positive=True),
+                 
+                 x_l=dynamicsymbols('x_l'),
+                 x_c=dynamicsymbols('x_c'),
+                 x_r=dynamicsymbols('x_r'),
+                 x_1=dynamicsymbols('x_1'),
+                 x_2=dynamicsymbols('x_2'),
+                 x_3=dynamicsymbols('x_3'),
+                 
                  qs=dynamicsymbols('x_l x_c x_r'),
                  ivar=Symbol('t'),
                  **kwargs):
@@ -2608,18 +2611,21 @@ class MDoFForcedTrolleysWithSprings(ComposedSystem):
                 x_l
             ]) + Spring(k_cl, pos1=x_l, qs=[x_l]) + Force(
                 -F * cos(Omega * ivar), pos1=x_l, qs=[x_l])
-        self.Trolley_2 = MaterialPoint(m2, x_c, qs=[x_c]) + Spring(
-            k_12, x_l, x_c) + Spring(k_12, x_l, x_c) + Spring(
-                k_23, x_c, x_r) + Spring(k_23, x_c, x_r) + Spring(
-                    k_c12, x_l, x_c) + Spring(k_c23, x_c, x_r)
-        self.Trolley_3 = MaterialPoint(m3, x_r, qs=[x_r]) + Spring(
+        
+        
+        
+        self.Trolley_2 = MaterialPoint(m2, x_c, qs=qs) + Spring(
+            k_12, x_l, x_c,qs=qs) + Spring(k_12, x_l, x_c,qs=qs) + Spring(
+                k_23, x_c, x_r,qs=qs) + Spring(k_23, x_c, x_r,qs=[x_c,x_l]) + Spring(
+                    k_c12, x_l, x_c,qs=qs) + Spring(k_c23, x_c, x_r,qs=qs)
+        self.Trolley_3 = MaterialPoint(m3, x_r, qs=qs) + Spring(
             k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[
                 x_r
             ]) + Spring(k_cr, pos1=x_r, qs=[x_r]) + Force(
                 -2 * F * cos(Omega * ivar), pos1=x_r, qs=[x_r])
 
         system = self.Trolley_1 + self.Trolley_2 + self.Trolley_3
-        super().__init__(system(qs))
+        super().__init__(system,**kwargs)
 
     def get_default_data(self):
 
