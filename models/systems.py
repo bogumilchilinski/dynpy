@@ -3067,4 +3067,229 @@ class CSCylinder(PlaneStressProblem):
 
         super().__init__(disp_func=disp_func,stress_tensor=stress_tensor,bc_dict=bc_dict,coords=coords,E=E,nu=nu,volumetric_load=volumetric_load,**kwargs)
         
+class MDoFThreePendulumsWithSprings(ComposedSystem):
+    scheme_name = 'MDOF_Three_Pendulum_Spring.png'
+    real_name = 'three_carriages.PNG'
 
+    def __init__(self,
+                 phi_1=dynamicsymbols('varphi_1'),
+                 phi_2=dynamicsymbols('varphi_2'),
+                 phi_3=dynamicsymbols('varphi_3'),
+                 phi_l=dynamicsymbols('varphi_l'),
+                 phi_r=dynamicsymbols('varphi_r'),
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 m3=Symbol('m_3', positive=True),
+                 k_1=Symbol('k_1', positive=True),
+                 k_2=Symbol('k_2', positive=True),
+                 k_3=Symbol('k_3', positive=True),
+                 k_4=Symbol('k_4', positive=True),
+                 l=Symbol('l', positive=True),
+                 g=Symbol('g', positive=True),
+                 qs=dynamicsymbols('varphi_1, varphi_2, varphi_3'),
+                 ivar=Symbol('t'),
+                 system = None,
+                 **kwargs):
+
+        self.m1 = m1
+        self.m2 = m2
+        self.m3 = m3
+        self.k_1 = k_1
+        self.k_2 = k_2
+        self.k_3 = k_3
+        self.k_4 = k_4
+        self.l = l
+        self.phi_1 = phi_1
+        self.phi_2 = phi_2
+        self.phi_3 = phi_3
+        self.phi_l = phi_l
+        self.phi_r = phi_r
+        self.g = g
+        
+        if system == None:
+            self.Pendulum1 = Pendulum(m1, g, l, angle=phi_1, qs=[phi_1])
+            self.Pendulum2 = Pendulum(m2, g, l, angle=phi_2, qs=[phi_2])
+            self.Pendulum3 = Pendulum(m3, g, l, angle=phi_3, qs=[phi_3])
+            self.Spring1 = Spring(k_1, pos1=(sqrt((l/2*(sin(phi_1)-sin(phi_2)))**2+(l/2*(cos(phi_1)-cos(phi_2)))**2)), qs=[phi_1, phi_2])
+            self.Spring2 = Spring(k_2, pos1=(sqrt((l/2*(sin(phi_2)-sin(phi_3)))**2+(l/2*(cos(phi_2)-cos(phi_3)))**2)), qs=[phi_2, phi_3])
+            self.Spring3 = Spring(k_3, pos1=(sqrt((l*(sin(phi_1)-sin(phi_2)))**2+(l*(cos(phi_1)-cos(phi_2)))**2)), qs=[phi_1, phi_2])
+            self.Spring4 = Spring(k_4, pos1=(sqrt((l*(sin(phi_2)-sin(phi_3)))**2+(l*(cos(phi_2)-cos(phi_3)))**2)), qs=[phi_2, phi_3])
+
+            system = self.Pendulum1 + self.Pendulum2 + self.Pendulum3 + self.Spring1 + self.Spring2 + self.Spring3 + self.Spring4
+        super().__init__(system(qs))
+
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
+            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.k_1: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_2: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_3: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_4: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+
+            self.phi_1: [self.phi_l, 0],
+            self.phi_2: [self.phi_l, self.phi_r, 0],
+            self.phi_3: [self.phi_r, 0],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.phi_1] != self.phi_l or parameters_dict[self.phi_2] != self.phi_l:
+
+            parameters_dict[self.phi_1] = self.phi_l
+
+        if parameters_dict[self.phi_2] != self.phi_r or parameters_dict[self.phi_3] != self.phi_r:
+
+            parameters_dict[self.phi_2] = self.phi_r
+
+        return parameters_dict
+
+    
+class MDoFLinearizedThreePendulumsWithSprings(MDoFThreePendulumsWithSprings):
+    scheme_name = 'MDOF_Three_Pendulum_Spring.png'
+    real_name = 'three_carriages.PNG'
+
+    
+    def __init__(self,
+                 phi_1=dynamicsymbols('varphi_1'),
+                 phi_2=dynamicsymbols('varphi_2'),
+                 phi_3=dynamicsymbols('varphi_3'),
+                 phi_l=dynamicsymbols('varphi_l'),
+                 phi_r=dynamicsymbols('varphi_r'),
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 m3=Symbol('m_3', positive=True),
+                 k_1=Symbol('k_1', positive=True),
+                 k_2=Symbol('k_2', positive=True),
+                 k_3=Symbol('k_3', positive=True),
+                 k_4=Symbol('k_4', positive=True),
+                 l=Symbol('l', positive=True),
+                 g=Symbol('g', positive=True),
+                 qs=dynamicsymbols('varphi_1, varphi_2, varphi_3'),
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        self.m1 = m1
+        self.m2 = m2
+        self.m3 = m3
+        self.k_1 = k_1
+        self.k_2 = k_2
+        self.k_3 = k_3
+        self.k_4 = k_4
+        self.l = l
+        self.phi_1 = phi_1
+        self.phi_2 = phi_2
+        self.phi_3 = phi_3
+        self.phi_l = phi_l
+        self.phi_r = phi_r
+        self.g = g
+        
+        self.Pendulum1 = Pendulum(m1, g, l, angle=phi_1, qs=[phi_1])
+        self.Pendulum2 = Pendulum(m2, g, l, angle=phi_2, qs=[phi_2])
+        self.Pendulum3 = Pendulum(m3, g, l, angle=phi_3, qs=[phi_3])
+        self.Spring1 = Spring(k_1, pos1=(phi_1 * (l/2)), pos2=(phi_2 * (l/2)), qs=[phi_1, phi_2])
+        self.Spring2 = Spring(k_2, pos1=(phi_2 * (l/2)), pos2=(phi_3 * (l/2)), qs=[phi_2, phi_3])
+        self.Spring3 = Spring(k_3, pos1=(phi_1 * l), pos2=(phi_2 * l), qs=[phi_1, phi_2])
+        self.Spring4 = Spring(k_4, pos1=(phi_2 * l), pos2=(phi_3 * l), qs=[phi_2, phi_3])
+
+        system = self.Pendulum1 + self.Pendulum2 + self.Pendulum3 + self.Spring1 + self.Spring2 + self.Spring3 + self.Spring4
+        super().__init__(system=system) 
+    
+
+    
+class DDoFTwoNonLinearDisks(ComposedSystem):
+    scheme_name = 'MDOF_Double_Disk.png'
+    real_name = 'dwa_wozki_XD.PNG'
+
+    def __init__(self,
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 kl=Symbol('k_l', positive=True),
+                 kc=Symbol('k_c', positive=True),
+                 kr=Symbol('k_r', positive=True),
+                 R=Symbol('R', positive=True),
+                 l=Symbol('l', positive=True),
+                 l_0=Symbol('l_0', positive=True),
+                 ivar=Symbol('t'),
+                 xl=dynamicsymbols('x_l'),
+                 xr=dynamicsymbols('x_r'),
+                 x=dynamicsymbols('x'),
+                 qs=dynamicsymbols('x_l, x_r'),
+                 **kwargs):
+
+        self.m1 = m1
+        self.m2 = m2
+        self.kl = kl
+        self.kc = kc
+        self.kr = kr
+        self.R = R
+        self.l_0 = l_0
+        self.l = l
+        self.xl = xl
+        self.xr = xr
+        self.x = x
+
+        self.Disk1 = MaterialPoint(m1, xl, qs=[xl]) + MaterialPoint(m1/2, xl, qs=[xl]) + Spring(kl, pos1=(sqrt(xl**2 + l**2) - l_0), qs=[xl])
+        self.Disk2 = MaterialPoint(m2, xr, qs=[xr]) + MaterialPoint(m2/2, xr, qs=[xr]) + Spring(kr, pos1=(sqrt(xr**2 + l**2) - l_0), qs=[xr])
+        self.Spring = Spring(kc, xl, xr,qs=[xl, xr])
+
+        system = self.Disk1 + self.Spring + self.Disk2
+        super().__init__(system(qs))
+
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
+            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.l: [1 * l0, 2 * l0, S.Half * l0, 3 * S.Half * l0, 1 * l0],
+            self.kl:
+            [S.Half * k0, S.Half * k0, 1 * k0, 3 * S.Half * k0, 2 * k0],
+            self.kr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.kc:
+            [S.Half * k0, 1 * k0, 3 * S.Half * k0, 2 * k0, 5 * S.Half * k0],
+            self.xl: [self.x, 0],
+            self.xr: [self.x, S.Zero],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.xl] == S.Zero:
+            parameters_dict[self.xr] = self.x
+
+        return parameters_dict
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m1: r'Disk Mass',
+            self.m2: r'Disk Mass',
+            self.kl: 'Left Spring Stiffness',
+            self.kr: 'Right Spring Stiffness',
+            self.kc: 'Central Spring Stiffness',
+            self.l: r'Length',
+            self.l_0: r'initial Spring Length',
+        }
+        return self.sym_desc_dict
