@@ -3096,7 +3096,28 @@ class CSPlate(PlaneStressProblem):
                  volumetric_load=0,
                  **kwargs
                 ):
+
+#         print('__init')
+#         print(type(self))
+#         display(disp_func)
         
+        super().__init__(disp_func=disp_func,stress_tensor=stress_tensor,bc_dict=bc_dict,coords=coords,E=E,nu=nu,D=D,volumetric_load=volumetric_load,**kwargs)
+        
+#         print('__init - after super')
+#         print(type(self))
+#         display(self.u)
+        self._h=h
+        
+        self._subs_dict = {E:D*(1-nu**2)*12/(h**3)} 
+        self.E_module=(h**3)/12*E
+#         self.u = Matrix([Function('\\psi')(Symbol('r')), 0])
+        
+#         print('__init - after super')
+#         print(type(self))
+#         display(self.u)
+
+
+
 class MDoFThreePendulumsWithSprings(ComposedSystem):
     scheme_name = 'MDOF_Three_Pendulum_Spring.png'
     real_name = 'three_carriages.PNG'
@@ -3185,7 +3206,7 @@ class MDoFThreePendulumsWithSprings(ComposedSystem):
 
             parameters_dict[self.phi_2] = self.phi_r
 
-<<<<<<< HEAD
+
         return parameters_dict
 
     
@@ -3324,23 +3345,4 @@ class DDoFTwoNonLinearDisks(ComposedSystem):
             self.l_0: r'initial Spring Length',
         }
         return self.sym_desc_dict
-=======
-#         print('__init')
-#         print(type(self))
-#         display(disp_func)
-        
-        super().__init__(disp_func=disp_func,stress_tensor=stress_tensor,bc_dict=bc_dict,coords=coords,E=E,nu=nu,D=D,volumetric_load=volumetric_load,**kwargs)
-        
-#         print('__init - after super')
-#         print(type(self))
-#         display(self.u)
-        self._h=h
-        
-        self._subs_dict = {E:D*(1-nu**2)*12/(h**3)} 
-        self.E_module=(h**3)/12*E
-#         self.u = Matrix([Function('\\psi')(Symbol('r')), 0])
-        
-#         print('__init - after super')
-#         print(type(self))
-#         display(self.u)
->>>>>>> 47b93c1414ae2dbff03bf9ddb9bbd24599164635
+
