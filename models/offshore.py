@@ -114,8 +114,8 @@ class DDoFVessel(ComposedSystem):
         numbers_dict={
             self.I_5:21*self.m_vessel,
             self.m_vessel: 1e7,
-            self.wave_level: 0.5 * cos(2/7 * pi * self.ivar),
-            self.wave_slope: 0.5 * cos(2/7 * pi * self.ivar),
+#             self.wave_level: 0.5 * cos(2/7 * pi * self.ivar),
+#             self.wave_slope: 0.5 * cos(2/7 * pi * self.ivar),
             self.rho:1025,
             self.g: 9.81,
             self.A_wl:4025,
@@ -123,8 +123,8 @@ class DDoFVessel(ComposedSystem):
             self.GM_L:290,
             self.CoB:3.6,
             self.CoF:13,
-            self.A_h:0.5,
-            self.Phi_h:0.315,
+            self.A_h:0.45,
+            self.Phi_h:-2.95,
         }
         
         return numbers_dict    
