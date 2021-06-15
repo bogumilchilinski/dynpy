@@ -3249,9 +3249,9 @@ class MDoFLinearizedThreePendulumsWithSprings(MDoFThreePendulumsWithSprings):
         self.phi_r = phi_r
         self.g = g
         
-        self.Pendulum1 = Pendulum(m1, g, l, angle=phi_1, qs=[phi_1])
-        self.Pendulum2 = Pendulum(m2, g, l, angle=phi_2, qs=[phi_2])
-        self.Pendulum3 = Pendulum(m3, g, l, angle=phi_3, qs=[phi_3])
+        self.Pendulum1 = Pendulum(m1, g, l, angle=phi_1, qs=[phi_1]).linearized()
+        self.Pendulum2 = Pendulum(m2, g, l, angle=phi_2, qs=[phi_2]).linearized()
+        self.Pendulum3 = Pendulum(m3, g, l, angle=phi_3, qs=[phi_3]).linearized()
         self.Spring1 = Spring(k_1, pos1=(phi_1 * (l/2)), pos2=(phi_2 * (l/2)), qs=[phi_1, phi_2])
         self.Spring2 = Spring(k_2, pos1=(phi_2 * (l/2)), pos2=(phi_3 * (l/2)), qs=[phi_2, phi_3])
         self.Spring3 = Spring(k_3, pos1=(phi_1 * l), pos2=(phi_2 * l), qs=[phi_1, phi_2])
