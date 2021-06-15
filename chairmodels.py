@@ -123,15 +123,15 @@ nDOF=len(q)
 # u_rr=u0/2*(1+(Heaviside(x-t0-2*R,0.5) - Heaviside(x-t0-delta_t-2*R,0.5) ))#road profile given in time domain
 # u_rf=u0/2*(1+(Heaviside(x-t0,0.5) - Heaviside(x-t0-delta_t,0.5) ))#road profile given in time domain
 
-# u_rf_bump=u0/2*(1+2/pi*atan(5*(x-t0)))-u0/2*(1+2/pi*atan(5*(x-t0-t_l)))
+u_rf_bump_on=u0/2*(1+2/pi*atan(5*(t-t0)))-u0/2*(1+2/pi*atan(5*(t-t0-t_l)))
 u_rf_bump=S.Zero
-# u_rr_bump=u_rf_bump.subs(x,x-2*R) 
+u_rr_bump_on=u_rf_bump.subs(t,t-1) 
 u_rr_bump=S.Zero#road profile given in time domain
  #road profile given in time domain
 
-# u_rf_mul_bumps=sum(u_rf_bump.subs(x,x-ii*l_bumps) for ii in range(5))
+u_rf_mul_bumps_on=sum(u_rf_bump_on.subs(x,x-ii*l_bumps) for ii in range(5))
 u_rf_mul_bumps=0
-# u_rr_mul_bumps=u_rf_mul_bumps.subs(x,x-2*R)
+u_rr_mul_bumps_on=u_rf_mul_bumps_on.subs(x,x-2*R)
 u_rr_mul_bumps=0#road profile given in time domain
  #road profile given in time domain
     
@@ -247,7 +247,7 @@ D_rapidchair3dof=(c_mu*T_RC_3dof).doit().expand()
 
 D_chair5dof_rc3dof=(c_mu*T_chair5dof_rc3dof).doit().expand()
 
-# D+= c_lam* + S.One/2*k_r*(((z+R*(phi)-z_rear)**2 ).diff(t))**2
+# D+= c_lam* S.One/2*k_r*(((z+R*(phi)-z_rear)**2 ).diff(t))**2
 
 # D+= c_lam* S.One/2*k_f*(((z-R*(phi)-z_fr)**2 ).diff(t))**2
 
@@ -307,9 +307,12 @@ L_chair5dof_rc3dof=T_chair5dof_rc3dof-V_chair5dof_rc3dof
 
 
 
-# qs_3dof = x, z, phi
-# qs_2dof = x, z
 
+V_rear_road = S.One/2*k_rt*(z_rear-u_rr_bump_on)**2  + S.One/2*k_r*(u_rear)**2 # Ep tylnich prętów ramy względem ich sprężystości
+V_fr_road = S.One/2*k_ft*(z_fr-u_rf_bump_on)**2  + S.One/2*k_f*(u_fr)**2       # Ep przednich prętów ramy względem ich sprężystości
+T_chair5dof = T_body + T_rot + T_rear + T_fr + T_wheel
+V_chair5dof_road = V_chair_g + V_rear_road + V_fr_road
+L_chair5dof_withroad = T_chair5dof - V_chair5dof_road
 
 
 
@@ -322,6 +325,7 @@ class Chair5DOF(dyn.LagrangesDynamicSystem):
         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
                  hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs)
         
+
         
         
         
@@ -348,7 +352,6 @@ chair_5dof_lin=chair_5dof.linearized()('Chair linearized 5DOF model')
 chair_3dof_rev = chair_5dof.subs(dof3_rev,method='direct').shranked(x, z_rear, z)('Chair 3DOF model with revolution')
 chair_3dof_norev = chair_5dof.subs(dof3_norev,method='direct').shranked(x, z, phi)('Chair 3DOF model without revolution')       
 chair_2dof = chair_5dof.subs(dof2,method='direct').shranked(x, z)('Chair 2DOF model')
-
 
 
 
@@ -599,3 +602,15 @@ dof_names_dict={chair_2dof:'o dwóch stopniach swobody',
                 rapidchair_3dof:'o trzech stopniach swobody',
                 chair5dof_rc3dof:'o ośmiu stopniach swobody'
                }
+
+
+Dlam_chair5dof=((chair_5dof_lin.q.diff(t)).T*chair_5dof_lin.stiffness_matrix()*chair_5dof_lin.q.diff(t)*c_lam).doit().expand()
+FL_lam_chair5dof = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*2*F*N.x)]+[(points_list[no],-D_chair5dof.diff(vel)*N.x) for no,vel in enumerate(Matrix(qs_5dof).diff(t))]+[(points_list[no],-Dlam_chair5dof.diff(vel)*N.x)  for no,vel in enumerate(Matrix(qs_5dof).diff(t))]
+class Chair5DOF_withroad(dyn.LagrangesDynamicSystem):
+
+    def __init__(self, Lagrangian=L_chair5dof_withroad, qs=qs_5dof, forcelist=FL_lam_chair5dof, bodies=None, frame=N,
+                       hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t'),**kwargs):
+        
+        super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
+                 hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs)
+chair_5dof_with_road=Chair5DOF_withroad()('Chair 5DOF model with road')
