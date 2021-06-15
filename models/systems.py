@@ -2412,7 +2412,7 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
 
 
 class DDoFTwoNonLinearTrolleys(ComposedSystem):
-    scheme_name = 'nonlin_trolley.PNG'
+    scheme_name = 'ddof_nonlin_trolleys.PNG'
     real_name = 'dwa_wozki_XD.PNG'
 
     def __init__(self,
@@ -2445,10 +2445,10 @@ class DDoFTwoNonLinearTrolleys(ComposedSystem):
             k1, pos1=(sqrt(x1**2 + d**2) - l_0), qs=[x1])
         self.Trolley2 = MaterialPoint(m2, x2, qs=[x2]) + Spring(
             k2, pos1=(sqrt(x2**2 + d**2) - l_0), qs=[x2])
-        self.Spring = Spring(k3, x1, x2)
+        self.Spring = Spring(k3, x1, x2,qs=[x1,x2])
 
         system = self.Trolley1 + self.Spring + self.Trolley2
-        super().__init__(system(qs))
+        super().__init__(system(qs),**kwargs)
 
     def get_default_data(self):
 
@@ -2561,12 +2561,7 @@ class MDoFForcedTrolleysWithSprings(ComposedSystem):
     real_name = 'three_carriages.PNG'
 
     def __init__(self,
-                 x_l=dynamicsymbols('x_l'),
-                 x_c=dynamicsymbols('x_c'),
-                 x_r=dynamicsymbols('x_r'),
-                 x_1=dynamicsymbols('x_1'),
-                 x_2=dynamicsymbols('x_2'),
-                 x_3=dynamicsymbols('x_3'),
+
                  m1=Symbol('m_1', positive=True),
                  m2=Symbol('m_2', positive=True),
                  m3=Symbol('m_3', positive=True),
@@ -2580,6 +2575,14 @@ class MDoFForcedTrolleysWithSprings(ComposedSystem):
                  k_cr=Symbol('k_cr', positive=True),
                  F=Symbol('F', positive=True),
                  Omega=Symbol('Omega', positive=True),
+                 
+                 x_l=dynamicsymbols('x_l'),
+                 x_c=dynamicsymbols('x_c'),
+                 x_r=dynamicsymbols('x_r'),
+                 x_1=dynamicsymbols('x_1'),
+                 x_2=dynamicsymbols('x_2'),
+                 x_3=dynamicsymbols('x_3'),
+                 
                  qs=dynamicsymbols('x_l x_c x_r'),
                  ivar=Symbol('t'),
                  **kwargs):
@@ -2608,18 +2611,21 @@ class MDoFForcedTrolleysWithSprings(ComposedSystem):
                 x_l
             ]) + Spring(k_cl, pos1=x_l, qs=[x_l]) + Force(
                 -F * cos(Omega * ivar), pos1=x_l, qs=[x_l])
-        self.Trolley_2 = MaterialPoint(m2, x_c, qs=[x_c]) + Spring(
-            k_12, x_l, x_c) + Spring(k_12, x_l, x_c) + Spring(
-                k_23, x_c, x_r) + Spring(k_23, x_c, x_r) + Spring(
-                    k_c12, x_l, x_c) + Spring(k_c23, x_c, x_r)
-        self.Trolley_3 = MaterialPoint(m3, x_r, qs=[x_r]) + Spring(
+        
+        
+        
+        self.Trolley_2 = MaterialPoint(m2, x_c, qs=qs) + Spring(
+            k_12, x_l, x_c,qs=qs) + Spring(k_12, x_l, x_c,qs=qs) + Spring(
+                k_23, x_c, x_r,qs=qs) + Spring(k_23, x_c, x_r,qs=[x_c,x_l]) + Spring(
+                    k_c12, x_l, x_c,qs=qs) + Spring(k_c23, x_c, x_r,qs=qs)
+        self.Trolley_3 = MaterialPoint(m3, x_r, qs=qs) + Spring(
             k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[
                 x_r
             ]) + Spring(k_cr, pos1=x_r, qs=[x_r]) + Force(
                 -2 * F * cos(Omega * ivar), pos1=x_r, qs=[x_r])
 
         system = self.Trolley_1 + self.Trolley_2 + self.Trolley_3
-        super().__init__(system(qs))
+        super().__init__(system,**kwargs)
 
     def get_default_data(self):
 
@@ -3078,7 +3084,7 @@ class CSCylinder(PlaneStressProblem):
         
 class CSPlate(PlaneStressProblem):
     
-    scheme_name = 'plate_loaded_scheme.PNG'
+    scheme_name = 'plate_point_load.PNG'
     real_name = 'reservoir.jpg'
     
     def __init__(self,
@@ -3210,17 +3216,17 @@ class MDoFThreePendulumsWithSprings(ComposedSystem):
         return parameters_dict
 
     
-class MDoFLinearizedThreePendulumsWithSprings(MDoFThreePendulumsWithSprings):
-    scheme_name = 'MDOF_Three_Pendulum_Spring.png'
-    real_name = 'three_carriages.PNG'
+class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
+    scheme_name = 'three_pendulums_forced.PNG'
+    real_name = 'lifting_tandem.png'
 
-    
     def __init__(self,
-                 phi_1=dynamicsymbols('varphi_1'),
-                 phi_2=dynamicsymbols('varphi_2'),
-                 phi_3=dynamicsymbols('varphi_3'),
-                 phi_l=dynamicsymbols('varphi_l'),
-                 phi_r=dynamicsymbols('varphi_r'),
+                 phi_1=dynamicsymbols('\\varphi_1'),
+                 phi_2=dynamicsymbols('\\varphi_2'),
+                 phi_3=dynamicsymbols('\\varphi_3'),
+                 phi_l=dynamicsymbols('\\varphi_l'),
+                 phi_c=dynamicsymbols('\\varphi_c'),
+                 phi_r=dynamicsymbols('\\varphi_r'),
                  m1=Symbol('m_1', positive=True),
                  m2=Symbol('m_2', positive=True),
                  m3=Symbol('m_3', positive=True),
@@ -3230,7 +3236,9 @@ class MDoFLinearizedThreePendulumsWithSprings(MDoFThreePendulumsWithSprings):
                  k_4=Symbol('k_4', positive=True),
                  l=Symbol('l', positive=True),
                  g=Symbol('g', positive=True),
-                 qs=dynamicsymbols('varphi_1, varphi_2, varphi_3'),
+                 Omega=Symbol('\Omega', positive=True),
+                 F=Symbol('F',positive=True),
+                 qs=dynamicsymbols('\\varphi_l, \\varphi_c, \\varphi_r'),
                  ivar=Symbol('t'),
                  **kwargs):
 
@@ -3246,21 +3254,63 @@ class MDoFLinearizedThreePendulumsWithSprings(MDoFThreePendulumsWithSprings):
         self.phi_2 = phi_2
         self.phi_3 = phi_3
         self.phi_l = phi_l
+        self.phi_c = phi_c
         self.phi_r = phi_r
         self.g = g
-        
-        self.Pendulum1 = Pendulum(m1, g, l, angle=phi_1, qs=[phi_1]).linearized()
-        self.Pendulum2 = Pendulum(m2, g, l, angle=phi_2, qs=[phi_2]).linearized()
-        self.Pendulum3 = Pendulum(m3, g, l, angle=phi_3, qs=[phi_3]).linearized()
-        self.Spring1 = Spring(k_1, pos1=(phi_1 * (l/2)), pos2=(phi_2 * (l/2)), qs=[phi_1, phi_2])
-        self.Spring2 = Spring(k_2, pos1=(phi_2 * (l/2)), pos2=(phi_3 * (l/2)), qs=[phi_2, phi_3])
-        self.Spring3 = Spring(k_3, pos1=(phi_1 * l), pos2=(phi_2 * l), qs=[phi_1, phi_2])
-        self.Spring4 = Spring(k_4, pos1=(phi_2 * l), pos2=(phi_3 * l), qs=[phi_2, phi_3])
+        self.Omega = Omega
+        self.F = F
+
+        self.Pendulum1 = Pendulum(m1, g, l, angle=phi_l, qs=[phi_l]).linearized() + Force(-F * l * cos(Omega * ivar), pos1=phi_l, qs=[phi_l])
+        self.Pendulum2 = Pendulum(m2, g, l, angle=phi_c, qs=[phi_c]).linearized()
+        self.Pendulum3 = Pendulum(m3, g, l, angle=phi_r, qs=[phi_r]).linearized() + Force(-2* F * l* cos(Omega * ivar), pos1=phi_r, qs=[phi_r])
+        self.Spring1 = Spring(k_1, pos1=(phi_l * (l/2)), pos2=(phi_c * (l/2)), qs=[phi_l, phi_c])
+        self.Spring2 = Spring(k_2, pos1=(phi_c * (l/2)), pos2=(phi_r * (l/2)), qs=[phi_c, phi_r])
+        self.Spring3 = Spring(k_3, pos1=(phi_l * l), pos2=(phi_c * l), qs=[phi_l, phi_c])
+        self.Spring4 = Spring(k_4, pos1=(phi_c * l), pos2=(phi_r * l), qs=[phi_c, phi_r])
+       
 
         system = self.Pendulum1 + self.Pendulum2 + self.Pendulum3 + self.Spring1 + self.Spring2 + self.Spring3 + self.Spring4
-        super().__init__(system=system) 
+        super().__init__(system(qs),**kwargs)
     
+    def get_default_data(self):
 
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
+            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.k_1: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_2: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_3: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_4: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+
+            self.phi_1: [self.phi_l, 0],
+            self.phi_2: [self.phi_l, self.phi_r, 0],
+            self.phi_3: [self.phi_r, 0],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.phi_1] != self.phi_l or parameters_dict[self.phi_2] != self.phi_l:
+
+            parameters_dict[self.phi_1] = self.phi_l
+
+        if parameters_dict[self.phi_2] != self.phi_r or parameters_dict[self.phi_3] != self.phi_r:
+
+            parameters_dict[self.phi_2] = self.phi_r
+
+
+        return parameters_dict
     
 class DDoFTwoNonLinearDisks(ComposedSystem):
     scheme_name = 'MDOF_Double_Disk.png'
@@ -3273,7 +3323,7 @@ class DDoFTwoNonLinearDisks(ComposedSystem):
                  kc=Symbol('k_c', positive=True),
                  kr=Symbol('k_r', positive=True),
                  R=Symbol('R', positive=True),
-                 l=Symbol('l', positive=True),
+                 d=Symbol('d', positive=True),
                  l_0=Symbol('l_0', positive=True),
                  ivar=Symbol('t'),
                  xl=dynamicsymbols('x_l'),
@@ -3289,17 +3339,17 @@ class DDoFTwoNonLinearDisks(ComposedSystem):
         self.kr = kr
         self.R = R
         self.l_0 = l_0
-        self.l = l
+        self.d = d
         self.xl = xl
         self.xr = xr
         self.x = x
 
-        self.Disk1 = MaterialPoint(m1, xl, qs=[xl]) + MaterialPoint(m1/2, xl, qs=[xl]) + Spring(kl, pos1=(sqrt(xl**2 + l**2) - l_0), qs=[xl])
-        self.Disk2 = MaterialPoint(m2, xr, qs=[xr]) + MaterialPoint(m2/2, xr, qs=[xr]) + Spring(kr, pos1=(sqrt(xr**2 + l**2) - l_0), qs=[xr])
-        self.Spring = Spring(kc, xl, xr,qs=[xl, xr])
+        self.Disk1 = MaterialPoint(m1, xl, qs=[xl]) + MaterialPoint(m1/2*R**2, xl/R, qs=[xl]) + Spring(kl, pos1=(sqrt(xl**2 + d**2) - l_0), qs=[xl])
+        self.Disk2 = MaterialPoint(m2, xr, qs=[xr]) + MaterialPoint(m2/2*R**2, xr/R, qs=[xr]) + Spring(kr, pos1=(sqrt(xr**2 + d**2) - l_0), qs=[xr])
+        self.Spring = Spring(kc, xl, xr, qs=[xl, xr])
 
         system = self.Disk1 + self.Spring + self.Disk2
-        super().__init__(system(qs))
+        super().__init__(system(qs),**kwargs)
 
     def get_default_data(self):
 
@@ -3308,7 +3358,7 @@ class DDoFTwoNonLinearDisks(ComposedSystem):
         default_data_dict = {
             self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
             self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.l: [1 * l0, 2 * l0, S.Half * l0, 3 * S.Half * l0, 1 * l0],
+            self.d: [1 * l0, 2 * l0, S.Half * l0, 3 * S.Half * l0, 1 * l0],
             self.kl:
             [S.Half * k0, S.Half * k0, 1 * k0, 3 * S.Half * k0, 2 * k0],
             self.kr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
