@@ -534,7 +534,6 @@ class PlotTestResult:
         ndp=DataPlot('wykres_nowy',position='H',preview=False)
         ndp.add_data_plot(filename=f'Wykres_alpha_{next(plots_no_gen)}.png',width='11cm')
         ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter - pomiary'''))
-        
         plt.show()
         
         
