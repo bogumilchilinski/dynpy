@@ -23,6 +23,8 @@ from sympy.physics.vector.printing import vlatex, vpprint
 
 from IPython.display import display, Markdown, Latex
 
+from .timeseries import TimeDataFrame, TimeSeries
+
 def plots_no():
     num = 0
     while True:
@@ -32,6 +34,31 @@ def plots_no():
 
 plots_no_gen= plots_no()
 
+class  ReportModule:
+
+    cls_container=[]
+
+    @classmethod
+    def set_container(cls,container=None):
+        cls.cls_container=container
+        return cls
+    
+    def __init__(self,container=None):
+        if container:
+            self._container
+        else:
+            self._container=type(self).cls_container
+        
+    def __str__(self):
+        return self._container.__str__()
+    
+    def __repr__(self):
+        return self._container.__repr__()
+    
+#     @classmethod
+#     def set_directory(cls,path=None):
+#         path='[SC] Analytical modelling of parametrically induced payload pendulation/computations/SDA_results'
+#         return os.chdir(path)
 
 class DataStorage:
     r'''
@@ -209,7 +236,7 @@ class SimulationalBlock:
         
         
         ndp=DataPlot('wykres_nowy',position='H',preview=False)
-        ndp.add_data_plot(filename=f'Wykres_alpha_{next(plots_no_gen)}.png',width='11cm')
+        ndp.add_data_plot(filename=f'./SDA_results/block_simulation_{next(plots_no_gen)}.png',width='11cm')
         ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''))
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
         #ndp.append(Label(self.marker_dict[coord]))
@@ -236,7 +263,17 @@ class SimulationFFT:
         plt.show()
         return fft_result
     
-class AccelerationComparison:
+    @classmethod
+    def fft(cls,analysis=None):
+        
+        fft_of_storage={key:result.to_frequency_domain().double_sided_rms()  for key,result in DataStorage._storage.items()}
+        
+        DataStorage._storage=fft_of_storage
+        
+        return fft_of_storage
+        
+    
+class AccelerationComparison(ReportModule):
     r'''
     It is computational block that prepares the comparison of particular coordinates regarding to changes of selected parameter.
     Class provides several methods devoted for data processing, ploting and reporting.
@@ -269,7 +306,7 @@ class AccelerationComparison:
     
     
     
-    def __init__(self,t_span=None,ics_list=None):
+    def __init__(self,t_span=None,data=None,ics_list=None):
         
         self._t_span=t_span
         self._ics_list=ics_list
@@ -278,11 +315,18 @@ class AccelerationComparison:
             self._t_span=t_span
         else:
             self._t_span = type(self).general_t_span
+            
+        if data:
+            self._data=data
+        else:
+            self._data=DataStorage._storage
+            
+        super().__init__(None)
 
 
     def _prepare_data(self,coordinate=None):
         
-        data=DataStorage._storage
+        data=self._data
         
         
 #         print('_______________test of plot_____________')
@@ -345,7 +389,7 @@ class AccelerationComparison:
 
 
             ndp=DataPlot('wykres_nowy',position='H',preview=False)
-            ndp.add_data_plot(filename=f'Wykres_summary{next(plots_no_gen)}.png',width='11cm')
+            ndp.add_data_plot(filename=f'./SDA_results/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
             
             
             ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(self._parameter)}\)'''))
@@ -355,7 +399,10 @@ class AccelerationComparison:
         #ndp.append(Label(self.marker_dict[coord]))
         
             if analysis:
-                analysis._container.append(ndp)        
+                analysis._container.append(ndp)
+            else:
+                print(TimeDataFrame(data).to_tikz_plot(f'./SDA_results/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'))
+                self._container.append(ndp)
 
         
             
@@ -378,14 +425,16 @@ class AccelerationComparison:
 
         
         ndp=DataPlot('wykres_nowy1',position='H',preview=False)
-        ndp.add_data_plot(filename=f'Wykres_max_{next(plots_no_gen)}.png',width='11cm')
+        ndp.add_data_plot(filename=f'./SDA_results/{self.__class__.__name__}_max_data_{next(plots_no_gen)}.png',width='11cm')
         ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''))
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
         #ndp.append(Label(self.marker_dict[coord]))
         
         if analysis:
             analysis._container.append(ndp)
-        
+        else:
+            self._container.append(ndp)
+
         
         return None
     
@@ -412,7 +461,10 @@ class AccelerationComparison:
         #ndp.append(Label(self.marker_dict[coord]))
         
         
-        analysis._container.append(ndp)
+        if analysis:
+            analysis._container.append(ndp)
+        else:
+            self._container.append(ndp)
         
         return None
     
@@ -445,6 +497,17 @@ class AccelerationComparison:
         
         return self._simulation_result
 
+class FFTComparison(AccelerationComparison):
+    
+    def _prepare_data(self,coordinate=None):
+    
+        data=self._data
+    
+        self._data   ={   key:value.to_frequency_domain().double_sided_rms()   for key,value in     data.items()}
+    
+        return super()._prepare_data(coordinate=None)
+    
+    
 class ReportEntry:
     def __init__(self,block_title):
         self._block_title = block_title
@@ -457,7 +520,7 @@ class ReportEntry:
         return sec
 
     
-class ReportText:
+class ReportText(ReportModule):
     def __init__(self,text=None,key_dict=DataStorage._dict):
         
         self._text='Figures {first_marker}-{last_marker}'
@@ -479,6 +542,8 @@ class ReportText:
         finally:
             self._text=self._text
         
+        super().__init__()
+        self._container.append(NoEscape( self._text  ))
 
     
     def __call__(self,analysis):
@@ -498,6 +563,7 @@ class ReportText:
         
         display(Markdown(self._text))
 
+        
         #return (self._text)
         return ''
 
