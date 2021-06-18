@@ -600,7 +600,6 @@ class PlotTestResult:
         ndp=DataPlot('wykres_nowy',position='H',preview=False)
         ndp.add_data_plot(filename=f'Wykres_alpha_{next(plots_no_gen)}.png',width='11cm')
         ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter - pomiary'''))
-        
         plt.show()
         
         
@@ -680,6 +679,7 @@ class SystemDynamicsAnalyzer:
         else:
             self.init_report()
             print(self._analysis_span)
+            
             return (self._analysis_span)
     
     def analysis_step(self,case_data,t_span,ics_list=None):
@@ -693,7 +693,7 @@ class SystemDynamicsAnalyzer:
 
         self.report_step(self._current_result)
     
-    
+        
         return self._current_result
     
     
