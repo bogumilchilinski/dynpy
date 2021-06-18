@@ -613,6 +613,7 @@ class SystemDynamicsAnalyzer:
         else:
             self.init_report()
             print(self._analysis_span)
+            
             return (self._analysis_span)
     
     def analysis_step(self,case_data,t_span,ics_list=None):
@@ -626,7 +627,7 @@ class SystemDynamicsAnalyzer:
 
         self.report_step(self._current_result)
     
-    
+        
         return self._current_result
     
     
