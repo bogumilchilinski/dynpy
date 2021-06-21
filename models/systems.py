@@ -3400,17 +3400,11 @@ class DDoFTwoNonLinearDisks(ComposedSystem):
     
 class MDoFForcedDisksWithParallelSprings(ComposedSystem):
     scheme_name = 'MDOF_Forced_Disks_With_Parallel_Springs.PNG'
-    real_name = 'three_carriages.PNG'
+    real_name = 'three_rollers_real.png'
 
     def __init__(self,
-                 x_l=dynamicsymbols('x_l'),
-                 x_c=dynamicsymbols('x_c'),
-                 x_r=dynamicsymbols('x_r'),
-                 x_1=dynamicsymbols('x_1'),
-                 x_2=dynamicsymbols('x_2'),
-                 x_3=dynamicsymbols('x_3'),
-                 m=Symbol('m', positive=True),
                  R=Symbol('R', positive=True),
+                 m=Symbol('m', positive=True),
                  m1=Symbol('m_1', positive=True),
                  m2=Symbol('m_2', positive=True),
                  m3=Symbol('m_3', positive=True),
@@ -3424,6 +3418,11 @@ class MDoFForcedDisksWithParallelSprings(ComposedSystem):
                  k_cr=Symbol('k_cr', positive=True),
                  F_0=Symbol('F_0', positive=True),
                  Omega=Symbol('Omega', positive=True),
+                 x_l=dynamicsymbols('x_l'),
+                 x_c=dynamicsymbols('x_c'),
+                 x_r=dynamicsymbols('x_r'),
+                 x_1=dynamicsymbols('x_1'),
+                 x_2=dynamicsymbols('x_2'),
                  qs=dynamicsymbols('x_l x_c x_r'),
                  ivar=Symbol('t'),
                  **kwargs):
@@ -3446,7 +3445,6 @@ class MDoFForcedDisksWithParallelSprings(ComposedSystem):
         self.x_r = x_r
         self.x_1 = x_1
         self.x_2 = x_2
-        self.x_3 = x_3
         self.Omega = Omega
 
         self.Disk1 = MaterialPoint(m, x_l, qs=[x_l]) + MaterialPoint(
@@ -3471,12 +3469,13 @@ class MDoFForcedDisksWithParallelSprings(ComposedSystem):
                 ]) + Spring(k_cr, pos1=x_r, qs=[x_r]) + Force(
                     -2 * F_0 * cos(Omega * ivar), pos1=x_r, qs=[x_r])
 
+
         system = self.Disk1 + self.Disk2 + self.Disk3
-        super().__init__(system(qs))
+        super().__init__(system(qs),**kwargs)
 
     def get_default_data(self):
 
-        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+        m0, k0, l0 = symbols('m k l_0', positive=True)
 
         default_data_dict = {
             self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
@@ -3492,7 +3491,7 @@ class MDoFForcedDisksWithParallelSprings(ComposedSystem):
             self.k_r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
             self.k_cr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
             self.x_l: [self.x_1, 0],
-            self.x_c: [self.x_1, self.x_2, 0],
+            self.x_c: [self.x_1, self.x_2],
             self.x_r: [self.x_2, 0],
         }
 
@@ -3523,22 +3522,23 @@ class MDoFForcedDisksWithParallelSprings(ComposedSystem):
     
 class MDoFDampedTrolleysWithSprings(ComposedSystem):
     scheme_name = 'MDOF_Damped_Trolleys_With_Springs.PNG'
-    real_name = 'three_carriages.PNG'
+    real_name = 'two_damped_trolleys.png'
 
     def __init__(self,
-                 x_l=dynamicsymbols('x_l'),
-                 x_r=dynamicsymbols('x_r'),
-                 x=dynamicsymbols('x'),
+                 R=Symbol('R', positive=True),
                  m=Symbol('m', positive=True),
                  m1=Symbol('m_1', positive=True),
                  m2=Symbol('m_2', positive=True),
-                 R=Symbol('R', positive=True),
+
                  k_l=Symbol('k_l', positive=True),
                  c_cl=Symbol('c_cl', positive=True),
                  k_c=Symbol('k_c', positive=True),
                  c_cc=Symbol('c_cc', positive=True),
                  k_r=Symbol('k_r', positive=True),
                  c_cr=Symbol('c_cr', positive=True),
+                 x_l=dynamicsymbols('x_l'),
+                 x_r=dynamicsymbols('x_r'),
+                 x=dynamicsymbols('x'),
                  qs=dynamicsymbols('x_l x_r'),
                  ivar=Symbol('t'),
                  **kwargs):
@@ -3569,11 +3569,11 @@ class MDoFDampedTrolleysWithSprings(ComposedSystem):
                           + MaterialPoint(m/2, x_r, qs = [x_r]))
 
         system = self.Trolley_1 + self.Trolley_2
-        super().__init__(system(qs))
+        super().__init__(system(qs),**kwargs)
 
     def get_default_data(self):
 
-        m0, k0, l0, lam = symbols('m_0 k_0 l_0 lambda', positive=True)
+        m0, k0, l0, lam = symbols('m k l_0 lambda', positive=True)
 
         default_data_dict = {
             self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
