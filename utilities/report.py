@@ -23,6 +23,8 @@ from sympy.physics.vector.printing import vlatex, vpprint
 
 from IPython.display import display, Markdown, Latex
 
+from .timeseries import TimeDataFrame, TimeSeries
+
 def plots_no():
     num = 0
     while True:
@@ -31,6 +33,51 @@ def plots_no():
 
 
 plots_no_gen= plots_no()
+
+class  ReportModule:
+
+    cls_container=[]
+    cls_path = ''
+    _caption='Figure describes the numerical data'
+
+    @classmethod
+    def set_container(cls,container=None):
+        cls.cls_container=container
+        return cls
+
+    @classmethod
+    def set_caption(cls,caption=''):
+        cls._caption=caption
+        return cls
+    
+    
+    @classmethod
+    def set_directory(cls,path=None):
+        
+        cls.cls_path='./SDA_results'
+        return cls
+    
+    
+    def __init__(self,container=None,path=None):
+        if container:
+            self._container=container
+        else:
+            self._container=type(self).cls_container
+            
+        if path:
+            self._path=path
+        else:
+            self._path=type(self).cls_path           
+            
+            
+        
+    def __str__(self):
+        return self._container.__str__()
+    
+    def __repr__(self):
+        return self._container.__repr__()
+    
+
 
 
 class DataStorage:
@@ -133,7 +180,7 @@ class DataStorage:
     def _nds(self):
         return self.named_storage
 
-class SimulationalBlock:
+class SimulationalBlock(ReportModule):
 
     
     r'''
@@ -164,6 +211,9 @@ class SimulationalBlock:
             self._t_span=t_span
         else:
             self._t_span = type(self).general_t_span
+            
+        self._numerical_system=None
+        super().__init__()
 
             
 
@@ -171,7 +221,11 @@ class SimulationalBlock:
 
         case_data=analysis._current_data
 
-        numerical_system=analysis._dynamic_system.numerized(parameter_values=case_data)
+        if not self._numerical_system:
+            
+            self._numerical_system=analysis._dynamic_system.numerized(parameter_values=case_data)
+            
+        numerical_system=self._numerical_system
         no_dof=len((numerical_system.dvars))
 
         if self._ics_list:
@@ -180,7 +234,8 @@ class SimulationalBlock:
 
         simulation_result=numerical_system.compute_solution(t_span=self._t_span,
                              ic_list=self._ics_list,
-                             t_eval=self._t_span
+                             t_eval=self._t_span,
+                             params_values=case_data
                              )
 
         self._simulation_result=simulation_result
@@ -209,7 +264,7 @@ class SimulationalBlock:
         
         
         ndp=DataPlot('wykres_nowy',position='H',preview=False)
-        ndp.add_data_plot(filename=f'Wykres_alpha_{next(plots_no_gen)}.png',width='11cm')
+        ndp.add_data_plot(filename=f'{cls.cls_path}/block_simulation_{next(plots_no_gen)}.png',width='11cm')
         ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''))
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
         #ndp.append(Label(self.marker_dict[coord]))
@@ -236,7 +291,17 @@ class SimulationFFT:
         plt.show()
         return fft_result
     
-class AccelerationComparison:
+    @classmethod
+    def fft(cls,analysis=None):
+        
+        fft_of_storage={key:result.to_frequency_domain().double_sided_rms()  for key,result in DataStorage._storage.items()}
+        
+        DataStorage._storage=fft_of_storage
+        
+        return fft_of_storage
+        
+    
+class AccelerationComparison(ReportModule):
     r'''
     It is computational block that prepares the comparison of particular coordinates regarding to changes of selected parameter.
     Class provides several methods devoted for data processing, ploting and reporting.
@@ -248,6 +313,8 @@ class AccelerationComparison:
     
     _data_storage={}
     
+    _formatter=lambda entry:  f'${latex(entry.lhs)} = {round(entry.rhs/1000)} \\si {{\\tonne}} ({ round(entry.rhs/10000000*100)  } \\% m_v ) $'
+    
     @classmethod
     def set_t_span(cls,t_span):
         
@@ -255,7 +322,12 @@ class AccelerationComparison:
         
         return cls
     
-
+    @classmethod
+    def set_label_foramatter(cls,formatter):
+        
+        cls._formatter=formatter
+        
+        return cls
     
     @classmethod
     def reset_storage(cls):
@@ -269,7 +341,7 @@ class AccelerationComparison:
     
     
     
-    def __init__(self,t_span=None,ics_list=None):
+    def __init__(self,t_span=None,data=None,ics_list=None,label=None):
         
         self._t_span=t_span
         self._ics_list=ics_list
@@ -278,18 +350,34 @@ class AccelerationComparison:
             self._t_span=t_span
         else:
             self._t_span = type(self).general_t_span
+            
+        if data:
+            self._data=data
+        else:
+            self._data=DataStorage._storage
+
+        if label:
+            self._label=label
+        else:
+            self._label=''
+            
+        super().__init__(None)
 
 
-    def _prepare_data(self,coordinate=None):
+    def _prepare_data(self,coordinate=None,xlim=None):
         
-        data=DataStorage._storage
-        
+        if xlim:
+            data={key:result.truncate(xlim[0],xlim[-1]) for key,result in self._data.items()}
+        else:
+             data=self._data       
         
 #         print('_______________test of plot_____________')
 #         print(data)
 #         print('_______________test of plot_____________')
         elements=list((data.values()))[0].columns
-        summaries_dict = {dynsym:pd.DataFrame()  for dynsym  in elements }
+        print('frametype')
+        print(type(list((data.values()))[0])())
+        summaries_dict = {dynsym:type(list((data.values()))[0])()  for dynsym  in elements }
         
         for key,result in data.items():
             for coord in elements:
@@ -301,24 +389,24 @@ class AccelerationComparison:
         else:
             return summaries_dict
                 
-    def prepare_summary(self,analysis=None,coordinate=None): 
+    def prepare_summary(self,analysis=None,coordinate=None,xlim=None): 
         
         if analysis:
             self._analysis=analysis
         
-        result=self._prepare_data()
+        result=self._prepare_data(xlim=xlim)
         
         elements=result.keys()
              
-        DataStorage._plot_markers_dict={elem:Marker(f'plot-{str(elem)}-{str(elem)}'  ,'fig')   for elem in elements}
-        DataStorage._subplot_markers_dict={elem:Marker(f'subplot-{str(elem)}-{str(elem)}'  ,'fig')   for elem in elements}
+        DataStorage._plot_markers_dict={elem:Marker(f'plot{self.__class__.__name__}{self._label}' ,'fig')   for elem in elements}
+        DataStorage._subplot_markers_dict={elem:Marker(f'subplot{self.__class__.__name__}{self._label}'  ,'fig')   for elem in elements}
         DataStorage.first_marker=list(DataStorage._plot_markers_dict.values())[0]
         DataStorage.last_marker=list(DataStorage._plot_markers_dict.values())[-1]
         
         
         return result
             
-    def plot_summary(self,analysis=None,coordinate=None):
+    def plot_summary(self,analysis=None,coordinate=None,xlim=None,legend_pos='north east'):
         if analysis:
             self._analysis=analysis
             self._parameter=analysis._parameter
@@ -333,29 +421,50 @@ class AccelerationComparison:
             if not isinstance(coordinate,list ):
                 coordinate=[coordinate]
                 
-            data_dict={coord : self._prepare_data()[coord] for coord  in coordinate}
+            data_dict={coord : self._prepare_data(xlim=xlim)[coord] for coord  in coordinate}
 
         else:
-            data_dict=self._prepare_data()
+            data_dict=self._prepare_data(xlim=xlim)
         
         
         for coord, data in data_dict.items():
+            
+
+            
+            
             data.plot()
             plt.ylabel(coord)
 
+            filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
 
-            ndp=DataPlot('wykres_nowy',position='H',preview=False)
-            ndp.add_data_plot(filename=f'Wykres_summary{next(plots_no_gen)}.png',width='11cm')
+            
+            ########### for tikz            
+            #ndp=DataPlot('wykres_nowy',position='H',preview=False)
+            
+            #it should be replaced with data.rename            
+            data.columns=[type(self)._formatter(label) for label in data.columns ]            
+            ndp=data.to_standalone_figure(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'7cm'),width=NoEscape(r'0.9\textwidth'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,x unit=\si{{\second}}'),legend_pos=legend_pos )
+            #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
+            
+
             
             
-            ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(self._parameter)}\)'''))
+            ########### for tikz
+            #ndp.append(data.to_pylatex_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
+            
+            ndp.add_caption(NoEscape(f'{type(self)._caption}'))
             
             plt.show()
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
-        #ndp.append(Label(self.marker_dict[coord]))
+            ndp.append(Label(DataStorage.last_marker))
         
             if analysis:
-                analysis._container.append(ndp)        
+                analysis._container.append(ndp)
+            else:
+                filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+                
+                #latex_code=(TimeDataFrame(data).to_tikz_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
+                self._container.append(ndp)
 
         
             
@@ -378,14 +487,16 @@ class AccelerationComparison:
 
         
         ndp=DataPlot('wykres_nowy1',position='H',preview=False)
-        ndp.add_data_plot(filename=f'Wykres_max_{next(plots_no_gen)}.png',width='11cm')
+        ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_max_data_{next(plots_no_gen)}.png',width='11cm')
         ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''))
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
         #ndp.append(Label(self.marker_dict[coord]))
         
         if analysis:
             analysis._container.append(ndp)
-        
+        else:
+            self._container.append(ndp)
+
         
         return None
     
@@ -405,14 +516,22 @@ class AccelerationComparison:
         df.plot(subplots=True)
         plt.show()
 
+        
+        
         ndp=DataPlot('wykres_nowy2',position='H',preview=False)
+        
+        
+        
         ndp.add_data_plot(filename=f'Wykres_mean_{next(plots_no_gen)}.png',width='11cm')
         ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''))
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
         #ndp.append(Label(self.marker_dict[coord]))
         
         
-        analysis._container.append(ndp)
+        if analysis:
+            analysis._container.append(ndp)
+        else:
+            self._container.append(ndp)
         
         return None
     
@@ -445,6 +564,22 @@ class AccelerationComparison:
         
         return self._simulation_result
 
+class FFTComparison(AccelerationComparison):
+    
+    def _prepare_data(self,coordinate=None,xlim=None):
+    
+        data=self._data
+    
+        self._data   ={   key:value.to_frequency_domain().double_sided_rms()   for key,value in     data.items()}
+        
+        print('fft_comp')
+        for data in self._data.values():
+            print(type(data))
+        
+    
+        return super()._prepare_data(coordinate=None,xlim=xlim)
+    
+    
 class ReportEntry:
     def __init__(self,block_title):
         self._block_title = block_title
@@ -457,7 +592,7 @@ class ReportEntry:
         return sec
 
     
-class ReportText:
+class ReportText(ReportModule):
     def __init__(self,text=None,key_dict=DataStorage._dict):
         
         self._text='Figures {first_marker}-{last_marker}'
@@ -479,6 +614,8 @@ class ReportText:
         finally:
             self._text=self._text
         
+        super().__init__()
+        self._container.append(NoEscape( self._text  ))
 
     
     def __call__(self,analysis):
@@ -498,6 +635,7 @@ class ReportText:
         
         display(Markdown(self._text))
 
+        
         #return (self._text)
         return ''
 
@@ -613,6 +751,7 @@ class SystemDynamicsAnalyzer:
         else:
             self.init_report()
             print(self._analysis_span)
+            
             return (self._analysis_span)
     
     def analysis_step(self,case_data,t_span,ics_list=None):
@@ -626,7 +765,7 @@ class SystemDynamicsAnalyzer:
 
         self.report_step(self._current_result)
     
-    
+        
         return self._current_result
     
     
