@@ -3309,6 +3309,101 @@ class SDoFDoubleTrolleyDifferentWheels(ComposedSystem):
 
         return parameters_dict
 
+    
+    
+
+class MDoFDampedTrolleysWithSprings(ComposedSystem):
+    scheme_name = 'MDOF_Damped_Trolleys_With_Springs.PNG'
+    real_name = 'two_damped_trolleys.png'
+
+    def __init__(self,
+                 R=Symbol('R', positive=True),
+                 m=Symbol('m', positive=True),
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 k_l=Symbol('k_l', positive=True),
+                 c_cl=Symbol('c_cl', positive=True),
+                 k_c=Symbol('k_c', positive=True),
+                 c_cc=Symbol('c_cc', positive=True),
+                 k_r=Symbol('k_r', positive=True),
+                 c_cr=Symbol('c_cr', positive=True),
+                 x_l=dynamicsymbols('x_l'),
+                 x_r=dynamicsymbols('x_r'),
+                 x=dynamicsymbols('x'),
+                 qs=dynamicsymbols('x_l x_r'),
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        self.m1 = m1
+        self.m2 = m2
+        self.m = m
+        self.k_l = k_l
+        self.c_cl = c_cl
+        self.k_c = k_c
+        self.c_cc = c_cc
+        self.k_r = k_r
+        self.c_cr = c_cr
+        self.x_l = x_l
+        self.x_r = x_r
+        self.x = x
+        self.R = R
+
+        self.Trolley_1 = (MaterialPoint(m1, x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[x_l]) 
+                          + Spring(k_l, pos1=x_l, qs=[x_l]) + Damper(c_cl, pos1=x_l, qs=[x_l]) 
+                          + MaterialPoint(m, x_l/2, qs = [x_l]) + MaterialPoint(m/2, x_l/2, qs = [x_l]) + MaterialPoint(m, x_l/2, qs = [x_l]) 
+                          + MaterialPoint(m/2, x_l/2, qs = [x_l]))
+
+        self.Trolley_2 = (MaterialPoint(m2, x_r, qs=[x_r]) + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) 
+                          + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) 
+                          + Damper(c_cc, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) 
+                          + Damper(c_cr, pos1=x_r, qs=[x_r]) + MaterialPoint(m, x_r/2, qs = [x_r]) + MaterialPoint(m/2, x_r/2, qs = [x_r]) + MaterialPoint(m, x_r/2, qs = [x_r]) 
+                          + MaterialPoint(m/2, x_r/2, qs = [x_r]))
+
+        system = self.Trolley_1 + self.Trolley_2
+        super().__init__(system(qs),**kwargs)
+
+    def get_default_data(self):
+
+        m0, k0, l0, lam = symbols('m k l_0 lambda', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
+            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.m: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+
+            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+            self.k_c: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+
+            self.c_cr: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
+            self.c_cc: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
+            self.c_cl: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
+
+            self.x_l: [self.x, 0],
+            self.x_r: [self.x, 0],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.x_l] == 0 and parameters_dict[self.x_r]==0:
+
+            parameters_dict[self.x_l] = self.x
+
+
+        return parameters_dict
+
+
+    
+    
 # OK
 class MDoFThreePendulumsWithSprings(ComposedSystem):
     scheme_name = 'MDOF_Three_Pendulum_Spring.png'
@@ -3402,6 +3497,83 @@ class MDoFThreePendulumsWithSprings(ComposedSystem):
 
         return parameters_dict
 
+    
+class MDoFLinearizedThreePendulumsWithSprings(MDoFThreePendulumsWithSprings):
+    scheme_name = 'three_pendulums_forced.PNG'
+    real_name = 'lifting_tandem.png'
+
+    def __init__(self,
+                 phi_1=dynamicsymbols('\\varphi_1'),
+                 phi_2=dynamicsymbols('\\varphi_2'),
+                 phi_3=dynamicsymbols('\\varphi_3'),
+                 phi_l=dynamicsymbols('\\varphi_l'),
+                 phi_c=dynamicsymbols('\\varphi_c'),
+                 phi_r=dynamicsymbols('\\varphi_r'),
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 m3=Symbol('m_3', positive=True),
+                 k_1=Symbol('k_1', positive=True),
+                 k_2=Symbol('k_2', positive=True),
+                 k_3=Symbol('k_3', positive=True),
+                 k_4=Symbol('k_4', positive=True),
+                 l=Symbol('l', positive=True),
+                 g=Symbol('g', positive=True),
+                 Omega=Symbol('\Omega', positive=True),
+                 F=Symbol('F',positive=True),
+                 qs=dynamicsymbols('\\varphi_l, \\varphi_c, \\varphi_r'),
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        self.m1 = m1
+        self.m2 = m2
+        self.m3 = m3
+        self.k_1 = k_1
+        self.k_2 = k_2
+        self.k_3 = k_3
+        self.k_4 = k_4
+        self.l = l
+        self.phi_1 = phi_1
+        self.phi_2 = phi_2
+        self.phi_3 = phi_3
+        self.phi_l = phi_l
+        self.phi_c = phi_c
+        self.phi_r = phi_r
+        self.g = g
+        self.Omega = Omega
+        self.F = F
+
+        self.Pendulum1 = Pendulum(m1, g, l, angle=phi_l, qs=[phi_l]).linearized() + Force(-F * l * cos(Omega * ivar), pos1=phi_l, qs=[phi_l])
+        self.Pendulum2 = Pendulum(m2, g, l, angle=phi_c, qs=[phi_c]).linearized()
+        self.Pendulum3 = Pendulum(m3, g, l, angle=phi_r, qs=[phi_r]).linearized() + Force(-2* F * l* cos(Omega * ivar), pos1=phi_r, qs=[phi_r])
+        self.Spring1 = Spring(k_1, pos1=(phi_l * (l/2)), pos2=(phi_c * (l/2)), qs=[phi_l, phi_c])
+        self.Spring2 = Spring(k_2, pos1=(phi_c * (l/2)), pos2=(phi_r * (l/2)), qs=[phi_c, phi_r])
+        self.Spring3 = Spring(k_3, pos1=(phi_l * l), pos2=(phi_c * l), qs=[phi_l, phi_c])
+        self.Spring4 = Spring(k_4, pos1=(phi_c * l), pos2=(phi_r * l), qs=[phi_c, phi_r])
+
+        system = self.Pendulum1 + self.Pendulum2 + self.Pendulum3 + self.Spring1 + self.Spring2 + self.Spring3 + self.Spring4
+        super().__init__(system(qs),**kwargs)
+
+
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
+            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+
+            self.k_1: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_2: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_3: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_4: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+
+            self.phi_1: [self.phi_l, 0],
+            self.phi_2: [self.phi_l, self.phi_r, 0],
+            self.phi_3: [self.phi_r, 0],
+        }
+
+        return default_data_dict
 # OK
 class MDoFForcedDisksWithSerialSprings(ComposedSystem):
     scheme_name = 'MDOF_Forced_Disks_With_Serial_Springs.PNG'
@@ -3507,82 +3679,7 @@ class MDoFForcedDisksWithSerialSprings(ComposedSystem):
         return parameters_dict
 
 
-class MDoFLinearizedThreePendulumsWithSprings(MDoFThreePendulumsWithSprings):
-    scheme_name = 'three_pendulums_forced.PNG'
-    real_name = 'lifting_tandem.png'
 
-    def __init__(self,
-                 phi_1=dynamicsymbols('\\varphi_1'),
-                 phi_2=dynamicsymbols('\\varphi_2'),
-                 phi_3=dynamicsymbols('\\varphi_3'),
-                 phi_l=dynamicsymbols('\\varphi_l'),
-                 phi_c=dynamicsymbols('\\varphi_c'),
-                 phi_r=dynamicsymbols('\\varphi_r'),
-                 m1=Symbol('m_1', positive=True),
-                 m2=Symbol('m_2', positive=True),
-                 m3=Symbol('m_3', positive=True),
-                 k_1=Symbol('k_1', positive=True),
-                 k_2=Symbol('k_2', positive=True),
-                 k_3=Symbol('k_3', positive=True),
-                 k_4=Symbol('k_4', positive=True),
-                 l=Symbol('l', positive=True),
-                 g=Symbol('g', positive=True),
-                 Omega=Symbol('\Omega', positive=True),
-                 F=Symbol('F',positive=True),
-                 qs=dynamicsymbols('\\varphi_l, \\varphi_c, \\varphi_r'),
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        self.m1 = m1
-        self.m2 = m2
-        self.m3 = m3
-        self.k_1 = k_1
-        self.k_2 = k_2
-        self.k_3 = k_3
-        self.k_4 = k_4
-        self.l = l
-        self.phi_1 = phi_1
-        self.phi_2 = phi_2
-        self.phi_3 = phi_3
-        self.phi_l = phi_l
-        self.phi_c = phi_c
-        self.phi_r = phi_r
-        self.g = g
-        self.Omega = Omega
-        self.F = F
-
-        self.Pendulum1 = Pendulum(m1, g, l, angle=phi_l, qs=[phi_l]).linearized() + Force(-F * l * cos(Omega * ivar), pos1=phi_l, qs=[phi_l])
-        self.Pendulum2 = Pendulum(m2, g, l, angle=phi_c, qs=[phi_c]).linearized()
-        self.Pendulum3 = Pendulum(m3, g, l, angle=phi_r, qs=[phi_r]).linearized() + Force(-2* F * l* cos(Omega * ivar), pos1=phi_r, qs=[phi_r])
-        self.Spring1 = Spring(k_1, pos1=(phi_l * (l/2)), pos2=(phi_c * (l/2)), qs=[phi_l, phi_c])
-        self.Spring2 = Spring(k_2, pos1=(phi_c * (l/2)), pos2=(phi_r * (l/2)), qs=[phi_c, phi_r])
-        self.Spring3 = Spring(k_3, pos1=(phi_l * l), pos2=(phi_c * l), qs=[phi_l, phi_c])
-        self.Spring4 = Spring(k_4, pos1=(phi_c * l), pos2=(phi_r * l), qs=[phi_c, phi_r])
-
-        system = self.Pendulum1 + self.Pendulum2 + self.Pendulum3 + self.Spring1 + self.Spring2 + self.Spring3 + self.Spring4
-        super().__init__(system(qs),**kwargs)
-
-
-    def get_default_data(self):
-
-        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
-
-        default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-
-            self.k_1: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_2: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_3: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_4: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-
-            self.phi_1: [self.phi_l, 0],
-            self.phi_2: [self.phi_l, self.phi_r, 0],
-            self.phi_3: [self.phi_r, 0],
-        }
-
-        return default_data_dict
 
     
 class DDoFTwoNonLinearDisks(ComposedSystem):
@@ -3673,7 +3770,7 @@ class DDoFTwoNonLinearDisks(ComposedSystem):
 
 
 
-class MDoFDoubleTrolleyWithSprings(ComposedSystem):
+class MDoFDoubleTrolleyWithNonlinearSprings(ComposedSystem):
     scheme_name = 'MDOF_Double_Trolley_With_Springs.PNG'
     real_name = 'DoubleTrolley_real.png'
 
@@ -3762,55 +3859,7 @@ class MDoFDoubleTrolleyWithSprings(ComposedSystem):
         return parameters_dict
 
 
-class SDoFTriplePendulum(ComposedSystem):
-    scheme_name = 'SDOFTriplePendulum.PNG'
-    real_name = 'TriplePendulum_real.jpg'
 
-    def __init__(self,
-                 m1=Symbol('m_1', positive=True),
-                 m2=Symbol('m_2', positive=True),
-                 m3=Symbol('m_3', positive=True),
-                 l_1=Symbol('l_1', positive=True),
-                 l_2=Symbol('l_2', positive=True),
-                 l_3=Symbol('l_3', positive=True),
-                 g=Symbol('g', positive=True),
-                 phi=dynamicsymbols('varphi'),
-                 qs=dynamicsymbols('varphi'),
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        self.m1 = m1
-        self.m2 = m2
-        self.m3 = m3
-        self.l_1 = l_1
-        self.l_2 = l_2
-        self.l_3 = l_3
-        self.phi = phi
-        self.g = g
-
-        self.pendulum1 = Pendulum(m1, g, l_1, angle=phi, qs=[phi])
-        self.pendulum2 = Pendulum(m2, g, (l_1+l_2), angle=phi, qs=[phi])
-        self.pendulum3 = Pendulum(m3, g, (l_1+l_2+l_3), angle=phi, qs=[phi])
-
-        system = self.pendulum1 + self.pendulum2 + self.pendulum3
-        super().__init__(system(qs),**kwargs)
-
-
-    def get_default_data(self):
-
-        m0, l0 = symbols('m_0 l_0', positive=True)
-
-        default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-
-            self.l_1: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-            self.l_2: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-            self.l_3: [0],
-        }
-
-        return default_data_dict
 
 class MDoFForcedDisksWithParallelSprings(ComposedSystem):
     scheme_name = 'MDOF_Forced_Disks_With_Parallel_Springs.PNG'
@@ -3934,180 +3983,8 @@ class MDoFForcedDisksWithParallelSprings(ComposedSystem):
 
         return parameters_dict
 
-class MDoFTriplePendulum(ComposedSystem):
-    scheme_name = 'MDOFTriplePendulum.PNG'
-    real_name = 'TriplePendulum_real.jpg'
-
-    def __init__(self,
-                 m1=Symbol('m_1', positive=True),
-                 m2=Symbol('m_2', positive=True),
-                 m3=Symbol('m_3', positive=True),
-                 l_1=Symbol('l_1', positive=True),
-                 l_2=Symbol('l_2', positive=True),
-                 l_3=Symbol('l_3', positive=True),
-                 g=Symbol('g', positive=True),
-                 phi_1=dynamicsymbols('varphi_1'),
-                 phi_2=dynamicsymbols('varphi_2'),
-                 phi_3=dynamicsymbols('varphi_3'),
-                 phi_r=dynamicsymbols('varphi_r'),
-                 phi_l=dynamicsymbols('varphi_l'),
-                 qs=dynamicsymbols('varphi_1 varphi_2 varphi_3'),
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        self.m1 = m1
-        self.m2 = m2
-        self.m3 = m3
-        self.l_1 = l_1
-        self.l_2 = l_2
-        self.l_3 = l_3
-        self.phi_1 = phi_1
-        self.phi_2 = phi_2
-        self.phi_3 = phi_3
-        self.phi_r = phi_r
-        self.phi_l = phi_l
-        self.g = g
-
-        self.Pendulum1 = Pendulum(m1, g, l_1, angle=phi_1, qs=[phi_1])
-        self.Pendulum2 = Pendulum(m2, g, (l_1+l_2), angle=phi_2, qs=[phi_2])
-        self.Pendulum3 = Pendulum(m3, g, (l_1+l_2+l_3), angle=phi_3, qs=[phi_3])
-
-        system = self.Pendulum1 + self.Pendulum2 + self.Pendulum3
-        super().__init__(system(qs),**kwargs)
-
-    def get_default_data(self):
 
 
-        m0, l0 = symbols('m_0 l_0', positive=True)
-
-        default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-
-            self.l_1: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-            self.l_2: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-            self.l_3: [2 * l0, 4 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-
-            self.phi_1:[self.phi_1],
-            self.phi_2:[self.phi_2],
-            self.phi_3:[self.phi_2],
-        }
-
-        return default_data_dict
-
-    def get_random_parameters(self):
-
-        default_data_dict = self.get_default_data()
-
-        parameters_dict = {
-            key: random.choice(items_list)
-            for key, items_list in default_data_dict.items()
-        }
-
-        if parameters_dict[self.phi_1] != self.phi_1:
-
-            parameters_dict[self.phi_2] = self.phi_1
-            parameters_dict[self.phi_3] = self.phi_2
-
-        if parameters_dict[self.phi_1] == self.phi_1 and parameters_dict[self.phi_2] == self.phi_1:
-
-            parameters_dict[self.phi_2] = self.phi_2
-            parameters_dict[self.phi_3] = self.phi_2
-
-        return parameters_dict
-
-class MDoFDampedTrolleysWithSprings(ComposedSystem):
-    scheme_name = 'MDOF_Damped_Trolleys_With_Springs.PNG'
-    real_name = 'two_damped_trolleys.png'
-
-    def __init__(self,
-                 R=Symbol('R', positive=True),
-                 m=Symbol('m', positive=True),
-                 m1=Symbol('m_1', positive=True),
-                 m2=Symbol('m_2', positive=True),
-                 k_l=Symbol('k_l', positive=True),
-                 c_cl=Symbol('c_cl', positive=True),
-                 k_c=Symbol('k_c', positive=True),
-                 c_cc=Symbol('c_cc', positive=True),
-                 k_r=Symbol('k_r', positive=True),
-                 c_cr=Symbol('c_cr', positive=True),
-                 x_l=dynamicsymbols('x_l'),
-                 x_r=dynamicsymbols('x_r'),
-                 x=dynamicsymbols('x'),
-                 qs=dynamicsymbols('x_l x_r'),
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        self.m1 = m1
-        self.m2 = m2
-        self.m = m
-        self.k_l = k_l
-        self.c_cl = c_cl
-        self.k_c = k_c
-        self.c_cc = c_cc
-        self.k_r = k_r
-        self.c_cr = c_cr
-        self.x_l = x_l
-        self.x_r = x_r
-        self.x = x
-        self.R = R
-
-        self.Trolley_1 = (MaterialPoint(m1, x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[x_l]) 
-                          + Spring(k_l, pos1=x_l, qs=[x_l]) + Damper(c_cl, pos1=x_l, qs=[x_l]) 
-                          + MaterialPoint(m, x_l/2, qs = [x_l]) + MaterialPoint(m/2, x_l/2, qs = [x_l]) + MaterialPoint(m, x_l/2, qs = [x_l]) 
-                          + MaterialPoint(m/2, x_l/2, qs = [x_l]))
-
-        self.Trolley_2 = (MaterialPoint(m2, x_r, qs=[x_r]) + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) 
-                          + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) 
-                          + Damper(c_cc, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) 
-                          + Damper(c_cr, pos1=x_r, qs=[x_r]) + MaterialPoint(m, x_r/2, qs = [x_r]) + MaterialPoint(m/2, x_r/2, qs = [x_r]) + MaterialPoint(m, x_r/2, qs = [x_r]) 
-                          + MaterialPoint(m/2, x_r/2, qs = [x_r]))
-
-        system = self.Trolley_1 + self.Trolley_2
-        super().__init__(system(qs),**kwargs)
-
-    def get_default_data(self):
-
-        m0, k0, l0, lam = symbols('m k l_0 lambda', positive=True)
-
-        default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-
-            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-            self.k_c: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-
-            self.c_cr: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
-            self.c_cc: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
-            self.c_cl: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
-
-            self.x_l: [self.x, 0],
-            self.x_r: [self.x, 0],
-        }
-
-        return default_data_dict
-
-    def get_random_parameters(self):
-
-        default_data_dict = self.get_default_data()
-
-        parameters_dict = {
-            key: random.choice(items_list)
-            for key, items_list in default_data_dict.items()
-        }
-
-        if parameters_dict[self.x_l] == 0 and parameters_dict[self.x_r]==0:
-
-            parameters_dict[self.x_l] = self.x
-
-
-        return parameters_dict
-
-
- 
 class MDoFForcedDisksWithSerialSprings(ComposedSystem):
     scheme_name = 'MDOF_Forced_Disks_With_Serial_Springs.PNG'
     real_name = 'three_carriages.PNG'
@@ -4210,88 +4087,60 @@ class MDoFForcedDisksWithSerialSprings(ComposedSystem):
             parameters_dict[self.x_r] = self.x_2
 
         return parameters_dict
-
-class MDoFDoubleTrolleyWithSprings(ComposedSystem):
-    scheme_name = 'MDOF_Double_Trolley_With_Springs.PNG'
-    real_name = 'three_carriages.PNG'
+    
+    
+    
+class SDoFTriplePendulum(ComposedSystem):
+    scheme_name = 'SDOFTriplePendulum.PNG'
+    real_name = 'TriplePendulum_real.jpg'
 
     def __init__(self,
-                 x_l=dynamicsymbols('x_l'),
-                 x_r=dynamicsymbols('x_r'),
-                 x=dynamicsymbols('x'),
-                 m=Symbol('m', positive=True),
                  m1=Symbol('m_1', positive=True),
                  m2=Symbol('m_2', positive=True),
-                 R=Symbol('R', positive=True),
-                 k_l=Symbol('k_l', positive=True),
-                 k_cl=Symbol('k_cl', positive=True),
-                 k_c=Symbol('k_c', positive=True),
-                 k_cc=Symbol('k_cc', positive=True),
-                 k_r=Symbol('k_r', positive=True),
-                 k_cr=Symbol('k_cr', positive=True),
-                 mu=Symbol('mu', positive=True),
-                 qs=dynamicsymbols('x_l x_r'),
+                 m3=Symbol('m_3', positive=True),
+                 l_1=Symbol('l_1', positive=True),
+                 l_2=Symbol('l_2', positive=True),
+                 l_3=Symbol('l_3', positive=True),
+                 g=Symbol('g', positive=True),
+                 phi=dynamicsymbols('varphi'),
+                 qs=dynamicsymbols('varphi'),
                  ivar=Symbol('t'),
                  **kwargs):
 
         self.m1 = m1
         self.m2 = m2
-        self.m = m
-        self.k_l = k_l
-        self.k_cl = k_cl
-        self.k_c = k_c
-        self.k_cc = k_cc
-        self.k_r = k_r
-        self.k_cr = k_cr
-        self.x_l = x_l
-        self.x_r = x_r
-        self.x = x
-        self.R = R
-        self.mu = mu
+        self.m3 = m3
+        self.l_1 = l_1
+        self.l_2 = l_2
+        self.l_3 = l_3
+        self.phi = phi
+        self.g = g
 
-        self.Trolley_1 = MaterialPoint(m1, x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[x_l]) + Spring(k_cl*(1-mu*x_l**2), pos1=x_l, qs=[x_l]) + MaterialPoint(m, x_l, qs = [x_l]) + MaterialPoint(m/2, x_l, qs = [x_l]) + MaterialPoint(m, x_l, qs = [x_l]) + MaterialPoint(m/2, x_l, qs = [x_l])
-        self.Trolley_2 = MaterialPoint(m2, x_r, qs=[x_r]) + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) + Spring(k_cc*(1-mu*(x_r - x_l)**2), pos1=x_l, pos2=x_r, qs=[x_l, x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_cr*(1-mu*x_r**2), pos1=x_r, qs=[x_r]) + MaterialPoint(m, x_r, qs = [x_r]) + MaterialPoint(m/2, x_r, qs = [x_r]) + MaterialPoint(m, x_r, qs = [x_r]) + MaterialPoint(m/2, x_r, qs = [x_r])
+        self.pendulum1 = Pendulum(m1, g, l_1, angle=phi, qs=[phi])
+        self.pendulum2 = Pendulum(m2, g, (l_1+l_2), angle=phi, qs=[phi])
+        self.pendulum3 = Pendulum(m3, g, (l_1+l_2+l_3), angle=phi, qs=[phi])
 
-        system = self.Trolley_1 + self.Trolley_2
-        super().__init__(system(qs))
+        system = self.pendulum1 + self.pendulum2 + self.pendulum3
+        super().__init__(system(qs),**kwargs)
+
 
     def get_default_data(self):
 
-        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+        m0, l0 = symbols('m_0 l_0', positive=True)
 
         default_data_dict = {
             self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
             self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.c_cl: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_c: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.c_cc: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.c_cr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
 
-            self.x_l: [self.x, 0],
-            self.x_r: [self.x, 0],
+            self.l_1: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+            self.l_2: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+            self.l_3: [0],
         }
 
         return default_data_dict
-
-    def get_random_parameters(self):
-
-        default_data_dict = self.get_default_data()
-
-        parameters_dict = {
-            key: random.choice(items_list)
-            for key, items_list in default_data_dict.items()
-        }
-
-        if parameters_dict[self.x_l] == 0 and parameters_dict[self.x_r]==0:
-
-            parameters_dict[self.x_l] = self.x
-
-
-        return parameters_dict
-
+    
+    
 class SDoFTriplePendulum(ComposedSystem):
     scheme_name = 'SDOFTriplePendulum.PNG'
     real_name = 'SDOFTriplePendulum.PNG'
@@ -4425,4 +4274,85 @@ class MDoFTriplePendulum(ComposedSystem):
 
         return parameters_dict
 
+class MDoFTriplePendulum(ComposedSystem):
+    scheme_name = 'MDOFTriplePendulum.PNG'
+    real_name = 'TriplePendulum_real.jpg'
 
+    def __init__(self,
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 m3=Symbol('m_3', positive=True),
+                 l_1=Symbol('l_1', positive=True),
+                 l_2=Symbol('l_2', positive=True),
+                 l_3=Symbol('l_3', positive=True),
+                 g=Symbol('g', positive=True),
+                 phi_1=dynamicsymbols('varphi_1'),
+                 phi_2=dynamicsymbols('varphi_2'),
+                 phi_3=dynamicsymbols('varphi_3'),
+                 phi_r=dynamicsymbols('varphi_r'),
+                 phi_l=dynamicsymbols('varphi_l'),
+                 qs=dynamicsymbols('varphi_1 varphi_2 varphi_3'),
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        self.m1 = m1
+        self.m2 = m2
+        self.m3 = m3
+        self.l_1 = l_1
+        self.l_2 = l_2
+        self.l_3 = l_3
+        self.phi_1 = phi_1
+        self.phi_2 = phi_2
+        self.phi_3 = phi_3
+        self.phi_r = phi_r
+        self.phi_l = phi_l
+        self.g = g
+
+        self.Pendulum1 = Pendulum(m1, g, l_1, angle=phi_1, qs=[phi_1])
+        self.Pendulum2 = Pendulum(m2, g, (l_1+l_2), angle=phi_2, qs=[phi_2])
+        self.Pendulum3 = Pendulum(m3, g, (l_1+l_2+l_3), angle=phi_3, qs=[phi_3])
+
+        system = self.Pendulum1 + self.Pendulum2 + self.Pendulum3
+        super().__init__(system(qs),**kwargs)
+
+    def get_default_data(self):
+
+
+        m0, l0 = symbols('m_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
+            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+
+            self.l_1: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+            self.l_2: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+            self.l_3: [2 * l0, 4 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+
+            self.phi_1:[self.phi_1],
+            self.phi_2:[self.phi_2],
+            self.phi_3:[self.phi_2],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.phi_1] != self.phi_1:
+
+            parameters_dict[self.phi_2] = self.phi_1
+            parameters_dict[self.phi_3] = self.phi_2
+
+        if parameters_dict[self.phi_1] == self.phi_1 and parameters_dict[self.phi_2] == self.phi_1:
+
+            parameters_dict[self.phi_2] = self.phi_2
+            parameters_dict[self.phi_3] = self.phi_2
+
+        return parameters_dict
