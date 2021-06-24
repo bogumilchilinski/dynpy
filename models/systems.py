@@ -812,6 +812,10 @@ class DDoFShaft(ComposedSystem):
 
         phi1, phi2 = qs
         theta = input_displacement
+        
+        self.phi_1=phi1
+        self.phi_2=phi2        
+        
 
         self.k_2 = k_2  # left spring
         self.k_1 = k_1  # right spring
@@ -836,6 +840,28 @@ class DDoFShaft(ComposedSystem):
         }
         return self.sym_desc_dict
 
+    
+    def get_default_data(self):
+
+
+        m0, l0 , G, l = symbols('m_0 l_0 G l', positive=True)
+
+        default_data_dict = {
+            self.I: [S.Half*m0*l**2,S.One*m0*l**2,(S.Half**2)*m0*l**2],
+            
+            
+
+            self.k_1: [1 * G * l0**4 /(10* l0), 2 *  G * l0**4 /(10* l0), S.Half *  G * l0**4 /(10* l0), 4 *  G * l0**4 /(10* l0), (S.Half**2) *  G * l0**4 /(10* l0)],
+            self.k_2: [1 * G * l0**4 /(10* l0), 2 *  G * l0**4 /(10* l0), S.Half *  G * l0**4 /(10* l0), 4 *  G * l0**4 /(10* l0), (S.Half**2) *  G * l0**4 /(10* l0)],
+
+            l:[1 * l0, 2 * l0, S.Half * l0, 4 * l0, (S.Half**2) * l0]
+            
+            self.phi_1:[self.phi, 0],
+            self.phi_2:[self.phi],
+        }
+
+        return default_data_dict
+    
 
 class DDoFDampedShaft(ComposedSystem):
 
@@ -4088,7 +4114,77 @@ class MDoFForcedDisksWithSerialSprings(ComposedSystem):
 
         return parameters_dict
     
-    
+class MDoFTriplePendulum(ComposedSystem):
+    scheme_name = 'MDOFTriplePendulum.PNG'
+    real_name = 'TriplePendulum_real.jpg'
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 m3=Symbol('m_3', positive=True),
+                 l_1=Symbol('l_1', positive=True),
+                 l_2=Symbol('l_2', positive=True),
+                 l_3=Symbol('l_3', positive=True),
+                 g=Symbol('g', positive=True),
+                 phi_1=dynamicsymbols('varphi_1'),
+                 phi_2=dynamicsymbols('varphi_2'),
+                 phi_3=dynamicsymbols('varphi_3'),
+                 phi_u=dynamicsymbols('varphi_u'),
+                 phi_l=dynamicsymbols('varphi_l'),
+                 qs=dynamicsymbols('varphi_1 varphi_2 varphi_3'),
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        self.m1 = m1
+        self.m2 = m2
+        self.m3 = m3
+        self.l_1 = l_1
+        self.l_2 = l_2
+        self.l_3 = l_3
+        self.phi_1 = phi_1
+        self.phi_2 = phi_2
+        self.phi_3 = phi_3
+        self.phi_u = phi_u
+        self.phi_l = phi_l
+        self.g = g
+
+        x_2 = sin(phi_1)*l_1 + sin(phi_2)*l_2
+        y_2 = cos(phi_1)*l_1 + cos(phi_2)*l_2
+        x_3 = x_2 + sin(phi_3)*l_3
+        y_3 = y_2 + cos(phi_3)*l_3
+
+        self.Pendulum1 = Pendulum(m1, g, l_1, angle=phi_1, qs=[phi_1])
+        self.material_point_11 = MaterialPoint(m2, x_2, qs=[phi_1, phi_2])
+        self.material_point_21 = MaterialPoint(m2, y_2, qs=[phi_1, phi_2])
+        self.gravity_1 = GravitationalForce(m2, g, pos1=-y_2, qs=[phi_2])
+        self.material_point_12 = MaterialPoint(m3, x_3, qs=[phi_1, phi_2, phi_3])
+        self.material_point_22 = MaterialPoint(m3, y_3, qs=[phi_1, phi_2, phi_3])
+        self.gravity_2 = GravitationalForce(m3, g, pos1=-y_3, qs=[phi_3])
+        
+        system = self.Pendulum1 + self.material_point_11 + self.material_point_12 + self.material_point_21 + self.material_point_22 + self.gravity_1 + self.gravity_2
+        super().__init__(system(qs).linearized(),**kwargs)
+
+    def get_default_data(self):
+
+
+        m0, l0 = symbols('m_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
+            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+
+            self.l_1: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+            self.l_2: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+            self.l_3: [2 * l0, 4 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+
+            self.phi_1:[self.phi_u,0],
+            self.phi_2:[self.phi_u,self.phi_l],
+            self.phi_3:[self.phi_l],
+        }
+
+        return default_data_dict    
     
 class SDoFTriplePendulum(ComposedSystem):
     scheme_name = 'SDOFTriplePendulum.PNG'
@@ -4135,224 +4231,14 @@ class SDoFTriplePendulum(ComposedSystem):
 
             self.l_1: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
             self.l_2: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-            self.l_3: [0],
+            self.l_3: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
         }
 
         return default_data_dict
     
     
-class SDoFTriplePendulum(ComposedSystem):
-    scheme_name = 'SDOFTriplePendulum.PNG'
-    real_name = 'SDOFTriplePendulum.PNG'
-
-    def __init__(self,
-                 phi=dynamicsymbols('varphi'),
-                 m1=Symbol('m_1', positive=True),
-                 m2=Symbol('m_2', positive=True),
-                 m3=Symbol('m_3', positive=True),
-                 l_1=Symbol('l_1', positive=True),
-                 l_2=Symbol('l_2', positive=True),
-                 l_3=Symbol('l_2', positive=True),
-                 g=Symbol('g', positive=True),
-                 qs=dynamicsymbols('varphi'),
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        self.m1 = m1
-        self.m2 = m2
-        self.m3 = m3
-        self.l_1 = l_1
-        self.l_2 = l_2
-        self.l_3 = l_3
-        self.phi = phi
-        self.g = g
-        
-        self.pendulum1 = Pendulum(m1, g, l_1, angle=phi, qs=[phi]).linearized()
-        self.pendulum2 = Pendulum(m2, g, (l_1+l_2), angle=phi, qs=[phi]).linearized()
-        self.pendulum3 = Pendulum(m3, g, (l_1+l_2+l_3), angle=phi, qs=[phi]).linearized()
-
-        system = self.pendulum1 + self.pendulum2 + self.pendulum3
-        super().__init__(system(qs))
-
-    def get_default_data(self):
-
-        m0, l0 = symbols('m_0 l_0', positive=True)
-
-        default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.l_1: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-            self.l_2: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-            self.l_3: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-
-            self.phi: [self.phi],
-        }
-
-        return default_data_dict
 
 
 
-class MDoFTriplePendulum(ComposedSystem):
-    scheme_name = 'MDOFTriplePendulum.PNG'
-    real_name = 'MDOFTriplePendulum.PNG'
-
-    def __init__(self,
-                 phi_1=dynamicsymbols('varphi_1'),
-                 phi_2=dynamicsymbols('varphi_2'),
-                 phi_3=dynamicsymbols('varphi_3'),
-                 phi_h=dynamicsymbols('varphi_h'),
-                 phi_l=dynamicsymbols('varphi_l'),
-                 m1=Symbol('m_1', positive=True),
-                 m2=Symbol('m_2', positive=True),
-                 m3=Symbol('m_3', positive=True),
-                 l_1=Symbol('l_1', positive=True),
-                 l_2=Symbol('l_2', positive=True),
-                 l_3=Symbol('l_2', positive=True),
-                 g=Symbol('g', positive=True),
-                 qs=dynamicsymbols('varphi_1 varphi_2 varphi_3'),
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        self.m1 = m1
-        self.m2 = m2
-        self.m3 = m3
-        self.l_1 = l_1
-        self.l_2 = l_2
-        self.l_3 = l_3
-        self.phi_1 = phi_1
-        self.phi_2 = phi_2
-        self.phi_3 = phi_3
-        self.phi_h = phi_h
-        self.phi_l = phi_l
-        self.g = g
-        
-        self.Pendulum1 = Pendulum(m1, g, l_1, angle=phi_1, qs=[phi_1]).linearized()
-        self.Pendulum2 = Pendulum(m2, g, (l_1+l_2), angle=phi_2, qs=[phi_2]).linearized()
-        self.Pendulum3 = Pendulum(m3, g, (l_1+l_2+l_3), angle=phi_3, qs=[phi_3]).linearized()
-        
-        system = self.Pendulum1 + self.Pendulum2 + self.Pendulum3
-        super().__init__(system(qs))
-
-    def get_default_data(self):
-
-        m0, l0 = symbols('m_0 l_0', positive=True)
-
-        default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.l_1: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-            self.l_2: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-            self.l_3: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-
-            self.phi_1: [self.phi_h, 0],
-            self.phi_2: [self.phi_h, phi_l],
-            self.phi_3: [self.phi_h, phi_l],
-        }
-
-        return default_data_dict
-
-    def get_random_parameters(self):
-
-        default_data_dict = self.get_default_data()
-
-        parameters_dict = {
-            key: random.choice(items_list)
-            for key, items_list in default_data_dict.items()
-        }
-
-        if parameters_dict[self.phi_1] != self.phi_h:
-
-            parameters_dict[self.phi_2] = self.phi_h
-            parameters_dict[self.phi_3] = self.phi_l
-
-        if parameters_dict[self.phi_1] == self.phi_h and parameters_dict[self.phi_2] == self.phi_h:
-
-            parameters_dict[self.phi_2] = self.phi_l
-            parameters_dict[self.phi_3] = self.phi_l
-
-        return parameters_dict
-
-class MDoFTriplePendulum(ComposedSystem):
-    scheme_name = 'MDOFTriplePendulum.PNG'
-    real_name = 'TriplePendulum_real.jpg'
-
-    def __init__(self,
-                 m1=Symbol('m_1', positive=True),
-                 m2=Symbol('m_2', positive=True),
-                 m3=Symbol('m_3', positive=True),
-                 l_1=Symbol('l_1', positive=True),
-                 l_2=Symbol('l_2', positive=True),
-                 l_3=Symbol('l_3', positive=True),
-                 g=Symbol('g', positive=True),
-                 phi_1=dynamicsymbols('varphi_1'),
-                 phi_2=dynamicsymbols('varphi_2'),
-                 phi_3=dynamicsymbols('varphi_3'),
-                 phi_r=dynamicsymbols('varphi_r'),
-                 phi_l=dynamicsymbols('varphi_l'),
-                 qs=dynamicsymbols('varphi_1 varphi_2 varphi_3'),
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        self.m1 = m1
-        self.m2 = m2
-        self.m3 = m3
-        self.l_1 = l_1
-        self.l_2 = l_2
-        self.l_3 = l_3
-        self.phi_1 = phi_1
-        self.phi_2 = phi_2
-        self.phi_3 = phi_3
-        self.phi_r = phi_r
-        self.phi_l = phi_l
-        self.g = g
-
-        self.Pendulum1 = Pendulum(m1, g, l_1, angle=phi_1, qs=[phi_1])
-        self.Pendulum2 = Pendulum(m2, g, (l_1+l_2), angle=phi_2, qs=[phi_2])
-        self.Pendulum3 = Pendulum(m3, g, (l_1+l_2+l_3), angle=phi_3, qs=[phi_3])
-
-        system = self.Pendulum1 + self.Pendulum2 + self.Pendulum3
-        super().__init__(system(qs),**kwargs)
-
-    def get_default_data(self):
 
 
-        m0, l0 = symbols('m_0 l_0', positive=True)
-
-        default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-
-            self.l_1: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-            self.l_2: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-            self.l_3: [2 * l0, 4 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-
-            self.phi_1:[self.phi_1],
-            self.phi_2:[self.phi_2],
-            self.phi_3:[self.phi_2],
-        }
-
-        return default_data_dict
-
-    def get_random_parameters(self):
-
-        default_data_dict = self.get_default_data()
-
-        parameters_dict = {
-            key: random.choice(items_list)
-            for key, items_list in default_data_dict.items()
-        }
-
-        if parameters_dict[self.phi_1] != self.phi_1:
-
-            parameters_dict[self.phi_2] = self.phi_1
-            parameters_dict[self.phi_3] = self.phi_2
-
-        if parameters_dict[self.phi_1] == self.phi_1 and parameters_dict[self.phi_2] == self.phi_1:
-
-            parameters_dict[self.phi_2] = self.phi_2
-            parameters_dict[self.phi_3] = self.phi_2
-
-        return parameters_dict
