@@ -9,7 +9,7 @@ from sympy.physics.mechanics import vlatex
 default_colors=['red','blue','orange','teal','black','green']
 
 class DataMethods:
-    def _pylatex_tikz(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'6cm'), width=NoEscape(r'15cm'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False):
+    def _pylatex_tikz(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False):
 
         
        
@@ -24,7 +24,7 @@ class DataMethods:
         
         colors_multiplicator=np.ceil(plots_no/len(colors_list))
 
-        plot_options = NoEscape('anchor=north west,ymajorgrids=true,xmajorgrids=true,grid style=dashed,legend style={font=\small},'+y_axis_description)+NoEscape(',height=')+height+NoEscape(',width=')+width
+        plot_options = NoEscape('anchor=north west,ymajorgrids=true,xmajorgrids=true,grid style=dashed,legend style={font=\small},'+y_axis_description)+NoEscape(',height=')+height+NoEscape(',width=')+width+NoEscape(f',xmin={min(self.index)},xmax={max(self.index)}')
         
         #with doc.create(Figure(position='!htb')) as fig:
 
@@ -58,14 +58,14 @@ class DataMethods:
 
         return tikzpicture
 
-    def to_pylatex_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'6cm'), width=NoEscape(r'15cm'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False):
+    def to_pylatex_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False):
         
         
         tikz_pic=self._pylatex_tikz(filename,labels_list,colors_list,height, width,x_axis_description,y_axis_description,subplots)
         
         return tikz_pic
     
-    def to_standalone_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'6cm'), width=NoEscape(r'15cm'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,legend_pos='north east'):
+    def to_standalone_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,legend_pos='north east'):
     
         geometry_options ={"margin": "0cm",}
         doc = Document(documentclass='standalone',geometry_options=None,document_options=["tikz"])
@@ -86,12 +86,12 @@ class DataMethods:
         doc.generate_pdf(filename,clean_tex=False)
         return doc.dumps()
 
-    def to_tikz_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'6cm'), width=NoEscape(r'15cm'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,legend_pos='north east'):
+    def to_tikz_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,legend_pos='north east'):
 
 
         return self.to_standalone_plot(filename,labels_list,colors_list,height, width,x_axis_description,y_axis_description,subplots,legend_pos)
     
-    def to_standalone_figure(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'6cm'), width=NoEscape(r'15cm'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,legend_pos='north east'):
+    def to_standalone_figure(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,legend_pos='north east'):
 
 
         self.to_standalone_plot(filename,labels_list,colors_list,height, width,x_axis_description,y_axis_description,subplots,legend_pos)
@@ -232,7 +232,7 @@ class SpectrumFrame(DataFrame,SpectralMethods):
 
         return super().to_tikz_plot(filename=filename,labels_list=labels_list,colors_list=colors_list,x_axis_description=x_axis_description,y_axis_description=y_axis_description,legend_pos=legend_pos)
 
-    def to_standalone_figure(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'6cm'), width=NoEscape(r'15cm'),x_axis_description=',xlabel={$f$},x unit=\si{\hertz},',y_axis_description='',subplots=False,legend_pos='north east'):
+    def to_standalone_figure(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$f$},x unit=\si{\hertz},',y_axis_description='',subplots=False,legend_pos='north east'):
 
         return super().to_standalone_figure(filename=filename,labels_list=labels_list,colors_list=colors_list,x_axis_description=x_axis_description,y_axis_description=y_axis_description,legend_pos=legend_pos)
     

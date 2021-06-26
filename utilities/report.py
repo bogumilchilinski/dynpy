@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import pint
 import sympy.physics.mechanics as me
-from pylatex import (Alignat, Axis, Command, Document, Eqref, Figure, Label,
+from pylatex import (Alignat, Axis, Command, Document, Eqref, Figure, Label, TextColor,
                      Marker, Math, NewLine, NewPage, Package, Plot, Quantity,
                      Ref, Section, Subsection, Table, Tabular, TikZ, Description)
 from pylatex.base_classes import Environment
@@ -39,6 +39,7 @@ class  ReportModule:
     cls_container=[]
     cls_path = ''
     _caption='Figure describes the numerical data'
+    _units={}
 
     @classmethod
     def set_container(cls,container=None):
@@ -56,7 +57,12 @@ class  ReportModule:
         
         cls.cls_path='./SDA_results'
         return cls
-    
+
+    @classmethod
+    def set_units_dict(cls,units={}):
+        
+        cls._units=units
+        return cls
     
     def __init__(self,container=None,path=None):
         if container:
@@ -313,7 +319,9 @@ class AccelerationComparison(ReportModule):
     
     _data_storage={}
     
-    _formatter=lambda entry:  f'${latex(entry.lhs)} = {round(entry.rhs/1000)} \\si {{\\tonne}} ({ round(entry.rhs/10000000*100)  } \\% m_v ) $'
+    _last_marker=None
+    
+    _formatter=lambda entry:  f'${latex(entry.lhs)} = {round(entry.rhs/1000)} \\si {{\\tonne}} ({ (entry.rhs/10000000*100).n(2,chop=True)  } \\% m_v ) $'
     
     @classmethod
     def set_t_span(cls,t_span):
@@ -343,6 +351,7 @@ class AccelerationComparison(ReportModule):
     
     def __init__(self,t_span=None,data=None,ics_list=None,label=None):
         
+        self.last_marker=None
         self._t_span=t_span
         self._ics_list=ics_list
         
@@ -402,11 +411,14 @@ class AccelerationComparison(ReportModule):
         DataStorage._subplot_markers_dict={elem:Marker(f'subplot{self.__class__.__name__}{self._label}'  ,'fig')   for elem in elements}
         DataStorage.first_marker=list(DataStorage._plot_markers_dict.values())[0]
         DataStorage.last_marker=list(DataStorage._plot_markers_dict.values())[-1]
-        
+        self.last_marker=list(DataStorage._plot_markers_dict.values())[-1]
+        type(self)._last_marker=list(DataStorage._plot_markers_dict.values())[-1]
+        print('marker - def')
+        print(self.last_marker)
         
         return result
             
-    def plot_summary(self,analysis=None,coordinate=None,xlim=None,legend_pos='north east'):
+    def plot_summary(self,analysis=None,coordinate=None,xlim=None,legend_pos='north east',legend_columns=1,colors_list=['blue','red','green','orange','violet','magenta','cyan']):
         if analysis:
             self._analysis=analysis
             self._parameter=analysis._parameter
@@ -442,8 +454,11 @@ class AccelerationComparison(ReportModule):
             #ndp=DataPlot('wykres_nowy',position='H',preview=False)
             
             #it should be replaced with data.rename            
-            data.columns=[type(self)._formatter(label) for label in data.columns ]            
-            ndp=data.to_standalone_figure(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'7cm'),width=NoEscape(r'0.9\textwidth'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,x unit=\si{{\second}}'),legend_pos=legend_pos )
+            data.columns=[type(self)._formatter(label) for label in data.columns ]   
+            
+            y_unit_str=f'{(type(self)._units[coord]):Lx}'.replace('[]','')
+            
+            ndp=data.to_standalone_figure(filepath,colors_list=colors_list,height=NoEscape(r'7cm'),width=NoEscape(r'0.9\textwidth'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
             #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
             
 
@@ -455,8 +470,12 @@ class AccelerationComparison(ReportModule):
             ndp.add_caption(NoEscape(f'{type(self)._caption}'))
             
             plt.show()
+            
+            print('marker - plot')
+            print(self.last_marker)
+            print(type(self)._last_marker)
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
-            ndp.append(Label(DataStorage.last_marker))
+            ndp.append(Label(type(self)._last_marker))
         
             if analysis:
                 analysis._container.append(ndp)
@@ -593,6 +612,16 @@ class ReportEntry:
 
     
 class ReportText(ReportModule):
+    
+    _color=None
+    
+    @classmethod
+    def set_text_color(cls,color=None):
+        
+        cls._color=color
+        
+        return cls
+    
     def __init__(self,text=None,key_dict=DataStorage._dict):
         
         self._text='Figures {first_marker}-{last_marker}'
@@ -615,7 +644,14 @@ class ReportText(ReportModule):
             self._text=self._text
         
         super().__init__()
-        self._container.append(NoEscape( self._text  ))
+        
+        if self.__class__._color:
+            
+            self._container.append(TextColor(self.__class__._color,NoEscape( self._text  )))
+            
+        else:
+            
+            self._container.append(NoEscape( self._text  ))
 
     
     def __call__(self,analysis):

@@ -2,6 +2,9 @@ from .systems import ComposedSystem
 from sympy.physics.mechanics import dynamicsymbols
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, Eq, pi)
 
+import pint
+ureg = pint.UnitRegistry()
+
 
 class DDoFVessel(ComposedSystem):
 
@@ -129,7 +132,17 @@ class DDoFVessel(ComposedSystem):
         
         return numbers_dict    
     
-    
+    def units(self):
+        units_dict={
+
+            self.q[1]:ureg.radian,
+            self.q[0]:ureg.meter,
+            self.q[1].diff(self.ivar):ureg.radian/ureg.second,
+            self.q[0].diff(self.ivar):ureg.meter/ureg.second,
+
+           }
+        
+        return units_dict    
     
 class TDoFCompensatedPayload(ComposedSystem):
 
@@ -264,6 +277,19 @@ class TDoFCompensatedPayload(ComposedSystem):
         return numbers_dict    
     
 
+    
+    def units(self):
+        units_dict={
+            self.q[2]:ureg.meter,
+            self.q[1]:ureg.meter,
+            self.q[0]:ureg.radian,
+            self.q[2].diff(self.ivar):ureg.meter/ureg.second,            
+            self.q[1].diff(self.ivar):ureg.meter/ureg.second,
+            self.q[0].diff(self.ivar):ureg.radian/ureg.second,
+
+           }
+        
+        return units_dict 
 # class PayloadVesselSystem(ComposedSystem):
     
 #     def __init__(self,
