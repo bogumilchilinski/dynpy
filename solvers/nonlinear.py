@@ -684,11 +684,11 @@ class MultiTimeScaleMethod(LinearODESolution):
             ivar=ivar,
             dvars=self.approximation_function(order=order)).solution()
 
-#         print('=eoms and its sol'*100)
-#         display(eoms)
-#         display(solution)
+        print('=eoms and its linear sol'*100)
+        display(eoms)
+        display(solution)
 
-#         print('=eoms and its sol'*100)
+        print('=eoms and its sol'*100)
         
         return self._format_solution(
             dvars=self.approximation_function(order=order),
