@@ -179,11 +179,11 @@ class FirstOrderODE:
         regular_main_matrix= Matrix(list(regular_odes_list.values())).jacobian( list(regular_vars) )
         #singular_odes=[no  for no in  const_odes_list]
         print('diagonalize')
-        print([Matrix(list(regular_odes_list.values())) ,list(regular_vars) ,[eqn  for eqn in const_odes_list.keys() ]])
+        print([Matrix(list(regular_odes_list.values())) ,list(regular_vars) ,const_odes_list])
         print('diagonalize')
 
 
-        return [Matrix(list(regular_odes_list.values())) ,list(regular_vars) ,[eqn  for eqn in const_odes_list.keys() ]]
+        return [Matrix(list(regular_odes_list.values())) ,list(regular_vars) ,const_odes_list ]
 
 
 
@@ -254,8 +254,9 @@ class FirstOrderODE:
 
         modes,eigs = self.eigenmodes(),self.eigenvalues()
         const_part = self.diagonalize()[2]
+        reg_vars = self.diagonalize()[1]
         
-        display( Matrix(const_part))
+        display( (const_part))
 
         
         
@@ -274,8 +275,13 @@ class FirstOrderODE:
         print('sol')
         display(solution)
         print('sol')
-        display( Matrix(const_part))
-        return sum(solution, Matrix([0] * len(solution[0])))
+
+
+        const_dict=({coord:C_list[ no+len(solution)] for no,coord in enumerate(const_part.keys())})
+
+        sol_dict={ coord:eq    for coord ,eq in zip(reg_vars,list(sum(solution, Matrix([0] * len(solution[0])))))}
+
+        return {**sol_dict,**const_dict }
 
     def steady_solution(self, initial_conditions=None):
 
