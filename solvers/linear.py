@@ -144,7 +144,7 @@ class FirstOrderODE:
         linear_odes=inertia_matrix.inv() * (main_matrix*sym.Matrix(self.dvars)+ode_sys.subs({dvar:0 for dvar  in self.dvars}).doit())
 
          
-        linear_odes_dict={ coord:eq  for coord,eq  in zip(linear_odes, self.dvars  )  }
+        linear_odes_dict={ coord:eq  for coord,eq  in zip( self.dvars,linear_odes,  )  }
 
 
 
