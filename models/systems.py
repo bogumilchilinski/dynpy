@@ -3806,7 +3806,7 @@ class DDoFTwoNonLinearDisks(ComposedSystem):
 
 class MDoFDoubleTrolleyWithNonlinearSprings(ComposedSystem):
     scheme_name = 'MDOF_Double_Trolley_With_Springs.PNG'
-    real_name = 'DoubleTrolley_real.png'
+    real_name = 'sdof_nonlinspring_trolleys_real.PNG'
 
     def __init__(self,
                  R=Symbol('R', positive=True),
