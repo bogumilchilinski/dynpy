@@ -169,6 +169,8 @@ class FirstOrderODE:
         else:
             regular_vars=Matrix(list(regular_odes_list.values())).atoms(Function)
 
+            
+        regular_vars =  regular_odes_list.keys()
 
         display(regular_vars)
 
@@ -565,13 +567,14 @@ class LinearODESolution:
         #         cos_components=ext_forces.atoms(cos)
 
         #        display('sin cos reco',)
-        components = ext_forces.atoms(sin, cos)
+        components =[comp for comp in ext_forces.atoms(sin, cos) if comp.has(self.ivar)]
 
         #        display('ext_forces',ext_forces)
 
         steady_sol = Matrix([0 for gen_coord in self.dvars])
 
         for comp in components:
+            #display(comp)
 
             omg = (comp.args[0].diff(self.ivar)).doit()
             #            display(omg)
@@ -583,6 +586,10 @@ class LinearODESolution:
             ) * omg**2 + sym.I * omg * self.damping_matrix(
             ) + self.stiffness_matrix()
 
+            #print('++linea.py++'*10)
+            #display(fund_mat)
+            #print('++linea.py++'*10)
+            
             steady_sol += (sym.re(fund_mat.inv()).doit() * amp_vector) * comp + (sym.im(fund_mat.inv()).doit() * amp_vector) * TR3(comp.subs(omg*self.ivar,omg*self.ivar-pi/2))
             
             #steady_sol += ((fund_mat.inv()) * amp_vector) * comp 
