@@ -4299,12 +4299,13 @@ class MDoFTripleShaft(ComposedSystem):
     real_name = 'ddof_shaft_real.png'
 
     def __init__(self,
-                 l_1=Symbol('l_1', positive=True),
-                 l_2=Symbol('l_2', positive=True),
-                 l_3=Symbol('l_3', positive=True),
+                 m = symbols('m', positive=True),
                  m_1=Symbol('m_1', positive=True),
                  m_2=Symbol('m_2', positive=True),
                  m_3=Symbol('m_3', positive=True),
+                 l_1=Symbol('l_1', positive=True),
+                 l_2=Symbol('l_2', positive=True),
+                 l_3=Symbol('l_3', positive=True),
                  d=Symbol('d', positive=True),
                  d_1=Symbol('d_1', positive=True),
                  d_2=Symbol('d_2', positive=True),
@@ -4315,26 +4316,30 @@ class MDoFTripleShaft(ComposedSystem):
                  M_3=Symbol('M_3', positive=True),
                  nu=Symbol('\\nu', positive=True),
                  delta=Symbol('\\delta', positive=True),
-                 pi = symbols('\\pi', positive=True),
+
                  input_displacement=dynamicsymbols('theta'),
                  phi_1=dynamicsymbols('\\varphi_1'),
                  phi_2=dynamicsymbols('\\varphi_2'),
                  phi_3=dynamicsymbols('\\varphi_3'),
+
+                 phi_l=dynamicsymbols('\\varphi_L'),
+                 phi_r=dynamicsymbols('\\varphi_R'),
+
                  ivar=Symbol('t'),
                  qs=dynamicsymbols('\\varphi_1, \\varphi_2, \\varphi_3,'),
                  **kwargs):
 
 
         theta = input_displacement
-
-        self.l_1=l_1
-        self.l_2=l_2
-        self.l_3=l_3
-
+        
         self.m_1=m_1
         self.m_2=m_2
         self.m_3=m_3
         self.G=G
+
+        self.l_1=l_1
+        self.l_2=l_2
+        self.l_3=l_3
 
         self.d_1=d_1
         self.d_2=d_2
@@ -4350,7 +4355,10 @@ class MDoFTripleShaft(ComposedSystem):
 
         self.phi_1=phi_1
         self.phi_2=phi_2
-        self.phi_3=phi_2
+        self.phi_3=phi_3
+        
+        self.phi_l=phi_l
+        self.phi_r=phi_r
 
         self.input_displacement = input_displacement
         self.qs = qs
@@ -4373,7 +4381,7 @@ class MDoFTripleShaft(ComposedSystem):
 
         system = self.disk_1 + self.disk_2 + self.disk_3 + self.spring_1 + self.spring_2 + self.spring_3
 
-        super().__init__(system,**kwargs)
+        super().__init__(system(qs),**kwargs)
 
 #     def symbols_description(self):
 #         self.sym_desc_dict = {
@@ -4387,13 +4395,19 @@ class MDoFTripleShaft(ComposedSystem):
     def get_default_data(self):
 
 
-        m0, M0, l0 , d0 = symbols('m_0 M_0 l_0 d_0', positive=True)
+        m0, M0, l0 , d0 ,M0= symbols('m_0 M_0 l_0 d_0 M_0', positive=True)
         theta0, Omega = symbols('theta_0, Omega', positive=True)
 
         default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            
+            Symbol('I_m'):[S.Half*Symbol('m')*Symbol('R')**2],
+            Symbol('I_S'):[S.Half*pi*Symbol('R_S')**4],
+            Symbol('k_S'):[Symbol('G')*Symbol('I_S')/Symbol('L_S')],
+            
+            
+            self.m_1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
+            self.m_2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.m_3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
 
             self.l_1: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
             self.l_2: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
@@ -4404,15 +4418,43 @@ class MDoFTripleShaft(ComposedSystem):
             self.d_3: [2 * d0, 4 * d0, S.Half * d0, 2 * d0, S.Half * d0],
             self.d: [2 * d0, 4 * d0, S.Half * d0, 2 * d0, S.Half * d0],
 
-            self.phi_1:[self.phi_1,0],
-            self.phi_2:[self.phi_1,self.phi_2],
-            self.phi_3:[self.phi_2],
+            self.phi_1:[self.phi_l,0],
+            self.phi_2:[self.phi_l,self.phi_r],
+            self.phi_3:[self.phi_r,0],
+            
+            self.delta:[0],
 
-            self.input_displacement:[theta0* cos(Omega * self.ivar) ],
+            self.input_displacement:[0],
+            
+            self.M_1:[M0],
+            self.M_2:[M0],
+            self.M_3:[M0],
+            
+            
+            
+            
         }
 
         return default_data_dict
 
 
+    def get_random_parameters(self):
 
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.phi_1] != self.phi_l or parameters_dict[self.phi_2] != self.phi_l:
+
+            parameters_dict[self.phi_1] = self.phi_l
+
+        if parameters_dict[self.phi_2] != self.phi_r or parameters_dict[self.phi_3] != self.phi_r:
+
+            parameters_dict[self.phi_3] = self.phi_r
+            
+
+        return parameters_dict
 
