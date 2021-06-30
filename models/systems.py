@@ -4400,9 +4400,9 @@ class MDoFTripleShaft(ComposedSystem):
 
         default_data_dict = {
             
-            Symbol('I_m'):[S.Half*Symbol('m')*Symbol('R')**2],
-            Symbol('I_S'):[S.Half*pi*Symbol('R_S')**4],
-            Symbol('k_S'):[Symbol('G')*Symbol('I_S')/Symbol('L_S')],
+#             Symbol('I_m'):[S.Half*Symbol('m')*Symbol('R')**2],
+#             Symbol('I_S'):[S.Half*pi*Symbol('R_S')**4],
+#             Symbol('k_S'):[Symbol('G')*Symbol('I_S')/Symbol('L_S')],
             
             
             self.m_1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
