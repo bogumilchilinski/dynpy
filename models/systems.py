@@ -4296,7 +4296,7 @@ class MDoFTripleShaft(ComposedSystem):
     """
 
     scheme_name = 'MDoFTripleShaft.PNG'
-    real_name = 'ddof_shaft_real.png'
+    real_name = 'MDoFTripleShaft_real.jpg'
 
     def __init__(self,
                  m = symbols('m', positive=True),
@@ -4314,7 +4314,7 @@ class MDoFTripleShaft(ComposedSystem):
                  M_1=Symbol('M_1', positive=True),
                  M_2=Symbol('M_2', positive=True),
                  M_3=Symbol('M_3', positive=True),
-                 nu=Symbol('\\nu', positive=True),
+                 Omega=Symbol('\\Omega', positive=True),
                  delta=Symbol('\\delta', positive=True),
 
                  input_displacement=dynamicsymbols('theta'),
@@ -4350,7 +4350,7 @@ class MDoFTripleShaft(ComposedSystem):
         self.M_2=M_2
         self.M_3=M_3
 
-        self.nu=nu
+        self.Omega=Omega
         self.delta=delta
 
         self.phi_1=phi_1
@@ -4372,11 +4372,11 @@ class MDoFTripleShaft(ComposedSystem):
         k_2=(G*I_0)/l_1
         k_3=(G*I_0)/l_1
 
-        self.disk_1 = Disk(I_1, pos1=phi_1, qs=qs) + Force(-M_1 * cos(nu * ivar + delta), pos1 = phi_1, qs = [phi_1])
+        self.disk_1 = Disk(I_1, pos1=phi_1, qs=qs) + Force(-M_1 * cos(Omega * ivar + delta), pos1 = phi_1, qs = [phi_1])
         self.spring_1 = Spring(k_1, pos1=theta, pos2=phi_1, qs=qs)  # left rod
-        self.disk_2 = Disk(I_2, pos1=phi_2, qs=qs) + Force(-M_2 * cos(nu * ivar + delta), pos1 = phi_2, qs = [phi_2])
+        self.disk_2 = Disk(I_2, pos1=phi_2, qs=qs) + Force(-M_2 * cos(Omega * ivar + delta), pos1 = phi_2, qs = [phi_2])
         self.spring_2 = Spring(k_2, pos1=phi_1, pos2=phi_2, qs=qs)  # central rod
-        self.disk_3 = Disk(I_3, pos1=phi_3, qs=qs) + Force(-M_3 * cos(nu * ivar + delta), pos1 = phi_3, qs = [phi_3])
+        self.disk_3 = Disk(I_3, pos1=phi_3, qs=qs) + Force(-M_3 * cos(Omega * ivar + delta), pos1 = phi_3, qs = [phi_3])
         self.spring_3 = Spring(k_3, pos1=phi_2, pos2=phi_3, qs=qs)  # right rod
 
         system = self.disk_1 + self.disk_2 + self.disk_3 + self.spring_1 + self.spring_2 + self.spring_3
@@ -4400,9 +4400,9 @@ class MDoFTripleShaft(ComposedSystem):
 
         default_data_dict = {
             
-#             Symbol('I_m'):[S.Half*Symbol('m')*Symbol('R')**2],
-#             Symbol('I_S'):[S.Half*pi*Symbol('R_S')**4],
-#             Symbol('k_S'):[Symbol('G')*Symbol('I_S')/Symbol('L_S')],
+            Symbol('I_m'):[S.Half*Symbol('m')*Symbol('R')**2],
+            Symbol('I_S'):[S.Half*pi*Symbol('R_S')**4],
+            Symbol('k_S'):[Symbol('G')*Symbol('I_S')/Symbol('L_S')],
             
             
             self.m_1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
@@ -4430,9 +4430,7 @@ class MDoFTripleShaft(ComposedSystem):
             self.M_2:[M0],
             self.M_3:[M0],
             
-            
-            
-            
+
         }
 
         return default_data_dict
