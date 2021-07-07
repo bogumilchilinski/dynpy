@@ -3532,7 +3532,7 @@ class MDoFThreePendulumsWithSprings(ComposedSystem):
         return parameters_dict
 
     
-class MDoFLinearizedThreePendulumsWithSprings(MDoFThreePendulumsWithSprings):
+class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
     scheme_name = 'three_pendulums_forced.PNG'
     real_name = 'lifting_tandem.png'
 
