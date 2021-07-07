@@ -37,7 +37,7 @@ plots_no_gen= plots_no()
 class  ReportModule:
 
     cls_container=[]
-    cls_path = ''
+    cls_path = '.'
     _caption='Figure describes the numerical data'
     _units={}
 
