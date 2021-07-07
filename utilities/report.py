@@ -37,6 +37,17 @@ class DataStorage:
     r'''
     This class represents data collector that stores the results able to obtain within other computational blocks.
     It ensures ease data transferring in order to do efficient analysis and data processing.
+    
+    Arguments
+    =========
+    data_set: dict
+        Dictionary of data to be deposited into storage.
+
+    Methods
+    =======
+
+    Example
+    =======
     '''
     
     _storage={}
@@ -139,6 +150,19 @@ class SimulationalBlock:
     r'''
     It is computational module which enables to perform numerical simulations of the dynamic system.
     Class provides several methods devoted for data processing, ploting and reporting.
+    
+    Arguments
+    =========
+    t_span: iterable
+        Time span.
+    ics_list: iterable
+        List containing values of initial conditions. 
+
+    Methods
+    =======
+
+    Example
+    =======
     '''
     
     _storage=DataStorage._lds
@@ -194,7 +218,7 @@ class SimulationalBlock:
         #print(DataStorage._list)
 
         DataStorage._list+=[simulation_result]
-
+        
         return simulation_result
 
     def simulation_result(self,analysis):
@@ -209,7 +233,7 @@ class SimulationalBlock:
         
         
         ndp=DataPlot('wykres_nowy',position='H',preview=False)
-        ndp.add_data_plot(filename=f'Wykres_alpha_{next(plots_no_gen)}.png',width='11cm')
+        ndp.add_data_plot(filename=f'plots/Wykres_alpha_{next(plots_no_gen)}.png',width='11cm')
         ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''))
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
         #ndp.append(Label(self.marker_dict[coord]))
@@ -222,6 +246,18 @@ class SimulationalBlock:
 
 
 class SimulationFFT:
+    r'''It is a class that provides Fast Fourier Transform techniques for formerly performed numerical simulations in time domain. Class supplies a method for plotting a double sided RMS.
+    
+    Arguments
+    =========
+    *args
+
+    Methods
+    =======
+
+    Example
+    =======
+    '''
     def __init__(self,*args):
         self._args=args
         
@@ -240,6 +276,19 @@ class AccelerationComparison:
     r'''
     It is computational block that prepares the comparison of particular coordinates regarding to changes of selected parameter.
     Class provides several methods devoted for data processing, ploting and reporting.
+    
+    Arguments
+    =========
+    t_span: iterable
+        Time span.
+    ics_list: iterable
+        List containing values of initial conditions. 
+
+    Methods
+    =======
+
+    Example
+    =======
     '''
     
     _story_point=None
@@ -288,6 +337,7 @@ class AccelerationComparison:
 #         print('_______________test of plot_____________')
 #         print(data)
 #         print('_______________test of plot_____________')
+#         print(data)
         elements=list((data.values()))[0].columns
         summaries_dict = {dynsym:pd.DataFrame()  for dynsym  in elements }
         
@@ -345,7 +395,7 @@ class AccelerationComparison:
 
 
             ndp=DataPlot('wykres_nowy',position='H',preview=False)
-            ndp.add_data_plot(filename=f'Wykres_summary{next(plots_no_gen)}.png',width='11cm')
+            ndp.add_data_plot(filename=f'plots/Wykres_summary{next(plots_no_gen)}.png',width='11cm')
             
             
             ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(self._parameter)}\)'''))
@@ -446,6 +496,20 @@ class AccelerationComparison:
         return self._simulation_result
 
 class ReportEntry:
+    r'''
+    This class creates a report section with a title provided by a user. 
+    
+    Arguments
+    =========
+    block_title: str
+        String to create a block title.
+
+    Methods
+    =======
+
+    Example
+    =======
+    '''
     def __init__(self,block_title):
         self._block_title = block_title
     
@@ -458,6 +522,22 @@ class ReportEntry:
 
     
 class ReportText:
+    r'''
+    This class appends a user defined text to the existing document container. 
+    
+    Arguments
+    =========
+    text: str
+        String that will be appended to the defined container.
+    key_dict: dict
+        Dictionary containing entries for string format method.
+        
+    Methods
+    =======
+
+    Example
+    =======
+    '''
     def __init__(self,text=None,key_dict=DataStorage._dict):
         
         self._text='Figures {first_marker}-{last_marker}'
@@ -502,6 +582,24 @@ class ReportText:
         return ''
 
 class PlotTestResult:
+    r'''
+    The class creates a plot from data provided by DataStorage and appends it to an existing document container instance. 
+    
+    Arguments
+    =========
+    *args
+    
+    keys_map: dict
+        Dictionary containing keys for mapping.
+    **kwargs
+    
+        
+    Methods
+    =======
+
+    Example
+    =======
+    '''
     def __init__(self,*args,keys_map=None,**kwargs):
         
         data_to_plot=DataStorage._storage
@@ -544,7 +642,27 @@ class PlotTestResult:
     
     
 class SystemDynamicsAnalyzer:
+    r'''
+    This is a computational block that runs a simulations on provided dynamic system. The class has methods responsible for data preparation, system analysis and reporting.
     
+    Arguments
+    =========
+    dynamic_system: Lagrange's method object
+        
+    reference_data: dict
+        Dictionary containing default values of systems's parameters.
+    report_init: list
+        List containing
+    report_step: list
+        List containing
+    report_end: list
+        List containing
+    Methods
+    =======
+
+    Example
+    =======
+    '''
 
     def __init__(self,dynamic_system,reference_data={},report_init=[ReportEntry('Report Beginning')],report_step=[SimulationalBlock(np.linspace(0,300,1000)).do_simulation],report_end=[ReportEntry('Report End')]):
 
@@ -620,7 +738,7 @@ class SystemDynamicsAnalyzer:
         
         self._current_value=case_data[self._parameter]
         self._current_data=case_data
-        
+        print(self._current_data)
         for action in self._loop_steps:
             self._current_result=action(self)
         

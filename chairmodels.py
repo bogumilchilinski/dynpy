@@ -240,6 +240,7 @@ rcdof1={z_wrc:0,theta:0} #RC 2dof
 rcdof2={z_wrc:0}
 
 
+# D_chair5dof=(c_mu*T_chair5dof).doit().expand()
 D_chair5dof=(c_mu*T_chair5dof).doit().expand()
 
 D_rapidchair3dof=(c_mu*T_RC_3dof).doit().expand()
@@ -365,6 +366,24 @@ rapidchair_1dof=rapidchair_3dof.subs(rcdof1,method='direct').shranked([phi_rc])(
 
 
 chair5dof_rc3dof=Chair5DOFwithRC3DOF()
+
+### system parametes
+m_fr, m_rear,m_3, k_r, k_rt, k_f, k_ft, k_rot = symbols('m_fr, m_r, M, k_r, k_rt, k_f, k_ft k_rot',positive=True)
+m,k,g,F_1,F_2,Omega,F,R,v0,u0,l_l,l_r= symbols('m,k,g,F_1,F_2,Omega, F_0 R, v_0,u_0,l_l,l_r',positive=True)
+I_ch, I_w , z_c3,l_fr,l_rear= symbols('I_chair, I_wheel, z_c3, l_fr, l_r',positive=True)
+m_RC, I_RC, l_RC, k_RC, phi0 = symbols('m_RC, I_RC, l_RC, k_RC, varphi_0',positive=True)
+m_w, I_wrc, r_w, k_w, k_fix,k_tire = symbols('m_w, I_wRC, R_w, k_w, k_fix, k_t',positive=True)
+c,c_mu,c_lam= symbols('c,c_mu, c_lambda',positive=True)
+a_ox, a_oz, a_rz ,a_rcz=symbols('a_ox, a_oz, a_rz ,a_rcz')
+
+pm=symbols('PM')
+
+t_l, delta_t,l_ramp,l_bumps = symbols('t_l,dt,l_ramp, l_bumps',positive=True)
+t0 = symbols('t_0')
+
+# generalized coordinates
+x,z_fr,z_rear,z, phi,phi_rc,theta,z_wrc = dynamicsymbols('x,z_fr,z_r,z, varphi,varphi_RC, theta, z_wrc')
+dx,dz_fr,dz_rear,dz,dphi,dphi_rc,dtheta,dz_wrc = dynamicsymbols('x,z_fr,z_r,z, varphi,varphi_RC, theta, z_wrc', 1)
 # ===========================SIMPLE MODEL=========================================================================================================
 T_body = S.One/2*m_3*x_m3.diff(t)**2 + S.One/2 * m_3* dz**2 # Ek ramy wózka w ruchu postępowym
 T_rot =  S.One/2 * I_ch* dphi**2  # Ek ramy wózka w ruchu obrotowym
@@ -379,7 +398,7 @@ V_fr = S.One/2*k_ft*(z_fr-0.01*cos(0.02/1.8*t-0.5/1.8))**2     # Ep przednich pr
 #+++++++++++++++++++++
 V_pion= S.One/2 * k_r*(z-z_rear)**2 + S.One/2 * k_f*(z-z_fr)**2  ##### te
 #+++++++++++++++++++++
-Dlam_chair5dof=((chair_5dof_lin.q.diff(t)).T*chair_5dof_lin.stiffness_matrix()*chair_5dof_lin.q.diff(t)*c_lam)[0]
+
 ##                k_rear                                    k_fr
 V_obr = S.One/2 * k_r * (z+l_l*phi-z_rear)**2 + S.One/2 * k_f * (z-l_r*phi-z_fr)**2 - S.One/2 * m_3 * z_c3 * g *phi**2
 
@@ -388,7 +407,12 @@ Epotential=V_rear+V_fr+V_pion+V_obr
 
 L_simple=Ekinetic-Epotential
 
-FL_SIMPLECHAIR = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*2*F*N.x)]+[(points_list[nom],(-D_chair5dof.diff(velm)-Dlam_chair5dof.diff(velm))*N.x)  for nom,velm in enumerate(Matrix(qs_5dof).diff(t))]
+
+Dlam_chair5dof=((chair_5dof_lin.q.diff(t)).T*Matrix([Epotential]).jacobian(chair_5dof_lin.q).jacobian(chair_5dof_lin.q)*chair_5dof_lin.q.diff(t)*c_lam)[0]
+Dmu_chair5dof=((chair_5dof_lin.q.diff(t)).T*Matrix([Ekinetic]).jacobian(chair_5dof_lin.q.diff(t)).jacobian(chair_5dof_lin.q.diff(t))*chair_5dof_lin.q.diff(t)*c_mu)[0]
+
+
+FL_SIMPLECHAIR = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*2*F*N.x)]+[(points_list[nom],(-Dmu_chair5dof.diff(velm)-Dlam_chair5dof.diff(velm))*N.x)  for nom,velm in enumerate(Matrix(qs_5dof).diff(t))]
 # +[(points_list[non],-Dlam_chair5dof.diff(veln)*N.x)  for non,veln in enumerate(Matrix(qs_5dof).diff(t))]
 class SimpleChair5DOF(dyn.LagrangesDynamicSystem):
     def __init__(self, Lagrangian=L_simple, qs=qs_5dof, forcelist=FL_SIMPLECHAIR, bodies=None, frame=N,
@@ -396,9 +420,41 @@ class SimpleChair5DOF(dyn.LagrangesDynamicSystem):
         
         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
                  hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs)
-chair_5dof_simple = SimpleChair5DOF()('Simple chair 5DOF model')
-# ===========================SIMPLE MODEL=========================================================================================================
 
+    def get_param_values(self):
+        default_data_dict={F:112.5,
+                   
+                   c_mu:0.0001,
+                   c_lam:0.0001,
+                   l_l:0.25,
+                   l_r:0.25,
+                   
+                   k_f:350000,
+                   k_ft:140000,
+                   k_r:400000,
+                   k_rt:120000,
+                   m_3:75,
+                   I_ch:9.479342+m_3*0.39*0.39,
+                   m_rear:2,
+                   m_fr:0.45,
+                   pm:0.1,
+                   Omega:0.05*np.pi*2,
+                   R:0.3,
+                   z_c3:0.5,
+                   g:9.81,
+                   I_w:m_rear*R**2,
+                                      l_fr:0.2,
+                   l_rear:0.01,    u0:0.005,
+    t0:1,
+    t_l:1,
+    l_bumps:0.15}
+        return default_data_dict            
+    def numerical_model(self):
+        pass
+
+        
+# ===========================SIMPLE MODEL=========================================================================================================
+chair_5dof_simple = SimpleChair5DOF()('Simple chair 5DOF model')
 
 
 
