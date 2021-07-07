@@ -53,9 +53,11 @@ class  ReportModule:
     
     
     @classmethod
-    def set_directory(cls,path=None):
+    def set_directory(cls,path='./SDA_results'):
         
-        cls.cls_path='./SDA_results'
+        
+        
+        cls.cls_path=path
         return cls
 
     @classmethod
