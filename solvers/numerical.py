@@ -166,10 +166,21 @@ class OdeComputationalCase:
         if type(t_span) == type(None):
             t_span = self.t_span
 
+        if type(t_eval) == type(None) and type(t_span) != type(None) :
+            t_eval = t_span
+            
         if type(params_values) == type(None):
             params_values = tuple(Matrix(self.params).subs(self.params_values))
             
-        if type(params_values) == type(dict):
+        if isinstance(params_values,dict):
+            self.params_values = params_values
+            self.params = list(self.params_values.keys())
+            
+            self.params = self.odes_system.free_symbols
+            self.params.remove(self.ivar)
+            
+            self.params=list(self.params)
+            
             params_values = tuple(Matrix(self.params).subs(params_values))
             
 

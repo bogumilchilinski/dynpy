@@ -16,7 +16,7 @@ import sympy.physics.mechanics as me
 
 from sympy.simplify.fu import TR8, TR10, TR7, TR3
 
-from .linear import LinearODESolution
+from .linear import LinearODESolution, FirstOrderODE
 
 class WeakNonlinearProblemSolution(LinearODESolution):
     def __init__(self,
@@ -343,7 +343,8 @@ class MultiTimeScaleMethod(LinearODESolution):
         self.eps = eps
         self._order=order
 
-        self.secular_eq=[]
+        self.secular_eq=set()
+        self.int_const=set()
 
         #        display(omega)
         self.omega = 1
@@ -558,12 +559,16 @@ class MultiTimeScaleMethod(LinearODESolution):
 
 #         #secular_comps = {sin(eig_min*self.ivar),cos(eig_min*self.ivar)}
         secular_comps = sum(sol_zeroth).atoms(sin, cos)
+     
+        self.int_const|={ eq.coeff(comp)   for eq in sol_zeroth for comp in secular_comps}
+    
+        
 
 #         display('+'*100,secular_comps,'+'*100)
         
         return secular_comps
 
-    def nth_order_solution(self, order=3):
+    def nth_order_solution(self, order=1):
 
         t_list=self.t_list
 
@@ -598,9 +603,24 @@ class MultiTimeScaleMethod(LinearODESolution):
                 dict=True,ivar=self.t_list[0])
             #            display(nth_solution)
             approx_dict.update(nth_solution)
+            
+        sec_eq=Matrix(list(self.secular_eq - {S.Zero}))
+        display(sec_eq)
+        display(self.int_const)
+        
+        const_sol=FirstOrderODE((sec_eq),
+                        self.t_list[1],
+                        dvars=Matrix(list(self.int_const))
+                        ).general_solution()
+        display(const_sol)
+        
+        t_back_subs={t_i:self.ivar*self.eps**t_ord for t_ord,t_i  in enumerate(self.t_list)}
+        
+        display(t_back_subs)
+        
 
         return Matrix(
-            self.predicted_solution(order=order).values()).subs(approx_dict)
+            self.predicted_solution(order=order).values()).subs(approx_dict).subs(const_sol).subs(t_back_subs)
 
     def zeroth_approximation(self, dict=False, equation=False):
 
@@ -653,13 +673,13 @@ class MultiTimeScaleMethod(LinearODESolution):
         # print('='*100,'eoms_nth for solve')
         
         eoms = (eoms.expand()).applyfunc(
-            lambda eqn: TR8(TR10(TR8(TR10(eqn).expand()).expand()).expand()))
+            lambda eqn: ((TR10(TR8(TR10(eqn).expand()).expand()).expand())))
 
         # print('='*100,'eoms_nth for solve')
         # display(eoms )
         # print('='*100,'eoms_nth for solve')
         
-        self.secular_eq+=[row.coeff(comp)  for row in eoms  for comp in secular_comps] #test
+        self.secular_eq|={row.coeff(comp)  for row in eoms  for comp in secular_comps} #test
 
         print('='*100)
         display(*self.secular_eq)
@@ -670,11 +690,11 @@ class MultiTimeScaleMethod(LinearODESolution):
 
         eoms = eoms.subs({comp: 0 for comp in secular_comps})
 
-        # print('='*100)
-        # display(eoms)
-        # display(self.approximation_function(order=order))
-        # display(ivar)
-        # print('='*100)
+        print('='*100)
+        display(eoms)
+        display(self.approximation_function(order=order))
+        display(ivar)
+        print('='*100)
 
         
         
@@ -684,11 +704,11 @@ class MultiTimeScaleMethod(LinearODESolution):
             ivar=ivar,
             dvars=self.approximation_function(order=order)).solution()
 
-#         print('=eoms and its sol'*100)
-#         display(eoms)
-#         display(solution)
+        print('=eoms and its linear sol'*100)
+        display(eoms)
+        display(solution)
 
-#         print('=eoms and its sol'*100)
+        print('=eoms and its sol'*100)
         
         return self._format_solution(
             dvars=self.approximation_function(order=order),

@@ -137,36 +137,55 @@ class FirstOrderODE:
         
         main_matrix = ode_sys.jacobian(self.dvars).subs({dvar:0 for dvar  in self.dvars})
 
-#         display(main_matrix)
+        inertia_matrix = ode_sys.jacobian(self.dvars.diff(self.ivar)).subs({dvar.diff(self.ivar):0 for dvar  in self.dvars})
+
+        display(inertia_matrix,main_matrix)
         
-        linear_odes=main_matrix*sym.Matrix(self.dvars)
+        linear_odes=inertia_matrix.inv() * (main_matrix*sym.Matrix(self.dvars)+ode_sys.subs({dvar:0 for dvar  in self.dvars}).doit())
+
+         
+        linear_odes_dict={ coord:eq  for coord,eq  in zip( self.dvars,linear_odes,  )  }
 
 
 
 
        
 
-        const_odes_list=[]
-        regular_odes_list=[]
+        const_odes_list={}
+        regular_odes_list={}
     
-        for  no,ode  in enumerate(linear_odes): 
+        for  coord, ode  in (linear_odes_dict.items()): 
             if ode==0:
-                const_odes_list+=[ode]
+                const_odes_list[coord]=ode
             else:
-                regular_odes_list+=[ode]
+                regular_odes_list[coord]=ode
+
+
+        display(*regular_odes_list)
+
 
         if isinstance(self.ivar,Function):
-            regular_vars=Matrix(regular_odes_list).atoms(Function) -{self.ivar}
+            regular_vars=Matrix(list(regular_odes_list.values())).atoms(Function) -{self.ivar}
         else:
-            regular_vars=Matrix(regular_odes_list).atoms(Function)
+            regular_vars=Matrix(list(regular_odes_list.values())).atoms(Function)
+
+            
+        regular_vars =  regular_odes_list.keys()
+
+        display(regular_vars)
+
+        
 
         #display( row  if row  in Matrix(regular_odes_list).rows  ) 
-        display( Matrix(regular_odes_list) )    
-        regular_main_matrix= Matrix(regular_odes_list).jacobian( list(regular_vars) )
+        display( list(regular_odes_list.values()) )    
+        regular_main_matrix= Matrix(list(regular_odes_list.values())).jacobian( list(regular_vars) )
         #singular_odes=[no  for no in  const_odes_list]
-        display(regular_main_matrix)
-    
-        return (regular_main_matrix).diagonalize(),list(linear_odes.atoms(Function) - regular_vars  )
+        print('diagonalize')
+        print([Matrix(list(regular_odes_list.values())) ,list(regular_vars) ,const_odes_list])
+        print('diagonalize')
+
+
+        return [Matrix(list(regular_odes_list.values())) ,list(regular_vars) ,const_odes_list ]
 
 
 
@@ -175,16 +194,21 @@ class FirstOrderODE:
         Determines the system eigenvalues matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
         '''
         
+        odes,vars=self.diagonalize()[0:2]
+
         
-        return self.diagonalize()[0][1]
+        return odes.jacobian(vars).diagonalize()[1]
 
     def eigenmodes(self):
         '''
         Determines the system eigenmodes matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
         '''
+
         
+        odes,vars=self.diagonalize()[0:2]
+        display(odes,vars)
         
-        return self.diagonalize()[0][0]
+        return odes.jacobian(vars).diagonalize()[0]
     
     
     def damped_natural_frequencies(self):
@@ -230,10 +254,11 @@ class FirstOrderODE:
         #         print('o tu')
         #         display(self.odes_system)
 
-        modes,eigs = self.diagonalize()[0]
-        const_part = self.diagonalize()[1]
+        modes,eigs = self.eigenmodes(),self.eigenvalues()
+        const_part = self.diagonalize()[2]
+        reg_vars = self.diagonalize()[1]
         
-        
+        display( (const_part))
 
         
         
@@ -252,7 +277,13 @@ class FirstOrderODE:
         print('sol')
         display(solution)
         print('sol')
-        return  Matrix(const_part)+sum(solution, Matrix([0] * len(solution[0])))
+
+
+        const_dict=({coord:C_list[ no+len(solution)] for no,coord in enumerate(const_part.keys())})
+
+        sol_dict={ coord:eq    for coord ,eq in zip(reg_vars,list(sum(solution, Matrix([0] * len(solution[0])))))}
+
+        return {**sol_dict,**const_dict }
 
     def steady_solution(self, initial_conditions=None):
 
@@ -536,13 +567,14 @@ class LinearODESolution:
         #         cos_components=ext_forces.atoms(cos)
 
         #        display('sin cos reco',)
-        components = ext_forces.atoms(sin, cos)
+        components =[comp for comp in ext_forces.atoms(sin, cos) if comp.has(self.ivar)]
 
         #        display('ext_forces',ext_forces)
 
         steady_sol = Matrix([0 for gen_coord in self.dvars])
 
         for comp in components:
+            #display(comp)
 
             omg = (comp.args[0].diff(self.ivar)).doit()
             #            display(omg)
@@ -554,6 +586,10 @@ class LinearODESolution:
             ) * omg**2 + sym.I * omg * self.damping_matrix(
             ) + self.stiffness_matrix()
 
+            #print('++linea.py++'*10)
+            #display(fund_mat)
+            #print('++linea.py++'*10)
+            
             steady_sol += (sym.re(fund_mat.inv()).doit() * amp_vector) * comp + (sym.im(fund_mat.inv()).doit() * amp_vector) * TR3(comp.subs(omg*self.ivar,omg*self.ivar-pi/2))
             
             #steady_sol += ((fund_mat.inv()) * amp_vector) * comp 

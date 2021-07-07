@@ -9,19 +9,14 @@ from sympy.physics.mechanics import vlatex
 default_colors=['red','blue','orange','teal','black','green']
 
 class DataMethods:
-    def to_tikz_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'6cm'), width=NoEscape(r'15cm'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False):
+    def _pylatex_tikz(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False):
 
         
-        geometry_options ={"margin": "0cm",}
-        doc = Document(documentclass='standalone',geometry_options=None,document_options=["tikz"])
-        #doc=Document(documentclass='subfiles',document_options=NoEscape('bch_r4.tex'))
-        doc.append(Command('usepgfplotslibrary',arguments='units'))
-        doc.packages.append(Package('siunitx'))
-        doc.packages.append(Package('amsmath'))
-        doc.packages.append(Package('float'))
+       
 
         
-        labels_list=['$'+vlatex(label)+'$' for label in self.columns]
+        labels_list=[('$'+vlatex(label)+'$').replace('$$','$') for label in self.columns]
+        #labels_list=[(vlatex(label)) for label in self.columns]
 
         data_for_plot_list=[zip(self.index,plot_data)  for label,plot_data in list(self.items())]
 
@@ -29,39 +24,83 @@ class DataMethods:
         
         colors_multiplicator=np.ceil(plots_no/len(colors_list))
 
-        plot_options = NoEscape('anchor=north west,ymajorgrids=true,xmajorgrids=true,grid style=dashed,legend style={font=\small},'+y_axis_description)+NoEscape(',height=')+height+NoEscape(',width=')+width
+        plot_options = NoEscape('anchor=north west,ymajorgrids=true,xmajorgrids=true,grid style=dashed,legend style={font=\small},'+y_axis_description)+NoEscape(',height=')+height+NoEscape(',width=')+width+NoEscape(f',xmin={min(self.index)},xmax={max(self.index)}')
         
         #with doc.create(Figure(position='!htb')) as fig:
 
         plot_options_list=[plot_options+NoEscape(',xticklabels=\empty,')]*(plots_no-1)
         plot_options_list.append( plot_options+NoEscape(x_axis_description) )
         
-        with doc.create(TikZ()) as tikzpicture:
-            if subplots==False:
+        
+        
+        tikzpicture = TikZ()
+        
+        if subplots==False:
 
-                with tikzpicture.create(Axis(options=plot_options_list[-1])) as plot:
+            with tikzpicture.create(Axis(options=plot_options_list[-1])) as plot:
 
-                    for data_for_plot,label,color in zip(data_for_plot_list,labels_list,colors_list*int(colors_multiplicator)) :
-                        coordinates = data_for_plot
+                for data_for_plot,label,color in zip(data_for_plot_list,labels_list,colors_list*int(colors_multiplicator)) :
+                    coordinates = data_for_plot
 
-                        plot.append(Plot(name=NoEscape(NoEscape(r'\tiny '+label)), coordinates=coordinates,options='color='+color+',solid'))
+                    plot.append(Plot(name=NoEscape(NoEscape(r'\tiny '+label)), coordinates=coordinates,options='color='+color+',solid'))
 
-            else:
-                at_option=NoEscape('')
-                for no,combined_plot_data in enumerate(zip(data_for_plot_list,labels_list,colors_list*int(colors_multiplicator))):
-                    data_for_plot,label,color = combined_plot_data
-                    plot_name=NoEscape(',name=plot'+str(no)+',')
-                    with tikzpicture.create(Axis(options=plot_options_list[no]+plot_name+at_option )) as plot:
-                        coordinates = data_for_plot
-                        plot.append(Plot(name=NoEscape(NoEscape(r'\tiny '+label)), coordinates=coordinates,options='color='+color+',solid'))
-                        #at_option=NoEscape('at=(plot'+str(no)+'.below south west),')
-                        at_option=NoEscape('at=(plot'+str(no)+'.south west),')
+        else:
+            at_option=NoEscape('')
+            for no,combined_plot_data in enumerate(zip(data_for_plot_list,labels_list,colors_list*int(colors_multiplicator))):
+                data_for_plot,label,color = combined_plot_data
+                plot_name=NoEscape(',name=plot'+str(no)+',')
+                with tikzpicture.create(Axis(options=plot_options_list[no]+plot_name+at_option )) as plot:
+                    coordinates = data_for_plot
+                    plot.append(Plot(name=NoEscape(NoEscape(r'\tiny '+label)), coordinates=coordinates,options='color='+color+',solid'))
+                    #at_option=NoEscape('at=(plot'+str(no)+'.below south west),')
+                    at_option=NoEscape('at=(plot'+str(no)+'.south west),')
                         
 
-        doc.generate_tex(filename)
+        return tikzpicture
+
+    def to_pylatex_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False):
+        
+        
+        tikz_pic=self._pylatex_tikz(filename,labels_list,colors_list,height, width,x_axis_description,y_axis_description,subplots)
+        
+        return tikz_pic
+    
+    def to_standalone_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,legend_pos='north east'):
+    
+        geometry_options ={"margin": "0cm",}
+        doc = Document(documentclass='standalone',geometry_options=None,document_options=["tikz"])
+        #doc=Document(documentclass='subfiles',document_options=NoEscape('bch_r4.tex'))
+
+        doc.packages.append(Package('siunitx'))
+        doc.packages.append(Package('amsmath'))
+        doc.packages.append(Package('float'))
+        doc.packages.append(Package('tikz'))        
+        doc.packages.append(Package('pgfplots'))        
+        doc.append(Command('usepgfplotslibrary',arguments='units'))
+        doc.append(Command('pgfplotsset',arguments=NoEscape(r'compat=newest,label style={font=\small},legend pos='+str(legend_pos))))
+        
+        tikz_pic=self._pylatex_tikz(filename,labels_list,colors_list,height, width,x_axis_description,y_axis_description,subplots)
+        
+        doc.append(tikz_pic)
+        
+        doc.generate_pdf(filename,clean_tex=False)
         return doc.dumps()
 
+    def to_tikz_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,legend_pos='north east'):
 
+
+        return self.to_standalone_plot(filename,labels_list,colors_list,height, width,x_axis_description,y_axis_description,subplots,legend_pos)
+    
+    def to_standalone_figure(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,legend_pos='north east'):
+
+
+        self.to_standalone_plot(filename,labels_list,colors_list,height, width,x_axis_description,y_axis_description,subplots,legend_pos)
+        fig = Figure(position='H')
+        fig.add_image(filename,width=NoEscape('0.49\\textwidth'),)
+        
+        return fig
+    
+    
 class SpectralMethods(DataMethods):
 
     def is_uniformly_distributed(self):
@@ -96,7 +135,7 @@ class SpectralMethods(DataMethods):
         f_span_shifted_ds=(fft.fftshift(self.index))
         spectrum_shifted_ds=fft.fftshift(abs(self)/len(self))
 
-        return TimeSeries(data=spectrum_shifted_ds,index=f_span_shifted_ds,name=self.name)
+        return SpectrumSeries(data=spectrum_shifted_ds,index=f_span_shifted_ds,name=self.name)
 
 #     def double_sided_spec(self):
 
@@ -183,20 +222,34 @@ class SpectrumFrame(DataFrame,SpectralMethods):
     def _constructor_sliced(self):
         return SpectrumSeries
 
+    
+    def to_tikz_plot(self,filename,labels_list=None,colors_list=['red','blue','orange'],x_axis_description=',xlabel={$f$},x unit=\si{\hertz},',y_axis_description=None,legend_pos='north east'):
+        
+        if y_axis_description == None:
+            y_axis_description='ylabel=$'+self.name+'$,'
+        
+        
+
+        return super().to_tikz_plot(filename=filename,labels_list=labels_list,colors_list=colors_list,x_axis_description=x_axis_description,y_axis_description=y_axis_description,legend_pos=legend_pos)
+
+    def to_standalone_figure(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$f$},x unit=\si{\hertz},',y_axis_description='',subplots=False,legend_pos='north east'):
+
+        return super().to_standalone_figure(filename=filename,labels_list=labels_list,colors_list=colors_list,x_axis_description=x_axis_description,y_axis_description=y_axis_description,legend_pos=legend_pos)
+    
 
     def double_sided_rms(self):
 
         spectrum_shifted_ds={name:data.double_sided_rms() for name,data in self.items()}
         f_span_shifted_ds=(fft.fftshift(self.index))
 
-        return TimeDataFrame(data=spectrum_shifted_ds,index=f_span_shifted_ds)
+        return SpectrumFrame(data=spectrum_shifted_ds,index=f_span_shifted_ds)
 
     def single_sided_rms(self):
 
         spectrum_shifted_ss={name:data.double_sided_rms()*np.heaviside(data.double_sided_rms().index,0.5)*2 for name,data in self.items()}
         f_span_shifted_ss=fft.fftshift(self.index)
 
-        return TimeDataFrame(data=spectrum_shifted_ss,index=f_span_shifted_ss)
+        return SpectrumFrame(data=spectrum_shifted_ss,index=f_span_shifted_ss)
 
 #     def time_series(self):
 

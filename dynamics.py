@@ -298,26 +298,16 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         Returns class instance with reduced Degrees of Freedom
         """
         
-        #print('L @', str(self))
-        #print(self.lagrangian())
-        
-        #print(self.q)
+
         
         self_dict = self._kwargs()
         self_dict['qs'] = flatten(args)
         
-        #print(self_dict)
-        
-        #print(flatten(args))
+
 
         new_sys=LagrangesDynamicSystem(**self_dict)
         
-        #print('new L @', str(new_sys))
-        #print(new_sys.lagrangian())
-        
-        #new_sys._q=Matrix(flatten(args)).T
-        #print(new_sys.q)
-        
+
         
         return type(self)(0,system=new_sys)
 
@@ -728,6 +718,23 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         Returns Equations of Motion of the system
         """
         return self.governing_equations
+    
+    def _to_acc(self,expand=True):
+        """
+        Returns Equations of Motion of the system
+        """
+        self_dict = self._kwargs()
+        self_dict['Lagrangian'] = self.lagrangian()/self.inertia_matrix()[0]
+        if expand:
+            self_dict['Lagrangian']=        self_dict['Lagrangian'].expand()
+
+
+        new_sys=LagrangesDynamicSystem(**self_dict)
+        
+
+        
+        return type(self)(0,system=new_sys)
+    
 
     def numerized(self, parameter_values={}, FFT = None):
         '''
