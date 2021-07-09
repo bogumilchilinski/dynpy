@@ -25,6 +25,8 @@ class FirstOrderODE:
     """
     This class represents the system of first order defferential equations. Allows to get the solution of given system.
     """
+
+    _const_list=set()
     
     def __init__(self,
                  odes_system,
@@ -252,7 +254,7 @@ class FirstOrderODE:
             C_list=[ (C_tmp)( *params )  for C_tmp in C_list]
             
         #         print('o tu')
-        #         display(self.odes_system)
+        self.__class__._const_list|=set(C_list)
 
         modes,eigs = self.eigenmodes(),self.eigenvalues()
         const_part = self.diagonalize()[2]
@@ -368,6 +370,9 @@ class FirstOrderODE:
 
 
 class LinearODESolution:
+    
+    _const_list=set()
+    
     def __init__(self,
                  odes_system,
                  ivar=Symbol('t'),
@@ -534,6 +539,9 @@ class LinearODESolution:
             
         #         print('o tu')
         #         display(self.odes_system)
+        
+        
+        self.__class__._const_list|=set(C_list)
 
         modes, eigs = ((self.inertia_matrix().inv() *
                         self.stiffness_matrix()).diagonalize())
