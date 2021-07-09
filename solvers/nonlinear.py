@@ -1,4 +1,4 @@
-from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Function, lambdify, factorial
+from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Function, lambdify, factorial,solve
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 import sympy as sym
@@ -280,6 +280,9 @@ class WeakNonlinearProblemSolution(LinearODESolution):
             eoms,
             ivar=self.ivar,
             dvars=self.approximation_function(order=order)).solution()
+        
+        print('Const const')
+        print(LinearODESolution._const_list)
 
         return self._format_solution(
             dvars=self.approximation_function(order=order),
@@ -323,6 +326,7 @@ class MultiTimeScaleMethod(LinearODESolution):
                  odes_system,
                  ivar=Symbol('t'),
                  dvars=[],
+                 ics=None,
                  eps=Symbol('varepsilon'),
                  omega=None,
                  order=1,
@@ -350,6 +354,8 @@ class MultiTimeScaleMethod(LinearODESolution):
         self.omega = 1
         if omega:
             self.omega = omega
+            
+        self.ics=ics
 
                 
     def set_solution_order(self,order=1):
@@ -613,14 +619,42 @@ class MultiTimeScaleMethod(LinearODESolution):
                         dvars=Matrix(list(self.int_const))
                         ).general_solution()
         display(const_sol)
+
+        print('Const const')
+        print(FirstOrderODE._const_list)    
         
         t_back_subs={t_i:self.ivar*self.eps**t_ord for t_ord,t_i  in enumerate(self.t_list)}
         
         display(t_back_subs)
         
-
+        
+        general_form_dict={var: eqn.subs(approx_dict).subs(const_sol).subs(t_back_subs)  for var, eqn in self.predicted_solution(order=order,dict=True).items()}
+        
+        
+        print('ics')
+        display(*list({var: eqn.subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values()))
+        display(*list({var: eqn.diff(self.ivar).subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values()))
+        
+        ics_eqns=(list({var: eqn.subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values())+
+                    list({var: eqn.diff(self.ivar).subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values())
+                      )
+        
+        
+        eqns=Matrix([eq.expand() for eq in ics_eqns])
+        
+        
+        
+        const_from_eqn=[var for  var in list(eqns.atoms(Symbol,Function)) if var in FirstOrderODE._const_list]
+        
+        display(const_from_eqn)
+        
+        
+        const_vals=Matrix([eq.expand() for eq in ics_eqns]).jacobian(const_from_eqn).inv()*Matrix(self.ics)
+                  
+        display(const_vals)
+                  
         return Matrix(
-            self.predicted_solution(order=order).values()).subs(approx_dict).subs(const_sol).subs(t_back_subs)
+            list(general_form_dict.values())).subs({})
 
     def zeroth_approximation(self, dict=False, equation=False):
 
@@ -681,22 +715,22 @@ class MultiTimeScaleMethod(LinearODESolution):
         
         self.secular_eq|={row.coeff(comp)  for row in eoms  for comp in secular_comps} #test
 
-        print('='*100)
-        display(*self.secular_eq)
-        print('='*100)
+#         print('='*100)
+#         display(*self.secular_eq)
+#         print('='*100)
 
        
         
 
         eoms = eoms.subs({comp: 0 for comp in secular_comps})
 
-        print('='*100)
-        display(eoms)
-        display(self.approximation_function(order=order))
-        display(ivar)
-        print('='*100)
+#         print('='*100)
+#         display(eoms)
+#         display(self.approximation_function(order=order))
+#         display(ivar)
+#         print('='*100)
 
-        
+    
         
         
         solution = LinearODESolution(
@@ -704,11 +738,11 @@ class MultiTimeScaleMethod(LinearODESolution):
             ivar=ivar,
             dvars=self.approximation_function(order=order)).solution()
 
-        print('=eoms and its linear sol'*100)
-        display(eoms)
-        display(solution)
+#         print('=eoms and its linear sol'*100)
+#         display(eoms)
+#         display(solution)
 
-        print('=eoms and its sol'*100)
+#         print('=eoms and its sol'*100)
         
         return self._format_solution(
             dvars=self.approximation_function(order=order),
