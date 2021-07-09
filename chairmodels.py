@@ -391,8 +391,8 @@ T_rear = S.One/2 * m_rear* dz_rear**2 + S.One/2 * m_rear * dx**2    # Ek tylnieg
 T_fr = S.One/2 * m_fr* dz_fr**2 + S.One/2 * m_fr * dx**2    # Ek przedniego koła If (mf)
 T_wheel = S.One/2 * I_w * (dx/R)**2
 
-V_rear = S.One/2*k_rt*(z_rear-0.01*cos(0.02/1.8*t))**2# Ep tylnich prętów ramy względem ich sprężystości
-V_fr = S.One/2*k_ft*(z_fr-0.01*cos(0.02/1.8*t-0.5/1.8))**2     # Ep przednich prętów ramy względem ich sprężystości
+V_rear = S.One/2*k_rt*(z_rear-0.01*cos(0.02/2*t))**2# Ep tylnich prętów ramy względem ich sprężystości
+V_fr = S.One/2*k_ft*(z_fr-0.01*cos(0.02/2*t-0.5/2))**2     # Ep przednich prętów ramy względem ich sprężystości
 
 
 #+++++++++++++++++++++
@@ -424,14 +424,14 @@ class SimpleChair5DOF(dyn.LagrangesDynamicSystem):
     def get_param_values(self):
         default_data_dict={F:112.5,
                    
-                   c_mu:0.0001,
-                   c_lam:0.0001,
+                   c_mu:0.00001,
+                   c_lam:0.00001,
                    l_l:0.25,
                    l_r:0.25,
                    
-                   k_f:350000,
-                   k_ft:140000,
-                   k_r:400000,
+                   k_f:600000,
+                   k_ft:200000,
+                   k_r:600000,
                    k_rt:120000,
                    m_3:75,
                    I_ch:9.479342+m_3*0.39*0.39,

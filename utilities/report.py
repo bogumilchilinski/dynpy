@@ -260,12 +260,16 @@ class SimulationalBlock(ReportModule):
         numerical_system=self._numerical_system
         no_dof=len((numerical_system.dvars))
 
-        if self._ics_list:
+        if not self._ics_list:
             ics_list=[0]*no_dof
 
-
+        print('numer',numerical_system)
+        
+        print('ics_self',self._ics_list)
+        print('ics',ics_list)
+        
         simulation_result=numerical_system.compute_solution(t_span=self._t_span,
-                             ic_list=self._ics_list,
+                             ic_list=ics_list,
                              t_eval=self._t_span,
                              params_values=case_data
                              )
@@ -712,7 +716,7 @@ class ReportText:
     def __init__(self,text=None,key_dict=DataStorage._dict):
         
         self._text='Figures {first_marker}-{last_marker}'
-        
+        self._container=[]
         if text:
             self._text = text
                 
@@ -863,6 +867,8 @@ class SystemDynamicsAnalyzer:
         
         self._parameter=parameter
         self._parameter_range=parameter_range
+        
+        print('prepare data')
         
         if isinstance(self._parameter,dict):
             analysis_span_list=[]
