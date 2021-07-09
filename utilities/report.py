@@ -255,13 +255,20 @@ class SimulationalBlock(ReportModule):
 
         if not self._numerical_system:
             
+            display(analysis._dynamic_system.system_parameters())
+            display(analysis._dynamic_system._eoms)
+            
             self._numerical_system=analysis._dynamic_system.numerized(parameter_values=case_data)
             
         numerical_system=self._numerical_system
         no_dof=len((numerical_system.dvars))
 
+        
+        
         if not self._ics_list:
             ics_list=[0]*no_dof
+        else:
+            ics_list=self._ics_list
 
         print('numer',numerical_system)
         
@@ -440,7 +447,7 @@ class AccelerationComparison(ReportModule):
 #         print('_______________test of plot_____________')
 #         print(data)
 #         print('_______________test of plot_____________')
-#         print(data)
+        print(data)
         elements=list((data.values()))[0].columns
         print('frametype')
         print(type(list((data.values()))[0])())
@@ -511,7 +518,8 @@ class AccelerationComparison(ReportModule):
             ########### for tikz            
             #ndp=DataPlot('wykres_nowy',position='H',preview=False)
             
-            #it should be replaced with data.rename            
+            #it should be replaced with data.rename
+            print(data)
             data.columns=[type(self)._formatter(label) for label in data.columns ]   
             
             y_unit_str=f'{(type(self)._units[coord]):Lx}'.replace('[]','')
