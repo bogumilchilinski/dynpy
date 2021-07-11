@@ -390,9 +390,12 @@ T_rot =  S.One/2 * I_ch* dphi**2  # Ek ramy wózka w ruchu obrotowym
 T_rear = S.One/2 * m_rear* dz_rear**2 + S.One/2 * m_rear * dx**2    # Ek tylniego koła Ir (mr)
 T_fr = S.One/2 * m_fr* dz_fr**2 + S.One/2 * m_fr * dx**2    # Ek przedniego koła If (mf)
 T_wheel = S.One/2 * I_w * (dx/R)**2
-
-V_rear = S.One/2*k_rt*(z_rear-0.01*cos(0.02/2*t))**2# Ep tylnich prętów ramy względem ich sprężystości
-V_fr = S.One/2*k_ft*(z_fr-0.01*cos(0.02/2*t-0.5/2))**2     # Ep przednich prętów ramy względem ich sprężystości
+amplitude=0.01
+length=0.2
+speed=1.8
+axw=0.5
+V_rear = S.One/2*k_rt*(z_rear-amplitude*cos(2*pi/(length/speed)*t))**2# Ep tylnich prętów ramy względem ich sprężystości
+V_fr = S.One/2*k_ft*(z_fr-amplitude*cos(2*pi/(length/speed)*(t-axw/speed)))**2     # Ep przednich prętów ramy względem ich sprężystości
 
 
 #+++++++++++++++++++++
@@ -422,17 +425,17 @@ class SimpleChair5DOF(dyn.LagrangesDynamicSystem):
                  hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs)
 
     def get_param_values(self):
-        default_data_dict={F:112.5,
+        default_data_dict={F:52.5,
                    
-                   c_mu:0.00001,
-                   c_lam:0.00001,
-                   l_l:0.25,
-                   l_r:0.25,
+                   c_mu:0.001,
+                   c_lam:0.001,
+                   l_l:0.1,
+                   l_r:0.6,
                    
-                   k_f:600000,
-                   k_ft:200000,
+                   k_f:400000,
+                   k_ft:120000,
                    k_r:600000,
-                   k_rt:120000,
+                   k_rt:40000,
                    m_3:75,
                    I_ch:9.479342+m_3*0.39*0.39,
                    m_rear:2,
