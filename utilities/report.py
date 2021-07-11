@@ -255,8 +255,8 @@ class SimulationalBlock(ReportModule):
 
         if not self._numerical_system:
             
-            display(analysis._dynamic_system.system_parameters())
-            display(analysis._dynamic_system._eoms)
+#             display(analysis._dynamic_system.system_parameters())
+#             display(analysis._dynamic_system._eoms)
             
             self._numerical_system=analysis._dynamic_system.numerized(parameter_values=case_data)
             
@@ -763,7 +763,9 @@ class SummaryTable(ReportModule):
         
         for key,result in data.items():
             for coord in elements:
-                summaries_dict[coord][key]  =result[coord].abs().max()
+                display(result[coord])
+                display(result[coord].abs().max())
+                summaries_dict[coord]  =result[coord].abs().max()
         type(self)._story_point=summaries_dict
         
         if coordinate:
@@ -820,7 +822,8 @@ class ReportEntry:
 
     
 
-class ReportText:
+class ReportText(ReportModule):
+    
     r'''
     This class appends a user defined text to the existing document container. 
     
@@ -847,11 +850,10 @@ class ReportText:
         
         return cls
     
-
     def __init__(self,text=None,key_dict=DataStorage._dict):
         
         self._text='Figures {first_marker}-{last_marker}'
-        self._container=[]
+        
         if text:
             self._text = text
                 
@@ -859,13 +861,7 @@ class ReportText:
             self._text=self._text.format(**DataStorage._dict)
 
         except:
-            print('+++++++++++++++++++++')
-
-            print('key are missing')
-            print('+++++++++++++++++++++')
-            print('available keys:')
-            print(list(DataStorage._dict.keys()))
-            print('+++++++++++++++++++++')
+            print('.w')
         finally:
             self._text=self._text
         
@@ -901,6 +897,98 @@ class ReportText:
         #return (self._text)
         return ''
 
+    
+    
+class SympyFormula(ReportModule):
+    
+    r'''
+    This class appends a sympy expression to the existing document container. 
+    
+    Arguments
+    =========
+    text: str
+        String that will be appended to the defined container.
+    key_dict: dict
+        Dictionary containing entries for string format method.
+        
+    Methods
+    =======
+
+    Example
+    =======
+    '''
+    
+    _color=None
+    
+    @classmethod
+    def set_text_color(cls,color=None):
+        
+        cls._color=color
+        
+        return cls
+    
+    def __init__(self,expr=None,key_dict=DataStorage._dict,marker=None,backend=vlatex,**kwargs):
+        
+        self._text='Figures {first_marker}-{last_marker}'
+        self._backend=backend
+        
+        if not marker == None:
+            self._marker = marker
+        else:
+            self._marker = Marker('formula',prefix='eq')  
+            
+            
+            
+        if not expr == None:
+            self._expr = expr
+
+                
+
+                
+        
+        super().__init__()
+        
+        
+        self._eq = DMath()
+        self._eq.append(NoEscape(self._backend(self._expr)))
+        self._eq.append(Label(self._marker))
+        
+        if self.__class__._color:
+            
+            self._container.append(TextColor(self.__class__._color,self._eq))
+            
+        else:
+            
+            self._container.append(self._eq)
+
+            
+    
+    def __call__(self,analysis):
+        
+        display(self._expr)
+        
+        analysis._container.append(self._eq)
+        
+        return self._text
+    
+    def __str__(self):
+        
+
+        return self._backend(self._expr)
+
+    def __repr__(self):
+        
+        display(self._expr)
+
+        return ''
+    
+    def _latex(self):
+        
+
+
+        return self._backend(self._expr)
+    
+    
 class PlotTestResult:
     r'''
     The class creates a plot from data provided by DataStorage and appends it to an existing document container instance. 
@@ -1005,6 +1093,8 @@ class SystemDynamicsAnalyzer:
         
         print('prepare data')
         
+        
+        
         if isinstance(self._parameter,dict):
             analysis_span_list=[]
             for key,value in parameter.items():
@@ -1023,7 +1113,7 @@ class SystemDynamicsAnalyzer:
             self.value=value
         else:
             analysis_span=[{**self._reference_data,**{self._parameter:param_value}} for   param_value in parameter_range]
-        
+            #print(analysis_span)
             self._analysis_span = analysis_span
         
         return analysis_span
@@ -1052,7 +1142,7 @@ class SystemDynamicsAnalyzer:
             return solution_list
         else:
             self.init_report()
-            print(self._analysis_span)
+            #print(self._analysis_span)
             
             return (self._analysis_span)
     
@@ -1060,7 +1150,7 @@ class SystemDynamicsAnalyzer:
         
         self._current_value=case_data[self._parameter]
         self._current_data=case_data
-        print(self._current_data)
+        #print(self._current_data)
         for action in self._loop_steps:
             self._current_result=action(self)
         
