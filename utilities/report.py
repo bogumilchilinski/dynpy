@@ -255,13 +255,20 @@ class SimulationalBlock(ReportModule):
 
         if not self._numerical_system:
             
+#             display(analysis._dynamic_system.system_parameters())
+#             display(analysis._dynamic_system._eoms)
+            
             self._numerical_system=analysis._dynamic_system.numerized(parameter_values=case_data)
             
         numerical_system=self._numerical_system
         no_dof=len((numerical_system.dvars))
 
+        
+        
         if not self._ics_list:
             ics_list=[0]*no_dof
+        else:
+            ics_list=self._ics_list
 
         print('numer',numerical_system)
         
@@ -658,6 +665,135 @@ class FFTComparison(AccelerationComparison):
     
         return super()._prepare_data(coordinate=None,xlim=xlim)
     
+
+class SummaryTable(ReportModule):
+    r'''
+    It is computational block that prepares the summary table of particular coordinates regarding to changes of selected parameter.
+    Class provides several methods devoted for data processing, ploting and reporting.
+    
+    Arguments
+    =========
+    t_span: iterable
+        Time span.
+    ics_list: iterable
+        List containing values of initial conditions. 
+
+    Methods
+    =======
+
+    Example
+    =======
+    '''
+    
+    _story_point=None
+    
+    general_t_span=None
+    
+    _data_storage={}
+    
+    _last_marker=None
+    
+    _formatter=lambda entry:  f'${latex(entry.lhs)} = {round(entry.rhs/1000)} \\si {{\\tonne}} ({ (entry.rhs/10000000*100).n(2,chop=True)  } \\% m_v ) $'
+    
+    @classmethod
+    def set_t_span(cls,t_span):
+        
+        cls.general_t_span=t_span
+        
+        return cls
+    
+    @classmethod
+    def set_label_foramatter(cls,formatter):
+        
+        cls._formatter=formatter
+        
+        return cls
+    
+    @classmethod
+    def reset_storage(cls):
+        
+        cls._story_point={}
+        cls._data_storage={}
+        
+        return cls
+
+    
+    
+    
+    
+    def __init__(self,t_span=None,data=None,ics_list=None,label=None):
+        
+        self.last_marker=None
+        self._t_span=t_span
+        self._ics_list=ics_list
+        
+        if t_span is not None:
+            self._t_span=t_span
+        else:
+            self._t_span = type(self).general_t_span
+            
+        if data:
+            self._data=data
+        else:
+            self._data=DataStorage._storage
+
+        if label:
+            self._label=label
+        else:
+            self._label=''
+            
+        super().__init__(None)
+
+
+    def _prepare_data(self,coordinate=None,xlim=None):
+        
+        if xlim:
+            data={key:result.truncate(xlim[0],xlim[-1]) for key,result in self._data.items()}
+        else:
+             data=self._data       
+        
+#         print('_______________test of plot_____________')
+#         print(data)
+#         print('_______________test of plot_____________')
+#         print(data)
+        elements=list((data.values()))[0].columns
+        print('frametype')
+        print(type(list((data.values()))[0])())
+        summaries_dict = {dynsym:type(list((data.values()))[0])()  for dynsym  in elements }
+        
+        for key,result in data.items():
+            for coord in elements:
+                display(result[coord])
+                display(result[coord].abs().max())
+                summaries_dict[coord]  =result[coord].abs().max()
+        type(self)._story_point=summaries_dict
+        
+        if coordinate:
+            return summaries_dict[coordinate]
+        else:
+            return summaries_dict
+                
+    def prepare_summary(self,analysis=None,coordinate=None,xlim=None): 
+        
+        if analysis:
+            self._analysis=analysis
+        
+        result=self._prepare_data(xlim=xlim)
+        
+        elements=result.keys()
+             
+        DataStorage._plot_markers_dict={elem:Marker(f'plot{self.__class__.__name__}{self._label}' ,'fig')   for elem in elements}
+        DataStorage._subplot_markers_dict={elem:Marker(f'subplot{self.__class__.__name__}{self._label}'  ,'fig')   for elem in elements}
+        DataStorage.first_marker=list(DataStorage._plot_markers_dict.values())[0]
+        DataStorage.last_marker=list(DataStorage._plot_markers_dict.values())[-1]
+        self.last_marker=list(DataStorage._plot_markers_dict.values())[-1]
+        type(self)._last_marker=list(DataStorage._plot_markers_dict.values())[-1]
+        print('marker - def')
+        print(self.last_marker)
+        
+        return result
+            
+    
     
 class ReportEntry:
     r'''
@@ -686,7 +822,8 @@ class ReportEntry:
 
     
 
-class ReportText:
+class ReportText(ReportModule):
+    
     r'''
     This class appends a user defined text to the existing document container. 
     
@@ -713,11 +850,10 @@ class ReportText:
         
         return cls
     
-
     def __init__(self,text=None,key_dict=DataStorage._dict):
         
         self._text='Figures {first_marker}-{last_marker}'
-        self._container=[]
+        
         if text:
             self._text = text
                 
@@ -725,13 +861,7 @@ class ReportText:
             self._text=self._text.format(**DataStorage._dict)
 
         except:
-            print('+++++++++++++++++++++')
-
-            print('key are missing')
-            print('+++++++++++++++++++++')
-            print('available keys:')
-            print(list(DataStorage._dict.keys()))
-            print('+++++++++++++++++++++')
+            print('.w')
         finally:
             self._text=self._text
         
@@ -767,6 +897,98 @@ class ReportText:
         #return (self._text)
         return ''
 
+    
+    
+class SympyFormula(ReportModule):
+    
+    r'''
+    This class appends a sympy expression to the existing document container. 
+    
+    Arguments
+    =========
+    text: str
+        String that will be appended to the defined container.
+    key_dict: dict
+        Dictionary containing entries for string format method.
+        
+    Methods
+    =======
+
+    Example
+    =======
+    '''
+    
+    _color=None
+    
+    @classmethod
+    def set_text_color(cls,color=None):
+        
+        cls._color=color
+        
+        return cls
+    
+    def __init__(self,expr=None,key_dict=DataStorage._dict,marker=None,backend=vlatex,**kwargs):
+        
+        self._text='Figures {first_marker}-{last_marker}'
+        self._backend=backend
+        
+        if not marker == None:
+            self._marker = marker
+        else:
+            self._marker = Marker('formula',prefix='eq')  
+            
+            
+            
+        if not expr == None:
+            self._expr = expr
+
+                
+
+                
+        
+        super().__init__()
+        
+        
+        self._eq = DMath()
+        self._eq.append(NoEscape(self._backend(self._expr)))
+        self._eq.append(Label(self._marker))
+        
+        if self.__class__._color:
+            
+            self._container.append(TextColor(self.__class__._color,self._eq))
+            
+        else:
+            
+            self._container.append(self._eq)
+
+            
+    
+    def __call__(self,analysis):
+        
+        display(self._expr)
+        
+        analysis._container.append(self._eq)
+        
+        return self._text
+    
+    def __str__(self):
+        
+
+        return self._backend(self._expr)
+
+    def __repr__(self):
+        
+        display(self._expr)
+
+        return ''
+    
+    def _latex(self):
+        
+
+
+        return self._backend(self._expr)
+    
+    
 class PlotTestResult:
     r'''
     The class creates a plot from data provided by DataStorage and appends it to an existing document container instance. 
@@ -871,6 +1093,8 @@ class SystemDynamicsAnalyzer:
         
         print('prepare data')
         
+        
+        
         if isinstance(self._parameter,dict):
             analysis_span_list=[]
             for key,value in parameter.items():
@@ -889,7 +1113,7 @@ class SystemDynamicsAnalyzer:
             self.value=value
         else:
             analysis_span=[{**self._reference_data,**{self._parameter:param_value}} for   param_value in parameter_range]
-        
+            #print(analysis_span)
             self._analysis_span = analysis_span
         
         return analysis_span
@@ -918,7 +1142,7 @@ class SystemDynamicsAnalyzer:
             return solution_list
         else:
             self.init_report()
-            print(self._analysis_span)
+            #print(self._analysis_span)
             
             return (self._analysis_span)
     
@@ -926,7 +1150,7 @@ class SystemDynamicsAnalyzer:
         
         self._current_value=case_data[self._parameter]
         self._current_data=case_data
-        print(self._current_data)
+        #print(self._current_data)
         for action in self._loop_steps:
             self._current_result=action(self)
         

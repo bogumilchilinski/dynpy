@@ -1,7 +1,7 @@
-#from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq
+from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq#, Tuple
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
-from sympy import *
+#from sympy import *
 #import sympy as sym
 from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
@@ -159,6 +159,8 @@ class OdeComputationalCase:
         '''
         Returns the dictionary containing the necessary argument of solve_ivp integrator from scipy.integrate module.
         '''
+#         print('input parames')
+#         display(params_values)
         if type(ic_list) == type(None):
             ic_list = list(Matrix(self.dvars).subs(self.ic_point))
         if len(ic_list) != len(self.dvars):
@@ -170,6 +172,10 @@ class OdeComputationalCase:
             t_eval = t_span
             
         if type(params_values) == type(None):
+            
+            self.params = self.odes_system.free_symbols
+            self.params.remove(self.ivar)
+            
             params_values = tuple(Matrix(self.params).subs(self.params_values))
             
         if isinstance(params_values,dict):
@@ -181,10 +187,26 @@ class OdeComputationalCase:
             
             self.params=list(self.params)
             
+            
+#             print('check')
+#             display(Matrix(self.params))
+#             print(*self.params)
+#             print(*map(type,(self.params)))
+#             display(params_values)
+#             display(Tuple(*self.params).subs(params_values))
+            
+#             print([ par in  params_values  for par in self.params ])
+            
+#             print(*params_values.keys())
+            
             params_values = tuple(Matrix(self.params).subs(params_values))
             
 
         case_odes = self.__numerical_odes
+        
+        print('params case')
+        display(self.params)
+        display(params_values)
 
         return {
             'fun': case_odes,
