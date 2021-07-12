@@ -611,29 +611,29 @@ class MultiTimeScaleMethod(LinearODESolution):
             approx_dict.update(nth_solution)
             
         sec_eq=Matrix(list(self.secular_eq - {S.Zero}))
-        display(sec_eq)
-        display(self.int_const)
+#         display(sec_eq)
+#         display(self.int_const)
         
         const_sol=FirstOrderODE((sec_eq),
                         self.t_list[1],
                         dvars=Matrix(list(self.int_const))
                         ).general_solution()
-        display(const_sol)
+#         display(const_sol)
 
-        print('Const const')
-        print(FirstOrderODE._const_list)    
+#         print('Const const')
+#         print(FirstOrderODE._const_list)    
         
         t_back_subs={t_i:self.ivar*self.eps**t_ord for t_ord,t_i  in enumerate(self.t_list)}
         
-        display(t_back_subs)
+#         display(t_back_subs)
         
         
         general_form_dict={var: eqn.subs(approx_dict).subs(const_sol).subs(t_back_subs)  for var, eqn in self.predicted_solution(order=order,dict=True).items()}
         
         
-        print('ics')
-        display(*list({var: eqn.subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values()))
-        display(*list({var: eqn.diff(self.ivar).subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values()))
+#         print('ics')
+#         display(*list({var: eqn.subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values()))
+#         display(*list({var: eqn.diff(self.ivar).subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values()))
         
         ics_eqns=(list({var: eqn.subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values())+
                     list({var: eqn.diff(self.ivar).subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values())
@@ -646,12 +646,12 @@ class MultiTimeScaleMethod(LinearODESolution):
         
         const_from_eqn=[var for  var in list(eqns.atoms(Symbol,Function)) if var in FirstOrderODE._const_list]
         
-        display(const_from_eqn)
+#         display(const_from_eqn)
         
         
         const_vals=Matrix([eq.expand() for eq in ics_eqns]).jacobian(const_from_eqn).inv()*Matrix(self.ics)
                   
-        display(const_vals)
+#         display(const_vals)
                   
         return Matrix(
             list(general_form_dict.values())).subs({})

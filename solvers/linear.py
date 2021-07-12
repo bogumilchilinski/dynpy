@@ -141,7 +141,7 @@ class FirstOrderODE:
 
         inertia_matrix = ode_sys.jacobian(self.dvars.diff(self.ivar)).subs({dvar.diff(self.ivar):0 for dvar  in self.dvars})
 
-        display(inertia_matrix,main_matrix)
+#         display(inertia_matrix,main_matrix)
         
         linear_odes=inertia_matrix.inv() * (main_matrix*sym.Matrix(self.dvars)+ode_sys.subs({dvar:0 for dvar  in self.dvars}).doit())
 
@@ -163,7 +163,7 @@ class FirstOrderODE:
                 regular_odes_list[coord]=ode
 
 
-        display(*regular_odes_list)
+#         display(*regular_odes_list)
 
 
         if isinstance(self.ivar,Function):
@@ -174,17 +174,17 @@ class FirstOrderODE:
             
         regular_vars =  regular_odes_list.keys()
 
-        display(regular_vars)
+#         display(regular_vars)
 
         
 
         #display( row  if row  in Matrix(regular_odes_list).rows  ) 
-        display( list(regular_odes_list.values()) )    
+#         display( list(regular_odes_list.values()) )    
         regular_main_matrix= Matrix(list(regular_odes_list.values())).jacobian( list(regular_vars) )
         #singular_odes=[no  for no in  const_odes_list]
-        print('diagonalize')
-        print([Matrix(list(regular_odes_list.values())) ,list(regular_vars) ,const_odes_list])
-        print('diagonalize')
+#         print('diagonalize')
+#         print([Matrix(list(regular_odes_list.values())) ,list(regular_vars) ,const_odes_list])
+#         print('diagonalize')
 
 
         return [Matrix(list(regular_odes_list.values())) ,list(regular_vars) ,const_odes_list ]
@@ -208,7 +208,7 @@ class FirstOrderODE:
 
         
         odes,vars=self.diagonalize()[0:2]
-        display(odes,vars)
+#         display(odes,vars)
         
         return odes.jacobian(vars).diagonalize()[0]
     
@@ -260,7 +260,7 @@ class FirstOrderODE:
         const_part = self.diagonalize()[2]
         reg_vars = self.diagonalize()[1]
         
-        display( (const_part))
+#         display( (const_part))
 
         
         
@@ -270,15 +270,15 @@ class FirstOrderODE:
 
         # t_sol = self.ivar
 
-        display(modes,eigs)
+#         display(modes,eigs)
         solution = [
             C_list[i]*modes[:,i]*exp(eigv*self.ivar)
              
             for i, eigv in enumerate([eigv for eigv in eigs if not eigv==0])
         ] 
-        print('sol')
-        display(solution)
-        print('sol')
+#         print('sol')
+#         display(solution)
+#         print('sol')
 
 
         const_dict=({coord:C_list[ no+len(solution)] for no,coord in enumerate(const_part.keys())})
