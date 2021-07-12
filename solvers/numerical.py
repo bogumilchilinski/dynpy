@@ -173,8 +173,11 @@ class OdeComputationalCase:
             
         if type(params_values) == type(None):
             
-            self.params = self.odes_system.free_symbols
+            self.params = list(self.odes_system.free_symbols)
             self.params.remove(self.ivar)
+            
+            print(self.params)
+            print(self.params_values)
             
             params_values = tuple(Matrix(self.params).subs(self.params_values))
             
