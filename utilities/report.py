@@ -336,7 +336,7 @@ class SimulationFFT:
     '''
     def __init__(self,*args):
         self._args=args
-        
+
     @classmethod
     def plot_fft(cls,analysis):
         
@@ -344,7 +344,8 @@ class SimulationFFT:
         
         fft_result = last_result.to_frequency_domain().double_sided_rms()
         
-        fft_result.plot()
+        fft_result.plot(xlim=(0,20),subplots=True,logy=True)
+#         plt.yscale('log')
         plt.show()
         return fft_result
     

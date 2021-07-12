@@ -23,7 +23,7 @@ a_sim=Symbol('a_sim',positive=True)
 
 ### system parametes
 m_fr, m_rear,m_3, k_r, k_rt, k_f, k_ft, k_rot = symbols('m_fr, m_r, M, k_r, k_rt, k_f, k_ft k_rot',positive=True)
-m,k,g,F_1,F_2,Omega,F,R,v0,u0,l_l,l_r= symbols('m,k,g,F_1,F_2,Omega, F_0 R, v_0,u_0,l_l,l_r',positive=True)
+m,k,g,F_1,F_2,Omega,F,R,v0,u0,l_l,l_r= symbols('m,k,g,F_1,F_2,Omega, F_0, R, v_0,u_0,l_l,l_r',positive=True)
 I_ch, I_w , z_c3,l_fr,l_rear= symbols('I_chair, I_wheel, z_c3, l_fr, l_r',positive=True)
 m_RC, I_RC, l_RC, k_RC, phi0 = symbols('m_RC, I_RC, l_RC, k_RC, varphi_0',positive=True)
 m_w, I_wrc, r_w, k_w, k_fix,k_tire = symbols('m_w, I_wRC, R_w, k_w, k_fix, k_t',positive=True)
@@ -390,9 +390,12 @@ T_rot =  S.One/2 * I_ch* dphi**2  # Ek ramy wózka w ruchu obrotowym
 T_rear = S.One/2 * m_rear* dz_rear**2 + S.One/2 * m_rear * dx**2    # Ek tylniego koła Ir (mr)
 T_fr = S.One/2 * m_fr* dz_fr**2 + S.One/2 * m_fr * dx**2    # Ek przedniego koła If (mf)
 T_wheel = S.One/2 * I_w * (dx/R)**2
-
-V_rear = S.One/2*k_rt*(z_rear-0.01*cos(0.02/2*t))**2# Ep tylnich prętów ramy względem ich sprężystości
-V_fr = S.One/2*k_ft*(z_fr-0.01*cos(0.02/2*t-0.5/2))**2     # Ep przednich prętów ramy względem ich sprężystości
+amplitude=0.01
+length=0.2
+speed=1.8
+axw=0.5
+V_rear = S.One/2*k_rt*(z_rear-amplitude*cos(2*pi/(length/speed)*t))**2# Ep tylnich prętów ramy względem ich sprężystości
+V_fr = S.One/2*k_ft*(z_fr-amplitude*cos(2*pi/(length/speed)*(t-axw/speed)))**2     # Ep przednich prętów ramy względem ich sprężystości
 
 
 #+++++++++++++++++++++
@@ -414,7 +417,7 @@ Dmu_chair5dof=((chair_5dof_lin.q.diff(t)).T*Matrix([Ekinetic]).jacobian(chair_5d
 
 FL_SIMPLECHAIR = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*2*F*N.x)]+[(points_list[nom],(-Dmu_chair5dof.diff(velm)-Dlam_chair5dof.diff(velm))*N.x)  for nom,velm in enumerate(Matrix(qs_5dof).diff(t))]
 # +[(points_list[non],-Dlam_chair5dof.diff(veln)*N.x)  for non,veln in enumerate(Matrix(qs_5dof).diff(t))]
-class SimpleChair5DOF(dyn.LagrangesDynamicSystem):
+class SimpleChair5DOF(dyn.HarmonicOscillator):
     def __init__(self, Lagrangian=L_simple, qs=qs_5dof, forcelist=FL_SIMPLECHAIR, bodies=None, frame=N,
                        hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t'),**kwargs):
         
@@ -422,17 +425,17 @@ class SimpleChair5DOF(dyn.LagrangesDynamicSystem):
                  hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs)
 
     def get_param_values(self):
-        default_data_dict={F:112.5,
+        default_data_dict={F:52.5,
                    
-                   c_mu:0.00001,
-                   c_lam:0.00001,
-                   l_l:0.25,
-                   l_r:0.25,
+                   c_mu:0.001,
+                   c_lam:0.001,
+                   l_l:0.1,
+                   l_r:0.6,
                    
-                   k_f:600000,
-                   k_ft:200000,
+                   k_f:400000,
+                   k_ft:120000,
                    k_r:600000,
-                   k_rt:120000,
+                   k_rt:40000,
                    m_3:75,
                    I_ch:9.479342+m_3*0.39*0.39,
                    m_rear:2,
