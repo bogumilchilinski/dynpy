@@ -344,7 +344,7 @@ class SimulationFFT:
         
         fft_result = last_result.to_frequency_domain().double_sided_rms()
         
-        fft_result.plot(xlim=(0,20),subplots=True,logy=True)
+        fft_result.plot(xlim=(0,100),subplots=True,logy=True)
 #         plt.yscale('log')
         plt.show()
         return fft_result
@@ -370,6 +370,10 @@ class AccelerationComparison(ReportModule):
         Time span.
     ics_list: iterable
         List containing values of initial conditions. 
+    data: dict
+        Dictionary consisting data for comparison.
+    label: str
+        User-defined LaTeX label for generated plots.
 
     Methods
     =======
@@ -652,7 +656,27 @@ class AccelerationComparison(ReportModule):
         return self._simulation_result
 
 class FFTComparison(AccelerationComparison):
+    r'''
+    It is computational block that prepares the comparison of FFT signals of particular coordinates regarding to changes of selected parameter.
+    Class inherits from AccelerationComparison and provides several methods devoted for data processing, ploting and reporting.
     
+    Arguments
+    =========
+    t_span: iterable
+        Time span.
+    ics_list: iterable
+        List containing values of initial conditions. 
+    data: dict
+        Dictionary consisting data for comparison.
+    label: str
+        User-defined LaTeX label for generated plots.
+
+    Methods
+    =======
+
+    Example
+    =======
+    '''
     def _prepare_data(self,coordinate=None,xlim=None):
     
         data=self._data
@@ -670,7 +694,7 @@ class FFTComparison(AccelerationComparison):
 class SummaryTable(ReportModule):
     r'''
     It is computational block that prepares the summary table of particular coordinates regarding to changes of selected parameter.
-    Class provides several methods devoted for data processing, ploting and reporting.
+    Class provides several methods devoted for data processing and reporting.
     
     Arguments
     =========
@@ -678,6 +702,10 @@ class SummaryTable(ReportModule):
         Time span.
     ics_list: iterable
         List containing values of initial conditions. 
+    data: dict
+        Dictionary consisting data for comparison.
+    label: str
+        User-defined LaTeX label for generated plots.
 
     Methods
     =======
