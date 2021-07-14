@@ -822,3 +822,33 @@ class MultiTimeScaleMethod(LinearODESolution):
     def first_approximation(self, dict=False, equation=False):
         return self.nth_approximation(order=1, dict=dict, equation=equation)    
     
+    def numerized(self,
+                 params_values={},
+                 **kwargs):
+
+        
+        return self.__class__(
+                odes_system=self.governing_equations,
+                 ivar=self.ivar,
+                 dvars= self.dvars,
+                 ics=self.ics,
+                 eps=self.eps,
+                 omega=self.omega,
+                 order=self._order,
+                 t_span=[],
+                 params=[],
+                 params_values=params_values,
+                 ic_point=self.ics,
+                 equation_type=None)
+    
+    
+    
+    def compute_solution(self,
+                         t_span=None,
+                         ic_list=None,
+                         t_eval=None,
+                         params_values=None,
+                         method='RK45'):
+        
+        return self.__call__( ivar=t_span, order=self._order, params_values=params_values)
+    
