@@ -425,7 +425,7 @@ class SimpleChair5DOF(dyn.HarmonicOscillator):
                  hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs)
 
     def get_param_values(self):
-        default_data_dict={F:120,
+        default_data_dict={F:112.5,
                    
                    c_mu:0.0001,
                    c_lam:0.0001,
@@ -433,7 +433,7 @@ class SimpleChair5DOF(dyn.HarmonicOscillator):
                    l_r:0.4,
                    
                    k_f:607500,
-                   k_ft:450000,
+                   k_ft:475000,
                    k_r:580000,
                    k_rt:400000,
                    m_3:75,

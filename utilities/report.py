@@ -344,7 +344,7 @@ class SimulationFFT:
         
         fft_result = last_result.to_frequency_domain().double_sided_rms()
         
-        fft_result.plot(xlim=(0,100),subplots=True,logy=True)
+        fft_result.plot(xlim=(0,None),subplots=True,logy=False)
 #         plt.yscale('log')
         plt.show()
         return fft_result
