@@ -786,15 +786,17 @@ class SummaryTable(ReportModule):
 #         print('_______________test of plot_____________')
 #         print(data)
         elements=list((data.values()))[0].columns
-        print('frametype')
-        print(type(list((data.values()))[0])())
+#         print('frametype')
+#         print(type(list((data.values()))[0])())
         summaries_dict = {dynsym:type(list((data.values()))[0])()  for dynsym  in elements }
         
         for key,result in data.items():
             for coord in elements:
-                display(result[coord])
-                display(result[coord].abs().max())
-                summaries_dict[coord]  =result[coord].abs().max()
+#                 display(result[coord])
+#                 display(key)
+                max_val=float((result[coord].abs().max()))
+#                 display(max_val)
+                summaries_dict[coord][key]  =[max_val]
         type(self)._story_point=summaries_dict
         
         if coordinate:
