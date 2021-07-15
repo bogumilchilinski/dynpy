@@ -937,10 +937,15 @@ class SympyFormula(ReportModule):
     
     Arguments
     =========
-    text: str
+    expr: str
         String that will be appended to the defined container.
     key_dict: dict
         Dictionary containing entries for string format method.
+    marker: pylatex.labelref.Marker object
+        User-defined marker for labeling and referencing math expressions.
+    backend: func
+        Type of backend used for processing provided Sympy expressions to LaTeX formula.
+    **kwargs
         
     Methods
     =======
@@ -1087,15 +1092,16 @@ class SystemDynamicsAnalyzer:
     Arguments
     =========
     dynamic_system: Lagrange's method object
-        
+        Dynamic model prepared basing on Sympy's Lagrange's method object.
     reference_data: dict
         Dictionary containing default values of systems's parameters.
     report_init: list
-        List containing
+        List containing objects called at an initial part of report.
     report_step: list
-        List containing
+        List containing objects called after the report_init.
     report_end: list
-        List containing
+        List containing objects called after the report_step.
+        
     Methods
     =======
 
@@ -1224,6 +1230,18 @@ class SystemDynamicsAnalyzer:
     
 
 class CompoundMatrix(Matrix):
+    r'''
+    dfa
+    
+    Arguments
+    =========
+
+    Methods
+    =======
+
+    Example
+    =======
+    '''
 
     def symbolic_form(self,symbol_str):
         
