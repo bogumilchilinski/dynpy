@@ -35,7 +35,22 @@ def plots_no():
 plots_no_gen= plots_no()
 
 class  ReportModule:
+    r'''
+    dsa
+    
+    Arguments
+    =========
+    container:
+        
+    path:
+    
+    Methods
+    =======
 
+    Example
+    =======
+    '''
+    
     cls_container=[]
     cls_path = '.'
     _caption='Figure describes the numerical data'
@@ -371,7 +386,7 @@ class AccelerationComparison(ReportModule):
     ics_list: iterable
         List containing values of initial conditions. 
     data: dict
-        Dictionary consisting data for comparison.
+        Dictionary consisting of data for comparison.
     label: str
         User-defined LaTeX label for generated plots.
 
@@ -400,7 +415,7 @@ class AccelerationComparison(ReportModule):
         return cls
     
     @classmethod
-    def set_label_foramatter(cls,formatter):
+    def set_label_formatter(cls,formatter):
         
         cls._formatter=formatter
         
