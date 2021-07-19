@@ -36,14 +36,14 @@ plots_no_gen= plots_no()
 
 class  ReportModule:
     r'''
-    dsa
+    Basic class for maintaining global options of a report module. It provides methods for setting options common with every class inheriting from ReportModule instance. 
     
     Arguments
     =========
-    container:
-        
-    path:
-    
+    container: obj
+        Pylatex container object such as Document() or Section().
+    path: str
+        Path for saving plots.
     Methods
     =======
 
@@ -539,9 +539,10 @@ class AccelerationComparison(ReportModule):
             #ndp=DataPlot('wykres_nowy',position='H',preview=False)
             
             #it should be replaced with data.rename
-            print(data)
+#             print(data)
+
             data.columns=[type(self)._formatter(label) for label in data.columns ]   
-            
+            print(type(self)._units)
             y_unit_str=f'{(type(self)._units[coord]):Lx}'.replace('[]','')
             
             ndp=data.to_standalone_figure(filepath,colors_list=colors_list,height=NoEscape(r'7cm'),width=NoEscape(r'0.9\textwidth'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )

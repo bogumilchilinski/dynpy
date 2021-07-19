@@ -673,7 +673,15 @@ units_dict={
 #             ao_rz_idmin:ureg.second,
             a_rz:ureg.gram,
             a_rcz:ureg.gram,
-            a_sim:ureg.meter/ureg.second/ureg.second
+            a_sim:ureg.meter/ureg.second/ureg.second,
+            dx.diff(t):ureg.meter/ureg.second/ureg.second/ureg.second,
+            dy.diff(t):ureg.meter/ureg.second/ureg.second/ureg.second,
+            dz_fr.diff(t):ureg.meter/ureg.second/ureg.second/ureg.second,
+            dz_rear.diff(t):ureg.meter/ureg.second/ureg.second/ureg.second,
+            dz.diff(t):ureg.meter/ureg.second/ureg.second/ureg.second,
+            dtheta.diff(t):ureg.radian/ureg.second/ureg.second,
+            dalpha.diff(t):ureg.radian/ureg.second/ureg.second,
+            dz_wrc.diff(t):ureg.meter/ureg.second/ureg.second/ureg.second,
            }
 
 
