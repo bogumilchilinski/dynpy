@@ -46,7 +46,13 @@ class  ReportModule:
         Path for saving plots.
     Methods
     =======
-
+        set_container(cls,container=None):
+            Classmethod; sets Pylatex container object such as Document() or Section(). None by default.
+        set_caption(cls,caption=''):
+            Classmethod; sets caption for images plotted under current instance. Empty string by default.
+        set_directory
+            
+        set_units_dict
     Example
     =======
     '''
@@ -503,7 +509,8 @@ class AccelerationComparison(ReportModule):
         
         return result
             
-    def plot_summary(self,analysis=None,coordinate=None,xlim=None,legend_pos='north east',legend_columns=1,colors_list=['blue','red','green','orange','violet','magenta','cyan']):
+    def plot_summary(self,analysis=None,coordinate=None,xlim=None,subplots=True,legend_pos='north east',legend_columns=1,colors_list=['blue','red','green','orange','violet','magenta','cyan']):
+        self.subplots=subplots
         if analysis:
             self._analysis=analysis
             self._parameter=analysis._parameter
@@ -528,8 +535,11 @@ class AccelerationComparison(ReportModule):
             
 
             
-            
-            data.plot()
+            if subplots==False:
+                
+                data.plot()
+            else:
+                data.plot(subplots=True)
             plt.ylabel(coord)
 
             filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'

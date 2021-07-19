@@ -680,7 +680,7 @@ units_dict={
             dz_rear.diff(t):ureg.meter/ureg.second/ureg.second/ureg.second,
             dz.diff(t):ureg.meter/ureg.second/ureg.second/ureg.second,
             dtheta.diff(t):ureg.radian/ureg.second/ureg.second,
-            dalpha.diff(t):ureg.radian/ureg.second/ureg.second,
+            dphi.diff(t):ureg.radian/ureg.second/ureg.second,
             dz_wrc.diff(t):ureg.meter/ureg.second/ureg.second/ureg.second,
            }
 
