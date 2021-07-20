@@ -40,10 +40,10 @@ class  ReportModule:
     
     Arguments
     =========
-    container: obj
-        Pylatex container object such as Document() or Section().
-    path: str
-        Path for saving plots.
+        container: obj
+            Pylatex container object such as Document() or Section().
+        path: str
+            Path for saving plots.
     Methods
     =======
         set_container(cls,container=None):
@@ -51,10 +51,30 @@ class  ReportModule:
         set_caption(cls,caption=''):
             Classmethod; sets caption for images plotted under current instance. Empty string by default.
         set_directory
-            
+            Classmethod; sets directory for saving generated plots. Directory must already exist. Default path: './SDA_results'.
         set_units_dict
+            Classmethod; sets dictionary which matches symbols to their units. Empty dict by default.
     Example
     =======
+        >>>from modules.utilities.report import ReportModule
+        >>>from pylatex import Document
+        >>>from sympy import Symbol
+        >>>import pint
+        
+        >>>ureg = pint.UnitRegistry()
+        >>>m=Symbol('m')
+        >>>doc=Document
+        >>>unit_dict={m:ureg.kilogram}
+        
+        >>>RM=ReportModule()
+        
+        >>>RM.set_container(doc)
+        
+        >>>RM.set_caption('This is caption.')
+        
+        >>>RM.set_directory('./my_directory')
+        
+        >>>RM.set_units_dict(unit_dict)
     '''
     
     cls_container=[]
@@ -112,16 +132,32 @@ class  ReportModule:
 class DataStorage:
     r'''
     This class represents data collector that stores the results able to obtain within other computational blocks.
-    It ensures ease data transferring in order to do efficient analysis and data processing.
+    It ensures easy data transferring in order to do efficient analysis and data processing.
     
     Arguments
     =========
-    data_set: dict
-        Dictionary of data to be deposited into storage.
-
+        data_set: dict
+            Dictionary of data to be deposited into storage.
     Methods
     =======
-
+        reset_storage(cls,*args,**kwargs):
+            Classmethod; Cleans storage.
+        load_result(self,analysis=None):
+        
+        def set_labeled_storage(cls,data):
+            Classmethod;
+        def set_indexed_storage(cls,data):
+            Classmethod;
+        def last_result(cls):
+            Classmethod;
+        def last_result_dict(cls):
+        
+        def labeled_storage(self):
+            Property;
+        def named_storage(self):
+            Property;
+        def indexed_storage(self):
+            Property;
     Example
     =======
     '''
@@ -530,62 +566,104 @@ class AccelerationComparison(ReportModule):
         else:
             data_dict=self._prepare_data(xlim=xlim)
         
-        
-        for coord, data in data_dict.items():
+        if subplots==False:
+            for coord, data in data_dict.items():
             
 
             
-            if subplots==False:
+            
                 
                 data.plot()
-            else:
-                data.plot(subplots=True)
-            plt.ylabel(coord)
+                plt.ylabel(coord)
 
-            filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
-
-            
-            ########### for tikz            
-            #ndp=DataPlot('wykres_nowy',position='H',preview=False)
-            
-            #it should be replaced with data.rename
-#             print(data)
-
-            data.columns=[type(self)._formatter(label) for label in data.columns ]   
-            print(type(self)._units)
-            y_unit_str=f'{(type(self)._units[coord]):Lx}'.replace('[]','')
-            
-            ndp=data.to_standalone_figure(filepath,colors_list=colors_list,height=NoEscape(r'7cm'),width=NoEscape(r'0.9\textwidth'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
-            #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
-            
-
-
-            
-            
-            ########### for tikz
-            #ndp.append(data.to_pylatex_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
-            
-            ndp.add_caption(NoEscape(f'{type(self)._caption}'))
-            
-            plt.show()
-            
-            print('marker - plot')
-            print(self.last_marker)
-            print(type(self)._last_marker)
-        #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
-            ndp.append(Label(type(self)._last_marker))
-        
-            if analysis:
-                analysis._container.append(ndp)
-            else:
                 filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
-                
-                #latex_code=(TimeDataFrame(data).to_tikz_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
-                self._container.append(ndp)
 
-        
-            
-        return ndp
+
+                ########### for tikz            
+                #ndp=DataPlot('wykres_nowy',position='H',preview=False)
+
+                #it should be replaced with data.rename
+    #             print(data)
+
+                data.columns=[type(self)._formatter(label) for label in data.columns ]   
+                print(type(self)._units)
+                y_unit_str=f'{(type(self)._units[coord]):Lx}'.replace('[]','')
+
+                ndp=data.to_standalone_figure(filepath,colors_list=colors_list,height=NoEscape(r'7cm'),width=NoEscape(r'0.9\textwidth'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
+                #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
+
+
+
+
+
+                ########### for tikz
+                #ndp.append(data.to_pylatex_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
+
+                ndp.add_caption(NoEscape(f'{type(self)._caption}'))
+
+                plt.show()
+
+                print('marker - plot')
+                print(self.last_marker)
+                print(type(self)._last_marker)
+            #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
+                ndp.append(Label(type(self)._last_marker))
+
+                if analysis:
+                    analysis._container.append(ndp)
+                else:
+                    filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+
+                    #latex_code=(TimeDataFrame(data).to_tikz_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
+                    self._container.append(ndp)
+
+
+
+
+        else:
+            for coord, data in data_dict.items():
+                data.plot(subplots=True,ylabel=coord)
+                filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+
+
+                ########### for tikz            
+                #ndp=DataPlot('wykres_nowy',position='H',preview=False)
+
+                #it should be replaced with data.rename
+    #             print(data)
+
+                data.columns=[type(self)._formatter(label) for label in data.columns ]   
+                print(type(self)._units)
+                y_unit_str=f'{(type(self)._units[coord]):Lx}'.replace('[]','')
+
+                ndp=data.to_standalone_figure(filepath,subplots=True,colors_list=colors_list,height=NoEscape(r'7cm'),width=NoEscape(r'0.9\textwidth'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
+                #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
+
+
+
+
+
+                ########### for tikz
+                #ndp.append(data.to_pylatex_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
+
+                ndp.add_caption(NoEscape(f'{type(self)._caption}'))
+
+                plt.show()
+
+                print('marker - plot')
+                print(self.last_marker)
+                print(type(self)._last_marker)
+            #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
+                ndp.append(Label(type(self)._last_marker))
+
+                if analysis:
+                    analysis._container.append(ndp)
+                else:
+                    filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+
+                    #latex_code=(TimeDataFrame(data).to_tikz_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
+                    self._container.append(ndp)
+            return ndp
 
     def plot_max_summary(self,analysis):
         
