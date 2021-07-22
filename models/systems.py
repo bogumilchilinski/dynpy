@@ -488,7 +488,7 @@ class SDoFDampedHarmonicOscillator(ComposedSystem):
         self.c = c
         self.mass = MaterialPoint(m, z, qs=[z])
         self.spring = Spring(k, z, qs=[z])
-        self.damper = Damper(c, z)
+        self.damper = Damper(c,pos1=z, qs=[z])
         system = self.mass + self.spring + self.damper
 
         super().__init__(system,**kwargs)

@@ -197,8 +197,9 @@ class DataStorage:
     def load_result(self,analysis=None):
         
         if analysis:
+            
             param=analysis._parameter
-        
+        print('a')
         current_data=DataStorage._storage[param]
         
         current_data.plot()
@@ -438,7 +439,7 @@ class AccelerationComparison(ReportModule):
     Example
     =======
     '''
-    
+    _subplot=False
     _story_point=None
     
     general_t_span=None
@@ -470,7 +471,7 @@ class AccelerationComparison(ReportModule):
         cls._data_storage={}
         
         return cls
-
+    
 
     def __init__(self,t_span=None,data=None,ics_list=None,label=None):
         
@@ -542,7 +543,7 @@ class AccelerationComparison(ReportModule):
         
         return result
             
-    def plot_summary(self,analysis=None,coordinate=None,xlim=None,subplots=False,legend_pos='north east',legend_columns=1,colors_list=['blue','red','green','orange','violet','magenta','cyan']):
+    def plot_summary(self,analysis=None,coordinate=None,xlim=None,subplots=_subplot,legend_pos='north east',legend_columns=1,colors_list=['blue','red','green','orange','violet','magenta','cyan']):
         self.subplots=subplots
         if analysis:
             self._analysis=analysis
@@ -633,7 +634,7 @@ class AccelerationComparison(ReportModule):
                 print(type(self)._units)
                 y_unit_str=f'{(type(self)._units[coord]):Lx}'.replace('[]','')
 
-                ndp=data.to_standalone_figure(filepath,subplots=True,colors_list=colors_list,height=NoEscape(r'7cm'),width=NoEscape(r'0.9\textwidth'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
+                ndp=data.to_standalone_figure(filepath,subplots=self.__class__.subplots,colors_list=colors_list,height=NoEscape(r'7cm'),width=NoEscape(r'0.9\textwidth'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
                 #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
 
 
