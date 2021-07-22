@@ -471,10 +471,7 @@ class AccelerationComparison(ReportModule):
         
         return cls
 
-    
-    
-    
-    
+
     def __init__(self,t_span=None,data=None,ics_list=None,label=None):
         
         self.last_marker=None
@@ -545,7 +542,7 @@ class AccelerationComparison(ReportModule):
         
         return result
             
-    def plot_summary(self,analysis=None,coordinate=None,xlim=None,subplots=True,legend_pos='north east',legend_columns=1,colors_list=['blue','red','green','orange','violet','magenta','cyan']):
+    def plot_summary(self,analysis=None,coordinate=None,xlim=None,subplots=False,legend_pos='north east',legend_columns=1,colors_list=['blue','red','green','orange','violet','magenta','cyan']):
         self.subplots=subplots
         if analysis:
             self._analysis=analysis
