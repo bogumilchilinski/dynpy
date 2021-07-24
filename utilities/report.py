@@ -440,6 +440,8 @@ class AccelerationComparison(ReportModule):
     =======
     '''
     _subplot=False
+    _height=r'7cm'
+    
     _story_point=None
     
     general_t_span=None
@@ -564,7 +566,7 @@ class AccelerationComparison(ReportModule):
         else:
             data_dict=self._prepare_data(xlim=xlim)
         
-        if subplots==False:
+        if self.__class__._subplot==False:
             for coord, data in data_dict.items():
             
 
@@ -587,7 +589,7 @@ class AccelerationComparison(ReportModule):
                 print(type(self)._units)
                 y_unit_str=f'{(type(self)._units[coord]):Lx}'.replace('[]','')
 
-                ndp=data.to_standalone_figure(filepath,colors_list=colors_list,height=NoEscape(r'7cm'),width=NoEscape(r'0.9\textwidth'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
+                ndp=data.to_standalone_figure(filepath,colors_list=colors_list,height=NoEscape(r'7cm'),width=NoEscape(r'12cm'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
                 #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
 
 
@@ -620,7 +622,7 @@ class AccelerationComparison(ReportModule):
 
         else:
             for coord, data in data_dict.items():
-                data.plot(subplots=True,ylabel=coord)
+                data.plot(subplots=self.__class__._subplot,ylabel=coord)
                 filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
 
 
@@ -634,7 +636,7 @@ class AccelerationComparison(ReportModule):
                 print(type(self)._units)
                 y_unit_str=f'{(type(self)._units[coord]):Lx}'.replace('[]','')
 
-                ndp=data.to_standalone_figure(filepath,subplots=self.__class__.subplots,colors_list=colors_list,height=NoEscape(r'7cm'),width=NoEscape(r'0.9\textwidth'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
+                ndp=data.to_standalone_figure(filepath,subplots=self.__class__._subplot,colors_list=colors_list,height=NoEscape(r'7cm'),width=NoEscape(r'0.9\textwidth'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
                 #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
 
 
