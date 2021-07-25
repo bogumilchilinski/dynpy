@@ -284,6 +284,31 @@ class SimulationalBlock(ReportModule):
     general_t_span=[]
     last_result=[]
     
+    _model=None
+    _reference_data=None
+
+    def label_formatter(self,analysis=None,label_generator=None):
+        
+        
+        
+        
+        if analysis:
+            var=analysis._parameter
+            value=analysis._current_value
+
+            if self._dynamic_system:
+                system=self._dynamic_system
+            else:
+                system=analysis._dynamic_system
+            
+            label=Eq(var,value,evaluate=False),str(system)
+            
+        else:
+            label=( (var,value)   for var,value in self._ref_data.items())
+        
+        return label
+
+    
     @classmethod
     def set_t_span(cls,t_span):
 
@@ -291,7 +316,7 @@ class SimulationalBlock(ReportModule):
 
         return cls
     
-    def __init__(self,t_span=None,ics_list=None):
+    def __init__(self,t_span=None,ics_list=None,dynamic_system=None,reference_data=None,**kwargs):
 
         
         self._t_span=t_span
@@ -303,20 +328,40 @@ class SimulationalBlock(ReportModule):
             self._t_span = type(self).general_t_span
             
         self._numerical_system=None
+        
+        self._dynamic_system=dynamic_system
+        self._ref_data=reference_data
+        
         super().__init__()
 
             
 
-    def do_simulation(self,analysis):
+    def do_simulation(self,analysis,**kwargs):
+        
+        if self._ref_data:
+            case_data=self._ref_data
+            var=analysis._parameter
+            value=analysis._current_value
+            
+            case_data[var]=value
 
-        case_data=analysis._current_data
+        else:
+            case_data=analysis._current_data
+            
+            
+            
+        if self._dynamic_system:
+            dynamic_system=self._dynamic_system
+        else:
+            dynamic_system=analysis._dynamic_system
+        
 
         if not self._numerical_system:
             
 #             display(analysis._dynamic_system.system_parameters())
 #             display(analysis._dynamic_system._eoms)
             
-            self._numerical_system=analysis._dynamic_system.numerized(parameter_values=case_data)
+            self._numerical_system=dynamic_system.numerized(parameter_values=case_data)
             
         numerical_system=self._numerical_system
         no_dof=len((numerical_system.dvars))
@@ -345,7 +390,9 @@ class SimulationalBlock(ReportModule):
         var=analysis._parameter
         value=analysis._current_value
 
-        DataStorage._storage[Eq(var,value,evaluate=False)]=simulation_result
+        label=self.label_formatter(analysis)
+        
+        DataStorage._storage[label]=simulation_result
 
         #print(DataStorage._list)
 
@@ -509,7 +556,7 @@ class AccelerationComparison(ReportModule):
 #         print('_______________test of plot_____________')
 #         print(data)
 #         print('_______________test of plot_____________')
-        print(data)
+#         print(data)
         elements=list((data.values()))[0].columns
         print('frametype')
         print(type(list((data.values()))[0])())
