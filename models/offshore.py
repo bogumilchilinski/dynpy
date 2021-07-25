@@ -152,7 +152,7 @@ class TDoFCompensatedPayload(ComposedSystem):
                  m_p=Symbol('m_p', positive=True),
                  k_w=Symbol('k_w', positive=True),
                  l_0=Symbol('l_0', positive=True),
-                 qs=dynamicsymbols('varphi h h_c'),
+                 qs=dynamicsymbols('\\varphi h h_c'),
                  y_e=dynamicsymbols('y_e'),
                  z_e=dynamicsymbols('z_e'),
                  m_c=Symbol('m_c', positive=True),

@@ -281,8 +281,8 @@ class WeakNonlinearProblemSolution(LinearODESolution):
             ivar=self.ivar,
             dvars=self.approximation_function(order=order)).solution()
         
-        print('Const const')
-        print(LinearODESolution._const_list)
+#         print('Const const')
+#         print(LinearODESolution._const_list)
 
         return self._format_solution(
             dvars=self.approximation_function(order=order),
@@ -346,7 +346,9 @@ class MultiTimeScaleMethod(LinearODESolution):
                          equation_type=equation_type)
         self.eps = eps
         self._order=order
-
+        
+        self._stored_solution=None
+        
         self.secular_eq=set()
         self.int_const=set()
 
@@ -381,7 +383,7 @@ class MultiTimeScaleMethod(LinearODESolution):
         Returns the list of time domanin slow varying function
         """
 
-        self._t_list=[t_i(self.ivar) for t_i in symbols(f't_0:{self._order+1}',cls=Function)]
+        self._t_list=[t_i(self.ivar) for t_i in symbols(f't_0:{self._order+1}',cls=Function, real=True)]
         return self._t_list
 
 
@@ -390,8 +392,12 @@ class MultiTimeScaleMethod(LinearODESolution):
         if params_values:
             self.params_values = params_values
 
-        solution = self.nth_order_solution(order).subs(self.params_values)
+        
+        if not self._stored_solution:
+            self._stored_solution = self.nth_order_solution(order)
 
+        solution=self._stored_solution.subs(self.params_values).subs(self.params_values).n()
+            
         if isinstance(ivar, Symbol):
             return solution.subs(self.ivar, ivar)
         else:
@@ -400,11 +406,20 @@ class MultiTimeScaleMethod(LinearODESolution):
             nth_order_solution_fun = lambdify(self.ivar, (solution), 'numpy')
 
             #return nth_order_solution_fun(ivar)
-            return TimeDataFrame(data={
+            solution  = TimeDataFrame(data={
                 dvar: data[0]
                 for dvar, data in zip(self.dvars, nth_order_solution_fun(ivar))
             },
                                  index=ivar)
+            
+            
+            for dvar in self.dvars:
+                solution[dvar.diff(self.ivar,1)]=solution[dvar].gradient()
+            
+            for dvar in self.dvars:
+                solution[dvar.diff(self.ivar,2)]=solution[dvar.diff(self.ivar,1)].gradient()
+            
+            return solution
 
     def _format_solution(self, dvars, solution, dict=False, equation=False):
 
@@ -658,7 +673,14 @@ class MultiTimeScaleMethod(LinearODESolution):
         const_sol=FirstOrderODE((sec_eq),
                         self.t_list[1],
                         dvars=Matrix(list(self.int_const))
-                        ).general_solution()
+                        ).solution()
+        
+#         print('trial for SS')
+        steady_sol=(FirstOrderODE((sec_eq),
+                        self.t_list[1],
+                        dvars=Matrix(list(self.int_const))
+                        ).steady_solution()) 
+        
         
         self._const_sol=const_sol
 #         display(const_sol)
@@ -676,9 +698,11 @@ class MultiTimeScaleMethod(LinearODESolution):
 #         display(*list({var: eqn.subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values()))
 #         display(*list({var: eqn.diff(self.ivar).subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values()))
         
-        ics_eqns=(list({var: eqn.subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values())+
-                    list({var: eqn.diff(self.ivar).subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values())
+        ics_eqns=(list({var: eqn.subs({self.ivar:0})  for var, eqn in general_form_dict.items()}.values())+
+                    list({var: eqn.diff(self.ivar).subs({self.ivar:0})  for var, eqn in general_form_dict.items()}.values())
                       )
+        
+        
         
         
         eqns=Matrix([eq.expand() for eq in ics_eqns])
@@ -687,15 +711,27 @@ class MultiTimeScaleMethod(LinearODESolution):
         
         const_from_eqn=[var for  var in list(eqns.atoms(Symbol,Function)) if var in FirstOrderODE._const_list]
         
+        #display(Matrix(ics_eqns).jacobian(const_from_eqn))
+        
         #display(const_from_eqn)
         
         #display(ics_eqns)
-        const_vals=Matrix([eq.expand() for eq in ics_eqns]).jacobian(const_from_eqn).inv()*Matrix(self.ics)
-                  
-        #display(const_vals)
-                  
+        const_vals_lin=Matrix([eq.expand() for eq in ics_eqns]).jacobian(const_from_eqn).subs({const:0 for const in const_from_eqn}).subs(self.eps,0)#*Matrix(self.ics)
+        const_vals_zth=Matrix([eq.expand() for eq in ics_eqns]).subs({const:0 for const in const_from_eqn})
+        
+        
+#         print('+++++++++  eqns for ics +++++++++++ ')
+#         display(const_vals_lin)
+#         display(const_vals_zth)
+        
+        self._ics_formula={const:val for const, val in zip(const_from_eqn,const_vals_lin.inv()*(Matrix(self.ics)-const_vals_zth))}
+        
+#         display(self._ics_formula)
+#         print('+++++++++  eqns for ics +++++++++++ ')      
+            
+            
         return Matrix(
-            list(general_form_dict.values())).subs(const_sol).subs(t_back_subs)
+            list(general_form_dict.values())).subs(const_sol).subs(t_back_subs).subs(self._ics_formula)
         
     
     def zeroth_approximation(self, dict=False, equation=False):
