@@ -636,7 +636,7 @@ class AccelerationComparison(ReportModule):
                 print(type(self)._units)
                 y_unit_str=f'{(type(self)._units[coord]):Lx}'.replace('[]','')
 
-                ndp=data.to_standalone_figure(filepath,subplots=self.__class__._subplot,colors_list=colors_list,height=NoEscape(r'7cm'),width=NoEscape(r'0.9\textwidth'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
+                ndp=data.to_standalone_figure(filepath,subplots=self.__class__._subplot,colors_list=colors_list,height=NoEscape(r'6cm'),width=NoEscape(r'0.9\textwidth'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
                 #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
 
 

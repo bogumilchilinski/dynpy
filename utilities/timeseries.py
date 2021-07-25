@@ -96,7 +96,7 @@ class DataMethods:
 
         self.to_standalone_plot(filename,labels_list,colors_list,height, width,x_axis_description,y_axis_description,subplots,legend_pos)
         fig = Figure(position='H')
-        fig.add_image(filename,width=NoEscape('0.49\\textwidth'),)
+        fig.add_image(filename,width=width)
         
         return fig
     
