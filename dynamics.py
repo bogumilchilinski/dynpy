@@ -960,7 +960,7 @@ class HarmonicOscillator(LinearDynamicSystem):
             self.ivar) + 2 * self.h * Matrix(self.u) + (self.omegah**2 +
                                                    self.h**2) * Matrix(self.q)
         print('Done')
-        return self.__governing_equations
+        return self._canonical_governing_equation
 
     def __solve(self, initial_conditions=None):
         '''
