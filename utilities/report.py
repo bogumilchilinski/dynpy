@@ -584,6 +584,7 @@ class AccelerationComparison(ReportModule):
 #         print(data)
 #         print('_______________test of plot_____________')
 #         print(data)
+        print(list((data.values()))[0])
         elements=list((data.values()))[0].columns
         print('frametype')
         print(type(list((data.values()))[0])())
