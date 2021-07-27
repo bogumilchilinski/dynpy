@@ -1,5 +1,6 @@
 import datetime as dtime
 import os
+
 import random
 
 import matplotlib.pyplot as plt
@@ -81,6 +82,8 @@ class  ReportModule:
     cls_path = '.'
     _caption='Figure describes the numerical data'
     _units={}
+    
+    
 
     @classmethod
     def set_container(cls,container=None):
@@ -278,15 +281,25 @@ class SimulationalBlock(ReportModule):
     =======
     '''
     
-    _storage=DataStorage._lds
-    _list=DataStorage._ids
-    _dict=DataStorage._nds
+    _frame=TimeDataFrame()
+    #_frame.columns=pd.MultiIndex()
+    
+    _list=[]
+    _dict={}
     general_t_span=[]
     last_result=[]
-    
     _model=None
     _reference_data=None
-
+    
+    @property
+    def frame(self):
+        
+        time_frame=TimeDataFrame(self.__class__._frame)
+        
+        time_frame.columns=pd.MultiIndex.from_tuples(self.__class__._frame.columns)
+        
+        return time_frame
+    
     def label_formatter(self,analysis=None,label_generator=None):
         
         
@@ -308,7 +321,16 @@ class SimulationalBlock(ReportModule):
         
         return label
 
+    @classmethod
+    def reset_storage(cls):
+        cls._frame=TimeDataFrame()
+
+
+        cls._list=[]
+        cls._dict={}
+        return cls
     
+
     @classmethod
     def set_t_span(cls,t_span):
 
@@ -392,8 +414,13 @@ class SimulationalBlock(ReportModule):
 
         label=self.label_formatter(analysis)
         
-        DataStorage._storage[label]=simulation_result
-
+        DataStorage._storage[label]=[simulation_result]
+        
+        
+        self.__class__._frame[[ label+(coord,) for coord in simulation_result.columns   ]]=simulation_result
+        self.__class__._list+=[simulation_result]
+        
+        
         #print(DataStorage._list)
 
         DataStorage._list+=[simulation_result]

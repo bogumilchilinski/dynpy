@@ -5,6 +5,7 @@ import sympy as sym
 from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
 import itertools as itools
+import copy
 import scipy.integrate as solver
 from ..utilities.timeseries import DataMethods, SpectralMethods, TimeDomainMethods, SpectrumSeries, SpectrumFrame, TimeSeries, TimeDataFrame
 
@@ -716,8 +717,8 @@ class MultiTimeScaleMethod(LinearODESolution):
         #display(const_from_eqn)
         
         #display(ics_eqns)
-        const_vals_lin=Matrix([eq.expand() for eq in ics_eqns]).jacobian(const_from_eqn).subs({const:0 for const in const_from_eqn}).subs(self.eps,0)#*Matrix(self.ics)
-        const_vals_zth=Matrix([eq.expand() for eq in ics_eqns]).subs({const:0 for const in const_from_eqn})
+        const_vals_lin=Matrix([eq.expand() for eq in ics_eqns]).jacobian(const_from_eqn).subs({const:0 for const in const_from_eqn}).subs(self.params_values)#*Matrix(self.ics)
+        const_vals_zth=Matrix([eq.expand() for eq in ics_eqns]).subs({const:0 for const in const_from_eqn}).subs(self.params_values)
         
         
 #         print('+++++++++  eqns for ics +++++++++++ ')
@@ -861,13 +862,16 @@ class MultiTimeScaleMethod(LinearODESolution):
     def numerized(self,
                  params_values={},
                  **kwargs):
-
         
-        return self.__class__(
+        if params_values=={}:
+            return copy.copy(self)
+        else:
+        
+            return self.__class__(
                 odes_system=self.governing_equations,
                  ivar=self.ivar,
                  dvars= self.dvars,
-                 ics=self.ics,
+                 ics=params_values['ics'],
                  eps=self.eps,
                  omega=self.omega,
                  order=self._order,
@@ -885,6 +889,8 @@ class MultiTimeScaleMethod(LinearODESolution):
                          t_eval=None,
                          params_values=None,
                          method='RK45'):
+        
+        #params_values['ics']=ic_list
         
         return self.__call__( ivar=t_span, order=self._order, params_values=params_values)
     
