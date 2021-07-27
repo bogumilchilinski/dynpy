@@ -414,7 +414,7 @@ class SimulationalBlock(ReportModule):
 
         label=self.label_formatter(analysis)
         
-        DataStorage._storage[label]=[simulation_result]
+        DataStorage._storage[label]=simulation_result
         
         
         self.__class__._frame[[ label+(coord,) for coord in simulation_result.columns   ]]=simulation_result
@@ -524,7 +524,7 @@ class AccelerationComparison(ReportModule):
     
     _last_marker=None
     
-    _formatter=lambda entry:  f'${latex(entry.lhs)} = {round(entry.rhs/1000)} \\si {{\\tonne}} ({ (entry.rhs/10000000*100).n(2,chop=True)  } \\% m_v ) $'
+    _formatter=lambda entry:  f'${latex(entry[0].lhs)} = {round(entry[0].rhs/1000)} \\si {{\\tonne}} ({ (entry[0].rhs/10000000*100).n(2,chop=True)  } \\% m_v ) $'
     
     @classmethod
     def set_t_span(cls,t_span):
@@ -578,15 +578,16 @@ class AccelerationComparison(ReportModule):
         if xlim:
             data={key:result.truncate(xlim[0],xlim[-1]) for key,result in self._data.items()}
         else:
-             data=self._data       
+            data=self._data       
         
 #         print('_______________test of plot_____________')
 #         print(data)
 #         print('_______________test of plot_____________')
 #         print(data)
+#         print(type(data))
         elements=list((data.values()))[0].columns
-        print('frametype')
-        print(type(list((data.values()))[0])())
+#         print('frametype')
+#         print(type(list((data.values()))[0])())
         summaries_dict = {dynsym:type(list((data.values()))[0])()  for dynsym  in elements }
         
         for key,result in data.items():
