@@ -145,8 +145,6 @@ class DataStorage:
     =======
         reset_storage(cls,*args,**kwargs):
             Classmethod; Cleans storage.
-        load_result(self,analysis=None):
-        
         def set_labeled_storage(cls,data):
             Classmethod;
         def set_indexed_storage(cls,data):
@@ -588,7 +586,7 @@ class AccelerationComparison(ReportModule):
         if label:
             self._label=label
         else:
-            self._label=''
+            self._label=next(plots_no_gen)
             
         super().__init__(None)
 
