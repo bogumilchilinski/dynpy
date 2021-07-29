@@ -461,21 +461,18 @@ class MultiTimeScaleMethod(LinearODESolution):
         solution = solution.applyfunc(lambda x: x.subs(self.extra_params).subs(self.params_values))
 
         print('solution after extra params')
-        display(-(self.nth_order_solution(order).rhs.subs(self.extra_params))
+        display(-(self.nth_order_solution(order).rhs.subs(self.extra_params)))
             
         if isinstance(ivar, Symbol):
-            
-            
+
             ics_dict=self._ic_from_sol(order=order,formula=True)
             display(ics_dict)
-            
-            
+
             return solution.subs(ics_dict).subs(self.extra_params).subs(self.ivar, ivar)
         else:
             #display(solution)
             #display(solution[1])
-            
-            
+
             print('linear values check')
             display(Dict(self._ic_from_sol(order=order,formula=True)).subs(self.params_values).subs(self.params_values)  )
             

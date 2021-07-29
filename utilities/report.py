@@ -586,7 +586,7 @@ class AccelerationComparison(ReportModule):
         if label:
             self._label=label
         else:
-            self._label=next(plots_no_gen)
+            self._label=None
             
         super().__init__(None)
 
@@ -627,9 +627,19 @@ class AccelerationComparison(ReportModule):
         result=self._prepare_data(xlim=xlim)
         
         elements=result.keys()
-             
-        DataStorage._plot_markers_dict={elem:Marker(f'plot{self.__class__.__name__}{self._label}' ,'fig')   for elem in elements}
-        DataStorage._subplot_markers_dict={elem:Marker(f'subplot{self.__class__.__name__}{self._label}'  ,'fig')   for elem in elements}
+        
+        
+        
+        if self._label:
+            DataStorage._plot_markers_dict={elem:Marker(f'plot{self.__class__.__name__}{self._label}' ,'fig')   for elem in elements}
+            DataStorage._subplot_markers_dict={elem:Marker(f'subplot{self.__class__.__name__}{self._label}'  ,'fig')   for elem in elements}
+        else:
+            
+
+            DataStorage._plot_markers_dict={elem:Marker(f'plot{self.__class__.__name__}{next(plot_no_gen)}' ,'fig')   for elem in elements}
+            DataStorage._subplot_markers_dict={elem:Marker(f'subplot{self.__class__.__name__}{next(plot_no_gen)}'  ,'fig')   for elem in elements}
+            
+            
         DataStorage.first_marker=list(DataStorage._plot_markers_dict.values())[0]
         DataStorage.last_marker=list(DataStorage._plot_markers_dict.values())[-1]
         self.last_marker=list(DataStorage._plot_markers_dict.values())[-1]
