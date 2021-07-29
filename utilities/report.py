@@ -356,7 +356,27 @@ class SimulationalBlock(ReportModule):
         
         super().__init__()
 
+    def show_eoms(self,analysis,**kwargs):
+        
+        if self._ref_data:
+            case_data=self._ref_data
+            var=analysis._parameter
+            value=analysis._current_value
             
+            case_data[var]=value
+
+        else:
+            case_data=analysis._current_data
+            
+            
+            
+        if self._dynamic_system:
+            dynamic_system=self._dynamic_system
+        else:
+            dynamic_system=analysis._dynamic_system
+            
+        display(dynamic_system._eoms)
+        return dynamic_system
 
     def do_simulation(self,analysis,**kwargs):
         
