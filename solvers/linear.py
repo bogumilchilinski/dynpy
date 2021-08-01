@@ -389,7 +389,7 @@ class FirstOrderODE:
             else:
                 steady_sol += sym.dsolve(eqns_res, self.dvars)
 
-        return {coord: eq for coord, eq in zip(reg_vars, steady_sol)}
+        return {coord: -eq for coord, eq in zip(reg_vars, steady_sol)}
 
     def solution(self, initial_conditions=None):
         return {
@@ -671,7 +671,7 @@ class LinearODESolution:
             else:
                 steady_sol += sym.dsolve(eqns_res, self.dvars)
 
-        return steady_sol
+        return -steady_sol
 
     def solution(self, initial_conditions=None):
         return self.general_solution(

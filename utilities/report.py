@@ -295,6 +295,8 @@ class SimulationalBlock(ReportModule):
         time_frame=TimeDataFrame(self.__class__._frame)
         
         time_frame.columns=pd.MultiIndex.from_tuples(self.__class__._frame.columns)
+        time_frame.columns.set_names(['model','parameter','coordinate'],inplace=True)
+        
         
         return time_frame
     
@@ -650,6 +652,7 @@ class AccelerationComparison(ReportModule):
         return result
             
     def plot_summary(self,analysis=None,coordinate=None,xlim=None,subplots=_subplot,legend_pos='north east',legend_columns=1,colors_list=['blue','red','green','orange','violet','magenta','cyan']):
+        
         self.subplots=subplots
         if analysis:
             self._analysis=analysis
@@ -972,7 +975,8 @@ class SummaryTable(ReportModule):
         if data:
             self._data=data
         else:
-            self._data=DataStorage._storage
+            #print(SimulationalBlock().frame)
+            self._data=SimulationalBlock().frame
 
         if label:
             self._label=label
@@ -982,30 +986,23 @@ class SummaryTable(ReportModule):
         super().__init__(None)
 
 
-    def _prepare_data(self,coordinate=None,xlim=None):
+    def _prepare_data(self,coordinate=None,level=None,xlim=None):
         
         if xlim:
             data={key:result.truncate(xlim[0],xlim[-1]) for key,result in self._data.items()}
         else:
-             data=self._data       
+             data=self._data
         
 #         print('_______________test of plot_____________')
 #         print(data)
 #         print('_______________test of plot_____________')
 #         print(data)
-        elements=list((data.values()))[0].columns
+        elements=data.columns
 #         print('frametype')
 #         print(type(list((data.values()))[0])())
-        summaries_dict = {dynsym:type(list((data.values()))[0])()  for dynsym  in elements }
+        summaries_dict = data.swaplevel(0,-1,axis=1)
         
-        for key,result in data.items():
-            for coord in elements:
-#                 display(result[coord])
-#                 display(key)
-                max_val=float((result[coord].abs().max()))
-#                 display(max_val)
-                summaries_dict[coord][key]  =[max_val]
-        type(self)._story_point=summaries_dict
+
         
         if coordinate:
             return summaries_dict[coordinate]
@@ -1017,7 +1014,20 @@ class SummaryTable(ReportModule):
         if analysis:
             self._analysis=analysis
         
-        result=self._prepare_data(xlim=xlim)
+        data_table=self._prepare_data(coordinate=coordinate,xlim=xlim).abs().max().to_frame().T
+        
+
+        
+        models=data_table.columns.get_level_values(0).unique()
+        #print(models)
+        
+        #display([data_table[model].T for model in models])
+        
+        result = type(data_table)()
+        
+        for model in models:
+            result[model]=data_table[model].T
+        
         
         elements=result.keys()
              
@@ -1031,7 +1041,139 @@ class SummaryTable(ReportModule):
         print(self.last_marker)
         
         return result
+    def show_summary(self,analysis=None,coordinate=None,xlim=None,legend_pos='north east',legend_columns=1,colors_list=['blue','red','green','orange','violet','magenta','cyan']):
+        
+        #self.subplots=subplots
+        if analysis:
+            self._analysis=analysis
+            self._parameter=analysis._parameter
+        else:
+            self._parameter='which name is missing.'
+        
             
+        
+
+
+
+        data_table=self.prepare_summary(coordinate=coordinate,xlim=xlim)
+        
+
+        
+        
+        display(data_table)
+        
+        latex_table = NoEscape(data_table.to_latex())
+        
+
+            
+        if analysis:
+            analysis._container.append(NoEscape(latex_table))
+        else:
+
+            self._container.append(NoEscape(latex_table))
+            
+        
+        
+        return data_table
+            
+#         if self.__class__._subplot==False:
+#             for coord, data in data_dict.items():
+            
+
+            
+            
+                
+#                 data.plot()
+#                 plt.ylabel(coord)
+
+#                 filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+
+
+#                 ########### for tikz            
+#                 #ndp=DataPlot('wykres_nowy',position='H',preview=False)
+
+#                 #it should be replaced with data.rename
+#     #             print(data)
+
+#                 data.columns=[type(self)._formatter(label) for label in data.columns ]   
+#                 print(type(self)._units)
+#                 y_unit_str=f'{(type(self)._units[coord]):Lx}'.replace('[]','')
+
+#                 ndp=data.to_standalone_figure(filepath,colors_list=colors_list,height=NoEscape(r'7cm'),width=NoEscape(r'12cm'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
+#                 #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
+
+
+
+
+
+#                 ########### for tikz
+#                 #ndp.append(data.to_pylatex_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
+
+#                 ndp.add_caption(NoEscape(f'{type(self)._caption}'))
+
+#                 plt.show()
+
+#                 print('marker - plot')
+#                 print(self.last_marker)
+#                 print(type(self)._last_marker)
+#             #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
+#                 ndp.append(Label(type(self)._last_marker))
+
+#                 if analysis:
+#                     analysis._container.append(ndp)
+#                 else:
+#                     filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+
+#                     #latex_code=(TimeDataFrame(data).to_tikz_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
+#                     self._container.append(ndp)
+
+
+
+
+#         else:
+#             for coord, data in data_dict.items():
+#                 data.plot(subplots=self.__class__._subplot,ylabel=coord)
+#                 filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+
+
+#                 ########### for tikz            
+#                 #ndp=DataPlot('wykres_nowy',position='H',preview=False)
+
+#                 #it should be replaced with data.rename
+#     #             print(data)
+
+#                 data.columns=[type(self)._formatter(label) for label in data.columns ]   
+#                 print(type(self)._units)
+#                 y_unit_str=f'{(type(self)._units[coord]):Lx}'.replace('[]','')
+
+#                 ndp=data.to_standalone_figure(filepath,subplots=self.__class__._subplot,colors_list=colors_list,height=NoEscape(r'6cm'),width=NoEscape(r'0.9\textwidth'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
+#                 #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
+
+
+
+
+
+#                 ########### for tikz
+#                 #ndp.append(data.to_pylatex_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
+
+#                 ndp.add_caption(NoEscape(f'{type(self)._caption}'))
+
+#                 plt.show()
+
+#                 print('marker - plot')
+#                 print(self.last_marker)
+#                 print(type(self)._last_marker)
+#             #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
+#                 ndp.append(Label(type(self)._last_marker))
+
+#                 if analysis:
+#                     analysis._container.append(ndp)
+#                 else:
+#                     filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+
+#                     #latex_code=(TimeDataFrame(data).to_tikz_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
+#                     self._container.append(ndp)
+#             return ndp            
     
     
 class ReportEntry:
