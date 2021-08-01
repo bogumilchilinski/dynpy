@@ -145,22 +145,18 @@ class DataStorage:
     =======
         reset_storage(cls,*args,**kwargs):
             Classmethod; Cleans storage.
-        def set_labeled_storage(cls,data):
-            Classmethod;
-        def set_indexed_storage(cls,data):
-            Classmethod;
-        def last_result(cls):
-            Classmethod;
-        def last_result_dict(cls):
-        
-        def labeled_storage(self):
-            Property;
-        def named_storage(self):
-            Property;
-        def indexed_storage(self):
-            Property;
     Example
     =======
+        >>>new_dict={'abs':312}
+        >>>DataStorage._storage=new_dict
+        
+        >>>RM.set_container(doc)
+        
+        >>>RM.set_caption('This is caption.')
+        
+        >>>RM.set_directory('./my_directory')
+        
+        >>>RM.set_units_dict(unit_dict)
     '''
     
     _storage={}
@@ -183,7 +179,7 @@ class DataStorage:
         type(self)._storage=self._data_set
         type(self)._story_point=[]
         
-        #print(type(self)._storage)
+
         
 
     @classmethod
@@ -195,68 +191,7 @@ class DataStorage:
         
         return cls
         
-    def load_result(self,analysis=None):
-        
-        if analysis:
-            
-            param=analysis._parameter
-        print('a')
-        current_data=DataStorage._storage[param]
-        
-        current_data.plot()
-        
-        return current_data
-    
-    @classmethod
-    def set_labeled_storage(cls,data):
-        
-        cls._storage=data
-        
-        return cls
-        
-    @classmethod
-    def set_indexed_storage(cls,data):
-        
-        cls._list=data
-        
-        return cls
-    
-    @classmethod
-    def last_result(cls):
-        return cls._list[-1]
-        
 
-    @classmethod
-    def last_result_dict(cls):
-        
-        key,value=list(cls._dict.keys())[-1]
-        
-        return {key:value}
-        
-    @property
-    def labeled_storage(self):
-        return type(self)._storage
-    
-    @property
-    def named_storage(self):
-        return type(self)._dict
-    
-    @property
-    def indexed_storage(self):
-        return type(self)._list
-    
-    @property
-    def _ids(self):
-        return self.indexed_storage
-        
-    @property
-    def _lds(self):
-        return self.labeled_storage
-    
-    
-    @property
-    def _nds(self):
-        return self.named_storage
 
 class SimulationalBlock(ReportModule):
 
@@ -634,12 +569,12 @@ class AccelerationComparison(ReportModule):
         
         if self._label:
             DataStorage._plot_markers_dict={elem:Marker(f'plot{self.__class__.__name__}{self._label}' ,'fig')   for elem in elements}
-            DataStorage._subplot_markers_dict={elem:Marker(f'subplot{self.__class__.__name__}{self._label}'  ,'fig')   for elem in elements}
+            DataStorage._subplot_markers_dict={elem:Marker(f'subplot{self.__class__.__name__}{self._label}' ,'fig')   for elem in elements}
         else:
             
 
-            DataStorage._plot_markers_dict={elem:Marker(f'plot{self.__class__.__name__}{next(plot_no_gen)}' ,'fig')   for elem in elements}
-            DataStorage._subplot_markers_dict={elem:Marker(f'subplot{self.__class__.__name__}{next(plot_no_gen)}'  ,'fig')   for elem in elements}
+            DataStorage._plot_markers_dict={elem:Marker(f'plot{self.__class__.__name__}{next(plots_no_gen)}' ,'fig')   for elem in elements}
+            DataStorage._subplot_markers_dict={elem:Marker(f'subplot{self.__class__.__name__}{next(plots_no_gen)}'  ,'fig')   for elem in elements}
             
             
         DataStorage.first_marker=list(DataStorage._plot_markers_dict.values())[0]
