@@ -147,16 +147,22 @@ class DataStorage:
             Classmethod; Cleans storage.
     Example
     =======
+        >>>elements=['first','second','third','fourth','fifth']
         >>>new_dict={'abs':312}
+        
+        >>>DS1=DataStorage(new_dict)
+        
         >>>DataStorage._storage=new_dict
         
-        >>>RM.set_container(doc)
+        >>>DataStorage._dict['x']='123'
         
-        >>>RM.set_caption('This is caption.')
+        >>>DataStorage._list=['a','b','c']
         
-        >>>RM.set_directory('./my_directory')
+        >>>DataStorage._plot_markers_dict={elem:Marker('plot1'+elem ,'fig')   for elem in elements}
+            
+        >>>DataStorage._subplot_markers_dict={elem:Marker('subplot1'+elem ,'fig')   for elem in elements}
         
-        >>>RM.set_units_dict(unit_dict)
+        >>>DataStorage.reset_storage()
     '''
     
     _storage={}
@@ -206,10 +212,18 @@ class SimulationalBlock(ReportModule):
         Time span.
     ics_list: iterable
         List containing values of initial conditions. 
+    dynamic_system: Lagrange's method object
+        Dynamic model prepared basing on Sympy's Lagrange's method object.
+    reference_data: dict
+        Dictionary containing default values of systems's parameters.
+    **kwargs
 
     Methods
     =======
-
+    frame(self):
+        Property; Sets time frame.
+    label_formatter(self,analysis=None,label_generator=None):
+        
     Example
     =======
     '''
