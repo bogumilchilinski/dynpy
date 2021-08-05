@@ -222,8 +222,21 @@ class SimulationalBlock(ReportModule):
     =======
     frame(self):
         Property; Sets time frame.
+    reset_storage(cls):
+        Classmethod; cleans storage including TimeDataFrame.
+    set_t_span(cls,t_span):
+        Classmethod; sets time span.
     label_formatter(self,analysis=None,label_generator=None):
-        
+        Provides label generated basing on current simulation or defined dictionary.
+    show_eoms(self,analysis,**kwargs):
+    
+    do_simulation(self,analysis,**kwargs):
+    
+    simulation_result(self,analysis):
+    
+    plot_result(cls,analysis):
+    
+
     Example
     =======
     '''
@@ -236,7 +249,7 @@ class SimulationalBlock(ReportModule):
     general_t_span=[]
     last_result=[]
     _model=None
-    _reference_data=None
+    _ref_data=None
     
     @property
     def frame(self):
@@ -266,7 +279,7 @@ class SimulationalBlock(ReportModule):
             label=Eq(var,value,evaluate=False),str(system)
             
         else:
-            label=( (var,value)   for var,value in self._ref_data.items())
+            label=( (var,value)   for var,value in self.__class__._ref_data.items())
         
         return label
 
