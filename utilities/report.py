@@ -488,11 +488,11 @@ class ReportModule:
     def __repr__(self):
         return self._container.__repr__()
 
-    def reported(self):
+    def reported(self,mode=True):
 
         new_obj = copy.copy(self)
 
-        new_obj._autoreporting = True
+        new_obj._autoreporting = mode
 
         return new_obj
 
@@ -512,16 +512,22 @@ class DataStorage:
             Classmethod; Cleans storage.
     Example
     =======
+        >>>elements=['first','second','third','fourth','fifth']
         >>>new_dict={'abs':312}
+        
+        >>>DS1=DataStorage(new_dict)
+        
         >>>DataStorage._storage=new_dict
         
-        >>>RM.set_container(doc)
+        >>>DataStorage._dict['x']='123'
         
-        >>>RM.set_caption('This is caption.')
+        >>>DataStorage._list=['a','b','c']
         
-        >>>RM.set_directory('./my_directory')
+        >>>DataStorage._plot_markers_dict={elem:Marker('plot1'+elem ,'fig')   for elem in elements}
+            
+        >>>DataStorage._subplot_markers_dict={elem:Marker('subplot1'+elem ,'fig')   for elem in elements}
         
-        >>>RM.set_units_dict(unit_dict)
+        >>>DataStorage.reset_storage()
     '''
 
     _storage = {}
@@ -608,9 +614,30 @@ class SimulationalBlock(ReportModule):
         Time span.
     ics_list: iterable
         List containing values of initial conditions. 
+    dynamic_system: Lagrange's method object
+        Dynamic model prepared basing on Sympy's Lagrange's method object.
+    reference_data: dict
+        Dictionary containing default values of systems's parameters.
+    **kwargs
 
     Methods
     =======
+    frame(self):
+        Property; Sets time frame.
+    reset_storage(cls):
+        Classmethod; cleans storage including TimeDataFrame.
+    set_t_span(cls,t_span):
+        Classmethod; sets time span.
+    label_formatter(self,analysis=None,label_generator=None):
+        Provides label generated basing on current simulation or defined dictionary.
+    show_eoms(self,analysis,**kwargs):
+    
+    do_simulation(self,analysis,**kwargs):
+    
+    simulation_result(self,analysis):
+    
+    plot_result(cls,analysis):
+    
 
     Example
     =======
@@ -625,7 +652,11 @@ class SimulationalBlock(ReportModule):
     _model = None
     _reference_data = None
     _hold=False
-    
+    last_result=[]
+
+    _ref_data=None  
+  
+
     
     def holded(self,hold=True):
         self.__class__._hold=hold
@@ -649,7 +680,9 @@ class SimulationalBlock(ReportModule):
             label = Eq(var, value, evaluate=False), str(system)
 
         else:
+
             label = ((var, value) for var, value in self._ref_data.items())
+
 
         return label
 
