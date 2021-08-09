@@ -347,7 +347,6 @@ class TimeDataFrame(DataFrame,TimeDomainMethods):
         data_gradient={name:data.gradient() for name,data in self.items()}
         return TimeDataFrame(data=data_gradient,index=data_gradient[next(iter(data_gradient))].index )
 
-
 #     def spectrum(self):
 
 #         spectrum={name:fft.fftshift(fft.fft(data)) for name,data in self.items()}

@@ -199,8 +199,13 @@ class WeakNonlinearProblemSolution(LinearODESolution):
                 'numpy')
 
             #            return nth_order_solution_fun(time)
-            return TimeDataFrame(
-                index=time, data={'solution': nth_order_solution_fun(time)})
+            result= TimeDataFrame(
+                index=time, data={'solution': (nth_order_solution_fun(time))}).copy().apply(np.real)
+            
+            display(result)
+            display(result.apply(np.real))
+            
+            return result
 
     def _format_solution(self, dvars, solution, dict=False, equation=False):
 
@@ -586,7 +591,7 @@ class MultiTimeScaleMethod(LinearODESolution):
             for dvar in self.dvars:
                 solution[dvar.diff(self.ivar,2)]=solution[dvar.diff(self.ivar,1)].gradient()
             
-            return solution
+            return solution.apply(np.real)
 
     def _format_solution(self, dvars, solution, dict=False, equation=False):
 
