@@ -378,7 +378,7 @@ class ReportModule:
     _list = []
     _subplot=False
     _hold=False
-    _out_formatter = lambda data: data
+    _out_formatter = BaseFrameFormatter# lambda data: data
 
     
     @classmethod
