@@ -43,6 +43,19 @@ plots_no_gen = plots_no()
 
 
 class BaseSeriesFormatter(TimeSeries):
+    r'''
+    Basic class for formatting data plots. It provides methods for setting options 
+    
+    Arguments
+    =========
+
+    Methods
+    =======
+
+    Example
+    =======
+
+    '''
     @property
     def _constructor(self):
         return BaseSeriesFormatter
