@@ -206,16 +206,16 @@ class BaseFrameFormatter(TimeDataFrame):
     def set_ylabel(self,label=None):
         if isinstance(self.index,pd.MultiIndex):
             
-        if label == None:
-            new_obj = self.copy()
+            if label == None:
+                new_obj = self.copy()
             
-            for label in new_obj.columns.tolist():
-                if label in self.__class__._units:
+                for label in new_obj.columns.tolist():
+                    if label in self.__class__._units:
                 
-                    y_unit_str = f'[${type(self)._units[label]}$]'
+                        y_unit_str = f'[${type(self)._units[label]}$]'
                     
-                else:
-                     y_unit_str=''
+                    else:
+                         y_unit_str=''
 
                 label = f'$ {latex(label[0])} $, {y_unit_str}'
                 
@@ -243,6 +243,15 @@ class BaseFrameFormatter(TimeDataFrame):
                 
         return new_obj
     
+#     def format_axis_label(self):
+
+#         new_obj = self.copy()
+        
+#         new_obj.columns = self.set_ylabel
+#         new_obj.index = self.set_xlabel
+        
+#         return new_obj
+    
     def set_legend(self,legend=[]):
         if legend == None:
             pass
@@ -254,7 +263,7 @@ class BaseFrameFormatter(TimeDataFrame):
         
         filtter = self.__class__._data_filtter
         
-        return filtter(self).format_labels().format_index()
+        return filtter(self).format_labels().format_index()#.set_ylabel().set_xlabel()
 
     
     def plot(self,*args,**kwargs):
@@ -1141,9 +1150,9 @@ class Summary(ReportModule):
 
             self.clear_frame(obj=False)
             
-        print(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule').replace('\\bottomrule','\\midrule \n \\bottomrule')   )
-        print(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule').__repr__() )
-        display(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule') )
+#         print(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule').replace('\\bottomrule','\\midrule \n \\bottomrule')   )
+#         print(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule').__repr__() )
+#         display(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule') )
             
         if self._autoreporting:
             self._container.append(
