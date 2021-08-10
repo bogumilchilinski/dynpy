@@ -201,7 +201,7 @@ class BaseFrameFormatter(TimeDataFrame):
         if label == None:
             new_obj = self.copy()
             
-            for label in new_obj.format_labels():
+            for label in new_obj.columns.tolist():
                 if label in self.__class__._units:
                 
                     y_unit_str = f'[${type(self)._units[label]}$]'
@@ -219,7 +219,7 @@ class BaseFrameFormatter(TimeDataFrame):
             if label == None:
                 new_obj = self.copy()
                 
-                for label in new_obj.format_labels():
+                for label in new_obj.index.tolist():
                     if label in self.__class__._units:
                         
                         x_unit_str = f'[${type(self)._units[label]}$]'
