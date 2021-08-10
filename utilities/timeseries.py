@@ -15,7 +15,7 @@ class DataMethods:
        
 
         
-        labels_list=[('$'+vlatex(label)+'$').replace('$$','$') for label in self.columns]
+        labels_list=[label for label in self.columns]
         #labels_list=[(vlatex(label)) for label in self.columns]
 
         data_for_plot_list=[zip(self.index,plot_data)  for label,plot_data in list(self.items())]

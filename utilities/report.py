@@ -143,7 +143,16 @@ class BaseFrameFormatter(TimeDataFrame):
         else:
             idx = self.columns
         print('idx',idx)
-        new_idx= [self._format_label(entry)  for entry in idx]
+        new_idx=[]
+        for entry in idx:
+            if entry in self.__class__._units:
+                
+                units=self.__class__._units
+                
+                new_idx+=[ self._format_label(entry) + f'{units[entry]}']
+            else:
+                new_idx+=[ self._format_label(entry)]
+
         print('new idx',new_idx)
         
         
@@ -174,12 +183,40 @@ class BaseFrameFormatter(TimeDataFrame):
     
     
     def set_ylabel(self,label=None):
-        new_obj = self.copy()
+        if isinstance(self.index,pd.MultiIndex):
+            
         if label == None:
-            for label in self.format_labels():
-                label = f'$ {latex(label[0])} )$'
+            new_obj = self.copy()
+            
+            for label in new_obj.format_labels():
+                if label in self.__class__._units:
                 
+                    y_unit_str = f'[${type(self)._units[label]}$]'
+                    
+                else:
+                     y_unit_str=''
+
+                label = f'$ {latex(label[0])} $, {y_unit_str}'
+                   
+        return label
+    
+    def set_xlabel(self,label=None):
+        if isinstance(self.index,pd.MultiIndex):
+            
+            if label == None:
+                new_obj = self.copy()
                 
+                for label in new_obj.format_labels():
+                    if label in self.__class__._units:
+                        
+                        x_unit_str = f'[${type(self)._units[label]}$]'
+                        
+                    else:
+                        x_unit_str = ''
+               
+                label = latex(self.index.name) + f'{x_unit_str}'
+                
+                new_obj.index.name = label
                 
         return new_obj
     
@@ -196,6 +233,14 @@ class BaseFrameFormatter(TimeDataFrame):
         
         return filtter(self).format_labels().format_index()
 
+    
+    def plot(self,*args,**kwargs):
+        
+        if not 'ylabel' in kwargs:
+            kwargs['ylabel']=self.__class__._ylabel
+        
+        return super().plot(*args,**kwargs)
+    
 class PivotSeriesSummary(BaseSeriesFormatter):
     @property
     def _constructor(self):
@@ -247,12 +292,7 @@ class PivotFrameSummary(BaseFrameFormatter):
         
         return new_obj
     
-    def plot(self,*args,**kwargs):
-        
-        if not 'ylabel' in kwargs:
-            kwargs['ylabel']=self.__class__._ylabel
-        
-        return super().plot(*args,**kwargs)
+
     
 class ReportModule:
     r'''
@@ -1003,15 +1043,17 @@ class Summary(ReportModule):
             self.clear_frame(obj=False)
         
         if self._autoreporting:
+            
+            filepath = f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+            
             self._container.append(
-                NoEscape(
                     self._apply_formatter(data[self._coord]).to_standalone_figure(
-                        f'xyz_{next(plots_no_gen)}',
+                        filepath,
                         subplots=False,
                         height=NoEscape(r'6cm'),
                         width=NoEscape(r'0.9\textwidth'),
                         y_axis_description='',
-                        legend_pos='north west')))
+                        legend_pos='north west'))
         
 
         
@@ -1076,10 +1118,14 @@ class Summary(ReportModule):
 
             self.clear_frame(obj=False)
             
+        print(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule').replace('\\bottomrule','\\midrule \n \\bottomrule')   )
+        print(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule').__repr__() )
+        display(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule') )
+            
         if self._autoreporting:
             self._container.append(
                 NoEscape(
-                    self._apply_formatter(data[self._coord]).to_latex() ))
+                    self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule').replace('\\bottomrule','\\midrule \n \\bottomrule') ))
 #                         f'xyz_{next(plots_no_gen)}',
 #                         subplots=self.__class__._subplot,
 
