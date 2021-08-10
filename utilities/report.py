@@ -104,6 +104,14 @@ class BaseSeriesFormatter(TimeSeries):
     
 class BaseFrameFormatter(TimeDataFrame):
     
+    _units={}
+
+    @classmethod
+    def set_units_dict(cls, units={}):
+
+        cls._units = units
+        return cls
+    
     _ylabel=None
     _label_formatter = None
     _data_filtter = lambda frame: frame.copy()
@@ -210,8 +218,10 @@ class BaseFrameFormatter(TimeDataFrame):
                      y_unit_str=''
 
                 label = f'$ {latex(label[0])} $, {y_unit_str}'
+                
+                new_obj.columns = label
                    
-        return label
+        return new_obj
     
     def set_xlabel(self,label=None):
         if isinstance(self.index,pd.MultiIndex):
