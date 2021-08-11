@@ -22,7 +22,7 @@ a_sim=Symbol('a_sim',positive=True)
 
 
 ### system parametes
-m_fr, m_rear,m_3, k_r, k_rt, k_f, k_ft, k_rot = symbols('m_fr, m_r, M, k_r, k_rt, k_f, k_ft k_rot',positive=True)
+m_fr, m_rear,m_3, k_r, k_rt, k_f, k_ft, k_rot,amplitude,length,speed,axw = symbols('m_fr, m_r, M, k_r, k_rt, k_f, k_ft k_rot, A, L, v, W_wb ',positive=True)
 m,k,g,F_1,F_2,Omega,F,R,v0,u0,l_l,l_r= symbols('m,k,g,F_1,F_2,Omega, F_0, R, v_0,u_0,l_l,l_r',positive=True)
 I_ch, I_w , z_c3,l_fr,l_rear= symbols('I_chair, I_wheel, z_c3, l_fr, l_r',positive=True)
 m_RC, I_RC, l_RC, k_RC, phi0 = symbols('m_RC, I_RC, l_RC, k_RC, varphi_0',positive=True)
@@ -390,10 +390,7 @@ T_rot =  S.One/2 * I_ch* dphi**2  # Ek ramy wózka w ruchu obrotowym
 T_rear = S.One/2 * m_rear* dz_rear**2 + S.One/2 * m_rear * dx**2    # Ek tylniego koła Ir (mr)
 T_fr = S.One/2 * m_fr* dz_fr**2 + S.One/2 * m_fr * dx**2    # Ek przedniego koła If (mf)
 T_wheel = S.One/2 * I_w * (dx/R)**2
-amplitude=0.0215
-length=0.19999999
-speed=1.7
-axw=0.5
+
 V_rear = S.One/2*k_rt*(z_rear-amplitude*cos(2*pi/(length/speed)*t))**2# Ep tylnich prętów ramy względem ich sprężystości
 V_fr = S.One/2*k_ft*(z_fr-amplitude*cos(2*pi/(length/speed)*(t-axw/speed)))**2     # Ep przednich prętów ramy względem ich sprężystości
 
@@ -446,11 +443,16 @@ class SimpleChair5DOF(dyn.HarmonicOscillator):
                    z_c3:0.4,
                    g:9.81,
                    I_w:m_rear*R**2,
-                                      l_fr:0.2,
-                   l_rear:0.01,    u0:0.005,
-    t0:1,
-    t_l:1,
-    l_bumps:0.15}
+                   l_fr:0.2,
+                   l_rear:0.01,
+                   u0:0.005,
+                   t0:1,
+                   t_l:1,
+                   l_bumps:0.15,
+                   amplitude:0.0215,
+                   length:0.19999999,
+                   speed:1.7,
+                   axw:0.5}
         return default_data_dict            
     def numerical_model(self):
         pass
@@ -683,7 +685,11 @@ units_dict={
             dphi.diff(t):ureg.radian/ureg.second/ureg.second,
             dz_wrc.diff(t):ureg.meter/ureg.second/ureg.second/ureg.second,
             l_l:ureg.meter,
-            l_r:ureg.meter
+            l_r:ureg.meter,
+            amplitude:ureg.meter,
+            length:ureg.meter,
+            speed:ureg.meter/ureg.second,
+            axw:ureg.meter,
            }
 
 
