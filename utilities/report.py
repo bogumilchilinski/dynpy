@@ -403,6 +403,12 @@ class ReportModule:
 
         return cls
 
+    @classmethod
+    def set_ploting_mode(cls, subplots=False):
+        cls._subplot=subplots
+
+        return cls
+    
 
 #     def _reset_storage(self, *args, **kwargs):
 
@@ -1063,7 +1069,7 @@ class Summary(ReportModule):
             data.columns =pd.MultiIndex.from_tuples(data.columns)
             
 
-            self._apply_formatter(data[self._coord]).plot()
+            self._apply_formatter(data[self._coord]).plot(subplots=self.__class__._subplot)
 
             print('o tu - from self')
             #print(pd.MultiIndex.from_tuples(list(result.columns)))
@@ -1077,7 +1083,7 @@ class Summary(ReportModule):
             data.columns =pd.MultiIndex.from_tuples(data.columns)
             
 
-            self._apply_formatter(data[self._coord]).plot()
+            self._apply_formatter(data[self._coord]).plot(subplots=self.__class__._subplot)
 
             print('o tu - from cls')
             #print(pd.MultiIndex.from_tuples(list(result.columns)))
@@ -1097,7 +1103,7 @@ class Summary(ReportModule):
             self._container.append(
                     self._apply_formatter(data[self._coord]).to_standalone_figure(
                         filepath,
-                        subplots=False,
+                        subplots=self.__class__._subplot,
                         height=NoEscape(r'6cm'),
                         width=NoEscape(r'0.9\textwidth'),
                         y_axis_description=NoEscape(ylabel),
