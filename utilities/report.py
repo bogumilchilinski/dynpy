@@ -105,6 +105,9 @@ class BaseSeriesFormatter(TimeSeries):
 class BaseFrameFormatter(TimeDataFrame):
     
     _units={}
+    _ylabel=None
+    _label_formatter = None
+    _data_filtter = lambda frame: frame.copy()
 
     @classmethod
     def set_units_dict(cls, units={}):
@@ -112,9 +115,7 @@ class BaseFrameFormatter(TimeDataFrame):
         cls._units = units
         return cls
     
-    _ylabel=None
-    _label_formatter = None
-    _data_filtter = lambda frame: frame.copy()
+
     
     def _format_label(self,obj ):
         if self.__class__._label_formatter:
@@ -176,7 +177,7 @@ class BaseFrameFormatter(TimeDataFrame):
 
         print('new idx',new_idx)
         
-        
+        self.__class__._ylabel=(list(idx)[0][0])
         
         new_obj=self.copy()
         new_obj.columns=new_idx
@@ -403,17 +404,17 @@ class ReportModule:
         return cls
 
 
-    def _reset_storage(self, *args, **kwargs):
+#     def _reset_storage(self, *args, **kwargs):
 
-        new_obj=copy.copy(self)
+#         new_obj=copy.copy(self)
         
-        new_obj._storage = {}
-        new_obj._dict = {}
-        new_obj._frame = TimeDataFrame()
-        new_obj._list = []
-        new_obj._subplot=False
+#         new_obj._storage = {}
+#         new_obj._dict = {}
+#         new_obj._frame = TimeDataFrame()
+#         new_obj._list = []
+#         new_obj._subplot=False
 
-        return copy.copy(self)
+#         return copy.copy(self)
     
     
     @classmethod
@@ -748,7 +749,8 @@ class SimulationalBlock(ReportModule):
                 system = self._dynamic_system
             else:
                 system = analysis._dynamic_system
-
+                
+            print('system label', str(system))
             label = Eq(var, value, evaluate=False), str(system)
 
         else:
@@ -778,6 +780,7 @@ class SimulationalBlock(ReportModule):
                  ics_list=None,
                  dynamic_system=None,
                  reference_data=None,
+                 label=None,
                  **kwargs):
 
         self._t_span = t_span
@@ -792,6 +795,8 @@ class SimulationalBlock(ReportModule):
 
         self._dynamic_system = dynamic_system
         self._ref_data = reference_data
+        print(self.__class__,label)
+        self._model_label=label
 
         super().__init__()
 
@@ -832,6 +837,11 @@ class SimulationalBlock(ReportModule):
         else:
             dynamic_system = analysis._dynamic_system
 
+        if self._model_label:
+            dynamic_system._label = self._model_label
+        
+        print('dynamic model name',dynamic_system._label)
+            
         if not self._numerical_system:
 
             #             display(analysis._dynamic_system.system_parameters())
@@ -1073,10 +1083,16 @@ class Summary(ReportModule):
             #print(pd.MultiIndex.from_tuples(list(result.columns)))
             plot_of_result = plt.show()
             self.clear_frame(obj=False)
+        if self._coord!=slice(None,None):
+            ylabel=f'$ {vlatex(self._coord)} $'
+        else:
+            ylabel='coords'
         
         if self._autoreporting:
             
             filepath = f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+            
+            
             
             self._container.append(
                     self._apply_formatter(data[self._coord]).to_standalone_figure(
@@ -1084,7 +1100,7 @@ class Summary(ReportModule):
                         subplots=False,
                         height=NoEscape(r'6cm'),
                         width=NoEscape(r'0.9\textwidth'),
-                        y_axis_description='',
+                        y_axis_description=NoEscape(ylabel),
                         legend_pos='north west'))
         
 
