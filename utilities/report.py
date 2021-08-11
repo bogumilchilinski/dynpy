@@ -115,7 +115,21 @@ class BaseFrameFormatter(TimeDataFrame):
         cls._units = units
         return cls
     
-
+    def _match_unit(self,sym):
+        
+        units = self.__class__._units
+        
+        if isinstance(sym,Eq):
+            sym_check = sym.lhs
+        else:
+            sym_check = sym
+        if sym_check in units:
+        
+            return f'{latex(sym)} [{units[sym_check]:~L}]'
+        else:
+            return f'{latex(sym)}'
+        
+        
     
     def _format_label(self,obj ):
         if self.__class__._label_formatter:
@@ -125,8 +139,9 @@ class BaseFrameFormatter(TimeDataFrame):
                 obj = obj
             else:
                 obj = obj,
+                
             
-            return ', '.join(f'${latex(elem)}$' if isinstance(elem, (Expr,Eq)) else f'{elem}' for   elem in obj)
+            return ', '.join(f'${self._match_unit(elem)}$' if isinstance(elem, (Expr,Eq)) else f'{elem}' for   elem in obj if elem != 0)
 
     @property
     def _constructor(self):
@@ -167,12 +182,13 @@ class BaseFrameFormatter(TimeDataFrame):
         print('idx',idx)
         new_idx=[]
         for entry in idx:
-            if entry in self.__class__._units:
+            print('entry',entry,type(entry))
+            if entry in self.__class__._units and entry != 0:
                 
                 units=self.__class__._units
                 
                 new_idx+=[ self._format_label(entry) + f'{units[entry]}']
-            else:
+            elif entry != 0:
                 new_idx+=[ self._format_label(entry)]
 
         print('new idx',new_idx)
@@ -1057,13 +1073,20 @@ class Summary(ReportModule):
         print('story in Sumary',(type(self)._frame).empty)
         print('out format',self._out_format)
 #         print(result)
+
+        if self._coord!=slice(None,None):
+            ylabel=f'$ {vlatex(self._coord)} $'
+        else:
+            ylabel='coords'
+
+
         if not (self)._frame.empty:#result.empty:
 
             data=((self)._frame)
             data.columns =pd.MultiIndex.from_tuples(data.columns)
             
 
-            self._apply_formatter(data[self._coord]).plot()
+            self._apply_formatter(data[self._coord]).plot(ylabel=ylabel)
 
             print('o tu - from self')
             #print(pd.MultiIndex.from_tuples(list(result.columns)))
@@ -1077,16 +1100,13 @@ class Summary(ReportModule):
             data.columns =pd.MultiIndex.from_tuples(data.columns)
             
 
-            self._apply_formatter(data[self._coord]).plot()
+            self._apply_formatter(data[self._coord]).plot(ylabel=ylabel)
 
             print('o tu - from cls')
             #print(pd.MultiIndex.from_tuples(list(result.columns)))
             plot_of_result = plt.show()
             self.clear_frame(obj=False)
-        if self._coord!=slice(None,None):
-            ylabel=f'$ {vlatex(self._coord)} $'
-        else:
-            ylabel='coords'
+
         
         if self._autoreporting:
             
@@ -1100,7 +1120,7 @@ class Summary(ReportModule):
                         subplots=False,
                         height=NoEscape(r'6cm'),
                         width=NoEscape(r'0.9\textwidth'),
-                        y_axis_description=NoEscape(ylabel),
+                        y_axis_description=f'ylabel={NoEscape(ylabel)},',
                         legend_pos='north west'))
         
 
