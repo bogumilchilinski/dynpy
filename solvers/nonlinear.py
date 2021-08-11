@@ -475,7 +475,8 @@ class MultiTimeScaleMethod(LinearODESolution):
                  params_values={},
                  extra_params={},
                  ic_point={},
-                 equation_type=None):
+                 equation_type=None,
+                 label=None):
 
         super().__init__(odes_system=odes_system,
                          ivar=ivar,
@@ -485,6 +486,11 @@ class MultiTimeScaleMethod(LinearODESolution):
                          params_values=params_values,
                          ic_point=ic_point,
                          equation_type=equation_type)
+        if label == None:
+            label = self._label = self.__class__.__name__ + ' with ' + str(
+                len(self.dvars)) + ' equations'
+        self._label = label
+
         self.eps = eps
         self._order=order
         
@@ -508,7 +514,12 @@ class MultiTimeScaleMethod(LinearODESolution):
         
         self._eoms=self.odes_system
 
-                
+    def __str__(self):
+        return self._label
+
+    def __repr__(self):
+        return self._label
+    
     def set_solution_order(self,order=1):
 
         self._order=order
@@ -1086,7 +1097,8 @@ class MultiTimeScaleMethod(LinearODESolution):
                  params=[],
                  params_values=params_values,
                  ic_point=self.ics,
-                 equation_type=None)
+                 equation_type=None,
+                 label=self._label)
     
     
     
