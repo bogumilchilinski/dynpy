@@ -43,6 +43,7 @@ plots_no_gen = plots_no()
 
 
 class BaseSeriesFormatter(TimeSeries):
+    _cols_name=None
     r'''
     Basic class for formatting data plots. It provides methods for setting options 
     
@@ -56,6 +57,13 @@ class BaseSeriesFormatter(TimeSeries):
     =======
 
     '''
+    
+    @classmethod
+    def columns_name(cls,name=None):
+        cls._cols_name=name
+        
+        return cls
+    
     @property
     def _constructor(self):
         return BaseSeriesFormatter
@@ -108,14 +116,35 @@ class BaseFrameFormatter(TimeDataFrame):
     _ylabel=None
     _label_formatter = None
     _data_filtter = lambda frame: frame.copy()
+    _cols_name=None
+    r'''
+    Basic class for formatting data plots. It provides methods for setting options 
+    
+    Arguments
+    =========
 
+    Methods
+    =======
+
+    Example
+    =======
+
+    '''
+    
+    @classmethod
+    def set_columns_name(cls,name=None):
+        cls._cols_name=name
+        
+        return cls
+    
     @classmethod
     def set_units_dict(cls, units={}):
 
         cls._units = units
         return cls
     
-    def _match_unit(self,sym):
+    def _match_unit(self,sym,latex_printer = vlatex):
+        
         
         units = self.__class__._units
         
@@ -124,10 +153,12 @@ class BaseFrameFormatter(TimeDataFrame):
         else:
             sym_check = sym
         if sym_check in units:
-        
-            return f'{latex(sym)} [{units[sym_check]:~L}]'
+            print('matched unit',f'{units[sym_check]:~L}')
+            return f'{latex_printer(sym)}~[{units[sym_check]:~L}]'
+            
+            #return f'{latex(sym)}'
         else:
-            return f'{latex(sym)}'
+            return f'{latex_printer(sym)}'
         
         
     
@@ -187,7 +218,8 @@ class BaseFrameFormatter(TimeDataFrame):
                 
                 units=self.__class__._units
                 
-                new_idx+=[ self._format_label(entry) + f'{units[entry]}']
+                #new_idx+=[ self._format_label(entry) + f'{units[entry]}']
+                new_idx+=[ self._format_label(entry) ]
             elif entry != 0:
                 new_idx+=[ self._format_label(entry)]
 
@@ -196,7 +228,15 @@ class BaseFrameFormatter(TimeDataFrame):
         self.__class__._ylabel=(list(idx)[0][0])
         
         new_obj=self.copy()
+        
         new_obj.columns=new_idx
+        
+        cols_name = self.__class__._cols_name
+        
+        if cols_name:
+            idx_name=self._format_label(cols_name)
+            new_obj.columns.name = idx_name
+
         
         return new_obj
 
@@ -209,13 +249,19 @@ class BaseFrameFormatter(TimeDataFrame):
         else:
             idx = self.index
         print('idx',idx)
-        new_idx= [entry  for entry in idx]
+        new_idx= idx.copy()
         print('new idx',new_idx)
-        
         
         
         new_obj=self.copy()
         new_obj.index=new_idx
+        
+        print('new_obj.index',new_obj.index.name)
+        
+        new_obj.index.name=  f'${self._match_unit(new_obj.index.name)}$'
+        #new_obj.index.name = 'cos'
+        
+        #print('new_obj.index.name',new_obj.index.name)
         
         return new_obj
     
@@ -273,12 +319,14 @@ class BaseFrameFormatter(TimeDataFrame):
         if legend == None:
             pass
 
+    def _filtter(self,filtter=None):
+        filtter = self.__class__._data_filtter
         
-        
+        return filtter
 
     def __call__(self):
         
-        filtter = self.__class__._data_filtter
+        filtter = self._filtter()
         
         return filtter(self).format_labels().format_index()#.set_ylabel().set_xlabel()
 
@@ -291,6 +339,8 @@ class BaseFrameFormatter(TimeDataFrame):
         return super().plot(*args,**kwargs)
     
 class PivotSeriesSummary(BaseSeriesFormatter):
+    
+    
     @property
     def _constructor(self):
         return PivotSeriesSummary
@@ -305,7 +355,7 @@ class PivotSeriesSummary(BaseSeriesFormatter):
     
 
 class PivotFrameSummary(BaseFrameFormatter):    
-    _data_filtter = lambda frame: frame.abs().max().reset_index(level=1).pivot(columns=['level_1'])
+#    _data_filtter = lambda frame: frame.abs().max().reset_index(level=1).pivot(columns=['level_1'])
 #    _label_formatter = lambda entry: f'${latex(entry)}$'
 
     
@@ -337,11 +387,20 @@ class PivotFrameSummary(BaseFrameFormatter):
         
         new_obj=self.copy()
         new_obj.index=new_idx
-        new_obj.index.name = f'${latex(list(idx)[0].lhs)}$'
+        
+        
+        
+        new_obj.index.name = f'${self._match_unit(list(idx)[0].lhs)}$'
         
         return new_obj
     
-
+    def _filtter(self,filtter=None):
+        if self.columns.nlevels ==2:
+            filtter = lambda frame: frame.abs().max().reset_index(level=1).pivot(columns=['level_1'])
+        else:
+            filtter = lambda frame: frame.abs().max().reset_index().pivot(columns=['level_0','level_2'],index=['level_1'])[0]
+        
+        return filtter
     
 class ReportModule:
     r'''
@@ -1080,8 +1139,11 @@ class Summary(ReportModule):
         print('out format',self._out_format)
 #         print(result)
 
+
+        formatter=self._out_format()
+
         if self._coord!=slice(None,None):
-            ylabel=f'$ {vlatex(self._coord)} $'
+            ylabel=f'$ {formatter._match_unit(self._coord)}$'
         else:
             ylabel='coords'
 
@@ -1119,7 +1181,16 @@ class Summary(ReportModule):
             
             filepath = f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
             
+            units=self.__class__._units
+            print('units',units)
+            if self._coord in units:
+                y_unit_str=f'y unit = {units[self._coord]:~Lx}'.replace('[]','')
+                
             
+            else:
+                y_unit_str=''
+                
+            print('y_unit_str',y_unit_str)
             
             self._container.append(
                     self._apply_formatter(data[self._coord]).to_standalone_figure(
@@ -1127,7 +1198,7 @@ class Summary(ReportModule):
                         subplots=self.__class__._subplot,
                         height=NoEscape(r'6cm'),
                         width=NoEscape(r'0.9\textwidth'),
-                        y_axis_description=f'ylabel={NoEscape(ylabel)},',
+                        y_axis_description=f'ylabel=${NoEscape(vlatex(self._coord))}$, {y_unit_str},',
                         legend_pos='north west'))
         
 

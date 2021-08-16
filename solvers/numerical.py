@@ -250,7 +250,7 @@ class OdeComputationalCase:
 
 
 
-        solution_tdf.index.name = 't'
+        solution_tdf.index.name = self.ivar
         return solution_tdf
 
 
