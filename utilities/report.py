@@ -1149,7 +1149,7 @@ class Summary(ReportModule):
         self._block=block
         if block:
             
-            self._frame = block.frame
+            self._frame = block._frame
             self._last_result = block._last_result
         if caption:
             self._caption = caption
@@ -1429,6 +1429,34 @@ class Summary(ReportModule):
 
         return result
 
+    def prepare_markers(self,
+                        analysis=None,
+                        coordinate=None,
+                        xlim=None,
+                        **kwargs):
+
+        
+
+        DataStorage._plot_markers_dict = {
+            elem: Marker(f'plot{self.__class__.__name__}', 'fig')
+            for elem in self._frame
+        }
+        DataStorage._subplot_markers_dict = {
+            elem: Marker(f'subplot{self.__class__.__name__}',
+                         'fig')
+            for elem in self._frame
+        }
+#         DataStorage.first_marker = list(
+#             DataStorage._plot_markers_dict.values())[0]
+#         DataStorage.last_marker = list(
+#             DataStorage._plot_markers_dict.values())[-1]
+#         self.last_marker = list(DataStorage._plot_markers_dict.values())[-1]
+#         type(self)._last_marker = list(
+#             DataStorage._plot_markers_dict.values())[-1]
+#         print('marker - def')
+#         print(self.last_marker)
+
+        return analysis
 
 class SimulationFFT:
     r'''It is a class that provides Fast Fourier Transform techniques for formerly performed numerical simulations in time domain. Class supplies a method for plotting a double sided RMS.
