@@ -1129,7 +1129,7 @@ class Summary(ReportModule):
         if subplots:
             self._subplot=subplots
         else:
-            self._subplot=self.__init__._subplot
+            self._subplot=self.__class__._subplot
         
         if coordinate:
             print('hello')
@@ -1332,7 +1332,7 @@ class Summary(ReportModule):
                         subplots=self._subplot,
                         height=NoEscape(r'6cm'),
                         width=NoEscape(r'0.5\textwidth'),
-                        x_axis_description=f'xlabel=${NoEscape(vlatex(ivar))}$, {x_unit_str},',
+                        x_axis_description=f',xlabel=${NoEscape(vlatex(ivar))}$, {x_unit_str},',
                         y_axis_description=f'ylabel=${NoEscape(vlatex(self._coord))}$, {y_unit_str},',
                         legend_pos=legend_pos,
                 )
