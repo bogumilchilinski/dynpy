@@ -178,7 +178,11 @@ class TimeDomainMethods(DataMethods):
         spectrum=(fft.fft(self.to_numpy()))
 
         f_span=fft.fftfreq(len(self.index),d=self.index[1]-self.index[0])
-        return SpectrumSeries(data=spectrum,index=(f_span),name=self.name)
+        
+        spectrum = SpectrumSeries(data=spectrum,index=(f_span),name=self.name)
+        spectrum.index.name='f'
+        
+        return spectrum
 
 #     def to_frequency_domain(self):
 

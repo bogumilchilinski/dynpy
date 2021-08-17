@@ -136,6 +136,13 @@ class BaseFrameFormatter(TimeDataFrame):
         cls._cols_name=name
         
         return cls
+
+    @classmethod
+    def set_data_filtter(cls, filtter=lambda frame: frame.copy()):
+
+        cls._data_filtter = filtter
+        print(cls._data_filtter)
+        return cls
     
     @classmethod
     def set_units_dict(cls, units={}):
@@ -258,6 +265,12 @@ class BaseFrameFormatter(TimeDataFrame):
         
         print('new_obj.index',new_obj.index.name)
         
+        if not new_obj.index.name:
+            new_obj.index.name = Symbol('f')
+            
+        
+        print('new_obj.index',new_obj.index.name)
+        
         new_obj.index.name=  f'${self._match_unit(new_obj.index.name)}$'
         #new_obj.index.name = 'cos'
         
@@ -327,8 +340,12 @@ class BaseFrameFormatter(TimeDataFrame):
     def __call__(self):
         
         filtter = self._filtter()
+        print('on __call__',filtter)
         
-        return filtter(self).format_labels().format_index()#.set_ylabel().set_xlabel()
+#         display('old data',self)
+#         display('new data',filtter(self))
+        
+        return self.__class__(filtter(self)).format_labels().format_index()#.set_ylabel().set_xlabel()
 
     
     def plot(self,*args,**kwargs):
@@ -337,6 +354,72 @@ class BaseFrameFormatter(TimeDataFrame):
             kwargs['ylabel']=self.__class__._ylabel
         
         return super().plot(*args,**kwargs)
+
+    
+class FFTSeriesFormatter(BaseSeriesFormatter):
+
+    r'''
+    Basic class for formatting data plots. It provides methods for setting options 
+    
+    Arguments
+    =========
+
+    Methods
+    =======
+
+    Example
+    =======
+
+    '''
+    _data_filtter = lambda frame: frame.copy()
+
+    
+    @property
+    def _constructor(self):
+        return FFTSeriesFormatter
+
+    @property
+    def _constructor_expanddim(self):
+        return FFTFrameFormatter
+
+    @property
+    def _constructor_sliced(self):
+        return FFTSeriesFormatter
+
+
+    
+class  FFTFrameFormatter(BaseFrameFormatter):
+    
+    _data_filtter = lambda obj: obj.to_frequency_domain().double_sided_rms()
+    r'''
+    Basic class for formatting data plots. It provides methods for setting options 
+    
+    Arguments
+    =========
+
+    Methods
+    =======
+
+    Example
+    =======
+
+    '''
+    
+
+
+    @property
+    def _constructor(self):
+        return FFTFrameFormatter
+
+    @property
+    def _constructor_expanddim(self):
+        return FFTFrameFormatter
+
+    @property
+    def _constructor_sliced(self):
+        return FFTSeriesFormatter
+    
+    
     
 class PivotSeriesSummary(BaseSeriesFormatter):
     
@@ -448,6 +531,7 @@ class ReportModule:
     cls_container = []
     cls_path = '.'
     _caption = 'Figure describes the numerical data'
+    _label = 'fig:markerIsMissing'
     _units = {}
     _autoreport = False
     _frame = TimeDataFrame()
@@ -553,9 +637,21 @@ class ReportModule:
     def _apply_formatter(self,data):
         
         print(type(self._out_format))
-        if (self._out_format is BaseFrameFormatter,PivotFrameSummary):
+        if (self._out_format is BaseFrameFormatter,PivotFrameSummary,FFTFrameFormatter):
             print('Base frmatter is working')
-            return self._out_format(data)()
+            
+            print('data.index',data.index)
+            print('data.index.name',data.index.name)
+            
+            result=self._out_format(data)()
+            
+#             print('#'*100)
+#             display(result)
+#             print(result.index.name)
+            if not result.index.name:
+                result.index.name = ''
+            
+            return result
         else:
             print('callable is working')
             return self._out_format(data)
@@ -1028,8 +1124,13 @@ class SimulationalBlock(ReportModule):
 
 
 class Summary(ReportModule):
-    def __init__(self, block=None,coordinate=None):
+    def __init__(self, block=None,coordinate=None,caption=None,label=None,subplots=False):
 
+        if subplots:
+            self._subplot=subplots
+        else:
+            self._subplot=self.__init__._subplot
+        
         if coordinate:
             print('hello')
             self._coord=coordinate
@@ -1050,7 +1151,20 @@ class Summary(ReportModule):
             
             self._frame = block.frame
             self._last_result = block._last_result
-            
+        if caption:
+            self._caption = caption
+        else:
+            self._caption = self.__class__._caption         
+
+        if label:
+            self._label = label
+        else:
+            self._label = self.__class__._label        
+
+        if label:
+            self._label = label
+        else:
+            self._label = self.__class__._label   
             
     def holded(self,hold=True):
         self.__class__._hold=hold
@@ -1067,6 +1181,9 @@ class Summary(ReportModule):
                            analysis._last_result)
             self.set_class_frame(analysis._last_result.columns,
                            analysis._last_result)
+            
+            self.__class__._frame.index.name=analysis._last_result.index.name
+            self._frame.index.name=analysis._last_result.index.name
         
         print('summary plot - call')
         print((self._block),type((self._block)))
@@ -1079,15 +1196,17 @@ class Summary(ReportModule):
             result_to_add =  type(self._block)._last_result
             columns_to_add = result_to_add.columns
             
+            print('plot index', result_to_add.index.name)
+            
             
             if self._frame is not None:
                 print('data is pushed to store - self -block')
                 self.set_frame(columns_to_add, result_to_add)
-                
+                self._frame.index.name=result_to_add.index.name
                 display(self._frame)
                 
                 self.set_class_frame(columns_to_add, result_to_add)
-                
+                self.__class__._frame.index.name=result_to_add.index.name
                 display(self.__class__._frame)
                 
                 result_of_plot = self._frame.plot(*args, **kwargs)
@@ -1098,6 +1217,7 @@ class Summary(ReportModule):
 
                 self.set_class_frame(columns_to_add, result_to_add)
                 result_of_plot = self.__class__._frame.plot(*args, **kwargs)
+                self.__class__._frame.index.name=result_to_add.index.name
 
 
 
@@ -1107,7 +1227,13 @@ class Summary(ReportModule):
 
         return result_of_plot
 
-    def show(self, analysis=None, **kwargs):
+    def show(self, analysis=None,                     
+                     legend_pos='north east',
+                     legend_columns=1,
+                     colors_list=[
+                         'blue', 'red', 'green', 'orange', 'violet', 'magenta',
+                         'cyan'], 
+                     **kwargs,):
         
         print('show')
         #print(type(self)._frame)
@@ -1154,7 +1280,7 @@ class Summary(ReportModule):
             data.columns =pd.MultiIndex.from_tuples(data.columns)
             
 
-            self._apply_formatter(data[self._coord]).plot(ylabel=ylabel,subplots=self.__class__._subplot)
+            self._apply_formatter(data[self._coord]).plot(ylabel=ylabel,subplots=self._subplot)
 
             print('o tu - from self')
             #print(pd.MultiIndex.from_tuples(list(result.columns)))
@@ -1168,7 +1294,7 @@ class Summary(ReportModule):
             data.columns =pd.MultiIndex.from_tuples(data.columns)
             
 
-            self._apply_formatter(data[self._coord]).plot(ylabel=ylabel,subplots=self.__class__._subplot)
+            self._apply_formatter(data[self._coord]).plot(ylabel=ylabel,subplots=self._subplot)
 
 
             print('o tu - from cls')
@@ -1190,16 +1316,31 @@ class Summary(ReportModule):
             else:
                 y_unit_str=''
                 
+            ivar= data[self._coord].index.name
+            if ivar in units:
+                x_unit_str=f'y unit = {units[ivar]:~Lx}'.replace('[]','')
+                
+            
+            else:
+                x_unit_str=''
+                
             print('y_unit_str',y_unit_str)
             
-            self._container.append(
-                    self._apply_formatter(data[self._coord]).to_standalone_figure(
+            fig=self._apply_formatter(data[self._coord]).to_standalone_figure(
                         filepath,
-                        subplots=self.__class__._subplot,
+                        colors_list=colors_list,
+                        subplots=self._subplot,
                         height=NoEscape(r'6cm'),
-                        width=NoEscape(r'0.9\textwidth'),
+                        width=NoEscape(r'0.5\textwidth'),
+                        x_axis_description=f'xlabel=${NoEscape(vlatex(ivar))}$, {x_unit_str},',
                         y_axis_description=f'ylabel=${NoEscape(vlatex(self._coord))}$, {y_unit_str},',
-                        legend_pos='north west'))
+                        legend_pos=legend_pos,
+                )
+            fig.append(self.__class__._caption)
+            
+            self._container.append(fig
+ 
+            )
         
 
         
@@ -1271,7 +1412,7 @@ class Summary(ReportModule):
         if self._autoreporting:
             self._container.append(
                 NoEscape(
-                    self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule').replace('\\bottomrule','\\midrule \n \\bottomrule') ))
+                    self._apply_formatter(data[self._coord]).to_latex(escape=False,caption='').replace('\\toprule','\\toprule \n \\midrule').replace('\\bottomrule','\\midrule \n \\bottomrule') ))
 #                         f'xyz_{next(plots_no_gen)}',
 #                         subplots=self.__class__._subplot,
 
