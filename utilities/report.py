@@ -184,7 +184,10 @@ class BaseFrameFormatter(TimeDataFrame):
             sym_check = sym.lhs
         else:
             sym_check = sym
+        print(f'variable is {sym}')
+        print(f'units are {units}')
         if sym_check in units:
+            print(f'{sym} is in units_dict')
             print('matched unit', f'{units[sym_check]:~L}')
             return f'{latex_printer(sym)}~[{units[sym_check]:~L}]'
 
@@ -402,6 +405,33 @@ class FFTSeriesFormatter(BaseSeriesFormatter):
     def _constructor_sliced(self):
         return FFTSeriesFormatter
 
+    
+    def format_index(self,domain=Symbol('f')):
+        if isinstance(self.index, pd.MultiIndex):
+
+            idx = self.index.tolist()
+
+        else:
+            idx = self.index
+        print('idx', idx)
+        new_idx = idx.copy()
+        print('new idx', new_idx)
+
+        new_obj = self.copy()
+        new_obj.index = new_idx
+
+        print('new_obj.index', new_obj.index.name)
+
+        new_obj.index.name = Symbol('f')
+
+        print('new_obj.index', new_obj.index.name)
+
+        new_obj.index.name = f'${self._match_unit(new_obj.index.name)}$'
+        #new_obj.index.name = 'cos'
+
+        #print('new_obj.index.name',new_obj.index.name)
+
+        return new_obj
 
 class FFTFrameFormatter(BaseFrameFormatter):
     
@@ -432,6 +462,33 @@ class FFTFrameFormatter(BaseFrameFormatter):
     def _constructor_sliced(self):
         return FFTSeriesFormatter
 
+    def format_index(self,domain=Symbol('f')):
+        if isinstance(self.index, pd.MultiIndex):
+
+            idx = self.index.tolist()
+
+        else:
+            idx = self.index
+        print('idx', idx)
+        new_idx = idx.copy()
+        print('new idx', new_idx)
+
+        new_obj = self.copy()
+        new_obj.index = new_idx
+
+        print('new_obj.index', new_obj.index.name)
+
+        new_obj.index.name = Symbol('f')
+
+        print('new_obj.index', new_obj.index.name)
+
+        new_obj.index.name = f'${self._match_unit(new_obj.index.name)}$'
+        #new_obj.index.name = 'cos'
+
+        #print('new_obj.index.name',new_obj.index.name)
+
+        return new_obj
+    
 
 class PivotSeriesSummary(BaseSeriesFormatter):
     _default_sep = ' \n '
@@ -448,6 +505,9 @@ class PivotSeriesSummary(BaseSeriesFormatter):
     def _constructor_sliced(self):
         return PivotSeriesSummary
 
+    
+
+    
 
 class PivotFrameSummary(BaseFrameFormatter):
     #    _data_filtter = lambda frame: frame.abs().max().reset_index(level=1).pivot(columns=['level_1'])
@@ -760,6 +820,8 @@ class ReportModule:
             self._out_format = output_formatter
         else:
             self._out_format = self.__class__._out_formatter
+            
+        print(f'Report module init - formatter is {self._out_format}')
 
     def _apply_formatter(self, data):
 
