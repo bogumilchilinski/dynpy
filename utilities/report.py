@@ -1427,7 +1427,7 @@ class Summary(ReportModule):
 
         
 
-        return result
+        return self._apply_formatter(data[self._coord])
 
     def prepare_markers(self,
                         analysis=None,
