@@ -65,7 +65,7 @@ class DataMethods:
         
         return tikz_pic
     
-    def to_standalone_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,legend_pos='north east'):
+    def to_standalone_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.5\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,legend_pos='north east'):
     
         geometry_options ={"margin": "0cm",}
         doc = Document(documentclass='standalone',geometry_options=None,document_options=["tikz"])

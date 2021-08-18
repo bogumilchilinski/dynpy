@@ -602,6 +602,8 @@ class MultiTimeScaleMethod(LinearODESolution):
             for dvar in self.dvars:
                 solution[dvar.diff(self.ivar,2)]=solution[dvar.diff(self.ivar,1)].gradient()
             
+            solution.index.name=self.ivar
+            
             return solution.apply(np.real)
 
     def _format_solution(self, dvars, solution, dict=False, equation=False):
