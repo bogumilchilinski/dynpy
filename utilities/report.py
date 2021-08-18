@@ -28,8 +28,8 @@ from IPython.display import display, Markdown, Latex
 from .timeseries import TimeDataFrame, TimeSeries
 import copy
 
-
 from collections.abc import Iterable
+
 
 def plots_no():
     num = 0
@@ -41,9 +41,8 @@ def plots_no():
 plots_no_gen = plots_no()
 
 
-
 class BaseSeriesFormatter(TimeSeries):
-    _cols_name=None
+    _cols_name = None
     r'''
     Basic class for formatting data plots. It provides methods for setting options 
     
@@ -57,13 +56,33 @@ class BaseSeriesFormatter(TimeSeries):
     =======
 
     '''
-    
+    _default_sep = ', '
+
     @classmethod
-    def columns_name(cls,name=None):
-        cls._cols_name=name
-        
+    def set_column_separator(cls, sep=', '):
+        cls._default_sep = sep
+
         return cls
-    
+
+    @classmethod
+    def set_data_filtter(cls, filtter=lambda frame: frame.copy()):
+
+        cls._data_filtter = filtter
+        print(cls._data_filtter)
+        return cls
+
+    @classmethod
+    def set_units_dict(cls, units={}):
+
+        cls._units = units
+        return cls
+
+    @classmethod
+    def columns_name(cls, name=None):
+        cls._cols_name = name
+
+        return cls
+
     @property
     def _constructor(self):
         return BaseSeriesFormatter
@@ -77,46 +96,45 @@ class BaseSeriesFormatter(TimeSeries):
         return BaseSeriesFormatter
 
     def set_multiindex(self):
-        midx  = pd.MultiIndex.from_tuples(self.index)
-        new_obj=self.__class__(self).index=midx
-        
+        midx = pd.MultiIndex.from_tuples(self.index)
+        new_obj = self.__class__(self).index = midx
+
         return new_obj
-    
-    def cut_coord(self,coord):
 
-        
-        new_frame=self.set_multiindex()
+    def cut_coord(self, coord):
 
-        
+        new_frame = self.set_multiindex()
+
         return new_frame[coord]
-    
+
     def format_labels(self):
-        if isinstance(self.index,pd.MultiIndex):
+        if isinstance(self.index, pd.MultiIndex):
             return self.index.tolist()
-        
-    def set_ylabel(self,label=None):
+
+    def set_ylabel(self, label=None):
         if label == None:
             for label in self.format_labels():
                 label = f'$ {latex(label[0])} )$'
         return label
-    
-    def set_xlabel(self,label=None):
-        if isinstance(self.index,pd.MultiIndex):
+
+    def set_xlabel(self, label=None):
+        if isinstance(self.index, pd.MultiIndex):
             if label == None:
                 label = self.index.name
         return label
-    
-    def set_legend(self,legend=None):
+
+    def set_legend(self, legend=None):
         if legend == None:
             pass
-    
+
+
 class BaseFrameFormatter(TimeDataFrame):
-    
-    _units={}
-    _ylabel=None
+
+    _units = {}
+    _ylabel = None
     _label_formatter = None
     _data_filtter = lambda frame: frame.copy()
-    _cols_name=None
+    _cols_name = None
     r'''
     Basic class for formatting data plots. It provides methods for setting options 
     
@@ -130,11 +148,19 @@ class BaseFrameFormatter(TimeDataFrame):
     =======
 
     '''
-    
+
+    _default_sep = ', '
+
     @classmethod
-    def set_columns_name(cls,name=None):
-        cls._cols_name=name
-        
+    def set_column_separator(cls, sep=', '):
+        cls._default_sep = sep
+
+        return cls
+
+    @classmethod
+    def set_columns_name(cls, name=None):
+        cls._cols_name = name
+
         return cls
 
     @classmethod
@@ -143,43 +169,77 @@ class BaseFrameFormatter(TimeDataFrame):
         cls._data_filtter = filtter
         print(cls._data_filtter)
         return cls
-    
+
     @classmethod
     def set_units_dict(cls, units={}):
 
         cls._units = units
         return cls
-    
-    def _match_unit(self,sym,latex_printer = vlatex):
-        
-        
+
+    def _match_unit(self, sym, latex_printer=vlatex):
+
         units = self.__class__._units
-        
-        if isinstance(sym,Eq):
+
+        if isinstance(sym, Eq):
             sym_check = sym.lhs
         else:
             sym_check = sym
         if sym_check in units:
-            print('matched unit',f'{units[sym_check]:~L}')
+            print('matched unit', f'{units[sym_check]:~L}')
             return f'{latex_printer(sym)}~[{units[sym_check]:~L}]'
-            
+
             #return f'{latex(sym)}'
         else:
             return f'{latex_printer(sym)}'
-        
-        
-    
-    def _format_label(self,obj ):
+
+    def _format_label(self, obj):
         if self.__class__._label_formatter:
             return self.__class__._label_formatter(obj)
         else:
-            if isinstance(obj,Iterable):
+            if isinstance(obj, Iterable):
                 obj = obj
             else:
                 obj = obj,
-                
-            
-            return ', '.join(f'${self._match_unit(elem)}$' if isinstance(elem, (Expr,Eq)) else f'{elem}' for   elem in obj if elem != 0)
+
+            return self.__class__._default_sep.join(
+                f'${self._match_unit(elem)}$' if isinstance(elem, (
+                    Expr, Eq)) else f'{elem}' for elem in obj if elem != 0)
+
+    def format_labels(self):
+        if isinstance(self.columns, pd.MultiIndex):
+
+            idx = self.columns.tolist()
+
+        else:
+            idx = self.columns
+        print('idx', idx)
+        new_idx = []
+        for entry in idx:
+            print('entry', entry, type(entry))
+            if entry in self.__class__._units and entry != 0:
+
+                units = self.__class__._units
+
+                #new_idx+=[ self._format_label(entry) + f'{units[entry]}']
+                new_idx += [self._format_label(entry)]
+            elif entry != 0:
+                new_idx += [self._format_label(entry)]
+
+        print('new idx', new_idx)
+
+        self.__class__._ylabel = (list(idx)[0][0])
+
+        new_obj = self.copy()
+
+        new_obj.columns = new_idx
+
+        cols_name = self.__class__._cols_name
+
+        if cols_name:
+            idx_name = self._format_label(cols_name)
+            new_obj.columns.name = idx_name
+
+        return new_obj
 
     @property
     def _constructor(self):
@@ -192,172 +252,129 @@ class BaseFrameFormatter(TimeDataFrame):
     @property
     def _constructor_sliced(self):
         return BaseSeriesFormatter
-    
-    def set_multiindex(self,names=None):
-        
-        midx  = pd.MultiIndex.from_tuples(self.columns,names=names)
-        
-        new_obj=self.__class__(self)
-        new_obj.columns=midx
-        
+
+    def set_multiindex(self, names=None):
+
+        midx = pd.MultiIndex.from_tuples(self.columns, names=names)
+
+        new_obj = self.__class__(self)
+        new_obj.columns = midx
+
         return new_obj
-    
-    def cut_coord(self,coord):
 
-        
-        new_frame=self.set_multiindex()
+    def cut_coord(self, coord):
 
-        
+        new_frame = self.set_multiindex()
+
         return new_frame[coord]
-    
-    def format_labels(self):
-        if isinstance(self.columns,pd.MultiIndex):
-            
-            idx = self.columns.tolist()
-            
-        else:
-            idx = self.columns
-        print('idx',idx)
-        new_idx=[]
-        for entry in idx:
-            print('entry',entry,type(entry))
-            if entry in self.__class__._units and entry != 0:
-                
-                units=self.__class__._units
-                
-                #new_idx+=[ self._format_label(entry) + f'{units[entry]}']
-                new_idx+=[ self._format_label(entry) ]
-            elif entry != 0:
-                new_idx+=[ self._format_label(entry)]
 
-        print('new idx',new_idx)
-        
-        self.__class__._ylabel=(list(idx)[0][0])
-        
-        new_obj=self.copy()
-        
-        new_obj.columns=new_idx
-        
-        cols_name = self.__class__._cols_name
-        
-        if cols_name:
-            idx_name=self._format_label(cols_name)
-            new_obj.columns.name = idx_name
-
-        
-        return new_obj
-
-    
     def format_index(self):
-        if isinstance(self.index,pd.MultiIndex):
-            
+        if isinstance(self.index, pd.MultiIndex):
+
             idx = self.index.tolist()
-            
+
         else:
             idx = self.index
-        print('idx',idx)
-        new_idx= idx.copy()
-        print('new idx',new_idx)
-        
-        
-        new_obj=self.copy()
-        new_obj.index=new_idx
-        
-        print('new_obj.index',new_obj.index.name)
-        
+        print('idx', idx)
+        new_idx = idx.copy()
+        print('new idx', new_idx)
+
+        new_obj = self.copy()
+        new_obj.index = new_idx
+
+        print('new_obj.index', new_obj.index.name)
+
         if not new_obj.index.name:
             new_obj.index.name = Symbol('f')
-            
-        
-        print('new_obj.index',new_obj.index.name)
-        
-        new_obj.index.name=  f'${self._match_unit(new_obj.index.name)}$'
+
+        print('new_obj.index', new_obj.index.name)
+
+        new_obj.index.name = f'${self._match_unit(new_obj.index.name)}$'
         #new_obj.index.name = 'cos'
-        
+
         #print('new_obj.index.name',new_obj.index.name)
-        
+
         return new_obj
-    
-    
-    def set_ylabel(self,label=None):
-        if isinstance(self.index,pd.MultiIndex):
-            
+
+    def set_ylabel(self, label=None):
+        if isinstance(self.index, pd.MultiIndex):
+
             if label == None:
                 new_obj = self.copy()
-            
+
                 for label in new_obj.columns.tolist():
                     if label in self.__class__._units:
-                
+
                         y_unit_str = f'[${type(self)._units[label]}$]'
-                    
+
                     else:
-                         y_unit_str=''
+                        y_unit_str = ''
 
                 label = f'$ {latex(label[0])} $, {y_unit_str}'
-                
+
                 new_obj.columns = label
-                   
+
         return new_obj
-    
-    def set_xlabel(self,label=None):
-        if isinstance(self.index,pd.MultiIndex):
-            
+
+    def set_xlabel(self, label=None):
+        if isinstance(self.index, pd.MultiIndex):
+
             if label == None:
                 new_obj = self.copy()
-                
+
                 for label in new_obj.index.tolist():
                     if label in self.__class__._units:
-                        
+
                         x_unit_str = f'[${type(self)._units[label]}$]'
-                        
+
                     else:
                         x_unit_str = ''
-               
+
                 label = latex(self.index.name) + f'{x_unit_str}'
-                
+
                 new_obj.index.name = label
-                
+
         return new_obj
-    
+
+
 #     def format_axis_label(self):
 
 #         new_obj = self.copy()
-        
+
 #         new_obj.columns = self.set_ylabel
 #         new_obj.index = self.set_xlabel
-        
+
 #         return new_obj
-    
-    def set_legend(self,legend=[]):
+
+    def set_legend(self, legend=[]):
         if legend == None:
             pass
 
-    def _filtter(self,filtter=None):
+    def _filtter(self, filtter=None):
         filtter = self.__class__._data_filtter
-        
+
         return filtter
 
     def __call__(self):
-        
+
         filtter = self._filtter()
-        print('on __call__',filtter)
-        
-#         display('old data',self)
-#         display('new data',filtter(self))
-        
-        return self.__class__(filtter(self)).format_labels().format_index()#.set_ylabel().set_xlabel()
+        print('on __call__', filtter)
 
-    
-    def plot(self,*args,**kwargs):
-        
+        #         display('old data',self)
+        #         display('new data',filtter(self))
+
+        return self.__class__(filtter(
+            self)).format_labels().format_index()  #.set_ylabel().set_xlabel()
+
+    def plot(self, *args, **kwargs):
+
         if not 'ylabel' in kwargs:
-            kwargs['ylabel']=self.__class__._ylabel
-        
-        return super().plot(*args,**kwargs)
+            kwargs['ylabel'] = self.__class__._ylabel
 
-    
+        return super().plot(*args, **kwargs)
+
+
 class FFTSeriesFormatter(BaseSeriesFormatter):
-
     r'''
     Basic class for formatting data plots. It provides methods for setting options 
     
@@ -373,7 +390,6 @@ class FFTSeriesFormatter(BaseSeriesFormatter):
     '''
     _data_filtter = lambda frame: frame.copy()
 
-    
     @property
     def _constructor(self):
         return FFTSeriesFormatter
@@ -387,10 +403,10 @@ class FFTSeriesFormatter(BaseSeriesFormatter):
         return FFTSeriesFormatter
 
 
+class FFTFrameFormatter(BaseFrameFormatter):
     
-class  FFTFrameFormatter(BaseFrameFormatter):
-    
-    _data_filtter = lambda obj: obj.to_frequency_domain().double_sided_rms()
+
+    _data_filtter = lambda obj: obj.to_frequency_domain().double_sided_rms().truncate(0,0.5)
     r'''
     Basic class for formatting data plots. It provides methods for setting options 
     
@@ -404,9 +420,6 @@ class  FFTFrameFormatter(BaseFrameFormatter):
     =======
 
     '''
-    
-
-
     @property
     def _constructor(self):
         return FFTFrameFormatter
@@ -418,12 +431,11 @@ class  FFTFrameFormatter(BaseFrameFormatter):
     @property
     def _constructor_sliced(self):
         return FFTSeriesFormatter
-    
-    
-    
+
+
 class PivotSeriesSummary(BaseSeriesFormatter):
-    
-    
+    _default_sep = ' \n '
+
     @property
     def _constructor(self):
         return PivotSeriesSummary
@@ -435,13 +447,13 @@ class PivotSeriesSummary(BaseSeriesFormatter):
     @property
     def _constructor_sliced(self):
         return PivotSeriesSummary
-    
 
-class PivotFrameSummary(BaseFrameFormatter):    
-#    _data_filtter = lambda frame: frame.abs().max().reset_index(level=1).pivot(columns=['level_1'])
-#    _label_formatter = lambda entry: f'${latex(entry)}$'
 
-    
+class PivotFrameSummary(BaseFrameFormatter):
+    #    _data_filtter = lambda frame: frame.abs().max().reset_index(level=1).pivot(columns=['level_1'])
+    #    _label_formatter = lambda entry: f'${latex(entry)}$'
+    _default_sep = ' \n '
+
     @property
     def _constructor(self):
         return PivotFrameSummary
@@ -453,38 +465,155 @@ class PivotFrameSummary(BaseFrameFormatter):
     @property
     def _constructor_sliced(self):
         return PivotSeriesSummary
-    
+
+    def _format_label(self, obj):
+        if self.__class__._label_formatter:
+            return self.__class__._label_formatter(obj)
+        else:
+            if isinstance(obj, Iterable):
+                obj = obj
+            else:
+                obj = obj,
+
+            return tuple([
+                f'${self._match_unit(elem)}$'
+                if isinstance(elem, (Expr, Eq)) else f'{elem}' for elem in obj
+                if elem != 0
+            ])
+
+    def format_labels(self):
+        if isinstance(self.columns, pd.MultiIndex):
+
+            idx = self.columns.tolist()
+
+        else:
+            idx = self.columns
+        print('idx', idx)
+        new_idx = []
+        for entry in idx:
+            print('entry', entry, type(entry))
+            if entry in self.__class__._units and entry != 0:
+
+                units = self.__class__._units
+
+                #new_idx+=[ self._format_label(entry) + f'{units[entry]}']
+                new_idx += [self._format_label(entry)]
+            elif entry != 0:
+                new_idx += [self._format_label(entry)]
+
+        print('new idx', new_idx)
+
+        self.__class__._ylabel = (list(idx)[0][0])
+
+        new_obj = self.copy()
+
+        new_obj.columns = pd.MultiIndex.from_tuples(new_idx)
+
+        cols_name = self.__class__._cols_name
+
+        if cols_name:
+            idx_name = self._format_label(cols_name)
+            new_obj.columns.name = idx_name
+
+        return new_obj
+
     def format_index(self):
-        if isinstance(self.index,pd.MultiIndex):
-            
+        if isinstance(self.index, pd.MultiIndex):
+
             idx = self.index.tolist()
-            
+
         else:
             idx = self.index
-        print('idx',idx)
-        new_idx= [entry.rhs.n(4)  for entry in idx]
-        
-        print('new idx',new_idx)
-        
+        print('idx', idx)
+        new_idx = [entry.rhs.n(4) for entry in idx]
+
+        print('new idx', new_idx)
+
         #self.__class__._ylabel=f'${latex(list(idx)[0].lhs)}$'
-        
-        new_obj=self.copy()
-        new_obj.index=new_idx
-        
-        
-        
+
+        new_obj = self.copy()
+        new_obj.index = new_idx
+
         new_obj.index.name = f'${self._match_unit(list(idx)[0].lhs)}$'
-        
+
         return new_obj
-    
-    def _filtter(self,filtter=None):
-        if self.columns.nlevels ==2:
-            filtter = lambda frame: frame.abs().max().reset_index(level=1).pivot(columns=['level_1'])
+
+    def _filtter(self, filtter=None):
+        if self.columns.nlevels == 2:
+            filtter = lambda frame: frame.abs().max().reset_index(
+                level=1).pivot(columns=['level_1'])
         else:
-            filtter = lambda frame: frame.abs().max().reset_index().pivot(columns=['level_0','level_2'],index=['level_1'])[0]
-        
+            filtter = lambda frame: frame.abs().max().reset_index().pivot(
+                columns=['level_0', 'level_2'], index=['level_1'])[0]
+
         return filtter
-    
+
+
+class PivotPlotSeriesSummary(BaseSeriesFormatter):
+    _default_sep = ', '
+
+    @property
+    def _constructor(self):
+        return PivotPlotSeriesSummary
+
+    @property
+    def _constructor_expanddim(self):
+        return PivotPlotFrameSummary
+
+    @property
+    def _constructor_sliced(self):
+        return PivotPlotSeriesSummary
+
+
+class PivotPlotFrameSummary(BaseFrameFormatter):
+    #    _data_filtter = lambda frame: frame.abs().max().reset_index(level=1).pivot(columns=['level_1'])
+    #    _label_formatter = lambda entry: f'${latex(entry)}$'
+    _default_sep = ', '
+
+    @property
+    def _constructor(self):
+        return PivotPlotFrameSummary
+
+    @property
+    def _constructor_expanddim(self):
+        return PivotPlotFrameSummary
+
+    @property
+    def _constructor_sliced(self):
+        return PivotPlotSeriesSummary
+
+    def format_index(self):
+        if isinstance(self.index, pd.MultiIndex):
+
+            idx = self.index.tolist()
+
+        else:
+            idx = self.index
+        print('idx', idx)
+        new_idx = [entry.rhs.n(4) for entry in idx]
+
+        print('new idx', new_idx)
+
+        #self.__class__._ylabel=f'${latex(list(idx)[0].lhs)}$'
+
+        new_obj = self.copy()
+        new_obj.index = new_idx
+
+        new_obj.index.name = f'${self._match_unit(list(idx)[0].lhs)}$'
+
+        return new_obj
+
+    def _filtter(self, filtter=None):
+        if self.columns.nlevels == 2:
+            filtter = lambda frame: frame.abs().max().reset_index(
+                level=1).pivot(columns=['level_1'])
+        else:
+            filtter = lambda frame: frame.abs().max().reset_index().pivot(
+                columns=['level_0', 'level_2'], index=['level_1'])[0]
+
+        return filtter
+
+
 class ReportModule:
     r'''
     Basic class for maintaining global options of a report module. It provides methods for setting options common with every class inheriting from ReportModule instance. 
@@ -536,16 +665,15 @@ class ReportModule:
     _autoreport = False
     _frame = TimeDataFrame()
     _list = []
-    _subplot=False
-    _hold=False
-    _out_formatter = BaseFrameFormatter# lambda data: data
+    _subplot = False
+    _hold = False
+    _out_formatter = BaseFrameFormatter  # lambda data: data
 
-    
     @classmethod
     def set_output_formatter(cls, formatter=BaseFrameFormatter):
         cls._out_formatter = formatter
         return cls
-    
+
     @classmethod
     def set_container(cls, container=None):
         cls.cls_container = container
@@ -564,15 +692,14 @@ class ReportModule:
 
     @classmethod
     def set_ploting_mode(cls, subplots=False):
-        cls._subplot=subplots
+        cls._subplot = subplots
 
         return cls
-    
 
 #     def _reset_storage(self, *args, **kwargs):
 
 #         new_obj=copy.copy(self)
-        
+
 #         new_obj._storage = {}
 #         new_obj._dict = {}
 #         new_obj._frame = TimeDataFrame()
@@ -580,8 +707,7 @@ class ReportModule:
 #         new_obj._subplot=False
 
 #         return copy.copy(self)
-    
-    
+
     @classmethod
     def _reset_storage(cls, *args, **kwargs):
 
@@ -589,11 +715,10 @@ class ReportModule:
         cls._dict = {}
         cls._frame = TimeDataFrame()
         cls._list = []
-        cls._subplot=False
+        cls._subplot = False
 
         return cls
-    
-    
+
     @classmethod
     def set_directory(cls, path='./SDA_results'):
 
@@ -606,7 +731,11 @@ class ReportModule:
         cls._units = units
         return cls
 
-    def __init__(self, container=None, path=None, autoreporting=False,output_formatter=None):
+    def __init__(self,
+                 container=None,
+                 path=None,
+                 autoreporting=False,
+                 output_formatter=None):
         if container:
             self._container = container
         else:
@@ -625,41 +754,38 @@ class ReportModule:
 
         self._last_result = None
         self._list = []
-        
-        if output_formatter:
-            
-            self._out_format=output_formatter
-        else:
-            self._out_format= self.__class__._out_formatter
 
-            
-    
-    def _apply_formatter(self,data):
-        
+        if output_formatter:
+
+            self._out_format = output_formatter
+        else:
+            self._out_format = self.__class__._out_formatter
+
+    def _apply_formatter(self, data):
+
         print(type(self._out_format))
-        if (self._out_format is BaseFrameFormatter,PivotFrameSummary,FFTFrameFormatter):
+        if (self._out_format is BaseFrameFormatter, PivotFrameSummary,
+                FFTFrameFormatter, PivotPlotFrameSummary):
             print('Base frmatter is working')
-            
-            print('data.index',data.index)
-            print('data.index.name',data.index.name)
-            
-            result=self._out_format(data)()
-            
-#             print('#'*100)
-#             display(result)
-#             print(result.index.name)
+
+            print('data.index', data.index)
+            print('data.index.name', data.index.name)
+
+            result = self._out_format(data)()
+
+            #             print('#'*100)
+            #             display(result)
+            #             print(result.index.name)
             if not result.index.name:
                 result.index.name = ''
-            
+
             return result
         else:
             print('callable is working')
             return self._out_format(data)
-    
-    
+
     @property
     def frame(self):
-
 
         if (self._frame) is not None:
 
@@ -669,8 +795,6 @@ class ReportModule:
 
             time_frame = TimeDataFrame(self.__class__._frame)
 
-
-
         if time_frame.columns != [] and time_frame.columns != pd.Index([]):
 
             time_frame.columns = pd.MultiIndex.from_tuples(time_frame.columns)
@@ -679,21 +803,17 @@ class ReportModule:
 
         return time_frame
 
+
 #     @classmethod
 #     @property
 #     def frame(cls):
 
-
 #         if (cls._frame) is not None:
 
 #             time_frame = TimeDataFrame(cls._frame)
-            
+
 #         else:
 #             time_frame = TimeDataFrame()
-
-
-
-
 
 #         if time_frame.columns != [] and time_frame.columns != pd.Index([]):
 
@@ -702,14 +822,13 @@ class ReportModule:
 #                                          inplace=True)
 
 #         return time_frame
-    
+
     def set_frame(self, key, frame):
         print('self frame is modified')
         self._frame[key] = frame
 
-
         return frame
-    
+
     def set_class_frame(self, key, frame):
         print('class frame is modified')
 
@@ -717,28 +836,28 @@ class ReportModule:
 
         return frame
 
-    def clear_frame(self,obj=True):
-        
+    def clear_frame(self, obj=True):
+
         if not self.__class__._hold:
-        
+
             if obj and (self._frame is not None):
                 print('self cleaner')
                 self._frame = type(self._frame)()
                 #self._frame = None
             if (not obj) and (self.__class__._frame is not None):
                 print('class cleaner')
-                self.__class__._frame =  type(self.__class__._frame)()
+                self.__class__._frame = type(self.__class__._frame)()
             #self.__class__._frame =  None
 
         return None
-    
+
     def __str__(self):
         return self._container.__str__()
 
     def __repr__(self):
         return self._container.__repr__()
 
-    def reported(self,mode=True):
+    def reported(self, mode=True):
 
         new_obj = copy.copy(self)
 
@@ -795,7 +914,6 @@ class DataStorage:
     @property
     def frame(self):
 
-
         if self._frame:
             time_frame = TimeDataFrame(self._frame)
 
@@ -817,16 +935,14 @@ class DataStorage:
     def set_frame(self, key, frame):
         self._frame[key] = frame
 
-
         return frame
-    
+
     def set_class_frame(self, key, frame):
 
         self.__class__._frame[key] = frame
 
         return frame
-    
-    
+
     def __init__(self, data_set=None):
 
         self._data_set = data_set
@@ -901,20 +1017,15 @@ class SimulationalBlock(ReportModule):
 
     _model = None
     _reference_data = None
-    _hold=False
-    last_result=[]
+    _hold = False
+    last_result = []
 
-    _ref_data=None  
-  
+    _ref_data = None
 
-    
-    def holded(self,hold=True):
-        self.__class__._hold=hold
-        
+    def holded(self, hold=True):
+        self.__class__._hold = hold
+
         return self.copy()
-        
-        
-    
 
     def label_formatter(self, analysis=None, label_generator=None):
 
@@ -926,14 +1037,13 @@ class SimulationalBlock(ReportModule):
                 system = self._dynamic_system
             else:
                 system = analysis._dynamic_system
-                
+
             print('system label', str(system))
             label = Eq(var, value, evaluate=False), str(system)
 
         else:
 
             label = ((var, value) for var, value in self._ref_data.items())
-
 
         return label
 
@@ -972,8 +1082,8 @@ class SimulationalBlock(ReportModule):
 
         self._dynamic_system = dynamic_system
         self._ref_data = reference_data
-        print(self.__class__,label)
-        self._model_label=label
+        print(self.__class__, label)
+        self._model_label = label
 
         super().__init__()
 
@@ -1016,9 +1126,9 @@ class SimulationalBlock(ReportModule):
 
         if self._model_label:
             dynamic_system._label = self._model_label
-        
-        print('dynamic model name',dynamic_system._label)
-            
+
+        print('dynamic model name', dynamic_system._label)
+
         if not self._numerical_system:
 
             #             display(analysis._dynamic_system.system_parameters())
@@ -1061,20 +1171,16 @@ class SimulationalBlock(ReportModule):
         self.__class__._list += [simulation_result]
         self.__class__._last_result = type(self.__class__._frame)()
         self.__class__._last_result[[
-           (coord,)  + label  for coord in simulation_result.columns
+            (coord, ) + label for coord in simulation_result.columns
         ]] = simulation_result
-
-
 
         self._frame[[label + (coord, ) for coord in simulation_result.columns
                      ]] = simulation_result
         self._list += [simulation_result]
         self._last_result = type(self._frame)()
         self._last_result[[
-            (coord,)  + label for coord in simulation_result.columns
+            (coord, ) + label for coord in simulation_result.columns
         ]] = simulation_result
-
-
 
         #print(DataStorage._list)
 
@@ -1087,7 +1193,7 @@ class SimulationalBlock(ReportModule):
             analysis._list += [simulation_result]
             analysis._last_result = type(analysis._frame)()
             analysis._last_result[[
-            (coord,)  + label for coord in simulation_result.columns
+                (coord, ) + label for coord in simulation_result.columns
             ]] = simulation_result
 
         return simulation_result
@@ -1124,51 +1230,53 @@ class SimulationalBlock(ReportModule):
 
 
 class Summary(ReportModule):
-    def __init__(self, block=None,coordinate=None,caption=None,label=None,subplots=False):
+    def __init__(self,
+                 block=None,
+                 coordinate=None,
+                 caption=None,
+                 label=None,
+                 subplots=False):
 
         if subplots:
-            self._subplot=subplots
+            self._subplot = subplots
         else:
-            self._subplot=self.__class__._subplot
-        
+            self._subplot = self.__class__._subplot
+
         if coordinate:
             print('hello')
-            self._coord=coordinate
+            self._coord = coordinate
 
         else:
-            self._coord=slice(None,None)
-            
+            self._coord = slice(None, None)
+
         print(f'the coord is {self._coord}')
-        
+
         super().__init__()
 
         #         print(self._frame)
         #         print(block,'abc')
         #         print(type(block))
-        
-        self._block=block
+
+        self._block = block
         if block:
-            
+
             self._frame = block._frame
             self._last_result = block._last_result
         if caption:
             self._caption = caption
         else:
-            self._caption = self.__class__._caption         
+            self._caption = self.__class__._caption
 
         if label:
             self._label = label
         else:
-            self._label = self.__class__._label        
+            self._label = self.__class__._label
 
-        if label:
-            self._label = label
-        else:
-            self._label = self.__class__._label   
-            
-    def holded(self,hold=True):
-        self.__class__._hold=hold
-        
+
+
+    def holded(self, hold=True):
+        self.__class__._hold = hold
+
         return copy.copy(self)
 
     def plot(self, *args, analysis=None, **kwargs):
@@ -1180,170 +1288,158 @@ class Summary(ReportModule):
             self.set_frame(analysis._last_result.columns,
                            analysis._last_result)
             self.set_class_frame(analysis._last_result.columns,
-                           analysis._last_result)
-            
-            self.__class__._frame.index.name=analysis._last_result.index.name
-            self._frame.index.name=analysis._last_result.index.name
-        
+                                 analysis._last_result)
+
+            self.__class__._frame.index.name = analysis._last_result.index.name
+            self._frame.index.name = analysis._last_result.index.name
+
         print('summary plot - call')
-        print((self._block),type((self._block)))
-        
-        result_of_plot=None
-        
+        print((self._block), type((self._block)))
+
+        result_of_plot = None
+
         if (self._block)._last_result is not None:
             #print()
-            
-            result_to_add =  type(self._block)._last_result
+
+            result_to_add = type(self._block)._last_result
             columns_to_add = result_to_add.columns
-            
+
             print('plot index', result_to_add.index.name)
-            
-            
+
             if self._frame is not None:
                 print('data is pushed to store - self -block')
                 self.set_frame(columns_to_add, result_to_add)
-                self._frame.index.name=result_to_add.index.name
+                self._frame.index.name = result_to_add.index.name
                 display(self._frame)
-                
+
                 self.set_class_frame(columns_to_add, result_to_add)
-                self.__class__._frame.index.name=result_to_add.index.name
+                self.__class__._frame.index.name = result_to_add.index.name
                 display(self.__class__._frame)
-                
+
                 result_of_plot = self._frame.plot(*args, **kwargs)
-                
-            else:    
-            
+
+            else:
+
                 print('data is pushed to store -  class -block')
 
                 self.set_class_frame(columns_to_add, result_to_add)
                 result_of_plot = self.__class__._frame.plot(*args, **kwargs)
-                self.__class__._frame.index.name=result_to_add.index.name
+                self.__class__._frame.index.name = result_to_add.index.name
 
-
-
-
-        
         plt.clf()
 
         return result_of_plot
 
-    def show(self, analysis=None,                     
-                     legend_pos='north east',
-                     legend_columns=1,
-                     colors_list=[
-                         'blue', 'red', 'green', 'orange', 'violet', 'magenta',
-                         'cyan'], 
-                     **kwargs,):
-        
+    def show(
+        self,
+        analysis=None,
+        legend_pos='north east',
+        legend_columns=1,
+        colors_list=[
+            'blue', 'red', 'green', 'orange', 'violet', 'magenta', 'cyan'
+        ],
+        **kwargs,
+    ):
+
         print('show')
         #print(type(self)._frame)
 
         result = type(self)()
-        
+
         if (type(self)._frame) is not None:
-            
-            data=(type(self)._frame)
+
+            data = (type(self)._frame)
             if not data.columns.empty:
-                data.columns =pd.MultiIndex.from_tuples(data.columns)
-            
+                data.columns = pd.MultiIndex.from_tuples(data.columns)
+
                 result = data[self._coord]
-        
-        
+
         if ((self._frame)) is not None:
-            
-            
-            data=((self)._frame)
+
+            data = ((self)._frame)
             if not data.columns.empty:
-                data.columns =pd.MultiIndex.from_tuples(data.columns)
-            
+                data.columns = pd.MultiIndex.from_tuples(data.columns)
+
                 result = data[self._coord]
-            
 
-              
+        print('story in Sumary', (type(self)._frame).empty)
+        print('out format', self._out_format)
+        #         print(result)
 
-        print('story in Sumary',(type(self)._frame).empty)
-        print('out format',self._out_format)
-#         print(result)
+        formatter = self._out_format()
 
-
-        formatter=self._out_format()
-
-        if self._coord!=slice(None,None):
-            ylabel=f'$ {formatter._match_unit(self._coord)}$'
+        if self._coord != slice(None, None):
+            ylabel = f'$ {formatter._match_unit(self._coord)}$'
         else:
-            ylabel='coords'
+            ylabel = 'coords'
 
+        if not (self)._frame.empty:  #result.empty:
 
-        if not (self)._frame.empty:#result.empty:
+            data = ((self)._frame)
+            data.columns = pd.MultiIndex.from_tuples(data.columns)
 
-            data=((self)._frame)
-            data.columns =pd.MultiIndex.from_tuples(data.columns)
-            
-
-            self._apply_formatter(data[self._coord]).plot(ylabel=ylabel,subplots=self._subplot)
+            self._apply_formatter(data[self._coord]).plot(
+                ylabel=ylabel, subplots=self._subplot)
 
             print('o tu - from self')
             #print(pd.MultiIndex.from_tuples(list(result.columns)))
             plot_of_result = plt.show()
             self.clear_frame()
 
-            
-        elif not type(self)._frame.empty:#result.empty:
-            
-            data=((self).__class__._frame)
-            data.columns =pd.MultiIndex.from_tuples(data.columns)
-            
+        elif not type(self)._frame.empty:  #result.empty:
 
-            self._apply_formatter(data[self._coord]).plot(ylabel=ylabel,subplots=self._subplot)
+            data = ((self).__class__._frame)
+            data.columns = pd.MultiIndex.from_tuples(data.columns)
 
+            self._apply_formatter(data[self._coord]).plot(
+                ylabel=ylabel, subplots=self._subplot)
 
             print('o tu - from cls')
             #print(pd.MultiIndex.from_tuples(list(result.columns)))
             plot_of_result = plt.show()
             self.clear_frame(obj=False)
 
-        
         if self._autoreporting:
-            
-            filepath = f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
-            
-            units=self.__class__._units
-            print('units',units)
-            if self._coord in units:
-                y_unit_str=f'y unit = {units[self._coord]:~Lx}'.replace('[]','')
-                
-            
-            else:
-                y_unit_str=''
-                
-            ivar= data[self._coord].index.name
-            if ivar in units:
-                x_unit_str=f'y unit = {units[ivar]:~Lx}'.replace('[]','')
-                
-            
-            else:
-                x_unit_str=''
-                
-            print('y_unit_str',y_unit_str)
-            
-            fig=self._apply_formatter(data[self._coord]).to_standalone_figure(
-                        filepath,
-                        colors_list=colors_list,
-                        subplots=self._subplot,
-                        height=NoEscape(r'6cm'),
-                        width=NoEscape(r'0.5\textwidth'),
-                        x_axis_description=f',xlabel=${NoEscape(vlatex(ivar))}$, {x_unit_str},',
-                        y_axis_description=f'ylabel=${NoEscape(vlatex(self._coord))}$, {y_unit_str},',
-                        legend_pos=legend_pos,
-                )
-            fig.append(self.__class__._caption)
-            
-            self._container.append(fig
- 
-            )
-        
 
-        
+            filepath = f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+
+            units = self.__class__._units
+            print('units', units)
+            if self._coord in units:
+                y_unit_str = f'y unit = {units[self._coord]:~Lx}'.replace(
+                    '[]', '')
+
+            else:
+                y_unit_str = ''
+
+            ivar = data[self._coord].index.name
+            if ivar in units:
+                x_unit_str = f'x unit = {units[ivar]:~Lx}'.replace('[]', '')
+
+            else:
+                x_unit_str = ''
+
+            print('y_unit_str', y_unit_str)
+
+            fig = self._apply_formatter(
+                data[self._coord]).to_standalone_figure(
+                    filepath,
+                    colors_list=colors_list,
+                    subplots=self._subplot,
+                    height=NoEscape(r'6cm'),
+                    width=NoEscape(r'0.9\textwidth'),
+                    x_axis_description=
+                    f',xlabel=${NoEscape(vlatex(ivar))}$, {x_unit_str},',
+                    y_axis_description=
+                    f'ylabel=${NoEscape(vlatex(self._coord))}$, {y_unit_str},',
+                    legend_pos=legend_pos,
+                )
+            fig.add_caption(NoEscape(self._caption))
+            fig.append(
+                Label(self._label)
+            )
+
+            self._container.append(fig)
 
         return result
 
@@ -1351,38 +1447,31 @@ class Summary(ReportModule):
 
         print('summary')
 
-
         result = type(self)()
-        
+
         if (type(self)._frame) is not None:
-            
-            data=(type(self)._frame)
+
+            data = (type(self)._frame)
             if not data.columns.empty:
-                data.columns =pd.MultiIndex.from_tuples(data.columns)
-            
+                data.columns = pd.MultiIndex.from_tuples(data.columns)
+
                 result = data[self._coord]
-        
-        
+
         if ((self._frame)) is not None:
-            
-            
-            data=((self)._frame)
+
+            data = ((self)._frame)
             if not data.columns.empty:
-                data.columns =pd.MultiIndex.from_tuples(data.columns)
-            
+                data.columns = pd.MultiIndex.from_tuples(data.columns)
+
                 result = data[self._coord]
-            
 
-              
+        print('story in Sumary', (type(self)._frame).empty)
 
-        print('story in Sumary',(type(self)._frame).empty)
-        
-#         print(result)
-        if not (self)._frame.empty:#result.empty:
+        #         print(result)
+        if not (self)._frame.empty:  #result.empty:
 
-            data=((self)._frame)
-            data.columns =pd.MultiIndex.from_tuples(data.columns)
-            
+            data = ((self)._frame)
+            data.columns = pd.MultiIndex.from_tuples(data.columns)
 
             display(self._apply_formatter(data[self._coord]))
 
@@ -1391,12 +1480,10 @@ class Summary(ReportModule):
 
             self.clear_frame()
 
-            
-        elif not type(self)._frame.empty:#result.empty:
-            
-            data=((self).__class__._frame)
-            data.columns =pd.MultiIndex.from_tuples(data.columns)
-            
+        elif not type(self)._frame.empty:  #result.empty:
+
+            data = ((self).__class__._frame)
+            data.columns = pd.MultiIndex.from_tuples(data.columns)
 
             display(self._apply_formatter(data[self._coord]))
 
@@ -1404,28 +1491,37 @@ class Summary(ReportModule):
             #print(pd.MultiIndex.from_tuples(list(result.columns)))
 
             self.clear_frame(obj=False)
-            
+
+
 #         print(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule').replace('\\bottomrule','\\midrule \n \\bottomrule')   )
 #         print(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule').__repr__() )
 #         display(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule') )
-            
+
         if self._autoreporting:
-            self._container.append(
+            tab = Table(position='H')
+
+            #                         f'xyz_{next(plots_no_gen)}',
+            #                         subplots=self.__class__._subplot,
+
+            #                         height=NoEscape(r'6cm'),
+            #                         width=NoEscape(r'0.9\textwidth'),
+            #                         y_axis_description='',
+            #                         legend_pos='north west')))
+
+            tab.add_caption(NoEscape(self._caption))
+            tab.append(
                 NoEscape(
-                    self._apply_formatter(data[self._coord]).to_latex(escape=False,caption='').replace('\\toprule','\\toprule \n \\midrule').replace('\\bottomrule','\\midrule \n \\bottomrule') ))
-#                         f'xyz_{next(plots_no_gen)}',
-#                         subplots=self.__class__._subplot,
+                    self._apply_formatter(data[self._coord]).to_latex(
+                        escape=False,
+                        caption='').replace('\\toprule',
+                                            '\\toprule \n \\midrule').replace(
+                                                '\\bottomrule',
+                                                '\\midrule \n \\bottomrule')))
+            tab.append(
+                Label(self._label)
+            )
 
-#                         height=NoEscape(r'6cm'),
-#                         width=NoEscape(r'0.9\textwidth'),
-#                         y_axis_description='',
-#                         legend_pos='north west')))
-        
-
-        
-
-
-        
+            self._container.append(tab)
 
         return result
 
@@ -1435,28 +1531,26 @@ class Summary(ReportModule):
                         xlim=None,
                         **kwargs):
 
-        
-
         DataStorage._plot_markers_dict = {
             elem: Marker(f'plot{self.__class__.__name__}', 'fig')
             for elem in self._frame
         }
         DataStorage._subplot_markers_dict = {
-            elem: Marker(f'subplot{self.__class__.__name__}',
-                         'fig')
+            elem: Marker(f'subplot{self.__class__.__name__}', 'fig')
             for elem in self._frame
         }
-#         DataStorage.first_marker = list(
-#             DataStorage._plot_markers_dict.values())[0]
-#         DataStorage.last_marker = list(
-#             DataStorage._plot_markers_dict.values())[-1]
-#         self.last_marker = list(DataStorage._plot_markers_dict.values())[-1]
-#         type(self)._last_marker = list(
-#             DataStorage._plot_markers_dict.values())[-1]
-#         print('marker - def')
-#         print(self.last_marker)
+        #         DataStorage.first_marker = list(
+        #             DataStorage._plot_markers_dict.values())[0]
+        #         DataStorage.last_marker = list(
+        #             DataStorage._plot_markers_dict.values())[-1]
+        #         self.last_marker = list(DataStorage._plot_markers_dict.values())[-1]
+        #         type(self)._last_marker = list(
+        #             DataStorage._plot_markers_dict.values())[-1]
+        #         print('marker - def')
+        #         print(self.last_marker)
 
         return analysis
+
 
 class SimulationFFT:
     r'''It is a class that provides Fast Fourier Transform techniques for formerly performed numerical simulations in time domain. Class supplies a method for plotting a double sided RMS.
@@ -3522,7 +3616,7 @@ class DataTable(Table):
         self._numerical_data = numerical_data
         self.position = position
 
-    def add_table(self, numerical_data=None,index=False):
+    def add_table(self, numerical_data=None, index=False):
         self.append(NoEscape('%%%%%%%%%%%%%% Table %%%%%%%%%%%%%%%'))
         #         if numerical_data!=None:
         #             self._numerical_data=numerical_data
