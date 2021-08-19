@@ -43,6 +43,7 @@ plots_no_gen = plots_no()
 
 class BaseSeriesFormatter(TimeSeries):
     _cols_name = None
+    _domain=None
     r'''
     Basic class for formatting data plots. It provides methods for setting options 
     
@@ -135,6 +136,7 @@ class BaseFrameFormatter(TimeDataFrame):
     _label_formatter = None
     _data_filtter = lambda frame: frame.copy()
     _cols_name = None
+    _domain=None
     r'''
     Basic class for formatting data plots. It provides methods for setting options 
     
@@ -378,6 +380,7 @@ class BaseFrameFormatter(TimeDataFrame):
 
 
 class FFTSeriesFormatter(BaseSeriesFormatter):
+    _domain = Symbol('f')
     r'''
     Basic class for formatting data plots. It provides methods for setting options 
     
@@ -434,7 +437,7 @@ class FFTSeriesFormatter(BaseSeriesFormatter):
         return new_obj
 
 class FFTFrameFormatter(BaseFrameFormatter):
-    
+    _domain = Symbol('f')   
 
     _data_filtter = lambda obj: obj.to_frequency_domain().double_sided_rms().truncate(0,0.5)
     r'''
@@ -513,6 +516,7 @@ class PivotFrameSummary(BaseFrameFormatter):
     #    _data_filtter = lambda frame: frame.abs().max().reset_index(level=1).pivot(columns=['level_1'])
     #    _label_formatter = lambda entry: f'${latex(entry)}$'
     _default_sep = ' \n '
+    
 
     @property
     def _constructor(self):
@@ -660,6 +664,8 @@ class PivotPlotFrameSummary(BaseFrameFormatter):
         new_obj.index = new_idx
 
         new_obj.index.name = f'${self._match_unit(list(idx)[0].lhs)}$'
+        
+        self.__class__._domain=list(idx)[0].lhs
 
         return new_obj
 
@@ -671,6 +677,8 @@ class PivotPlotFrameSummary(BaseFrameFormatter):
             filtter = lambda frame: frame.abs().max().reset_index().pivot(
                 columns=['level_0', 'level_2'], index=['level_1'])[0]
 
+        
+            
         return filtter
 
 
@@ -728,6 +736,7 @@ class ReportModule:
     _subplot = False
     _hold = False
     _out_formatter = BaseFrameFormatter  # lambda data: data
+
 
     @classmethod
     def set_output_formatter(cls, formatter=BaseFrameFormatter):
@@ -912,6 +921,8 @@ class ReportModule:
             #self.__class__._frame =  None
 
         return None
+    
+
 
     def __str__(self):
         return self._container.__str__()
@@ -1473,8 +1484,14 @@ class Summary(ReportModule):
 
             else:
                 y_unit_str = ''
-
-            ivar = data[self._coord].index.name
+                
+            new_data = self._apply_formatter(data[self._coord])
+            
+            if new_data.__class__._domain:
+                ivar = new_data.__class__._domain
+            else:
+                ivar = data[self._coord].index.name
+            
             if ivar in units:
                 x_unit_str = f'x unit = {units[ivar]:~Lx}'.replace('[]', '')
 
@@ -1483,15 +1500,14 @@ class Summary(ReportModule):
 
             print('y_unit_str', y_unit_str)
 
-            fig = self._apply_formatter(
-                data[self._coord]).to_standalone_figure(
+            fig = new_data.to_standalone_figure(
                     filepath,
                     colors_list=colors_list,
                     subplots=self._subplot,
                     height=NoEscape(r'6cm'),
                     width=NoEscape(r'0.9\textwidth'),
                     x_axis_description=
-                    f',xlabel=${NoEscape(vlatex(ivar))}$, {x_unit_str},',
+                    f',xlabel=${NoEscape(vlatex(ivar))}$, {x_unit_str},'.replace('$$','$'),
                     y_axis_description=
                     f'ylabel=${NoEscape(vlatex(self._coord))}$, {y_unit_str},',
                     legend_pos=legend_pos,
