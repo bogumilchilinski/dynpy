@@ -41,6 +41,361 @@ def plots_no():
 plots_no_gen = plots_no()
 
 
+
+
+
+class BasicFormattedSeries(TimeSeries):
+    
+    @property
+    def _common_constructor_frame(self):
+        return BasicFormattedFrame
+    
+    
+    _cols_name = None
+    _domain=None
+    r'''
+    Basic class for formatting data plots. It provides methods for setting options 
+    
+    Arguments
+    =========
+
+    Methods
+    =======
+
+    Example
+    =======
+
+    '''
+    _default_sep = ', '
+
+#     @classmethod
+#     def set_column_separator(cls, sep=', '):
+#         cls._default_sep = sep
+
+#         return cls
+
+#     @classmethod
+#     def set_data_filtter(cls, filtter=lambda frame: frame.copy()):
+
+#         cls._data_filtter = filtter
+#         print(cls._data_filtter)
+#         return cls
+
+#     @classmethod
+#     def set_units_dict(cls, units={}):
+
+#         cls._units = units
+#         return cls
+
+#     @classmethod
+#     def columns_name(cls, name=None):
+#         cls._cols_name = name
+
+#         return cls
+
+    @property
+    def _constructor(self):
+        return self.__class__
+
+    @property
+    def _constructor_expanddim(self):
+        return self._common_constructor_frame
+
+    @property
+    def _constructor_sliced(self):
+        return self.__class__
+
+#     def set_multiindex(self):
+#         midx = pd.MultiIndex.from_tuples(self.index)
+#         new_obj = self.__class__(self).index = midx
+
+#         return new_obj
+
+#     def cut_coord(self, coord):
+
+#         new_frame = self.set_multiindex()
+
+#         return new_frame[coord]
+
+#     def format_labels(self):
+#         if isinstance(self.index, pd.MultiIndex):
+#             return self.index.tolist()
+
+#     def set_ylabel(self, label=None):
+#         if label == None:
+#             for label in self.format_labels():
+#                 label = f'$ {latex(label[0])} )$'
+#         return label
+
+#     def set_xlabel(self, label=None):
+#         if isinstance(self.index, pd.MultiIndex):
+#             if label == None:
+#                 label = self.index.name
+#         return label
+
+#     def set_legend(self, legend=None):
+#         if legend == None:
+#             pass
+
+
+class BasicFormattedFrame(TimeDataFrame):
+    
+    @property
+    def _common_constructor_series(self):
+        return BasicFormattedSeries
+    
+
+    _units = {}
+    _ylabel = None
+    _label_formatter = None
+    _data_filtter = lambda frame: frame.copy()
+    _cols_name = None
+    _domain=None
+    r'''
+    Basic class for formatting data plots. It provides methods for setting options 
+    
+    Arguments
+    =========
+
+    Methods
+    =======
+
+    Example
+    =======
+
+    '''
+
+    _default_sep = ', '
+
+#     @classmethod
+#     def set_column_separator(cls, sep=', '):
+#         cls._default_sep = sep
+
+#         return cls
+
+#     @classmethod
+#     def set_columns_name(cls, name=None):
+#         cls._cols_name = name
+
+#         return cls
+
+#     @classmethod
+#     def set_data_filtter(cls, filtter=lambda frame: frame.copy()):
+
+#         cls._data_filtter = filtter
+#         print(cls._data_filtter)
+#         return cls
+
+#     @classmethod
+#     def set_units_dict(cls, units={}):
+
+#         cls._units = units
+#         return cls
+
+#     def _match_unit(self, sym, latex_printer=vlatex):
+
+#         units = self.__class__._units
+
+#         if isinstance(sym, Eq):
+#             sym_check = sym.lhs
+#         else:
+#             sym_check = sym
+#         print(f'variable is {sym}')
+#         print(f'units are {units}')
+#         if sym_check in units:
+#             print(f'{sym} is in units_dict')
+#             print('matched unit', f'{units[sym_check]:~L}')
+#             return f'{latex_printer(sym)}~[{units[sym_check]:~L}]'
+
+#             #return f'{latex(sym)}'
+#         else:
+#             return f'{latex_printer(sym)}'
+
+#     def _format_label(self, obj):
+#         if self.__class__._label_formatter:
+#             return self.__class__._label_formatter(obj)
+#         else:
+#             if isinstance(obj, Iterable):
+#                 obj = obj
+#             else:
+#                 obj = obj,
+
+#             return self.__class__._default_sep.join(
+#                 f'${self._match_unit(elem)}$' if isinstance(elem, (
+#                     Expr, Eq)) else f'{elem}' for elem in obj if elem != 0)
+
+#     def format_labels(self):
+#         if isinstance(self.columns, pd.MultiIndex):
+
+#             idx = self.columns.tolist()
+
+#         else:
+#             idx = self.columns
+#         print('idx', idx)
+#         new_idx = []
+#         for entry in idx:
+#             print('entry', entry, type(entry))
+#             if entry in self.__class__._units and entry != 0:
+
+#                 units = self.__class__._units
+
+#                 #new_idx+=[ self._format_label(entry) + f'{units[entry]}']
+#                 new_idx += [self._format_label(entry)]
+#             elif entry != 0:
+#                 new_idx += [self._format_label(entry)]
+
+#         print('new idx', new_idx)
+
+#         self.__class__._ylabel = (list(idx)[0][0])
+
+#         new_obj = self.copy()
+
+#         new_obj.columns = new_idx
+
+#         cols_name = self.__class__._cols_name
+
+#         if cols_name:
+#             idx_name = self._format_label(cols_name)
+#             new_obj.columns.name = idx_name
+
+#         return new_obj
+
+    @property
+    def _constructor(self):
+        return self.__class__
+
+    @property
+    def _constructor_expanddim(self):
+        return self.__class__
+
+    @property
+    def _constructor_sliced(self):
+        return self._common_constructor_series
+
+#     def set_multiindex(self, names=None):
+
+#         midx = pd.MultiIndex.from_tuples(self.columns, names=names)
+
+#         new_obj = self.__class__(self)
+#         new_obj.columns = midx
+
+#         return new_obj
+
+#     def cut_coord(self, coord):
+
+#         new_frame = self.set_multiindex()
+
+#         return new_frame[coord]
+
+#     def format_index(self):
+#         if isinstance(self.index, pd.MultiIndex):
+
+#             idx = self.index.tolist()
+
+#         else:
+#             idx = self.index
+#         print('idx', idx)
+#         new_idx = idx.copy()
+#         print('new idx', new_idx)
+
+#         new_obj = self.copy()
+#         new_obj.index = new_idx
+
+#         print('new_obj.index', new_obj.index.name)
+
+#         if not new_obj.index.name:
+#             new_obj.index.name = Symbol('f')
+
+#         print('new_obj.index', new_obj.index.name)
+
+#         new_obj.index.name = f'${self._match_unit(new_obj.index.name)}$'
+#         #new_obj.index.name = 'cos'
+
+#         #print('new_obj.index.name',new_obj.index.name)
+
+#         return new_obj
+
+#     def set_ylabel(self, label=None):
+#         if isinstance(self.index, pd.MultiIndex):
+
+#             if label == None:
+#                 new_obj = self.copy()
+
+#                 for label in new_obj.columns.tolist():
+#                     if label in self.__class__._units:
+
+#                         y_unit_str = f'[${type(self)._units[label]}$]'
+
+#                     else:
+#                         y_unit_str = ''
+
+#                 label = f'$ {latex(label[0])} $, {y_unit_str}'
+
+#                 new_obj.columns = label
+
+#         return new_obj
+
+#     def set_xlabel(self, label=None):
+#         if isinstance(self.index, pd.MultiIndex):
+
+#             if label == None:
+#                 new_obj = self.copy()
+
+#                 for label in new_obj.index.tolist():
+#                     if label in self.__class__._units:
+
+#                         x_unit_str = f'[${type(self)._units[label]}$]'
+
+#                     else:
+#                         x_unit_str = ''
+
+#                 label = latex(self.index.name) + f'{x_unit_str}'
+
+#                 new_obj.index.name = label
+
+#         return new_obj
+
+
+# #     def format_axis_label(self):
+
+# #         new_obj = self.copy()
+
+# #         new_obj.columns = self.set_ylabel
+# #         new_obj.index = self.set_xlabel
+
+# #         return new_obj
+
+#     def set_legend(self, legend=[]):
+#         if legend == None:
+#             pass
+
+#     def _filtter(self, filtter=None):
+#         filtter = self.__class__._data_filtter
+
+#         return filtter
+
+#     def __call__(self):
+
+#         filtter = self._filtter()
+#         print('on __call__', filtter)
+
+#         #         display('old data',self)
+#         #         display('new data',filtter(self))
+
+#         return self.__class__(filtter(
+#             self)).format_labels().format_index()  #.set_ylabel().set_xlabel()
+
+    def plot(self, *args, **kwargs):
+
+        if not 'ylabel' in kwargs:
+            kwargs['ylabel'] = self.__class__._ylabel
+
+        return super().plot(*args, **kwargs)
+
+
+
+
+
 class BaseSeriesFormatter(TimeSeries):
     _cols_name = None
     _domain=None
@@ -1327,7 +1682,8 @@ class Summary(ReportModule):
                  coordinate=None,
                  caption=None,
                  label=None,
-                 subplots=False):
+                 subplots=False,
+                extra_commands=None):
 
         if subplots:
             self._subplot = subplots
@@ -1365,6 +1721,11 @@ class Summary(ReportModule):
             self._label = self.__class__._label
 
 
+        if extra_commands is not None:
+            self._extra_commands = extra_commands
+        else:
+            self._extra_commands = None
+            
 
     def holded(self, hold=True):
         self.__class__._hold = hold
@@ -1430,6 +1791,7 @@ class Summary(ReportModule):
         colors_list=[
             'blue', 'red', 'green', 'orange', 'violet', 'magenta', 'cyan'
         ],
+        extra_commands=None,
         **kwargs,
     ):
 
@@ -1519,6 +1881,9 @@ class Summary(ReportModule):
 
             print('y_unit_str', y_unit_str)
 
+            if extra_commands is None:
+                extra_commands= self._extra_commands
+            
             fig = new_data.to_standalone_figure(
                     filepath,
                     colors_list=colors_list,
@@ -1530,12 +1895,15 @@ class Summary(ReportModule):
                     y_axis_description=
                     f'ylabel=${NoEscape(vlatex(self._coord))}$, {y_unit_str},',
                     legend_pos=legend_pos,
+                    extra_commands=extra_commands,
                 )
             fig.add_caption(NoEscape(self._caption))
             fig.append(
                 Label(self._label)
             )
-
+            
+            
+            
             self._container.append(fig)
 
         return result
@@ -1861,7 +2229,9 @@ class AccelerationComparison(ReportModule):
                      colors_list=[
                          'blue', 'red', 'green', 'orange', 'violet', 'magenta',
                          'cyan'
-                     ]):
+                     ],
+                    extra_commands=None,
+                    options=None):
 
         self.subplots = subplots
         if analysis:
@@ -1912,7 +2282,9 @@ class AccelerationComparison(ReportModule):
                         f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'
                     ),
                     legend_pos=legend_pos + ',' +
-                    f'legend columns= {legend_columns}')
+                    f'legend columns= {legend_columns}',
+                    extra_commands=extra_commands,
+                    options=options)
                 #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
 
                 ########### for tikz
@@ -1964,7 +2336,10 @@ class AccelerationComparison(ReportModule):
                         f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'
                     ),
                     legend_pos=legend_pos + ',' +
-                    f'legend columns= {legend_columns}')
+                    f'legend columns= {legend_columns}',
+                    extra_commands=extra_commands,
+                    options=options
+                )
                 #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
 
                 ########### for tikz
