@@ -1041,6 +1041,25 @@ class DataStorage:
 
         return cls
 
+    
+class NumericalDataSet:
+    def __init__(self,numerical_data, *args, keys_map=None, **kwargs):
+
+        data_to_plot = numerical_data
+
+        self._keys_map = {key: key for key in data_to_plot.keys()}
+
+        if keys_map:
+            self._keys_map = keys_map
+
+        self._data_to_plot = data_to_plot
+
+    def __call__(self, analysis, *args, **kwargs):
+        step_val = analysis._current_value
+        
+    def numerized():
+        pass
+    
 
 class SimulationalBlock(ReportModule):
     r'''
