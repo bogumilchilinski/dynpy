@@ -1396,11 +1396,12 @@ class DataStorage:
 
         return cls
 
-    
 class NumericalDataSet:
-    def __init__(self,numerical_data, *args, keys_map=None, **kwargs):
+    def __init__(self,numerical_data,key=None, *args, keys_map=None,label='Experimental data', **kwargs):
 
         data_to_plot = numerical_data
+        
+        self._key=key
 
         self._keys_map = {key: key for key in data_to_plot.keys()}
 
@@ -1408,12 +1409,47 @@ class NumericalDataSet:
             self._keys_map = keys_map
 
         self._data_to_plot = data_to_plot
+        self._label=label
+        
+        self.dvars=list( list(data_to_plot.values())[0].columns)
 
     def __call__(self, analysis, *args, **kwargs):
         step_val = analysis._current_value
         
-    def numerized():
-        pass
+    def numerized(self,
+                 params_values={},
+                 **kwargs):
+        
+
+        
+        if params_values=={}:
+            return copy.copy(self)
+        else:
+        
+            return copy.copy(self)
+    
+    
+    
+    def compute_solution(self,
+                         t_span=None,
+                         ic_list=None,
+                         t_eval=None,
+                         params_values=None,
+                         method='RK45'):
+        
+#         print('compute_solution')
+#         display(params_values)
+#         display(ic_list)
+        
+        if ic_list:
+            print('class ics has been taken')
+            self.ics=ic_list
+            
+
+        
+        display(self._data_to_plot)
+        
+        return self._data_to_plot[params_values[self._key]]
     
 
 class SimulationalBlock(ReportModule):
