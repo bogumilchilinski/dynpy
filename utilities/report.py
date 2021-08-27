@@ -12,7 +12,7 @@ import sympy.physics.mechanics as me
 from pylatex import (Alignat, Axis, Command, Document, Eqref, Figure, Label,
                      TextColor, Marker, Math, NewLine, NewPage, Package, Plot,
                      Quantity, Ref, Section, Subsection, Table, Tabular, TikZ,
-                     Description)
+                     Description,LongTable)
 from pylatex.base_classes import Environment
 from pylatex.package import Package
 from pylatex.section import Chapter
@@ -1091,6 +1091,7 @@ class ReportModule:
     _subplot = False
     _hold = False
     _out_formatter = BaseFrameFormatter  # lambda data: data
+    _height=NoEscape(r'6cm')
 
 
     @classmethod
@@ -1120,6 +1121,11 @@ class ReportModule:
 
         return cls
 
+    @classmethod
+    def set_plot_height(cls, height=None):
+        cls._height = height
+
+        return cls
 #     def _reset_storage(self, *args, **kwargs):
 
 #         new_obj=copy.copy(self)
@@ -1415,6 +1421,9 @@ class NumericalDataSet:
 
     def __call__(self, analysis, *args, **kwargs):
         step_val = analysis._current_value
+
+    def __str__(self):
+        return self._label
         
     def numerized(self,
                  params_values={},
@@ -1924,7 +1933,7 @@ class Summary(ReportModule):
                     filepath,
                     colors_list=colors_list,
                     subplots=self._subplot,
-                    height=NoEscape(r'6cm'),
+                    height=self._height,
                     width=NoEscape(r'0.9\textwidth'),
                     x_axis_description=
                     f',xlabel=${NoEscape(vlatex(ivar))}$, {x_unit_str},'.replace('$$','$'),
@@ -1999,7 +2008,7 @@ class Summary(ReportModule):
 #         display(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule') )
 
         if self._autoreporting:
-            tab = Table(position='H')
+            tab = Table(position='!htb')
 
             #                         f'xyz_{next(plots_no_gen)}',
             #                         subplots=self.__class__._subplot,
@@ -4124,14 +4133,14 @@ class DataTable(Table):
         self._numerical_data = numerical_data
         self.position = position
 
-    def add_table(self, numerical_data=None, index=False):
+    def add_table(self, numerical_data=None, index=False, longtable=False):
         self.append(NoEscape('%%%%%%%%%%%%%% Table %%%%%%%%%%%%%%%'))
         #         if numerical_data!=None:
         #             self._numerical_data=numerical_data
 
         tab = self._numerical_data
         self.append(
-            NoEscape(tab.to_latex(index=index, escape=False, longtable=False)))
+            NoEscape(tab.to_latex(index=index, escape=False, longtable=longtable)))
 
 
 class ReportSection(Section):
