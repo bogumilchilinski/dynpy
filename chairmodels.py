@@ -19,7 +19,7 @@ mechanics_printing()
 
 t=Symbol('t') #independent variable - time
 a_sim=Symbol('a_sim',positive=True)
-
+ivar=Symbol('t')
 
 ### system parametes
 m_fr, m_rear,m_3, k_r, k_rt, k_f, k_ft, k_rot,amplitude,length,speed,axw = symbols('m_fr, m_r, M, k_r, k_rt, k_f, k_ft k_rot, A, L, v, W_wb ',positive=True)
@@ -446,14 +446,46 @@ class SimpleChair5DOF(dyn.HarmonicOscillator):
                    l_fr:0.2,
                    l_rear:0.01,
                    u0:0.005,
-                   t0:1,
-                   t_l:1,
+
                    l_bumps:0.15,
                    amplitude:0.0215,
-                   length:0.19999999,
+                   length:0.18,
                    speed:1.7,
                    axw:0.5}
-        return default_data_dict            
+        return default_data_dict       
+    
+    def get_table_values(self):
+        table_data_dict={F:112.5,
+                   
+                   c_mu:0.0001,
+                   c_lam:0.0001,
+                   l_l:0.2,
+                   l_r:0.4,
+                   
+                   k_f:607500,
+                   k_ft:475000,
+                   k_r:580000,
+                   k_rt:400000,
+                   m_3:75,
+                   I_ch:20.8868,
+                   m_rear:1.5,
+                   m_fr:0.6,
+                   pm:0.1,
+                   Omega:0.3454,
+                   R:0.3,
+                   z_c3:0.4,
+                   g:9.81,
+                   I_w:0.135,
+                   l_fr:0.2,
+                   l_rear:0.01,
+                   u0:0.005,
+
+                   l_bumps:0.15,
+                   amplitude:0.0215,
+                   length:0.18,
+                   speed:1.7,
+                   axw:0.5}
+        return table_data_dict       
     def numerical_model(self):
         pass
 
@@ -589,6 +621,7 @@ chair_sin=chair_dict['full_nonlin_sin']
 
 
 
+
 units_dict={
             c:ureg.kilogram/ureg.second,
             c_mu:S.One/ureg.second,
@@ -648,7 +681,7 @@ units_dict={
             dtheta:ureg.radian/ureg.second,
             dalpha:ureg.radian/ureg.second,
             dz_wrc:ureg.meter/ureg.second,
-            pm:ureg.m/ureg.m,
+            pm:ureg.meter/ureg.meter,
             t_l:ureg.second,
             delta_t:ureg.second,
             l_ramp:ureg.meter,
@@ -676,20 +709,21 @@ units_dict={
             a_rz:ureg.gram,
             a_rcz:ureg.gram,
             a_sim:ureg.meter/ureg.second/ureg.second,
-            dx.diff(t):ureg.meter/ureg.second/ureg.second/ureg.second,
-            dy.diff(t):ureg.meter/ureg.second/ureg.second/ureg.second,
-            dz_fr.diff(t):ureg.meter/ureg.second/ureg.second/ureg.second,
-            dz_rear.diff(t):ureg.meter/ureg.second/ureg.second/ureg.second,
-            dz.diff(t):ureg.meter/ureg.second/ureg.second/ureg.second,
+            dx.diff(t):ureg.meter/ureg.second/ureg.second,
+            dy.diff(t):ureg.meter/ureg.second/ureg.second,
+            dz_fr.diff(t):ureg.meter/ureg.second/ureg.second,
+            dz_rear.diff(t):ureg.meter/ureg.second/ureg.second,
+            dz.diff(t):ureg.meter/ureg.second/ureg.second,
             dtheta.diff(t):ureg.radian/ureg.second/ureg.second,
             dphi.diff(t):ureg.radian/ureg.second/ureg.second,
-            dz_wrc.diff(t):ureg.meter/ureg.second/ureg.second/ureg.second,
+            dz_wrc.diff(t):ureg.meter/ureg.second/ureg.second,
             l_l:ureg.meter,
             l_r:ureg.meter,
             amplitude:ureg.meter,
             length:ureg.meter,
             speed:ureg.meter/ureg.second,
             axw:ureg.meter,
+            ivar:ureg.second
            }
 
 
