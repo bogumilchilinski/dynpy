@@ -41,18 +41,115 @@ def plots_no():
 plots_no_gen = plots_no()
 
 
-
-
-
-class BasicFormattedSeries(TimeSeries):
-    
-    @property
-    def _common_constructor_frame(self):
-        return BasicFormattedFrame
+class BasicFormattingTools:
     
     
-    _cols_name = None
+    _latex_backend=vlatex
+    _label_formatter = lambda obj: f'${vlatex(obj)}$' if isinstance(obj,(Expr,Eq)) else obj
     _domain=None
+    _units={}
+    _applying_func = None
+    _init_ops=True
+
+    _default_sep = ', '
+    
+    @classmethod
+    def set_default_column_separator(cls, sep=', '):
+        cls._default_sep = sep
+
+        return cls
+
+    @classmethod
+    def set_global_units(cls, units={}):
+
+        cls._units = units
+        return cls
+
+
+    
+    def set_multiindex_axis(self,axis=0):
+        
+        if axis == 'index':
+            axis = 0
+        elif axis == 'colums':
+            axis = 1
+            
+        
+        idx = self.axes[axis]
+        
+        if isinstance(idx,pd.MultiIndex):
+       
+            new_obj = self.copy()
+            
+        else:
+            midx = pd.MultiIndex.from_tuples(idx)
+            new_obj = self.copy().set_axis(midx,axis=axis)
+
+        return new_obj
+
+    def set_flat_index_axis(self,axis=0):
+        
+        if axis == 'index':
+            axis = 0
+        elif axis == 'colums':
+            axis = 1
+
+        idx = self.axes[axis]
+        
+        if isinstance(idx,pd.MultiIndex):
+            midx = idx.to_flat_index()
+            new_obj = self.copy().set_axis(midx,axis=axis)
+
+        else:
+
+            new_obj = self.copy()
+
+        return new_obj
+    
+
+    def switch_axis_type(self,axis=0):
+        
+        if axis == 'index':
+            axis = 0
+        elif axis == 'colums':
+            axis = 1
+            
+        
+        idx = self.axes[axis]
+        
+        if isinstance(idx,pd.MultiIndex):
+            
+            new_obj = self.set_flat_index_axis(axis=axis)
+            
+        else:
+            new_obj = self.copy().set_multiindex_axis(axis=axis)
+
+        return new_obj
+    
+    
+    def switch_index_type(self):
+
+        return self.switch_axis_type(axis=0)
+
+    
+    def apply_for_init(self,func=None,**kwargs):
+        if func:
+            print('func is used')
+            ops_func = func
+        elif self.__class__._applying_func is not None and self.__class__._init_ops:
+            print('class func is used')
+            ops_func = self.__class__._applying_func
+        else:
+            print('identity is used')
+            ops_func = lambda data: data
+        
+        
+        
+        return ops_func
+        
+    
+class BasicFormattedSeries(TimeSeries,BasicFormattingTools):
+
     r'''
     Basic class for formatting data plots. It provides methods for setting options 
     
@@ -66,14 +163,17 @@ class BasicFormattedSeries(TimeSeries):
     =======
 
     '''
-    _default_sep = ', '
+    
+    @property
+    def _common_constructor_frame(self):
+        return BasicFormattedFrame
+    
+    
+    _cols_name = None
 
-#     @classmethod
-#     def set_column_separator(cls, sep=', '):
-#         cls._default_sep = sep
 
-#         return cls
 
+    
 #     @classmethod
 #     def set_data_filtter(cls, filtter=lambda frame: frame.copy()):
 
@@ -105,40 +205,12 @@ class BasicFormattedSeries(TimeSeries):
     def _constructor_sliced(self):
         return self.__class__
 
-#     def set_multiindex(self):
-#         midx = pd.MultiIndex.from_tuples(self.index)
-#         new_obj = self.__class__(self).index = midx
-
-#         return new_obj
-
-#     def cut_coord(self, coord):
-
-#         new_frame = self.set_multiindex()
-
-#         return new_frame[coord]
-
-#     def format_labels(self):
-#         if isinstance(self.index, pd.MultiIndex):
-#             return self.index.tolist()
-
-#     def set_ylabel(self, label=None):
-#         if label == None:
-#             for label in self.format_labels():
-#                 label = f'$ {latex(label[0])} )$'
-#         return label
-
-#     def set_xlabel(self, label=None):
-#         if isinstance(self.index, pd.MultiIndex):
-#             if label == None:
-#                 label = self.index.name
-#         return label
-
-#     def set_legend(self, legend=None):
-#         if legend == None:
-#             pass
 
 
-class BasicFormattedFrame(TimeDataFrame):
+
+
+
+class BasicFormattedFrame(TimeDataFrame,BasicFormattingTools):
     
     @property
     def _common_constructor_series(self):
@@ -147,7 +219,7 @@ class BasicFormattedFrame(TimeDataFrame):
 
     _units = {}
     _ylabel = None
-    _label_formatter = None
+
     _data_filtter = lambda frame: frame.copy()
     _cols_name = None
     _domain=None
@@ -167,6 +239,34 @@ class BasicFormattedFrame(TimeDataFrame):
 
     _default_sep = ', '
 
+
+    def __init__(self,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+        #_try_evat='test'
+        print(f'custom init of {type(self)}')
+        
+        super().__init__(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
+        
+        op_func=self.apply_for_init(**kwargs)
+        self._op_func=op_func
+        
+        #print('evaluation holded','try evalf',_try_evat)
+        class_op=self.__class__._applying_func
+        self.__class__._applying_func=None
+
+        #self._try_evat='was changed'
+        super().__init__(data=op_func((self)))
+        self.__class__._applying_func=class_op
+        #print('evaluation started again','try evalf',_try_evat)
+    
+    def switch_columns_type(self):
+
+
+        return self.switch_axis_type(axis=1)
+    
+    
+
+    
+    
 #     @classmethod
 #     def set_column_separator(cls, sep=', '):
 #         cls._default_sep = sep
@@ -186,11 +286,7 @@ class BasicFormattedFrame(TimeDataFrame):
 #         print(cls._data_filtter)
 #         return cls
 
-#     @classmethod
-#     def set_units_dict(cls, units={}):
 
-#         cls._units = units
-#         return cls
 
 #     def _match_unit(self, sym, latex_printer=vlatex):
 
@@ -211,54 +307,27 @@ class BasicFormattedFrame(TimeDataFrame):
 #         else:
 #             return f'{latex_printer(sym)}'
 
-#     def _format_label(self, obj):
-#         if self.__class__._label_formatter:
-#             return self.__class__._label_formatter(obj)
-#         else:
-#             if isinstance(obj, Iterable):
-#                 obj = obj
-#             else:
-#                 obj = obj,
+    def _format_entry(self, obj,formatter=None):
+        if formatter is not None:
+            return formatter(obj)
+        else:
+            return self.__class__._label_formatter(obj)
 
-#             return self.__class__._default_sep.join(
-#                 f'${self._match_unit(elem)}$' if isinstance(elem, (
-#                     Expr, Eq)) else f'{elem}' for elem in obj if elem != 0)
+    def format_columns_name(self,formatter=None):
+        if formatter is None:
+            
+            formatter = self.__class__._label_formatter        
+        new_obj = self.copy()
+        
+        new_obj_idx= new_obj.columns.to_frame()
+        
+        display(new_obj_idx)
+        display(new_obj_idx.applymap(formatter))
 
-#     def format_labels(self):
-#         if isinstance(self.columns, pd.MultiIndex):
+        new_obj_idx = new_obj_idx.applymap(formatter)
 
-#             idx = self.columns.tolist()
 
-#         else:
-#             idx = self.columns
-#         print('idx', idx)
-#         new_idx = []
-#         for entry in idx:
-#             print('entry', entry, type(entry))
-#             if entry in self.__class__._units and entry != 0:
-
-#                 units = self.__class__._units
-
-#                 #new_idx+=[ self._format_label(entry) + f'{units[entry]}']
-#                 new_idx += [self._format_label(entry)]
-#             elif entry != 0:
-#                 new_idx += [self._format_label(entry)]
-
-#         print('new idx', new_idx)
-
-#         self.__class__._ylabel = (list(idx)[0][0])
-
-#         new_obj = self.copy()
-
-#         new_obj.columns = new_idx
-
-#         cols_name = self.__class__._cols_name
-
-#         if cols_name:
-#             idx_name = self._format_label(cols_name)
-#             new_obj.columns.name = idx_name
-
-#         return new_obj
+        return new_obj.set_axis(new_obj_idx ,axis=1)
 
     @property
     def _constructor(self):
