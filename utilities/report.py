@@ -256,7 +256,9 @@ class BasicFormattedFrame(TimeDataFrame,BasicFormattingTools):
         #self._try_evat='was changed'
         super().__init__(data=op_func((self)))
         self.__class__._applying_func=class_op
+        self._no=1
         #print('evaluation started again','try evalf',_try_evat)
+        print(self._no)
     
     def switch_columns_type(self):
 
@@ -1105,7 +1107,22 @@ class PivotPlotFrameSummary(BaseFrameFormatter):
             
         return filtter
 
-
+    
+    
+class MarkersRegister:
+    
+    _markers = pd.DataFrame()
+    _instance_list=[]
+    _first_instace_marker=None
+    _last_instance_marker=None
+    
+    def __init__(self,marker_str='auto_marker'):
+        
+        self.__class__._instance_list.append(self)
+        self._first_instace_marker=None
+        self._last_instance_marker=None
+    
+    
 class ReportModule:
     r'''
     Basic class for maintaining global options of a report module. It provides methods for setting options common with every class inheriting from ReportModule instance. 
