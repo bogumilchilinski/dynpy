@@ -1798,6 +1798,7 @@ class Summary(ReportModule):
                  caption=None,
                  label=None,
                  subplots=False,
+                 height=None,
                 extra_commands=None):
 
         if subplots:
@@ -1824,6 +1825,7 @@ class Summary(ReportModule):
         if block:
 
             self._frame = block._frame
+            
             self._last_result = block._last_result
         if caption:
             self._caption = caption
@@ -1835,6 +1837,11 @@ class Summary(ReportModule):
         else:
             self._label = self.__class__._label
 
+        if height:
+            self._height = height
+        else:
+            self._height = self.__class__._height
+            
 
         if extra_commands is not None:
             self._extra_commands = extra_commands
@@ -2003,7 +2010,8 @@ class Summary(ReportModule):
                     filepath,
                     colors_list=colors_list,
                     subplots=self._subplot,
-                    height=self._height,
+                    height=self._height
+                ,
                     width=NoEscape(r'0.9\textwidth'),
                     x_axis_description=
                     f',xlabel=${NoEscape(vlatex(ivar))}$, {x_unit_str},'.replace('$$','$'),
