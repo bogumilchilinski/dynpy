@@ -48,6 +48,8 @@ class BasicFormattingTools:
     _label_formatter = lambda obj: f'${vlatex(obj)}$' if isinstance(obj,(Expr,Eq)) else obj
     _domain=None
     _units={}
+    _applying_func = None
+    _init_ops=True
 
     _default_sep = ', '
     
@@ -64,6 +66,88 @@ class BasicFormattingTools:
         return cls
 
 
+    
+    def set_multiindex_axis(self,axis=0):
+        
+        if axis == 'index':
+            axis = 0
+        elif axis == 'colums':
+            axis = 1
+            
+        
+        idx = self.axes[axis]
+        
+        if isinstance(idx,pd.MultiIndex):
+       
+            new_obj = self.copy()
+            
+        else:
+            midx = pd.MultiIndex.from_tuples(idx)
+            new_obj = self.copy().set_axis(midx,axis=axis)
+
+        return new_obj
+
+    def set_flat_index_axis(self,axis=0):
+        
+        if axis == 'index':
+            axis = 0
+        elif axis == 'colums':
+            axis = 1
+
+        idx = self.axes[axis]
+        
+        if isinstance(idx,pd.MultiIndex):
+            midx = idx.to_flat_index()
+            new_obj = self.copy().set_axis(midx,axis=axis)
+
+        else:
+
+            new_obj = self.copy()
+
+        return new_obj
+    
+
+    def switch_axis_type(self,axis=0):
+        
+        if axis == 'index':
+            axis = 0
+        elif axis == 'colums':
+            axis = 1
+            
+        
+        idx = self.axes[axis]
+        
+        if isinstance(idx,pd.MultiIndex):
+            
+            new_obj = self.set_flat_index_axis(axis=axis)
+            
+        else:
+            new_obj = self.copy().set_multiindex_axis(axis=axis)
+
+        return new_obj
+    
+    
+    def switch_index_type(self):
+
+        return self.switch_axis_type(axis=0)
+
+    
+    def apply_for_init(self,func=None,**kwargs):
+        if func:
+            print('func is used')
+            ops_func = func
+        elif self.__class__._applying_func is not None and self.__class__._init_ops:
+            print('class func is used')
+            ops_func = self.__class__._applying_func
+        else:
+            print('identity is used')
+            ops_func = lambda data: data
+        
+        
+        
+        return ops_func
+        
+    
 class BasicFormattedSeries(TimeSeries,BasicFormattingTools):
 
     r'''
@@ -123,32 +207,7 @@ class BasicFormattedSeries(TimeSeries,BasicFormattingTools):
 
 
 
-    def switch_axis_type(self,**kwargs):
-        
-        if axis == 'index':
-            axis = 0
-        elif axis == 'colums':
-            axis = 1
-            
-        
-        idx = self.index
-        
-        if isinstance(idx,pd.MultiIndex):
-            idx_tuples = idx.to_flat_index()
-            new_obj = self.copy().set_index(idx_tuples)
-            
-        else:
-            midx = pd.MultiIndex.from_tuples(idx)
-            new_obj = self.copy().set_index(mdix)
 
-        return new_obj
-    
-    
-    
-    def switch_index_type(self):
-
-
-        return self.switch_axis_type(axis=0)
 
 
 class BasicFormattedFrame(TimeDataFrame,BasicFormattingTools):
@@ -180,46 +239,24 @@ class BasicFormattedFrame(TimeDataFrame,BasicFormattingTools):
 
     _default_sep = ', '
 
-    def set_multiindex_axis(self,axis=0):
-        
-        if axis == 'index':
-            axis = 0
-        elif axis == 'colums':
-            axis = 1
-            
-        
-        idx = self.axes[axis]
-        
-        if isinstance(idx,pd.MultiIndex):
-       
-            new_obj = self.copy()
-            
-        else:
-            midx = pd.MultiIndex.from_tuples(idx)
-            new_obj = self.copy().set_axis(midx,axis=axis)
 
-        return new_obj
-
-
-    def switch_axis_type(self,axis=0):
+    def __init__(self,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+        #_try_evat='test'
+        print(f'custom init of {type(self)}')
         
-        if axis == 'index':
-            axis = 0
-        elif axis == 'colums':
-            axis = 1
-            
+        super().__init__(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
         
-        idx = self.axes[axis]
+        op_func=self.apply_for_init(**kwargs)
+        self._op_func=op_func
         
-        if isinstance(idx,pd.MultiIndex):
-            
-            new_obj = self.copy()
-            
-        else:
-            new_obj = self.copy().set_multiindex_axis(self,axis=0)
+        #print('evaluation holded','try evalf',_try_evat)
+        class_op=self.__class__._applying_func
+        self.__class__._applying_func=None
 
-        return new_obj
-    
+        #self._try_evat='was changed'
+        super().__init__(data=op_func((self)))
+        self.__class__._applying_func=class_op
+        #print('evaluation started again','try evalf',_try_evat)
     
     def switch_columns_type(self):
 
@@ -227,10 +264,7 @@ class BasicFormattedFrame(TimeDataFrame,BasicFormattingTools):
         return self.switch_axis_type(axis=1)
     
     
-    def switch_index_type(self):
 
-
-        return self.switch_axis_type(axis=0)
     
     
 #     @classmethod
