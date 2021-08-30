@@ -1093,6 +1093,7 @@ class ReportModule:
     _out_formatter = BaseFrameFormatter  # lambda data: data
     _height=NoEscape(r'6cm')
 
+    
 
     @classmethod
     def set_output_formatter(cls, formatter=BaseFrameFormatter):
