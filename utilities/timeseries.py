@@ -9,6 +9,9 @@ from sympy.physics.mechanics import vlatex
 default_colors=['red','blue','orange','teal','black','green']
 
 class DataMethods:
+    
+    
+    
     def _pylatex_tikz(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,extra_commands=None,options=None):
 
         
@@ -157,7 +160,22 @@ class SpectralMethods(DataMethods):
 
 class TimeDomainMethods(DataMethods):
 
-
+    
+    def _set_comp_time(self,time):
+        self._comp_time=time
+        return None
+    
+    def _get_comp_time(self):
+        
+        try:
+            obj = self._comp_time
+        except:
+            obj=None
+        else:
+            obj = None
+            
+        return obj
+        
     def gradient(self):
         
         

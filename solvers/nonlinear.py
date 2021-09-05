@@ -19,7 +19,7 @@ from sympy.simplify.fu import TR8, TR10, TR7, TR3
 
 from .linear import LinearODESolution, FirstOrderODE
 
-
+from timer import timer
 from collections.abc import Iterable
 
 class AnalyticalSolution(Matrix):
@@ -577,32 +577,33 @@ class MultiTimeScaleMethod(LinearODESolution):
 
 #             print('linear values check')
 #             display(Dict(self._ic_from_sol(order=order,formula=True)).subs(self.params_values).subs(self.params_values)  )
-            
+        
 #             print('nonlinear values check')
             ics_dict=self._ic_from_sol(order=order,formula=False)
 #             display(Dict(ics_dict).subs(self.params_values))
-            
-            ics_symbols_dict={sym:val for sym, val in zip(self.ics_symbols,self.ics)  }
-            
-#             display(ics_symbols_dict)
-            
-            nth_order_solution_fun = lambdify(self.ivar, (solution.subs(ics_dict).subs(self.extra_params).subs(ics_symbols_dict)).subs(self.params_values).n(), 'numpy')
 
-            #return nth_order_solution_fun(ivar)
-            solution  = TimeDataFrame(data={
-                dvar: data[0]
-                for dvar, data in zip(self.dvars, nth_order_solution_fun(ivar))
-            },
-                                 index=ivar)
-            
-            
-            for dvar in self.dvars:
-                solution[dvar.diff(self.ivar,1)]=solution[dvar].gradient()
-            
-            for dvar in self.dvars:
-                solution[dvar.diff(self.ivar,2)]=solution[dvar.diff(self.ivar,1)].gradient()
-            
-            solution.index.name=self.ivar
+            ics_symbols_dict={sym:val for sym, val in zip(self.ics_symbols,self.ics)  }
+#             display(ics_symbols_dict)
+
+            nth_order_solution_fun = lambdify(self.ivar, (solution.subs(ics_dict).subs(self.extra_params).subs(ics_symbols_dict)).subs(self.params_values).n(), 'numpy')
+            with timer() as t:    
+                #return nth_order_solution_fun(ivar)
+                solution  = TimeDataFrame(data={
+                    dvar: data[0]
+                    for dvar, data in zip(self.dvars, nth_order_solution_fun(ivar))
+                },
+                                     index=ivar)
+
+
+                for dvar in self.dvars:
+                    solution[dvar.diff(self.ivar,1)]=solution[dvar].gradient()
+
+                for dvar in self.dvars:
+                    solution[dvar.diff(self.ivar,2)]=solution[dvar.diff(self.ivar,1)].gradient()
+
+                solution.index.name=self.ivar
+                
+                print('A_time'*20,t.elapse)
             
             return solution.apply(np.real)
 

@@ -18,6 +18,7 @@ from pylatex.package import Package
 from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
 from sympy import Matrix, symbols, Symbol, Eq, Expr
+from sympy.core.relational import Relational
 
 from sympy import Symbol, Function, Derivative, latex
 
@@ -41,14 +42,94 @@ def plots_no():
 plots_no_gen = plots_no()
 
 
+class EntryWithUnit:
+    _units={}
+    _latex_backend=latex
+
+    
+    @classmethod
+    def set_default_units(cls, units={}):
+
+        cls._units = units
+        return cls
+    
+    def __init__(self,obj,units=None,latex_backend=None,**kwargs):
+        self._obj =obj
+        self._unit=None
+        self._left_par = '['
+        self._right_par = ']'
+        
+        if units is not None:
+            self._units= units
+        else:
+            self._units= self.__class__._units
+
+            
+        if latex_backend is not None:
+            self._latex_backend= latex_backend
+        else:
+            self._latex_backend= self.__class__._latex_backend
+            
+        if isinstance(self._obj,Relational):
+            self._left_par = ''
+            self._right_par = ''
+            self._quantity = self._obj.lhs
+        else:
+            self._quantity=self._obj
+            
+        self._set_quantity_unit()
+        
+    def _set_quantity_unit(self):
+        if self._quantity in self._units:
+            self._unit = self._units[self._quantity]
+        else:
+            self._unit=None
+
+            
+    def __str__(self):
+        entry_str=self._obj.__str__()
+        unit = self._unit
+        left_par=self._left_par
+        right_par=self._right_par
+        
+        if unit:
+            return f'{entry_str} {left_par}{unit.__str__()}{right_par}'
+        else:
+            return f'{entry_str}'
+
+    def __repr__(self):
+        entry_str=self._obj.__repr__()
+        unit = self._unit
+        left_par=self._left_par
+        right_par=self._right_par
+        
+        if unit:
+            return f'{entry_str} {left_par}{unit.__repr__()}{right_par}'
+        else:
+            return f'{entry_str}'
+        
+    def _latex(self,*args):
+        entry_str=self._latex_backend(self._obj)
+        unit = self._unit
+        left_par=self._left_par
+        right_par=self._right_par
+        
+        
+        if unit:
+            return f'{entry_str} {left_par}{unit:~L}{right_par}'
+        else:
+            return f'{self._obj}'
+
+
 class BasicFormattingTools:
     
     
     _latex_backend=vlatex
-    _label_formatter = lambda obj: f'${vlatex(obj)}$' if isinstance(obj,(Expr,Eq)) else obj
+    _label_formatter = lambda obj: f'${vlatex(obj)}$' if isinstance(obj,(Expr,Eq,EntryWithUnit)) else obj
+    _unit_selector = EntryWithUnit
     _domain=None
     _units={}
-    _applying_func = None
+    _applying_func = lambda x: x.copy().swaplevel(axis=1)
     _init_ops=True
 
     _default_sep = ', '
@@ -60,12 +141,16 @@ class BasicFormattingTools:
         return cls
 
     @classmethod
-    def set_global_units(cls, units={}):
+    def set_default_units(cls, units={}):
 
         cls._units = units
         return cls
 
+    @classmethod
+    def set_default_unit_selector(cls, selector=EntryWithUnit):
 
+        cls._unit_selector = selector
+        return cls
     
     def set_multiindex_axis(self,axis=0):
         
@@ -87,6 +172,11 @@ class BasicFormattingTools:
 
         return new_obj
 
+    
+    def set_multiindex_columns(self):
+        
+        return self.set_multiindex_axis(axis=1)
+    
     def set_flat_index_axis(self,axis=0):
         
         if axis == 'index':
@@ -132,23 +222,28 @@ class BasicFormattingTools:
         return self.switch_axis_type(axis=0)
 
     
-    def apply_for_init(self,func=None,**kwargs):
+
+    def __call__(self):
+        return self.copy()
+    
+    
+    
+    def applying_method(self,data,func=None,**kwargs):
         if func:
             print('func is used')
             ops_func = func
-        elif self.__class__._applying_func is not None and self.__class__._init_ops:
+        elif self.__class__._applying_func is not None:
             print('class func is used')
             ops_func = self.__class__._applying_func
         else:
             print('identity is used')
             ops_func = lambda data: data
+
         
-        
-        
-        return ops_func
+        return ops_func(data)
         
     
-class BasicFormattedSeries(TimeSeries,BasicFormattingTools):
+class AdaptableSeries(TimeSeries,BasicFormattingTools):
 
     r'''
     Basic class for formatting data plots. It provides methods for setting options 
@@ -166,12 +261,26 @@ class BasicFormattedSeries(TimeSeries,BasicFormattingTools):
     
     @property
     def _common_constructor_frame(self):
-        return BasicFormattedFrame
+        return AdaptableDataFrame#._init_without_ops
     
+    
+    @property
+    def _common_constructor_series(self):
+        return self.__class__#._init_without_ops
     
     _cols_name = None
 
 
+    @classmethod
+    def _init_with_ops(cls,data=None, index=None, dtype=None, name=None, copy=False, fastpath=False,**kwargs):
+        print(f'pure init of {cls}')
+        return cls(data=data, index=index,  dtype=dtype,name=name, copy=copy,fastpath=fastpath,func=lambda obj: obj)
+        
+    
+    def __init__(self,data=None, index=None, dtype=None, name=None, copy=False, fastpath=False,**kwargs):
+
+        super().__init__(data=data, index=index,  dtype=dtype,name=name, copy=copy,fastpath=fastpath)
+        
 
     
 #     @classmethod
@@ -195,7 +304,7 @@ class BasicFormattedSeries(TimeSeries,BasicFormattingTools):
 
     @property
     def _constructor(self):
-        return self.__class__
+        return self._common_constructor_series
 
     @property
     def _constructor_expanddim(self):
@@ -203,18 +312,23 @@ class BasicFormattedSeries(TimeSeries,BasicFormattingTools):
 
     @property
     def _constructor_sliced(self):
-        return self.__class__
+        return self._common_constructor_series
 
 
 
 
 
 
-class BasicFormattedFrame(TimeDataFrame,BasicFormattingTools):
+class AdaptableDataFrame(TimeDataFrame,BasicFormattingTools):
     
     @property
     def _common_constructor_series(self):
-        return BasicFormattedSeries
+        return AdaptableSeries#._init_without_ops
+    
+    
+    @property
+    def _common_constructor_frame(self):
+        return self.__class__#._init_without_ops
     
 
     _units = {}
@@ -239,26 +353,34 @@ class BasicFormattedFrame(TimeDataFrame,BasicFormattingTools):
 
     _default_sep = ', '
 
+    @classmethod
+    def _init_with_ops(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
 
+        raw_frame= cls(data=data, index=index, columns=columns, dtype=dtype, copy=copy,func=lambda obj: obj)
+        
+        print('_init_with_ops')
+        display(raw_frame)
+        
+        new_frame=raw_frame.applying_method(raw_frame,**kwargs)
+        
+        print('_init_without_ops')
+        display(new_frame)        
+        
+       
+        return cls(data=new_frame, index=index, columns=columns, dtype=dtype, copy=copy,func=lambda obj: obj)
+
+    @classmethod
+    def formatted(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+        return cls._init_with_ops(data=data, index=index, columns=columns, dtype=dtype, copy=copy,**kwargs)
+    
+    
     def __init__(self,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
         #_try_evat='test'
         print(f'custom init of {type(self)}')
         
         super().__init__(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
         
-        op_func=self.apply_for_init(**kwargs)
-        self._op_func=op_func
-        
-        #print('evaluation holded','try evalf',_try_evat)
-        class_op=self.__class__._applying_func
-        self.__class__._applying_func=None
 
-        #self._try_evat='was changed'
-        super().__init__(data=op_func((self)))
-        self.__class__._applying_func=class_op
-        self._no=1
-        #print('evaluation started again','try evalf',_try_evat)
-        print(self._no)
     
     def switch_columns_type(self):
 
@@ -315,10 +437,45 @@ class BasicFormattedFrame(TimeDataFrame,BasicFormattingTools):
         else:
             return self.__class__._label_formatter(obj)
 
-    def format_columns_name(self,formatter=None):
+    def _modify_axis(self,func,axis=0):
+        
+        new_obj = self.copy()
+        
+        new_obj_idx= new_obj.axes[axis]
+        
+        display(new_obj_idx)
+        display(new_obj_idx.to_frame().applymap(func))
+
+        idx_frame = new_obj_idx.to_frame().applymap(func)
+        
+        if isinstance(new_obj_idx,pd.MultiIndex):
+            new_obj_idx = pd.MultiIndex.from_frame(idx_frame)
+        else:
+            
+            display(idx_frame)
+            display(list(idx_frame))
+            
+            new_obj_idx = pd.Index(idx_frame,name=new_obj_idx.name)
+            
+
+
+        return new_obj.set_axis(new_obj_idx ,axis=axis)
+
+    def fit_units_to_columns(self,selector=None):
+        if selector is None:
+            selector = self.__class__._unit_selector
+            
+            
+        new_frame=self._modify_axis(selector.set_default_units(self.__class__._units),axis=1)
+        
+        return new_frame
+            
+    
+    
+    def format_columns_names(self,formatter=None):
         if formatter is None:
             
-            formatter = self.__class__._label_formatter        
+            formatter = self.__class__._label_formatter
         new_obj = self.copy()
         
         new_obj_idx= new_obj.columns.to_frame()
@@ -333,11 +490,11 @@ class BasicFormattedFrame(TimeDataFrame,BasicFormattingTools):
 
     @property
     def _constructor(self):
-        return self.__class__
+        return self._common_constructor_frame
 
     @property
     def _constructor_expanddim(self):
-        return self.__class__
+        return self._common_constructor_frame
 
     @property
     def _constructor_sliced(self):
@@ -464,9 +621,50 @@ class BasicFormattedFrame(TimeDataFrame,BasicFormattingTools):
         return super().plot(*args, **kwargs)
 
 
+class AbstractFrameFormatter(AdaptableDataFrame):
+    _applying_func=lambda x: (x*100)
+
+    @classmethod
+    def _apply_func(cls,func=None,**kwargs):
+        
+        if func:
+            ops_to_apply=func
+        elif cls._applying_func:
+            ops_to_apply=cls._applying_func
+        else:
+            ops_to_apply=lambda obj: obj
+        
+        return ops_to_apply
+    
+    def __new__(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+        
+        ops_to_apply=cls._apply_func(**kwargs)
+       
+        return ops_to_apply(BasicFormattedFrame(data=data, index=index, columns=columns, dtype=dtype, copy=copy))
 
 
+class AbstractSeriesFormatted(AdaptableSeries):
+    _applying_func=lambda x: (x*100)
 
+    @classmethod
+    def _apply_func(cls,func=None,**kwargs):
+        
+        if func:
+            ops_to_apply=func
+        elif cls._applying_func:
+            ops_to_apply=cls._applying_func
+        else:
+            ops_to_apply=lambda obj: obj
+        
+        return ops_to_apply
+    
+    def __new__(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+        
+        ops_to_apply=cls._apply_func(**kwargs)
+       
+        return ops_to_apply(BasicFormattedSeries(data=data, index=index, columns=columns, dtype=dtype, copy=copy))
+    
+    
 class BaseSeriesFormatter(TimeSeries):
     _cols_name = None
     _domain=None
@@ -1121,7 +1319,27 @@ class MarkersRegister:
         self.__class__._instance_list.append(self)
         self._first_instace_marker=None
         self._last_instance_marker=None
-    
+
+        
+class AutoMarker:
+    def __init__(self,obj,marker_str=None,marker_prefix=None):
+        
+        if marker_str:
+            self._str=marker_str
+        else:
+            self._str=str(obj)
+            
+            
+        if marker_prefix:
+            self._prefix=marker_prefix            
+        elif isinstance(obj,[Expr,Eq,Matrix]):
+            self._prefix='eq'
+        else:
+            self._prefix='fig'            
+        
+        self._marker = Marker(self._marker_str,prefix=self._prefix)
+        
+        MarkersRegister._markers[obj]=self._marker
     
 class ReportModule:
     r'''
@@ -1289,7 +1507,9 @@ class ReportModule:
 
             print('data.index', data.index)
             print('data.index.name', data.index.name)
-
+            print('xX'*100)
+            print( self._out_format )
+            print('xX'*100)
             result = self._out_format(data)()
 
             #             print('#'*100)
@@ -1884,7 +2104,9 @@ class Summary(ReportModule):
 
             self.__class__._frame.index.name = analysis._last_result.index.name
             self._frame.index.name = analysis._last_result.index.name
-
+            print('_'*100,analysis._last_result._get_comp_time())            
+            
+            
         print('summary plot - call')
         print((self._block), type((self._block)))
 
@@ -1894,6 +2116,7 @@ class Summary(ReportModule):
             #print()
 
             result_to_add = type(self._block)._last_result
+            print('_'*100,result_to_add._get_comp_time())
             columns_to_add = result_to_add.columns
 
             print('plot index', result_to_add.index.name)
@@ -1919,6 +2142,7 @@ class Summary(ReportModule):
                 self.__class__._frame.index.name = result_to_add.index.name
 
         plt.clf()
+
 
         return result_of_plot
 
