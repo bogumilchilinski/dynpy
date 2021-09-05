@@ -134,13 +134,13 @@ class BasicFormattingTools:
     
     def apply_for_init(self,func=None,**kwargs):
         if func:
-            print('func is used')
+            #print('func is used')
             ops_func = func
         elif self.__class__._applying_func is not None and self.__class__._init_ops:
-            print('class func is used')
+            #print('class func is used')
             ops_func = self.__class__._applying_func
         else:
-            print('identity is used')
+            #print('identity is used')
             ops_func = lambda data: data
         
         
@@ -178,7 +178,7 @@ class BasicFormattedSeries(TimeSeries,BasicFormattingTools):
 #     def set_data_filtter(cls, filtter=lambda frame: frame.copy()):
 
 #         cls._data_filtter = filtter
-#         print(cls._data_filtter)
+#         #print(cls._data_filtter)
 #         return cls
 
 #     @classmethod
@@ -242,14 +242,14 @@ class BasicFormattedFrame(TimeDataFrame,BasicFormattingTools):
 
     def __init__(self,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
         #_try_evat='test'
-        print(f'custom init of {type(self)}')
+        #print(f'custom init of {type(self)}')
         
         super().__init__(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
         
         op_func=self.apply_for_init(**kwargs)
         self._op_func=op_func
         
-        #print('evaluation holded','try evalf',_try_evat)
+        ##print('evaluation holded','try evalf',_try_evat)
         class_op=self.__class__._applying_func
         self.__class__._applying_func=None
 
@@ -257,8 +257,8 @@ class BasicFormattedFrame(TimeDataFrame,BasicFormattingTools):
         super().__init__(data=op_func((self)))
         self.__class__._applying_func=class_op
         self._no=1
-        #print('evaluation started again','try evalf',_try_evat)
-        print(self._no)
+        ##print('evaluation started again','try evalf',_try_evat)
+        #print(self._no)
     
     def switch_columns_type(self):
 
@@ -285,12 +285,12 @@ class BasicFormattedFrame(TimeDataFrame,BasicFormattingTools):
 #     def set_data_filtter(cls, filtter=lambda frame: frame.copy()):
 
 #         cls._data_filtter = filtter
-#         print(cls._data_filtter)
+#         #print(cls._data_filtter)
 #         return cls
 
 
 
-#     def _match_unit(self, sym, latex_printer=vlatex):
+#     def _match_unit(self, sym, latex_#printer=vlatex):
 
 #         units = self.__class__._units
 
@@ -298,16 +298,16 @@ class BasicFormattedFrame(TimeDataFrame,BasicFormattingTools):
 #             sym_check = sym.lhs
 #         else:
 #             sym_check = sym
-#         print(f'variable is {sym}')
-#         print(f'units are {units}')
+#         #print(f'variable is {sym}')
+#         #print(f'units are {units}')
 #         if sym_check in units:
-#             print(f'{sym} is in units_dict')
-#             print('matched unit', f'{units[sym_check]:~L}')
-#             return f'{latex_printer(sym)}~[{units[sym_check]:~L}]'
+#             #print(f'{sym} is in units_dict')
+#             #print('matched unit', f'{units[sym_check]:~L}')
+#             return f'{latex_#printer(sym)}~[{units[sym_check]:~L}]'
 
 #             #return f'{latex(sym)}'
 #         else:
-#             return f'{latex_printer(sym)}'
+#             return f'{latex_#printer(sym)}'
 
     def _format_entry(self, obj,formatter=None):
         if formatter is not None:
@@ -365,24 +365,24 @@ class BasicFormattedFrame(TimeDataFrame,BasicFormattingTools):
 
 #         else:
 #             idx = self.index
-#         print('idx', idx)
+#         #print('idx', idx)
 #         new_idx = idx.copy()
-#         print('new idx', new_idx)
+#         #print('new idx', new_idx)
 
 #         new_obj = self.copy()
 #         new_obj.index = new_idx
 
-#         print('new_obj.index', new_obj.index.name)
+#         #print('new_obj.index', new_obj.index.name)
 
 #         if not new_obj.index.name:
 #             new_obj.index.name = Symbol('f')
 
-#         print('new_obj.index', new_obj.index.name)
+#         #print('new_obj.index', new_obj.index.name)
 
 #         new_obj.index.name = f'${self._match_unit(new_obj.index.name)}$'
 #         #new_obj.index.name = 'cos'
 
-#         #print('new_obj.index.name',new_obj.index.name)
+#         ##print('new_obj.index.name',new_obj.index.name)
 
 #         return new_obj
 
@@ -448,7 +448,7 @@ class BasicFormattedFrame(TimeDataFrame,BasicFormattingTools):
 #     def __call__(self):
 
 #         filtter = self._filtter()
-#         print('on __call__', filtter)
+#         #print('on __call__', filtter)
 
 #         #         display('old data',self)
 #         #         display('new data',filtter(self))
@@ -495,7 +495,7 @@ class BaseSeriesFormatter(TimeSeries):
     def set_data_filtter(cls, filtter=lambda frame: frame.copy()):
 
         cls._data_filtter = filtter
-        print(cls._data_filtter)
+        #print(cls._data_filtter)
         return cls
 
     @classmethod
@@ -595,7 +595,7 @@ class BaseFrameFormatter(TimeDataFrame):
     def set_data_filtter(cls, filtter=lambda frame: frame.copy()):
 
         cls._data_filtter = filtter
-        print(cls._data_filtter)
+        #print(cls._data_filtter)
         return cls
 
     @classmethod
@@ -612,11 +612,11 @@ class BaseFrameFormatter(TimeDataFrame):
             sym_check = sym.lhs
         else:
             sym_check = sym
-        print(f'variable is {sym}')
-        print(f'units are {units}')
+        #print(f'variable is {sym}')
+        #print(f'units are {units}')
         if sym_check in units:
-            print(f'{sym} is in units_dict')
-            print('matched unit', f'{units[sym_check]:~L}')
+            #print(f'{sym} is in units_dict')
+            #print('matched unit', f'{units[sym_check]:~L}')
             return f'{latex_printer(sym)}~[{units[sym_check]:~L}]'
 
             #return f'{latex(sym)}'
@@ -643,10 +643,10 @@ class BaseFrameFormatter(TimeDataFrame):
 
         else:
             idx = self.columns
-        print('idx', idx)
+        #print('idx', idx)
         new_idx = []
         for entry in idx:
-            print('entry', entry, type(entry))
+            #print('entry', entry, type(entry))
             if entry in self.__class__._units and entry != 0:
 
                 units = self.__class__._units
@@ -656,7 +656,7 @@ class BaseFrameFormatter(TimeDataFrame):
             elif entry != 0:
                 new_idx += [self._format_label(entry)]
 
-        print('new idx', new_idx)
+        #print('new idx', new_idx)
 
         self.__class__._ylabel = (list(idx)[0][0])
 
@@ -706,24 +706,24 @@ class BaseFrameFormatter(TimeDataFrame):
 
         else:
             idx = self.index
-        print('idx', idx)
+        #print('idx', idx)
         new_idx = idx.copy()
-        print('new idx', new_idx)
+        #print('new idx', new_idx)
 
         new_obj = self.copy()
         new_obj.index = new_idx
 
-        print('new_obj.index', new_obj.index.name)
+        #print('new_obj.index', new_obj.index.name)
 
         if not new_obj.index.name:
             new_obj.index.name = Symbol('f')
 
-        print('new_obj.index', new_obj.index.name)
+        #print('new_obj.index', new_obj.index.name)
 
         new_obj.index.name = f'${self._match_unit(new_obj.index.name)}$'
         #new_obj.index.name = 'cos'
 
-        #print('new_obj.index.name',new_obj.index.name)
+        ##print('new_obj.index.name',new_obj.index.name)
 
         return new_obj
 
@@ -789,7 +789,7 @@ class BaseFrameFormatter(TimeDataFrame):
     def __call__(self):
 
         filtter = self._filtter()
-        print('on __call__', filtter)
+        #print('on __call__', filtter)
 
         #         display('old data',self)
         #         display('new data',filtter(self))
@@ -842,23 +842,23 @@ class FFTSeriesFormatter(BaseSeriesFormatter):
 
         else:
             idx = self.index
-        print('idx', idx)
+        #print('idx', idx)
         new_idx = idx.copy()
-        print('new idx', new_idx)
+        #print('new idx', new_idx)
 
         new_obj = self.copy()
         new_obj.index = new_idx
 
-        print('new_obj.index', new_obj.index.name)
+        #print('new_obj.index', new_obj.index.name)
 
         new_obj.index.name = Symbol('f')
 
-        print('new_obj.index', new_obj.index.name)
+        #print('new_obj.index', new_obj.index.name)
 
         new_obj.index.name = f'${self._match_unit(new_obj.index.name)}$'
         #new_obj.index.name = 'cos'
 
-        #print('new_obj.index.name',new_obj.index.name)
+        ##print('new_obj.index.name',new_obj.index.name)
 
         return new_obj
 
@@ -898,23 +898,23 @@ class FFTFrameFormatter(BaseFrameFormatter):
 
         else:
             idx = self.index
-        print('idx', idx)
+        #print('idx', idx)
         new_idx = idx.copy()
-        print('new idx', new_idx)
+        #print('new idx', new_idx)
 
         new_obj = self.copy()
         new_obj.index = new_idx
 
-        print('new_obj.index', new_obj.index.name)
+        #print('new_obj.index', new_obj.index.name)
 
         new_obj.index.name = Symbol('f')
 
-        print('new_obj.index', new_obj.index.name)
+        #print('new_obj.index', new_obj.index.name)
 
         new_obj.index.name = f'${self._match_unit(new_obj.index.name)}$'
         #new_obj.index.name = 'cos'
 
-        #print('new_obj.index.name',new_obj.index.name)
+        ##print('new_obj.index.name',new_obj.index.name)
 
         return new_obj
     
@@ -978,10 +978,10 @@ class PivotFrameSummary(BaseFrameFormatter):
 
         else:
             idx = self.columns
-        print('idx', idx)
+        #print('idx', idx)
         new_idx = []
         for entry in idx:
-            print('entry', entry, type(entry))
+            #print('entry', entry, type(entry))
             if entry in self.__class__._units and entry != 0:
 
                 units = self.__class__._units
@@ -991,7 +991,7 @@ class PivotFrameSummary(BaseFrameFormatter):
             elif entry != 0:
                 new_idx += [self._format_label(entry)]
 
-        print('new idx', new_idx)
+        #print('new idx', new_idx)
 
         self.__class__._ylabel = (list(idx)[0][0])
 
@@ -1014,10 +1014,10 @@ class PivotFrameSummary(BaseFrameFormatter):
 
         else:
             idx = self.index
-        print('idx', idx)
+        #print('idx', idx)
         new_idx = [entry.rhs.n(4) for entry in idx]
 
-        print('new idx', new_idx)
+        #print('new idx', new_idx)
 
         #self.__class__._ylabel=f'${latex(list(idx)[0].lhs)}$'
 
@@ -1079,10 +1079,10 @@ class PivotPlotFrameSummary(BaseFrameFormatter):
 
         else:
             idx = self.index
-        print('idx', idx)
+        #print('idx', idx)
         new_idx = [entry.rhs.n(4) for entry in idx]
 
-        print('new idx', new_idx)
+        #print('new idx', new_idx)
 
         #self.__class__._ylabel=f'${latex(list(idx)[0].lhs)}$'
 
@@ -1278,29 +1278,29 @@ class ReportModule:
         else:
             self._out_format = self.__class__._out_formatter
             
-        print(f'Report module init - formatter is {self._out_format}')
+        #print(f'Report module init - formatter is {self._out_format}')
 
     def _apply_formatter(self, data):
 
-        print(type(self._out_format))
+        #print(type(self._out_format))
         if (self._out_format is BaseFrameFormatter, PivotFrameSummary,
                 FFTFrameFormatter, PivotPlotFrameSummary):
-            print('Base frmatter is working')
+            #print('Base frmatter is working')
 
-            print('data.index', data.index)
-            print('data.index.name', data.index.name)
+            #print('data.index', data.index)
+            #print('data.index.name', data.index.name)
 
             result = self._out_format(data)()
 
-            #             print('#'*100)
+            #             #print('#'*100)
             #             display(result)
-            #             print(result.index.name)
+            #             #print(result.index.name)
             if not result.index.name:
                 result.index.name = ''
 
             return result
         else:
-            print('callable is working')
+            #print('callable is working')
             return self._out_format(data)
 
     @property
@@ -1343,13 +1343,13 @@ class ReportModule:
 #         return time_frame
 
     def set_frame(self, key, frame):
-        print('self frame is modified')
+        #print('self frame is modified')
         self._frame[key] = frame
 
         return frame
 
     def set_class_frame(self, key, frame):
-        print('class frame is modified')
+        #print('class frame is modified')
 
         self.__class__._frame[key] = frame
 
@@ -1360,11 +1360,11 @@ class ReportModule:
         if not self.__class__._hold:
 
             if obj and (self._frame is not None):
-                print('self cleaner')
+                #print('self cleaner')
                 self._frame = type(self._frame)()
                 #self._frame = None
             if (not obj) and (self.__class__._frame is not None):
-                print('class cleaner')
+                #print('class cleaner')
                 self.__class__._frame = type(self.__class__._frame)()
             #self.__class__._frame =  None
 
@@ -1533,12 +1533,12 @@ class NumericalDataSet:
                          params_values=None,
                          method='RK45'):
         
-#         print('compute_solution')
+#         #print('compute_solution')
 #         display(params_values)
 #         display(ic_list)
         
         if ic_list:
-            print('class ics has been taken')
+            #print('class ics has been taken')
             self.ics=ic_list
             
 
@@ -1617,7 +1617,7 @@ class SimulationalBlock(ReportModule):
             else:
                 system = analysis._dynamic_system
 
-            print('system label', str(system))
+            #print('system label', str(system))
             label = Eq(var, value, evaluate=False), str(system)
 
         else:
@@ -1661,7 +1661,7 @@ class SimulationalBlock(ReportModule):
 
         self._dynamic_system = dynamic_system
         self._ref_data = reference_data
-        print(self.__class__, label)
+        #print(self.__class__, label)
         self._model_label = label
 
         super().__init__()
@@ -1706,7 +1706,7 @@ class SimulationalBlock(ReportModule):
         if self._model_label:
             dynamic_system._label = self._model_label
 
-        print('dynamic model name', dynamic_system._label)
+        #print('dynamic model name', dynamic_system._label)
 
         if not self._numerical_system:
 
@@ -1724,10 +1724,10 @@ class SimulationalBlock(ReportModule):
         else:
             ics_list = self._ics_list
 
-        print('numer', numerical_system)
+        #print('numer', numerical_system)
 
-        print('ics_self', self._ics_list)
-        print('ics', ics_list)
+        #print('ics_self', self._ics_list)
+        #print('ics', ics_list)
 
         simulation_result = numerical_system.compute_solution(
             t_span=self._t_span,
@@ -1761,7 +1761,7 @@ class SimulationalBlock(ReportModule):
             (coord, ) + label for coord in simulation_result.columns
         ]] = simulation_result
 
-        #print(DataStorage._list)
+        ##print(DataStorage._list)
 
         DataStorage._list += [simulation_result]
 
@@ -1824,19 +1824,19 @@ class Summary(ReportModule):
             self._subplot = self.__class__._subplot
 
         if coordinate:
-            print('hello')
+            #print('hello')
             self._coord = coordinate
 
         else:
             self._coord = slice(None, None)
 
-        print(f'the coord is {self._coord}')
+        #print(f'the coord is {self._coord}')
 
         super().__init__()
 
-        #         print(self._frame)
-        #         print(block,'abc')
-        #         print(type(block))
+        #         #print(self._frame)
+        #         #print(block,'abc')
+        #         #print(type(block))
 
         self._block = block
         if block:
@@ -1873,10 +1873,10 @@ class Summary(ReportModule):
 
     def plot(self, *args, analysis=None, **kwargs):
 
-        #         print('analysis')
-        #         print(analysis)
+        #         #print('analysis')
+        #         #print(analysis)
         if analysis:
-            print('data is pushed to store - analysis')
+            #print('data is pushed to store - analysis')
             self.set_frame(analysis._last_result.columns,
                            analysis._last_result)
             self.set_class_frame(analysis._last_result.columns,
@@ -1885,21 +1885,21 @@ class Summary(ReportModule):
             self.__class__._frame.index.name = analysis._last_result.index.name
             self._frame.index.name = analysis._last_result.index.name
 
-        print('summary plot - call')
-        print((self._block), type((self._block)))
+        #print('summary plot - call')
+        #print((self._block), type((self._block)))
 
         result_of_plot = None
 
         if (self._block)._last_result is not None:
-            #print()
+            ##print()
 
             result_to_add = type(self._block)._last_result
             columns_to_add = result_to_add.columns
 
-            print('plot index', result_to_add.index.name)
+            #print('plot index', result_to_add.index.name)
 
             if self._frame is not None:
-                print('data is pushed to store - self -block')
+                #print('data is pushed to store - self -block')
                 self.set_frame(columns_to_add, result_to_add)
                 self._frame.index.name = result_to_add.index.name
                 display(self._frame)
@@ -1912,7 +1912,7 @@ class Summary(ReportModule):
 
             else:
 
-                print('data is pushed to store -  class -block')
+                #print('data is pushed to store -  class -block')
 
                 self.set_class_frame(columns_to_add, result_to_add)
                 result_of_plot = self.__class__._frame.plot(*args, **kwargs)
@@ -1934,8 +1934,8 @@ class Summary(ReportModule):
         **kwargs,
     ):
 
-        print('show')
-        #print(type(self)._frame)
+        #print('show')
+        ##print(type(self)._frame)
 
         result = type(self)()
 
@@ -1955,9 +1955,9 @@ class Summary(ReportModule):
 
                 result = data[self._coord]
 
-        print('story in Sumary', (type(self)._frame).empty)
-        print('out format', self._out_format)
-        #         print(result)
+        #print('story in Sumary', (type(self)._frame).empty)
+        #print('out format', self._out_format)
+        #         #print(result)
 
         formatter = self._out_format()
 
@@ -1974,8 +1974,8 @@ class Summary(ReportModule):
             self._apply_formatter(data[self._coord]).plot(
                 ylabel=ylabel, subplots=self._subplot)
 
-            print('o tu - from self')
-            #print(pd.MultiIndex.from_tuples(list(result.columns)))
+            #print('o tu - from self')
+            ##print(pd.MultiIndex.from_tuples(list(result.columns)))
             plot_of_result = plt.show()
             self.clear_frame()
 
@@ -1987,8 +1987,8 @@ class Summary(ReportModule):
             self._apply_formatter(data[self._coord]).plot(
                 ylabel=ylabel, subplots=self._subplot)
 
-            print('o tu - from cls')
-            #print(pd.MultiIndex.from_tuples(list(result.columns)))
+            #print('o tu - from cls')
+            ##print(pd.MultiIndex.from_tuples(list(result.columns)))
             plot_of_result = plt.show()
             self.clear_frame(obj=False)
 
@@ -1997,7 +1997,7 @@ class Summary(ReportModule):
             filepath = f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
 
             units = self.__class__._units
-            print('units', units)
+            #print('units', units)
             if self._coord in units:
                 y_unit_str = f'y unit = {units[self._coord]:~Lx}'.replace(
                     '[]', '')
@@ -2018,7 +2018,7 @@ class Summary(ReportModule):
             else:
                 x_unit_str = ''
 
-            print('y_unit_str', y_unit_str)
+            #print('y_unit_str', y_unit_str)
 
             if extra_commands is None:
                 extra_commands= self._extra_commands
@@ -2050,7 +2050,7 @@ class Summary(ReportModule):
 
     def summary(self, analysis=None, **kwargs):
 
-        print('summary')
+        #print('summary')
 
         result = type(self)()
 
@@ -2070,9 +2070,9 @@ class Summary(ReportModule):
 
                 result = data[self._coord]
 
-        print('story in Sumary', (type(self)._frame).empty)
+        #print('story in Sumary', (type(self)._frame).empty)
 
-        #         print(result)
+        #         #print(result)
         if not (self)._frame.empty:  #result.empty:
 
             data = ((self)._frame)
@@ -2080,8 +2080,8 @@ class Summary(ReportModule):
 
             display(self._apply_formatter(data[self._coord]))
 
-            print('o tu - from self')
-            #print(pd.MultiIndex.from_tuples(list(result.columns)))
+            #print('o tu - from self')
+            ##print(pd.MultiIndex.from_tuples(list(result.columns)))
 
             self.clear_frame()
 
@@ -2092,14 +2092,14 @@ class Summary(ReportModule):
 
             display(self._apply_formatter(data[self._coord]))
 
-            print('o tu - from cls')
-            #print(pd.MultiIndex.from_tuples(list(result.columns)))
+            #print('o tu - from cls')
+            ##print(pd.MultiIndex.from_tuples(list(result.columns)))
 
             self.clear_frame(obj=False)
 
 
-#         print(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule').replace('\\bottomrule','\\midrule \n \\bottomrule')   )
-#         print(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule').__repr__() )
+#         #print(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule').replace('\\bottomrule','\\midrule \n \\bottomrule')   )
+#         #print(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule').__repr__() )
 #         display(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule') )
 
         if self._autoreporting:
@@ -2151,8 +2151,8 @@ class Summary(ReportModule):
         #         self.last_marker = list(DataStorage._plot_markers_dict.values())[-1]
         #         type(self)._last_marker = list(
         #             DataStorage._plot_markers_dict.values())[-1]
-        #         print('marker - def')
-        #         print(self.last_marker)
+        #         #print('marker - def')
+        #         #print(self.last_marker)
 
         return analysis
 
@@ -2289,14 +2289,14 @@ class AccelerationComparison(ReportModule):
             data = self._data
 
 
-#         print('_______________test of plot_____________')
-#         print(data)
-#         print('_______________test of plot_____________')
-#         print(data)
+#         #print('_______________test of plot_____________')
+#         #print(data)
+#         #print('_______________test of plot_____________')
+#         #print(data)
 
         elements = list((data.values()))[0].columns
-        #         print('frametype')
-        #         print(type(list((data.values()))[0])())
+        #         #print('frametype')
+        #         #print(type(list((data.values()))[0])())
         summaries_dict = {
             dynsym: type(list((data.values()))[0])()
             for dynsym in elements
@@ -2354,8 +2354,8 @@ class AccelerationComparison(ReportModule):
         self.last_marker = list(DataStorage._plot_markers_dict.values())[-1]
         type(self)._last_marker = list(
             DataStorage._plot_markers_dict.values())[-1]
-        print('marker - def')
-        print(self.last_marker)
+        #print('marker - def')
+        #print(self.last_marker)
 
         return result
 
@@ -2404,12 +2404,12 @@ class AccelerationComparison(ReportModule):
                 #ndp=DataPlot('wykres_nowy',position='H',preview=False)
 
                 #it should be replaced with data.rename
-                #             print(data)
+                #             #print(data)
 
                 data.columns = [
                     type(self)._formatter(label) for label in data.columns
                 ]
-                print(type(self)._units)
+                #print(type(self)._units)
                 y_unit_str = f'{(type(self)._units[coord]):Lx}'.replace(
                     '[]', '')
 
@@ -2434,9 +2434,9 @@ class AccelerationComparison(ReportModule):
 
                 plt.show()
 
-                print('marker - plot')
-                print(self.last_marker)
-                print(type(self)._last_marker)
+                #print('marker - plot')
+                #print(self.last_marker)
+                #print(type(self)._last_marker)
                 #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
                 ndp.append(Label(type(self)._last_marker))
 
@@ -2457,12 +2457,12 @@ class AccelerationComparison(ReportModule):
                 #ndp=DataPlot('wykres_nowy',position='H',preview=False)
 
                 #it should be replaced with data.rename
-                #             print(data)
+                #             #print(data)
 
                 data.columns = [
                     type(self)._formatter(label) for label in data.columns
                 ]
-                print(type(self)._units)
+                #print(type(self)._units)
                 y_unit_str = f'{(type(self)._units[coord]):Lx}'.replace(
                     '[]', '')
 
@@ -2489,9 +2489,9 @@ class AccelerationComparison(ReportModule):
 
                 plt.show()
 
-                print('marker - plot')
-                print(self.last_marker)
-                print(type(self)._last_marker)
+                #print('marker - plot')
+                #print(self.last_marker)
+                #print(type(self)._last_marker)
                 #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
                 ndp.append(Label(type(self)._last_marker))
 
@@ -2604,42 +2604,42 @@ class AccelerationComparison(ReportModule):
         return self._simulation_result
 
 
-class FFTComparison(AccelerationComparison):
-    r'''
-    It is computational block that prepares the comparison of FFT signals of particular coordinates regarding to changes of selected parameter.
-    Class inherits from AccelerationComparison and provides several methods devoted for data processing, ploting and reporting.
+# class FFTComparison(AccelerationComparison):
+#     r'''
+#     It is computational block that prepares the comparison of FFT signals of particular coordinates regarding to changes of selected parameter.
+#     Class inherits from AccelerationComparison and provides several methods devoted for data processing, ploting and reporting.
     
-    Arguments
-    =========
-    t_span: iterable
-        Time span.
-    ics_list: iterable
-        List containing values of initial conditions. 
-    data: dict
-        Dictionary consisting data for comparison.
-    label: str
-        User-defined LaTeX label for generated plots.
+#     Arguments
+#     =========
+#     t_span: iterable
+#         Time span.
+#     ics_list: iterable
+#         List containing values of initial conditions. 
+#     data: dict
+#         Dictionary consisting data for comparison.
+#     label: str
+#         User-defined LaTeX label for generated plots.
 
-    Methods
-    =======
+#     Methods
+#     =======
 
-    Example
-    =======
-    '''
-    def _prepare_data(self, coordinate=None, xlim=None):
+#     Example
+#     =======
+#     '''
+#     def _prepare_data(self, coordinate=None, xlim=None):
 
-        data = self._data
+#         data = self._data
 
-        self._data = {
-            key: value.to_frequency_domain().double_sided_rms()
-            for key, value in data.items()
-        }
+#         self._data = {
+#             key: value.to_frequency_domain().double_sided_rms()
+#             for key, value in data.items()
+#         }
 
-        print('fft_comp')
-        for data in self._data.values():
-            print(type(data))
+#         #print('fft_comp')
+# #         for data in self._data.values():
+#             #print(type(data))
 
-        return super()._prepare_data(coordinate=None, xlim=xlim)
+#         return super()._prepare_data(coordinate=None, xlim=xlim)
 
 
 class SummaryTable(ReportModule):
@@ -2716,7 +2716,7 @@ class SummaryTable(ReportModule):
         if data:
             self._data = data
         else:
-            #print(SimulationalBlock().frame)
+            ##print(SimulationalBlock().frame)
             self._data = SimulationalBlock().frame
 
         if label:
@@ -2736,13 +2736,13 @@ class SummaryTable(ReportModule):
         else:
             data = self._data
 
-#         print('_______________test of plot_____________')
-#         print(data)
-#         print('_______________test of plot_____________')
-#         print(data)
+#         #print('_______________test of plot_____________')
+#         #print(data)
+#         #print('_______________test of plot_____________')
+#         #print(data)
         elements = data.columns
-        #         print('frametype')
-        #         print(type(list((data.values()))[0])())
+        #         #print('frametype')
+        #         #print(type(list((data.values()))[0])())
         summaries_dict = data.swaplevel(0, -1, axis=1)
 
         if coordinate:
@@ -2763,7 +2763,7 @@ class SummaryTable(ReportModule):
                                         xlim=xlim).abs().max().to_frame().T
 
         models = data_table.columns.get_level_values(0).unique()
-        #print(models)
+        ##print(models)
 
         #display([data_table[model].T for model in models])
 
@@ -2790,8 +2790,8 @@ class SummaryTable(ReportModule):
         self.last_marker = list(DataStorage._plot_markers_dict.values())[-1]
         type(self)._last_marker = list(
             DataStorage._plot_markers_dict.values())[-1]
-        print('marker - def')
-        print(self.last_marker)
+        #print('marker - def')
+        #print(self.last_marker)
 
         return result
 
@@ -2840,10 +2840,10 @@ class SummaryTable(ReportModule):
 #                 #ndp=DataPlot('wykres_nowy',position='H',preview=False)
 
 #                 #it should be replaced with data.rename
-#     #             print(data)
+#     #             #print(data)
 
 #                 data.columns=[type(self)._formatter(label) for label in data.columns ]
-#                 print(type(self)._units)
+#                 #print(type(self)._units)
 #                 y_unit_str=f'{(type(self)._units[coord]):Lx}'.replace('[]','')
 
 #                 ndp=data.to_standalone_figure(filepath,colors_list=colors_list,height=NoEscape(r'7cm'),width=NoEscape(r'12cm'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
@@ -2856,9 +2856,9 @@ class SummaryTable(ReportModule):
 
 #                 plt.show()
 
-#                 print('marker - plot')
-#                 print(self.last_marker)
-#                 print(type(self)._last_marker)
+#                 #print('marker - plot')
+#                 #print(self.last_marker)
+#                 #print(type(self)._last_marker)
 #             #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
 #                 ndp.append(Label(type(self)._last_marker))
 
@@ -2879,10 +2879,10 @@ class SummaryTable(ReportModule):
 #                 #ndp=DataPlot('wykres_nowy',position='H',preview=False)
 
 #                 #it should be replaced with data.rename
-#     #             print(data)
+#     #             #print(data)
 
 #                 data.columns=[type(self)._formatter(label) for label in data.columns ]
-#                 print(type(self)._units)
+#                 #print(type(self)._units)
 #                 y_unit_str=f'{(type(self)._units[coord]):Lx}'.replace('[]','')
 
 #                 ndp=data.to_standalone_figure(filepath,subplots=self.__class__._subplot,colors_list=colors_list,height=NoEscape(r'6cm'),width=NoEscape(r'0.9\textwidth'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
@@ -2895,9 +2895,9 @@ class SummaryTable(ReportModule):
 
 #                 plt.show()
 
-#                 print('marker - plot')
-#                 print(self.last_marker)
-#                 print(type(self)._last_marker)
+#                 #print('marker - plot')
+#                 #print(self.last_marker)
+#                 #print(type(self)._last_marker)
 #             #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
 #                 ndp.append(Label(type(self)._last_marker))
 
@@ -2992,7 +2992,7 @@ class ReportText(ReportModule):
 
     def __call__(self, analysis):
 
-        print(self._text)
+        #print(self._text)
 
         analysis._container.append(NoEscape(self._text))
 
@@ -3198,14 +3198,14 @@ class SystemDynamicsAnalyzer(ReportModule):
         self._container = []
         super().__init__()
 
-        print(self._last_result)
+        #print(self._last_result)
 
     def prepare_data(self, parameter, parameter_range=None):
 
         self._parameter = parameter
         self._parameter_range = parameter_range
 
-        print('prepare data')
+        #print('prepare data')
 
         if isinstance(self._parameter, dict):
             analysis_span_list = []
@@ -3217,7 +3217,7 @@ class SystemDynamicsAnalyzer(ReportModule):
 
                         analysis_span = {**self._reference_data, **{key: val}}
                         analysis_span_list.append(analysis_span)
-                        print(analysis_span_list)
+                        #print(analysis_span_list)
 
                 else:
                     raise TypeError('Each dictionary value should be a list.')
@@ -3230,7 +3230,7 @@ class SystemDynamicsAnalyzer(ReportModule):
                     self._parameter: param_value
                 }
             } for param_value in parameter_range]
-            #print(analysis_span)
+            ##print(analysis_span)
             self._analysis_span = analysis_span
 
         return analysis_span
@@ -3258,7 +3258,7 @@ class SystemDynamicsAnalyzer(ReportModule):
             return solution_list
         else:
             self.init_report()
-            #print(self._analysis_span)
+            ##print(self._analysis_span)
 
             return (self._analysis_span)
 
@@ -3266,7 +3266,7 @@ class SystemDynamicsAnalyzer(ReportModule):
 
         self._current_value = case_data[self._parameter]
         self._current_data = case_data
-        #print(self._current_data)
+        ##print(self._current_data)
         for action in self._loop_steps:
             self._current_result = action(analysis=self)
 
@@ -4224,7 +4224,7 @@ class DataTable(Table):
 
     def __init__(self, numerical_data, position=None):
         super().__init__(position=position)
-        #print(numerical_data)
+        ##print(numerical_data)
         self._numerical_data = numerical_data
         self.position = position
 
@@ -4275,9 +4275,9 @@ class ReportSection(Section):
 
         a = np.asarray(list(select.keys()))
 
-        print('indicator: ', indicator)
-        print(select[a.flat[np.abs(a - indicator).argmin()]])
-        print(select[a.flat[np.abs(a - indicator).argmin()]])
+        #print('indicator: ', indicator)
+        #print(select[a.flat[np.abs(a - indicator).argmin()]])
+        #print(select[a.flat[np.abs(a - indicator).argmin()]])
 
         return select[a.flat[np.abs(a - indicator).argmin()]]
 
@@ -4454,16 +4454,16 @@ class ReportSection(Section):
                 subsec.append(
                     NoEscape(str(initial_description).format(**format_dict)))
 
-                print(
-                    np.array_split(range(len(row['simulations'].columns)),
-                                   plots_no))
+#                 print(
+#                     np.array_split(range(len(row['simulations'].columns)),
+#                                    plots_no))
 
                 for no, control_list in enumerate(
                         np.array_split(range(len(row['simulations'].columns)),
                                        plots_no)):
 
-                    #print(row['simulations'].iloc[:,int(control_list[0]):int(control_list[-1]+1)])
-                    print('control list', control_list)
+                    ##print(row['simulations'].iloc[:,int(control_list[0]):int(control_list[-1]+1)])
+                    #print('control list', control_list)
 
                     current_time = dtime.datetime.now().timestamp()
                     current_fig_mrk = Marker(
@@ -4558,7 +4558,7 @@ class ReportSection(Section):
                                                  units_dict=units_dict,
                                                  marker=summary_mrk))
 
-            print(format_dict)
+            #print(format_dict)
 
             subsec.append(
                 NoEscape(str(initial_description).format(**format_dict)))
@@ -4568,7 +4568,7 @@ class ReportSection(Section):
                 for name in summary_frame.columns
             }
 
-            print(step_key_influence_dict)
+            #print(step_key_influence_dict)
 
             with subsec.create(
                     PlottedData(summary_frame,

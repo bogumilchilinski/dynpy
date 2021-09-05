@@ -422,7 +422,7 @@ class SimpleChair5DOF(dyn.HarmonicOscillator):
                  hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs)
 
     def get_param_values(self):
-        default_data_dict={F:112.5,
+        default_data_dict={F:150,
                    
                    c_mu:0.0001,
                    c_lam:0.0001,
@@ -448,14 +448,14 @@ class SimpleChair5DOF(dyn.HarmonicOscillator):
                    u0:0.005,
 
                    l_bumps:0.15,
-                   amplitude:0.0215,
-                   length:0.18,
+                   amplitude:0.0165,
+                   length:0.19,
                    speed:1.7,
-                   axw:0.5}
+                   axw:0.47}
         return default_data_dict       
     
     def get_table_values(self):
-        table_data_dict={F:112.5,
+        table_data_dict={F:150,
                    
                    c_mu:0.0001,
                    c_lam:0.0001,
@@ -481,10 +481,10 @@ class SimpleChair5DOF(dyn.HarmonicOscillator):
                    u0:0.005,
 
                    l_bumps:0.15,
-                   amplitude:0.0215,
-                   length:0.18,
+                   amplitude:0.0165,
+                   length:0.19,
                    speed:1.7,
-                   axw:0.5}
+                   axw:0.47}
         return table_data_dict       
     def numerical_model(self):
         pass
@@ -621,6 +621,8 @@ chair_sin=chair_dict['full_nonlin_sin']
 
 
 
+ureg.define('dimles = 0 = - ')
+ureg.dimles
 
 units_dict={
             c:ureg.kilogram/ureg.second,
@@ -681,7 +683,7 @@ units_dict={
             dtheta:ureg.radian/ureg.second,
             dalpha:ureg.radian/ureg.second,
             dz_wrc:ureg.meter/ureg.second,
-            pm:ureg.meter/ureg.meter,
+            pm:ureg.dimles,
             t_l:ureg.second,
             delta_t:ureg.second,
             l_ramp:ureg.meter,
