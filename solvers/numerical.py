@@ -7,6 +7,7 @@ from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
 import itertools as itools
 import scipy.integrate as solver
+from sympy.utilities.lambdify import lambdify
 from ..utilities.timeseries import TimeSeries, TimeDataFrame
 from scipy.misc import derivative
 from collections import ChainMap
@@ -59,10 +60,13 @@ class OdeComputationalCase:
                  params_values={},
                  ic_point=None,
                  evaluate=False,
-                 label=None):
+                 label=None,
+                 backend='fortran',
+                 ):
 
 
         #if label==None:
+        self._backend = backend
 
         self.odes_system = odes_system
         self.ivar = ivar
@@ -138,6 +142,22 @@ class OdeComputationalCase:
         return autowrap(((self.odes_system).subs(subs_dict, simultaneous=True)),
                         args=args_list)
 
+
+    def __numpy_odes_rhs(self):
+        '''
+        Generates the numpy code related to symbolical expresions declered in the __init__ method. The function object is returned where the all arguments create a tuple.
+        '''
+        subs_dict = {
+            var: Symbol('temp_sym_' + str(i))
+            for i, var in enumerate(self.dvars)
+        }
+
+        args_list = [self.ivar] + list(subs_dict.values()) + self.params
+
+        return lambdify( args_list ,
+                         ((self.odes_system).subs(subs_dict, simultaneous=True)).n(),
+                         [{'sin':np.sin,'cos':np.cos},'numpy']
+                        )
     
         # return autowrap(  (msubs(self.odes_system,subs_dict)),args=args_list)
 
@@ -145,7 +165,10 @@ class OdeComputationalCase:
         '''
         Generates and returns the bininary code related to symbolical expresions declered in the __init__ method. Ready-to-use function object in the compact form f(t,y,params).
         '''
-        odes_rhs = self.__fortran_odes_rhs()
+        if self._backend == 'numpy':
+            odes_rhs = self.__numpy_odes_rhs()        
+        else:
+            odes_rhs = self.__fortran_odes_rhs()
 
         self.__numerical_odes = lambda t, y, *args, **kwargs: np.asarray(
             (odes_rhs(t, *y, *args, **kwargs))).reshape(y.shape)
