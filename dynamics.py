@@ -737,7 +737,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return type(self)(0,system=new_sys)
     
 
-    def numerized(self, parameter_values={}, FFT = None,label=None,**kwargs):
+    def numerized(self, parameter_values={}, FFT = None,label=None,backend='fortran',**kwargs):
         '''
         Takes values of parameters, substitute it into the list of parameters and changes list it into a Tuple. Returns instance of class OdeComputationalCase.
         Arguments:
@@ -773,7 +773,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                 computed_case['label']=label
                 print('computed case',computed_case)
 
-            return OdeComputationalCase(**computed_case, evaluate=True)
+            return OdeComputationalCase(**computed_case,backend=backend, evaluate=True)
 
 
 
