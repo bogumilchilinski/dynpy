@@ -285,24 +285,6 @@ class AdaptableSeries(TimeSeries,BasicFormattingTools):
         
 
     
-#     @classmethod
-#     def set_data_filtter(cls, filtter=lambda frame: frame.copy()):
-
-#         cls._data_filtter = filtter
-#         #print(cls._data_filtter)
-#         return cls
-
-#     @classmethod
-#     def set_units_dict(cls, units={}):
-
-#         cls._units = units
-#         return cls
-
-#     @classmethod
-#     def columns_name(cls, name=None):
-#         cls._cols_name = name
-
-#         return cls
 
     @property
     def _constructor(self):
@@ -315,9 +297,6 @@ class AdaptableSeries(TimeSeries,BasicFormattingTools):
     @property
     def _constructor_sliced(self):
         return self._common_constructor_series
-
-
-
 
 
 
@@ -622,7 +601,79 @@ class AdaptableDataFrame(TimeDataFrame,BasicFormattingTools):
 
         return super().plot(*args, **kwargs)
 
+    
+class ComputationalErrorFrame(AdaptableDataFrame):
+    _applying_func = lambda obj: obj.join(((obj[obj.columns[1]]-obj[obj.columns[0]]).div(obj[obj.columns[0]],axis=0))).set_axis(list(obj.columns)+[Symbol('\\delta')],axis=1)
 
+    
+    @property
+    def _common_constructor_series(self):
+        return ComputationalErrorSeries
+    
+
+class ComputationalErrorSeries(AdaptableSeries):
+    @property
+    def _common_constructor_series(self):
+        return ComputationalErrorFrame
+
+    
+    
+class LatexDataFrame(AdaptableDataFrame):
+    _applying_func = lambda obj: (obj).fit_units_to_columns().set_multiindex_columns().format_columns_names().set_multiindex_columns()
+
+    
+    @property
+    def _common_constructor_series(self):
+        return LatexSeries
+    
+
+class LatexSeries(AdaptableSeries):
+    @property
+    def _common_constructor_series(self):
+        return LatexDataFrame
+    
+class ParametersSummaryFrame(AdaptableDataFrame):
+    _applying_func = lambda frame: frame.abs().max().reset_index().pivot(columns=['level_0', 'level_2'], index=['level_1'])[0]
+
+    
+    @property
+    def _common_constructor_series(self):
+        return ParameterSummarySeries
+
+
+    
+    
+#     def _filtter(self, filtter=None):
+#         if self.columns.nlevels == 2:
+#             filtter = lambda frame: frame.abs().max().reset_index(
+#                 level=1).pivot(columns=['level_1'])
+#         else:
+#             filtter = 
+
+#         return filtter
+
+class ParameterSummarySeries(AdaptableSeries):
+    @property
+    def _common_constructor_series(self):
+        return ParameterSummaryFrame
+    
+    
+class NumericalAnalysisDataFrame(AdaptableDataFrame):
+    _applying_func = None
+
+    
+    @property
+    def _common_constructor_series(self):
+        return NumericalAnalisysSeries
+    
+    
+    
+
+class NumericalAnalisysSeries(AdaptableSeries):
+    @property
+    def _common_constructor_series(self):
+        return NumericalAnalysisDataFrame
+    
 class AbstractFrameFormatter(AdaptableDataFrame):
     _applying_func=lambda x: (x*100)
 
@@ -2833,42 +2884,40 @@ class AccelerationComparison(ReportModule):
         return self._simulation_result
 
 
-# class FFTComparison(AccelerationComparison):
-#     r'''
-#     It is computational block that prepares the comparison of FFT signals of particular coordinates regarding to changes of selected parameter.
-#     Class inherits from AccelerationComparison and provides several methods devoted for data processing, ploting and reporting.
+class FFTComparison(AccelerationComparison):
+    r'''
+    It is computational block that prepares the comparison of FFT signals of particular coordinates regarding to changes of selected parameter.
+    Class inherits from AccelerationComparison and provides several methods devoted for data processing, ploting and reporting.
     
-#     Arguments
-#     =========
-#     t_span: iterable
-#         Time span.
-#     ics_list: iterable
-#         List containing values of initial conditions. 
-#     data: dict
-#         Dictionary consisting data for comparison.
-#     label: str
-#         User-defined LaTeX label for generated plots.
+    Arguments
+    =========
+    t_span: iterable
+        Time span.
+    ics_list: iterable
+        List containing values of initial conditions. 
+    data: dict
+        Dictionary consisting data for comparison.
+    label: str
+        User-defined LaTeX label for generated plots.
 
-#     Methods
-#     =======
+    Methods
+    =======
 
-#     Example
-#     =======
-#     '''
-#     def _prepare_data(self, coordinate=None, xlim=None):
+    Example
+    =======
+    '''
+    def _prepare_data(self, coordinate=None, xlim=None):
 
-#         data = self._data
+        data = self._data
 
-#         self._data = {
-#             key: value.to_frequency_domain().double_sided_rms()
-#             for key, value in data.items()
-#         }
+        self._data = {
+            key: value.to_frequency_domain().double_sided_rms()
+            for key, value in data.items()
+        }
 
-#         #print('fft_comp')
-# #         for data in self._data.values():
-#             #print(type(data))
 
-#         return super()._prepare_data(coordinate=None, xlim=xlim)
+
+        return super()._prepare_data(coordinate=None, xlim=xlim)
 
 
 class SummaryTable(ReportModule):
