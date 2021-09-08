@@ -7,6 +7,7 @@ from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
 import itertools as itools
 import scipy.integrate as solver
+from sympy.utilities.lambdify import lambdify
 from ..utilities.timeseries import TimeSeries, TimeDataFrame
 from scipy.misc import derivative
 from collections import ChainMap
@@ -16,6 +17,7 @@ from IPython.display import display
 import sympy.physics.mechanics as me
 
 from sympy.simplify.fu import TR8, TR10, TR7, TR3
+from timer import timer
 
 
 
@@ -58,10 +60,13 @@ class OdeComputationalCase:
                  params_values={},
                  ic_point=None,
                  evaluate=False,
-                 label=None):
+                 label=None,
+                 backend='fortran',
+                 ):
 
 
         #if label==None:
+        self._backend = backend
 
         self.odes_system = odes_system
         self.ivar = ivar
@@ -137,6 +142,22 @@ class OdeComputationalCase:
         return autowrap(((self.odes_system).subs(subs_dict, simultaneous=True)),
                         args=args_list)
 
+
+    def __numpy_odes_rhs(self):
+        '''
+        Generates the numpy code related to symbolical expresions declered in the __init__ method. The function object is returned where the all arguments create a tuple.
+        '''
+        subs_dict = {
+            var: Symbol('temp_sym_' + str(i))
+            for i, var in enumerate(self.dvars)
+        }
+
+        args_list = [self.ivar] + list(subs_dict.values()) + self.params
+
+        return lambdify( args_list ,
+                         ((self.odes_system).subs(subs_dict, simultaneous=True)).n(),
+                         [{'sin':np.sin,'cos':np.cos},'numpy']
+                        )
     
         # return autowrap(  (msubs(self.odes_system,subs_dict)),args=args_list)
 
@@ -144,7 +165,10 @@ class OdeComputationalCase:
         '''
         Generates and returns the bininary code related to symbolical expresions declered in the __init__ method. Ready-to-use function object in the compact form f(t,y,params).
         '''
-        odes_rhs = self.__fortran_odes_rhs()
+        if self._backend == 'numpy':
+            odes_rhs = self.__numpy_odes_rhs()        
+        else:
+            odes_rhs = self.__fortran_odes_rhs()
 
         self.__numerical_odes = lambda t, y, *args, **kwargs: np.asarray(
             (odes_rhs(t, *y, *args, **kwargs))).reshape(y.shape)
@@ -229,28 +253,33 @@ class OdeComputationalCase:
         '''
         Returns the result of the computations of solve_ivp integrator from scipy.integrate module.
         '''
-        solution = solver.solve_ivp(
-            **self.solve_ivp_input(t_span=t_span,
-                                   ic_list=ic_list,
-                                   t_eval=t_eval,
-                                   params_values=params_values,
-                                   method=method))
         
-        solution_tdf = TimeDataFrame(
-            data={key: solution.y[no, :]
-                  for no, key in enumerate(self.dvars)}, index=t_span)
-        
+        with timer() as t:
+            solution = solver.solve_ivp(
+                **self.solve_ivp_input(t_span=t_span,
+                                       ic_list=ic_list,
+                                       t_eval=t_eval,
+                                       params_values=params_values,
+                                       method=method))
 
-        
-        velocities = self.dvars[int(len(self.dvars)/2) :]
-        for vel in velocities:
-            solution_tdf[vel].to_numpy()
-            gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
+            solution_tdf = TimeDataFrame(
+                data={key: solution.y[no, :]
+                      for no, key in enumerate(self.dvars)}, index=t_span)
+
+
+
+            velocities = self.dvars[int(len(self.dvars)/2) :]
+            for vel in velocities:
+                solution_tdf[vel].to_numpy()
+                gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
             solution_tdf[vel.diff(self.ivar)] = gradient
+            print('_'*100,t.elapse)
+            comp_time=t.elapse
 
 
 
-        solution_tdf.index.name = 't'
+        solution_tdf._set_comp_time(comp_time)
+        solution_tdf.index.name = self.ivar
         return solution_tdf
 
 

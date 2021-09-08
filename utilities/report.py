@@ -1,5 +1,6 @@
 import datetime as dtime
 import os
+
 import random
 
 import matplotlib.pyplot as plt
@@ -8,22 +9,28 @@ import numpy as np
 import pandas as pd
 import pint
 import sympy.physics.mechanics as me
-from pylatex import (Alignat, Axis, Command, Document, Eqref, Figure, Label, TextColor,
-                     Marker, Math, NewLine, NewPage, Package, Plot, Quantity,
-                     Ref, Section, Subsection, Table, Tabular, TikZ, Description)
+from pylatex import (Alignat, Axis, Command, Document, Eqref, Figure, Label,
+                     TextColor, Marker, Math, NewLine, NewPage, Package, Plot,
+                     Quantity, Ref, Section, Subsection, Table, Tabular, TikZ,
+                     Description,LongTable)
 from pylatex.base_classes import Environment
 from pylatex.package import Package
 from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
-from sympy import Matrix,symbols,Symbol,Eq
+from sympy import Matrix, symbols, Symbol, Eq, Expr
+from sympy.core.relational import Relational
 
-from sympy import Symbol,Function,Derivative,latex
+from sympy import Symbol, Function, Derivative, latex
 
 from sympy.physics.vector.printing import vlatex, vpprint
 
 from IPython.display import display, Markdown, Latex
 
 from .timeseries import TimeDataFrame, TimeSeries
+import copy
+
+from collections.abc import Iterable
+
 
 def plots_no():
     num = 0
@@ -32,176 +39,1789 @@ def plots_no():
         num += 1
 
 
-plots_no_gen= plots_no()
+plots_no_gen = plots_no()
 
-class  ReportModule:
 
-    cls_container=[]
-    cls_path = '.'
-    _caption='Figure describes the numerical data'
+class EntryWithUnit:
     _units={}
+    _latex_backend=latex
 
-    @classmethod
-    def set_container(cls,container=None):
-        cls.cls_container=container
-        return cls
-
-    @classmethod
-    def set_caption(cls,caption=''):
-        cls._caption=caption
-        return cls
-    
     
     @classmethod
-    def set_directory(cls,path='./SDA_results'):
-        
-        
-        
-        cls.cls_path=path
-        return cls
+    def set_default_units(cls, units={}):
 
-    @classmethod
-    def set_units_dict(cls,units={}):
-        
-        cls._units=units
+        cls._units = units
         return cls
     
-    def __init__(self,container=None,path=None):
-        if container:
-            self._container=container
+    def __init__(self,obj,units=None,latex_backend=None,**kwargs):
+        self._obj =obj
+        self._unit=None
+        self._left_par = '['
+        self._right_par = ']'
+        
+        if units is not None:
+            self._units= units
         else:
-            self._container=type(self).cls_container
+            self._units= self.__class__._units
+
             
-        if path:
-            self._path=path
+        if latex_backend is not None:
+            self._latex_backend= latex_backend
         else:
-            self._path=type(self).cls_path           
+            self._latex_backend= self.__class__._latex_backend
             
+        if isinstance(self._obj,Relational):
+            self._left_par = ''
+            self._right_par = ''
+            self._quantity = self._obj.lhs
+        else:
+            self._quantity=self._obj
             
+        self._set_quantity_unit()
         
+    def _set_quantity_unit(self):
+        if self._quantity in self._units:
+            self._unit = self._units[self._quantity]
+        else:
+            self._unit=None
+
+            
     def __str__(self):
-        return self._container.__str__()
-    
+        entry_str=self._obj.__str__()
+        unit = self._unit
+        left_par=self._left_par
+        right_par=self._right_par
+        
+        if unit:
+            return f'{entry_str} {left_par}{unit.__str__()}{right_par}'
+        else:
+            return f'{entry_str}'
+
     def __repr__(self):
-        return self._container.__repr__()
+        entry_str=self._obj.__repr__()
+        unit = self._unit
+        left_par=self._left_par
+        right_par=self._right_par
+        
+        if unit:
+            return f'{entry_str} {left_par}{unit.__repr__()}{right_par}'
+        else:
+            return f'{entry_str}'
+        
+    def _latex(self,*args):
+        entry_str=self._latex_backend(self._obj)
+        unit = self._unit
+        left_par=self._left_par
+        right_par=self._right_par
+        
+        
+        if unit:
+            return f'{entry_str} {left_par}{unit:~L}{right_par}'
+        else:
+            return f'{self._obj}'
+
+
+class BasicFormattingTools:
+    
+    
+    _latex_backend=vlatex
+    _label_formatter = lambda obj: f'${vlatex(obj)}$' if isinstance(obj,(Expr,Eq,EntryWithUnit)) else obj
+    _unit_selector = EntryWithUnit
+    _domain=None
+    _units={}
+    _applying_func = lambda x: x.copy().swaplevel(axis=1)
+    _init_ops=True
+
+    _default_sep = ', '
+    
+    @classmethod
+    def set_default_column_separator(cls, sep=', '):
+        cls._default_sep = sep
+
+        return cls
+
+    @classmethod
+    def set_default_units(cls, units={}):
+
+        cls._units = units
+        return cls
+
+    @classmethod
+    def set_default_unit_selector(cls, selector=EntryWithUnit):
+
+        cls._unit_selector = selector
+        return cls
+    
+    def set_multiindex_axis(self,axis=0):
+        
+        if axis == 'index':
+            axis = 0
+        elif axis == 'colums':
+            axis = 1
+            
+        
+        idx = self.axes[axis]
+        
+        if isinstance(idx,pd.MultiIndex):
+       
+            new_obj = self.copy()
+            
+        else:
+            midx = pd.MultiIndex.from_tuples(idx)
+            new_obj = self.copy().set_axis(midx,axis=axis)
+
+        return new_obj
+
+    
+    def set_multiindex_columns(self):
+        
+        return self.set_multiindex_axis(axis=1)
+    
+    def set_flat_index_axis(self,axis=0):
+        
+        if axis == 'index':
+            axis = 0
+        elif axis == 'colums':
+            axis = 1
+
+        idx = self.axes[axis]
+        
+        if isinstance(idx,pd.MultiIndex):
+            midx = idx.to_flat_index()
+            new_obj = self.copy().set_axis(midx,axis=axis)
+
+        else:
+
+            new_obj = self.copy()
+
+        return new_obj
     
 
+    def switch_axis_type(self,axis=0):
+        
+        if axis == 'index':
+            axis = 0
+        elif axis == 'colums':
+            axis = 1
+            
+        
+        idx = self.axes[axis]
+        
+        if isinstance(idx,pd.MultiIndex):
+            
+            new_obj = self.set_flat_index_axis(axis=axis)
+            
+        else:
+            new_obj = self.copy().set_multiindex_axis(axis=axis)
 
+        return new_obj
+    
+    
+    def switch_index_type(self):
 
-class DataStorage:
+        return self.switch_axis_type(axis=0)
+
+    
+
+    def __call__(self):
+        return self.copy()
+    
+    
+    
+    def applying_method(self,data,func=None,**kwargs):
+        if func:
+            #print('func is used')
+            ops_func = func
+
+        elif self.__class__._applying_func is not None:
+            print('class func is used')
+
+            ops_func = self.__class__._applying_func
+        else:
+            #print('identity is used')
+            ops_func = lambda data: data
+
+        
+        return ops_func(data)
+        
+    
+class AdaptableSeries(TimeSeries,BasicFormattingTools):
+
     r'''
-    This class represents data collector that stores the results able to obtain within other computational blocks.
-    It ensures ease data transferring in order to do efficient analysis and data processing.
+    Basic class for formatting data plots. It provides methods for setting options 
     
     Arguments
     =========
-    data_set: dict
-        Dictionary of data to be deposited into storage.
 
     Methods
     =======
 
     Example
     =======
+
     '''
     
-    _storage={}
-    _dict={}
-    _plot_markers_dict={}
-    _subplot_markers_dict={}
-    _list=[]
-    first_marker=None
-    last_marker=None
-  
-    def __init__(self,data_set={}):
-        
-        self._data_set=data_set
-        self._marker_dict={}
-        self._marker_dict_sub={}
+    @property
+    def _common_constructor_frame(self):
+        return AdaptableDataFrame#._init_without_ops
+    
+    
+    @property
+    def _common_constructor_series(self):
+        return self.__class__#._init_without_ops
+    
+    _cols_name = None
 
-        
-
-        
-        type(self)._storage=self._data_set
-        type(self)._story_point=[]
-        
-        #print(type(self)._storage)
-        
 
     @classmethod
-    def reset_storage(cls,*args,**kwargs):
+    def _init_with_ops(cls,data=None, index=None, dtype=None, name=None, copy=False, fastpath=False,**kwargs):
+        print(f'pure init of {cls}')
+        return cls(data=data, index=index,  dtype=dtype,name=name, copy=copy,fastpath=fastpath,func=lambda obj: obj)
         
-        cls._storage={}
-        cls._dict={}
-        cls._list=[]
+    
+    def __init__(self,data=None, index=None, dtype=None, name=None, copy=False, fastpath=False,**kwargs):
+
+        super().__init__(data=data, index=index,  dtype=dtype,name=name, copy=copy,fastpath=fastpath)
         
+
+    
+
+    @property
+    def _constructor(self):
+        return self._common_constructor_series
+
+    @property
+    def _constructor_expanddim(self):
+        return self._common_constructor_frame
+
+    @property
+    def _constructor_sliced(self):
+        return self._common_constructor_series
+
+
+
+class AdaptableDataFrame(TimeDataFrame,BasicFormattingTools):
+    
+    @property
+    def _common_constructor_series(self):
+        return AdaptableSeries#._init_without_ops
+    
+    
+    @property
+    def _common_constructor_frame(self):
+        return self.__class__#._init_without_ops
+    
+
+    _units = {}
+    _ylabel = None
+
+    _data_filtter = lambda frame: frame.copy()
+    _cols_name = None
+    _domain=None
+    r'''
+    Basic class for formatting data plots. It provides methods for setting options 
+    
+    Arguments
+    =========
+
+    Methods
+    =======
+
+    Example
+    =======
+
+    '''
+
+    _default_sep = ', '
+
+    @classmethod
+    def _init_with_ops(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+
+        raw_frame= cls(data=data, index=index, columns=columns, dtype=dtype, copy=copy,func=lambda obj: obj)
+        
+        print('_init_with_ops')
+        display(raw_frame)
+        
+        new_frame=raw_frame.applying_method(raw_frame,**kwargs)
+        
+        print('_init_without_ops')
+        display(new_frame)        
+        
+       
+        return cls(data=new_frame, index=index, columns=columns, dtype=dtype, copy=copy,func=lambda obj: obj)
+
+    @classmethod
+    def formatted(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+        return cls._init_with_ops(data=data, index=index, columns=columns, dtype=dtype, copy=copy,**kwargs)
+    
+    
+    def __init__(self,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+        #_try_evat='test'
+        #print(f'custom init of {type(self)}')
+        
+        super().__init__(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
+        
+
+    
+    def switch_columns_type(self):
+
+
+        return self.switch_axis_type(axis=1)
+    
+    
+
+    
+    
+#     @classmethod
+#     def set_column_separator(cls, sep=', '):
+#         cls._default_sep = sep
+
+#         return cls
+
+#     @classmethod
+#     def set_columns_name(cls, name=None):
+#         cls._cols_name = name
+
+#         return cls
+
+#     @classmethod
+#     def set_data_filtter(cls, filtter=lambda frame: frame.copy()):
+
+#         cls._data_filtter = filtter
+#         #print(cls._data_filtter)
+#         return cls
+
+
+
+#     def _match_unit(self, sym, latex_#printer=vlatex):
+
+#         units = self.__class__._units
+
+#         if isinstance(sym, Eq):
+#             sym_check = sym.lhs
+#         else:
+#             sym_check = sym
+#         #print(f'variable is {sym}')
+#         #print(f'units are {units}')
+#         if sym_check in units:
+#             #print(f'{sym} is in units_dict')
+#             #print('matched unit', f'{units[sym_check]:~L}')
+#             return f'{latex_#printer(sym)}~[{units[sym_check]:~L}]'
+
+#             #return f'{latex(sym)}'
+#         else:
+#             return f'{latex_#printer(sym)}'
+
+    def _format_entry(self, obj,formatter=None):
+        if formatter is not None:
+            return formatter(obj)
+        else:
+            return self.__class__._label_formatter(obj)
+
+    def _modify_axis(self,func,axis=0):
+        
+        new_obj = self.copy()
+        
+        new_obj_idx= new_obj.axes[axis]
+        
+        display(new_obj_idx)
+        display(new_obj_idx.to_frame().applymap(func))
+
+        idx_frame = new_obj_idx.to_frame().applymap(func)
+        
+        if isinstance(new_obj_idx,pd.MultiIndex):
+            new_obj_idx = pd.MultiIndex.from_frame(idx_frame)
+        else:
+            
+            display(idx_frame)
+            display(list(idx_frame))
+            
+            new_obj_idx = pd.Index(idx_frame,name=new_obj_idx.name)
+            
+
+
+        return new_obj.set_axis(new_obj_idx ,axis=axis)
+
+    def fit_units_to_columns(self,selector=None):
+        if selector is None:
+            selector = self.__class__._unit_selector
+            
+            
+        new_frame=self._modify_axis(selector.set_default_units(self.__class__._units),axis=1)
+        
+        return new_frame
+            
+    
+    
+    def format_columns_names(self,formatter=None):
+        if formatter is None:
+            
+            formatter = self.__class__._label_formatter
+        new_obj = self.copy()
+        
+        new_obj_idx= new_obj.columns.to_frame()
+        
+        display(new_obj_idx)
+        display(new_obj_idx.applymap(formatter))
+
+        new_obj_idx = new_obj_idx.applymap(formatter)
+
+
+        return new_obj.set_axis(new_obj_idx ,axis=1)
+
+    @property
+    def _constructor(self):
+        return self._common_constructor_frame
+
+    @property
+    def _constructor_expanddim(self):
+        return self._common_constructor_frame
+
+    @property
+    def _constructor_sliced(self):
+        return self._common_constructor_series
+
+#     def set_multiindex(self, names=None):
+
+#         midx = pd.MultiIndex.from_tuples(self.columns, names=names)
+
+#         new_obj = self.__class__(self)
+#         new_obj.columns = midx
+
+#         return new_obj
+
+#     def cut_coord(self, coord):
+
+#         new_frame = self.set_multiindex()
+
+#         return new_frame[coord]
+
+#     def format_index(self):
+#         if isinstance(self.index, pd.MultiIndex):
+
+#             idx = self.index.tolist()
+
+#         else:
+#             idx = self.index
+#         #print('idx', idx)
+#         new_idx = idx.copy()
+#         #print('new idx', new_idx)
+
+#         new_obj = self.copy()
+#         new_obj.index = new_idx
+
+#         #print('new_obj.index', new_obj.index.name)
+
+#         if not new_obj.index.name:
+#             new_obj.index.name = Symbol('f')
+
+#         #print('new_obj.index', new_obj.index.name)
+
+#         new_obj.index.name = f'${self._match_unit(new_obj.index.name)}$'
+#         #new_obj.index.name = 'cos'
+
+#         ##print('new_obj.index.name',new_obj.index.name)
+
+#         return new_obj
+
+#     def set_ylabel(self, label=None):
+#         if isinstance(self.index, pd.MultiIndex):
+
+#             if label == None:
+#                 new_obj = self.copy()
+
+#                 for label in new_obj.columns.tolist():
+#                     if label in self.__class__._units:
+
+#                         y_unit_str = f'[${type(self)._units[label]}$]'
+
+#                     else:
+#                         y_unit_str = ''
+
+#                 label = f'$ {latex(label[0])} $, {y_unit_str}'
+
+#                 new_obj.columns = label
+
+#         return new_obj
+
+#     def set_xlabel(self, label=None):
+#         if isinstance(self.index, pd.MultiIndex):
+
+#             if label == None:
+#                 new_obj = self.copy()
+
+#                 for label in new_obj.index.tolist():
+#                     if label in self.__class__._units:
+
+#                         x_unit_str = f'[${type(self)._units[label]}$]'
+
+#                     else:
+#                         x_unit_str = ''
+
+#                 label = latex(self.index.name) + f'{x_unit_str}'
+
+#                 new_obj.index.name = label
+
+#         return new_obj
+
+
+# #     def format_axis_label(self):
+
+# #         new_obj = self.copy()
+
+# #         new_obj.columns = self.set_ylabel
+# #         new_obj.index = self.set_xlabel
+
+# #         return new_obj
+
+#     def set_legend(self, legend=[]):
+#         if legend == None:
+#             pass
+
+#     def _filtter(self, filtter=None):
+#         filtter = self.__class__._data_filtter
+
+#         return filtter
+
+#     def __call__(self):
+
+#         filtter = self._filtter()
+#         #print('on __call__', filtter)
+
+#         #         display('old data',self)
+#         #         display('new data',filtter(self))
+
+#         return self.__class__(filtter(
+#             self)).format_labels().format_index()  #.set_ylabel().set_xlabel()
+
+    def plot(self, *args, **kwargs):
+
+        if not 'ylabel' in kwargs:
+            kwargs['ylabel'] = self.__class__._ylabel
+
+        return super().plot(*args, **kwargs)
+
+    
+class ComputationalErrorFrame(AdaptableDataFrame):
+    _applying_func = lambda obj: obj.join(((obj[obj.columns[1]]-obj[obj.columns[0]]).div(obj[obj.columns[0]],axis=0))).set_axis(list(obj.columns)+[Symbol('\\delta')],axis=1)
+
+    
+    @property
+    def _common_constructor_series(self):
+        return ComputationalErrorSeries
+    
+
+class ComputationalErrorSeries(AdaptableSeries):
+    @property
+    def _common_constructor_series(self):
+        return ComputationalErrorFrame
+
+    
+    
+class LatexDataFrame(AdaptableDataFrame):
+    _applying_func = lambda obj: (obj).fit_units_to_columns().set_multiindex_columns().format_columns_names().set_multiindex_columns()
+
+    
+    @property
+    def _common_constructor_series(self):
+        return LatexSeries
+    
+
+class LatexSeries(AdaptableSeries):
+    @property
+    def _common_constructor_series(self):
+        return LatexDataFrame
+    
+class ParametersSummaryFrame(AdaptableDataFrame):
+    _applying_func = lambda frame: frame.abs().max().reset_index().pivot(columns=['level_0', 'level_2'], index=['level_1'])[0]
+
+    
+    @property
+    def _common_constructor_series(self):
+        return ParameterSummarySeries
+
+
+    
+    
+#     def _filtter(self, filtter=None):
+#         if self.columns.nlevels == 2:
+#             filtter = lambda frame: frame.abs().max().reset_index(
+#                 level=1).pivot(columns=['level_1'])
+#         else:
+#             filtter = 
+
+#         return filtter
+
+class ParameterSummarySeries(AdaptableSeries):
+    @property
+    def _common_constructor_series(self):
+        return ParameterSummaryFrame
+    
+    
+class NumericalAnalysisDataFrame(AdaptableDataFrame):
+    _applying_func = None
+
+    
+    @property
+    def _common_constructor_series(self):
+        return NumericalAnalisysSeries
+    
+    
+    
+
+class NumericalAnalisysSeries(AdaptableSeries):
+    @property
+    def _common_constructor_series(self):
+        return NumericalAnalysisDataFrame
+    
+class AbstractFrameFormatter(AdaptableDataFrame):
+    _applying_func=lambda x: (x*100)
+
+    @classmethod
+    def _apply_func(cls,func=None,**kwargs):
+        
+        if func:
+            ops_to_apply=func
+        elif cls._applying_func:
+            ops_to_apply=cls._applying_func
+        else:
+            ops_to_apply=lambda obj: obj
+        
+        return ops_to_apply
+    
+    def __new__(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+        
+        ops_to_apply=cls._apply_func(**kwargs)
+       
+        return ops_to_apply(BasicFormattedFrame(data=data, index=index, columns=columns, dtype=dtype, copy=copy))
+
+
+class AbstractSeriesFormatted(AdaptableSeries):
+    _applying_func=lambda x: (x*100)
+
+    @classmethod
+    def _apply_func(cls,func=None,**kwargs):
+        
+        if func:
+            ops_to_apply=func
+        elif cls._applying_func:
+            ops_to_apply=cls._applying_func
+        else:
+            ops_to_apply=lambda obj: obj
+        
+        return ops_to_apply
+    
+    def __new__(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+        
+        ops_to_apply=cls._apply_func(**kwargs)
+       
+        return ops_to_apply(BasicFormattedSeries(data=data, index=index, columns=columns, dtype=dtype, copy=copy))
+    
+    
+class BaseSeriesFormatter(TimeSeries):
+    _cols_name = None
+    _domain=None
+    r'''
+    Basic class for formatting data plots. It provides methods for setting options 
+    
+    Arguments
+    =========
+
+    Methods
+    =======
+
+    Example
+    =======
+
+    '''
+    _default_sep = ', '
+
+    @classmethod
+    def set_column_separator(cls, sep=', '):
+        cls._default_sep = sep
+
         return cls
-        
-    def load_result(self,analysis=None):
-        
-        if analysis:
-            param=analysis._parameter
-        
-        current_data=DataStorage._storage[param]
-        
-        current_data.plot()
-        
-        return current_data
-    
-    @classmethod
-    def set_labeled_storage(cls,data):
-        
-        cls._storage=data
-        
-        return cls
-        
-    @classmethod
-    def set_indexed_storage(cls,data):
-        
-        cls._list=data
-        
-        return cls
-    
-    @classmethod
-    def last_result(cls):
-        return cls._list[-1]
-        
 
     @classmethod
-    def last_result_dict(cls):
+    def set_data_filtter(cls, filtter=lambda frame: frame.copy()):
+
+        cls._data_filtter = filtter
+        #print(cls._data_filtter)
+        return cls
+
+    @classmethod
+    def set_units_dict(cls, units={}):
+
+        cls._units = units
+        return cls
+
+    @classmethod
+    def columns_name(cls, name=None):
+        cls._cols_name = name
+
+        return cls
+
+    @property
+    def _constructor(self):
+        return BaseSeriesFormatter
+
+    @property
+    def _constructor_expanddim(self):
+        return BaseFrameFormatter
+
+    @property
+    def _constructor_sliced(self):
+        return BaseSeriesFormatter
+
+    def set_multiindex(self):
+        midx = pd.MultiIndex.from_tuples(self.index)
+        new_obj = self.__class__(self).index = midx
+
+        return new_obj
+
+    def cut_coord(self, coord):
+
+        new_frame = self.set_multiindex()
+
+        return new_frame[coord]
+
+    def format_labels(self):
+        if isinstance(self.index, pd.MultiIndex):
+            return self.index.tolist()
+
+    def set_ylabel(self, label=None):
+        if label == None:
+            for label in self.format_labels():
+                label = f'$ {latex(label[0])} )$'
+        return label
+
+    def set_xlabel(self, label=None):
+        if isinstance(self.index, pd.MultiIndex):
+            if label == None:
+                label = self.index.name
+        return label
+
+    def set_legend(self, legend=None):
+        if legend == None:
+            pass
+
+
+class BaseFrameFormatter(TimeDataFrame):
+
+    _units = {}
+    _ylabel = None
+    _label_formatter = None
+    _data_filtter = lambda frame: frame.copy()
+    _cols_name = None
+    _domain=None
+    r'''
+    Basic class for formatting data plots. It provides methods for setting options 
+    
+    Arguments
+    =========
+
+    Methods
+    =======
+
+    Example
+    =======
+
+    '''
+
+    _default_sep = ', '
+
+    @classmethod
+    def set_column_separator(cls, sep=', '):
+        cls._default_sep = sep
+
+        return cls
+
+    @classmethod
+    def set_columns_name(cls, name=None):
+        cls._cols_name = name
+
+        return cls
+
+    @classmethod
+    def set_data_filtter(cls, filtter=lambda frame: frame.copy()):
+
+        cls._data_filtter = filtter
+        #print(cls._data_filtter)
+        return cls
+
+    @classmethod
+    def set_units_dict(cls, units={}):
+
+        cls._units = units
+        return cls
+
+    def _match_unit(self, sym, latex_printer=vlatex):
+
+        units = self.__class__._units
+
+        if isinstance(sym, Eq):
+            sym_check = sym.lhs
+        else:
+            sym_check = sym
+        #print(f'variable is {sym}')
+        #print(f'units are {units}')
+        if sym_check in units:
+            #print(f'{sym} is in units_dict')
+            #print('matched unit', f'{units[sym_check]:~L}')
+            return f'{latex_printer(sym)}~[{units[sym_check]:~L}]'
+
+            #return f'{latex(sym)}'
+        else:
+            return f'{latex_printer(sym)}'
+
+    def _format_label(self, obj):
+        if self.__class__._label_formatter:
+            return self.__class__._label_formatter(obj)
+        else:
+            if isinstance(obj, Iterable):
+                obj = obj
+            else:
+                obj = obj,
+
+            return self.__class__._default_sep.join(
+                f'${self._match_unit(elem)}$' if isinstance(elem, (
+                    Expr, Eq)) else f'{elem}' for elem in obj if elem != 0)
+
+    def format_labels(self):
+        if isinstance(self.columns, pd.MultiIndex):
+
+            idx = self.columns.tolist()
+
+        else:
+            idx = self.columns
+        #print('idx', idx)
+        new_idx = []
+        for entry in idx:
+            #print('entry', entry, type(entry))
+            if entry in self.__class__._units and entry != 0:
+
+                units = self.__class__._units
+
+                #new_idx+=[ self._format_label(entry) + f'{units[entry]}']
+                new_idx += [self._format_label(entry)]
+            elif entry != 0:
+                new_idx += [self._format_label(entry)]
+
+        #print('new idx', new_idx)
+
+        self.__class__._ylabel = (list(idx)[0][0])
+
+        new_obj = self.copy()
+
+        new_obj.columns = new_idx
+
+        cols_name = self.__class__._cols_name
+
+        if cols_name:
+            idx_name = self._format_label(cols_name)
+            new_obj.columns.name = idx_name
+
+        return new_obj
+
+    @property
+    def _constructor(self):
+        return BaseFrameFormatter
+
+    @property
+    def _constructor_expanddim(self):
+        return BaseFrameFormatter
+
+    @property
+    def _constructor_sliced(self):
+        return BaseSeriesFormatter
+
+    def set_multiindex(self, names=None):
+
+        midx = pd.MultiIndex.from_tuples(self.columns, names=names)
+
+        new_obj = self.__class__(self)
+        new_obj.columns = midx
+
+        return new_obj
+
+    def cut_coord(self, coord):
+
+        new_frame = self.set_multiindex()
+
+        return new_frame[coord]
+
+    def format_index(self):
+        if isinstance(self.index, pd.MultiIndex):
+
+            idx = self.index.tolist()
+
+        else:
+            idx = self.index
+        #print('idx', idx)
+        new_idx = idx.copy()
+        #print('new idx', new_idx)
+
+        new_obj = self.copy()
+        new_obj.index = new_idx
+
+        #print('new_obj.index', new_obj.index.name)
+
+        if not new_obj.index.name:
+            new_obj.index.name = Symbol('f')
+
+        #print('new_obj.index', new_obj.index.name)
+
+        new_obj.index.name = f'${self._match_unit(new_obj.index.name)}$'
+        #new_obj.index.name = 'cos'
+
+        ##print('new_obj.index.name',new_obj.index.name)
+
+        return new_obj
+
+    def set_ylabel(self, label=None):
+        if isinstance(self.index, pd.MultiIndex):
+
+            if label == None:
+                new_obj = self.copy()
+
+                for label in new_obj.columns.tolist():
+                    if label in self.__class__._units:
+
+                        y_unit_str = f'[${type(self)._units[label]}$]'
+
+                    else:
+                        y_unit_str = ''
+
+                label = f'$ {latex(label[0])} $, {y_unit_str}'
+
+                new_obj.columns = label
+
+        return new_obj
+
+    def set_xlabel(self, label=None):
+        if isinstance(self.index, pd.MultiIndex):
+
+            if label == None:
+                new_obj = self.copy()
+
+                for label in new_obj.index.tolist():
+                    if label in self.__class__._units:
+
+                        x_unit_str = f'[${type(self)._units[label]}$]'
+
+                    else:
+                        x_unit_str = ''
+
+                label = latex(self.index.name) + f'{x_unit_str}'
+
+                new_obj.index.name = label
+
+        return new_obj
+
+
+#     def format_axis_label(self):
+
+#         new_obj = self.copy()
+
+#         new_obj.columns = self.set_ylabel
+#         new_obj.index = self.set_xlabel
+
+#         return new_obj
+
+    def set_legend(self, legend=[]):
+        if legend == None:
+            pass
+
+    def _filtter(self, filtter=None):
+        filtter = self.__class__._data_filtter
+
+        return filtter
+
+    def __call__(self):
+
+        filtter = self._filtter()
+        #print('on __call__', filtter)
+
+        #         display('old data',self)
+        #         display('new data',filtter(self))
+
+        return self.__class__(filtter(
+            self)).format_labels().format_index()  #.set_ylabel().set_xlabel()
+
+    def plot(self, *args, **kwargs):
+
+        if not 'ylabel' in kwargs:
+            kwargs['ylabel'] = self.__class__._ylabel
+
+        return super().plot(*args, **kwargs)
+
+
+class FFTSeriesFormatter(BaseSeriesFormatter):
+    _domain = Symbol('f')
+    r'''
+    Basic class for formatting data plots. It provides methods for setting options 
+    
+    Arguments
+    =========
+
+    Methods
+    =======
+
+    Example
+    =======
+
+    '''
+    _data_filtter = lambda frame: frame.copy()
+
+    @property
+    def _constructor(self):
+        return FFTSeriesFormatter
+
+    @property
+    def _constructor_expanddim(self):
+        return FFTFrameFormatter
+
+    @property
+    def _constructor_sliced(self):
+        return FFTSeriesFormatter
+
+    
+    def format_index(self,domain=Symbol('f')):
+        if isinstance(self.index, pd.MultiIndex):
+
+            idx = self.index.tolist()
+
+        else:
+            idx = self.index
+        #print('idx', idx)
+        new_idx = idx.copy()
+        #print('new idx', new_idx)
+
+        new_obj = self.copy()
+        new_obj.index = new_idx
+
+        #print('new_obj.index', new_obj.index.name)
+
+        new_obj.index.name = Symbol('f')
+
+        #print('new_obj.index', new_obj.index.name)
+
+        new_obj.index.name = f'${self._match_unit(new_obj.index.name)}$'
+        #new_obj.index.name = 'cos'
+
+        ##print('new_obj.index.name',new_obj.index.name)
+
+        return new_obj
+
+class FFTFrameFormatter(BaseFrameFormatter):
+    _domain = Symbol('f')   
+
+    _data_filtter = lambda obj: obj.to_frequency_domain().double_sided_rms().truncate(0,0.5)
+    r'''
+    Basic class for formatting data plots. It provides methods for setting options 
+    
+    Arguments
+    =========
+
+    Methods
+    =======
+
+    Example
+    =======
+
+    '''
+    @property
+    def _constructor(self):
+        return FFTFrameFormatter
+
+    @property
+    def _constructor_expanddim(self):
+        return FFTFrameFormatter
+
+    @property
+    def _constructor_sliced(self):
+        return FFTSeriesFormatter
+
+    def format_index(self,domain=Symbol('f')):
+        if isinstance(self.index, pd.MultiIndex):
+
+            idx = self.index.tolist()
+
+        else:
+            idx = self.index
+        #print('idx', idx)
+        new_idx = idx.copy()
+        #print('new idx', new_idx)
+
+        new_obj = self.copy()
+        new_obj.index = new_idx
+
+        #print('new_obj.index', new_obj.index.name)
+
+        new_obj.index.name = Symbol('f')
+
+        #print('new_obj.index', new_obj.index.name)
+
+        new_obj.index.name = f'${self._match_unit(new_obj.index.name)}$'
+        #new_obj.index.name = 'cos'
+
+        ##print('new_obj.index.name',new_obj.index.name)
+
+        return new_obj
+    
+
+class PivotSeriesSummary(BaseSeriesFormatter):
+    _default_sep = ' \n '
+
+    @property
+    def _constructor(self):
+        return PivotSeriesSummary
+
+    @property
+    def _constructor_expanddim(self):
+        return PivotFrameSummary
+
+    @property
+    def _constructor_sliced(self):
+        return PivotSeriesSummary
+
+    
+
+    
+
+class PivotFrameSummary(BaseFrameFormatter):
+    #    _data_filtter = lambda frame: frame.abs().max().reset_index(level=1).pivot(columns=['level_1'])
+    #    _label_formatter = lambda entry: f'${latex(entry)}$'
+    _default_sep = ' \n '
+    
+
+    @property
+    def _constructor(self):
+        return PivotFrameSummary
+
+    @property
+    def _constructor_expanddim(self):
+        return PivotFrameSummary
+
+    @property
+    def _constructor_sliced(self):
+        return PivotSeriesSummary
+
+    def _format_label(self, obj):
+        if self.__class__._label_formatter:
+            return self.__class__._label_formatter(obj)
+        else:
+            if isinstance(obj, Iterable):
+                obj = obj
+            else:
+                obj = obj,
+
+            return tuple([
+                f'${self._match_unit(elem)}$'
+                if isinstance(elem, (Expr, Eq)) else f'{elem}' for elem in obj
+                if elem != 0
+            ])
+
+    def format_labels(self):
+        if isinstance(self.columns, pd.MultiIndex):
+
+            idx = self.columns.tolist()
+
+        else:
+            idx = self.columns
+        #print('idx', idx)
+        new_idx = []
+        for entry in idx:
+            #print('entry', entry, type(entry))
+            if entry in self.__class__._units and entry != 0:
+
+                units = self.__class__._units
+
+                #new_idx+=[ self._format_label(entry) + f'{units[entry]}']
+                new_idx += [self._format_label(entry)]
+            elif entry != 0:
+                new_idx += [self._format_label(entry)]
+
+        #print('new idx', new_idx)
+
+        self.__class__._ylabel = (list(idx)[0][0])
+
+        new_obj = self.copy()
+
+        new_obj.columns = pd.MultiIndex.from_tuples(new_idx)
+
+        cols_name = self.__class__._cols_name
+
+        if cols_name:
+            idx_name = self._format_label(cols_name)
+            new_obj.columns.name = idx_name
+
+        return new_obj
+
+    def format_index(self):
+        if isinstance(self.index, pd.MultiIndex):
+
+            idx = self.index.tolist()
+
+        else:
+            idx = self.index
+        #print('idx', idx)
+        new_idx = [entry.rhs.n(4) for entry in idx]
+
+        #print('new idx', new_idx)
+
+        #self.__class__._ylabel=f'${latex(list(idx)[0].lhs)}$'
+
+        new_obj = self.copy()
+        new_obj.index = new_idx
+
+        new_obj.index.name = f'${self._match_unit(list(idx)[0].lhs)}$'
+
+        return new_obj
+
+    def _filtter(self, filtter=None):
+        if self.columns.nlevels == 2:
+            filtter = lambda frame: frame.abs().max().reset_index(
+                level=1).pivot(columns=['level_1'])
+        else:
+            filtter = lambda frame: frame.abs().max().reset_index().pivot(
+                columns=['level_0', 'level_2'], index=['level_1'])[0]
+
+        return filtter
+
+
+class PivotPlotSeriesSummary(BaseSeriesFormatter):
+    _default_sep = ', '
+
+    @property
+    def _constructor(self):
+        return PivotPlotSeriesSummary
+
+    @property
+    def _constructor_expanddim(self):
+        return PivotPlotFrameSummary
+
+    @property
+    def _constructor_sliced(self):
+        return PivotPlotSeriesSummary
+
+
+class PivotPlotFrameSummary(BaseFrameFormatter):
+    #    _data_filtter = lambda frame: frame.abs().max().reset_index(level=1).pivot(columns=['level_1'])
+    #    _label_formatter = lambda entry: f'${latex(entry)}$'
+    _default_sep = ', '
+
+    @property
+    def _constructor(self):
+        return PivotPlotFrameSummary
+
+    @property
+    def _constructor_expanddim(self):
+        return PivotPlotFrameSummary
+
+    @property
+    def _constructor_sliced(self):
+        return PivotPlotSeriesSummary
+
+    def format_index(self):
+        if isinstance(self.index, pd.MultiIndex):
+
+            idx = self.index.tolist()
+
+        else:
+            idx = self.index
+        #print('idx', idx)
+        new_idx = [entry.rhs.n(4) for entry in idx]
+
+        #print('new idx', new_idx)
+
+        #self.__class__._ylabel=f'${latex(list(idx)[0].lhs)}$'
+
+        new_obj = self.copy()
+        new_obj.index = new_idx
+
+        new_obj.index.name = f'${self._match_unit(list(idx)[0].lhs)}$'
         
-        key,value=list(cls._dict.keys())[-1]
+        self.__class__._domain=list(idx)[0].lhs
+
+        return new_obj
+
+    def _filtter(self, filtter=None):
+        if self.columns.nlevels == 2:
+            filtter = lambda frame: frame.abs().max().reset_index(
+                level=1).pivot(columns=['level_1'])
+        else:
+            filtter = lambda frame: frame.abs().max().reset_index().pivot(
+                columns=['level_0', 'level_2'], index=['level_1'])[0]
+
         
-        return {key:value}
+            
+        return filtter
+
+    
+    
+class MarkersRegister:
+    
+    _markers = pd.DataFrame()
+    _instance_list=[]
+    _first_instace_marker=None
+    _last_instance_marker=None
+    
+    def __init__(self,marker_str='auto_marker'):
         
-    @property
-    def labeled_storage(self):
-        return type(self)._storage
-    
-    @property
-    def named_storage(self):
-        return type(self)._dict
-    
-    @property
-    def indexed_storage(self):
-        return type(self)._list
-    
-    @property
-    def _ids(self):
-        return self.indexed_storage
+        self.__class__._instance_list.append(self)
+        self._first_instace_marker=None
+        self._last_instance_marker=None
+
         
+class AutoMarker:
+    def __init__(self,obj,marker_str=None,marker_prefix=None):
+        
+        if marker_str:
+            self._str=marker_str
+        else:
+            self._str=str(obj)
+            
+            
+        if marker_prefix:
+            self._prefix=marker_prefix            
+        elif isinstance(obj,[Expr,Eq,Matrix]):
+            self._prefix='eq'
+        else:
+            self._prefix='fig'            
+        
+        self._marker = Marker(self._marker_str,prefix=self._prefix)
+        
+        MarkersRegister._markers[obj]=self._marker
+    
+class ReportModule:
+    r'''
+    Basic class for maintaining global options of a report module. It provides methods for setting options common with every class inheriting from ReportModule instance. 
+    
+    Arguments
+    =========
+        container: obj
+            Python's build-in list or Pylatex container object such as Document() or Section().
+        path: str
+            Path for saving plots.
+    Methods
+    =======
+        set_container(cls,container=None):
+            Classmethod; sets Pylatex container object such as Document() or Section(). None by default.
+        set_caption(cls,caption=''):
+            Classmethod; sets caption for images plotted under current instance. Empty string by default.
+        set_directory
+            Classmethod; sets directory for saving generated plots. Directory must already exist. Default path: './SDA_results'.
+        set_units_dict
+            Classmethod; sets dictionary which matches symbols to their units. Empty dict by default.
+    Example
+    =======
+        >>>from modules.utilities.report import ReportModule
+        >>>from pylatex import Document
+        >>>from sympy import Symbol
+        >>>import pint
+        
+        >>>ureg = pint.UnitRegistry()
+        >>>m=Symbol('m')
+        >>>doc=Document
+        >>>unit_dict={m:ureg.kilogram}
+        
+        >>>RM=ReportModule()
+        
+        >>>RM.set_container(doc)
+        
+        >>>RM.set_caption('This is caption.')
+        
+        >>>RM.set_directory('./my_directory')
+        
+        >>>RM.set_units_dict(unit_dict)
+    '''
+
+    cls_container = []
+    cls_path = '.'
+    _caption = 'Figure describes the numerical data'
+    _label = 'fig:markerIsMissing'
+    _units = {}
+    _autoreport = False
+    _frame = TimeDataFrame()
+    _list = []
+    _subplot = False
+    _hold = False
+    _out_formatter = BaseFrameFormatter  # lambda data: data
+    _height=NoEscape(r'6cm')
+
+    
+
+    @classmethod
+    def set_output_formatter(cls, formatter=BaseFrameFormatter):
+        cls._out_formatter = formatter
+        return cls
+
+    @classmethod
+    def set_container(cls, container=None):
+        cls.cls_container = container
+        return cls
+
+    @classmethod
+    def set_caption(cls, caption=''):
+        cls._caption = caption
+        return cls
+
+    @classmethod
+    def set_reporting_mode(cls, mode=True):
+        cls._autoreporting = mode
+
+        return cls
+
+    @classmethod
+    def set_ploting_mode(cls, subplots=False):
+        cls._subplot = subplots
+
+        return cls
+
+    @classmethod
+    def set_plot_height(cls, height=None):
+        cls._height = height
+
+        return cls
+#     def _reset_storage(self, *args, **kwargs):
+
+#         new_obj=copy.copy(self)
+
+#         new_obj._storage = {}
+#         new_obj._dict = {}
+#         new_obj._frame = TimeDataFrame()
+#         new_obj._list = []
+#         new_obj._subplot=False
+
+#         return copy.copy(self)
+
+    @classmethod
+    def _reset_storage(cls, *args, **kwargs):
+
+        cls._storage = {}
+        cls._dict = {}
+        cls._frame = TimeDataFrame()
+        cls._list = []
+        cls._subplot = False
+
+        return cls
+
+    @classmethod
+    def set_directory(cls, path='./SDA_results'):
+
+        cls.cls_path = path
+        return cls
+
+    @classmethod
+    def set_units_dict(cls, units={}):
+
+        cls._units = units
+        return cls
+
+    def __init__(self,
+                 container=None,
+                 path=None,
+                 autoreporting=False,
+                 output_formatter=None):
+        if container:
+            self._container = container
+        else:
+            self._container = type(self).cls_container
+
+        if path:
+            self._path = path
+        else:
+            self._path = type(self).cls_path
+
+        self._autoreporting = autoreporting
+
+        self._storage = None
+        self._story_point = []
+        self._frame = TimeDataFrame()
+
+        self._last_result = None
+        self._list = []
+
+        if output_formatter:
+
+            self._out_format = output_formatter
+        else:
+            self._out_format = self.__class__._out_formatter
+            
+        #print(f'Report module init - formatter is {self._out_format}')
+
+    def _apply_formatter(self, data):
+
+        #print(type(self._out_format))
+        if (self._out_format is BaseFrameFormatter, PivotFrameSummary,
+                FFTFrameFormatter, PivotPlotFrameSummary):
+            #print('Base frmatter is working')
+
+
+            #print('data.index', data.index)
+            #print('data.index.name', data.index.name)
+
+
+            result = self._out_format(data)()
+
+            #             #print('#'*100)
+            #             display(result)
+            #             #print(result.index.name)
+            if not result.index.name:
+                result.index.name = ''
+
+            return result
+        else:
+            #print('callable is working')
+            return self._out_format(data)
+
     @property
-    def _lds(self):
-        return self.labeled_storage
+    def frame(self):
+
+        if (self._frame) is not None:
+
+            time_frame = TimeDataFrame(self._frame)
+
+        else:
+
+            time_frame = TimeDataFrame(self.__class__._frame)
+
+        if time_frame.columns != [] and time_frame.columns != pd.Index([]):
+
+            time_frame.columns = pd.MultiIndex.from_tuples(time_frame.columns)
+            time_frame.columns.set_names(['model', 'parameter', 'coordinate'],
+                                         inplace=True)
+
+        return time_frame
+
+
+#     @classmethod
+#     @property
+#     def frame(cls):
+
+#         if (cls._frame) is not None:
+
+#             time_frame = TimeDataFrame(cls._frame)
+
+#         else:
+#             time_frame = TimeDataFrame()
+
+#         if time_frame.columns != [] and time_frame.columns != pd.Index([]):
+
+#             time_frame.columns = pd.MultiIndex.from_tuples(time_frame.columns)
+#             time_frame.columns.set_names(['model', 'parameter', 'coordinate'],
+#                                          inplace=True)
+
+#         return time_frame
+
+    def set_frame(self, key, frame):
+        #print('self frame is modified')
+        self._frame[key] = frame
+
+        return frame
+
+    def set_class_frame(self, key, frame):
+        #print('class frame is modified')
+
+        self.__class__._frame[key] = frame
+
+        return frame
+
+    def clear_frame(self, obj=True):
+
+        if not self.__class__._hold:
+
+            if obj and (self._frame is not None):
+                #print('self cleaner')
+                self._frame = type(self._frame)()
+                #self._frame = None
+            if (not obj) and (self.__class__._frame is not None):
+                #print('class cleaner')
+                self.__class__._frame = type(self.__class__._frame)()
+            #self.__class__._frame =  None
+
+        return None
+    
+
+
+    def __str__(self):
+        return self._container.__str__()
+
+    def __repr__(self):
+        return self._container.__repr__()
+
+    def reported(self, mode=True):
+
+        new_obj = copy.copy(self)
+
+        new_obj._autoreporting = mode
+
+        return new_obj
+
+
+class DataStorage:
+    r'''
+    This class represents data collector that stores the results able to obtain within other computational blocks.
+    It ensures easy data transferring in order to do efficient analysis and data processing.
+    
+    Arguments
+    =========
+        data_set: dict
+            Dictionary of data to be deposited into storage.
+    Methods
+    =======
+        reset_storage(cls,*args,**kwargs):
+            Classmethod; Cleans storage.
+    Example
+    =======
+        >>>elements=['first','second','third','fourth','fifth']
+        >>>new_dict={'abs':312}
+        
+        >>>DS1=DataStorage(new_dict)
+        
+        >>>DataStorage._storage=new_dict
+        
+        >>>DataStorage._dict['x']='123'
+        
+        >>>DataStorage._list=['a','b','c']
+        
+        >>>DataStorage._plot_markers_dict={elem:Marker('plot1'+elem ,'fig')   for elem in elements}
+            
+        >>>DataStorage._subplot_markers_dict={elem:Marker('subplot1'+elem ,'fig')   for elem in elements}
+        
+        >>>DataStorage.reset_storage()
+    '''
+
+    _storage = {}
+    _dict = {}
+    _plot_markers_dict = {}
+    _subplot_markers_dict = {}
+    _list = []
+    first_marker = None
+    last_marker = None
+
+    _frame = TimeDataFrame()
+    last_result = None
+    _last_result = None
+
+    @property
+    def frame(self):
+
+        if self._frame:
+            time_frame = TimeDataFrame(self._frame)
+
+            time_frame.columns = pd.MultiIndex.from_tuples(
+                list(time_frame.columns))
+            time_frame.columns.set_names(['model', 'parameter', 'coordinate'],
+                                         inplace=True)
+
+        else:
+            time_frame = TimeDataFrame(self.__class__._frame)
+
+            time_frame.columns = pd.MultiIndex.from_tuples(
+                list(self.__class__._frame.columns))
+            time_frame.columns.set_names(['model', 'parameter', 'coordinate'],
+                                         inplace=True)
+
+        return time_frame
+
+    def set_frame(self, key, frame):
+        self._frame[key] = frame
+
+        return frame
+
+    def set_class_frame(self, key, frame):
+
+        self.__class__._frame[key] = frame
+
+        return frame
+
+    def __init__(self, data_set=None):
+
+        self._data_set = data_set
+        self._marker_dict = {}
+        self._marker_dict_sub = {}
+
+        self._storage = self._data_set
+        self._story_point = []
+        self._frame = data_set
+        self._last_result = None
+        self._list
+
+        _frame = TimeDataFrame()
+        last_result = None
+        _last_result = None
+
+    @classmethod
+    def reset_storage(cls, *args, **kwargs):
+
+        cls._storage = {}
+        cls._dict = {}
+        cls._list = []
+
+        return cls
+
+class NumericalDataSet:
+    def __init__(self,numerical_data,key=None, *args, keys_map=None,label='Experimental data', **kwargs):
+
+        data_to_plot = numerical_data
+        
+        self._key=key
+
+        self._keys_map = {key: key for key in data_to_plot.keys()}
+
+        if keys_map:
+            self._keys_map = keys_map
+
+        self._data_to_plot = data_to_plot
+        self._label=label
+        
+        self.dvars=list( list(data_to_plot.values())[0].columns)
+
+    def __call__(self, analysis, *args, **kwargs):
+        step_val = analysis._current_value
+
+    def __str__(self):
+        return self._label
+        
+    def numerized(self,
+                 params_values={},
+                 **kwargs):
+        
+
+        
+        if params_values=={}:
+            return copy.copy(self)
+        else:
+        
+            return copy.copy(self)
     
     
-    @property
-    def _nds(self):
-        return self.named_storage
+    
+    def compute_solution(self,
+                         t_span=None,
+                         ic_list=None,
+                         t_eval=None,
+                         params_values=None,
+                         method='RK45'):
+        
+#         #print('compute_solution')
+#         display(params_values)
+#         display(ic_list)
+        
+        if ic_list:
+            #print('class ics has been taken')
+            self.ics=ic_list
+            
+
+        
+        display(self._data_to_plot)
+        
+        return self._data_to_plot[params_values[self._key]]
+    
 
 class SimulationalBlock(ReportModule):
-
-    
     r'''
     It is computational module which enables to perform numerical simulations of the dynamic system.
     Class provides several methods devoted for data processing, ploting and reporting.
@@ -212,113 +1832,609 @@ class SimulationalBlock(ReportModule):
         Time span.
     ics_list: iterable
         List containing values of initial conditions. 
+    dynamic_system: Lagrange's method object
+        Dynamic model prepared basing on Sympy's Lagrange's method object.
+    reference_data: dict
+        Dictionary containing default values of systems's parameters.
+    **kwargs
 
     Methods
     =======
+    frame(self):
+        Property; Sets time frame.
+    reset_storage(cls):
+        Classmethod; cleans storage including TimeDataFrame.
+    set_t_span(cls,t_span):
+        Classmethod; sets time span.
+    label_formatter(self,analysis=None,label_generator=None):
+        Provides label generated basing on current simulation or defined dictionary.
+    show_eoms(self,analysis,**kwargs):
+    
+    do_simulation(self,analysis,**kwargs):
+    
+    simulation_result(self,analysis):
+    
+    plot_result(cls,analysis):
+    
 
     Example
     =======
     '''
-    
-    _storage=DataStorage._lds
-    _list=DataStorage._ids
-    _dict=DataStorage._nds
-    general_t_span=[]
-    last_result=[]
-    
-    @classmethod
-    def set_t_span(cls,t_span):
 
-        cls.general_t_span=t_span
+    #_frame.columns=pd.MultiIndex()
+
+    _list = []
+    _dict = {}
+    general_t_span = []
+
+    _model = None
+    _reference_data = None
+    _hold = False
+    last_result = []
+
+    _ref_data = None
+
+    def holded(self, hold=True):
+        self.__class__._hold = hold
+
+        return self.copy()
+
+    def label_formatter(self, analysis=None, label_generator=None):
+
+        if analysis:
+            var = analysis._parameter
+            value = analysis._current_value
+
+            if self._dynamic_system:
+                system = self._dynamic_system
+            else:
+                system = analysis._dynamic_system
+
+            #print('system label', str(system))
+            label = Eq(var, value, evaluate=False), str(system)
+
+        else:
+
+            label = ((var, value) for var, value in self._ref_data.items())
+
+        return label
+
+    @classmethod
+    def reset_storage(cls):
+        cls._frame = TimeDataFrame()
+
+        cls._list = []
+        cls._dict = {}
+        return cls
+
+    @classmethod
+    def set_t_span(cls, t_span):
+
+        cls.general_t_span = t_span
 
         return cls
-    
-    def __init__(self,t_span=None,ics_list=None):
 
-        
-        self._t_span=t_span
-        self._ics_list=ics_list
-        
+    def __init__(self,
+                 t_span=None,
+                 ics_list=None,
+                 dynamic_system=None,
+                 reference_data=None,
+                 label=None,
+                 **kwargs):
+
+        self._t_span = t_span
+        self._ics_list = ics_list
+
         if t_span is not None:
-            self._t_span=t_span
+            self._t_span = t_span
         else:
             self._t_span = type(self).general_t_span
-            
-        self._numerical_system=None
+
+        self._numerical_system = None
+
+        self._dynamic_system = dynamic_system
+        self._ref_data = reference_data
+        #print(self.__class__, label)
+        self._model_label = label
+
         super().__init__()
 
-            
+    def show_eoms(self, analysis, **kwargs):
 
-    def do_simulation(self,analysis):
+        if self._ref_data:
+            case_data = self._ref_data
+            var = analysis._parameter
+            value = analysis._current_value
 
-        case_data=analysis._current_data
+            case_data[var] = value
+
+        else:
+            case_data = analysis._current_data
+
+        if self._dynamic_system:
+            dynamic_system = self._dynamic_system
+        else:
+            dynamic_system = analysis._dynamic_system
+
+        display(dynamic_system._eoms)
+        return dynamic_system
+
+    def do_simulation(self, analysis, **kwargs):
+
+        if self._ref_data:
+            case_data = self._ref_data
+            var = analysis._parameter
+            value = analysis._current_value
+
+            case_data[var] = value
+
+        else:
+            case_data = analysis._current_data
+
+        if self._dynamic_system:
+            dynamic_system = self._dynamic_system
+        else:
+            dynamic_system = analysis._dynamic_system
+
+        if self._model_label:
+            dynamic_system._label = self._model_label
+
+        #print('dynamic model name', dynamic_system._label)
 
         if not self._numerical_system:
-            
-#             display(analysis._dynamic_system.system_parameters())
-#             display(analysis._dynamic_system._eoms)
-            
-            self._numerical_system=analysis._dynamic_system.numerized(parameter_values=case_data)
-            
-        numerical_system=self._numerical_system
-        no_dof=len((numerical_system.dvars))
 
-        
-        
+            #             display(analysis._dynamic_system.system_parameters())
+            #             display(analysis._dynamic_system._eoms)
+
+            self._numerical_system = dynamic_system.numerized(
+                parameter_values=case_data)
+
+        numerical_system = self._numerical_system
+        no_dof = len((numerical_system.dvars))
+
         if not self._ics_list:
-            ics_list=[0]*no_dof
+            ics_list = [0] * no_dof
         else:
-            ics_list=self._ics_list
+            ics_list = self._ics_list
 
-        print('numer',numerical_system)
-        
-        print('ics_self',self._ics_list)
-        print('ics',ics_list)
-        
-        simulation_result=numerical_system.compute_solution(t_span=self._t_span,
-                             ic_list=ics_list,
-                             t_eval=self._t_span,
-                             params_values=case_data
-                             )
+        #print('numer', numerical_system)
 
-        self._simulation_result=simulation_result
+        #print('ics_self', self._ics_list)
+        #print('ics', ics_list)
 
+        simulation_result = numerical_system.compute_solution(
+            t_span=self._t_span,
+            ic_list=ics_list,
+            t_eval=self._t_span,
+            params_values=case_data)
 
-        var=analysis._parameter
-        value=analysis._current_value
+        self._simulation_result = simulation_result
 
-        DataStorage._storage[Eq(var,value,evaluate=False)]=simulation_result
+        var = analysis._parameter
+        value = analysis._current_value
 
-        #print(DataStorage._list)
+        label = self.label_formatter(analysis)
 
-        DataStorage._list+=[simulation_result]
-        
+        DataStorage._storage[label] = simulation_result
+
+        self.__class__._frame[[
+            label + (coord, ) for coord in simulation_result.columns
+        ]] = simulation_result
+        self.__class__._list += [simulation_result]
+        self.__class__._last_result = type(self.__class__._frame)()
+        self.__class__._last_result[[
+            (coord, ) + label for coord in simulation_result.columns
+        ]] = simulation_result
+
+        self._frame[[label + (coord, ) for coord in simulation_result.columns
+                     ]] = simulation_result
+        self._list += [simulation_result]
+        self._last_result = type(self._frame)()
+        self._last_result[[
+            (coord, ) + label for coord in simulation_result.columns
+        ]] = simulation_result
+
+        ##print(DataStorage._list)
+
+        DataStorage._list += [simulation_result]
+
+        if (analysis) is not None:
+            analysis._frame[[
+                label + (coord, ) for coord in simulation_result.columns
+            ]] = simulation_result
+            analysis._list += [simulation_result]
+            analysis._last_result = type(analysis._frame)()
+            analysis._last_result[[
+                (coord, ) + label for coord in simulation_result.columns
+            ]] = simulation_result
+
         return simulation_result
 
-    def simulation_result(self,analysis):
+    def simulation_result(self, analysis):
         return self._simulation_result
 
     @classmethod
-    def plot_result(cls,analysis):
-        
-        last_result=DataStorage._list[-1]
-        
-        last_result.plot()
-        
-        
-        ndp=DataPlot('wykres_nowy',position='H',preview=False)
+    def plot_result(cls, analysis):
 
-        ndp.add_data_plot(filename=f'{cls.cls_path}/block_simulation_{next(plots_no_gen)}.png',width='11cm')
+        last_result = DataStorage._list[-1]
 
-        ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''))
+        plot_of_result = last_result.plot()
+
+        ndp = DataPlot('wykres_nowy', position='H', preview=False)
+
+        ndp.add_data_plot(
+            filename=
+            f'{cls.cls_path}/block_simulation_{next(plots_no_gen)}.png',
+            width='11cm')
+
+        ndp.add_caption(
+            NoEscape(
+                f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''
+            ))
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
         #ndp.append(Label(self.marker_dict[coord]))
-        
+
         analysis._container.append(ndp)
-        
+
         plt.show()
-        
-        return None
+
+        return plot_of_result
+
+
+class Summary(ReportModule):
+    def __init__(self,
+                 block=None,
+                 coordinate=None,
+                 caption=None,
+                 label=None,
+                 subplots=False,
+                 height=None,
+                extra_commands=None):
+
+        if subplots:
+            self._subplot = subplots
+        else:
+            self._subplot = self.__class__._subplot
+
+        if coordinate:
+            #print('hello')
+            self._coord = coordinate
+
+        else:
+            self._coord = slice(None, None)
+
+        #print(f'the coord is {self._coord}')
+
+        super().__init__()
+
+        #         #print(self._frame)
+        #         #print(block,'abc')
+        #         #print(type(block))
+
+        self._block = block
+        if block:
+
+            self._frame = block._frame
+            
+            self._last_result = block._last_result
+        if caption:
+            self._caption = caption
+        else:
+            self._caption = self.__class__._caption
+
+        if label:
+            self._label = label
+        else:
+            self._label = self.__class__._label
+
+        if height:
+            self._height = height
+        else:
+            self._height = self.__class__._height
+            
+
+        if extra_commands is not None:
+            self._extra_commands = extra_commands
+        else:
+            self._extra_commands = None
+            
+
+    def holded(self, hold=True):
+        self.__class__._hold = hold
+
+        return copy.copy(self)
+
+    def plot(self, *args, analysis=None, **kwargs):
+
+        #         #print('analysis')
+        #         #print(analysis)
+        if analysis:
+            #print('data is pushed to store - analysis')
+            self.set_frame(analysis._last_result.columns,
+                           analysis._last_result)
+            self.set_class_frame(analysis._last_result.columns,
+                                 analysis._last_result)
+
+            self.__class__._frame.index.name = analysis._last_result.index.name
+            self._frame.index.name = analysis._last_result.index.name
+
+            print('_'*100,analysis._last_result._get_comp_time())            
+
+
+
+        #print('summary plot - call')
+        #print((self._block), type((self._block)))
+
+
+        result_of_plot = None
+
+        if (self._block)._last_result is not None:
+            ##print()
+
+            result_to_add = type(self._block)._last_result
+            print('_'*100,result_to_add._get_comp_time())
+            columns_to_add = result_to_add.columns
+
+            #print('plot index', result_to_add.index.name)
+
+            if self._frame is not None:
+                #print('data is pushed to store - self -block')
+                self.set_frame(columns_to_add, result_to_add)
+                self._frame.index.name = result_to_add.index.name
+                display(self._frame)
+
+                self.set_class_frame(columns_to_add, result_to_add)
+                self.__class__._frame.index.name = result_to_add.index.name
+                display(self.__class__._frame)
+
+                result_of_plot = self._frame.plot(*args, **kwargs)
+
+            else:
+
+                #print('data is pushed to store -  class -block')
+
+                self.set_class_frame(columns_to_add, result_to_add)
+                result_of_plot = self.__class__._frame.plot(*args, **kwargs)
+                self.__class__._frame.index.name = result_to_add.index.name
+
+        plt.clf()
+
+
+        return result_of_plot
+
+    def show(
+        self,
+        analysis=None,
+        legend_pos='north east',
+        legend_columns=1,
+        colors_list=[
+            'blue', 'red', 'green', 'orange', 'violet', 'magenta', 'cyan'
+        ],
+        extra_commands=None,
+        **kwargs,
+    ):
+
+        #print('show')
+        ##print(type(self)._frame)
+
+        result = type(self)()
+
+        if (type(self)._frame) is not None:
+
+            data = (type(self)._frame)
+            if not data.columns.empty:
+                data.columns = pd.MultiIndex.from_tuples(data.columns)
+
+                result = data[self._coord]
+
+        if ((self._frame)) is not None:
+
+            data = ((self)._frame)
+            if not data.columns.empty:
+                data.columns = pd.MultiIndex.from_tuples(data.columns)
+
+                result = data[self._coord]
+
+        #print('story in Sumary', (type(self)._frame).empty)
+        #print('out format', self._out_format)
+        #         #print(result)
+
+        formatter = self._out_format()
+
+        if self._coord != slice(None, None):
+            ylabel = f'$ {formatter._match_unit(self._coord)}$'
+        else:
+            ylabel = 'coords'
+
+        if not (self)._frame.empty:  #result.empty:
+
+            data = ((self)._frame)
+            data.columns = pd.MultiIndex.from_tuples(data.columns)
+
+            self._apply_formatter(data[self._coord]).plot(
+                ylabel=ylabel, subplots=self._subplot)
+
+            #print('o tu - from self')
+            ##print(pd.MultiIndex.from_tuples(list(result.columns)))
+            plot_of_result = plt.show()
+            self.clear_frame()
+
+        elif not type(self)._frame.empty:  #result.empty:
+
+            data = ((self).__class__._frame)
+            data.columns = pd.MultiIndex.from_tuples(data.columns)
+
+            self._apply_formatter(data[self._coord]).plot(
+                ylabel=ylabel, subplots=self._subplot)
+
+            #print('o tu - from cls')
+            ##print(pd.MultiIndex.from_tuples(list(result.columns)))
+            plot_of_result = plt.show()
+            self.clear_frame(obj=False)
+
+        if self._autoreporting:
+
+            filepath = f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+
+            units = self.__class__._units
+            #print('units', units)
+            if self._coord in units:
+                y_unit_str = f'y unit = {units[self._coord]:~Lx}'.replace(
+                    '[]', '')
+
+            else:
+                y_unit_str = ''
+                
+            new_data = self._apply_formatter(data[self._coord])
+            
+            if new_data.__class__._domain:
+                ivar = new_data.__class__._domain
+            else:
+                ivar = data[self._coord].index.name
+            
+            if ivar in units:
+                x_unit_str = f'x unit = {units[ivar]:~Lx}'.replace('[]', '')
+
+            else:
+                x_unit_str = ''
+
+            #print('y_unit_str', y_unit_str)
+
+            if extra_commands is None:
+                extra_commands= self._extra_commands
+            
+            fig = new_data.to_standalone_figure(
+                    filepath,
+                    colors_list=colors_list,
+                    subplots=self._subplot,
+                    height=self._height
+                ,
+                    width=NoEscape(r'0.9\textwidth'),
+                    x_axis_description=
+                    f',xlabel=${NoEscape(vlatex(ivar))}$, {x_unit_str},'.replace('$$','$'),
+                    y_axis_description=
+                    f'ylabel=${NoEscape(vlatex(self._coord))}$, {y_unit_str},',
+                    legend_pos=legend_pos,
+                    extra_commands=extra_commands,
+                )
+            fig.add_caption(NoEscape(self._caption))
+            fig.append(
+                Label(self._label)
+            )
+            
+            
+            
+            self._container.append(fig)
+
+        return result
+
+    def summary(self, analysis=None, **kwargs):
+
+        #print('summary')
+
+        result = type(self)()
+
+        if (type(self)._frame) is not None:
+
+            data = (type(self)._frame)
+            if not data.columns.empty:
+                data.columns = pd.MultiIndex.from_tuples(data.columns)
+
+                result = data[self._coord]
+
+        if ((self._frame)) is not None:
+
+            data = ((self)._frame)
+            if not data.columns.empty:
+                data.columns = pd.MultiIndex.from_tuples(data.columns)
+
+                result = data[self._coord]
+
+        #print('story in Sumary', (type(self)._frame).empty)
+
+        #         #print(result)
+        if not (self)._frame.empty:  #result.empty:
+
+            data = ((self)._frame)
+            data.columns = pd.MultiIndex.from_tuples(data.columns)
+
+            display(self._apply_formatter(data[self._coord]))
+
+            #print('o tu - from self')
+            ##print(pd.MultiIndex.from_tuples(list(result.columns)))
+
+            self.clear_frame()
+
+        elif not type(self)._frame.empty:  #result.empty:
+
+            data = ((self).__class__._frame)
+            data.columns = pd.MultiIndex.from_tuples(data.columns)
+
+            display(self._apply_formatter(data[self._coord]))
+
+            #print('o tu - from cls')
+            ##print(pd.MultiIndex.from_tuples(list(result.columns)))
+
+            self.clear_frame(obj=False)
+
+
+#         #print(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule').replace('\\bottomrule','\\midrule \n \\bottomrule')   )
+#         #print(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule').__repr__() )
+#         display(self._apply_formatter(data[self._coord]).to_latex(escape=False).replace('\\toprule','\\toprule \n \\midrule') )
+
+        if self._autoreporting:
+            tab = Table(position='!htb')
+
+            #                         f'xyz_{next(plots_no_gen)}',
+            #                         subplots=self.__class__._subplot,
+
+            #                         height=NoEscape(r'6cm'),
+            #                         width=NoEscape(r'0.9\textwidth'),
+            #                         y_axis_description='',
+            #                         legend_pos='north west')))
+
+            tab.add_caption(NoEscape(self._caption))
+            tab.append(
+                NoEscape(
+                    self._apply_formatter(data[self._coord]).to_latex(
+                        escape=False,
+                        caption='').replace('\\toprule',
+                                            '\\toprule \n \\midrule').replace(
+                                                '\\bottomrule',
+                                                '\\midrule \n \\bottomrule')))
+            tab.append(
+                Label(self._label)
+            )
+
+            self._container.append(tab)
+
+        return self._apply_formatter(data[self._coord])
+
+    def prepare_markers(self,
+                        analysis=None,
+                        coordinate=None,
+                        xlim=None,
+                        **kwargs):
+
+        DataStorage._plot_markers_dict = {
+            elem: Marker(f'plot{self.__class__.__name__}', 'fig')
+            for elem in self._frame
+        }
+        DataStorage._subplot_markers_dict = {
+            elem: Marker(f'subplot{self.__class__.__name__}', 'fig')
+            for elem in self._frame
+        }
+        #         DataStorage.first_marker = list(
+        #             DataStorage._plot_markers_dict.values())[0]
+        #         DataStorage.last_marker = list(
+        #             DataStorage._plot_markers_dict.values())[-1]
+        #         self.last_marker = list(DataStorage._plot_markers_dict.values())[-1]
+        #         type(self)._last_marker = list(
+        #             DataStorage._plot_markers_dict.values())[-1]
+        #         #print('marker - def')
+        #         #print(self.last_marker)
+
+        return analysis
 
 
 class SimulationFFT:
@@ -334,31 +2450,34 @@ class SimulationFFT:
     Example
     =======
     '''
-    def __init__(self,*args):
-        self._args=args
+    def __init__(self, *args):
+        self._args = args
 
     @classmethod
-    def plot_fft(cls,analysis):
-        
-        last_result=DataStorage._list[-1]
-        
+    def plot_fft(cls, analysis):
+
+        last_result = DataStorage._list[-1]
+
         fft_result = last_result.to_frequency_domain().double_sided_rms()
-        
-        fft_result.plot(xlim=(0,100),subplots=True,logy=True)
-#         plt.yscale('log')
+
+        fft_result.plot(xlim=(0, None), subplots=True, logy=False)
+        #         plt.yscale('log')
         plt.show()
         return fft_result
-    
+
     @classmethod
-    def fft(cls,analysis=None):
-        
-        fft_of_storage={key:result.to_frequency_domain().double_sided_rms()  for key,result in DataStorage._storage.items()}
-        
-        DataStorage._storage=fft_of_storage
-        
+    def fft(cls, analysis=None):
+
+        fft_of_storage = {
+            key: result.to_frequency_domain().double_sided_rms()
+            for key, result in DataStorage._storage.items()
+        }
+
+        DataStorage._storage = fft_of_storage
+
         return fft_of_storage
-        
-    
+
+
 class AccelerationComparison(ReportModule):
     r'''
     It is computational block that prepares the comparison of particular coordinates regarding to changes of selected parameter.
@@ -371,7 +2490,7 @@ class AccelerationComparison(ReportModule):
     ics_list: iterable
         List containing values of initial conditions. 
     data: dict
-        Dictionary consisting data for comparison.
+        Dictionary consisting of data for comparison.
     label: str
         User-defined LaTeX label for generated plots.
 
@@ -381,279 +2500,389 @@ class AccelerationComparison(ReportModule):
     Example
     =======
     '''
-    
-    _story_point=None
-    
-    general_t_span=None
-    
-    _data_storage={}
-    
-    _last_marker=None
-    
-    _formatter=lambda entry:  f'${latex(entry.lhs)} = {round(entry.rhs/1000)} \\si {{\\tonne}} ({ (entry.rhs/10000000*100).n(2,chop=True)  } \\% m_v ) $'
-    
+    _subplot = False
+    _height = r'7cm'
+
+    _story_point = None
+
+    general_t_span = None
+
+    _data_storage = {}
+
+    _last_marker = None
+
+    _formatter = lambda entry: f'${latex(entry[0].lhs)} = {round(entry[0].rhs/1000)} \\si {{\\tonne}} ({ (entry[0].rhs/10000000*100).n(2,chop=True)  } \\% m_v ) $'
+
     @classmethod
-    def set_t_span(cls,t_span):
-        
-        cls.general_t_span=t_span
-        
+    def set_t_span(cls, t_span):
+
+        cls.general_t_span = t_span
+
         return cls
-    
+
     @classmethod
-    def set_label_foramatter(cls,formatter):
-        
-        cls._formatter=formatter
-        
+    def set_label_formatter(cls, formatter):
+
+        cls._formatter = formatter
+
         return cls
-    
+
     @classmethod
     def reset_storage(cls):
-        
-        cls._story_point={}
-        cls._data_storage={}
-        
+
+        cls._story_point = {}
+        cls._data_storage = {}
+
         return cls
 
-    
-    
-    
-    
-    def __init__(self,t_span=None,data=None,ics_list=None,label=None):
-        
-        self.last_marker=None
-        self._t_span=t_span
-        self._ics_list=ics_list
-        
+    def __init__(self, t_span=None, data=None, ics_list=None, label=None):
+
+        self.last_marker = None
+        self._t_span = t_span
+        self._ics_list = ics_list
+
         if t_span is not None:
-            self._t_span=t_span
+            self._t_span = t_span
         else:
             self._t_span = type(self).general_t_span
-            
+
         if data:
-            self._data=data
+            self._data = data
         else:
-            self._data=DataStorage._storage
+            self._data = DataStorage._storage
 
         if label:
-            self._label=label
+            self._label = label
         else:
-            self._label=''
-            
+            self._label = None
+
         super().__init__(None)
 
+    def _prepare_data(self, coordinate=None, xlim=None):
 
-    def _prepare_data(self,coordinate=None,xlim=None):
-        
         if xlim:
-            data={key:result.truncate(xlim[0],xlim[-1]) for key,result in self._data.items()}
+            data = {
+                key: result.truncate(xlim[0], xlim[-1])
+                for key, result in self._data.items()
+            }
         else:
-             data=self._data       
-        
-#         print('_______________test of plot_____________')
-#         print(data)
-#         print('_______________test of plot_____________')
-        print(data)
-        elements=list((data.values()))[0].columns
-        print('frametype')
-        print(type(list((data.values()))[0])())
-        summaries_dict = {dynsym:type(list((data.values()))[0])()  for dynsym  in elements }
-        
-        for key,result in data.items():
+            data = self._data
+
+
+#         #print('_______________test of plot_____________')
+#         #print(data)
+#         #print('_______________test of plot_____________')
+#         #print(data)
+
+        elements = list((data.values()))[0].columns
+        #         #print('frametype')
+        #         #print(type(list((data.values()))[0])())
+        summaries_dict = {
+            dynsym: type(list((data.values()))[0])()
+            for dynsym in elements
+        }
+
+        for key, result in data.items():
             for coord in elements:
-                summaries_dict[coord][key]  =result[coord]
-        type(self)._story_point=summaries_dict
-        
+                summaries_dict[coord][key] = result[coord]
+        type(self)._story_point = summaries_dict
+
         if coordinate:
             return summaries_dict[coordinate]
         else:
             return summaries_dict
-                
-    def prepare_summary(self,analysis=None,coordinate=None,xlim=None): 
-        
+
+    def prepare_summary(self, analysis=None, coordinate=None, xlim=None):
+
         if analysis:
-            self._analysis=analysis
-        
-        result=self._prepare_data(xlim=xlim)
-        
-        elements=result.keys()
-             
-        DataStorage._plot_markers_dict={elem:Marker(f'plot{self.__class__.__name__}{self._label}' ,'fig')   for elem in elements}
-        DataStorage._subplot_markers_dict={elem:Marker(f'subplot{self.__class__.__name__}{self._label}'  ,'fig')   for elem in elements}
-        DataStorage.first_marker=list(DataStorage._plot_markers_dict.values())[0]
-        DataStorage.last_marker=list(DataStorage._plot_markers_dict.values())[-1]
-        self.last_marker=list(DataStorage._plot_markers_dict.values())[-1]
-        type(self)._last_marker=list(DataStorage._plot_markers_dict.values())[-1]
-        print('marker - def')
-        print(self.last_marker)
-        
+            self._analysis = analysis
+
+        result = self._prepare_data(xlim=xlim)
+
+        elements = result.keys()
+
+        if self._label:
+            DataStorage._plot_markers_dict = {
+                elem: Marker(f'plot{self.__class__.__name__}{self._label}',
+                             'fig')
+                for elem in elements
+            }
+            DataStorage._subplot_markers_dict = {
+                elem: Marker(f'subplot{self.__class__.__name__}{self._label}',
+                             'fig')
+                for elem in elements
+            }
+        else:
+
+            DataStorage._plot_markers_dict = {
+                elem:
+                Marker(f'plot{self.__class__.__name__}{next(plots_no_gen)}',
+                       'fig')
+                for elem in elements
+            }
+            DataStorage._subplot_markers_dict = {
+                elem:
+                Marker(f'subplot{self.__class__.__name__}{next(plots_no_gen)}',
+                       'fig')
+                for elem in elements
+            }
+
+        DataStorage.first_marker = list(
+            DataStorage._plot_markers_dict.values())[0]
+        DataStorage.last_marker = list(
+            DataStorage._plot_markers_dict.values())[-1]
+        self.last_marker = list(DataStorage._plot_markers_dict.values())[-1]
+        type(self)._last_marker = list(
+            DataStorage._plot_markers_dict.values())[-1]
+        #print('marker - def')
+        #print(self.last_marker)
+
         return result
-            
-    def plot_summary(self,analysis=None,coordinate=None,xlim=None,legend_pos='north east',legend_columns=1,colors_list=['blue','red','green','orange','violet','magenta','cyan']):
-        if analysis:
-            self._analysis=analysis
-            self._parameter=analysis._parameter
-        else:
-            self._parameter='which name is missing.'
-        
-            
-        
 
-        
+    def plot_summary(self,
+                     analysis=None,
+                     coordinate=None,
+                     xlim=None,
+                     subplots=_subplot,
+                     legend_pos='north east',
+                     legend_columns=1,
+                     colors_list=[
+                         'blue', 'red', 'green', 'orange', 'violet', 'magenta',
+                         'cyan'
+                     ],
+                    extra_commands=None,
+                    options=None):
+
+        self.subplots = subplots
+        if analysis:
+            self._analysis = analysis
+            self._parameter = analysis._parameter
+        else:
+            self._parameter = 'which name is missing.'
+
         if coordinate:
-            if not isinstance(coordinate,list ):
-                coordinate=[coordinate]
-                
-            data_dict={coord : self._prepare_data(xlim=xlim)[coord] for coord  in coordinate}
+            if not isinstance(coordinate, list):
+                coordinate = [coordinate]
+
+            data_dict = {
+                coord: self._prepare_data(xlim=xlim)[coord]
+                for coord in coordinate
+            }
 
         else:
-            data_dict=self._prepare_data(xlim=xlim)
-        
-        
-        for coord, data in data_dict.items():
-            
+            data_dict = self._prepare_data(xlim=xlim)
 
-            
-            
-            data.plot()
-            plt.ylabel(coord)
+        if self.__class__._subplot == False:
+            for coord, data in data_dict.items():
 
-            filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+                data.plot()
+                plt.ylabel(coord)
 
-            
-            ########### for tikz            
-            #ndp=DataPlot('wykres_nowy',position='H',preview=False)
-            
-            #it should be replaced with data.rename
-            print(data)
-            data.columns=[type(self)._formatter(label) for label in data.columns ]   
-            
-            y_unit_str=f'{(type(self)._units[coord]):Lx}'.replace('[]','')
-            
-            ndp=data.to_standalone_figure(filepath,colors_list=colors_list,height=NoEscape(r'7cm'),width=NoEscape(r'0.9\textwidth'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
-            #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
-            
+                filepath = f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
 
+                ########### for tikz
+                #ndp=DataPlot('wykres_nowy',position='H',preview=False)
 
-            
-            
-            ########### for tikz
-            #ndp.append(data.to_pylatex_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
-            
-            ndp.add_caption(NoEscape(f'{type(self)._caption}'))
-            
-            plt.show()
-            
-            print('marker - plot')
-            print(self.last_marker)
-            print(type(self)._last_marker)
-        #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
-            ndp.append(Label(type(self)._last_marker))
-        
-            if analysis:
-                analysis._container.append(ndp)
-            else:
-                filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
-                
-                #latex_code=(TimeDataFrame(data).to_tikz_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
-                self._container.append(ndp)
+                #it should be replaced with data.rename
+                #             #print(data)
 
-        
-            
-        return ndp
+                data.columns = [
+                    type(self)._formatter(label) for label in data.columns
+                ]
+                #print(type(self)._units)
+                y_unit_str = f'{(type(self)._units[coord]):Lx}'.replace(
+                    '[]', '')
 
-    def plot_max_summary(self,analysis):
-        
+                ndp = data.to_standalone_figure(
+                    filepath,
+                    colors_list=colors_list,
+                    height=NoEscape(r'7cm'),
+                    width=NoEscape(r'12cm'),
+                    y_axis_description=NoEscape(
+                        f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'
+                    ),
+                    legend_pos=legend_pos + ',' +
+                    f'legend columns= {legend_columns}',
+                    extra_commands=extra_commands,
+                    options=options)
+                #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
+
+                ########### for tikz
+                #ndp.append(data.to_pylatex_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
+
+                ndp.add_caption(NoEscape(f'{type(self)._caption}'))
+
+                plt.show()
+
+                #print('marker - plot')
+                #print(self.last_marker)
+                #print(type(self)._last_marker)
+                #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
+                ndp.append(Label(type(self)._last_marker))
+
+                if analysis:
+                    analysis._container.append(ndp)
+                else:
+                    filepath = f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+
+                    #latex_code=(TimeDataFrame(data).to_tikz_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
+                    self._container.append(ndp)
+
+        else:
+            for coord, data in data_dict.items():
+                data.plot(subplots=self.__class__._subplot, ylabel=coord)
+                filepath = f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+
+                ########### for tikz
+                #ndp=DataPlot('wykres_nowy',position='H',preview=False)
+
+                #it should be replaced with data.rename
+                #             #print(data)
+
+                data.columns = [
+                    type(self)._formatter(label) for label in data.columns
+                ]
+                #print(type(self)._units)
+                y_unit_str = f'{(type(self)._units[coord]):Lx}'.replace(
+                    '[]', '')
+
+                ndp = data.to_standalone_figure(
+                    filepath,
+                    subplots=self.__class__._subplot,
+                    colors_list=colors_list,
+                    height=NoEscape(r'6cm'),
+                    width=NoEscape(r'0.9\textwidth'),
+                    y_axis_description=NoEscape(
+                        f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'
+                    ),
+                    legend_pos=legend_pos + ',' +
+                    f'legend columns= {legend_columns}',
+                    extra_commands=extra_commands,
+                    options=options
+                )
+                #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
+
+                ########### for tikz
+                #ndp.append(data.to_pylatex_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
+
+                ndp.add_caption(NoEscape(f'{type(self)._caption}'))
+
+                plt.show()
+
+                #print('marker - plot')
+                #print(self.last_marker)
+                #print(type(self)._last_marker)
+                #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
+                ndp.append(Label(type(self)._last_marker))
+
+                if analysis:
+                    analysis._container.append(ndp)
+                else:
+                    filepath = f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+
+                    #latex_code=(TimeDataFrame(data).to_tikz_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
+                    self._container.append(ndp)
+            return ndp
+
+    def plot_max_summary(self, analysis):
+
         if not type(self)._story_point:
-            type(self)._story_point=self._prepare_data()
-        
-        data_dict=type(self)._story_point
-        
-        new_data_dict={key:data.abs().max() for key, data in data_dict.items()}
+            type(self)._story_point = self._prepare_data()
 
-        df=pd.DataFrame(new_data_dict)
+        data_dict = type(self)._story_point
+
+        new_data_dict = {
+            key: data.abs().max()
+            for key, data in data_dict.items()
+        }
+
+        df = pd.DataFrame(new_data_dict)
         df.plot()
         plt.show()
         df.plot(subplots=True)
         plt.show()
 
-        
-        ndp=DataPlot('wykres_nowy1',position='H',preview=False)
-        ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_max_data_{next(plots_no_gen)}.png',width='11cm')
-        ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''))
+        ndp = DataPlot('wykres_nowy1', position='H', preview=False)
+        ndp.add_data_plot(
+            filename=
+            f'{self._path}/{self.__class__.__name__}_max_data_{next(plots_no_gen)}.png',
+            width='11cm')
+        ndp.add_caption(
+            NoEscape(
+                f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''
+            ))
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
         #ndp.append(Label(self.marker_dict[coord]))
-        
+
         if analysis:
             analysis._container.append(ndp)
         else:
             self._container.append(ndp)
 
-        
         return None
-    
-    
-    def plot_mean_summary(self,analysis):
-        
-        if not type(self)._story_point:
-            type(self)._story_point=self._prepare_data()
-        
-        data_dict=type(self)._story_point
-        
-        new_data_dict={key:data.abs().mean() for key, data in data_dict.items()}
 
-        df=pd.DataFrame(new_data_dict)
+    def plot_mean_summary(self, analysis):
+
+        if not type(self)._story_point:
+            type(self)._story_point = self._prepare_data()
+
+        data_dict = type(self)._story_point
+
+        new_data_dict = {
+            key: data.abs().mean()
+            for key, data in data_dict.items()
+        }
+
+        df = pd.DataFrame(new_data_dict)
         df.plot()
         plt.show()
         df.plot(subplots=True)
         plt.show()
 
-        
-        
-        ndp=DataPlot('wykres_nowy2',position='H',preview=False)
-        
-        
-        
-        ndp.add_data_plot(filename=f'Wykres_mean_{next(plots_no_gen)}.png',width='11cm')
-        ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''))
+        ndp = DataPlot('wykres_nowy2', position='H', preview=False)
+
+        ndp.add_data_plot(filename=f'Wykres_mean_{next(plots_no_gen)}.png',
+                          width='11cm')
+        ndp.add_caption(
+            NoEscape(
+                f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''
+            ))
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
         #ndp.append(Label(self.marker_dict[coord]))
-        
-        
+
         if analysis:
             analysis._container.append(ndp)
         else:
             self._container.append(ndp)
-        
+
         return None
-    
-    
-    def simulation_result(self,analysis):
+
+    def simulation_result(self, analysis):
         return type(self)._story_point
 
     @classmethod
-    def get_from_storage(cls,storage=DataStorage):
-        
-        type(self)._story_point=storage._storage
-        
+    def get_from_storage(cls, storage=DataStorage):
+
+        type(self)._story_point = storage._storage
+
         return cls
-    
-    
+
     @property
     def data_storage(self):
         return type(self)._data_storage
-    
-    def plot_result(self,analysis):
-        
-        self._simulation_result=type(self)._story_point
-        
+
+    def plot_result(self, analysis, **kwargs):
+
+        self._simulation_result = type(self)._story_point
+
         self._simulation_result.plot()
         plt.show()
-        
+
         self._simulation_result.plot(subplots=True)
         plt.show()
-    
-        
+
         return self._simulation_result
+
 
 class FFTComparison(AccelerationComparison):
     r'''
@@ -677,19 +2906,19 @@ class FFTComparison(AccelerationComparison):
     Example
     =======
     '''
-    def _prepare_data(self,coordinate=None,xlim=None):
-    
-        data=self._data
-    
-        self._data   ={   key:value.to_frequency_domain().double_sided_rms()   for key,value in     data.items()}
-        
-        print('fft_comp')
-        for data in self._data.values():
-            print(type(data))
-        
-    
-        return super()._prepare_data(coordinate=None,xlim=xlim)
-    
+    def _prepare_data(self, coordinate=None, xlim=None):
+
+        data = self._data
+
+        self._data = {
+            key: value.to_frequency_domain().double_sided_rms()
+            for key, value in data.items()
+        }
+
+
+
+        return super()._prepare_data(coordinate=None, xlim=xlim)
+
 
 class SummaryTable(ReportModule):
     r'''
@@ -713,119 +2942,253 @@ class SummaryTable(ReportModule):
     Example
     =======
     '''
-    
-    _story_point=None
-    
-    general_t_span=None
-    
-    _data_storage={}
-    
-    _last_marker=None
-    
-    _formatter=lambda entry:  f'${latex(entry.lhs)} = {round(entry.rhs/1000)} \\si {{\\tonne}} ({ (entry.rhs/10000000*100).n(2,chop=True)  } \\% m_v ) $'
-    
+
+    _story_point = None
+
+    general_t_span = None
+
+    _data_storage = {}
+
+    _last_marker = None
+
+    _formatter = lambda entry: f'${latex(entry.lhs)} = {round(entry.rhs/1000)} \\si {{\\tonne}} ({ (entry.rhs/10000000*100).n(2,chop=True)  } \\% m_v ) $'
+
     @classmethod
-    def set_t_span(cls,t_span):
-        
-        cls.general_t_span=t_span
-        
+    def set_t_span(cls, t_span):
+
+        cls.general_t_span = t_span
+
         return cls
-    
+
     @classmethod
-    def set_label_foramatter(cls,formatter):
-        
-        cls._formatter=formatter
-        
+    def set_label_foramatter(cls, formatter):
+
+        cls._formatter = formatter
+
         return cls
-    
+
     @classmethod
     def reset_storage(cls):
-        
-        cls._story_point={}
-        cls._data_storage={}
-        
+
+        cls._story_point = {}
+        cls._data_storage = {}
+
         return cls
 
-    
-    
-    
-    
-    def __init__(self,t_span=None,data=None,ics_list=None,label=None):
-        
-        self.last_marker=None
-        self._t_span=t_span
-        self._ics_list=ics_list
-        
+    def __init__(self,
+                 t_span=None,
+                 data=None,
+                 ics_list=None,
+                 label=None,
+                 **kwargs):
+
+        self.last_marker = None
+        self._t_span = t_span
+        self._ics_list = ics_list
+
         if t_span is not None:
-            self._t_span=t_span
+            self._t_span = t_span
         else:
             self._t_span = type(self).general_t_span
-            
+
         if data:
-            self._data=data
+            self._data = data
         else:
-            self._data=DataStorage._storage
+            ##print(SimulationalBlock().frame)
+            self._data = SimulationalBlock().frame
 
         if label:
-            self._label=label
+            self._label = label
         else:
-            self._label=''
-            
+            self._label = ''
+
         super().__init__(None)
 
+    def _prepare_data(self, coordinate=None, level=None, xlim=None):
 
-    def _prepare_data(self,coordinate=None,xlim=None):
-        
         if xlim:
-            data={key:result.truncate(xlim[0],xlim[-1]) for key,result in self._data.items()}
+            data = {
+                key: result.truncate(xlim[0], xlim[-1])
+                for key, result in self._data.items()
+            }
         else:
-             data=self._data       
-        
-#         print('_______________test of plot_____________')
-#         print(data)
-#         print('_______________test of plot_____________')
-#         print(data)
-        elements=list((data.values()))[0].columns
-#         print('frametype')
-#         print(type(list((data.values()))[0])())
-        summaries_dict = {dynsym:type(list((data.values()))[0])()  for dynsym  in elements }
-        
-        for key,result in data.items():
-            for coord in elements:
-#                 display(result[coord])
-#                 display(key)
-                max_val=float((result[coord].abs().max()))
-#                 display(max_val)
-                summaries_dict[coord][key]  =[max_val]
-        type(self)._story_point=summaries_dict
-        
+            data = self._data
+
+#         #print('_______________test of plot_____________')
+#         #print(data)
+#         #print('_______________test of plot_____________')
+#         #print(data)
+        elements = data.columns
+        #         #print('frametype')
+        #         #print(type(list((data.values()))[0])())
+        summaries_dict = data.swaplevel(0, -1, axis=1)
+
         if coordinate:
             return summaries_dict[coordinate]
         else:
             return summaries_dict
-                
-    def prepare_summary(self,analysis=None,coordinate=None,xlim=None): 
-        
+
+    def prepare_summary(self,
+                        analysis=None,
+                        coordinate=None,
+                        xlim=None,
+                        **kwargs):
+
         if analysis:
-            self._analysis=analysis
-        
-        result=self._prepare_data(xlim=xlim)
-        
-        elements=result.keys()
-             
-        DataStorage._plot_markers_dict={elem:Marker(f'plot{self.__class__.__name__}{self._label}' ,'fig')   for elem in elements}
-        DataStorage._subplot_markers_dict={elem:Marker(f'subplot{self.__class__.__name__}{self._label}'  ,'fig')   for elem in elements}
-        DataStorage.first_marker=list(DataStorage._plot_markers_dict.values())[0]
-        DataStorage.last_marker=list(DataStorage._plot_markers_dict.values())[-1]
-        self.last_marker=list(DataStorage._plot_markers_dict.values())[-1]
-        type(self)._last_marker=list(DataStorage._plot_markers_dict.values())[-1]
-        print('marker - def')
-        print(self.last_marker)
-        
+            self._analysis = analysis
+
+        data_table = self._prepare_data(coordinate=coordinate,
+                                        xlim=xlim).abs().max().to_frame().T
+
+        models = data_table.columns.get_level_values(0).unique()
+        ##print(models)
+
+        #display([data_table[model].T for model in models])
+
+        result = type(data_table)()
+
+        for model in models:
+            result[model] = data_table[model].T
+
+        elements = result.keys()
+
+        DataStorage._plot_markers_dict = {
+            elem: Marker(f'plot{self.__class__.__name__}{self._label}', 'fig')
+            for elem in elements
+        }
+        DataStorage._subplot_markers_dict = {
+            elem: Marker(f'subplot{self.__class__.__name__}{self._label}',
+                         'fig')
+            for elem in elements
+        }
+        DataStorage.first_marker = list(
+            DataStorage._plot_markers_dict.values())[0]
+        DataStorage.last_marker = list(
+            DataStorage._plot_markers_dict.values())[-1]
+        self.last_marker = list(DataStorage._plot_markers_dict.values())[-1]
+        type(self)._last_marker = list(
+            DataStorage._plot_markers_dict.values())[-1]
+        #print('marker - def')
+        #print(self.last_marker)
+
         return result
-            
-    
-    
+
+    def show_summary(self,
+                     analysis=None,
+                     coordinate=None,
+                     xlim=None,
+                     legend_pos='north east',
+                     legend_columns=1,
+                     colors_list=[
+                         'blue', 'red', 'green', 'orange', 'violet', 'magenta',
+                         'cyan'
+                     ]):
+
+        #self.subplots=subplots
+        if analysis:
+            self._analysis = analysis
+            self._parameter = analysis._parameter
+        else:
+            self._parameter = 'which name is missing.'
+
+        data_table = self.prepare_summary(coordinate=coordinate, xlim=xlim)
+
+        display(data_table)
+
+        latex_table = NoEscape(data_table.to_latex())
+
+        if analysis:
+            analysis._container.append(NoEscape(latex_table))
+        else:
+
+            self._container.append(NoEscape(latex_table))
+
+        return data_table
+
+
+#         if self.__class__._subplot==False:
+#             for coord, data in data_dict.items():
+
+#                 data.plot()
+#                 plt.ylabel(coord)
+
+#                 filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+
+#                 ########### for tikz
+#                 #ndp=DataPlot('wykres_nowy',position='H',preview=False)
+
+#                 #it should be replaced with data.rename
+#     #             #print(data)
+
+#                 data.columns=[type(self)._formatter(label) for label in data.columns ]
+#                 #print(type(self)._units)
+#                 y_unit_str=f'{(type(self)._units[coord]):Lx}'.replace('[]','')
+
+#                 ndp=data.to_standalone_figure(filepath,colors_list=colors_list,height=NoEscape(r'7cm'),width=NoEscape(r'12cm'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
+#                 #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
+
+#                 ########### for tikz
+#                 #ndp.append(data.to_pylatex_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
+
+#                 ndp.add_caption(NoEscape(f'{type(self)._caption}'))
+
+#                 plt.show()
+
+#                 #print('marker - plot')
+#                 #print(self.last_marker)
+#                 #print(type(self)._last_marker)
+#             #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
+#                 ndp.append(Label(type(self)._last_marker))
+
+#                 if analysis:
+#                     analysis._container.append(ndp)
+#                 else:
+#                     filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+
+#                     #latex_code=(TimeDataFrame(data).to_tikz_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
+#                     self._container.append(ndp)
+
+#         else:
+#             for coord, data in data_dict.items():
+#                 data.plot(subplots=self.__class__._subplot,ylabel=coord)
+#                 filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+
+#                 ########### for tikz
+#                 #ndp=DataPlot('wykres_nowy',position='H',preview=False)
+
+#                 #it should be replaced with data.rename
+#     #             #print(data)
+
+#                 data.columns=[type(self)._formatter(label) for label in data.columns ]
+#                 #print(type(self)._units)
+#                 y_unit_str=f'{(type(self)._units[coord]):Lx}'.replace('[]','')
+
+#                 ndp=data.to_standalone_figure(filepath,subplots=self.__class__._subplot,colors_list=colors_list,height=NoEscape(r'6cm'),width=NoEscape(r'0.9\textwidth'),y_axis_description=NoEscape(f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'),legend_pos=legend_pos+','+f'legend columns= {legend_columns}' )
+#                 #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
+
+#                 ########### for tikz
+#                 #ndp.append(data.to_pylatex_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
+
+#                 ndp.add_caption(NoEscape(f'{type(self)._caption}'))
+
+#                 plt.show()
+
+#                 #print('marker - plot')
+#                 #print(self.last_marker)
+#                 #print(type(self)._last_marker)
+#             #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
+#                 ndp.append(Label(type(self)._last_marker))
+
+#                 if analysis:
+#                     analysis._container.append(ndp)
+#                 else:
+#                     filepath=f'{self._path}/{self.__class__.__name__}_tikz_{next(plots_no_gen)}'
+
+#                     #latex_code=(TimeDataFrame(data).to_tikz_plot(filepath,colors_list=['blue','red','green','orange','violet','magenta','cyan'],height=NoEscape(r'5.5cm'),width=NoEscape(r'0.5\textwidth')))
+#                     self._container.append(ndp)
+#             return ndp
+
+
 class ReportEntry:
     r'''
     This class creates a report section with a title provided by a user. 
@@ -841,20 +3204,18 @@ class ReportEntry:
     Example
     =======
     '''
-    def __init__(self,block_title):
+    def __init__(self, block_title, **kwargs):
         self._block_title = block_title
-    
-    def __call__(self,system):
-        sec=Section(self._block_title)
-        
-        system._container.append(sec)
-        
+
+    def __call__(self, analysis, **kwargs):
+        sec = Section(self._block_title)
+
+        analysis._container.append(sec)
+
         return sec
 
-    
 
 class ReportText(ReportModule):
-    
     r'''
     This class appends a user defined text to the existing document container. 
     
@@ -871,76 +3232,77 @@ class ReportText(ReportModule):
     Example
     =======
     '''
-    
-    _color=None
-    
+
+    _color = None
+
     @classmethod
-    def set_text_color(cls,color=None):
-        
-        cls._color=color
-        
+    def set_text_color(cls, color=None):
+
+        cls._color = color
+
         return cls
-    
-    def __init__(self,text=None,key_dict=DataStorage._dict):
-        
-        self._text='Figures {first_marker}-{last_marker}'
-        
+
+    def __init__(self, text=None, key_dict=DataStorage._dict, **kwargs):
+
+        self._text = 'Figures {first_marker}-{last_marker}'
+
         if text:
             self._text = text
-                
+
         try:
-            self._text=self._text.format(**DataStorage._dict)
+            self._text = self._text.format(**DataStorage._dict)
 
         except:
             print('.w')
         finally:
-            self._text=self._text
-        
-        super().__init__()
-        
-        if self.__class__._color:
-            
-            self._container.append(TextColor(self.__class__._color,NoEscape( self._text  )))
-            
-        else:
-            
-            self._container.append(NoEscape( self._text  ))
+            self._text = self._text
 
-    
-    def __call__(self,analysis):
-        
-        print(self._text)
-        
-        analysis._container.append(NoEscape( self._text  ))
-        
+        super().__init__()
+
+        if self.__class__._color:
+
+            self._container.append(
+                TextColor(self.__class__._color, NoEscape(self._text)))
+
+        else:
+
+            self._container.append(NoEscape(self._text))
+
+    def __call__(self, analysis):
+
+        #print(self._text)
+
+        analysis._container.append(NoEscape(self._text))
+
         return self._text
-    
+
     def __str__(self):
-        
 
         return self._text
 
     def __repr__(self):
-        
+
         display(Markdown(self._text))
 
-        
         #return (self._text)
         return ''
 
-    
-    
+
 class SympyFormula(ReportModule):
-    
     r'''
     This class appends a sympy expression to the existing document container. 
     
     Arguments
     =========
-    text: str
+    expr: str
         String that will be appended to the defined container.
     key_dict: dict
         Dictionary containing entries for string format method.
+    marker: pylatex.labelref.Marker object
+        User-defined marker for labeling and referencing math expressions.
+    backend: func
+        Type of backend used for processing provided Sympy expressions to LaTeX formula.
+    **kwargs
         
     Methods
     =======
@@ -948,78 +3310,71 @@ class SympyFormula(ReportModule):
     Example
     =======
     '''
-    
-    _color=None
-    
+
+    _color = None
+
     @classmethod
-    def set_text_color(cls,color=None):
-        
-        cls._color=color
-        
+    def set_text_color(cls, color=None):
+
+        cls._color = color
+
         return cls
-    
-    def __init__(self,expr=None,key_dict=DataStorage._dict,marker=None,backend=vlatex,**kwargs):
-        
-        self._text='Figures {first_marker}-{last_marker}'
-        self._backend=backend
-        
+
+    def __init__(self,
+                 expr=None,
+                 key_dict=DataStorage._dict,
+                 marker=None,
+                 backend=vlatex,
+                 **kwargs):
+
+        self._text = 'Figures {first_marker}-{last_marker}'
+        self._backend = backend
+
         if not marker == None:
             self._marker = marker
         else:
-            self._marker = Marker('formula',prefix='eq')  
-            
-            
-            
+            self._marker = Marker('formula', prefix='eq')
+
         if not expr == None:
             self._expr = expr
 
-                
-
-                
-        
         super().__init__()
-        
-        
+
         self._eq = DMath()
         self._eq.append(NoEscape(self._backend(self._expr)))
         self._eq.append(Label(self._marker))
-        
+
         if self.__class__._color:
-            
-            self._container.append(TextColor(self.__class__._color,self._eq))
-            
+
+            self._container.append(TextColor(self.__class__._color, self._eq))
+
         else:
-            
+
             self._container.append(self._eq)
 
-            
-    
-    def __call__(self,analysis):
-        
+    def __call__(self, analysis):
+
         display(self._expr)
-        
+
         analysis._container.append(self._eq)
-        
+
         return self._text
-    
+
     def __str__(self):
-        
 
         return self._backend(self._expr)
 
     def __repr__(self):
-        
+
         display(self._expr)
 
         return ''
-    
-    def _latex(self):
-        
 
+    def _latex(self):
 
         return self._backend(self._expr)
-    
-    
+
+
 class PlotTestResult:
     r'''
     The class creates a plot from data provided by DataStorage and appends it to an existing document container instance. 
@@ -1039,206 +3394,206 @@ class PlotTestResult:
     Example
     =======
     '''
-    def __init__(self,*args,keys_map=None,**kwargs):
-        
-        data_to_plot=DataStorage._storage
-        
-        self._keys_map={key:key for key in data_to_plot.keys()}
+    def __init__(self, *args, keys_map=None, **kwargs):
 
-        
+        data_to_plot = DataStorage._storage
+
+        self._keys_map = {key: key for key in data_to_plot.keys()}
+
         if keys_map:
-            self._keys_map=keys_map
-            
-            
+            self._keys_map = keys_map
 
-        
-        self._data_to_plot=data_to_plot
+        self._data_to_plot = data_to_plot
 
-    
-    def __call__(self,analysis,*args,**kwargs):
-        step_val=analysis._current_value
-        
-        new_key=self._keys_map[step_val]
-        
-        if not 'first_mrk'  in DataStorage._dict.keys():
-            DataStorage._dict['first_mrk']=Marker('first_mrk','fig')
-        
-        DataStorage._dict['last_mrk']=Marker('last_mrk','fig')
-        
+    def __call__(self, analysis, *args, **kwargs):
+        step_val = analysis._current_value
+
+        new_key = self._keys_map[step_val]
+
+        if not 'first_mrk' in DataStorage._dict.keys():
+            DataStorage._dict['first_mrk'] = Marker('first_mrk', 'fig')
+
+        DataStorage._dict['last_mrk'] = Marker('last_mrk', 'fig')
+
         self._data_to_plot[new_key].plot()
-        
-        
-        ndp=DataPlot('wykres_nowy',position='H',preview=False)
-        ndp.add_data_plot(filename=f'Wykres_alpha_{next(plots_no_gen)}.png',width='11cm')
-        ndp.add_caption(NoEscape(f'''Summary plot: simulation results for parameter - pomiary'''))
+
+        ndp = DataPlot('wykres_nowy', position='H', preview=False)
+        ndp.add_data_plot(filename=f'Wykres_alpha_{next(plots_no_gen)}.png',
+                          width='11cm')
+        ndp.add_caption(
+            NoEscape(
+                f'''Summary plot: simulation results for parameter - pomiary'''
+            ))
         plt.show()
-        
-        
+
         analysis._container.append(ndp)
-        
+
         return self._data_to_plot[new_key]
-    
-    
-    
-class SystemDynamicsAnalyzer:
+
+
+class SystemDynamicsAnalyzer(ReportModule):
     r'''
     This is a computational block that runs a simulations on provided dynamic system. The class has methods responsible for data preparation, system analysis and reporting.
     
     Arguments
     =========
     dynamic_system: Lagrange's method object
-        
+        Dynamic model prepared basing on Sympy's Lagrange's method object.
     reference_data: dict
         Dictionary containing default values of systems's parameters.
     report_init: list
-        List containing
+        List containing objects called at an initial part of report.
     report_step: list
-        List containing
+        List containing objects called after the report_init.
     report_end: list
-        List containing
+        List containing objects called after the report_step.
+        
     Methods
     =======
 
     Example
     =======
     '''
+    def __init__(self,
+                 dynamic_system,
+                 reference_data={},
+                 report_init=[ReportEntry('Report Beginning')],
+                 report_step=[
+                     SimulationalBlock(np.linspace(0, 300, 1000)).do_simulation
+                 ],
+                 report_end=[ReportEntry('Report End')],
+                 **kwargs):
 
-    def __init__(self,dynamic_system,reference_data={},report_init=[ReportEntry('Report Beginning')],report_step=[SimulationalBlock(np.linspace(0,300,1000)).do_simulation],report_end=[ReportEntry('Report End')]):
+        self._dynamic_system = dynamic_system
+        self._reference_data = reference_data
 
-        self._dynamic_system=dynamic_system
-        self._reference_data=reference_data
-        
-        self._init_steps=report_init
-        self._loop_steps=report_step
-        self._end_steps=report_end
-        
-        
-        self._fig_no=plots_no()
-        
-        self._container=[]
-        
-    def prepare_data(self,parameter,parameter_range=None):
-        
-        self._parameter=parameter
-        self._parameter_range=parameter_range
-        
-        print('prepare data')
-        
-        
-        
-        if isinstance(self._parameter,dict):
-            analysis_span_list=[]
-            for key,value in parameter.items():
-                
-                if isinstance(value,list):
-                    
-                    for num,val in enumerate(value):
-                        
-                        analysis_span={**self._reference_data,**{key:val}}
+        self._init_steps = report_init
+        self._loop_steps = report_step
+        self._end_steps = report_end
+
+        self._fig_no = plots_no()
+
+        self._container = []
+        super().__init__()
+
+        #print(self._last_result)
+
+    def prepare_data(self, parameter, parameter_range=None):
+
+        self._parameter = parameter
+        self._parameter_range = parameter_range
+
+        #print('prepare data')
+
+        if isinstance(self._parameter, dict):
+            analysis_span_list = []
+            for key, value in parameter.items():
+
+                if isinstance(value, list):
+
+                    for num, val in enumerate(value):
+
+                        analysis_span = {**self._reference_data, **{key: val}}
                         analysis_span_list.append(analysis_span)
-                        print(analysis_span_list)
-                        
-                else: 
+                        #print(analysis_span_list)
+
+                else:
                     raise TypeError('Each dictionary value should be a list.')
             self._analysis_span = analysis_span_list
-            self.value=value
+            self.value = value
         else:
-            analysis_span=[{**self._reference_data,**{self._parameter:param_value}} for   param_value in parameter_range]
-            #print(analysis_span)
+            analysis_span = [{
+                **self._reference_data,
+                **{
+                    self._parameter: param_value
+                }
+            } for param_value in parameter_range]
+            ##print(analysis_span)
             self._analysis_span = analysis_span
-        
+
         return analysis_span
 
+    def analyze_system(self, t_span, container=None):
 
-
-    
-    def analyze_system(self,t_span,container=None):
-        
         if container:
-            self._container=container
+            self._container = container
         if self._dynamic_system:
-            solution_list=[]
+            solution_list = []
 
             self.init_report()
 
-            for num,case_data in enumerate(self._analysis_span):
-                self.num=num
-                data_for_plot=self.analysis_step(case_data=case_data,t_span=t_span,ics_list=None)
+            for num, case_data in enumerate(self._analysis_span):
+                self.num = num
+                data_for_plot = self.analysis_step(case_data=case_data,
+                                                   t_span=t_span,
+                                                   ics_list=None)
 
-                solution_list+=[(case_data,data_for_plot)]
+                solution_list += [(case_data, data_for_plot)]
 
             self.report_end()
 
-            self.solution_list=solution_list   
+            self.solution_list = solution_list
             return solution_list
         else:
             self.init_report()
-            #print(self._analysis_span)
-            
+            ##print(self._analysis_span)
+
             return (self._analysis_span)
-    
-    def analysis_step(self,case_data,t_span,ics_list=None):
-        
-        self._current_value=case_data[self._parameter]
-        self._current_data=case_data
-        #print(self._current_data)
+
+    def analysis_step(self, case_data, t_span, ics_list=None):
+
+        self._current_value = case_data[self._parameter]
+        self._current_data = case_data
+        ##print(self._current_data)
         for action in self._loop_steps:
-            self._current_result=action(self)
-        
+            self._current_result = action(analysis=self)
 
         self.report_step(self._current_result)
-    
-        
+
         return self._current_result
-    
-    
-    def init_report(self,result_to_report=None):
-        
+
+    def init_report(self, result_to_report=None):
+
         for action in self._init_steps:
-            self._current_result=action(self)
+            self._current_result = action(analysis=self)
 
-        
-        return self._current_result
-    
-    
-    def report_step(self,result_to_report,container_type=None):
-        
-        
-
-        
         return self._current_result
 
+    def report_step(self, result_to_report, container_type=None):
 
-            
-        
-    def report_end(self,result_to_report=None,container_type=None):
-        
+        return self._current_result
+
+    def report_end(self, result_to_report=None, container_type=None):
+
         for action in self._end_steps:
-            self._current_result=action(self)
+            self._current_result = action(analysis=self)
 
-        
         return self._current_result
 
-    
-    
-    
 
 class CompoundMatrix(Matrix):
+    r'''
+    dfa
+    
+    Arguments
+    =========
 
-    def symbolic_form(self,symbol_str):
-        
-        nrows,ncols=self.shape
-        
-        matrix_filling=symbols()
+    Methods
+    =======
 
+    Example
+    =======
+    '''
+    def symbolic_form(self, symbol_str):
+
+        nrows, ncols = self.shape
+
+        matrix_filling = symbols()
 
 
 class InlineMath(Math):
     """A class representing a inline math environment."""
-
-
-
-    def __init__(self, formula, escape=False,backend=vlatex):
+    def __init__(self, formula, escape=False, backend=vlatex):
         r"""
         Args
         ----
@@ -1250,17 +3605,14 @@ class InlineMath(Math):
             if True, will escape strings
         """
 
-
         self.escape = escape
         self.formula = vlatex(formula)
-        self.backend=backend
-        
+        self.backend = backend
+
         super().__init__(inline=True, data=backend(formula), escape=escape)
 
-class SymbolsList(NoEscape):
-    
 
-    
+class SymbolsList(NoEscape):
     def __new__(cls, symbols_list, backend=vlatex):
         r"""
         Args
@@ -1273,18 +3625,14 @@ class SymbolsList(NoEscape):
             if True, will escape strings
         """
 
-        
+        list_str = f', '.join(
+            [f'\\( {backend(sym)} \\)' for sym in symbols_list])
 
-        
-        list_str=f', '.join([ f'\\( {backend(sym)} \\)'  for sym in  symbols_list  ]  )
-        
         #return super(SymbolsList,cls).__new__(cls,list_str)
         return list_str
-    
-class NumbersList(NoEscape):
-    
 
-    
+
+class NumbersList(NoEscape):
     def __new__(cls, numbers_list, backend=vlatex):
         r"""
         Args
@@ -1297,39 +3645,49 @@ class NumbersList(NoEscape):
             if True, will escape strings
         """
 
-        
+        list_str = f', '.join([f'\\( {sym} \\)' for sym in numbers_list])
 
-        
-        list_str=f', '.join([ f'\\( {sym} \\)'  for sym in  numbers_list  ]  )
-        
         return list_str
 
 
 class SymbolsDescription(Description):
     """A class representing LaTeX description environment of Symbols explained in description_dict."""
-    _latex_name ='description'
-    def __init__(self,description_dict=None,expr=None,options=None,arguments=None,start_arguments=None,**kwargs):
-        self.description_dict=description_dict
-        self.expr=expr
-        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
-        
-        
+    _latex_name = 'description'
+
+    def __init__(self,
+                 description_dict=None,
+                 expr=None,
+                 options=None,
+                 arguments=None,
+                 start_arguments=None,
+                 **kwargs):
+        self.description_dict = description_dict
+        self.expr = expr
+        super().__init__(options=options,
+                         arguments=arguments,
+                         start_arguments=start_arguments,
+                         **kwargs)
+
         if description_dict and expr:
-            
-            symbols_set=expr.atoms(Symbol,Function,Derivative)
-            
-            symbols_to_add={ sym:desc  for  sym,desc in description_dict.items() if sym in symbols_set}
-            
+
+            symbols_set = expr.atoms(Symbol, Function, Derivative)
+
+            symbols_to_add = {
+                sym: desc
+                for sym, desc in description_dict.items() if sym in symbols_set
+            }
+
             self.add_items(symbols_to_add)
-        
+
         if description_dict:
             self.add_items(description_dict)
-            
-    def add_items(self,description_dict):
-        
+
+    def add_items(self, description_dict):
+
         for label, entry in description_dict.items():
-            
-            self.add_item(NoEscape(InlineMath(vlatex(label)).dumps()),NoEscape(vlatex(entry)))
+
+            self.add_item(NoEscape(InlineMath(vlatex(label)).dumps()),
+                          NoEscape(vlatex(entry)))
 
 
 class Equation(Environment):
@@ -1628,7 +3986,7 @@ measurement_summary_1 = [
     'Na wykresach zaprezentowano przebiegi od momentu włączenia, aż do wyłączenia aparatury pomiarowej. ',
 ]
 
-measurement_summary_a_ox= [
+measurement_summary_a_ox = [
     'Dla czujnika \({a_ox}\), maksymalna wartość amplitudy przyśpieszenia wyniosła {a_ox_max}, natomiast minimalna - {a_ox_min}. ',
     'W analizowanym przebiegu parametr \({a_ox}\) osiągnał wartość maksymalną równą {a_ox_max} przy wartości minimalnej {a_ox_min}. ',
     'Minimalna wartość dla przebiegu \({a_ox}\) wyniosła {a_ox_min}, natomiast wartość maksymalna odpowiednio {a_ox_min}. ',
@@ -1665,12 +4023,14 @@ measurement_summary_a_rcz = [
     'Przebieg wkresu przyspieszenia \({a_rcz}\) przyjumuje wartości nie mniejsze niż {a_rcz_min} i nie większe od {a_rcz_max}. ',
     'Akcelerometr (\({a_rcz}\)) umieszczony na wahaczu napędu RapidChair zarejestrował przyspieszenia w zakresie od {a_rcz_min} do {a_rcz_max}. ',
     'Odczytanie danych dla czujnika umieszczonego na wahaczu napędu RapidChair umożliwia określenie skrajnych wartości amplitudy przespieszeń pomiędzy {a_rcz_min} a {a_rcz_max}. ',
-    'Sygnał \({a_rcz}\) przyjmuje wartości nie mniejsze niż {a_rcz_min} oraz nie większe niż {a_rcz_max}.']
+    'Sygnał \({a_rcz}\) przyjmuje wartości nie mniejsze niż {a_rcz_min} oraz nie większe niż {a_rcz_max}.'
+]
 
 meas_summary_bank = RandomDescription(measurement_summary_1,
-    measurement_summary_a_ox, measurement_summary_a_oz,measurement_summary_a_rz,measurement_summary_a_rcz)
-
-
+                                      measurement_summary_a_ox,
+                                      measurement_summary_a_oz,
+                                      measurement_summary_a_rz,
+                                      measurement_summary_a_rcz)
 
 measurement_summary_4 = [
     'Zaobserwowano wpływ badanego parametru \({a_rx}\) na drgania wózka, których maksymalna wartość amplitudy porecntu (%) przyśpieszenia ziemskiego wyniosła {a_rx_max}. ',
@@ -1772,8 +4132,10 @@ introduction_bank_meas_4 = [  #poprawione (nie trzeba zmieniać zdań)
     'W dalszej części przedstawiono jedynie przebiegi drgań z {entries_no} pomiarów uznanych za miarodajne. '
 ]
 
-meas_intro_composed_model =RandomDescription(introduction_bank_meas_1, introduction_bank_meas_2,
-                          introduction_bank_meas_3, introduction_bank_meas_4)
+meas_intro_composed_model = RandomDescription(introduction_bank_meas_1,
+                                              introduction_bank_meas_2,
+                                              introduction_bank_meas_3,
+                                              introduction_bank_meas_4)
 
 ending_bank_meas_1 = [  #poprawione
     'Dla każdego przypadku masy układu przeprowadzono co najmniej trzy przejazdy, dzięki czemu zmniejszono ryzyko uwzględnienia losowych błędów. ',
@@ -1796,7 +4158,8 @@ ending_bank_meas_3 = [  #poprawione (nie trzeba zmieniać zdań)
     'Zestawienie przebiegów czasowych zamieszczono w następnej sekcji dokumentu.'
 ]
 
-meas_ending_composed_model = RandomDescription(ending_bank_meas_1, ending_bank_meas_3)
+meas_ending_composed_model = RandomDescription(ending_bank_meas_1,
+                                               ending_bank_meas_3)
 
 intro_bank_meas_1 = [  #poprawione
     'Na wykresie {nr_rys} przedstawiano zmiany wartości przyspieszeń drgań charakteryzujących ruch wózka.',
@@ -1819,7 +4182,9 @@ intro_bank_meas_3 = [  #poprawione (nie trzeba zmieniać zdań)
     'Przyjęto następujące oznaczenia: \({a_ox}\) - przyspieszenia wzdłużne czujnika umieszcoznego w osi wózka, \({a_oz}\) - przyspieszenia pionowe czujnika umieszcoznego w osi wózka, \({a_rz}\) - przyspieszenia pionowe czujnika na podnóżku oraz \({a_rcz}\) - przyspieszenia pionowe czujnika w wahaczu RapidChair.',
 ]
 
-intro_bank_meas_composed_model = RandomDescription(intro_bank_meas_1, intro_bank_meas_2,intro_bank_meas_3)
+intro_bank_meas_composed_model = RandomDescription(intro_bank_meas_1,
+                                                   intro_bank_meas_2,
+                                                   intro_bank_meas_3)
 introduction_bank_1 = [
     'Na wykresie {nr_rys} przedstawiano zmiany wielkości dynamicznych charakteryzujących ruch obiektu. Po przeanalizowaniu można zanotować wzajemną zależność poszczególnych wielkości dynamicznych.',
     'Charakter przebiegu wartości dynamicznych układu został przedstawiony na rysunku {nr_rys}.',
@@ -1851,10 +4216,24 @@ intro_bank_composed_model = [
                           introduction_bank_3)) for obj in range(30)
 ]
 
-meas_comparation_bank_1=['Na Rysunku {nr_rys} przedstawiono zestawienie wartości maksymalnych przyspieszeń drgań dla poszczególnych czujników w funkcji masy pasażera.', 'Wykres {nr_rys} reprezentuje zmienność wartości maksymalnych przyspieszeń drgań dla każdego z czujników, w odniesieniu do masy pasażera.', 'Rysunek {nr_rys} reprezentuje zestawienie zmienności maksymalnych amplitud przyspieszeń w zależności od masy testującego.']
-meas_comparation_bank_2=['Między innymi na jego podstawie, uwzględniając informacje o poziomach minimalnych i średnich, dokonano oceny wpływu masy układu na poziom drgań dla danej próby. ','Posłużył on, wraz z informacjami o wartościach minimalnych i średnich, do określenia, w jakim stopniu masa układu wpływa na charakter drgań w zakresie całej przeprowadzonej próby. ', 'Wspólnie z danymi o wartościach średnich i minimalnych stanowił on podstawę do określenia wpływu masy układu na ogólny poziom amplitud przyspieszeń drgań na rozpatrywanej nawierzchni.']
-meas_comparation_bank_3=['Opisane w dalszej kolejności poziomy wpływu masy na wielkość drgań odnoszą się do amplitud w punktach mocowania poszczególnych akcelerometrów.','Ogólny poziom drgań oceniano poprzez poziom wpływu masy na przyspieszenia drgań w każdym z punktów mocowania czujnika z osobna. ', 'Dalszej oceny wpływu masy pasaera {param_name} na poziom drgań dokonywano w każdym z punktów mocowania czujników z osobna.']
-meas_comparation_composed_model=RandomDescription(meas_comparation_bank_1,meas_comparation_bank_2,meas_comparation_bank_3)
+meas_comparation_bank_1 = [
+    'Na Rysunku {nr_rys} przedstawiono zestawienie wartości maksymalnych przyspieszeń drgań dla poszczególnych czujników w funkcji masy pasażera.',
+    'Wykres {nr_rys} reprezentuje zmienność wartości maksymalnych przyspieszeń drgań dla każdego z czujników, w odniesieniu do masy pasażera.',
+    'Rysunek {nr_rys} reprezentuje zestawienie zmienności maksymalnych amplitud przyspieszeń w zależności od masy testującego.'
+]
+meas_comparation_bank_2 = [
+    'Między innymi na jego podstawie, uwzględniając informacje o poziomach minimalnych i średnich, dokonano oceny wpływu masy układu na poziom drgań dla danej próby. ',
+    'Posłużył on, wraz z informacjami o wartościach minimalnych i średnich, do określenia, w jakim stopniu masa układu wpływa na charakter drgań w zakresie całej przeprowadzonej próby. ',
+    'Wspólnie z danymi o wartościach średnich i minimalnych stanowił on podstawę do określenia wpływu masy układu na ogólny poziom amplitud przyspieszeń drgań na rozpatrywanej nawierzchni.'
+]
+meas_comparation_bank_3 = [
+    'Opisane w dalszej kolejności poziomy wpływu masy na wielkość drgań odnoszą się do amplitud w punktach mocowania poszczególnych akcelerometrów.',
+    'Ogólny poziom drgań oceniano poprzez poziom wpływu masy na przyspieszenia drgań w każdym z punktów mocowania czujnika z osobna. ',
+    'Dalszej oceny wpływu masy pasaera {param_name} na poziom drgań dokonywano w każdym z punktów mocowania czujników z osobna.'
+]
+meas_comparation_composed_model = RandomDescription(meas_comparation_bank_1,
+                                                    meas_comparation_bank_2,
+                                                    meas_comparation_bank_3)
 
 conclusion_bank_x = [
     'Zauważa się {x(t)_inf} zmienności parametru \({param_name}\) dla współrzędnej \({x(t)}\) oraz odpowiadającej temu przemieszczniu prędkości. Stwierdzono wpływ badanego parametru, gdzie maksymalne wartości dla wymienionych współrzędnych przyjmują odpowiednio {x(t)_max} oraz {Derivative(x(t), t)_max} dla {x(t)_idmax} i {Derivative(x(t), t)_idmax}. ',
@@ -1885,10 +4264,9 @@ measurement_conclusion_bank_a_rcz = [
     'Ostatnie rozpoznanie, przeprowadzone dla czujnika na wahaczu napędu RapidCHair (sygnał \({a_rcz}\)) ukazuje {a_rcz_inf} masy pasażera na drgania struktury. '
     #'Zmianę dynamiki pod wpływem zmienności parametru \({param_name}\) obserwuje się dla \({a_rx}\), gdzie największa wartość pokonanej drogi to {a_rx_max}. W konsekwencji zaobserwowano {a_rx_inf} analizowanej zmiennej na wartość prędkości liniowej \({Derivative(a_rx, t)}\), dla której minimalna wartość wynosi {Derivative(a_rx, t)_min}, a największą osiąganą wartością jest {Derivative(a_rx, t)_max} odpowiednio dla wartości parmametru: {Derivative(a_rx, t)_idmin} oraz {Derivative(a_rx, t)_idmax}. ',
 ]
-measurement_conclusion_bank_composed_model =RandomDescription(
-            measurement_conclusion_bank_a_ox,measurement_conclusion_bank_a_oz,measurement_conclusion_bank_a_rz,measurement_conclusion_bank_a_rcz
-        )
-
+measurement_conclusion_bank_composed_model = RandomDescription(
+    measurement_conclusion_bank_a_ox, measurement_conclusion_bank_a_oz,
+    measurement_conclusion_bank_a_rz, measurement_conclusion_bank_a_rcz)
 
 conclusion_bank_varphi_rc = [
     'Zaobserwowano {varphi_RC(t)_inf} rozpatrywanego parametru - \({param_name}\) na wartość drgań i prędkość kątową napędu RC. Przemieszczenia kątowe nie przyjmują wartości mniejszej niż {varphi_RC(t)_min} oraz większej niż {varphi_RC(t)_max} odpowiednio dla wartości parametru: {varphi_RC(t)_idmin} oraz {varphi_RC(t)_idmax}. Dla prędkości kątowej napędu minimalna wartość amplitudy to {Derivative(varphi_RC(t), t)_min}, a największą osiąganą wartością jest {Derivative(varphi_RC(t), t)_max}.',
@@ -1955,7 +4333,6 @@ conclusion_bank_composed_model = [
                           conclusion_bank_no_impact)) for obj in range(30)
 ]
 
-
 conclusion_bank_chair_model_gen = RandomDescription(conclusion_bank_x,
                                                     conclusion_bank_z,
                                                     conclusion_bank_phi,
@@ -2004,9 +4381,10 @@ simulations_summary_str = ''' Dla rozważanego modelu dynamicznego wózka inwali
 
 class PlottedData(Figure):
     _latex_name = 'figure'
+
     def __init__(self,
                  numerical_data,
-                 fig_name ='Name',
+                 fig_name='Name',
                  *args,
                  units_dict=None,
                  preview=False,
@@ -2016,10 +4394,10 @@ class PlottedData(Figure):
 
         self._numerical_data = numerical_data
         self.fig_name = str(fig_name)
-        self._latex_name='figure' 
+        self._latex_name = 'figure'
         super()._latex_name
         self.preview = preview
-        self._units_dict=units_dict
+        self._units_dict = units_dict
 
     def add_data_plot(self,
                       numerical_data=None,
@@ -2038,14 +4416,12 @@ class PlottedData(Figure):
                                  xlabel=xlabel,
                                  grid=grid,
                                  fontsize=fontsize)
-        
+
         #plt.xlim(numerical_data.index[0],numerical_data.index[-1])
 
         if num_yticks != None:
             ticks_no = num_yticks
             for axl in ax:
-                
-                
 
                 ylimit = axl.set_ylim(bottom=round(np.floor(
                     axl.get_ylim()[0])),
@@ -2055,33 +4431,33 @@ class PlottedData(Figure):
 
                 axl.plot()
         #ax=solution_tmp.plot(subplots=True)
-        
+
         if self._units_dict:
-            label_formatter=lambda sym: '$' + vlatex(sym) + '$' + '[${val:~L}$]'.format(val=self._units_dict[sym])
+            label_formatter = lambda sym: '$' + vlatex(
+                sym) + '$' + '[${val:~L}$]'.format(val=self._units_dict[sym])
         else:
-            label_formatter=lambda sym: '$' + vlatex(sym) + '$' 
-            
-        label_formatter_without_SI=lambda sym: '$' + vlatex(sym) + '$' 
-        
+            label_formatter = lambda sym: '$' + vlatex(sym) + '$'
+
+        label_formatter_without_SI = lambda sym: '$' + vlatex(sym) + '$'
+
         if subplots:
             ([
-                ax_tmp.legend([label_formatter(sym)],loc='lower right')
-                for ax_tmp, sym in zip(ax, numerical_data.columns)        
+                ax_tmp.legend([label_formatter(sym)], loc='lower right')
+                for ax_tmp, sym in zip(ax, numerical_data.columns)
             ])
-            
+
             ([
-
-                
-                ax_tmp.set_ylabel(label_formatter_without_SI(sym)#.replace(r '\' , ' ')#.replace( '\\' ,' ' ) 
-                                   )
-
-                for ax_tmp, sym in zip(ax, numerical_data.columns)        
+                ax_tmp.set_ylabel(
+                    label_formatter_without_SI(
+                        sym)  #.replace(r '\' , ' ')#.replace( '\\' ,' ' ) 
+                ) for ax_tmp, sym in zip(ax, numerical_data.columns)
             ])
-            
+
         else:
-            ax.legend([[label_formatter(sym)] for sym in numerical_data.columns],loc='lower right')
-            
-            
+            ax.legend([[label_formatter(sym)]
+                       for sym in numerical_data.columns],
+                      loc='lower right')
+
         #plt.legend(loc='lower right')
         plt.savefig(self.fig_name + '.png')
         self.add_image(self.fig_name, width=NoEscape('15cm'))
@@ -2094,8 +4470,9 @@ class PlottedData(Figure):
 
 class DataPlot(Figure):
     _latex_name = 'figure'
+
     def __init__(self,
-                 fig_name = 'Name',
+                 fig_name='Name',
                  *args,
                  preview=False,
                  position=None,
@@ -2106,40 +4483,37 @@ class DataPlot(Figure):
         #self._latex_name='figure' #super()._latex_name
         self.preview = preview
 
-    def add_data_plot(self,*args,filename=None,width='15cm',**kwargs):
+    def add_data_plot(self, *args, filename=None, width='15cm', **kwargs):
 
         import matplotlib.pyplot as plt
         if not filename:
             current_time = dtime.datetime.now().timestamp()
-            filename=f'autoadded_figure_{current_time}.png'
+            filename = f'autoadded_figure_{current_time}.png'
 
-        plt.savefig(filename,*args,**kwargs)
+        plt.savefig(filename, *args, **kwargs)
         self.add_image(filename, width=NoEscape(width))
 
         if self.preview == True:
             plt.show()
 
-        
-
-    
 
 class DataTable(Table):
     _latex_name = 'table'
 
     def __init__(self, numerical_data, position=None):
         super().__init__(position=position)
-        #print(numerical_data)
+        ##print(numerical_data)
         self._numerical_data = numerical_data
         self.position = position
 
-    def add_table(self, numerical_data=None):
+    def add_table(self, numerical_data=None, index=False, longtable=False):
         self.append(NoEscape('%%%%%%%%%%%%%% Table %%%%%%%%%%%%%%%'))
         #         if numerical_data!=None:
         #             self._numerical_data=numerical_data
 
         tab = self._numerical_data
         self.append(
-            NoEscape(tab.to_latex(index=False, escape=False, longtable=False)))
+            NoEscape(tab.to_latex(index=index, escape=False, longtable=longtable)))
 
 
 class ReportSection(Section):
@@ -2179,9 +4553,9 @@ class ReportSection(Section):
 
         a = np.asarray(list(select.keys()))
 
-        print('indicator: ', indicator)
-        print(select[a.flat[np.abs(a - indicator).argmin()]])
-        print(select[a.flat[np.abs(a - indicator).argmin()]])
+        #print('indicator: ', indicator)
+        #print(select[a.flat[np.abs(a - indicator).argmin()]])
+        #print(select[a.flat[np.abs(a - indicator).argmin()]])
 
         return select[a.flat[np.abs(a - indicator).argmin()]]
 
@@ -2202,7 +4576,7 @@ class ReportSection(Section):
         feature_dict = {
             'param_name': vlatex(self.analysis_key),
             'string': string,
-            'entries_no':'nnn'
+            'entries_no': 'nnn'
         }
         if marker:
             feature_dict.update({'nr_rys': Ref(marker).dumps()})
@@ -2245,7 +4619,6 @@ class ReportSection(Section):
                     units_dict=units_dict))
                 for name in column_names
             })
-            
 
         if type(given_data_dict) != type(None):
             feature_dict.update({
@@ -2333,22 +4706,20 @@ class ReportSection(Section):
         with self.create(Subsection(title)) as subsec:
 
             simulation_results_frame = numerical_data
-            
+
             for key, row in simulation_results_frame.iterrows():
-                
-                
 
                 data_with_units = {
                     parameter: value
                     for parameter, value in row.items()
                     if isinstance(parameter, Symbol)
                 }
-                
 
                 current_time = dtime.datetime.now().timestamp()
-                current_fig_mrk = Marker(('data_plot_' +
-                                             str(self.analysis_key) + '_' + str(1+next(plots_no_gen))),
-                                         prefix='fig')
+                current_fig_mrk = Marker(
+                    ('data_plot_' + str(self.analysis_key) + '_' +
+                     str(1 + next(plots_no_gen))),
+                    prefix='fig')
 
                 format_dict = {
                     **(self.get_feature_dict(numerical_data=row['simulations'],
@@ -2358,23 +4729,25 @@ class ReportSection(Section):
                     #**{str(name):vlatex(name) for name in row['simulations'].columns}
                 }
 
-                
                 subsec.append(
                     NoEscape(str(initial_description).format(**format_dict)))
-                
-                print(
-                np.array_split(range(len(row['simulations'].columns)),plots_no )    
-                )
 
-                for no,control_list in enumerate(np.array_split(range(len(row['simulations'].columns)),plots_no )):
-                
-                    #print(row['simulations'].iloc[:,int(control_list[0]):int(control_list[-1]+1)])
-                    print('control list',control_list)
-                    
+#                 print(
+#                     np.array_split(range(len(row['simulations'].columns)),
+#                                    plots_no))
+
+                for no, control_list in enumerate(
+                        np.array_split(range(len(row['simulations'].columns)),
+                                       plots_no)):
+
+                    ##print(row['simulations'].iloc[:,int(control_list[0]):int(control_list[-1]+1)])
+                    #print('control list', control_list)
+
                     current_time = dtime.datetime.now().timestamp()
-                    current_fig_mrk = Marker(('data_plot_' +
-                                             str(self.analysis_key) + '_' + str(next(plots_no_gen))),
-                                             prefix='fig')
+                    current_fig_mrk = Marker(
+                        ('data_plot_' + str(self.analysis_key) + '_' +
+                         str(next(plots_no_gen))),
+                        prefix='fig')
 
                     format_dict = {
                         **(self.get_feature_dict(numerical_data=row['simulations'],
@@ -2383,10 +4756,14 @@ class ReportSection(Section):
                                                  marker=current_fig_mrk)),
                         #**{str(name):vlatex(name) for name in row['simulations'].columns}
                     }
-                
+
                     with subsec.create(
-                            PlottedData(row['simulations'].iloc[:,int(control_list[0]):int(control_list[-1]+1)],
-                                        './plots/fig_' + str(current_time)+'_'+str(no),
+                            PlottedData(row['simulations'].
+                                        iloc[:,
+                                             int(control_list[0]
+                                                 ):int(control_list[-1] + 1)],
+                                        './plots/fig_' + str(current_time) +
+                                        '_' + str(no),
                                         position='H',
                                         units_dict=units_dict,
                                         preview=self.preview)) as fig:
@@ -2404,10 +4781,8 @@ class ReportSection(Section):
                                 caption.format(**format_dict)))
                         fig.append(Label(current_fig_mrk))
 
-                
                 subsec.append(
-                    NoEscape(str(ending_summary)  .format(**format_dict)
-                             ))
+                    NoEscape(str(ending_summary).format(**format_dict)))
 
                 #subsec.append(NewPage())
                 #subsec.append(NoEscape('\\'))
@@ -2431,14 +4806,14 @@ class ReportSection(Section):
             numerical_data=None,
             units_dict={},
             xlabel=' ',
-            figsize=(10,4),
+            figsize=(10, 4),
             initial_description='Initial description',
             ending_summary='Ending summary',  # random.choice(conclusion_bank_composed_model)
     ):
         ''' Dla rozważanego modelu dynamicznego wózka inwalidzkiego wraz z napędem RC przedstawiono efekty symulacji numerycznych. Dla uzyskanych danych symulacyjnych, przygotowano wykresy przedstawiające maksymalne wartości osiąganych amplitud w funkcji analizowanego parametru dla współrzędnych uogólnionych modelu oraz ich pierwszych pochodnych (przemieszczeń i prędkości). Opracowane wykresy porównawcze pozwoliły na określenie wpływu badanych parametrów na dynamikę rozpatrywanego układu. Bazując na wynikach przerprowadzonych symulacji przygotowano zestawienie dla parametru \({param_name}\).  '''
 
         summary_frame = numerical_data
-        
+
         with self.create(Subsection(title)) as subsec:
 
             current_time = dtime.datetime.now().timestamp()
@@ -2461,7 +4836,7 @@ class ReportSection(Section):
                                                  units_dict=units_dict,
                                                  marker=summary_mrk))
 
-            print(format_dict)
+            #print(format_dict)
 
             subsec.append(
                 NoEscape(str(initial_description).format(**format_dict)))
@@ -2471,7 +4846,7 @@ class ReportSection(Section):
                 for name in summary_frame.columns
             }
 
-            print(step_key_influence_dict)
+            #print(step_key_influence_dict)
 
             with subsec.create(
                     PlottedData(summary_frame,
@@ -2479,7 +4854,9 @@ class ReportSection(Section):
                                 position='H',
                                 units_dict=units_dict,
                                 preview=True)) as fig:
-                fig.add_data_plot(summary_frame,xlabel=xlabel,figsize=figsize)
+                fig.add_data_plot(summary_frame,
+                                  xlabel=xlabel,
+                                  figsize=figsize)
                 fig.add_caption(
                     NoEscape(
                         'Zestawienie wyników przeprowadzonej analizy.'.format(
@@ -2505,7 +4882,7 @@ class ReportSection(Section):
             numerical_data=None,
             units_dict={},
             xlabel=' ',
-            figsize=(10,4),
+            figsize=(10, 4),
             initial_description='Initial description',
             ending_summary='Ending summary',  # random.choice(conclusion_bank_composed_model)
     ):

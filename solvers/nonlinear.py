@@ -1,10 +1,11 @@
-from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Function, lambdify, factorial,solve
+from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Function, lambdify, factorial,solve, Dict
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 import sympy as sym
 from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
 import itertools as itools
+import copy
 import scipy.integrate as solver
 from ..utilities.timeseries import DataMethods, SpectralMethods, TimeDomainMethods, SpectrumSeries, SpectrumFrame, TimeSeries, TimeDataFrame
 
@@ -17,6 +18,140 @@ import sympy.physics.mechanics as me
 from sympy.simplify.fu import TR8, TR10, TR7, TR3
 
 from .linear import LinearODESolution, FirstOrderODE
+
+from timer import timer
+from collections.abc import Iterable
+
+class AnalyticalSolution(Matrix):
+    def __new__(cls, lhs,rhs ,evaluate=True, **options):
+
+        if not isinstance(lhs,Iterable):
+            lhs = Matrix([lhs])
+        if not isinstance(rhs,Iterable):
+            rhs = Matrix([rhs])        
+        
+        
+        
+        obj = super().__new__(cls,rhs,evaluate=evaluate, **options)
+        
+        #display(obj)
+        obj._lhs=lhs
+
+        return obj
+
+#     def __init__(self, lhs,rhs ,evaluate=True, **options):
+#         if not isinstance(lhs,Iterable):
+#             lhs = Matrix([lhs])
+            
+#         print('init')
+#         self.llhs=lhs
+#         print(self.llhs)
+    
+    @classmethod
+    def from_dict(cls,dictionary,**options):
+        
+        #tuples_list = [(var,eq)  for var,eq in dictionary.items()]
+        
+        
+        
+        return cls( list(dictionary.keys()),list(dictionary.values()) ,**options   )
+    
+    def subs(self,*args,**kwargs):
+        
+        obj = super().subs(*args,**kwargs)
+        obj._lhs=self._lhs
+        
+        return obj
+    
+    
+    def __add__(self,other):
+        
+        if isinstance(other,self.__class__):
+            other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
+        
+        obj = super().__add__(other)
+        obj._lhs=self._lhs
+        
+        return obj
+
+    
+    def __mul__(self,other):
+        
+        obj = super().__mul__(other)
+        obj._lhs=self._lhs
+        
+        return obj
+    
+    
+    def __call__(self,t,params={}):
+        
+        solution = (self.nth_order_solution(order).rhs.subs(self.extra_params).subs(self.params_values))
+        
+        solution = solution.applyfunc(lambda x: x.subs(self.extra_params).subs(self.params_values))
+
+#         print('solution after extra params')
+#         display(-(self.nth_order_solution(order).rhs.subs(self.extra_params)))
+            
+        if isinstance(ivar, Symbol):
+
+            ics_dict=self._ic_from_sol(order=order,formula=True)
+            display(ics_dict)
+
+            return solution.subs(ics_dict).subs(self.extra_params).subs(self.ivar, ivar)
+        else:
+            #display(solution)
+            #display(solution[1])
+
+#             print('linear values check')
+#             display(Dict(self._ic_from_sol(order=order,formula=True)).subs(self.params_values).subs(self.params_values)  )
+            
+#             print('nonlinear values check')
+            ics_dict=self._ic_from_sol(order=order,formula=False)
+#             display(Dict(ics_dict).subs(self.params_values))
+            
+            ics_symbols_dict={sym:val for sym, val in zip(self.ics_symbols,self.ics)  }
+            
+#             display(ics_symbols_dict)
+            
+            nth_order_solution_fun = lambdify(self.ivar, (solution.subs(ics_dict).subs(self.extra_params).subs(ics_symbols_dict)).subs(self.params_values).n(), 'numpy')
+
+            #return nth_order_solution_fun(ivar)
+            solution  = TimeDataFrame(data={
+                dvar: data[0]
+                for dvar, data in zip(self.dvars, nth_order_solution_fun(ivar))
+            },
+                                 index=ivar)
+            
+            
+            for dvar in self.dvars:
+                solution[dvar.diff(self.ivar,1)]=solution[dvar].gradient()
+            
+            for dvar in self.dvars:
+                solution[dvar.diff(self.ivar,2)]=solution[dvar.diff(self.ivar,1)].gradient()
+            
+            return solution
+    
+    
+    @property
+    def lhs(self):
+        return Matrix( list(self.as_dict().keys()) )
+
+    
+    @property
+    def rhs(self):
+        return Matrix( list(self.as_dict().values()) )
+    
+    def as_iterable(self):
+
+        return [(lhs,comp) for lhs,comp  in zip(self._lhs,self)]
+        
+    
+    def as_dict(self):
+        
+
+        return Dict({lhs:rhs  for  lhs,rhs in self.as_iterable()})
+
+
 
 class WeakNonlinearProblemSolution(LinearODESolution):
     def __init__(self,
@@ -64,8 +199,13 @@ class WeakNonlinearProblemSolution(LinearODESolution):
                 'numpy')
 
             #            return nth_order_solution_fun(time)
-            return TimeDataFrame(
-                index=time, data={'solution': nth_order_solution_fun(time)})
+            result= TimeDataFrame(
+                index=time, data={'solution': (nth_order_solution_fun(time))}).copy().apply(np.real)
+            
+            display(result)
+            display(result.apply(np.real))
+            
+            return result
 
     def _format_solution(self, dvars, solution, dict=False, equation=False):
 
@@ -281,8 +421,8 @@ class WeakNonlinearProblemSolution(LinearODESolution):
             ivar=self.ivar,
             dvars=self.approximation_function(order=order)).solution()
         
-        print('Const const')
-        print(LinearODESolution._const_list)
+#         print('Const const')
+#         print(LinearODESolution._const_list)
 
         return self._format_solution(
             dvars=self.approximation_function(order=order),
@@ -333,8 +473,10 @@ class MultiTimeScaleMethod(LinearODESolution):
                  t_span=[],
                  params=[],
                  params_values={},
+                 extra_params={},
                  ic_point={},
-                 equation_type=None):
+                 equation_type=None,
+                 label=None):
 
         super().__init__(odes_system=odes_system,
                          ivar=ivar,
@@ -344,9 +486,20 @@ class MultiTimeScaleMethod(LinearODESolution):
                          params_values=params_values,
                          ic_point=ic_point,
                          equation_type=equation_type)
+        if label == None:
+            label = self._label = self.__class__.__name__ + ' with ' + str(
+                len(self.dvars)) + ' equations'
+        self._label = label
+
         self.eps = eps
         self._order=order
-
+        
+        self._stored_solution=None
+        self._saved_solution={}
+        self.extra_params=extra_params
+        
+        print(extra_params)
+        
         self.secular_eq=set()
         self.int_const=set()
 
@@ -358,8 +511,15 @@ class MultiTimeScaleMethod(LinearODESolution):
         self.ics=ics
         
         self._const_sol={}
+        
+        self._eoms=self.odes_system
 
-                
+    def __str__(self):
+        return self._label
+
+    def __repr__(self):
+        return self._label
+    
     def set_solution_order(self,order=1):
 
         self._order=order
@@ -381,7 +541,7 @@ class MultiTimeScaleMethod(LinearODESolution):
         Returns the list of time domanin slow varying function
         """
 
-        self._t_list=[t_i(self.ivar) for t_i in symbols(f't_0:{self._order+1}',cls=Function)]
+        self._t_list=[t_i(self.ivar) for t_i in symbols(f't_0:{self._order+1}',cls=Function, real=True)]
         return self._t_list
 
 
@@ -390,21 +550,62 @@ class MultiTimeScaleMethod(LinearODESolution):
         if params_values:
             self.params_values = params_values
 
-        solution = self.nth_order_solution(order).subs(self.params_values)
+#         print('call - parameters given')
+#         display(self.params_values)
+#         display('current ics', self.ics)
+#         display((self.extra_params))
+        
+        
+        
 
+        solution = (self.nth_order_solution(order).rhs.subs(self.extra_params).subs(self.params_values))
+        
+        solution = solution.applyfunc(lambda x: x.subs(self.extra_params).subs(self.params_values))
+
+#         print('solution after extra params')
+#         display(-(self.nth_order_solution(order).rhs.subs(self.extra_params)))
+            
         if isinstance(ivar, Symbol):
-            return solution.subs(self.ivar, ivar)
+
+            ics_dict=self._ic_from_sol(order=order,formula=True)
+            display(ics_dict)
+
+            return solution.subs(ics_dict).subs(self.extra_params).subs(self.ivar, ivar)
         else:
             #display(solution)
             #display(solution[1])
-            nth_order_solution_fun = lambdify(self.ivar, (solution), 'numpy')
 
-            #return nth_order_solution_fun(ivar)
-            return TimeDataFrame(data={
-                dvar: data[0]
-                for dvar, data in zip(self.dvars, nth_order_solution_fun(ivar))
-            },
-                                 index=ivar)
+#             print('linear values check')
+#             display(Dict(self._ic_from_sol(order=order,formula=True)).subs(self.params_values).subs(self.params_values)  )
+        
+#             print('nonlinear values check')
+            ics_dict=self._ic_from_sol(order=order,formula=False)
+#             display(Dict(ics_dict).subs(self.params_values))
+
+            ics_symbols_dict={sym:val for sym, val in zip(self.ics_symbols,self.ics)  }
+#             display(ics_symbols_dict)
+
+            nth_order_solution_fun = lambdify(self.ivar, (solution.subs(ics_dict).subs(self.extra_params).subs(ics_symbols_dict)).subs(self.params_values).n(), 'numpy')
+            with timer() as t:    
+                #return nth_order_solution_fun(ivar)
+                solution  = TimeDataFrame(data={
+                    dvar: data[0]
+                    for dvar, data in zip(self.dvars, nth_order_solution_fun(ivar))
+                },
+                                     index=ivar)
+
+
+                for dvar in self.dvars:
+                    solution[dvar.diff(self.ivar,1)]=solution[dvar].gradient()
+
+                for dvar in self.dvars:
+                    solution[dvar.diff(self.ivar,2)]=solution[dvar.diff(self.ivar,1)].gradient()
+
+                solution.index.name=self.ivar
+                
+                print('A_time'*20,t.elapse)
+            
+            return solution.apply(np.real)
 
     def _format_solution(self, dvars, solution, dict=False, equation=False):
 
@@ -643,8 +844,59 @@ class MultiTimeScaleMethod(LinearODESolution):
                   
         return general_form_dict
 
+
+    def _ic_from_sol(self,order=1,formula=True):
     
-    def nth_order_solution(self, order=1):
+    
+        general_sol_obj=self.nth_order_solution(order=order)
+        general_form_dict = general_sol_obj.as_dict()
+        
+#         display(general_form_dict)
+        
+        ics_eqns=list(general_sol_obj.rhs.subs({self.ivar:0})) + list(general_sol_obj.rhs.diff(self.ivar).subs({self.ivar:0}))
+        
+        
+        
+        
+        eqns=Matrix([eq.expand() for eq in ics_eqns])
+        
+#         display(eqns)
+        
+        const_from_eqn=[var for  var in list(eqns.atoms(Symbol,Function)) if var in FirstOrderODE._const_list]
+        
+        #display(Matrix(ics_eqns).jacobian(const_from_eqn))
+        
+#         print('const from eqns')
+#         display(const_from_eqn)
+        
+        #display(ics_eqns)
+        
+#         print('ics params check')
+#         display(self.params_values)
+        
+        if formula:
+        
+            const_vals_lin=Matrix([eq.expand() for eq in ics_eqns]).jacobian(const_from_eqn).subs({const:0 for const in const_from_eqn}).subs(self.eps,0)#.subs(self.params_values)#*Matrix(self.ics)
+            const_vals_zth=Matrix([eq.expand() for eq in ics_eqns]).subs({const:0 for const in const_from_eqn})#.subs(self.params_values)
+            
+        else:
+                    
+            const_vals_lin=Matrix([eq.expand() for eq in ics_eqns]).jacobian(const_from_eqn).subs({const:0 for const in const_from_eqn}).subs(self.params_values)#*Matrix(self.ics)
+            const_vals_zth=Matrix([eq.expand() for eq in ics_eqns]).subs({const:0 for const in const_from_eqn}).subs(self.params_values)
+        
+        
+#         print('+++++++++  eqns for ics +++++++++++ ')
+#         display(const_vals_lin)
+#         display(const_vals_zth)
+
+        self.ics_symbols= symbols(f'D0:{len(self.ics)}')
+        
+        self._ics_formula={const:val for const, val in zip(const_from_eqn,const_vals_lin.inv()*(-const_vals_zth + Matrix(self.ics_symbols) ))}
+        
+        return self._ics_formula
+    
+    
+    def _nth_order_solution(self, order=1):
 
         general_form_dict=self._nth_order_solution_with_C(order=order)
         
@@ -658,9 +910,16 @@ class MultiTimeScaleMethod(LinearODESolution):
         const_sol=FirstOrderODE((sec_eq),
                         self.t_list[1],
                         dvars=Matrix(list(self.int_const))
-                        ).general_solution()
+                        ).solution()
         
-        self._const_sol=const_sol
+#         print('trial for SS')
+        steady_sol=(FirstOrderODE((sec_eq),
+                        self.t_list[1],
+                        dvars=Matrix(list(self.int_const))
+                        ).steady_solution()) 
+        
+        
+        self._const_sol={coord: const_sol[coord] + steady_sol[coord] for coord in const_sol.keys()}
 #         display(const_sol)
 
 #         print('Const const')
@@ -676,28 +935,25 @@ class MultiTimeScaleMethod(LinearODESolution):
 #         display(*list({var: eqn.subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values()))
 #         display(*list({var: eqn.diff(self.ivar).subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values()))
         
-        ics_eqns=(list({var: eqn.subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values())+
-                    list({var: eqn.diff(self.ivar).subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values())
-                      )
+
         
-        
-        eqns=Matrix([eq.expand() for eq in ics_eqns])
-        
-        
-        
-        const_from_eqn=[var for  var in list(eqns.atoms(Symbol,Function)) if var in FirstOrderODE._const_list]
-        
-        #display(const_from_eqn)
-        
-        #display(ics_eqns)
-        const_vals=Matrix([eq.expand() for eq in ics_eqns]).jacobian(const_from_eqn).inv()*Matrix(self.ics)
-                  
-        #display(const_vals)
-                  
-        return Matrix(
-            list(general_form_dict.values())).subs(const_sol).subs(t_back_subs)
-        
+#         display(self._ics_formula)
+#         print('+++++++++  eqns for ics +++++++++++ ')      
+
+
+            
+        return AnalyticalSolution.from_dict(general_form_dict)
+
     
+    def nth_order_solution(self, order=1):
+        
+        if not order in self._saved_solution:
+            
+            self._saved_solution[order]  = self._nth_order_solution(order=order)
+
+            
+        return self._saved_solution[order]
+            
     def zeroth_approximation(self, dict=False, equation=False):
 
         #eoms = Matrix(self.odes_system).subs(self.eps, 0)
@@ -825,13 +1081,18 @@ class MultiTimeScaleMethod(LinearODESolution):
     def numerized(self,
                  params_values={},
                  **kwargs):
+        
 
         
-        return self.__class__(
+        if params_values=={}:
+            return copy.copy(self)
+        else:
+        
+            return self.__class__(
                 odes_system=self.governing_equations,
                  ivar=self.ivar,
                  dvars= self.dvars,
-                 ics=self.ics,
+                 ics=params_values['ics'],
                  eps=self.eps,
                  omega=self.omega,
                  order=self._order,
@@ -839,7 +1100,8 @@ class MultiTimeScaleMethod(LinearODESolution):
                  params=[],
                  params_values=params_values,
                  ic_point=self.ics,
-                 equation_type=None)
+                 equation_type=None,
+                 label=self._label)
     
     
     
@@ -849,6 +1111,18 @@ class MultiTimeScaleMethod(LinearODESolution):
                          t_eval=None,
                          params_values=None,
                          method='RK45'):
+        
+#         print('compute_solution')
+#         display(params_values)
+#         display(ic_list)
+        
+        if ic_list:
+            print('class ics has been taken')
+            self.ics=ic_list
+            
+
+        
+        
         
         return self.__call__( ivar=t_span, order=self._order, params_values=params_values)
     

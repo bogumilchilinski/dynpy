@@ -386,7 +386,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                           bodies=self._bodies,
                           frame=self.frame,
                           hol_coneqs=hol_coneqs,
-                          nonhol_coneqs=nonhol_coneqs_subs
+                          nonhol_coneqs=nonhol_coneqs_subs,
+                          label=f'{self._label} for {args} and {kwargs}'
                           )
 
         return type(self)(0,system=new_system)
@@ -736,7 +737,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return type(self)(0,system=new_sys)
     
 
-    def numerized(self, parameter_values={}, FFT = None):
+    def numerized(self, parameter_values={}, FFT = None,label=None,backend='fortran',**kwargs):
         '''
         Takes values of parameters, substitute it into the list of parameters and changes list it into a Tuple. Returns instance of class OdeComputationalCase.
         Arguments:
@@ -767,8 +768,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         if not FFT:
             data_Tuple = Tuple(*self.system_parameters()).subs(parameter_values)
             computed_case = self.computational_case(parameter_values=data_Tuple)
+            if label:
+                print('dynpy label',label)
+                computed_case['label']=label
+                print('computed case',computed_case)
 
-            return OdeComputationalCase(**computed_case, evaluate=True)
+            return OdeComputationalCase(**computed_case,backend=backend, evaluate=True)
 
 
 
@@ -960,7 +965,7 @@ class HarmonicOscillator(LinearDynamicSystem):
             self.ivar) + 2 * self.h * Matrix(self.u) + (self.omegah**2 +
                                                    self.h**2) * Matrix(self.q)
         print('Done')
-        return self.__governing_equations
+        return self._canonical_governing_equation
 
     def __solve(self, initial_conditions=None):
         '''

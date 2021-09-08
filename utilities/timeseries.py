@@ -9,13 +9,16 @@ from sympy.physics.mechanics import vlatex
 default_colors=['red','blue','orange','teal','black','green']
 
 class DataMethods:
-    def _pylatex_tikz(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False):
+    
+    
+    
+    def _pylatex_tikz(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,extra_commands=None,options=None):
 
         
        
 
         
-        labels_list=[('$'+vlatex(label)+'$').replace('$$','$') for label in self.columns]
+        labels_list=[label for label in self.columns]
         #labels_list=[(vlatex(label)) for label in self.columns]
 
         data_for_plot_list=[zip(self.index,plot_data)  for label,plot_data in list(self.items())]
@@ -33,7 +36,7 @@ class DataMethods:
         
         
         
-        tikzpicture = TikZ()
+        tikzpicture = TikZ(options=options)
         
         if subplots==False:
 
@@ -42,7 +45,7 @@ class DataMethods:
                 for data_for_plot,label,color in zip(data_for_plot_list,labels_list,colors_list*int(colors_multiplicator)) :
                     coordinates = data_for_plot
 
-                    plot.append(Plot(name=NoEscape(NoEscape(r'\tiny '+label)), coordinates=coordinates,options='color='+color+',solid'))
+                    plot.append(Plot(name=NoEscape(NoEscape(r'\tiny '+label)), coordinates=coordinates,options='color='+color+',solid'+NoEscape(f',rounded corners=1mm,')))
 
         else:
             at_option=NoEscape('')
@@ -51,21 +54,23 @@ class DataMethods:
                 plot_name=NoEscape(',name=plot'+str(no)+',')
                 with tikzpicture.create(Axis(options=plot_options_list[no]+plot_name+at_option )) as plot:
                     coordinates = data_for_plot
-                    plot.append(Plot(name=NoEscape(NoEscape(r'\tiny '+label)), coordinates=coordinates,options='color='+color+',solid'))
+                    plot.append(Plot(name=NoEscape(NoEscape(r'\tiny '+label)), coordinates=coordinates,options='color='+color+',solid'+NoEscape(f',rounded corners=1mm,')))
                     #at_option=NoEscape('at=(plot'+str(no)+'.below south west),')
                     at_option=NoEscape('at=(plot'+str(no)+'.south west),')
-                        
+        
+        if extra_commands is not None:
+            tikzpicture.append(extra_commands)
 
         return tikzpicture
 
-    def to_pylatex_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False):
+    def to_pylatex_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,extra_commands=None):
         
         
-        tikz_pic=self._pylatex_tikz(filename,labels_list,colors_list,height, width,x_axis_description,y_axis_description,subplots)
+        tikz_pic=self._pylatex_tikz(filename,labels_list,colors_list,height, width,x_axis_description,y_axis_description,subplots,extra_commands=extra_commands)
         
         return tikz_pic
     
-    def to_standalone_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,legend_pos='north east'):
+    def to_standalone_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.5\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,legend_pos='north east',extra_commands=None,options=None):
     
         geometry_options ={"margin": "0cm",}
         doc = Document(documentclass='standalone',geometry_options=None,document_options=["tikz"])
@@ -77,26 +82,28 @@ class DataMethods:
         doc.packages.append(Package('tikz'))        
         doc.packages.append(Package('pgfplots'))        
         doc.append(Command('usepgfplotslibrary',arguments='units'))
+        doc.append(Command('usetikzlibrary',arguments='spy'))
+        
         doc.append(Command('pgfplotsset',arguments=NoEscape(r'compat=newest,label style={font=\small},legend pos='+str(legend_pos))))
         
-        tikz_pic=self._pylatex_tikz(filename,labels_list,colors_list,height, width,x_axis_description,y_axis_description,subplots)
+        tikz_pic=self._pylatex_tikz(filename,labels_list,colors_list,height, width,x_axis_description,y_axis_description,subplots,extra_commands=extra_commands,options=options)
         
         doc.append(tikz_pic)
         
         doc.generate_pdf(filename,clean_tex=False)
         return doc.dumps()
 
-    def to_tikz_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,legend_pos='north east'):
+    def to_tikz_plot(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,legend_pos='north east',extra_commands=None,options=None):
 
 
-        return self.to_standalone_plot(filename,labels_list,colors_list,height, width,x_axis_description,y_axis_description,subplots,legend_pos)
+        return self.to_standalone_plot(filename,labels_list,colors_list,height, width,x_axis_description,y_axis_description,subplots,legend_pos,extra_commands=extra_commands,options=options)
     
-    def to_standalone_figure(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,legend_pos='north east'):
+    def to_standalone_figure(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$t$},x unit=\si{\second},',y_axis_description='',subplots=False,legend_pos='north east',extra_commands=None,options=None):
 
 
-        self.to_standalone_plot(filename,labels_list,colors_list,height, width,x_axis_description,y_axis_description,subplots,legend_pos)
+        self.to_standalone_plot(filename,labels_list,colors_list,height, width,x_axis_description,y_axis_description,subplots,legend_pos,extra_commands=extra_commands,options=options)
         fig = Figure(position='H')
-        fig.add_image(filename,width=NoEscape('0.49\\textwidth'),)
+        fig.add_image(filename,width=width)
         
         return fig
     
@@ -153,7 +160,22 @@ class SpectralMethods(DataMethods):
 
 class TimeDomainMethods(DataMethods):
 
-
+    
+    def _set_comp_time(self,time):
+        self._comp_time=time
+        return None
+    
+    def _get_comp_time(self):
+        
+        try:
+            obj = self._comp_time
+        except:
+            obj=None
+        else:
+            obj = None
+            
+        return obj
+        
     def gradient(self):
         
         
@@ -178,7 +200,11 @@ class TimeDomainMethods(DataMethods):
         spectrum=(fft.fft(self.to_numpy()))
 
         f_span=fft.fftfreq(len(self.index),d=self.index[1]-self.index[0])
-        return SpectrumSeries(data=spectrum,index=(f_span),name=self.name)
+        
+        spectrum = SpectrumSeries(data=spectrum,index=(f_span),name=self.name)
+        spectrum.index.name='f'
+        
+        return spectrum
 
 #     def to_frequency_domain(self):
 
@@ -223,18 +249,18 @@ class SpectrumFrame(DataFrame,SpectralMethods):
         return SpectrumSeries
 
     
-    def to_tikz_plot(self,filename,labels_list=None,colors_list=['red','blue','orange'],x_axis_description=',xlabel={$f$},x unit=\si{\hertz},',y_axis_description=None,legend_pos='north east'):
+    def to_tikz_plot(self,filename,labels_list=None,colors_list=['red','blue','orange'],x_axis_description=',xlabel={$f$},x unit=\si{\hertz},',y_axis_description=None,legend_pos='north east',extra_commands=None):
         
         if y_axis_description == None:
             y_axis_description='ylabel=$'+self.name+'$,'
         
         
 
-        return super().to_tikz_plot(filename=filename,labels_list=labels_list,colors_list=colors_list,x_axis_description=x_axis_description,y_axis_description=y_axis_description,legend_pos=legend_pos)
+        return super().to_tikz_plot(filename=filename,labels_list=labels_list,colors_list=colors_list,x_axis_description=x_axis_description,y_axis_description=y_axis_description,legend_pos=legend_pos,extra_commands=extra_commands)
 
-    def to_standalone_figure(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$f$},x unit=\si{\hertz},',y_axis_description='',subplots=False,legend_pos='north east'):
+    def to_standalone_figure(self,filename,labels_list=None,colors_list=default_colors,height=NoEscape(r'7cm'), width=NoEscape(r'0.9\textwidth'),x_axis_description=',xlabel={$f$},x unit=\si{\hertz},',y_axis_description='',subplots=False,legend_pos='north east',extra_commands=None,options=None):
 
-        return super().to_standalone_figure(filename=filename,labels_list=labels_list,colors_list=colors_list,x_axis_description=x_axis_description,y_axis_description=y_axis_description,legend_pos=legend_pos)
+        return super().to_standalone_figure(filename=filename,labels_list=labels_list,colors_list=colors_list,x_axis_description=x_axis_description,y_axis_description=y_axis_description,legend_pos=legend_pos,extra_commands=extra_commands,options=options)
     
 
     def double_sided_rms(self):
@@ -310,14 +336,14 @@ class TimeSeries(Series,TimeDomainMethods):
 #         f_span=fft.fftfreq(len(self.index),d=self.index[1]-self.index[0])
 #         return SpectrumSeries(data=spectrum,index=(f_span))
 
-    def to_tikz_plot(self,filename,labels_list=None,colors_list=['red','blue','orange'],x_axis_description='xlabel={$t$},x unit=\si{\second},',y_axis_description=None):
+    def to_tikz_plot(self,filename,labels_list=None,colors_list=['red','blue','orange'],x_axis_description='xlabel={$t$},x unit=\si{\second},',y_axis_description=None,extra_commands=None,options=None):
         
         if y_axis_description == None:
             y_axis_description='ylabel=$'+self.name+'$,'
         
         
         aux_dataframe=TimeDataFrame(data=self,index=self.index)
-        dumped_tex=aux_dataframe.to_tikz_plot(filename=filename,labels_list=labels_list,colors_list=colors_list,x_axis_description=x_axis_description,y_axis_description=y_axis_description)
+        dumped_tex=aux_dataframe.to_tikz_plot(filename=filename,labels_list=labels_list,colors_list=colors_list,x_axis_description=x_axis_description,y_axis_description=y_axis_description,extra_commands=extra_commands,options=options)
         return dumped_tex
 
 class TimeDataFrame(DataFrame,TimeDomainMethods):
@@ -346,7 +372,6 @@ class TimeDataFrame(DataFrame,TimeDomainMethods):
 
         data_gradient={name:data.gradient() for name,data in self.items()}
         return TimeDataFrame(data=data_gradient,index=data_gradient[next(iter(data_gradient))].index )
-
 
 #     def spectrum(self):
 

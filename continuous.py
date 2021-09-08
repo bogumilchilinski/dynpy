@@ -1,6 +1,7 @@
+from numpy import positive
 from sympy import (flatten, SeqFormula, Function, Symbol, symbols, Eq, Matrix,
                    S, oo, dsolve, solve, Number, pi, cos, sin, Tuple,
-                   Derivative)
+                   Derivative,sqrt)
 
 from sympy.physics.vector.printing import vpprint, vlatex
 
@@ -15,6 +16,9 @@ class ContinuousSystem:
                  derivative_order=2,
                  label=None,
                  system=None,
+                 time_comp=Function('T')(Symbol('t')),
+                 spatial_comp=Function('X')(Symbol('x')),
+                 mode_symbol=Symbol('k',positive=True),
                  **kwargs):
 
         if system:
@@ -24,6 +28,11 @@ class ContinuousSystem:
             spatial_var = system.r
             derivative_order = system.diff_ord
             bc_dict = system.bc_dict
+            time_comp = system.time_comp
+            spatial_comp = system.spatial_comp
+            mode_symbol = system._mode_symbol
+
+
 
         self.t = t_var
         self.L = L
@@ -32,6 +41,10 @@ class ContinuousSystem:
         self.diff_ord = derivative_order
         self.bc_dict = bc_dict
         self._bc = Symbol('BC')
+        self._mode_symbol = mode_symbol
+
+        self.time_comp=time_comp
+        self.spatial_comp=spatial_comp
 
         self._sep_expr = Symbol('k', positive=True)
 
@@ -236,7 +249,7 @@ class ContinuousSystem:
     def eigenvalues(self,
                     bc_dict=None,
                     sep_expr=None,
-                    arg=Symbol('k', positive=True),
+                    arg=None,
                     spatial_comp=Function('X')(Symbol('x')),
                     index=Symbol('n', integer=True, positive=True)):
 
@@ -247,6 +260,10 @@ class ContinuousSystem:
             self.bc_dict = bc_dict
         else:
             bc_dict = self.bc_dict
+
+        if arg is None:
+            arg = selg._mode_symbol
+
 
         roots = solve(self.char_poly(bc_dict, sep_expr, spatial_comp), arg)
         print('+++++++++++++ roots from eigs')
@@ -270,9 +287,12 @@ class ContinuousSystem:
                    mode_no,
                    bc_dict=None,
                    sep_expr=None,
-                   arg=Symbol('k', positive=True),
+                   arg=None,
                    spatial_comp=Function('X')(Symbol('x')),
                    index=Symbol('n', integer=True, positive=True)):
+
+        if arg is None:
+            arg = selg._mode_symbol
 
         if not sep_expr:
             sep_expr = self._sep_expr
@@ -320,6 +340,22 @@ class ContinuousSystem:
 #         display(gen_sol)
         
         return gen_sol.subs(mode_subs).subs(arg, eig_value).subs({c_var: 1 for c_var in C_list}).subs(index, mode_no).n(2)
+
+    def phase_velocity(self):
+
+
+        X_fun=self.spatial_comp
+        T_fun=self.time_comp
+
+        nat_freq=Symbol('omega',positive=True)
+
+        #display(self.time_eqn())
+
+        nat_freq_eq=self.time_eqn().subs({T_fun.diff(self.t,2) :-T_fun*nat_freq **2 })
+        
+        nat_freq_expr = solve( nat_freq_eq.lhs - nat_freq_eq.rhs, nat_freq **2 )
+
+        return sqrt(max(nat_freq_expr))
 
 
 class PlaneStressProblem:

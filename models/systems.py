@@ -488,7 +488,7 @@ class SDoFDampedHarmonicOscillator(ComposedSystem):
         self.c = c
         self.mass = MaterialPoint(m, z, qs=[z])
         self.spring = Spring(k, z, qs=[z])
-        self.damper = Damper(c, z)
+        self.damper = Damper(c,pos1=z, qs=[z])
         system = self.mass + self.spring + self.damper
 
         super().__init__(system,**kwargs)
@@ -3220,13 +3220,13 @@ class MDoFDoubleTrolleyDifferentWheels(ComposedSystem):
 
     def get_default_data(self):
 
-        m0, k0, l0, lam = symbols('m_0 k_0 l_0 lambda', positive=True)
+        m0, k0, l0, lam = symbols('m k l_0 lambda', positive=True)
 
         default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m_w1: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m_w2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.m1: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
+            self.m2: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
+            self.m_w1: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
+            self.m_w2: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
             self.k_l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
             self.k_c: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
             self.k_r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
@@ -3309,10 +3309,10 @@ class SDoFDoubleTrolleyDifferentWheels(ComposedSystem):
         m0, k0, l0, lam = symbols('m_0 k_0 l_0 lambda', positive=True)
 
         default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m_w1: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m_w2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.m1: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
+            self.m2: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
+            self.m_w1: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
+            self.m_w2: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
             self.k_l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
             self.k_c: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
             self.k_r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
@@ -3401,9 +3401,9 @@ class MDoFDampedTrolleysWithSprings(ComposedSystem):
         m0, k0, l0, lam = symbols('m k l_0 lambda', positive=True)
 
         default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
 
             self.k_l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
             self.k_c: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
@@ -3496,9 +3496,9 @@ class MDoFThreePendulumsWithSprings(ComposedSystem):
 
 
         default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
             self.k_1: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
             self.k_2: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
             self.k_3: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
@@ -3593,9 +3593,9 @@ class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
         m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
 
         default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
 
             self.k_1: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
             self.k_2: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
@@ -3608,109 +3608,7 @@ class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
         }
 
         return default_data_dict
-# OK
-class MDoFForcedDisksWithSerialSprings(ComposedSystem):
-    scheme_name = 'MDOF_Forced_Disks_With_Serial_Springs.PNG'
-    real_name = 'three_carriages.PNG'
 
-    def __init__(self,
-                 R=Symbol('R', positive=True),
-                 m=Symbol('m', positive=True),
-                 m1=Symbol('m_1', positive=True),
-                 m2=Symbol('m_2', positive=True),
-                 m3=Symbol('m_3', positive=True),
-                 k_ll=Symbol('k_ll', positive=True),
-                 k_lr=Symbol('k_lr', positive=True),
-                 k_12l=Symbol('k_12l', positive=True),
-                 k_12r=Symbol('k_12r', positive=True),
-                 k_23l=Symbol('k_23l', positive=True),
-                 k_23r=Symbol('k_23r', positive=True),
-                 k_rl=Symbol('k_rl', positive=True),
-                 k_rr=Symbol('k_rr', positive=True),
-                 F_0=Symbol('F_0', positive=True),
-                 Omega=Symbol('Omega', positive=True),
-                 x_l=dynamicsymbols('x_l'),
-                 x_c=dynamicsymbols('x_c'),
-                 x_r=dynamicsymbols('x_r'),
-                 x_1=dynamicsymbols('x_1'),
-                 x_2=dynamicsymbols('x_2'),
-                 x_3=dynamicsymbols('x_3'),
-                 qs=dynamicsymbols('x_l x_c x_r'),
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        self.m = m
-        self.m1 = m1
-        self.m2 = m2
-        self.m3 = m3
-        self.R = R
-        self.k_ll = k_ll
-        self.k_lr = k_lr
-        self.k_12l = k_12l
-        self.k_12r = k_12r
-        self.k_23l = k_23l
-        self.k_23r = k_23r
-        self.k_rl = k_rl
-        self.k_rr = k_rr
-        self.x_l = x_l
-        self.x_c = x_c
-        self.x_r = x_r
-        self.x_1 = x_1
-        self.x_2 = x_2
-        self.x_3 = x_3
-        self.Omega = Omega
-
-        self.Disk1 =  MaterialPoint(m, x_l, qs = [x_l]) + MaterialPoint(m/2, x_l, qs = [x_l]) + MaterialPoint(m1, x_l, qs = [x_l]) + Spring((k_ll*k_lr)/(k_ll+k_lr), pos1 = x_l, qs = [x_l]) + Force(-2*F_0 * cos(Omega * ivar), pos1 = x_l, qs = [x_l])
-        self.Disk2 =  MaterialPoint(m, x_c, qs = [x_c]) + MaterialPoint(m/2, x_c, qs = [x_c]) + MaterialPoint(m2, x_c, qs = [x_c]) + Spring((k_12l*k_12r)/(k_12l+k_12r), pos1 = x_l, pos2 = x_c, qs = [x_l, x_c]) + Spring((k_23l*k_23r)/(k_23l+k_23r), pos1 = x_c, pos2 = x_r, qs = [x_c, x_r])
-        self.Disk3 =  MaterialPoint(m, x_r, qs = [x_r]) + MaterialPoint(m/2, x_r, qs = [x_r]) + MaterialPoint(m3, x_r, qs = [x_r]) + Spring((k_rl*k_rr)/(k_rl+k_rr), pos1 = x_r, qs = [x_r]) + Force(-F_0 * cos(Omega * ivar), pos1 = x_r, qs = [x_r])
-        
-        system = self.Disk1 + self.Disk2 + self.Disk3
-        super().__init__(system(qs),**kwargs)
-
-    def get_default_data(self):
-
-        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
-
-        default_data_dict = {
-
-            self.m: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.k_ll: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_lr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_12l: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_12r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_23l: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_23r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_rl: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_rr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-
-            self.x_l: [self.x_1, 0],
-            self.x_c: [self.x_1, self.x_2, 0],
-            self.x_r: [self.x_2, 0],
-            }
-
-        return default_data_dict
-
-    def get_random_parameters(self):
-
-        default_data_dict = self.get_default_data()
-
-        parameters_dict = {
-            key: random.choice(items_list)
-            for key, items_list in default_data_dict.items()
-        }
-
-        if parameters_dict[self.x_l] != self.x_1 or parameters_dict[self.x_c] != self.x_1:
-
-            parameters_dict[self.x_l] = self.x_1
-
-        if parameters_dict[self.x_c] != self.x_2 or parameters_dict[self.x_r] != self.x_2:
-
-            parameters_dict[self.x_r] = self.x_2
-
-        return parameters_dict
 
 
 
@@ -3977,10 +3875,10 @@ class MDoFForcedDisksWithParallelSprings(ComposedSystem):
         m0, k0, l0 = symbols('m k l_0', positive=True)
 
         default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
 
             self.k_l: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
             self.k_cl: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
@@ -4021,19 +3919,17 @@ class MDoFForcedDisksWithParallelSprings(ComposedSystem):
 
 
 
+    
+    
+# OK
 class MDoFForcedDisksWithSerialSprings(ComposedSystem):
     scheme_name = 'MDOF_Forced_Disks_With_Serial_Springs.PNG'
     real_name = 'three_carriages.PNG'
 
     def __init__(self,
-                 x_l=dynamicsymbols('x_l'),
-                 x_c=dynamicsymbols('x_c'),
-                 x_r=dynamicsymbols('x_r'),
-                 x_1=dynamicsymbols('x_1'),
-                 x_2=dynamicsymbols('x_2'),
-                 x_3=dynamicsymbols('x_3'),
-                 m=Symbol('m', positive=True),
+                 r=Symbol('r', positive=True), #!!! Important - it's dummy variable which is to remove when the LagrangesDynamicSystem inits will be improved
                  R=Symbol('R', positive=True),
+                 m=Symbol('m', positive=True),
                  m1=Symbol('m_1', positive=True),
                  m2=Symbol('m_2', positive=True),
                  m3=Symbol('m_3', positive=True),
@@ -4047,6 +3943,12 @@ class MDoFForcedDisksWithSerialSprings(ComposedSystem):
                  k_rr=Symbol('k_rr', positive=True),
                  F_0=Symbol('F_0', positive=True),
                  Omega=Symbol('Omega', positive=True),
+                 x_l=dynamicsymbols('x_l'),
+                 x_c=dynamicsymbols('x_c'),
+                 x_r=dynamicsymbols('x_r'),
+                 x_1=dynamicsymbols('x_1'),
+                 x_2=dynamicsymbols('x_2'),
+                 x_3=dynamicsymbols('x_3'),
                  qs=dynamicsymbols('x_l x_c x_r'),
                  ivar=Symbol('t'),
                  **kwargs):
@@ -4071,37 +3973,40 @@ class MDoFForcedDisksWithSerialSprings(ComposedSystem):
         self.x_2 = x_2
         self.x_3 = x_3
         self.Omega = Omega
-        
 
-        self.Disk1 =  MaterialPoint(m, x_l, qs = [x_l]) + MaterialPoint(m/2, x_l, qs = [x_l]) + MaterialPoint(m1, x_l, qs = [x_l]) + Spring((k_ll*k_lr)/(k_ll+k_lr), pos1 = x_l, qs = [x_l]) + Force(-F_0 * cos(Omega * ivar), pos1 = x_l, qs = [x_l])
+        self.Disk1 =  MaterialPoint(m, x_l, qs = [x_l]) + MaterialPoint(m/2, x_l, qs = [x_l]) + MaterialPoint(m1, x_l, qs = [x_l]) + Spring((k_ll*k_lr)/(k_ll+k_lr), pos1 = x_l, qs = [x_l]) + Force(-2*F_0 * cos(Omega * ivar), pos1 = x_l, qs = [x_l])
         self.Disk2 =  MaterialPoint(m, x_c, qs = [x_c]) + MaterialPoint(m/2, x_c, qs = [x_c]) + MaterialPoint(m2, x_c, qs = [x_c]) + Spring((k_12l*k_12r)/(k_12l+k_12r), pos1 = x_l, pos2 = x_c, qs = [x_l, x_c]) + Spring((k_23l*k_23r)/(k_23l+k_23r), pos1 = x_c, pos2 = x_r, qs = [x_c, x_r])
         self.Disk3 =  MaterialPoint(m, x_r, qs = [x_r]) + MaterialPoint(m/2, x_r, qs = [x_r]) + MaterialPoint(m3, x_r, qs = [x_r]) + Spring((k_rl*k_rr)/(k_rl+k_rr), pos1 = x_r, qs = [x_r]) + Force(-F_0 * cos(Omega * ivar), pos1 = x_r, qs = [x_r])
+
+
+        
         
         system = self.Disk1 + self.Disk2 + self.Disk3
-        super().__init__(system(qs))
+        super().__init__(system(qs),**kwargs)
 
     def get_default_data(self):
 
-        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+        m0, k0, l0 = symbols('m k l_0', positive=True)
 
         default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.k_ll: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_lr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_12l: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_12r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_23l: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_23r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_rl: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_rr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            
+            self.k_ll: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+            self.k_lr: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+            self.k_12l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+            self.k_12r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+            self.k_23l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+            self.k_23r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+            self.k_rl: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+            self.k_rr: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
 
             self.x_l: [self.x_1, 0],
             self.x_c: [self.x_1, self.x_2, 0],
             self.x_r: [self.x_2, 0],
-        }
+            }
 
         return default_data_dict
 
@@ -4123,6 +4028,9 @@ class MDoFForcedDisksWithSerialSprings(ComposedSystem):
             parameters_dict[self.x_r] = self.x_2
 
         return parameters_dict
+    
+    
+
     
 class MDoFTriplePendulum(ComposedSystem):
     scheme_name = 'MDOFTriplePendulum.PNG'
@@ -4211,6 +4119,9 @@ class MDoFTriplePendulum(ComposedSystem):
 
 
         return parameters_dict
+
+    
+
     
     
 class SDoFTriplePendulum(ComposedSystem):

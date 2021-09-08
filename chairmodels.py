@@ -19,10 +19,10 @@ mechanics_printing()
 
 t=Symbol('t') #independent variable - time
 a_sim=Symbol('a_sim',positive=True)
-
+ivar=Symbol('t')
 
 ### system parametes
-m_fr, m_rear,m_3, k_r, k_rt, k_f, k_ft, k_rot = symbols('m_fr, m_r, M, k_r, k_rt, k_f, k_ft k_rot',positive=True)
+m_fr, m_rear,m_3, k_r, k_rt, k_f, k_ft, k_rot,amplitude,length,speed,axw = symbols('m_fr, m_r, M, k_r, k_rt, k_f, k_ft k_rot, A, L, v, W_wb ',positive=True)
 m,k,g,F_1,F_2,Omega,F,R,v0,u0,l_l,l_r= symbols('m,k,g,F_1,F_2,Omega, F_0, R, v_0,u_0,l_l,l_r',positive=True)
 I_ch, I_w , z_c3,l_fr,l_rear= symbols('I_chair, I_wheel, z_c3, l_fr, l_r',positive=True)
 m_RC, I_RC, l_RC, k_RC, phi0 = symbols('m_RC, I_RC, l_RC, k_RC, varphi_0',positive=True)
@@ -390,10 +390,7 @@ T_rot =  S.One/2 * I_ch* dphi**2  # Ek ramy wózka w ruchu obrotowym
 T_rear = S.One/2 * m_rear* dz_rear**2 + S.One/2 * m_rear * dx**2    # Ek tylniego koła Ir (mr)
 T_fr = S.One/2 * m_fr* dz_fr**2 + S.One/2 * m_fr * dx**2    # Ek przedniego koła If (mf)
 T_wheel = S.One/2 * I_w * (dx/R)**2
-amplitude=0.0215
-length=0.19999999
-speed=1.7
-axw=0.5
+
 V_rear = S.One/2*k_rt*(z_rear-amplitude*cos(2*pi/(length/speed)*t))**2# Ep tylnich prętów ramy względem ich sprężystości
 V_fr = S.One/2*k_ft*(z_fr-amplitude*cos(2*pi/(length/speed)*(t-axw/speed)))**2     # Ep przednich prętów ramy względem ich sprężystości
 
@@ -425,7 +422,7 @@ class SimpleChair5DOF(dyn.HarmonicOscillator):
                  hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs)
 
     def get_param_values(self):
-        default_data_dict={F:120,
+        default_data_dict={F:150,
                    
                    c_mu:0.0001,
                    c_lam:0.0001,
@@ -433,7 +430,7 @@ class SimpleChair5DOF(dyn.HarmonicOscillator):
                    l_r:0.4,
                    
                    k_f:607500,
-                   k_ft:450000,
+                   k_ft:475000,
                    k_r:580000,
                    k_rt:400000,
                    m_3:75,
@@ -446,12 +443,49 @@ class SimpleChair5DOF(dyn.HarmonicOscillator):
                    z_c3:0.4,
                    g:9.81,
                    I_w:m_rear*R**2,
-                                      l_fr:0.2,
-                   l_rear:0.01,    u0:0.005,
-    t0:1,
-    t_l:1,
-    l_bumps:0.15}
-        return default_data_dict            
+                   l_fr:0.2,
+                   l_rear:0.01,
+                   u0:0.005,
+
+                   l_bumps:0.15,
+                   amplitude:0.0165,
+                   length:0.19,
+                   speed:1.7,
+                   axw:0.47}
+        return default_data_dict       
+    
+    def get_table_values(self):
+        table_data_dict={F:150,
+                   
+                   c_mu:0.0001,
+                   c_lam:0.0001,
+                   l_l:0.2,
+                   l_r:0.4,
+                   
+                   k_f:607500,
+                   k_ft:475000,
+                   k_r:580000,
+                   k_rt:400000,
+                   m_3:75,
+                   I_ch:20.8868,
+                   m_rear:1.5,
+                   m_fr:0.6,
+                   pm:0.1,
+                   Omega:0.3454,
+                   R:0.3,
+                   z_c3:0.4,
+                   g:9.81,
+                   I_w:0.135,
+                   l_fr:0.2,
+                   l_rear:0.01,
+                   u0:0.005,
+
+                   l_bumps:0.15,
+                   amplitude:0.0165,
+                   length:0.19,
+                   speed:1.7,
+                   axw:0.47}
+        return table_data_dict       
     def numerical_model(self):
         pass
 
@@ -587,6 +621,9 @@ chair_sin=chair_dict['full_nonlin_sin']
 
 
 
+ureg.define('dimles = 0 = - ')
+ureg.dimles
+
 units_dict={
             c:ureg.kilogram/ureg.second,
             c_mu:S.One/ureg.second,
@@ -646,7 +683,7 @@ units_dict={
             dtheta:ureg.radian/ureg.second,
             dalpha:ureg.radian/ureg.second,
             dz_wrc:ureg.meter/ureg.second,
-            pm:ureg.m/ureg.m,
+            pm:ureg.dimles,
             t_l:ureg.second,
             delta_t:ureg.second,
             l_ramp:ureg.meter,
@@ -673,7 +710,22 @@ units_dict={
 #             ao_rz_idmin:ureg.second,
             a_rz:ureg.gram,
             a_rcz:ureg.gram,
-            a_sim:ureg.meter/ureg.second/ureg.second
+            a_sim:ureg.meter/ureg.second/ureg.second,
+            dx.diff(t):ureg.meter/ureg.second/ureg.second,
+            dy.diff(t):ureg.meter/ureg.second/ureg.second,
+            dz_fr.diff(t):ureg.meter/ureg.second/ureg.second,
+            dz_rear.diff(t):ureg.meter/ureg.second/ureg.second,
+            dz.diff(t):ureg.meter/ureg.second/ureg.second,
+            dtheta.diff(t):ureg.radian/ureg.second/ureg.second,
+            dphi.diff(t):ureg.radian/ureg.second/ureg.second,
+            dz_wrc.diff(t):ureg.meter/ureg.second/ureg.second,
+            l_l:ureg.meter,
+            l_r:ureg.meter,
+            amplitude:ureg.meter,
+            length:ureg.meter,
+            speed:ureg.meter/ureg.second,
+            axw:ureg.meter,
+            ivar:ureg.second
            }
 
 
