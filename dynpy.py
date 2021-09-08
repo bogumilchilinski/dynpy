@@ -6,7 +6,7 @@ from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
 import itertools as itools
 import scipy.integrate as solver
-from .timeseries import *
+#from .timeseries import *
 
 from collections import ChainMap
 
@@ -22,6 +22,12 @@ def multivariable_taylor_series(expr, args, n=2, x0=None):
     Computes the multivariable Taylor series of expresion expr for the given order n in the neighbourhood of x0 point.
     
     Args:
+    
+    
+    
+    
+    
+    
         expr (:obj:Expr): Expresion describing the function under consideration.
         args (array_like): Set of the arguments.
         to be continued ...
