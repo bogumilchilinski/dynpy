@@ -355,7 +355,7 @@ class ContinuousSystem:
         
         nat_freq_expr = solve( nat_freq_eq.lhs - nat_freq_eq.rhs, nat_freq **2 )
 
-        return sqrt(max(nat_freq_expr))
+        return sqrt(max(nat_freq_expr))/self._mode_symbol
 
 
 class PlaneStressProblem:
