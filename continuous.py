@@ -292,7 +292,7 @@ class ContinuousSystem:
                    index=Symbol('n', integer=True, positive=True)):
 
         if arg is None:
-            arg = selg._mode_symbol
+            arg = self._mode_symbol
 
         if not sep_expr:
             sep_expr = self._sep_expr
