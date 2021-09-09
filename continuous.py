@@ -292,7 +292,7 @@ class ContinuousSystem:
                    index=Symbol('n', integer=True, positive=True)):
 
         if arg is None:
-            arg = selg._mode_symbol
+            arg = self._mode_symbol
 
         if not sep_expr:
             sep_expr = self._sep_expr
@@ -355,7 +355,7 @@ class ContinuousSystem:
         
         nat_freq_expr = solve( nat_freq_eq.lhs - nat_freq_eq.rhs, nat_freq **2 )
 
-        return sqrt(max(nat_freq_expr))
+        return sqrt(max(nat_freq_expr))/self._mode_symbol
 
 
 class PlaneStressProblem:
