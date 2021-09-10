@@ -461,8 +461,9 @@ class AdaptableDataFrame(TimeDataFrame,BasicFormattingTools):
         
         new_obj_idx= new_obj.columns.to_frame()
         
-        display(new_obj_idx)
+        print('format columns names')
         display(new_obj_idx.applymap(formatter))
+        display(new_obj_idx.applymap(formatter).applymap(type))        
 
         new_obj_idx = new_obj_idx.applymap(formatter)
 
@@ -619,7 +620,7 @@ class ComputationalErrorSeries(AdaptableSeries):
     
     
 class LatexDataFrame(AdaptableDataFrame):
-    _applying_func = lambda obj: (obj).fit_units_to_columns().set_multiindex_columns().format_columns_names().set_multiindex_columns()
+    _applying_func = lambda obj: (obj).set_multiindex_columns().format_columns_names().set_multiindex_columns()
 
     
     @property
@@ -673,6 +674,9 @@ class NumericalAnalisysSeries(AdaptableSeries):
     @property
     def _common_constructor_series(self):
         return NumericalAnalysisDataFrame
+
+    
+
     
 class AbstractFrameFormatter(AdaptableDataFrame):
     _applying_func=lambda x: (x*100)
