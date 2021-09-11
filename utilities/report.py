@@ -690,22 +690,24 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
             print(case_data)
             print(type(case_data))
 
-        columns_index = self.columns
+            columns_index = self.columns
 
-        display(columns_index.to_frame())
+            display(columns_index.to_frame())
 
-        current_models =  columns_index.to_frame()[model_level_name][case_data] 
+            current_models =  columns_index.to_frame()[model_level_name][case_data] 
 
-        params_dict={}
+            params_dict={}
 
-        for param_no in [1,2]:
-            param_eq=columns_index.to_frame()[param_no][case_data] 
-            params_dict[param_eq.lhs]=param_eq.rhs
+            for param_no in [1,2]:
+                param_eq=columns_index.to_frame()[param_no][case_data] 
+                params_dict[param_eq.lhs]=param_eq.rhs
 
-        display(params_dict)
+            display(params_dict)
 
-        numerized_model= current_models.numerized(parameter_values=params_dict,backend=backend)
-        print(numerized_model)     
+            numerized_model= current_models.numerized(parameter_values=params_dict,backend=backend)
+            print(numerized_model)
+
+            display(self.columns.droplevel(coord_level_name).unique())  
 
         return  numerized_model
 
