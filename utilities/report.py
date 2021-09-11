@@ -696,16 +696,8 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
         computed_data._comp_time=AdaptableDataFrame(columns=self.columns.droplevel(coord_level_name).unique())
         
         for case_data in self.columns.droplevel(coord_level_name).unique():
-            print(case_data)
-            print(type(case_data))
-
-            
-
-            
 
             model = case_data[model_level_name]
-
-            display(model)
 
             params_dict={}
 
@@ -713,12 +705,9 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
                 params_dict[param_eq.lhs]=param_eq.rhs
 
-            display(params_dict)
-
-
 
             numerized_model= model.numerized(parameter_values=params_dict,backend=backend)
-            print(numerized_model.dvars)
+
 
             t_span=self.index
             t0=t_span[0]
@@ -729,16 +718,10 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
             result=numerized_model.compute_solution(t_span,ics_list)
 
-            display(result)
-            print('slice by tuple')
             computed_data[case_data]=result[computed_data[case_data].columns]
 
 
-            print('>'*100,result._get_comp_time())
-
             sim_time=pd.Series([result._get_comp_time()],index=['duration'] )
-
-            display(sim_time)
 
             computed_data._comp_time[case_data]=sim_time
 
