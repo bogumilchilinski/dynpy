@@ -662,13 +662,53 @@ class ParameterSummarySeries(AdaptableSeries):
 class NumericalAnalysisDataFrame(AdaptableDataFrame):
     _applying_func = None
 
+    def __init__(self,data=None, index=None, columns=None, model = None, ics=None ,dtype=None, copy=None,**kwargs):
+        #_try_evat='test'
+        #print(f'custom init of {type(self)}')
+        
+        super().__init__(data=data, index=index, columns=columns, dtype=dtype, copy=copy,**kwargs)
+        self._numerical_model = model
+        self._ics_list=ics
+
     
     @property
     def _common_constructor_series(self):
         return NumericalAnalisysSeries
     
     
-    
+    def _spot_model(self,current_case):
+
+        columns_index = self.columns
+
+        if 'model' in columns_index.names:
+            current_models =  columns_index.to_frame()[model][current_case]
+        else:
+            current_model = self._numerical_model
+
+    def perform_simulations(self,model_level_name=0,coord_level_name=-1,ics=None,backend=None):
+        for case_data,data in self.items():
+            print(case_data)
+            print(type(case_data))
+
+        columns_index = self.columns
+
+        display(columns_index.to_frame())
+
+        current_models =  columns_index.to_frame()[model_level_name][case_data] 
+
+        params_dict={}
+
+        for param_no in [1,2]:
+            param_eq=columns_index.to_frame()[param_no][case_data] 
+            params_dict[param_eq.lhs]=param_eq.rhs
+
+        display(params_dict)
+
+        numerized_model= current_models.numerized(parameter_values=params_dict,backend=backend)
+        print(numerized_model)     
+
+        return  numerized_model
+
 
 class NumericalAnalisysSeries(AdaptableSeries):
     @property
