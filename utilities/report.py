@@ -669,6 +669,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
         super().__init__(data=data, index=index, columns=columns, dtype=dtype, copy=copy,**kwargs)
         self._numerical_model = model
         self._ics_list=ics
+        self._comp_time=None
 
     
     @property
@@ -688,6 +689,11 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
     def perform_simulations(self,model_level_name=0,coord_level_name=-1,ics=None,backend=None):
         
         display(self.columns.droplevel(coord_level_name).unique()) 
+
+
+        computed_data = self.copy()
+
+        computed_data._comp_time=AdaptableDataFrame(columns=self.columns.droplevel(coord_level_name).unique())
         
         for case_data in self.columns.droplevel(coord_level_name).unique():
             print(case_data)
@@ -724,12 +730,21 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
             result=numerized_model.compute_solution(t_span,ics_list)
 
             display(result)
+            print('slice by tuple')
+            computed_data[case_data]=result[computed_data[case_data].columns]
 
 
+            print('>'*100,result._get_comp_time())
+
+            sim_time=pd.Series([result._get_comp_time()],index=['duration'] )
+
+            display(sim_time)
+
+            computed_data._comp_time[case_data]=sim_time
 
              
 
-        return  self[case_data]
+        return  computed_data
 
 
 class NumericalAnalisysSeries(AdaptableSeries):

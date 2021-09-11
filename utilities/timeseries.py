@@ -172,7 +172,7 @@ class TimeDomainMethods(DataMethods):
         except:
             obj=None
         else:
-            obj = None
+            obj = self._comp_time
             
         return obj
         

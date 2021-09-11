@@ -262,7 +262,7 @@ class ContinuousSystem:
             bc_dict = self.bc_dict
 
         if arg is None:
-            arg = selg._mode_symbol
+            arg = self._mode_symbol
 
 
         roots = solve(self.char_poly(bc_dict, sep_expr, spatial_comp), arg)
