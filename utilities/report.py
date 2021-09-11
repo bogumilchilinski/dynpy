@@ -686,30 +686,50 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
             current_model = self._numerical_model
 
     def perform_simulations(self,model_level_name=0,coord_level_name=-1,ics=None,backend=None):
-        for case_data,data in self.items():
+        
+        display(self.columns.droplevel(coord_level_name).unique()) 
+        
+        for case_data in self.columns.droplevel(coord_level_name).unique():
             print(case_data)
             print(type(case_data))
 
-            columns_index = self.columns
+            
 
-            display(columns_index.to_frame())
+            
 
-            current_models =  columns_index.to_frame()[model_level_name][case_data] 
+            model = case_data[model_level_name]
+
+            display(model)
 
             params_dict={}
 
-            for param_no in [1,2]:
-                param_eq=columns_index.to_frame()[param_no][case_data] 
+            for param_eq in case_data[1:]:
+
                 params_dict[param_eq.lhs]=param_eq.rhs
 
             display(params_dict)
 
-            numerized_model= current_models.numerized(parameter_values=params_dict,backend=backend)
-            print(numerized_model)
 
-            display(self.columns.droplevel(coord_level_name).unique())  
 
-        return  numerized_model
+            numerized_model= model.numerized(parameter_values=params_dict,backend=backend)
+            print(numerized_model.dvars)
+
+            t_span=self.index
+            t0=t_span[0]
+
+            ics_series=(self[case_data].T[t0])
+
+            ics_list=[ics_series[coord]  for coord in numerized_model.dvars]
+
+            result=numerized_model.compute_solution(t_span,ics_list)
+
+            display(result)
+
+
+
+             
+
+        return  self[case_data]
 
 
 class NumericalAnalisysSeries(AdaptableSeries):
