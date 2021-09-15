@@ -528,6 +528,15 @@ class MultiTimeScaleMethod(LinearODESolution):
     def order(self):
 
         return self._order
+    
+    
+    @property
+    def ics_dvars(self):
+
+        q=list(self.dvars)
+        dq= list(Matrix(self.dvars).diff(self.ivar))
+        
+        return Matrix(q+dq)
 
     @order.setter
     def order(self,order):
@@ -1082,24 +1091,34 @@ class MultiTimeScaleMethod(LinearODESolution):
                  params_values={},
                  **kwargs):
         
-
+        print('params values')
+        print(params_values)
         
         if params_values=={}:
             return copy.copy(self)
         else:
-        
+            
+            if 'ics' in params_values:
+                ics_list = params_values['ics']
+            else:
+                ics_list = self.ics
+            
+            
+            
+            
+                
             return self.__class__(
                 odes_system=self.governing_equations,
                  ivar=self.ivar,
                  dvars= self.dvars,
-                 ics=params_values['ics'],
+                 ics=ics_list,
                  eps=self.eps,
                  omega=self.omega,
                  order=self._order,
                  t_span=[],
                  params=[],
-                 params_values=params_values,
-                 ic_point=self.ics,
+                 params_values={**self.params_values,**params_values},
+                 ic_point=ics_list,
                  equation_type=None,
                  label=self._label)
     

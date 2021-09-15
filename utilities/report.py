@@ -129,7 +129,7 @@ class BasicFormattingTools:
     _unit_selector = EntryWithUnit
     _domain=None
     _units={}
-    _applying_func = lambda x: x.copy().swaplevel(axis=1)
+    _applying_func = lambda x: x.copy()
     _init_ops=True
 
     _default_sep = ', '
@@ -196,6 +196,9 @@ class BasicFormattingTools:
 
         return new_obj
     
+    def set_flat_index_columns(self):
+        
+        return self.set_flat_index_axis(axis=1)    
 
     def switch_axis_type(self,axis=0):
         
@@ -223,8 +226,8 @@ class BasicFormattingTools:
 
     
 
-    def __call__(self):
-        return self.copy()
+#     def __call__(self):
+#         return self.copy()
     
     
     
@@ -245,7 +248,8 @@ class BasicFormattingTools:
         return ops_func(data)
         
     
-class AdaptableSeries(TimeSeries,BasicFormattingTools):
+class AdaptableSeries(TimeSeries#,BasicFormattingTools
+                     ):
 
     r'''
     Basic class for formatting data plots. It provides methods for setting options 
@@ -300,7 +304,8 @@ class AdaptableSeries(TimeSeries,BasicFormattingTools):
 
 
 
-class AdaptableDataFrame(TimeDataFrame,BasicFormattingTools):
+class AdaptableDataFrame(TimeDataFrame#,BasicFormattingTools
+                        ):
     
     @property
     def _common_constructor_series(self):
@@ -595,12 +600,12 @@ class AdaptableDataFrame(TimeDataFrame,BasicFormattingTools):
 #         return self.__class__(filtter(
 #             self)).format_labels().format_index()  #.set_ylabel().set_xlabel()
 
-    def plot(self, *args, **kwargs):
+#     def plot(self, *args, **kwargs):
 
-        if not 'ylabel' in kwargs:
-            kwargs['ylabel'] = self.__class__._ylabel
+#         if not 'ylabel' in kwargs:
+#             kwargs['ylabel'] = None
 
-        return super().plot(*args, **kwargs)
+#         return super().plot(*args, **kwargs)
 
     
 class ComputationalErrorFrame(AdaptableDataFrame):
@@ -659,7 +664,8 @@ class ParameterSummarySeries(AdaptableSeries):
         return ParameterSummaryFrame
     
     
-class NumericalAnalysisDataFrame(AdaptableDataFrame):
+class NumericalAnalysisDataFrame(TimeDataFrame#AdaptableDataFrame
+                                ):
     _applying_func = None
 
     def __init__(self,data=None, index=None, columns=None, model = None, ics=None ,dtype=None, copy=None,**kwargs):
@@ -667,9 +673,9 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
         #print(f'custom init of {type(self)}')
         
         super().__init__(data=data, index=index, columns=columns, dtype=dtype, copy=copy,**kwargs)
-        self._numerical_model = model
-        self._ics_list=ics
-        self._comp_time=None
+#         self._numerical_model = model
+#         self._ics_list=ics
+        #self._comp_time=None
 
     
     @property
@@ -693,7 +699,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
         computed_data = self.copy()
 
-        computed_data._comp_time=AdaptableDataFrame(columns=self.columns.droplevel(coord_level_name).unique())
+        #computed_data._comp_time=AdaptableDataFrame(columns=self.columns.droplevel(coord_level_name).unique())
         
         for case_data in self.columns.droplevel(coord_level_name).unique():
 
@@ -705,17 +711,21 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
                 params_dict[param_eq.lhs]=param_eq.rhs
 
+            
+            numerized_model= model.numerized(params_dict,backend=backend)
 
-            numerized_model= model.numerized(parameter_values=params_dict,backend=backend)
 
-
-            t_span=self.index
+            t_span=np.asarray((self.index))
+            print(type(t_span))
+            
             t0=t_span[0]
 
             ics_series=(self[case_data].T[t0])
 
-            ics_list=[ics_series[coord]  for coord in numerized_model.dvars]
+            ics_list=[np.float(ics_series[coord])  for coord in numerized_model.ics_dvars]
 
+            print(ics_list)
+            
             result=numerized_model.compute_solution(t_span,ics_list)
 
             computed_data[case_data]=result[computed_data[case_data].columns]
@@ -723,14 +733,15 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
             sim_time=pd.Series([result._get_comp_time()],index=['duration'] )
 
-            computed_data._comp_time[case_data]=sim_time
+            #computed_data._comp_time[case_data]=sim_time
 
              
 
-        return  computed_data
+        return  self._constructor(computed_data)
 
 
-class NumericalAnalisysSeries(AdaptableSeries):
+class NumericalAnalisysSeries(TimeSeries#AdaptableSeries
+                             ):
     @property
     def _common_constructor_series(self):
         return NumericalAnalysisDataFrame

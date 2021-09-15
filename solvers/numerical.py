@@ -127,6 +127,14 @@ class OdeComputationalCase:
     def __repr__(self):
 
         return self.__str__()
+    
+    @property
+    def ics_dvars(self):
+
+
+
+        return self.dvars
+    
 
     def __fortran_odes_rhs(self):
         '''
