@@ -164,6 +164,38 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     '''
 
+    scheme_name = 'engine.png'
+    real_name = 'engine_real.PNG'
+
+    @classmethod
+    def _scheme(cls):
+
+        path = __file__.replace('systems.py', 'images/') + cls.scheme_name
+
+        return path
+
+    @classmethod
+    def _real_example(cls):
+
+        path = __file__.replace('systems.py', 'images/') + cls.real_name
+
+        return path
+
+    @classmethod
+    def preview(cls, example=False):
+        if example:
+            path = cls._real_example()
+
+        else:
+            path = cls._scheme()
+
+        with open(f"{path}", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+        image_file.close()
+
+        return Image(base64.b64decode(encoded_string))
+
+
     def __init__(self,
                  Lagrangian,
                  qs=None,
@@ -411,36 +443,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         display(expr)
         pass
 
-    scheme_name = 'engine.png'
-    real_name = 'engine_real.PNG'
 
-    @classmethod
-    def _scheme(cls):
-
-        path = __file__.replace('systems.py', 'images/') + cls.scheme_name
-
-        return path
-
-    @classmethod
-    def _real_example(cls):
-
-        path = __file__.replace('systems.py', 'images/') + cls.real_name
-
-        return path
-
-    @classmethod
-    def preview(cls, example=False):
-        if example:
-            path = cls._real_example()
-
-        else:
-            path = cls._scheme()
-
-        with open(f"{path}", "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read())
-        image_file.close()
-
-        return Image(base64.b64decode(encoded_string))
 
     def __call__(self, *args, label=None):
         """
