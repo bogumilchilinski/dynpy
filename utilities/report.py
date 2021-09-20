@@ -129,7 +129,7 @@ class BasicFormattingTools:
     _unit_selector = EntryWithUnit
     _domain=None
     _units={}
-    _applying_func = lambda x: x.copy()
+    _applying_func = lambda x: x
     _init_ops=True
 
     _default_sep = ', '
@@ -246,7 +246,70 @@ class BasicFormattingTools:
 
         
         return ops_func(data)
+
+    
+    def format_columns_names(self,formatter=None):
+        if formatter is None:
+            
+            formatter = self.__class__._label_formatter
+        new_obj = self.copy()
         
+        new_obj_idx= new_obj.columns.to_frame()
+        
+        print('format columns names')
+        display(new_obj_idx.applymap(formatter))
+        display(new_obj_idx.applymap(formatter).applymap(type))        
+
+        new_obj_idx = new_obj_idx.applymap(formatter)
+
+
+        return new_obj.set_axis(new_obj_idx ,axis=1)
+
+    
+    def fit_units_to_columns(self,selector=None):
+        if selector is None:
+            selector = self.__class__._unit_selector
+            
+            
+        new_frame=self._modify_axis(selector.set_default_units(self.__class__._units),axis=1)
+        
+        return new_frame
+    
+    def _modify_axis(self,func,axis=0):
+        
+        new_obj = self.copy()
+        
+        new_obj_idx= new_obj.axes[axis]
+        
+        display(new_obj_idx)
+        display(new_obj_idx.to_frame().applymap(func))
+
+        idx_frame = new_obj_idx.to_frame().applymap(func)
+        
+        if isinstance(new_obj_idx,pd.MultiIndex):
+            new_obj_idx = pd.MultiIndex.from_frame(idx_frame)
+        else:
+            
+            display(idx_frame)
+            display(list(idx_frame))
+            
+            new_obj_idx = pd.Index(idx_frame,name=new_obj_idx.name)
+            
+
+
+        return new_obj.set_axis(new_obj_idx ,axis=axis)
+
+    def switch_columns_type(self):
+
+
+        return self.switch_axis_type(axis=1)
+    
+    def _format_entry(self, obj,formatter=None):
+        if formatter is not None:
+            return formatter(obj)
+        else:
+            return self.__class__._label_formatter(obj)
+    
     
 class AdaptableSeries(TimeSeries#,BasicFormattingTools
                      ):
@@ -274,18 +337,18 @@ class AdaptableSeries(TimeSeries#,BasicFormattingTools
     def _common_constructor_series(self):
         return self.__class__#._init_without_ops
     
-    _cols_name = None
+#     _cols_name = None
 
 
-    @classmethod
-    def _init_with_ops(cls,data=None, index=None, dtype=None, name=None, copy=False, fastpath=False,**kwargs):
-        print(f'pure init of {cls}')
-        return cls(data=data, index=index,  dtype=dtype,name=name, copy=copy,fastpath=fastpath,func=lambda obj: obj)
+#     @classmethod
+#     def _init_with_ops(cls,data=None, index=None, dtype=None, name=None, copy=False, fastpath=False,**kwargs):
+#         print(f'pure init of {cls}')
+#         return cls(data=data, index=index,  dtype=dtype,name=name, copy=copy,fastpath=fastpath,func=lambda obj: obj)
         
     
-    def __init__(self,data=None, index=None, dtype=None, name=None, copy=False, fastpath=False,**kwargs):
+#     def __init__(self,data=None, index=None, dtype=None, name=None, copy=False, fastpath=False,**kwargs):
 
-        super().__init__(data=data, index=index,  dtype=dtype,name=name, copy=copy,fastpath=fastpath)
+#         super().__init__(data=data, index=index,  dtype=dtype,name=name, copy=copy,fastpath=fastpath)
         
 
     
@@ -317,12 +380,12 @@ class AdaptableDataFrame(TimeDataFrame#,BasicFormattingTools
         return self.__class__#._init_without_ops
     
 
-    _units = {}
-    _ylabel = None
+#     _units = {}
+#     _ylabel = None
 
-    _data_filtter = lambda frame: frame.copy()
-    _cols_name = None
-    _domain=None
+#     _data_filtter = lambda frame: frame.copy()
+#     _cols_name = None
+#     _domain=None
     r'''
     Basic class for formatting data plots. It provides methods for setting options 
     
@@ -337,41 +400,35 @@ class AdaptableDataFrame(TimeDataFrame#,BasicFormattingTools
 
     '''
 
-    _default_sep = ', '
 
-    @classmethod
-    def _init_with_ops(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+#     @classmethod
+#     def _init_with_ops(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
 
-        raw_frame= cls(data=data, index=index, columns=columns, dtype=dtype, copy=copy,func=lambda obj: obj)
+#         raw_frame= cls(data=data, index=index, columns=columns, dtype=dtype, copy=copy,func=lambda obj: obj)
         
-        print('_init_with_ops')
-        display(raw_frame)
+#         print('_init_with_ops')
+#         display(raw_frame)
         
-        new_frame=raw_frame.applying_method(raw_frame,**kwargs)
+#         new_frame=raw_frame.applying_method(raw_frame,**kwargs)
         
-        print('_init_without_ops')
-        display(new_frame)        
+#         print('_init_without_ops')
+#         display(new_frame)        
         
        
-        return cls(data=new_frame, index=index, columns=columns, dtype=dtype, copy=copy,func=lambda obj: obj)
+#         return cls(data=new_frame, index=index, columns=columns, dtype=dtype, copy=copy,func=lambda obj: obj)
 
-    @classmethod
-    def formatted(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
-        return cls._init_with_ops(data=data, index=index, columns=columns, dtype=dtype, copy=copy,**kwargs)
+#     @classmethod
+#     def formatted(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+#         return cls._init_with_ops(data=data, index=index, columns=columns, dtype=dtype, copy=copy,**kwargs)
     
     
-    def __init__(self,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
-        #_try_evat='test'
-        #print(f'custom init of {type(self)}')
-        
-        super().__init__(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
+#     def __init__(self,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+
+#         super().__init__(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
         
 
     
-    def switch_columns_type(self):
 
-
-        return self.switch_axis_type(axis=1)
     
     
 
@@ -417,63 +474,14 @@ class AdaptableDataFrame(TimeDataFrame#,BasicFormattingTools
 #         else:
 #             return f'{latex_#printer(sym)}'
 
-    def _format_entry(self, obj,formatter=None):
-        if formatter is not None:
-            return formatter(obj)
-        else:
-            return self.__class__._label_formatter(obj)
-
-    def _modify_axis(self,func,axis=0):
-        
-        new_obj = self.copy()
-        
-        new_obj_idx= new_obj.axes[axis]
-        
-        display(new_obj_idx)
-        display(new_obj_idx.to_frame().applymap(func))
-
-        idx_frame = new_obj_idx.to_frame().applymap(func)
-        
-        if isinstance(new_obj_idx,pd.MultiIndex):
-            new_obj_idx = pd.MultiIndex.from_frame(idx_frame)
-        else:
-            
-            display(idx_frame)
-            display(list(idx_frame))
-            
-            new_obj_idx = pd.Index(idx_frame,name=new_obj_idx.name)
-            
 
 
-        return new_obj.set_axis(new_obj_idx ,axis=axis)
 
-    def fit_units_to_columns(self,selector=None):
-        if selector is None:
-            selector = self.__class__._unit_selector
-            
-            
-        new_frame=self._modify_axis(selector.set_default_units(self.__class__._units),axis=1)
-        
-        return new_frame
+
             
     
     
-    def format_columns_names(self,formatter=None):
-        if formatter is None:
-            
-            formatter = self.__class__._label_formatter
-        new_obj = self.copy()
-        
-        new_obj_idx= new_obj.columns.to_frame()
-        
-        print('format columns names')
-        display(new_obj_idx.applymap(formatter))
-        display(new_obj_idx.applymap(formatter).applymap(type))        
 
-        new_obj_idx = new_obj_idx.applymap(formatter)
-
-
-        return new_obj.set_axis(new_obj_idx ,axis=1)
 
     @property
     def _constructor(self):
@@ -664,10 +672,32 @@ class ParameterSummarySeries(AdaptableSeries):
         return ParameterSummaryFrame
     
     
-class NumericalAnalysisDataFrame(TimeDataFrame#AdaptableDataFrame
+class NumericalAnalysisDataFrame(TimeDataFrame
+                                 #AdaptableDataFrame
+                                 ,BasicFormattingTools
                                 ):
     _applying_func = None
 
+    @classmethod
+    def _init_with_ops(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+
+        raw_frame= cls(data=data, index=index, columns=columns, dtype=dtype, copy=copy,func=lambda obj: obj)
+        
+        print('_init_with_ops')
+        display(raw_frame)
+        
+        new_frame=raw_frame.applying_method(raw_frame,**kwargs)
+        
+        print('_init_without_ops')
+        display(new_frame)        
+        
+       
+        return cls(data=new_frame, index=index, columns=columns, dtype=dtype, copy=copy,func=lambda obj: obj)
+
+    @classmethod
+    def formatted(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+        return cls._init_with_ops(data=data, index=index, columns=columns, dtype=dtype, copy=copy,**kwargs)
+    
     def __init__(self,data=None, index=None, columns=None, model = None, ics=None ,dtype=None, copy=None,**kwargs):
         #_try_evat='test'
         #print(f'custom init of {type(self)}')
@@ -675,7 +705,7 @@ class NumericalAnalysisDataFrame(TimeDataFrame#AdaptableDataFrame
         super().__init__(data=data, index=index, columns=columns, dtype=dtype, copy=copy,**kwargs)
 #         self._numerical_model = model
 #         self._ics_list=ics
-        #self._comp_time=None
+        self._comp_time=None
 
     
     @property
@@ -699,7 +729,7 @@ class NumericalAnalysisDataFrame(TimeDataFrame#AdaptableDataFrame
 
         computed_data = self.copy()
 
-        #computed_data._comp_time=AdaptableDataFrame(columns=self.columns.droplevel(coord_level_name).unique())
+        computed_data._comp_time=AdaptableDataFrame(columns=self.columns.droplevel(coord_level_name).unique())
         
         for case_data in self.columns.droplevel(coord_level_name).unique():
 
@@ -733,14 +763,16 @@ class NumericalAnalysisDataFrame(TimeDataFrame#AdaptableDataFrame
 
             sim_time=pd.Series([result._get_comp_time()],index=['duration'] )
 
-            #computed_data._comp_time[case_data]=sim_time
+            computed_data._comp_time[case_data]=sim_time
 
              
 
         return  self._constructor(computed_data)
 
 
-class NumericalAnalisysSeries(TimeSeries#AdaptableSeries
+class NumericalAnalisysSeries(TimeSeries
+                              #AdaptableSeries
+                              ,BasicFormattingTools
                              ):
     @property
     def _common_constructor_series(self):
