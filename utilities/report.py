@@ -340,16 +340,7 @@ class AdaptableSeries(TimeSeries,BasicFormattingTools
 #     _cols_name = None
 
 
-#     @classmethod
-#     def _init_with_ops(cls,data=None, index=None, dtype=None, name=None, copy=False, fastpath=False,**kwargs):
-#         print(f'pure init of {cls}')
-#         return cls(data=data, index=index,  dtype=dtype,name=name, copy=copy,fastpath=fastpath,func=lambda obj: obj)
-        
-    
-#     def __init__(self,data=None, index=None, dtype=None, name=None, copy=False, fastpath=False,**kwargs):
 
-#         super().__init__(data=data, index=index,  dtype=dtype,name=name, copy=copy,fastpath=fastpath)
-        
 
     
 
@@ -434,19 +425,7 @@ class ComputationalErrorSeries(AdaptableSeries):
 
     
     
-class LatexDataFrame(AdaptableDataFrame):
-    _applying_func = lambda obj: (obj).set_multiindex_columns().format_columns_names().set_multiindex_columns()
 
-    
-    @property
-    def _common_constructor_series(self):
-        return LatexSeries
-    
-
-class LatexSeries(AdaptableSeries):
-    @property
-    def _common_constructor_series(self):
-        return LatexDataFrame
     
 class ParametersSummaryFrame(AdaptableDataFrame):
     _applying_func = lambda frame: frame.abs().max().reset_index().pivot(columns=['level_0', 'level_2'], index=['level_1'])[0]
@@ -482,6 +461,8 @@ class NumericalAnalysisDataFrame(TimeDataFrame
                                 ):
     _applying_func = None
 
+    _metadata = ["_applying_func"]
+
     @classmethod
     def _init_with_ops(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
 
@@ -506,7 +487,7 @@ class NumericalAnalysisDataFrame(TimeDataFrame
         #_try_evat='test'
         #print(f'custom init of {type(self)}')
         
-        super().__init__(data=data, index=index, columns=columns, dtype=dtype, copy=copy,**kwargs)
+        super().__init__(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
 #         self._numerical_model = model
 #         self._ics_list=ics
         self._comp_time=None
@@ -614,6 +595,43 @@ class NumericalAnalisysSeries(TimeSeries
     def _constructor_sliced(self):
         return self._common_constructor_series
     
+class LatexDataFrame(TimeDataFrame
+                                 #AdaptableDataFrame
+                                 ,BasicFormattingTools):
+    _applying_func = lambda obj: (obj).set_multiindex_columns().format_columns_names().set_multiindex_columns()
+
+    @classmethod
+    def _init_with_ops(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+
+        raw_frame= cls(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
+        
+        print('_init_with_ops')
+        display(raw_frame)
+        
+        new_frame=raw_frame.applying_method(raw_frame,**kwargs)
+        
+        print('_init_without_ops')
+        display(new_frame)        
+        
+       
+        return cls(data=new_frame, index=index, columns=columns, dtype=dtype, copy=copy,func=lambda obj: obj)
+
+    @classmethod
+    def formatted(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+        return cls._init_with_ops(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
+
+    
+    @property
+    def _common_constructor_series(self):
+        return LatexSeries
+    
+
+class LatexSeries(TimeSeries
+                              #AdaptableSeries
+                              ,BasicFormattingTools):
+    @property
+    def _common_constructor_series(self):
+        return LatexDataFrame
 class AbstractFrameFormatter(AdaptableDataFrame):
     _applying_func=lambda x: (x*100)
 
