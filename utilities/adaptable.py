@@ -2,7 +2,10 @@ from numpy import (fft)
 import numpy as np
 from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, Plot, Figure , Alignat, Package,Quantity, Command
 from pylatex.utils import italic,NoEscape
-from sympy import latex, Symbol, Expr, Eq
+
+from sympy import Matrix, symbols, Symbol, Eq, Expr,latex
+from sympy.core.relational import Relational
+
 from sympy.physics.mechanics import vlatex
 
 import pandas as pd

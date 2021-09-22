@@ -614,9 +614,12 @@ class MultiTimeScaleMethod(LinearODESolution):
                 
                 print('A_time'*20,t.elapse)
             
+            solution=solution.apply(np.real)
             solution._set_comp_time(t.elapse)
+            
+            print('B_time'*20,solution._get_comp_time())
 
-            return solution.apply(np.real)
+            return solution
 
     def _format_solution(self, dvars, solution, dict=False, equation=False):
 
