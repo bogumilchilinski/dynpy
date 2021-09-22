@@ -27,6 +27,7 @@ from sympy.physics.vector.printing import vlatex, vpprint
 from IPython.display import display, Markdown, Latex
 
 from .timeseries import TimeDataFrame, TimeSeries
+from .adaptable import AdaptableDataFrame, AdaptableSeries
 import copy
 
 from collections.abc import Iterable
@@ -42,372 +43,7 @@ def plots_no():
 plots_no_gen = plots_no()
 
 
-class EntryWithUnit:
-    _units={}
-    _latex_backend=latex
 
-    
-    @classmethod
-    def set_default_units(cls, units={}):
-
-        cls._units = units
-        return cls
-    
-    def __init__(self,obj,units=None,latex_backend=None,**kwargs):
-        self._obj =obj
-        self._unit=None
-        self._left_par = '['
-        self._right_par = ']'
-        
-        if units is not None:
-            self._units= units
-        else:
-            self._units= self.__class__._units
-
-            
-        if latex_backend is not None:
-            self._latex_backend= latex_backend
-        else:
-            self._latex_backend= self.__class__._latex_backend
-            
-        if isinstance(self._obj,Relational):
-            self._left_par = ''
-            self._right_par = ''
-            self._quantity = self._obj.lhs
-        else:
-            self._quantity=self._obj
-            
-        self._set_quantity_unit()
-        
-    def _set_quantity_unit(self):
-        if self._quantity in self._units:
-            self._unit = self._units[self._quantity]
-        else:
-            self._unit=None
-
-            
-    def __str__(self):
-        entry_str=self._obj.__str__()
-        unit = self._unit
-        left_par=self._left_par
-        right_par=self._right_par
-        
-        if unit:
-            return f'{entry_str} {left_par}{unit.__str__()}{right_par}'
-        else:
-            return f'{entry_str}'
-
-    def __repr__(self):
-        entry_str=self._obj.__repr__()
-        unit = self._unit
-        left_par=self._left_par
-        right_par=self._right_par
-        
-        if unit:
-            return f'{entry_str} {left_par}{unit.__repr__()}{right_par}'
-        else:
-            return f'{entry_str}'
-        
-    def _latex(self,*args):
-        entry_str=self._latex_backend(self._obj)
-        unit = self._unit
-        left_par=self._left_par
-        right_par=self._right_par
-        
-        
-        if unit:
-            return f'{entry_str} {left_par}{unit:~L}{right_par}'
-        else:
-            return f'{self._obj}'
-
-
-class BasicFormattingTools:
-    
-    
-    _latex_backend=vlatex
-    _label_formatter = lambda obj: f'${vlatex(obj)}$' if isinstance(obj,(Expr,Eq,EntryWithUnit)) else obj
-    _unit_selector = EntryWithUnit
-    _domain=None
-    _units={}
-    _applying_func = lambda x: x
-    _init_ops=True
-
-    _default_sep = ', '
-    
-    @classmethod
-    def set_default_column_separator(cls, sep=', '):
-        cls._default_sep = sep
-
-        return cls
-
-    @classmethod
-    def set_default_units(cls, units={}):
-
-        cls._units = units
-        return cls
-
-    @classmethod
-    def set_default_unit_selector(cls, selector=EntryWithUnit):
-
-        cls._unit_selector = selector
-        return cls
-    
-    def set_multiindex_axis(self,axis=0):
-        
-        if axis == 'index':
-            axis = 0
-        elif axis == 'colums':
-            axis = 1
-            
-        
-        idx = self.axes[axis]
-        
-        if isinstance(idx,pd.MultiIndex):
-       
-            new_obj = self.copy()
-            
-        else:
-            midx = pd.MultiIndex.from_tuples(idx)
-            new_obj = self.copy().set_axis(midx,axis=axis)
-
-        return new_obj
-
-    
-    def set_multiindex_columns(self):
-        
-        return self.set_multiindex_axis(axis=1)
-    
-    def set_flat_index_axis(self,axis=0):
-        
-        if axis == 'index':
-            axis = 0
-        elif axis == 'colums':
-            axis = 1
-
-        idx = self.axes[axis]
-        
-        if isinstance(idx,pd.MultiIndex):
-            midx = idx.to_flat_index()
-            new_obj = self.copy().set_axis(midx,axis=axis)
-
-        else:
-
-            new_obj = self.copy()
-
-        return new_obj
-    
-    def set_flat_index_columns(self):
-        
-        return self.set_flat_index_axis(axis=1)    
-
-    def switch_axis_type(self,axis=0):
-        
-        if axis == 'index':
-            axis = 0
-        elif axis == 'colums':
-            axis = 1
-            
-        
-        idx = self.axes[axis]
-        
-        if isinstance(idx,pd.MultiIndex):
-            
-            new_obj = self.set_flat_index_axis(axis=axis)
-            
-        else:
-            new_obj = self.copy().set_multiindex_axis(axis=axis)
-
-        return new_obj
-    
-    
-    def switch_index_type(self):
-
-        return self.switch_axis_type(axis=0)
-
-    
-
-#     def __call__(self):
-#         return self.copy()
-    
-    
-    
-    def applying_method(self,data,func=None,**kwargs):
-        if func:
-            #print('func is used')
-            ops_func = func
-
-        elif self.__class__._applying_func is not None:
-            print('class func is used')
-
-            ops_func = self.__class__._applying_func
-        else:
-            #print('identity is used')
-            ops_func = lambda data: data
-
-        
-        return ops_func(data)
-
-    
-    def format_columns_names(self,formatter=None):
-        if formatter is None:
-            
-            formatter = self.__class__._label_formatter
-        new_obj = self.copy()
-        
-        new_obj_idx= new_obj.columns.to_frame()
-        
-        print('format columns names')
-        display(new_obj_idx.applymap(formatter))
-        display(new_obj_idx.applymap(formatter).applymap(type))        
-
-        new_obj_idx = new_obj_idx.applymap(formatter)
-
-
-        return new_obj.set_axis(new_obj_idx ,axis=1)
-
-    
-    def fit_units_to_columns(self,selector=None):
-        if selector is None:
-            selector = self.__class__._unit_selector
-            
-            
-        new_frame=self._modify_axis(selector.set_default_units(self.__class__._units),axis=1)
-        
-        return new_frame
-    
-    def _modify_axis(self,func,axis=0):
-        
-        new_obj = self.copy()
-        
-        new_obj_idx= new_obj.axes[axis]
-        
-        display(new_obj_idx)
-        display(new_obj_idx.to_frame().applymap(func))
-
-        idx_frame = new_obj_idx.to_frame().applymap(func)
-        
-        if isinstance(new_obj_idx,pd.MultiIndex):
-            new_obj_idx = pd.MultiIndex.from_frame(idx_frame)
-        else:
-            
-            display(idx_frame)
-            display(list(idx_frame))
-            
-            new_obj_idx = pd.Index(idx_frame,name=new_obj_idx.name)
-            
-
-
-        return new_obj.set_axis(new_obj_idx ,axis=axis)
-
-    def switch_columns_type(self):
-
-
-        return self.switch_axis_type(axis=1)
-    
-    def _format_entry(self, obj,formatter=None):
-        if formatter is not None:
-            return formatter(obj)
-        else:
-            return self.__class__._label_formatter(obj)
-    
-    
-class AdaptableSeries(TimeSeries,BasicFormattingTools
-                     ):
-
-    r'''
-    Basic class for formatting data plots. It provides methods for setting options 
-    
-    Arguments
-    =========
-
-    Methods
-    =======
-
-    Example
-    =======
-
-    '''
-    
-    @property
-    def _common_constructor_frame(self):
-        return AdaptableDataFrame#._init_without_ops
-    
-    
-    @property
-    def _common_constructor_series(self):
-        return self.__class__#._init_without_ops
-    
-#     _cols_name = None
-
-
-
-
-    
-
-    @property
-    def _constructor(self):
-        return self._common_constructor_series
-
-    @property
-    def _constructor_expanddim(self):
-        return self._common_constructor_frame
-
-    @property
-    def _constructor_sliced(self):
-        return self._common_constructor_series
-
-
-
-class AdaptableDataFrame(TimeDataFrame,BasicFormattingTools
-                        ):
-    
-    @property
-    def _common_constructor_series(self):
-        return AdaptableSeries#._init_without_ops
-    
-    
-    @property
-    def _common_constructor_frame(self):
-        return self.__class__#._init_without_ops
-    
-
-
-    
-
-
-    @property
-    def _constructor(self):
-        return self._common_constructor_frame
-
-    @property
-    def _constructor_expanddim(self):
-        return self._common_constructor_frame
-
-    @property
-    def _constructor_sliced(self):
-        return self._common_constructor_series
-
-
-    @classmethod
-    def _init_with_ops(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
-
-        raw_frame= cls(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
-        
-        print('_init_with_ops')
-        display(raw_frame)
-        
-        new_frame=raw_frame.applying_method(raw_frame,**kwargs)
-        
-        print('_init_without_ops')
-        display(new_frame)        
-        
-       
-        return cls(data=new_frame, index=index, columns=columns, dtype=dtype, copy=copy)
-
-    @classmethod
-    def formatted(cls,data=None, index=None, columns=None, dtype=None, copy=None):
-        return cls._init_with_ops(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
-    
     
 class ComputationalErrorFrame(AdaptableDataFrame):
     _applying_func = lambda obj: obj.join(((obj[obj.columns[1]]-obj[obj.columns[0]]).div(obj[obj.columns[0]],axis=0))).set_axis(list(obj.columns)+[Symbol('\\delta')],axis=1)
@@ -455,9 +91,7 @@ class ParameterSummarySeries(AdaptableSeries):
     
     
     
-class NumericalAnalysisDataFrame(TimeDataFrame
-                                 #AdaptableDataFrame
-                                 ,BasicFormattingTools
+class NumericalAnalysisDataFrame(AdaptableDataFrame
                                 ):
     _applying_func = None
 
@@ -492,26 +126,17 @@ class NumericalAnalysisDataFrame(TimeDataFrame
 #         self._ics_list=ics
         self._comp_time=None
 
-    
-    @property
-    def _common_constructor_series(self):
-        return NumericalAnalisysSeries
-    
-    @property
-    def _common_constructor_frame(self):
-        return self.__class__#._init_without_ops
+  
 
     @property
     def _constructor(self):
-        return self._common_constructor_frame
+        return NumericalAnalysisDataFrame
 
-    @property
-    def _constructor_expanddim(self):
-        return self._common_constructor_frame
+
 
     @property
     def _constructor_sliced(self):
-        return self._common_constructor_series
+        return NumericalAnalisysSeries
 
     
     def _spot_model(self,current_case):
@@ -571,33 +196,20 @@ class NumericalAnalysisDataFrame(TimeDataFrame
         return (computed_data)
 
 
-class NumericalAnalisysSeries(TimeSeries
-                              #AdaptableSeries
-                              ,BasicFormattingTools
-                             ):
-    @property
-    def _common_constructor_series(self):
-        return NumericalAnalysisDataFrame
-    
-    @property
-    def _common_constructor_series(self):
-        return self.__class__#._init_without_ops
+class NumericalAnalisysSeries(AdaptableSeries):
+
 
     @property
     def _constructor(self):
-        return self._common_constructor_series
+        return NumericalAnalisysSeries
 
     @property
     def _constructor_expanddim(self):
-        return self._common_constructor_frame
+        return NumericalAnalysisDataFrame
 
-    @property
-    def _constructor_sliced(self):
-        return self._common_constructor_series
+
     
-class LatexDataFrame(TimeDataFrame
-                                 #AdaptableDataFrame
-                                 ,BasicFormattingTools):
+class LatexDataFrame(AdaptableDataFrame):
     _applying_func = lambda obj: (obj).set_multiindex_columns().format_columns_names().set_multiindex_columns()
 
     @classmethod
@@ -626,9 +238,7 @@ class LatexDataFrame(TimeDataFrame
         return LatexSeries
     
 
-class LatexSeries(TimeSeries
-                              #AdaptableSeries
-                              ,BasicFormattingTools):
+class LatexSeries(AdaptableSeries):
     @property
     def _common_constructor_series(self):
         return LatexDataFrame
@@ -669,11 +279,11 @@ class AbstractSeriesFormatted(AdaptableSeries):
         
         return ops_to_apply
     
-    def __new__(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+    # def __new__(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
         
-        ops_to_apply=cls._apply_func(**kwargs)
+    #     ops_to_apply=cls._apply_func(**kwargs)
        
-        return ops_to_apply(BasicFormattedSeries(data=data, index=index, columns=columns, dtype=dtype, copy=copy))
+    #     return ops_to_apply(BasicFormattedSeries(data=data, index=index, columns=columns, dtype=dtype, copy=copy))
     
     
 class BaseSeriesFormatter(TimeSeries):
