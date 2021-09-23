@@ -344,10 +344,7 @@ class BasicFormattingTools:
 
         return self.switch_axis_type(axis=0)
 
-    
 
-#     def __call__(self):
-#         return self.copy()
     
     
     
@@ -367,57 +364,60 @@ class BasicFormattingTools:
         
         return ops_func(data)
 
-    
-    def format_columns_names(self,formatter=None):
-        if formatter is None:
-            
-            formatter = self.__class__._label_formatter
-        new_obj = self.copy()
-        
-        new_obj_idx= new_obj.columns.to_frame()
-        
-        print('format columns names')
-        display(new_obj_idx.applymap(formatter))
-        display(new_obj_idx.applymap(formatter).applymap(type))        
-
-        new_obj_idx = new_obj_idx.applymap(formatter)
-
-
-        return new_obj.set_axis(new_obj_idx ,axis=1)
-
-    
-    def fit_units_to_columns(self,selector=None):
-        if selector is None:
-            selector = self.__class__._unit_selector
-            
-            
-        new_frame=self._modify_axis(selector.set_default_units(self.__class__._units),axis=1)
-        
-        return new_frame
-    
     def _modify_axis(self,func,axis=0):
         
         new_obj = self.copy()
-        
         new_obj_idx= new_obj.axes[axis]
-        
-        display(new_obj_idx)
-        display(new_obj_idx.to_frame().applymap(func))
-
         idx_frame = new_obj_idx.to_frame().applymap(func)
         
         if isinstance(new_obj_idx,pd.MultiIndex):
             new_obj_idx = pd.MultiIndex.from_frame(idx_frame)
         else:
-            
-            display(idx_frame)
-            display(list(idx_frame))
-            
             new_obj_idx = pd.Index(idx_frame,name=new_obj_idx.name)
             
 
 
         return new_obj.set_axis(new_obj_idx ,axis=axis)
+    
+
+    def format_axis_names(self,formatter=None,axis=0):
+        if formatter is None:
+            
+            formatter = self.__class__._label_formatter
+
+        new_frame=self._modify_axis(formatter,axis=axis)
+        
+        return new_frame
+
+    def format_index_names(self,formatter=None):
+
+        return self.format_axis_names(formatter=formatter,axis=0)
+
+    def format_columns_names(self,formatter=None):
+
+        return self.format_axis_names(formatter=formatter,axis=1)
+
+    def format_axes_names(self,formatter=None):
+
+        return self.format_axis_names(formatter=formatter,axis=1).format_axis_names(formatter=formatter,axis=0)
+    
+    def fit_units_to_axis(self,unit_selector=None,axis=0):
+        if unit_selector is None:
+            unit_selector = self.__class__._unit_selector
+            
+        new_frame=self._modify_axis(unit_selector.set_default_units(self.__class__._units),axis=axis)
+        
+        return new_frame
+
+    def fit_units_to_index(self,unit_selector=None):        
+        return self.fit_units_to_axis(unit_selector=unit_selector,axis=0)
+
+
+    def fit_units_to_columns(self,unit_selector=None):        
+        return self.fit_units_to_axis(unit_selector=unit_selector,axis=1)
+
+    def fit_units_to_axes(self,unit_selector=None):        
+        return self.fit_units_to_axis(unit_selector=unit_selector,axis=1).fit_units_to_axis(unit_selector=unit_selector,axis=0)
 
     def switch_columns_type(self):
 
@@ -464,8 +464,6 @@ class AdaptableSeries(pd.Series,BasicFormattingTools):
 
 
 class AdaptableDataFrame(pd.DataFrame,BasicFormattingTools):
-    
-
 
     @property
     def _constructor(self):
@@ -480,15 +478,8 @@ class AdaptableDataFrame(pd.DataFrame,BasicFormattingTools):
     def _init_with_ops(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
 
         raw_frame= cls(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
-        
-        print('_init_with_ops')
-        display(raw_frame)
-        
         new_frame=raw_frame.applying_method(raw_frame,**kwargs)
-        
-        print('_init_without_ops')
-        display(new_frame)        
-        
+
        
         return cls(data=new_frame, index=index, columns=columns, dtype=dtype, copy=copy)
 
@@ -500,27 +491,7 @@ class AdaptableDataFrame(pd.DataFrame,BasicFormattingTools):
 
 class LatexDataFrame(AdaptableDataFrame
                                  ,BasicFormattingTools):
-    _applying_func = lambda obj: (obj).set_multiindex_columns().format_columns_names().set_multiindex_columns()
-
-    @classmethod
-    def _init_with_ops(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
-
-        raw_frame= cls(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
-        
-        print('_init_with_ops')
-        display(raw_frame)
-        
-        new_frame=raw_frame.applying_method(raw_frame,**kwargs)
-        
-        print('_init_without_ops')
-        display(new_frame)        
-        
-       
-        return cls(data=new_frame, index=index, columns=columns, dtype=dtype, copy=copy)
-
-    @classmethod
-    def formatted(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
-        return cls._init_with_ops(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
+    _applying_func = lambda obj: (obj).set_multiindex_columns().fit_units_to_axes().format_axes_names().set_multiindex_columns()
 
     
     @property
