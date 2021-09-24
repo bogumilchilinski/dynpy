@@ -761,8 +761,7 @@ class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
 
 
 class LatexDataFrame(AdaptableDataFrame):
-    _applying_func = lambda obj: (obj).set_multiindex_columns(
-    ).fit_units_to_axes().set_multiindex_columns().format_axes_names()
+    _applying_func = lambda obj: (obj).fit_units_to_axes().format_axes_names()
 
     @property
     def _constructor_sliced(self):
