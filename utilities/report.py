@@ -3887,7 +3887,7 @@ class DataTable(Table):
 
         tab = self._numerical_data
         self.append(
-            NoEscape(tab.to_latex(index=index, escape=False, longtable=longtable)))
+            NoEscape(tab.to_latex(index=index, escape=False, longtable=longtable).replace('\\toprule','\\toprule \n \\midrule').replace('\\bottomrule','\\midrule \n \\bottomrule'))
 
 
 class ReportSection(Section):

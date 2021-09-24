@@ -446,15 +446,15 @@ class BasicFormattingTools(DataMethods):
     @staticmethod
     def _label_formatter(obj):
         
-        print('type',type(obj))
+        #print('type',type(obj))
         
-        print(isinstance(obj, (Expr, Eq, EntryWithUnit)))
+        #print(isinstance(obj, (Expr, Eq, EntryWithUnit)))
         
         if isinstance(obj, (Expr, Eq, EntryWithUnit)):
             formatted_str = f'${vlatex(obj)}$' 
         else:
             formatted_str=str(obj)
-        print('effect',formatted_str)
+        #print('effect',formatted_str)
         
         return formatted_str
     
@@ -533,7 +533,7 @@ class BasicFormattingTools(DataMethods):
             ops_func = func
 
         elif self.__class__._applying_func is not None:
-            print('class func is used')
+            #print('class func is used')
 
             ops_func = self.__class__._applying_func
         else:
@@ -551,11 +551,11 @@ class BasicFormattingTools(DataMethods):
         if isinstance(new_obj_idx, pd.MultiIndex):
             new_obj_idx = pd.MultiIndex.from_frame(idx_frame)
         else:
-            display(idx_frame)
+
             
-            new_obj_idx = pd.Index((idx_frame),name=new_obj_idx.name)
-            new_obj_idx = pd.Index((new_obj_idx.tolist(),name=new_obj_idx.name)
-            display(new_obj_idx)
+            #new_obj_idx = pd.Index((idx_frame),name=new_obj_idx.name)
+            new_obj_idx = pd.Index(map(func,new_obj_idx.tolist()),name=new_obj_idx.name)
+
 
         return new_obj.set_axis(new_obj_idx, axis=axis)
 
