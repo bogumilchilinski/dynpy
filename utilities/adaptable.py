@@ -309,6 +309,9 @@ class EntryWithUnit:
     
     def __new__(cls,obj,units=None,latex_backend=None,**kwargs):
         obj_with_unit= super().__new__(cls)
+        obj_with_unit._obj=obj
+        obj_with_unit._left_par = '['
+        obj_with_unit._right_par = ']'
 
         if units is not None:
             obj_with_unit._units= units
@@ -327,31 +330,38 @@ class EntryWithUnit:
         if has_unit:
 
             obj_with_unit._obj =obj
-            obj_with_unit._unit=None
-            obj_with_unit._left_par = '['
-            obj_with_unit._right_par = ']'
+
+
             
                 
             if latex_backend is not None:
                 obj_with_unit._latex_backend= latex_backend
             else:
                 obj_with_unit._latex_backend= cls._latex_backend
+                
+
 
             return obj_with_unit
 
         else:
+
             return obj
 
 
         
 
     def _set_quantity_unit(self):
+        
+
+
         if self._quantity in self._units:
+
             self._unit = self._units[self._quantity]
             return True
         else:
 
             self._unit=None
+
             return False
 
 
@@ -379,6 +389,7 @@ class EntryWithUnit:
             return f'{entry_str}'
 
     def _latex(self, *args):
+
         entry_str = self._latex_backend(self._obj)
         unit = self._unit
         left_par = self._left_par
@@ -540,7 +551,11 @@ class BasicFormattingTools(DataMethods):
         if isinstance(new_obj_idx, pd.MultiIndex):
             new_obj_idx = pd.MultiIndex.from_frame(idx_frame)
         else:
-            new_obj_idx = pd.Index(idx_frame, name=new_obj_idx.name)
+            display(idx_frame)
+            
+            new_obj_idx = pd.Index((idx_frame),name=new_obj_idx.name)
+            new_obj_idx = pd.Index((new_obj_idx.tolist(),name=new_obj_idx.name)
+            display(new_obj_idx)
 
         return new_obj.set_axis(new_obj_idx, axis=axis)
 
@@ -642,7 +657,7 @@ class BasicFormattingTools(DataMethods):
         
         
         tab=DataTable(self)
-        tab.add_table()
+        tab.add_table(index=True)
         
         container.append(tab)
 
