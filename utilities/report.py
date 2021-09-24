@@ -27,7 +27,7 @@ from sympy.physics.vector.printing import vlatex, vpprint
 from IPython.display import display, Markdown, Latex
 
 from .timeseries import TimeDataFrame, TimeSeries
-from .adaptable import AdaptableDataFrame, AdaptableSeries
+
 import copy
 
 from collections.abc import Iterable
@@ -45,245 +45,51 @@ plots_no_gen = plots_no()
 
 
     
-class ComputationalErrorFrame(AdaptableDataFrame):
-    _applying_func = lambda obj: obj.join(((obj[obj.columns[1]]-obj[obj.columns[0]]).div(obj[obj.columns[0]],axis=0))).set_axis(list(obj.columns)+[Symbol('\\delta')],axis=1)
-
-    
-    @property
-    def _common_constructor_series(self):
-        return ComputationalErrorSeries
-    
-
-class ComputationalErrorSeries(AdaptableSeries):
-    @property
-    def _common_constructor_series(self):
-        return ComputationalErrorFrame
 
     
     
+# class AbstractFrameFormatter(AdaptableDataFrame):
+#     _applying_func=lambda x: (x*100)
 
-    
-class ParametersSummaryFrame(AdaptableDataFrame):
-    _applying_func = lambda frame: frame.abs().max().reset_index().pivot(columns=['level_0', 'level_2'], index=['level_1'])[0]
-
-    
-    @property
-    def _common_constructor_series(self):
-        return ParameterSummarySeries
-
-
-    
-    
-#     def _filtter(self, filtter=None):
-#         if self.columns.nlevels == 2:
-#             filtter = lambda frame: frame.abs().max().reset_index(
-#                 level=1).pivot(columns=['level_1'])
+#     @classmethod
+#     def _apply_func(cls,func=None,**kwargs):
+        
+#         if func:
+#             ops_to_apply=func
+#         elif cls._applying_func:
+#             ops_to_apply=cls._applying_func
 #         else:
-#             filtter = 
-
-#         return filtter
-
-class ParameterSummarySeries(AdaptableSeries):
-    @property
-    def _common_constructor_series(self):
-        return ParameterSummaryFrame
-
+#             ops_to_apply=lambda obj: obj
+        
+#         return ops_to_apply
     
-    
-    
-class NumericalAnalysisDataFrame(AdaptableDataFrame
-                                ):
-    _applying_func = None
-
-    _metadata = ["_applying_func"]
-
-    @classmethod
-    def _init_with_ops(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
-
-        raw_frame= cls(data=data, index=index, columns=columns, dtype=dtype, copy=copy,func=lambda obj: obj)
+#     def __new__(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
         
-        print('_init_with_ops')
-        display(raw_frame)
-        
-        new_frame=raw_frame.applying_method(raw_frame,**kwargs)
-        
-        print('_init_without_ops')
-        display(new_frame)        
-        
+#         ops_to_apply=cls._apply_func(**kwargs)
        
-        return cls(data=new_frame, index=index, columns=columns, dtype=dtype, copy=copy,func=lambda obj: obj)
+#         return ops_to_apply(BasicFormattedFrame(data=data, index=index, columns=columns, dtype=dtype, copy=copy))
 
-    @classmethod
-    def formatted(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
-        return cls._init_with_ops(data=data, index=index, columns=columns, dtype=dtype, copy=copy,**kwargs)
+
+# class AbstractSeriesFormatted(AdaptableSeries):
+#     _applying_func=lambda x: (x*100)
+
+#     @classmethod
+#     def _apply_func(cls,func=None,**kwargs):
+        
+#         if func:
+#             ops_to_apply=func
+#         elif cls._applying_func:
+#             ops_to_apply=cls._applying_func
+#         else:
+#             ops_to_apply=lambda obj: obj
+        
+#         return ops_to_apply
     
-    def __init__(self,data=None, index=None, columns=None, model = None, ics=None ,dtype=None, copy=None,**kwargs):
-        #_try_evat='test'
-        #print(f'custom init of {type(self)}')
+#     # def __new__(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
         
-        super().__init__(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
-#         self._numerical_model = model
-#         self._ics_list=ics
-        self._comp_time=None
-
-  
-
-    @property
-    def _constructor(self):
-        return NumericalAnalysisDataFrame
-
-
-
-    @property
-    def _constructor_sliced(self):
-        return NumericalAnalisysSeries
-
-    
-    def _spot_model(self,current_case):
-
-        columns_index = self.columns
-
-        if 'model' in columns_index.names:
-            current_models =  columns_index.to_frame()[model][current_case]
-        else:
-            current_model = self._numerical_model
-
-    def perform_simulations(self,model_level_name=0,coord_level_name=-1,ics=None,backend=None):
-        
-        display(self.columns.droplevel(coord_level_name).unique()) 
-
-
-        computed_data = self.copy()
-
-        computed_data._comp_time=AdaptableDataFrame(columns=self.columns.droplevel(coord_level_name).unique())
-        
-        for case_data in self.columns.droplevel(coord_level_name).unique():
-
-            model = case_data[model_level_name]
-
-            params_dict={}
-
-            for param_eq in case_data[1:]:
-
-                params_dict[param_eq.lhs]=param_eq.rhs
-
-            
-            numerized_model= model.numerized(params_dict,backend=backend)
-
-
-            t_span=np.asarray((self.index))
-            print(type(t_span))
-            
-            t0=t_span[0]
-
-            ics_series=(self[case_data].T[t0])
-
-            ics_list=[np.float(ics_series[coord])  for coord in numerized_model.ics_dvars]
-
-            print(ics_list)
-            
-            result=numerized_model.compute_solution(t_span,ics_list)
-
-            computed_data[case_data]=result[computed_data[case_data].columns]
-
-
-            sim_time=pd.Series([result._get_comp_time()],index=['duration'] )
-
-            computed_data._comp_time[case_data]=sim_time
-
-             
-
-        return (computed_data)
-
-
-class NumericalAnalisysSeries(AdaptableSeries):
-
-
-    @property
-    def _constructor(self):
-        return NumericalAnalisysSeries
-
-    @property
-    def _constructor_expanddim(self):
-        return NumericalAnalysisDataFrame
-
-
-    
-class LatexDataFrame(AdaptableDataFrame):
-    _applying_func = lambda obj: (obj).set_multiindex_columns().format_columns_names().set_multiindex_columns()
-
-    @classmethod
-    def _init_with_ops(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
-
-        raw_frame= cls(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
-        
-        print('_init_with_ops')
-        display(raw_frame)
-        
-        new_frame=raw_frame.applying_method(raw_frame,**kwargs)
-        
-        print('_init_without_ops')
-        display(new_frame)        
-        
+#     #     ops_to_apply=cls._apply_func(**kwargs)
        
-        return cls(data=new_frame, index=index, columns=columns, dtype=dtype, copy=copy,func=lambda obj: obj)
-
-    @classmethod
-    def formatted(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
-        return cls._init_with_ops(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
-
-    
-    @property
-    def _common_constructor_series(self):
-        return LatexSeries
-    
-
-class LatexSeries(AdaptableSeries):
-    @property
-    def _common_constructor_series(self):
-        return LatexDataFrame
-class AbstractFrameFormatter(AdaptableDataFrame):
-    _applying_func=lambda x: (x*100)
-
-    @classmethod
-    def _apply_func(cls,func=None,**kwargs):
-        
-        if func:
-            ops_to_apply=func
-        elif cls._applying_func:
-            ops_to_apply=cls._applying_func
-        else:
-            ops_to_apply=lambda obj: obj
-        
-        return ops_to_apply
-    
-    def __new__(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
-        
-        ops_to_apply=cls._apply_func(**kwargs)
-       
-        return ops_to_apply(BasicFormattedFrame(data=data, index=index, columns=columns, dtype=dtype, copy=copy))
-
-
-class AbstractSeriesFormatted(AdaptableSeries):
-    _applying_func=lambda x: (x*100)
-
-    @classmethod
-    def _apply_func(cls,func=None,**kwargs):
-        
-        if func:
-            ops_to_apply=func
-        elif cls._applying_func:
-            ops_to_apply=cls._applying_func
-        else:
-            ops_to_apply=lambda obj: obj
-        
-        return ops_to_apply
-    
-    # def __new__(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
-        
-    #     ops_to_apply=cls._apply_func(**kwargs)
-       
-    #     return ops_to_apply(BasicFormattedSeries(data=data, index=index, columns=columns, dtype=dtype, copy=copy))
+#     #     return ops_to_apply(BasicFormattedSeries(data=data, index=index, columns=columns, dtype=dtype, copy=copy))
     
     
 class BaseSeriesFormatter(TimeSeries):
