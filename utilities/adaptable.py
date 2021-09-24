@@ -306,36 +306,55 @@ class EntryWithUnit:
         cls._units = units
         return cls
 
-    def __init__(self, obj, units=None, latex_backend=None, **kwargs):
-        self._obj = obj
-        self._unit = None
-        self._left_par = '['
-        self._right_par = ']'
+    
+    def __new__(cls,obj,units=None,latex_backend=None,**kwargs):
+        obj_with_unit= super().__new__(cls)
 
         if units is not None:
-            self._units = units
+            obj_with_unit._units= units
         else:
-            self._units = self.__class__._units
+            obj_with_unit._units= cls._units
 
-        if latex_backend is not None:
-            self._latex_backend = latex_backend
+        if isinstance(obj,Relational):
+            obj_with_unit._left_par = ''
+            obj_with_unit._right_par = ''
+            obj_with_unit._quantity = obj_with_unit._obj.lhs
         else:
-            self._latex_backend = self.__class__._latex_backend
+            obj_with_unit._quantity=obj_with_unit._obj
+        
+        has_unit = obj_with_unit._set_quantity_unit()
 
-        if isinstance(self._obj, Relational):
-            self._left_par = ''
-            self._right_par = ''
-            self._quantity = self._obj.lhs
+        if has_unit:
+
+            obj_with_unit._obj =obj
+            obj_with_unit._unit=None
+            obj_with_unit._left_par = '['
+            obj_with_unit._right_par = ']'
+            
+                
+            if latex_backend is not None:
+                obj_with_unit._latex_backend= latex_backend
+            else:
+                obj_with_unit._latex_backend= cls._latex_backend
+
+            return obj_with_unit
+
         else:
-            self._quantity = self._obj
+            return obj
 
-        self._set_quantity_unit()
+
+        
 
     def _set_quantity_unit(self):
         if self._quantity in self._units:
             self._unit = self._units[self._quantity]
+            return True
         else:
-            self._unit = None
+
+            self._unit=None
+            return False
+
+
 
     def __str__(self):
         entry_str = self._obj.__str__()
