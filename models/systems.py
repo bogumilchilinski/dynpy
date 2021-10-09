@@ -2445,6 +2445,88 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
 #         super().__init__(shaft_base)
 
 
+class DDoFTwoDisksWithThreeSprings(ComposedSystem):
+    scheme_name = 'MDOF_Double_Disk.png'
+    real_name = 'dwa_wozki_XD.PNG'
+
+    def __init__(self,
+                 d=Symbol('d', positive=True),
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 kl=Symbol('k_l', positive=True),
+                 kc=Symbol('k_c', positive=True),
+                 kr=Symbol('k_r', positive=True),
+                 R=Symbol('R', positive=True),
+                 l_0=Symbol('l_0', positive=True),
+                 ivar=Symbol('t'),
+                 xl=dynamicsymbols('x_l'),
+                 xr=dynamicsymbols('x_r'),
+                 x=dynamicsymbols('x'),
+                 qs=dynamicsymbols('x_l, x_r'),
+                 **kwargs):
+
+        self.m1 = m1
+        self.m2 = m2
+        self.kl = kl
+        self.kc = kc
+        self.kr = kr
+        self.R = R
+        self.l_0 = l_0
+        self.d = d
+        self.xl = xl
+        self.xr = xr
+        self.x = x
+
+        self.Disk1 = MaterialPoint(m1, xl, qs=[xl]) + MaterialPoint(m1/2*R**2, xl/R, qs=[xl]) + Spring(kl, xl, qs=[xl])
+        self.Disk2 = MaterialPoint(m2, xr, qs=[xr]) + MaterialPoint(m2/2*R**2, xr/R, qs=[xr]) + Spring(kr,xr, qs=[xr])
+        self.Spring = Spring(kc, xl, xr, qs=[xl, xr])
+
+        system = self.Disk1 + self.Spring + self.Disk2
+        super().__init__(system(qs),**kwargs)
+
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+
+            self.d: [1 * l0, 2 * l0, S.Half * l0, 4 * S.Half * l0,  S.Half**2 * l0],
+
+            self.kl: [S.Half * k0, S.Half**2 * k0, 1 * k0, 4 * S.Half * k0, 2 * k0],
+            self.kr: [S.Half * k0, S.Half**2 * k0, 1 * k0, 4 * S.Half * k0, 2 * k0],
+            self.kc: [S.Half * k0, S.Half**2 * k0, 1 * k0, 4 * S.Half * k0, 2 * k0],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+
+
+        return parameters_dict
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m1: r'Disk Mass',
+            self.m2: r'Disk Mass',
+            self.kl: 'Left Spring Stiffness',
+            self.kr: 'Right Spring Stiffness',
+            self.kc: 'Central Spring Stiffness',
+            self.l: r'Length',
+            self.l_0: r'initial Spring Length',
+        }
+        return self.sym_desc_dict
+
+
 class DDoFTwoNonLinearTrolleys(ComposedSystem):
     scheme_name = 'ddof_nonlin_trolleys.PNG'
     real_name = 'dwa_wozki_XD.PNG'
