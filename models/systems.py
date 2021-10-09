@@ -1482,7 +1482,122 @@ class DDoFCoupledPendulum(ComposedSystem):
         }
         return self.sym_desc_dict
 
+    def get_default_data(self):
 
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#             self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#             self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+
+            self.k: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#             self.k_2: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#             self.k_3: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#             self.k_4: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            
+            self.l: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+
+#             self.phi_1: [self.phi_l, 0],
+#             self.phi_2: [self.phi_l, self.phi_r, 0],
+#             self.phi_3: [self.phi_r, 0],
+        }
+
+        return default_data_dict
+    
+class DDoFLinearizedCoupledPendulum(ComposedSystem):
+    """
+    Model of a DDoF Linearized Coupled Pendulum.
+
+        Arguments:
+        =========
+            m = Mass
+                -Mass of system on spring
+
+            g = gravitional field
+                -value of gravitional field acceleration
+
+            l = lenght
+                -Dimension of pendulum strong
+
+            k = spring coefficient
+                -value of spring coefficient
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+        Example
+        =======
+        A mass oscillating up and down while being held up by a spring with a spring constant kinematicly
+
+        >>> t = symbols('t')
+        >>> m, g, l, k = symbols('m, g, l, k')
+        >>> qs = dynamicsymbols('varphi_1, varphi_2') # Generalized Coordinates
+        >>> DDoFCouplePendulum()
+
+        -We define the symbols and dynamicsymbols
+        -determine the instance of the pendulum by using class SDoFCouplePendulum()
+    """
+    scheme_name = 'mdof_dpendulum.png'
+    real_name = 'lifting_tandem.png'
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 g=Symbol('g', positive=True),
+                 l=Symbol('l', positive=True),
+                 k=Symbol('k', positive=True),
+                 qs=dynamicsymbols('\\varphi_1, \\varphi_2'),
+                 **kwargs):
+
+        phi1, phi2 = qs
+
+        self.m = m
+        self.g = g
+        self.l = l
+        self.k = k
+
+        self.spring = Spring(k, pos1=(phi1 * (l/2)), pos2=(phi2 * (l/2)), qs=[qs])
+        self.pendulum_1 = Pendulum(m, g, l, angle=phi1, qs=[qs]).linearized()
+        self.pendulum_2 = Pendulum(m, g, l, angle=phi2, qs=[qs]).linearized()
+
+        system = self.pendulum_1 + self.pendulum_2 + self.spring
+        super().__init__(system,**kwargs)
+        
+        
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass of pendulum',
+            self.g: r'Gravity constant',
+            self.l: r'Pendulum length',
+            self.k: r'Stifness coefficient',
+        }
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#             self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#             self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+
+            self.k: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#             self.k_2: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#             self.k_3: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#             self.k_4: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            
+            self.l: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+
+#             self.phi_1: [self.phi_l, 0],
+#             self.phi_2: [self.phi_l, self.phi_r, 0],
+#             self.phi_3: [self.phi_r, 0],
+        }
+
+        return default_data_dict
 # class SDoFEngine(ComposedSystem):
 #     scheme_name = 'engine.png'
 #     real_name = 'engine_real.PNG'
@@ -2446,8 +2561,8 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
 
 
 class DDoFTwoDisksWithThreeSprings(ComposedSystem):
-    scheme_name = 'MDOF_Double_Disk.png'
-    real_name = 'dwa_wozki_XD.PNG'
+    scheme_name = 'ddof_disks_3_springs_scheme.png'
+    real_name = 'nonlin_trolley_real.PNG'
 
     def __init__(self,
                  d=Symbol('d', positive=True),

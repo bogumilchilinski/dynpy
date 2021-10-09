@@ -421,8 +421,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                           nonhol_coneqs=nonhol_coneqs_subs,
                           label=f'{self._label} for {args} and {kwargs}'
                           )
-
-        return type(self)(0,system=new_system)
+        new_sys = type(self)(0,system=new_system)
+        new_sys._given_data=args[0]
+        
+        return new_sys
 
         # return type(self)(Lagrangian=lagrangian_subs,
         #                   qs=self.q,
