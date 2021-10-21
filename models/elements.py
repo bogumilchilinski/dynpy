@@ -101,7 +101,9 @@ class MaterialPoint(Element):
         if isinstance(pos1, Point):
             
             
+            
             Lagrangian = S.Half * m * ((base_origin.pos_from(pos1).diff(ivar,frame).magnitude())**2)
+            #Lagrangian = S.Half * m * ((base_origin.vel(frame).magnitude())**2)
             
         else:
             Lagrangian = S.Half * m * diff(pos1,ivar)**2
