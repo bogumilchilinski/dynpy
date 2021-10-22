@@ -542,8 +542,8 @@ class DDoFSimplifyVehicleSuspension(ComposedSystem):
         -and then we determine the instance of the system using class DDoFSymplifyVehicleSuspension()
     """
 
-    scheme_name = 'car.png'
-    real_name = 'car_real.jpg'
+    scheme_name = 'vehicle_suspension.PNG'
+    real_name = 'vehicle_suspension_real.PNG'
 
     def __init__(self,
                  m=Symbol('m', positive=True),
@@ -575,7 +575,7 @@ class DDoFSimplifyVehicleSuspension(ComposedSystem):
                                 qs=qs)
         self.spring_1 = Spring(k_1, pos1=z + phi * l_l, qs=qs)  # left spring
         self.spring_2 = Spring(k_2, pos1=z - phi * l_r, qs=qs)  # right spring
-        self.force = Force(F_engine, pos1=z - l_r * phi, qs=qs)
+        self.force = Force(F_engine, pos1=z - phi * l_r, qs=qs)
         system = self.body + self.spring_1 + self.spring_2 + self.force
 
         super().__init__(system,**kwargs)
@@ -607,7 +607,7 @@ class DDoFSimplifyVehicleSuspension(ComposedSystem):
             self.l_rod: [S.Half * l0, 2 * l0, 1 * l0, 4 * l0, 6 * l0],
             self.F_engine: [e*m_e*nu**2*cos(nu*t)],
             m_e: [S.Half**2 * m0, S.Half**3 * m0, S.Half**4 * m0, S.Half**5 * m0, S.Half**5 * m0],
-            e: [S.Half**2 * l0, S.Half**3 * l0, S.Half**4 * l0, S.Half**5 * l0, S.Half**6 * l0],
+            e: [S.Half**2 * l0, S.Half**3 * l0, S.Half**4 * l0, S.Half**5 * l0, S.Half**5 * l0],
         }
 
         return default_data_dict
@@ -2289,7 +2289,7 @@ class MDoFElasticPendulum(ComposedSystem):
         -determine the instance of the pendulum by using class SDoFCouplePendulum()
     """
 
-    scheme_name = 'damped_elastic_pendulum.PNG'
+    scheme_name = 'elastic_pendulum.PNG'
     real_name = 'elastic_pendulum_real.PNG'
 
     def __init__(self,
@@ -2325,11 +2325,9 @@ class MDoFElasticPendulum(ComposedSystem):
 #         print(self.payload, 'try', type(self.payload))
 
         self.spring = Spring(k, z, qs=[phi, z])
-        self.material_point_1 = MaterialPoint(m,
-                                              #sqrt(diff(z, ivar)**2 + (diff(phi, ivar) * (l + z))**2),
-                                              self.payload,
+        self.material_point_1 = HarmonicOscillator(
+                                              S.Half*m * (diff(z, ivar)**2 + (diff(phi, ivar) * (l + z))**2),
                                               qs=[phi, z],
-                                              frame=self.frame
                                              )
         # self.material_point_2 = MaterialPoint(m, y, qs=[phi, z])
         self.gravity = GravitationalForce(m, g, pos1=-y, qs=[phi, z])
@@ -2357,6 +2355,13 @@ class MDoFElasticPendulum(ComposedSystem):
             self.k: [S.Half * k0, 1 * k0, 2 * k0, S.Half * k0, 2 * k0]
         }
         return default_data_dict
+    
+    def linearized(self, x0=None, op_point=True, hint=None, label=None):
+
+        if hint is None:
+            hint=[self.phi]
+        
+        return super().linearized(x0=x0, op_point=True, hint=hint, label=label)
 
 class MDoFDampedElasticPendulum(ComposedSystem):
     """
