@@ -650,14 +650,14 @@ class BasicFormattingTools(DataMethods):
         container.append(fig)
         return self.plot()
 
-    def reported(self,container=None):
+    def reported(self,container=None,index=True):
 
         if container is None:
             container = self.__class__._container
         
         
         tab=DataTable(self)
-        tab.add_table(index=True)
+        tab.add_table(index=index)
         
         container.append(tab)
 
@@ -787,13 +787,23 @@ class ComputationalErrorFrame(AdaptableDataFrame):
 
     
     @property
-    def _common_constructor_series(self):
+    def _constructor(self):
+        return ComputationalErrorFrame
+
+    @property
+    def _constructor_sliced(self):
         return ComputationalErrorSeries
     
 
 class ComputationalErrorSeries(AdaptableSeries):
+    
     @property
-    def _common_constructor_series(self):
+    def _constructor(self):
+        return ComputationalErrorSeries
+
+
+    @property
+    def _constructor_expanddim(self):        
         return ComputationalErrorFrame
 
     
