@@ -6,7 +6,7 @@ from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
 
-from .elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force
+from .elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame,base_origin
 from ..continuous import ContinuousSystem, PlaneStressProblem
 
 import base64
@@ -542,8 +542,8 @@ class DDoFSimplifyVehicleSuspension(ComposedSystem):
         -and then we determine the instance of the system using class DDoFSymplifyVehicleSuspension()
     """
 
-    scheme_name = 'car.png'
-    real_name = 'car_real.jpg'
+    scheme_name = 'vehicle_suspension.PNG'
+    real_name = 'vehicle_suspension_real.PNG'
 
     def __init__(self,
                  m=Symbol('m', positive=True),
@@ -555,7 +555,7 @@ class DDoFSimplifyVehicleSuspension(ComposedSystem):
                  k_1=Symbol('k_1', positive=True),
                  F_engine=Symbol('F_{engine}', positive=True),
                  ivar=Symbol('t', positive=True),
-                 qs=dynamicsymbols('z, phi'),
+                 qs=dynamicsymbols('z, \\varphi'),
                  **kwargs):
 
         z, phi = qs
@@ -575,7 +575,7 @@ class DDoFSimplifyVehicleSuspension(ComposedSystem):
                                 qs=qs)
         self.spring_1 = Spring(k_1, pos1=z + phi * l_l, qs=qs)  # left spring
         self.spring_2 = Spring(k_2, pos1=z - phi * l_r, qs=qs)  # right spring
-        self.force = Force(F_engine, pos1=z - l_r * phi, qs=qs)
+        self.force = Force(F_engine, pos1=z - phi * l_r, qs=qs)
         system = self.body + self.spring_1 + self.spring_2 + self.force
 
         super().__init__(system,**kwargs)
@@ -592,6 +592,25 @@ class DDoFSimplifyVehicleSuspension(ComposedSystem):
             self.F_engine: r'Force',
         }
         return self.sym_desc_dict
+    
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+        e,m_e,nu,t = symbols('e m_e \\nu t',positive=True)
+
+        default_data_dict = {
+            self.m: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
+            self.k_1: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, 3*S.Half * k0],
+            self.k_2: [S.Half * k0, S.Half**2 * k0, 1* k0, 2 * k0, 3 * k0],
+            self.l_l: [1 * l0, 2 * l0, S.Half * l0, 3 * l0, 4 * l0],
+            self.l_r: [3*S.Half * l0, 2 * l0, 1 * l0, 3 * l0, 5 * l0],
+            self.l_rod: [S.Half * l0, 2 * l0, 1 * l0, 4 * l0, 6 * l0],
+            self.F_engine: [e*m_e*nu**2*cos(nu*t)],
+            m_e: [S.Half**2 * m0, S.Half**3 * m0, S.Half**4 * m0, S.Half**5 * m0, S.Half**5 * m0],
+            e: [S.Half**2 * l0, S.Half**3 * l0, S.Half**4 * l0, S.Half**5 * l0, S.Half**5 * l0],
+        }
+
+        return default_data_dict
 
 
 class DDoFVehicleSuspension(ComposedSystem):
@@ -1482,7 +1501,122 @@ class DDoFCoupledPendulum(ComposedSystem):
         }
         return self.sym_desc_dict
 
+    def get_default_data(self):
 
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#             self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#             self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+
+            self.k: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#             self.k_2: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#             self.k_3: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#             self.k_4: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            
+            self.l: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+
+#             self.phi_1: [self.phi_l, 0],
+#             self.phi_2: [self.phi_l, self.phi_r, 0],
+#             self.phi_3: [self.phi_r, 0],
+        }
+
+        return default_data_dict
+    
+class DDoFLinearizedCoupledPendulum(ComposedSystem):
+    """
+    Model of a DDoF Linearized Coupled Pendulum.
+
+        Arguments:
+        =========
+            m = Mass
+                -Mass of system on spring
+
+            g = gravitional field
+                -value of gravitional field acceleration
+
+            l = lenght
+                -Dimension of pendulum strong
+
+            k = spring coefficient
+                -value of spring coefficient
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+        Example
+        =======
+        A mass oscillating up and down while being held up by a spring with a spring constant kinematicly
+
+        >>> t = symbols('t')
+        >>> m, g, l, k = symbols('m, g, l, k')
+        >>> qs = dynamicsymbols('varphi_1, varphi_2') # Generalized Coordinates
+        >>> DDoFCouplePendulum()
+
+        -We define the symbols and dynamicsymbols
+        -determine the instance of the pendulum by using class SDoFCouplePendulum()
+    """
+    scheme_name = 'mdof_dpendulum.png'
+    real_name = 'lifting_tandem.png'
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 g=Symbol('g', positive=True),
+                 l=Symbol('l', positive=True),
+                 k=Symbol('k', positive=True),
+                 qs=dynamicsymbols('\\varphi_1, \\varphi_2'),
+                 **kwargs):
+
+        phi1, phi2 = qs
+
+        self.m = m
+        self.g = g
+        self.l = l
+        self.k = k
+
+        self.spring = Spring(k, pos1=(phi1 * (l/2)), pos2=(phi2 * (l/2)), qs=[qs])
+        self.pendulum_1 = Pendulum(m, g, l, angle=phi1, qs=[qs]).linearized()
+        self.pendulum_2 = Pendulum(m, g, l, angle=phi2, qs=[qs]).linearized()
+
+        system = self.pendulum_1 + self.pendulum_2 + self.spring
+        super().__init__(system,**kwargs)
+        
+        
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass of pendulum',
+            self.g: r'Gravity constant',
+            self.l: r'Pendulum length',
+            self.k: r'Stifness coefficient',
+        }
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#             self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#             self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+
+            self.k: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#             self.k_2: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#             self.k_3: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#             self.k_4: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            
+            self.l: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+
+#             self.phi_1: [self.phi_l, 0],
+#             self.phi_2: [self.phi_l, self.phi_r, 0],
+#             self.phi_3: [self.phi_r, 0],
+        }
+
+        return default_data_dict
 # class SDoFEngine(ComposedSystem):
 #     scheme_name = 'engine.png'
 #     real_name = 'engine_real.PNG'
@@ -2155,7 +2289,7 @@ class MDoFElasticPendulum(ComposedSystem):
         -determine the instance of the pendulum by using class SDoFCouplePendulum()
     """
 
-    scheme_name = 'damped_elastic_pendulum.PNG'
+    scheme_name = 'elastic_pendulum.PNG'
     real_name = 'elastic_pendulum_real.PNG'
 
     def __init__(self,
@@ -2169,7 +2303,6 @@ class MDoFElasticPendulum(ComposedSystem):
                  **kwargs):
 
         self.k = k
-
         self.l = l
         self.m = m
         self.g = g
@@ -2179,25 +2312,24 @@ class MDoFElasticPendulum(ComposedSystem):
         x = (l + z) * sin(phi)
         y = (l + z) * cos(phi)
 
-        self.frame = ReferenceFrame('N')
+        self.frame = base_frame
 
         self.payload = Point('payload')
-        # self.payload.set_vel(
-        #     frame, (sqrt((diff(x, ivar)**2 + diff(y, ivar)**2).simplify()))*frame.x)
+#         self.payload.set_vel(
+#             self.frame, (sqrt((diff(x, ivar)**2 + diff(y, ivar)**2).simplify()))*self.frame.x)
         self.payload.set_vel(
             self.frame,
             sqrt(diff(z, ivar)**2 + (diff(phi, ivar) * (l + z))**2) *
             self.frame.x)
 
-        #print(payload, 'try', type(payload))
+#         print(self.payload, 'try', type(self.payload))
 
         self.spring = Spring(k, z, qs=[phi, z])
-        self.material_point_1 = MaterialPoint(m,
-                                              self.payload,
+        self.material_point_1 = HarmonicOscillator(
+                                              S.Half*m * (diff(z, ivar)**2 + (diff(phi, ivar) * (l + z))**2),
                                               qs=[phi, z],
-                                              frame=self.frame)
+                                             )
         # self.material_point_2 = MaterialPoint(m, y, qs=[phi, z])
-        #self.M_engine = Force(F, theta, qs=[phi, z])
         self.gravity = GravitationalForce(m, g, pos1=-y, qs=[phi, z])
         system = (self.spring + self.gravity + self.material_point_1
                   )  # + self.material_point_2
@@ -2207,12 +2339,29 @@ class MDoFElasticPendulum(ComposedSystem):
     def symbols_description(self):
         self.sym_desc_dict = {
             self.k: r'Spring stiffness',
-            self.l: r'Winch length',
+            self.l: r'Pendulum length',
             self.m: r'Mass',
             self.g: 'Gravity constant',
         }
         return self.sym_desc_dict
 
+    def get_default_data(self):
+
+        m0, l0, k0 = symbols('m_0 l_0 k_0', positive=True)
+
+        default_data_dict = {
+            self.m: [1 * m0, S.Half**2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.l: [1 * l0, S.Half * l0, 2 * l0, 1 * l0, 2 * l0],
+            self.k: [S.Half * k0, 1 * k0, 2 * k0, S.Half * k0, 2 * k0]
+        }
+        return default_data_dict
+    
+    def linearized(self, x0=None, op_point=True, hint=None, label=None):
+
+        if hint is None:
+            hint=[self.phi]
+        
+        return super().linearized(x0=x0, op_point=True, hint=hint, label=label)
 
 class MDoFDampedElasticPendulum(ComposedSystem):
     """
@@ -2443,6 +2592,88 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
 #             L_shaft, qs=[xb, xe], forcelist=[], frame=N)
 
 #         super().__init__(shaft_base)
+
+
+class DDoFTwoDisksWithThreeSprings(ComposedSystem):
+    scheme_name = 'ddof_disks_3_springs_scheme.png'
+    real_name = 'nonlin_trolley_real.PNG'
+
+    def __init__(self,
+                 d=Symbol('d', positive=True),
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 kl=Symbol('k_l', positive=True),
+                 kc=Symbol('k_c', positive=True),
+                 kr=Symbol('k_r', positive=True),
+                 R=Symbol('R', positive=True),
+                 l_0=Symbol('l_0', positive=True),
+                 ivar=Symbol('t'),
+                 xl=dynamicsymbols('x_l'),
+                 xr=dynamicsymbols('x_r'),
+                 x=dynamicsymbols('x'),
+                 qs=dynamicsymbols('x_l, x_r'),
+                 **kwargs):
+
+        self.m1 = m1
+        self.m2 = m2
+        self.kl = kl
+        self.kc = kc
+        self.kr = kr
+        self.R = R
+        self.l_0 = l_0
+        self.d = d
+        self.xl = xl
+        self.xr = xr
+        self.x = x
+
+        self.Disk1 = MaterialPoint(m1, xl, qs=[xl]) + MaterialPoint(m1/2*R**2, xl/R, qs=[xl]) + Spring(kl, xl, qs=[xl])
+        self.Disk2 = MaterialPoint(m2, xr, qs=[xr]) + MaterialPoint(m2/2*R**2, xr/R, qs=[xr]) + Spring(kr,xr, qs=[xr])
+        self.Spring = Spring(kc, xl, xr, qs=[xl, xr])
+
+        system = self.Disk1 + self.Spring + self.Disk2
+        super().__init__(system(qs),**kwargs)
+
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+
+#             self.d: [1 * l0, 2 * l0, S.Half * l0, 4 * S.Half * l0,  S.Half**2 * l0],
+
+            self.kl: [S.Half * k0, S.Half**2 * k0, 1 * k0, 4 * S.Half * k0, 2 * k0],
+            self.kr: [S.Half * k0, S.Half**2 * k0, 1 * k0, 4 * S.Half * k0, 2 * k0],
+            self.kc: [S.Half * k0, S.Half**2 * k0, 1 * k0, 4 * S.Half * k0, 2 * k0],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+
+
+        return parameters_dict
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m1: r'Disk Mass',
+            self.m2: r'Disk Mass',
+            self.kl: 'Left Spring Stiffness',
+            self.kr: 'Right Spring Stiffness',
+            self.kc: 'Central Spring Stiffness',
+            self.l: r'Length',
+            self.l_0: r'initial Spring Length',
+        }
+        return self.sym_desc_dict
 
 
 class DDoFTwoNonLinearTrolleys(ComposedSystem):

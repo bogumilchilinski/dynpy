@@ -421,8 +421,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                           nonhol_coneqs=nonhol_coneqs_subs,
                           label=f'{self._label} for {args} and {kwargs}'
                           )
-
-        return type(self)(0,system=new_system)
+        new_sys = type(self)(0,system=new_system)
+        new_sys._given_data=args[0]
+        
+        return new_sys
 
         # return type(self)(Lagrangian=lagrangian_subs,
         #                   qs=self.q,
@@ -506,9 +508,14 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self.q_0 = static_disp_dict
         
         eq_eqns=self.governing_equations.subs(static_disp_dict)
+        
+        
+        
         trig_comps=eq_eqns.atoms(sin,cos)
+        #trig_comp={}
+        
 
-        return self.governing_equations.subs(static_disp_dict).subs({comp:0 for comp  in trig_comps})
+        return self.governing_equations.subs(static_disp_dict).subs({comp:0 for comp  in trig_comps if comp.has(self.ivar)})
 
     def external_forces(self):
         """
@@ -572,10 +579,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         eqns_to_solve = self.equilibrium_equation(
             static_disp_dict=static_disp_dict).doit()
-        #         display(args,kwargs)
+        #display(eqns_to_solve )
         roots = solve(list(eqns_to_solve) + list(flatten([hint])),
                       list(self.q_0.values()),
                       dict=dict)
+        
+        #display(roots)
 
         if subs:
             roots = [{
@@ -660,8 +669,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         if not x0:
             x0 = {coord: 0 for coord in self.Y}
 
+        #display(self._op_points(hint=hint, subs=True))
         if op_point:
             x0.update(self._op_points(hint=hint, subs=True)[0])
+            #print('current op')
+            #display(self._op_points(hint=hint, subs=True))
 
         lagrangian_approx = multivariable_taylor_series(self.lagrangian(),
                                                         self.Y,
