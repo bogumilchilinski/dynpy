@@ -4608,13 +4608,15 @@ class CrankSystem(ComposedSystem):
     def __init__(self,
                  I=Symbol('I', positive=True),
                  r=Symbol('r', positive=True),
-                 l=Symbol('l', positive=True),
+                 h=Symbol('h', positive=True),
+                 a=Symbol('a', positive=True),
+                 b=Symbol('b', positive=True),
                  phi=dynamicsymbols('phi'),
                  beta=dynamicsymbols('beta'),
                  **kwargs):
 
         self.I = I
-        self.l=l
+        self.h=h
         self.r=r
         self.phi = phi
         self.beta = beta
@@ -4628,7 +4630,35 @@ class CrankSystem(ComposedSystem):
     def _dbeta(self):
         beta=atan(self.r/self.l*self.phi)
         return beta.diff(self.ivar).subs(self._given_data)
-        
+    @property
+    def _velocity_b2(self):
+        return (phi.diff(self.ivar)*r).subs(self._given_data)
+    @property
+    def _velocity_b2b3(self):
+        return (sqrt(h**2 + 2*h*r*cos(phi) + r**2)).subs(self._given_data)
+    @property
+    def _velocity_b3(self):
+        gamma=arcsin(self._velocity_b2b3/self._velocity_b2)
+        return (self._velocity_b2*cos(gamma)).subs(self._given_data)
+    @property
+    def _velocity_d(self):
+        return (b*sqrt((h**2 - h**2*a**2/b**2 + 2*h*r*cos(phi) - 2*h*r*a**2*cos(phi)/b**2 + r**2 - r**2*a**2*cos(phi)**2/b**2)/(h**2 + 2*h*r*cos(phi) + r**2)) + r*b*sin(phi)/sqrt(h**2 + 2*h*r*cos(phi) + r**2)).subs(self._given_data)
+    @property
+    def _velocity_c(self):
+        omega3=self._velocity_b3/sqrt(r**2 + h**2 - 2*r*h*cos(pi-phi))
+        return (omega3*a).subs(self._given_data)
+    @property
+    def _acceleration_b2(self):
+        return (phi.diff(self.ivar)**2*r).subs(self._given_data)
+    @property
+    def _acceleration_b3n(self):
+        return (self._velocity_b3**2/sqrt(r**2 + h**2 - 2*r*h*cos(pi-phi))).subs(self._given_data)
+    @property
+    def _acceleration_cn(self):
+        return (self._velocity_b3**2*(a/(sqrt(r**2 + h**2 - 2*r*h*cos(pi-phi)))**2).subs(self._given_data)
+    @property
+    def _acceleration_d(self):
+        return (self._velocity_b3**2*(a/(sqrt(r**2 + h**2 - 2*r*h*cos(pi-phi)))**2).subs(self._given_data)
     @property
     def linkage_ang_velocity(self):
         return self._dbeta
