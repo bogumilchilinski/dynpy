@@ -4598,3 +4598,62 @@ class MDoFTripleShaft(ComposedSystem):
 
         return parameters_dict
 
+
+
+class CrankSystem(ComposedSystem):
+
+    scheme_name = 'bridge_tmd.png'
+    real_name = 'beam_bridge_real.PNG'
+
+    def __init__(self,
+                 I=Symbol('I', positive=True),
+                 r=Symbol('r', positive=True),
+                 l=Symbol('l', positive=True),
+                 phi=dynamicsymbols('phi'),
+                 beta=dynamicsymbols('beta'),
+                 **kwargs):
+
+        self.I = I
+        self.l=l
+        self.r=r
+        self.phi = phi
+        self.beta = beta
+
+        self.crank = Disk(I, phi, qs=[phi])
+        composed_system = (self.crank)
+
+        super().__init__(composed_system,**kwargs)
+
+    @property
+    def _dbeta(self):
+        beta=atan(self.r/self.l*self.phi)
+        return beta.diff(self.ivar).subs(self._given_data)
+        
+    @property
+    def linkage_ang_velocity(self):
+        return self._dbeta
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.I: r'crank moment of inertia',
+            # self.k_beam: r'Beam stiffness',
+            # self.g: r'gravitational field acceleration'
+        }
+
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+        E, I, l, m0, k0 = symbols('E I l_beam m_0 k_0', positive=True)
+
+        default_data_dict = {
+            self.I: [20 * I, 30 * I,],
+            # self.k_beam: [
+            #     2 * 48 * E * I / l**3, 3 * 48 * E * I / l**3,
+            #     4 * 48 * E * I / l**3, 5 * 48 * E * I / l**3,
+            #     6 * 48 * E * I / l**3
+            # ],
+            # self.m_TMD: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
+            # self.k_TMD: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
+        }
+
+        return default_data_dict
