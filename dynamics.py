@@ -256,6 +256,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             label = self.__class__.__name__ + ' with ' + str(len(self.q)) + 'DOF'
 
         self._label = label
+        self._given_data={}
 
         #LM=me.LagrangesMethod(Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs)
     
@@ -322,8 +323,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         if not self_dict['frame']:
             self_dict['frame'] = other_dict['frame']
+            
+        systems_sum=LagrangesDynamicSystem(**self_dict)
+        systems_sum._given_data={**other._given_data,**self._given_data}
 
-        return LagrangesDynamicSystem(**self_dict)
+        return systems_sum
 
     def shranked(self, *args):
         """
