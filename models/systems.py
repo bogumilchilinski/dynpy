@@ -4602,7 +4602,7 @@ class MDoFTripleShaft(ComposedSystem):
 
 class CrankSystem(ComposedSystem):
 
-    scheme_name = 'bridge_tmd.png'
+    scheme_name = 'crank_mechanism.png'
     real_name = 'beam_bridge_real.PNG'
 
     def __init__(self,
@@ -4621,7 +4621,7 @@ class CrankSystem(ComposedSystem):
         self.phi = phi
         self.beta = beta
 
-        self.crank = Disk(I, phi, qs=[phi])
+        self.crank = MaterialPoint(I, phi, qs=[phi])
         composed_system = (self.crank)
 
         super().__init__(composed_system,**kwargs)
@@ -4632,33 +4632,33 @@ class CrankSystem(ComposedSystem):
         return beta.diff(self.ivar).subs(self._given_data)
     @property
     def _velocity_b2(self):
-        return (phi.diff(self.ivar)*r).subs(self._given_data)
+        return (self.phi.diff(self.ivar)*self.r).subs(self._given_data)
     @property
     def _velocity_b2b3(self):
-        return (sqrt(h**2 + 2*h*r*cos(phi) + r**2)).subs(self._given_data)
+        return (sqrt(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)).subs(self._given_data)
     @property
     def _velocity_b3(self):
         gamma=arcsin(self._velocity_b2b3/self._velocity_b2)
         return (self._velocity_b2*cos(gamma)).subs(self._given_data)
     @property
     def _velocity_d(self):
-        return (b*sqrt((h**2 - h**2*a**2/b**2 + 2*h*r*cos(phi) - 2*h*r*a**2*cos(phi)/b**2 + r**2 - r**2*a**2*cos(phi)**2/b**2)/(h**2 + 2*h*r*cos(phi) + r**2)) + r*b*sin(phi)/sqrt(h**2 + 2*h*r*cos(phi) + r**2)).subs(self._given_data)
+        return (self.b*sqrt((self.h**2 - self.h**2*self.a**2/self.b**2 + 2*self.h*self.r*cos(self.phi) - 2*self.h*self.r*self.a**2*cos(self.phi)/self.b**2 + self.r**2 - self.r**2*self.a**2*cos(self.phi)**2/self.b**2)/(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)) + self.r*self.b*sin(self.phi)/sqrt(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)).subs(self._given_data)
     @property
     def _velocity_c(self):
-        omega3=self._velocity_b3/sqrt(r**2 + h**2 - 2*r*h*cos(pi-phi))
-        return (omega3*a).subs(self._given_data)
+        omega3=self._velocity_b3/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi))
+        return (omega3*self.a).subs(self._given_data)
     @property
     def _acceleration_b2(self):
-        return (phi.diff(self.ivar)**2*r).subs(self._given_data)
+        return (self.phi.diff(self.ivar)**2*self.r).subs(self._given_data)
     @property
     def _acceleration_b3n(self):
-        return (self._velocity_b3**2/sqrt(r**2 + h**2 - 2*r*h*cos(pi-phi))).subs(self._given_data)
+        return (self._velocity_b3**2/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi))).subs(self._given_data)
     @property
     def _acceleration_cn(self):
-        return (self._velocity_b3**2*(a/(sqrt(r**2 + h**2 - 2*r*h*cos(pi-phi)))**2).subs(self._given_data)
+        return (self._velocity_b3**2*(self.a/(sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi)))**2)).subs(self._given_data)
     @property
     def _acceleration_d(self):
-        return (self._velocity_b3**2*(a/(sqrt(r**2 + h**2 - 2*r*h*cos(pi-phi)))**2).subs(self._given_data)
+        return (self._velocity_d.diff(self.ivar)).subs(self._given_data)
     @property
     def linkage_ang_velocity(self):
         return self._dbeta
@@ -4673,17 +4673,13 @@ class CrankSystem(ComposedSystem):
         return self.sym_desc_dict
 
     def get_default_data(self):
-        E, I, l, m0, k0 = symbols('E I l_beam m_0 k_0', positive=True)
+        E, I, l, m0, k0 = symbols('E I0 l_beam m_0 k_0', positive=True)
 
         default_data_dict = {
-            self.I: [20 * I, 30 * I,],
-            # self.k_beam: [
-            #     2 * 48 * E * I / l**3, 3 * 48 * E * I / l**3,
-            #     4 * 48 * E * I / l**3, 5 * 48 * E * I / l**3,
-            #     6 * 48 * E * I / l**3
-            # ],
-            # self.m_TMD: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
-            # self.k_TMD: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
+            self.I: [20 * I, 30 * I,60 * I,50 * I,40 * I,],
+            self.h:[1,2,3],
+            self.r:[0.1,0.2,0.3],
+            self.phi : [10,20,30],
         }
 
         return default_data_dict
