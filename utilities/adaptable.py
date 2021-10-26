@@ -765,6 +765,7 @@ class BasicFormattingTools(DataMethods):
         container.append(fig)
         return plotted_frame.plot(ylabel=ylabel)
 
+
     def reported(self,
                  container=None,
                  index=True,
@@ -785,6 +786,7 @@ class BasicFormattingTools(DataMethods):
 
         if label is not None:
             tab.append(Label(label))
+
 
         container.append(tab)
 
@@ -916,13 +918,23 @@ class ComputationalErrorFrame(AdaptableDataFrame):
         (obj.columns[0])]).div(obj[obj.columns[0]]).rename('Difference'))
 
     @property
-    def _common_constructor_series(self):
+    def _constructor(self):
+        return ComputationalErrorFrame
+
+    @property
+    def _constructor_sliced(self):
         return ComputationalErrorSeries
 
 
 class ComputationalErrorSeries(AdaptableSeries):
+    
     @property
-    def _common_constructor_series(self):
+    def _constructor(self):
+        return ComputationalErrorSeries
+
+
+    @property
+    def _constructor_expanddim(self):        
         return ComputationalErrorFrame
 
 
