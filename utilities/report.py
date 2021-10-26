@@ -1345,6 +1345,9 @@ class SimulationalBlock(ReportModule):
         else:
             case_data = analysis._current_data
 
+        print('$'*100)
+        display(case_data)
+            
         if self._dynamic_system:
             dynamic_system = self._dynamic_system
         else:
@@ -3881,6 +3884,7 @@ class DataTable(Table):
         self.position = position
 
     def add_table(self, numerical_data=None, index=False, longtable=False):
+        self.append(NoEscape('\\centering'))
         self.append(NoEscape('%%%%%%%%%%%%%% Table %%%%%%%%%%%%%%%'))
         #         if numerical_data!=None:
         #             self._numerical_data=numerical_data
