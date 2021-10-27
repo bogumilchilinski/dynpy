@@ -1,4 +1,4 @@
-from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Function, lambdify, factorial,solve, Dict
+from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Function, lambdify, factorial,solve, Dict, Number, N
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 import sympy as sym
@@ -462,6 +462,12 @@ class WeakNonlinearProblemSolution(LinearODESolution):
 
     
 class MultiTimeScaleMethod(LinearODESolution):
+    
+    _stored_solution=None
+    _saved_solution={}
+    
+    _saved_numerized={}
+    
     def __init__(self,
                  odes_system,
                  ivar=Symbol('t'),
@@ -553,27 +559,33 @@ class MultiTimeScaleMethod(LinearODESolution):
         self._t_list=[t_i(self.ivar) for t_i in symbols(f't_0:{self._order+1}',cls=Function, real=True)]
         return self._t_list
 
+    def _numbers_dict(self,data):
+        
+        return {key:float(N(value))  for key,value in data.items() if isinstance(N(value),Number)}
+    
 
+    def _notnumbers_dict(self,data):
+        
+        return {key:value  for key,value in data.items() if not isinstance(N(value),Number)}
+    
+    
     def __call__(self, ivar, order=1, params_values=None):
 
         if params_values:
             self.params_values = params_values
+            
 
-#         print('call - parameters given')
-#         display(self.params_values)
-#         display('current ics', self.ics)
-#         display((self.extra_params))
-        
-        
+
         
 
-        solution = (self.nth_order_solution(order).rhs.subs(self.extra_params).subs(self.params_values))
+        solution = self.nth_order_solution(order).rhs
+        
+                    
         
         solution = solution.applyfunc(lambda x: x.subs(self.extra_params).subs(self.params_values))
+                    
 
-#         print('solution after extra params')
-#         display(-(self.nth_order_solution(order).rhs.subs(self.extra_params)))
-            
+
         if isinstance(ivar, Symbol):
 
             ics_dict=self._ic_from_sol(order=order,formula=True)
@@ -581,25 +593,38 @@ class MultiTimeScaleMethod(LinearODESolution):
 
             return solution.subs(ics_dict).subs(self.extra_params).subs(self.ivar, ivar)
         else:
-            #display(solution)
-            #display(solution[1])
+    
 
-#             print('linear values check')
-#             display(Dict(self._ic_from_sol(order=order,formula=True)).subs(self.params_values).subs(self.params_values)  )
-        
-#             print('nonlinear values check')
             ics_dict=self._ic_from_sol(order=order,formula=False)
-#             display(Dict(ics_dict).subs(self.params_values))
 
             ics_symbols_dict={sym:val for sym, val in zip(self.ics_symbols,self.ics)  }
-#             display(ics_symbols_dict)
 
-            nth_order_solution_fun = lambdify(self.ivar, (solution.subs(ics_dict).subs(self.extra_params).subs(ics_symbols_dict)).subs(self.params_values).n(), 'numpy')
-            with timer() as t:    
+
+            ######################### old #############
+
+            #nth_order_solution_fun = lambdify(self.ivar, (solution.subs(ics_dict).subs(self.extra_params).subs(ics_symbols_dict)).subs(self.params_values).n(), 'numpy')
+            ######################### old #############
+
+            notnumbers_dict={**self._notnumbers_dict(self.extra_params),**self._notnumbers_dict(self.params_values) }
+            numbers_dict={**self._numbers_dict(self.extra_params),**self._numbers_dict(self.params_values) }
+
+            nth_order_solution_expr = solution.subs(ics_dict).subs(notnumbers_dict)
+
+
+                
+            if  (tuple(nth_order_solution_expr)) not in self.__class__._saved_numerized:
+                self.__class__._saved_numerized[tuple(nth_order_solution_expr)]= lambdify([self.ivar]+list(numbers_dict.keys())+list(ics_symbols_dict.keys()), nth_order_solution_expr.n()  )
+
+            with timer() as t:
+                    
+                nth_order_solution_fun = self.__class__._saved_numerized[tuple(nth_order_solution_expr)]
+    
+            
                 #return nth_order_solution_fun(ivar)
                 solution  = TimeDataFrame(data={
                     dvar: data[0]
-                    for dvar, data in zip(self.dvars, nth_order_solution_fun(ivar))
+                    for dvar, data in zip(self.dvars, nth_order_solution_fun(ivar,**{str(key):val for key,val in numbers_dict.items()},**{str(key):val for key,val in ics_symbols_dict.items()}))
+                    #for dvar, data in zip(self.dvars, nth_order_solution_fun(ivar))
                 },
                                      index=ivar)
 
@@ -614,7 +639,8 @@ class MultiTimeScaleMethod(LinearODESolution):
                 
                 print('A_time'*20,t.elapse)
             
-            solution=solution.apply(np.real)
+                solution=solution.apply(np.real)
+                
             solution._set_comp_time(t.elapse)
             
             print('B_time'*20,solution._get_comp_time())
@@ -961,12 +987,15 @@ class MultiTimeScaleMethod(LinearODESolution):
     
     def nth_order_solution(self, order=1):
         
-        if not order in self._saved_solution:
+        if not (tuple(self._eoms),order) in self.__class__._saved_solution:
             
-            self._saved_solution[order]  = self._nth_order_solution(order=order)
+
+            self.__class__._saved_solution[(tuple(self._eoms),order)]  = self._nth_order_solution(order=order)
+
+
 
             
-        return self._saved_solution[order]
+        return self.__class__._saved_solution[(tuple(self._eoms),order)]
             
     def zeroth_approximation(self, dict=False, equation=False):
 
@@ -1112,7 +1141,7 @@ class MultiTimeScaleMethod(LinearODESolution):
             
             
                 
-            return self.__class__(
+            new_system =  self.__class__(
                 odes_system=self.governing_equations,
                  ivar=self.ivar,
                  dvars= self.dvars,
@@ -1126,6 +1155,12 @@ class MultiTimeScaleMethod(LinearODESolution):
                  ic_point=ics_list,
                  equation_type=None,
                  label=self._label)
+            
+            new_system._stored_solution = copy.copy(self._stored_solution)
+            new_system._saved_solution = copy.copy(self._saved_solution)
+
+            
+            return new_system
     
     
     
