@@ -1,4 +1,4 @@
-from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
+from sympy import (Symbol, symbols, Matrix, sin, cos, asin, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, pi, latex, dsolve,
                    solve, fraction, factorial,Subs, Number)
 
@@ -4613,6 +4613,7 @@ class CrankSystem(ComposedSystem):
                  b=Symbol('b', positive=True),
                  phi=dynamicsymbols('phi'),
                  beta=dynamicsymbols('beta'),
+#                  alpga=dynamicsymbols('alpha'),
                  **kwargs):
 
         self.I = I
@@ -4620,6 +4621,9 @@ class CrankSystem(ComposedSystem):
         self.r=r
         self.phi = phi
         self.beta = beta
+#         self.alpha = alp
+        self.a = a
+        self.b = b
 
         self.crank = MaterialPoint(I, phi, qs=[phi])
         composed_system = (self.crank)
@@ -4638,7 +4642,7 @@ class CrankSystem(ComposedSystem):
         return (sqrt(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)).subs(self._given_data)
     @property
     def _velocity_b3(self):
-        gamma=arcsin(self._velocity_b2b3/self._velocity_b2)
+        gamma=asin(self._velocity_b2b3/self._velocity_b2)
         return (self._velocity_b2*cos(gamma)).subs(self._given_data)
     @property
     def _velocity_d(self):
@@ -4658,7 +4662,17 @@ class CrankSystem(ComposedSystem):
         return (self._velocity_b3**2*(self.a/(sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi)))**2)).subs(self._given_data)
     @property
     def _acceleration_d(self):
-        return (self._velocity_d.diff(self.ivar)).subs(self._given_data)
+        d_vel=self.b*sqrt((self.h**2 - self.h**2*self.a**2/self.b**2 + 2*self.h*self.r*cos(self.phi) - 2*self.h*self.r*self.a**2*cos(self.phi)/self.b**2 + self.r**2 - self.r**2*self.a**2*cos(self.phi)**2/self.b**2)/(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)) + self.r*self.b*sin(self.phi)/sqrt(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)
+        d_acc=d_vel.diff(self.ivar)
+        return d_acc.subs(self._given_data)
+    @property
+    def _displacement_d(self):
+
+        return (-self.b*sqrt((self.h**2 - self.h**2*self.a**2/self.b**2 + 2*self.h*self.r*cos(self.phi) - 2*self.h*self.r*self.a**2*cos(self.phi)/self.b**2 + self.r**2 - self.r**2*self.a**2*cos(self.phi)**2/self.b**2)/(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)) - self.r*self.a*sin(self.phi)/sqrt(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)).subs(self._given_data)
+    
+    @property
+    def _omega_3(self):
+        return (self._velocity_b3/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi))).subs(self._given_data)
     @property
     def linkage_ang_velocity(self):
         return self._dbeta
@@ -4674,11 +4688,13 @@ class CrankSystem(ComposedSystem):
 
     def get_default_data(self):
         E, I, l, m0, k0 = symbols('E I0 l_beam m_0 k_0', positive=True)
-
+        
         default_data_dict = {
             self.I: [20 * I, 30 * I,60 * I,50 * I,40 * I,],
             self.h:[1,2,3],
             self.r:[0.1,0.2,0.3],
+            self.a:[10],
+            self.b:[20],
             self.phi : [10,20,30],
         }
 
