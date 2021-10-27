@@ -763,7 +763,7 @@ class BasicFormattingTools(DataMethods):
             fig.append(Label(label))
 
         container.append(fig)
-        return plotted_frame.plot(ylabel=ylabel)
+        return plotted_frame.plot(ylabel=ylabel,subplots=subplots)
 
 
     def reported(self,
