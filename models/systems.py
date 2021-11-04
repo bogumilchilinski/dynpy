@@ -4673,21 +4673,21 @@ class CrankSystem(ComposedSystem):
         return (self.phi.diff(self.ivar)*self.r)
     @property
     def _velocity_b2b3(self):
-        return (sqrt(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2))
+        return (sqrt(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)).diff(self.ivar)
     @property
     def _velocity_b3(self):
         gamma=asin(self._velocity_b2b3/self._velocity_b2)
-        return (self._velocity_b2*cos(gamma))
+        return self._velocity_b2*cos(gamma)
     @property
     def _velocity_d(self):
         return self._displacement_d.diff(self.ivar)
     @property
     def _velocity_c(self):
         omega3=self._velocity_b3/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi))
-        return (omega3*self.a)
+        return omega3*self.a
     @property
     def _acceleration_b2(self):
-        return (self.phi.diff(self.ivar)**2*self.r)
+        return self.phi.diff(self.ivar)**2*self.r
     @property
     def _acceleration_b3n(self):
         return (self._velocity_b3**2/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi)))
@@ -4696,15 +4696,15 @@ class CrankSystem(ComposedSystem):
         return (self._velocity_b3**2*(self.a/(sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi)))**2))
     @property
     def _acceleration_d(self):
-        return abs(self._velocity_d.diff(self.ivar))
+        return self._velocity_d.diff(self.ivar)
 
     
     @property
     def _omega_3(self):
-        return abs((self._velocity_b3/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi))))
+        return (self._velocity_b3/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi)))
     @property
     def linkage_ang_velocity(self):
-        return abs(self._dbeta)
+        return self._dbeta
 
     def symbols_description(self):
         self.sym_desc_dict = {
