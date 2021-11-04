@@ -4217,7 +4217,7 @@ class MDoFForcedDisksWithSerialSprings(ComposedSystem):
 
     def get_default_data(self):
 
-        m0, k0, l0 = symbols('m k l_0', positive=True)
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
 
         default_data_dict = {
             self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
@@ -4597,7 +4597,35 @@ class MDoFTripleShaft(ComposedSystem):
             
 
         return parameters_dict
+    
+    
 
+class LagrangeIOnMathFunction(ComposedSystem):
+
+    scheme_name = 'mat_point_parabola.PNG'
+    real_name = 'mat_point_parabola.PNG'
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 g=Symbol('g', positive=True),
+                 x=dynamicsymbols('x'),
+                 y=dynamicsymbols('y'),
+                 a=symbols('a',positive=True),
+                 R=symbols('R',positive=True),
+                 ivar=Symbol('t'),
+                 qs=dynamicsymbols('x,y'),
+                 **kwargs):
+
+        self.m = m
+        self.x = x
+        self.y = y
+        self.a = a
+        self.R = R
+        self.g = g
+
+        system = HarmonicOscillator(S.Half*m*x.diff(ivar)**2+S.Half*m*y.diff(ivar)**2-m*g*y,qs=[x,y])
+
+        super().__init__(system(qs),**kwargs)
 
 
 class CrankSystem(ComposedSystem):
@@ -4665,7 +4693,7 @@ class CrankSystem(ComposedSystem):
         return (self._velocity_b3**2/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi)))
     @property
     def _acceleration_cn(self):
-        return (self._velocity_b3**2*(self.a/(sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi)))**2)))
+        return (self._velocity_b3**2*(self.a/(sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi)))**2))
     @property
     def _acceleration_d(self):
         return abs(self._velocity_d.diff(self.ivar))
