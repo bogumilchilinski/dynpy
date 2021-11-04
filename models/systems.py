@@ -4217,7 +4217,7 @@ class MDoFForcedDisksWithSerialSprings(ComposedSystem):
 
     def get_default_data(self):
 
-        m0, k0, l0 = symbols('m k l_0', positive=True)
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
 
         default_data_dict = {
             self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
@@ -4597,13 +4597,41 @@ class MDoFTripleShaft(ComposedSystem):
             
 
         return parameters_dict
+    
+    
 
+class LagrangeIOnMathFunction(ComposedSystem):
+
+    scheme_name = 'mat_point_parabola.PNG'
+    real_name = 'mat_point_parabola.PNG'
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 g=Symbol('g', positive=True),
+                 x=dynamicsymbols('x'),
+                 y=dynamicsymbols('y'),
+                 a=symbols('a',positive=True),
+                 R=symbols('R',positive=True),
+                 ivar=Symbol('t'),
+                 qs=dynamicsymbols('x,y'),
+                 **kwargs):
+
+        self.m = m
+        self.x = x
+        self.y = y
+        self.a = a
+        self.R = R
+        self.g = g
+
+        system = HarmonicOscillator(S.Half*m*x.diff(ivar)**2+S.Half*m*y.diff(ivar)**2-m*g*y,qs=[x,y])
+
+        super().__init__(system(qs),**kwargs)
 
 
 class CrankSystem(ComposedSystem):
 
     scheme_name = 'crank_mechanism.png'
-    real_name = 'beam_bridge_real.PNG'
+    real_name = 'crank_slider_real.jpg'
 
     def __init__(self,
                  I=Symbol('I', positive=True),
@@ -4613,7 +4641,7 @@ class CrankSystem(ComposedSystem):
                  b=Symbol('b', positive=True),
                  phi=dynamicsymbols('phi'),
                  beta=dynamicsymbols('beta'),
-#                  alpga=dynamicsymbols('alpha'),
+#                  alpha=dynamicsymbols('alpha'),
                  **kwargs):
 
         self.I = I
@@ -4632,47 +4660,48 @@ class CrankSystem(ComposedSystem):
 
     @property
     def _dbeta(self):
-        beta=atan(self.r/self.l*self.phi)
-        return beta.diff(self.ivar).subs(self._given_data)
-    @property
-    def _velocity_b2(self):
-        return (self.phi.diff(self.ivar)*self.r).subs(self._given_data)
-    @property
-    def _velocity_b2b3(self):
-        return (sqrt(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)).subs(self._given_data)
-    @property
-    def _velocity_b3(self):
-        gamma=asin(self._velocity_b2b3/self._velocity_b2)
-        return (self._velocity_b2*cos(gamma)).subs(self._given_data)
-    @property
-    def _velocity_d(self):
-        return (self.b*sqrt((self.h**2 - self.h**2*self.a**2/self.b**2 + 2*self.h*self.r*cos(self.phi) - 2*self.h*self.r*self.a**2*cos(self.phi)/self.b**2 + self.r**2 - self.r**2*self.a**2*cos(self.phi)**2/self.b**2)/(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)) + self.r*self.b*sin(self.phi)/sqrt(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)).subs(self._given_data)
-    @property
-    def _velocity_c(self):
-        omega3=self._velocity_b3/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi))
-        return (omega3*self.a).subs(self._given_data)
-    @property
-    def _acceleration_b2(self):
-        return (self.phi.diff(self.ivar)**2*self.r).subs(self._given_data)
-    @property
-    def _acceleration_b3n(self):
-        return (self._velocity_b3**2/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi))).subs(self._given_data)
-    @property
-    def _acceleration_cn(self):
-        return (self._velocity_b3**2*(self.a/(sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi)))**2)).subs(self._given_data)
-    @property
-    def _acceleration_d(self):
-        d_vel=self.b*sqrt((self.h**2 - self.h**2*self.a**2/self.b**2 + 2*self.h*self.r*cos(self.phi) - 2*self.h*self.r*self.a**2*cos(self.phi)/self.b**2 + self.r**2 - self.r**2*self.a**2*cos(self.phi)**2/self.b**2)/(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)) + self.r*self.b*sin(self.phi)/sqrt(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)
-        d_acc=d_vel.diff(self.ivar)
-        return d_acc.subs(self._given_data)
+        beta=atan(self.r/self.l*self.phi) #it's probably wrong - has to be checked
+        return beta.diff(self.ivar)
+    
     @property
     def _displacement_d(self):
 
-        return (-self.b*sqrt((self.h**2 - self.h**2*self.a**2/self.b**2 + 2*self.h*self.r*cos(self.phi) - 2*self.h*self.r*self.a**2*cos(self.phi)/self.b**2 + self.r**2 - self.r**2*self.a**2*cos(self.phi)**2/self.b**2)/(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)) - self.r*self.a*sin(self.phi)/sqrt(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)).subs(self._given_data)
+        return -(-self.b*sqrt((self.h**2 - self.h**2*self.a**2/self.b**2 + 2*self.h*self.r*cos(self.phi) - 2*self.h*self.r*self.a**2*cos(self.phi)/self.b**2 + self.r**2 - self.r**2*self.a**2*cos(self.phi)**2/self.b**2)/(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)) - self.r*self.a*sin(self.phi)/sqrt(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2))
+    
+    @property
+    def _velocity_b2(self):
+        return (self.phi.diff(self.ivar)*self.r)
+    @property
+    def _velocity_b2b3(self):
+        return (sqrt(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)).diff(self.ivar)
+    @property
+    def _velocity_b3(self):
+        gamma=asin(self._velocity_b2b3/self._velocity_b2)
+        return self._velocity_b2*cos(gamma)
+    @property
+    def _velocity_d(self):
+        return self._displacement_d.diff(self.ivar)
+    @property
+    def _velocity_c(self):
+        omega3=self._velocity_b3/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi))
+        return omega3*self.a
+    @property
+    def _acceleration_b2(self):
+        return self.phi.diff(self.ivar)**2*self.r
+    @property
+    def _acceleration_b3n(self):
+        return (self._velocity_b3**2/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi)))
+    @property
+    def _acceleration_cn(self):
+        return (self._velocity_b3**2*(self.a/(sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi)))**2))
+    @property
+    def _acceleration_d(self):
+        return self._velocity_d.diff(self.ivar)
+
     
     @property
     def _omega_3(self):
-        return (self._velocity_b3/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi))).subs(self._given_data)
+        return (self._velocity_b3/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi)))
     @property
     def linkage_ang_velocity(self):
         return self._dbeta
