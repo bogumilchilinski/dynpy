@@ -145,7 +145,10 @@ class DataMethods:
             legend_pos='north east',
             extra_commands=None,
             options=None,
-            smooth=False):
+            smooth=False,
+            picture=True,
+            *arg,
+            **kwargs):
 
         geometry_options = {
             "margin": "0cm",
@@ -183,8 +186,12 @@ class DataMethods:
                                       smooth=smooth)
 
         doc.append(tikz_pic)
-
-        doc.generate_pdf(filename, clean_tex=False)
+        
+        if picture:
+            doc.generate_pdf(filename, clean_tex=False)
+        else:
+            doc.generate_tex(filename)            
+        
         return doc.dumps()
 
     def to_tikz_plot(self,
@@ -199,7 +206,9 @@ class DataMethods:
                      legend_pos='north east',
                      extra_commands=None,
                      options=None,
-                     smooth=False):
+                     smooth=False,
+                     picture=True,
+                     ):
 
         return self.to_standalone_plot(filename,
                                        labels_list,
@@ -212,7 +221,8 @@ class DataMethods:
                                        legend_pos,
                                        extra_commands=extra_commands,
                                        options=options,
-                                       smooth=smooth)
+                                       smooth=smooth,
+                                       picture=picture)
 
     def to_standalone_figure(
             self,
@@ -227,7 +237,9 @@ class DataMethods:
             legend_pos='north east',
             extra_commands=None,
             options=None,
-            smooth=False):
+            smooth=False,
+            picture=True,
+            ):
 
         self.to_standalone_plot(filename,
                                 labels_list,
@@ -240,9 +252,10 @@ class DataMethods:
                                 legend_pos,
                                 extra_commands=extra_commands,
                                 options=options,
-                                smooth=smooth)
+                                smooth=smooth,
+                                picture=picture)
         fig = Figure(position='H')
-        fig.add_image(filename, width=NoEscape(r'0.49\textwidth'))
+        fig.append(Command(command='input',arguments=filename))
 
         return fig
 
@@ -707,6 +720,7 @@ class BasicFormattingTools(DataMethods):
                 label=None,
                 caption=None,
                 smooth=False,
+                picture=True,
                 *args,
                 **kwargs):
         
@@ -754,7 +768,8 @@ class BasicFormattingTools(DataMethods):
             legend_pos=legend_pos,
             extra_commands=extra_commands,
             options=options,
-            smooth=smooth)
+            smooth=smooth,
+            picture = picture)
 
         if caption is not None:
             fig.add_caption(NoEscape(caption))
