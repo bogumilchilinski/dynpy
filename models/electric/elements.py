@@ -33,7 +33,7 @@ class Inductor(MaterialPoint):
     def __init__(self, inductance, q0 , qs=None, frame=base_frame, ivar=Symbol('t')):
         super().__init__(m=inductance, pos1=q0 , qs=qs, frame=frame, ivar=ivar)
         
-class Resistance(Damper):
+class Resistor(Damper):
     """
     Model of a Material point with changing point of mass:
     Creates a material point of an inertial body, after inputing correct values of mass -m and general coordinates, which follows a linear motion.
@@ -41,4 +41,4 @@ class Resistance(Damper):
     scheme_name = 'material_point.png'
     real_name = 'material_point.png'
     def __init__(self, resistance, q0,  qs=None, ivar=Symbol('t'), frame=base_frame):
-        super().__init__(c=resistance, pos1=q0, pos2=0, qs=None, ivar=Symbol('t'), frame=base_frame)
+        super().__init__(c=resistance, pos1=q0, pos2=0, qs=qs, ivar=Symbol('t'), frame=base_frame)
