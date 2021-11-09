@@ -4654,7 +4654,7 @@ class CrankSystem(ComposedSystem):
                  h=Symbol('h', positive=True),
                  a=Symbol('a', positive=True),
                  b=Symbol('b', positive=True),
-                 phi=dynamicsymbols('phi'),
+                 phi=dynamicsymbols('\\varphi'),
                  beta=dynamicsymbols('beta'),
 #                  alpha=dynamicsymbols('alpha'),
                  **kwargs):
