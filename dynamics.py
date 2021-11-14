@@ -363,6 +363,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         Returns class instance with substituted numerical values
         """
 
+        given_data=args[0]
+        
         hol_coneqs = list(self._hol_coneqs)
 
         if 'method' in kwargs.keys():
@@ -426,7 +428,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                           label=f'{self._label} for {args} and {kwargs}'
                           )
         new_sys = type(self)(0,system=new_system)
-        new_sys._given_data=args[0]
+        
+        
+
+        new_sys._given_data=given_data
         
         return new_sys
 
