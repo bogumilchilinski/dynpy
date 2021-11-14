@@ -2707,10 +2707,8 @@ class SympyFormula(ReportModule):
         self._text = 'Figures {first_marker}-{last_marker}'
         self._backend = backend
 
-        if not marker == None:
-            self._marker = marker
-        else:
-            self._marker = Marker('formula', prefix='eq')
+
+        self._marker = marker
 
         if not expr == None:
             self._expr = expr
@@ -2719,16 +2717,18 @@ class SympyFormula(ReportModule):
 
         self._eq = DMath()
         self._eq.append(NoEscape(self._backend(self._expr)))
-        self._eq.append(Label(self._marker))
+        
+        if self._marker is not None:
+
+            self._eq.append(Label(self._marker))
 
         if self.__class__._color:
 
             self._container.append(TextColor(self.__class__._color, self._eq))
-
         else:
-
             self._container.append(self._eq)
 
+            
     def __call__(self, analysis):
 
         display(self._expr)

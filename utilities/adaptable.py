@@ -428,6 +428,7 @@ class BasicFormattingTools(DataMethods):
 
     _default_sep = ', '
     _container = []
+    _default_path = './'
 
     @classmethod
     def set_default_column_separator(cls, sep=', '):
@@ -436,8 +437,14 @@ class BasicFormattingTools(DataMethods):
         return cls
 
     @classmethod
+    def set_directory(cls, path='./'):
+
+        cls._default_path = path
+        return cls
+    
+    @classmethod
     def set_default_container(cls, container=[]):
-        cls._container = []
+        cls._container = container
 
         return cls
 
@@ -751,7 +758,7 @@ class BasicFormattingTools(DataMethods):
         plotted_frame = plotted_frame.set_str_index_columns()
 
         if filename is None:
-            filename = f'./SDA_results/plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
+            filename = f'{self.__class__._default_path}/plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
 
         if container is None:
             container = self.__class__._container
