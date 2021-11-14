@@ -255,7 +255,11 @@ class DataMethods:
                                 smooth=smooth,
                                 picture=picture)
         fig = Figure(position='H')
-        fig.append(Command(command='input',arguments=filename))
+        
+        if picture:
+            fig.add_image(filename)
+        else:    
+            fig.append(Command(command='input',arguments=filename))
 
         return fig
 
@@ -429,6 +433,7 @@ class BasicFormattingTools(DataMethods):
     _default_sep = ', '
     _container = []
     _default_path = './'
+    _picture=False
 
     @classmethod
     def set_default_column_separator(cls, sep=', '):
@@ -436,6 +441,12 @@ class BasicFormattingTools(DataMethods):
 
         return cls
 
+    @classmethod
+    def set_picture_mode(cls, picture=False):
+
+        cls._picture=picture
+        return cls
+    
     @classmethod
     def set_directory(cls, path='./'):
 
@@ -727,7 +738,7 @@ class BasicFormattingTools(DataMethods):
                 label=None,
                 caption=None,
                 smooth=False,
-                picture=True,
+                picture=None,
                 *args,
                 **kwargs):
         
@@ -763,6 +774,10 @@ class BasicFormattingTools(DataMethods):
         if container is None:
             container = self.__class__._container
 
+        if picture is None:
+            picture = self.__class__._picture
+            
+            
         fig = plotted_frame.to_standalone_figure(
             filename,
             labels_list=labels_list,
