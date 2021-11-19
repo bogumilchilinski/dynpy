@@ -2569,6 +2569,18 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
             self.F: r'Force',
         }
         return self.sym_desc_dict
+    
+    def get_default_data(self):
+
+        m0 = symbols('m_0', positive=True)
+        
+        default_data_dict = {
+            self.m :[S.Half * m0, 1 * m0, 2 * m0, 2**2 * m0, S.Half**2 * m0,8*m0,S.Half**3],
+            self.y:[ a*x**2, a*(1-cos(x)),a*sin(x)**2,a*sin(x)**4,a*x**4]
+
+        }
+
+        return default_data_dict
 
 
 # class MDoFShaft(ComposedSystem):
