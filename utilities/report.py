@@ -1207,7 +1207,6 @@ class SimulationalBlock(ReportModule):
     ics_list: iterable
         List containing values of initial conditions. 
     dynamic_system: Lagrange's method object
-        Dynamic model prepared basing on Sympy's Lagrange's method object.
     reference_data: dict
         Dictionary containing default values of systems's parameters.
     **kwargs
@@ -2713,7 +2712,7 @@ class SympyFormula(ReportModule):
         if not expr == None:
             self._expr = expr
 
-        super().__init__()
+        super().__init__(**kwargs)
 
         self._eq = DMath()
         self._eq.append(NoEscape(self._backend(self._expr)))

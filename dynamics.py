@@ -1,6 +1,6 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                     hessian, Function, flatten, Tuple, im, pi, latex,dsolve,solve,
-                    fraction,factorial)
+                    fraction,factorial,Derivative, Integral)
 
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
@@ -27,11 +27,11 @@ from .solvers.linear import LinearODESolution, FirstOrderODE
 from .solvers.nonlinear import WeakNonlinearProblemSolution, MultiTimeScaleMethod
 
 
-from pylatex import Document, Section, Subsection, Subsubsection, Itemize, Package, HorizontalSpace, Description, Marker
+from pylatex import Document, Section, Subsection, Subsubsection, Itemize, Package, HorizontalSpace, Description, Marker, Ref, Marker
 from pylatex.section import Paragraph, Chapter
 from pylatex.utils import italic, NoEscape
 
-from .utilities.report import (SystemDynamicsAnalyzer,ReportText,SympyFormula)
+from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula)
 
 #from .utilities.adaptable import *
 
@@ -535,7 +535,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return self.governing_equations.subs(static_disp_dict).subs({comp:0 for comp  in trig_comps if comp.has(self.ivar)})
 
-    def solution(self,preview=True):
+    def calculations_steps(self,preview=True):
 
         doc_model = Document('model')
 
@@ -558,12 +558,29 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         dyn_sys_lin = dyn_sys.linearized()
 
 
-        mrk_lagrangian_nonlin=Marker('lagrangian_nonlin_sys',prefix='eq')
+        mrk_lagrangian_nonlin=Marker('lagrangianNL',prefix='eq')
 
         display(ReportText(f'''The following model is considered. The system's Lagrangian is described by the formula ({Ref(mrk_lagrangian_nonlin).dumps()}):
                             '''))
 
         display((SympyFormula(  Eq(Symbol('L'),dyn_sys.L.expand()[0])  , marker=mrk_lagrangian_nonlin )  ))
+        
+        q_sym =[ Symbol(f'{coord}'[0:-3]) for coord in dyn_sys.q]
+        
+        diffL_d=lambda coord: Symbol(latex(Derivative(Symbol('L'),Symbol(vlatex(coord))))  )
+        
+        for coord in dyn_sys.Y:
+            display((SympyFormula(  Eq(diffL_d(coord),dyn_sys.L.expand()[0].diff(coord))  , marker=mrk_lagrangian_nonlin,backend=vlatex )  ))
+            
+        d_dt_diffL_d=lambda coord: Symbol(latex(Derivative(diffL_d(coord)  , self.ivar ))  )
+
+        for coord in dyn_sys.q.diff(self.ivar):
+            display((SympyFormula(  Eq(d_dt_diffL_d(coord),dyn_sys.L.expand()[0].diff(coord).diff(self.ivar))  , marker=mrk_lagrangian_nonlin,backend=vlatex )  ))
+        
+        #with doc_model.create(DMath()) as eq:
+        #    eq.append(NoEscape(latex(Derivative(Symbol('L'),q_sym[0],evaluate=False))))
+        #    eq.append(NoEscape('='))
+        #    eq.append(NoEscape(vlatex(dyn_sys.L.expand()[0].diff(dyn_sys.q[0]))))
 
         mrk_gov_eq_nonlin=Marker('gov_eq_nonlin_sys',prefix='eq')
 
