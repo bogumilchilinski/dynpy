@@ -1,6 +1,6 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                     hessian, Function, flatten, Tuple, im, pi, latex,dsolve,solve,
-                    fraction,factorial)
+                    fraction,factorial,Derivative, Integral)
 
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
@@ -25,6 +25,15 @@ from .solvers.numerical import OdeComputationalCase
 from .solvers.linear import LinearODESolution, FirstOrderODE
 
 from .solvers.nonlinear import WeakNonlinearProblemSolution, MultiTimeScaleMethod
+
+
+from pylatex import Document, Section, Subsection, Subsubsection, Itemize, Package, HorizontalSpace, Description, Marker, Ref, Marker
+from pylatex.section import Paragraph, Chapter
+from pylatex.utils import italic, NoEscape
+
+from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula)
+
+#from .utilities.adaptable import *
 
 
 def multivariable_taylor_series(expr, args, n=2, x0=None):
@@ -526,6 +535,76 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return self.governing_equations.subs(static_disp_dict).subs({comp:0 for comp  in trig_comps if comp.has(self.ivar)})
 
+    def calculations_steps(self,preview=True):
+
+        doc_model = Document('model')
+
+        doc_model.packages.append(Package('booktabs'))
+        doc_model.packages.append(Package('float'))
+        doc_model.packages.append(Package('standalone'))
+        doc_model.packages.append(Package('siunitx'))
+
+
+        ReportText.set_container(doc_model)
+        ReportText.set_directory('./SDAresults')
+
+        #LatexDataFrame.set_picture_mode(True)
+        #LatexDataFrame.set_directory('./SDAresults')
+
+        SympyFormula.set_container(doc_model)
+        
+        
+        dyn_sys = self
+        dyn_sys_lin = dyn_sys.linearized()
+
+
+        mrk_lagrangian_nonlin=Marker('lagrangianNL',prefix='eq')
+
+        display(ReportText(f'''The following model is considered. The system's Lagrangian is described by the formula ({Ref(mrk_lagrangian_nonlin).dumps()}):
+                            '''))
+
+        display((SympyFormula(  Eq(Symbol('L'),dyn_sys.L.expand()[0])  , marker=mrk_lagrangian_nonlin )  ))
+        
+        q_sym =[ Symbol(f'{coord}'[0:-3]) for coord in dyn_sys.q]
+        
+        diffL_d=lambda coord: Symbol(latex(Derivative(Symbol('L'),Symbol(vlatex(coord))))  )
+        
+        for coord in dyn_sys.Y:
+            display((SympyFormula(  Eq(diffL_d(coord),dyn_sys.L.expand()[0].diff(coord))  , marker=mrk_lagrangian_nonlin,backend=vlatex )  ))
+            
+        d_dt_diffL_d=lambda coord: Symbol(latex(Derivative(diffL_d(coord)  , self.ivar ))  )
+
+        for coord in dyn_sys.q.diff(self.ivar):
+            display((SympyFormula(  Eq(d_dt_diffL_d(coord),dyn_sys.L.expand()[0].diff(coord).diff(self.ivar))  , marker=mrk_lagrangian_nonlin,backend=vlatex )  ))
+        
+        #with doc_model.create(DMath()) as eq:
+        #    eq.append(NoEscape(latex(Derivative(Symbol('L'),q_sym[0],evaluate=False))))
+        #    eq.append(NoEscape('='))
+        #    eq.append(NoEscape(vlatex(dyn_sys.L.expand()[0].diff(dyn_sys.q[0]))))
+
+        mrk_gov_eq_nonlin=Marker('gov_eq_nonlin_sys',prefix='eq')
+
+        display(ReportText(f'''The governing equations of the system have a following form ({Ref(mrk_gov_eq_nonlin).dumps()}):
+                            '''))
+
+        for eq in dyn_sys._eoms:
+            display(SympyFormula( Eq(eq,0) , marker=mrk_gov_eq_nonlin ))
+
+        mrk_lagrangian_lin=Marker('lagrangian_lin_sys',prefix='eq')
+
+        display(ReportText(f'''Linearized model of the system can be useful as an initial step of the analysis. 
+                                It enables to find a simplified solution in the neighborhood of the critical point.
+                                Such an approach introduces some error but the solution has qualitative compability of the exact and linearized result. The simplified Lagrangian formula ({Ref(mrk_lagrangian_lin).dumps()}) is as follows:
+                            '''))
+
+        display((SympyFormula(  Eq(Symbol('L'),dyn_sys_lin.L.expand()[0]) , marker=mrk_lagrangian_lin  )  ))
+
+        mrk_gov_eq_lin=Marker('gov_eq_lin_sys',prefix='eq')
+        
+        return doc_model
+    
+    
+    
     def external_forces(self):
         """
         Returns Matrix with external forces
