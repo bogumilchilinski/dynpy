@@ -266,6 +266,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         self._label = label
         self._given_data={}
+        
+        self._nonlinear_base_system=None
 
         #LM=me.LagrangesMethod(Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs)
     
@@ -441,6 +443,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
 
         new_sys._given_data=given_data
+        new_sys._nonlinear_base_system = self._nonlinear_base_system
         
         return new_sys
 
@@ -535,7 +538,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return self.governing_equations.subs(static_disp_dict).subs({comp:0 for comp  in trig_comps if comp.has(self.ivar)})
 
-    def calculations_steps(self,preview=True):
+    def calculations_steps(self,preview=True,system=None):
 
         doc_model = Document('model')
 
@@ -553,14 +556,18 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         SympyFormula.set_container(doc_model)
         
+        if system is None:
+            system = self
         
-        dyn_sys = self
+        dyn_sys=system
         dyn_sys_lin = dyn_sys.linearized()
 
 
         mrk_lagrangian_nonlin=Marker('lagrangianNL',prefix='eq')
 
-        display(ReportText(f'''The following model is considered. The system's Lagrangian is described by the formula ({Ref(mrk_lagrangian_nonlin).dumps()}):
+        #display(ReportText(f'''The following model is considered. The system's Lagrangian is described by the formula ({Ref(mrk_lagrangian_nonlin).dumps()}):
+        #                    '''))
+        display(ReportText(f'''Lagrangian systemu wyrażony jest wzorem ({Ref(mrk_lagrangian_nonlin).dumps()}):
                             '''))
 
         display((SympyFormula(  Eq(Symbol('L'),dyn_sys.L.expand()[0])  , marker=mrk_lagrangian_nonlin )  ))
@@ -568,6 +575,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         q_sym =[ Symbol(f'{coord}'[0:-3]) for coord in dyn_sys.q]
         
         diffL_d=lambda coord: Symbol(latex(Derivative(Symbol('L'),Symbol(vlatex(coord))))  )
+        
+        display(ReportText(f'''Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące: 
+                               #({Ref(mrk_lagrangian_nonlin).dumps()}):
+                            '''))
         
         for coord in dyn_sys.Y:
             display((SympyFormula(  Eq(diffL_d(coord),dyn_sys.L.expand()[0].diff(coord))  , marker=mrk_lagrangian_nonlin,backend=vlatex )  ))
@@ -584,22 +595,27 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         mrk_gov_eq_nonlin=Marker('gov_eq_nonlin_sys',prefix='eq')
 
-        display(ReportText(f'''The governing equations of the system have a following form ({Ref(mrk_gov_eq_nonlin).dumps()}):
-                            '''))
+        #display(ReportText(f'''The governing equations of the system have a following form ({Ref(mrk_gov_eq_nonlin).dumps()}):
+        #                    '''))
 
+        display(ReportText(f'''
+                           Wykorzystując obliczone pochodne, wyznacza się równania ruchu na podstawie odpowiedniego wzoru.
+                           Równania ruchu układu (nieliniowe w ogólnym przypadku) przedstawiają zależności ({Ref(mrk_gov_eq_nonlin).dumps()}):
+                           '''))
+        
         for eq in dyn_sys._eoms:
             display(SympyFormula( Eq(eq,0) , marker=mrk_gov_eq_nonlin ))
 
-        mrk_lagrangian_lin=Marker('lagrangian_lin_sys',prefix='eq')
+        #mrk_lagrangian_lin=Marker('lagrangian_lin_sys',prefix='eq')
+        #
+        #display(ReportText(f'''Linearized model of the system can be useful as an initial step of the analysis. 
+        #                        It enables to find a simplified solution in the neighborhood of the critical point.
+        #                        Such an approach introduces some error but the solution has qualitative compability of the exact and linearized result. The simplified Lagrangian formula ({Ref(mrk_lagrangian_lin).dumps()}) is as follows:
+        #                    '''))
 
-        display(ReportText(f'''Linearized model of the system can be useful as an initial step of the analysis. 
-                                It enables to find a simplified solution in the neighborhood of the critical point.
-                                Such an approach introduces some error but the solution has qualitative compability of the exact and linearized result. The simplified Lagrangian formula ({Ref(mrk_lagrangian_lin).dumps()}) is as follows:
-                            '''))
+        #display((SympyFormula(  Eq(Symbol('L'),dyn_sys_lin.L.expand()[0]) , marker=mrk_lagrangian_lin  )  ))
 
-        display((SympyFormula(  Eq(Symbol('L'),dyn_sys_lin.L.expand()[0]) , marker=mrk_lagrangian_lin  )  ))
-
-        mrk_gov_eq_lin=Marker('gov_eq_lin_sys',prefix='eq')
+        #mrk_gov_eq_lin=Marker('gov_eq_lin_sys',prefix='eq')
         
         return doc_model
     
@@ -767,13 +783,18 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                                                         self.Y,
                                                         n=n + 1,
                                                         x0=x0)
-
-        return LagrangesDynamicSystem(lagrangian_approx,
+        
+        approx_sys =LagrangesDynamicSystem(lagrangian_approx,
                                       self.q,
                                       forcelist=self.forcelist,
                                       frame=self.frame,
                                       label=label,
                                       ivar=self.ivar)
+
+        approx_sys._nonlinear_base_system = self
+        
+        return approx_sys
+
 
     def linearized(self, x0=None, op_point=False, hint=[], label=None):
         """
@@ -809,12 +830,17 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                                            hint=hint,
                                            x0=x0)
 
-        return LinearDynamicSystem(linearized_sys.lagrangian(),
+        
+        lin_sys = LinearDynamicSystem(linearized_sys.lagrangian(),
                                    self.q,
                                    forcelist=self.forcelist,
                                    frame=self.frame,
                                    label=label,
                                    ivar=self.ivar)
+        
+        lin_sys._nonlinear_base_system = self
+        
+        return lin_sys
 
     @property
     def _eoms(self):
@@ -892,6 +918,47 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
 
     '''
 
+    def calculations_steps(self,preview=True,system=None):
+        
+        if self._nonlinear_base_system is None:
+            doc_model=super().calculations_steps(preview=True)
+            
+        else:
+            doc_model= super().calculations_steps(preview=True,system=self._nonlinear_base_system)
+
+
+        
+            if system is None:
+                system = self
+
+            dyn_sys=self._nonlinear_base_system
+            dyn_sys_lin = self
+
+
+
+            display(ReportText(
+                    f'''Linearyzaja równań polega na znalezieniu ich rozwinięcia w szereg Taylora względem współrzęnych, prędkości i przyspieszeń uogólnionych. 
+                    Formalnie należy obliczyć pochodne cząstkowe wielkości uogólnionych ze składników równań Lagrange'a:
+                                '''))
+
+
+
+            diffL_d=lambda coord: Symbol(latex(Derivative(Symbol('L'),Symbol(vlatex(coord))))  )
+
+            mrk_lagrangian_nonlin = Marker('lagrangLin',prefix='eq')
+            display(ReportText(f'''Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące: 
+                                   ({Ref(mrk_lagrangian_nonlin).dumps()}):
+                                '''))
+            
+            #op_point = {coord  for coord in self.Y + list(self.q.diff(self.ivar))}
+
+            display((SympyFormula(  Eq(Symbol('L'),dyn_sys_lin.L.expand()[0]) , marker=mrk_lagrangian_lin  )  ))
+            
+
+        
+        return doc_model
+    
+    
     def stiffness_matrix(self):
         '''
         Returns the system stiffness matrix, which is based on the equations of motion of the Lagrange's system. Matrix is obtained from jacobian which is called with system's generalized coordinates vector.

@@ -1108,6 +1108,16 @@ class SDoFFreePendulum(ComposedSystem):
             self.l: r'Pendulum length',
         }
         return self.sym_desc_dict
+    
+    def get_default_data(self):
+
+        m0, l0 = symbols('m_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m: [2 * m0, 1*m0, S.Half * m0, S.Half**2 * m0, 3*S.Half * m0],
+            self.l: [2 * l0, 1*l0, S.Half * l0, S.Half**2 * l0, 3*S.Half * l0],
+        }
+        return default_data_dict
 
 
 class SDoFExcitedPendulum(ComposedSystem):
@@ -2494,13 +2504,13 @@ class Inverted_Pendulum(HarmonicOscillator):
 
 
 class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
-    scheme_name = 'troleywithnonlinspring.PNG'
+    scheme_name = 'sdof_nonlin_trolley.PNG'
     real_name = 'trolleywithnonlinearspring_real.png'
 
     def __init__(self,
                  m=Symbol('m', positive=True),
                  k=Symbol('k', positive=True),
-                 l=Symbol('l', positive=True),
+                 d=Symbol('d', positive=True),
                  l_0=Symbol('l_0', positive=True),
                  ivar=Symbol('t', positive=True),
                  F=Symbol('F_0', positive=True),
@@ -2549,12 +2559,12 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
 
         self.m = m
         self.k = k
-        self.l = l
+        self.d = d
         self.l_0 = l_0
         self.F = F
 
         self.MaterialPoint = MaterialPoint(m, x, qs=[x])
-        self.Spring = Spring(k, pos1=(sqrt(x**2 + l**2) - l_0), qs=[x])
+        self.Spring = Spring(k, pos1=(sqrt(x**2 + d**2) - l_0), qs=[x])
         self.Force = Force(-F * cos(Omega * ivar), pos1=x, qs=[x])
 
         system = self.MaterialPoint + self.Spring + self.Force
@@ -2569,6 +2579,18 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
             self.F: r'Force',
         }
         return self.sym_desc_dict
+    
+    def get_default_data(self):
+
+        m0,l0,k0 = symbols('m_0 l_0 k_0', positive=True)
+
+        default_data_dict = {
+            self.m :[S.Half * m0, 1 * m0, 2 * m0, S.Half**2 * m0, 3*S.Half * m0],
+            self.d :[S.Half * l0, 1 * l0, 2 * l0, S.Half**2 * l0, 3*S.Half * l0],
+            self.k: [S.Half * k0, 1 * k0, 2 * k0, S.Half**2 * k0, 3*S.Half * k0],
+        }
+
+        return default_data_dict
 
 
 # class MDoFShaft(ComposedSystem):
