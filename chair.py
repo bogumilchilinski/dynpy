@@ -21,7 +21,7 @@ t=Symbol('t') #independent variable - time
 a_sim=Symbol('a_sim',positive=True)
 ivar=Symbol('t')
 
-### system parametes
+### system parameters
 m_fr, m_rear,m_3, k_r, k_rt, k_f, k_ft, k_rot,amplitude,length,speed,axw = symbols('m_fr, m_r, M, k_r, k_rt, k_f, k_ft k_rot, A, L, v, W_wb ',positive=True)
 m,k,g,F_1,F_2,Omega,F,R,v0,u0,l_l,l_r= symbols('m,k,g,F_1,F_2,Omega, F_0, R, v_0,u_0,l_l,l_r',positive=True)
 I_ch, I_w , z_c3,l_fr,l_rear= symbols('I_chair, I_wheel, z_c3, l_fr, l_r',positive=True)
@@ -415,13 +415,89 @@ Dmu_chair5dof=((chair_5dof_lin.q.diff(t)).T*Matrix([Ekinetic]).jacobian(chair_5d
 FL_SIMPLECHAIR = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*2*F*N.x)]+[(points_list[nom],(-Dmu_chair5dof.diff(velm)-Dlam_chair5dof.diff(velm))*N.x)  for nom,velm in enumerate(Matrix(qs_5dof).diff(t))]
 # +[(points_list[non],-Dlam_chair5dof.diff(veln)*N.x)  for non,veln in enumerate(Matrix(qs_5dof).diff(t))]
 class SimpleChair5DOF(dyn.HarmonicOscillator):
-    def __init__(self, Lagrangian=L_simple, qs=qs_5dof, forcelist=FL_SIMPLECHAIR, bodies=None, frame=N,
+    
+    m_fr, m_rear,m_3, k_r, k_rt, k_f, k_ft, k_rot = symbols('m_fr, m_r, M, k_r, k_rt, k_f, k_ft k_rot',positive=True)
+    m,k,g,F_1,F_2,Omega,F,R,v0,u0,l_l,l_r= symbols('m,k,g,F_1,F_2,Omega, F_0 R, v_0,u_0,l_l,l_r',positive=True)
+    I_ch, I_w , z_c3,l_fr,l_rear= symbols('I_chair, I_wheel, z_c3, l_fr, l_r',positive=True)
+    m_RC, I_RC, l_RC, k_RC, phi0 = symbols('m_RC, I_RC, l_RC, k_RC, varphi_0',positive=True)
+    m_w, I_wrc, r_w, k_w, k_fix,k_tire = symbols('m_w, I_wRC, R_w, k_w, k_fix, k_t',positive=True)
+    c,c_mu,c_lam= symbols('c,c_mu, c_lambda',positive=True)
+    a_ox, a_oz, a_rz ,a_rcz=symbols('a_ox, a_oz, a_rz ,a_rcz')
+
+    pm=symbols('PM')
+
+    t_l, delta_t,l_ramp,l_bumps = symbols('t_l,dt,l_ramp, l_bumps',positive=True)
+    t0 = symbols('t_0')
+    
+    # generalized coordinates
+    x,z_fr,z_rear,z, phi,phi_rc,theta,z_wrc = dynamicsymbols('x,z_fr,z_r,z, varphi,varphi_RC, theta, z_wrc')
+    dx,dz_fr,dz_rear,dz,dphi,dphi_rc,dtheta,dz_wrc = dynamicsymbols('x,z_fr,z_r,z, varphi,varphi_RC, theta, z_wrc', 1)
+    
+    def __init__(self,
+                 m_fr=m_fr,
+                 m_rear=m_rear,
+                 m_3=m_3,
+                 k_r=k_r,
+                 k_rt=k_rt,
+                 k_f=k_f,
+                 k_ft=k_ft,
+                 k_rot=k_rot,
+                 qs=[x,z_fr,z_rear,z, phi],
+                 forcelist=FL_SIMPLECHAIR,
+                 bodies=None, frame=N,
                        hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t'),**kwargs):
         
 
-        self.m = m_3
+   
         
-        super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
+        
+        if m_3 is None:
+            m_3 = self.__class__.m_3
+
+        self.m_3 = m_3
+        
+        m,k,g,F_1,F_2,Omega,F,R,v0,u0,l_l,l_r= symbols('m,k,g,F_1,F_2,Omega, F_0 R, v_0,u_0,l_l,l_r',positive=True)
+        I_ch, I_w , z_c3,l_fr,l_rear= symbols('I_chair, I_wheel, z_c3, l_fr, l_r',positive=True)
+        m_RC, I_RC, l_RC, k_RC, phi0 = symbols('m_RC, I_RC, l_RC, k_RC, varphi_0',positive=True)
+        m_w, I_wrc, r_w, k_w, k_fix,k_tire = symbols('m_w, I_wRC, R_w, k_w, k_fix, k_t',positive=True)
+        c,c_mu,c_lam= symbols('c,c_mu, c_lambda',positive=True)
+        a_ox, a_oz, a_rz ,a_rcz=symbols('a_ox, a_oz, a_rz ,a_rcz')
+
+        pm=symbols('PM')
+
+        t_l, delta_t,l_ramp,l_bumps = symbols('t_l,dt,l_ramp, l_bumps',positive=True)
+        t0 = symbols('t_0')
+        
+        
+        # generalized coordinates
+        x,z_fr,z_rear,z, phi,phi_rc,theta,z_wrc = dynamicsymbols('x,z_fr,z_r,z, varphi,varphi_RC, theta, z_wrc')
+        dx,dz_fr,dz_rear,dz,dphi,dphi_rc,dtheta,dz_wrc = dynamicsymbols('x,z_fr,z_r,z, varphi,varphi_RC, theta, z_wrc', 1)
+        
+        # ===========================SIMPLE MODEL=========================================================================================================
+        T_body = S.One/2*m_3*x_m3.diff(t)**2 + S.One/2 * m_3* dz**2 # Ek ramy wózka w ruchu postępowym
+        T_rot =  S.One/2 * I_ch* dphi**2  # Ek ramy wózka w ruchu obrotowym
+        T_rear = S.One/2 * m_rear* dz_rear**2 + S.One/2 * m_rear * dx**2    # Ek tylniego koła Ir (mr)
+        T_fr = S.One/2 * m_fr* dz_fr**2 + S.One/2 * m_fr * dx**2    # Ek przedniego koła If (mf)
+        T_wheel = S.One/2 * I_w * (dx/R)**2
+
+        V_rear = S.One/2*k_rt*(z_rear-amplitude*cos(2*pi/(length/speed)*t))**2# Ep tylnich prętów ramy względem ich sprężystości
+        V_fr = S.One/2*k_ft*(z_fr-amplitude*cos(2*pi/(length/speed)*(t-axw/speed)))**2     # Ep przednich prętów ramy względem ich sprężystości
+
+
+        #+++++++++++++++++++++
+        V_pion= S.One/2 * k_r*(z-z_rear)**2 + S.One/2 * k_f*(z-z_fr)**2  ##### te
+        #+++++++++++++++++++++
+
+        ##                k_rear                                    k_fr
+        V_obr = S.One/2 * k_r * (z+l_l*phi-z_rear)**2 + S.One/2 * k_f * (z-l_r*phi-z_fr)**2 - S.One/2 * m_3 * z_c3 * g *phi**2
+
+        Ekinetic=T_body+T_rot+T_rear+T_fr+T_wheel
+        Epotential=V_rear+V_fr+V_pion+V_obr
+
+        L_simple=Ekinetic-Epotential
+        
+        
+        super().__init__( Lagrangian=L_simple, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
                  hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs)
 
     def get_param_values(self):
@@ -499,266 +575,143 @@ chair_5dof_simple = SimpleChair5DOF()('Simple chair 5DOF model')
 
 
 
-T_chair_3dof_rev =T_chair5dof.subs(dof3_rev,method='direct')
-T_chair_3dof_norev =T_chair5dof.subs(dof3_norev,method='direct')
-T_chair_2dof=T_chair5dof.subs(dof2,method='direct')
-
-
-# FL_lam_chair5dof = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*2*F*N.x)]+[(points_list[no],-D_chair5dof.diff(vel)*N.x) for no,vel in enumerate(Matrix(qs_5dof).diff(t))]+[(points_list[no],-Dlam_chair5dof.diff(vel)*N.x)  for no,vel in enumerate(Matrix(qs_5dof).diff(t))]
-# FL_5dof_road = [(Pl, 0.005*sin(2*t)*N.x)]+[(points_list[no],-D_chair5dof.diff(vel)*N.x) for no,vel in enumerate(Matrix(qs_5dof).diff(t))]
-# class Chair5DOF_withroad(dyn.LagrangesDynamicSystem):
-
-#     def __init__(self, Lagrangian=L_chair5dof_withroad, qs=qs_5dof, forcelist=FL_5dof_road, bodies=None, frame=N,
-#                        hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t'),**kwargs):
-        
-#         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
-#                  hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs)
-# chair_5dof_with_road=Chair5DOF_withroad()('Chair 5DOF model with road')
-
-
-# class Chair3dof(dyn.LagrangesDynamicSystem):
-#     def __init__(self, Lagrangian=L_default_3dof, qs=qs_3dof, forcelist=FL, bodies=None, frame=N,
-#                        hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t')):
-        
-#         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
-#                  hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar)
-
-        
-# class Chair2dof(dyn.LagrangesDynamicSystem):
-#     def __init__(self, Lagrangian=L_default_2dof, qs=qs_2dof, forcelist=FL, bodies=None, frame=N,
-#                        hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t')):
-        
-#         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
-#                  hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar)
-        
-
-
-m_fr, m_rear,m_3, k_r, k_rt, k_f, k_ft = symbols('m_fr, m_r, M, k_r, k_rt, k_f, k_ft',positive=True)
-m,k,g,F_1,F_2,Omega,F,R,v0,u0= symbols('m,k,g,F_1,F_2,Omega, F_0, R, v_0,u_0',positive=True)
-I_ch, I_w , z_c3,l_fr,l_rear,R_curve,= symbols('I_chair, I_wheel, z_c3, l_fr, l_r, R_curve',positive=True)
-
-
-
-
-t_l, delta_t,l_ramp,l_bumps = symbols('t_l,dt,l_ramp, l_bumps',positive=True)
-t0 = symbols('t_0')
-
-pm=symbols('PM')
-c,c_mu,c_lam= symbols('c,c_mu, c_lambda',positive=True)
-L_sym=symbols('L')
-
-
-x,y,alpha = dynamicsymbols('x,y,alpha')
-dx,dy,dalpha = dynamicsymbols('x,y,alpha', 1)
-
-x_r=dynamicsymbols('x_r')
-y_r=dynamicsymbols('y_r')
-
-q=[x,y, phi,alpha]
-u=[dx,dy, dphi,dalpha]
-Y = q + u
-nDOF=len(q)
-
-
-
-
-T_rocker =  S.One/2 *m_w*  ((x+x_r+ l_rear * cos(phi+alpha) ).diff(t)**2 +(y+y_r + l_rear * sin(phi+alpha) ).diff(t)**2)
-T_chair_top = S.One/2 * m_3 * ((x+x_r ).diff(t)**2 +(y+y_r ).diff(t)**2)+ S.One/2 * I_ch * dphi**2 + S.One/2 * I_w * (dphi+dalpha)**2 
-
-T=T_chair_top + T_rocker
-
-
-V_5dof = S.One /2 * k * alpha **2 +  S.One /2 * k_r * (x**2+y**2 ) +  S.One /2 * k_r * (y + l_rear * sin(phi+alpha)) **2
-V=V_5dof.expand()
-
-
-
-
-D=D=c_mu*sum(Matrix(u)*Matrix(u).T)
-D=D.doit().expand()
-
-
-L=(T-V).doit().expand()#.subs({l_fr:0,l_rear:0}).doit()
-#display(L.simplify())
-Eq(L_sym,L)
-
-
-op_point={item:0  for item in reversed(Y)}
-
-
-N = ReferenceFrame('N')
-Pl = Point('P_l')
-Pr = Point('P_r')
-Pl.set_vel(N, (dx * N.x+dy * N.y))
-Pr.set_vel(N, dx*(1-cos(alpha)) * N.x+dy*(1+sin(alpha)) * N.y)
-
-
-points_list=[Point('P_'+str(no))  for no,vel in enumerate(u)]
-[points_list[no].set_vel(N,vel*N.x)  for no,vel in enumerate(u)]
-
-
-
-#FL = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*F*(cos(Omega*t)) * N.x+sin(Omega*t) * N.y)]+[(points_list[no],-D.diff(vel)*N.x)  for no,vel in enumerate(u)]   #,(Pr, R*F*cos(Omega*t) * N.x)]
-FL = [(Pr, F*(N.x+N.y))]+[(Pl, 2*F*N.x)]+[(points_list[no],-D.diff(vel)*N.x)  for no,vel in enumerate(u)]
-
-
-
-#L_linearized = multivariable_taylor_series(L,args=Y,n=2,x0=op_point).expand().doit()
-
-L_dict={'full_nonlin':L.expand(),
-        #'linearized':L_linearized,
-        'full_nonlin_circle':L.expand().doit().subs({x_r:R_curve*cos(Omega*t),y_r:R_curve*sin(Omega*t)}).doit().expand(),
-        'full_nonlin_sin':L.expand().doit().subs({x_r:v0*t,y_r:R_curve*sin(Omega*t)}).doit().expand(),
-#         'linearized_bump':L_linearized.subs({u_road(x):u_rf_bump,u_road(x-2*R):u_rr_bump}).doit().expand(),
-#         'full_nonlin_bumps':L.subs({u_road(x):u_rf_mul_bumps,u_road(x-2*R):u_rr_mul_bumps}).doit().expand(),
-#         'linearized_bumps':L_linearized.subs({u_road(x):u_rf_mul_bumps,u_road(x-2*R):u_rr_mul_bumps}).doit().expand(),
-#         'full_nonlin_ramp':L.subs({u_road(x):u_rf_ramp,u_road(x-2*R):u_rr_ramp}).doit().expand(),
-#         'linearized_ramp':L_linearized.subs({u_road(x):u_rf_ramp,u_road(x-2*R):u_rr_ramp}).doit().expand(),
-        }
-
-chair_dict={key: dyn.HarmonicOscillator(LagrangesMethod(L_tmp ,q,forcelist=FL,frame=N)) for key,L_tmp in L_dict.items()}
-
-
-
-chair_circle=chair_dict['full_nonlin_circle']
-chair_sin=chair_dict['full_nonlin_sin']
 
 
 
 ureg.define('dimles = 0 = - ')
 ureg.dimles
 
-units_dict={
-            c:ureg.kilogram/ureg.second,
-            c_mu:S.One/ureg.second,
-            c_lam:S.One/ureg.second,
-            m_3:ureg.kilogram,    
-            m_w:ureg.kilogram,
-            m_fr:ureg.kilogram,
-            m_rear:ureg.kilogram,
-            m:ureg.kilogram,
-            m_RC:ureg.kilogram,
-            k_r:ureg.newton/ureg.meter,
-            k_rt:ureg.newton/ureg.meter,
-            k_f:ureg.newton/ureg.meter,
-            k_w:ureg.newton/ureg.meter,
-            k_fix:ureg.newton/ureg.meter,
-            k_tire:ureg.newton/ureg.meter,
-            k_ft:ureg.newton/ureg.meter,
-            k:ureg.newton/ureg.meter,
-            k_RC:ureg.newton/ureg.meter,
-            g:ureg.meter/ureg.second**2,
-            F_1:ureg.newton,
-            F_2:ureg.newton,
-            F:ureg.newton,
-            u0:ureg.meter,
-            Omega:ureg.radian/ureg.second,
-            R:ureg.meter,
-            R_curve:ureg.meter,
-            r_w:ureg.meter,
-            v0:ureg.meter/ureg.second,
-            I_ch:ureg.kilogram*ureg.meter**2,
-            I_w:ureg.kilogram*ureg.meter**2,
-            I_RC:ureg.kilogram*ureg.meter**2,
-            I_wrc:ureg.kilogram*ureg.meter**2,
-            dphi:ureg.radian/ureg.second,
-            dphi_rc:ureg.radian/ureg.second,
-            z_c3:ureg.meter,
-            z_fr:ureg.meter,
-            l_fr:ureg.meter,
-            l_rear:ureg.meter,
-            l_RC:ureg.meter,
-            phi0:ureg.radian,
-            x:ureg.meter,
-            y:ureg.meter,
-            z:ureg.meter,
-            z_rear:ureg.meter,
-            z_fr:ureg.meter,
-            z_wrc:ureg.meter,
-            phi:ureg.radian,
-            alpha:ureg.radian,
-            phi_rc:ureg.radian,
-            theta:ureg.radian,
-            dx:ureg.meter/ureg.second,
-            dy:ureg.meter/ureg.second,
-            dz_fr:ureg.meter/ureg.second,
-            dz_rear:ureg.meter/ureg.second,
-            dz:ureg.meter/ureg.second,
-            dtheta:ureg.radian/ureg.second,
-            dalpha:ureg.radian/ureg.second,
-            dz_wrc:ureg.meter/ureg.second,
-            pm:ureg.dimles,
-            t_l:ureg.second,
-            delta_t:ureg.second,
-            l_ramp:ureg.meter,
-            l_bumps:ureg.meter,
-            t0:ureg.second,
-            'dimensionless':ureg.meter/ureg.meter,
-#             ao_x_max:ureg.gram,
-            a_ox:ureg.gram,
-#             ao_x_min:ureg.gram,
-#             ao_x_idmax:ureg.second,
-#             ao_x_idmin:ureg.second,
-#             ao_z_max:ureg.gram,
-            a_oz:ureg.gram,
-#             ao_z_min:ureg.gram,
-#             ao_z_idmax:ureg.second,
-#             ao_z_idmin:ureg.second,
-#             ao_rx_max:ureg.gram,
-#             ao_rx_min:ureg.gram,
-#             ao_rx_idmax:ureg.second,
-#             ao_rx_idmin:ureg.second,
-#             ao_rz_max:ureg.gram,
-#             ao_rz_min:ureg.gram,
-#             ao_rz_idmax:ureg.second,
-#             ao_rz_idmin:ureg.second,
-            a_rz:ureg.gram,
-            a_rcz:ureg.gram,
-            a_sim:ureg.meter/ureg.second/ureg.second,
-            dx.diff(t):ureg.meter/ureg.second/ureg.second,
-            dy.diff(t):ureg.meter/ureg.second/ureg.second,
-            dz_fr.diff(t):ureg.meter/ureg.second/ureg.second,
-            dz_rear.diff(t):ureg.meter/ureg.second/ureg.second,
-            dz.diff(t):ureg.meter/ureg.second/ureg.second,
-            dtheta.diff(t):ureg.radian/ureg.second/ureg.second,
-            dphi.diff(t):ureg.radian/ureg.second/ureg.second,
-            dz_wrc.diff(t):ureg.meter/ureg.second/ureg.second,
-            l_l:ureg.meter,
-            l_r:ureg.meter,
-            amplitude:ureg.meter,
-            length:ureg.meter,
-            speed:ureg.meter/ureg.second,
-            axw:ureg.meter,
-            ivar:ureg.second
-           }
+# units_dict={
+#             c:ureg.kilogram/ureg.second,
+#             c_mu:S.One/ureg.second,
+#             c_lam:S.One/ureg.second,
+#             m_3:ureg.kilogram,    
+#             m_w:ureg.kilogram,
+#             m_fr:ureg.kilogram,
+#             m_rear:ureg.kilogram,
+#             m:ureg.kilogram,
+#             m_RC:ureg.kilogram,
+#             k_r:ureg.newton/ureg.meter,
+#             k_rt:ureg.newton/ureg.meter,
+#             k_f:ureg.newton/ureg.meter,
+#             k_w:ureg.newton/ureg.meter,
+#             k_fix:ureg.newton/ureg.meter,
+#             k_tire:ureg.newton/ureg.meter,
+#             k_ft:ureg.newton/ureg.meter,
+#             k:ureg.newton/ureg.meter,
+#             k_RC:ureg.newton/ureg.meter,
+#             g:ureg.meter/ureg.second**2,
+#             F_1:ureg.newton,
+#             F_2:ureg.newton,
+#             F:ureg.newton,
+#             u0:ureg.meter,
+#             Omega:ureg.radian/ureg.second,
+#             R:ureg.meter,
+#             R_curve:ureg.meter,
+#             r_w:ureg.meter,
+#             v0:ureg.meter/ureg.second,
+#             I_ch:ureg.kilogram*ureg.meter**2,
+#             I_w:ureg.kilogram*ureg.meter**2,
+#             I_RC:ureg.kilogram*ureg.meter**2,
+#             I_wrc:ureg.kilogram*ureg.meter**2,
+#             dphi:ureg.radian/ureg.second,
+#             dphi_rc:ureg.radian/ureg.second,
+#             z_c3:ureg.meter,
+#             z_fr:ureg.meter,
+#             l_fr:ureg.meter,
+#             l_rear:ureg.meter,
+#             l_RC:ureg.meter,
+#             phi0:ureg.radian,
+#             x:ureg.meter,
+#             y:ureg.meter,
+#             z:ureg.meter,
+#             z_rear:ureg.meter,
+#             z_fr:ureg.meter,
+#             z_wrc:ureg.meter,
+#             phi:ureg.radian,
+#             alpha:ureg.radian,
+#             phi_rc:ureg.radian,
+#             theta:ureg.radian,
+#             dx:ureg.meter/ureg.second,
+#             dy:ureg.meter/ureg.second,
+#             dz_fr:ureg.meter/ureg.second,
+#             dz_rear:ureg.meter/ureg.second,
+#             dz:ureg.meter/ureg.second,
+#             dtheta:ureg.radian/ureg.second,
+#             dalpha:ureg.radian/ureg.second,
+#             dz_wrc:ureg.meter/ureg.second,
+#             pm:ureg.dimles,
+#             t_l:ureg.second,
+#             delta_t:ureg.second,
+#             l_ramp:ureg.meter,
+#             l_bumps:ureg.meter,
+#             t0:ureg.second,
+#             'dimensionless':ureg.meter/ureg.meter,
+# #             ao_x_max:ureg.gram,
+#             a_ox:ureg.gram,
+# #             ao_x_min:ureg.gram,
+# #             ao_x_idmax:ureg.second,
+# #             ao_x_idmin:ureg.second,
+# #             ao_z_max:ureg.gram,
+#             a_oz:ureg.gram,
+# #             ao_z_min:ureg.gram,
+# #             ao_z_idmax:ureg.second,
+# #             ao_z_idmin:ureg.second,
+# #             ao_rx_max:ureg.gram,
+# #             ao_rx_min:ureg.gram,
+# #             ao_rx_idmax:ureg.second,
+# #             ao_rx_idmin:ureg.second,
+# #             ao_rz_max:ureg.gram,
+# #             ao_rz_min:ureg.gram,
+# #             ao_rz_idmax:ureg.second,
+# #             ao_rz_idmin:ureg.second,
+#             a_rz:ureg.gram,
+#             a_rcz:ureg.gram,
+#             a_sim:ureg.meter/ureg.second/ureg.second,
+#             dx.diff(t):ureg.meter/ureg.second/ureg.second,
+#             dy.diff(t):ureg.meter/ureg.second/ureg.second,
+#             dz_fr.diff(t):ureg.meter/ureg.second/ureg.second,
+#             dz_rear.diff(t):ureg.meter/ureg.second/ureg.second,
+#             dz.diff(t):ureg.meter/ureg.second/ureg.second,
+#             dtheta.diff(t):ureg.radian/ureg.second/ureg.second,
+#             dphi.diff(t):ureg.radian/ureg.second/ureg.second,
+#             dz_wrc.diff(t):ureg.meter/ureg.second/ureg.second,
+#             l_l:ureg.meter,
+#             l_r:ureg.meter,
+#             amplitude:ureg.meter,
+#             length:ureg.meter,
+#             speed:ureg.meter/ureg.second,
+#             axw:ureg.meter,
+#             ivar:ureg.second
+#            }
 
 
 
-model_names_dict={
-    chair_2dof:'chair_model_2dof',
-    chair_3dof_norev:'chair_model_3dof_norev',
-    chair_3dof_rev:'chair_model_3dof_rev',
-    chair_5dof:'chair_model_5dof',
-    chair_5dof_lin:'chair_model_5dof',
-    rapidchair_1dof:'rapidchair_model_1dof',
-    rapidchair_2dof:'rapidchair_model_2dof',
-    rapidchair_3dof:'rapidchair_model_3dof',
-    chair5dof_rc3dof:'chair_and_rapidchair_model'
-    }
+# model_names_dict={
+#     chair_2dof:'chair_model_2dof',
+#     chair_3dof_norev:'chair_model_3dof_norev',
+#     chair_3dof_rev:'chair_model_3dof_rev',
+#     chair_5dof:'chair_model_5dof',
+#     chair_5dof_lin:'chair_model_5dof',
+#     rapidchair_1dof:'rapidchair_model_1dof',
+#     rapidchair_2dof:'rapidchair_model_2dof',
+#     rapidchair_3dof:'rapidchair_model_3dof',
+#     chair5dof_rc3dof:'chair_and_rapidchair_model'
+#     }
 
 
 
 
 
-dof_names_dict={chair_2dof:'o dwóch stopniach swobody',
-                chair_3dof_norev:'o trzech stopniach swobody bez obrotu',
-                chair_3dof_rev:'o trzech stopniach swobody z obrotem',
-                chair_5dof:'o pięciu stopniach swobody (nieliniowy)',
-                chair_5dof_lin:'o pięciu stopniach swobody (zlinearyzowany)',
-                rapidchair_1dof:'o jednym stopniu swobody',
-                rapidchair_2dof:'o dwóch stopniach swobody',
-                rapidchair_3dof:'o trzech stopniach swobody',
-                chair5dof_rc3dof:'o ośmiu stopniach swobody'
-               }
+# dof_names_dict={chair_2dof:'o dwóch stopniach swobody',
+#                 chair_3dof_norev:'o trzech stopniach swobody bez obrotu',
+#                 chair_3dof_rev:'o trzech stopniach swobody z obrotem',
+#                 chair_5dof:'o pięciu stopniach swobody (nieliniowy)',
+#                 chair_5dof_lin:'o pięciu stopniach swobody (zlinearyzowany)',
+#                 rapidchair_1dof:'o jednym stopniu swobody',
+#                 rapidchair_2dof:'o dwóch stopniach swobody',
+#                 rapidchair_3dof:'o trzech stopniach swobody',
+#                 chair5dof_rc3dof:'o ośmiu stopniach swobody'
+#                }
 
 
