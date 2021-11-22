@@ -4773,6 +4773,7 @@ class SDOFWinchSystem(ComposedSystem):
     real_name = 'winch_mechanism_real.PNG'
 
     def __init__(self,
+                 I_s=Symbol('I_s', positive=True),
                  I_k=Symbol('I_k', positive=True),
                  I_1=Symbol('I_1', positive=True),
                  i_1=Symbol('i_1', positive=True),
@@ -4784,7 +4785,7 @@ class SDOFWinchSystem(ComposedSystem):
                  ivar=Symbol('t'),
                  phi=dynamicsymbols('\\varphi'),
                  D=Symbol('D', positive=True),
-                 v=Symbol('v', positive=True),
+                 mu=Symbol('\\mu', positive=True),
                  M_s=Symbol('M_s', positive=True),
                  M_T=Symbol('M_T', positive=True),
                  G=Symbol('G', positive=True),
@@ -4795,9 +4796,10 @@ class SDOFWinchSystem(ComposedSystem):
         pos1=phi
         qs=[phi]
         phi_1=phi
-        phi_2=phi_1/i_1
-        phi_3=phi_2/i_2
+        phi_2=phi_1*i_1
+        phi_3=phi_2*i_2
 
+        self.I_s = I_s
         self.I_k = I_k
         self.I_1 = I_1
         self.i_1 = i_1
@@ -4808,28 +4810,31 @@ class SDOFWinchSystem(ComposedSystem):
         self.I_b = I_b
         self.D = D
         self.G = G
-        self.v = v
+        self.g = g
+        self.mu = mu
         self.M_T = M_T
         self.M_s = M_s
         self.phi = phi
         self.phi_2 = phi_2
         self.phi_3 = phi_3
+        self.alpha = alpha
         
 
         
-
-        self.disk_k = Disk(I_k, phi_1, qs=qs)
+        self.engine = Disk(I_s, phi_1, qs=qs)
+#         self.disk_k = Disk(I_k, phi_1, qs=qs)
         self.disk_1 = Disk(I_1, phi_1, qs=qs)
         self.disk_2 = Disk(I_2, phi_2, qs=qs)
         self.disk_3 = Disk(I_3, phi_2, qs=qs)
         self.disk_4 = Disk(I_4, phi_3, qs=qs)
         self.disk_B = Disk(I_b, phi_3, qs=qs)
         self.load = MaterialPoint(G/g, pos1=phi_3* D/2, qs=qs)
-        self.gravity = GravitationalForce(G/g, g, pos1=phi_3* D/2 * cos(alpha) , qs=qs)
+        self.friction_comp = GravitationalForce(G/g, g, pos1=phi_3* D/2 * cos(alpha)*mu , qs=qs)
         self.force = Force(-M_T,pos1=phi_3,qs=qs)
-        self.engine = Force(M_s,pos1=phi_3,qs=qs)
+        self.drive = Force(M_s,pos1=phi_1,qs=qs)
+        self.gravity_comp = GravitationalForce(G/g, g, pos1=phi_3* D/2 * sin(alpha) , qs=qs)
 
-        system = self.disk_k + self.disk_1 + self.disk_2 + self.disk_3 + self.disk_4 + self.disk_B + self.load + self.gravity + self.force + self.engine
+        system = self.engine + self.disk_1 + self.disk_2 + self.disk_3 + self.disk_4 + self.disk_B + self.load + self.friction_comp + self.gravity_comp + self.force + self.drive
 
         super().__init__(system,**kwargs)
         
@@ -4845,15 +4850,28 @@ class SDOFWinchSystem(ComposedSystem):
         return self.sym_desc_dict
 
     def get_default_data(self):
-        E, I, l, m0, k0 = symbols('E I0 l_beam m_0 k_0', positive=True)
+        E, I_s,I_k,I_b,I_1,I_2,I_3,I_4,i_1, i_2,D,G,g,mu,M_T,M_s= symbols('E I_s I_k I_b I_1 I_2 I_3 I_4 i_1 i_2 D G g \mu M_T M_s', positive=True)
         
         default_data_dict = {
-            self.I: [20 * I, 30 * I,60 * I,50 * I,40 * I,],
-            self.h:[1,2,3],
-            self.r:[0.1,0.2,0.3],
-            self.a:[10],
-            self.b:[20],
-            self.phi : [10,20,30],
+            self.I_s: [20,30,40],
+            self.I_k: [20,30,40],
+            self.I_1: [20,30,40],
+            self.I_2: [20,30,40],
+            self.I_3: [20,30,40],
+            self.I_4: [20,30,40],
+            self.I_b: [20,30,40],
+            self.i_1: [20,30,40],
+            self.i_2: [20,30,40],
+            self.D: [10,20,30],
+            self.G: [10,20,30],
+            self.g: [10,20,30],
+            self.mu : [10,20,30],
+            self.M_T : [10,20,30],
+            self.M_s : [10,20,30],
+            self.phi: [10,20,30],
+            self.phi_2: [10,20,30],
+            self.phi_3  : [10,20,30],
+            self.alpha  : [10,20,30],
         }
 
         return default_data_dict
