@@ -1108,6 +1108,16 @@ class SDoFFreePendulum(ComposedSystem):
             self.l: r'Pendulum length',
         }
         return self.sym_desc_dict
+    
+    def get_default_data(self):
+
+        m0, l0 = symbols('m_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m: [2 * m0, 1*m0, S.Half * m0, S.Half**2 * m0, 3*S.Half * m0],
+            self.l: [2 * l0, 1*l0, S.Half * l0, S.Half**2 * l0, 3*S.Half * l0],
+        }
+        return default_data_dict
 
 
 class SDoFExcitedPendulum(ComposedSystem):
@@ -2494,13 +2504,13 @@ class Inverted_Pendulum(HarmonicOscillator):
 
 
 class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
-    scheme_name = 'troleywithnonlinspring.PNG'
+    scheme_name = 'sdof_nonlin_trolley.PNG'
     real_name = 'trolleywithnonlinearspring_real.png'
 
     def __init__(self,
                  m=Symbol('m', positive=True),
                  k=Symbol('k', positive=True),
-                 l=Symbol('l', positive=True),
+                 d=Symbol('d', positive=True),
                  l_0=Symbol('l_0', positive=True),
                  ivar=Symbol('t', positive=True),
                  F=Symbol('F_0', positive=True),
@@ -2549,12 +2559,12 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
 
         self.m = m
         self.k = k
-        self.l = l
+        self.d = d
         self.l_0 = l_0
         self.F = F
 
         self.MaterialPoint = MaterialPoint(m, x, qs=[x])
-        self.Spring = Spring(k, pos1=(sqrt(x**2 + l**2) - l_0), qs=[x])
+        self.Spring = Spring(k, pos1=(sqrt(x**2 + d**2) - l_0), qs=[x])
         self.Force = Force(-F * cos(Omega * ivar), pos1=x, qs=[x])
 
         system = self.MaterialPoint + self.Spring + self.Force
@@ -2572,12 +2582,12 @@ class SDoFTrolleyWithNonlinearSpring(ComposedSystem):
     
     def get_default_data(self):
 
-        m0 = symbols('m_0', positive=True)
-        
-        default_data_dict = {
-            self.m :[S.Half * m0, 1 * m0, 2 * m0, 2**2 * m0, S.Half**2 * m0,8*m0,S.Half**3],
-            self.y:[ a*x**2, a*(1-cos(x)),a*sin(x)**2,a*sin(x)**4,a*x**4]
+        m0,l0,k0 = symbols('m_0 l_0 k_0', positive=True)
 
+        default_data_dict = {
+            self.m :[S.Half * m0, 1 * m0, 2 * m0, S.Half**2 * m0, 3*S.Half * m0],
+            self.d :[S.Half * l0, 1 * l0, 2 * l0, S.Half**2 * l0, 3*S.Half * l0],
+            self.k: [S.Half * k0, 1 * k0, 2 * k0, S.Half**2 * k0, 3*S.Half * k0],
         }
 
         return default_data_dict
@@ -4755,3 +4765,114 @@ class CrankSystem(ComposedSystem):
         }
 
         return default_data_dict
+
+class SDOFWinchSystem(ComposedSystem):
+
+
+    scheme_name = 'Winch_System.png'
+    real_name = 'winch_mechanism_real.PNG'
+
+    def __init__(self,
+                 I_s=Symbol('I_s', positive=True),
+                 I_k=Symbol('I_k', positive=True),
+                 I_1=Symbol('I_1', positive=True),
+                 i_1=Symbol('i_1', positive=True),
+                 I_2=Symbol('I_2', positive=True),
+                 i_2=Symbol('i_2', positive=True),
+                 I_3=Symbol('I_3', positive=True),
+                 I_4=Symbol('I_4', positive=True),
+                 I_b=Symbol('I_b', positive=True),
+                 ivar=Symbol('t'),
+                 phi=dynamicsymbols('\\varphi'),
+                 D=Symbol('D', positive=True),
+                 mu=Symbol('\\mu', positive=True),
+                 M_s=Symbol('M_s', positive=True),
+                 M_T=Symbol('M_T', positive=True),
+                 G=Symbol('G', positive=True),
+                 g=Symbol('g',positive=True),
+                 alpha=Symbol('\\alpha'),
+                 **kwargs):
+        
+        pos1=phi
+        qs=[phi]
+        phi_1=phi
+        phi_2=phi_1*i_1
+        phi_3=phi_2*i_2
+
+        self.I_s = I_s
+        self.I_k = I_k
+        self.I_1 = I_1
+        self.i_1 = i_1
+        self.I_2 = I_2
+        self.I_3 = I_3
+        self.i_2 = i_2
+        self.I_4 = I_4
+        self.I_b = I_b
+        self.D = D
+        self.G = G
+        self.g = g
+        self.mu = mu
+        self.M_T = M_T
+        self.M_s = M_s
+        self.phi = phi
+        self.phi_2 = phi_2
+        self.phi_3 = phi_3
+        self.alpha = alpha
+        
+
+        
+        self.engine = Disk(I_s, phi_1, qs=qs)
+#         self.disk_k = Disk(I_k, phi_1, qs=qs)
+        self.disk_1 = Disk(I_1, phi_1, qs=qs)
+        self.disk_2 = Disk(I_2, phi_2, qs=qs)
+        self.disk_3 = Disk(I_3, phi_2, qs=qs)
+        self.disk_4 = Disk(I_4, phi_3, qs=qs)
+        self.disk_B = Disk(I_b, phi_3, qs=qs)
+        self.load = MaterialPoint(G/g, pos1=phi_3* D/2, qs=qs)
+        self.friction_comp = GravitationalForce(G/g, g, pos1=phi_3* D/2 * cos(alpha)*mu , qs=qs)
+        self.force = Force(-M_T,pos1=phi_3,qs=qs)
+        self.drive = Force(M_s,pos1=phi_1,qs=qs)
+        self.gravity_comp = GravitationalForce(G/g, g, pos1=phi_3* D/2 * sin(alpha) , qs=qs)
+
+        system = self.engine + self.disk_1 + self.disk_2 + self.disk_3 + self.disk_4 + self.disk_B + self.load + self.friction_comp + self.gravity_comp + self.force + self.drive
+
+        super().__init__(system,**kwargs)
+        
+        
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.I: r'crank moment of inertia',
+            # self.k_beam: r'Beam stiffness',
+            # self.g: r'gravitational field acceleration'
+        }
+
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+        E, I_s,I_k,I_b,I_1,I_2,I_3,I_4,i_1, i_2,D,G,g,mu,M_T,M_s= symbols('E I_s I_k I_b I_1 I_2 I_3 I_4 i_1 i_2 D G g \mu M_T M_s', positive=True)
+        
+        default_data_dict = {
+            self.I_s: [20,30,40],
+            self.I_k: [20,30,40],
+            self.I_1: [20,30,40],
+            self.I_2: [20,30,40],
+            self.I_3: [20,30,40],
+            self.I_4: [20,30,40],
+            self.I_b: [20,30,40],
+            self.i_1: [20,30,40],
+            self.i_2: [20,30,40],
+            self.D: [10,20,30],
+            self.G: [10,20,30],
+            self.g: [10,20,30],
+            self.mu : [10,20,30],
+            self.M_T : [10,20,30],
+            self.M_s : [10,20,30],
+            self.phi: [10,20,30],
+            self.phi_2: [10,20,30],
+            self.phi_3  : [10,20,30],
+            self.alpha  : [10,20,30],
+        }
+
+        return default_data_dict
+        
