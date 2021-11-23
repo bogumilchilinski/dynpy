@@ -4782,8 +4782,11 @@ class SDOFWinchSystem(ComposedSystem):
                  I_3=Symbol('I_3', positive=True),
                  I_4=Symbol('I_4', positive=True),
                  I_b=Symbol('I_b', positive=True),
+                 A=Symbol('A', positive=True),
+                 B=Symbol('B', positive=True),
                  ivar=Symbol('t'),
                  phi=dynamicsymbols('\\varphi'),
+                 dphi=dynamicsymbols('\\varphi',1),
                  D=Symbol('D', positive=True),
                  mu=Symbol('\\mu', positive=True),
                  M_s=Symbol('M_s', positive=True),
@@ -4818,7 +4821,9 @@ class SDOFWinchSystem(ComposedSystem):
         self.phi_2 = phi_2
         self.phi_3 = phi_3
         self.alpha = alpha
-        
+        self.A=A
+        self.B=B
+        self.dphi = dphi
 
         
         self.engine = Disk(I_s, phi_1, qs=qs)
