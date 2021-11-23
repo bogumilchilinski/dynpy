@@ -489,7 +489,7 @@ class SimpleChair5DOF(dyn.HarmonicOscillator):
         #+++++++++++++++++++++
 
         ##                k_rear                                    k_fr
-        V_obr = S.One/2 * k_r * (z+l_l*phi-z_rear)**2 + S.One/2 * k_f * (z-l_r*phi-z_fr)**2 - S.One/2 * m_3 * z_c3 * g *phi**2
+        V_obr = S.One/2 * k_r * (z+l_l*phi-z_rear)**2 + S.One/2 * k_f * (z-l_r*phi-z_fr)**2 + m_3 *(z+ z_c3 )* g * cos(phi)
 
         Ekinetic=T_body+T_rot+T_rear+T_fr+T_wheel
         Epotential=V_rear+V_fr+V_pion+V_obr

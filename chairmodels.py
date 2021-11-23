@@ -367,7 +367,7 @@ rapidchair_1dof=rapidchair_3dof.subs(rcdof1,method='direct').shranked([phi_rc])(
 
 chair5dof_rc3dof=Chair5DOFwithRC3DOF()
 
-### system parametes
+### system parameters
 m_fr, m_rear,m_3, k_r, k_rt, k_f, k_ft, k_rot = symbols('m_fr, m_r, M, k_r, k_rt, k_f, k_ft k_rot',positive=True)
 m,k,g,F_1,F_2,Omega,F,R,v0,u0,l_l,l_r= symbols('m,k,g,F_1,F_2,Omega, F_0 R, v_0,u_0,l_l,l_r',positive=True)
 I_ch, I_w , z_c3,l_fr,l_rear= symbols('I_chair, I_wheel, z_c3, l_fr, l_r',positive=True)
@@ -399,7 +399,7 @@ V_fr = S.One/2*k_ft*(z_fr-amplitude*cos(2*pi/(length/speed)*(t-axw/speed)))**2  
 V_pion= S.One/2 * k_r*(z-z_rear)**2 + S.One/2 * k_f*(z-z_fr)**2  ##### te
 #+++++++++++++++++++++
 
-##                k_rear                                    k_fr
+##               k_rear                                    k_fr
 V_obr = S.One/2 * k_r * (z+l_l*phi-z_rear)**2 + S.One/2 * k_f * (z-l_r*phi-z_fr)**2 - S.One/2 * m_3 * z_c3 * g *phi**2
 
 Ekinetic=T_body+T_rot+T_rear+T_fr+T_wheel
