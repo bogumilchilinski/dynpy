@@ -4881,7 +4881,7 @@ class SDOFWinchSystem(ComposedSystem):
 
         return default_data_dict
         
-    def steady_velocity(self):
+    def steady_angular_velocity(self):
         obj=self
         eoms_num = obj._eoms[0].subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data)
         eom_sol = dsolve(eoms_num, obj.q[0], ics={obj.q[0].subs(obj.ivar, 0): 0, obj.q[0].diff(obj.ivar).subs(obj.ivar, 0): 0})
@@ -4892,5 +4892,6 @@ class SDOFWinchSystem(ComposedSystem):
         obj=self
         M_Z = obj._eoms[0].doit().subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data).subs([(obj.q[0].diff(obj.ivar,obj.ivar),0),(obj.q[0].diff(obj.ivar),0)])
         delta_1 = 0.4*(obj.A-Abs(M_Z))/(obj.phi_1.diff(obj.ivar)**2*obj.I_k)
+#         0.4*(num_data.loc[case_no,'A']-Abs(M_Z))/(omega_ust**2*I_r)
         return delta_1
         
