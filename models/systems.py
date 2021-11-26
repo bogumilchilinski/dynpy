@@ -4817,7 +4817,7 @@ class SDOFWinchSystem(ComposedSystem):
         self.mu = mu
         self.M_T = M_T
         self.M_s = M_s
-        self.phi = phi
+        self.phi_1 = phi_1
         self.phi_2 = phi_2
         self.phi_3 = phi_3
         self.alpha = alpha
@@ -4873,11 +4873,24 @@ class SDOFWinchSystem(ComposedSystem):
             self.mu : [10,20,30],
             self.M_T : [10,20,30],
             self.M_s : [10,20,30],
-            self.phi: [10,20,30],
+            self.phi_1: [10,20,30],
             self.phi_2: [10,20,30],
             self.phi_3  : [10,20,30],
             self.alpha  : [10,20,30],
         }
 
         return default_data_dict
+        
+    def steady_velocity(self):
+        obj=self
+        eoms_num = obj._eoms[0].subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data)
+        eom_sol = dsolve(eoms_num, obj.q[0], ics={obj.q[0].subs(obj.ivar, 0): 0, obj.q[0].diff(obj.ivar).subs(obj.ivar, 0): 0})
+        omega_steady_state =  (eom_sol.rhs.diff(obj.ivar).subs(obj.ivar,oo))
+        return omega_steady_state
+    
+    def delta_1(self):
+        obj=self
+        M_Z = obj._eoms[0].doit().subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data).subs([(obj.q[0].diff(obj.ivar,obj.ivar),0),(obj.q[0].diff(obj.ivar),0)])
+        delta_1 = 0.4*(obj.A-Abs(M_Z))/(obj.phi_1.diff(obj.ivar)**2*obj.I_k)
+        return delta_1
         

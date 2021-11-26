@@ -257,7 +257,8 @@ class OdeComputationalCase:
                          ic_list=None,
                          t_eval=None,
                          params_values=None,
-                         method='RK45'):
+                         method='RK45',
+                         derivatives=False):
         '''
         Returns the result of the computations of solve_ivp integrator from scipy.integrate module.
         '''
@@ -283,6 +284,9 @@ class OdeComputationalCase:
             solution_tdf[vel.diff(self.ivar)] = gradient
             print('_'*100,t.elapse)
             comp_time=t.elapse
+            
+            #if derivatives:
+                
 
 
 
