@@ -1,6 +1,6 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                     hessian, Function, flatten, Tuple, im, pi, latex,dsolve,solve,
-                    fraction,factorial,Derivative, Integral,Expr,Subs)
+                    fraction,factorial,Derivative, Integral,Expr,Subs, Mul, Add)
 
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
@@ -1083,14 +1083,31 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
             if system is None:
                 system = self
 
+            
+                
             dyn_sys=self._nonlinear_base_system
-            dyn_sys_lin = self
+            dyn_sys_lin=dyn_sys.linearized()
+            
+            coords=list(dyn_sys.Y) + list(dyn_sys.q.diff(t,t))
+            op_point = {coord: 0 for coord in coords}
+
+            #display(self._op_points(hint=hint, subs=True))
+            op_point.update(dyn_sys._op_points(subs=True)[0])
 
 
-
+            mrk_lagrangian_nonlin = Marker('lagrangLin',prefix='eq')
+            mrk_lagrangian_lin = Marker('lagrangLin',prefix='eq')
+            
             display(ReportText(
-                    f'''Linearyzaja równań polega na znalezieniu ich rozwinięcia w szereg Taylora względem współrzęnych, prędkości i przyspieszeń uogólnionych. 
-                    Formalnie należy obliczyć pochodne cząstkowe wielkości uogólnionych ze składników równań Lagrange'a:
+                    f'''Linearyzaja równań polega na znalezieniu ich rozwinięcia w szereg Taylora względem współrzęnych, prędkości i przyspieszeń uogólnionych w otoczeniu punktu równowagi.
+                    Są one następujące:
+                                '''))                    
+            
+            for eq_coord,val in op_point.items():
+                display((SympyFormula(  Eq(eq_coord,val) , marker=mrk_lagrangian_lin  )  ))
+            
+            display(ReportText(
+                    f'''Formalnie należy obliczyć pochodne cząstkowe wielkości uogólnionych ze składników równań Lagrange'a:
                                 '''))
 
 
@@ -1098,8 +1115,7 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
             diffL_d=lambda coord: Symbol(latex(Derivative(Symbol('L'),Symbol(vlatex(coord))))  )
 
             
-            mrk_lagrangian_nonlin = Marker('lagrangLin',prefix='eq')
-            mrk_lagrangian_lin = Marker('lagrangLin',prefix='eq')
+
             display(ReportText(f'''Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące: 
                                    ({Ref(mrk_lagrangian_nonlin).dumps()}):
                                 '''))
@@ -1111,21 +1127,56 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
             display((SympyFormula(  Eq(Symbol('L'),dyn_sys_lin.L.expand()[0]) , marker=mrk_lagrangian_lin  )  ))
             
             for no,eom in enumerate(dyn_sys._eoms):
+
+
+
                 
-                eq_sym=Symbol(f'rr_{no}')
+                eq_sym=Symbol(f'rr_{latex(dyn_sys.q[no])}')
                 
-                coords=list(dyn_sys.Y) + list(dyn_sys.q.diff(t,t))
                 
-                diff_list=MultivariableTaylorSeries(eom,coords,n=1,x0=None).calculation_steps(expr_symbol=eq_sym)
+                display(ReportText(f'''Równanie ruchu dla współrzędnej ${latex(dyn_sys.q[no])}$ można przestawić jako:
+                                    '''))
+                
+                display((SympyFormula(  Eq(Eq(eq_sym,eom),0,evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+                
+                display(ReportText(f'''Równanie ruchu po linearyzacji przedstawia zależność:
+                                    '''))
+
+                
+                
+                
+                
+                display((SympyFormula(  Eq(MultivariableTaylorSeries(eq_sym,coords,n=1,x0=op_point),0) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+                
+                diff_list=MultivariableTaylorSeries(eom,coords,n=1,x0=op_point).calculation_steps(expr_symbol=eq_sym)
                 
                 for diff_eq in diff_list:
                 
                     display((SympyFormula(  diff_eq , marker=mrk_lagrangian_lin,backend=latex  )  ))
                     
-               
-            
+                display(ReportText(f'''Po podstawieniu obliczonych pochodnych, otrzumuje się następujące równanie:
+                                    '''))
+                display((SympyFormula(  Eq(MultivariableTaylorSeries(eom,coords,n=1,x0=op_point).doit(),0,evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+                
+            display(ReportText(f'''Z równań ruchu wyznaczono macierz mas i sztywności układu:
+                                    '''))
+            display((SympyFormula(  Eq(Symbol('M'),dyn_sys_lin.inertia_matrix(),evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
 
-        
+            display((SympyFormula(  Eq(Symbol('K'),dyn_sys_lin.stiffness_matrix(),evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+            
+            Delta = Symbol('\Delta')
+            
+            display(ReportText(f'''Macierz fundamentalna, na podstawie której wyznaczono równanie charakterystyczne rozważanego układu ${latex(Delta)}$, przedstawiają się następująco:
+                                    '''))
+
+            display((SympyFormula(  Eq(Symbol('A'),dyn_sys_lin.fundamental_matrix(),evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+            display((SympyFormula(  Eq(Delta,dyn_sys_lin.fundamental_matrix().det().simplify().simplify(),evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+
+            display(ReportText(f'''Rozwiązanie równania charakterystycznego (dwukwadratowego) pozwala obliczyć częstości drgań własnych układu:
+                                    '''))
+            for no,omega in enumerate([omega for omega in HarmonicOscillator(dyn_sys_lin).natural_frequencies().doit() if omega !=0]):
+                display((SympyFormula( Eq(Symbol(f'omega_0{no+1}'),omega) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+
         return doc_model
     
     
