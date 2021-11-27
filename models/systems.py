@@ -1,6 +1,6 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, asin, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, pi, latex, dsolve,
-                   solve, fraction, factorial,Subs, Number)
+                   solve, fraction, factorial,Subs, Number,oo)
 
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
@@ -4887,6 +4887,12 @@ class SDOFWinchSystem(ComposedSystem):
         eom_sol = dsolve(eoms_num, obj.q[0], ics={obj.q[0].subs(obj.ivar, 0): 0, obj.q[0].diff(obj.ivar).subs(obj.ivar, 0): 0})
         omega_steady_state =  (eom_sol.rhs.diff(obj.ivar).subs(obj.ivar,oo))
         return omega_steady_state
+    
+    def reduced_torque(self):
+        obj=self
+        
+        red_tor = -(obj._eoms[0].doit().subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data).subs([(obj.q[0].diff(obj.ivar,obj.ivar),0),(obj.q[0].diff(obj.ivar),0)])).n(5)
+        return red_tor
     
     def delta_1(self):
         obj=self
