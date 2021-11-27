@@ -4842,8 +4842,6 @@ class SDOFWinchSystem(ComposedSystem):
         system = self.engine + self.disk_1 + self.disk_2 + self.disk_3 + self.disk_4 + self.disk_B + self.load + self.friction_comp + self.gravity_comp + self.force + self.drive
 
         super().__init__(system,**kwargs)
-        
-        
 
     def symbols_description(self):
         self.sym_desc_dict = {
