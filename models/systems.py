@@ -1,6 +1,6 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, asin, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, pi, latex, dsolve,
-                   solve, fraction, factorial,Subs, Number,oo)
+                   solve, fraction, factorial,Subs, Number, oo, Abs)
 
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
@@ -4893,17 +4893,17 @@ class SDOFWinchSystem(ComposedSystem):
         return red_tor
     
     def delta_1(self):
+        
         obj=self
         M_Z = obj._eoms[0].doit().subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data).subs([(obj.q[0].diff(obj.ivar,obj.ivar),0),(obj.q[0].diff(obj.ivar),0)])
-        delta_1 = 0.4*(obj.A-Abs(M_Z))/(obj.phi_1.diff(obj.ivar)**2*obj.I_k)
-#         0.4*(num_data.loc[case_no,'A']-Abs(M_Z))/(omega_ust**2*I_r)
+        delta_1 = 0.4*(obj.A-Abs(M_Z))/(self.steady_angular_velocity()**2*self.reduced_inertia())
+
         return delta_1
 
     def reduced_inertia(self):
         obj = self
         
         ans = obj.inertia_matrix()[0]
-
 
         return ans
 
@@ -4914,5 +4914,9 @@ class SDOFWinchSystem(ComposedSystem):
 
         ik=((((delta_1/0.02)-1)*I_r).n(5))
         return ik
-
+    def startup_mass_velocity(self):
+        obj=self
+        st_val=obj.D/2*obj.phi_3
+        return st_val
+        
 
