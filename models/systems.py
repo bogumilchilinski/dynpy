@@ -494,7 +494,7 @@ class SDoFDampedHarmonicOscillator(ComposedSystem):
         super().__init__(system,**kwargs)
 
 
-class DDoFSimplifyVehicleSuspension(ComposedSystem):
+class DDoFSimplifySuspension(ComposedSystem):
     """
     Ready to use sample Double Degree of Freedom System represents symmetrical kinematically excited beam with two springs.
         Arguments:
