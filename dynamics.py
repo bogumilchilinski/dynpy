@@ -1439,7 +1439,7 @@ class HarmonicOscillator(LinearDynamicSystem):
                                     excitation_freq=Symbol('Omega',
                                                            positive=True)):
         '''
-        Returns the Frequency Response Function of the system for the given excitation amplitude (working correctly for single degree of freedom systems).
+        Returns the Frequency Response Function of the system for the given excitation amplitude working correctly for systems with defined stiffenes matrix.
         '''
 
 
