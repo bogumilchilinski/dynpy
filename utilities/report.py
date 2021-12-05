@@ -3044,6 +3044,14 @@ class SymbolsDescription(Description):
                          start_arguments=start_arguments,
                          **kwargs)
 
+
+        self.add_items(self._symbols_to_add_dict())
+
+    def _symbols_to_add_dict(self):
+        
+        description_dict = self.description_dict
+        expr = self.expr
+        
         if description_dict and expr:
 
             symbols_set = expr.atoms(Symbol, Function, Derivative)
@@ -3052,12 +3060,35 @@ class SymbolsDescription(Description):
                 sym: desc
                 for sym, desc in description_dict.items() if sym in symbols_set
             }
+            
+            return symbols_to_add
 
-            self.add_items(symbols_to_add)
+            
 
-        if description_dict:
-            self.add_items(description_dict)
+        elif description_dict:
+            return description_dict
+        
+        else:
+            return {}
+            
+            
 
+    def reported(self,container=[]):
+        
+        container.append(self)
+        
+        entries = [f'{vlatex(key)} - {value}'     for  key,value in self._symbols_to_add_dict().items()]
+        
+        text = '- ' +  ', \n - '.join(entries) + '.'
+        
+        display(Markdown(text))
+
+        #return (self._text)
+        return ''
+        
+
+        
+            
     def add_items(self, description_dict):
 
         for label, entry in description_dict.items():
@@ -3066,6 +3097,18 @@ class SymbolsDescription(Description):
                           NoEscape(vlatex(entry)))
 
 
+    def __repr__(self):
+
+        entries = [f'{vlatex(key)} - {value}'     for  key,value in self._symbols_to_add_dict().items()]
+        
+        text = '- ' +  ', \n - '.join(entries) + '.'
+        
+        display(Markdown(text))
+
+        #return (self._text)
+        return ''
+            
+            
 class Equation(Environment):
     """A class to wrap LaTeX's alltt environment."""
 
