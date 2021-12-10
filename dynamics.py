@@ -254,6 +254,24 @@ def scalar_fun_quadratic_form(expr, coordinates, op_point):
     return constant_term + linear_term + quad_tem
 
 
+class DynamicSymbol(Function):
+    
+    def _repr_latex_(self):
+        print(self.args)
+        return super()._repr_latex_()[0:-2]
+    
+
+
+
+class DynamicDerivative(Derivative):
+    
+    def _repr_latex_(self):
+        
+        print(self.args)
+        return super()._repr_latex_()[0:-2]
+    
+    
+
 class LagrangesDynamicSystem(me.LagrangesMethod):
     '''Lagrange's method object
 
