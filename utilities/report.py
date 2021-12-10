@@ -3025,6 +3025,36 @@ class NumbersList(NoEscape):
 
         return list_str
 
+class DescrptionsRegistry:
+    
+    _descriptions={}
+    _described_elements={}
+    
+    def __init__(self,description_dict=None,method='add'):
+        if description_dict is not None:  self._descriptions = description_dict
+
+            
+            
+    def _get_description(self,items):
+        symbols_list=self._desctiption.keys()
+        
+        
+        
+        missing_symbols_desc={sym:'???' for sym in items if sym not in symbols_list}
+        
+        self._descriptions = {**self._descriptions,**missing_symbols_desc}
+        self.__class__._descriptions  = {**self.__class__._descriptions,**missing_symbols_desc}
+        
+
+        syms_to_desc=[sym for sym in items if sym not in self._described_elements.keys()]
+        
+        self._described_elements = {**self._described_elements,**syms_to_desc}
+        self.__class__._described_elements = {**self.__class__._described_elements,**syms_to_desc}
+        
+        return syms_to_desc
+                
+        
+        
 
 class SymbolsDescription(Description):
     """A class representing LaTeX description environment of Symbols explained in description_dict."""
@@ -3077,9 +3107,9 @@ class SymbolsDescription(Description):
         
         container.append(self)
         
-        entries = [f'{vlatex(key)} - {value}'     for  key,value in self._symbols_to_add_dict().items()]
+        entries = [f'${vlatex(key)}$ - {value}'     for  key,value in self._symbols_to_add_dict().items()]
         
-        text = '- ' +  ', \n - '.join(entries) + '.'
+        text = ',  \n'.join(entries) +'.'
         
         display(Markdown(text))
 
@@ -3099,9 +3129,9 @@ class SymbolsDescription(Description):
 
     def __repr__(self):
 
-        entries = [f'{vlatex(key)} - {value}'     for  key,value in self._symbols_to_add_dict().items()]
+        entries = [f'${vlatex(key)}$ - {value}'     for  key,value in self._symbols_to_add_dict().items()]
         
-        text = '- ' +  ', \n - '.join(entries) + '.'
+        text = ',  \n'.join(entries) +'.'
         
         display(Markdown(text))
 
