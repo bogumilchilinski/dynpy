@@ -3025,6 +3025,36 @@ class NumbersList(NoEscape):
 
         return list_str
 
+class DescrptionsRegistry:
+    
+    _descriptions={}
+    _described_elements={}
+    
+    def __init__(self,description_dict=None,method='add'):
+        if description_dict is not None:  self._descriptions = description_dict
+
+            
+            
+    def _get_description(self,items):
+        symbols_list=self._desctiption.keys()
+        
+        
+        
+        missing_symbols_desc={sym:'???' for sym in items if sym not in symbols_list}
+        
+        self._descriptions = {**self._descriptions,**missing_symbols_desc}
+        self.__class__._descriptions  = {**self.__class__._descriptions,**missing_symbols_desc}
+        
+
+        syms_to_desc=[sym for sym in items if sym not in self._described_elements.keys()]
+        
+        self._described_elements = {**self._described_elements,**syms_to_desc}
+        self.__class__._described_elements = {**self.__class__._described_elements,**syms_to_desc}
+        
+        return syms_to_desc
+                
+        
+        
 
 class SymbolsDescription(Description):
     """A class representing LaTeX description environment of Symbols explained in description_dict."""
@@ -3044,6 +3074,14 @@ class SymbolsDescription(Description):
                          start_arguments=start_arguments,
                          **kwargs)
 
+
+        self.add_items(self._symbols_to_add_dict())
+
+    def _symbols_to_add_dict(self):
+        
+        description_dict = self.description_dict
+        expr = self.expr
+        
         if description_dict and expr:
 
             symbols_set = expr.atoms(Symbol, Function, Derivative)
@@ -3052,12 +3090,35 @@ class SymbolsDescription(Description):
                 sym: desc
                 for sym, desc in description_dict.items() if sym in symbols_set
             }
+            
+            return symbols_to_add
 
-            self.add_items(symbols_to_add)
+            
 
-        if description_dict:
-            self.add_items(description_dict)
+        elif description_dict:
+            return description_dict
+        
+        else:
+            return {}
+            
+            
 
+    def reported(self,container=[]):
+        
+        container.append(self)
+        
+        entries = [f'${vlatex(key)}$ - {value}'     for  key,value in self._symbols_to_add_dict().items()]
+        
+        text = ',  \n'.join(entries) +'.'
+        
+        display(Markdown(text))
+
+        #return (self._text)
+        return ''
+        
+
+        
+            
     def add_items(self, description_dict):
 
         for label, entry in description_dict.items():
@@ -3066,6 +3127,18 @@ class SymbolsDescription(Description):
                           NoEscape(vlatex(entry)))
 
 
+    def __repr__(self):
+
+        entries = [f'${vlatex(key)}$ - {value}'     for  key,value in self._symbols_to_add_dict().items()]
+        
+        text = ',  \n'.join(entries) +'.'
+        
+        display(Markdown(text))
+
+        #return (self._text)
+        return ''
+            
+            
 class Equation(Environment):
     """A class to wrap LaTeX's alltt environment."""
 

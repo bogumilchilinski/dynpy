@@ -340,7 +340,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     Finaly one can define instance rod of class LagrangesDynamicSystem by making use of calculation and variables made previously. In addition there is possibility to create instant of class OdeComputationalCase (rod_numerical) that allows to perform numerical operations on the EOM
 
     '''
-
+    _hint=[]
+    _default_subs_method='direct'
     scheme_name = 'engine.png'
     real_name = 'engine_real.PNG'
 
@@ -549,7 +550,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         if 'method' in kwargs.keys():
             method = kwargs['method']
         else:
-            method = 'direct'
+            method = self._default_subs_method
 
         if method == 'as_constrains':
             if len(args) == 2:
@@ -772,7 +773,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                            '''))
         
         for eq in dyn_sys._eoms:
-            display(SympyFormula( Eq(eq,0) , marker=mrk_gov_eq_nonlin ))
+            display(SympyFormula( Eq(eq.simplify().expand(),0) , marker=mrk_gov_eq_nonlin ))
 
         #mrk_lagrangian_lin=Marker('lagrangian_lin_sys',prefix='eq')
         #
@@ -842,17 +843,29 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                    static_disp_dict=None,
                    dict=True,
                    subs=False,
-                   hint=[], 
+                   hint=None, 
                    *args,
                    **kwargs):
         """
         Provides the interface for critical points evaluation (solves the equlibrium conditions and returns its roots).
         """
+        
+        if hint is None: hint = self._hint
+            
+        #display(hint)
 
         eqns_to_solve = self.equilibrium_equation(
             static_disp_dict=static_disp_dict).doit()
+        #print('op point - new')
         #display(eqns_to_solve )
-        roots = solve(list(eqns_to_solve) + list(flatten([hint])),
+        
+        hint= [eq.subs(self.q_0) for eq  in hint]
+        
+        combined_eqns=list(eqns_to_solve) + list(flatten([hint]))
+        #display(combined_eqns)
+                                                 
+        
+        roots = solve(combined_eqns,
                       list(self.q_0.values()),
                       dict=dict)
         
@@ -1117,52 +1130,64 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
             mrk_lagrangian_lin = Marker('lagrangLin',prefix='eq')
             
             display(ReportText(
-                    f'''Linearyzaja równań polega na znalezieniu ich rozwinięcia w szereg Taylora względem współrzęnych, prędkości i przyspieszeń uogólnionych w otoczeniu punktu równowagi.
-                    Są one następujące:
-                                '''))                    
+                    f'''Linearyzaja równań polega na znalezieniu ich rozwinięcia w szereg Taylora względem współrzędnych, prędkości i przyspieszeń uogólnionych w otoczeniu punktu równowagi.
+                    Celem uproszczenia wprowadzono następujące oznaczenia:'''))
+            
+            for coord in coords:
+                display((SympyFormula(  Eq(Symbol(vlatex(coord)),Symbol(latex(coord))) , marker=mrk_lagrangian_lin  )  )) 
+            
+            
+            
+            display(ReportText(
+                    f'''Punkty równowagi rozważanego układu są następujące:
+                                '''))          
+            
+            
+
+            
             
             for eq_coord,val in op_point.items():
                 display((SympyFormula(  Eq(eq_coord,val) , marker=mrk_lagrangian_lin  )  ))
+                
+                
+  
             
-            display(ReportText(
-                    f'''Formalnie należy obliczyć pochodne cząstkowe wielkości uogólnionych ze składników równań Lagrange'a:
-                                '''))
-
+            
+            
 
 
             diffL_d=lambda coord: Symbol(latex(Derivative(Symbol('L'),Symbol(vlatex(coord))))  )
 
             
 
-            display(ReportText(f'''Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące: 
-                                   ({Ref(mrk_lagrangian_nonlin).dumps()}):
-                                '''))
+#             display(ReportText(f'''Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące: 
+#                                    ({Ref(mrk_lagrangian_nonlin).dumps()}):
+#                                 '''))
             
             #op_point = {coord  for coord in self.Y + list(self.q.diff(self.ivar))}
 
 
             
-            display((SympyFormula(  Eq(Symbol('L'),dyn_sys_lin.L.expand()[0]) , marker=mrk_lagrangian_lin  )  ))
+            #display((SympyFormula(  Eq(Symbol('L'),dyn_sys_lin.L.expand()[0]) , marker=mrk_lagrangian_lin  )  ))
             
             for no,eom in enumerate(dyn_sys._eoms):
 
 
 
                 
-                eq_sym=Symbol(f'rr_{latex(dyn_sys.q[no])}')
+                eq_sym=Symbol(f'RR_{latex(dyn_sys.q[no])}')
                 
                 
                 display(ReportText(f'''Równanie ruchu dla współrzędnej ${latex(dyn_sys.q[no])}$ można przestawić jako:
                                     '''))
                 
-                display((SympyFormula(  Eq(Eq(eq_sym,eom),0,evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
-                
-                display(ReportText(f'''Równanie ruchu po linearyzacji przedstawia zależność:
-                                    '''))
+                display((SympyFormula(  Eq(eq_sym,eom,evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
 
                 
-                
-                
+                display(ReportText(
+                    f'''Formalnie należy obliczyć pochodne cząstkowe wielkości uogólnionych ze składników równań Lagrange'a:
+                                '''))
+
                 
                 display((SympyFormula(  Eq(MultivariableTaylorSeries(eq_sym,coords,n=1,x0=op_point),0) , marker=mrk_lagrangian_lin,backend=latex  )  ))
                 
@@ -1172,9 +1197,9 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
                 
                     display((SympyFormula(  diff_eq , marker=mrk_lagrangian_lin,backend=latex  )  ))
                     
-                display(ReportText(f'''Po podstawieniu obliczonych pochodnych, otrzumuje się następujące równanie:
+                display(ReportText(f'''Po podstawieniu obliczonych pochodnych, otrzumuje się następujące zlinearyzowane równanie:
                                     '''))
-                display((SympyFormula(  Eq(MultivariableTaylorSeries(eom,coords,n=1,x0=op_point).doit(),0,evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+                display((SympyFormula(  Eq(MultivariableTaylorSeries(eom,coords,n=1,x0=op_point).doit().expand().simplify().expand(),0,evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
                 
             display(ReportText(f'''Z równań ruchu wyznaczono macierz mas i sztywności układu:
                                     '''))
@@ -1188,7 +1213,7 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
                                     '''))
 
             display((SympyFormula(  Eq(Symbol('A'),dyn_sys_lin.fundamental_matrix(),evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
-            display((SympyFormula(  Eq(Delta,dyn_sys_lin.fundamental_matrix().det().simplify().simplify(),evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+            display((SympyFormula(  Eq(Delta,dyn_sys_lin.fundamental_matrix().det().expand().simplify().simplify().expand(),evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
 
             display(ReportText(f'''Rozwiązanie równania charakterystycznego (dwukwadratowego) pozwala obliczyć częstości drgań własnych układu:
                                     '''))
@@ -1457,7 +1482,7 @@ class HarmonicOscillator(LinearDynamicSystem):
                                     excitation_freq=Symbol('Omega',
                                                            positive=True)):
         '''
-        Returns the Frequency Response Function of the system for the given excitation amplitude (working correctly for single degree of freedom systems).
+        Returns the Frequency Response Function of the system for the given excitation amplitude working correctly for systems with defined stiffenes matrix.
         '''
 
 
