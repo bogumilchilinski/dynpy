@@ -20,7 +20,7 @@ from pylatex.utils import NoEscape, italic
 from sympy import Matrix, symbols, Symbol, Eq, Expr
 from sympy.core.relational import Relational
 
-from sympy import Symbol, Function, Derivative, latex
+from sympy import Symbol, Function, Derivative, latex, sin, cos, tan,exp
 
 from sympy.physics.vector.printing import vlatex, vpprint
 
@@ -3056,6 +3056,46 @@ class DescrptionsRegistry:
         
         
 
+class DescriptionsRegistry:
+    
+    _descriptions={}
+    _described_elements={}
+    
+    @classmethod
+    def set_descriptions(cls,description={}):
+        cls._descriptions = description
+    
+    @classmethod
+    def reset_registry(cls):
+        cls._described_elements={}
+    
+    def __init__(self,description_dict=None,method='add'):
+        if description_dict is not None:  self._descriptions = description_dict
+
+            
+            
+    def _get_description(self,items):
+        symbols_list=self._descriptions.keys()
+        
+        
+        
+        missing_symbols_desc={sym:'???' for sym in items if sym not in symbols_list}
+        
+        self._descriptions = {**self._descriptions,**missing_symbols_desc}
+        self.__class__._descriptions  = {**self.__class__._descriptions,**missing_symbols_desc}
+        
+
+        #syms_to_desc={sym for sym in items if sym not in self._described_elements.keys()}
+        syms_to_desc={sym:self._descriptions[sym] for sym in items if sym not in self._described_elements.keys()}
+        
+        self._described_elements = {**self._described_elements,**syms_to_desc}
+        self.__class__._described_elements = {**self.__class__._described_elements,**syms_to_desc}
+        
+        return syms_to_desc
+                
+        
+
+
 class SymbolsDescription(Description):
     """A class representing LaTeX description environment of Symbols explained in description_dict."""
     _latex_name = 'description'
@@ -3075,16 +3115,18 @@ class SymbolsDescription(Description):
                          **kwargs)
 
 
-        self.add_items(self._symbols_to_add_dict())
+        self._added_symbols=self._symbols_to_add_dict()
+        
+        self.add_items(self._added_symbols)
 
     def _symbols_to_add_dict(self):
         
         description_dict = self.description_dict
         expr = self.expr
         
-        if description_dict and expr:
+        if description_dict is not None and expr is not None:
 
-            symbols_set = expr.atoms(Symbol, Function, Derivative)
+            symbols_set = expr.atoms(Symbol, Function, Derivative) - expr.atoms(sin,cos,tan,exp)
 
             symbols_to_add = {
                 sym: desc
@@ -3095,9 +3137,33 @@ class SymbolsDescription(Description):
 
             
 
-        elif description_dict:
-            return description_dict
-        
+        elif (description_dict is None) and (expr is not None):
+
+            
+            symbols_set=set()
+            if isinstance(expr,Iterable):
+                for elem in expr:
+                    symbols_set |= elem.atoms(Symbol, Function, Derivative) - elem.atoms(sin,cos,tan,exp)
+            #print(symbols_set)
+            else:
+                symbols_set |= expr.atoms(Symbol, Function, Derivative) - expr.atoms(sin,cos,tan,exp)
+
+
+            
+            description_dict = DescriptionsRegistry()._get_description(symbols_set)
+            
+            #print(description_dict)
+
+            symbols_to_add = {
+                sym: desc
+                for sym, desc in description_dict.items()
+            }
+            
+            ##print('symbols')
+            #print(symbols_to_add)
+            
+            return symbols_to_add
+
         else:
             return {}
             
@@ -3107,9 +3173,14 @@ class SymbolsDescription(Description):
         
         container.append(self)
         
-        entries = [f'${vlatex(key)}$ - {value}'     for  key,value in self._symbols_to_add_dict().items()]
+
+        entries = [f'${vlatex(key)}$ - {value}'     for  key,value in self._added_symbols.items()]
         
-        text = ',  \n'.join(entries) +'.'
+        end_sign = '.'
+        if len(entries) == 0: end_sign = ''
+        
+        text = ',  \n'.join(entries) + end_sign
+
         
         display(Markdown(text))
 
@@ -3129,9 +3200,14 @@ class SymbolsDescription(Description):
 
     def __repr__(self):
 
-        entries = [f'${vlatex(key)}$ - {value}'     for  key,value in self._symbols_to_add_dict().items()]
+
+        entries = [f'${vlatex(key)}$ - {value}'     for  key,value in self._added_symbols.items()]
         
-        text = ',  \n'.join(entries) +'.'
+        end_sign = '.'
+        if len(entries) == 0: end_sign = ''
+        
+        text = ',  \n'.join(entries) + end_sign
+
         
         display(Markdown(text))
 

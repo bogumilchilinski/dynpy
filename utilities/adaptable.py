@@ -656,21 +656,27 @@ class BasicFormattingTools(DataMethods):
     def to_named_axis_form(self, axis=0):
         new_obj = self.copy()
 
-        idx = new_obj.index
+        idx = new_obj.axes[axis]
 
-        if isinstance(idx, pd.Index):
-            name = idx.name
-        else:
+        if isinstance(idx, pd.MultiIndex):
             print('MultiIndex modification has been not supported yet')
-            return new_obj
+            numbered_obj=new_obj.format_axis_names(lambda name: float(name.rhs) if isinstance(name,Eq) else name  ,axis=axis)
+            #sym_wyn.loc[:,ix[:,:,dyn_sys.phi_1]].plot()
 
-        if all([isinstance(entry, Relational) for entry in idx]):
-            #TODO: add numerical types recognizing
-            new_obj_with_name = new_obj._modify_axis(
-                lambda elem: float(elem.rhs) if isinstance(elem.rhs,Number) else elem.rhs, axis=axis)
+            new_obj_with_name=numbered_obj.format_columns_names(lambda name: float(name.rhs) if isinstance(name,Eq) else name  )
+            new_obj_with_name.axes[axis].names=[ level_idx[0].lhs if isinstance(level_idx[0],Eq) else  level_idx.name  for level_idx  in idx.levels ]
+            
 
-        print(new_obj_with_name.axes[axis].name)
-        new_obj_with_name.axes[axis].name = idx[0].lhs
+        else:
+            name = idx.name
+            
+            if all([isinstance(entry, Relational) for entry in idx]):
+                #TODO: add numerical types recognizing
+                new_obj_with_name = new_obj._modify_axis(
+                    lambda elem: float(elem.rhs) if isinstance(elem.rhs,Number) else elem.rhs, axis=axis)
+
+                print(new_obj_with_name.axes[axis].name)
+                new_obj_with_name.axes[axis].name = idx[0].lhs
 
         return new_obj_with_name  #.rename(Symbol('l_w'),axis=axis)
 
