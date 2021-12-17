@@ -4909,7 +4909,7 @@ class SDOFWinchSystem(ComposedSystem):
         obj=self
         eoms_num = N(obj._eoms[0].subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data),3)
         eom_sol = dsolve(eoms_num, obj.q[0], ics={obj.q[0].subs(obj.ivar, 0): 0, obj.q[0].diff(obj.ivar).subs(obj.ivar, 0): 0})
-        omega_steady_state =  N((eom_sol.rhs.diff(obj.ivar).subs(obj.ivar,oo)),3)
+        omega_steady_state =  N(eom_sol.rhs.diff(obj.ivar).subs(obj.ivar,oo),3)
         return omega_steady_state
     
     def reduced_torque(self):
@@ -4970,10 +4970,13 @@ class SDOFDrivetrainVehicleSystem(ComposedSystem):
                  z_4=Symbol('z_4', positive=True),
                  I_4=Symbol('I_4', positive=True),
                  omega_3=Symbol('omega_3', positive=True),
+                 I_c=Symbol('I_c',positive=True),
                  I_d=Symbol('I_d', positive=True),
                  I_w=Symbol('I_w', positive=True),
                  r=Symbol('r', positive=True),
                  m=Symbol('m', positive=True),
+                 i_1=Symbol('i_1',positive=True),
+                 i_2=Symbol('i_2',positive=True),
                  ivar=Symbol('t'),
                  A=Symbol('A', positive=True),
                  B=Symbol('B', positive=True),
@@ -4987,10 +4990,10 @@ class SDOFDrivetrainVehicleSystem(ComposedSystem):
         pos1=phi
         qs=[phi]
         phi_1=phi
-        i_1=z_1/z_2
-        i_2=z_3/z_4
-        phi_2=phi_1*i_1
-        phi_3=phi_2*i_2
+#         i_1=z_2/z_1
+#         i_2=z_4/z_3
+        phi_2=phi_1/i_1
+        phi_3=phi_2/i_2
 
         self.M_s = M_m
         self.omega_m = omega_m
@@ -5000,25 +5003,30 @@ class SDOFDrivetrainVehicleSystem(ComposedSystem):
         self.I_3 = I_3
         self.i_2 = i_2
         self.I_4 = I_4
+        self.I_a = I_a
         self.I_b = I_b
-        self.I_k = I_w
+        self.I_c = I_c
+        self.I_d = I_d
+        self.I_k = I_k
+        self.I_m = I_m
+        self.I_w = I_w
         self.phi_1 = phi_1
         self.phi_2 = phi_2
         self.phi_3 = phi_3
         self.alpha = alpha
-        self.A=A
-        self.B=B
+        self.A = A
+        self.B = B
         self.dphi = dphi
-        self.r=r
-        self.D=2*self.r
-        self.m=m
-        self.c=c
-        self.g=g
+        self.r = r
+        self.D = 2*self.r
+        self.m = m
+        self.c = c
+        self.g = g
         
-        self.engine_inertia = Force(M_m, pos1=phi_1,qs=qs)
-        self.engine_force = Disk(I_m, phi_1, qs=qs)
-        self.flywheel = Disk(I, phi_1, qs=qs)
-        self.clutch = Disk(I_b, phi_1, qs=qs)
+        self.engine_force = Force(M_m, pos1=phi_1,qs=qs)
+        self.engine_inertia = Disk(I_m, phi_1, qs=qs)
+#         self.flywheel = Disk(I, phi_1, qs=qs)
+        self.clutch = Disk(I_c, phi_1, qs=qs)
         self.driveshaft_1 = Disk(I_a, phi_1, qs=qs)
         self.transmission_i = Disk(I_1, phi_1, qs=qs)
         self.transmission_o = Disk(I_2, phi_2, qs=qs)
@@ -5028,10 +5036,10 @@ class SDOFDrivetrainVehicleSystem(ComposedSystem):
         self.axleshaft = Disk(I_d, phi_3, qs=qs)
         self.wheels = Disk(4*I_w, phi_3, qs=qs)
         self.mass = MaterialPoint(m, pos1=phi_3*r , qs=qs)
-        self.gravity = GravitationalForce(m*g, g, pos1=phi_3* r * sin(alpha) , qs=qs)
+        self.gravity = Force(-m*g*sin(alpha), pos1=phi_3* r,qs=qs)#GravitationalForce(m, g, pos1=phi_3* r * sin(alpha) , qs=qs)
         self.air_force = Damper(c,pos1=phi_3*r,qs=qs) #(self, c, pos1, pos2=0, qs=None, ivar=Symbol('t'), frame=base_frame)
 
-        system = self.engine_inertia + self.engine_force + self.flywheel + self.clutch + self.driveshaft_1 + self.transmission_i + self.transmission_o + self.driveshaft_2 + self.diff_i + self.diff_o + self.axleshaft + self.wheels + self.mass + self.gravity + self.air_force
+        system = self.engine_inertia + self.engine_force + self.clutch + self.driveshaft_1 + self.transmission_i + self.transmission_o + self.driveshaft_2 + self.diff_i + self.diff_o + self.axleshaft + self.wheels + self.mass + self.gravity + self.air_force
 
         super().__init__(system,**kwargs)
 
@@ -5069,6 +5077,7 @@ class SDOFDrivetrainVehicleSystem(ComposedSystem):
         }
 
         return default_data_dict
+    
     def linear_vehicle_velocity(self):
         obj=self
         lin_veh_vel=omega_steady_state*vel_ratio
@@ -5081,35 +5090,33 @@ class SDOFDrivetrainVehicleSystem(ComposedSystem):
     
     def steady_angular_velocity(self):
         obj=self
-        eoms_num = obj._eoms[0].subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data)
+        display(obj._eoms[0])
+        eoms_num = N(obj._eoms[0].subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data),3)
+        display(eoms_num)
         eom_sol = dsolve(eoms_num, obj.q[0], ics={obj.q[0].subs(obj.ivar, 0): 0, obj.q[0].diff(obj.ivar).subs(obj.ivar, 0): 0})
-        omega_steady_state =  (eom_sol.rhs.diff(obj.ivar).subs(obj.ivar,oo))
+        omega_steady_state =  N(eom_sol.rhs.diff(obj.ivar).subs(obj.ivar,oo),3)
         return omega_steady_state
     
     def steady_angular_velocity_rev_per_min(self):
         obj=self
         ang_vel = obj.steady_angular_velocity()
-        
         return ang_vel* 60/360
     
     def reduced_torque(self):
         obj=self
-        red_tor = -(obj._eoms[0].doit().subs(obj.M_s,obj.A-obj.B*obj.dphi).subs([(obj.q[0].diff(obj.ivar,obj.ivar),0),(obj.q[0].diff(obj.ivar),0)]))
+        red_tor = (obj._eoms[0].doit().subs(obj.M_s,obj.A-obj.B*obj.dphi).subs([(obj.q[0].diff(obj.ivar,obj.ivar),0),(obj.q[0].diff(obj.ivar),0)]))
         return red_tor
     
     def delta_1(self):
         obj=self
         M_Z = obj._eoms[0].doit().subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data).subs([(obj.q[0].diff(obj.ivar,obj.ivar),0),(obj.q[0].diff(obj.ivar),0)])
-        delta_1 = 0.4*(obj.A-Abs(M_Z))/(obj.phi_1.diff(obj.ivar)**2*obj.I_k)
+        delta_1 = 0.4*(obj.A-Abs(M_Z))/(self.steady_angular_velocity()**2*self.reduced_inertia())
 #         0.4*(num_data.loc[case_no,'A']-Abs(M_Z))/(omega_ust**2*I_r)
         return delta_1
 
     def reduced_inertia(self):
         obj = self
-        
         ans = obj.inertia_matrix()[0]
-
-
         return ans
 
     def flywheel_moment_of_inertia(self):
@@ -5117,7 +5124,7 @@ class SDOFDrivetrainVehicleSystem(ComposedSystem):
         delta_1=self.delta_1()
         I_r=self.reduced_inertia()
 
-        ik=((((delta_1/0.02)-1)*I_r).n(5))
+        ik=((((delta_1/0.004)-1)*I_r).n(5))
         return ik
     
     def startup_mass_velocity(self):
