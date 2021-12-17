@@ -52,6 +52,10 @@ class ContinuousSystem:
             label = self.__class__.__name__ + ' on ' + str(self.q)
 
         self._label = label
+        self._given_data={}
+        
+        self._nonlinear_base_system=None
+        
 
     @property
     def BC(self):
@@ -94,8 +98,12 @@ class ContinuousSystem:
                                       spatial_var=self.r,
                                       derivative_order=self.diff_ord,
                                       label=self._label)
+        
+        new_sys = type(self)(0, q_new, system=new_system)
+        new_sys._given_data=given_data
+        new_sys._nonlinear_base_system = self._nonlinear_base_system
 
-        return type(self)(0, q_new, system=new_system)
+        return new_sys
 
     @property
     def _eoms(self):
