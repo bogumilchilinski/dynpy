@@ -5042,6 +5042,8 @@ class SDOFDrivetrainVehicleSystem(ComposedSystem):
         system = self.engine_inertia + self.engine_force + self.clutch + self.driveshaft_1 + self.transmission_i + self.transmission_o + self.driveshaft_2 + self.diff_i + self.diff_o + self.axleshaft + self.wheels + self.mass + self.gravity + self.air_force
 
         super().__init__(system,**kwargs)
+        
+        self.__cached_solution = None
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -5088,13 +5090,20 @@ class SDOFDrivetrainVehicleSystem(ComposedSystem):
         vel_ratio=self.phi_3*self.r/self.phi
         return vel_ratio
     
+
     def steady_angular_velocity(self):
         obj=self
-        display(obj._eoms[0])
-        eoms_num = N(obj._eoms[0].subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data),3)
-        display(eoms_num)
-        eom_sol = dsolve(eoms_num, obj.q[0], ics={obj.q[0].subs(obj.ivar, 0): 0, obj.q[0].diff(obj.ivar).subs(obj.ivar, 0): 0})
+
+        
+        eom_sol = obj._eom_solution()
+        #omega_steady_state =  (eom_sol.rhs.diff(obj.ivar).subs(obj.ivar,oo))
+
+        #display(obj._eoms[0])
+        #eoms_num = N(obj._eoms[0].subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data),3)
+        #display(eoms_num)
+        #eom_sol = dsolve(eoms_num, obj.q[0], ics={obj.q[0].subs(obj.ivar, 0): 0, obj.q[0].diff(obj.ivar).subs(obj.ivar, 0): 0})
         omega_steady_state =  N(eom_sol.rhs.diff(obj.ivar).subs(obj.ivar,oo),3)
+
         return omega_steady_state
     
     def steady_angular_velocity_rev_per_min(self):
@@ -5142,9 +5151,19 @@ class SDOFDrivetrainVehicleSystem(ComposedSystem):
         
         return obj.reduced_torque()/obj.startup_mass_velocity()
 
-    def simplified_EOM(self):
+
+    
+    def _eom_solution(self):
         obj=self
         
-        EOM_dsolve = dsolve(eoms_num, obj.q[0], ics={obj.q[0].subs(obj.ivar, 0): 0, obj.q[0].diff(obj.ivar).subs(obj.ivar, 0): 0})
+        if obj.__cached_solution is None:
+        
+            eoms_num = N(obj._eoms[0].subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data),3)
+            EOM_dsolve = dsolve(eoms_num, obj.q[0], ics={obj.q[0].subs(obj.ivar, 0): 0, obj.q[0].diff(obj.ivar).subs(obj.ivar, 0): 0})
+            obj.__cached_solution = EOM_dsolve
+        else:
+            EOM_dsolve = obj.__cached_solution
+            
+       
         
         return EOM_dsolve
