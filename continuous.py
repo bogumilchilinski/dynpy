@@ -83,6 +83,9 @@ class ContinuousSystem:
         return self.__str__()
 
     def subs(self, *args, **kwargs):
+        
+        given_data=args[0]
+        
         L_new = self.L.subs(*args)
         q_new = self.q.subs(*args)
 
