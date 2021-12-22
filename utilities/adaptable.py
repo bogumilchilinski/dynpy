@@ -9,7 +9,7 @@ from sympy.core.relational import Relational
 from sympy.physics.mechanics import vlatex
 
 import pandas as pd
-from .report import DataTable
+from .report import DataTable, AutoMarker
 #from number impo
 
 
@@ -659,7 +659,7 @@ class BasicFormattingTools(DataMethods):
         idx = new_obj.axes[axis]
 
         if isinstance(idx, pd.MultiIndex):
-            print('MultiIndex modification has been not supported yet')
+            #print('MultiIndex modification has been not supported yet')
             numbered_obj=new_obj.format_axis_names(lambda name: float(name.rhs) if isinstance(name,Eq) else name  ,axis=axis)
             #sym_wyn.loc[:,ix[:,:,dyn_sys.phi_1]].plot()
 
@@ -803,10 +803,14 @@ class BasicFormattingTools(DataMethods):
             fig.add_caption(NoEscape(caption))
 
         if label is not None:
+            AutoMarker.add_marker(plotted_frame.to_latex(),label)
             fig.append(Label(label))
+        else:
+            auto_mrk=AutoMarker(plotted_frame.to_latex()).marker
+            fig.append(Label(auto_mrk))
 
         container.append(fig)
-        return plotted_frame.plot(ylabel=ylabel,subplots=subplots)
+        return plotted_frame#.plot(ylabel=ylabel,subplots=subplots)
 
 
     def reported(self,
@@ -830,8 +834,17 @@ class BasicFormattingTools(DataMethods):
         if label is not None:
             tab.append(Label(label))
 
+        if label is not None:
+            AutoMarker.add_marker(self.to_latex(),label)
+            tab.append(Label(label))
+        else:
+            auto_mrk=AutoMarker(self.to_latex()).marker
+            tab.append(Label(auto_mrk))
+            
 
         container.append(tab)
+        
+        
 
         return self.copy()
 
