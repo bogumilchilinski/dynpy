@@ -20,7 +20,7 @@ from pylatex.utils import NoEscape, italic
 from sympy import Matrix, symbols, Symbol, Eq, Expr
 from sympy.core.relational import Relational
 
-from sympy import Symbol, Function, Derivative, latex, sin, cos, tan,exp
+from sympy import Symbol, Function, Derivative, latex, sin, cos, tan,exp,atan
 
 from sympy.physics.vector.printing import vlatex, vpprint
 
@@ -2718,8 +2718,12 @@ class SympyFormula(ReportModule):
         self._eq.append(NoEscape(self._backend(self._expr)))
         
         if self._marker is not None:
-
+            AutoMarker.add_marker(self._expr,self._marker)
             self._eq.append(Label(self._marker))
+        else:
+            auto_mrk=AutoMarker(self._expr).marker
+            self._eq.append(Label(auto_mrk))
+            
 
         if self.__class__._color:
 
@@ -3099,7 +3103,11 @@ class DescriptionsRegistry:
 class SymbolsDescription(Description):
     """A class representing LaTeX description environment of Symbols explained in description_dict."""
     _latex_name = 'description'
-
+    cls_container = []
+    @classmethod
+    def set_container(cls, container=[]):
+        cls.cls_container = container
+        return cls
     def __init__(self,
                  description_dict=None,
                  expr=None,
@@ -3143,10 +3151,10 @@ class SymbolsDescription(Description):
             symbols_set=set()
             if isinstance(expr,Iterable):
                 for elem in expr:
-                    symbols_set |= elem.atoms(Symbol, Function, Derivative) - elem.atoms(sin,cos,tan,exp)
+                    symbols_set |= elem.atoms(Symbol, Function, Derivative) - elem.atoms(sin,cos,tan,exp,atan)
             #print(symbols_set)
             else:
-                symbols_set |= expr.atoms(Symbol, Function, Derivative) - expr.atoms(sin,cos,tan,exp)
+                symbols_set |= expr.atoms(Symbol, Function, Derivative) - expr.atoms(sin,cos,tan,exp,atan)
 
 
             
@@ -3169,33 +3177,39 @@ class SymbolsDescription(Description):
             
             
 
-    def reported(self,container=[]):
-        
-        container.append(self)
-        
-
+    def reported(self,container=None):
+        if container:
+            self._container = container
+        else:
+            self._container = type(self).cls_container
+#         self._container.append(self)
         entries = [f'${vlatex(key)}$ - {value}'     for  key,value in self._added_symbols.items()]
         
         end_sign = '.'
         if len(entries) == 0: end_sign = ''
         
-        text = ',  \n'.join(entries) + end_sign
 
-        
-        display(Markdown(text))
-
+        self._container.append(self)
         #return (self._text)
-        return ''
+        return copy.deepcopy(self)
         
 
         
             
     def add_items(self, description_dict):
 
+        end_symbol ='.'
+        
+        if len(description_dict.keys())>0:
+            last_key=list(description_dict.keys())[-1]
+            end_symbol =';'
+        
         for label, entry in description_dict.items():
 
+            if label == last_key: end_symbol ='.'
+            
             self.add_item(NoEscape(InlineMath(vlatex(label)).dumps()),
-                          NoEscape(vlatex(entry)))
+                          NoEscape(f'- {vlatex(entry)}{end_symbol}'))
 
 
     def __repr__(self):
@@ -3213,6 +3227,92 @@ class SymbolsDescription(Description):
 
         #return (self._text)
         return ''
+            
+            
+class MarkerRegistry(dict):
+    
+    _prefix = 'automrk'
+    _markers_dict={}
+    
+    def __init__(self,prefix='automrk',sufix=None):
+        super().__init__()
+        self._prefix = prefix
+
+
+class AutoMarker:
+    _markers_dict={}
+    _prefix = 'eq'
+    _name = None
+    _floats_no_gen = plots_no()
+    
+    @classmethod
+    def add_marker(cls,elem,marker):
+        
+        if isinstance(elem,(pd.DataFrame,pd.Series)):
+            elem_id = elem.to_latex()
+            prefix = 'fig'
+            
+        elif isinstance(elem,Matrix):
+            elem_id = ImmutableMatrix(elem)
+            prefix='eq'
+        else:
+            elem_id = elem
+        
+        
+        cls._markers_dict[elem_id]=marker
+        
+        return None
+    
+    
+    def __init__(self,elem,prefix='eq',name=None,sufix=None):
+        
+        if isinstance(elem,(pd.DataFrame,pd.Series)):
+            elem_id = elem.to_latex()
+            prefix = 'fig'
+            
+        elif isinstance(elem,Matrix):
+            elem_id = ImmutableMatrix(elem)
+            prefix='eq'
+        else:
+            elem_id = elem
+
+            
+        self._marker_name = elem.__class__.__name__
+        self._elem_id = elem_id
+        self._prefix = prefix
+        self._sufix = sufix
+            
+        self._get_marker()
+
+        
+
+    def _get_marker(self,elem=None):
+        if elem is None:
+            elem = self._elem_id
+            
+        available_markers=self._markers_dict
+            
+        if elem in available_markers:
+            marker = available_markers[elem]
+        else:
+            
+
+            marker = Marker(f'Mrk{self._marker_name}{next(self._floats_no_gen)}',prefix=self._prefix)
+            self._markers_dict[elem] = marker
+        
+        self._marker = marker
+        return marker
+    @property
+    def marker(self):
+        return self._marker
+        
+    def __repr__(self):
+        return f'AutoMarker for {self._marker}'
+    
+    def __str__(self):
+        return Ref(self._marker).dumps()
+    
+
             
             
 class Equation(Environment):
