@@ -10,6 +10,8 @@ from sympy.physics.mechanics import vlatex
 
 import pandas as pd
 from .report import DataTable, AutoMarker
+
+import matplotlib.pyplot as plt
 #from number impo
 
 
@@ -745,6 +747,7 @@ class BasicFormattingTools(DataMethods):
                 caption=None,
                 smooth=False,
                 picture=None,
+                preview=False,
                 *args,
                 **kwargs):
         
@@ -810,9 +813,18 @@ class BasicFormattingTools(DataMethods):
             fig.append(Label(auto_mrk))
 
         container.append(fig)
+        if preview:
+            plotted_frame.plot(ylabel=ylabel,subplots=subplots)
+            plt.show()
+        
         return plotted_frame#.plot(ylabel=ylabel,subplots=subplots)
 
 
+
+        
+        
+    
+    
     def reported(self,
                  container=None,
                  index=True,

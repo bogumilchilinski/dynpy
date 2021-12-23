@@ -20,7 +20,7 @@ from pylatex.utils import NoEscape, italic
 from sympy import Matrix, symbols, Symbol, Eq, Expr
 from sympy.core.relational import Relational
 
-from sympy import Symbol, Function, Derivative, latex, sin, cos, tan,exp,atan
+from sympy import Symbol, Function, Derivative, latex, sin, cos, tan,exp,atan,ImmutableMatrix
 
 from sympy.physics.vector.printing import vlatex, vpprint
 
