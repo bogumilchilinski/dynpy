@@ -26,6 +26,23 @@ default_colors = ['red', 'blue', 'orange', 'teal', 'black', 'green']
 
 
 class DataMethods:
+    
+    _figure_gen = lambda: Figure(position='H')
+    _image_parameters={'width':NoEscape('0.9\textwidth')}
+    
+    @classmethod
+    def set_default_figure_generator(cls,figure_generator=None):
+        if figure_generator is not None:
+            cls._figure_gen = figure_generator
+        return cls
+    
+    @classmethod
+    def set_default_image_parameters(cls,image_parameters=None):
+        if image_parameters is not None:
+            cls._image_parameters = image_parameters
+        return cls    
+    
+    
     def _pylatex_tikz(self,
                       filename,
                       labels_list=None,
@@ -102,8 +119,8 @@ class DataMethods:
                              coordinates=coordinates,
                              options='color=' + color + ',solid' + radius_str))
                     #at_option=NoEscape('at=(plot'+str(no)+'.below south west),')
-                    at_option = NoEscape('at=(plot' + str(no) +
-                                         '.south west),')
+                    at_option = NoEscape('at={(plot' + str(no) +
+                                         '.south west)},yshift=-0.1cm,')
 
         if extra_commands is not None:
             tikzpicture.append(extra_commands)
@@ -256,10 +273,12 @@ class DataMethods:
                                 options=options,
                                 smooth=smooth,
                                 picture=picture)
-        fig = Figure(position='H')
+       
+        fig = self.__class__._figure_gen()
+        img_params=self.__class__._image_parameters
         
         if picture:
-            fig.add_image(filename)
+            fig.add_image(filename,width=NoEscape(r'0.9\textwidth'))
         else:    
             fig.append(Command(command='input',arguments=filename))
 
@@ -434,7 +453,7 @@ class BasicFormattingTools(DataMethods):
 
     _default_sep = ', '
     _container = []
-    _default_path = './'
+    _default_path = './tikzplots'
     _picture=False
 
     @classmethod
@@ -775,7 +794,7 @@ class BasicFormattingTools(DataMethods):
         
             
             
-        plotted_frame = plotted_frame.set_str_index_columns()
+        plotted_frame = plotted_frame.set_str_index_columns().rename_axis(None,axis=1)
 
         if filename is None:
             filename = f'{self.__class__._default_path}/plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
@@ -814,6 +833,9 @@ class BasicFormattingTools(DataMethods):
 
         container.append(fig)
         if preview:
+            
+            #print(plotted_frame.columns)
+            
             plotted_frame.plot(ylabel=ylabel,subplots=subplots)
             plt.show()
         
