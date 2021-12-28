@@ -96,9 +96,12 @@ class OdeComputationalCase:
         self.t_span = t_span
 
         if evaluate:
+            
             self.form_numerical_rhs()
+            self._evaluated=True
         else:
             self.__numerical_odes = None
+            self._evaluated=False
 
         if label == None:
             label = self._label = self.__class__.__name__ + ' with ' + str(
@@ -262,6 +265,11 @@ class OdeComputationalCase:
         '''
         Returns the result of the computations of solve_ivp integrator from scipy.integrate module.
         '''
+        
+        if not self._evaluated:
+            self.form_numerical_rhs()
+            self._evaluated=True
+        
         
         with timer() as t:
             solution = solver.solve_ivp(
