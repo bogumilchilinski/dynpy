@@ -17,7 +17,7 @@ from pylatex.base_classes import Environment
 from pylatex.package import Package
 from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
-from sympy import Matrix, symbols, Symbol, Eq, Expr
+from sympy import Matrix, symbols, Symbol, Eq, Expr, Number,Equality,Add, Mul
 from sympy.core.relational import Relational
 
 from sympy import Symbol, Function, Derivative, latex, sin, cos, tan,exp,atan,ImmutableMatrix
@@ -2657,6 +2657,7 @@ class SympyFormula(ReportModule):
     '''
 
     _color = None
+    _break_mode = 'autobreak'
 
     @classmethod
     def set_text_color(cls, color=None):
@@ -2683,8 +2684,24 @@ class SympyFormula(ReportModule):
 
         super().__init__(**kwargs)
 
-        self._eq = DMath()
-        self._eq.append(NoEscape(self._backend(self._expr)))
+        if self._break_mode == 'autobreak':
+            if isinstance(expr,(Matrix,ImmutableMatrix)):
+                
+                self._eq = Equation()
+                self._eq.append(NoEscape(self._backend(self._expr)))
+                
+
+            else:
+
+                self._eq = Align()
+                with self._eq.create(AutoBreak()) as eq:
+                    eq.append_formula(expr)
+                
+                
+            
+        else:
+            self._eq = DMath()
+            self._eq.append(NoEscape(self._backend(self._expr)))
         
         if self._marker is not None:
             AutoMarker.add_marker(self._expr,self._marker)
@@ -3210,11 +3227,15 @@ class AutoBreak(Environment):
     packages = [Package('mathtools'), Package('autobreak')]
     escape = False
     content_separator = "\n"
-    
+    latex_backend = vlatex
     
     
     
     def _split_expr(self,expr):
+        
+        
+
+        
         
         if isinstance(expr,Equality):
             
@@ -3222,19 +3243,57 @@ class AutoBreak(Environment):
             
         elif isinstance(expr,Add):
             
-            elems = list(eprx.args)
+            elems = list(expr.args)
+            #elems = sum(([obj,Symbol('+')] for obj in elems),[]  )[0:-1]
+            #elems=[]
             
+            #for obj in list(expr.args):
+            #    display(obj.args)
+            #    elems += [obj,Symbol('+')]
             
-        elif isinstance(expr,list):
-            if len(expr)>1:
-                elems = sum([self._split_expr(obj)  for  obj in expr])
-            else:
-                elems = expr
-        
+        else:
+            elems = [expr]
+            
+        #print('elems')
+        #display(elems)
+
+        if len(elems)>1:
+            #print('elems')
+            #display(elems)
+            elems = sum([self._split_expr(obj)  for  obj in elems],[])
         else:
             elems = [expr]
         
         return elems
+    
+    def append_formula(self,expr):
+        
+        terms = self._split_expr(expr)
+        
+
+        new_terms=[]
+        
+        for no,obj in enumerate(terms):
+
+            if terms[no-1] == Symbol('='):
+                new_terms += [obj]
+            
+            elif isinstance(obj,Mul) and not ((any([elem.is_negative  for elem  in obj.args]))):
+               
+                new_terms += [Symbol('+'),obj]
+
+            elif obj == Symbol('='):
+                new_terms += [obj]
+                
+            elif isinstance(obj,(Symbol,Function,Number)):
+                new_terms += [Symbol('+'),obj]
+                
+            else:
+                new_terms += [obj]
+        
+        for term in new_terms[1:]:
+            self.append(self.__class__.latex_backend(term))
+    
         
 
 # class EqRef(Environment):
