@@ -26,6 +26,7 @@ from sympy.physics.vector.printing import vlatex, vpprint
 
 from IPython.display import display, Markdown, Latex
 
+from .adaptable import *
 from .timeseries import TimeDataFrame, TimeSeries
 
 import copy
@@ -734,39 +735,7 @@ class PivotPlotFrameSummary(BaseFrameFormatter):
 
     
     
-class MarkersRegister:
-    
-    _markers = pd.DataFrame()
-    _instance_list=[]
-    _first_instace_marker=None
-    _last_instance_marker=None
-    
-    def __init__(self,marker_str='auto_marker'):
-        
-        self.__class__._instance_list.append(self)
-        self._first_instace_marker=None
-        self._last_instance_marker=None
 
-        
-class AutoMarker:
-    def __init__(self,obj,marker_str=None,marker_prefix=None):
-        
-        if marker_str:
-            self._str=marker_str
-        else:
-            self._str=str(obj)
-            
-            
-        if marker_prefix:
-            self._prefix=marker_prefix            
-        elif isinstance(obj,[Expr,Eq,Matrix]):
-            self._prefix='eq'
-        else:
-            self._prefix='fig'            
-        
-        self._marker = Marker(self._marker_str,prefix=self._prefix)
-        
-        MarkersRegister._markers[obj]=self._marker
     
 class ReportModule:
     r'''
@@ -3029,34 +2998,7 @@ class NumbersList(NoEscape):
 
         return list_str
 
-class DescrptionsRegistry:
-    
-    _descriptions={}
-    _described_elements={}
-    
-    def __init__(self,description_dict=None,method='add'):
-        if description_dict is not None:  self._descriptions = description_dict
 
-            
-            
-    def _get_description(self,items):
-        symbols_list=self._desctiption.keys()
-        
-        
-        
-        missing_symbols_desc={sym:'???' for sym in items if sym not in symbols_list}
-        
-        self._descriptions = {**self._descriptions,**missing_symbols_desc}
-        self.__class__._descriptions  = {**self.__class__._descriptions,**missing_symbols_desc}
-        
-
-        syms_to_desc=[sym for sym in items if sym not in self._described_elements.keys()]
-        
-        self._described_elements = {**self._described_elements,**syms_to_desc}
-        self.__class__._described_elements = {**self.__class__._described_elements,**syms_to_desc}
-        
-        return syms_to_desc
-                
         
         
 
@@ -3104,6 +3046,8 @@ class SymbolsDescription(Description):
     """A class representing LaTeX description environment of Symbols explained in description_dict."""
     _latex_name = 'description'
     cls_container = []
+    _description_head = 'where:'
+    
     @classmethod
     def set_container(cls, container=[]):
         cls.cls_container = container
@@ -3188,8 +3132,10 @@ class SymbolsDescription(Description):
         end_sign = '.'
         if len(entries) == 0: end_sign = ''
         
-
-        self._container.append(self)
+        if len(entries) != 0:
+        
+            self._container.append(NoEscape(self._description_head)+'\n')
+            self._container.append(self)
         #return (self._text)
         return copy.deepcopy(self)
         
@@ -3218,9 +3164,13 @@ class SymbolsDescription(Description):
         entries = [f'${vlatex(key)}$ - {value}'     for  key,value in self._added_symbols.items()]
         
         end_sign = '.'
-        if len(entries) == 0: end_sign = ''
+        head = self._description_head +'  \n'
         
-        text = ',  \n'.join(entries) + end_sign
+        if len(entries) == 0: 
+            end_sign = ''
+            head = ''
+        
+        text =head + ',  \n'.join(entries) + end_sign
 
         
         display(Markdown(text))
@@ -3229,89 +3179,13 @@ class SymbolsDescription(Description):
         return ''
             
             
-class MarkerRegistry(dict):
-    
-    _prefix = 'automrk'
-    _markers_dict={}
-    
-    def __init__(self,prefix='automrk',sufix=None):
-        super().__init__()
-        self._prefix = prefix
 
+class Align(Environment):
+    """A class to wrap LaTeX's alltt environment."""
 
-class AutoMarker:
-    _markers_dict={}
-    _prefix = 'eq'
-    _name = None
-    _floats_no_gen = plots_no()
-    
-    @classmethod
-    def add_marker(cls,elem,marker):
-        
-        if isinstance(elem,(pd.DataFrame,pd.Series)):
-            elem_id = elem.to_latex()
-            prefix = 'fig'
-            
-        elif isinstance(elem,Matrix):
-            elem_id = ImmutableMatrix(elem)
-            prefix='eq'
-        else:
-            elem_id = elem
-        
-        
-        cls._markers_dict[elem_id]=marker
-        
-        return None
-    
-    
-    def __init__(self,elem,prefix='eq',name=None,sufix=None):
-        
-        if isinstance(elem,(pd.DataFrame,pd.Series)):
-            elem_id = elem.to_latex()
-            prefix = 'fig'
-            
-        elif isinstance(elem,Matrix):
-            elem_id = ImmutableMatrix(elem)
-            prefix='eq'
-        else:
-            elem_id = elem
-
-            
-        self._marker_name = elem.__class__.__name__
-        self._elem_id = elem_id
-        self._prefix = prefix
-        self._sufix = sufix
-            
-        self._get_marker()
-
-        
-
-    def _get_marker(self,elem=None):
-        if elem is None:
-            elem = self._elem_id
-            
-        available_markers=self._markers_dict
-            
-        if elem in available_markers:
-            marker = available_markers[elem]
-        else:
-            
-
-            marker = Marker(f'Mrk{self._marker_name}{next(self._floats_no_gen)}',prefix=self._prefix)
-            self._markers_dict[elem] = marker
-        
-        self._marker = marker
-        return marker
-    @property
-    def marker(self):
-        return self._marker
-        
-    def __repr__(self):
-        return f'AutoMarker for {self._marker}'
-    
-    def __str__(self):
-        return Ref(self._marker).dumps()
-    
+    packages = [Package('mathtools')]
+    escape = False
+    content_separator = "\n"    
 
             
             
@@ -3326,10 +3200,42 @@ class Equation(Environment):
 class DMath(Environment):
     """A class to wrap LaTeX's alltt environment."""
 
-    packages = [Package('breqn'), Package('flexisym')]
+    packages = [Package('flexisym'), Package('breqn')]
     escape = False
     content_separator = "\n"
 
+class AutoBreak(Environment):
+    """A class to wrap LaTeX's alltt environment."""
+
+    packages = [Package('mathtools'), Package('autobreak')]
+    escape = False
+    content_separator = "\n"
+    
+    
+    
+    
+    def _split_expr(self,expr):
+        
+        if isinstance(expr,Equality):
+            
+            elems=[expr.lhs, Symbol('='),expr.rhs]
+            
+        elif isinstance(expr,Add):
+            
+            elems = list(eprx.args)
+            
+            
+        elif isinstance(expr,list):
+            if len(expr)>1:
+                elems = sum([self._split_expr(obj)  for  obj in expr])
+            else:
+                elems = expr
+        
+        else:
+            elems = [expr]
+        
+        return elems
+        
 
 # class EqRef(Environment):
 #         """A class to wrap LaTeX's alltt environment."""
@@ -4122,25 +4028,7 @@ class DataPlot(Figure):
             plt.show()
 
 
-class DataTable(Table):
-    _latex_name = 'table'
 
-    def __init__(self, numerical_data, position=None):
-        super().__init__(position=position)
-        ##print(numerical_data)
-        self._numerical_data = numerical_data
-        self.position = position
-
-    def add_table(self, numerical_data=None, index=False, longtable=False):
-        self.append(NoEscape('\\centering'))
-        self.append(NoEscape('%%%%%%%%%%%%%% Table %%%%%%%%%%%%%%%'))
-        #         if numerical_data!=None:
-        #             self._numerical_data=numerical_data
-
-        tab = self._numerical_data
-        self.append(
-            NoEscape(tab.to_latex(index=index, escape=False, longtable=longtable).replace('\\toprule','\\toprule \n \\midrule').replace('\\bottomrule','\\midrule \n \\bottomrule'))
-            )
 
 
 class ReportSection(Section):

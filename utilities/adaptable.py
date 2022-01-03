@@ -1,6 +1,6 @@
 from numpy import (fft)
 import numpy as np
-from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, Plot, Figure, Alignat, Package, Quantity, Command, Label
+from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, Plot, Figure, Alignat, Package, Quantity, Command, Label, Table, Marker,Ref
 from pylatex.utils import italic, NoEscape
 
 from sympy import Matrix, symbols, Symbol, Eq, Expr, latex, Float, Function, Number
@@ -8,8 +8,9 @@ from sympy.core.relational import Relational
 
 from sympy.physics.mechanics import vlatex
 
+from IPython.display import display, Markdown, Latex
+
 import pandas as pd
-from .report import DataTable, AutoMarker
 
 import matplotlib.pyplot as plt
 #from number impo
@@ -29,6 +30,22 @@ class DataMethods:
     
     _figure_gen = lambda: Figure(position='H')
     _image_parameters={'width':NoEscape('0.9\textwidth')}
+    _legend_fontsize = r' '
+    _label_fontsize = r'\small '
+
+    
+    @classmethod
+    def set_default_label_fontsize(cls,fontsize=None):
+        if fontsize is not None:
+            cls._label_fontsize = fontsize
+        return cls
+    
+    @classmethod
+    def set_default_legend_fontsize(cls,fontsize=None):
+        if fontsize is not None:
+            cls._legend_fontsize = fontsize
+        return cls
+    
     
     @classmethod
     def set_default_figure_generator(cls,figure_generator=None):
@@ -87,6 +104,9 @@ class DataMethods:
 
         tikzpicture = TikZ(options=options)
 
+        
+        legend_font_size=self.__class__._legend_fontsize
+        
         if subplots == False:
 
             with tikzpicture.create(
@@ -98,7 +118,7 @@ class DataMethods:
                     coordinates = data_for_plot
 
                     plot.append(
-                        Plot(name=NoEscape(NoEscape(r'\tiny ' + str(label))),
+                        Plot(name=NoEscape(NoEscape(legend_font_size + str(label))),
                              coordinates=coordinates,
                              options='color=' + color + ',solid' + radius_str))
 
@@ -115,7 +135,7 @@ class DataMethods:
                     coordinates = data_for_plot
                     plot.append(
                         Plot(name=NoEscape(
-                            NoEscape(r'\tiny ') + NoEscape(label)),
+                            NoEscape(legend_font_size) + NoEscape(str(label))),
                              coordinates=coordinates,
                              options='color=' + color + ',solid' + radius_str))
                     #at_option=NoEscape('at=(plot'+str(no)+'.below south west),')
@@ -189,7 +209,7 @@ class DataMethods:
             Command(
                 'pgfplotsset',
                 arguments=NoEscape(
-                    r'compat=newest,label style={font=\small},legend pos=' +
+                    r'compat=newest,label style={fontsize},legend pos='.format(fontsize='{'+f'font={self.__class__._label_fontsize}' +'}') +
                     str(legend_pos))))
 
         tikz_pic = self._pylatex_tikz(filename,
@@ -437,6 +457,132 @@ class EntryWithUnit:
         else:
             return f'{self._obj}'
 
+        
+class DataTable(Table):
+    _latex_name = 'table'
+
+    def __init__(self, numerical_data, position=None):
+        super().__init__(position=position)
+        ##print(numerical_data)
+        self._numerical_data = numerical_data
+        self.position = position
+
+    def add_table(self, numerical_data=None, index=False, longtable=False):
+        self.append(NoEscape('\\centering'))
+        self.append(NoEscape('%%%%%%%%%%%%%% Table %%%%%%%%%%%%%%%'))
+        #         if numerical_data!=None:
+        #             self._numerical_data=numerical_data
+
+        tab = self._numerical_data
+        self.append(
+            NoEscape(tab.to_latex(index=index, escape=False, longtable=longtable).replace('\\toprule','\\toprule \n \\midrule').replace('\\bottomrule','\\midrule \n \\bottomrule'))
+            )
+        
+        
+class MarkerRegistry(dict):
+    
+    _prefix = 'automrk'
+    _markers_dict={}
+    
+    def __init__(self,prefix='automrk',sufix=None):
+        super().__init__()
+        self._prefix = prefix
+
+
+class AutoMarker:
+    _markers_dict={}
+    _prefix = 'eq'
+    _name = None
+    _floats_no_gen = plots_no()
+    
+    @classmethod
+    def add_marker(cls,elem,marker):
+        
+        if isinstance(elem,(AdaptableDataFrame)):
+            elem_id = elem._get_str_key()
+            if elem._subplot is None:
+                prefix = 'tab'
+            else:
+                prefix = 'fig'
+        
+        elif isinstance(elem,(pd.DataFrame,pd.Series)):
+            elem_id = elem.to_latex()
+            prefix = 'fig'
+            
+        elif isinstance(elem,Matrix):
+            elem_id = ImmutableMatrix(elem)
+            prefix='eq'
+        else:
+            elem_id = elem
+        
+        
+        cls._markers_dict[elem_id]=marker
+        
+        return None
+    
+    
+    def __init__(self,elem,prefix='eq',name=None,sufix=None):
+
+        
+        if isinstance(elem,(AdaptableDataFrame)):
+            elem_id = elem._get_str_key()
+            if elem._subplot is None:
+                prefix = 'tab'
+            else:
+                prefix = 'fig'
+        
+        elif isinstance(elem,(pd.DataFrame,pd.Series)):
+            elem_id = elem.to_latex()
+            prefix = 'fig'
+            
+        elif isinstance(elem,Matrix):
+            elem_id = ImmutableMatrix(elem)
+            prefix='eq'
+        else:
+            elem_id = elem
+
+            
+        self._marker_name = elem.__class__.__name__
+        self._elem_id = elem_id
+        self._prefix = prefix
+        self._sufix = sufix
+            
+        self._get_marker()
+
+        
+
+    def _get_marker(self,elem=None):
+        if elem is None:
+            elem = self._elem_id
+            
+        available_markers=self._markers_dict
+        
+
+            
+        if elem in available_markers:
+            marker = available_markers[elem]
+        else:
+            
+
+            marker = Marker(f'Mrk{self._marker_name}{next(self._floats_no_gen)}',prefix=self._prefix)
+            self._markers_dict[elem] = marker
+        
+
+        
+        self._marker = marker
+        return marker
+    
+    @property
+    def marker(self):
+        return self._marker
+        
+    def __repr__(self):
+        return f'AutoMarker for {self._marker}'
+    
+    def __str__(self):
+        return Ref(self._marker).dumps()
+        
+        
 
 class BasicFormattingTools(DataMethods):
 
@@ -794,7 +940,8 @@ class BasicFormattingTools(DataMethods):
         
             
             
-        plotted_frame = plotted_frame.set_str_index_columns().rename_axis(None,axis=1)
+        plotted_frame = plotted_frame.set_str_index_columns()
+        plotted_frame = plotted_frame.rename_axis(None,axis=1)
 
         if filename is None:
             filename = f'{self.__class__._default_path}/plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
@@ -825,19 +972,17 @@ class BasicFormattingTools(DataMethods):
             fig.add_caption(NoEscape(caption))
 
         if label is not None:
-            AutoMarker.add_marker(plotted_frame.to_latex(),label)
+            AutoMarker.add_marker(plotted_frame._get_str_key(),label)
             fig.append(Label(label))
         else:
-            auto_mrk=AutoMarker(plotted_frame.to_latex()).marker
+            auto_mrk=AutoMarker(plotted_frame._get_str_key()).marker
             fig.append(Label(auto_mrk))
 
         container.append(fig)
         if preview:
-            
-            #print(plotted_frame.columns)
-            
             plotted_frame.plot(ylabel=ylabel,subplots=subplots)
             plt.show()
+            display(Markdown(caption))
         
         return plotted_frame#.plot(ylabel=ylabel,subplots=subplots)
 
@@ -978,7 +1123,14 @@ class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
                          dtype=dtype,
                          copy=copy)
         self._reported = False
+        
+        self._subplot = None
+        self._caption = None
+        self._prepared_fig = None
 
+
+    def _get_str_key(self):
+        return self.to_latex()+f'subplot={self._subplot}, self._caption{self._caption} '
 
 class LatexDataFrame(AdaptableDataFrame):
     _applying_func = lambda obj: (obj).fit_units_to_axes().format_axes_names()
