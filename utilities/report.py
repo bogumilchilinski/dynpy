@@ -2689,24 +2689,26 @@ class SympyFormula(ReportModule):
                 
                 self._eq = Equation()
                 self._eq.append(NoEscape(self._backend(self._expr)))
+
+            elif isinstance(expr,(Eq,Relational)):
                 
+                if isinstance(expr.lhs,(Matrix,ImmutableMatrix)) or isinstance(expr.rhs,(Matrix,ImmutableMatrix)):
+                
+                    self._eq = Equation()
+                    self._eq.append(NoEscape(self._backend(self._expr)))
+                    
+                else:
+                    self._eq = Align()
+                    with self._eq.create(AutoBreak()) as eq:
+                        eq.append_formula(expr)
+                    
+            
 
             else:
 
                 self._eq = Align()
                 with self._eq.create(AutoBreak()) as eq:
                     eq.append_formula(expr)
-                
-                
-            
-        else:
-            self._eq = DMath()
-            self._eq.append(NoEscape(self._backend(self._expr)))
-        
-        if self._marker is not None:
-            AutoMarker.add_marker(self._expr,self._marker)
-            self._eq.append(Label(self._marker))
-        else:
             auto_mrk=AutoMarker(self._expr).marker
             self._eq.append(Label(auto_mrk))
             

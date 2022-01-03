@@ -3,7 +3,7 @@ import numpy as np
 from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, Plot, Figure, Alignat, Package, Quantity, Command, Label, Table, Marker,Ref
 from pylatex.utils import italic, NoEscape
 
-from sympy import Matrix, symbols, Symbol, Eq, Expr, latex, Float, Function, Number
+from sympy import Matrix, ImmutableMatrix, symbols, Symbol, Eq, Expr, latex, Float, Function, Number
 from sympy.core.relational import Relational
 
 from sympy.physics.mechanics import vlatex
