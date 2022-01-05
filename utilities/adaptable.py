@@ -601,7 +601,26 @@ class BasicFormattingTools(DataMethods):
     _container = []
     _default_path = './tikzplots'
     _picture=False
+    
+    _default_width =  NoEscape(r'0.9\textwidth')
+    _default_height = NoEscape(r'6cm')
 
+    
+    @classmethod
+    def set_default_width(cls, width=  NoEscape(r'0.9\textwidth')):
+        cls._default_width = width
+
+        return cls
+
+    
+    @classmethod
+    def set_default_height(cls, height = NoEscape(r'6cm')):
+        cls._default_height = height
+
+        return cls
+
+
+    
     @classmethod
     def set_default_column_separator(cls, sep=', '):
         cls._default_sep = sep
@@ -899,8 +918,8 @@ class BasicFormattingTools(DataMethods):
                 filename=None,
                 labels_list=None,
                 colors_list=default_colors,
-                height=NoEscape(r'6cm'),
-                width=NoEscape(r'0.9\textwidth'),
+                height=None,
+                width=None,
                 x_axis_description=None,
                 y_axis_description=None,
                 subplots=False,
@@ -918,6 +937,12 @@ class BasicFormattingTools(DataMethods):
         
         ',xlabel={$t$},x unit=\si{\second},'
 
+        if height is None:
+            height = self._default_height
+            
+        if width is None:
+            width = self._default_width
+        
         plotted_frame = self.copy()
         col_idx = plotted_frame.columns
 
