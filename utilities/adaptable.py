@@ -32,7 +32,7 @@ class DataMethods:
     _image_parameters={'width':NoEscape('0.9\textwidth')}
     _legend_fontsize = r' '
     _label_fontsize = r'\small '
-
+    #_extra
     
     @classmethod
     def set_default_label_fontsize(cls,fontsize=None):
@@ -58,6 +58,8 @@ class DataMethods:
         if image_parameters is not None:
             cls._image_parameters = image_parameters
         return cls    
+    
+    
     
     
     def _pylatex_tikz(self,
@@ -607,11 +609,16 @@ class BasicFormattingTools(DataMethods):
     
     _default_width =  NoEscape(r'0.9\textwidth')
     _default_height = NoEscape(r'6cm')
-
+    _preview_mode = False
     
     @classmethod
     def set_default_width(cls, width=  NoEscape(r'0.9\textwidth')):
         cls._default_width = width
+        return cls
+    
+    @classmethod
+    def set_preview_mode(cls, preview=False):
+        cls._preview_mode = preview
         return cls
 
     
@@ -647,6 +654,10 @@ class BasicFormattingTools(DataMethods):
 
         return cls
 
+
+    
+    
+    
     @classmethod
     def set_default_units(cls, units={}):
 
@@ -933,7 +944,7 @@ class BasicFormattingTools(DataMethods):
                 caption=None,
                 smooth=False,
                 picture=None,
-                preview=False,
+                preview=None,
                 *args,
                 **kwargs):
         
@@ -1040,11 +1051,16 @@ class BasicFormattingTools(DataMethods):
             auto_mrk=AutoMarker(plotted_frame).marker
             fig.append(Label(auto_mrk))
 
-        container.append(fig)
+        
+        
+        if preview is None:
+            preview = self.__class__._preview_mode
+        
         if preview:
             plotted_frame.plot(ylabel=ylabel,subplots=subplots)
             plt.show()
             display(Markdown(caption))
+            container.append(fig)
         
         return plotted_frame#.plot(ylabel=ylabel,subplots=subplots)
 
