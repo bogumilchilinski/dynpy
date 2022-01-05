@@ -601,6 +601,8 @@ class BasicFormattingTools(DataMethods):
     _container = []
     _default_path = './tikzplots'
     _picture=False
+    _subplot=False
+    _caption = 'Default caption'
 
     @classmethod
     def set_default_column_separator(cls, sep=', '):
@@ -968,14 +970,49 @@ class BasicFormattingTools(DataMethods):
             smooth=smooth,
             picture = picture)
 
+        
+        ############################ to pack as method
         if caption is not None:
             fig.add_caption(NoEscape(caption))
+            plotted_frame._caption = caption
+        elif plotted_frame._caption is not None:
+            fig.add_caption(NoEscape(plotted_frame._caption))
+            plotted_frame._caption = plotted_frame._caption
+
+        else:
+            fig.add_caption(NoEscape(plotted_frame.__class__._caption))
+            plotted_frame._caption = plotted_frame.__class__._caption
+
+            
+        caption = plotted_frame._caption
+        #################################33 to as method
+        
+        ############################ to pack as method
+        if subplots is not None:
+
+            plotted_frame._subplot = subplots
+        elif plotted_frame._subplot is not None:
+
+            plotted_frame._subplot = plotted_frame._subplot
+
+        else:
+            plotted_frame._subplot = plotted_frame.__class__._subplot
+
+            
+        subplots = plotted_frame._subplot
+        #################################33 to as method        
+        
+ 
+
+
+
+
 
         if label is not None:
             AutoMarker.add_marker(plotted_frame._get_str_key(),label)
             fig.append(Label(label))
         else:
-            auto_mrk=AutoMarker(plotted_frame._get_str_key()).marker
+            auto_mrk=AutoMarker(plotted_frame).marker
             fig.append(Label(auto_mrk))
 
         container.append(fig)
@@ -1130,8 +1167,9 @@ class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
 
 
     def _get_str_key(self):
-        return self.to_latex()+f'subplot={self._subplot}, self._caption{self._caption} '
-
+        #return self.to_latex()+f'subplot={self._subplot}, self._caption{self._caption} '
+        return self.to_latex()+f'subplot={self._subplot}'
+    
 class LatexDataFrame(AdaptableDataFrame):
     _applying_func = lambda obj: (obj).fit_units_to_axes().format_axes_names()
 
