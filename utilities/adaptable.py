@@ -13,6 +13,7 @@ from IPython.display import display, Markdown, Latex
 import pandas as pd
 
 import matplotlib.pyplot as plt
+import copy
 #from number impo
 
 
@@ -32,8 +33,16 @@ class DataMethods:
     _image_parameters={'width':NoEscape('0.9\textwidth')}
     _legend_fontsize = r' '
     _label_fontsize = r'\small '
+    _template = Document(documentclass='standalone',geometry_options=None,document_options=["tikz"])
     #_extra
-    
+
+    @classmethod
+    def set_document_template(cls,template=None):
+        if template is not None:
+            cls._template = template
+        return cls
+
+
     @classmethod
     def set_default_label_fontsize(cls,fontsize=None):
         if fontsize is not None:
@@ -188,19 +197,23 @@ class DataMethods:
             options=None,
             smooth=False,
             picture=True,
+            template=None,
             *arg,
             **kwargs):
 
         geometry_options = {
             "margin": "0cm",
         }
-        doc = Document(documentclass='standalone',
-                       geometry_options=None,
-                       document_options=["tikz"])
+        
+        if template is None:
+            
+            doc = self.__class__._template
+            
+        doc = copy.deepcopy(self.__class__._template)
         #doc=Document(documentclass='subfiles',document_options=NoEscape('bch_r4.tex'))
 
         doc.packages.append(Package('siunitx'))
-        doc.packages.append(Package('amsmath'))
+        doc.packages.append(Package('mathtools'))
         doc.packages.append(Package('float'))
         doc.packages.append(Package('tikz'))
         doc.packages.append(Package('pgfplots'))
@@ -956,7 +969,11 @@ class BasicFormattingTools(DataMethods):
         if width is None:
             width = self._default_width
         
+        #print(self._ylabel)
+        
         plotted_frame = self.copy()
+        #print('copy',plotted_frame._ylabel)
+        
         col_idx = plotted_frame.columns
 
         latex_backend = self.__class__._latex_backend
@@ -968,7 +985,15 @@ class BasicFormattingTools(DataMethods):
 
             y_axis_description = 'ylabel={' + ylabel + '},'
 
+            plotted_frame._ylabel=ylabel
             plotted_frame = plotted_frame.droplevel(-1, axis=1)
+            
+            
+            
+        elif self._ylabel is not None:
+            ylabel = self._ylabel
+            y_axis_description = 'ylabel={' + ylabel + '},'
+            
         else:
             ylabel = None
             y_axis_description = ''
@@ -1037,7 +1062,7 @@ class BasicFormattingTools(DataMethods):
             
         subplots = plotted_frame._subplot
         #################################33 to as method        
-        
+        plotted_frame._ylabel=ylabel
  
 
 
@@ -1205,6 +1230,7 @@ class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
         self._subplot = None
         self._caption = None
         self._prepared_fig = None
+        self._ylabel = None
 
 
     def _get_str_key(self):
