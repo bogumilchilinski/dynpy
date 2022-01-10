@@ -16,7 +16,6 @@ class GeometryOfPoint:
     def __init__(self, *args , frame=base_frame, base_origin=base_origin , ivar=Symbol('t')):
         
         #print(type(args),args)
-        
         #name = str(args[0])
 
         if isinstance(args[0], Point):
@@ -80,6 +79,7 @@ class Element(LagrangesDynamicSystem):
 
         return IP.display.Image(base64.b64decode(encoded_string))
 
+    
 class MaterialPoint(Element):
     """
     Model of a Material point with changing point of mass:
@@ -90,17 +90,12 @@ class MaterialPoint(Element):
     real_name = 'material_point.png'
     def __init__(self, m, pos1 , qs=None, frame=base_frame, ivar=Symbol('t')):
         
-        
-
-        
         if not qs:
             self.qs = [pos1]
 
         pos1=GeometryOfPoint(pos1).get_point()
             
         if isinstance(pos1, Point):
-            
-            
             
             Lagrangian = S.Half * m * ((base_origin.pos_from(pos1).diff(ivar,frame).magnitude())**2)
             #Lagrangian = S.Half * m * ((base_origin.vel(frame).magnitude())**2)
@@ -111,6 +106,7 @@ class MaterialPoint(Element):
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar,frame=frame)
 
+        
 class Spring(Element):
     """
     Model of a Spring:
@@ -121,19 +117,16 @@ class Spring(Element):
     scheme_name = 'spring.png'
     real_name = 'spring.png'
     def __init__(self, stiffness, pos1, pos2=0,l_0=0 ,  qs=None,ivar=Symbol('t'), frame = base_frame):
-        
 
-        
 
         pos1=GeometryOfPoint(pos1).get_point()
         pos2=GeometryOfPoint(pos2).get_point()
 
         if not qs:
             self.qs = [pos1]
-                
-        Lagrangian = (-S.Half * stiffness * ((pos2.pos_from(pos1)).magnitude() -l_0  )**2 )
-            
-            
+
+        Lagrangian = (-S.Half * stiffness * ((pos2.pos_from(pos1)).magnitude() - l_0  )**2 )
+
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, frame=frame)
 
@@ -151,7 +144,6 @@ class GravitationalForce(Element):
             qs=[pos1]
 
         Lagrangian = -(m * g * (pos1))
-
 
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)

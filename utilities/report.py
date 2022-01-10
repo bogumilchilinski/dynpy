@@ -12,15 +12,15 @@ import sympy.physics.mechanics as me
 from pylatex import (Alignat, Axis, Command, Document, Eqref, Figure, Label,
                      TextColor, Marker, Math, NewLine, NewPage, Package, Plot,
                      Quantity, Ref, Section, Subsection, Table, Tabular, TikZ,
-                     Description,LongTable)
+                     Description, LongTable)
 from pylatex.base_classes import Environment
 from pylatex.package import Package
 from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
-from sympy import Matrix, symbols, Symbol, Eq, Expr, Number,Equality,Add, Mul
+from sympy import Matrix, symbols, Symbol, Eq, Expr, Number, Equality, Add, Mul
 from sympy.core.relational import Relational
 
-from sympy import Symbol, Function, Derivative, latex, sin, cos, tan,exp,atan,ImmutableMatrix
+from sympy import Symbol, Function, Derivative, latex, sin, cos, tan, exp, atan, ImmutableMatrix
 
 from sympy.physics.vector.printing import vlatex, vpprint
 
@@ -43,59 +43,52 @@ def plots_no():
 
 plots_no_gen = plots_no()
 
-
-
-    
-
-    
-    
 # class AbstractFrameFormatter(AdaptableDataFrame):
 #     _applying_func=lambda x: (x*100)
 
 #     @classmethod
 #     def _apply_func(cls,func=None,**kwargs):
-        
+
 #         if func:
 #             ops_to_apply=func
 #         elif cls._applying_func:
 #             ops_to_apply=cls._applying_func
 #         else:
 #             ops_to_apply=lambda obj: obj
-        
-#         return ops_to_apply
-    
-#     def __new__(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
-        
-#         ops_to_apply=cls._apply_func(**kwargs)
-       
-#         return ops_to_apply(BasicFormattedFrame(data=data, index=index, columns=columns, dtype=dtype, copy=copy))
 
+#         return ops_to_apply
+
+#     def __new__(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+
+#         ops_to_apply=cls._apply_func(**kwargs)
+
+#         return ops_to_apply(BasicFormattedFrame(data=data, index=index, columns=columns, dtype=dtype, copy=copy))
 
 # class AbstractSeriesFormatted(AdaptableSeries):
 #     _applying_func=lambda x: (x*100)
 
 #     @classmethod
 #     def _apply_func(cls,func=None,**kwargs):
-        
+
 #         if func:
 #             ops_to_apply=func
 #         elif cls._applying_func:
 #             ops_to_apply=cls._applying_func
 #         else:
 #             ops_to_apply=lambda obj: obj
-        
+
 #         return ops_to_apply
-    
+
 #     # def __new__(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
-        
+
 #     #     ops_to_apply=cls._apply_func(**kwargs)
-       
+
 #     #     return ops_to_apply(BasicFormattedSeries(data=data, index=index, columns=columns, dtype=dtype, copy=copy))
-    
-    
+
+
 class BaseSeriesFormatter(TimeSeries):
     _cols_name = None
-    _domain=None
+    _domain = None
     r'''
     Basic class for formatting data plots. It provides methods for setting options 
     
@@ -188,7 +181,7 @@ class BaseFrameFormatter(TimeDataFrame):
     _label_formatter = None
     _data_filtter = lambda frame: frame.copy()
     _cols_name = None
-    _domain=None
+    _domain = None
     r'''
     Basic class for formatting data plots. It provides methods for setting options 
     
@@ -460,8 +453,7 @@ class FFTSeriesFormatter(BaseSeriesFormatter):
     def _constructor_sliced(self):
         return FFTSeriesFormatter
 
-    
-    def format_index(self,domain=Symbol('f')):
+    def format_index(self, domain=Symbol('f')):
         if isinstance(self.index, pd.MultiIndex):
 
             idx = self.index.tolist()
@@ -488,10 +480,12 @@ class FFTSeriesFormatter(BaseSeriesFormatter):
 
         return new_obj
 
-class FFTFrameFormatter(BaseFrameFormatter):
-    _domain = Symbol('f')   
 
-    _data_filtter = lambda obj: obj.to_frequency_domain().double_sided_rms().truncate(0,0.5)
+class FFTFrameFormatter(BaseFrameFormatter):
+    _domain = Symbol('f')
+
+    _data_filtter = lambda obj: obj.to_frequency_domain().double_sided_rms(
+    ).truncate(0, 0.5)
     r'''
     Basic class for formatting data plots. It provides methods for setting options 
     
@@ -517,7 +511,7 @@ class FFTFrameFormatter(BaseFrameFormatter):
     def _constructor_sliced(self):
         return FFTSeriesFormatter
 
-    def format_index(self,domain=Symbol('f')):
+    def format_index(self, domain=Symbol('f')):
         if isinstance(self.index, pd.MultiIndex):
 
             idx = self.index.tolist()
@@ -543,7 +537,7 @@ class FFTFrameFormatter(BaseFrameFormatter):
         ##print('new_obj.index.name',new_obj.index.name)
 
         return new_obj
-    
+
 
 class PivotSeriesSummary(BaseSeriesFormatter):
     _default_sep = ' \n '
@@ -560,15 +554,11 @@ class PivotSeriesSummary(BaseSeriesFormatter):
     def _constructor_sliced(self):
         return PivotSeriesSummary
 
-    
-
-    
 
 class PivotFrameSummary(BaseFrameFormatter):
     #    _data_filtter = lambda frame: frame.abs().max().reset_index(level=1).pivot(columns=['level_1'])
     #    _label_formatter = lambda entry: f'${latex(entry)}$'
     _default_sep = ' \n '
-    
 
     @property
     def _constructor(self):
@@ -716,8 +706,8 @@ class PivotPlotFrameSummary(BaseFrameFormatter):
         new_obj.index = new_idx
 
         new_obj.index.name = f'${self._match_unit(list(idx)[0].lhs)}$'
-        
-        self.__class__._domain=list(idx)[0].lhs
+
+        self.__class__._domain = list(idx)[0].lhs
 
         return new_obj
 
@@ -729,14 +719,9 @@ class PivotPlotFrameSummary(BaseFrameFormatter):
             filtter = lambda frame: frame.abs().max().reset_index().pivot(
                 columns=['level_0', 'level_2'], index=['level_1'])[0]
 
-        
-            
         return filtter
 
-    
-    
 
-    
 class ReportModule:
     r'''
     Basic class for maintaining global options of a report module. It provides methods for setting options common with every class inheriting from ReportModule instance. 
@@ -791,9 +776,7 @@ class ReportModule:
     _subplot = False
     _hold = False
     _out_formatter = BaseFrameFormatter  # lambda data: data
-    _height=NoEscape(r'6cm')
-
-    
+    _height = NoEscape(r'6cm')
 
     @classmethod
     def set_output_formatter(cls, formatter=BaseFrameFormatter):
@@ -891,7 +874,7 @@ class ReportModule:
             self._out_format = output_formatter
         else:
             self._out_format = self.__class__._out_formatter
-            
+
         #print(f'Report module init - formatter is {self._out_format}')
 
     def _apply_formatter(self, data):
@@ -901,10 +884,8 @@ class ReportModule:
                 FFTFrameFormatter, PivotPlotFrameSummary):
             #print('Base frmatter is working')
 
-
             #print('data.index', data.index)
             #print('data.index.name', data.index.name)
-
 
             result = self._out_format(data)()
 
@@ -985,8 +966,6 @@ class ReportModule:
             #self.__class__._frame =  None
 
         return None
-    
-
 
     def __str__(self):
         return self._container.__str__()
@@ -1105,12 +1084,19 @@ class DataStorage:
 
         return cls
 
+
 class NumericalDataSet:
-    def __init__(self,numerical_data,key=None, *args, keys_map=None,label='Experimental data', **kwargs):
+    def __init__(self,
+                 numerical_data,
+                 key=None,
+                 *args,
+                 keys_map=None,
+                 label='Experimental data',
+                 **kwargs):
 
         data_to_plot = numerical_data
-        
-        self._key=key
+
+        self._key = key
 
         self._keys_map = {key: key for key in data_to_plot.keys()}
 
@@ -1118,51 +1104,43 @@ class NumericalDataSet:
             self._keys_map = keys_map
 
         self._data_to_plot = data_to_plot
-        self._label=label
-        
-        self.dvars=list( list(data_to_plot.values())[0].columns)
+        self._label = label
+
+        self.dvars = list(list(data_to_plot.values())[0].columns)
 
     def __call__(self, analysis, *args, **kwargs):
         step_val = analysis._current_value
 
     def __str__(self):
         return self._label
-        
-    def numerized(self,
-                 params_values={},
-                 **kwargs):
-        
 
-        
-        if params_values=={}:
+    def numerized(self, params_values={}, **kwargs):
+
+        if params_values == {}:
             return copy.copy(self)
         else:
-        
+
             return copy.copy(self)
-    
-    
-    
+
     def compute_solution(self,
                          t_span=None,
                          ic_list=None,
                          t_eval=None,
                          params_values=None,
                          method='RK45'):
-        
-#         #print('compute_solution')
-#         display(params_values)
-#         display(ic_list)
-        
+
+        #         #print('compute_solution')
+        #         display(params_values)
+        #         display(ic_list)
+
         if ic_list:
             #print('class ics has been taken')
-            self.ics=ic_list
-            
+            self.ics = ic_list
 
-        
         display(self._data_to_plot)
-        
+
         return self._data_to_plot[params_values[self._key]]
-    
+
 
 class SimulationalBlock(ReportModule):
     r'''
@@ -1313,9 +1291,9 @@ class SimulationalBlock(ReportModule):
         else:
             case_data = analysis._current_data
 
-        print('$'*100)
+        print('$' * 100)
         display(case_data)
-            
+
         if self._dynamic_system:
             dynamic_system = self._dynamic_system
         else:
@@ -1434,7 +1412,7 @@ class Summary(ReportModule):
                  label=None,
                  subplots=False,
                  height=None,
-                extra_commands=None):
+                 extra_commands=None):
 
         if subplots:
             self._subplot = subplots
@@ -1460,7 +1438,7 @@ class Summary(ReportModule):
         if block:
 
             self._frame = block._frame
-            
+
             self._last_result = block._last_result
         if caption:
             self._caption = caption
@@ -1476,13 +1454,11 @@ class Summary(ReportModule):
             self._height = height
         else:
             self._height = self.__class__._height
-            
 
         if extra_commands is not None:
             self._extra_commands = extra_commands
         else:
             self._extra_commands = None
-            
 
     def holded(self, hold=True):
         self.__class__._hold = hold
@@ -1503,13 +1479,10 @@ class Summary(ReportModule):
             self.__class__._frame.index.name = analysis._last_result.index.name
             self._frame.index.name = analysis._last_result.index.name
 
-            print('_'*100,analysis._last_result._get_comp_time())            
-
-
+            print('_' * 100, analysis._last_result._get_comp_time())
 
         #print('summary plot - call')
         #print((self._block), type((self._block)))
-
 
         result_of_plot = None
 
@@ -1517,7 +1490,7 @@ class Summary(ReportModule):
             ##print()
 
             result_to_add = type(self._block)._last_result
-            print('_'*100,result_to_add._get_comp_time())
+            print('_' * 100, result_to_add._get_comp_time())
             columns_to_add = result_to_add.columns
 
             #print('plot index', result_to_add.index.name)
@@ -1543,7 +1516,6 @@ class Summary(ReportModule):
                 self.__class__._frame.index.name = result_to_add.index.name
 
         plt.clf()
-
 
         return result_of_plot
 
@@ -1629,14 +1601,14 @@ class Summary(ReportModule):
 
             else:
                 y_unit_str = ''
-                
+
             new_data = self._apply_formatter(data[self._coord])
-            
+
             if new_data.__class__._domain:
                 ivar = new_data.__class__._domain
             else:
                 ivar = data[self._coord].index.name
-            
+
             if ivar in units:
                 x_unit_str = f'x unit = {units[ivar]:~Lx}'.replace('[]', '')
 
@@ -1646,29 +1618,25 @@ class Summary(ReportModule):
             #print('y_unit_str', y_unit_str)
 
             if extra_commands is None:
-                extra_commands= self._extra_commands
-            
+                extra_commands = self._extra_commands
+
             fig = new_data.to_standalone_figure(
-                    filepath,
-                    colors_list=colors_list,
-                    subplots=self._subplot,
-                    height=self._height
-                ,
-                    width=NoEscape(r'0.9\textwidth'),
-                    x_axis_description=
-                    f',xlabel=${NoEscape(vlatex(ivar))}$, {x_unit_str},'.replace('$$','$'),
-                    y_axis_description=
-                    f'ylabel=${NoEscape(vlatex(self._coord))}$, {y_unit_str},',
-                    legend_pos=legend_pos,
-                    extra_commands=extra_commands,
-                )
-            fig.add_caption(NoEscape(self._caption))
-            fig.append(
-                Label(self._label)
+                filepath,
+                colors_list=colors_list,
+                subplots=self._subplot,
+                height=self._height,
+                width=NoEscape(r'0.9\textwidth'),
+                x_axis_description=
+                f',xlabel=${NoEscape(vlatex(ivar))}$, {x_unit_str},'.replace(
+                    '$$', '$'),
+                y_axis_description=
+                f'ylabel=${NoEscape(vlatex(self._coord))}$, {y_unit_str},',
+                legend_pos=legend_pos,
+                extra_commands=extra_commands,
             )
-            
-            
-            
+            fig.add_caption(NoEscape(self._caption))
+            fig.append(Label(self._label))
+
             self._container.append(fig)
 
         return result
@@ -1747,9 +1715,7 @@ class Summary(ReportModule):
                                             '\\toprule \n \\midrule').replace(
                                                 '\\bottomrule',
                                                 '\\midrule \n \\bottomrule')))
-            tab.append(
-                Label(self._label)
-            )
+            tab.append(Label(self._label))
 
             self._container.append(tab)
 
@@ -1995,8 +1961,8 @@ class AccelerationComparison(ReportModule):
                          'blue', 'red', 'green', 'orange', 'violet', 'magenta',
                          'cyan'
                      ],
-                    extra_commands=None,
-                    options=None):
+                     extra_commands=None,
+                     options=None):
 
         self.subplots = subplots
         if analysis:
@@ -2103,8 +2069,7 @@ class AccelerationComparison(ReportModule):
                     legend_pos=legend_pos + ',' +
                     f'legend columns= {legend_columns}',
                     extra_commands=extra_commands,
-                    options=options
-                )
+                    options=options)
                 #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
 
                 ########### for tikz
@@ -2259,8 +2224,6 @@ class FFTComparison(AccelerationComparison):
             key: value.to_frequency_domain().double_sided_rms()
             for key, value in data.items()
         }
-
-
 
         return super()._prepare_data(coordinate=None, xlim=xlim)
 
@@ -2676,7 +2639,6 @@ class SympyFormula(ReportModule):
         self._text = 'Figures {first_marker}-{last_marker}'
         self._backend = backend
 
-
         self._marker = marker
 
         if not expr == None:
@@ -2685,33 +2647,32 @@ class SympyFormula(ReportModule):
         super().__init__(**kwargs)
 
         if self._break_mode == 'autobreak':
-            if isinstance(expr,(Matrix,ImmutableMatrix)):
-                
+            if isinstance(expr, (Matrix, ImmutableMatrix)):
+
                 self._eq = Equation()
                 self._eq.append(NoEscape(self._backend(self._expr)))
 
-            elif isinstance(expr,(Eq,Relational)):
-                
-                if isinstance(expr.lhs,(Matrix,ImmutableMatrix)) or isinstance(expr.rhs,(Matrix,ImmutableMatrix)):
-                
+            elif isinstance(expr, (Eq, Relational)):
+
+                if isinstance(expr.lhs,
+                              (Matrix, ImmutableMatrix)) or isinstance(
+                                  expr.rhs, (Matrix, ImmutableMatrix)):
+
                     self._eq = Equation()
                     self._eq.append(NoEscape(self._backend(self._expr)))
-                    
+
                 else:
                     self._eq = Align()
                     with self._eq.create(AutoBreak()) as eq:
                         eq.append_formula(expr)
-                    
-            
 
             else:
 
                 self._eq = Align()
                 with self._eq.create(AutoBreak()) as eq:
                     eq.append_formula(expr)
-            auto_mrk=AutoMarker(self._expr).marker
+            auto_mrk = AutoMarker(self._expr).marker
             self._eq.append(Label(auto_mrk))
-            
 
         if self.__class__._color:
 
@@ -2719,7 +2680,6 @@ class SympyFormula(ReportModule):
         else:
             self._container.append(self._eq)
 
-            
     def __call__(self, analysis):
 
         display(self._expr)
@@ -3018,47 +2978,49 @@ class NumbersList(NoEscape):
         return list_str
 
 
-        
-        
-
 class DescriptionsRegistry:
-    
-    _descriptions={}
-    _described_elements={}
-    
+
+    _descriptions = {}
+    _described_elements = {}
+
     @classmethod
-    def set_descriptions(cls,description={}):
+    def set_descriptions(cls, description={}):
         cls._descriptions = description
-    
+
     @classmethod
     def reset_registry(cls):
-        cls._described_elements={}
-    
-    def __init__(self,description_dict=None,method='add'):
-        if description_dict is not None:  self._descriptions = description_dict
+        cls._described_elements = {}
 
-            
-            
-    def _get_description(self,items):
-        symbols_list=self._descriptions.keys()
-        
-        
-        
-        missing_symbols_desc={sym:'???' for sym in items if sym not in symbols_list}
-        
-        self._descriptions = {**self._descriptions,**missing_symbols_desc}
-        self.__class__._descriptions  = {**self.__class__._descriptions,**missing_symbols_desc}
-        
+    def __init__(self, description_dict=None, method='add'):
+        if description_dict is not None: self._descriptions = description_dict
+
+    def _get_description(self, items):
+        symbols_list = self._descriptions.keys()
+
+        missing_symbols_desc = {
+            sym: '???'
+            for sym in items if sym not in symbols_list
+        }
+
+        self._descriptions = {**self._descriptions, **missing_symbols_desc}
+        self.__class__._descriptions = {
+            **self.__class__._descriptions,
+            **missing_symbols_desc
+        }
 
         #syms_to_desc={sym for sym in items if sym not in self._described_elements.keys()}
-        syms_to_desc={sym:self._descriptions[sym] for sym in items if sym not in self._described_elements.keys()}
-        
-        self._described_elements = {**self._described_elements,**syms_to_desc}
-        self.__class__._described_elements = {**self.__class__._described_elements,**syms_to_desc}
-        
+        syms_to_desc = {
+            sym: self._descriptions[sym]
+            for sym in items if sym not in self._described_elements.keys()
+        }
+
+        self._described_elements = {**self._described_elements, **syms_to_desc}
+        self.__class__._described_elements = {
+            **self.__class__._described_elements,
+            **syms_to_desc
+        }
+
         return syms_to_desc
-                
-        
 
 
 class SymbolsDescription(Description):
@@ -3066,11 +3028,17 @@ class SymbolsDescription(Description):
     _latex_name = 'description'
     cls_container = []
     _description_head = 'where:'
-    
+
     @classmethod
     def set_container(cls, container=[]):
         cls.cls_container = container
         return cls
+
+    @classmethod
+    def set_default_header(cls, header='where:'):
+        cls._description_head = header
+        return cls
+    
     def __init__(self,
                  description_dict=None,
                  expr=None,
@@ -3085,129 +3053,127 @@ class SymbolsDescription(Description):
                          start_arguments=start_arguments,
                          **kwargs)
 
+        self._added_symbols = self._symbols_to_add_dict()
 
-        self._added_symbols=self._symbols_to_add_dict()
-        
         self.add_items(self._added_symbols)
 
     def _symbols_to_add_dict(self):
-        
+
         description_dict = self.description_dict
         expr = self.expr
-        
+
         if description_dict is not None and expr is not None:
 
-            symbols_set = expr.atoms(Symbol, Function, Derivative) - expr.atoms(sin,cos,tan,exp)
+            symbols_set = expr.atoms(
+                Symbol, Function, Derivative) - expr.atoms(sin, cos, tan, exp)
 
             symbols_to_add = {
                 sym: desc
                 for sym, desc in description_dict.items() if sym in symbols_set
             }
-            
-            return symbols_to_add
 
-            
+            return symbols_to_add
 
         elif (description_dict is None) and (expr is not None):
 
-            
-            symbols_set=set()
-            if isinstance(expr,Iterable):
+            symbols_set = set()
+            if isinstance(expr, Iterable):
                 for elem in expr:
-                    symbols_set |= elem.atoms(Symbol, Function, Derivative) - elem.atoms(sin,cos,tan,exp,atan)
+                    symbols_set |= elem.atoms(Symbol, Function,
+                                              Derivative) - elem.atoms(
+                                                  sin, cos, tan, exp, atan)
             #print(symbols_set)
             else:
-                symbols_set |= expr.atoms(Symbol, Function, Derivative) - expr.atoms(sin,cos,tan,exp,atan)
+                symbols_set |= expr.atoms(Symbol, Function,
+                                          Derivative) - expr.atoms(
+                                              sin, cos, tan, exp, atan)
 
+            description_dict = DescriptionsRegistry()._get_description(
+                symbols_set)
 
-            
-            description_dict = DescriptionsRegistry()._get_description(symbols_set)
-            
             #print(description_dict)
 
             symbols_to_add = {
                 sym: desc
                 for sym, desc in description_dict.items()
             }
-            
+
             ##print('symbols')
             #print(symbols_to_add)
-            
+
             return symbols_to_add
 
         else:
             return {}
-            
-            
 
-    def reported(self,container=None):
+    def reported(self, container=None):
         if container:
             self._container = container
         else:
             self._container = type(self).cls_container
+
+
 #         self._container.append(self)
-        entries = [f'${vlatex(key)}$ - {value}'     for  key,value in self._added_symbols.items()]
-        
+        entries = [
+            f'${vlatex(key)}$ - {value}'
+            for key, value in self._added_symbols.items()
+        ]
+
         end_sign = '.'
         if len(entries) == 0: end_sign = ''
-        
+
         if len(entries) != 0:
-        
-            self._container.append(NoEscape(self._description_head)+'\n')
+
+            self._container.append(NoEscape(self._description_head) + '\n')
             self._container.append(self)
         #return (self._text)
         return copy.deepcopy(self)
-        
 
-        
-            
     def add_items(self, description_dict):
 
-        end_symbol ='.'
-        
-        if len(description_dict.keys())>0:
-            last_key=list(description_dict.keys())[-1]
-            end_symbol =';'
-        
+        end_symbol = '.'
+
+        if len(description_dict.keys()) > 0:
+            last_key = list(description_dict.keys())[-1]
+            end_symbol = ';'
+
         for label, entry in description_dict.items():
 
-            if label == last_key: end_symbol ='.'
-            
+            if label == last_key: end_symbol = '.'
+
             self.add_item(NoEscape(InlineMath(vlatex(label)).dumps()),
                           NoEscape(f'- {vlatex(entry)}{end_symbol}'))
 
-
     def __repr__(self):
 
+        entries = [
+            f'${vlatex(key)}$ - {value}'
+            for key, value in self._added_symbols.items()
+        ]
 
-        entries = [f'${vlatex(key)}$ - {value}'     for  key,value in self._added_symbols.items()]
-        
         end_sign = '.'
-        head = self._description_head +'  \n'
-        
-        if len(entries) == 0: 
+        head = self._description_head + '  \n'
+
+        if len(entries) == 0:
             end_sign = ''
             head = ''
-        
-        text =head + ',  \n'.join(entries) + end_sign
 
-        
+        text = head + ',  \n'.join(entries) + end_sign
+
         display(Markdown(text))
 
         #return (self._text)
         return ''
-            
-            
+
 
 class Align(Environment):
     """A class to wrap LaTeX's alltt environment."""
 
     packages = [Package('mathtools')]
     escape = False
-    content_separator = "\n"    
+    content_separator = "\n"
 
-            
-            
+
 class Equation(Environment):
     """A class to wrap LaTeX's alltt environment."""
 
@@ -3223,6 +3189,7 @@ class DMath(Environment):
     escape = False
     content_separator = "\n"
 
+
 class AutoBreak(Environment):
     """A class to wrap LaTeX's alltt environment."""
 
@@ -3230,73 +3197,66 @@ class AutoBreak(Environment):
     escape = False
     content_separator = "\n"
     latex_backend = vlatex
-    
-    
-    
-    def _split_expr(self,expr):
-        
-        
 
-        
-        
-        if isinstance(expr,Equality):
-            
-            elems=[expr.lhs, Symbol('='),expr.rhs]
-            
-        elif isinstance(expr,Add):
-            
+    def _split_expr(self, expr):
+
+        if isinstance(expr, Equality):
+
+            elems = [expr.lhs, Symbol('='), expr.rhs]
+
+        elif isinstance(expr, Add):
+
             elems = list(expr.args)
             #elems = sum(([obj,Symbol('+')] for obj in elems),[]  )[0:-1]
             #elems=[]
-            
+
             #for obj in list(expr.args):
             #    display(obj.args)
             #    elems += [obj,Symbol('+')]
-            
+
         else:
             elems = [expr]
-            
+
         #print('elems')
         #display(elems)
 
-        if len(elems)>1:
+        if len(elems) > 1:
             #print('elems')
             #display(elems)
-            elems = sum([self._split_expr(obj)  for  obj in elems],[])
+            elems = sum([self._split_expr(obj) for obj in elems], [])
         else:
             elems = [expr]
-        
+
         return elems
-    
-    def append_formula(self,expr):
-        
+
+    def append_formula(self, expr):
+
         terms = self._split_expr(expr)
-        
 
-        new_terms=[]
-        
-        for no,obj in enumerate(terms):
+        new_terms = []
 
-            if terms[no-1] == Symbol('='):
+        for no, obj in enumerate(terms):
+
+            if terms[no - 1] == Symbol('='):
                 new_terms += [obj]
-            
-            elif isinstance(obj,Mul) and not ((any([elem.is_negative  for elem  in obj.args]))):
-               
-                new_terms += [Symbol('+'),obj]
+
+            elif isinstance(obj, Mul) and not (
+                (any([elem.is_negative for elem in obj.args]))):
+
+                new_terms += [Symbol('+'), obj]
 
             elif obj == Symbol('='):
                 new_terms += [obj]
-                
-            elif isinstance(obj,(Symbol,Function,Number)):
-                new_terms += [Symbol('+'),obj]
-                
+
+            elif isinstance(obj, (Symbol, Function, Number)):
+                new_terms += [Symbol('+'), obj]
+
             else:
                 new_terms += [obj]
-        
+
         for term in new_terms[1:]:
             self.append(self.__class__.latex_backend(term))
-    
-        
+
 
 # class EqRef(Environment):
 #         """A class to wrap LaTeX's alltt environment."""
@@ -4089,9 +4049,6 @@ class DataPlot(Figure):
             plt.show()
 
 
-
-
-
 class ReportSection(Section):
 
     _latex_name = 'section'
@@ -4308,9 +4265,9 @@ class ReportSection(Section):
                 subsec.append(
                     NoEscape(str(initial_description).format(**format_dict)))
 
-#                 print(
-#                     np.array_split(range(len(row['simulations'].columns)),
-#                                    plots_no))
+                #                 print(
+                #                     np.array_split(range(len(row['simulations'].columns)),
+                #                                    plots_no))
 
                 for no, control_list in enumerate(
                         np.array_split(range(len(row['simulations'].columns)),

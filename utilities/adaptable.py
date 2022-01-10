@@ -963,12 +963,23 @@ class BasicFormattingTools(DataMethods):
 
         if y_axis_description is None and isinstance(col_idx, pd.MultiIndex):
 
-            ylabel = latex_backend(
-                EntryWithUnit(col_idx.get_level_values(-1).unique()[0]))
+            #print('index2transform',col_idx.get_level_values(-1).unique())
+            if len(col_idx.get_level_values(-1).unique())==1:
+                ylabel = latex_backend(
+                    EntryWithUnit(col_idx.get_level_values(-1).unique()[0]))
 
-            y_axis_description = 'ylabel={' + ylabel + '},'
+                y_axis_description = 'ylabel={' + ylabel + '},'
 
-            plotted_frame = plotted_frame.droplevel(-1, axis=1)
+                plotted_frame = plotted_frame.droplevel(-1, axis=1)
+            else:
+                ylabel_list  = [latex_backend(EntryWithUnit(label))   for label in col_idx.get_level_values(-1).unique()]
+                
+                #print('ylabels',ylabel_list)
+                
+                ylabel = ', '.join(ylabel_list)
+
+                y_axis_description = 'ylabel={' + ylabel + '},'                
+                
         else:
             ylabel = None
             y_axis_description = ''
