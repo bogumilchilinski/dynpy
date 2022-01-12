@@ -154,9 +154,9 @@ class FirstOrderODE:
             {dvar: 0
              for dvar in self.dvars})
 
-        inertia_matrix = ode_sys.jacobian(self.dvars.diff(self.ivar)).subs(
+        inertia_matrix = ode_sys.jacobian(self.dvars).subs(
             {dvar.diff(self.ivar): 0
-             for dvar in self.dvars})
+             for dvar in self.dvars}) #.diff(self.ivar)
 
         #         display(inertia_matrix,main_matrix)
 
@@ -485,6 +485,15 @@ class LinearODESolution:
         #         print('------------------- linear mat ------------------')
 
         return result
+    
+    def fundamental_matrix(self, freq=Symbol('omega', positive=True)):
+        '''
+        Method returns a fundamental matrix of the system built from inertia and stiffness matrices. Takes one optional argument.
+
+        Args:
+            freq (optional, obj:Symbol): This argument lets user to choose a symbol for frequency representation. Set to 'omega' by default, 'positive=True' ensures its affiliation to real numbers domain.
+        '''
+        return -freq**2 * self.inertia_matrix() + self.stiffness_matrix()
 
     def damping_matrix(self):
         '''
