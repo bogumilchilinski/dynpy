@@ -409,8 +409,12 @@ class EntryWithUnit:
         else:
             obj_with_unit._quantity = obj_with_unit._obj
 
+        
+            
         has_unit = obj_with_unit._set_quantity_unit()
 
+        
+        
         if has_unit:
 
             obj_with_unit._obj = obj
@@ -716,11 +720,17 @@ class BasicFormattingTools(DataMethods):
         return ops_func(data)
 
     def _modify_axis(self, func, axis=0):
+        
+        
 
         new_obj = self.copy()
         new_obj_idx = new_obj.axes[axis]
         idx_frame = new_obj_idx.to_frame().applymap(func)
 
+        #print('idx',new_obj_idx)
+        
+        #display('map',idx_frame)
+        
         if isinstance(new_obj_idx, pd.MultiIndex):
             new_obj_idx = pd.MultiIndex.from_frame(idx_frame)
             #new_obj_idx.names=map(func,new_obj_idx.names)
@@ -887,7 +897,7 @@ class BasicFormattingTools(DataMethods):
                 new_obj_with_name = new_obj._modify_axis(
                     lambda elem: float(elem.rhs) if isinstance(elem.rhs,Number) else elem.rhs, axis=axis)
 
-                print(new_obj_with_name.axes[axis].name)
+                #print(new_obj_with_name.axes[axis].name)
                 new_obj_with_name.axes[axis].name = idx[0].lhs
 
         return new_obj_with_name  #.rename(Symbol('l_w'),axis=axis)
