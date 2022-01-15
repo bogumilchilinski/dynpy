@@ -716,6 +716,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         doc_model.packages.append(Package('standalone'))
         doc_model.packages.append(Package('siunitx'))
 
+        
+        
 
         ReportText.set_container(doc_model)
         ReportText.set_directory('./SDAresults')
