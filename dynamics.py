@@ -32,7 +32,7 @@ from pylatex.section import Paragraph, Chapter
 from pylatex.utils import italic, NoEscape
 
 from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula)
-
+import copy
 #from .utilities.adaptable import *
 
 
@@ -588,13 +588,14 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             new_point.set_vel(self.frame,
                               old_point.vel(frame).subs(*args, **kwargs))
 
+
         forces_subs = list(zip(new_points, new_forces))
 
         nonhol_coneqs_subs = list(self.coneqs)[len(
             (self._hol_coneqs)):]  # ,ivar=self.ivar
 
-        #         print(forces_subs)
-        #         print(self.forcelist)
+        #print(forces_subs)
+        #print(self.forcelist)
 
         # print(type(self))
 
@@ -607,13 +608,23 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                           nonhol_coneqs=nonhol_coneqs_subs,
                           label=f'{self._label} for {args} and {kwargs}'
                           )
-        new_sys = type(self)(0,system=new_system)
+        
+        #display(new_system._eoms)
+        
+        #print('subs is ran for '+str(type(self)))
+        
+        new_sys = type(self)(0,system=new_system)#(f'{self._label} for {args} and {kwargs}')
+        new_sys._label=f'{self._label} for {args} and {kwargs}'
+
         
         
 
         new_sys._given_data=given_data
-        new_sys._nonlinear_base_system = self._nonlinear_base_system
+        new_sys._nonlinear_base_system = copy.copy(self._nonlinear_base_system)
         
+        #print(new_sys)
+        #display(new_system._eoms)
+        #display(new_system.forcelist)
         return new_sys
 
         # return type(self)(Lagrangian=lagrangian_subs,
@@ -641,6 +652,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         Returns the label of the object or class instance with reduced Degrees of Freedom.
         """
+
         
         if isinstance(args[0], str):
             if label:

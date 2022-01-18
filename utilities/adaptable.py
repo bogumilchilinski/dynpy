@@ -1446,6 +1446,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
             for param_eq in case_data[1:]:
 
                 params_dict[param_eq.lhs] = param_eq.rhs
+                
 
             numerized_model = model.numerized(params_dict, backend=backend)
 
