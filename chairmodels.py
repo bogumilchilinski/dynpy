@@ -111,6 +111,7 @@ var_dynamic = {x:'przemieszczenie poziome wózka',
               }
 
 
+
 symbols_description={**var_static,**var_dynamic}
 
 

@@ -9,10 +9,14 @@ from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
 from .elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame,base_origin
 from ..continuous import ContinuousSystem, PlaneStressProblem
 
+
+
 import base64
 import random
 import IPython as IP
 import numpy as np
+
+import inspect
 
 class ComposedSystem(HarmonicOscillator):
     """Base class for all systems
@@ -49,6 +53,24 @@ class ComposedSystem(HarmonicOscillator):
 
         return IP.display.Image(base64.b64decode(encoded_string))
 
+    def calculations_steps(self,preview=True,system=None,code=False):
+        
+#         latex_store=AutoBreak.latex_backend
+#         AutoBreak.latex_backend = latex
+        
+        print('zlo')
+        print(inspect.getsource(self.__class__))
+
+        
+        doc_model=super().calculations_steps(preview=True,code=code)
+        
+        
+#         AutoBreak.latex_backend = latex_store
+        return doc_model
+            
+
+    
+    
     def get_default_data(self):
         return None
 
@@ -2326,14 +2348,12 @@ class MDoFElasticPendulum(ComposedSystem):
         self.frame = base_frame
 
         self.payload = Point('payload')
-#         self.payload.set_vel(
-#             self.frame, (sqrt((diff(x, ivar)**2 + diff(y, ivar)**2).simplify()))*self.frame.x)
+
         self.payload.set_vel(
             self.frame,
             sqrt(diff(z, ivar)**2 + (diff(phi, ivar) * (l + z))**2) *
             self.frame.x)
 
-#         print(self.payload, 'try', type(self.payload))
 
         self.spring = Spring(k, z, qs=[phi, z])
         self.material_point_1 = HarmonicOscillator(
@@ -2342,8 +2362,7 @@ class MDoFElasticPendulum(ComposedSystem):
                                              )
         # self.material_point_2 = MaterialPoint(m, y, qs=[phi, z])
         self.gravity = GravitationalForce(m, g, pos1=-y, qs=[phi, z])
-        system = (self.spring + self.gravity + self.material_point_1
-                  )  # + self.material_point_2
+        system = (self.spring + self.gravity + self.material_point_1)
 
         super().__init__(system,**kwargs)
 
@@ -2363,8 +2382,8 @@ class MDoFElasticPendulum(ComposedSystem):
         default_data_dict = {
             self.m: [1 * m0, S.Half**2 * m0, S.Half * m0, 1 * m0, 2 * m0],
             self.l: [1 * l0, S.Half * l0, 2 * l0, 1 * l0, 2 * l0],
-            self.k: [S.Half * k0, 1 * k0, 2 * k0, S.Half * k0, 2 * k0]
-        }
+            self.k: [S.Half * k0, 1 * k0, 2 * k0, S.Half * k0, 2 * k0]}
+        
         return default_data_dict
     
     def linearized(self, x0=None, op_point=True, hint=None, label=None):
