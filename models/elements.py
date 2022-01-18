@@ -303,7 +303,7 @@ class Excitation(Element):
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
         
 
-class Force(LagrangesDynamicSystem):
+class Force(Element):
     """
     Creates enforcement.
     """
@@ -316,7 +316,7 @@ class Force(LagrangesDynamicSystem):
                  ivar=Symbol('t'),
                  frame = base_frame):
 
-        if qs == None:
+        if qs is None:
             qs = [pos1]
             
         else:
@@ -324,17 +324,20 @@ class Force(LagrangesDynamicSystem):
     
         if isinstance(pos1, Point):
             P = pos1
-            if qs==None:
+            if qs is None:
                 diffs=P.vel(frame).magnitude().atoms(Derivative)
                 
                 qs= [deriv.args[0] for deriv in diffs]
                 print(qs)
         else:
+            
             P = Point('P')
             P.set_vel(frame,pos1.diff(ivar)*frame.x)
             force=+force*frame.x
 
         forcelist=[(P,force)]
+        
+        #display(forcelist)
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
         
