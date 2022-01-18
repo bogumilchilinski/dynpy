@@ -10,13 +10,7 @@ class TikzCaSCStandalone(Document):
     latex_name = 'document'
     packages = [
         Package('natbib', options=['numbers']),
-        #         Package('siunitx'),
-        #         Package('amsmath'),
-        #         Package('float'),
-        #         Package('tikz'),
-        #         Package('pgfplots'),
-        #         Command('usepgfplotslibrary', arguments='units'),
-        #         Command('usetikzlibrary', arguments='spy')
+
     ]
 
     def __init__(self,
