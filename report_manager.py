@@ -408,6 +408,7 @@ class PlottedData(Figure):
         plt.close()
 
 
+
 class DataTable(Table):
     _latex_name = 'table'
 

@@ -88,3 +88,4 @@ class TikzStandalone(Document):
             geometry_options=geometry_options,
             data=data,
         )
+
