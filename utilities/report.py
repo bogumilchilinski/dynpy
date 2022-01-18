@@ -17,7 +17,7 @@ from pylatex.base_classes import Environment
 from pylatex.package import Package
 from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
-from sympy import Matrix, symbols, Symbol, Eq, Expr, Number, Equality, Add, Mul
+from sympy import Matrix, symbols, Symbol, Eq, Expr, Number, Equality, Add, Mul,Subs
 from sympy.core.relational import Relational
 
 from sympy import Symbol, Function, Derivative, latex, sin, cos, tan, exp, atan, ImmutableMatrix
@@ -3248,7 +3248,7 @@ class AutoBreak(Environment):
             elif obj == Symbol('='):
                 new_terms += [obj]
 
-            elif isinstance(obj, (Symbol, Function, Number)):
+            elif isinstance(obj, (Symbol, Function, Number,Derivative,Subs,Expr)):
                 new_terms += [Symbol('+'), obj]
 
             else:

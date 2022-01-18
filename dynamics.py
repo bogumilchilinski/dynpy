@@ -27,14 +27,32 @@ from .solvers.linear import LinearODESolution, FirstOrderODE
 from .solvers.nonlinear import WeakNonlinearProblemSolution, MultiTimeScaleMethod
 
 
-from pylatex import Document, Section, Subsection, Subsubsection, Itemize, Package, HorizontalSpace, Description, Marker, Ref, Marker
+from pylatex import Document, Section, Subsection, Subsubsection, Itemize, Package, HorizontalSpace, Description, Marker, Ref, Marker, Figure
+from pylatex.base_classes import Environment
 from pylatex.section import Paragraph, Chapter
 from pylatex.utils import italic, NoEscape
 
-from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula)
+from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak)
 
-#from .utilities.adaptable import *
+from .utilities.adaptable import AutoMarker
+import inspect
 
+
+class Verbatim(Environment):
+    pass
+
+class Minted(Environment):
+    packages=[Package('minted')]
+    content_separator = "\n"
+
+class LstListing(Environment):
+    packages=[Package('lstlisting')]
+    
+    
+class PyVerbatim(Environment):
+    packages=[Package('pythontex')]
+    content_separator = "\n"
+    
 
 def multivariable_taylor_series(expr, args, n=2, x0=None):
     '''
@@ -348,15 +366,19 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     @classmethod
     def _scheme(cls):
 
-        path = __file__.replace('systems.py', 'images/') + cls.scheme_name
+        path = __file__.replace('.py', '/images/') + cls.scheme_name
+        
+        path = './dynpy/models/images/' + cls.scheme_name
 
         return path
 
     @classmethod
     def _real_example(cls):
 
-        path = __file__.replace('systems.py', 'images/') + cls.real_name
+        path = __file__.replace('.py', '/images/') + cls.real_name
 
+        path = './dynpy/models/images/' + cls.real_name
+        
         return path
 
     @classmethod
@@ -707,7 +729,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return self.governing_equations.subs(static_disp_dict).subs({comp:0 for comp  in trig_comps if comp.has(self.ivar)})
 
-    def calculations_steps(self,preview=True,system=None):
+    def calculations_steps(self,preview=True,system=None,code=False):
 
         doc_model = Document('model')
 
@@ -727,16 +749,38 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         if system is None:
             system = self
+            
+        display(ReportText(f'''Ilustracja przedstawia rzeczywisty obiekt mechaniczny, będący przedmiotem modelowania i analizy dynamicznej.
+                            '''))
+
+        print(system._scheme())
+        with doc_model.create(Figure(position='H')) as fig:
+            fig.add_image(system._real_example())
+        
+        with doc_model.create(Figure(position='H')) as fig:
+            fig.add_image(system._scheme())
+            
+            
+        if code:
+            display(ReportText(f'''Rozpatrywany układ został opisany (sformalizowany) przy pomocy odpowiedniej klasy dziedziczącej po typie nadrzędnym "ComposedModel". Kod zaprezentowanej struktury jest następujący:
+                                '''))
+
+            doc_model.content_separator='\n'
+            with doc_model.create(PyVerbatim()) as verb:
+                print(inspect.getsource(system.__class__))
+                verb.append(NoEscape(inspect.getsource(system.__class__))  )
         
         dyn_sys=system
         dyn_sys_lin = dyn_sys.linearized()
 
-
+        
+        print(self._scheme())
+        
         mrk_lagrangian_nonlin=Marker('lagrangianNL',prefix='eq')
 
         #display(ReportText(f'''The following model is considered. The system's Lagrangian is described by the formula ({Ref(mrk_lagrangian_nonlin).dumps()}):
         #                    '''))
-        display(ReportText(f'''Lagrangian systemu wyrażony jest wzorem ({Ref(mrk_lagrangian_nonlin).dumps()}):
+        display(ReportText(f'''Lagrangian systemu wyrażony jest wzorem ({AutoMarker(Eq(Symbol('L'),dyn_sys.L.expand()[0]))}):
                             '''))
 
         display((SympyFormula(  Eq(Symbol('L'),dyn_sys.L.expand()[0])  , marker=mrk_lagrangian_nonlin )  ))
@@ -746,7 +790,6 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         diffL_d=lambda coord: Symbol(latex(Derivative(Symbol('L'),Symbol(vlatex(coord))))  )
         
         display(ReportText(f'''Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące: 
-                               #({Ref(mrk_lagrangian_nonlin).dumps()}):
                             '''))
         
         for coord in dyn_sys.Y:
@@ -769,7 +812,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         display(ReportText(f'''
                            Wykorzystując obliczone pochodne, wyznacza się równania ruchu na podstawie odpowiedniego wzoru.
-                           Równania ruchu układu (nieliniowe w ogólnym przypadku) przedstawiają zależności ({Ref(mrk_gov_eq_nonlin).dumps()}):
+                           Równania ruchu układu (nieliniowe w ogólnym przypadku) przedstawiają zależności ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})-({AutoMarker(Eq(dyn_sys._eoms[-1].simplify().expand(),0))}):
                            '''))
         
         for eq in dyn_sys._eoms:
@@ -1099,17 +1142,22 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
 
     '''
 
-    def calculations_steps(self,preview=True,system=None):
+    def calculations_steps(self,preview=True,system=None,code=False):
+        
+        latex_store=AutoBreak.latex_backend
+        AutoBreak.latex_backend = latex
         
         t=self.ivar
         
         if self._nonlinear_base_system is None:
-            doc_model=super().calculations_steps(preview=True)
+            doc_model=super().calculations_steps(preview=True,code=code)
             
         else:
-            doc_model= super().calculations_steps(preview=True,system=self._nonlinear_base_system)
+            doc_model= super().calculations_steps(preview=True,system=self._nonlinear_base_system,code=code)
 
 
+            
+        
         
             if system is None:
                 system = self
@@ -1119,7 +1167,7 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
             dyn_sys=self._nonlinear_base_system
             dyn_sys_lin=dyn_sys.linearized()
             
-            coords=list(dyn_sys.Y) + list(dyn_sys.q.diff(t,t))
+            coords=tuple(list(dyn_sys.Y) + list(dyn_sys.q.diff(t,t)))
             op_point = {coord: 0 for coord in coords}
 
             #display(self._op_points(hint=hint, subs=True))
@@ -1188,10 +1236,14 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
                     f'''Formalnie należy obliczyć pochodne cząstkowe wielkości uogólnionych ze składników równań Lagrange'a:
                                 '''))
 
-                
-                display((SympyFormula(  Eq(MultivariableTaylorSeries(eq_sym,coords,n=1,x0=op_point),0) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+
+                display((SympyFormula(  Eq(MultivariableTaylorSeries(eq_sym,coords,n=1,x0=op_point)._symbolic_sum(),0) , marker=None,backend=latex  )  ))
                 
                 diff_list=MultivariableTaylorSeries(eom,coords,n=1,x0=op_point).calculation_steps(expr_symbol=eq_sym)
+                
+                display(ReportText(
+                    f'''Poszczególne pochodne mają następującą postać:
+                                '''))
                 
                 for diff_eq in diff_list:
                 
@@ -1220,6 +1272,7 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
             for no,omega in enumerate([omega for omega in HarmonicOscillator(dyn_sys_lin).natural_frequencies().doit() if omega !=0]):
                 display((SympyFormula( Eq(Symbol(f'omega_0{no+1}'),omega) , marker=mrk_lagrangian_lin,backend=latex  )  ))
 
+        AutoBreak.latex_backend = latex_store
         return doc_model
     
     

@@ -517,6 +517,8 @@ class AutoMarker:
     @classmethod
     def add_marker(cls,elem,marker):
         
+
+        
         if isinstance(elem,(AdaptableDataFrame)):
             elem_id = elem._get_str_key()
             if elem._subplot is None:
@@ -566,11 +568,17 @@ class AutoMarker:
         self._prefix = prefix
         self._sufix = sufix
             
+
+            
+            
         self._get_marker()
 
         
 
     def _get_marker(self,elem=None):
+        
+
+        
         if elem is None:
             elem = self._elem_id
             
