@@ -742,7 +742,17 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return self.governing_equations.subs(static_disp_dict).subs({comp:0 for comp  in trig_comps if comp.has(self.ivar)})
 
-    def calculations_steps(self,preview=True,system=None,code=False,documentclass=Document):
+    def calculations_steps(self,preview=True,system=None,code=False,documentclass=Document,lang='pl'):
+
+        if lang=='pl':
+            doc_model = self._calculations_steps_pl(preview=preview,system=system,code=code,documentclass=documentclass)
+        else:
+            doc_model = self._calculations_steps_en(preview=preview,system=system,code=code,documentclass=documentclass)
+        
+        
+        return doc_model
+    
+    def _calculations_steps_pl(self,preview=True,system=None,code=False,documentclass=Document):
 
         
         
@@ -767,9 +777,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         if system is None:
             system = self
             
+        doc_model.append(Section('Analiza dynamiczna układu drgającego',numbering=False))
+            
         display(ReportText(f'''Ilustracja przedstawia rzeczywisty obiekt mechaniczny, będący przedmiotem modelowania i analizy dynamicznej.
                             '''))
-
+        
         print(system._scheme())
         with doc_model.create(Figure(position='H')) as fig:
             fig.add_image(system._real_example())
@@ -848,6 +860,113 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         return doc_model
     
+    def _calculations_steps_en(self,preview=True,system=None,code=False,documentclass=Document):
+
+        
+        
+        doc_model = documentclass('model')
+
+        doc_model.packages.append(Package('booktabs'))
+        doc_model.packages.append(Package('float'))
+        doc_model.packages.append(Package('standalone'))
+        doc_model.packages.append(Package('siunitx'))
+
+        
+        
+
+        ReportText.set_container(doc_model)
+        ReportText.set_directory('./SDAresults')
+
+        #LatexDataFrame.set_picture_mode(True)
+        #LatexDataFrame.set_directory('./SDAresults')
+
+        SympyFormula.set_container(doc_model)
+        
+        if system is None:
+            system = self
+            
+        doc_model.append(Section('Analysis of dynamic system',numbering=False))
+            
+        display(ReportText(f'''The figure presents real object, which is subject of demonstrated analysis.
+                            '''))
+        
+        print(system._scheme())
+        with doc_model.create(Figure(position='H')) as fig:
+            fig.add_image(system._real_example())
+        
+        with doc_model.create(Figure(position='H')) as fig:
+            fig.add_image(system._scheme())
+            
+            
+        if code:
+            display(ReportText(f'''Considered object was described (formalized) with utilization of appropriate class. The class inherits from "ComposedModel" type. The code for this system is as follows:
+                                '''))
+
+            doc_model.content_separator='\n'
+            with doc_model.create(PyVerbatim()) as verb:
+                print(inspect.getsource(system.__class__))
+                verb.append(NoEscape(inspect.getsource(system.__class__))  )
+        
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys.linearized()
+
+        
+        print(self._scheme())
+        
+        mrk_lagrangian_nonlin=Marker('lagrangianNL',prefix='eq')
+
+        #display(ReportText(f'''The following model is considered. The system's Lagrangian is described by the formula ({Ref(mrk_lagrangian_nonlin).dumps()}):
+        #                    '''))
+        display(ReportText(f'''The Lagrangian of the system under consideration is described by formula ({AutoMarker(Eq(Symbol('L'),dyn_sys.L.expand()[0]))}):
+                            '''))
+
+        display((SympyFormula(  Eq(Symbol('L'),dyn_sys.L.expand()[0])  , marker=mrk_lagrangian_nonlin )  ))
+        
+        q_sym =[ Symbol(f'{coord}'[0:-3]) for coord in dyn_sys.q]
+        
+        diffL_d=lambda coord: Symbol(latex(Derivative(Symbol('L'),Symbol(vlatex(coord))))  )
+        
+        display(ReportText(f'''The next step is to calculate derivatives appering in the Euler-Lagranges equations. Subsequent derivatives are as follows: 
+                            '''))
+        
+        for coord in dyn_sys.Y:
+            display((SympyFormula(  Eq(diffL_d(coord),dyn_sys.L.expand()[0].diff(coord))  , marker=mrk_lagrangian_nonlin,backend=vlatex )  ))
+            
+        d_dt_diffL_d=lambda coord: Symbol(latex(Derivative(diffL_d(coord)  , self.ivar ))  )
+
+        for coord in dyn_sys.q.diff(self.ivar):
+            display((SympyFormula(  Eq(d_dt_diffL_d(coord),dyn_sys.L.expand()[0].diff(coord).diff(self.ivar))  , marker=mrk_lagrangian_nonlin,backend=vlatex )  ))
+        
+        #with doc_model.create(DMath()) as eq:
+        #    eq.append(NoEscape(latex(Derivative(Symbol('L'),q_sym[0],evaluate=False))))
+        #    eq.append(NoEscape('='))
+        #    eq.append(NoEscape(vlatex(dyn_sys.L.expand()[0].diff(dyn_sys.q[0]))))
+
+        mrk_gov_eq_nonlin=Marker('gov_eq_nonlin_sys',prefix='eq')
+
+        #display(ReportText(f'''The governing equations of the system have a following form ({Ref(mrk_gov_eq_nonlin).dumps()}):
+        #                    '''))
+
+        display(ReportText(f'''
+                           The computed derivatives were applied for calculations of equations of motion.
+                           Obtained formulas are described by equations ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})-({AutoMarker(Eq(dyn_sys._eoms[-1].simplify().expand(),0))}):
+                           '''))
+        
+        for eq in dyn_sys._eoms:
+            display(SympyFormula( Eq(eq.simplify().expand(),0) , marker=mrk_gov_eq_nonlin ))
+
+        #mrk_lagrangian_lin=Marker('lagrangian_lin_sys',prefix='eq')
+        #
+        #display(ReportText(f'''Linearized model of the system can be useful as an initial step of the analysis. 
+        #                        It enables to find a simplified solution in the neighborhood of the critical point.
+        #                        Such an approach introduces some error but the solution has qualitative compability of the exact and linearized result. The simplified Lagrangian formula ({Ref(mrk_lagrangian_lin).dumps()}) is as follows:
+        #                    '''))
+
+        #display((SympyFormula(  Eq(Symbol('L'),dyn_sys_lin.L.expand()[0]) , marker=mrk_lagrangian_lin  )  ))
+
+        #mrk_gov_eq_lin=Marker('gov_eq_lin_sys',prefix='eq')
+        
+        return doc_model
     
     
     def external_forces(self):
@@ -1159,7 +1278,19 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
 
     '''
 
-    def calculations_steps(self,preview=True,system=None,code=False,documentclass=Document):
+
+    def calculations_steps(self,preview=True,system=None,code=False,documentclass=Document,lang='pl'):
+
+        if lang=='pl':
+            doc_model = self._calculations_steps_pl(preview=preview,system=system,code=code,documentclass=documentclass)
+        else:
+            doc_model = self._calculations_steps_en(preview=preview,system=system,code=code,documentclass=documentclass)
+        
+        
+        return doc_model        
+    
+    
+    def _calculations_steps_pl(self,preview=True,system=None,code=False,documentclass=Document):
         
         latex_store=AutoBreak.latex_backend
         AutoBreak.latex_backend = latex
@@ -1167,10 +1298,10 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
         t=self.ivar
         
         if self._nonlinear_base_system is None:
-            doc_model=super().calculations_steps(preview=True,code=code,documentclass=documentclass)
+            doc_model=super()._calculations_steps_pl(preview=preview,code=code,documentclass=documentclass)
             
         else:
-            doc_model= super().calculations_steps(preview=True,system=self._nonlinear_base_system,code=code,documentclass=documentclass)
+            doc_model= super()._calculations_steps_pl(preview=preview,system=self._nonlinear_base_system,code=code,documentclass=documentclass)
 
 
             
@@ -1291,6 +1422,141 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
 
         AutoBreak.latex_backend = latex_store
         return doc_model
+    
+    
+    def _calculations_steps_en(self,preview=True,system=None,code=False,documentclass=Document):
+        
+        latex_store=AutoBreak.latex_backend
+        AutoBreak.latex_backend = latex
+        
+        t=self.ivar
+        
+        if self._nonlinear_base_system is None:
+            doc_model=super()._calculations_steps_en(preview=preview,code=code,documentclass=documentclass)
+            
+        else:
+            doc_model= super()._calculations_steps_en(preview=preview,system=self._nonlinear_base_system,code=code,documentclass=documentclass)
+
+
+            
+        
+        
+            if system is None:
+                system = self
+
+            
+                
+            dyn_sys=self._nonlinear_base_system
+            dyn_sys_lin=dyn_sys.linearized()
+            
+            coords=tuple(list(dyn_sys.Y) + list(dyn_sys.q.diff(t,t)))
+            op_point = {coord: 0 for coord in coords}
+
+            #display(self._op_points(hint=hint, subs=True))
+            op_point.update(dyn_sys._op_points(subs=True)[0])
+
+
+            mrk_lagrangian_nonlin = Marker('lagrangLin',prefix='eq')
+            mrk_lagrangian_lin = Marker('lagrangLin',prefix='eq')
+            
+            display(ReportText(
+                    f'''Linearization of governing equations is based on Taylor series expansion for generalized coordinates,velocities and accelerations in the neighborhood of the stationary point.
+                    The following conditions were introduced, in order to simplify equations of motions:'''))
+            
+            for coord in coords:
+                display((SympyFormula(  Eq(Symbol(vlatex(coord)),Symbol(latex(coord))) , marker=mrk_lagrangian_lin  )  )) 
+            
+            
+            
+            display(ReportText(
+                    f'''Equilibrium points of the system are as follows:
+                                '''))          
+            
+            
+
+            
+            
+            for eq_coord,val in op_point.items():
+                display((SympyFormula(  Eq(eq_coord,val) , marker=mrk_lagrangian_lin  )  ))
+                
+                
+  
+            
+            
+            
+
+
+            diffL_d=lambda coord: Symbol(latex(Derivative(Symbol('L'),Symbol(vlatex(coord))))  )
+
+            
+
+#             display(ReportText(f'''Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące: 
+#                                    ({Ref(mrk_lagrangian_nonlin).dumps()}):
+#                                 '''))
+            
+            #op_point = {coord  for coord in self.Y + list(self.q.diff(self.ivar))}
+
+
+            
+            #display((SympyFormula(  Eq(Symbol('L'),dyn_sys_lin.L.expand()[0]) , marker=mrk_lagrangian_lin  )  ))
+            
+            for no,eom in enumerate(dyn_sys._eoms):
+
+
+
+                
+                eq_sym=Symbol(f'RR_{latex(dyn_sys.q[no])}')
+                
+                
+                display(ReportText(f'''Equation of motion for the coordinate ${latex(dyn_sys.q[no])}$ has a following form:
+                                    '''))
+                
+                display((SympyFormula(  Eq(eq_sym,eom,evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+
+                
+                display(ReportText(
+                    f'''The partial derivatives of Lagranges equations components  have to be calculated, in order to obtained linearized equations:
+                                '''))
+
+
+                display((SympyFormula(  Eq(MultivariableTaylorSeries(eq_sym,coords,n=1,x0=op_point)._symbolic_sum(),0) , marker=None,backend=latex  )  ))
+                
+                diff_list=MultivariableTaylorSeries(eom,coords,n=1,x0=op_point).calculation_steps(expr_symbol=eq_sym)
+                
+                display(ReportText(
+                    f'''The derivatives have a following form:
+                                '''))
+                
+                for diff_eq in diff_list:
+                
+                    display((SympyFormula(  diff_eq , marker=mrk_lagrangian_lin,backend=latex  )  ))
+                    
+                display(ReportText(f'''The linearized equation is obtained by the substition of calculated derivatives:
+                                    '''))
+                display((SympyFormula(  Eq(MultivariableTaylorSeries(eom,coords,n=1,x0=op_point).doit().expand().simplify().expand(),0,evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+                
+            display(ReportText(f'''The inertia matrix $M$ and stiffness matrix $K$ are as follows:
+                                    '''))
+            display((SympyFormula(  Eq(Symbol('M'),dyn_sys_lin.inertia_matrix(),evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+
+            display((SympyFormula(  Eq(Symbol('K'),dyn_sys_lin.stiffness_matrix(),evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+            
+            Delta = Symbol('\Delta')
+            
+            display(ReportText(f'''Fundamental matrix (needed to obtain characteristic equation ${latex(Delta)}$), has a following representation:
+                                    '''))
+
+            display((SympyFormula(  Eq(Symbol('A'),dyn_sys_lin.fundamental_matrix(),evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+            display((SympyFormula(  Eq(Delta,dyn_sys_lin.fundamental_matrix().det().expand().simplify().simplify().expand(),evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+
+            display(ReportText(f'''The solution of characteristic equation (biquatradic polynomial) enables to determine natural frequencies of the system:
+                                    '''))
+            for no,omega in enumerate([omega for omega in HarmonicOscillator(dyn_sys_lin).natural_frequencies().doit() if omega !=0]):
+                display((SympyFormula( Eq(Symbol(f'omega_0{no+1}'),omega.expand().simplify()) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+
+        AutoBreak.latex_backend = latex_store
+        return doc_model
+    
     
     
     def stiffness_matrix(self):
