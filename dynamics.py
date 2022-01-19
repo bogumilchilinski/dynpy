@@ -742,9 +742,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return self.governing_equations.subs(static_disp_dict).subs({comp:0 for comp  in trig_comps if comp.has(self.ivar)})
 
-    def calculations_steps(self,preview=True,system=None,code=False):
+    def calculations_steps(self,preview=True,system=None,code=False,documentclass=Document):
 
-        doc_model = Document('model')
+        
+        
+        doc_model = documentclass('model')
 
         doc_model.packages.append(Package('booktabs'))
         doc_model.packages.append(Package('float'))
@@ -1157,7 +1159,7 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
 
     '''
 
-    def calculations_steps(self,preview=True,system=None,code=False):
+    def calculations_steps(self,preview=True,system=None,code=False,documentclass=Document):
         
         latex_store=AutoBreak.latex_backend
         AutoBreak.latex_backend = latex
@@ -1165,10 +1167,10 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
         t=self.ivar
         
         if self._nonlinear_base_system is None:
-            doc_model=super().calculations_steps(preview=True,code=code)
+            doc_model=super().calculations_steps(preview=True,code=code,documentclass=documentclass)
             
         else:
-            doc_model= super().calculations_steps(preview=True,system=self._nonlinear_base_system,code=code)
+            doc_model= super().calculations_steps(preview=True,system=self._nonlinear_base_system,code=code,documentclass=documentclass)
 
 
             
