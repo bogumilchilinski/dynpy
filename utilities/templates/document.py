@@ -6,9 +6,6 @@ from pylatex.utils import (#italic,
                            NoEscape)
 
 
-
-
-
 class CaseTemplate(Document):
 
     latex_name = 'document'
