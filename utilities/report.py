@@ -20,7 +20,7 @@ from pylatex.utils import NoEscape, italic
 from sympy import Matrix, symbols, Symbol, Eq, Expr, Number, Equality, Add, Mul,Subs
 from sympy.core.relational import Relational
 
-from sympy import Symbol, Function, Derivative, latex, sin, cos, tan, exp, atan, ImmutableMatrix
+from sympy import Symbol, Function, Derivative, latex, sin, cos, tan, exp, atan, ImmutableMatrix, sign
 
 from sympy.physics.vector.printing import vlatex, vpprint
 
@@ -3081,12 +3081,12 @@ class SymbolsDescription(Description):
                 for elem in expr:
                     symbols_set |= elem.atoms(Symbol, Function,
                                               Derivative) - elem.atoms(
-                                                  sin, cos, tan, exp, atan)
+                                                  sin, cos, tan, exp, atan, sign)
             #print(symbols_set)
             else:
                 symbols_set |= expr.atoms(Symbol, Function,
                                           Derivative) - expr.atoms(
-                                              sin, cos, tan, exp, atan)
+                                              sin, cos, tan, exp, atan, sign)
 
             description_dict = DescriptionsRegistry()._get_description(
                 symbols_set)

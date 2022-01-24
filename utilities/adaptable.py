@@ -1364,13 +1364,10 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
                         copy=copy,
                         func=lambda obj: obj)
 
-        print('_init_with_ops')
-        display(raw_frame)
+
 
         new_frame = raw_frame.applying_method(raw_frame, **kwargs)
 
-        print('_init_without_ops')
-        display(new_frame)
 
         return cls(data=new_frame,
                    index=index,
@@ -1459,18 +1456,21 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
             numerized_model = model.numerized(params_dict, backend=backend)
 
             t_span = np.asarray((self.index))
-            print(type(t_span))
+
 
             t0 = t_span[0]
 
             ics_series = (self[case_data].T[t0])
 
+            print(ics_series)
+            
+            
             ics_list = [
                 np.float(ics_series[coord])
                 for coord in numerized_model.ics_dvars
             ]
 
-            print(ics_list)
+
 
             result = numerized_model.compute_solution(t_span, ics_list)
 

@@ -477,6 +477,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     def Y(self):
         return Matrix(list(self.q) + list(self.q.diff(self.ivar)))
 
+    
+    
+    
     def _kwargs(self):
         """
         Returns all keyword arguments that an instance has
@@ -1018,6 +1021,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return Eq(Symbol('H'), (ham_sum-self.lagrangian()).subs(mom_subs[0]))
 
+    def default_ics(self,critical_point=False):
+        return {coord:0 for coord in self.Y}
+    
     def _op_points(self,
                    static_disp_dict=None,
                    dict=True,
@@ -1572,7 +1578,7 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
         Args:
             freq (optional, obj:Symbol): This argument lets user to choose a symbol for frequency representation. Set to 'omega' by default, 'positive=True' ensures its affiliation to real numbers domain.
         '''
-        return -freq**2 * self.inertia_matrix() + self.stiffness_matrix()
+        return -freq**2 * self.inertia_matrix() +freq *sym.I * self.damping_matrix()   + self.stiffness_matrix()
 
 
     def damping_matrix(self):
