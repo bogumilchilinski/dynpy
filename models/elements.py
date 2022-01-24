@@ -1,4 +1,4 @@
-from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Derivative, Expr)
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Derivative,Integral, Expr,Function,latex)
 from numbers import Number
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
@@ -341,7 +341,38 @@ class Force(Element):
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
         
+class ProportionalController(Element):
+    def __init__(self, Kp, pos1, RV=0, qs=None, ivar=Symbol('t'), frame=base_frame):
+        if qs==None:
+            qs = [pos1]
+        self.Kp = Kp
+        P_term = Spring(stiffness = self.Kp, pos1 = qs[0],pos2=RV, qs = qs)
+        super().__init__(P_term, qs=qs)
 
+
+class IntegralController(Element):
+    def __init__(self, Ki, pos1, aux_arg=None, RV=0, qs=None, ivar=Symbol('t'), frame=base_frame):          # aux_arg --> auxiliary argument
+        if aux_arg==None:
+            #aux_arg = dynamicsymbols(f'\\int~{latex(pos1)}dt')[0]
+            aux_arg = Function(f'{latex(Integral(pos1,ivar))}')(ivar)
+        qs = [pos1, aux_arg]
+        self.Ki = Ki
+
+        aux_integral = MaterialPoint(1, aux_arg, qs = qs)
+
+        Force1 = Force(-self.Ki*aux_arg, pos1=pos1, qs=qs)
+        Force2 = Force(pos1.diff(ivar), pos1=aux_arg, qs=qs)
+        I_term = aux_integral + Force1 + Force2
+        super().__init__(I_term, qs=qs)
+
+
+class DerivativeController(Element):
+    def __init__(self, Kd, pos1, RV=0, qs=None, ivar=Symbol('t'), frame=base_frame):
+        if qs==None:
+            qs = [pos1]
+        self.Kd = Kd
+        D_term = Damper(c=self.Kd, pos1 = qs[0], pos2=RV, qs = qs)
+        super().__init__(D_term, qs=qs)
         
 ###################################################################################################################################
 
