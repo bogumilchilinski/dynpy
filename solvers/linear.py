@@ -544,6 +544,15 @@ class LinearODESolution:
                               if not eigen == 0})
 
         return diag(*natural_freqs)
+    
+    def natural_frequencies(self):
+        '''
+        Determines the system natural frequencies matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
+        '''
+        
+        natural_freqs=list({(sqrt(abs(eigen**2))) for eigen  in self.eigenvalues() if not eigen==0 })
+        
+        return diag(*natural_freqs)
 
     def general_solution(self, initial_conditions=None):
         '''

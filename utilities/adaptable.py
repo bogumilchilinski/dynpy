@@ -730,21 +730,17 @@ class BasicFormattingTools(DataMethods):
     def _modify_axis(self, func, axis=0):
         
         
-
         new_obj = self.copy()
         new_obj_idx = new_obj.axes[axis]
         idx_frame = new_obj_idx.to_frame().applymap(func)
 
         #print('idx',new_obj_idx)
-        
         #display('map',idx_frame)
         
         if isinstance(new_obj_idx, pd.MultiIndex):
             new_obj_idx = pd.MultiIndex.from_frame(idx_frame)
             #new_obj_idx.names=map(func,new_obj_idx.names)
-
         else:
-
             #new_obj_idx = pd.Index((idx_frame),name=new_obj_idx.name)
             new_obj_idx = new_obj_idx.map(func)
 
@@ -1092,12 +1088,12 @@ class BasicFormattingTools(DataMethods):
         else:
             plotted_frame._subplot = plotted_frame.__class__._subplot
 
-            
-        subplots = plotted_frame._subplot
-        #################################33 to as method        
-        plotted_frame._ylabel=ylabel
- 
 
+        subplots = plotted_frame._subplot
+        
+        #################################33 to as method
+        
+        ylabel = plotted_frame._ylabel
 
 
 
