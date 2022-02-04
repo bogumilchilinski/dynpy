@@ -3809,6 +3809,7 @@ class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
     real_name = 'lifting_tandem.png'
 
     def __init__(self,
+                 R=Symbol('R', positive=True),
                  phi_1=dynamicsymbols('\\varphi_1'),
                  phi_2=dynamicsymbols('\\varphi_2'),
                  phi_3=dynamicsymbols('\\varphi_3'),
@@ -3857,12 +3858,12 @@ class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
         self.Spring4 = Spring(k_4, pos1=(phi_c * l), pos2=(phi_r * l), qs=[phi_c, phi_r])
 
         system = self.Pendulum1 + self.Pendulum2 + self.Pendulum3 + self.Spring1 + self.Spring2 + self.Spring3 + self.Spring4
-        super().__init__(system(qs),**kwargs)
+        super().__init__(system,**kwargs)
 
 
     def get_default_data(self):
 
-        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+        m0, k0 = symbols('m_0 k_0', positive=True)
 
         default_data_dict = {
             self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
@@ -3874,20 +3875,39 @@ class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
             self.k_3: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
             self.k_4: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
 
-            self.phi_1: [self.phi_l, 0],
-            self.phi_2: [self.phi_l, self.phi_r, 0],
-            self.phi_3: [self.phi_r, 0],
+            self.phi_l: [self.phi_1, 0],
+            self.phi_c: [self.phi_1, self.phi_2],
+            self.phi_r: [self.phi_2, 0],
         }
 
         return default_data_dict
 
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.phi_l] != self.phi_1 or parameters_dict[self.phi_c] != self.phi_1:
+
+            parameters_dict[self.phi_l] = self.phi_1
+
+        if parameters_dict[self.phi_c] != self.phi_2 or parameters_dict[self.phi_r] != self.phi_2:
+
+            parameters_dict[self.phi_r] = self.phi_2
+
+
+        return parameters_dict
 
 
 
 
     
 class DDoFTwoNonLinearDisks(ComposedSystem):
-    scheme_name = 'MDOF_Double_Disk.png'
+    scheme_name = 'sdof_nonlin_disc.png'
     real_name = 'dwa_wozki_XD.PNG'
 
     def __init__(self,
