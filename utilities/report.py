@@ -30,6 +30,7 @@ from .adaptable import *
 from .timeseries import TimeDataFrame, TimeSeries
 
 import copy
+import inspect
 
 from collections.abc import Iterable
 
@@ -2595,7 +2596,145 @@ class ReportText(ReportModule):
         #return (self._text)
         return ''
 
+    
+class Verbatim(Environment):
+    pass
 
+class Minted(Environment):
+    packages=[Package('minted')]
+    content_separator = "\n"
+
+class LstListing(Environment):
+    packages=[Package('lstlisting')]
+    
+    
+class PyVerbatim(Environment):
+    packages=[Package('pythontex')]
+    content_separator = "\n"
+    #inspect.getsource(system.__class__)
+
+    
+class Picture(Figure,ReportModule):
+    """A class that represents a figure environment."""
+
+    #: By default floats are positioned inside a separate paragraph.
+    #: Setting this to option to `False` will change that.
+    separate_paragraph = True
+
+
+    
+    _latex_name = 'figure'
+    def __init__(self, image=None, position=None, **kwargs):
+        """
+        Args
+        ----
+        position: str
+            Define the positioning of a floating environment, for instance
+            ``'h'``. See the references for more information.
+        References
+        ----------
+            * https://www.sharelatex.com/learn/Positioning_of_Figures
+        """
+    
+        self.image = image
+        super().__init__(position=position,**kwargs)
+        
+        if self.image is not None:
+            self.add_image(NoEscape(self.image))
+            
+    def __repr__(self):
+
+        if self.image is not None:
+            path = (self.image)
+        else:
+            path = 'nothing to preview :('
+        
+        repr_string=f'''
+        \n++++++++++ IMAGE +++++++
+        \n++                    ++
+        \n++  path:{path}       ++
+        \n++                    ++
+        \n++++++++++ IMAGE +++++++
+        
+        '''
+        
+        return repr_string
+    
+    def reported(self):
+        self.cls_container.append(self)
+        
+        return copy.deepcopy(self)
+    
+class ObjectCode(PyVerbatim,ReportModule):
+    _latex_name='pyverbatim'
+    
+    r"""A base class for LaTeX environments.
+    This class implements the basics of a LaTeX environment. A LaTeX
+    environment looks like this:
+    .. code-block:: latex
+        \begin{environment_name}
+            Some content that is in the environment
+        \end{environment_name}
+    The text that is used in the place of environment_name is by default the
+    name of the class in lowercase.
+    However, this default can be overridden in 2 ways:
+    1. setting the _latex_name class variable when declaring the class
+    2. setting the _latex_name attribute when initialising object
+    """
+
+    #: Set to true if this full container should be equivalent to an empty
+    #: string if it has no content.
+    omit_if_empty = False
+
+    def __init__(self, inspected_obj=None, options=None, arguments=None, start_arguments=None,
+                 **kwargs):
+        r"""
+        Args
+        ----
+        options: str or list or  `~.Options`
+            Options to be added to the ``\begin`` command
+        arguments: str or list or `~.Arguments`
+            Arguments to be added to the ``\begin`` command
+        start_arguments: str or list or `~.Arguments`
+            Arguments to be added before the options
+        """
+
+        self.inspected_obj = inspected_obj
+        self.options = options
+        self.arguments = arguments
+        self.start_arguments = start_arguments
+
+        
+        
+        super().__init__(options=None, arguments=None, start_arguments=None,**kwargs)
+        
+        if self.inspected_obj is not None:
+            self.append(NoEscape(
+                inspect.getsource(self.inspected_obj)
+                ))
+    
+    def __repr__(self):
+
+        if self.inspected_obj is not None:
+            code = (inspect.getsource(self.inspected_obj))
+        else:
+            code = 'nothing to print :('
+        
+        repr_string=f'''
+        \n++++++++++ CODE +++++++
+        \n{code}
+        \n++++++++++ CODE +++++++
+        
+        '''
+        
+        return repr_string
+    
+    def reported(self):
+        self.cls_container.append(self)
+        
+        return copy.deepcopy(self)
+    
+    
 class SympyFormula(ReportModule):
     r'''
     This class appends a sympy expression to the existing document container. 
