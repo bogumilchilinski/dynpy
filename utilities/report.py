@@ -3038,24 +3038,7 @@ class SystemDynamicsAnalyzer(ReportModule):
         return self._current_result
 
 
-class CompoundMatrix(Matrix):
-    r'''
-    dfa
-    
-    Arguments
-    =========
 
-    Methods
-    =======
-
-    Example
-    =======
-    '''
-    def symbolic_form(self, symbol_str):
-
-        nrows, ncols = self.shape
-
-        matrix_filling = symbols()
 
 
 class InlineMath(Math):
@@ -3320,7 +3303,83 @@ class Equation(Environment):
     escape = False
     content_separator = "\n"
 
+class CompositeMatrix(Equation):
 
+    
+    r"""A class representing a composite matrix surrounded by Equation environment
+    .. code-block:: latex
+        \begin{environment_name}
+            Some content that is in the environment
+        \end{environment_name}
+    The text that is used in the place of environment_name is by default the
+    name of the class in lowercase.
+    However, this default can be overridden in 2 ways:
+    1. setting the _latex_name class variable when declaring the class
+    2. setting the _latex_name attribute when initialising object
+    """
+
+    #: Set to true if this full container should be equivalent to an empty
+    #: string if it has no content.
+    omit_if_empty = False
+    _latex_name='equation'
+
+    def __init__(self,matrix=None,repr_sym='A', options=None, arguments=None, start_arguments=None,
+                 **kwargs):
+        r"""
+        Args
+        ----
+        options: str or list or  `~.Options`
+            Options to be added to the ``\begin`` command
+        arguments: str or list or `~.Arguments`
+            Arguments to be added to the ``\begin`` command
+        start_arguments: str or list or `~.Arguments`
+            Arguments to be added before the options
+        """
+
+        self.matrix = matrix
+        self.repr_sym='A'
+        self.options = options
+        self.arguments = arguments
+        self.start_arguments = start_arguments
+
+        
+        
+        super().__init__(options=None, arguments=None, start_arguments=None,**kwargs)
+        
+        if self.matrix is not None:
+            
+            display(self._sym_matrix)
+            self.append(NoEscape(
+                latex(self._sym_matrix)
+                ))
+    
+    @property
+    def _sym_matrix(self):
+        subs_list = [(elem,Symbol(f'{self.repr_sym}_{no}'))   for no,elem in enumerate(self.matrix) if elem != 0] 
+        
+        return self.matrix.subs(subs_list)
+    
+    def __repr__(self):
+
+        if self.inspected_obj is not None:
+            code = (inspect.getsource(self.inspected_obj))
+        else:
+            code = 'nothing to print :('
+        
+        repr_string=f'''
+        \n++++++++++ CODE +++++++
+        \n{code}
+        \n++++++++++ CODE +++++++
+        
+        '''
+        
+        return repr_string
+    
+    def reported(self):
+        self.cls_container.append(self)
+        
+        return copy.deepcopy(self)
+    
 class DMath(Environment):
     """A class to wrap LaTeX's alltt environment."""
 
