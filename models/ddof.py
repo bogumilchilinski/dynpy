@@ -578,10 +578,10 @@ class DampedVehicleSuspension(ComposedSystem):
                  c_r=Symbol('c_r', positive=True),
                  l_cl=Symbol('l_{cl}', positive=True),
                  l_cr=Symbol('l_{cr}', positive=True),
-                 k_1=DDoFVehicleSuspension().k_1,
-                 k_2=DDoFVehicleSuspension().k_2,
-                 l_l=DDoFVehicleSuspension().l_l,
-                 l_r=DDoFVehicleSuspension().l_r,
+                 k_1=VehicleSuspension().k_1,
+                 k_2=VehicleSuspension().k_2,
+                 l_l=VehicleSuspension().l_l,
+                 l_r=VehicleSuspension().l_r,
                  qs=dynamicsymbols('z, \\varphi'),
                  **kwargs):
 

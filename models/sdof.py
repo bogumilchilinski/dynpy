@@ -94,7 +94,7 @@ class ComposedSystem(HarmonicOscillator):
 
 
 
-class HarmonicOscillator(ComposedSystem):
+class SpringMassSystem(ComposedSystem):
     """Ready to use sample Single Degree of Freedom System with mass on spring
         Arguments:
         =========
@@ -305,7 +305,7 @@ class BeamBridgeTMD(ComposedSystem):
 
 
     
-class DampedHarmonicOscillator(ComposedSystem):
+class DampedSpringMassSystem(ComposedSystem):
     scheme_name = '???'
     real_name = 'engine_real.PNG'
 
@@ -1156,7 +1156,7 @@ class NonlinearEngine(ComposedSystem):
             self.e: [2 * e0, S.Half * e0, 4 * e0, S.Half**2 * e0,3 * e0,3* S.Half * e0, 9 * e0, 3*S.Half**2 * e0],
         }
         return default_data_dict
-class StraightNonlinearEngine(SDoFNonlinearEngine):
+class StraightNonlinearEngine(NonlinearEngine):
     """
     Model of an exemplary Engine with nonlinear suspension aligned horizontally.
 
