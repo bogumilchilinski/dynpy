@@ -2613,7 +2613,7 @@ class PyVerbatim(Environment):
     content_separator = "\n"
     #inspect.getsource(system.__class__)
 
-    
+
 class Picture(Figure,ReportModule):
     """A class that represents a figure environment."""
 
@@ -2624,7 +2624,7 @@ class Picture(Figure,ReportModule):
 
     
     _latex_name = 'figure'
-    def __init__(self, image=None, position=None, **kwargs):
+    def __init__(self, image=None, position=None, caption=None, **kwargs):
         """
         Args
         ----
@@ -2637,10 +2637,14 @@ class Picture(Figure,ReportModule):
         """
     
         self.image = image
+        self.caption = caption
         super().__init__(position=position,**kwargs)
         
         if self.image is not None:
             self.add_image(NoEscape(self.image))
+            
+        if self.caption is not None:
+            self.add_caption(NoEscape(self.caption))
             
     def __repr__(self):
 
