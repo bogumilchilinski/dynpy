@@ -90,112 +90,6 @@ class ComposedSystem(HarmonicOscillator):
 
         return parameters_dict
 
-
-class ContinuousSystem(ContinuousSystem):
-    """Base class for all systems
-
-    """
-    scheme_name = 'damped_car_new.PNG'
-    real_name = 'car_real.jpg'
-
-    @classmethod
-    def _scheme(cls):
-
-        path = __file__.replace('systems.py', 'images/') + cls.scheme_name
-
-        return path
-
-    @classmethod
-    def _real_example(cls):
-
-        path = __file__.replace('systems.py', 'images/') + cls.real_name
-
-        return path
-
-    @classmethod
-    def preview(cls, example=False):
-        if example:
-            path = cls._real_example()
-
-        else:
-            path = cls._scheme()
-
-        with open(f"{path}", "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read())
-        image_file.close()
-
-        return IP.display.Image(base64.b64decode(encoded_string))
-
-    def get_default_data(self):
-        return None
-
-    def get_random_parameters(self):
-
-        default_data_dict = self.get_default_data()
-
-        if default_data_dict:
-            parameters_dict = {
-                key: random.choice(items_list)
-                for key, items_list in default_data_dict.items()
-            }
-        else:
-            parameters_dict=None
-
-        return parameters_dict    
-    
-class PlaneStressProblem(PlaneStressProblem):
-    """Base class for all systems
-
-    """
-    scheme_name = 'damped_car_new.PNG'
-    real_name = 'car_real.jpg'
-
-    @classmethod
-    def _scheme(cls):
-
-        path = __file__.replace('systems.py', 'images/') + cls.scheme_name
-
-        return path
-
-    @classmethod
-    def _real_example(cls):
-
-        path = __file__.replace('systems.py', 'images/') + cls.real_name
-
-        return path
-
-    @classmethod
-    def preview(cls, example=False):
-        if example:
-            path = cls._real_example()
-
-        else:
-            path = cls._scheme()
-
-        with open(f"{path}", "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read())
-        image_file.close()
-
-        return IP.display.Image(base64.b64decode(encoded_string))
-
-    def get_default_data(self):
-        return None
-
-    def get_random_parameters(self):
-
-        default_data_dict = self.get_default_data()
-
-        if default_data_dict:
-            parameters_dict = {
-                key: random.choice(items_list)
-                for key, items_list in default_data_dict.items()
-            }
-        else:
-            parameters_dict=None
-
-        return parameters_dict    
-
-
 class BeamBridgeTMD(ComposedSystem):
 
     scheme_name = 'bridge_tmd.png'
@@ -578,10 +472,10 @@ class DampedVehicleSuspension(ComposedSystem):
                  c_r=Symbol('c_r', positive=True),
                  l_cl=Symbol('l_{cl}', positive=True),
                  l_cr=Symbol('l_{cr}', positive=True),
-                 k_1=DDoFVehicleSuspension().k_1,
-                 k_2=DDoFVehicleSuspension().k_2,
-                 l_l=DDoFVehicleSuspension().l_l,
-                 l_r=DDoFVehicleSuspension().l_r,
+                 k_1=VehicleSuspension().k_1,
+                 k_2=VehicleSuspension().k_2,
+                 l_l=VehicleSuspension().l_l,
+                 l_r=VehicleSuspension().l_r,
                  qs=dynamicsymbols('z, \\varphi'),
                  **kwargs):
 
@@ -644,7 +538,7 @@ class DampedVehicleSuspension(ComposedSystem):
 #         return self.sym_desc_dict
 
 
-class DDoFShaft(ComposedSystem):
+class Shaft(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
     =========
             I = Moment of Inertia
@@ -820,89 +714,6 @@ class DampedShaft(ComposedSystem):
             }
           
         return parameters_dict
-    
-    
-class Pendulum(ComposedSystem):
-    """
-    Model of a sDoF mathematical Pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
-
-        Arguments:
-        =========
-            m = Mass
-                -Mass of system on spring
-
-            g = gravitional field
-                -value of gravitional's field acceleration
-
-            l = lenght
-                -Dimension of pendulum's strong
-
-            ivar = symbol object
-                -Independant time variable
-
-            qs = dynamicsymbol object
-                -Generalized coordinates
-
-        Example
-        =======
-        A mass oscillating up and down while being held up by a spring with a spring constant kinematicly 
-
-        >>> t = symbols('t')
-        >>> m, g, l = symbols('m, g, l')
-        >>> qs = dynamicsymbols('varphi') # Generalized Coordinates
-        >>> Pendulum()
-
-        -We define the symbols and dynamicsymbols
-        -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
-        -determine the instance of the pendulum by using class Pendulum()
-    """
-    scheme_name = 'undamped_pendulum.png'
-    real_name = 'pendulum_real.jpg'
-
-    def __init__(self,
-                 m=Symbol('m', positive=True),
-                 g=Symbol('g', positive=True),
-                 l=Symbol('l', positive=True),
-                 angle=dynamicsymbols('varphi'),
-                 qs=None,
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        if qs == None:
-            qs = [angle]
-        else:
-            qs = qs
-
-        self.m = m
-        self.g = g
-        self.l = l
-
-        Lagrangian = S.Half * m * l**2 * diff(
-            angle, ivar)**2 - m * g * l * (1 - cos(angle))
-
-        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar,**kwargs)
-
-    def get_default_data(self):
-
-        m0, l0 = symbols('m_0 l_0', positive=True)
-
-        default_data_dict = {
-            self.m: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
-            self.l: [2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0,7*l0, 8*l0, 9*l0,10*l0],
-        }
-        return default_data_dict
-
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.m: r'Mass of pendulum',
-            self.g: r'Gravity constant',
-            self.l: r'Pendulum length',
-        }
-        return self.sym_desc_dict
-
-
-# wymienić obrazek na taki, gdzie nie ma wymuszenia i symbole na obrazku będą zgodne z tymi w klasie
-
 
 class CoupledPendulum(ComposedSystem):
     """
