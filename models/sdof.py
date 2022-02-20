@@ -27,16 +27,29 @@ class ComposedSystem(HarmonicOscillator):
 
     @classmethod
     def _scheme(cls):
-
-        path = __file__.replace('systems.py', 'images/') + cls.scheme_name
-
+        if 'systems.py' in __file__: 
+            path = __file__.replace('systems.py', 'images/') + cls.scheme_name
+        if 'sdof.py' in __file__: 
+            path = __file__.replace('sdof.py', 'images/') + cls.scheme_name
+        if 'ddof.py' in __file__: 
+            path = __file__.replace('ddof.py', 'images/') + cls.scheme_name
+        if 'mdof.py' in __file__: 
+            path = __file__.replace('mdof.py', 'images/') + cls.scheme_name
+        print(path)
         return path
 
     @classmethod
     def _real_example(cls):
-
-        path = __file__.replace('systems.py', 'images/') + cls.real_name
-
+        if 'systems.py' in __file__: 
+            path = __file__.replace('systems.py', 'images/') + cls.real_name
+        if 'sdof.py' in __file__: 
+            path = __file__.replace('sdof.py', 'images/') + cls.real_name
+        if 'ddof.py' in __file__: 
+            path = __file__.replace('ddof.py', 'images/') + cls.real_name
+        if 'mdof.py' in __file__: 
+            path = __file__.replace('mdof.py', 'images/') + cls.real_name
+            
+        print(path)
         return path
 
     @classmethod
@@ -91,9 +104,161 @@ class ComposedSystem(HarmonicOscillator):
         return parameters_dict
 
 
+class InlineEnginePerpendicularSprings(ComposedSystem):
+    scheme_name = 'inline_engine_perpendicular_springs.png'
+    real_name = 'paccar.jpg'
 
+    def __init__(self,
+                 M=Symbol('M', positive=True),
+                 k_m=Symbol('k_m', positive=True),
+                 m_e=Symbol('m_e', positive=True),
+                 e=Symbol('e', positive=True),
+                 l=Symbol('l',positive=True),
+                 x=dynamicsymbols('x'),
+                 z=dynamicsymbols('z'),
+                 phi=dynamicsymbols('phi'),
+                 ivar=Symbol('t', positive=True),
+                 **kwargs):
 
+        self.M = M
+        self.k_m = k_m
+        self.m_e = m_e
+        self.e = e
 
+        self.MaterialPoint_1 = MaterialPoint(M, pos1=z, qs=[z])
+        self.MaterialPoint_2 = MaterialPoint(m_e,
+                                             pos1=z + e * cos(phi),
+                                             qs=[z])
+        self.SpringVer = Spring(2 * k_m, pos1=z, qs=[z])
+        self.SpringHor = Spring(2 * k_m, pos1=x, qs=[z])
+        system = self.SpringVer + self.SpringHor + self.MaterialPoint_1 + self.MaterialPoint_2
+        super().__init__(system,**kwargs)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.M: r'Mass of engine block',
+            self.k_m: r'Spring stiffness coefficient',
+            self.m_e: r'',
+            self.e: r'',
+        }
+        return self.sym_desc_dict
+
+class BoxerEnginePerpendicularSprings(ComposedSystem):
+    scheme_name = 'boxer_engine_perpendicular_springs.png'
+    real_name = 'f6c_valkyrie.jpg'
+
+    def __init__(self,
+                 M=Symbol('M', positive=True),
+                 k_m=Symbol('k_m', positive=True),
+                 m_e=Symbol('m_e', positive=True),
+                 e=Symbol('e', positive=True),
+                 l=Symbol('l',positive=True),
+                 x=dynamicsymbols('x'),
+                 z=dynamicsymbols('z'),
+                 phi=dynamicsymbols('phi'),
+                 ivar=Symbol('t', positive=True),
+                 **kwargs):
+
+        self.M = M
+        self.k_m = k_m
+        self.m_e = m_e
+        self.e = e
+
+        self.MaterialPoint_1 = MaterialPoint(M, pos1=x, qs=[x])
+        self.MaterialPoint_2 = MaterialPoint(m_e,
+                                             pos1=x + e * sin(phi),
+                                             qs=[x])
+        self.SpringVer = Spring(2 * k_m, pos1=x, qs=[x])
+        self.SpringHor = Spring(2 * k_m, pos1=z, qs=[x])
+        system = self.SpringVer + self.SpringHor + self.MaterialPoint_1 + self.MaterialPoint_2
+        super().__init__(system,**kwargs)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.M: r'Mass of engine block',
+            self.k_m: r'Spring stiffness coefficient',
+            self.m_e: r'',
+            self.e: r'',
+        }
+        return self.sym_desc_dict
+
+    
+class NonLinearInlineEnginePerpendicularSprings(ComposedSystem):
+    scheme_name = 'nonlin_inline_engine_perpendicular_springs.png'
+    real_name = 'paccar.jpg'
+
+    def __init__(self,
+                 M=Symbol('M', positive=True),
+                 k_m=Symbol('k_m', positive=True),
+                 m_e=Symbol('m_e', positive=True),
+                 e=Symbol('e', positive=True),
+                 l=Symbol('l_0',positive=True),
+                 z=dynamicsymbols('z'),
+                 phi=dynamicsymbols('phi'),
+                 ivar=Symbol('t', positive=True),
+                 **kwargs):
+
+        self.M = M
+        self.k_m = k_m
+        self.m_e = m_e
+        self.e = e
+
+        self.MaterialPoint_1 = MaterialPoint(M, pos1=z, qs=[z])
+        self.MaterialPoint_2 = MaterialPoint(m_e,
+                                             pos1=z + e * cos(phi),
+                                             qs=[z])
+        self.SpringVer = Spring(2 * k_m, pos1=z, qs=[z])
+        self.SpringHor = Spring(2 * k_m, pos1=(l**2+z**2)**(1/2)-l, qs=[z])
+        system = self.SpringVer + self.SpringHor + self.MaterialPoint_1 + self.MaterialPoint_2
+        super().__init__(system,**kwargs)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.M: r'Mass of engine block',
+            self.k_m: r'Spring stiffness coefficient',
+            self.m_e: r'',
+            self.e: r'',
+        }
+        return self.sym_desc_dict
+    
+class NonLinearBoxerEnginePerpendicularSprings(ComposedSystem):
+    scheme_name = 'nonlin_boxer_engine_perpendicular_springs.png'
+    real_name = 'f6c_valkyrie.jpg'
+
+    def __init__(self,
+                 M=Symbol('M', positive=True),
+                 k_m=Symbol('k_m', positive=True),
+                 m_e=Symbol('m_e', positive=True),
+                 e=Symbol('e', positive=True),
+                 l=Symbol('l_0',positive=True),
+                 x=dynamicsymbols('x'),
+                 phi=dynamicsymbols('phi'),
+                 ivar=Symbol('t', positive=True),
+                 **kwargs):
+
+        self.M = M
+        self.k_m = k_m
+        self.m_e = m_e
+        self.e = e
+
+        self.MaterialPoint_1 = MaterialPoint(M, pos1=x, qs=[x])
+        self.MaterialPoint_2 = MaterialPoint(m_e,
+                                             pos1=x + e * sin(phi),
+                                             qs=[x])
+        self.SpringVer = Spring(2 * k_m, pos1=x, qs=[x])
+        self.SpringHor = Spring(2 * k_m, pos1=(l**2+x**2)**(1/2)-l, qs=[x])
+        system = self.SpringVer + self.SpringHor + self.MaterialPoint_1 + self.MaterialPoint_2
+        super().__init__(system,**kwargs)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.M: r'Mass of engine block',
+            self.k_m: r'Spring stiffness coefficient',
+            self.m_e: r'',
+            self.e: r'',
+        }
+        return self.sym_desc_dict
+    
 class SpringMassSystem(ComposedSystem):
     """Ready to use sample Single Degree of Freedom System with mass on spring
         Arguments:
@@ -142,7 +307,7 @@ class SpringMassSystem(ComposedSystem):
 
         self.m = m
         self.k = k
-
+        
         self.mass = MaterialPoint(m, z, qs=[z])
         self.spring = Spring(k, z, qs=[z])
         composed_system = self.mass + self.spring
@@ -234,77 +399,6 @@ class BeamBridge(ComposedSystem):
         return self.sym_desc_dict
 
 
-class BeamBridgeTMD(ComposedSystem):
-
-    scheme_name = 'bridge_tmd.png'
-    real_name = 'beam_bridge_real.PNG'
-
-    def __init__(self,
-                 m=Symbol('m', positive=True),
-                 m_TMD=Symbol('m_TMD', positive=True),
-                 k_beam=Symbol('k_beam', positive=True),
-                 k_TMD=Symbol('k_TMD', positive=True),
-                 ivar=Symbol('t'),
-                 g=Symbol('g', positive=True),
-                 Omega=Symbol('Omega', positive=True),
-                 F_0=Symbol('F_0', positive=True),
-                 z=dynamicsymbols('z'),
-                 z_TMD=dynamicsymbols('z_TMD'),
-                 **kwargs):
-
-        self.m = m
-        self.k_beam = k_beam
-        self.g = g
-        self.Omega = Omega
-        self.F_0 = F_0
-        self.m_TMD = m_TMD
-        self.k_TMD = k_TMD
-        self.z_TMD = z_TMD
-        self.z = z
-
-        self.mass = MaterialPoint(m, z, qs=[z])
-        self.spring = Spring(k_beam, z, qs=[z])
-        self.gravity_force = GravitationalForce(self.m, self.g, z)
-        self.gravity_TMD = GravitationalForce(self.m_TMD, self.g, z_TMD)
-        self.force = Force(-F_0 * sin(Omega * ivar), pos1=z)
-        self.TMD = MaterialPoint(m_TMD, pos1=z_TMD, qs=[z_TMD])
-        self.spring_TMD = Spring(k_TMD, z, z_TMD, qs=[z, z_TMD])
-        composed_system = (self.mass + self.spring + self.gravity_force + self.force +
-                  self.TMD + self.spring_TMD + self.gravity_TMD)
-
-        super().__init__(composed_system,**kwargs)
-
-
-
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.m: r'mass of system on the spring',
-            self.k_beam: r'Beam stiffness',
-            self.g: r'gravitational field acceleration'
-        }
-
-        return self.sym_desc_dict
-
-    def get_default_data(self):
-
-        E, I, l, m0, k0 = symbols('E I l_beam m_0 k_0', positive=True)
-
-        default_data_dict = {
-            self.m: [20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0],
-            self.k_beam: [
-                2 * 48 * E * I / l**3, 3 * 48 * E * I / l**3,
-                4 * 48 * E * I / l**3, 5 * 48 * E * I / l**3,
-                6 * 48 * E * I / l**3
-            ],
-            self.m_TMD: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
-            self.k_TMD: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
-        }
-
-        return default_data_dict
-
-
-
-    
 class DampedSpringMassSystem(ComposedSystem):
     scheme_name = '???'
     real_name = 'engine_real.PNG'
@@ -875,7 +969,7 @@ class Engine(ComposedSystem):
             self.e: r'',
         }
         return self.sym_desc_dict
-
+    
 
 class DampedEngine(ComposedSystem):
     scheme_name = 'engine_with_damper.png'
@@ -952,104 +1046,6 @@ class DampedEngine(ComposedSystem):
         }
         return self.sym_desc_dict
 
-
-class EngineWithTMD(ComposedSystem):
-    """
-    Model of a DDoF Coupled Pendulum.
-
-        Arguments:
-        =========
-            M = Mass
-                -Mass of system on spring
-
-            m_e = mass
-                -value of particle mass
-
-            m_TMD = mass
-                -value of TMD mass
-
-            e = distance
-                -motion radius of a particle
-
-            k_m = spring coefficient
-                -value of spring coefficient
-
-            k_TMD = spring coefficient
-                -value of spring coefficient
-
-            ivar = symbol object
-                -Independant time variable
-
-            qs = dynamicsymbol object
-                -Generalized coordinates
-
-        Example
-        =======
-        A mass oscillating up and down while being held up by a spring with a spring constant kinematicly
-
-        >>> t = symbols('t')
-        >>> M, m_e, m_TMD, e, k_m, k_TMD = symbols('M, m_e, m_TMD, e, k_m, k_TMD')
-        >>> qs = dynamicsymbols('z, z_TMD') # Generalized Coordinates
-        >>> DDoFCouplePendulum()
-
-        -We define the symbols and dynamicsymbols
-        -determine the instance of the pendulum by using class SDoFCouplePendulum()
-    """
-
-    scheme_name = 'engine_TMD.PNG'
-    real_name = 'engine_real.PNG'
-
-    def __init__(self,
-                 M=Symbol('M', positive=True),
-                 k_m=Symbol('k_m', positive=True),
-                 k_TMD=Symbol('k_{TMD}', positive=True),
-                 m_e=Symbol('m_e', positive=True),
-                 m_TMD=Symbol('m_{TMD}', positive=True),
-                 e=Symbol('e', positive=True),
-                 z=dynamicsymbols('z'),
-                 z_TMD=dynamicsymbols('z_{TMD}'),
-                 phi=dynamicsymbols('varphi'),
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        self.M = M
-        self.k_m = k_m
-        self.k_TMD = k_TMD
-        self.m_e = m_e
-        self.m_TMD = m_TMD
-        self.e = e
-        self.z = z
-        self.z_TMD = z_TMD
-        self.phi = phi
-
-        self.MaterialPoint_1 = MaterialPoint(M, pos1=z, qs=[z])
-        self.MaterialPoint_2 = MaterialPoint(m_e,
-                                             pos1=z + e * cos(phi),
-                                             qs=[z])
-        self.MaterialPoint_3 = MaterialPoint(m_TMD, pos1=z_TMD, qs=[z_TMD])
-        self.Spring_1 = Spring(2 * k_m, pos1=z, qs=[z])
-        self.Spring_2 = Spring(k_TMD, pos1=z, pos2=z_TMD, qs=[z_TMD])
-
-        system = self.Spring_1 + self.Spring_2 + self.MaterialPoint_1 + \
-            self.MaterialPoint_2 + self.MaterialPoint_3
-        super().__init__(system,**kwargs)
-
-    def equilibrium_equation(self, static_disp_dict=None):
-        static_disp_dict = {
-            self.z: Symbol('z_0', positive=True),
-            self.z_TMD: Symbol('z_{TMD0}', positive=True)
-        }
-
-        return super().equilibrium_equation(static_disp_dict=static_disp_dict)
-
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.M: r'Mass of engine block',
-            self.k_m: r'Spring stiffness coefficient',
-            self.m_e: r'',
-            self.e: r'',
-        }
-        return self.sym_desc_dict
 
 
 class NonlinearEngine(ComposedSystem):
@@ -1211,45 +1207,6 @@ class StraightNonlinearEngine(NonlinearEngine):
         }
         return default_data_dict
 
-
-
-class Inverted_Pendulum(HarmonicOscillator):
-    def __init__(self,
-                 M=symbols('M', positive=True),
-                 m=symbols('m', positive=True),
-                 I=symbols('I', positive=True),
-                 g=symbols('g', positive=True),
-                 b=symbols('b', positive=True),
-                 l=symbols('l', positive=True),
-                 F=symbols('F', positive=True),
-                 var=dynamicsymbols('x, phi'),
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        x, phi = var
-
-        self.rod = (
-            RigidBody2D(m,
-                        I,
-                        pos_lin=0,
-                        pos_rot=0,
-                        pos_lin_c=(x + l * sin(phi)),
-                        pos_rot_c=phi,
-                        qs=[x, phi]) +
-            MaterialPoint(m, l * cos(phi), qs=[phi]) +
-            GravitationalForce(m, g, pos1=0, pos_c=l * cos(phi), qs=[phi]))
-
-        self.cart = MaterialPoint(M, x, qs=[x])
-
-        self.force = Force(F, x)
-
-        self.friction = Damper(b, x)
-
-        system = self.rod + self.cart + self.friction + self.force
-
-        super().__init__(system,**kwargs)
-
-
 class TrolleyWithNonlinearSpring(ComposedSystem):
     scheme_name = 'sdof_nonlin_trolley.PNG'
     real_name = 'trolleywithnonlinearspring_real.png'
@@ -1339,30 +1296,6 @@ class TrolleyWithNonlinearSpring(ComposedSystem):
 
         return default_data_dict
 
-
-# class MDoFShaft(ComposedSystem):
-#     scheme_name = '...'
-#     real_name = '...'
-
-#     def __init__(self, system=None, ivar=Symbol('t')):
-
-#         t = ivar
-
-#         m, m_0, k, M, k_m, g, F_1, F_2, Omega, F, R, e, m_e, J, k_m, beta, k_m = symbols(
-#             'm,m_0,k,M,k_v,g,F_1,F_2,Omega, F_0, R, e, m_e, J, k_m, beta, k_m',
-#             positive=True)
-
-#         T = 0
-#         V = 0
-
-#         L_Shaft = (T - V)
-
-#         shaft_base = HarmonicOscillator(
-#             L_shaft, qs=[xb, xe], forcelist=[], frame=N)
-
-#         super().__init__(shaft_base)
-
-
 class NonLinearTrolley(ComposedSystem):
 
     scheme_name = 'nonlin_trolley.PNG'
@@ -1425,103 +1358,6 @@ class NonLinearTrolley(ComposedSystem):
         return self.sym_desc_dict
 
 
-class DoubleTrolleyDifferentWheels(ComposedSystem):
-    scheme_name = 'MDOFDoubleTrolleyDifferentWheels.PNG'
-    real_name = 'MDOFDoubleTrolleyDifferentWheels.PNG'
-
-    def __init__(self,
-                 x_l=dynamicsymbols('x_l'),
-                 x_r=dynamicsymbols('x_r'),
-                 x_1=dynamicsymbols('x_1'),
-                 x_2=dynamicsymbols('x_2'),
-                 m_w1=Symbol('m_w1', positive=True),
-                 m_w2=Symbol('m_w2', positive=True),
-                 m1=Symbol('m_1', positive=True),
-                 m2=Symbol('m_2', positive=True),
-                 R=Symbol('R', positive=True),
-                 k_l=Symbol('k_l', positive=True),
-                 c_cl=Symbol('c_cl', positive=True),
-                 k_c=Symbol('k_c', positive=True),
-                 c_cc=Symbol('c_cc', positive=True),
-                 k_r=Symbol('k_r', positive=True),
-                 c_cr=Symbol('c_cr', positive=True),
-                 lam=Symbol('lambda', positive=True),
-
-                 qs=dynamicsymbols('x_l x_r'),
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        self.m1 = m1
-        self.m2 = m2
-        self.m_w1 = m_w1
-        self.m_w2 = m_w2
-        self.k_l = k_l
-        self.c_cl = c_cl
-        self.k_c = k_c
-        self.c_cc = c_cc
-        self.k_r = k_r
-        self.c_cr = c_cr
-        self.x_l = x_l
-        self.x_r = x_r
-        self.x_1 = x_1
-        self.x_2 = x_2
-        self.R = R
-        self.lam = lam
-
-        self.trolley_1 = (MaterialPoint(m1, x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[x_l]) 
-                          + Spring(k_l, pos1=x_l, qs=[x_l]) + Damper(c_cl, pos1=x_l, qs=[x_l]) 
-                          + MaterialPoint(m_w1, x_l/2, qs = [x_l]) + MaterialPoint(m_w1/2, x_l/2, qs = [x_l]) + MaterialPoint(m_w1, x_l/2, qs = [x_l])
-                          + MaterialPoint(m_w1/2, x_l/2, qs = [x_l]))
-
-        self.trolley_2 = (MaterialPoint(m2, x_r, qs=[x_r]) + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) 
-                          + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) 
-                          + Damper(c_cc, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) 
-                          + Damper(c_cr, pos1=x_r, qs=[x_r]) + MaterialPoint(m_w2, x_r/2, qs = [x_r]) + MaterialPoint(m_w2/2, x_r/2, qs = [x_r]) + MaterialPoint(m_w2, x_r/2, qs = [x_r])
-                          + MaterialPoint(m_w2/2, x_r/2, qs = [x_r]))
-
-        system = self.trolley_1 + self.trolley_2
-        super().__init__(system(qs),**kwargs)
-
-        
-    def get_default_data(self):
-
-        m0, k0, l0, lam = symbols('m_0 k_0 l_0 lambda', positive=True)
-
-        default_data_dict = {
-            self.m1: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
-            self.m_w1: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
-            self.m_w2: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
-            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-            self.k_c: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-
-            self.c_cr: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
-            self.c_cc: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
-            self.c_cl: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
-
-            self.x_l: [self.x, 0],
-            self.x_r: [self.x, 0],
-        }
-
-        return default_data_dict
-
-    def get_random_parameters(self):
-
-        default_data_dict = self.get_default_data()
-
-        parameters_dict = {
-            key: random.choice(items_list)
-            for key, items_list in default_data_dict.items()
-        }
-
-        if parameters_dict[self.x_l] == 0 and parameters_dict[self.x_r]==0:
-
-            parameters_dict[self.x_l] = self.x
-
-
-        return parameters_dict
-
 
 class TriplePendulum(ComposedSystem):
     scheme_name = 'SDOFTriplePendulum.PNG'
@@ -1578,522 +1414,3 @@ class TriplePendulum(ComposedSystem):
     
     
 
-class LagrangeIOnMathFunction(ComposedSystem):
-
-    scheme_name = 'mat_point_parabola.PNG'
-    real_name = 'tautochrone_curve_small.gif'
-
-    def __init__(self,
-                 m=Symbol('m', positive=True),
-                 g=Symbol('g', positive=True),
-                 x=dynamicsymbols('x'),
-                 y=dynamicsymbols('y'),
-                 a=symbols('a',positive=True),
-                 R=symbols('R',positive=True),
-                 ivar=Symbol('t'),
-                 qs=dynamicsymbols('x,y'),
-                 **kwargs):
-
-        self.m = m
-        self.x = x
-        self.y = y
-        self.a = a
-        self.R = R
-        self.g = g
-
-        system = HarmonicOscillator(S.Half*m*x.diff(ivar)**2+S.Half*m*y.diff(ivar)**2-m*g*y,qs=[x,y])
-
-        super().__init__(system(qs),**kwargs)
-
-    def get_default_data(self):
-
-
-        m0 = symbols('m_0', positive=True)
-        x  = self.x
-        a, Omega = symbols('a, Omega', positive=True)
-
-        default_data_dict = {
-            self.m :[S.Half * m0, 1 * m0, 2 * m0, 2**2 * m0, S.Half**2 * m0,8*m0,S.Half**3],
-            self.y:[ a*x**2, a*(1-cos(x)),a*sin(x)**2,a*sin(x)**4,a*x**4]
-
-        }
-
-        return default_data_dict
-        
-
-class CrankSystem(ComposedSystem):
-
-    scheme_name = 'crank_mechanism.png'
-    real_name = 'crank_slider_real.jpg'
-
-    def __init__(self,
-                 I=Symbol('I', positive=True),
-                 r=Symbol('r', positive=True),
-                 h=Symbol('h', positive=True),
-                 a=Symbol('a', positive=True),
-                 b=Symbol('b', positive=True),
-                 phi=dynamicsymbols('\\varphi'),
-                 beta=dynamicsymbols('beta'),
-#                  alpha=dynamicsymbols('alpha'),
-                 **kwargs):
-
-        self.I = I
-        self.h=h
-        self.r=r
-        self.phi = phi
-        self.beta = beta
-#         self.alpha = alp
-        self.a = a
-        self.b = b
-
-        self.crank = MaterialPoint(I, phi, qs=[phi])
-        composed_system = (self.crank)
-
-        super().__init__(composed_system,**kwargs)
-
-    @property
-    def _dbeta(self):
-        beta=atan(self.r/self.l*self.phi) #it's probably wrong - has to be checked
-        return beta.diff(self.ivar)
-    
-    @property
-    def _displacement_d(self):
-
-        return -(-self.b*sqrt((self.h**2 - self.h**2*self.a**2/self.b**2 + 2*self.h*self.r*cos(self.phi) - 2*self.h*self.r*self.a**2*cos(self.phi)/self.b**2 + self.r**2 - self.r**2*self.a**2*cos(self.phi)**2/self.b**2)/(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)) - self.r*self.a*sin(self.phi)/sqrt(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2))
-    
-    @property
-    def _velocity_b2(self):
-        return (self.phi.diff(self.ivar)*self.r)
-    @property
-    def _velocity_b2b3(self):
-        return (sqrt(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)).diff(self.ivar)
-    @property
-    def _velocity_b3(self):
-        gamma=asin(self._velocity_b2b3/self._velocity_b2)
-        return self._velocity_b2*cos(gamma)
-    @property
-    def _velocity_d(self):
-        return self._displacement_d.diff(self.ivar)
-    @property
-    def _velocity_c(self):
-        omega3=self._velocity_b3/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi))
-        return omega3*self.a
-    @property
-    def _acceleration_b2(self):
-        return self.phi.diff(self.ivar)**2*self.r
-    @property
-    def _acceleration_b3n(self):
-        return (self._velocity_b3**2/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi)))
-    @property
-    def _acceleration_cn(self):
-        return (self._velocity_b3**2*(self.a/(sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi)))**2))
-    @property
-    def _acceleration_d(self):
-        return self._velocity_d.diff(self.ivar)
-
-    
-    @property
-    def _omega_3(self):
-        return (self._velocity_b3/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi)))
-    @property
-    def linkage_ang_velocity(self):
-        return self._dbeta
-
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.I: r'crank moment of inertia',
-            # self.k_beam: r'Beam stiffness',
-            # self.g: r'gravitational field acceleration'
-        }
-
-        return self.sym_desc_dict
-
-    def get_default_data(self):
-        E, I, l, m0, k0 = symbols('E I0 l_beam m_0 k_0', positive=True)
-        
-        default_data_dict = {
-            self.I: [20 * I, 30 * I,60 * I,50 * I,40 * I,],
-            self.h:[1,2,3],
-            self.r:[0.1,0.2,0.3],
-            self.a:[10],
-            self.b:[20],
-            self.phi : [10,20,30],
-        }
-
-        return default_data_dict
-
-class WinchSystem(ComposedSystem):
-
-
-    scheme_name = 'Winch_System.png'
-    real_name = 'winch_mechanism_real.PNG'
-
-    def __init__(self,
-                 I_s=Symbol('I_s', positive=True),
-                 I_k=Symbol('I_k', positive=True),
-                 I_1=Symbol('I_1', positive=True),
-                 i_1=Symbol('i_1', positive=True),
-                 I_2=Symbol('I_2', positive=True),
-                 i_2=Symbol('i_2', positive=True),
-                 I_3=Symbol('I_3', positive=True),
-                 I_4=Symbol('I_4', positive=True),
-                 I_b=Symbol('I_b', positive=True),
-                 A=Symbol('A', positive=True),
-                 B=Symbol('B', positive=True),
-                 ivar=Symbol('t'),
-                 phi=dynamicsymbols('\\varphi'),
-                 dphi=dynamicsymbols('\\varphi',1),
-                 D=Symbol('D', positive=True),
-                 mu=Symbol('\\mu', positive=True),
-                 M_s=Symbol('M_s', positive=True),
-                 M_T=Symbol('M_T', positive=True),
-                 G=Symbol('G', positive=True),
-                 g=Symbol('g',positive=True),
-                 alpha=Symbol('\\alpha'),
-                 **kwargs):
-        
-        pos1=phi
-        qs=[phi]
-        phi_1=phi
-        phi_2=phi_1*i_1
-        phi_3=phi_2*i_2
-
-        self.I_s = I_s
-        self.I_k = I_k
-        self.I_1 = I_1
-        self.i_1 = i_1
-        self.I_2 = I_2
-        self.I_3 = I_3
-        self.i_2 = i_2
-        self.I_4 = I_4
-        self.I_b = I_b
-        self.D = D
-        self.G = G
-        self.g = g
-        self.mu = mu
-        self.M_T = M_T
-        self.M_s = M_s
-        self.phi_1 = phi_1
-        self.phi_2 = phi_2
-        self.phi_3 = phi_3
-        self.alpha = alpha
-        self.A=A
-        self.B=B
-        self.dphi = dphi
-
-        
-        self.engine = Disk(I_s, phi_1, qs=qs)
-#         self.disk_k = Disk(I_k, phi_1, qs=qs)
-        self.disk_1 = Disk(I_1, phi_1, qs=qs)
-        self.disk_2 = Disk(I_2, phi_2, qs=qs)
-        self.disk_3 = Disk(I_3, phi_2, qs=qs)
-        self.disk_4 = Disk(I_4, phi_3, qs=qs)
-        self.disk_B = Disk(I_b, phi_3, qs=qs)
-        self.load = MaterialPoint(G/g, pos1=phi_3* D/2, qs=qs)
-        self.friction_comp = GravitationalForce(G/g, g, pos1=phi_3* D/2 * cos(alpha)*mu , qs=qs)
-        self.force = Force(-M_T,pos1=phi_3,qs=qs)
-        self.drive = Force(M_s,pos1=phi_1,qs=qs)
-        self.gravity_comp = GravitationalForce(G/g, g, pos1=phi_3* D/2 * sin(alpha) , qs=qs)
-
-        system = self.engine + self.disk_1 + self.disk_2 + self.disk_3 + self.disk_4 + self.disk_B + self.load + self.friction_comp + self.gravity_comp + self.force + self.drive
-
-        super().__init__(system,**kwargs)
-
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.I: r'crank moment of inertia',
-            # self.k_beam: r'Beam stiffness',
-            # self.g: r'gravitational field acceleration'
-        }
-
-        return self.sym_desc_dict
-
-    def get_default_data(self):
-        E, I_s,I_k,I_b,I_1,I_2,I_3,I_4,i_1, i_2,D,G,g,mu,M_T,M_s= symbols('E I_s I_k I_b I_1 I_2 I_3 I_4 i_1 i_2 D G g \mu M_T M_s', positive=True)
-        
-        default_data_dict = {
-            self.I_s: [20,30,40],
-            self.I_k: [20,30,40],
-            self.I_1: [20,30,40],
-            self.I_2: [20,30,40],
-            self.I_3: [20,30,40],
-            self.I_4: [20,30,40],
-            self.I_b: [20,30,40],
-            self.i_1: [20,30,40],
-            self.i_2: [20,30,40],
-            self.D: [10,20,30],
-            self.G: [10,20,30],
-            self.g: [10,20,30],
-            self.mu : [10,20,30],
-            self.M_T : [10,20,30],
-            self.M_s : [10,20,30],
-            self.phi_1: [10,20,30],
-            self.phi_2: [10,20,30],
-            self.phi_3  : [10,20,30],
-            self.alpha  : [10,20,30],
-        }
-
-        return default_data_dict
-        
-    def steady_angular_velocity(self):
-        obj=self
-        eoms_num = N(obj._eoms[0].subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data),3)
-        eom_sol = dsolve(eoms_num, obj.q[0], ics={obj.q[0].subs(obj.ivar, 0): 0, obj.q[0].diff(obj.ivar).subs(obj.ivar, 0): 0})
-        omega_steady_state =  N(eom_sol.rhs.diff(obj.ivar).subs(obj.ivar,oo),3)
-        return omega_steady_state
-    
-    def reduced_torque(self):
-        obj=self
-        
-        red_tor = -(obj._eoms[0].doit().subs(obj.M_s,obj.A-obj.B*obj.dphi).subs([(obj.q[0].diff(obj.ivar,obj.ivar),0),(obj.q[0].diff(obj.ivar),0)]))
-        return red_tor
-    
-    def delta_1(self):
-        
-        obj=self
-        M_Z = obj._eoms[0].doit().subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data).subs([(obj.q[0].diff(obj.ivar,obj.ivar),0),(obj.q[0].diff(obj.ivar),0)])
-        delta_1 = 0.4*(obj.A-Abs(M_Z))/(self.steady_angular_velocity()**2*self.reduced_inertia())
-
-        return delta_1
-
-    def reduced_inertia(self):
-        obj = self
-        
-        ans = obj.inertia_matrix()[0]
-
-        return ans
-
-    def flywheel_moment_of_inertia(self):
-        obj=self
-        delta_1=self.delta_1()
-        I_r=self.reduced_inertia()
-
-        ik=((((delta_1/0.02)-1)*I_r).n(5))
-        return ik
-    def startup_mass_velocity(self):
-        obj=self
-        st_val=obj.D/2*obj.phi_3
-        return st_val
-        
-class DrivetrainVehicleSystem(ComposedSystem):
-
-
-    #scheme_name = 'vehicle_drivetrain.png'
-    #real_name = 'vehicle_drivetrain_real.PNG'
-
-    def __init__(self,
-                 R=Symbol('R'),
-                 M_m=Symbol('M_m', positive=True),
-                 omega_m=Symbol('\\omega_m', positive=True),
-                 I_m=Symbol('I_m', positive=True),
-                 I=Symbol('I', positive=True),
-                 I_k=Symbol('I_k', positive=True),
-                 omega_1=Symbol('\\omega_1', positive=True),
-                 I_a=Symbol('I_a', positive=True),
-                 z_1=Symbol('z_1', positive=True),
-                 I_1=Symbol('I_1', positive=True),
-                 z_2=Symbol('z_2', positive=True),
-                 I_2=Symbol('I_2', positive=True),
-                 I_b=Symbol('I_b', positive=True),
-                 z_3=Symbol('z_3', positive=True),
-                 I_3=Symbol('I_3', positive=True),
-                 z_4=Symbol('z_4', positive=True),
-                 I_4=Symbol('I_4', positive=True),
-                 omega_3=Symbol('omega_3', positive=True),
-                 I_c=Symbol('I_c',positive=True),
-                 I_d=Symbol('I_d', positive=True),
-                 I_w=Symbol('I_w', positive=True),
-                 r=Symbol('r', positive=True),
-                 m=Symbol('m', positive=True),
-                 i_1=Symbol('i_1',positive=True),
-                 i_2=Symbol('i_2',positive=True),
-                 ivar=Symbol('t'),
-                 A=Symbol('A', positive=True),
-                 B=Symbol('B', positive=True),
-                 phi=dynamicsymbols('\\varphi'),
-                 dphi=dynamicsymbols('\\varphi',1),
-                 alpha=Symbol('alpha'),
-                 c=Symbol('c'),
-                 g=Symbol('g'),
-                 **kwargs):
-        
-        pos1=phi
-        qs=[phi]
-        phi_1=phi
-#         i_1=z_2/z_1
-#         i_2=z_4/z_3
-        phi_2=phi_1/i_1
-        phi_3=phi_2/i_2
-
-        self.M_s = M_m
-        self.omega_m = omega_m
-        self.I_1 = I_1
-        self.i_1 = i_1
-        self.I_2 = I_2
-        self.I_3 = I_3
-        self.i_2 = i_2
-        self.I_4 = I_4
-        self.I_a = I_a
-        self.I_b = I_b
-        self.I_c = I_c
-        self.I_d = I_d
-        self.I_k = I_k
-        self.I_m = I_m
-        self.I_w = I_w
-        self.phi_1 = phi_1
-        self.phi_2 = phi_2
-        self.phi_3 = phi_3
-        self.alpha = alpha
-        self.A = A
-        self.B = B
-        self.dphi = dphi
-        self.r = r
-        self.D = 2*self.r
-        self.m = m
-        self.c = c
-        self.g = g
-        
-        self.engine_force = Force(M_m, pos1=phi_1,qs=qs)
-        self.engine_inertia = Disk(I_m, phi_1, qs=qs)
-#         self.flywheel = Disk(I, phi_1, qs=qs)
-        self.clutch = Disk(I_c, phi_1, qs=qs)
-        self.driveshaft_1 = Disk(I_a, phi_1, qs=qs)
-        self.transmission_i = Disk(I_1, phi_1, qs=qs)
-        self.transmission_o = Disk(I_2, phi_2, qs=qs)
-        self.driveshaft_2 = Disk(I_b, phi_2, qs=qs)
-        self.diff_i = Disk(I_3, phi_2, qs=qs)
-        self.diff_o = Disk(I_4, phi_3, qs=qs)
-        self.axleshaft = Disk(I_d, phi_3, qs=qs)
-        self.wheels = Disk(4*I_w, phi_3, qs=qs)
-        self.mass = MaterialPoint(m, pos1=phi_3*r , qs=qs)
-        self.gravity = Force(-m*g*sin(alpha), pos1=phi_3* r,qs=qs)#GravitationalForce(m, g, pos1=phi_3* r * sin(alpha) , qs=qs)
-        self.air_force = Damper(c,pos1=phi_3*r,qs=qs) #(self, c, pos1, pos2=0, qs=None, ivar=Symbol('t'), frame=base_frame)
-
-        system = self.engine_inertia + self.engine_force + self.clutch + self.driveshaft_1 + self.transmission_i + self.transmission_o + self.driveshaft_2 + self.diff_i + self.diff_o + self.axleshaft + self.wheels + self.mass + self.gravity + self.air_force
-
-        super().__init__(system,**kwargs)
-        
-        self.__cached_solution = None
-
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.I_c: r'moment of inertia',
-            # self.g: r'gravitational field acceleration'
-        }
-
-        return self.sym_desc_dict
-
-    def get_default_data(self):
-        
-        E, I_s,I_k,I_b,I_1,I_2,I_3,I_4,i_1, i_2,D,G,g,mu,M_T,M_s= symbols('E I_s I_k I_b I_1 I_2 I_3 I_4 i_1 i_2 D G g \mu M_T M_s', positive=True)
-        
-        default_data_dict = {
-#             self.I_s: [20,30,40],
-#             self.I_k: [20,30,40],
-#             self.I_1: [20,30,40],
-#             self.I_2: [20,30,40],
-#             self.I_3: [20,30,40],
-#             self.I_4: [20,30,40],
-#             self.I_b: [20,30,40],
-#             self.i_1: [20,30,40],
-#             self.i_2: [20,30,40],
-#             self.D: [10,20,30],
-#             self.G: [10,20,30],
-#             self.g: [10,20,30],
-#             self.mu : [10,20,30],
-#             self.M_T : [10,20,30],
-#             self.M_s : [10,20,30],
-#             self.phi_1: [10,20,30],
-#             self.phi_2: [10,20,30],
-#             self.phi_3  : [10,20,30],
-        }
-
-        return default_data_dict
-    
-    def linear_vehicle_velocity(self):
-        obj=self
-        lin_veh_vel=omega_steady_state*vel_ratio
-        return lin_veh_vel
-    
-    def velocity_ratio(self):
-        obj=self
-        vel_ratio=self.phi_3*self.r/self.phi
-        return vel_ratio
-    
-
-    def steady_angular_velocity(self):
-        obj=self
-
-        
-        eom_sol = obj._eom_solution()
-        #omega_steady_state =  (eom_sol.rhs.diff(obj.ivar).subs(obj.ivar,oo))
-
-        #display(obj._eoms[0])
-        #eoms_num = N(obj._eoms[0].subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data),3)
-        #display(eoms_num)
-        #eom_sol = dsolve(eoms_num, obj.q[0], ics={obj.q[0].subs(obj.ivar, 0): 0, obj.q[0].diff(obj.ivar).subs(obj.ivar, 0): 0})
-        omega_steady_state =  N(eom_sol.rhs.diff(obj.ivar).subs(obj.ivar,oo),3)
-
-        return omega_steady_state
-    
-    def steady_angular_velocity_rev_per_min(self):
-        obj=self
-        ang_vel = obj.steady_angular_velocity()
-        return ang_vel* 60/360
-    
-    def reduced_torque(self):
-        obj=self
-        red_tor = (obj._eoms[0].doit().subs(obj.M_s,obj.A-obj.B*obj.dphi).subs([(obj.q[0].diff(obj.ivar,obj.ivar),0),(obj.q[0].diff(obj.ivar),0)]))
-        return red_tor
-    
-    def delta_1(self):
-        obj=self
-        M_Z = obj._eoms[0].doit().subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data).subs([(obj.q[0].diff(obj.ivar,obj.ivar),0),(obj.q[0].diff(obj.ivar),0)])
-        delta_1 = 0.4*(obj.A-Abs(M_Z))/(self.steady_angular_velocity()**2*self.reduced_inertia())
-#         0.4*(num_data.loc[case_no,'A']-Abs(M_Z))/(omega_ust**2*I_r)
-        return delta_1
-
-    def reduced_inertia(self):
-        obj = self
-        ans = obj.inertia_matrix()[0]
-        return ans
-
-    def flywheel_moment_of_inertia(self):
-        obj=self
-        delta_1=self.delta_1()
-        I_r=self.reduced_inertia()
-
-        ik=((((delta_1/0.004)-1)*I_r).n(5))
-        return ik
-    
-    def startup_mass_velocity(self):
-        obj=self
-        st_val=obj.D/2*obj.phi_3
-        return st_val
-    
-    def reducted_mass(self):
-        obj=self
-        
-        return obj.flywheel_moment_of_inertia()/(obj.startup_mass_velocity()*obj.phi1)**2
-    
-    def reducted_force(self):
-        obj=self
-        
-        return obj.reduced_torque()/obj.startup_mass_velocity()
-
-
-    
-    def _eom_solution(self):
-        obj=self
-        
-        if obj.__cached_solution is None:
-        
-            eoms_num = N(obj._eoms[0].subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data),3)
-            EOM_dsolve = dsolve(eoms_num, obj.q[0], ics={obj.q[0].subs(obj.ivar, 0): 0, obj.q[0].diff(obj.ivar).subs(obj.ivar, 0): 0})
-            obj.__cached_solution = EOM_dsolve
-        else:
-            EOM_dsolve = obj.__cached_solution
-            
-       
-        
-        return EOM_dsolve
