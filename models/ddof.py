@@ -539,7 +539,7 @@ class DampedVehicleSuspension(ComposedSystem):
 #         return self.sym_desc_dict
 
 
-class DDoFShaft(ComposedSystem):
+class Shaft(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
     =========
             I = Moment of Inertia
@@ -715,7 +715,6 @@ class DampedShaft(ComposedSystem):
             }
           
         return parameters_dict
-    
 
 
 
@@ -1223,6 +1222,7 @@ class TwoNonLinearTrolleys(ComposedSystem):
         }
         return self.sym_desc_dict
 
+
 class TwoNonLinearDisks(ComposedSystem):
     scheme_name = 'sdof_nonlin_disc.png'
     real_name = 'dwa_wozki_XD.PNG'
@@ -1396,4 +1396,6 @@ class NonLinearVeeEnginePerpendicularSprings(ComposedSystem):
             self.m_e: r'',
             self.e: r'',
         }
+
         return self.sym_desc_dict
+

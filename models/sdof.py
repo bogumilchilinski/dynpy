@@ -9,13 +9,10 @@ from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
 from .elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame,base_origin
 from ..continuous import ContinuousSystem, PlaneStressProblem
 
-
-
 import base64
 import random
 import IPython as IP
 import numpy as np
-
 import inspect
 
 class ComposedSystem(HarmonicOscillator):
@@ -67,23 +64,20 @@ class ComposedSystem(HarmonicOscillator):
         return IP.display.Image(base64.b64decode(encoded_string))
 
     def calculations_steps(self,preview=True,system=None,code=False):
-        
+
 #         latex_store=AutoBreak.latex_backend
 #         AutoBreak.latex_backend = latex
-        
+
         print('zlo')
         print(inspect.getsource(self.__class__))
 
-        
         doc_model=super().calculations_steps(preview=True,code=code)
-        
-        
+
+
 #         AutoBreak.latex_backend = latex_store
         return doc_model
-            
 
-    
-    
+
     def get_default_data(self):
         return None
 
@@ -102,6 +96,7 @@ class ComposedSystem(HarmonicOscillator):
             parameters_dict=None
 
         return parameters_dict
+
 
 
 class InlineEnginePerpendicularSprings(ComposedSystem):
@@ -259,7 +254,9 @@ class NonLinearBoxerEnginePerpendicularSprings(ComposedSystem):
         }
         return self.sym_desc_dict
     
+
 class SpringMassSystem(ComposedSystem):
+
     """Ready to use sample Single Degree of Freedom System with mass on spring
         Arguments:
         =========
@@ -399,7 +396,82 @@ class BeamBridge(ComposedSystem):
         return self.sym_desc_dict
 
 
+
+class BeamBridgeTMD(ComposedSystem):
+
+    scheme_name = 'bridge_tmd.png'
+    real_name = 'beam_bridge_real.PNG'
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 m_TMD=Symbol('m_TMD', positive=True),
+                 k_beam=Symbol('k_beam', positive=True),
+                 k_TMD=Symbol('k_TMD', positive=True),
+                 ivar=Symbol('t'),
+                 g=Symbol('g', positive=True),
+                 Omega=Symbol('Omega', positive=True),
+                 F_0=Symbol('F_0', positive=True),
+                 z=dynamicsymbols('z'),
+                 z_TMD=dynamicsymbols('z_TMD'),
+                 **kwargs):
+
+        self.m = m
+        self.k_beam = k_beam
+        self.g = g
+        self.Omega = Omega
+        self.F_0 = F_0
+        self.m_TMD = m_TMD
+        self.k_TMD = k_TMD
+        self.z_TMD = z_TMD
+        self.z = z
+
+        self.mass = MaterialPoint(m, z, qs=[z])
+        self.spring = Spring(k_beam, z, qs=[z])
+        self.gravity_force = GravitationalForce(self.m, self.g, z)
+        self.gravity_TMD = GravitationalForce(self.m_TMD, self.g, z_TMD)
+        self.force = Force(-F_0 * sin(Omega * ivar), pos1=z)
+        self.TMD = MaterialPoint(m_TMD, pos1=z_TMD, qs=[z_TMD])
+        self.spring_TMD = Spring(k_TMD, z, z_TMD, qs=[z, z_TMD])
+        composed_system = (self.mass + self.spring + self.gravity_force + self.force +
+                  self.TMD + self.spring_TMD + self.gravity_TMD)
+
+        super().__init__(composed_system,**kwargs)
+
+
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'mass of system on the spring',
+            self.k_beam: r'Beam stiffness',
+            self.g: r'gravitational field acceleration'
+        }
+
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        E, I, l, m0, k0 = symbols('E I l_beam m_0 k_0', positive=True)
+
+        default_data_dict = {
+            self.m: [20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0],
+            self.k_beam: [
+                2 * 48 * E * I / l**3, 3 * 48 * E * I / l**3,
+                4 * 48 * E * I / l**3, 5 * 48 * E * I / l**3,
+                6 * 48 * E * I / l**3
+            ],
+            self.m_TMD: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
+            self.k_TMD: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
+        }
+
+        return default_data_dict
+
+
+
+
+    
+
 class DampedSpringMassSystem(ComposedSystem):
+
     scheme_name = '???'
     real_name = 'engine_real.PNG'
 
@@ -421,6 +493,11 @@ class DampedSpringMassSystem(ComposedSystem):
         system = self.mass + self.spring + self.damper
 
         super().__init__(system,**kwargs)
+
+
+class DampedHarmonicOscillator(DampedSpringMassSystem):
+    pass
+
 
 
 class Pendulum(ComposedSystem):
@@ -501,9 +578,7 @@ class Pendulum(ComposedSystem):
         }
         return self.sym_desc_dict
 
-
 # wymienić obrazek na taki, gdzie nie ma wymuszenia i symbole na obrazku będą zgodne z tymi w klasie
-
 
 class FreePendulum(ComposedSystem):
     """
@@ -577,7 +652,6 @@ class FreePendulum(ComposedSystem):
             self.l: [2 * l0, 1*l0, S.Half * l0, S.Half**2 * l0, 3*S.Half * l0],
         }
         return default_data_dict
-
 
 class ExcitedPendulum(ComposedSystem):
     """
@@ -848,7 +922,6 @@ class PendulumKinematicExct(ComposedSystem):
 
 
 class Winch(ComposedSystem):
-
 
     scheme_name = 'sdof_winch.PNG'
     real_name = 'winch_mechanism_real.PNG'
@@ -1152,6 +1225,9 @@ class NonlinearEngine(ComposedSystem):
             self.e: [2 * e0, S.Half * e0, 4 * e0, S.Half**2 * e0,3 * e0,3* S.Half * e0, 9 * e0, 3*S.Half**2 * e0],
         }
         return default_data_dict
+    
+    
+    
 class StraightNonlinearEngine(NonlinearEngine):
     """
     Model of an exemplary Engine with nonlinear suspension aligned horizontally.
@@ -1356,7 +1432,6 @@ class NonLinearTrolley(ComposedSystem):
             self.l_0: r'length',
         }
         return self.sym_desc_dict
-
 
 
 class TriplePendulum(ComposedSystem):
