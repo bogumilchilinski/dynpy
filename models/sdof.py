@@ -98,6 +98,116 @@ class ComposedSystem(HarmonicOscillator):
         return parameters_dict
 
 
+class BlowerToothedBelt(ComposedSystem):
+
+
+    scheme_name = 'blower_toothed_belt.png'
+    real_name = 'blown_440_big_block.jpg'
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 k_belt=Symbol('k_b', positive=True),
+                 k_tensioner=Symbol('k_t', positive=True),
+                 ivar=Symbol('t'),
+                 Omega=Symbol('Omega', positive=True),
+                 F_0=Symbol('F_0', positive=True),
+                 z=dynamicsymbols('z'),
+                 **kwargs
+                 ):
+        self.z=z
+        self.m = m
+        self.k_belt = k_belt
+        self.k_tensioner = k_tensioner
+        
+        self.mass = MaterialPoint(m, z, qs=[z])
+        self.upper_belt = Spring(k_belt, z, qs=[z])
+        self.lower_belt = Spring(k_belt, z, qs=[z])
+        self.tensioner=Spring(k_tensioner, z, qs=[z])
+        self.force = Force(F_0 * sin(Omega * ivar), pos1=z)
+        composed_system = self.mass + self.upper_belt + self.lower_belt + self.tensioner + self.force
+
+        super().__init__(composed_system,**kwargs)
+    def get_default_data(self):
+
+        m0, k0 = symbols('m_0 k_0', positive=True)
+
+        default_data_dict = {
+            self.m: [20 * m0],#, 30 * m0, 40 * m0, 50 * m0, 60 * m0],
+            self.k_belt: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
+            self.k_tensioner: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
+        }
+
+        return default_data_dict
+
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'mass of system on the spring',
+            self.k_belt: r'Belt stiffnes',
+            self.k_tensioner :r'Tensioner spring stiffnes',
+        }
+
+        return self.sym_desc_dict
+    
+class EngineVerticalSpringGravity(ComposedSystem):
+    scheme_name = 'engine_vertical_spring_gravity.png'
+    real_name = 'buick_regal_3800.jpg'
+
+    def __init__(self,
+                 M=Symbol('M', positive=True),
+                 k_m=Symbol('k_m', positive=True),
+                 m_e=Symbol('m_e', positive=True),
+                 e=Symbol('e', positive=True),
+                 l=Symbol('l',positive=True),
+                 x=dynamicsymbols('x'),
+                 z=dynamicsymbols('z'),
+                 Omega=Symbol('\Omega',positive=True),
+                 phi=dynamicsymbols('phi'),
+                 ivar=Symbol('t'),
+                 g=Symbol('g', positive=True),
+                 **kwargs):
+        self.z=z
+        self.Omega=Omega
+        self.t=ivar
+        self.M = M
+        self.k_m = k_m
+        self.m_e = m_e
+        self.e = e
+        self.g=g
+        self.phi=phi
+        self.MaterialPoint_1 = MaterialPoint(M, pos1=z, qs=[z])
+        self.MaterialPoint_2 = MaterialPoint(m_e,
+                                             pos1=z + e * cos(phi),
+                                             qs=[z])
+        self.SpringVer = Spring(2 * k_m, pos1=z, qs=[z])
+        self.gravity_force1 = GravitationalForce(self.M, self.g, z, qs=[z])
+        self.gravity_force2 = GravitationalForce(self.m_e, self.g, z + e * cos(phi), qs=[z])
+        system = self.SpringVer + self.MaterialPoint_1 + self.MaterialPoint_2 + self.gravity_force1 + self.gravity_force2
+        super().__init__(system,**kwargs)
+        
+    def get_default_data(self):
+
+        m0, k0, e0, g = symbols('m_0 k_0 e_0 g', positive=True)
+
+        default_data_dict = {
+            self.M: [2000 * m0, 3000 * m0, 4000 * m0, 5000 * m0, 6000 * m0],
+            self.k_m: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
+            self.m_e: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
+            self.e:[2 * e0, 3 * e0, 4 * e0, 5 * e0, 6 * e0],
+            self.g:[g],
+#             self.phi:[self.Omega*self.t],
+            self.phi:[self.Omega*self.t]
+        }
+
+        return default_data_dict
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.M: r'Mass of engine block',
+            self.k_m: r'Spring stiffness coefficient',
+            self.m_e: r'',
+            self.e: r'',
+        }
+        return self.sym_desc_dict
 
 class InlineEnginePerpendicularSprings(ComposedSystem):
     scheme_name = 'inline_engine_perpendicular_springs.png'
@@ -112,7 +222,7 @@ class InlineEnginePerpendicularSprings(ComposedSystem):
                  x=dynamicsymbols('x'),
                  z=dynamicsymbols('z'),
                  phi=dynamicsymbols('phi'),
-                 ivar=Symbol('t', positive=True),
+                 ivar=Symbol('t'),
                  **kwargs):
 
         self.M = M
@@ -151,7 +261,7 @@ class BoxerEnginePerpendicularSprings(ComposedSystem):
                  x=dynamicsymbols('x'),
                  z=dynamicsymbols('z'),
                  phi=dynamicsymbols('phi'),
-                 ivar=Symbol('t', positive=True),
+                 ivar=Symbol('t'),
                  **kwargs):
 
         self.M = M
@@ -190,7 +300,7 @@ class NonLinearInlineEnginePerpendicularSprings(ComposedSystem):
                  l=Symbol('l_0',positive=True),
                  z=dynamicsymbols('z'),
                  phi=dynamicsymbols('phi'),
-                 ivar=Symbol('t', positive=True),
+                 ivar=Symbol('t'),
                  **kwargs):
 
         self.M = M
@@ -228,7 +338,7 @@ class NonLinearBoxerEnginePerpendicularSprings(ComposedSystem):
                  l=Symbol('l_0',positive=True),
                  x=dynamicsymbols('x'),
                  phi=dynamicsymbols('phi'),
-                 ivar=Symbol('t', positive=True),
+                 ivar=Symbol('t'),
                  **kwargs):
 
         self.M = M

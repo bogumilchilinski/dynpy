@@ -27,17 +27,31 @@ class ComposedSystem(HarmonicOscillator):
 
     @classmethod
     def _scheme(cls):
-
-        path = __file__.replace('systems.py', 'images/') + cls.scheme_name
-
+        if 'systems.py' in __file__: 
+            path = __file__.replace('systems.py', 'images/') + cls.scheme_name
+        if 'sdof.py' in __file__: 
+            path = __file__.replace('sdof.py', 'images/') + cls.scheme_name
+        if 'ddof.py' in __file__: 
+            path = __file__.replace('ddof.py', 'images/') + cls.scheme_name
+        if 'mdof.py' in __file__: 
+            path = __file__.replace('mdof.py', 'images/') + cls.scheme_name
+        print(path)
         return path
 
     @classmethod
     def _real_example(cls):
-
-        path = __file__.replace('systems.py', 'images/') + cls.real_name
-
+        if 'systems.py' in __file__: 
+            path = __file__.replace('systems.py', 'images/') + cls.real_name
+        if 'sdof.py' in __file__: 
+            path = __file__.replace('sdof.py', 'images/') + cls.real_name
+        if 'ddof.py' in __file__: 
+            path = __file__.replace('ddof.py', 'images/') + cls.real_name
+        if 'mdof.py' in __file__: 
+            path = __file__.replace('mdof.py', 'images/') + cls.real_name
+            
+        print(path)
         return path
+
 
     @classmethod
     def preview(cls, example=False):
