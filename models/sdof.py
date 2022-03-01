@@ -21,6 +21,9 @@ class ComposedSystem(HarmonicOscillator):
     """
     scheme_name = 'damped_car_new.PNG'
     real_name = 'car_real.jpg'
+    detail_scheme_name = 'damped_car_new.PNG'
+    detail_real_name = 'car_real.jpg'
+
 
     @classmethod
     def _scheme(cls):
@@ -32,7 +35,6 @@ class ComposedSystem(HarmonicOscillator):
             path = __file__.replace('ddof.py', 'images/') + cls.scheme_name
         if 'mdof.py' in __file__: 
             path = __file__.replace('mdof.py', 'images/') + cls.scheme_name
-        print(path)
         return path
 
     @classmethod
@@ -45,8 +47,33 @@ class ComposedSystem(HarmonicOscillator):
             path = __file__.replace('ddof.py', 'images/') + cls.real_name
         if 'mdof.py' in __file__: 
             path = __file__.replace('mdof.py', 'images/') + cls.real_name
-            
-        print(path)
+
+        return path
+    
+    @classmethod
+    def _detail_real(cls):
+        if 'systems.py' in __file__: 
+            path = __file__.replace('systems.py', 'images/') + cls.detail_real_name
+        if 'sdof.py' in __file__: 
+            path = __file__.replace('sdof.py', 'images/') + cls.detail_real_name
+        if 'ddof.py' in __file__: 
+            path = __file__.replace('ddof.py', 'images/') + cls.detail_real_name
+        if 'mdof.py' in __file__: 
+            path = __file__.replace('mdof.py', 'images/') + cls.detail_real_name
+
+        return path
+    
+    @classmethod
+    def _detail_scheme(cls):
+        if 'systems.py' in __file__: 
+            path = __file__.replace('systems.py', 'images/') + cls.detail_scheme_name
+        if 'sdof.py' in __file__: 
+            path = __file__.replace('sdof.py', 'images/') + cls.detail_scheme_name
+        if 'ddof.py' in __file__: 
+            path = __file__.replace('ddof.py', 'images/') + cls.detail_scheme_name
+        if 'mdof.py' in __file__: 
+            path = __file__.replace('mdof.py', 'images/') + cls.detail_scheme_name
+
         return path
 
     @classmethod
@@ -151,8 +178,8 @@ class BlowerToothedBelt(ComposedSystem):
     
 class EngineVerticalSpringGravity(ComposedSystem):
     scheme_name = 'engine_vertical_spring_gravity.png'
-    real_name = 'buick_regal_3800.jpg'
-
+    real_name = 'paccar.jpg'
+    
     def __init__(self,
                  M=Symbol('M', positive=True),
                  k_m=Symbol('k_m', positive=True),
@@ -162,7 +189,7 @@ class EngineVerticalSpringGravity(ComposedSystem):
                  x=dynamicsymbols('x'),
                  z=dynamicsymbols('z'),
                  Omega=Symbol('\Omega',positive=True),
-                 phi=dynamicsymbols('phi'),
+                 phi=dynamicsymbols('varphi'),
                  ivar=Symbol('t'),
                  g=Symbol('g', positive=True),
                  **kwargs):
@@ -190,9 +217,9 @@ class EngineVerticalSpringGravity(ComposedSystem):
         m0, k0, e0, g = symbols('m_0 k_0 e_0 g', positive=True)
 
         default_data_dict = {
-            self.M: [2000 * m0, 3000 * m0, 4000 * m0, 5000 * m0, 6000 * m0],
+            self.M: [200 * m0, 300 * m0, 400 * m0, 500 * m0, 600 * m0],
             self.k_m: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
-            self.m_e: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
+            self.m_e: [0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0],
             self.e:[2 * e0, 3 * e0, 4 * e0, 5 * e0, 6 * e0],
             self.g:[g],
 #             self.phi:[self.Omega*self.t],
