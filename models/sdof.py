@@ -80,10 +80,14 @@ class ComposedSystem(HarmonicOscillator):
     def preview(cls, example=False):
         if example:
             path = cls._real_example()
-
+            
+        elif example == 'detail_scheme_name':
+            path = cls._detail_scheme()
+        elif example == 'detail_real_name':
+            path = cls._detail_real()
         else:
             path = cls._scheme()
-
+        print(path)
         with open(f"{path}", "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read())
         image_file.close()
@@ -137,7 +141,7 @@ class BlowerToothedBelt(ComposedSystem):
                  k_tensioner=Symbol('k_t', positive=True),
                  ivar=Symbol('t'),
                  Omega=Symbol('Omega', positive=True),
-                 F_0=Symbol('F_0', positive=True),
+                 F=Symbol('F', positive=True),
                  z=dynamicsymbols('z'),
                  **kwargs
                  ):
@@ -145,23 +149,80 @@ class BlowerToothedBelt(ComposedSystem):
         self.m = m
         self.k_belt = k_belt
         self.k_tensioner = k_tensioner
-        
+        self.F=F
+        self.Omega=Omega
         self.mass = MaterialPoint(m, z, qs=[z])
         self.upper_belt = Spring(k_belt, z, qs=[z])
         self.lower_belt = Spring(k_belt, z, qs=[z])
         self.tensioner=Spring(k_tensioner, z, qs=[z])
-        self.force = Force(F_0 * sin(Omega * ivar), pos1=z)
+        self.force = Force(F * sin(Omega * ivar), pos1=z)
         composed_system = self.mass + self.upper_belt + self.lower_belt + self.tensioner + self.force
 
         super().__init__(composed_system,**kwargs)
     def get_default_data(self):
 
-        m0, k0 = symbols('m_0 k_0', positive=True)
+        m0, k0, F0, Omega0 = symbols('m_0 k_0 F_0 Omega_0', positive=True)
 
         default_data_dict = {
             self.m: [0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0],
             self.k_belt: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
             self.k_tensioner: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
+            self.F: [F0, 2 * F0, 3 * F0, 4 * F0, 5 * F0, 6 * F0],
+            self.Omega: [Omega0, 2 * Omega0, 3 * Omega0, 4 * Omega0, 5 * Omega0, 6 * Omega0],
+        }
+
+        return default_data_dict
+
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'mass of system on the spring',
+            self.k_belt: r'Belt stiffnes',
+            self.k_tensioner :r'Tensioner spring stiffnes',
+        }
+
+        return self.sym_desc_dict
+    
+class DampedBlowerToothedBelt(ComposedSystem):
+
+
+    scheme_name = 'blower_toothed_belt.png'
+    real_name = 'blown_440_big_block.jpg'
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 k_belt=Symbol('k_b', positive=True),
+                 k_tensioner=Symbol('k_t', positive=True),
+                 ivar=Symbol('t'),
+                 Omega=Symbol('Omega', positive=True),
+                 F=Symbol('F', positive=True),
+                 z=dynamicsymbols('z'),
+                 **kwargs
+                 ):
+        self.z=z
+        self.m = m
+        self.k_belt = k_belt
+        self.k_tensioner = k_tensioner
+        self.F=F
+        self.Omega=Omega
+        self.mass = MaterialPoint(m, z, qs=[z])
+        self.upper_belt = Spring(k_belt, z, qs=[z])
+        self.lower_belt = Spring(k_belt, z, qs=[z])
+        self.tensioner=Spring(k_tensioner, z, qs=[z])
+        self.force = Force(F * sin(Omega * ivar), pos1=z)
+        composed_system = self.mass + self.upper_belt + self.lower_belt + self.tensioner + self.force
+
+        super().__init__(composed_system,**kwargs)
+    def get_default_data(self):
+
+        m0, k0, F0, Omega0 = symbols('m_0 k_0 F_0 Omega_0', positive=True)
+
+        default_data_dict = {
+            self.m: [0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0],
+            self.k_belt: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
+            self.k_tensioner: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
+            self.F: [F0, 2 * F0, 3 * F0, 4 * F0, 5 * F0, 6 * F0],
+            self.Omega: [Omega0, 2 * Omega0, 3 * Omega0, 4 * Omega0, 5 * Omega0, 6 * Omega0],
         }
 
         return default_data_dict
@@ -179,6 +240,8 @@ class BlowerToothedBelt(ComposedSystem):
 class EngineVerticalSpringGravity(ComposedSystem):
     scheme_name = 'engine_vertical_spring_gravity.png'
     real_name = 'paccar.jpg'
+    detail_scheme_name = 'sruba_pasowana.png'
+    detail_real_name = 'buick_regal_3800.jpg'
     
     def __init__(self,
                  M=Symbol('M', positive=True),
