@@ -745,6 +745,17 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return self.governing_equations.subs(static_disp_dict).subs({comp:0 for comp  in trig_comps if comp.has(self.ivar)})
 
+    
+    def static_load(self):
+        """
+        Finds the static load of the considered problem based on the system governing equations stated in the class instance.
+        """
+        eqns = self.equilibrium_equation()
+        
+
+        return eqns.subs({coord:0 for coord in self.q_0.values()})
+    
+    
     def calculations_steps(self,preview=True,system=None,code=False,documentclass=Document,lang='pl'):
 
         if lang=='pl':
