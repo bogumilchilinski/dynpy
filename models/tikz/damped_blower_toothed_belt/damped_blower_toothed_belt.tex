@@ -86,18 +86,33 @@
 
 \draw (ground.south west) -- (ground.south east);
 
-\draw (crank.180) --++ (-0.5cm,0) node (cl) [left,midway,xshift=-0.1cm] {};
-\draw (crank.0) --++ (0.5cm,0) node (cr) [left,midway,xshift=-0.1cm] {};
-\draw (blower.180) --++ (-0.5cm,0) node (bl) [left,midway,xshift=-0.1cm] {};
-\draw (blower.0) --++ (0.5cm,0) node (br) [left,midway,xshift=-0.1cm] {};
-\draw (bl.center)--++(0,-1cm);
-\draw (br.center)--++(0,-1cm);
-\draw (cl.center)--++(0,1cm);
-\draw (cr.center)--++(0,1cm);
-% \draw [spring]  (cl) -- (bl) node (k_b1) [left,midway,xshift=-0.1cm] {$k_b$};
-% \draw [spring]  (crank.0)  -- (blower.0) node (k_b2) [right,midway,xshift=0.1cm] {$k_b$};
+\draw[thick] (crank.180) --++ (-0.5cm,0) node (cl) {};
+\draw[thick] (crank.0) --++ (0.5cm,0) node (cr) {};
+\draw[thick] (blower.180) --++ (-0.5cm,0) node (bl) {};
+\draw[thick] (blower.0) --++ (0.5cm,0) node (br) {};
+
+\draw[thick] (bl.center)--++(0,-1cm) node (b2l) {};
+\draw[thick] (br.center)--++(0,-1cm) node (b2r) {};
+\draw[thick] (cl.center)--++(0,1cm) node (c2l) {};
+\draw[thick] (cr.center)--++(0,1cm) node (c2r) {};
+
+\draw[thick] (c2l.center)--++(-0.5cm,0) node (cll) {};
+\draw[thick] (c2l.center)--++(0.5cm,0) node (clr) {};
+\draw[thick] (c2r.center)--++(-0.5cm,0) node (crl) {};
+\draw[thick] (c2r.center)--++(0.5cm,0) node (crr) {};
+\draw[thick] (b2l.center)--++(0.5cm,0) node (blr) {};
+\draw[thick] (b2l.center)--++(-0.5cm,0) node (bll) {};
+\draw[thick] (b2r.center)--++(0.5cm,0) node (brr) {};
+\draw[thick] (b2r.center)--++(-0.5cm,0) node (brl) {};
+
+\draw [spring]  (cll.center) -- (bll.center) node (k_b1) [left,midway,xshift=-0.1cm] {$k_b$};
+\draw [spring]  (crr.center) -- (brr.center) node (k_b2) [right,midway,xshift=0.1cm] {$k_b$};
+
+\draw [damper]  (clr.center) -- (blr.center) node (k_b1) [left,midway,xshift=-0.3cm] {$c_b$};
+\draw [damper]  (crl.center) -- (brl.center) node (k_b2) [right,midway,xshift=0.3cm] {$c_b$};
+
 \draw [tspring]  (blower.center) -- (ground.270) node (k_t) [right,midway,yshift=0.4cm,xshift=0.1cm] {$k_t$};
-% \draw [damper] ([xshift=0.5cm]mass.north)  node[] (center_damper){}  --++ (0cm,1.1cm) node[midway,right,xshift=0.25cm] {$c_{TMD}$};
+
 \coordinate (end2) at (-2.5,0.25) ;
 
 \coordinate (end1) at (2.5,0.25) ;

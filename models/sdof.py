@@ -142,6 +142,7 @@ class BlowerToothedBelt(ComposedSystem):
                  ivar=Symbol('t'),
                  Omega=Symbol('Omega', positive=True),
                  F=Symbol('F', positive=True),
+                 Q=Symbol('Q', positive=True),
                  z=dynamicsymbols('z'),
                  **kwargs
                  ):
@@ -150,12 +151,14 @@ class BlowerToothedBelt(ComposedSystem):
         self.k_belt = k_belt
         self.k_tensioner = k_tensioner
         self.F=F
+        self.Q=Q
+        self.P0 = Symbol('P_0',positive=True)
         self.Omega=Omega
         self.mass = MaterialPoint(m, z, qs=[z])
         self.upper_belt = Spring(k_belt, z, qs=[z])
         self.lower_belt = Spring(k_belt, z, qs=[z])
         self.tensioner=Spring(k_tensioner, z, qs=[z])
-        self.force = Force(F * sin(Omega * ivar), pos1=z)
+        self.force = Force(F * sin(Omega * ivar), pos1=z) + Force(Q, pos1=z)
         composed_system = self.mass + self.upper_belt + self.lower_belt + self.tensioner + self.force
 
         super().__init__(composed_system,**kwargs)
@@ -169,6 +172,7 @@ class BlowerToothedBelt(ComposedSystem):
             self.k_tensioner: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
             self.F: [F0, 2 * F0, 3 * F0, 4 * F0, 5 * F0, 6 * F0],
             self.Omega: [Omega0, 2 * Omega0, 3 * Omega0, 4 * Omega0, 5 * Omega0, 6 * Omega0],
+            self.Q: [15*F0, 8 * F0, 9 * F0, 10 * F0, 12 * F0, 16 * F0],
         }
 
         return default_data_dict
@@ -196,6 +200,7 @@ class DampedBlowerToothedBelt(ComposedSystem):
                  ivar=Symbol('t'),
                  Omega=Symbol('Omega', positive=True),
                  F=Symbol('F', positive=True),
+                 Q=Symbol('Q', positive=True),
                  z=dynamicsymbols('z'),
                  **kwargs
                  ):
@@ -204,12 +209,14 @@ class DampedBlowerToothedBelt(ComposedSystem):
         self.k_belt = k_belt
         self.k_tensioner = k_tensioner
         self.F=F
+        self.Q=Q
+        self.P0 = Symbol('P_0',positive=True)
         self.Omega=Omega
         self.mass = MaterialPoint(m, z, qs=[z])
         self.upper_belt = Spring(k_belt, z, qs=[z])
         self.lower_belt = Spring(k_belt, z, qs=[z])
         self.tensioner=Spring(k_tensioner, z, qs=[z])
-        self.force = Force(F * sin(Omega * ivar), pos1=z)
+        self.force = Force(F * sin(Omega * ivar), pos1=z) + Force(Q, pos1=z)
         composed_system = self.mass + self.upper_belt + self.lower_belt + self.tensioner + self.force
 
         super().__init__(composed_system,**kwargs)
@@ -223,6 +230,7 @@ class DampedBlowerToothedBelt(ComposedSystem):
             self.k_tensioner: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
             self.F: [F0, 2 * F0, 3 * F0, 4 * F0, 5 * F0, 6 * F0],
             self.Omega: [Omega0, 2 * Omega0, 3 * Omega0, 4 * Omega0, 5 * Omega0, 6 * Omega0],
+            self.Q: [15*F0, 8 * F0, 9 * F0, 10 * F0, 12 * F0, 16 * F0],
         }
 
         return default_data_dict
@@ -280,9 +288,9 @@ class EngineVerticalSpringGravity(ComposedSystem):
         m0, k0, e0, g = symbols('m_0 k_0 e_0 g', positive=True)
 
         default_data_dict = {
-            self.M: [200 * m0, 300 * m0, 400 * m0, 500 * m0, 600 * m0],
-            self.k_m: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
-            self.m_e: [0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0],
+            self.M: [200 * m0, 350 * m0, 400 * m0, 550 * m0, 650 * m0, 700 * m0, 800 * m0],
+            self.k_m: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0,9*k0,10*k0],
+            self.m_e: [0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0, 0.7 * m0, 0.8 * m0, 0.9 * m0],
             self.e:[2 * e0, 3 * e0, 4 * e0, 5 * e0, 6 * e0],
             self.g:[g],
 #             self.phi:[self.Omega*self.t],
