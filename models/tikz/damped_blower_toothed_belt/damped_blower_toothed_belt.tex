@@ -91,6 +91,9 @@
 \draw (blower.180) --++ (-0.5cm,0) node (bl) [left,midway,xshift=-0.1cm] {};
 \draw (blower.0) --++ (0.5cm,0) node (br) [left,midway,xshift=-0.1cm] {};
 \draw (bl.center)--++(0,-1cm);
+\draw (br.center)--++(0,-1cm);
+\draw (cl.center)--++(0,1cm);
+\draw (cr.center)--++(0,1cm);
 % \draw [spring]  (cl) -- (bl) node (k_b1) [left,midway,xshift=-0.1cm] {$k_b$};
 % \draw [spring]  (crank.0)  -- (blower.0) node (k_b2) [right,midway,xshift=0.1cm] {$k_b$};
 \draw [tspring]  (blower.center) -- (ground.270) node (k_t) [right,midway,yshift=0.4cm,xshift=0.1cm] {$k_t$};
