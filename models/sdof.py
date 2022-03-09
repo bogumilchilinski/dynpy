@@ -134,7 +134,9 @@ class BlowerToothedBelt(ComposedSystem):
 
     scheme_name = 'blower_toothed_belt.png'
     real_name = 'blown_440_big_block.jpg'
-
+    detail_scheme_name = 'blower_roller_bolt.png'
+    detail_real_name = 'tensioner_pulley.jpg'
+                
     def __init__(self,
                  m=Symbol('m', positive=True),
                  k_belt=Symbol('k_b', positive=True),
@@ -158,7 +160,7 @@ class BlowerToothedBelt(ComposedSystem):
         self.upper_belt = Spring(k_belt, z, qs=[z])
         self.lower_belt = Spring(k_belt, z, qs=[z])
         self.tensioner=Spring(k_tensioner, z, qs=[z])
-        self.force = Force(F * sin(Omega * ivar), pos1=z) + Force(Q, pos1=z)
+        self.force = Force(F * sin(Omega * ivar), pos1=z) + Force(-Q, pos1=z)
         composed_system = self.mass + self.upper_belt + self.lower_belt + self.tensioner + self.force
 
         super().__init__(composed_system,**kwargs)
@@ -171,7 +173,7 @@ class BlowerToothedBelt(ComposedSystem):
             self.k_belt: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
             self.k_tensioner: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
             self.F: [F0, 2 * F0, 3 * F0, 4 * F0, 5 * F0, 6 * F0],
-            self.Omega: [Omega0, 2 * Omega0, 3 * Omega0, 4 * Omega0, 5 * Omega0, 6 * Omega0],
+            #self.Omega: [Omega0, 2 * Omega0, 3 * Omega0, 4 * Omega0, 5 * Omega0, 6 * Omega0],
             self.Q: [15*F0, 8 * F0, 9 * F0, 10 * F0, 12 * F0, 16 * F0],
         }
 
@@ -190,8 +192,10 @@ class BlowerToothedBelt(ComposedSystem):
 class DampedBlowerToothedBelt(ComposedSystem):
 
 
-    scheme_name = 'blower_toothed_belt.png'
+    scheme_name = 'damped_blower_toothed_belt.png'
     real_name = 'blown_440_big_block.jpg'
+    detail_scheme_name = 'blower_roller_bolt.png'
+    detail_real_name = 'tensioner_pulley.jpg'
 
     def __init__(self,
                  m=Symbol('m', positive=True),
@@ -201,6 +205,7 @@ class DampedBlowerToothedBelt(ComposedSystem):
                  Omega=Symbol('Omega', positive=True),
                  F=Symbol('F', positive=True),
                  Q=Symbol('Q', positive=True),
+                 c=Symbol('c_b', positive=True),
                  z=dynamicsymbols('z'),
                  **kwargs
                  ):
@@ -212,17 +217,21 @@ class DampedBlowerToothedBelt(ComposedSystem):
         self.Q=Q
         self.P0 = Symbol('P_0',positive=True)
         self.Omega=Omega
+        self.c=c
+        
         self.mass = MaterialPoint(m, z, qs=[z])
         self.upper_belt = Spring(k_belt, z, qs=[z])
         self.lower_belt = Spring(k_belt, z, qs=[z])
         self.tensioner=Spring(k_tensioner, z, qs=[z])
         self.force = Force(F * sin(Omega * ivar), pos1=z) + Force(Q, pos1=z)
-        composed_system = self.mass + self.upper_belt + self.lower_belt + self.tensioner + self.force
+        self.damper_left = Damper(c,pos1=z, qs=[z])
+        self.damper_right = Damper(c,pos1=z, qs=[z])
+        composed_system = self.mass + self.upper_belt + self.lower_belt + self.tensioner + self.force + self.damper_left + self.damper_right
 
         super().__init__(composed_system,**kwargs)
     def get_default_data(self):
 
-        m0, k0, F0, Omega0 = symbols('m_0 k_0 F_0 Omega_0', positive=True)
+        m0, k0, F0, Omega0, c0 = symbols('m_0 k_0 F_0 Omega_0 c_0', positive=True)
 
         default_data_dict = {
             self.m: [0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0],
@@ -231,6 +240,7 @@ class DampedBlowerToothedBelt(ComposedSystem):
             self.F: [F0, 2 * F0, 3 * F0, 4 * F0, 5 * F0, 6 * F0],
             self.Omega: [Omega0, 2 * Omega0, 3 * Omega0, 4 * Omega0, 5 * Omega0, 6 * Omega0],
             self.Q: [15*F0, 8 * F0, 9 * F0, 10 * F0, 12 * F0, 16 * F0],
+            self.c: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0],
         }
 
         return default_data_dict
@@ -281,6 +291,71 @@ class EngineVerticalSpringGravity(ComposedSystem):
         self.gravity_force1 = GravitationalForce(self.M, self.g, z, qs=[z])
         self.gravity_force2 = GravitationalForce(self.m_e, self.g, z + e * cos(phi), qs=[z])
         system = self.SpringVer + self.MaterialPoint_1 + self.MaterialPoint_2 + self.gravity_force1 + self.gravity_force2
+        super().__init__(system,**kwargs)
+        
+    def get_default_data(self):
+
+        m0, k0, e0, g = symbols('m_0 k_0 e_0 g', positive=True)
+
+        default_data_dict = {
+            self.M: [200 * m0, 350 * m0, 400 * m0, 550 * m0, 650 * m0, 700 * m0, 800 * m0],
+            self.k_m: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0,9*k0,10*k0],
+            self.m_e: [0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0, 0.7 * m0, 0.8 * m0, 0.9 * m0],
+            self.e:[2 * e0, 3 * e0, 4 * e0, 5 * e0, 6 * e0],
+            self.g:[g],
+#             self.phi:[self.Omega*self.t],
+            self.phi:[self.Omega*self.t]
+        }
+
+        return default_data_dict
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.M: r'Mass of engine block',
+            self.k_m: r'Spring stiffness coefficient',
+            self.m_e: r'',
+            self.e: r'',
+        }
+        return self.sym_desc_dict
+    
+class DampedEngineVerticalSpringGravity(ComposedSystem):
+    scheme_name = 'damped_engine_vertical_spring_gravity.png'
+    real_name = 'paccar.jpg'
+    detail_scheme_name = 'sruba_pasowana.png'
+    detail_real_name = 'buick_regal_3800.jpg'
+    
+    def __init__(self,
+                 M=Symbol('M', positive=True),
+                 k_m=Symbol('k_m', positive=True),
+                 m_e=Symbol('m_e', positive=True),
+                 e=Symbol('e', positive=True),
+                 l=Symbol('l',positive=True),
+                 x=dynamicsymbols('x'),
+                 z=dynamicsymbols('z'),
+                 Omega=Symbol('\Omega',positive=True),
+                 phi=dynamicsymbols('varphi'),
+                 ivar=Symbol('t'),
+                 c=Symbol('c_b', positive=True),
+                 g=Symbol('g', positive=True),
+                 **kwargs):
+        self.z=z
+        self.Omega=Omega
+        self.t=ivar
+        self.M = M
+        self.k_m = k_m
+        self.m_e = m_e
+        self.e = e
+        self.g=g
+        self.phi=phi
+        self.MaterialPoint_1 = MaterialPoint(M, pos1=z, qs=[z])
+        self.MaterialPoint_2 = MaterialPoint(m_e,
+                                             pos1=z + e * cos(phi),
+                                             qs=[z])
+        self.SpringVer = Spring(2 * k_m, pos1=z, qs=[z])
+        self.gravity_force1 = GravitationalForce(self.M, self.g, z, qs=[z])
+        self.gravity_force2 = GravitationalForce(self.m_e, self.g, z + e * cos(phi), qs=[z])
+        self.damper_left = Damper(c,pos1=z, qs=[z])
+        self.damper_right = Damper(c,pos1=z, qs=[z])
+        system = self.SpringVer + self.MaterialPoint_1 + self.MaterialPoint_2 + self.gravity_force1 + self.gravity_force2 + self.damper_left + self.damper_right
         super().__init__(system,**kwargs)
         
     def get_default_data(self):

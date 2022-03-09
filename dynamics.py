@@ -1814,7 +1814,7 @@ class HarmonicOscillator(LinearDynamicSystem):
             self,
             cos_amp=None,
             sin_amp=None,
-            excitation_freq=Symbol('Omega', positive=True),
+            excitation_freq=None,
     ):
         ''''
         Computes the steady solution amplitude for the system defined in the instance of this class.
@@ -1840,33 +1840,47 @@ class HarmonicOscillator(LinearDynamicSystem):
 
 
         self.Omega = excitation_freq
+        omg = self.Omega
 
-        solution = self.steady_solution()[0].expand()
+        #solution = self.steady_solution()[0].expand()
+        sin_fun=list(self.external_forces().atoms(sin))
+        cos_fun=list(self.external_forces().atoms(cos))
 
-        # print(solution)
+        if len(sin_fun) == 1: 
+        
+            omg_sin=list(set((sin_fun[0]).args)-{self.ivar})[0]
 
-        comp_sin = solution.coeff(sin(excitation_freq * self.ivar))
-        comp_cos = solution.coeff(cos(excitation_freq * self.ivar))
-
-        n_sin, d_sin = fraction(comp_sin)
-        n_cos, d_cos = fraction(comp_cos)
-
-        # print(d_sin)
-        # print(d_cos)
-        if d_cos==S.One:
-            d=d_sin
+            comp_sin = self.external_forces().applyfunc(lambda comp: comp.coeff(sin_fun[0]))
         else:
-            d=d_cos
+            comp_sin=(self.external_forces()*S.Zero).doit()
+            omg_sin=S.Zero
+            
+            
+        if len(cos_fun) == 1: 
+            omg_cos=list(set(cos_fun[0].args)-{self.ivar})[0]
 
-        # print(d)
+            comp_cos = self.external_forces().applyfunc(lambda comp: comp.coeff(cos_fun[0]))
+        else:
+            comp_cos=(self.external_forces()*S.Zero).doit()
+            omg_cos=S.Zero
 
-        if len(self.q) == 1:  # if single degree of freedom
-            frf_expr = ((sqrt((n_sin**2 + n_cos**2).simplify())) /
-                        d.doit()).simplify()   # sDoF
-        else:  # DoF > 1
-            frf_expr = self.fundamental_matrix().inv() * self.rhs().coeff(sin(excitation_freq * self.ivar)).coeff(cos(excitation_freq * self.ivar))  # mDoF
+        if omg_sin == 0:
+            omg = omg_cos
+        else:
+            omg = omg_sin
+            
+        if excitation_freq is not None:
+            omg = excitation_freq
+        else:
+            omg = omg.coeff(self.ivar)
+            
+        fund_mat = -self.inertia_matrix(
+        ) * omg**2 + sym.I * omg * self.damping_matrix(
+        ) + self.stiffness_matrix()
 
-        return frf_expr
+        amp=(fund_mat.inv() * (comp_sin)).T*(fund_mat.inv() * (comp_sin))  +  (fund_mat.inv() * (comp_cos)).T*(fund_mat.inv() * (comp_cos))
+
+        return sqrt(amp[0])
 
     def dynamic_amplification_factor(self,
                                      excitation_amp=None,
