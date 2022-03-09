@@ -480,7 +480,7 @@ class EntryWithUnit:
 class DataTable(Table):
     _latex_name = 'table'
 
-    def __init__(self, numerical_data, position=None):
+    def __init__(self, numerical_data, position='H'):
         super().__init__(position=position)
         ##print(numerical_data)
         self._numerical_data = numerical_data
