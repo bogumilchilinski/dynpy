@@ -76,9 +76,12 @@
     %\fill [black] (M.center) circle (0.05);
 \draw[thick, ->,] (M)[xshift=0cm,yshift=1.0cm ] arc (90:45:1.0cm) node[below,midway,xshift=-0.0cm,yshift=0.0cm] {$\varphi$};
 
-\draw [damper] (M.south west)[xshift=0.5cm]   node (left_vertical_spring){}  --++ (0cm,-1.5cm) node[midway,left,xshift=-0.15cm,yshift=-0.3cm] {$k_{m}$};
+\node (ldmp) at (M.south west)[xshift=0.5cm] {};
+\node (rdmp) at (M.south east)[xshift=-0.5cm] {};
+
+\draw [damper] (ldmp.center)   node (left_vertical_spring){}  --++ (0cm,-1.5cm) node[midway,right,yshift=-0.35cm] {$c_{m}$};
     
-\draw [damper] (M.south east)  node[] (right_vertical_spring){}  --++ (0cm,-1.5cm) node[midway,right,xshift=0.15cm,yshift=-0.3cm] {$k_{m}$};
+\draw [damper] (rdmp.center)  node[] (right_vertical_spring){}  --++ (0cm,-1.5cm) node[midway,left,yshift=-0.35cm] {$c_{m}$};
 
    % \node (beam) [fill=gray,anchor=north,xshift=0cm,yshift=0cm,minimum width=2cm,minimum height=0.05pt] at (origo) {} node[right]{$m_{beam}=0$};
 
@@ -89,9 +92,9 @@
 
 %beam_center.center
 
-\node (ground1) [ground,anchor=north,yshift=-0cm,minimum width=1cm] at (left_vertical_spring)[yshift=-1.5cm] {};
+\node (ground1) [ground,anchor=north,yshift=-0cm,minimum width=1cm] at (left_vertical_spring)[yshift=-1.5cm,xshift=-0.25cm] {};
 
-\node (ground2) [ground,anchor=north,yshift=-0cm,minimum width=1cm] at (right_vertical_spring)[yshift=-1.5cm] {};
+\node (ground2) [ground,anchor=north,yshift=-0cm,minimum width=1cm] at (right_vertical_spring)[yshift=-1.5cm,xshift=0.25cm] {};
 
 
 \draw (ground1.north west) --(ground1.north east);
