@@ -67,7 +67,7 @@
 
 \node (crank) [draw,fill=pink,circle,outer sep=0pt, thick,minimum size=2cm] at (0cm,-4cm) {};
 \node (blower) [label={[label distance=-0.75cm]-75:$m$},draw,fill=pink,circle,outer sep=0pt, thick,minimum size=2cm] at (0,0cm) {};
-\node (ground) [ground,anchor=north,minimum width=3cm,minimum height=0.2cm] at (0,2cm) {};
+\node (ground) [ground,anchor=north,minimum width=3cm,minimum height=0.2cm] at (0,3cm) {};
 
 
 \draw [thick,rotate=-90] (crank.center)--++ (-60:0.5)--++(-0.5,0) node[midway] (support_end){}--++ (60:0.5);
@@ -111,7 +111,15 @@
 \draw [damper]  (clr.center) -- (blr.center) node (k_b1) [left,midway,xshift=-0.3cm] {$c_b$};
 \draw [damper]  (crl.center) -- (brl.center) node (k_b2) [right,midway,xshift=0.3cm] {$c_b$};
 
-\draw [tspring]  (blower.center) -- (ground.270) node (k_t) [right,midway,yshift=0.4cm,xshift=0.1cm] {$k_t$};
+\draw[thick] (ground.270)--++(0,-0.5cm) node (g2n) {};
+\draw[thick] (g2n.center)--++(-0.5cm,0) node (n2s) {};
+\draw[thick] (g2n.center)--++(0.5cm,0) node (n2d) {};
+\draw[thick] (blower.center)--++(0,0.5cm) node (b2n) {};
+\draw[thick] (b2n.center)--++(-0.5cm,0) node (n2ss) {};
+\draw[thick] (b2n.center)--++(0.5cm,0) node (n2dd) {};
+
+\draw [tspring]  (n2s.center) -- (n2ss.center) node (k_t) [right,midway,yshift=0cm,xshift=0.1cm] {$k_t$};
+\draw [damper]   (n2dd.center) -- (n2d.center) node (c_t) [right,midway,yshift=0cm,xshift=0.3cm] {$c_t$};
 
 \coordinate (end2) at (-2.5,0.25) ;
 
