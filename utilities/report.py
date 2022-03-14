@@ -29,6 +29,8 @@ from IPython.display import display, Markdown, Latex
 from .adaptable import *
 from .timeseries import TimeDataFrame, TimeSeries
 
+
+
 import copy
 import inspect
 
@@ -2613,6 +2615,262 @@ class PyVerbatim(Environment):
     content_separator = "\n"
     #inspect.getsource(system.__class__)
 
+    
+
+class BeamerTemplate(Document):
+
+    latex_name = 'document'
+    packages = [
+                  Package('microtype'),
+                  Package('polski',options=['MeX']),
+                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('listings'),
+                  #Package('titlesec'),
+                  Package('fancyhdr'),
+                  Command('pagestyle', arguments=['fancy']),
+                  Command('fancyhf', arguments=['']),
+                  #Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
+                  #Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
+                  #Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
+                  #Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']), 
+                  Command('usetheme', arguments=['Madrid']),
+
+            ]
+    
+    
+    def __init__(self,
+                 default_filepath='default_filepath',
+                 *,
+                 title=None,
+                 documentclass='beamer',
+                 document_options=None,
+                 fontenc='T1',
+                 inputenc='utf8',
+                 font_size='normalsize',
+                 lmodern=False,
+                 textcomp=True,
+                 microtype=True,
+                 page_numbers=True,
+                 indent=None,
+                 geometry_options=None,
+                 data=None):
+
+        super().__init__(
+            default_filepath=default_filepath,
+            documentclass=documentclass,
+            document_options=document_options,
+            fontenc=fontenc,
+            inputenc=inputenc,
+            font_size=font_size,
+            lmodern=lmodern,
+            textcomp=textcomp,
+            microtype=microtype,
+            page_numbers=page_numbers,
+            indent=indent,
+            geometry_options=geometry_options,
+            data=data, 
+            )
+        self.title = title
+        
+        if self.title is not None:
+            self.packages.append(Command('title', arguments=[self.title]))
+        self.append(Command('frame', arguments=[NoEscape(r'\titlepage')]))
+
+class Frame(Environment,ReportModule):
+
+    
+    r"""A base class for LaTeX environments.
+    This class implements the basics of a LaTeX environment. A LaTeX
+    environment looks like this:
+    .. code-block:: latex
+        \begin{environment_name}
+            Some content that is in the environment
+        \end{environment_name}
+    The text that is used in the place of environment_name is by default the
+    name of the class in lowercase.
+    However, this default can be overridden in 2 ways:
+    1. setting the _latex_name class variable when declaring the class
+    2. setting the _latex_name attribute when initialising object
+    """
+
+    #: Set to true if this full container should be equivalent to an empty
+    #: string if it has no content.
+    omit_if_empty = False
+
+    def __init__(self, title=None, options=None, arguments=None, start_arguments=None,
+                 **kwargs):
+        r"""
+        Args
+        ----
+        options: str or list or  `~.Options`
+            Options to be added to the ``\begin`` command
+        arguments: str or list or `~.Arguments`
+            Arguments to be added to the ``\begin`` command
+        start_arguments: str or list or `~.Arguments`
+            Arguments to be added before the options
+        """
+
+        self.title = title
+        self.options = options
+        self.arguments = arguments
+        self.start_arguments = start_arguments
+
+        
+        
+        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
+        
+        if self.title is not None:
+            self.append(
+                Command('frametitle', arguments=[self.title])
+                )
+
+
+class Markdown(Environment,ReportModule):
+    packages = [
+                  Package('markdown'),
+        ]
+    
+    r"""A base class for LaTeX environments.
+    This class implements the basics of a LaTeX environment. A LaTeX
+    environment looks like this:
+    .. code-block:: latex
+        \begin{environment_name}
+            Some content that is in the environment
+        \end{environment_name}
+    The text that is used in the place of environment_name is by default the
+    name of the class in lowercase.
+    However, this default can be overridden in 2 ways:
+    1. setting the _latex_name class variable when declaring the class
+    2. setting the _latex_name attribute when initialising object
+    """
+
+    #: Set to true if this full container should be equivalent to an empty
+    #: string if it has no content.
+    omit_if_empty = False
+
+    def __init__(self, markdown=None, options=None, arguments=None, start_arguments=None,
+                 **kwargs):
+        r"""
+        Args
+        ----
+        options: str or list or  `~.Options`
+            Options to be added to the ``\begin`` command
+        arguments: str or list or `~.Arguments`
+            Arguments to be added to the ``\begin`` command
+        start_arguments: str or list or `~.Arguments`
+            Arguments to be added before the options
+        """
+
+        self.markdown = markdown
+        self.options = options
+        self.arguments = arguments
+        self.start_arguments = start_arguments
+
+        
+        
+        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
+        
+        if self.markdown is not None:
+            self.append(
+
+                NoEscape(markdown)
+                )
+
+    def dumps(self):
+        return NoEscape(ppd.convert_text(self.markdown,to='latex',format='md'))
+            
+    def _repr_markdown_(self):
+        return self.markdown
+
+    def reported(self):
+        
+        
+        latex_code=ppd.convert_text(self.markdown,to='latex',format='md')
+        
+        self.cls_container.append(NoEscape(latex_code))
+        
+    
+class Block(Environment,ReportModule):
+    
+    packages = [
+                  Package('markdown'),
+        ]
+    
+    r"""A base class for LaTeX environments.
+    This class implements the basics of a LaTeX environment. A LaTeX
+    environment looks like this:
+    .. code-block:: latex
+        \begin{environment_name}
+            Some content that is in the environment
+        \end{environment_name}
+    The text that is used in the place of environment_name is by default the
+    name of the class in lowercase.
+    However, this default can be overridden in 2 ways:
+    1. setting the _latex_name class variable when declaring the class
+    2. setting the _latex_name attribute when initialising object
+    """
+
+    #: Set to true if this full container should be equivalent to an empty
+    #: string if it has no content.
+    omit_if_empty = False
+
+    def __init__(self,header=None, data=None, options=None, arguments=None, start_arguments=None,
+                 **kwargs):
+        r"""
+        Args
+        ----
+        arguments: str or `list`
+            The arguments for the container command
+        options: str, list or `~.Options`
+            The options for the preamble command
+        data: str or `~.LatexObject`
+            The data to place inside the preamble command
+        """
+
+
+
+
+
+        
+        self.data = data
+        self.options = options
+        self.arguments = arguments
+        self.header = header
+
+        if type(self.header) is not list:
+            header_list = [self.header]
+        else:
+            header_list = self.header
+            
+            
+            
+        
+        super().__init__(options=options, arguments=header_list, start_arguments=start_arguments,**kwargs)
+        
+        if self.data is not None:
+            self.append(
+
+                data
+                )
+            
+    def _repr_markdown_(self):
+        return self.dumps()
+
+    def reported(self):
+        
+        
+        #latex_code=ppd.convert_text(self.markdown,to='latex',format='md')
+        
+        self.cls_container.append(self)
+        
+        return copy.deepcopy(self)            
+
+class AlertBlock(Block):
+    pass
+
+class ExampleBlock(Block):
+    pass
+    
 
 class Picture(Figure,ReportModule):
     """A class that represents a figure environment."""

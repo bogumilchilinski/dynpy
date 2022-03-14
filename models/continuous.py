@@ -53,24 +53,7 @@ class ComposedSystem(HarmonicOscillator):
 
         return IP.display.Image(base64.b64decode(encoded_string))
 
-    def calculations_steps(self,preview=True,system=None,code=False):
-        
-#         latex_store=AutoBreak.latex_backend
-#         AutoBreak.latex_backend = latex
-        
-        print('zlo')
-        print(inspect.getsource(self.__class__))
 
-        
-        doc_model=super().calculations_steps(preview=True,code=code)
-        
-        
-#         AutoBreak.latex_backend = latex_store
-        return doc_model
-            
-
-    
-    
     def get_default_data(self):
         return None
 

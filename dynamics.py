@@ -27,32 +27,20 @@ from .solvers.linear import LinearODESolution, FirstOrderODE
 from .solvers.nonlinear import WeakNonlinearProblemSolution, MultiTimeScaleMethod
 
 
-from pylatex import Document, Section, Subsection, Subsubsection, Itemize, Package, HorizontalSpace, Description, Marker, Ref, Marker, Figure
+from pylatex import Document, Section, Subsection, Subsubsection, Itemize, Package, HorizontalSpace, Description, Marker, Ref, Marker, Figure, Command, NewPage, LargeText, HugeText, MediumText, Center
 from pylatex.base_classes import Environment
 from pylatex.section import Paragraph, Chapter
 from pylatex.utils import italic, NoEscape
 
-from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak)
+from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim)
+from .utilities.templates.document import *
 
 from .utilities.adaptable import AutoMarker
 import inspect
 import copy
 
 
-class Verbatim(Environment):
-    pass
 
-class Minted(Environment):
-    packages=[Package('minted')]
-    content_separator = "\n"
-
-class LstListing(Environment):
-    packages=[Package('lstlisting')]
-    
-    
-class PyVerbatim(Environment):
-    packages=[Package('pythontex')]
-    content_separator = "\n"
     
 
 def multivariable_taylor_series(expr, args, n=2, x0=None):
@@ -363,6 +351,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     _default_subs_method='direct'
     scheme_name = 'engine.png'
     real_name = 'engine_real.PNG'
+    reportclass= CaseTemplate
 
     @classmethod
     def _scheme(cls):
@@ -755,6 +744,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return eqns.subs({coord:0 for coord in self.q_0.values()})
     
+    @property
+    def report(self):
+        ExampleTemplate.title=self._label
+        return self.calculations_steps(preview=True,system=None,code=False,documentclass=ExampleTemplate,lang='pl')
+    
     
     def calculations_steps(self,preview=True,system=None,code=False,documentclass=Document,lang='pl'):
 
@@ -790,7 +784,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         if system is None:
             system = self
-            
+
+
+        doc_model.append(NewPage())
         doc_model.append(Section('Analiza dynamiczna układu drgającego',numbering=False))
             
         display(ReportText(f'''Ilustracja przedstawia rzeczywisty obiekt mechaniczny, będący przedmiotem modelowania i analizy dynamicznej.
@@ -1440,6 +1436,7 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
         AutoBreak.latex_backend = latex_store
         return doc_model
     
+
     
     def _calculations_steps_en(self,preview=True,system=None,code=False,documentclass=Document):
         

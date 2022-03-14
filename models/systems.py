@@ -343,15 +343,15 @@ class BeamBridgeTMD(ComposedSystem):
 
     def __init__(self,
                  m=Symbol('m', positive=True),
-                 m_TMD=Symbol('m_TMD', positive=True),
-                 k_beam=Symbol('k_beam', positive=True),
-                 k_TMD=Symbol('k_TMD', positive=True),
+                 m_TMD=Symbol('m_D', positive=True),
+                 k_beam=Symbol('k_b', positive=True),
+                 k_TMD=Symbol('k_D', positive=True),
                  ivar=Symbol('t'),
                  g=Symbol('g', positive=True),
                  Omega=Symbol('Omega', positive=True),
                  F_0=Symbol('F_0', positive=True),
                  z=dynamicsymbols('z'),
-                 z_TMD=dynamicsymbols('z_TMD'),
+                 z_TMD=dynamicsymbols('z_D'),
                  **kwargs):
 
         self.m = m
@@ -848,11 +848,11 @@ class DDoFShaft(ComposedSystem):
                  k_2=Symbol('k_2', positive=True),
                  k_1=Symbol('k_1', positive=True),
                  input_displacement=dynamicsymbols('theta'),
-                 phi_1=dynamicsymbols('\\varphi_1'),                 
-                 phi_2=dynamicsymbols('\\varphi_2'),                 
-                 phi=dynamicsymbols('\\varphi'),
+                 phi_1=dynamicsymbols('varphi_1'),                 
+                 phi_2=dynamicsymbols('varphi_2'),                 
+                 phi=dynamicsymbols('varphi'),
                  ivar=Symbol('t'),
-                 qs=dynamicsymbols('\\varphi_1, \\varphi_2'),
+                 qs=dynamicsymbols('varphi_1, varphi_2'),
                  **kwargs):
 
 
@@ -926,7 +926,7 @@ class DDoFDampedShaft(ComposedSystem):
                  c_2=Symbol('c_1', positive=True),
                  input_displacement=dynamicsymbols('theta'),
                  ivar=Symbol('t'),
-                 qs=dynamicsymbols('\\varphi_1, \\varphi_2'),
+                 qs=dynamicsymbols('varphi_1, varphi_2'),
                  **kwargs):
 
         phi1, phi2 = qs

@@ -94,19 +94,7 @@ class ComposedSystem(HarmonicOscillator):
 
         return IP.display.Image(base64.b64decode(encoded_string))
 
-    def calculations_steps(self,preview=True,system=None,code=False):
 
-#         latex_store=AutoBreak.latex_backend
-#         AutoBreak.latex_backend = latex
-
-        print('zlo')
-        print(inspect.getsource(self.__class__))
-
-        doc_model=super().calculations_steps(preview=True,code=code)
-
-
-#         AutoBreak.latex_backend = latex_store
-        return doc_model
 
 
     def get_default_data(self):
@@ -136,7 +124,9 @@ class BlowerToothedBelt(ComposedSystem):
     real_name = 'blown_440_big_block.jpg'
     detail_scheme_name = 'blower_roller_bolt.png'
     detail_real_name = 'tensioner_pulley.jpg'
-                
+    sys_type_pl='Nietłumione układy o jednym stopniu swobody z wymuszeniem'
+    sys_name_pl='Napinacz paska kompresora'
+    
     def __init__(self,
                  m=Symbol('m', positive=True),
                  k_belt=Symbol('k_b', positive=True),
@@ -205,7 +195,9 @@ class DampedBlowerToothedBelt(ComposedSystem):
                  Omega=Symbol('Omega', positive=True),
                  F=Symbol('F', positive=True),
                  Q=Symbol('Q', positive=True),
-                 c=Symbol('c_b', positive=True),
+                 c_belt=Symbol('c_b', positive=True),
+                 c_tensioner=Symbol('c_t', positive=True),
+                 lam=Symbol('lambda', positive=True),
                  z=dynamicsymbols('z'),
                  **kwargs
                  ):
@@ -217,30 +209,32 @@ class DampedBlowerToothedBelt(ComposedSystem):
         self.Q=Q
         self.P0 = Symbol('P_0',positive=True)
         self.Omega=Omega
-        self.c=c
-        
+        self.lam=lam
+        self.c_belt = c_belt
+        self.c_tensioner = c_tensioner
         self.mass = MaterialPoint(m, z, qs=[z])
         self.upper_belt = Spring(k_belt, z, qs=[z])
         self.lower_belt = Spring(k_belt, z, qs=[z])
         self.tensioner=Spring(k_tensioner, z, qs=[z])
-        self.force = Force(F * sin(Omega * ivar), pos1=z) + Force(Q, pos1=z)
-        self.damper_left = Damper(c,pos1=z, qs=[z])
-        self.damper_right = Damper(c,pos1=z, qs=[z])
-        composed_system = self.mass + self.upper_belt + self.lower_belt + self.tensioner + self.force + self.damper_left + self.damper_right
+        self.force = Force(F * sin(Omega * ivar), pos1=z) + Force(-Q, pos1=z)
+        self.damping= Damper(2*c_belt+c_tensioner,pos1=z, qs=[z])
+        composed_system = self.mass + self.upper_belt + self.lower_belt + self.tensioner + self.force + self.damping
 
         super().__init__(composed_system,**kwargs)
     def get_default_data(self):
 
-        m0, k0, F0, Omega0, c0 = symbols('m_0 k_0 F_0 Omega_0 c_0', positive=True)
+        m0, k0, F0, Omega0, lam = symbols('m_0 k_0 F_0 Omega_0 lambda', positive=True)
 
         default_data_dict = {
-            self.m: [0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0],
+            self.c_belt: [lam*(self.k_belt)],
+            self.c_tensioner: [self.lam*(self.k_tensioner)],
+            self.m: [0.1*m0, 0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0, 0.7 * m0, 0.8 * m0, 0.9 * m0],
             self.k_belt: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
             self.k_tensioner: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
             self.F: [F0, 2 * F0, 3 * F0, 4 * F0, 5 * F0, 6 * F0],
             self.Omega: [Omega0, 2 * Omega0, 3 * Omega0, 4 * Omega0, 5 * Omega0, 6 * Omega0],
             self.Q: [15*F0, 8 * F0, 9 * F0, 10 * F0, 12 * F0, 16 * F0],
-            self.c: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0],
+
         }
 
         return default_data_dict
@@ -334,18 +328,21 @@ class DampedEngineVerticalSpringGravity(ComposedSystem):
                  Omega=Symbol('\Omega',positive=True),
                  phi=dynamicsymbols('varphi'),
                  ivar=Symbol('t'),
-                 c=Symbol('c_b', positive=True),
+                 c_m=Symbol('c_m', positive=True),
                  g=Symbol('g', positive=True),
+                 lam=Symbol('lambda', positive=True),
                  **kwargs):
         self.z=z
         self.Omega=Omega
         self.t=ivar
         self.M = M
         self.k_m = k_m
+        self.c_m = c_m
         self.m_e = m_e
         self.e = e
         self.g=g
         self.phi=phi
+        self.lam=lam
         self.MaterialPoint_1 = MaterialPoint(M, pos1=z, qs=[z])
         self.MaterialPoint_2 = MaterialPoint(m_e,
                                              pos1=z + e * cos(phi),
@@ -353,21 +350,22 @@ class DampedEngineVerticalSpringGravity(ComposedSystem):
         self.SpringVer = Spring(2 * k_m, pos1=z, qs=[z])
         self.gravity_force1 = GravitationalForce(self.M, self.g, z, qs=[z])
         self.gravity_force2 = GravitationalForce(self.m_e, self.g, z + e * cos(phi), qs=[z])
-        self.damper_left = Damper(c,pos1=z, qs=[z])
-        self.damper_right = Damper(c,pos1=z, qs=[z])
-        system = self.SpringVer + self.MaterialPoint_1 + self.MaterialPoint_2 + self.gravity_force1 + self.gravity_force2 + self.damper_left + self.damper_right
+        self.damping= Damper((2*c_m),pos1=z, qs=[z])
+        system = self.SpringVer + self.MaterialPoint_1 + self.MaterialPoint_2 + self.gravity_force1 + self.gravity_force2 + self.damping
         super().__init__(system,**kwargs)
         
     def get_default_data(self):
 
-        m0, k0, e0, g = symbols('m_0 k_0 e_0 g', positive=True)
+        m0, k0, e0, g, lam = symbols('m_0 k_0 e_0 g lambda', positive=True)
 
         default_data_dict = {
+            self.c_m: [self.lam*(self.k_m)],
             self.M: [200 * m0, 350 * m0, 400 * m0, 550 * m0, 650 * m0, 700 * m0, 800 * m0],
             self.k_m: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0,9*k0,10*k0],
             self.m_e: [0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0, 0.7 * m0, 0.8 * m0, 0.9 * m0],
             self.e:[2 * e0, 3 * e0, 4 * e0, 5 * e0, 6 * e0],
             self.g:[g],
+
 #             self.phi:[self.Omega*self.t],
             self.phi:[self.Omega*self.t]
         }
