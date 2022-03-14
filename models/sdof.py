@@ -94,19 +94,7 @@ class ComposedSystem(HarmonicOscillator):
 
         return IP.display.Image(base64.b64decode(encoded_string))
 
-    def calculations_steps(self,preview=True,system=None,code=False):
 
-#         latex_store=AutoBreak.latex_backend
-#         AutoBreak.latex_backend = latex
-
-        print('zlo')
-        print(inspect.getsource(self.__class__))
-
-        doc_model=super().calculations_steps(preview=True,code=code)
-
-
-#         AutoBreak.latex_backend = latex_store
-        return doc_model
 
 
     def get_default_data(self):
@@ -136,7 +124,9 @@ class BlowerToothedBelt(ComposedSystem):
     real_name = 'blown_440_big_block.jpg'
     detail_scheme_name = 'blower_roller_bolt.png'
     detail_real_name = 'tensioner_pulley.jpg'
-                
+    sys_type_pl='Nietłumione układy o jednym stopniu swobody z wymuszeniem'
+    sys_name_pl='Napinacz paska kompresora'
+    
     def __init__(self,
                  m=Symbol('m', positive=True),
                  k_belt=Symbol('k_b', positive=True),
@@ -238,7 +228,7 @@ class DampedBlowerToothedBelt(ComposedSystem):
         default_data_dict = {
             self.c_belt: [lam*(self.k_belt)],
             self.c_tensioner: [self.lam*(self.k_tensioner)],
-            self.m: [0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0],
+            self.m: [0.1*m0, 0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0, 0.7 * m0, 0.8 * m0, 0.9 * m0],
             self.k_belt: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
             self.k_tensioner: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
             self.F: [F0, 2 * F0, 3 * F0, 4 * F0, 5 * F0, 6 * F0],
