@@ -2624,13 +2624,16 @@ class Picture(Figure,ReportModule):
 
     
     _latex_name = 'figure'
-    def __init__(self, image=None, position=None, caption=None, **kwargs):
+    def __init__(self, image=None, position=None, caption=None,width=NoEscape('0.8\textwidth'), **kwargs):
         """
         Args
         ----
         position: str
             Define the positioning of a floating environment, for instance
             ``'h'``. See the references for more information.
+        width: str
+            Documentation entry
+            
         References
         ----------
             * https://www.sharelatex.com/learn/Positioning_of_Figures
@@ -2638,10 +2641,12 @@ class Picture(Figure,ReportModule):
     
         self.image = image
         self.caption = caption
+        self.width = width
+        
         super().__init__(position=position,**kwargs)
         
         if self.image is not None:
-            self.add_image(NoEscape(self.image))
+            self.add_image(NoEscape(self.image),width=width)
             
         if self.caption is not None:
             self.add_caption(NoEscape(self.caption))
