@@ -24,12 +24,13 @@ from sympy import Symbol, Function, Derivative, latex, sin, cos, tan, exp, atan,
 
 from sympy.physics.vector.printing import vlatex, vpprint
 
-from IPython.display import display, Markdown, Latex
+from IPython.display import display, Latex
+from IPython.display import Markdown as IPMarkdown
 
 from .adaptable import *
 from .timeseries import TimeDataFrame, TimeSeries
 
-
+import pypandoc as ppd
 
 import copy
 import inspect
@@ -2593,7 +2594,7 @@ class ReportText(ReportModule):
 
     def __repr__(self):
 
-        display(Markdown(self._text))
+        display(IPMarkdown(self._text))
 
         #return (self._text)
         return ''
@@ -3549,7 +3550,7 @@ class SymbolsDescription(Description):
 
         text = head + ',  \n'.join(entries) + end_sign
 
-        display(Markdown(text))
+        display(IPMarkdown(text))
 
         #return (self._text)
         return ''
