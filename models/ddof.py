@@ -518,8 +518,8 @@ class DampedVehicleSuspension(ComposedSystem):
                  l_rod=Symbol('l_{rod}', positive=True),
                  l_l=Symbol('l_l', positive=True),
                  l_r=Symbol('l_r', positive=True),
-                 k_2=Symbol('k_r', positive=True),
-                 k_1=Symbol('k_l', positive=True),
+                 k_r=Symbol('k_r', positive=True),
+                 k_l=Symbol('k_l', positive=True),
                  F_engine=Symbol('F_{engine}', positive=True),
                  ivar=Symbol('t', positive=True),
                  qs=dynamicsymbols('z, \\varphi'),
@@ -535,12 +535,12 @@ class DampedVehicleSuspension(ComposedSystem):
         self.m = m  # mass of a rod
 
         self.l_rod = l_rod  # length of a rod
-        self.k_2 = k_2  # left spring
-        self.k_1 = k_1  # right spring
+        self.k_r = k_r  # left spring
+        self.k_l = k_l  # right spring
         self.I = I  # moment of inertia of a rod
         self.F_engine = F_engine
-        self.k_1 = k_1
-        self.k_2 = k_2
+
+
         self.c_l = c_l
         self.c_r = c_r
         self.l_cl = l_cl
@@ -548,14 +548,14 @@ class DampedVehicleSuspension(ComposedSystem):
         self.l_l = l_l
         self.l_r = l_r
         
-        self.damper_l = Damper(c=c_l, pos1=z + phi * l_cl,
+        self.damper_l = Damper(c=c_l, pos1=z + phi * l_l,
                                qs=qs)  # left damper
-        self.damper_r = Damper(c=c_r, pos1=z - phi * l_cr,
+        self.damper_r = Damper(c=c_r, pos1=z - phi * l_r,
                                qs=qs)  # right damper
         
         self.body = RigidBody2D(m, I, pos_lin=z, pos_rot=phi, qs=qs)  # rod
-        self.spring_1 = Spring(k_1, pos1=z + phi * l_l, qs=qs)  # left spring
-        self.spring_2 = Spring(k_2, pos1=z - phi * l_r, qs=qs)  # right spring
+        self.spring_1 = Spring(k_l, pos1=z + phi * l_l, qs=qs)  # left spring
+        self.spring_2 = Spring(k_r, pos1=z - phi * l_r, qs=qs)  # right spring
         self.force = Force(F_engine, pos1=z - l_r * phi, qs=qs)
         system = self.body + self.spring_1 + self.spring_2 + self.force + self.damper_l + self.damper_r
 
@@ -563,18 +563,104 @@ class DampedVehicleSuspension(ComposedSystem):
 
     def get_default_data(self):
 
-        c0, k_0, l_l0, omega, F_0 = symbols('c_0 k_0 l_0 omega F_0',
+        m0, l0, c0, k_0, l_l0, omega, F_0 = symbols('m_0 l_0 c_0 k_0 l_l0 Omega F_0',
                                             positive=True)
 
         default_data_dict = {
-            self.c_r: [self.c_l],
-            self.k_2: [self.k_1],
-            self.l_r: [self.l_l],
-            self.l_cr: [self.l_l],
-            self.l_cl: [self.l_l],
+            self.I: [self.m*self.l_rod**2],
+            self.l_rod:[l0,2*l0,3*l0,4*l0,5*l0,6*l0,7*l0,8*l0,9*l0],
+            self.m: [m0,2*m0,3*m0,4*m0,5*m0,6*m0,7*m0,8*m0,9*m0],
+            self.c_r: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0],
+            self.k_l: [2 * k_0, 3 * k_0, 4 * k_0, 5 * k_0, 6 * k_0],
+            self.k_r: [2 * k_0, 3 * k_0, 4 * k_0, 5 * k_0, 6 * k_0],
+            
+            
             self.c_l: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0],
-            self.k_1: [2 * k_0, 3 * k_0, 4 * k_0, 5 * k_0, 6 * k_0],
-            self.l_l: [2 * l_l0, 3 * l_l0, 4 * l_l0, 5 * l_l0, 6 * l_l0],
+            self.l_r: [0.2*self.l_rod,0.25 * self.l_rod, 0.3 * self.l_rod, 0.4 * self.l_rod, 0.5 * self.l_rod,0.35 * self.l_rod, 0.45 * self.l_rod],
+            self.l_l: [0.2*self.l_rod,0.25 * self.l_rod, 0.3 * self.l_rod, 0.4 * self.l_rod, 0.5 * self.l_rod,0.35 * self.l_rod, 0.45 * self.l_rod],
+
+            self.F_engine: [
+                2 * F_0 * sin(omega * self.ivar),
+                3 * F_0 * sin(omega * self.ivar),
+                4 * F_0 * sin(omega * self.ivar),
+                5 * F_0 * sin(omega * self.ivar),
+                6 * F_0 * sin(omega * self.ivar)
+            ]
+        }
+
+        return default_data_dict
+    
+class UndampedVehicleSuspension(ComposedSystem):
+    scheme_name = 'car_undamped.png'
+    real_name = 'car_real.jpg'
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 I=Symbol('I', positive=True),
+                 l_rod=Symbol('l_{rod}', positive=True),
+                 l_l=Symbol('l_l', positive=True),
+                 l_r=Symbol('l_r', positive=True),
+                 k_r=Symbol('k_r', positive=True),
+                 k_l=Symbol('k_l', positive=True),
+                 F_engine=Symbol('F_{engine}', positive=True),
+                 ivar=Symbol('t', positive=True),
+                 qs=dynamicsymbols('z, \\varphi'),
+                 c_l=Symbol('c_l', positive=True),
+                 c_r=Symbol('c_r', positive=True),
+                 l_cl=Symbol('l_{cl}', positive=True),
+                 l_cr=Symbol('l_{cr}', positive=True),
+
+                 **kwargs):
+
+        z, phi = qs
+
+        self.m = m  # mass of a rod
+
+        self.l_rod = l_rod  # length of a rod
+        self.k_r = k_r  # left spring
+        self.k_l = k_l  # right spring
+        self.I = I  # moment of inertia of a rod
+        self.F_engine = F_engine
+
+
+        self.c_l = c_l
+        self.c_r = c_r
+        self.l_cl = l_cl
+        self.l_cr = l_cr
+        self.l_l = l_l
+        self.l_r = l_r
+        
+        self.damper_l = Damper(c=c_l, pos1=z + phi * l_l,
+                               qs=qs)  # left damper
+        self.damper_r = Damper(c=c_r, pos1=z - phi * l_r,
+                               qs=qs)  # right damper
+        
+        self.body = RigidBody2D(m, I, pos_lin=z, pos_rot=phi, qs=qs)  # rod
+        self.spring_1 = Spring(k_l, pos1=z + phi * l_l, qs=qs)  # left spring
+        self.spring_2 = Spring(k_r, pos1=z - phi * l_r, qs=qs)  # right spring
+        self.force = Force(F_engine, pos1=z - l_r * phi, qs=qs)
+        system = self.body + self.spring_1 + self.spring_2 + self.force
+
+        super().__init__(system,**kwargs)
+
+    def get_default_data(self):
+
+        m0, l0, c0, k_0, l_l0, omega, F_0 = symbols('m_0 l_0 c_0 k_0 l_l0 Omega F_0',
+                                            positive=True)
+
+        default_data_dict = {
+            self.I: [self.m*self.l_rod**2],
+            self.l_rod:[l0,2*l0,3*l0,4*l0,5*l0,6*l0,7*l0,8*l0,9*l0],
+            self.m: [m0,2*m0,3*m0,4*m0,5*m0,6*m0,7*m0,8*m0,9*m0],
+            self.c_r: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0],
+            self.k_l: [2 * k_0, 3 * k_0, 4 * k_0, 5 * k_0, 6 * k_0],
+            self.k_r: [2 * k_0, 3 * k_0, 4 * k_0, 5 * k_0, 6 * k_0],
+            
+            
+            self.c_l: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0],
+            self.l_r: [0.2*self.l_rod,0.25 * self.l_rod, 0.3 * self.l_rod, 0.4 * self.l_rod, 0.5 * self.l_rod,0.35 * self.l_rod, 0.45 * self.l_rod],
+            self.l_l: [0.2*self.l_rod,0.25 * self.l_rod, 0.3 * self.l_rod, 0.4 * self.l_rod, 0.5 * self.l_rod,0.35 * self.l_rod, 0.45 * self.l_rod],
+
             self.F_engine: [
                 2 * F_0 * sin(omega * self.ivar),
                 3 * F_0 * sin(omega * self.ivar),

@@ -2796,6 +2796,7 @@ class Block(Environment,ReportModule):
     packages = [
                   Package('markdown'),
         ]
+    content_separator = "\n"
     
     r"""A base class for LaTeX environments.
     This class implements the basics of a LaTeX environment. A LaTeX
