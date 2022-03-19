@@ -124,8 +124,7 @@ class BlowerToothedBelt(ComposedSystem):
     real_name = 'blown_440_big_block.jpg'
     detail_scheme_name = 'blower_roller_bolt.png'
     detail_real_name = 'tensioner_pulley.jpg'
-    sys_type_pl='Nietłumione układy o jednym stopniu swobody z wymuszeniem'
-    sys_name_pl='Napinacz paska kompresora'
+
     
     def __init__(self,
                  m=Symbol('m', positive=True),

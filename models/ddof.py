@@ -24,18 +24,56 @@ class ComposedSystem(HarmonicOscillator):
     """
     scheme_name = 'damped_car_new.PNG'
     real_name = 'car_real.jpg'
-
+    detail_scheme_name = 'damped_car_new.PNG'
+    detail_real_name = 'car_real.jpg'
     @classmethod
     def _scheme(cls):
-
-        path = __file__.replace('ddof.py', 'images/') + cls.scheme_name
-
+        if 'systems.py' in __file__: 
+            path = __file__.replace('systems.py', 'images/') + cls.scheme_name
+        if 'sdof.py' in __file__: 
+            path = __file__.replace('sdof.py', 'images/') + cls.scheme_name
+        if 'ddof.py' in __file__: 
+            path = __file__.replace('ddof.py', 'images/') + cls.scheme_name
+        if 'mdof.py' in __file__: 
+            path = __file__.replace('mdof.py', 'images/') + cls.scheme_name
         return path
 
     @classmethod
     def _real_example(cls):
+        if 'systems.py' in __file__: 
+            path = __file__.replace('systems.py', 'images/') + cls.real_name
+        if 'sdof.py' in __file__: 
+            path = __file__.replace('sdof.py', 'images/') + cls.real_name
+        if 'ddof.py' in __file__: 
+            path = __file__.replace('ddof.py', 'images/') + cls.real_name
+        if 'mdof.py' in __file__: 
+            path = __file__.replace('mdof.py', 'images/') + cls.real_name
 
-        path = __file__.replace('ddof.py', 'images/') + cls.real_name
+        return path
+    
+    @classmethod
+    def _detail_real(cls):
+        if 'systems.py' in __file__: 
+            path = __file__.replace('systems.py', 'images/') + cls.detail_real_name
+        if 'sdof.py' in __file__: 
+            path = __file__.replace('sdof.py', 'images/') + cls.detail_real_name
+        if 'ddof.py' in __file__: 
+            path = __file__.replace('ddof.py', 'images/') + cls.detail_real_name
+        if 'mdof.py' in __file__: 
+            path = __file__.replace('mdof.py', 'images/') + cls.detail_real_name
+
+        return path
+    
+    @classmethod
+    def _detail_scheme(cls):
+        if 'systems.py' in __file__: 
+            path = __file__.replace('systems.py', 'images/') + cls.detail_scheme_name
+        if 'sdof.py' in __file__: 
+            path = __file__.replace('sdof.py', 'images/') + cls.detail_scheme_name
+        if 'ddof.py' in __file__: 
+            path = __file__.replace('ddof.py', 'images/') + cls.detail_scheme_name
+        if 'mdof.py' in __file__: 
+            path = __file__.replace('mdof.py', 'images/') + cls.detail_scheme_name
 
         return path
 
@@ -79,6 +117,7 @@ class BeamBridgeTMD(ComposedSystem):
 
     scheme_name = 'bridge_tmd.png'
     real_name = 'beam_bridge_real.PNG'
+    detail_real_name = 'real_bidge_tmd.jpg'
 
     def __init__(self,
                  m=Symbol('m', positive=True),
@@ -148,24 +187,49 @@ class BeamBridgeDampedTMD(ComposedSystem):
 
     scheme_name = 'bridge_tmd_dmp.png'
     real_name = 'beam_bridge_real.PNG'
-
+    detail_real_name = 'real_bidge_tmd.jpg'
+    
     def __init__(self,
-                 non_damped_system,
+                 m=Symbol('m', positive=True),
+                 m_TMD=Symbol('m_TMD', positive=True),
+                 k_beam=Symbol('k_beam', positive=True),
+                 k_TMD=Symbol('k_TMD', positive=True),
+                 ivar=Symbol('t'),
+                 g=Symbol('g', positive=True),
+                 Omega=Symbol('Omega', positive=True),
+                 F_0=Symbol('F_0', positive=True),
                  c_TMD=Symbol('c_TMD', positive=True),
                  c=Symbol('c', positive=True),
                  z_TMD=BeamBridgeTMD().z_TMD,
                  z=BeamBridgeTMD().z,
                  **kwargs):
         qs = z, z_TMD
-        self.nds = non_damped_system
+        
+        self.m = m
+        self.k_beam = k_beam
+        self.g = g
+        self.Omega = Omega
+        self.F_0 = F_0
+        self.m_TMD = m_TMD
+        self.k_TMD = k_TMD
+        self.z_TMD = z_TMD
+        self.z = z
         self.c = c
         self.c_TMD = c_TMD
 
+        self.mass = MaterialPoint(m, z, qs=[z])
+        self.spring = Spring(k_beam, z, qs=[z])
+        self.gravity_force = GravitationalForce(self.m, self.g, z)
+        self.gravity_TMD = GravitationalForce(self.m_TMD, self.g, z_TMD)
+        self.force = Force(-F_0 * sin(Omega * ivar), pos1=z)
+        self.TMD = MaterialPoint(m_TMD, pos1=z_TMD, qs=[z_TMD])
+        self.spring_TMD = Spring(k_TMD, z, z_TMD, qs=[z, z_TMD])
+        
         self.damper_TMD = Damper(c=c_TMD, pos1=z - z_TMD, qs=qs)  # left damper
         self.damper = Damper(c=c, pos1=z, qs=qs)
-        system = (self.nds + self.damper + self.damper_TMD)
+        composed_system = self.mass + self.spring + self.gravity_force + self.force + self.TMD + self.spring_TMD + self.gravity_TMD + self.damper + self.damper_TMD
 
-        super().__init__(system,**kwargs)
+        super().__init__(composed_system,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -1101,8 +1165,8 @@ class EngineWithTMD(ComposedSystem):
         -determine the instance of the pendulum by using class SDoFCouplePendulum()
     """
 
-    scheme_name = 'engine_TMD.PNG'
-    real_name = 'engine_real.PNG'
+    scheme_name = 'tmd_engine_vertical_spring_gravity.png'
+    real_name = 'paccar.jpg'
 
     def __init__(self,
                  M=Symbol('M', positive=True),
@@ -1113,6 +1177,7 @@ class EngineWithTMD(ComposedSystem):
                  e=Symbol('e', positive=True),
                  z=dynamicsymbols('z'),
                  z_TMD=dynamicsymbols('z_{TMD}'),
+                 Omega=Symbol('\Omega',positive=True),
                  phi=dynamicsymbols('varphi'),
                  ivar=Symbol('t'),
                  **kwargs):
@@ -1126,7 +1191,8 @@ class EngineWithTMD(ComposedSystem):
         self.z = z
         self.z_TMD = z_TMD
         self.phi = phi
-
+        self.Omega=Omega
+        self.t=ivar
         self.MaterialPoint_1 = MaterialPoint(M, pos1=z, qs=[z])
         self.MaterialPoint_2 = MaterialPoint(m_e,
                                              pos1=z + e * cos(phi),
@@ -1164,6 +1230,8 @@ class EngineWithTMD(ComposedSystem):
             self.k_m: [2*k0, 3*k0, 4*k0, 5*k0, 6*k0],
             self.m_TMD: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
             self.k_TMD: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
+            self.phi:[self.Omega*self.t],
+            self.m_e: [0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0, 0.7 * m0, 0.8 * m0, 0.9 * m0],
         }
 
         return default_data_dict
