@@ -9,8 +9,9 @@ from pylatex.base_classes.containers import Container
 from pylatex.utils import (#italic, 
                            NoEscape)
 
-from ..report import *
 from ..adaptable import *
+from ..report import *
+
 
 class MultivariableTaylorSeries(Expr):
     
@@ -161,10 +162,17 @@ class MultivariableTaylorSeries(Expr):
         return self._series()
 
 
+class ReportComponent(Section):
 
-class LagrangianComponent(Section):
+    latex_name = 'section'
+    packages=[
+              Package('standalone'),
+              Package('siunitx')
+             ]
     
-    def __init__(self, system,title='Analiza dynamiczna układu drgającego', numbering=False, *, label=True, **kwargs):
+    title='Report generic component'
+
+    def __init__(self, system,title=None, numbering=False, *, label=True, **kwargs):
         """
         Args
         ----
@@ -178,40 +186,127 @@ class LagrangianComponent(Section):
         """
 
         self._system=system
+        
+        if title is None:
+            title = self.title
+        
         super().__init__(title=title, numbering=numbering, label=label, **kwargs)
 
 
-
-
-        self.packages.append(Package('booktabs'))
-        self.packages.append(Package('float'))
-        self.packages.append(Package('standalone'))
-        self.packages.append(Package('siunitx'))
-
-        
-        
+                
 
         ReportText.set_container(self)
         ReportText.set_directory('./SDAresults')
-
-        #LatexDataFrame.set_picture_mode(True)
-        #LatexDataFrame.set_directory('./SDAresults')
-
         SympyFormula.set_container(self)
+        LatexDataFrame.set_default_container(self)
+        Markdown.set_container(self)
+        LatexDataFrame.set_picture_mode(True)
+        LatexDataFrame.set_directory('./SDAresults')
+        
+        
+        self.append_elements()
+        
+    def append_elements(self):
+        pass
+
+    
+
+    def as_frame(self):
+        frame=Frame(title=self.title,options=['allowframebreaks'])
+        #frame.packages +(self.packages)
+        frame+=(list(self))
+        return frame
+
+
+
+class TitlePageComponent(Environment):
+    
+    latex_name='titlepage'
+    
+    def __init__(self, system=None, options=None, arguments=None, start_arguments=None,
+                 **kwargs):
+        r"""
+        Args
+        ----
+        options: str or list or  `~.Options`
+            Options to be added to the ``\begin`` command
+        arguments: str or list or `~.Arguments`
+            Arguments to be added to the ``\begin`` command
+        start_arguments: str or list or `~.Arguments`
+            Arguments to be added before the options
+        """
+
+        self.system = system
+        self.options = options
+        self.arguments = arguments
+        self.start_arguments = start_arguments
+
+        
+        
+        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
+        
+        if self.system is not None:
+
+        
+            system = self.system
+
+
+
+            self.append(NoEscape(f'Rozważany układ z klasy:  {system._label}'))
+
+            self.append(NoEscape(f'Liczba stopnii swobody:  {len(system.q)}'))    
+
+
+class SchemeComponent(ReportComponent):
+    
+    packages=[Package('float')]
+
+    def append_elements(self):
+        
+        system = self._system
+        
+
+#                             '''))
+        display(ReportText(f'''Ilustracja przedstawia schemat rzeczywistego obiektu mechanicznego, będący przedmiotem modelowania i analizy dynamicznej.
+                            '''))        
+        print(system._scheme())
+
+        
+        with self.create(Figure(position='H')) as fig:
+            fig.add_image(system._scheme(),width='6cm')
+            
+            
+
+
+    
+class ExemplaryPictureComponent(SchemeComponent):
+    
+    
+    
+    def append_elements(self):
+        
+        system = self._system
         
 
         #self.append(Section('Analiza dynamiczna układu drgającego',numbering=False))
             
-
-#         if code:
-#             display(ReportText(f'''Rozpatrywany układ został opisany (sformalizowany) przy pomocy odpowiedniej klasy dziedziczącej po typie nadrzędnym "ComposedModel". Kod zaprezentowanej struktury jest następujący:
-#                                 '''))
-
-#             doc_model.content_separator='\n'
-#             with doc_model.create(PyVerbatim()) as verb:
-#                 print(inspect.getsource(system.__class__))
-#                 verb.append(NoEscape(inspect.getsource(system.__class__))  )
+        display(ReportText(f'''Ilustracja przedstawia rzeczywisty obiekt mechaniczny, będący przedmiotem modelowania i analizy dynamicznej.
+                            '''))
+      
+        print(system._scheme())
+        with self.create(Figure(position='H')) as fig:
+            fig.add_image(system._real_example(),width='6cm')
+            
+            
+            
+class LagrangianComponent(ReportComponent):
+    
+    title="Lagrangian (funkcja Lagrange'a)  układu"
         
+
+    def append_elements(self):
+        
+        system = self._system
         dyn_sys=system
         dyn_sys_lin = dyn_sys.linearized()
 
@@ -229,7 +324,15 @@ class LagrangianComponent(Section):
         
         q_sym =[ Symbol(f'{coord}'[0:-3]) for coord in dyn_sys.q]
         
-        diffL_d=lambda coord: Symbol(latex(Derivative(Symbol('L'),Symbol(vlatex(coord))))  )
+        diffL_d=lambda coord: Symbol(f'\\frac{{ \\partial L}}{{  \\partial {vlatex(coord)}  }}')
+        d_dt_diffL_d=lambda coord: Symbol(f'\\frac{{ \\mathrm{{d}}  }}{{  \\mathrm{{d}} {vlatex(system.ivar)}  }} {vlatex(diffL_d(coord))} ')        
+
+        display(ReportText(f'''Równania Eulera-Lagrange'a dla rozważanego przypadku są nastęujące: 
+                            '''))
+        
+        for coord in dyn_sys.q:
+            display((SympyFormula(  Eq(d_dt_diffL_d(coord.diff(system.ivar)) - diffL_d(coord) ,Symbol(f'Q_{{ {vlatex(coord)} }}^N'))  , marker=mrk_lagrangian_nonlin,backend=vlatex )  ))
+        
         
         display(ReportText(f'''Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące: 
                             '''))
@@ -237,11 +340,12 @@ class LagrangianComponent(Section):
         for coord in dyn_sys.Y:
             display((SympyFormula(  Eq(diffL_d(coord),dyn_sys.L.expand()[0].diff(coord))  , marker=mrk_lagrangian_nonlin,backend=vlatex )  ))
             
-        d_dt_diffL_d=lambda coord: Symbol(latex(Derivative(diffL_d(coord)  , system.ivar ))  )
+
 
         for coord in dyn_sys.q.diff(system.ivar):
             display((SympyFormula(  Eq(d_dt_diffL_d(coord),dyn_sys.L.expand()[0].diff(coord).diff(system.ivar))  , marker=mrk_lagrangian_nonlin,backend=vlatex )  ))
-        
+            
+            #display(Markdown(f'\\begin{equation}    \\end{equation}').reported())
         #with doc_model.create(DMath()) as eq:
         #    eq.append(NoEscape(latex(Derivative(Symbol('L'),q_sym[0],evaluate=False))))
         #    eq.append(NoEscape('='))
@@ -252,22 +356,7 @@ class LagrangianComponent(Section):
         #display(ReportText(f'''The governing equations of the system have a following form ({Ref(mrk_gov_eq_nonlin).dumps()}):
         #                    '''))
 
-        display(ReportText(f'''
-                           Wykorzystując obliczone pochodne, wyznacza się równania ruchu na podstawie odpowiedniego wzoru.
-                           Równania ruchu układu (nieliniowe w ogólnym przypadku) przedstawiają zależności ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})-({AutoMarker(Eq(dyn_sys._eoms[-1].simplify().expand(),0))}):
-                           '''))
-        
-        for eq in dyn_sys._eoms:
-            display(SympyFormula( Eq(eq.simplify().expand(),0) , marker=mrk_gov_eq_nonlin ))
 
-        #mrk_lagrangian_lin=Marker('lagrangian_lin_sys',prefix='eq')
-        #
-        #display(ReportText(f'''Linearized model of the system can be useful as an initial step of the analysis. 
-        #                        It enables to find a simplified solution in the neighborhood of the critical point.
-        #                        Such an approach introduces some error but the solution has qualitative compability of the exact and linearized result. The simplified Lagrangian formula ({Ref(mrk_lagrangian_lin).dumps()}) is as follows:
-        #                    '''))
-
-        #display((SympyFormula(  Eq(Symbol('L'),dyn_sys_lin.L.expand()[0]) , marker=mrk_lagrangian_lin  )  ))
 
 
         
@@ -277,43 +366,40 @@ class LagrangianComponent(Section):
         frame+=(list(self))
         return frame
     
-class LinearizationComponent(Section):
     
-    def __init__(self, system,title='Linearyzacja równań ruchu', numbering=False, *, label=True, **kwargs):
-        """
-        Args
-        ----
-        title: str
-            The section title.
-        numbering: bool
-            Add a number before the section title.
-        label: Label or bool or str
-            Can set a label manually or use a boolean to set
-            preference between automatic or no label
-        """
-
-        self._system=system
-        super().__init__(title=title, numbering=numbering, label=label, **kwargs)
-
-
-
-
-        self.packages.append(Package('booktabs'))
-        self.packages.append(Package('float'))
-        self.packages.append(Package('standalone'))
-        self.packages.append(Package('siunitx'))
+class GoverningEquationComponent(ReportComponent):
+    
+    title="Lagrangian (funkcja Lagrange'a)  układu"
+    
+    def append_elements(self):
+        
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys.linearized()
 
         
-        
 
-        ReportText.set_container(self)
+
+        display(ReportText(f'''
+                           Wykorzystując obliczone pochodne, wyznacza się równania ruchu na podstawie odpowiedniego wzoru.
+                           Równania ruchu układu (nieliniowe w ogólnym przypadku) przedstawiają zależności ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})-({AutoMarker(Eq(dyn_sys._eoms[-1].simplify().expand(),0))}):
+                           '''))
+        
+        for eq in dyn_sys._eoms:
+            display(SympyFormula( Eq(eq.simplify().expand(),0) , marker=None))
+
+
+
+
+class LinearizationComponent(ReportComponent):
+    
+    title="Linearyzacja równań ruchu"
+    
+    def append_elements(self):
+        
+        system = self._system
         ReportText.set_directory('./SDAresults')
 
-        #LatexDataFrame.set_picture_mode(True)
-        #LatexDataFrame.set_directory('./SDAresults')
-
-        SympyFormula.set_container(self)
-        
         latex_store=AutoBreak.latex_backend
         AutoBreak.latex_backend = latex_store
         
@@ -346,33 +432,13 @@ class LinearizationComponent(Section):
                 f'''Punkty równowagi rozważanego układu są następujące:
                             '''))          
 
-
-
-
-
         for eq_coord,val in op_point.items():
             display((SympyFormula(  Eq(eq_coord,val) , marker=mrk_lagrangian_lin  )  ))
-
-
-
-
-
-
 
 
         diffL_d=lambda coord: Symbol(latex(Derivative(Symbol('L'),Symbol(vlatex(coord))))  )
 
 
-
-#             display(ReportText(f'''Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące: 
-#                                    ({Ref(mrk_lagrangian_nonlin).dumps()}):
-#                                 '''))
-
-        #op_point = {coord  for coord in self.Y + list(self.q.diff(self.ivar))}
-
-
-
-        #display((SympyFormula(  Eq(Symbol('L'),dyn_sys_lin.L.expand()[0]) , marker=mrk_lagrangian_lin  )  ))
 
         for no,eom in enumerate(dyn_sys._eoms):
 
@@ -409,6 +475,31 @@ class LinearizationComponent(Section):
                                 '''))
             display((SympyFormula(  Eq(MultivariableTaylorSeries(eom,coords,n=1,x0=op_point).doit().expand().simplify().expand(),0,evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
 
+
+
+        AutoBreak.latex_backend = latex_store
+
+
+    
+class FundamentalMatrixComponent(ReportComponent):
+    
+    title="Linearyzacja równań ruchu"
+    
+    def append_elements(self):
+        
+        system = self._system
+        ReportText.set_directory('./SDAresults')
+
+        latex_store=AutoBreak.latex_backend
+        AutoBreak.latex_backend = latex_store
+        
+        t=system.ivar
+        
+
+        dyn_sys=system
+        dyn_sys_lin=dyn_sys.linearized()
+
+
         display(ReportText(f'''Z równań ruchu wyznaczono macierz mas i sztywności układu:
                                 '''))
         display((SympyFormula(  Eq(Symbol('M'),dyn_sys_lin.inertia_matrix(),evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
@@ -423,135 +514,10 @@ class LinearizationComponent(Section):
         display((SympyFormula(  Eq(Symbol('A'),dyn_sys_lin.fundamental_matrix(),evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
         display((SympyFormula(  Eq(Delta,dyn_sys_lin.fundamental_matrix().det().expand().simplify().simplify().expand(),evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
 
-#         display(ReportText(f'''Rozwiązanie równania charakterystycznego (dwukwadratowego) pozwala obliczyć częstości drgań własnych układu:
-#                                 '''))
-#         for no,omega in enumerate([omega for omega in (dyn_sys_lin).natural_frequencies().doit() if omega !=0]):
-#             display((SympyFormula( Eq(Symbol(f'omega_0{no+1}'),omega) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+
 
         AutoBreak.latex_backend = latex_store
 
-    
-    def as_frame(self):
-        frame=Frame(title=self.title,options=['allowframebreaks'])
-        #frame.packages +=list(self.packages)
-        frame+=(list(self))
-        return frame
-    
-class SchemeComponent(Section):
-    
-    def __init__(self, system,title='Przykładowy obiekt', numbering=False, *, label=True, **kwargs):
-        """
-        Args
-        ----
-        title: str
-            The section title.
-        numbering: bool
-            Add a number before the section title.
-        label: Label or bool or str
-            Can set a label manually or use a boolean to set
-            preference between automatic or no label
-        """
-
-        self._system=system
-        super().__init__(title=title, numbering=numbering, label=label, **kwargs)
-
-
-
-
-        self.packages.append(Package('booktabs'))
-        self.packages.append(Package('float'))
-        self.packages.append(Package('standalone'))
-        self.packages.append(Package('siunitx'))
 
         
-        
 
-        ReportText.set_container(self)
-        ReportText.set_directory('./SDAresults')
-
-        #LatexDataFrame.set_picture_mode(True)
-        #LatexDataFrame.set_directory('./SDAresults')
-
-        SympyFormula.set_container(self)
-        
-
-        #self.append(Section('Analiza dynamiczna układu drgającego',numbering=False))
-            
-#         display(ReportText(f'''Ilustracja przedstawia schemat rzeczywisty obiekt mechaniczny, będący przedmiotem modelowania i analizy dynamicznej.
-#                             '''))
-        display(ReportText(f'''Ilustracja przedstawia schemat rzeczywistego obiektu mechanicznego, będący przedmiotem modelowania i analizy dynamicznej.
-                            '''))        
-        print(system._scheme())
-#         with self.create(Figure(position='H')) as fig:
-#             fig.add_image(system._real_example())
-        
-        with self.create(Figure(position='H')) as fig:
-            fig.add_image(system._scheme(),width='6cm')
-            
-            
-
-
-
-        
-    def as_frame(self):
-        frame=Frame(title=self.title,options=['allowframebreaks'])
-        #frame.packages +=list(self.packages)
-        frame+=(list(self))
-        return frame
-    
-class ExemplaryPictureComponent(Section):
-    
-    def __init__(self, system,title='Schemat modelu dynamicznego', numbering=False, *, label=True, **kwargs):
-        """
-        Args
-        ----
-        title: str
-            The section title.
-        numbering: bool
-            Add a number before the section title.
-        label: Label or bool or str
-            Can set a label manually or use a boolean to set
-            preference between automatic or no label
-        """
-
-        self._system=system
-        super().__init__(title=title, numbering=numbering, label=label, **kwargs)
-
-
-
-
-        self.packages.append(Package('booktabs'))
-        self.packages.append(Package('float'))
-        self.packages.append(Package('standalone'))
-        self.packages.append(Package('siunitx'))
-
-        
-        
-
-        ReportText.set_container(self)
-        ReportText.set_directory('./SDAresults')
-
-        #LatexDataFrame.set_picture_mode(True)
-        #LatexDataFrame.set_directory('./SDAresults')
-
-        SympyFormula.set_container(self)
-        
-
-        #self.append(Section('Analiza dynamiczna układu drgającego',numbering=False))
-            
-        display(ReportText(f'''Ilustracja przedstawia rzeczywisty obiekt mechaniczny, będący przedmiotem modelowania i analizy dynamicznej.
-                            '''))
-      
-        print(system._scheme())
-        with self.create(Figure(position='H')) as fig:
-            fig.add_image(system._real_example(),width='6cm')
-        
-
-
-
-        
-    def as_frame(self):
-        frame=Frame(title=self.title,options=['allowframebreaks'])
-        #frame.packages +=list(self.packages)
-        frame+=(list(self))
-        return frame
