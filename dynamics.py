@@ -1967,7 +1967,7 @@ class HarmonicOscillator(LinearDynamicSystem):
 class DampedHarmonicOscillator(HarmonicOscillator):
     def solution(self, initial_conditions=None):
         '''
-        Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
+        Solves the problem in the symbolic way and returns matrix of solution (in the form of equations (objects of Eq class)).
         '''
         pass
 

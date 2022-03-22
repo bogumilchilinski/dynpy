@@ -1,4 +1,4 @@
-from pylatex import (Document, Package, Command
+from pylatex import (Document, Package, Command, NewPage
                      #Section, Subsection, Subsubsection, Itemize,  HorizontalSpace, Description, Marker
                     )
 #from pylatex.section import Paragraph, Chapter
@@ -75,7 +75,7 @@ class CaseTemplate(Document):
         )
 
 class ExampleTemplate(Document):
-    title='Basic title'
+    
     latex_name = 'document'
     packages = [
                   Package('microtype'),
@@ -113,6 +113,7 @@ class ExampleTemplate(Document):
     
     
     def __init__(self,
+                 title='Basic title',
                  default_filepath='default_filepath',
                  *,
                  documentclass='article',
@@ -144,8 +145,9 @@ class ExampleTemplate(Document):
             data=data,
         )
 #         label=self.label
-        self.packages.append(Command('title', arguments=[self.__class__.title]))
+        self.title=title
+        self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
         self.packages.append(Command('author', arguments=['Bogumił Chiliński, Anna Mackojć, Damian Sierociński']))
         self.append(Command('maketitle'))
-        
+        self.append(NewPage())
         # tu implementować co tam potrzeba

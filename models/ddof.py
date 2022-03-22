@@ -146,7 +146,7 @@ class BeamBridgeTMD(ComposedSystem):
         self.spring = Spring(k_beam, z, qs=[z])
         self.gravity_force = GravitationalForce(self.m, self.g, z)
         self.gravity_TMD = GravitationalForce(self.m_TMD, self.g, z_TMD)
-        self.force = Force(-F_0 * sin(Omega * ivar), pos1=z)
+        self.force = Force(F_0 * sin(Omega * ivar), pos1=z)
         self.TMD = MaterialPoint(m_TMD, pos1=z_TMD, qs=[z_TMD])
         self.spring_TMD = Spring(k_TMD, z, z_TMD, qs=[z, z_TMD])
         composed_system = (self.mass + self.spring + self.gravity_force + self.force +
@@ -221,7 +221,7 @@ class BeamBridgeDampedTMD(ComposedSystem):
         self.spring = Spring(k_beam, z, qs=[z])
         self.gravity_force = GravitationalForce(self.m, self.g, z)
         self.gravity_TMD = GravitationalForce(self.m_TMD, self.g, z_TMD)
-        self.force = Force(-F_0 * sin(Omega * ivar), pos1=z)
+        self.force = Force(F_0 * sin(Omega * ivar), pos1=z)
         self.TMD = MaterialPoint(m_TMD, pos1=z_TMD, qs=[z_TMD])
         self.spring_TMD = Spring(k_TMD, z, z_TMD, qs=[z, z_TMD])
         
@@ -248,19 +248,19 @@ class BeamBridgeDampedTMD(ComposedSystem):
         if real is False:
             
             default_data_dict = {
-                self.m: [20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0],
+                self.m: [m0, 20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0, 70*m0, 80*m0, 90*m0],
                 self.c: [lamb * self.k_beam],
-                self.k_beam: [
+                self.k_beam: [10 * 48 * E * I / l**3,
                     20 * 48 * E * I / l**3, 30 * 48 * E * I / l**3,
                     40 * 48 * E * I / l**3, 50 * 48 * E * I / l**3,
-                    60 * 48 * E * I / l**3
+                    60 * 48 * E * I / l**3, 70 * 48 * E * I / l**3, 80 * 48 * E * I / l**3, 90 * 48 * E * I / l**3
                 ],
                 self.c_TMD: [lamb * self.k_TMD],
-                self.m_TMD: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
+                self.m_TMD: [m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7*m0, 8*m0, 9*m0],
                 self.k_TMD: [
-                    1 * 48 * E * I / l**3, 3 * 48 * E * I / l**3,
-                    3 * 48 * E * I / l**3, 5 * 48 * E * I / l**3,
-                    5 * 48 * E * I / l**3
+                    1 * 48 * E * I / l**3, 2 * 48 * E * I / l**3,
+                    3 * 48 * E * I / l**3, 4 * 48 * E * I / l**3,
+                    5 * 48 * E * I / l**3, 6 * 48 * E * I / l**3, 7 * 48 * E * I / l**3, 8 * 48 * E * I / l**3, 9 * 48 * E * I / l**3
                 ],
             }
         else:
@@ -837,14 +837,14 @@ class Shaft(ComposedSystem):
         theta0, Omega = symbols('theta_0, Omega', positive=True)
 
         default_data_dict = {
-            self.I: [S.Half*m0*l**2,S.One*m0*l**2,(S.Half**2)*m0*l**2],
+            self.I: [S.Half*m0*l**2,S.One*m0*l**2,(S.Half**2)*m0*l**2,2*m0*l**2,3*m0*l**2,4*m0*l**2,5*m0*l**2,6*m0*l**2,7*m0*l**2,8*m0*l**2,9*m0*l**2],
             
             
 
-            self.k_1: [1 * G * l**4 /(10* l), 2 *  G * l**4 /(10* l), S.Half *  G * l**4 /(10* l), 4 *  G * l**4 /(10* l), (S.Half**2) *  G * l**4 /(10* l)],
-            self.k_2: [1 * G * l**4 /(10* l), 2 *  G * l**4 /(10* l), S.Half *  G * l**4 /(10* l), 4 *  G * l**4 /(10* l), (S.Half**2) *  G * l**4 /(10* l)],
+            self.k_1: [1 * G * l**4 /(10* l), 2 *  G * l**4 /(10* l), S.Half *  G * l**4 /(10* l), 4 *  G * l**4 /(10* l), (S.Half**2) *  G * l**4 /(10* l), 3 *  G * l**4 /(10* l), 5 *  G * l**4 /(10* l), 6 *  G * l**4 /(10* l), 7 *  G * l**4 /(10* l), 8 *  G * l**4 /(10* l), 9 *  G * l**4 /(10* l)],
+            self.k_2: [1 * G * l**4 /(10* l), 2 *  G * l**4 /(10* l), S.Half *  G * l**4 /(10* l), 4 *  G * l**4 /(10* l), (S.Half**2) *  G * l**4 /(10* l), 3 *  G * l**4 /(10* l), 5 *  G * l**4 /(10* l), 6 *  G * l**4 /(10* l), 7 *  G * l**4 /(10* l), 8 *  G * l**4 /(10* l), 9 *  G * l**4 /(10* l)],
 
-            l:[1 * l0, 2 * l0, S.Half * l0, 4 * l0, (S.Half**2) * l0],
+            l:[1 * l0, 2 * l0, S.Half * l0, 4 * l0, (S.Half**2) * l0, 3 * l0, (S.Half**2) * l0, 5 * l0, (S.Half**2) * l0, 6 * l0, (S.Half**2) * l0, 7 * l0, (S.Half**2) * l0, 8 * l0, (S.Half**2) * l0, 9 * l0, (S.Half**2) * l0],
             
 #             self.phi_1:[self.phi, 0],
 #             self.phi_2:[self.phi],
@@ -1166,7 +1166,7 @@ class EngineWithTMD(ComposedSystem):
     """
 
     scheme_name = 'tmd_engine_vertical_spring_gravity.png'
-    real_name = 'paccar.jpg'
+    real_name = 'tmd_engine_real.jpg'
 
     def __init__(self,
                  M=Symbol('M', positive=True),
@@ -1223,15 +1223,16 @@ class EngineWithTMD(ComposedSystem):
         return self.sym_desc_dict
     def get_default_data(self):
 
-        m0, k0 = symbols('m_0 k_0', positive=True)
+        m0, k0, e0 = symbols('m_0 k_0 e_0', positive=True)
 
         default_data_dict = {
-            self.M: [20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0],
-            self.k_m: [2*k0, 3*k0, 4*k0, 5*k0, 6*k0],
-            self.m_TMD: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
-            self.k_TMD: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
+            self.M: [10 * m0, 20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0, 70 * m0, 80 * m0, 90 * m0],
+            self.k_m: [k0, 2*k0, 3*k0, 4*k0, 5*k0, 6*k0, 7*k0, 8*k0, 9*k0],
+            self.m_TMD: [m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0],
+            self.k_TMD: [k0, 2*k0, 3*k0, 4*k0, 5*k0, 6*k0, 7*k0, 8*k0, 9*k0],
             self.phi:[self.Omega*self.t],
-            self.m_e: [0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0, 0.7 * m0, 0.8 * m0, 0.9 * m0],
+            self.m_e: [0.1*m0, 0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0, 0.7 * m0, 0.8 * m0, 0.9 * m0],
+            self.e:[e0, 2 * e0, 3 * e0, 4 * e0, 5 * e0, 6 * e0, 7*e0, 8*e0, 9* e0]
         }
 
         return default_data_dict

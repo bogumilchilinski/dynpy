@@ -36,7 +36,7 @@
 
 
     \node (part1) [draw,pattern=crosshatch dots,outer sep=0pt,thick,minimum width=8cm, minimum height=0.3cm,anchor=east,label={right,above=:{}}] at (origo){};
-    \node (p1_label) at ($(part1) + (3.2,0.7)$) [below] {$E, I, l_{beam}$};
+    \node (p1_label) at ($(part1) + (3.2,0.7)$) [below] {$E, I, l_{beam}, m$};
 
 
 \draw [thick] ([xshift=0.5cm,yshift=-0.0cm]part1.south west)--++ (-60:0.5)--++(-0.5,0) node (support_end){}--++ (60:0.5);
@@ -54,7 +54,7 @@
 
 \draw [thick] ([yshift=-0.1cm]origo) -- ([yshift=0.1cm]origo);
 
-\draw [color=black,force,<-]  (part1.center) node [above=1.5cm] (R){$F(t)=F_0sin\omega t$}     -- ++(0cm,1.5cm) ;
+\draw [color=black,force,<-]  (part1.center) node [above=1.5cm] (R){$F(t)=F_0sin\Omega t$}     -- ++(0cm,1.5cm) ;
 
 \draw [spring] ([xshift=-0.5cm]part1.south)  node[] (center_spring){}  --++ (0cm,-1.1cm) node[midway,left] {$k_{TMD}$};
 

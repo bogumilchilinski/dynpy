@@ -1,7 +1,7 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, re, pi, latex,
                    dsolve, solve, fraction, factorial, Add, Mul, exp,
-                   numbered_symbols, integrate)
+                   numbered_symbols, integrate, ImmutableMatrix)
 
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
@@ -404,6 +404,8 @@ class FirstOrderODE:
 class LinearODESolution:
 
     _const_list = set()
+    _cache={}
+    
 
     def __init__(self,
                  odes_system,
@@ -608,87 +610,97 @@ class LinearODESolution:
         return sum(solution, Matrix([0] * len(Y_mat)))
 
     def steady_solution(self, initial_conditions=None):
+        if (tuple(self.dvars),ImmutableMatrix(self.governing_equations)) in self.__class__._cache:
 
-        ext_forces = self.external_forces().expand().applyfunc(
-            lambda row: (TR8(row).expand()))
 
-        #         sin_components=ext_forces.atoms(sin)
-        #         cos_components=ext_forces.atoms(cos)
+            print('cache for Linear ODE')
+            steady_sol=self.__class__._cache[(tuple(self.dvars),ImmutableMatrix(self.governing_equations))]
+            
+        else:
+            print('new solution')
+            ext_forces = self.external_forces().expand().applyfunc(
+                lambda row: (TR8(row).expand()))
 
-        #        display('sin cos reco',)
-        components = [
-            comp for comp in ext_forces.atoms(sin, cos) if comp.has(self.ivar)
-        ]
+            #         sin_components=ext_forces.atoms(sin)
+            #         cos_components=ext_forces.atoms(cos)
 
-        #        display('ext_forces',ext_forces)
+            #        display('sin cos reco',)
+            components = [
+                comp for comp in ext_forces.atoms(sin, cos) if comp.has(self.ivar)
+            ]
 
-        steady_sol = Matrix([0 for gen_coord in self.dvars])
+            #        display('ext_forces',ext_forces)
 
-        for comp in components:
-            #display(comp)
+            steady_sol = Matrix([0 for gen_coord in self.dvars])
 
-            omg = (comp.args[0].diff(self.ivar)).doit()
-            #            display(omg)
-            amp_vector = Matrix([row.coeff(comp) for row in ext_forces])
+            for comp in components:
+                #display(comp)
 
-            #display(amp_vector)
+                omg = (comp.args[0].diff(self.ivar)).doit()
+                #            display(omg)
+                amp_vector = Matrix([row.coeff(comp) for row in ext_forces])
 
-            fund_mat = -self.inertia_matrix(
-            ) * omg**2 + sym.I * omg * self.damping_matrix(
-            ) + self.stiffness_matrix()
+                #display(amp_vector)
 
-            #print('++linea.py++'*10)
-            #display(fund_mat)
-            #print('++linea.py++'*10)
+                fund_mat = -self.inertia_matrix(
+                ) * omg**2 + sym.I * omg * self.damping_matrix(
+                ) + self.stiffness_matrix()
 
-            steady_sol += (
-                sym.re(fund_mat.inv()).doit() * amp_vector) * comp + (
-                    sym.im(fund_mat.inv()).doit() * amp_vector) * TR3(
-                        comp.subs(omg * self.ivar, omg * self.ivar - pi / 2))
+                #print('++linea.py++'*10)
+                #display(fund_mat)
+                #print('++linea.py++'*10)
 
-            #steady_sol += ((fund_mat.inv()) * amp_vector) * comp
+                steady_sol += (
+                    sym.re(fund_mat.inv()).doit() * amp_vector) * comp + (
+                        sym.im(fund_mat.inv()).doit() * amp_vector) * TR3(
+                            comp.subs(omg * self.ivar, omg * self.ivar - pi / 2))
 
-            ext_forces -= (amp_vector * comp).expand()
-        #print(ext_forces.doit().expand())
+                #steady_sol += ((fund_mat.inv()) * amp_vector) * comp
 
-        # const_elems = lambda expr: [
-        #     expr for expr in comp.expand().args if not expr.has(self.ivar)
-        #     if isinstance(comp, Add)
-        # ]
+                ext_forces -= (amp_vector * comp).expand()
+            #print(ext_forces.doit().expand())
 
-        const_mat = Matrix([
-            sum((expr for expr in comp.expand().args if not expr.has(self.ivar)
-                 if isinstance(comp, Add)), 0) for comp in ext_forces.doit()
-        ])
+            # const_elems = lambda expr: [
+            #     expr for expr in comp.expand().args if not expr.has(self.ivar)
+            #     if isinstance(comp, Add)
+            # ]
 
-        #        display('const',const_mat)
+            const_mat = Matrix([
+                sum((expr for expr in comp.expand().args if not expr.has(self.ivar)
+                     if isinstance(comp, Add)), 0) for comp in ext_forces.doit()
+            ])
 
-        steady_sol += (self.stiffness_matrix().inv() * const_mat).doit()
+            #        display('const',const_mat)
 
-        ext_forces -= const_mat
+            steady_sol += (self.stiffness_matrix().inv() * const_mat).doit()
 
-        #        display('res',ext_forces)
+            ext_forces -= const_mat
 
-        if ext_forces.doit().expand() != sym.Matrix(
-            [0 for gen_coord in self.dvars]):
-            #             print('o tu')
-            #             display((self.governing_equations - self.external_forces() +
-            #                      ext_forces).expand().doit())
-            eqns_res = (self.governing_equations - self.external_forces() +
-                        ext_forces).expand().doit()
+            #        display('res',ext_forces)
 
-            if len(self.dvars) == 1:
-                steady_sol += Matrix([
-                    sym.dsolve(eqns_res[0], self.dvars[0]).rhs.subs({
-                        Symbol('C1'):
-                        0,
-                        Symbol('C2'):
-                        0
-                    })
-                ])
-            else:
-                steady_sol += sym.dsolve(eqns_res, self.dvars)
+            if ext_forces.doit().expand() != sym.Matrix(
+                [0 for gen_coord in self.dvars]):
+                #             print('o tu')
+                #             display((self.governing_equations - self.external_forces() +
+                #                      ext_forces).expand().doit())
+                eqns_res = (self.governing_equations - self.external_forces() +
+                            ext_forces).expand().doit()
 
+                if len(self.dvars) == 1:
+                    steady_sol += Matrix([
+                        sym.dsolve(eqns_res[0], self.dvars[0]).rhs.subs({
+                            Symbol('C1'):
+                            0,
+                            Symbol('C2'):
+                            0
+                        })
+                    ])
+                else:
+                    steady_sol += sym.dsolve(eqns_res, self.dvars)
+                    
+            self.__class__._cache[(tuple(self.dvars),ImmutableMatrix(self.governing_equations))] = steady_sol
+
+                
         return -steady_sol
 
     def solution(self, initial_conditions=None):

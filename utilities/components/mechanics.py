@@ -11,7 +11,7 @@ from pylatex.utils import (#italic,
 
 from ..adaptable import *
 from ..report import *
-
+from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator
 
 class MultivariableTaylorSeries(Expr):
     
@@ -258,7 +258,7 @@ class TitlePageComponent(Environment):
 
 
 class SchemeComponent(ReportComponent):
-    
+    title="Schemat układu"
     packages=[Package('float')]
 
     def append_elements(self):
@@ -273,7 +273,7 @@ class SchemeComponent(ReportComponent):
 
         
         with self.create(Figure(position='H')) as fig:
-            fig.add_image(system._scheme(),width='6cm')
+            fig.add_image(system._scheme(),width='8cm')
             
             
 
@@ -281,7 +281,7 @@ class SchemeComponent(ReportComponent):
     
 class ExemplaryPictureComponent(SchemeComponent):
     
-    
+    title="Przykład rzeczywistego obiektu"
     
     def append_elements(self):
         
@@ -295,9 +295,107 @@ class ExemplaryPictureComponent(SchemeComponent):
       
         print(system._scheme())
         with self.create(Figure(position='H')) as fig:
-            fig.add_image(system._real_example(),width='6cm')
+            fig.add_image(system._real_example(),width='8cm')
             
-            
+class KineticEnergyComponent(ReportComponent):
+    
+    title="Energia kinetyczna"
+    
+    def append_elements(self):
+        
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys.linearized()
+
+        
+
+
+        display(ReportText(f'''
+                           Energia kinetyczna układu wyrażona jest wzorem:
+                           
+                           '''))
+        
+
+        display(SympyFormula( Eq(Symbol('T'),
+                     dyn_sys_lin.lagrangian() - dyn_sys_lin.lagrangian().subs(
+                         {coord: 0
+                          for coord in Matrix(dyn_sys_lin.q).diff(dyn_sys_lin.ivar)})) , marker=None))
+        
+class PotentialEnergyComponent(ReportComponent):
+    
+    title="Energia kinetyczna"
+    
+    def append_elements(self):
+        
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys.linearized()
+
+        
+
+
+        display(ReportText(f'''
+                           Energia potencjalna układu wyrażona jest wzorem:
+                           
+                           '''))
+        
+
+        display(SympyFormula( Eq(Symbol('V'),- dyn_sys_lin.lagrangian().subs(
+                         {coord: 0
+                          for coord in Matrix(dyn_sys_lin.q).diff(dyn_sys_lin.ivar)})) , marker=None))
+        
+class DissipationComponent(ReportComponent):
+    
+    title="Dyssypacyjna funkcja Rayleigh'a"
+    
+    def append_elements(self):
+        
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys.linearized()
+
+        
+
+
+        display(ReportText(f'''
+                           Energia rozpraszana w tłumikach wyrażona jest wzorem:
+                           
+                           '''))
+
+        display(SympyFormula(Eq(Symbol('D'), (S.One/2 * diff(dyn_sys.q.transpose())* dyn_sys_lin.damping_matrix()* diff(dyn_sys.q))[0])))
+#         display(SympyFormula( Eq(Symbol('D'),- dyn_sys_lin.lagrangian().subs(
+#                          {coord: 0
+#                           for coord in Matrix(dyn_sys_lin.q).diff(dyn_sys_lin.ivar)})) , marker=None))
+# class EnergyDiffsComponent(ReportComponent):
+#     def append_elements(self):
+        
+#         system = self._system
+#         dyn_sys=system
+#         dyn_sys_lin = dyn_sys.linearized()
+#         q_sym =[ Symbol(f'{coord}'[0:-3]) for coord in dyn_sys.q]
+
+#         diffEk_d=lambda coord: Symbol(f'\\frac{{ \\partial T}}{{  \\partial {vlatex(coord.diff(dyn_sys.ivar))}  }}')
+#         d_dt_diffEk_d=lambda coord: Symbol(f'\\frac{{ \\mathrm{{d}}  }}{{  \\mathrm{{d}} {vlatex(system.ivar)}  }} {vlatex(diffEk_d(coord))} ') 
+#         diffEp_d=lambda coord: Symbol(f'\\frac{{ \\partial V}}{{  \\partial {vlatex(coord)}  }}')
+#         display(ReportText(f'''Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące: 
+#                             '''))
+
+#         for coord in dyn_sys.Y:
+#             display((SympyFormula(  Eq(d_dt_diffEk_d(coord),dyn_sys.L.expand()[0].diff(coord))  , marker='b',backend=vlatex )  ))
+
+
+
+#         for coord in dyn_sys.q.diff(system.ivar):
+#             display((SympyFormula(  Eq(diffEp_d,dyn_sys.L.expand()[0].diff(coord).diff(system.ivar))  , marker='a',backend=vlatex  )  ))
+
+#             #display(Markdown(f'\\begin{equation}    \\end{equation}').reported())
+#         #with doc_model.create(DMath()) as eq:
+#         #    eq.append(NoEscape(latex(Derivative(Symbol('L'),q_sym[0],evaluate=False))))
+#         #    eq.append(NoEscape('='))
+#         #    eq.append(NoEscape(vlatex(dyn_sys.L.expand()[0].diff(dyn_sys.q[0]))))
+
+# #         mrk_gov_eq_nonlin=Marker('gov_eq_nonlin_sys',prefix='eq')
+
             
 class LagrangianComponent(ReportComponent):
     
@@ -325,13 +423,14 @@ class LagrangianComponent(ReportComponent):
         q_sym =[ Symbol(f'{coord}'[0:-3]) for coord in dyn_sys.q]
         
         diffL_d=lambda coord: Symbol(f'\\frac{{ \\partial L}}{{  \\partial {vlatex(coord)}  }}')
+        diffD_d=lambda coord: Symbol(f'\\frac{{ \\partial D}}{{  \\partial {vlatex(diff(coord))}  }}')
         d_dt_diffL_d=lambda coord: Symbol(f'\\frac{{ \\mathrm{{d}}  }}{{  \\mathrm{{d}} {vlatex(system.ivar)}  }} {vlatex(diffL_d(coord))} ')        
 
         display(ReportText(f'''Równania Eulera-Lagrange'a dla rozważanego przypadku są nastęujące: 
                             '''))
         
         for coord in dyn_sys.q:
-            display((SympyFormula(  Eq(d_dt_diffL_d(coord.diff(system.ivar)) - diffL_d(coord) ,Symbol(f'Q_{{ {vlatex(coord)} }}^N'))  , marker=mrk_lagrangian_nonlin,backend=vlatex )  ))
+            display((SympyFormula(  Eq(d_dt_diffL_d(coord.diff(system.ivar)) - diffL_d(coord) + diffD_d(coord),Symbol(f'Q_{{ {vlatex(coord)} }}^N'))  , marker=mrk_lagrangian_nonlin,backend=vlatex )  ))
         
         
         display(ReportText(f'''Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące: 
@@ -344,7 +443,8 @@ class LagrangianComponent(ReportComponent):
 
         for coord in dyn_sys.q.diff(system.ivar):
             display((SympyFormula(  Eq(d_dt_diffL_d(coord),dyn_sys.L.expand()[0].diff(coord).diff(system.ivar))  , marker=mrk_lagrangian_nonlin,backend=vlatex )  ))
-            
+        for coord in dyn_sys.q:
+            display((SympyFormula(  Eq(diffD_d(coord),(S.One/2 * diff(dyn_sys.q.transpose())* dyn_sys_lin.damping_matrix()* diff(dyn_sys.q))[0].diff(diff(coord)))  , marker=mrk_lagrangian_nonlin,backend=vlatex )  ))
             #display(Markdown(f'\\begin{equation}    \\end{equation}').reported())
         #with doc_model.create(DMath()) as eq:
         #    eq.append(NoEscape(latex(Derivative(Symbol('L'),q_sym[0],evaluate=False))))
@@ -518,6 +618,65 @@ class FundamentalMatrixComponent(ReportComponent):
 
         AutoBreak.latex_backend = latex_store
 
+class GeneralSolutionComponent(ReportComponent):
+    
+    title="Rozwiązanie ogólne"
+    
+    def append_elements(self):
+        
+        system = self._system
+        ReportText.set_directory('./SDAresults')
 
+        latex_store=AutoBreak.latex_backend
+        AutoBreak.latex_backend = latex_store
+        
+        t=system.ivar
         
 
+        dyn_sys=system
+        dyn_sys_lin=dyn_sys.linearized()
+
+
+        display(ReportText(f'''Rozwiązanie ogólne przedstawia wyrażenie:
+                                '''))
+        display((SympyFormula(  Eq(Symbol('X'),HarmonicOscillator(dyn_sys_lin.linearized(
+                                            )).general_solution().n(3),
+                                            evaluate=False) , marker='a',backend=latex  )  ))
+
+
+        AutoBreak.latex_backend = latex_store
+        
+class SteadySolutionComponent(ReportComponent):
+    
+    title="Rozwiązanie szczególne"
+    
+    def append_elements(self,phi=False):
+        
+        system = self._system
+        ReportText.set_directory('./SDAresults')
+
+        latex_store=AutoBreak.latex_backend
+        AutoBreak.latex_backend = latex_store
+        
+        t=system.ivar
+        
+
+        dyn_sys=system
+        dyn_sys_lin=dyn_sys.linearized()
+
+
+        display(ReportText(f'''Rozwiązanie szczególne przedstawia wyrażenie:
+                                '''))
+        if not phi:
+            
+            display((SympyFormula(  Eq(Symbol('X_s'),
+                                            HarmonicOscillator(dyn_sys_lin.linearized(
+                                            )).subs(dyn_sys.phi,Symbol('Omega t')).steady_solution().n(3),
+                                            evaluate=False) , marker='b',backend=latex  )  ))
+        else:
+            display((SympyFormula(  Eq(Symbol('X_s'),
+                                HarmonicOscillator(dyn_sys_lin.linearized(
+                                )).steady_solution().n(3),
+                                evaluate=False) , marker='b',backend=latex  )  ))
+
+        AutoBreak.latex_backend = latex_store
