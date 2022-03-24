@@ -2940,7 +2940,7 @@ class Picture(Figure,ReportModule):
 
     
     _latex_name = 'figure'
-    def __init__(self, image=None, position=None, caption=None,width=NoEscape('0.8\textwidth'), **kwargs):
+    def __init__(self, image=None, position=None, caption=None,width=NoEscape('0.8\\textwidth'), **kwargs):
         """
         Args
         ----

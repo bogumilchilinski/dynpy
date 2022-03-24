@@ -472,7 +472,7 @@ class EntryWithUnit:
         right_par = self._right_par
 
         if unit:
-            return f'{entry_str} {left_par}{unit:~L}{right_par}'
+            return f'{entry_str} {left_par}{unit:Lx}{right_par}'
         else:
             return f'{self._obj}'
 
