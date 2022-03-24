@@ -4728,7 +4728,7 @@ class LagrangeIOnMathFunction(ComposedSystem):
         }
 
         return default_data_dict
-        
+
 
 class CrankSystem(ComposedSystem):
 
