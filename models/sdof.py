@@ -1684,10 +1684,10 @@ class NonLinearTrolley(ComposedSystem):
         m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
 
         default_data_dict = {
-            self.m: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.d: [1 * l0, 2 * l0, S.Half * l0, 3 * S.Half * l0, 1 * l0],
+            self.m: [S.Half * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0],
+            self.d: [1 * l0, 2 * l0, S.Half * l0, 3 * S.Half * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0, 9 * l0],
             self.k:
-            [S.Half * k0, S.Half * k0, 1 * k0, 3 * S.Half * k0, 2 * k0],
+            [S.Half * k0, 2 * k0, 1 * k0, 3 * S.Half * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0, 3 * k0],
         }
 
         return default_data_dict
