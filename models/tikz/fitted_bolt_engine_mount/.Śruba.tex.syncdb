@@ -1,0 +1,1 @@
+{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-interaction=nonstopmode","-output-directory=/tmp/a45e5279e4ef3a695502b69c92bf2f509d380947","Śruba.tex"]}
