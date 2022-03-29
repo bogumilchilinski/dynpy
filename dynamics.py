@@ -1303,10 +1303,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
 
 
-    @classmethod
-    def from_system(cls, system):
 
-        return cls(system)
 
 
 class LinearDynamicSystem(LagrangesDynamicSystem):
