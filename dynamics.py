@@ -1,3 +1,4 @@
+from typing import Type
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                     hessian, Function, flatten, Tuple, im, pi, latex,dsolve,solve,
                     fraction,factorial,Derivative, Integral,Expr,Subs, Mul, Add)
@@ -402,10 +403,23 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         Supply the following for the initialization of DynamicSystem in the same way as LagrangesMethod
         """
 
+        self._kinetic_energy = None
+        self._potential_energy = None
+
         if system:
-#             print('init form system for ' ,system , 'with q = ' ,system.q)
+            # print(system._kinetic_energy)
             Lagrangian=system
             system=None
+            
+            
+            # self._kinetic_energy = Lagrangian._kinetic_energy
+            # self._potential_energy = Lagrangian._potential_energy
+
+        if isinstance(Lagrangian, LagrangesDynamicSystem):
+
+            self._kinetic_energy = Lagrangian._kinetic_energy
+            self._potential_energy = Lagrangian._potential_energy
+
 
         if isinstance(Lagrangian, me.LagrangesMethod):
 #             print('standart init')
@@ -419,6 +433,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             qs = Lagrangian.q
             Lagrangian = sum(Lagrangian._L)
 
+
+
+        
         self.ivar = ivar
         #         self.forcelist=forcelist
         self.system = system
@@ -521,6 +538,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             
         systems_sum=LagrangesDynamicSystem(**self_dict)
         systems_sum._given_data={**other._given_data,**self._given_data}
+        
+        systems_sum._kinetic_energy = sum([energy for energy in [self._kinetic_energy,other._kinetic_energy] if energy is not None])
+        systems_sum._potential_energy = sum([energy for energy in [self._potential_energy,other._potential_energy] if energy is not None])
+        
+        # print(systems_sum._kinetic_energy)
+        # print(systems_sum._potential_energy)
 
         return systems_sum
 

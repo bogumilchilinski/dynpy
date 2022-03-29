@@ -105,6 +105,10 @@ class MaterialPoint(Element):
 
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar,frame=frame)
+        
+        self._kinetic_energy = Lagrangian
+        
+        
 
         
 class Spring(Element):
@@ -129,6 +133,8 @@ class Spring(Element):
 
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, frame=frame)
+        
+        self._potential_energy = - Lagrangian
 
 
 class GravitationalForce(Element):
@@ -148,6 +154,7 @@ class GravitationalForce(Element):
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
+        self._potential_energy = - Lagrangian
 
 class Disk(Element):
     """
@@ -195,7 +202,8 @@ class RigidBody2D(Element):
 
         
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, frame=frame)
-  
+        
+        self._kinetic_energy = Lagrangian
         
 class Damper(Element):
     """
