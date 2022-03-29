@@ -467,26 +467,59 @@ class NonLinearInlineEnginePerpendicularSprings(ComposedSystem):
                  k_m=Symbol('k_m', positive=True),
                  m_e=Symbol('m_e', positive=True),
                  e=Symbol('e', positive=True),
-                 l=Symbol('l_0',positive=True),
+                 l=Symbol('l',positive=True),
                  z=dynamicsymbols('z'),
                  phi=dynamicsymbols('phi'),
+                 Omega=Symbol('\Omega',positive=True),
                  ivar=Symbol('t'),
+                 d=Symbol('d', positive=True),
                  **kwargs):
-
+        self.t=ivar
         self.M = M
         self.k_m = k_m
         self.m_e = m_e
         self.e = e
-
+        self.phi=phi
+        self.Omega=Omega
+        self.d=d
+        self.l=l
         self.MaterialPoint_1 = MaterialPoint(M, pos1=z, qs=[z])
         self.MaterialPoint_2 = MaterialPoint(m_e,
                                              pos1=z + e * cos(phi),
                                              qs=[z])
         self.SpringVer = Spring(2 * k_m, pos1=z, qs=[z])
-        self.SpringHor = Spring(2 * k_m, pos1=(l**2+z**2)**(1/2)-l, qs=[z])
+        self.SpringHor = Spring(2 * k_m, pos1=(sqrt(d**2+z**2)-l), qs=[z])
         system = self.SpringVer + self.SpringHor + self.MaterialPoint_1 + self.MaterialPoint_2
         super().__init__(system,**kwargs)
+    def get_default_data(self):
 
+        m0, k0, e0, l0 = symbols('m_0 k_0 e_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.M: [200 * m0, 350 * m0, 400 * m0, 550 * m0, 650 * m0, 700 * m0, 800 * m0],
+            self.k_m: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0,9*k0,10*k0],
+            self.m_e: [0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0, 0.7 * m0, 0.8 * m0, 0.9 * m0],
+            self.e:[2 * e0, 3 * e0, 4 * e0, 5 * e0, 6 * e0],
+            self.d:[2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0],
+            self.l:[l0],
+#             self.g:[g],
+#             self.phi:[self.Omega*self.t],
+            self.phi:[self.Omega*self.t]
+        }
+
+        return default_data_dict
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+        
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+        if 4*parameters_dict[self.k_m]-2*parameters_dict[self.k_m]*parameters_dict[self.l]/parameters_dict[self.d] == 0:
+            parameters_dict[self.d]=2*parameters_dict[self.d]
+        
+        return parameters_dict
     def symbols_description(self):
         self.sym_desc_dict = {
             self.M: r'Mass of engine block',
@@ -505,26 +538,59 @@ class NonLinearBoxerEnginePerpendicularSprings(ComposedSystem):
                  k_m=Symbol('k_m', positive=True),
                  m_e=Symbol('m_e', positive=True),
                  e=Symbol('e', positive=True),
-                 l=Symbol('l_0',positive=True),
+                 l=Symbol('l',positive=True),
                  x=dynamicsymbols('x'),
                  phi=dynamicsymbols('phi'),
+                 Omega=Symbol('\Omega',positive=True),
                  ivar=Symbol('t'),
+                 d=Symbol('d', positive=True),
                  **kwargs):
-
+        self.t=ivar
         self.M = M
         self.k_m = k_m
         self.m_e = m_e
         self.e = e
-
+        self.phi=phi
+        self.Omega=Omega
+        self.d=d
+        self.l=l
         self.MaterialPoint_1 = MaterialPoint(M, pos1=x, qs=[x])
         self.MaterialPoint_2 = MaterialPoint(m_e,
                                              pos1=x + e * sin(phi),
                                              qs=[x])
-        self.SpringVer = Spring(2 * k_m, pos1=x, qs=[x])
-        self.SpringHor = Spring(2 * k_m, pos1=(l**2+x**2)**(1/2)-l, qs=[x])
+        self.SpringHor = Spring(2 * k_m, pos1=x, qs=[x])
+        self.SpringVer = Spring(2 * k_m, pos1=(sqrt(d**2+x**2)-l), qs=[x])
         system = self.SpringVer + self.SpringHor + self.MaterialPoint_1 + self.MaterialPoint_2
         super().__init__(system,**kwargs)
+    def get_default_data(self):
 
+        m0, k0, e0, l0 = symbols('m_0 k_0 e_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.M: [200 * m0, 350 * m0, 400 * m0, 550 * m0, 650 * m0, 700 * m0, 800 * m0],
+            self.k_m: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0,9*k0,10*k0],
+            self.m_e: [0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0, 0.7 * m0, 0.8 * m0, 0.9 * m0],
+            self.e:[2 * e0, 3 * e0, 4 * e0, 5 * e0, 6 * e0],
+            self.d:[2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0],
+            self.l:[l0],
+#             self.g:[g],
+#             self.phi:[self.Omega*self.t],
+            self.phi:[self.Omega*self.t]
+        }
+
+        return default_data_dict
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+        
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+        if 4*parameters_dict[self.k_m]-2*parameters_dict[self.k_m]*parameters_dict[self.l]/parameters_dict[self.d] == 0:
+            parameters_dict[self.d]=2*parameters_dict[self.d]
+        
+        return parameters_dict
     def symbols_description(self):
         self.sym_desc_dict = {
             self.M: r'Mass of engine block',
@@ -1455,6 +1521,7 @@ class NonlinearEngine(ComposedSystem):
                  z=dynamicsymbols('z'),
                  phi=dynamicsymbols('phi'),
                  ivar=Symbol('t', positive=True),
+                 Omega=Symbol('\Omega',positive=True),
                  **kwargs):
 
         self.M = M
@@ -1466,7 +1533,7 @@ class NonlinearEngine(ComposedSystem):
         self.l_0 = l_0
         self.z = z
         self.phi = phi
-
+        self.Omega = Omega
         N = ReferenceFrame('N')
         O = Point('O')
 
@@ -1503,6 +1570,7 @@ class NonlinearEngine(ComposedSystem):
             self.m_e: [m0,3*m0,5*m0,7*m0,9*m0,2 * m0, 4 * m0,6*m0,8*m0],
             self.k_m: [k0,2*k0,4*k0,6*k0,8*k0, 3 * k0,5*k0,7*k0,9*k0],
             self.e: [2 * e0, S.Half * e0, 4 * e0, S.Half**2 * e0,3 * e0,3* S.Half * e0, 9 * e0, 3*S.Half**2 * e0],
+            self.phi:[self.Omega*self.ivar]
         }
         return default_data_dict
     
@@ -1563,7 +1631,7 @@ class StraightNonlinearEngine(NonlinearEngine):
         }
         return default_data_dict
 
-class TrolleyWithNonlinearSpring(ComposedSystem):
+class ForcedNonLinearTrolley(ComposedSystem):
     scheme_name = 'sdof_nonlin_trolley.PNG'
     real_name = 'trolleywithnonlinearspring_real.png'
 
@@ -1642,15 +1710,28 @@ class TrolleyWithNonlinearSpring(ComposedSystem):
     
     def get_default_data(self):
 
-        m0,l0,k0 = symbols('m_0 l_0 k_0', positive=True)
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
 
         default_data_dict = {
-            self.m :[S.Half * m0, 1 * m0, 2 * m0, S.Half**2 * m0, 3*S.Half * m0],
-            self.d :[S.Half * l0, 1 * l0, 2 * l0, S.Half**2 * l0, 3*S.Half * l0],
-            self.k: [S.Half * k0, 1 * k0, 2 * k0, S.Half**2 * k0, 3*S.Half * k0],
+            self.m: [S.Half * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0],
+            self.d: [1 * l0, 2 * l0, S.Half * l0, 3 * S.Half * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0, 9 * l0],
+            self.k:
+            [S.Half * k0, 2 * k0, 1 * k0, 3 * S.Half * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0, 3 * k0],
+            self.l_0:[l0]
         }
 
         return default_data_dict
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+        
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+        if parameters_dict[self.k]-parameters_dict[self.k]*parameters_dict[self.l_0]/parameters_dict[self.d] == 0:
+            parameters_dict[self.d]=2*parameters_dict[self.d]
+        return parameters_dict
 
 class NonLinearTrolley(ComposedSystem):
 
@@ -1688,6 +1769,7 @@ class NonLinearTrolley(ComposedSystem):
             self.d: [1 * l0, 2 * l0, S.Half * l0, 3 * S.Half * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0, 9 * l0],
             self.k:
             [S.Half * k0, 2 * k0, 1 * k0, 3 * S.Half * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0, 3 * k0],
+            self.l_0:[l0]
         }
 
         return default_data_dict
@@ -1695,13 +1777,13 @@ class NonLinearTrolley(ComposedSystem):
     def get_random_parameters(self):
 
         default_data_dict = self.get_default_data()
-
+        
         parameters_dict = {
             key: random.choice(items_list)
             for key, items_list in default_data_dict.items()
         }
-
-
+        if parameters_dict[self.k]-parameters_dict[self.k]*parameters_dict[self.l_0]/parameters_dict[self.d] == 0:
+            parameters_dict[self.d]=2*parameters_dict[self.d]
         return parameters_dict
 
     def symbols_description(self):
