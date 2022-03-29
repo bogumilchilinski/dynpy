@@ -387,6 +387,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return Image(base64.b64decode(encoded_string))
 
 
+
+
     def __init__(self,
                  Lagrangian,
                  qs=None,
@@ -467,6 +469,17 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         self._nonlinear_base_system=None
 
+    @classmethod
+    def from_system(cls, system):
+        
+        kwargs=system._kwargs()
+        
+        new_system=cls(kwargs)
+        
+        new_system._kinetic_energy = system._kinetic._kinetic_energy
+        new_system._potential_energy = system._kinetic._potential_energy
+
+        return new_system
         #LM=me.LagrangesMethod(Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs)
     
     def symbols_description(self):
