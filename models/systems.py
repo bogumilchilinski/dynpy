@@ -516,7 +516,7 @@ class SDoFDampedHarmonicOscillator(ComposedSystem):
         super().__init__(system,**kwargs)
 
 
-class DDoFSimplifySuspension(ComposedSystem):
+class DDoFSimplifyVehicleSuspension(ComposedSystem):
     """
     Ready to use sample Double Degree of Freedom System represents symmetrical kinematically excited beam with two springs.
         Arguments:
@@ -595,9 +595,9 @@ class DDoFSimplifySuspension(ComposedSystem):
                                 pos_lin=z,
                                 pos_rot=phi,
                                 qs=qs)
-        self.spring_1 = Spring(k_1, pos1=z + phi * l_l, qs=qs)  # left spring
-        self.spring_2 = Spring(k_2, pos1=z - phi * l_r, qs=qs)  # right spring
-        self.force = Force(F_engine, pos1=z - phi * l_r, qs=qs)
+        self.spring_1 = Spring(k_1, pos1=z + phi * l_rod, qs=qs)  # left spring
+        self.spring_2 = Spring(k_2, pos1=z - phi * l_rod, qs=qs)  # right spring
+        self.force = Force(F_engine, pos1=z - phi * l_rod, qs=qs)
         system = self.body + self.spring_1 + self.spring_2 + self.force
 
         super().__init__(system,**kwargs)
@@ -4691,6 +4691,7 @@ class LagrangeIOnMathFunction(ComposedSystem):
 
     scheme_name = 'mat_point_parabola.PNG'
     real_name = 'tautochrone_curve_small.gif'
+    _default_subs_method='as_constrains'
 
     def __init__(self,
                  m=Symbol('m', positive=True),
