@@ -474,10 +474,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         kwargs=system._kwargs()
         
-        new_system=cls(kwargs)
+        new_system=cls(**kwargs)
         
-        new_system._kinetic_energy = system._kinetic._kinetic_energy
-        new_system._potential_energy = system._kinetic._potential_energy
+        new_system._kinetic_energy = system._kinetic_energy
+        new_system._potential_energy = system._potential_energy
 
         return new_system
         #LM=me.LagrangesMethod(Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs)
