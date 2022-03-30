@@ -407,6 +407,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         self._kinetic_energy = None
         self._potential_energy = None
+        self._dissipative_energy = None
 
         if system:
             # print(system._kinetic_energy)
