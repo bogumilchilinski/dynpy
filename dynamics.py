@@ -407,7 +407,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         self._kinetic_energy = None
         self._potential_energy = None
-        self._dissipative_energy = None
+        self._dissipative_potential = None
 
         if system:
             # print(system._kinetic_energy)
@@ -422,6 +422,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
             self._kinetic_energy = Lagrangian._kinetic_energy
             self._potential_energy = Lagrangian._potential_energy
+            self._dissipative_potential = Lagrangian._dissipative_potential
 
 
         if isinstance(Lagrangian, me.LagrangesMethod):
@@ -479,6 +480,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         new_system._kinetic_energy = system._kinetic_energy
         new_system._potential_energy = system._potential_energy
+        new_system._dissipative_potential = system._dissipative_potential
 
         return new_system
         #LM=me.LagrangesMethod(Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs)
