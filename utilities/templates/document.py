@@ -45,7 +45,7 @@ class CaseTemplate(Document):
     def __init__(self,
                  default_filepath='default_filepath',
                  *,
-                 documentclass='article',
+                 documentclass='report',
                  document_options=None,
                  fontenc='T1',
                  inputenc='utf8',
@@ -55,7 +55,7 @@ class CaseTemplate(Document):
                  microtype=True,
                  page_numbers=True,
                  indent=None,
-                 geometry_options=['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
+                 geometry_options=None,#['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
                  data=None):
 
         super().__init__(
@@ -78,9 +78,11 @@ class ExampleTemplate(Document):
     
     latex_name = 'document'
     packages = [
+                  Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
                   Package('microtype'),
+                  Package('authoraftertitle'),
                   Package('polski',options=['MeX']),
-#                   Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
                   Package('listings'),
                   Package('titlesec'),
                   Package('fancyhdr'),
@@ -89,6 +91,7 @@ class ExampleTemplate(Document):
                   Command('fancyhead',  arguments=['B. Chiliński, A. Mackojć, D. Sierociński'],options=['R']),
                   Command('fancyhead', arguments=['Drgania mechaniczne, 2022'],options=['L']),
                   Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
+                  
         
                   #Command('newcommand{\praca}', arguments=['Praca dyplomowa']),
                   #Command('newcommand{\dyplom}', arguments=['Inżynierska']),
@@ -116,7 +119,7 @@ class ExampleTemplate(Document):
                  title='Basic title',
                  default_filepath='default_filepath',
                  *,
-                 documentclass='article',
+                 documentclass='report',
                  document_options=None,
                  fontenc='T1',
                  inputenc='utf8',
@@ -126,7 +129,7 @@ class ExampleTemplate(Document):
                  microtype=True,
                  page_numbers=True,
                  indent=None,
-                 geometry_options=['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
+                 geometry_options=None,#['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
                  data=None):
 
         super().__init__(
@@ -146,8 +149,9 @@ class ExampleTemplate(Document):
         )
 #         label=self.label
         self.title=title
-        self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
+        #self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
         self.packages.append(Command('author', arguments=['Bogumił Chiliński, Anna Mackojć, Damian Sierociński']))
-        self.append(Command('maketitle'))
+        self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
+        #self.append(Command('maketitle'))
         self.append(NewPage())
         # tu implementować co tam potrzeba

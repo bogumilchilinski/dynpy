@@ -11,7 +11,7 @@ from pylatex.utils import (#italic,
 
 from ..adaptable import *
 from ..report import *
-from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator
+
 
 class MultivariableTaylorSeries(Expr):
     
@@ -162,9 +162,9 @@ class MultivariableTaylorSeries(Expr):
         return self._series()
 
 
-class ReportComponent(Section):
+class ReportComponent(Subsection):
 
-    latex_name = 'section'
+    latex_name = 'subsection'
     packages=[
               Package('standalone'),
               Package('siunitx')
@@ -251,51 +251,83 @@ class TitlePageComponent(Environment):
             system = self.system
 
 
+            
+            self.append(NoEscape('\centering'))
 
-            self.append(NoEscape(f'Rozważany układ z klasy:  {system._label}'))
+            self.append(NoEscape('\\Huge DRGANIA MECHANICZNE \n \n'))
+            
+            self.append(Command('vspace',arguments='1cm'))
 
-            self.append(NoEscape(f'Liczba stopnii swobody:  {len(system.q)}'))    
+            
+            
+            if len(system.q)==1:
+                dof_str = 'JEDNYM STOPNIU SWOBODY'
+            else:
+                dof_str = 'WIELU STOPNIACH SWOBODY'
+                
+            if system._dissipative_potential==0 or system._dissipative_potential is None:
+                damping_str = 'NIETŁUMIONE'
+            else:
+                damping_str = 'TŁUMIONE'
+
+           
+            self.append(NoEscape(f'\\Large {damping_str} UKŁADY O {dof_str} \n \n'))    
+            
+            self.append(Command('vspace',arguments='1cm'))
+            
+            self.append(NoEscape(f'{system._label} \n \n'))
+            
+            self.append(Command('vspace',arguments='1cm'))
+            
+            self.append(Command('MyAuthor'))
+            self.append(NoEscape(f'\\par'))
+            self.append(Command('vspace',arguments='1cm'))
+            
+            #self.append(Command('vspace',arguments='1cm'))
+            #self.append(NoEscape(f'\\protect\\par'))
+            #self.append(NewLine())
+            self.append(Command('MyDate'))
+
+ 
 
 
-class SchemeComponent(ReportComponent):
+    
+class ExemplaryPictureComponent(ReportComponent):
+    
+    title="Przykład rzeczywistego obiektu"
+    packages=[Package('float')] 
+                                
+    def append_elements(self):
+        
+        system = self._system
+
+        display(ReportText(f'''Ilustracja przedstawia rzeczywisty obiekt mechaniczny, będący przedmiotem modelowania i analizy dynamicznej.
+                            '''))
+
+        with self.create(Figure(position='H')) as fig:
+            fig.add_image(system._real_example(),width='8cm')
+
+        display(ReportText(f'''Model dynamiczny układu określa się na podstawie analizy rozważanego przypadku. 
+        Należy pamiętać, że stopień odwzorowania (poziom abstrakcji) modelu zależy od tego do czego planuje się go używać.
+                            '''))            
+
+        
+class SchemeComponent(ExemplaryPictureComponent):
     title="Schemat układu"
-    packages=[Package('float')]
+
 
     def append_elements(self):
         
         system = self._system
-        
 
-#                             '''))
-        display(ReportText(f'''Ilustracja przedstawia schemat rzeczywistego obiektu mechanicznego, będący przedmiotem modelowania i analizy dynamicznej.
-                            '''))        
-        print(system._scheme())
-
+        display(ReportText(f'''Ilustracja przedstawia schemat rzeczywistego obiektu mechanicznego, wyznaczony na podstawie uprzedniej analizy rzeczywistego obiektu.
+                            '''))
         
         with self.create(Figure(position='H')) as fig:
             fig.add_image(system._scheme(),width='8cm')
-            
-            
 
-
-    
-class ExemplaryPictureComponent(SchemeComponent):
-    
-    title="Przykład rzeczywistego obiektu"
-    
-    def append_elements(self):
-        
-        system = self._system
-        
-
-        #self.append(Section('Analiza dynamiczna układu drgającego',numbering=False))
-            
-        display(ReportText(f'''Ilustracja przedstawia rzeczywisty obiekt mechaniczny, będący przedmiotem modelowania i analizy dynamicznej.
+        display(ReportText(f'''Analizując przedstawiony układ można stwierdzić, że jego liczba stopni swobody to {len(system.q)}.
                             '''))
-      
-        print(system._scheme())
-        with self.create(Figure(position='H')) as fig:
-            fig.add_image(system._real_example(),width='8cm')
             
 class KineticEnergyComponent(ReportComponent):
     
@@ -305,7 +337,7 @@ class KineticEnergyComponent(ReportComponent):
         
         system = self._system
         dyn_sys=system
-        dyn_sys_lin = dyn_sys.linearized()
+        dyn_sys_lin = dyn_sys
 
         
 
@@ -317,32 +349,36 @@ class KineticEnergyComponent(ReportComponent):
         
 
         display(SympyFormula( Eq(Symbol('T'),
-                     dyn_sys_lin.lagrangian() - dyn_sys_lin.lagrangian().subs(
-                         {coord: 0
-                          for coord in Matrix(dyn_sys_lin.q).diff(dyn_sys_lin.ivar)})) , marker=None))
-        
+                     dyn_sys_lin._kinetic_energy) , marker=None))
+               
+        display(ReportText(f'''
+                           Wyznaczona wielkość określa energię układu wynikającą z jego własności inercyjnych (energię zmagazynowaną w elementach bezwładnych).
+                           
+                           '''))
+    
+    
+    
 class PotentialEnergyComponent(ReportComponent):
     
-    title="Energia kinetyczna"
-    
+    title="Energia potencjalna"
+
     def append_elements(self):
-        
+
         system = self._system
         dyn_sys=system
-        dyn_sys_lin = dyn_sys.linearized()
-
-        
+        dyn_sys_lin = dyn_sys
 
 
         display(ReportText(f'''
                            Energia potencjalna układu wyrażona jest wzorem:
-                           
                            '''))
-        
 
-        display(SympyFormula( Eq(Symbol('V'),- dyn_sys_lin.lagrangian().subs(
-                         {coord: 0
-                          for coord in Matrix(dyn_sys_lin.q).diff(dyn_sys_lin.ivar)})) , marker=None))
+        display(SympyFormula( Eq(Symbol('V'),
+                     dyn_sys_lin._potential_energy ), marker=None))
+
+        display(ReportText(f'''
+                           Zaprezentowana zależność opisuje oddziaływanie potencjalnych pól sił w których znajduje się obiekt.
+                           '''))        
         
 class DissipationComponent(ReportComponent):
     
@@ -352,49 +388,23 @@ class DissipationComponent(ReportComponent):
         
         system = self._system
         dyn_sys=system
-        dyn_sys_lin = dyn_sys.linearized()
+        dyn_sys_lin = dyn_sys
 
         
 
 
         display(ReportText(f'''
-                           Energia rozpraszana w tłumikach wyrażona jest wzorem:
+                           Energia rozpraszana tłumieniem wyrażona jest wzorem:
                            
                            '''))
 
-        display(SympyFormula(Eq(Symbol('D'), (S.One/2 * diff(dyn_sys.q.transpose())* dyn_sys_lin.damping_matrix()* diff(dyn_sys.q))[0])))
-#         display(SympyFormula( Eq(Symbol('D'),- dyn_sys_lin.lagrangian().subs(
-#                          {coord: 0
-#                           for coord in Matrix(dyn_sys_lin.q).diff(dyn_sys_lin.ivar)})) , marker=None))
-# class EnergyDiffsComponent(ReportComponent):
-#     def append_elements(self):
-        
-#         system = self._system
-#         dyn_sys=system
-#         dyn_sys_lin = dyn_sys.linearized()
-#         q_sym =[ Symbol(f'{coord}'[0:-3]) for coord in dyn_sys.q]
+        display(SympyFormula( Eq(Symbol('D'),
+             dyn_sys_lin._dissipative_potential) , marker=None ))
 
-#         diffEk_d=lambda coord: Symbol(f'\\frac{{ \\partial T}}{{  \\partial {vlatex(coord.diff(dyn_sys.ivar))}  }}')
-#         d_dt_diffEk_d=lambda coord: Symbol(f'\\frac{{ \\mathrm{{d}}  }}{{  \\mathrm{{d}} {vlatex(system.ivar)}  }} {vlatex(diffEk_d(coord))} ') 
-#         diffEp_d=lambda coord: Symbol(f'\\frac{{ \\partial V}}{{  \\partial {vlatex(coord)}  }}')
-#         display(ReportText(f'''Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące: 
-#                             '''))
-
-#         for coord in dyn_sys.Y:
-#             display((SympyFormula(  Eq(d_dt_diffEk_d(coord),dyn_sys.L.expand()[0].diff(coord))  , marker='b',backend=vlatex )  ))
-
-
-
-#         for coord in dyn_sys.q.diff(system.ivar):
-#             display((SympyFormula(  Eq(diffEp_d,dyn_sys.L.expand()[0].diff(coord).diff(system.ivar))  , marker='a',backend=vlatex  )  ))
-
-#             #display(Markdown(f'\\begin{equation}    \\end{equation}').reported())
-#         #with doc_model.create(DMath()) as eq:
-#         #    eq.append(NoEscape(latex(Derivative(Symbol('L'),q_sym[0],evaluate=False))))
-#         #    eq.append(NoEscape('='))
-#         #    eq.append(NoEscape(vlatex(dyn_sys.L.expand()[0].diff(dyn_sys.q[0]))))
-
-# #         mrk_gov_eq_nonlin=Marker('gov_eq_nonlin_sys',prefix='eq')
+        display(ReportText(f'''
+                           Podana zależność stanowi potencjał dysynpacyjny Rayleigh'a, 
+                           który poddany różniczkowaniu względem wektora prędkości uogólnionych pozwala na określenie sił wiskotycznego tłumienia.
+                           '''))
 
             
 class LagrangianComponent(ReportComponent):
@@ -456,7 +466,8 @@ class LagrangianComponent(ReportComponent):
         #display(ReportText(f'''The governing equations of the system have a following form ({Ref(mrk_gov_eq_nonlin).dumps()}):
         #                    '''))
 
-
+        display(ReportText(f'''Wyniki przedstawionych operacji wykorzystuje się wyznaczenia równań ruchu układu.
+                            '''))
 
 
         
@@ -469,7 +480,7 @@ class LagrangianComponent(ReportComponent):
     
 class GoverningEquationComponent(ReportComponent):
     
-    title="Lagrangian (funkcja Lagrange'a)  układu"
+    title="Równania ruchu"
     
     def append_elements(self):
         
@@ -479,16 +490,24 @@ class GoverningEquationComponent(ReportComponent):
 
         
 
+        
+        if len(system.q)==1:
+            markers_str=f"przedstawia zależność ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})"            
+        else:
+            markers_str=f"przedstawiają zależności ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})-({AutoMarker(Eq(dyn_sys._eoms[-1].simplify().expand(),0))})"
 
         display(ReportText(f'''
                            Wykorzystując obliczone pochodne, wyznacza się równania ruchu na podstawie odpowiedniego wzoru.
-                           Równania ruchu układu (nieliniowe w ogólnym przypadku) przedstawiają zależności ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})-({AutoMarker(Eq(dyn_sys._eoms[-1].simplify().expand(),0))}):
+                           Równania ruchu układu (nieliniowe w ogólnym przypadku) {markers_str}:
                            '''))
         
         for eq in dyn_sys._eoms:
             display(SympyFormula( Eq(eq.simplify().expand(),0) , marker=None))
 
-
+        display(ReportText(f'''
+                           Wyznaczone równania stanowią matematyczny opis dynamiczny właściwości układu.
+                           Dalsza analiza pozwala na skuteczną analizę działania modelowanego obiektu i określenie jego parametrów mechanicznych.
+                           '''))
 
 
 class LinearizationComponent(ReportComponent):
@@ -583,7 +602,7 @@ class LinearizationComponent(ReportComponent):
     
 class FundamentalMatrixComponent(ReportComponent):
     
-    title="Linearyzacja równań ruchu"
+    title="Wyznaczanie macierzy fundamentalnej"
     
     def append_elements(self):
         
@@ -602,19 +621,20 @@ class FundamentalMatrixComponent(ReportComponent):
 
         display(ReportText(f'''Z równań ruchu wyznaczono macierz mas i sztywności układu:
                                 '''))
-        display((SympyFormula(  Eq(Symbol('M'),dyn_sys_lin.inertia_matrix(),evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+        display((SympyFormula(  Eq(Symbol('M'),dyn_sys_lin.inertia_matrix(),evaluate=False) , marker='a' )  ))
 
-        display((SympyFormula(  Eq(Symbol('K'),dyn_sys_lin.stiffness_matrix(),evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+        display((SympyFormula(  Eq(Symbol('K'),dyn_sys_lin.stiffness_matrix(),evaluate=False) , marker='a')  ))
 
         Delta = Symbol('\Delta')
 
         display(ReportText(f'''Macierz fundamentalna, na podstawie której wyznaczono równanie charakterystyczne rozważanego układu ${latex(Delta)}$, przedstawiają się następująco:
                                 '''))
 
-        display((SympyFormula(  Eq(Symbol('A'),dyn_sys_lin.fundamental_matrix(),evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
-        display((SympyFormula(  Eq(Delta,dyn_sys_lin.fundamental_matrix().det().expand().simplify().simplify().expand(),evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+        display((SympyFormula(  Eq(Symbol('A'),dyn_sys_lin.fundamental_matrix(),evaluate=False) , marker='a'  )  ))
+        display((SympyFormula(  Eq(Delta,dyn_sys_lin.fundamental_matrix().det().expand().simplify().simplify().expand(),evaluate=False) , marker='a',backend=latex  )  ))
 
-
+        display(ReportText(f'''Macierz fundamentalna pozwala określić rozwiązanie ustalone. Natomiast bazując na równaniu charakterystycznym określa się częstości własne układu.
+                                '''))
 
         AutoBreak.latex_backend = latex_store
 
@@ -623,6 +643,8 @@ class GeneralSolutionComponent(ReportComponent):
     title="Rozwiązanie ogólne"
     
     def append_elements(self):
+
+        from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator
         
         system = self._system
         ReportText.set_directory('./SDAresults')
@@ -643,14 +665,18 @@ class GeneralSolutionComponent(ReportComponent):
                                             )).general_solution().n(3),
                                             evaluate=False) , marker='a',backend=latex  )  ))
 
+        display(ReportText(f'''Rozwiązanie ogólne opisuje ruch analizowanego układu (przedstawia przemieszczenie w funkcji czasu) i wynika z rozważań dotyczących drgań swobodnych układu.
+                                '''))
 
         AutoBreak.latex_backend = latex_store
         
 class SteadySolutionComponent(ReportComponent):
     
     title="Rozwiązanie szczególne"
-    
-    def append_elements(self,phi=False):
+    _phi=False
+    def append_elements(self,phi=_phi):
+
+        from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator
         
         system = self._system
         ReportText.set_directory('./SDAresults')
@@ -667,16 +693,13 @@ class SteadySolutionComponent(ReportComponent):
 
         display(ReportText(f'''Rozwiązanie szczególne przedstawia wyrażenie:
                                 '''))
-        if not phi:
-            
-            display((SympyFormula(  Eq(Symbol('X_s'),
-                                            HarmonicOscillator(dyn_sys_lin.linearized(
-                                            )).subs(dyn_sys.phi,Symbol('Omega t')).steady_solution().n(3),
-                                            evaluate=False) , marker='b',backend=latex  )  ))
-        else:
-            display((SympyFormula(  Eq(Symbol('X_s'),
-                                HarmonicOscillator(dyn_sys_lin.linearized(
-                                )).steady_solution().n(3),
-                                evaluate=False) , marker='b',backend=latex  )  ))
+
+        display((SympyFormula(  Eq(Symbol('X_s'),
+                            HarmonicOscillator(dyn_sys_lin.linearized(
+                            )).steady_solution().n(3),
+                            evaluate=False) , marker='b',backend=latex  )  ))
 
         AutoBreak.latex_backend = latex_store
+
+        display(ReportText(f'''Rozwiązanie szczególne związane jest obecnością wielkości wymuszających ruch (drgania) analizowanego układu.
+                                '''))

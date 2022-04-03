@@ -178,7 +178,7 @@ class Disk(Element):
 
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, frame=frame)
-
+        self._kinetic_energy = Lagrangian
         
 class RigidBody2D(Element):
     """
@@ -242,7 +242,7 @@ class Damper(Element):
         #print(forcelist)
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
-
+        self._dissipative_potential = D
         
 class PID(Element):
     """
