@@ -170,14 +170,17 @@ class BeamBridgeTMD(ComposedSystem):
         E, I, l, m0, k0 = symbols('E I l_beam m_0 k_0', positive=True)
 
         default_data_dict = {
-            self.m: [20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0],
-            self.k_beam: [
+            self.m: [10*m0, 20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0, 70 * m0, 80 * m0, 90 * m0],
+            self.k_beam: [1 * 48 * E * I / l**3,
                 2 * 48 * E * I / l**3, 3 * 48 * E * I / l**3,
                 4 * 48 * E * I / l**3, 5 * 48 * E * I / l**3,
-                6 * 48 * E * I / l**3
+                6 * 48 * E * I / l**3,
+                7 * 48 * E * I / l**3,
+                8 * 48 * E * I / l**3,
+                9 * 48 * E * I / l**3
             ],
-            self.m_TMD: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
-            self.k_TMD: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
+            self.m_TMD: [1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0],
+            self.k_TMD: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
         }
 
         return default_data_dict
@@ -248,7 +251,7 @@ class BeamBridgeDampedTMD(ComposedSystem):
         if real is False:
             
             default_data_dict = {
-                self.m: [m0, 20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0, 70*m0, 80*m0, 90*m0],
+                self.m: [10 * m0, 20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0, 70*m0, 80*m0, 90*m0],
                 self.c: [lamb * self.k_beam],
                 self.k_beam: [10 * 48 * E * I / l**3,
                     20 * 48 * E * I / l**3, 30 * 48 * E * I / l**3,

@@ -35,6 +35,8 @@ from pylatex.utils import italic, NoEscape
 
 from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim)
 from .utilities.templates.document import *
+from .utilities.components import mechanics as mech_comp
+
 
 from .utilities.adaptable import AutoMarker
 import inspect
@@ -352,7 +354,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     _default_subs_method='direct'
     scheme_name = 'engine.png'
     real_name = 'engine_real.PNG'
-    reportclass= CaseTemplate
+    reportclass= ExampleTemplate
 
     @classmethod
     def _scheme(cls):
@@ -407,6 +409,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         self._kinetic_energy = None
         self._potential_energy = None
+        self._dissipative_potential = None
 
         if system:
             # print(system._kinetic_energy)
@@ -421,6 +424,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
             self._kinetic_energy = Lagrangian._kinetic_energy
             self._potential_energy = Lagrangian._potential_energy
+            self._dissipative_potential = Lagrangian._dissipative_potential
 
 
         if isinstance(Lagrangian, me.LagrangesMethod):
@@ -474,10 +478,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         kwargs=system._kwargs()
         
-        new_system=cls(kwargs)
+        new_system=cls(**kwargs)
         
-        new_system._kinetic_energy = system._kinetic._kinetic_energy
-        new_system._potential_energy = system._kinetic._potential_energy
+        new_system._kinetic_energy = system._kinetic_energy
+        new_system._potential_energy = system._potential_energy
+        new_system._dissipative_potential = system._dissipative_potential
 
         return new_system
         #LM=me.LagrangesMethod(Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs)
@@ -554,6 +559,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         systems_sum._kinetic_energy = sum([energy for energy in [self._kinetic_energy,other._kinetic_energy] if energy is not None])
         systems_sum._potential_energy = sum([energy for energy in [self._potential_energy,other._potential_energy] if energy is not None])
+        systems_sum._dissipative_potential = sum([energy for energy in [self._dissipative_potential,other._dissipative_potential] if energy is not None])
         
         # print(systems_sum._kinetic_energy)
         # print(systems_sum._potential_energy)
@@ -667,7 +673,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         new_sys = type(self)(0,system=new_system)#(f'{self._label} for {args} and {kwargs}')
         new_sys._label=f'{self._label} for {args} and {kwargs}'
 
-        
+        new_sys._kinetic_energy = (self._kinetic_energy*S.One).subs(*args, **kwargs)
+        new_sys._potential_energy = (self._potential_energy*S.One).subs(*args, **kwargs)
+#         if hasattr(self._dissipative_potential,'subs'):
+        new_sys._dissipative_potential = (self._dissipative_potential*S.One).subs(*args, **kwargs) 
+#         else:
+#             new_sys._dissipative_potential = self._dissipative_potential
         
 
         new_sys._given_data=given_data
@@ -678,14 +689,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         #display(new_system.forcelist)
         return new_sys
 
-        # return type(self)(Lagrangian=lagrangian_subs,
-        #                   qs=self.q,
-        #                   forcelist=forces_subs,
-        #                   bodies=self._bodies,
-        #                   frame=self.frame,
-        #                   hol_coneqs=hol_coneqs,
-        #                   nonhol_coneqs=nonhol_coneqs_subs
-        #                   )
+
 
 
 
@@ -781,9 +785,44 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return eqns.subs({coord:0 for coord in self.q_0.values()})
     
     @property
+    def report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.GoverningEquationComponent,
+        mech_comp.FundamentalMatrixComponent,
+        mech_comp.GeneralSolutionComponent,
+        mech_comp.SteadySolutionComponent,
+            
+            
+        ]
+        
+        return comp_list
+    
+    @property
     def report(self):
-        ExampleTemplate.title=self._label
-        return self.calculations_steps(preview=True,system=None,code=False,documentclass=ExampleTemplate,lang='pl')
+
+      
+        sys=self
+        doc = ExampleTemplate()
+        doc.append(mech_comp.TitlePageComponent(sys))
+        doc.append(mech_comp.SchemeComponent(sys))
+        doc.append(mech_comp.ExemplaryPictureComponent(sys))
+        doc.append(mech_comp.KineticEnergyComponent(sys))
+        doc.append(mech_comp.PotentialEnergyComponent(sys))
+        doc.append(mech_comp.LagrangianComponent(sys))
+        doc.append(mech_comp.GoverningEquationComponent(sys))
+        doc.append(mech_comp.FundamentalMatrixComponent(sys))
+        doc.append(mech_comp.GeneralSolutionComponent(sys))
+        doc.append(mech_comp.SteadySolutionComponent(sys))
+    
+    
+        return doc
     
     
     def calculations_steps(self,preview=True,system=None,code=False,documentclass=Document,lang='pl'):
