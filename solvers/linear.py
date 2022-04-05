@@ -21,6 +21,124 @@ import sympy.physics.mechanics as me
 from sympy.simplify.fu import TR8, TR10, TR7, TR3
 
 
+
+class AnalyticalSolution(Matrix):
+    def __new__(cls, lhs,rhs ,evaluate=True, **options):
+
+        if not isinstance(lhs,Iterable):
+            lhs = Matrix([lhs])
+        if not isinstance(rhs,Iterable):
+            rhs = Matrix([rhs])        
+        
+        
+        
+        obj = super().__new__(cls,rhs,evaluate=evaluate, **options)
+        
+
+        obj._lhs=lhs
+
+        return obj
+
+
+    
+    @classmethod
+    def from_dict(cls,dictionary,**options):
+        
+        #tuples_list = [(var,eq)  for var,eq in dictionary.items()]
+        
+        
+        
+        return cls( list(dictionary.keys()),list(dictionary.values()) ,**options   )
+    
+    def subs(self,*args,**kwargs):
+        
+        obj = super().subs(*args,**kwargs)
+        obj._lhs=self._lhs
+        
+        return obj
+    
+    
+    def __add__(self,other):
+        
+        if isinstance(other,self.__class__):
+            other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
+        
+        obj = super().__add__(other)
+        obj._lhs=self._lhs
+        
+        return obj
+
+    
+    def __mul__(self,other):
+        
+        obj = super().__mul__(other)
+        obj._lhs=self._lhs
+        
+        return obj
+    
+    
+    def __call__(self,t,params={}):
+        
+        solution = (self.nth_order_solution(order).rhs.subs(self.extra_params).subs(self.params_values))
+        
+        solution = solution.applyfunc(lambda x: x.subs(self.extra_params).subs(self.params_values))
+
+#         print('solution after extra params')
+#         display(-(self.nth_order_solution(order).rhs.subs(self.extra_params)))
+            
+        if isinstance(ivar, Symbol):
+
+            ics_dict=self._ic_from_sol(order=order,formula=True)
+            display(ics_dict)
+
+            return solution.subs(ics_dict).subs(self.extra_params).subs(self.ivar, ivar)
+        else:
+
+            ics_dict=self._ic_from_sol(order=order,formula=False)
+#             display(Dict(ics_dict).subs(self.params_values))
+            
+            ics_symbols_dict={sym:val for sym, val in zip(self.ics_symbols,self.ics)  }
+            
+
+            nth_order_solution_fun = lambdify(self.ivar, (solution.subs(ics_dict).subs(self.extra_params).subs(ics_symbols_dict)).subs(self.params_values).n(), 'numpy')
+
+            #return nth_order_solution_fun(ivar)
+            solution  = TimeDataFrame(data={
+                dvar: data[0]
+                for dvar, data in zip(self.dvars, nth_order_solution_fun(ivar))
+            },
+                                 index=ivar)
+            
+            
+            for dvar in self.dvars:
+                solution[dvar.diff(self.ivar,1)]=solution[dvar].gradient()
+            
+            for dvar in self.dvars:
+                solution[dvar.diff(self.ivar,2)]=solution[dvar.diff(self.ivar,1)].gradient()
+            
+            return solution
+    
+    
+    @property
+    def lhs(self):
+        return Matrix( list(self.as_dict().keys()) )
+
+    
+    @property
+    def rhs(self):
+        return Matrix( list(self.as_dict().values()) )
+    
+    def as_iterable(self):
+
+        return [(lhs,comp) for lhs,comp  in zip(self._lhs,self)]
+        
+    
+    def as_dict(self):
+        
+
+        return Dict({lhs:rhs  for  lhs,rhs in self.as_iterable()})
+
+
 class FirstOrderODE:
     """
     This class represents the system of first order defferential equations. Allows to get the solution of given system.
