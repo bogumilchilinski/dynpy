@@ -887,7 +887,7 @@ class Pendulum(ComposedSystem):
                  m=Symbol('m', positive=True),
                  g=Symbol('g', positive=True),
                  l=Symbol('l', positive=True),
-                 angle=dynamicsymbols('varphi'),
+                 angle=dynamicsymbols('\\varphi'),
                  qs=None,
                  ivar=Symbol('t'),
                  **kwargs):
@@ -901,18 +901,18 @@ class Pendulum(ComposedSystem):
         self.g = g
         self.l = l
 
-        Lagrangian = S.Half * m * l**2 * diff(
-            angle, ivar)**2 - m * g * l * (1 - cos(angle))
-
-        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar,**kwargs)
+        self.potential=GravitationalForce(self.m, self.g, l*(1-cos(angle)), qs=qs)
+        self.kinen=MaterialPoint(self.m, pos1=qs[0], qs=[angle])
+        composed_system=self.potential+self.kinen
+        super().__init__(composed_system,**kwargs)
 
     def get_default_data(self):
 
         m0, l0 = symbols('m_0 l_0', positive=True)
 
         default_data_dict = {
-            self.m: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
-            self.l: [2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0,7*l0, 8*l0, 9*l0,10*l0],
+            self.m: [1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0,10 * m0, 11 * m0, 12 * m0, 13 * m0, 14 * m0, 15 * m0, 16 * m0, 17 * m0, 18 * m0, 19 * m0, 20 * m0, 21 * m0, 22 * m0, 23 * m0, 24 * m0, 25 * m0, 26 * m0, 27 * m0, 28 * m0, 29 * m0, 30 * m0],
+            self.l: [1 * l0, 2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0,7*l0, 8*l0, 9*l0,10*l0, 11 * l0, 12 * l0, 13 * l0, 14 * l0, 15 * l0, 16 * l0,17*l0, 18*l0, 19*l0,20*l0, 21 * l0, 22 * l0, 23 * l0, 24 * l0, 25 * l0, 26 * l0,27*l0, 28*l0, 29*l0,30*l0],
         }
         return default_data_dict
 
@@ -1766,7 +1766,7 @@ class NonLinearTrolley(ComposedSystem):
 
         default_data_dict = {
             self.m: [S.Half * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0],
-            self.d: [1 * l0, 2 * l0, S.Half * l0, 3 * S.Half * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0, 9 * l0],
+            self.d: [1 * l0, 2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0, 9 * l0],
             self.k:
             [S.Half * k0, 2 * k0, 1 * k0, 3 * S.Half * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0, 3 * k0],
             self.l_0:[l0]
