@@ -903,8 +903,9 @@ class Pendulum(ComposedSystem):
 
         self.potential=GravitationalForce(self.m, self.g, l*(1-cos(angle)), qs=qs)
         self.kinen=MaterialPoint(self.m, pos1=qs[0], qs=[angle])
-        composed_system=self.potential+self.kinen
-        super().__init__(composed_system,**kwargs)
+        print(self.kinen)
+        system=self.potential+self.kinen
+        super().__init__(system,**kwargs)
 
     def get_default_data(self):
 
@@ -1041,7 +1042,8 @@ class ExcitedPendulum(ComposedSystem):
 
     def __init__(
             self,
-            m=Symbol('m', positive=True),
+            dummy=Symbol('dummy',positive=True),
+            m1=Symbol('m', positive=True),
             g=Symbol('g', positive=True),
             l=Symbol('l', positive=True),
             F=Symbol('F', positive=True),
@@ -1057,12 +1059,12 @@ class ExcitedPendulum(ComposedSystem):
         else:
             qs = qs
 
-        self.m = m
+        self.m1 = m1
         self.g = g
         self.l = l
         self.F = F
 
-        self.pendulum = Pendulum(m, g, l, angle=phi)
+        self.pendulum = Pendulum(m1, g, l, angle=phi)
         self.force = Force(-F * l * cos(phi), pos1=phi, qs=qs)
         system = self.pendulum + self.force
 
@@ -1070,13 +1072,23 @@ class ExcitedPendulum(ComposedSystem):
 
     def symbols_description(self):
         self.sym_desc_dict = {
-            self.m: r'Mass of pendulum',
+            self.m1: r'Mass of pendulum',
             self.g: r'Gravity constant',
             self.l: r'Pendulum length',
             self.F: r'Force',
         }
         return self.sym_desc_dict
 
+    def get_default_data(self):
+
+        m0, l0, F0 = symbols('m_0 l_0 F_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0,10 * m0, 11 * m0, 12 * m0, 13 * m0, 14 * m0, 15 * m0, 16 * m0, 17 * m0, 18 * m0, 19 * m0, 20 * m0, 21 * m0, 22 * m0, 23 * m0, 24 * m0, 25 * m0, 26 * m0, 27 * m0, 28 * m0, 29 * m0, 30 * m0],
+            self.l: [1 * l0, 2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0,7*l0, 8*l0, 9*l0,10*l0, 11 * l0, 12 * l0, 13 * l0, 14 * l0, 15 * l0, 16 * l0,17*l0, 18*l0, 19*l0,20*l0, 21 * l0, 22 * l0, 23 * l0, 24 * l0, 25 * l0, 26 * l0,27*l0, 28*l0, 29*l0,30*l0],
+            self.F: [1 * F0, 2 * F0, 3 * F0, 4 * F0, 5 * F0, 6 * F0,7*F0, 8*F0, 9*F0,10*F0, 11 * F0, 12 * F0, 13 * F0, 14 * F0, 15 * F0, 16 * F0,17*F0, 18*F0, 19*F0,20*F0, 21 * F0, 22 * F0, 23 * F0, 24 * F0, 25 * F0, 26 * F0,27*F0, 28*F0, 29*F0,30*F0],
+        }
+        return default_data_dict
 
 class DampedPendulum(ComposedSystem):
     """

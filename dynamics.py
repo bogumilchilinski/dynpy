@@ -23,7 +23,7 @@ from sympy.simplify.fu import TR8, TR10, TR7, TR3
 
 from .solvers.numerical import OdeComputationalCase
 
-from .solvers.linear import LinearODESolution, FirstOrderODE
+from .solvers.linear import LinearODESolution, FirstOrderODE,MultivariableTaylorSeries,FirstOrderODESystem
 
 from .solvers.nonlinear import WeakNonlinearProblemSolution, MultiTimeScaleMethod
 
@@ -99,153 +99,7 @@ def multivariable_taylor_series(expr, args, n=2, x0=None):
     ]) + expr.subs(op_point)).doit()
 
 
-class MultivariableTaylorSeries(Expr):
-    
-    def __new__(cls,expr, variables,*args, n=2, x0=None):
-        
-        obj=super().__new__(cls,expr,variables,*args)
-        obj._vars = variables
-        obj._order = n
-        obj._op_point = x0
-        
-        obj._expr_symbol = None
-        
-        return obj
 
-    def _set_default_op_point(self):
-        '''
-        It sets 0 as op_point if x0 (look __new__) is not provided. For lack of op_point, the result is the same as MacLaurina series 
-        '''
-        
-        if self._op_point is None:
-            self._op_point = {coord:0 for coord in self._vars}
-        
-        return self._op_point
-    
-    def _args_shifted(self,*args):
-        
-        self._set_default_op_point()
-        
-        args_shifted = {
-            arg: arg - arg_shift
-            for arg, arg_shift in self._op_point.items()
-        }
-        
-        return args_shifted
-
-    def _diff_orders_dict(self):
-            
-        order_max = self._order
-        args = self._vars
-        args_shifted = self._args_shifted()
-        
-            
-        diff_orders_list = sum([
-            list(itools.combinations_with_replacement(args, order))
-            for order in range(1, order_max + 1, 1)
-        ], [])
-        
-        
-        diff_orders_dict = {
-            comp: (sym.Mul(*comp).subs(args_shifted) / sym.Mul(*[
-                sym.factorial(elem) for elem in sym.Poly(sym.Mul(*comp), *args).terms()[0][0]
-            ])).doit()
-            for comp in diff_orders_list
-        }
-
-        return diff_orders_dict
-
-    
-    def _diff_symbols_dict(self):
-        
-        diff_orders_dict=self._diff_orders_dict()
-        expr=self.args[0]
-        op_point=self._op_point
-        
-        
-        
-        return {S.Zero:Subs(expr,list(op_point.keys()),list(op_point.values())),**{args_tmp:Subs(Derivative(expr,*args_tmp,evaluate=False),list(op_point.keys()),list(op_point.values())) 
-            for args_tmp, poly in diff_orders_dict.items()}}
-
-    def _diff_expr_dict(self):
-        
-        diff_orders_dict=self._diff_orders_dict()
-        expr=self.args[0]
-        op_point=self._op_point
-        
-        return {S.Zero:expr.subs(op_point),**{args_tmp:expr.diff(*args_tmp).subs(op_point)
-            for args_tmp, poly in diff_orders_dict.items()}}
-    
-    def _components_dict(self):
-        
-        diff_orders_dict=self._diff_orders_dict()
-        derivatives_dict=self._diff_symbols_dict()
-        
-        expr=self.args[0]
-        op_point=self._op_point
-        
-        return {
-                Subs(expr,list(op_point.keys()),list(op_point.values())):expr.subs(op_point),
-                **{derivatives_dict[args_tmp] : expr.diff(*args_tmp).subs(op_point) for args_tmp, poly in diff_orders_dict.items()}
-        }
-        
-    def _series(self):
-        diff_orders_dict=self._diff_orders_dict()
-        diff_dict=self._diff_symbols_dict()
-        
-        expr=self.args[0]
-        op_point=self._op_point
-        
-        return expr.subs(op_point).doit()+Add(*[expr.diff(*args_tmp).subs(op_point).doit() * poly for args_tmp, poly in diff_orders_dict.items()],evaluate=False)
-    
-    def _symbolic_sum(self):
-        diff_orders_dict=self._diff_orders_dict()
-        diff_dict=self._diff_symbols_dict()
-        
-        expr=self.args[0]
-        op_point=self._op_point
-        
-        return Subs(expr,list(op_point.keys()),list(op_point.values()))+Add(*[Mul(diff_dict[args_tmp]  ,poly,evaluate=True) for args_tmp, poly in diff_orders_dict.items()],evaluate=False)
-    
-    def _latex(self,*args):
-        
-        diff_orders_dict=self._diff_orders_dict()
-        diff_dict=self._diff_symbols_dict()
-        
-        expr=self.args[0]
-        op_point=self._op_point
-        
-        return '+'.join([latex(Mul(diff_dict[args_tmp]  ,poly,evaluate=True)) for args_tmp, poly in diff_orders_dict.items()])
-
-    
-    def calculation_steps(self,expr_symbol=None,form=None):
-
-        obj = self
-        
-        if expr_symbol is None:
-            obj._expr_symbol = self.args[0]
-            
-        obj_sym = self.__class__(expr_symbol,self._vars, n=self._order, x0=self._op_point)
-        
-        expr_dict=(self._diff_expr_dict())
-        diffs_dict=(obj_sym._diff_symbols_dict())
-        
-
-        
-        
-        return [Eq(diffs_dict[key],expr_dict[key].doit())   for  key  in diffs_dict.keys()]
-    
-    def __str__(self,*args):
-        return (self.args[0]).__str__()
-    
-    def __repr__(self,*args):
-        return (self.args[0]).__repr__()
-
-    
-    
-    
-    def doit(self,*args):
-        return self._series()
     
 
 
@@ -673,6 +527,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         new_sys = type(self)(0,system=new_system)#(f'{self._label} for {args} and {kwargs}')
         new_sys._label=f'{self._label} for {args} and {kwargs}'
 
+        print('self._kinetic_energy')
+        print(self._kinetic_energy)
+        print(self._potential_energy)
+        print(self._potential_energy)
+        
         new_sys._kinetic_energy = (self._kinetic_energy*S.One).subs(*args, **kwargs)
         new_sys._potential_energy = (self._potential_energy*S.One).subs(*args, **kwargs)
 #         if hasattr(self._dissipative_potential,'subs'):
@@ -810,16 +669,16 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
       
         sys=self
         doc = ExampleTemplate()
-        doc.append(mech_comp.TitlePageComponent(sys))
-        doc.append(mech_comp.SchemeComponent(sys))
-        doc.append(mech_comp.ExemplaryPictureComponent(sys))
-        doc.append(mech_comp.KineticEnergyComponent(sys))
-        doc.append(mech_comp.PotentialEnergyComponent(sys))
-        doc.append(mech_comp.LagrangianComponent(sys))
-        doc.append(mech_comp.GoverningEquationComponent(sys))
-        doc.append(mech_comp.FundamentalMatrixComponent(sys))
-        doc.append(mech_comp.GeneralSolutionComponent(sys))
-        doc.append(mech_comp.SteadySolutionComponent(sys))
+        # doc.append(mech_comp.TitlePageComponent(sys))
+        # doc.append(mech_comp.SchemeComponent(sys))
+        # doc.append(mech_comp.ExemplaryPictureComponent(sys))
+        # doc.append(mech_comp.KineticEnergyComponent(sys))
+        # doc.append(mech_comp.PotentialEnergyComponent(sys))
+        # doc.append(mech_comp.LagrangianComponent(sys))
+        # doc.append(mech_comp.GoverningEquationComponent(sys))
+        # doc.append(mech_comp.FundamentalMatrixComponent(sys))
+        # doc.append(mech_comp.GeneralSolutionComponent(sys))
+        # doc.append(mech_comp.SteadySolutionComponent(sys))
     
     
         return doc
@@ -1042,7 +901,6 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         #mrk_lagrangian_lin=Marker('lagrangian_lin_sys',prefix='eq')
         #
-        #display(ReportText(f'''Linearized model of the system can be useful as an initial step of the analysis. 
         #                        It enables to find a simplified solution in the neighborhood of the critical point.
         #                        Such an approach introduces some error but the solution has qualitative compability of the exact and linearized result. The simplified Lagrangian formula ({Ref(mrk_lagrangian_lin).dumps()}) is as follows:
         #                    '''))
