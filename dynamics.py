@@ -261,9 +261,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         Supply the following for the initialization of DynamicSystem in the same way as LagrangesMethod
         """
 
-        self._kinetic_energy = None
-        self._potential_energy = None
-        self._dissipative_potential = None
+        self._kinetic_energy = 0
+        self._potential_energy = 0
+        self._dissipative_potential = 0
 
         if system:
             # print(system._kinetic_energy)
