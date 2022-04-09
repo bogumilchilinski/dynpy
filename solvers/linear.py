@@ -1,7 +1,7 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, re, pi, latex,
                    dsolve, solve, fraction, factorial, Add, Mul, exp,
-                   numbered_symbols, integrate, ImmutableMatrix,Expr,Dict,Subs,Derivative)
+                   numbered_symbols, integrate, ImmutableMatrix,Expr,Dict,Subs,Derivative,Dummy)
 
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
@@ -172,7 +172,7 @@ class MultivariableTaylorSeries(Expr):
     
     
     
-    def doit(self,*args):
+    def doit(self,**hints):
         return self._series()
 
 
@@ -185,9 +185,7 @@ class AnalyticalSolution(Matrix):
             lhs = Matrix([lhs])
         if not isinstance(rhs,Iterable):
             rhs = Matrix([rhs])        
-        
-        
-        
+
         obj = super().__new__(cls,rhs,evaluate=evaluate, **options)
         
 
@@ -211,6 +209,8 @@ class AnalyticalSolution(Matrix):
     
     def subs(self,*args,**kwargs):
         
+
+        
         obj = super().subs(*args,**kwargs)
         obj._lhs=self._lhs
         
@@ -228,6 +228,27 @@ class AnalyticalSolution(Matrix):
         return obj
 
     
+    def __rsub__(self,other):
+        
+        if isinstance(other,self.__class__):
+            other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
+        
+        obj = super().__rsub__(other)
+        obj._lhs=self._lhs
+        
+        return obj
+
+    
+    def __sub__(self,other):
+        
+        if isinstance(other,self.__class__):
+            other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
+        
+        obj = super().__sub__(other)
+        obj._lhs=self._lhs
+        
+        return obj
+    
     def __mul__(self,other):
         
         obj = super().__mul__(other)
@@ -235,6 +256,19 @@ class AnalyticalSolution(Matrix):
         
         return obj
     
+    def doit(self,**hints):
+        
+        obj = super().doit(**hints)
+        obj._lhs=self._lhs
+        
+        return obj
+    
+    def _eval_applyfunc(self, f):
+        
+        obj = super()._eval_applyfunc(f)
+        obj._lhs=self._lhs
+        
+        return obj
     
     def __call__(self,t,params={}):
         
@@ -297,12 +331,22 @@ class AnalyticalSolution(Matrix):
 
         return Dict({lhs:rhs  for  lhs,rhs in self.as_iterable()})
 
+    @property
+    def _lhs_repr(self):
+        return self.lhs
     
-    
-    
-    
+    def __repr__(self):
 
-class FirstOrderODESystem(AnalyticalSolution):
+        return f'{self._lhs_repr} = {self.rhs}'
+    
+    
+    def _latex(self,*args):
+
+        return latex(Eq(self._lhs_repr,self.rhs,evaluate=False))
+
+    
+    
+class ODESystem(AnalyticalSolution):
     
     _ivar = Symbol('t')
     
@@ -316,8 +360,13 @@ class FirstOrderODESystem(AnalyticalSolution):
 
         
         obj = super().__new__(cls,dvars,odes_system,evaluate=evaluate, **options)
-        obj._dvars = dvars
+        
 
+        
+        obj._dvars = dvars
+        obj._const_list = []
+        
+        
         if ivar is not None:
             obj._ivar = ivar
 
@@ -334,7 +383,15 @@ class FirstOrderODESystem(AnalyticalSolution):
     
     @property
     def odes(self):
-        return self.rhs
+        return self.rhs 
+    
+    @property
+    def _lhs_repr(self):
+        return (self.lhs).applyfunc(lambda obj: Derivative(obj,self.ivar,evaluate=False)  )
+
+class FirstOrderODESystem(ODESystem):
+    
+
 
     def solution(self,ics=None):
         return self.linearized().solution()
@@ -400,6 +457,8 @@ class FirstOrderODESystem(AnalyticalSolution):
     
 class FirstOrderLinearODESystem(FirstOrderODESystem):
     
+       
+    
     @cached_property
     def _fundamental_matrix(self):
         
@@ -419,33 +478,40 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         A=self._fundamental_matrix
         b=self._free_terms
         
-        return AnalyticalSolution(self.dvars,linodesolve(A,t=self.ivar,b=b))
+        sol = AnalyticalSolution(self.dvars,linodesolve(A,t=self.ivar,b=b))
+        dummies_set= sol.atoms(Dummy)
+        const_dict = {dummy_symbol : Symbol(f'C_{no+1}')   for  no,dummy_symbol  in enumerate(dummies_set)}
+        
+        self._const_list = list(const_dict.values())
+        
+        return AnalyticalSolution(self.dvars,sol).subs( const_dict )
+    
+    @cached_property    
+    def const_set(self):
+
+        return self._const_list
     
     
     @cached_property
     def general_solution(self):
-        
-        A=self._fundamental_matrix
-        b=self.dvars*0
-        
-        return AnalyticalSolution(self.dvars,linodesolve(A,t=self.ivar,b=b))
+
+        return self._solution - self.steady_solution
 
 
     @cached_property
     def steady_solution(self):
-        
-        A=self._fundamental_matrix
-        b=self._free_terms
-        
-        return self._solution + self.general_solution
+
+        return self._solution.subs({const_sym:0 for const_sym  in self._const_list})
     
-    
-    def solution(self,ics=None):
-        
+    @property
+    def solution(self):
 
         return self._solution
     
 
+    
+    
+    
     
 class FirstOrderODE:
     """
