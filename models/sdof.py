@@ -231,7 +231,7 @@ class DampedBlowerToothedBelt(ComposedSystem):
             self.k_belt: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
             self.k_tensioner: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
             self.F: [F0, 2 * F0, 3 * F0, 4 * F0, 5 * F0, 6 * F0],
-            self.Omega: [Omega0, 2 * Omega0, 3 * Omega0, 4 * Omega0, 5 * Omega0, 6 * Omega0],
+#             self.Omega: [Omega0, 2 * Omega0, 3 * Omega0, 4 * Omega0, 5 * Omega0, 6 * Omega0],
             self.Q: [15*F0, 8 * F0, 9 * F0, 10 * F0, 12 * F0, 16 * F0],
 
         }
