@@ -527,10 +527,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         new_sys = type(self)(0,system=new_system)#(f'{self._label} for {args} and {kwargs}')
         new_sys._label=f'{self._label} for {args} and {kwargs}'
 
-        print('self._kinetic_energy')
-        print(self._kinetic_energy)
-        print(self._potential_energy)
-        print(self._potential_energy)
+        #print('self._kinetic_energy')
+        #print(self._kinetic_energy)
+        #print(self._potential_energy)
+        #print(self._potential_energy)
         
         new_sys._kinetic_energy = (self._kinetic_energy*S.One).subs(*args, **kwargs)
         new_sys._potential_energy = (self._potential_energy*S.One).subs(*args, **kwargs)
