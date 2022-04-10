@@ -817,17 +817,17 @@ class ForcedTrolleysWithSprings(ComposedSystem):
         m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
 
         default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_cl: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_c12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_c23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_cr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0, 10 * m0, 11 * m0, 12 * m0, 13 * m0, 14 * m0, 15 * m0, 16 * m0, 17 * m0, 18 * m0, 19 * m0],
+            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0, 10 * m0, 11 * m0, 12 * m0, 13 * m0, 14 * m0, 15 * m0, 16 * m0, 17 * m0, 18 * m0, 19 * m0],
+            self.m3: [S.Half * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0, 10 * m0, 11 * m0, 12 * m0, 13 * m0, 14 * m0, 15 * m0, 16 * m0, 17 * m0, 18 * m0, 19 * m0],
+            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0, 10 * k0, 11 * k0, 12 * k0, 13 * k0, 14 * k0, 15 * k0, 16 * k0, 17 * k0, 18 * k0, 19 * k0,],
+            self.k_cl: [1 * k0, 2 * k0, S.Half * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0, 10 * k0, 11 * k0, 12 * k0, 13 * k0, 14 * k0, 15 * k0, 16 * k0, 17 * k0, 18 * k0, 19 * k0,],
+            self.k_12: [1 * k0, 2 * k0, S.Half * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0, 10 * k0, 11 * k0, 12 * k0, 13 * k0, 14 * k0, 15 * k0, 16 * k0, 17 * k0, 18 * k0, 19 * k0,],
+            self.k_c12: [1 * k0, 2 * k0, S.Half * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0, 10 * k0, 11 * k0, 12 * k0, 13 * k0, 14 * k0, 15 * k0, 16 * k0, 17 * k0, 18 * k0, 19 * k0,],
+            self.k_23: [1 * k0, 2 * k0, S.Half * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0, 10 * k0, 11 * k0, 12 * k0, 13 * k0, 14 * k0, 15 * k0, 16 * k0, 17 * k0, 18 * k0, 19 * k0,],
+            self.k_c23: [1 * k0, 2 * k0, S.Half * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0, 10 * k0, 11 * k0, 12 * k0, 13 * k0, 14 * k0, 15 * k0, 16 * k0, 17 * k0, 18 * k0, 19 * k0,],
+            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0, 10 * k0, 11 * k0, 12 * k0, 13 * k0, 14 * k0, 15 * k0, 16 * k0, 17 * k0, 18 * k0, 19 * k0,],
+            self.k_cr: [1 * k0, 2 * k0, S.Half * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0, 10 * k0, 11 * k0, 12 * k0, 13 * k0, 14 * k0, 15 * k0, 16 * k0, 17 * k0, 18 * k0, 19 * k0,],
 
             self.x_l: [self.x_1, 0],
             self.x_c: [self.x_1, self.x_2, 0],
@@ -844,7 +844,7 @@ class ForcedTrolleysWithSprings(ComposedSystem):
             key: random.choice(items_list)
             for key, items_list in default_data_dict.items()
         }
-
+        print(parameters_dict)
         if parameters_dict[self.x_l] != self.x_1 or parameters_dict[self.x_c] != self.x_1:
 
             parameters_dict[self.x_l] = self.x_1

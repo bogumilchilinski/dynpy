@@ -1168,7 +1168,7 @@ class EngineWithTMD(ComposedSystem):
         -determine the instance of the pendulum by using class SDoFCouplePendulum()
     """
 
-    scheme_name = 'tmd_engine_vertical_spring_gravity.png'
+    scheme_name = 'tmd_engine_vertical_spring_nogravity.png'
     real_name = 'tmd_engine_real.jpg'
 
     def __init__(self,

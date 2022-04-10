@@ -1,7 +1,7 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, re, pi, latex,
                    dsolve, solve, fraction, factorial, Add, Mul, exp,
-                   numbered_symbols, integrate, ImmutableMatrix)
+                   numbered_symbols, integrate, ImmutableMatrix,Expr,Dict,Subs,Derivative,Dummy)
 
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
@@ -19,8 +19,498 @@ from IPython.display import display
 import sympy.physics.mechanics as me
 
 from sympy.simplify.fu import TR8, TR10, TR7, TR3
+from collections.abc import Iterable
+from sympy.solvers.ode.systems import linodesolve
+from functools import cached_property
+
+class MultivariableTaylorSeries(Expr):
+    
+    def __new__(cls,expr, variables,*args, n=2, x0=None):
+        
+        obj=super().__new__(cls,expr,variables,*args)
+        obj._vars = variables
+        obj._order = n
+        obj._op_point = x0
+        
+        obj._expr_symbol = None
+        
+        return obj
+
+    @property
+    def order(self):
+        return self._order
+    
+    def _set_default_op_point(self):
+        '''
+        It sets 0 as op_point if x0 (look __new__) is not provided. For lack of op_point, the result is the same as MacLaurina series 
+        '''
+        
+        if self._op_point is None:
+            self._op_point = {coord:0 for coord in self._vars}
+        
+        return self._op_point
+    
+    def _args_shifted(self,*args):
+        
+        self._set_default_op_point()
+        
+        args_shifted = {
+            arg: arg - arg_shift
+            for arg, arg_shift in self._op_point.items()
+        }
+        
+        return args_shifted
+
+    def _diff_orders_dict(self):
+            
+        order_max = self._order
+        args = self._vars
+        args_shifted = self._args_shifted()
+        
+            
+        diff_orders_list = sum([
+            list(itools.combinations_with_replacement(args, order))
+            for order in range(1, order_max + 1, 1)
+        ], [])
+        
+        
+        diff_orders_dict = {
+            comp: (sym.Mul(*comp).subs(args_shifted) / sym.Mul(*[
+                sym.factorial(elem) for elem in sym.Poly(sym.Mul(*comp), *args).terms()[0][0]
+            ])).doit()
+            for comp in diff_orders_list
+        }
+
+        return diff_orders_dict
+
+    
+    def _diff_symbols_dict(self):
+        
+        diff_orders_dict=self._diff_orders_dict()
+        expr=self.args[0]
+        op_point=self._op_point
+        
+        
+        
+        return {S.Zero:Subs(expr,list(op_point.keys()),list(op_point.values())),**{args_tmp:Subs(Derivative(expr,*args_tmp,evaluate=False),list(op_point.keys()),list(op_point.values())) 
+            for args_tmp, poly in diff_orders_dict.items()}}
+
+    def _diff_expr_dict(self):
+        
+        diff_orders_dict=self._diff_orders_dict()
+        expr=self.args[0]
+        op_point=self._op_point
+        
+        return {S.Zero:expr.subs(op_point),**{args_tmp:expr.diff(*args_tmp).subs(op_point)
+            for args_tmp, poly in diff_orders_dict.items()}}
+    
+    def _components_dict(self):
+        
+        diff_orders_dict=self._diff_orders_dict()
+        derivatives_dict=self._diff_symbols_dict()
+        
+        expr=self.args[0]
+        op_point=self._op_point
+        
+        return {
+                Subs(expr,list(op_point.keys()),list(op_point.values())):expr.subs(op_point),
+                **{derivatives_dict[args_tmp] : expr.diff(*args_tmp).subs(op_point) for args_tmp, poly in diff_orders_dict.items()}
+        }
+        
+    def _series(self):
+        diff_orders_dict=self._diff_orders_dict()
+        diff_dict=self._diff_symbols_dict()
+        
+        expr=self.args[0]
+        op_point=self._op_point
+        
+        return expr.subs(op_point).doit()+Add(*[expr.diff(*args_tmp).subs(op_point).doit() * poly for args_tmp, poly in diff_orders_dict.items()],evaluate=False)
+    
+    def _symbolic_sum(self):
+        diff_orders_dict=self._diff_orders_dict()
+        diff_dict=self._diff_symbols_dict()
+        
+        expr=self.args[0]
+        op_point=self._op_point
+        
+        return Subs(expr,list(op_point.keys()),list(op_point.values()))+Add(*[Mul(diff_dict[args_tmp]  ,poly,evaluate=True) for args_tmp, poly in diff_orders_dict.items()],evaluate=False)
+    
+    def _latex(self,*args):
+        
+        diff_orders_dict=self._diff_orders_dict()
+        diff_dict=self._diff_symbols_dict()
+        
+        expr=self.args[0]
+        op_point=self._op_point
+        
+        return '+'.join([latex(Mul(diff_dict[args_tmp]  ,poly,evaluate=True)) for args_tmp, poly in diff_orders_dict.items()])
+
+    
+    def calculation_steps(self,expr_symbol=None,form=None):
+
+        obj = self
+        
+        if expr_symbol is None:
+            obj._expr_symbol = self.args[0]
+            
+        obj_sym = self.__class__(expr_symbol,self._vars, n=self._order, x0=self._op_point)
+        
+        expr_dict=(self._diff_expr_dict())
+        diffs_dict=(obj_sym._diff_symbols_dict())
+        
+
+        
+        
+        return [Eq(diffs_dict[key],expr_dict[key].doit())   for  key  in diffs_dict.keys()]
+    
+    def __str__(self,*args):
+        return (self.args[0]).__str__()
+    
+    def __repr__(self,*args):
+        return (self.args[0]).__repr__()
+
+    
+    
+    
+    def doit(self,**hints):
+        return self._series()
 
 
+
+
+class AnalyticalSolution(Matrix):
+    def __new__(cls, lhs,rhs ,evaluate=True, **options):
+
+        if not isinstance(lhs,Iterable):
+            lhs = Matrix([lhs])
+        if not isinstance(rhs,Iterable):
+            rhs = Matrix([rhs])        
+
+        obj = super().__new__(cls,rhs,evaluate=evaluate, **options)
+        
+
+        obj._lhs=lhs
+
+        return obj
+
+
+
+    
+    
+    
+    @classmethod
+    def from_dict(cls,dictionary,**options):
+        
+
+        
+        return cls( list(dictionary.keys()),list(dictionary.values()) ,**options   )
+    
+    def subs(self,*args,**kwargs):
+        
+
+        
+        obj = super().subs(*args,**kwargs)
+        obj._lhs=self._lhs
+        
+        return obj
+    
+    
+    def __add__(self,other):
+        
+        if isinstance(other,self.__class__):
+            other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
+        
+        obj = super().__add__(other)
+        obj._lhs=self._lhs
+        
+        return obj
+
+    
+    def __rsub__(self,other):
+        
+        if isinstance(other,self.__class__):
+            other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
+        
+        obj = super().__rsub__(other)
+        obj._lhs=self._lhs
+        
+        return obj
+
+    
+    def __sub__(self,other):
+        
+        if isinstance(other,self.__class__):
+            other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
+        
+        obj = super().__sub__(other)
+        obj._lhs=self._lhs
+        
+        return obj
+    
+    def __mul__(self,other):
+        
+        obj = super().__mul__(other)
+        obj._lhs=self._lhs
+        
+        return obj
+    
+    def doit(self,**hints):
+        
+        obj = super().doit(**hints)
+        obj._lhs=self._lhs
+        
+        return obj
+    
+    def _eval_applyfunc(self, f):
+        
+        obj = super()._eval_applyfunc(f)
+        obj._lhs=self._lhs
+        
+        return obj
+    
+    def __call__(self,t,params={}):
+        
+        solution = (self.nth_order_solution(order).rhs.subs(self.extra_params).subs(self.params_values))
+        
+        solution = solution.applyfunc(lambda x: x.subs(self.extra_params).subs(self.params_values))
+
+#         print('solution after extra params')
+#         display(-(self.nth_order_solution(order).rhs.subs(self.extra_params)))
+            
+        if isinstance(ivar, Symbol):
+
+            ics_dict=self._ic_from_sol(order=order,formula=True)
+            display(ics_dict)
+
+            return solution.subs(ics_dict).subs(self.extra_params).subs(self.ivar, ivar)
+        else:
+
+            ics_dict=self._ic_from_sol(order=order,formula=False)
+#             display(Dict(ics_dict).subs(self.params_values))
+            
+            ics_symbols_dict={sym:val for sym, val in zip(self.ics_symbols,self.ics)  }
+            
+
+            nth_order_solution_fun = lambdify(self.ivar, (solution.subs(ics_dict).subs(self.extra_params).subs(ics_symbols_dict)).subs(self.params_values).n(), 'numpy')
+
+            #return nth_order_solution_fun(ivar)
+            solution  = TimeDataFrame(data={
+                dvar: data[0]
+                for dvar, data in zip(self.dvars, nth_order_solution_fun(ivar))
+            },
+                                 index=ivar)
+            
+            
+            for dvar in self.dvars:
+                solution[dvar.diff(self.ivar,1)]=solution[dvar].gradient()
+            
+            for dvar in self.dvars:
+                solution[dvar.diff(self.ivar,2)]=solution[dvar.diff(self.ivar,1)].gradient()
+            
+            return solution
+    
+    
+    @property
+    def lhs(self):
+        return Matrix( list(self.as_dict().keys()) )
+
+    
+    @property
+    def rhs(self):
+        return Matrix( list(self.as_dict().values()) )
+    
+    def as_iterable(self):
+
+        return [(lhs,comp) for lhs,comp  in zip(self._lhs,self)]
+        
+    
+    def as_dict(self):
+        
+
+        return Dict({lhs:rhs  for  lhs,rhs in self.as_iterable()})
+
+    @property
+    def _lhs_repr(self):
+        return self.lhs
+    
+    def __repr__(self):
+
+        return f'{self._lhs_repr} = {self.rhs}'
+    
+    
+    def _latex(self,*args):
+
+        return latex(Eq(self._lhs_repr,self.rhs,evaluate=False))
+
+    
+    
+class ODESystem(AnalyticalSolution):
+    
+    _ivar = Symbol('t')
+    
+    def __new__(cls, odes_system,dvars , ivar=None ,evaluate=True, **options):
+
+        if not isinstance(odes_system,Iterable):
+            odes_system = Matrix([odes_system])
+        if not isinstance(dvars,Iterable):
+            dvars = Matrix([dvars])        
+        
+
+        
+        obj = super().__new__(cls,dvars,odes_system,evaluate=evaluate, **options)
+        
+
+        
+        obj._dvars = dvars
+        obj._const_list = []
+        
+        
+        if ivar is not None:
+            obj._ivar = ivar
+
+        return obj
+
+    @property
+    def ivar(self):
+        return self._ivar
+    
+    
+    @property
+    def dvars(self):
+        return self.lhs
+    
+    @property
+    def odes(self):
+        return self.rhs 
+    
+    @property
+    def _lhs_repr(self):
+        return (self.lhs).applyfunc(lambda obj: Derivative(obj,self.ivar,evaluate=False)  )
+
+class FirstOrderODESystem(ODESystem):
+    
+
+
+    def solution(self,ics=None):
+        return self.linearized().solution()
+    
+    
+    def approximated(self, n=3, x0=None, op_point=False, hint=[], label=None):
+        """
+        Returns approximated N-th order function calculated with Taylor series method as an instance of the class
+        """
+
+        # print('x0',x0)
+        if not x0:
+            x0 = {coord: 0 for coord in self.dvars}
+
+        # #display(self._op_points(hint=hint, subs=True))
+        # if op_point:
+        #     x0.update(self._op_points(hint=hint, subs=True)[0])
+        #     #print('current op')
+        #     #display(self._op_points(hint=hint, subs=True))
+
+        
+        lin_eqns = [MultivariableTaylorSeries(ode, self.dvars, n=n, x0=x0).doit() for ode in self.odes   ]
+    
+        if n==1:
+            return FirstOrderLinearODESystem(lin_eqns,self.dvars,self.ivar)
+        else:
+            return FirstOrderODESystem(lin_eqns,self.dvars,self.ivar)
+
+
+    def linearized(self, x0=None, op_point=False, hint=[], label=None):
+        """
+        Returns approximated first order function calculated with Taylor series method as an instance of the class. It enables to obtain linearized output.
+        Arguments:
+        =========
+            System = Created system based on symbolical represent of mechanical parts of it
+            
+            op_point - boolean, which points out if the operating point will be evaluated
+            
+            x0 - setting operating point
+            
+            hint - (optional) Adds additional equation to equilibrium condition and calculate op_point as equilibrium system.
+            
+            label=None (optional): string
+                Label of the class instance. Default label: '{Class name} with {length of qs} DOF'
+
+        Example:
+        =======
+        Creating the examplary system. A mass oscillating up and down while being held up by a spring with a spring constant kinematicly 
+
+        >>> t = symbols('t')
+        >>> m, g, l = symbols('m, g, l')
+        >>> qs = dynamicsymbols('varphi') 
+        >>> Pendulum()
+
+        Creating linerized system in symbolic pattern
+        >>> System_linearized = Sytem.linearized()
+
+        """
+
+        return self.approximated(n=1, x0=x0, op_point=op_point, hint=hint, label=label)
+
+
+    
+class FirstOrderLinearODESystem(FirstOrderODESystem):
+    
+       
+    
+    @cached_property
+    def _fundamental_matrix(self):
+        
+        return self.odes.jacobian(self.dvars)
+    
+    
+    
+    @cached_property
+    def _free_terms(self):
+        
+        return self.odes.subs({coord:0 for coord in self.dvars})
+
+    
+    @cached_property
+    def _solution(self):
+        
+        A=self._fundamental_matrix
+        b=self._free_terms
+        
+        sol = AnalyticalSolution(self.dvars,linodesolve(A,t=self.ivar,b=b))
+        dummies_set= sol.atoms(Dummy)
+        const_dict = {dummy_symbol : Symbol(f'C_{no+1}')   for  no,dummy_symbol  in enumerate(dummies_set)}
+        
+        self._const_list = list(const_dict.values())
+        
+        return AnalyticalSolution(self.dvars,sol).subs( const_dict )
+    
+    @cached_property    
+    def const_set(self):
+
+        return self._const_list
+    
+    
+    @cached_property
+    def general_solution(self):
+
+        return self._solution - self.steady_solution
+
+
+    @cached_property
+    def steady_solution(self):
+
+        return self._solution.subs({const_sym:0 for const_sym  in self._const_list})
+    
+    @property
+    def solution(self):
+
+        return self._solution
+    
+
+    
+    
+    
+    
 class FirstOrderODE:
     """
     This class represents the system of first order defferential equations. Allows to get the solution of given system.
@@ -613,11 +1103,11 @@ class LinearODESolution:
         if (tuple(self.dvars),ImmutableMatrix(self.governing_equations)) in self.__class__._cache:
 
 
-            print('cache for Linear ODE')
+            #print('cache for Linear ODE')
             steady_sol=self.__class__._cache[(tuple(self.dvars),ImmutableMatrix(self.governing_equations))]
             
         else:
-            print('new solution')
+            #print('new solution')
             ext_forces = self.external_forces().expand().applyfunc(
                 lambda row: (TR8(row).expand()))
 

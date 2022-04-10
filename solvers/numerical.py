@@ -28,7 +28,7 @@ class OdeComputationalCase:
     Arguments
     =========
     odes_system: Symbol object
-        Ordinary differential equation in symbolic form
+        System of first order ordinary differential equations in symbolic form
 
     ivar=None (optional): Symbol object
         Independent variable
