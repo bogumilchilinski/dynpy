@@ -1071,6 +1071,18 @@ class ExcitedPendulum(ComposedSystem):
 
         super().__init__(system,**kwargs)
 
+    def get_default_data(self):
+
+        m0, l0, g0, F0 = symbols('m_0 l_0 g_0 F_0', positive=True)
+
+        default_data_dict = {
+            self.m: [2 * m0, 1*m0, S.Half * m0, S.Half**2 * m0, 3*S.Half * m0],
+            self.l: [2 * l0, 1*l0, S.Half * l0, S.Half**2 * l0, 3*S.Half * l0],
+            self.g: [g0],
+            self.F: [2 * F0, 1*F0, S.Half * F0, S.Half**2 * F0, 3*S.Half * F0],
+        }
+        return default_data_dict
+        
     def symbols_description(self):
         self.sym_desc_dict = {
             self.m1: r'Mass of pendulum',

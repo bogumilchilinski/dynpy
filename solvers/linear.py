@@ -201,9 +201,7 @@ class AnalyticalSolution(Matrix):
     @classmethod
     def from_dict(cls,dictionary,**options):
         
-        #tuples_list = [(var,eq)  for var,eq in dictionary.items()]
-        
-        
+
         
         return cls( list(dictionary.keys()),list(dictionary.values()) ,**options   )
     
