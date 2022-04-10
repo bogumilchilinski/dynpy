@@ -1808,5 +1808,56 @@ class NonLinearTrolley(ComposedSystem):
         }
         return self.sym_desc_dict
 
+class NonLinearDisc(ComposedSystem):
+    scheme_name = 'nonlinear_disc.png'
+    real_name = 'dwa_wozki_XD.PNG'
 
+    def __init__(self,
+                 m1=Symbol('m', positive=True),
+                 
+                 kl=Symbol('k', positive=True),
+
+                 R=Symbol('R', positive=True),
+                 d=Symbol('d', positive=True),
+                 l_0=Symbol('l_0', positive=True),
+                 ivar=Symbol('t'),
+
+                 x=dynamicsymbols('x'),
+                 qs=dynamicsymbols('x'),
+                 **kwargs):
+        
+        self.m1 = m1
+
+        self.kl = kl
+
+        self.R = R
+        self.l_0 = l_0
+        self.d = d
+
+        self.x = x
+
+        self.Disk1 = MaterialPoint(m1, x, qs=[x]) + MaterialPoint(m1/2*R**2, x/R, qs=[x]) + Spring(kl, pos1=(sqrt(x**2 + d**2) - l_0), qs=[x])
+
+
+        system = self.Disk1
+        super().__init__(system,**kwargs)
+
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [0.5* m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0,9 * m0],
+
+
+            self.d: [5 * l0, 2 * l0, 3 * S.Half * l0, 4 * l0, 6 * l0, 7 * l0, 8 * l0, 9 * l0],
+
+            self.kl: [1 * k0, 3 * k0, 2 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
+            self.l_0:[l0],
+            
+        }
+
+        return default_data_dict
+
+    
 

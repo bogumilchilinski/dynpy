@@ -59,16 +59,15 @@
 
     \tikzstyle{ground}=[fill,pattern=north east lines,draw=none,minimum width=0.75cm,minimum height=0.3cm]
 
-    \node (M) [draw,outer sep=0pt,circle,thick,minimum width=2cm, minimum height=2cm,label={[label distance=-0.9cm]90:$m_1,R$}] {};
+    \node (M) [draw,outer sep=0pt,circle,thick,minimum width=2cm, minimum height=2cm,label={[label distance=0.25cm]0:$m, R, I=\frac{1}{2} m R^2$}] {};
     %\node (m1_label) at ($(origo)+(310:3.9cm)$) {$m_{1}$};
 
-    \node (M2) at (M) [draw,outer sep=0pt,circle,thick,minimum width=2cm, minimum height=2cm,xshift=6cm,label={[label distance=-0.9cm]90:$m_2,R$}] {};
 
     \node (spring_ground) at ($ (M.center) + (0,-3cm) $) {};
-        \node (spring_ground2) at ($ (M2.center) + (0,-3cm) $) {};
 
-    \draw [|-|] (M.center) ++ (-2,0) -- ($(spring_ground.center) + (-2cm,0cm)$) node[midway,left] {$l$};
-    \draw [spring] (spring_ground.center) -- (M.center) node [pos=0.4,right] {$k_l$,$l_{0}$};
+
+    \draw [|-|] (M.center) ++ (-2,0) -- ($(spring_ground.center) + (-2cm,0cm)$) node[midway,left] {$d$};
+    \draw [spring] (spring_ground.center) -- (M.center) node [pos=0.4,right] {$k$, $l_{0}$};
 
     
 
@@ -76,9 +75,9 @@
     \fill [black] (M.center) circle (0.05);
 
 
-%     \node (ground) [ground,anchor=north,xshift=-0cm,yshift=-0.cm,minimum width=9cm] at ($(M.south)!0.5!(M2.south)$) {};
+    \node (ground) [ground,anchor=north,xshift=-0cm,yshift=-0.cm,minimum width=3cm] at ($(M.south)!0.5!(M.south)$) {};
 
-%     \draw [thick] (ground.north west) -- (ground.north east);
+    \draw [thick] (ground.north west) -- (ground.north east);
 
     
     
@@ -89,7 +88,7 @@
 
 
 
-\draw [-latex,thin] (M.north) --++ (0cm,0.5cm) -- +(1.5cm,0cm) node[right] {$x_l$};
+\draw [-latex,thin] (M.north) --++ (0cm,0.5cm) -- +(1.5cm,0cm) node[right] {$x$};
 
 
 
