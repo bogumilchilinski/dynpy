@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1649444061 "nonlinear_disc.tex" "nonlinear_disc.pdf" "nonlinear_disc" 1649444062
+["pdflatex"] 1649519448 "nonlinear_disc.tex" "nonlinear_disc.pdf" "nonlinear_disc" 1649519449
   "/dev/null" 1649346088 0 d41d8cd98f00b204e9800998ecf8427e ""
   "/etc/texmf/web2c/texmf.cnf" 1590581910 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -208,7 +208,6 @@
   "/usr/share/texmf/fonts/tfm/public/lm/rm-lmr5.tfm" 1254938640 11804 aefb10c002e6492c25236524a447f969 ""
   "/usr/share/texmf/fonts/tfm/public/lm/rm-lmr7.tfm" 1254938640 11852 5a9022f105fd1ee2797df861e79ae9a0 ""
   "/usr/share/texmf/fonts/type1/public/lm/lmmi10.pfb" 1254938640 30388 702fae6a5f0e6e9c48a1d872b442ffcf ""
-  "/usr/share/texmf/fonts/type1/public/lm/lmmi7.pfb" 1254938640 30789 be3ebdf20b6442cc4aaf81a81e17daf4 ""
   "/usr/share/texmf/fonts/type1/public/lm/lmr10.pfb" 1254938640 119235 f35b44530a1d90eb90fe15d9cba67ea0 ""
   "/usr/share/texmf/fonts/type1/public/lm/lmr7.pfb" 1254938640 121145 68312a933e2c689ed40ec0aba373e279 ""
   "/usr/share/texmf/tex/latex/lm/lmodern.sty" 1256929440 1606 c17281c7cff2bbd7ff0173e1433487ec ""
@@ -220,13 +219,13 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1581979058 38841 ce3692aa899bb693b90b87eaa5d4d84e ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1590748799 4770781 1ed1abab22da9c3e2cc82e4db562318b ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1590748886 8256264 954d301c1bc5de4ed644a8052052631e ""
-  "nonlinear_disc.aux" 1649444062 662 b2b94621371df8d9296b8bf5bec1b851 "pdflatex"
-  "nonlinear_disc.out" 1649444061 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-  "nonlinear_disc.tex" 1649444050 3322 66c68b0768285a0b55fe1f9c5cab3167 ""
+  "nonlinear_disc.aux" 1649519449 662 b2b94621371df8d9296b8bf5bec1b851 "pdflatex"
+  "nonlinear_disc.out" 1649519449 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "nonlinear_disc.tex" 1649519443 3116 ffd1973de4b68356bd32a2feafb5eafa ""
   "pythontex-files-nonlinear_disc/nonlinear_disc.pytxmcr" 0 -1 0 ""
   (generated)
-  "nonlinear_disc.pdf"
-  "nonlinear_disc.pytxcode"
   "nonlinear_disc.out"
-  "nonlinear_disc.aux"
+  "nonlinear_disc.pytxcode"
+  "nonlinear_disc.pdf"
   "nonlinear_disc.log"
+  "nonlinear_disc.aux"
