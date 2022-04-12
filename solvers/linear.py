@@ -173,7 +173,7 @@ class MultivariableTaylorSeries(Expr):
     
     
     def doit(self,**hints):
-        return self._series()
+        return self._series().doit()
 
 
 
