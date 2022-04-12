@@ -17,14 +17,50 @@ import sympy.physics.mechanics as me
 
 from sympy.simplify.fu import TR8, TR10, TR7, TR3
 
-from .linear import LinearODESolution, FirstOrderODE, AnalyticalSolution,FirstOrderLinearODESystem,ODESystem
+from .linear import LinearODESolution, FirstOrderODE, AnalyticalSolution,FirstOrderLinearODESystem,  FirstOrderODESystem,ODESystem
 
 from timer import timer
 from collections.abc import Iterable
 from functools import cached_property
 
+class NthOrderODEsApproximation(FirstOrderLinearODESystem):
+    
+    
+    @cached_property
+    def _secular_funcs(self):
+        
+
+        secular_funcs = self.general_solution.atoms(Function) - {self.ivar}
+        return secular_funcs
+    
+    @cached_property
+    def secular_terms(self):
+        
+        
+        sec_conditions =[list(self.odes.applyfunc( lambda entry: entry.coeff(func)  ))   for func in self._secular_funcs]
+        
+        return sec_conditions
 
 
+    def remove_secular_terms(self):
+        
+        obj = copy.copy(self)
+        subs_dict = {comp:0 for comp in self.secular_terms}
+        
+        return obj.subs(subs_dict)
+    
+#     def find_approximation(self):
+        
+#         zeroth_ord = self.odes.applyfunc(lambda ode: ode.general_solution.self.remove_secular_terms())
+        
+#         for order,approx in enumerate(self.odes):
+            
+#             approx._parameters = self.t_list[order+1:]
+            
+#             nth_ord = approx.applyfunc(lambda ode: ode.steady_solution.self.remove_secular_terms())
+        
+#         return {order:}
+        
 
 class MultiTimeScaleSolution(FirstOrderLinearODESystem):
     
@@ -187,14 +223,14 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
         
 
         
-        display(self.predicted_solution(order).as_dict())
+        #display(self.predicted_solution(order).as_dict().subs(sec_ord_subs).doit().subs(first_ord_subs).doit())
 
 
-        eoms_approximated = FirstOrderLinearODESystem(odes_system,self.dvars).subs(
+        eoms_approximated = FirstOrderODESystem(odes_system,self.dvars).subs(
             self.predicted_solution(order).as_dict())
         
         
-        eoms_approximated = eoms_approximated.subs(sec_ord_subs).doit().subs(first_ord_subs)
+        eoms_approximated = eoms_approximated.as_matrix().subs(sec_ord_subs).doit().subs(first_ord_subs).doit()
 
         
         
@@ -204,7 +240,7 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
             
             })
         
-        return eoms_approximated.subs(t_fun_subs_dict)
+        return eoms_approximated.subs(t_fun_subs_dict).subs(sec_ord_subs).doit().subs(first_ord_subs).doit()
 
     def eoms_approximation_list(self,
                                 max_order=3,
@@ -219,11 +255,38 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
         order_get=lambda obj,order: obj.diff(self.eps, order) / factorial(order)
         
         
-        return [ FirstOrderLinearODESystem(eoms_approximated.applyfunc(lambda obj: order_get(obj,order)).subs(
-                    self.eps, 0).doit().rhs, self.approximation_function(order) )
+        return [ NthOrderODEsApproximation.from_ode_system(ODESystem(eoms_approximated.applyfunc(lambda obj: order_get(obj,order)).subs(
+                    self.eps, 0).doit(), self.approximation_function(order),ivar = self.t_list[0] ))
             for order in range(min_order, max_order + 1)
         ]
 
+
+    def _general_sol(self,order=3):
+        
+        approx_eoms_list = self.eoms_approximation_list(order)
+        
+        
+        approx_eoms_list[0]._parameters = self._t_list[1:]
+        sol_subs_dict = approx_eoms_list[0].solution.as_dict()
+        
+        display(sol_subs_dict)
+
+        for order,approx in enumerate(approx_eoms_list[1:]):
+
+            approx._parameters = self._t_list[1:]
+            
+            display(approx.ivar,approx)
+            
+            
+            sol=approx.subs(sol_subs_dict).steady_solution.as_dict()
+            
+            display(sol)
+            
+            sol_subs_dict = {**sol_subs_dict,**sol}
+
+        
+        return sol_subs_dict
+    
     def nth_eoms_approximation(self, order=3):
 
         eoms_approximated = self.eoms_approximation_list(max_order=order,

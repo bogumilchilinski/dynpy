@@ -246,6 +246,8 @@ class AnalyticalSolution(Matrix):
         obj._lhs=self._lhs
         
         return obj
+
+    
     
     def __mul__(self,other):
         
@@ -319,6 +321,10 @@ class AnalyticalSolution(Matrix):
     def rhs(self):
         return Matrix( list(self.as_dict().values()) )
     
+
+    def as_matrix(self):
+        return Matrix( self.lhs-self.rhs )    
+    
     def as_iterable(self):
 
         return [(lhs,comp) for lhs,comp  in zip(self._lhs,self)]
@@ -347,8 +353,14 @@ class AnalyticalSolution(Matrix):
 class ODESystem(AnalyticalSolution):
     
     _ivar = Symbol('t')
+    _parameters = None
+
+    @classmethod
+    def set_default_parameters(cls,parameters):
+        cls._parameters = parameters
+        return cls
     
-    def __new__(cls, odes_system,dvars , ivar=None ,evaluate=True, **options):
+    def __new__(cls, odes_system,dvars , ivar=None ,evaluate=True, parameters = None, **options):
 
         if not isinstance(odes_system,Iterable):
             odes_system = Matrix([odes_system])
@@ -356,9 +368,11 @@ class ODESystem(AnalyticalSolution):
             dvars = Matrix([dvars])        
         
 
+
         
         obj = super().__new__(cls,dvars,odes_system,evaluate=evaluate, **options)
         
+        obj._parameters = parameters
 
         
         obj._dvars = dvars
@@ -370,27 +384,67 @@ class ODESystem(AnalyticalSolution):
 
         return obj
 
-    @property
+    @cached_property
     def ivar(self):
         return self._ivar
     
     
-    @property
+    @cached_property
     def dvars(self):
         return self.lhs
-    
-    @property
+  
+    @cached_property
+    def parameters(self):
+        
+        return self._parameters
+
+    @cached_property
     def odes(self):
         return self.rhs 
-    
-    @property
-    def _lhs_repr(self):
-        return (self.lhs).applyfunc(lambda obj: Derivative(obj,self.ivar,evaluate=False)  )
 
+
+    def as_eq(self):
+        return Eq(self.odes,self.dvars*0,evaluate=False)
+    
+    
+    @cached_property
+    def _lhs_repr(self):
+        #return (self.lhs).applyfunc(lambda obj: Derivative(obj,self.ivar,evaluate=False)  )
+        return (self.lhs).applyfunc(lambda obj: obj.diff(self.ivar)  )
+
+    
+    
+    def _latex(self,*args):
+
+        
+        return f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}' 
+
+    def as_matrix(self):
+        return Matrix(self._lhs_repr - self.rhs) 
+    
+
+    def as_first_ode_linear_system(self):
+        
+        
+        return FirstOrderLinearODESystem.from_ode_system(self)
+        
+    
+    
 class FirstOrderODESystem(ODESystem):
     
-
-
+    @classmethod
+    def from_ode_system(cls,odes_system):
+        
+        ivar= odes_system.ivar
+        vels = odes_system._lhs_repr
+        
+        vel_coeffs_mat  = odes_system.odes.jacobian(vels) #it should be reimplemented with .jacobian in Analytical Solution class
+        
+        odes = vel_coeffs_mat.inv() * (-odes_system.odes.subs({ vel:0     for vel in vels } ))
+        
+        return cls( odes , odes_system.dvars,ivar=ivar)
+    
+    
     def solution(self,ics=None):
         return self.linearized().solution()
     
@@ -451,7 +505,21 @@ class FirstOrderODESystem(ODESystem):
 
         return self.approximated(n=1, x0=x0, op_point=op_point, hint=hint, label=label)
 
+    def subs(self,*args,**kwargs):
+        
 
+        
+        obj = super().subs(*args,**kwargs)
+        obj._lhs=self._lhs.subs(*args,**kwargs)
+        
+        return obj
+    
+
+    def _latex(self,*args):
+
+        
+        return latex(Eq(self._lhs_repr,self.rhs ,evaluate=False   ))
+    
     
 class FirstOrderLinearODESystem(FirstOrderODESystem):
     
@@ -470,6 +538,24 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         return self.odes.subs({coord:0 for coord in self.dvars})
 
     
+    def _const_mapper(self,const_set,parameters=None):
+        
+        if parameters is None:
+            parameters = self.parameters
+        
+        const_base_dict={dummy_symbol : Symbol(f'C_{no+1}')   for  no,dummy_symbol  in enumerate(const_set)}
+        
+        if parameters is None:
+            const_dict=const_base_dict
+        else:
+            const_fun_dict = {dummy_symbol : Function(str(c_symbol))   for  dummy_symbol,c_symbol  in const_base_dict.items()}
+            const_dict = {dummy_symbol : c_fun(*parameters)   for  dummy_symbol,c_fun  in const_fun_dict.items()}
+        
+        self._const_list = list(const_dict.values())
+        
+        return const_dict
+    
+    
     @cached_property
     def _solution(self):
         
@@ -478,9 +564,9 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         sol = AnalyticalSolution(self.dvars,linodesolve(A,t=self.ivar,b=b))
         dummies_set= sol.atoms(Dummy)
-        const_dict = {dummy_symbol : Symbol(f'C_{no+1}')   for  no,dummy_symbol  in enumerate(dummies_set)}
+        const_dict = self._const_mapper(dummies_set)
         
-        self._const_list = list(const_dict.values())
+        
         
         return AnalyticalSolution(self.dvars,sol).subs( const_dict )
     

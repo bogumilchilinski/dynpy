@@ -356,9 +356,8 @@ INPUT nonlinear_disc.aux
 INPUT ./nonlinear_disc.out
 INPUT ./nonlinear_disc.out
 INPUT /usr/share/texmf/fonts/enc/dvips/lm/lm-ec.enc
-INPUT /usr/share/texmf/fonts/enc/dvips/lm/lm-mathit.enc
 INPUT /usr/share/texmf/fonts/enc/dvips/lm/lm-rm.enc
+INPUT /usr/share/texmf/fonts/enc/dvips/lm/lm-mathit.enc
 INPUT /usr/share/texmf/fonts/type1/public/lm/lmmi10.pfb
-INPUT /usr/share/texmf/fonts/type1/public/lm/lmmi7.pfb
 INPUT /usr/share/texmf/fonts/type1/public/lm/lmr10.pfb
 INPUT /usr/share/texmf/fonts/type1/public/lm/lmr7.pfb
