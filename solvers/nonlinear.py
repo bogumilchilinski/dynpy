@@ -283,6 +283,8 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
             
             eqns_map = lambda obj: TR10(TR8(TR10(obj.expand()).expand())).expand()
             
+            display(approx.applyfunc(eqns_map).secular_terms())
+            
             approx_subs=approx.subs(sol_subs_dict).applyfunc(eqns_map).remove_secular_terms()
             
 
