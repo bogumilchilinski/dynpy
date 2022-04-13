@@ -37,17 +37,19 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
     def secular_terms(self):
         
         
-        sec_conditions =[list(self.odes.applyfunc( lambda entry: entry.coeff(func)  ))   for func in self._secular_funcs]
+        sec_conditions =sum((list(self.odes.applyfunc( lambda entry: entry.coeff(func)  ))   for func in self._secular_funcs),[])
         
         return sec_conditions
 
 
     def remove_secular_terms(self):
         
-        obj = copy.copy(self)
-        subs_dict = {comp:0 for comp in self.secular_terms}
+        obj = self.__class__.from_ode_system(self)
+        subs_dict = {comp:0 for comp in self._secular_funcs}
         
-        return obj.subs(subs_dict)
+        
+        
+        return obj.subs(subs_dict).doit()
     
 #     def find_approximation(self):
         
@@ -267,7 +269,9 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
         
         
         approx_eoms_list[0]._parameters = self._t_list[1:]
-        sol_subs_dict = approx_eoms_list[0].solution.as_dict()
+        sol = approx_eoms_list[0].solution
+        sol_subs_dict = sol.as_dict()
+        sol_list = [sol]
         
         display(sol_subs_dict)
 
@@ -275,17 +279,22 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
 
             approx._parameters = self._t_list[1:]
             
-            display(approx.ivar,approx)
+
+            
+            eqns_map = lambda obj: TR10(TR8(TR10(obj.expand()).expand())).expand()
+            
+            approx_subs=approx.subs(sol_subs_dict).applyfunc(eqns_map).remove_secular_terms()
+            
+
+            
+            sol=approx_subs.steady_solution.applyfunc(lambda obj: obj.expand())
             
             
-            sol=approx.subs(sol_subs_dict).steady_solution.as_dict()
-            
-            display(sol)
-            
-            sol_subs_dict = {**sol_subs_dict,**sol}
+            sol_subs_dict = {**sol_subs_dict,**sol.as_dict()}
+            sol_list += [sol]
 
         
-        return sol_subs_dict
+        return Matrix(sol_list)
     
     def nth_eoms_approximation(self, order=3):
 

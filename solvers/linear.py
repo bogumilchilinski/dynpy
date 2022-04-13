@@ -18,7 +18,7 @@ from IPython.display import display
 
 import sympy.physics.mechanics as me
 
-from sympy.simplify.fu import TR8, TR10, TR7, TR3
+from sympy.simplify.fu import TR8, TR10, TR7,TR6, TR5, TR3
 from collections.abc import Iterable
 from sympy.solvers.ode.systems import linodesolve
 from functools import cached_property
@@ -429,6 +429,87 @@ class ODESystem(AnalyticalSolution):
         return FirstOrderLinearODESystem.from_ode_system(self)
         
     
+    def subs(self,*args,**kwargs):
+        
+
+        
+        obj = super().subs(*args,**kwargs)
+        obj._lhs=self._lhs
+        obj._ivar = self.ivar
+        
+        return obj
+    
+    
+    def __add__(self,other):
+        
+        if isinstance(other,self.__class__):
+            other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
+        
+        obj = super().__add__(other)
+        obj._lhs=self._lhs
+        obj._ivar = self.ivar
+        
+        return obj
+
+    
+    def __rsub__(self,other):
+        
+        if isinstance(other,self.__class__):
+            other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
+        
+        obj = super().__rsub__(other)
+        obj._lhs=self._lhs
+        obj._ivar = self.ivar
+        
+        return obj
+
+    
+    def __sub__(self,other):
+        
+        if isinstance(other,self.__class__):
+            other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
+        
+        obj = super().__sub__(other)
+        obj._lhs=self._lhs
+        obj._ivar = self.ivar
+        
+        return obj
+
+    
+    
+    def __mul__(self,other):
+        
+        obj = super().__mul__(other)
+        obj._lhs=self._lhs
+        obj._ivar = self.ivar
+        
+        return obj
+    
+    def doit(self,**hints):
+        
+        obj = super().doit(**hints)
+        obj._lhs=self._lhs
+        obj._ivar = self.ivar
+        
+        return obj
+    
+    def copy(self):
+        
+        
+        
+        return copy.copy(self)
+    
+    
+    def _eval_applyfunc(self, f):
+        
+        obj = super()._eval_applyfunc(f)
+        obj._lhs=self._lhs
+        obj._ivar = self.ivar
+        
+        return obj
+    
+    
+    
     
 class FirstOrderODESystem(ODESystem):
     
@@ -440,10 +521,17 @@ class FirstOrderODESystem(ODESystem):
         
         vel_coeffs_mat  = odes_system.odes.jacobian(vels) #it should be reimplemented with .jacobian in Analytical Solution class
         
-        odes = vel_coeffs_mat.inv() * (-odes_system.odes.subs({ vel:0     for vel in vels } ))
+        if vel_coeffs_mat == Matrix.zeros(len(vels)):
         
+            odes = odes_system
+        else:
+            odes = vel_coeffs_mat.inv() * (-odes_system.odes.subs({ vel:0     for vel in vels } ))
+            
+            
         return cls( odes , odes_system.dvars,ivar=ivar)
-    
+ 
+
+
     
     def solution(self,ics=None):
         return self.linearized().solution()
@@ -545,27 +633,56 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         const_base_dict={dummy_symbol : Symbol(f'C_{no+1}')   for  no,dummy_symbol  in enumerate(const_set)}
         
+        dummies_set = sum((list(dummy_expr.atoms(Dummy))  for dummy_expr  in const_set),[])
+        
+        
         if parameters is None:
             const_dict=const_base_dict
+            
+            const_dict=solve([key-val  for  key,val in const_base_dict.items()] , dummies_set )
+            
         else:
             const_fun_dict = {dummy_symbol : Function(str(c_symbol))   for  dummy_symbol,c_symbol  in const_base_dict.items()}
             const_dict = {dummy_symbol : c_fun(*parameters)   for  dummy_symbol,c_fun  in const_fun_dict.items()}
-        
+            
+            display([key-val  for  key,val in const_dict.items()],list(const_dict.values()))
+            
+            const_dict=solve([key-val  for  key,val in const_dict.items()] , dummies_set  )
+            
+            
+
+        display(const_dict)
+            
         self._const_list = list(const_dict.values())
         
+
+        
         return const_dict
-    
+
+    @cached_property
+    def solution_map(self):
+        return lambda obj: TR8(TR10(TR8(obj.doit(conds='none')).expand()).expand())
+        
     
     @cached_property
     def _solution(self):
         
+        
+        
         A=self._fundamental_matrix
         b=self._free_terms
         
-        sol = AnalyticalSolution(self.dvars,linodesolve(A,t=self.ivar,b=b))
-        dummies_set= sol.atoms(Dummy)
-        const_dict = self._const_mapper(dummies_set)
+   
+        sol = AnalyticalSolution(self.dvars,linodesolve(A,t=self.ivar,b=b)).applyfunc(self.solution_map)
         
+        dummies_set= sol.atoms(Dummy)
+        
+        func_set=(set(sum((list(sol[0].coeff(dummy).atoms(Function)) for dummy  in dummies_set),[])) - {self.ivar}  )
+        
+        dummies_set = {sol[0].coeff(fun)   for fun  in  func_set}
+        
+        const_dict = self._const_mapper(dummies_set)
+
         
         
         return AnalyticalSolution(self.dvars,sol).subs( const_dict )
