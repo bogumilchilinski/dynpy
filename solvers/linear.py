@@ -200,10 +200,18 @@ class AnalyticalSolution(Matrix):
     
     @classmethod
     def from_dict(cls,dictionary,**options):
-        
 
-        
         return cls( list(dictionary.keys()),list(dictionary.values()) ,**options   )
+
+    
+    @classmethod
+    def from_eq(cls,matrix_eq,**options):
+        
+        eq = matrix_eq
+        
+        obj = cls(eq.lhs,eq.rhs ,evaluate=True ,**options   )
+        
+        return obj
     
     def subs(self,*args,**kwargs):
         
@@ -227,40 +235,39 @@ class AnalyticalSolution(Matrix):
 
     
     def __rsub__(self,other):
-        
+
         if isinstance(other,self.__class__):
             other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
-        
+
         obj = super().__rsub__(other)
         obj._lhs=self._lhs
-        
+
         return obj
 
-    
+
     def __sub__(self,other):
-        
+
         if isinstance(other,self.__class__):
             other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
-        
+
         obj = super().__sub__(other)
         obj._lhs=self._lhs
-        
+
         return obj
 
-    
-    
+
     def __mul__(self,other):
-        
+
         obj = super().__mul__(other)
         obj._lhs=self._lhs
-        
+
         return obj
-    
+
     def doit(self,**hints):
-        
+
         obj = super().doit(**hints)
         obj._lhs=self._lhs
-        
+
         return obj
     
     def _eval_applyfunc(self, f):
@@ -651,7 +658,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
             
             
 
-        display(const_dict)
+        #display(const_dict)
             
         self._const_list = list(const_dict.values())
         
