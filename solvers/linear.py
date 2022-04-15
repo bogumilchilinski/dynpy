@@ -632,6 +632,48 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         return self.odes.subs({coord:0 for coord in self.dvars})
 
+
+    @cached_property
+    def _auxiliary_fundamental_matrix(self):
+        
+        odes_list = list(self.odes)
+        dvars_list = list(self.dvars)
+        
+        if len(self.dvars) >= 2:
+            no = int(len(self.dvars)/2)
+        
+            odes=  odes_list[no:] + odes_list[:no] 
+            dvars = dvars_list[no:] + dvars_list[:no]
+        else:
+            odes=odes_list
+            dvars=dvars_list
+        
+        odes = Matrix(odes)
+        dvars = Matrix(dvars)
+        
+        return odes.jacobian(dvars)
+    
+    @cached_property
+    def _auxiliary_free_terms(self):
+        
+        odes_list = list(self.odes)
+        dvars = self.dvars
+        
+        if len(self.dvars) >= 2:
+            no = int(len(self.dvars)/2)
+        
+            odes=  odes_list[no:] + odes_list[:no] 
+
+        else:
+            odes=odes_list
+
+        odes = Matrix(odes)
+        
+
+        
+        return odes.subs({coord:0 for coord in dvars})   
+    
+    
     
     def _const_mapper(self,const_set,parameters=None):
         
@@ -640,21 +682,21 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         const_base_dict={dummy_symbol : Symbol(f'C_{no+1}')   for  no,dummy_symbol  in enumerate(const_set)}
         
-        dummies_set = sum((list(dummy_expr.atoms(Dummy))  for dummy_expr  in const_set),[])
+        
         
         
         if parameters is None:
             const_dict=const_base_dict
             
-            const_dict=solve([key-val  for  key,val in const_base_dict.items()] , dummies_set )
+            #const_dict=solve([key-val  for  key,val in const_base_dict.items()] , dummies_set )
             
         else:
             const_fun_dict = {dummy_symbol : Function(str(c_symbol))   for  dummy_symbol,c_symbol  in const_base_dict.items()}
             const_dict = {dummy_symbol : c_fun(*parameters)   for  dummy_symbol,c_fun  in const_fun_dict.items()}
             
-            display([key-val  for  key,val in const_dict.items()],list(const_dict.values()))
+            #display([key-val  for  key,val in const_dict.items()],list(const_dict.values()))
             
-            const_dict=solve([key-val  for  key,val in const_dict.items()] , dummies_set  )
+            #const_dict=solve([key-val  for  key,val in const_dict.items()] , dummies_set  )
             
             
 
@@ -672,29 +714,52 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
     
     @cached_property
-    def _solution(self):
-        
-        
-        
-        A=self._fundamental_matrix
-        b=self._free_terms
-        
-   
-        sol = AnalyticalSolution(self.dvars,linodesolve(A,t=self.ivar,b=b)).applyfunc(self.solution_map)
-        
-        dummies_set= sol.atoms(Dummy)
-        
-        func_set=(set(sum((list(sol[0].coeff(dummy).atoms(Function)) for dummy  in dummies_set),[])) - {self.ivar}  )
-        
-        dummies_set = {sol[0].coeff(fun)   for fun  in  func_set}
-        
-        const_dict = self._const_mapper(dummies_set)
+    def _general_solution(self):
 
         
         
+        
+        A = self._auxiliary_fundamental_matrix
+        
+        sol = AnalyticalSolution(self.dvars,linodesolve(A,t=self.ivar,b=0*self.dvars))#.applyfunc(self.solution_map)
+        
+        dummies_set= sol.atoms(Dummy)
+        const_dict = self._const_mapper(dummies_set)
+
+        if len(self.dvars) >= 2:
+            no = int(len(self.dvars)/2)
+        
+            sol=  sol[no:] + sol[:no]
+
         return AnalyticalSolution(self.dvars,sol).subs( const_dict )
-    
-    @cached_property    
+                                 
+
+                                 
+    @cached_property
+    def _steady_solution(self):
+                                 
+        
+        
+        
+        A = self._auxiliary_fundamental_matrix
+        b = self._auxiliary_free_terms
+                                 
+
+        sol = AnalyticalSolution(self.dvars,linodesolve(A,t=self.ivar,b=b)).applyfunc(self.solution_map)
+        
+        dummies_set= sol.atoms(Dummy)
+
+
+        if len(self.dvars) >= 2:
+            no = int(len(self.dvars)/2)
+        
+            sol=  sol[no:] + sol[:no] 
+     
+        
+        return AnalyticalSolution(self.dvars,sol).subs({dum_sym:0 for dum_sym in dummies_set})
+                                 
+                                 
+    @cached_property
     def const_set(self):
 
         return self._const_list
@@ -703,18 +768,18 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
     @cached_property
     def general_solution(self):
 
-        return self._solution - self.steady_solution
+        return self._general_solution
 
 
     @cached_property
     def steady_solution(self):
 
-        return self._solution.subs({const_sym:0 for const_sym  in self._const_list})
+        return self._steady_solution
     
     @property
     def solution(self):
 
-        return self._solution
+        return self.general_solution + self.steady_solution
     
 
     

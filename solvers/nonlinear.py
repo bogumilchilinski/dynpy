@@ -36,8 +36,9 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
     @cached_property
     def secular_terms(self):
         
-        
-        sec_conditions =sum((list(self.odes.applyfunc( lambda entry: entry.coeff(func)  ))   for func in self._secular_funcs),[])
+#         print('secsec')
+#         display(self.odes)
+        sec_conditions =[self.odes.applyfunc( lambda entry: entry.coeff(func))  for func in self._secular_funcs]
         
         return sec_conditions
 
@@ -281,11 +282,15 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
             
 
             
-            eqns_map = lambda obj: TR10(TR8(TR10(obj.expand()).expand())).expand()
+            eqns_map = lambda obj: TR10(TR8(TR10(obj.expand()).expand())).expand().doit().expand()
             
-            display(approx.applyfunc(eqns_map).secular_terms())
             
-            approx_subs=approx.subs(sol_subs_dict).applyfunc(eqns_map).remove_secular_terms()
+            
+            approx_subs=approx.subs(sol_subs_dict).applyfunc(eqns_map)
+            
+            display(approx_subs.secular_terms)
+            
+            approx_subs=approx_subs.remove_secular_terms()
             
 
             
