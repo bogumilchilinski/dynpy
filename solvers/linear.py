@@ -524,7 +524,10 @@ class FirstOrderODESystem(ODESystem):
     def from_ode_system(cls,odes_system):
         
         ivar= odes_system.ivar
-        vels = odes_system._lhs_repr
+        vels = odes_system.dvars.diff(ivar)
+        
+        display(vels)
+        display(odes_system.odes)
         
         vel_coeffs_mat  = odes_system.odes.jacobian(vels) #it should be reimplemented with .jacobian in Analytical Solution class
         

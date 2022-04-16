@@ -37,8 +37,15 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
     def secular_terms(self):
         
 #         print('secsec')
-#         display(self.odes)
-        sec_conditions =[self.odes.applyfunc( lambda entry: entry.coeff(func))  for func in self._secular_funcs]
+        sec_funcs=self._secular_funcs
+        self._const_list
+        
+        sec_conditions =[((self.odes.applyfunc( lambda entry: entry.coeff(func))))  for func in sec_funcs]
+        
+        display(self._const_list)
+        ivar=self._parameters[0]
+        
+        sec_conditions =FirstOrderODESystem.from_ode_system(ODESystem([sec_conditions[1][1],sec_conditions[3][1]],dvars = self._const_list ,ivar=ivar  )).linearized().solution
         
         return sec_conditions
 
@@ -229,7 +236,7 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
         #display(self.predicted_solution(order).as_dict().subs(sec_ord_subs).doit().subs(first_ord_subs).doit())
 
 
-        eoms_approximated = FirstOrderODESystem(odes_system,self.dvars).subs(
+        eoms_approximated = FirstOrderODESystem(odes_system,self.dvars,parameters = self.t_list).subs(
             self.predicted_solution(order).as_dict())
         
         
@@ -259,7 +266,7 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
         
         
         return [ NthOrderODEsApproximation.from_ode_system(ODESystem(eoms_approximated.applyfunc(lambda obj: order_get(obj,order)).subs(
-                    self.eps, 0).doit(), self.approximation_function(order),ivar = self.t_list[0] ))
+                    self.eps, 0).doit(), self.approximation_function(order),ivar = self.t_list[0],parameters = self.t_list ))
             for order in range(min_order, max_order + 1)
         ]
 
@@ -287,7 +294,7 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
             
             
             approx_subs=approx.subs(sol_subs_dict).applyfunc(eqns_map)
-            
+            approx_subs._parameters = self._t_list[1:]
             display(approx_subs.secular_terms)
             
             approx_subs=approx_subs.remove_secular_terms()
