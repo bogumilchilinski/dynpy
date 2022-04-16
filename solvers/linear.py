@@ -1,6 +1,6 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, re, pi, latex,
-                   dsolve, solve, fraction, factorial, Add, Mul, exp,
+                   dsolve, solve, fraction, factorial, Add, Mul, exp, zeros,
                    numbered_symbols, integrate, ImmutableMatrix,Expr,Dict,Subs,Derivative,Dummy)
 
 from sympy.physics.mechanics import dynamicsymbols
@@ -179,8 +179,23 @@ class MultivariableTaylorSeries(Expr):
 
 
 class AnalyticalSolution(Matrix):
-    def __new__(cls, lhs,rhs ,evaluate=True, **options):
+    def __new__(cls, lhs,rhs=None ,evaluate=True, **options):
 
+        if isinstance(lhs,dict):
+            return cls.from_dict(lhs,**options)
+        if isinstance(lhs,eq):
+            return cls.from_eq(lhs,**options)
+        else:
+            return cls._contructor(lhs,rhs ,evaluate=evaluat, **options)
+
+        return obj
+
+
+
+    
+    @classmethod
+    def _constructor(cls, lhs,rhs=None ,evaluate=True, **options):
+        
         if not isinstance(lhs,Iterable):
             lhs = Matrix([lhs])
         if not isinstance(rhs,Iterable):
@@ -192,25 +207,45 @@ class AnalyticalSolution(Matrix):
         obj._lhs=lhs
 
         return obj
-
-
-
-    
-    
     
     @classmethod
     def from_dict(cls,dictionary,**options):
 
-        return cls( list(dictionary.keys()),list(dictionary.values()) ,**options   )
+        return cls._constructor( list(dictionary.keys()),list(dictionary.values()) ,**options   )
 
     
     @classmethod
     def from_eq(cls,matrix_eq,**options):
+        if isinstance(matrix_eq,Eq):
+            
+            eq = matrix_eq
+        else:
+            print ('TypeError: matrix_eq is not Eq')
+            return None
         
-        eq = matrix_eq
+        obj = cls._constructor(eq.lhs,eq.rhs ,evaluate=True ,**options   )
         
-        obj = cls(eq.lhs,eq.rhs ,evaluate=True ,**options   )
+        return obj
+
+    @classmethod
+    def from_eqns_matrix(cls,eqns_matrix,dvars,**options):
+
+        obj = zeros(shape(eqns_matrix))
+        if isinstance(eqns_matrix,matrix):
+            matrix = eqns_matrix
+        else:
+            print ('TypeError: eqns_matrix is not matrix')
+            return None
         
+        for eqs in shape(matrix):
+            if isinstance(matrix[eqs-1],Eq):
+                eq = matrix[eqs-1]
+            else:
+                print ('TypeError: eqprestion is not Eq')
+                return None
+
+            obj[eqs-1] = cls._constructor(eq.lhs,eq.rhs,evaluate=True ,**options   )
+
         return obj
     
     def subs(self,*args,**kwargs):
@@ -361,6 +396,15 @@ class ODESystem(AnalyticalSolution):
     
     _ivar = Symbol('t')
     _parameters = None
+    
+    @classmethod
+    def from_odes_system(cls,odes_system):
+
+        sys = odes_system
+        dvars = sys.dvars
+        ivar = sys.ivar
+
+        return cls._constructor(cls, sys , dvars , ivar , **options)
 
     @classmethod
     def set_default_parameters(cls,parameters):
@@ -368,14 +412,21 @@ class ODESystem(AnalyticalSolution):
         return cls
     
     def __new__(cls, odes_system,dvars , ivar=None ,evaluate=True, parameters = None, **options):
+        if isinstance(odes_system,dict):
+            return cls.from_dict(odes_system,**options)
+        if isinstance(odes_system,eq):
+            return cls.from_eq(odes_system,**options)
+        else:
+            return cls._contructor(cls, odes_system , dvars , ivar=ivar , evaluate=evaluate , parameters = parameters , **options)
 
+
+    @classmethod
+    def _constructor(cls, odes_system,dvars , ivar=None ,evaluate=True, parameters = None, **options):
+        
         if not isinstance(odes_system,Iterable):
             odes_system = Matrix([odes_system])
         if not isinstance(dvars,Iterable):
-            dvars = Matrix([dvars])        
-        
-
-
+            dvars = Matrix([dvars])
         
         obj = super().__new__(cls,dvars,odes_system,evaluate=evaluate, **options)
         
@@ -390,7 +441,7 @@ class ODESystem(AnalyticalSolution):
             obj._ivar = ivar
 
         return obj
-
+    
     @cached_property
     def ivar(self):
         return self._ivar
@@ -520,8 +571,10 @@ class ODESystem(AnalyticalSolution):
     
 class FirstOrderODESystem(ODESystem):
     
+    
+    
     @classmethod
-    def from_ode_system(cls,odes_system):
+    def from_rhs_eqns(cls,odes_system):
         
         ivar= odes_system.ivar
         vels = odes_system._lhs_repr
@@ -610,10 +663,7 @@ class FirstOrderODESystem(ODESystem):
         return obj
     
 
-    def _latex(self,*args):
 
-        
-        return latex(Eq(self._lhs_repr,self.rhs ,evaluate=False   ))
     
     
 class FirstOrderLinearODESystem(FirstOrderODESystem):
@@ -782,7 +832,10 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         return self.general_solution + self.steady_solution
     
 
-    
+    def _latex(self,*args):
+
+        
+        return latex(Eq(self._lhs_repr,self.rhs ,evaluate=False   ))    
     
     
     
