@@ -1836,7 +1836,7 @@ class EngineWithTMD(ComposedSystem):
             m_e = mass
                 -value of particle mass
 
-            m_TMD = mass
+            m_g = mass
                 -value of TMD mass
 
             e = distance
