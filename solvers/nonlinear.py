@@ -660,46 +660,46 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
     def first_approximation(self, dict=False, equation=False):
         return self.nth_approximation(order=1, dict=dict, equation=equation)    
     
-    def numerized(self,
-                 params_values={},
-                 **kwargs):
+#     def numerized(self,
+#                  params_values={},
+#                  **kwargs):
         
-        print('params values')
-        print(params_values)
+#         print('params values')
+#         print(params_values)
         
-        if params_values=={}:
-            return copy.copy(self)
-        else:
+#         if params_values=={}:
+#             return copy.copy(self)
+#         else:
             
-            if 'ics' in params_values:
-                ics_list = params_values['ics']
-            else:
-                ics_list = self.ics
+#             if 'ics' in params_values:
+#                 ics_list = params_values['ics']
+#             else:
+#                 ics_list = self.ics
             
             
             
             
                 
-            new_system =  self.__class__(
-                odes_system=self.governing_equations,
-                 ivar=self.ivar,
-                 dvars= self.dvars,
-                 ics=ics_list,
-                 eps=self.eps,
-                 omega=self.omega,
-                 order=self._order,
-                 t_span=[],
-                 params=[],
-                 params_values={**self.params_values,**params_values},
-                 ic_point=ics_list,
-                 equation_type=None,
-                 label=self._label)
+#             new_system =  self.__class__(
+#                 odes_system=self.governing_equations,
+#                  ivar=self.ivar,
+#                  dvars= self.dvars,
+#                  ics=ics_list,
+#                  eps=self.eps,
+#                  omega=self.omega,
+#                  order=self._order,
+#                  t_span=[],
+#                  params=[],
+#                  params_values={**self.params_values,**params_values},
+#                  ic_point=ics_list,
+#                  equation_type=None,
+#                  label=self._label)
             
-            new_system._stored_solution = copy.copy(self._stored_solution)
-            new_system._saved_solution = copy.copy(self._saved_solution)
+#             new_system._stored_solution = copy.copy(self._stored_solution)
+#             new_system._saved_solution = copy.copy(self._saved_solution)
 
             
-            return new_system
+#             return new_system
     
     
     

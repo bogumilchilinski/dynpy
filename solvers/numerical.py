@@ -108,6 +108,11 @@ class OdeComputationalCase:
                 len(self.dvars)) + ' equations'
         self._label = label
 
+    @property
+    def parameters(self):
+        return self.odes_system.free_symbols-{self.ivar}
+        
+        
     def __call__(self, label=None):
 
         #         if len(args)>0:

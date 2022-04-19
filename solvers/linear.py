@@ -25,6 +25,8 @@ from collections.abc import Iterable
 from sympy.solvers.ode.systems import linodesolve
 from functools import cached_property
 
+from .numerical import OdeComputationalCase
+
 
 
 class MultivariableTaylorSeries(Expr):
@@ -425,6 +427,9 @@ class ODESystem(AnalyticalSolution):
     def set_default_parameters(cls,parameters):
         cls._parameters = parameters
         return cls
+
+
+    
     
     def __new__(cls, odes,dvars,odes_rhs=None , ivar=None ,evaluate=True, parameters = None, **options):
         
@@ -480,6 +485,15 @@ class ODESystem(AnalyticalSolution):
     def ivar(self):
         return self._ivar
     
+    
+    @cached_property
+    def odes_rhs(self):
+        if self.dvars.diff(self.ivar) == self.lhs:
+            return self.rhs
+        else:
+            inertia_mat=self.lhs.jacobian(self.dvars)
+            
+            return inertia_mat.inv()*self.rhs
     
     @cached_property
     def dvars(self):
@@ -606,9 +620,7 @@ class ODESystem(AnalyticalSolution):
         
         return obj
     
-    def numerized(self,params_values={},ic_list=[]):
-        
-        return OdeComputationalCase(odes_system=self.odes,dvars=self.dvars,ivar=self.ivar).compute_solution()
+
     
     
 class FirstOrderODESystem(ODESystem):
@@ -650,6 +662,12 @@ class FirstOrderODESystem(ODESystem):
         else:
             return FirstOrderODESystem(lin_eqns,dvars=self.dvars,ivar=self.ivar)
 
+    def numerized(self,params_values=None,ic_list=[]):
+        '''
+        Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
+        '''
+        return OdeComputationalCase(odes_system=self.odes_rhs,dvars=self.dvars,ivar=self.ivar)
+        
 
     def linearized(self, x0=None, op_point=False, hint=[], label=None):
         """
@@ -859,11 +877,9 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
             no = int(len(self.dvars)/2)
         
             sol=  sol[no:] + sol[:no] 
-     
-        
+
         return AnalyticalSolution(self.dvars,sol).subs({dum_sym:0 for dum_sym in dummies_set})
-                                 
-                                 
+
     @cached_property
     def const_set(self):
 
