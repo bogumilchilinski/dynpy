@@ -1741,7 +1741,7 @@ class HarmonicOscillator(LinearDynamicSystem):
             self,
             cos_amp=None,
             sin_amp=None,
-            excitation_freq=None,
+            excitation_freq=Symbol('Omega',positive=True)
     ):
         ''''
         Computes the steady solution amplitude for the system defined in the instance of this class.
