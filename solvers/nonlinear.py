@@ -1,4 +1,5 @@
-from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Function, lambdify, factorial,solve, Dict, Number, N
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag,
+                   Eq, Function, lambdify, factorial,solve, Dict, Number, N,Add,Mul)
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 import sympy as sym
@@ -15,16 +16,63 @@ from IPython.display import display
 
 import sympy.physics.mechanics as me
 
-from sympy.simplify.fu import TR8, TR10, TR7, TR3
+from sympy.simplify.fu import TR8, TR10, TR7, TR3, TR0
 
-from .linear import LinearODESolution, FirstOrderODE, AnalyticalSolution,FirstOrderLinearODESystem,ODESystem
+from .linear import LinearODESolution, FirstOrderODE, AnalyticalSolution,FirstOrderLinearODESystem,  FirstOrderODESystem,ODESystem
 
 from timer import timer
 from collections.abc import Iterable
 from functools import cached_property
 
+class NthOrderODEsApproximation(FirstOrderLinearODESystem):
+    
+    
+    @cached_property
+    def _secular_funcs(self):
+        
+
+        secular_funcs = self.general_solution.atoms(Function) - set(self._const_list) - set(self._parameters) - {self.ivar}
+        return secular_funcs
+    
+    @cached_property
+    def secular_terms(self):
+        
+#         print('secsec')
+        sec_funcs=self._secular_funcs
+        self._const_list
+        
+        sec_conditions =[((self.odes.applyfunc( lambda entry: entry.coeff(func))))  for func in sec_funcs]
+        
+        display(self._const_list)
+        ivar=self._parameters[0]
+        
+        sec_conditions =FirstOrderODESystem.from_ode_system(ODESystem([sec_conditions[1][1],sec_conditions[3][1]],dvars = self._const_list ,ivar=ivar  )).linearized().solution
+        
+        return sec_conditions
 
 
+    def remove_secular_terms(self):
+        
+        obj = self.__class__.from_ode_system(self)
+        
+        subs_dict = {comp:0 for comp in self._secular_funcs}
+        
+        
+        
+        return obj.subs(subs_dict).doit()
+    
+#     def find_approximation(self):
+        
+#         zeroth_ord = self.odes.applyfunc(lambda ode: ode.general_solution.self.remove_secular_terms())
+        
+#         for order,approx in enumerate(self.odes):
+            
+#             approx._parameters = self.t_list[order+1:]
+            
+#             nth_ord = approx.applyfunc(lambda ode: ode.steady_solution.self.remove_secular_terms())
+        
+#         return {order:}
+        
 
 class MultiTimeScaleSolution(FirstOrderLinearODESystem):
     
@@ -54,8 +102,8 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
         if not isinstance(dvars,Iterable):
             dvars = Matrix([dvars])        
 
-        obj = super().__new__(cls,odes_system,dvars,evaluate=evaluate, **options)
-        obj._dvars = dvars
+        obj = super().__new__(cls,odes_system,dvars=dvars,ivar=ivar,evaluate=evaluate, **options)
+
         obj._const_list = []
 
         if ivar is not None:
@@ -90,7 +138,7 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
         
         obj._eoms=odes_system
         obj.odes_system=odes_system
-        obj._odes = odes_system
+        #obj._odes = odes_system
 
         return obj
         
@@ -187,14 +235,16 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
         
 
         
-        display(self.predicted_solution(order).as_dict())
+        #display(self.predicted_solution(order).as_dict().subs(sec_ord_subs).doit().subs(first_ord_subs).doit())
 
+        odes_lhs=self.predicted_solution(order).diff(self.ivar).subs(first_ord_subs).doit()
+        odes_rhs = self.rhs.subs(self.predicted_solution(order).as_dict()).subs(first_ord_subs).doit()
 
-        eoms_approximated = FirstOrderLinearODESystem(odes_system,self.dvars).subs(
-            self.predicted_solution(order).as_dict())
+        #eoms_approximated = ODESystem(odes_system,dvars=self.dvars,parameters = self.t_list).subs(
+        #    self.predicted_solution(order).as_dict())
+        eoms_approximated = odes_lhs - odes_rhs
         
-        
-        eoms_approximated = eoms_approximated.subs(sec_ord_subs).doit().subs(first_ord_subs)
+        eoms_approximated = eoms_approximated.subs(sec_ord_subs).doit().subs(first_ord_subs).doit()
 
         
         
@@ -204,26 +254,82 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
             
             })
         
-        return eoms_approximated.subs(t_fun_subs_dict)
+        return eoms_approximated.subs(t_fun_subs_dict).doit()
 
     def eoms_approximation_list(self,
                                 max_order=3,
                                 min_order=0,
                                 odes_system=None):
 
-        eoms_approximated = self.eoms_approximation(
-            order=max_order, odes_system=odes_system).expand()
+        eoms_approximated = self.eoms_approximation(order=max_order, odes_system=odes_system).expand()
 
         
         
-        order_get=lambda obj,order: obj.diff(self.eps, order) / factorial(order)
+        order_get=lambda obj,order: (obj.diff(self.eps, order) / factorial(order)).subs(self.eps, 0).doit()
         
         
-        return [ FirstOrderLinearODESystem(eoms_approximated.applyfunc(lambda obj: order_get(obj,order)).subs(
-                    self.eps, 0).doit().rhs, self.approximation_function(order) )
+        
+        return [ NthOrderODEsApproximation.from_odes(eoms_approximated.applyfunc(lambda obj: order_get(obj,order)) , self.approximation_function(order),ivar = self.t_list[0],parameters = self.t_list )
             for order in range(min_order, max_order + 1)
         ]
 
+
+    def _general_sol(self,order=3):
+        
+        approx_eoms_list = self.eoms_approximation_list(order)
+        
+        
+        approx_eoms_list[0]._parameters = self._t_list[1:]
+        sol = approx_eoms_list[0].solution
+        sol_subs_dict = sol.as_dict()
+        sol_list = [sol]
+        
+        display(sol_subs_dict)
+
+        for order,approx in enumerate(approx_eoms_list[1:]):
+
+            approx._parameters = self._t_list[1:]
+            
+
+            
+            eqns_map = lambda obj: (TR10(TR8(TR10(obj.expand()).expand())).expand().doit().expand())
+            
+            def eqns_map(obj):
+                
+                oper_expr = lambda obj: (TR10(TR8(TR10(TR0(obj.expand())).expand())).expand().doit().expand())
+                
+
+                
+                
+                if isinstance(obj,Add):
+                    elems=obj.args
+                    return sum(oper_expr(elem)  for elem in elems)
+                else:
+                    return oper_expr(obj)
+                
+                
+            
+
+            approx_subs=approx.applyfunc(eqns_map).subs(sol_subs_dict).applyfunc(eqns_map)
+            approx_subs._parameters = self._t_list[1:]
+
+            
+            approx_subs=approx_subs.remove_secular_terms()
+
+
+
+            #display(approx_subs.lhs,approx_subs.rhs)
+            #display(approx_subs)
+            
+            sol=approx_subs.steady_solution.applyfunc(lambda obj: obj.expand()).applyfunc(eqns_map)
+            
+            
+            sol_subs_dict = {**sol_subs_dict,**sol.as_dict()}
+            sol_list += [sol]
+
+        
+        return (sol_list)
+    
     def nth_eoms_approximation(self, order=3):
 
         eoms_approximated = self.eoms_approximation_list(max_order=order,
