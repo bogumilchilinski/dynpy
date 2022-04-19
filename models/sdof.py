@@ -222,17 +222,18 @@ class DampedBlowerToothedBelt(ComposedSystem):
         super().__init__(composed_system,**kwargs)
     def get_default_data(self):
 
-        m0, k0, F0, Omega0, lam = symbols('m_0 k_0 F_0 Omega_0 lambda', positive=True)
+        m0, k0, F0, Omega0, lam0 = symbols('m_0 k_0 F_0 Omega_0 lambda_0', positive=True)
 
         default_data_dict = {
-            self.c_belt: [lam*(self.k_belt)],
+            self.c_belt: [self.lam*(self.k_belt)],
             self.c_tensioner: [self.lam*(self.k_tensioner)],
             self.m: [0.1*m0, 0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0, 0.7 * m0, 0.8 * m0, 0.9 * m0],
             self.k_belt: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
             self.k_tensioner: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
             self.F: [F0, 2 * F0, 3 * F0, 4 * F0, 5 * F0, 6 * F0],
-            self.Omega: [Omega0, 2 * Omega0, 3 * Omega0, 4 * Omega0, 5 * Omega0, 6 * Omega0],
+#             self.Omega: [Omega0, 2 * Omega0, 3 * Omega0, 4 * Omega0, 5 * Omega0, 6 * Omega0],
             self.Q: [15*F0, 8 * F0, 9 * F0, 10 * F0, 12 * F0, 16 * F0],
+            self.lam: [0.1*lam0, 0.2 * lam0, 0.3 * lam0, 0.4 * lam0, 0.5 * lam0, 0.6 * lam0, 0.7 * lam0, 0.8 * lam0, 0.9 * lam0],
 
         }
 
@@ -1070,6 +1071,18 @@ class ExcitedPendulum(ComposedSystem):
 
         super().__init__(system,**kwargs)
 
+    def get_default_data(self):
+
+        m0, l0, g0, F0 = symbols('m_0 l_0 g_0 F_0', positive=True)
+
+        default_data_dict = {
+            self.m: [2 * m0, 1*m0, S.Half * m0, S.Half**2 * m0, 3*S.Half * m0],
+            self.l: [2 * l0, 1*l0, S.Half * l0, S.Half**2 * l0, 3*S.Half * l0],
+            self.g: [g0],
+            self.F: [2 * F0, 1*F0, S.Half * F0, S.Half**2 * F0, 3*S.Half * F0],
+        }
+        return default_data_dict
+        
     def symbols_description(self):
         self.sym_desc_dict = {
             self.m1: r'Mass of pendulum',
@@ -1273,8 +1286,8 @@ class PendulumKinematicExct(ComposedSystem):
         m0, l0 = symbols('m_0 l_0', positive=True)
 
         default_data_dict = {
-            self.m: [2 * m0, S.Half * m0, 4 * m0, m0, S.Half**2 * m0, 8*m0, 16*m0],
-            self.l: [2 * l0, S.Half * l0, 4 * l0, S.Half**2 * l0, 3 * l0, 3 * S.Half * l0, 9 * l0, 3*S.Half**2 * l0],
+            self.m: [1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0,10 * m0, 11 * m0, 12 * m0, 13 * m0, 14 * m0, 15 * m0, 16 * m0, 17 * m0, 18 * m0, 19 * m0, 20 * m0, 21 * m0, 22 * m0, 23 * m0, 24 * m0, 25 * m0, 26 * m0, 27 * m0, 28 * m0, 29 * m0, 30 * m0],
+            self.l: [1 * l0, 2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0,7*l0, 8*l0, 9*l0,10*l0, 11 * l0, 12 * l0, 13 * l0, 14 * l0, 15 * l0, 16 * l0,17*l0, 18*l0, 19*l0,20*l0, 21 * l0, 22 * l0, 23 * l0, 24 * l0, 25 * l0, 26 * l0,27*l0, 28*l0, 29*l0,30*l0],
         }
         return default_data_dict
 
@@ -1480,7 +1493,7 @@ class DampedEngine(ComposedSystem):
 
 
 class NonlinearEngine(ComposedSystem):
-    scheme_name = 'engine.png'
+    scheme_name = 'nonline_engine_angled_springs.png'
     real_name = 'engine_real.PNG'
     """
     Model of an exemplary Tuned Mass Damper (TMD) simulated as Double Degree of Freedom of coupled trolleys.
@@ -1575,14 +1588,15 @@ class NonlinearEngine(ComposedSystem):
         return self.sym_desc_dict
     def get_default_data(self):
 
-        m0, k0, e0 = symbols('m_0 k_0 e_0', positive=True)
+        m0, k0, e0, l0 = symbols('m_0 k_0 e_0 l_0', positive=True)
 
         default_data_dict = {
             self.M: [100*m0,300*m0,500*m0,700*m0,900*m0,200 * m0, 400 * m0,600*m0,800*m0],
             self.m_e: [m0,3*m0,5*m0,7*m0,9*m0,2 * m0, 4 * m0,6*m0,8*m0],
             self.k_m: [k0,2*k0,4*k0,6*k0,8*k0, 3 * k0,5*k0,7*k0,9*k0],
             self.e: [2 * e0, S.Half * e0, 4 * e0, S.Half**2 * e0,3 * e0,3* S.Half * e0, 9 * e0, 3*S.Half**2 * e0],
-            self.phi:[self.Omega*self.ivar]
+            self.phi:[self.Omega*self.ivar],
+            self.d:[2*l0,3*l0,4*l0,5*l0,6*l0,7*l0,8*l0,9*l0]
         }
         return default_data_dict
     
@@ -1807,5 +1821,56 @@ class NonLinearTrolley(ComposedSystem):
         }
         return self.sym_desc_dict
 
+class NonLinearDisc(ComposedSystem):
+    scheme_name = 'nonlinear_disc.png'
+    real_name = 'dwa_wozki_XD.PNG'
 
+    def __init__(self,
+                 m1=Symbol('m', positive=True),
+                 
+                 kl=Symbol('k', positive=True),
+
+                 R=Symbol('R', positive=True),
+                 d=Symbol('d', positive=True),
+                 l_0=Symbol('l_0', positive=True),
+                 ivar=Symbol('t'),
+
+                 x=dynamicsymbols('x'),
+                 qs=dynamicsymbols('x'),
+                 **kwargs):
+        
+        self.m1 = m1
+
+        self.kl = kl
+
+        self.R = R
+        self.l_0 = l_0
+        self.d = d
+
+        self.x = x
+
+        self.Disk1 = MaterialPoint(m1, x, qs=[x]) + MaterialPoint(m1/2*R**2, x/R, qs=[x]) + Spring(kl, pos1=(sqrt(x**2 + d**2) - l_0), qs=[x])
+
+
+        system = self.Disk1
+        super().__init__(system,**kwargs)
+
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [0.5* m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0,9 * m0],
+
+
+            self.d: [5 * l0, 2 * l0, 3 * S.Half * l0, 4 * l0, 6 * l0, 7 * l0, 8 * l0, 9 * l0],
+
+            self.kl: [1 * k0, 3 * k0, 2 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
+            self.l_0:[l0],
+            
+        }
+
+        return default_data_dict
+
+    
 
