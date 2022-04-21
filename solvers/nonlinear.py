@@ -30,8 +30,9 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
     @cached_property
     def _secular_funcs(self):
         
-
-        secular_funcs = self.general_solution.atoms(Function) - set(self._const_list) - set(self._parameters) - {self.ivar}
+        # weird error to improve, when .remove_secular_terms is called. if secular terms are missing, method returns None, 
+        # if statement should be considered
+        secular_funcs = set() | (self.general_solution.atoms(Function) - set(self._const_list) - set(self._parameters) - {self.ivar})
         return secular_funcs
     
     @cached_property
@@ -41,15 +42,14 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
         sec_funcs=self._secular_funcs
         self._const_list
         
-        sec_conditions =[((self.odes.applyfunc( lambda entry: entry.coeff(func))))  for func in sec_funcs]
+        sec_conditions =Matrix([list((self.odes.applyfunc( lambda entry: entry.coeff(func))))  for func in sec_funcs])
         
-        display(self._const_list)
+        
         ivar=self._parameters[0]
         
-        sec_conditions =FirstOrderODESystem.from_ode_system(ODESystem([sec_conditions[1][1],sec_conditions[3][1]],dvars = self._const_list ,ivar=ivar  )).linearized().solution
+        #sec_conditions =FirstOrderODESystem.from_ode_system(ODESystem([sec_conditions[1][1],sec_conditions[3][1]],dvars = self._const_list ,ivar=ivar  )).linearized().solution
         
-        return sec_conditions
-
+        return ODESystem(Matrix(sec_conditions[:,1]),dvars = Matrix(self._const_list) ,ivar=ivar  )
 
     def remove_secular_terms(self):
         
@@ -125,7 +125,7 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
         
 
         
-        obj.secular_eq=set()
+        obj.secular_eq={}
         obj.int_const=set()
 
         obj.omega = 1
@@ -276,6 +276,8 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
 
     def _general_sol(self,order=3):
         
+        self.secular_eq={}
+        
         approx_eoms_list = self.eoms_approximation_list(order)
         
         
@@ -313,9 +315,9 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
             approx_subs=approx.applyfunc(eqns_map).subs(sol_subs_dict).applyfunc(eqns_map)
             approx_subs._parameters = self._t_list[1:]
 
-            
+            self.secular_eq[self.eps**(order+1)] = (approx_subs.secular_terms)
             approx_subs=approx_subs.remove_secular_terms()
-
+            
 
 
             #display(approx_subs.lhs,approx_subs.rhs)

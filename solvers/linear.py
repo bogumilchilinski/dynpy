@@ -1,7 +1,8 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, re, pi, latex,
                    dsolve, solve, fraction, factorial, Add, Mul, exp, zeros,
-                   numbered_symbols, integrate, ImmutableMatrix,Expr,Dict,Subs,Derivative,Dummy)
+                   numbered_symbols, integrate, ImmutableMatrix,Expr,Dict,Subs,Derivative,Dummy,
+                  lambdify)
 
 from sympy.matrices.matrices import MatrixBase
 
@@ -401,6 +402,22 @@ class AnalyticalSolution(Matrix):
 
         return latex(Eq(self._lhs_repr,self.rhs,evaluate=False))
 
+    def numerized(self,t_span=[],parameters={}):
+        
+        ivar = Symbol('t')
+        
+        solution = self.rhs.subs(parameters)
+        
+        sol_func = lambdify(ivar, solution, 'numpy')
+        
+        numerized_data = (sol_func(t_span))
+        
+        dvars = self.lhs
+        
+        numerized_sol  = TimeDataFrame(data={dvar:data[0] for dvar,data in zip(dvars,numerized_data)},index=t_span)
+        numerized_sol.index.name = ivar
+        
+        return numerized_sol
     
     
 class ODESystem(AnalyticalSolution):
@@ -662,7 +679,7 @@ class FirstOrderODESystem(ODESystem):
         else:
             return FirstOrderODESystem(lin_eqns,dvars=self.dvars,ivar=self.ivar)
 
-    def numerized(self,params_values=None,ic_list=[]):
+    def numerized(self,parameters={},ic_list=[]):
         '''
         Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
         '''
