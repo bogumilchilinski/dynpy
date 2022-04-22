@@ -332,6 +332,12 @@ class MultiTimeScaleSolution(FirstOrderLinearODESystem):
         
         return (sol_list)
     
+    def general_solution(self,order=2):
+        
+        self._general_sol()
+        
+        
+    
     def nth_eoms_approximation(self, order=3):
 
         eoms_approximated = self.eoms_approximation_list(max_order=order,

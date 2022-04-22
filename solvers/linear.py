@@ -753,7 +753,21 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
             
         return cls._constructor( odes=vels , dvars=dvars  , odes_rhs = odes   ,ivar=ivar,parameters=parameters)
 
-    
+    @classmethod
+    def from_ode_system(cls,ode_system):
+
+        sys = ode_system
+        odes=sys.lhs
+        odes_rhs = sys.rhs
+        dvars = sys.dvars
+        ivar = sys.ivar
+        parameters = sys._parameters
+        
+        vels = dvars.diff(ivar)
+        inertia_mat = odes.jacobian(vels) - odes_rhs.jacobian(vels)
+        rhs = (odes_rhs).subs({  vel:0 for vel in vels}) - (odes).subs({  vel:0 for vel in vels})
+
+        return cls._constructor(vels , dvars,inertia_mat.inv()*rhs, ivar ,parameters=parameters)
     
     
     @cached_property
