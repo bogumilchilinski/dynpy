@@ -600,10 +600,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         Returns the right-hand side of the equations of motion in the form of equations matrix. Output is provided basing on LagrangesMethod object.
         """
 
-        return Matrix([
-            Eq(comp.diff(self.ivar), self.rhs()[no], evaluate=False)
-            for no, comp in enumerate(list(self.Y))
-        ])
+        return Eq( self.Y.diff(self.ivar),self.rhs()  )
 
     def equilibrium_equation(self, static_disp_dict=None):
         """
@@ -913,7 +910,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         Returns Matrix with external forces
         """
-        return self.governing_equations.subs(
+        return -self.governing_equations.subs(
             {gen_coord: 0
              for gen_coord in self.Y}).doit()
 
@@ -1716,7 +1713,7 @@ class HarmonicOscillator(LinearDynamicSystem):
         """
 
         """
-        return LinearODESolution(self._eoms, ivar=self.ivar, dvars=self.q).steady_solution(
+        return LinearODESolution(self._eoms.doit().expand().doit(), ivar=self.ivar, dvars=self.q).steady_solution(
             initial_conditions=initial_conditions)
 
     def solution(self, initial_conditions=None):
@@ -1801,8 +1798,21 @@ class HarmonicOscillator(LinearDynamicSystem):
         fund_mat = -self.inertia_matrix(
         ) * omg**2 + sym.I * omg * self.damping_matrix(
         ) + self.stiffness_matrix()
+        
 
-        amp=(fund_mat.inv() * (comp_sin)).T*(fund_mat.inv() * (comp_sin))  +  (fund_mat.inv() * (comp_cos)).T*(fund_mat.inv() * (comp_cos))
+            
+            
+        if len(self.q)==1:
+            
+            m=self.inertia_matrix()[0]
+            k=self.stiffness_matrix()[0]
+            c=self.damping_matrix()[0]
+            
+            amp = [(comp_sin+comp_cos)[0]**2/((k - m*omg**2)**2 + 2*c**2*omg**2)]
+            
+        else:
+
+            amp=(fund_mat.inv() * (comp_sin)).T*(fund_mat.inv() * (comp_sin))  +  (fund_mat.inv() * (comp_cos)).T*(fund_mat.inv() * (comp_cos))
 
         return sqrt(amp[0])
 

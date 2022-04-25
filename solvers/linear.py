@@ -1577,7 +1577,7 @@ class LinearODESolution:
 
                 if len(self.dvars) == 1:
                     steady_sol += Matrix([
-                        sym.dsolve(eqns_res[0], self.dvars[0]).rhs.subs({
+                        sym.dsolve(eqns_res[0].expand().doit(), self.dvars[0]).rhs.subs({
                             Symbol('C1'):
                             0,
                             Symbol('C2'):

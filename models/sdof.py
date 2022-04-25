@@ -743,44 +743,38 @@ class BeamBridge(ComposedSystem):
         return self.sym_desc_dict
 
 
+class BeamBridgeDamped(ComposedSystem):
 
-class BeamBridgeTMD(ComposedSystem):
-
-    scheme_name = 'bridge_tmd.png'
+    scheme_name = 'bridge_dmp.png'
     real_name = 'beam_bridge_real.PNG'
 
     def __init__(self,
                  m=Symbol('m', positive=True),
-                 m_TMD=Symbol('m_TMD', positive=True),
                  k_beam=Symbol('k_beam', positive=True),
-                 k_TMD=Symbol('k_TMD', positive=True),
                  ivar=Symbol('t'),
                  g=Symbol('g', positive=True),
                  Omega=Symbol('Omega', positive=True),
                  F_0=Symbol('F_0', positive=True),
+                 c=Symbol('c', positive=True),
+                 l=Symbol('l', positive=True),
                  z=dynamicsymbols('z'),
-                 z_TMD=dynamicsymbols('z_TMD'),
                  **kwargs):
 
         self.m = m
+        self.c=c
         self.k_beam = k_beam
         self.g = g
         self.Omega = Omega
         self.F_0 = F_0
-        self.m_TMD = m_TMD
-        self.k_TMD = k_TMD
-        self.z_TMD = z_TMD
+        self.l=l
         self.z = z
 
         self.mass = MaterialPoint(m, z, qs=[z])
         self.spring = Spring(k_beam, z, qs=[z])
         self.gravity_force = GravitationalForce(self.m, self.g, z)
-        self.gravity_TMD = GravitationalForce(self.m_TMD, self.g, z_TMD)
         self.force = Force(-F_0 * sin(Omega * ivar), pos1=z)
-        self.TMD = MaterialPoint(m_TMD, pos1=z_TMD, qs=[z_TMD])
-        self.spring_TMD = Spring(k_TMD, z, z_TMD, qs=[z, z_TMD])
-        composed_system = (self.mass + self.spring + self.gravity_force + self.force +
-                  self.TMD + self.spring_TMD + self.gravity_TMD)
+        self.damper = Damper(c=c, pos1=z, qs=[z])
+        composed_system = (self.mass + self.spring + self.gravity_force + self.force + self.damper)
 
         super().__init__(composed_system,**kwargs)
 
@@ -797,17 +791,19 @@ class BeamBridgeTMD(ComposedSystem):
 
     def get_default_data(self):
 
-        E, I, l, m0, k0 = symbols('E I l_beam m_0 k_0', positive=True)
+        E, I, l0, m0, k0,c0, lam = symbols('E I l_0 m_0 k_0 c_0 lambda', positive=True)
 
         default_data_dict = {
             self.m: [20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0],
+            
             self.k_beam: [
-                2 * 48 * E * I / l**3, 3 * 48 * E * I / l**3,
-                4 * 48 * E * I / l**3, 5 * 48 * E * I / l**3,
-                6 * 48 * E * I / l**3
-            ],
-            self.m_TMD: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
-            self.k_TMD: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
+                2 * 48 * E * I / l0**3, 3 * 48 * E * I / l0**3,
+                4 * 48 * E * I / l0**3, 5 * 48 * E * I / l0**3,
+                6 * 48 * E * I / l0**3],
+            
+
+            self.c:[lam*self.k_beam],
+            self.l:[l0],
         }
 
         return default_data_dict
@@ -903,7 +899,7 @@ class Pendulum(ComposedSystem):
         self.l = l
 
         self.potential=GravitationalForce(self.m, self.g, l*(1-cos(angle)), qs=qs)
-        self.kinen=MaterialPoint(self.m, pos1=qs[0], qs=[angle])
+        self.kinen=MaterialPoint(self.m*self.l**2, pos1=qs[0], qs=[angle])
         print(self.kinen)
         system=self.potential+self.kinen
         super().__init__(system,**kwargs)
