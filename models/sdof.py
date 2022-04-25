@@ -277,6 +277,9 @@ class EngineVerticalSpringGravity(ComposedSystem):
         self.e = e
         self.g=g
         self.phi=phi
+        
+        #phi=self.Omega*self.t
+        
         self.MaterialPoint_1 = MaterialPoint(M, pos1=z, qs=[z])
         self.MaterialPoint_2 = MaterialPoint(m_e,
                                              pos1=z + e * cos(phi),
@@ -292,13 +295,14 @@ class EngineVerticalSpringGravity(ComposedSystem):
         m0, k0, e0, g = symbols('m_0 k_0 e_0 g', positive=True)
 
         default_data_dict = {
+            self.phi:[self.Omega*self.t],
             self.M: [200 * m0, 350 * m0, 400 * m0, 550 * m0, 650 * m0, 700 * m0, 800 * m0],
             self.k_m: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0,9*k0,10*k0],
-            self.m_e: [0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0, 0.7 * m0, 0.8 * m0, 0.9 * m0],
+            self.m_e: [2*S.One/10 * m0, 3*S.One/10 * m0, 4*S.One/10 * m0, 5*S.One/10 * m0, 6*S.One/10 * m0, 7*S.One/10 * m0, 8*S.One/10 * m0, 9*S.One/10 * m0],
             self.e:[2 * e0, 3 * e0, 4 * e0, 5 * e0, 6 * e0],
             self.g:[g],
 #             self.phi:[self.Omega*self.t],
-            self.phi:[self.Omega*self.t]
+            
         }
 
         return default_data_dict
