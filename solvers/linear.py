@@ -1,6 +1,6 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, re, pi, latex,
-                   dsolve, solve, fraction, factorial, Add, Mul, exp, zeros,
+                   dsolve, solve, fraction, factorial, Add, Mul, exp, zeros, shape,
                    numbered_symbols, integrate, ImmutableMatrix,Expr,Dict,Subs,Derivative,Dummy,
                   lambdify)
 
@@ -194,6 +194,8 @@ class AnalyticalSolution(Matrix):
             return cls.from_dict(data,**options)
         if isinstance(data,Eq):
             return cls.from_eq(data,**options)
+        if isinstance(data,Matrix) and isinstance(data[0],Eq):
+            return cls.from_eqns_matrix(data,**options)
         else:
             return cls._constructor(data,rhs ,evaluate=evaluate, **options)
 
@@ -212,7 +214,7 @@ class AnalyticalSolution(Matrix):
         if rhs is None:
             rhs = 0*lhs
         elif not isinstance(rhs,Iterable):
-            rhs = Matrix([rhs])        
+            rhs = Matrix([rhs])
 
         obj = super().__new__(cls,rhs,evaluate=evaluate, **options)
 
@@ -240,10 +242,11 @@ class AnalyticalSolution(Matrix):
         return obj
 
     @classmethod
-    def from_eqns_matrix(cls,eqns_matrix,dvars,**options):
+    def from_eqns_matrix(cls,eqns_matrix,**options):
 
-        obj = zeros(shape(eqns_matrix))
-        if isinstance(eqns_matrix,matrix):
+        dvars = []
+        values = []
+        if isinstance(eqns_matrix,Matrix):
             matrix = eqns_matrix
         else:
             print ('TypeError: eqns_matrix is not matrix')
@@ -256,9 +259,16 @@ class AnalyticalSolution(Matrix):
                 print ('TypeError: eqprestion is not Eq')
                 return None
 
-            obj[eqs-1] = cls._constructor(eq.lhs,eq.rhs,evaluate=True ,**options   )
+            dvar = eq.lhs
+            dvars.append(dvar)
+            
+            value = eq.rhs
+            values.append(value)
+            
+        obj = cls._constructor(Matrix(dvars),Matrix(values),evaluate=True ,**options)
 
         return obj
+    
     
     def subs(self,*args,**kwargs):
         
@@ -385,10 +395,14 @@ class AnalyticalSolution(Matrix):
         
     
     def as_dict(self):
-        
 
         return Dict({lhs:rhs  for  lhs,rhs in self.as_iterable()})
+    
+    def as_eq_list(self):
+        
 
+        return [ Eq(lhs,comp,evaluate=False) for lhs,comp  in zip(self._lhs,self)]
+    
     @property
     def _lhs_repr(self):
         return self.lhs
@@ -550,7 +564,81 @@ class ODESystem(AnalyticalSolution):
         
         
         return FirstOrderLinearODESystem.from_ode_system(self)
+
+    def approximated(self, n=3, x0=None, op_point=False, hint=[], label=None):
+        """
+        Returns approximated N-th order function calculated with Taylor series method as an instance of the class
+        """
+
+        # print('x0',x0)
+        if not x0:
+            x0 = {coord: 0 for coord in self.dvars}
+
+        # #display(self._op_points(hint=hint, subs=True))
+        # if op_point:
+        #     x0.update(self._op_points(hint=hint, subs=True)[0])
+        #     #print('current op')
+        #     #display(self._op_points(hint=hint, subs=True))
+
         
+        ivar = self.ivar
+        diff_matrix = self.lhs.jacobian(self.dvars.diff(ivar))
+        
+        
+        
+        rhs_eqns=diff_matrix.inv()*self.rhs
+        
+        lin_eqns = Matrix([MultivariableTaylorSeries(ode, self.dvars, n=n, x0=x0).doit() for ode in rhs_eqns   ])
+    
+    
+        if n==1:
+            return FirstOrderLinearODESystem(lin_eqns,dvars=self.dvars,ivar=self.ivar)
+        else:
+            return FirstOrderODESystem(lin_eqns,dvars=self.dvars,ivar=self.ivar)
+
+    def numerized(self,parameters={},ic_list=[]):
+        '''
+        Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
+        '''
+        return OdeComputationalCase(odes_system=self.odes_rhs,dvars=self.dvars,ivar=self.ivar)
+        
+
+    def linearized(self, x0=None, op_point=False, hint=[], label=None):
+        """
+        Returns approximated first order function calculated with Taylor series method as an instance of the class. It enables to obtain linearized output.
+        Arguments:
+        =========
+            System = Created system based on symbolical represent of mechanical parts of it
+            
+            op_point - boolean, which points out if the operating point will be evaluated
+            
+            x0 - setting operating point
+            
+            hint - (optional) Adds additional equation to equilibrium condition and calculate op_point as equilibrium system.
+            
+            label=None (optional): string
+                Label of the class instance. Default label: '{Class name} with {length of qs} DOF'
+
+        Example:
+        =======
+        Creating the examplary system. A mass oscillating up and down while being held up by a spring with a spring constant kinematicly 
+
+        >>> t = symbols('t')
+        >>> m, g, l = symbols('m, g, l')
+        >>> qs = dynamicsymbols('varphi') 
+        >>> Pendulum()
+
+        Creating linerized system in symbolic pattern
+        >>> System_linearized = Sytem.linearized()
+
+        """
+
+        return self.approximated(n=1, x0=x0, op_point=op_point, hint=hint, label=label)
+    
+    
+    
+    
+    
     
     def subs(self,*args,**kwargs):
         
@@ -637,86 +725,20 @@ class ODESystem(AnalyticalSolution):
         
         return obj
     
+    def is_linear(self):
+        
+        if isinstance(self,self.linearized()):
+            return print('True')
+        else:
+            return print('False')
 
-    
-    
 class FirstOrderODESystem(ODESystem):
     
 
     
     def solution(self,ics=None):
         return self.linearized().solution()
-    
-    
-    def approximated(self, n=3, x0=None, op_point=False, hint=[], label=None):
-        """
-        Returns approximated N-th order function calculated with Taylor series method as an instance of the class
-        """
 
-        # print('x0',x0)
-        if not x0:
-            x0 = {coord: 0 for coord in self.dvars}
-
-        # #display(self._op_points(hint=hint, subs=True))
-        # if op_point:
-        #     x0.update(self._op_points(hint=hint, subs=True)[0])
-        #     #print('current op')
-        #     #display(self._op_points(hint=hint, subs=True))
-
-        
-        ivar = self.ivar
-        diff_matrix = self.lhs.jacobian(self.dvars.diff(ivar))
-        
-        
-        
-        rhs_eqns=diff_matrix.inv()*self.rhs
-        
-        lin_eqns = Matrix([MultivariableTaylorSeries(ode, self.dvars, n=n, x0=x0).doit() for ode in rhs_eqns   ])
-    
-    
-        if n==1:
-            return FirstOrderLinearODESystem(lin_eqns,dvars=self.dvars,ivar=self.ivar)
-        else:
-            return FirstOrderODESystem(lin_eqns,dvars=self.dvars,ivar=self.ivar)
-
-    def numerized(self,parameters={},ic_list=[]):
-        '''
-        Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
-        '''
-        return OdeComputationalCase(odes_system=self.odes_rhs,dvars=self.dvars,ivar=self.ivar)
-        
-
-    def linearized(self, x0=None, op_point=False, hint=[], label=None):
-        """
-        Returns approximated first order function calculated with Taylor series method as an instance of the class. It enables to obtain linearized output.
-        Arguments:
-        =========
-            System = Created system based on symbolical represent of mechanical parts of it
-            
-            op_point - boolean, which points out if the operating point will be evaluated
-            
-            x0 - setting operating point
-            
-            hint - (optional) Adds additional equation to equilibrium condition and calculate op_point as equilibrium system.
-            
-            label=None (optional): string
-                Label of the class instance. Default label: '{Class name} with {length of qs} DOF'
-
-        Example:
-        =======
-        Creating the examplary system. A mass oscillating up and down while being held up by a spring with a spring constant kinematicly 
-
-        >>> t = symbols('t')
-        >>> m, g, l = symbols('m, g, l')
-        >>> qs = dynamicsymbols('varphi') 
-        >>> Pendulum()
-
-        Creating linerized system in symbolic pattern
-        >>> System_linearized = Sytem.linearized()
-
-        """
-
-        return self.approximated(n=1, x0=x0, op_point=op_point, hint=hint, label=label)
 
     def subs(self,*args,**kwargs):
         
