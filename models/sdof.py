@@ -269,6 +269,8 @@ class EngineVerticalSpringGravity(ComposedSystem):
                  g=Symbol('g', positive=True),
                  **kwargs):
         self.z=z
+        self.x=x
+        self.l=l
         self.Omega=Omega
         self.t=ivar
         self.M = M
