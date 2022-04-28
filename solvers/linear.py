@@ -438,6 +438,7 @@ class ODESystem(AnalyticalSolution):
     
     _ivar = Symbol('t')
     _parameters = None
+    _ode_order = 1
     
     @classmethod
     def from_ode_system(cls,ode_system):
@@ -448,8 +449,9 @@ class ODESystem(AnalyticalSolution):
         dvars = sys.dvars
         ivar = sys.ivar
         parameters = sys._parameters
+        ode_order = sys.ode_order
 
-        return cls._constructor(odes , dvars, odes_rhs , ivar ,parameters=parameters)
+        return cls._constructor(odes , dvars, odes_rhs , ivar,ode_order=ode_order ,parameters=parameters)
 
     
 
@@ -462,27 +464,31 @@ class ODESystem(AnalyticalSolution):
 
     
     
-    def __new__(cls, odes,dvars,odes_rhs=None , ivar=None ,evaluate=True, parameters = None, **options):
+    def __new__(cls, odes,dvars,odes_rhs=None , ivar=None ,ode_order=None,evaluate=True, parameters = None, **options):
         
 
 
         if ivar is None:
             ivar = cls._ivar
+            
+        if ode_order is None:
+            ode_order = cls._ode_order
+
         
         if isinstance(odes,dict):
             return cls.from_dict(odes,**options)
         if isinstance(odes,Eq):
             return cls.from_eq(odes,**options)
-        if isinstance(odes,MatrixBase) and odes.jacobian(dvars.diff(ivar)).det()==0:
-            return cls.from_rhs(odes_rhs=odes,dvars=dvars,ivar=ivar)
+        if isinstance(odes,MatrixBase) and odes.jacobian(dvars.diff(ivar,ode_order)).det()==0:
+            return cls.from_rhs(odes_rhs=odes,dvars=dvars,ivar=ivar,ode_order=ode_order,parameters = parameters)
         else:
-            return cls._constructor(odes,dvars,odes_rhs=odes_rhs , ivar=ivar ,evaluate=evaluate, parameters = parameters, **options)
+            return cls._constructor(odes,dvars,odes_rhs=odes_rhs , ivar=ivar,ode_order=ode_order ,evaluate=evaluate, parameters = parameters, **options)
 
 
 
 
     @classmethod
-    def from_rhs(cls,odes_rhs,dvars,ivar=None,order=1):
+    def from_rhs(cls,odes_rhs,dvars,ivar=None,ode_order=1,parameters=None):
         
         if ivar is None:
             ivar = cls._ivar
@@ -490,11 +496,11 @@ class ODESystem(AnalyticalSolution):
         vels = dvars.diff(ivar)
         
 
-        return cls._constructor( odes=vels , dvars=dvars  , odes_rhs = odes_rhs   ,ivar=ivar)
+        return cls._constructor( odes=vels , dvars=dvars  , odes_rhs = odes_rhs   ,ivar=ivar, ode_order=ode_order,parameters=parameters)
         
         
     @classmethod
-    def _constructor(cls,odes,dvars,odes_rhs=None , ivar=None ,evaluate=True, parameters = None, **options):
+    def _constructor(cls,odes,dvars,odes_rhs=None , ivar=None,ode_order=None ,evaluate=True, parameters = None, **options):
         
 
         if not isinstance(dvars,Iterable):
@@ -510,31 +516,51 @@ class ODESystem(AnalyticalSolution):
         if ivar is not None:
             obj._ivar = ivar
 
+        if ode_order is not None:
+            obj._ode_order = ode_order
+
+            
         return obj
     
     @cached_property
     def ivar(self):
         return self._ivar
     
-    
-    @cached_property
-    def odes_rhs(self):
-        if self.dvars.diff(self.ivar) == self.lhs:
-            return self.rhs
-        else:
-            inertia_mat=self.lhs.jacobian(self.dvars)
-            
-            return inertia_mat.inv()*self.rhs
-    
     @cached_property
     def dvars(self):
         return self._dvars
-  
+    
+    @cached_property
+    def _fode_dvars(self):
+        return Matrix([self._dvars.diff(self.ivar,order) for order  in range(self.ode_order)])
+    
+    @cached_property
+    def _highest_diff(self):
+        return self.dvars.diff(self.ivar,self.ode_order)
+    
+    @cached_property
+    def odes_rhs(self):
+        
+        diffs = self._highest_diff
+        
+        if diffs == self.lhs:
+            return self.rhs
+        else:
+            diff_coeffs_mat=self.lhs.jacobian(diffs)
+            
+            return diff_coeffs_mat.inv()*(self.rhs  - self.lhs.subs({elem:0 for elem in diffs }))
+
+                                          
     @cached_property
     def parameters(self):
         
         return self._parameters
 
+    @cached_property    
+    def ode_order(self):
+        
+        return self._ode_order
+    
     @cached_property
     def odes(self):
         return Matrix([Add(lhs,-rhs,evaluate=False) if lhs-rhs == 0 else lhs-rhs   for lhs,rhs   in zip(self.lhs,self.rhs) ])
@@ -649,7 +675,7 @@ class ODESystem(AnalyticalSolution):
         obj._lhs = self.lhs.subs(*args,**kwargs)
         obj._dvars=self._dvars
         obj._ivar = self.ivar
-
+        obj._ode_order = self.ode_order
         
         return obj
     
@@ -662,6 +688,7 @@ class ODESystem(AnalyticalSolution):
         obj = super().__add__(other)
         obj._dvars=self._dvars
         obj._ivar = self.ivar
+        obj._ode_order = self.ode_order
         
         return obj
 
@@ -674,6 +701,7 @@ class ODESystem(AnalyticalSolution):
         obj = super().__rsub__(other)
         obj._lhs=self._lhs
         obj._ivar = self.ivar
+        obj._ode_order = self.ode_order
         
         return obj
 
@@ -687,6 +715,7 @@ class ODESystem(AnalyticalSolution):
         _
         obj._dvars=self._dvars
         obj._ivar = self.ivar
+        obj._ode_order = self.ode_order
         
         return obj
 
@@ -697,6 +726,7 @@ class ODESystem(AnalyticalSolution):
         obj = super().__mul__(other)
         obj._dvars=self._dvars
         obj._ivar = self.ivar
+        obj._ode_order = self.ode_order
         
         return obj
     
@@ -706,6 +736,7 @@ class ODESystem(AnalyticalSolution):
         obj._lhs = self._lhs.doit(**hints)
         obj._dvars=self._dvars
         obj._ivar = self.ivar
+        obj._ode_order = self.ode_order
         
         return obj
     
@@ -722,9 +753,12 @@ class ODESystem(AnalyticalSolution):
         obj._lhs = self.lhs._eval_applyfunc(f)
         obj._dvars=self._dvars
         obj._ivar = self.ivar
+        obj._ode_order = self.ode_order
+        
         
         return obj
     
+
     def is_linear(self):
         
         if isinstance(self,self.linearized()):
@@ -732,12 +766,60 @@ class ODESystem(AnalyticalSolution):
         else:
             return print('False')
 
+
+    def numerized(self,parameters={},ic_list=[]):
+        '''
+        Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
+        '''
+
+        
+        ode=self.as_first_ode_linear_system()
+        
+        return OdeComputationalCase(odes_system=ode.rhs,dvars=ode.dvars,ivar=ode.ivar)
+    
+    
+
 class FirstOrderODESystem(ODESystem):
     
 
     
     def solution(self,ics=None):
         return self.linearized().solution()
+
+
+        
+
+    def linearized(self, x0=None, op_point=False, hint=[], label=None):
+        """
+        Returns approximated first order function calculated with Taylor series method as an instance of the class. It enables to obtain linearized output.
+        Arguments:
+        =========
+            System = Created system based on symbolical represent of mechanical parts of it
+            
+            op_point - boolean, which points out if the operating point will be evaluated
+            
+            x0 - setting operating point
+            
+            hint - (optional) Adds additional equation to equilibrium condition and calculate op_point as equilibrium system.
+            
+            label=None (optional): string
+                Label of the class instance. Default label: '{Class name} with {length of qs} DOF'
+
+        Example:
+        =======
+        Creating the examplary system. A mass oscillating up and down while being held up by a spring with a spring constant kinematicly 
+
+        >>> t = symbols('t')
+        >>> m, g, l = symbols('m, g, l')
+        >>> qs = dynamicsymbols('varphi') 
+        >>> Pendulum()
+
+        Creating linerized system in symbolic pattern
+        >>> System_linearized = Sytem.linearized()
+
+        """
+
+        return self.approximated(n=1, x0=x0, op_point=op_point, hint=hint, label=label)
 
 
     def subs(self,*args,**kwargs):
@@ -756,40 +838,51 @@ class FirstOrderODESystem(ODESystem):
 class FirstOrderLinearODESystem(FirstOrderODESystem):
     
     @classmethod
-    def from_odes(cls,odes_system,dvars,ivar=None,order=1,parameters=None):
+    def from_odes(cls,odes_system,dvars,ivar=None,ode_order=1,parameters=None):
         
         
-        vels = dvars.diff(ivar)
+        diffs = dvars.diff(ivar,ode_order)
+
+        diffs_coeffs_mat  = odes_system.jacobian(diffs) #it should be reimplemented with .jacobian in Analytical Solution class
         
-        #display(vels)
-        #display(odes_system)
-        
-        vel_coeffs_mat  = odes_system.jacobian(vels) #it should be reimplemented with .jacobian in Analytical Solution class
-        
-        if vel_coeffs_mat == Matrix.zeros(len(vels)):
+        if diffs_coeffs_mat == Matrix.zeros(len(diffs)):
         
             odes = odes_system
         else:
-            odes = vel_coeffs_mat.inv() * (-odes_system.subs({ vel:0     for vel in vels } ))
+            odes = diffs_coeffs_mat.inv() * (-odes_system.subs({ d_dvar:0     for d_dvar in diffs } ))
             
+        f_ord_dvars=Matrix(sum([list(dvars.diff(ivar,no))   for no in  range(ode_order)],[]))
             
-        return cls._constructor( odes=vels , dvars=dvars  , odes_rhs = odes   ,ivar=ivar,parameters=parameters)
+        return cls._constructor( odes=f_ord_dvars.diff(ivar) , dvars=f_ord_dvars  , odes_rhs = Matrix([f_ord_dvars[len(dvars):],odes] )  ,ivar=ivar,ode_order=ode_order,parameters=parameters)
 
     @classmethod
     def from_ode_system(cls,ode_system):
 
+        
+        
         sys = ode_system
         odes=sys.lhs
         odes_rhs = sys.rhs
         dvars = sys.dvars
         ivar = sys.ivar
+        ode_order = sys.ode_order
         parameters = sys._parameters
         
-        vels = dvars.diff(ivar)
-        inertia_mat = odes.jacobian(vels) - odes_rhs.jacobian(vels)
-        rhs = (odes_rhs).subs({  vel:0 for vel in vels}) - (odes).subs({  vel:0 for vel in vels})
 
-        return cls._constructor(vels , dvars,inertia_mat.inv()*rhs, ivar ,parameters=parameters)
+        
+        diffs = dvars.diff(ivar,ode_order)
+
+        
+        diffs_coeffs_mat = odes.jacobian(diffs) - odes_rhs.jacobian(diffs)
+
+        
+        rhs = (odes_rhs).subs({  d_dvar:0 for d_dvar in diffs}) - (odes).subs({  d_dvar:0 for d_dvar in diffs})
+        
+        
+        f_ord_dvars=Matrix(sum([list(dvars.diff(ivar,no))   for no in  range(ode_order)],[]))
+
+        
+        return cls._constructor(f_ord_dvars.diff(ivar) , f_ord_dvars,Matrix([f_ord_dvars[len(dvars):], diffs_coeffs_mat.inv()*rhs]), ivar = ivar,ode_order=ode_order ,parameters=parameters)
     
     
     @cached_property
@@ -1630,7 +1723,7 @@ class LinearODESolution:
 
                 if len(self.dvars) == 1:
                     steady_sol += Matrix([
-                        sym.dsolve(eqns_res[0], self.dvars[0]).rhs.subs({
+                        sym.dsolve(eqns_res[0].expand().doit(), self.dvars[0]).rhs.subs({
                             Symbol('C1'):
                             0,
                             Symbol('C2'):
