@@ -2274,7 +2274,7 @@ class TriplePendulum(ComposedSystem):
         self.gravity_2 = GravitationalForce(m3, g, pos1=-y_3, qs=[phi_3])
         
         system = self.Pendulum1 + self.material_point_11 + self.material_point_12 + self.material_point_21 + self.material_point_22 + self.gravity_1 + self.gravity_2
-        super().__init__(system(qs).linearized(),**kwargs)
+        super().__init__(system(qs),**kwargs)
 
     def get_default_data(self):
 
@@ -2313,6 +2313,94 @@ class TriplePendulum(ComposedSystem):
 
         return parameters_dict
 
+class LinearizedTriplePendulum(ComposedSystem):
+    scheme_name = 'MDOFTriplePendulum.PNG'
+    real_name = 'TriplePendulum_real.jpg'
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 m3=Symbol('m_3', positive=True),
+                 l_1=Symbol('l_1', positive=True),
+                 l_2=Symbol('l_2', positive=True),
+                 l_3=Symbol('l_3', positive=True),
+                 g=Symbol('g', positive=True),
+                 phi_1=dynamicsymbols('varphi_1'),
+                 phi_2=dynamicsymbols('varphi_2'),
+                 phi_3=dynamicsymbols('varphi_3'),
+                 phi_u=dynamicsymbols('varphi_u'),
+                 phi_l=dynamicsymbols('varphi_l'),
+                 qs=dynamicsymbols('varphi_1 varphi_2 varphi_3'),
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        self.m1 = m1
+        self.m2 = m2
+        self.m3 = m3
+        self.l_1 = l_1
+        self.l_2 = l_2
+        self.l_3 = l_3
+        self.phi_1 = phi_1
+        self.phi_2 = phi_2
+        self.phi_3 = phi_3
+        self.phi_u = phi_u
+        self.phi_l = phi_l
+        self.g = g
+
+        x_2 = sin(phi_1)*l_1 + sin(phi_2)*l_2
+        y_2 = cos(phi_1)*l_1 + cos(phi_2)*l_2
+        x_3 = x_2 + sin(phi_3)*l_3
+        y_3 = y_2 + cos(phi_3)*l_3
+
+        self.Pendulum1 = Pendulum(m1, g, l_1, angle=phi_1, qs=[phi_1])
+        self.material_point_11 = MaterialPoint(m2, x_2, qs=[phi_1, phi_2])
+        self.material_point_21 = MaterialPoint(m2, y_2, qs=[phi_1, phi_2])
+        self.gravity_1 = GravitationalForce(m2, g, pos1=-y_2, qs=[phi_2])
+        self.material_point_12 = MaterialPoint(m3, x_3, qs=[phi_1, phi_2, phi_3])
+        self.material_point_22 = MaterialPoint(m3, y_3, qs=[phi_1, phi_2, phi_3])
+        self.gravity_2 = GravitationalForce(m3, g, pos1=-y_3, qs=[phi_3])
+        
+        system = self.Pendulum1 + self.material_point_11 + self.material_point_12 + self.material_point_21 + self.material_point_22 + self.gravity_1 + self.gravity_2
+        super().__init__(system(qs).linearized(),**kwargs)
+
+    def get_default_data(self):
+
+
+        m0, l0 = symbols('m_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
+            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+
+            self.l_1: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+            self.l_2: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+            self.l_3: [2 * l0, 4 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+
+            self.phi_1:[self.phi_u,0],
+            self.phi_2:[self.phi_u,self.phi_l],
+            self.phi_3:[self.phi_l],
+        }
+
+        return default_data_dict    
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.phi_2] == parameters_dict[self.phi_3]:
+
+            parameters_dict[self.phi_2] = self.phi_u
+
+
+        return parameters_dict
+    
 class TripleShaft(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
     =========
