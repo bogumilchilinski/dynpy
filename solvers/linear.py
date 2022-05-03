@@ -190,7 +190,7 @@ class AnalyticalSolution(Matrix):
 
         
         
-        if isinstance(data,dict):
+        if isinstance(data,(dict,Dict)):
             return cls.from_dict(data,**options)
         if isinstance(data,Eq):
             return cls.from_eq(data,**options)
@@ -207,7 +207,7 @@ class AnalyticalSolution(Matrix):
     @classmethod
     def _constructor(cls, lhs,rhs=None ,evaluate=True, **options):
         
-        if not isinstance(lhs,Iterable):
+        if not isinstance(lhs,Iterable): 
             lhs = Matrix([lhs])
             
         # it should be reimplemented with @property if None as odes_rhs is spotted
@@ -223,13 +223,13 @@ class AnalyticalSolution(Matrix):
         return obj
     
     @classmethod
-    def from_dict(cls,dictionary,**options):
-
-        return cls._constructor( list(dictionary.keys()),list(dictionary.values()) ,**options   )
+    def from_dict(cls,dictionary,**options): # działa
+        
+        return cls._constructor( Matrix(list(dictionary.keys())),Matrix(list(dictionary.values())) ,**options   )
 
     
     @classmethod
-    def from_eq(cls,matrix_eq,**options):
+    def from_eq(cls,matrix_eq,**options): #
         if isinstance(matrix_eq,Eq):
             
             eq = matrix_eq
@@ -387,7 +387,10 @@ class AnalyticalSolution(Matrix):
     
 
     def as_matrix(self):
-        return Matrix( self.lhs-self.rhs )    
+        return Matrix( self.lhs-self.rhs )
+    
+    def as_eq(self):
+        return Eq(self.lhs,self.rhs)
     
     def as_iterable(self):
 
@@ -399,7 +402,6 @@ class AnalyticalSolution(Matrix):
         return Dict({lhs:rhs  for  lhs,rhs in self.as_iterable()})
     
     def as_eq_list(self):
-        
 
         return [ Eq(lhs,comp,evaluate=False) for lhs,comp  in zip(self._lhs,self)]
     
@@ -712,7 +714,7 @@ class ODESystem(AnalyticalSolution):
             other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
         
         obj = super().__sub__(other)
-        _
+        
         obj._dvars=self._dvars
         obj._ivar = self.ivar
         obj._ode_order = self.ode_order
@@ -852,6 +854,9 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
             odes = diffs_coeffs_mat.inv() * (-odes_system.subs({ d_dvar:0     for d_dvar in diffs } ))
             
         f_ord_dvars=Matrix(sum([list(dvars.diff(ivar,no))   for no in  range(ode_order)],[]))
+        
+        display(odes)
+        display(f_ord_dvars)
             
         return cls._constructor( odes=f_ord_dvars.diff(ivar) , dvars=f_ord_dvars  , odes_rhs = Matrix([f_ord_dvars[len(dvars):],odes] )  ,ivar=ivar,ode_order=ode_order,parameters=parameters)
 
@@ -865,24 +870,18 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         odes_rhs = sys.rhs
         dvars = sys.dvars
         ivar = sys.ivar
-        ode_order = sys.ode_order
+        ode_order = 1
         parameters = sys._parameters
         
 
-        
-        diffs = dvars.diff(ivar,ode_order)
 
         
-        diffs_coeffs_mat = odes.jacobian(diffs) - odes_rhs.jacobian(diffs)
+        
+        f_ord_dvars=sys._fode_dvars
+        ode_rhs = Matrix(list(f_ord_dvars[len(dvars):]) + list(sys.odes_rhs))
 
         
-        rhs = (odes_rhs).subs({  d_dvar:0 for d_dvar in diffs}) - (odes).subs({  d_dvar:0 for d_dvar in diffs})
-        
-        
-        f_ord_dvars=Matrix(sum([list(dvars.diff(ivar,no))   for no in  range(ode_order)],[]))
-
-        
-        return cls._constructor(f_ord_dvars.diff(ivar) , f_ord_dvars,Matrix([f_ord_dvars[len(dvars):], diffs_coeffs_mat.inv()*rhs]), ivar = ivar,ode_order=ode_order ,parameters=parameters)
+        return cls._constructor(f_ord_dvars.diff(ivar) , f_ord_dvars,ode_rhs, ivar = ivar,ode_order=ode_order ,parameters=parameters)
     
     
     @cached_property

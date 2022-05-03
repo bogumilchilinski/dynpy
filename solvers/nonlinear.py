@@ -1,6 +1,6 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    Function, lambdify, factorial, solve, Dict, Number, N, Add,
-                   Mul, expand)
+                   Mul, expand,zoo)
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 import sympy as sym
@@ -27,12 +27,12 @@ from functools import cached_property
 
 
 class NthOrderODEsApproximation(FirstOrderLinearODESystem):
-    _ode_order=2
+    _ode_order=1
 
     @cached_property
     def _secular_funcs(self):
 
-        # weird error to improve, when .remove_secular_terms is called. if secular terms are missing, method returns None,
+        # weird error occurs, when .remove_secular_terms is called. if secular terms are missing, method returns None,
         # if statement should be considered
         secular_funcs = set() | (self.general_solution.atoms(Function) - set(
             self._const_list) - set(self._parameters) - {self.ivar})
@@ -58,7 +58,7 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
         sec_odes=ODESystem((sec_conditions),
                          dvars=Matrix(self._const_list),
                          ivar=ivar,
-                         order=1)
+                         ode_order=1)
         
         
         
@@ -67,13 +67,20 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
     def remove_secular_terms(self):
 
 
-        obj = FirstOrderLinearODESystem.from_rhs(self.rhs,self.dvars,ivar=self.ivar,ode_order=1)
+        obj = FirstOrderLinearODESystem.from_ode_system(self)
 
-        subs_dict = {comp: 0 for comp in self._secular_funcs}
+        # subs_dict = {comp: 0 for comp in self._secular_funcs}
+        
+        # return obj.subs(subs_dict).doit().subs(zoo,0).doit()
+        
+        secular_expr_list = [obj.applyfunc(lambda row: row.coeff(comp)*comp).rhs  for comp in self._secular_funcs]
+        secular_expr = sum(secular_expr_list,Matrix( [0]*len(obj) ))
 
-        return obj.subs(subs_dict).doit()
+        return (obj - secular_expr).expand()
 
 
+
+        
 #     def find_approximation(self):
 
 #         zeroth_ord = self.odes.applyfunc(lambda ode: ode.general_solution.self.remove_secular_terms())
@@ -241,7 +248,7 @@ class MultiTimeScaleSolution(ODESystem):
         odes_rhs = self.lhs.subs(self.predicted_solution(
             order).as_dict()).subs(sec_ord_subs).doit().subs(first_ord_subs).doit()
 
-        display()
+        #display()
         #eoms_approximated = ODESystem(odes_system,dvars=self.dvars,parameters = self.t_list).subs(
         #    self.predicted_solution(order).as_dict())
         eoms_approximated = - odes_rhs
@@ -273,15 +280,22 @@ class MultiTimeScaleSolution(ODESystem):
         order_get = lambda obj, order: (obj.diff(self.eps, order) / factorial(
             order)).subs(self.eps, 0).doit()
 
-        return [
-            NthOrderODEsApproximation.from_odes(
+        #NthOrderODEsApproximation
+        
+        
+        approx_list=[
+            ODESystem(
                 eoms_approximated.applyfunc(lambda obj: order_get(obj, order)),
-                self.approximation_function(order),
+                dvars=self.approximation_function(order),
                 ivar=self.t_list[0],
                 ode_order=2,
-                parameters=self.t_list)
+                parameters=self.t_list).as_first_ode_linear_system()
             for order in range(min_order, max_order + 1)
         ]
+        
+        
+        #return approx_list
+        return [NthOrderODEsApproximation.from_ode_system(approx_ode)   for approx_ode in approx_list]
 
     def _general_sol(self, order=1):
 
@@ -293,8 +307,9 @@ class MultiTimeScaleSolution(ODESystem):
         sol = approx_eoms_list[0].solution
         sol_subs_dict = sol.as_dict()
         sol_list = [sol]
-
-        #         display(sol_subs_dict)
+        
+        # display(sol_list)
+        # display(sol_subs_dict)
 
         for order, approx in enumerate(approx_eoms_list[1:]):
 
@@ -314,14 +329,23 @@ class MultiTimeScaleSolution(ODESystem):
                     return sum(oper_expr(elem) for elem in elems)
                 else:
                     return oper_expr(obj)
-
+            
+                
             approx_subs = approx.applyfunc(eqns_map).subs(
                 sol_subs_dict).applyfunc(eqns_map)
+            
+
+            
             approx_subs._parameters = self._t_list[1:]
 
             self.secular_eq[self.eps**(order +
                                        1)] = (approx_subs.secular_terms)
+            
+            
+            #display(self.secular_eq)
             approx_subs = approx_subs.remove_secular_terms()
+            
+            
 
             #display(approx_subs.lhs,approx_subs.rhs)
             #display(approx_subs)
