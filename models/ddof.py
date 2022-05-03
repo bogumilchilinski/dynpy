@@ -753,7 +753,7 @@ class UndampedVehicleSuspension(ComposedSystem):
 #         return self.sym_desc_dict
 
 
-class Shaft(ComposedSystem):
+class DDoFShaft(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
     =========
             I = Moment of Inertia
@@ -857,7 +857,7 @@ class Shaft(ComposedSystem):
         return default_data_dict
     
 
-class DampedShaft(ComposedSystem):
+class DDoFDampedShaft(ComposedSystem):
 
 
     scheme_name = 'ddof_damped_shaft.png'
