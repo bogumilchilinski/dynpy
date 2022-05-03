@@ -179,7 +179,9 @@ class Disk(Element):
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, frame=frame)
         self._kinetic_energy = Lagrangian
+
         
+
 class RigidBody2D(Element):
     """
     Model of a 2DoF Rigid body:

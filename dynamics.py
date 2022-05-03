@@ -449,7 +449,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return LagrangesDynamicSystem(**self_dict)
 
-    def subs(self, *args, **kwargs):
+    def subs(self, *args, simultaneous=False, **kwargs):
         """
         Returns class instance with substituted numerical values
         """
@@ -457,6 +457,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         given_data=args[0]
         
         hol_coneqs = list(self._hol_coneqs)
+        
+#         if 'simultaneous' in kwargs.keys():
+#             simultaneous = kwargs['simultaneous']
 
         if 'method' in kwargs.keys():
             method = kwargs['method']
@@ -486,18 +489,17 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         old_points = [point for point, force in self.forcelist]
         new_forces = [
-            force.subs(*args, **kwargs) for point, force in self.forcelist
+            force.subs(*args,simultaneous=simultaneous, **kwargs) for point, force in self.forcelist
         ]
-
         frame = self.frame
 
-        lagrangian_subs = self.lagrangian().subs(*args, **kwargs)
+        lagrangian_subs = self.lagrangian().subs(*args,simultaneous=simultaneous, **kwargs)
 
         new_points = [me.Point(str(point)) for point in old_points]
 
         for new_point, old_point in zip(new_points, old_points):
             new_point.set_vel(self.frame,
-                              old_point.vel(frame).subs(*args, **kwargs))
+                              old_point.vel(frame).subs(*args,simultaneous=simultaneous, **kwargs))
 
 
         forces_subs = list(zip(new_points, new_forces))
@@ -529,10 +531,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
 
         
-        new_sys._kinetic_energy = (self._kinetic_energy*S.One).subs(*args, **kwargs)
-        new_sys._potential_energy = (self._potential_energy*S.One).subs(*args, **kwargs)
+        new_sys._kinetic_energy = (self._kinetic_energy*S.One).subs(*args,simultaneous=simultaneous, **kwargs)
+        new_sys._potential_energy = (self._potential_energy*S.One).subs(*args,simultaneous=simultaneous, **kwargs)
 #         if hasattr(self._dissipative_potential,'subs'):
-        new_sys._dissipative_potential = (self._dissipative_potential*S.One).subs(*args, **kwargs) 
+        new_sys._dissipative_potential = (self._dissipative_potential*S.One).subs(*args,simultaneous=simultaneous, **kwargs) 
 #         else:
 #             new_sys._dissipative_potential = self._dissipative_potential
         
@@ -600,10 +602,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         Returns the right-hand side of the equations of motion in the form of equations matrix. Output is provided basing on LagrangesMethod object.
         """
 
-        return Matrix([
-            Eq(comp.diff(self.ivar), self.rhs()[no], evaluate=False)
-            for no, comp in enumerate(list(self.Y))
-        ])
+        return Eq( self.Y.diff(self.ivar),self.rhs()  )
 
     def equilibrium_equation(self, static_disp_dict=None):
         """
@@ -913,7 +912,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         Returns Matrix with external forces
         """
-        return self.governing_equations.subs(
+        return -self.governing_equations.subs(
             {gen_coord: 0
              for gen_coord in self.Y}).doit()
 
@@ -1716,7 +1715,7 @@ class HarmonicOscillator(LinearDynamicSystem):
         """
 
         """
-        return LinearODESolution(self._eoms, ivar=self.ivar, dvars=self.q).steady_solution(
+        return LinearODESolution(self._eoms.doit().expand().doit(), ivar=self.ivar, dvars=self.q).steady_solution(
             initial_conditions=initial_conditions)
 
     def solution(self, initial_conditions=None):
@@ -1801,8 +1800,21 @@ class HarmonicOscillator(LinearDynamicSystem):
         fund_mat = -self.inertia_matrix(
         ) * omg**2 + sym.I * omg * self.damping_matrix(
         ) + self.stiffness_matrix()
+        
 
-        amp=(fund_mat.inv() * (comp_sin)).T*(fund_mat.inv() * (comp_sin))  +  (fund_mat.inv() * (comp_cos)).T*(fund_mat.inv() * (comp_cos))
+            
+            
+        if len(self.q)==1:
+            
+            m=self.inertia_matrix()[0]
+            k=self.stiffness_matrix()[0]
+            c=self.damping_matrix()[0]
+            
+            amp = [(comp_sin+comp_cos)[0]**2/((k - m*omg**2)**2 + 2*c**2*omg**2)]
+            
+        else:
+
+            amp=(fund_mat.inv() * (comp_sin)).T*(fund_mat.inv() * (comp_sin))  +  (fund_mat.inv() * (comp_cos)).T*(fund_mat.inv() * (comp_cos))
 
         return sqrt(amp[0])
 
