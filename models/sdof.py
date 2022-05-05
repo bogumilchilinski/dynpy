@@ -1348,7 +1348,46 @@ class ExcitedDampedPendulum(ComposedSystem):
         }
         return self.sym_desc_dict
 
+"""class PendulumKinematicExct(ComposedSystem):
 
+    scheme_name = 'kin_exct_pendulum.PNG'
+    real_name = 'pendulum_real.jpg'
+
+    l=Symbol('l', positive=True)
+    m=Symbol('m', positive=True)
+    g=Symbol('g', positive=True)
+    phi=dynamicsymbols('\\varphi')
+    x_e=dynamicsymbols('x_e')
+    def __init__(self,
+                 l=None,
+                 m=None,
+                 g=None,
+                 phi=None,
+                 x_e=None,
+                 qs=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+        if l is not None self.l = l
+        if m is not None self.m = m
+        if g is not None self.g = g
+        if phi is not None self.phi = phi
+        if x_e is not None self.x_e = x_e
+        
+        self.ivar = ivar
+        self.qs = [self.phi]
+
+        x = l * sin(phi) + x_e
+        y = l * cos(phi)
+
+        self.material_point_1 = MaterialPoint(m, x, qs=[phi])
+        self.material_point_2 = MaterialPoint(m, y, qs=[phi])
+        self.gravity = GravitationalForce(m, g, pos1=-y, qs=[phi])
+
+        system = self.material_point_1 + self.material_point_2 + self.gravity
+
+        super().__init__(system,**kwargs)
+
+"""
 class PendulumKinematicExct(ComposedSystem):
 
     scheme_name = 'kin_exct_pendulum.PNG'
