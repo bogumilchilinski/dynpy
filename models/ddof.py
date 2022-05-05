@@ -719,12 +719,12 @@ class UndampedVehicleSuspension(ComposedSystem):
             self.I: [self.m*self.l_rod**2],
             self.l_rod:[l0,2*l0,3*l0,4*l0,5*l0,6*l0,7*l0,8*l0,9*l0],
             self.m: [m0,2*m0,3*m0,4*m0,5*m0,6*m0,7*m0,8*m0,9*m0],
-            self.c_r: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0],
-            self.k_l: [2 * k_0, 3 * k_0, 4 * k_0, 5 * k_0, 6 * k_0],
-            self.k_r: [2 * k_0, 3 * k_0, 4 * k_0, 5 * k_0, 6 * k_0],
+            self.c_r: [c0, 2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0, 7 * c0, 8 * c0, 9 * c0],
+            self.k_l: [k_0,2 * k_0, 3 * k_0, 4 * k_0, 5 * k_0, 6 * k_0, 7 * k_0, 8 * k_0, 9 * k_0],
+            self.k_r: [k_0,2 * k_0, 3 * k_0, 4 * k_0, 5 * k_0, 6 * k_0, 7 * k_0, 8 * k_0, 9 * k_0],
             
             
-            self.c_l: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0],
+            self.c_l: [c0, 2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0, 7 * c0, 8 * c0, 9 * c0],
             self.l_r: [0.2*self.l_rod,0.25 * self.l_rod, 0.3 * self.l_rod, 0.4 * self.l_rod, 0.5 * self.l_rod,0.35 * self.l_rod, 0.45 * self.l_rod],
             self.l_l: [0.2*self.l_rod,0.25 * self.l_rod, 0.3 * self.l_rod, 0.4 * self.l_rod, 0.5 * self.l_rod,0.35 * self.l_rod, 0.45 * self.l_rod],
 

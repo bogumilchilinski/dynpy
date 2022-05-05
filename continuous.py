@@ -290,7 +290,7 @@ class ContinuousSystem:
         seq=SeqFormula(first_root + (index -1) * spatial_span,
                           (index, 1, oo))
 
-        display(seq)
+#         display(seq)
         
         return seq
 

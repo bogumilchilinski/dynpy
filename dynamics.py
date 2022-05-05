@@ -449,7 +449,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return LagrangesDynamicSystem(**self_dict)
 
-    def subs(self, *args, **kwargs):
+    def subs(self, *args, simultaneous=False, **kwargs):
         """
         Returns class instance with substituted numerical values
         """
@@ -457,6 +457,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         given_data=args[0]
         
         hol_coneqs = list(self._hol_coneqs)
+        
+#         if 'simultaneous' in kwargs.keys():
+#             simultaneous = kwargs['simultaneous']
 
         if 'method' in kwargs.keys():
             method = kwargs['method']
@@ -486,18 +489,17 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         old_points = [point for point, force in self.forcelist]
         new_forces = [
-            force.subs(*args, **kwargs) for point, force in self.forcelist
+            force.subs(*args,simultaneous=simultaneous, **kwargs) for point, force in self.forcelist
         ]
-
         frame = self.frame
 
-        lagrangian_subs = self.lagrangian().subs(*args, **kwargs)
+        lagrangian_subs = self.lagrangian().subs(*args,simultaneous=simultaneous, **kwargs)
 
         new_points = [me.Point(str(point)) for point in old_points]
 
         for new_point, old_point in zip(new_points, old_points):
             new_point.set_vel(self.frame,
-                              old_point.vel(frame).subs(*args, **kwargs))
+                              old_point.vel(frame).subs(*args,simultaneous=simultaneous, **kwargs))
 
 
         forces_subs = list(zip(new_points, new_forces))
@@ -529,10 +531,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
 
         
-        new_sys._kinetic_energy = (self._kinetic_energy*S.One).subs(*args, **kwargs)
-        new_sys._potential_energy = (self._potential_energy*S.One).subs(*args, **kwargs)
+        new_sys._kinetic_energy = (self._kinetic_energy*S.One).subs(*args,simultaneous=simultaneous, **kwargs)
+        new_sys._potential_energy = (self._potential_energy*S.One).subs(*args,simultaneous=simultaneous, **kwargs)
 #         if hasattr(self._dissipative_potential,'subs'):
-        new_sys._dissipative_potential = (self._dissipative_potential*S.One).subs(*args, **kwargs) 
+        new_sys._dissipative_potential = (self._dissipative_potential*S.One).subs(*args,simultaneous=simultaneous, **kwargs) 
 #         else:
 #             new_sys._dissipative_potential = self._dissipative_potential
         
