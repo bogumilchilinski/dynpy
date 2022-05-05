@@ -24,6 +24,10 @@ class ComposedSystem(HarmonicOscillator):
     detail_scheme_name = 'damped_car_new.PNG'
     detail_real_name = 'car_real.jpg'
 
+    m0=Symbol('m_0',positive=True)
+    k0=Symbol('k_0',positive=True)
+    F0=Symbol('F_0',positive=True)
+    Omega0=Symbol('Omega_0',positive=True)
 
     @classmethod
     def _scheme(cls):
@@ -155,7 +159,7 @@ class BlowerToothedBelt(ComposedSystem):
         super().__init__(composed_system,**kwargs)
     def get_default_data(self):
 
-        m0, k0, F0, Omega0 = symbols('m_0 k_0 F_0 Omega_0', positive=True)
+        #m0, k0, F0, Omega0 = symbols('m_0 k_0 F_0 Omega_0', positive=True)
 
         default_data_dict = {
             self.m: [0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0],
@@ -1959,110 +1963,8 @@ class NonLinearDisc(ComposedSystem):
 
         return default_data_dict
 
-class SDoFShaft(ComposedSystem):
-    """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
-    =========
-            I = Moment of Inertia
-                -Moment of Inertia in case of both disc
-
-            k_1 =Right spring coefficient
-                -Right spring carrying the system
-
-            k_2 =Left spring coefficient
-                -Left spring carrying the system
-
-            ivar = symbol object
-                -Independant time variable
-
-            qs = dynamicsymbol object
-                -Generalized coordinates
-
-    Example
-    =======
-    A mass oscillating up and down while being held up by a spring with a spring constant k
-
-    >>> t = symbols('t')
-    >>> I, k1, k2 = symbols('I, k_1, k_2')
-    >>> qs = dynamicsymbols('phi_1, phi_2') # Generalized Coordinates
-    >>> DDoFShaft()
-
-    -defines the symbols and dynamicsymbols
-    -finally determines the instance of the system using class DDoFShaft
-    """
-
-    scheme_name = 'ddof_shaft.png'
-    real_name = 'ddof_shaft_real.png'
-
-    def __init__(self,
-                 l=Symbol('l', positive=True),
-                 I=Symbol('I', positive=True),
-                 k_2=Symbol('k_2', positive=True),
-                 k_1=Symbol('k_1', positive=True),
-                 Ms=Symbol('M_s',positive=True),
-                 input_displacement=dynamicsymbols('theta'),
-                 phi_1=dynamicsymbols('\\varphi_1'),                 
-                 phi_2=dynamicsymbols('\\varphi_2'),                 
-                 phi=dynamicsymbols('\\varphi'),
-                 ivar=Symbol('t'),
-                 qs=dynamicsymbols('\\varphi_1, \\varphi_2'),
-                 **kwargs):
-
-
-        theta = input_displacement
-        
-        self.phi_1=phi_1
-        self.phi_2=phi_2        
-        
-        self.Ms=Ms
-        self.k_2 = k_2  # left spring
-        self.k_1 = k_1  # right spring
-        self.I = I  # moment of inertia of a rod
-        self.input_displacement = input_displacement
-        self.qs = qs
-        
-        self.phi=phi
-
-        self.disc_1 = Disk(I, pos1=phi_1, qs=qs)
-#         self.spring_1 = Spring(k_1, phi_1, phi_2, qs=qs)  # left spring
-        self.disc_2 = Disk(I, pos1=phi_2, qs=qs)
-        self.spring_2 = Spring(k_2, pos1=phi_1, pos2=theta,
-                               qs=qs)  # right spring
-        self.moment=Force(Ms, pos1=phi_1)
-        system = self.disc_1 + self.spring_2 + self.moment
-
-        super().__init__(system,**kwargs)
-
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.I: r'Moment of Inertia',
-            self.k_1: r'',
-            self.k_2: r'',
-        }
-        return self.sym_desc_dict
 
     
-    def get_default_data(self):
-
-
-        m0, l0 , G, l = symbols('m_0 l_0 G l', positive=True)
-        theta0, Omega = symbols('theta_0, Omega', positive=True)
-
-        default_data_dict = {
-            self.I: [S.Half*m0*l**2,S.One*m0*l**2,(S.Half**2)*m0*l**2,2*m0*l**2,3*m0*l**2,4*m0*l**2,5*m0*l**2,6*m0*l**2,7*m0*l**2,8*m0*l**2,9*m0*l**2],
-            
-            
-
-            self.k_1: [1 * G * l**4 /(10* l), 2 *  G * l**4 /(10* l), S.Half *  G * l**4 /(10* l), 4 *  G * l**4 /(10* l), (S.Half**2) *  G * l**4 /(10* l), 3 *  G * l**4 /(10* l), 5 *  G * l**4 /(10* l), 6 *  G * l**4 /(10* l), 7 *  G * l**4 /(10* l), 8 *  G * l**4 /(10* l), 9 *  G * l**4 /(10* l)],
-            self.k_2: [1 * G * l**4 /(10* l), 2 *  G * l**4 /(10* l), S.Half *  G * l**4 /(10* l), 4 *  G * l**4 /(10* l), (S.Half**2) *  G * l**4 /(10* l), 3 *  G * l**4 /(10* l), 5 *  G * l**4 /(10* l), 6 *  G * l**4 /(10* l), 7 *  G * l**4 /(10* l), 8 *  G * l**4 /(10* l), 9 *  G * l**4 /(10* l)],
-
-            l:[1 * l0, 2 * l0, S.Half * l0, 4 * l0, (S.Half**2) * l0, 3 * l0, (S.Half**2) * l0, 5 * l0, (S.Half**2) * l0, 6 * l0, (S.Half**2) * l0, 7 * l0, (S.Half**2) * l0, 8 * l0, (S.Half**2) * l0, 9 * l0, (S.Half**2) * l0],
-            
-#             self.phi_1:[self.phi, 0],
-#             self.phi_2:[self.phi],
-            self.input_displacement:[theta0* cos(Omega * self.ivar) ],
-        }
-
-        return default_data_dict
     
 
 class DampedShaft(ComposedSystem):

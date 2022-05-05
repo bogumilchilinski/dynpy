@@ -1,6 +1,6 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    Function, lambdify, factorial, solve, Dict, Number, N, Add,
-                   Mul, expand,zoo)
+                   Mul, expand,zoo,exp,Dummy)
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 import sympy as sym
@@ -24,6 +24,70 @@ from .linear import LinearODESolution, FirstOrderODE, AnalyticalSolution, FirstO
 from timer import timer
 from collections.abc import Iterable
 from functools import cached_property
+
+def const_no_gen():
+    num = 0
+    while True:
+        yield num
+        num += 1
+
+class SimplifiedExpr:
+    
+    _const_no=const_no_gen()
+    
+    _subs_container={}
+    def __init__(self,expr,ivar,parameters = None ):
+
+        self._expr = expr
+        self._ivar = ivar
+        self._parameters = parameters
+    @property
+    def _fun_list(self):
+        funlist=[expr  for  expr in  (self._expr).atoms(sin,cos,exp) if expr.has(self._ivar)]
+        return funlist
+    @property
+    def simplified_expr(self):
+        return self.sum_expr
+    @property
+    def sum_expr(self):
+        
+        data = self._expr_collector
+        expr_dict={key:values[0]  for  key,values  in  data.items() }
+        self.__class__._subs_container={**self.__class__._subs_container, **expr_dict}
+        
+        simplified_sum=sum([key*values[1]  for  key,values  in  data.items()  ],S.Zero)
+        expanded_sum=sum([values[0]*values[1]  for  key,values  in  data.items()  ],S.Zero)
+        
+        expr_rest = (self._expr - expanded_sum).expand()
+        
+        return sum([key*values[1]  for  key,values  in  data.items()  ],S.Zero) + expr_rest
+
+    
+    @property
+    def _expr_dict(self):
+        expr_dict={key:values[0]  for  key,values  in  self._expr_collector.items() }
+        return expr_dict
+    @property
+    def _expr_collector(self):
+        
+        parameters = self._parameters
+        
+        if parameters:
+            aux_symbol = lambda no: Function(f'DummyFun_{next(self._const_no)}')(*parameters)
+        else:
+            aux_symbol = lambda no: Dummy(f'D_{no}')
+        
+        bucket = {aux_symbol(no):(self._expr.coeff(fun),fun) for no,fun in enumerate(self._fun_list)}
+        return bucket
+    @property
+    def full_expr(self):
+        #display(self.__class__._subs_container)
+    
+        return self._expr.doit().expand().subs(self.__class__._subs_container)
+    
+    def __repr__(self,*args):
+        return 'instance of SimplifiedExpr'
+
 
 
 class NthOrderODEsApproximation(FirstOrderLinearODESystem):
@@ -305,11 +369,12 @@ class MultiTimeScaleSolution(ODESystem):
 
         approx_eoms_list[0]._parameters = self._t_list[1:]
         sol = approx_eoms_list[0].solution
-        sol_subs_dict = sol.as_dict()
         sol_list = [sol]
+        sol_subs_list = [sol.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).full_expr).doit() for sol in sol_list]
+        sol_subs_dict  = {  dvar:eqn     for  sol   in sol_subs_list  for dvar, eqn in sol.as_dict().items()}
         
-        # display(sol_list)
-        # display(sol_subs_dict)
+        #display(sol_list)
+        #display(sol_subs_dict)
 
         for order, approx in enumerate(approx_eoms_list[1:]):
 
@@ -330,10 +395,15 @@ class MultiTimeScaleSolution(ODESystem):
                 else:
                     return oper_expr(obj)
             
-                
+            #display(approx)
+            
+            sol_subs_list = [sol.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).full_expr).doit() for sol in sol_list]
+            sol_subs_dict  = {  dvar:eqn     for  sol   in sol_subs_list  for dvar, eqn in sol.as_dict().items()}
+        
             approx_subs = approx.applyfunc(eqns_map).subs(
                 sol_subs_dict).applyfunc(eqns_map)
             
+            #display(approx_subs)
 
             
             approx_subs._parameters = self._t_list[1:]
@@ -351,12 +421,14 @@ class MultiTimeScaleSolution(ODESystem):
             #display(approx_subs)
 
             sol = approx_subs.steady_solution.applyfunc(
-                lambda obj: obj.expand()).applyfunc(eqns_map)
+                lambda obj: obj.expand()).applyfunc(eqns_map).applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).sum_expr)
 
-            sol_subs_dict = {**sol_subs_dict, **sol.as_dict()}
-            sol_list += [sol]
+            #sol_subs_dict = {**sol_subs_dict, **sol.as_dict()}
+            #display(*list(sol.as_matrix()))
+            sol_list += [sol.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).full_expr).doit()]
+            #sol_list += [sol]
 
-        return (sol_list)
+        return sol_list
 
     def general_solution(self, order=1):
 
@@ -371,14 +443,16 @@ class MultiTimeScaleSolution(ODESystem):
                 {self.t_list[1]: self.eps  * self.ivar})
 
             sol_list += [(self.eps**order) *
-                         solution.subs({
+                         solution.applyfunc(lambda obj: obj.expand().subs(SimplifiedExpr._subs_container).doit()).subs({
                              self.t_list[1]: self.eps  * self.ivar,
                              self.t_list[0]: self.ivar
                          })]
+            
+        #display(*list(SimplifiedExpr._subs_container.values()))
 
         return AnalyticalSolution(Matrix(list(self.dvars) +  list(self.dvars.diff(self.ivar)) ) ,
                                   sum(sol_list,
-                                      Matrix(2*len(self.dvars)*[0])  )).applyfunc(expand)
+                                      Matrix(2*len(self.dvars)*[0])  )).applyfunc(lambda obj: obj.expand().doit())
 
     def nth_eoms_approximation(self, order=3):
 
