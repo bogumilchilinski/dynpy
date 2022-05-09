@@ -70,9 +70,9 @@
 % \node (hole_3) [fill=white,draw,outer sep=0pt,thick,anchor=center,xshift=0cm,yshift=0cm,minimum height=0.6cm ,minimum width=0.5cm] at (I_3.center) {};
 
 
-\draw[thick,double=white,double distance=0.4cm,line cap=rect] (origo) node (start){} --++(-1cm,0) node[above=+0.3cm] (Label1){} -- ++ (-1cm,0) node (P_load){} -- ++ (-4.5cm,0) node[below=+0.25cm] (Label2){$G,I_1,l_1,c$} -- ++ (-5.5cm,0) node (shaft_end){};
+\draw[thick,double=white,double distance=0.4cm,line cap=rect] (origo) node (start){} --++(-1cm,0) node[above=+0.3cm] (Label1){} -- ++ (-1cm,0) node (P_load){} -- ++ (-4.5cm,0) node[below=+0.25cm] (Label2){$G,I_1,l_1$} -- ++ (-5.5cm,0) node (shaft_end){};
 
-\draw[thick,double=white,double distance=0.6cm,line cap=rect] ([xshift=-0.3cm]I_1.west) --++(-2.5cm,0) node[midway,below=0.3cm] {$G,I_2,l_2,c$};
+\draw[thick,double=white,double distance=0.6cm,line cap=rect] ([xshift=-0.3cm]I_1.west) --++(-2.5cm,0) node[midway,below=0.3cm] {$G,I_2,l_2$};
 
 
 \draw [thin, loosely dashdotted] ([xshift=0.25cm]start.east) --([xshift=-0.25cm]shaft_end.west);
@@ -80,7 +80,9 @@
 % \draw[thick] (shaft_end.north) -- (shaft_end.south);
 % \draw[thick] (start.north) -- (start.south);
 
-\draw[thick, teal,->] (I_3)++(0.5cm,-1cm)  --++(0.35cm,1cm) --++ (-0.35cm,1cm) node[above right, black] {$\Phi(t)$};
+\draw[thick, teal,->] (I_3)++(0.5cm,-1cm)  --++(0.35cm,1cm) --++ (-0.35cm,1cm) node[above right, black] {$\theta(t)$};
+
+\draw[thick, teal,->] (I_1)++(0.5cm,-1cm)  --++(0.35cm,1cm) --++ (-0.35cm,1cm) node[above right, black] {$M_s$};
 
 % \draw [spring]  (I_1.north west) ++ (0cm,-0.5cm) -- ([yshift=-0.5cm]I_2.north east) node (k)[above,midway] {$k$};
 

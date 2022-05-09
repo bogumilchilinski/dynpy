@@ -1142,7 +1142,7 @@ class SDoFFreePendulum(ComposedSystem):
         return default_data_dict
 
 
-class SDoFExcitedPendulum(ComposedSystem):
+class SDoFExcitedg(ComposedSystem):
     """
     Model of a sDoF Excited Pendulum.
 

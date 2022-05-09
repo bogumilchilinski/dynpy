@@ -253,7 +253,7 @@ class DampedBlowerToothedBelt(ComposedSystem):
 
         return self.sym_desc_dict
     
-class EngineVerticalSpringGravity(ComposedSystem):
+class DynamicShearScrewDiameter(ComposedSystem):
     scheme_name = 'engine_vertical_spring_gravity.png'
     real_name = 'paccar.jpg'
     detail_scheme_name = 'sruba_pasowana.png'
@@ -789,13 +789,13 @@ class BeamBridgeDamped(ComposedSystem):
         self.z = z
         self.module=module
         self.inertia=inertia
-#         k_beam=48*self.E * self.I / self.l**3
-#         c=self.lam*k_beam
+#         c=self.lam*k_beamhaft
+
         self.mass = MaterialPoint(m, z, qs=[z])
         self.spring = Spring(k_beam, z, qs=[z])
-        self.gravity_force = GravitationalForce(self.m, self.g, z)
+        self.gravity_force = GravitationalForce(m, g, z)
         self.force = Force(-F_0 * sin(Omega * ivar), pos1=z)
-        self.damper = Damper(c=c, pos1=z, qs=[z])
+        self.damper = Damper(c, pos1=z, qs=[z])
         composed_system = (self.mass + self.spring + self.gravity_force + self.force + self.damper)
 
         super().__init__(composed_system,**kwargs)
@@ -814,27 +814,20 @@ class BeamBridgeDamped(ComposedSystem):
     def get_default_data(self):
 
 #         E0, I0, l0, m0, k0,c0, lam0= symbols('E_0 I_0 l_0 m_0 k_0 c_0 lambda_0', positive=True)
-        E0, I, l0, m0, lam0, I0= symbols('E0 I l_0 m_0 lambda I_0', positive=True)
+        E0, I0, l0, m0, lam0 = symbols('E_0 I_0 l_0 m_0 lambda_0', positive=True)
         default_data_dict = {
             
 #             self.lam:[10],
             self.c:[self.k_beam*self.lam],
-            self.k_beam: [1 * 48 * self.module * self.inertia / self.l**3,
-                2 * 48 * self.module * self.inertia / self.l**3, 3 * 48 * self.module * self.inertia / self.l**3,
-                4 * 48 * self.module * self.inertia / self.l**3, 5 * 48 * self.module * self.inertia / self.l**3,
-                6 * 48 * self.module * self.inertia / self.l**3,7 * 48 * self.module * self.inertia / self.l**3,8 * 48 * self.module * self.inertia/ self.l**3,9 * 48 * self.module * self.inertia / self.l**3,
-10 * 48 * self.module * self.inertia / self.l**3,11 * 48 * self.module * self.inertia / self.l**3,
-               12 * 48 * self.module * self.inertia / self.l**3, 13 * 48 * self.module * self.inertia / self.l**3,
-               14 * 48 * self.module * self.inertia / self.l**3, 15 * 48 *self.module * self.inertia / self.l**3,
-               16 * 48 * self.module * self.inertia / self.l**3,17 * 48 * self.module * self.inertia / self.l**3,18 * 48 * self.module * self.inertia / self.l**3,19 * 48 * self.module * self.inertia / self.l**3],
+            self.k_beam: [S.One*48*self.module * self.inertia / self.l**3],
             self.m: [10* m0, 20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0, 70 * m0, 80 * m0, 90 * m0],
 #             self.l:[l0,2*l0,3*l0,4*l0,5*l0,6*l0,7*l0,8*l0,9*l0],
 #             self.E:[E0,2*E0,3*E0,4*E0,5*E0,6*E0,7*E0,8*E0,9*E0],
 #             self.I:[I0,2*I0,3*I0,4*I0,5*I0,6*I0,7*I0,8*I0,9*I0],
-#,100* m0, 200 * m0, 300 * m0, 400 * m0, 500 * m0, 600 * m0, 700 * m0, 800 * m0, 900 * m0            
-            self.module:[E0,2*E0,3*E0,4*E0,5*E0,6*E0,7*E0,8*E0,9*E0],
-            self.inertia:[I0,2*I0,3*I0,4*I0,5*I0,6*I0,7*I0,8*I0,9*I0],
-            self.l:[l0,2*l0,3*l0,4*l0,5*l0,6*l0,7*l0,8*l0,9*l0],
+#,100* m0, 200 * m0, 300 * m0, 400 * m0, 500 * m0, 600 * m0, 700 * m0, 800 * m0, 900 * m0 
+            self.module:[E0,2*E0,3*E0,4*E0,5*E0,6*E0,7*E0,8*E0,9*E0,10*E0,11*E0,12*E0,13*E0,14*E0,15*E0,16*E0,17*E0,18*E0,19*E0,],
+            self.inertia:[I0,2*I0,3*I0,4*I0,5*I0,6*I0,7*I0,8*I0,9*I0,10*I0,11*I0,12*I0,13*I0,14*I0,15*I0,16*I0,17*I0,18*I0,19*I0,],
+            self.l:[l0,2*l0,3*l0,4*l0,5*l0,6*l0,7*l0,8*l0,9*l0,10*l0,11*l0,12*l0,13*l0,14*l0,15*l0,16*l0,17*l0,18*l0,19*l0,],
             self.lam:[lam0,2*lam0,3*lam0,4*lam0,5*lam0,6*lam0,7*lam0,8*lam0,9*lam0],
         }
 
@@ -1348,17 +1341,19 @@ class ExcitedDampedPendulum(ComposedSystem):
         }
         return self.sym_desc_dict
 
-"""class PendulumKinematicExct(ComposedSystem):
+class PendulumKinematicExct(ComposedSystem):
 
     scheme_name = 'kin_exct_pendulum.PNG'
-    real_name = 'pendulum_real.jpg'
+    real_name = 'elastic_pendulum_real.PNG'
 
     l=Symbol('l', positive=True)
     m=Symbol('m', positive=True)
     g=Symbol('g', positive=True)
+    Omega = Symbol('Omega', positive=True)
     phi=dynamicsymbols('\\varphi')
     x_e=dynamicsymbols('x_e')
     def __init__(self,
+                 l0=None,
                  l=None,
                  m=None,
                  g=None,
@@ -1367,57 +1362,28 @@ class ExcitedDampedPendulum(ComposedSystem):
                  qs=None,
                  ivar=Symbol('t'),
                  **kwargs):
-        if l is not None self.l = l
-        if m is not None self.m = m
-        if g is not None self.g = g
-        if phi is not None self.phi = phi
-        if x_e is not None self.x_e = x_e
+        if l is not None: self.l = l
+        if m is not None: self.m = m
+        if g is not None: self.g = g
+        if phi is not None: self.phi = phi
+        if x_e is not None: self.x_e = x_e
         
         self.ivar = ivar
         self.qs = [self.phi]
 
-        x = l * sin(phi) + x_e
-        y = l * cos(phi)
+        x = self.l * sin(self.phi) + self.x_e
+        y = self.l * cos(self.phi)
 
-        self.material_point_1 = MaterialPoint(m, x, qs=[phi])
-        self.material_point_2 = MaterialPoint(m, y, qs=[phi])
-        self.gravity = GravitationalForce(m, g, pos1=-y, qs=[phi])
-
-        system = self.material_point_1 + self.material_point_2 + self.gravity
-
-        super().__init__(system,**kwargs)
-
-"""
-class PendulumKinematicExct(ComposedSystem):
-
-    scheme_name = 'kin_exct_pendulum.PNG'
-    real_name = 'pendulum_real.jpg'
-
-    def __init__(self,
-                 l=Symbol('l', positive=True),
-                 m=Symbol('m', positive=True),
-                 g=Symbol('g', positive=True),
-                 ivar=Symbol('t'),
-                 phi=dynamicsymbols('\\varphi'),
-                 x_e=dynamicsymbols('x_e'),
-                 **kwargs):
-
-        self.l = l
-        self.m = m
-        self.g = g
-        self.phi = phi
-        self.x_e = x_e
-
-        x = l * sin(phi) + x_e
-        y = l * cos(phi)
-
-        self.material_point_1 = MaterialPoint(m, x, qs=[phi])
-        self.material_point_2 = MaterialPoint(m, y, qs=[phi])
-        self.gravity = GravitationalForce(m, g, pos1=-y, qs=[phi])
+        self.material_point_1 = MaterialPoint(self.m, x, qs=self.qs)
+        self.material_point_2 = MaterialPoint(self.m, y, qs=self.qs)
+        self.gravity = GravitationalForce(self.m, self.g, pos1=-y, qs=self.qs)
 
         system = self.material_point_1 + self.material_point_2 + self.gravity
 
         super().__init__(system,**kwargs)
+
+
+
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -1430,15 +1396,36 @@ class PendulumKinematicExct(ComposedSystem):
 
     def get_default_data(self):
 
-        m0, l0 = symbols('m_0 l_0', positive=True)
+        m0, l0, x0, Omega= symbols('m_0 l_0 x_0 Omega', positive=True)
 
         default_data_dict = {
             self.m: [1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0,10 * m0, 11 * m0, 12 * m0, 13 * m0, 14 * m0, 15 * m0, 16 * m0, 17 * m0, 18 * m0, 19 * m0, 20 * m0, 21 * m0, 22 * m0, 23 * m0, 24 * m0, 25 * m0, 26 * m0, 27 * m0, 28 * m0, 29 * m0, 30 * m0],
             self.l: [1 * l0, 2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0,7*l0, 8*l0, 9*l0,10*l0, 11 * l0, 12 * l0, 13 * l0, 14 * l0, 15 * l0, 16 * l0,17*l0, 18*l0, 19*l0,20*l0, 21 * l0, 22 * l0, 23 * l0, 24 * l0, 25 * l0, 26 * l0,27*l0, 28*l0, 29*l0,30*l0],
+            self.x_e : [x0 * sin(self.Omega * self.ivar)]
         }
         return default_data_dict
 
 
+    def max_static_cable_force(self):
+        return (self.m * self.g).subs(self._given_data)
+    
+    def max_dynamic_cable_force(self):
+
+        omg_amp = ComposedSystem(self.linearized()).frequency_response_function()*self.Omega
+
+        return (self.m*self.l* (omg_amp)**2 + self.max_static_cable_force())
+    
+    def static_cable_diameter(self):
+        kr=Symbol('k_r', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_static_cable_force())/(pi*kr*Re))**(1/2)
+    
+    def dynamic_cable_diameter(self):
+        kr=Symbol('k_r', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_dynamic_cable_force())/(pi*kr*Re))**(1/2)
+    
+    
 class Winch(ComposedSystem):
 
     scheme_name = 'sdof_winch.PNG'
@@ -2020,7 +2007,162 @@ class NonLinearDisc(ComposedSystem):
         return default_data_dict
 
 
+class Shaft(ComposedSystem):
+    """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
+    =========
+            I = Moment of Inertia
+                -Moment of Inertia in case of both disc
+
+            k_1 =Right spring coefficient
+                -Right spring carrying the system
+
+            k_2 =Left spring coefficient
+                -Left spring carrying the system
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+    Example
+    =======
+    A mass oscillating up and down while being held up by a spring with a spring constant k
+
+    >>> t = symbols('t')
+    >>> I, k1, k2 = symbols('I, k_1, k_2')
+    >>> qs = dynamicsymbols('phi_1, phi_2') # Generalized Coordinates
+    >>> DDoFShaft()
+
+    -defines the symbols and dynamicsymbols
+    -finally determines the instance of the system using class DDoFShaft
+    """
+
+    scheme_name = 'shaft_sdof_scheme.png'
+    real_name = 'ddof_shaft_real.png'
+    detail_scheme_name = 'parallel_key_load.png'
+    detail_real_name = 'shaft_with_key.png'
     
+    l0 = Symbol('l_0', positive=True)
+    G=Symbol('G', positive=True)
+    I=Symbol('I', positive=True)
+    l_1=Symbol('l_1', positive=True)
+    l_2=Symbol('l_2', positive=True)
+    I_1=Symbol('I_1', positive=True)
+    I_2=Symbol('I_2', positive=True)
+    Ms=Symbol('M_s',positive=True)
+    Omega=Symbol('Omega',positive=True)
+ 
+    theta=dynamicsymbols('theta')              
+    phi=dynamicsymbols('\\varphi')
+                 
+
+    def __init__(self,
+                 l0=None,
+                 G=None,
+                 I=None,
+                 l_1=None,
+                 l_2=None,
+                 I_1=None,
+                 I_2=None,
+                 Ms=None,             
+                 phi=None,
+                 theta=None,
+                 ivar=Symbol('t'),
+                 qs=None,
+                 
+                 **kwargs):
+        if G is not None: self.G = G
+            
+        if I is not None: self.I = I
+        if Ms is not None: self.Ms = Ms
+        #if Omega is not None: self.Omega = Omega
+        if  l_1 is not None: self.l_1 = l_1
+        if  l_2 is not None: self.l_2 = l_2
+        if  I_1 is not None: self.I_1 = I_1
+        if  I_2 is not None: self.I_2 = I_2
+        if  phi is not None: self.phi = phi 
+        if  theta is not None: self.theta = theta 
+            
+        theta = self.theta
+        self.qs = [self.phi]
+        self.ivar = ivar      
+        
+        self.k_1 = (self.G*self.I_1)/self.l_1
+        self.k_2 = (self.G*self.I_2)/self.l_2
+
+        self.disc_1 = Disk(self.I, pos1=self.phi, qs=self.qs)
+        self.spring_2 = Spring(self.k_1*self.k_2/(self.k_2+self.k_1), pos1=self.phi, pos2=theta,
+                               qs=self.qs)  # right spring
+        self.moment=Force(self.Ms, pos1=self.phi, qs=self.qs)
+        system = self.disc_1 + self.spring_2 + self.moment
+        self.system=system
+
+        super().__init__(system,**kwargs)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.I: r'Moment of Inertia',
+            self.k_1: r'',
+            self.k_2: r'',
+        }
+        return self.sym_desc_dict
+
+  
+    def get_default_data(self):
+
+
+        m0, l0 , G, l = symbols('m_0 l_0 G l', positive=True)
+        theta0, Omega = symbols('theta_0, Omega', positive=True)
+
+        default_data_dict = {
+            self.I: [S.Half*m0*(l0**2)*no for no in range(1,3)],
+            self.I_1: [S.Half**(no)*(l0**4) for no in range(1,8)],
+            self.I_2: [S.Half**no*(l0**4) for no in range(1,8)],
+            self.l_1: [S.Half**(no-6)*l0 for no in range(1,8)],
+            self.l_2: [S.Half**(no-6)*l0 for no in range(1,8)],
+
+
+            self.theta:[theta0* cos(Omega * self.ivar) ],
+        }
+
+        return default_data_dict
+    
+        
+    def disc_force(self):
+        t=self.ivar
+        return self.I * self.steady_solution().diff(t,t)
+  
+    
+    def max_static_force_pin(self):
+        d=Symbol('d',positive=True)
+        return 2*self.Ms/d
+    
+    
+    def max_dynamic_force_pin(self):
+        d=Symbol('d',positive=True)
+        return self.frequency_response_function(self.natural_frequencies()[0])*self.stiffness_matrix()[0]
+
+
+    def max_static_bearing_force(self):
+        d=Symbol('d',positive=True)
+        return abs(2*self.static_load()[0]/d)
+    
+    def max_dynamic_bearing_force(self):
+        d=Symbol('d',positive=True)
+        acc_amp = self.frequency_response_function()*self.Omega**2
+
+        return  abs(2*(self.I*acc_amp)/d) + self.max_static_bearing_force()#.subs(self._given_data)
+    
+    def static_key_length(self):
+        kd=Symbol('k_d', positive=True)
+        h=Symbol('h', positive=True)
+        return (2*self.max_static_bearing_force())/(kd*h)
+    
+    def dynamic_key_length(self):
+        kd=Symbol('k_d', positive=True)
+        h=Symbol('h', positive=True)
+        return (2*self.max_dynamic_bearing_force())/(kd*h)
     
 
 class DampedShaft(ComposedSystem):
