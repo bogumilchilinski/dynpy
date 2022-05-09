@@ -472,7 +472,7 @@ class EntryWithUnit:
         right_par = self._right_par
 
         if unit:
-            return f'{entry_str} {left_par}{unit:~L}{right_par}'
+            return f'{entry_str} {left_par}{unit:Lx}{right_par}'
         else:
             return f'{self._obj}'
 
@@ -480,7 +480,7 @@ class EntryWithUnit:
 class DataTable(Table):
     _latex_name = 'table'
 
-    def __init__(self, numerical_data, position=None):
+    def __init__(self, numerical_data, position='H'):
         super().__init__(position=position)
         ##print(numerical_data)
         self._numerical_data = numerical_data

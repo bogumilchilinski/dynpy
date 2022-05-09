@@ -343,15 +343,15 @@ class BeamBridgeTMD(ComposedSystem):
 
     def __init__(self,
                  m=Symbol('m', positive=True),
-                 m_TMD=Symbol('m_TMD', positive=True),
-                 k_beam=Symbol('k_beam', positive=True),
-                 k_TMD=Symbol('k_TMD', positive=True),
+                 m_TMD=Symbol('m_D', positive=True),
+                 k_beam=Symbol('k_b', positive=True),
+                 k_TMD=Symbol('k_D', positive=True),
                  ivar=Symbol('t'),
                  g=Symbol('g', positive=True),
                  Omega=Symbol('Omega', positive=True),
                  F_0=Symbol('F_0', positive=True),
                  z=dynamicsymbols('z'),
-                 z_TMD=dynamicsymbols('z_TMD'),
+                 z_TMD=dynamicsymbols('z_D'),
                  **kwargs):
 
         self.m = m
@@ -516,7 +516,7 @@ class SDoFDampedHarmonicOscillator(ComposedSystem):
         super().__init__(system,**kwargs)
 
 
-class DDoFSimplifySuspension(ComposedSystem):
+class DDoFSimplifyVehicleSuspension(ComposedSystem):
     """
     Ready to use sample Double Degree of Freedom System represents symmetrical kinematically excited beam with two springs.
         Arguments:
@@ -595,9 +595,9 @@ class DDoFSimplifySuspension(ComposedSystem):
                                 pos_lin=z,
                                 pos_rot=phi,
                                 qs=qs)
-        self.spring_1 = Spring(k_1, pos1=z + phi * l_l, qs=qs)  # left spring
-        self.spring_2 = Spring(k_2, pos1=z - phi * l_r, qs=qs)  # right spring
-        self.force = Force(F_engine, pos1=z - phi * l_r, qs=qs)
+        self.spring_1 = Spring(k_1, pos1=z + phi * l_rod, qs=qs)  # left spring
+        self.spring_2 = Spring(k_2, pos1=z - phi * l_rod, qs=qs)  # right spring
+        self.force = Force(F_engine, pos1=z - phi * l_rod, qs=qs)
         system = self.body + self.spring_1 + self.spring_2 + self.force
 
         super().__init__(system,**kwargs)
@@ -848,11 +848,11 @@ class DDoFShaft(ComposedSystem):
                  k_2=Symbol('k_2', positive=True),
                  k_1=Symbol('k_1', positive=True),
                  input_displacement=dynamicsymbols('theta'),
-                 phi_1=dynamicsymbols('\\varphi_1'),                 
-                 phi_2=dynamicsymbols('\\varphi_2'),                 
-                 phi=dynamicsymbols('\\varphi'),
+                 phi_1=dynamicsymbols('varphi_1'),                 
+                 phi_2=dynamicsymbols('varphi_2'),                 
+                 phi=dynamicsymbols('varphi'),
                  ivar=Symbol('t'),
-                 qs=dynamicsymbols('\\varphi_1, \\varphi_2'),
+                 qs=dynamicsymbols('varphi_1, varphi_2'),
                  **kwargs):
 
 
@@ -926,7 +926,7 @@ class DDoFDampedShaft(ComposedSystem):
                  c_2=Symbol('c_1', positive=True),
                  input_displacement=dynamicsymbols('theta'),
                  ivar=Symbol('t'),
-                 qs=dynamicsymbols('\\varphi_1, \\varphi_2'),
+                 qs=dynamicsymbols('varphi_1, varphi_2'),
                  **kwargs):
 
         phi1, phi2 = qs
@@ -1836,7 +1836,7 @@ class EngineWithTMD(ComposedSystem):
             m_e = mass
                 -value of particle mass
 
-            m_TMD = mass
+            m_g = mass
                 -value of TMD mass
 
             e = distance
@@ -4691,6 +4691,7 @@ class LagrangeIOnMathFunction(ComposedSystem):
 
     scheme_name = 'mat_point_parabola.PNG'
     real_name = 'tautochrone_curve_small.gif'
+    _default_subs_method='as_constrains'
 
     def __init__(self,
                  m=Symbol('m', positive=True),
@@ -5206,3 +5207,65 @@ class SDOFDrivetrainVehicleSystem(ComposedSystem):
        
         
         return EOM_dsolve
+    
+class LagrangeIBlocksOnInclinedPlane(ComposedSystem):
+    scheme_name = 'ddof_disks_3_springs_scheme.png'
+    real_name = 'nonlin_trolley_real.PNG'
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 m3=Symbol('m_3', positive=True),
+                 m4=Symbol('m_4', positive=True),
+                 R=Symbol('R', positive=True),
+                 g=Symbol('g', positive=True),
+                 alpha=Symbol('alpha',positive=True),
+                 beta=Symbol('beta',positive=True),
+                 ivar=Symbol('t'),
+                 x1=dynamicsymbols('x_1'),
+                 x2=dynamicsymbols('x_2'),
+                 x3=dynamicsymbols('x_3'),
+                 x4=dynamicsymbols('x_4'),
+                 phi=dynamicsymbols('\\varphi'),
+                 qs=dynamicsymbols('x_1, x_2, x_3, x_4, \\varphi'),
+                 **kwargs):
+
+        self.m = m
+        self.m1 = m1
+        self.m2 = m2
+        self.m3 = m3
+        self.m4 = m4
+
+        self.Mass1 = MaterialPoint(m1, pos1=x1, qs=[x1]) + GravitationalForce(m1, g, pos1=-x1*sin(alpha), qs=[x1])
+        self.Mass2 = MaterialPoint(m2, pos1=x2, qs=[x2]) + GravitationalForce(m2, g, pos1=-x2*sin(alpha), qs=[x2])
+        self.Mass3 = MaterialPoint(m3, pos1=x3, qs=[x3]) + GravitationalForce(m3, g, pos1=-x3*sin(beta), qs=[x3])
+        self.Mass4 = MaterialPoint(m4, pos1=x4, qs=[x4]) + GravitationalForce(m4, g, pos1=-x4*sin(beta), qs=[x4])
+        self.Pulley = MaterialPoint(1/2*m*R**2, pos1=phi, qs=[phi])
+
+        system = self.Mass1 + self.Mass2 + self.Mass3 + self.Mass4 + self.Pulley
+        super().__init__(system.lagrangian(),qs=qs, hol_coneqs=[x1-x2,phi*R-x2,x2-x3,phi*R-x3],**kwargs)
+    def get_default_data(self):
+
+        m0 = symbols('m_0', positive=True)
+
+        default_data_dict = {
+            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m4: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        return parameters_dict

@@ -28,7 +28,7 @@ class OdeComputationalCase:
     Arguments
     =========
     odes_system: Symbol object
-        Ordinary differential equation in symbolic form
+        System of first order ordinary differential equations in symbolic form
 
     ivar=None (optional): Symbol object
         Independent variable
@@ -108,6 +108,11 @@ class OdeComputationalCase:
                 len(self.dvars)) + ' equations'
         self._label = label
 
+    @property
+    def parameters(self):
+        return self.odes_system.free_symbols-{self.ivar}
+        
+        
     def __call__(self, label=None):
 
         #         if len(args)>0:
@@ -147,10 +152,15 @@ class OdeComputationalCase:
             var: Symbol('temp_sym_' + str(i))
             for i, var in enumerate(self.dvars)
         }
+        
+        ivar_temp = Symbol('temp_ivar')
+        #subs_dict[self.ivar] = ivar_temp
 
-        args_list = [self.ivar] + list(subs_dict.values()) + self.params
+        args_list = [ivar_temp] + list(subs_dict.values()) + self.params
 
-        return autowrap(((self.odes_system).subs(subs_dict, simultaneous=True)),
+#         display(self.odes_system.subs(subs_dict, simultaneous=True))
+        
+        return autowrap(((self.odes_system).subs({self.ivar:ivar_temp,**subs_dict}, simultaneous=True)),
                         args=args_list)
 
 
@@ -208,8 +218,8 @@ class OdeComputationalCase:
             
         if type(params_values) == type(None):
             
-            self.params = list(self.odes_system.free_symbols)
-            self.params.remove(self.ivar)
+            self.params = list(self.odes_system.free_symbols - {self.ivar,Symbol('t')})
+            
             
             print(self.params)
             print(self.params_values)
@@ -220,8 +230,8 @@ class OdeComputationalCase:
             self.params_values = params_values
             self.params = list(self.params_values.keys())
             
-            self.params = self.odes_system.free_symbols
-            self.params.remove(self.ivar)
+            self.params = self.odes_system.free_symbols - {self.ivar,Symbol('t')}
+            
             
             self.params=list(self.params)
             

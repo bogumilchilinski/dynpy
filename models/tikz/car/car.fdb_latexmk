@@ -1,6 +1,11 @@
 # Fdb version 3
+<<<<<<< HEAD
 ["pdflatex"] 1645131766 "car.tex" "car.pdf" "car" 1645131768
   "/dev/null" 1645018436 0 d41d8cd98f00b204e9800998ecf8427e ""
+=======
+["pdflatex"] 1647296884 "car.tex" "car.pdf" "car" 1647296886
+  "/dev/null" 1647257177 0 d41d8cd98f00b204e9800998ecf8427e ""
+>>>>>>> 8b5973a5b15b3641061e17d5ad28296fb6de6011
   "/etc/texmf/web2c/texmf.cnf" 1590581910 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecrm1000.tfm" 1136768653 3584 adb004a0c8e7c46ee66cad73671f37b4 ""
@@ -219,6 +224,7 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1581979058 38841 ce3692aa899bb693b90b87eaa5d4d84e ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1590748799 4770781 1ed1abab22da9c3e2cc82e4db562318b ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1590748886 8256264 954d301c1bc5de4ed644a8052052631e ""
+<<<<<<< HEAD
   "car.aux" 1645131767 662 b2b94621371df8d9296b8bf5bec1b851 "pdflatex"
   "car.out" 1645131767 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
   "car.tex" 1616573910 3011 69e22cdec7f80fb1eb106bf47a700cc2 ""
@@ -229,3 +235,15 @@
   "car.log"
   "car.pdf"
   "car.aux"
+=======
+  "car.aux" 1647296886 662 b2b94621371df8d9296b8bf5bec1b851 "pdflatex"
+  "car.out" 1647296886 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "car.tex" 1616573910 3011 69e22cdec7f80fb1eb106bf47a700cc2 ""
+  "pythontex-files-car/car.pytxmcr" 0 -1 0 ""
+  (generated)
+  "car.pdf"
+  "car.pytxcode"
+  "car.aux"
+  "car.out"
+  "car.log"
+>>>>>>> 8b5973a5b15b3641061e17d5ad28296fb6de6011
