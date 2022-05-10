@@ -18,13 +18,15 @@ import numpy as np
 
 import inspect
 
+
 class ComposedSystem(HarmonicOscillator):
     """Base class for all systems
 
     """
     scheme_name = 'damped_car_new.PNG'
     real_name = 'car_real.jpg'
-
+    _default_args = ()
+    
     @classmethod
     def _scheme(cls):
         if 'systems.py' in __file__: 

@@ -205,6 +205,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     '''
     _hint=[]
+    _default_args = (0,[Function('x')(Symbol('t'))])
     _default_subs_method='direct'
     scheme_name = 'engine.png'
     real_name = 'engine_real.PNG'
@@ -339,7 +340,23 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         new_system._dissipative_potential = system._dissipative_potential
 
         return new_system
-        #LM=me.LagrangesMethod(Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs)
+
+    @classmethod
+    def from_default_data(cls):
+        
+        system=cls(*cls._default_args)
+
+        return system
+    
+    @classmethod
+    def from_random_data(cls):
+        
+        system=cls.from_default_data()
+        subs_dict=system.get_random_parameters()
+        
+        return system.subs(subs_dict)
+    
+        
     
     def symbols_description(self):
         self.sym_desc_dict = {

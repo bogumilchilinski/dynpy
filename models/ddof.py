@@ -26,6 +26,8 @@ class ComposedSystem(HarmonicOscillator):
     real_name = 'car_real.jpg'
     detail_scheme_name = 'damped_car_new.PNG'
     detail_real_name = 'car_real.jpg'
+    _default_args = ()
+    
     @classmethod
     def _scheme(cls):
         if 'systems.py' in __file__: 
