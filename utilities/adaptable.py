@@ -1459,8 +1459,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
             ics_series = (self[case_data].T[t0])
 
             print(ics_series)
-            
-            
+
             ics_list = [
                 np.float(ics_series[coord])
                 for coord in numerized_model.ics_dvars

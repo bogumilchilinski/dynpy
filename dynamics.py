@@ -271,8 +271,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             system=None
             
             
-            # self._kinetic_energy = Lagrangian._kinetic_energy
-            # self._potential_energy = Lagrangian._potential_energy
+#             self._kinetic_energy = Lagrangian._kinetic_energy
+#             self._potential_energy = Lagrangian._potential_energy
 
         if isinstance(Lagrangian, LagrangesDynamicSystem):
 
@@ -415,8 +415,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         systems_sum._potential_energy = sum([energy for energy in [self._potential_energy,other._potential_energy] if energy is not None])
         systems_sum._dissipative_potential = sum([energy for energy in [self._dissipative_potential,other._dissipative_potential] if energy is not None])
         
-        # print(systems_sum._kinetic_energy)
-        # print(systems_sum._potential_energy)
+
 
         return systems_sum
 
@@ -446,8 +445,14 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self_dict['qs'] = [
             coord for coord in self.q if coord not in bounded_coordinates
         ]
+        systems_sum=LagrangesDynamicSystem(**self_dict)
+        systems_sum._given_data={**other._given_data,**self._given_data}
+        
+        systems_sum._kinetic_energy = sum([energy for energy in [self._kinetic_energy,other._kinetic_energy] if energy is not None])
+        systems_sum._potential_energy = sum([energy for energy in [self._potential_energy,other._potential_energy] if energy is not None])
+        systems_sum._dissipative_potential = sum([energy for energy in [self._dissipative_potential,other._dissipative_potential] if energy is not None])
 
-        return LagrangesDynamicSystem(**self_dict)
+        return systems_sum
 
     def subs(self, *args, simultaneous=False, **kwargs):
         """
@@ -537,11 +542,16 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         new_sys._dissipative_potential = (self._dissipative_potential*S.One).subs(*args,simultaneous=simultaneous, **kwargs) 
 #         else:
 #             new_sys._dissipative_potential = self._dissipative_potential
-        
+
+#         new_sys._kinetic_energy = sum([energy for energy in [self._kinetic_energy,other._kinetic_energy] if energy is not None])
+#         new_sys._potential_energy = sum([energy for energy in [self._potential_energy,other._potential_energy] if energy is not None])
+#         new_sys._dissipative_potential = sum([energy for energy in [self._dissipative_potential,other._dissipative_potential] if energy is not None])
 
         new_sys._given_data=given_data
         new_sys._nonlinear_base_system = copy.copy(self._nonlinear_base_system)
-        
+        display(new_sys._eoms)
+        print(new_sys._kinetic_energy)
+        print(new_sys._potential_energy)
         #print(new_sys)
         #display(new_system._eoms)
         #display(new_system.forcelist)
