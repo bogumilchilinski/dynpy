@@ -43,7 +43,7 @@ class SimplifiedExpr:
         self._parameters = parameters
     @property
     def _fun_list(self):
-        funlist=[expr  for  expr in  (self._expr).atoms(sin,cos,exp) if expr.has(self._ivar)]
+        funlist=[expr  for  expr in  (self._expr).atoms(sin,cos) if expr.has(self._ivar)]
         return funlist
     @property
     def simplified_expr(self):
@@ -59,8 +59,11 @@ class SimplifiedExpr:
         expanded_sum=sum([values[0]*values[1]  for  key,values  in  data.items()  ],S.Zero)
         
         expr_rest = (self._expr - expanded_sum).expand()
+        display(expr_rest)
         
-        return sum([key*values[1]  for  key,values  in  data.items()  ],S.Zero) + expr_rest
+        print(len(self._expr.args))
+        print(len(simplified_sum.args))
+        return simplified_sum + expr_rest
 
     
     @property
@@ -443,7 +446,7 @@ class MultiTimeScaleSolution(ODESystem):
                 {self.t_list[1]: self.eps  * self.ivar})
 
             sol_list += [(self.eps**order) *
-                         solution.applyfunc(lambda obj: obj.expand().subs(SimplifiedExpr._subs_container).doit()).subs({
+                         solution.subs({
                              self.t_list[1]: self.eps  * self.ivar,
                              self.t_list[0]: self.ivar
                          })]
