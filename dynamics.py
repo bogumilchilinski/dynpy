@@ -471,7 +471,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return systems_sum
 
-    def subs(self, *args, simultaneous=False, **kwargs):
+    def subs(self, *args, **kwargs):
         """
         Returns class instance with substituted numerical values
         """
@@ -480,8 +480,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         hol_coneqs = list(self._hol_coneqs)
         
-#         if 'simultaneous' in kwargs.keys():
-#             simultaneous = kwargs['simultaneous']
+        simultaneous = False
+        if 'simultaneous' in kwargs.keys():
+            simultaneous = kwargs['simultaneous']
+        
+        
 
         if 'method' in kwargs.keys():
             method = kwargs['method']
