@@ -338,8 +338,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         new_system._kinetic_energy = system._kinetic_energy
         new_system._potential_energy = system._potential_energy
         new_system._dissipative_potential = system._dissipative_potential
-        
-        return new_system
+
 
     @classmethod
     def from_default_data(cls):
@@ -575,7 +574,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         new_sys._given_data=given_data
         new_sys._nonlinear_base_system = copy.copy(self._nonlinear_base_system)
+<<<<<<< HEAD
 #         display(new_sys._eoms)
+=======
+        display(new_sys._eoms)
+>>>>>>> f962a773e79d0997ff1e46cbdf6cb3e9321db20b
 #         print(new_sys._kinetic_energy)
 #         print(new_sys._potential_energy)
         #print(new_sys)
