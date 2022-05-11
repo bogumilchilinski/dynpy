@@ -254,77 +254,130 @@ class DampedBlowerToothedBelt(ComposedSystem):
 
         return self.sym_desc_dict
     
-class DynamicShearScrewDiameter(ComposedSystem):
+class EngineVerticalSpringGravity(ComposedSystem):
     scheme_name = 'engine_vertical_spring_gravity.png'
     real_name = 'paccar.jpg'
     detail_scheme_name = 'sruba_pasowana.png'
     detail_real_name = 'buick_regal_3800.jpg'
     
+
+    
+    M=Symbol('M',positive=True)
+    m_e=Symbol('m_e',positive=True)
+    phi=dynamicsymbols('varphi')
+    g=Symbol('g',positive=True)
+    k_m=Symbol('k_m',positive=True)
+    c_m=Symbol('c_m',positive=True)
+    e=Symbol('e',positive=True)
+    z=dynamicsymbols('z')
+
+    
     def __init__(self,
-                 M=Symbol('M', positive=True),
-                 k_m=Symbol('k_m', positive=True),
-                 m_e=Symbol('m_e', positive=True),
-                 e=Symbol('e', positive=True),
-                 l=Symbol('l',positive=True),
-                 x=dynamicsymbols('x'),
-                 z=dynamicsymbols('z'),
-                 Omega=Symbol('\Omega',positive=True),
-                 phi=dynamicsymbols('varphi'),
+                 M=None,
+                 m_e=None,
+                 phi=None,
+                 g=None,
+                 q=None,
+                 z=None,
+                 k_m=None,
+                 c_m=None,
+                 e=None,
+                 qs=None,
                  ivar=Symbol('t'),
-                 g=Symbol('g', positive=True),
                  **kwargs):
-        self.z=z
-        self.x=x
-        self.l=l
-        self.Omega=Omega
-        self.t=ivar
-        self.M = M
-        self.k_m = k_m
-        self.m_e = m_e
-        self.e = e
-        self.g=g
-        self.phi=phi
         
-        #phi=self.Omega*self.t
+        if M is not None: self.M=M
+        if m_e is not None: self.m_e=m_e
+        if phi is not None: self.phi=sin(20*t)
+        if g is not None: self.g=g
+        if k_m is not None: self.k_m=k_m
+        if c_m is not None: self.c_m=c_m
+        if e is not None: self.e=e
+        if z is not None: self.z=z
+
+            
+        self.qs = [self.z]
+        self.ivar = ivar
         
-        self.MaterialPoint_1 = MaterialPoint(M, pos1=z, qs=[z])
-        self.MaterialPoint_2 = MaterialPoint(m_e,
-                                             pos1=z + e * cos(phi),
-                                             qs=[z])
-        self.SpringVer = Spring(2 * k_m, pos1=z, qs=[z])
-        self.gravity_force1 = GravitationalForce(self.M, self.g, z, qs=[z])
-        self.gravity_force2 = GravitationalForce(self.m_e, self.g, z + e * cos(phi), qs=[z])
-        system = self.SpringVer + self.MaterialPoint_1 + self.MaterialPoint_2 + self.gravity_force1 + self.gravity_force2
-        super().__init__(system,**kwargs)
+        self.mass = MaterialPoint(self.M, pos1=self.z, qs=[self.z])
+        self.crank = MaterialPoint(self.m_e,
+                                             pos1=self.z + self.e * cos(self.phi),
+                                             qs=[self.z])
+
+
+
         
+        self.left_junction = Spring(self.k_m, self.z, qs=[self.z])
+        
+        self.left_damper = Damper(self.c_m,self.z,qs=[self.z])
+        
+        self.right_junction = Spring(self.k_m, self.z,qs=[self.z])
+        
+        self.right_damper = Damper(self.c_m,self.z,qs=[self.z])
+        
+        
+        composed_system = self.mass + self.left_junction + self.right_junction + self.left_damper + self.right_damper+ self.crank
+        super().__init__(composed_system,**kwargs)
+
     def get_default_data(self):
 
-        m0, k0, e0, g = symbols('m_0 k_0 e_0 g', positive=True)
+        m_e, k_m, g, = self.m_e,self.k_m,self.g,
 
         default_data_dict = {
-            self.phi:[self.Omega*self.t],
-            self.M: [200 * m0, 350 * m0, 400 * m0, 550 * m0, 650 * m0, 700 * m0, 800 * m0],
-            self.k_m: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0,9*k0,10*k0],
-            self.m_e: [2*S.One/10 * m0, 3*S.One/10 * m0, 4*S.One/10 * m0, 5*S.One/10 * m0, 6*S.One/10 * m0, 7*S.One/10 * m0, 8*S.One/10 * m0, 9*S.One/10 * m0],
-            self.e:[2 * e0, 3 * e0, 4 * e0, 5 * e0, 6 * e0],
-            self.g:[g],
-#             self.phi:[self.Omega*self.t],
-            
+            self.m_e: [m_e*no for no in range (1,8)],
+            self.k_m: [k_m*no for no in range (1,8)],
+            self.c_m: [c_m*no for no in range (1,8)],
+            self.g: [g*no for no in range (1,8)],
         }
 
         return default_data_dict
+
+    def right_spring_force(self):
+        return self.k_m * self.steady_solution()
+    def right_damper_force(self):
+        return self.c_m * self.steady_solution().diff(self.ivar)
+
+    def left_spring_force(self,):
+        return self.k_m * self.steady_solution()
+    def left_damper_force(self):
+        return self.c_m * self.steady_solution().diff(self.ivar)
+
+    
     def symbols_description(self):
         self.sym_desc_dict = {
-            self.M: r'Mass of engine block',
-            self.k_m: r'Spring stiffness coefficient',
-            self.m_e: r'',
-            self.e: r'',
+            self.m: r'mass of system on the spring',
+            self.k_belt: r'Belt stiffnes',
+            self.k_tensioner :r'Tensioner spring stiffnes',
         }
+
         return self.sym_desc_dict
     
+    def tensioner_belt_force(self):
+        return self.k_tensioner * self.steady_solution()
     
-    def spring_total_dyn_force(self):
-        return (self.k_m * self.steady_solution()).expand()
+    def left_belt_force(self):
+        return self.k_belt * self.steady_solution()
+    
+    def right_belt_force(self):
+        return self.k_belt * self.steady_solution()
+    
+    def max_static_force_pin(self):
+        return abs(self.static_load().doit()[0])
+    
+    
+    def max_dynamic_force_pin(self):
+        return self.frequency_response_function()*self.stiffness_matrix()[0]+self.max_static_force_pin()
+    
+    def static_force_pin_diameter(self):
+        kt=Symbol('k_t', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_static_force_pin())/(pi*kt*Re))**(1/2)
+    
+    def dynamic_force_pin_diameter(self):
+        kt=Symbol('k_t', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_dynamic_force_pin())/(pi*kt*Re))**(1/2)
+    
     
     
 class DampedEngineVerticalSpringGravity(ComposedSystem):
