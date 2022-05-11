@@ -309,25 +309,26 @@ class EngineVerticalSpringGravity(ComposedSystem):
         
         self.left_junction = Spring(self.k_m, self.z, qs=[self.z])
         
-        self.left_damper = Damper(self.c_m,self.z,qs=[self.z])
+        #self.left_damper = Damper(self.c_m,self.z,qs=[self.z])
         
         self.right_junction = Spring(self.k_m, self.z,qs=[self.z])
         
-        self.right_damper = Damper(self.c_m,self.z,qs=[self.z])
+        #self.right_damper = Damper(self.c_m,self.z,qs=[self.z])
         
         
-        composed_system = self.mass + self.left_junction + self.right_junction + self.left_damper + self.right_damper+ self.crank
+        composed_system = self.mass + self.left_junction + self.right_junction + self.crank # + self.left_damper + self.right_damper
         super().__init__(composed_system,**kwargs)
 
     def get_default_data(self):
 
-        m_e, k_m, g, = self.m_e,self.k_m,self.g,
+        m0, k0, e0, g, lam = symbols('m_0 k_0 e_0 g lambda', positive=True)
 
         default_data_dict = {
-            self.m_e: [m_e*no for no in range (1,8)],
-            self.k_m: [k_m*no for no in range (1,8)],
-            self.c_m: [c_m*no for no in range (1,8)],
-            self.g: [g*no for no in range (1,8)],
+            self.c_m: [lam*self.k_m],
+            self.M: [m0*no*10 for no in range (5,8)],
+            self.m_e: [m0*no for no in range (1,8)],
+            self.k_m: [k0*no for no in range (1,8)],
+            self.e: [S.One/10*e0*no for no in range (1,8)],
         }
 
         return default_data_dict

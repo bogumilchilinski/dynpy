@@ -339,6 +339,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         new_system._potential_energy = system._potential_energy
         new_system._dissipative_potential = system._dissipative_potential
 
+        return new_system
 
     @classmethod
     def from_default_data(cls):
@@ -441,16 +442,20 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         
 
-        
+        system=self
         self_dict = self._kwargs()
         self_dict['qs'] = flatten(args)
         
 
 
         new_sys=LagrangesDynamicSystem(**self_dict)
+        new_system=type(self).from_system(new_sys)
         
+        new_system._kinetic_energy = system._kinetic_energy
+        new_system._potential_energy = system._potential_energy
+        new_system._dissipative_potential = system._dissipative_potential
 
-        return type(self).from_system(new_sys)
+        return new_system
         #return type(self)(0,system=new_sys)
 
     def remove(self, *args):
