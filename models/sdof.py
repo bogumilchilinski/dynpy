@@ -2066,7 +2066,7 @@ class Shaft(ComposedSystem):
                  l_2=None,
                  I_1=None,
                  I_2=None,
-                 Ms=None,             
+                 Ms=None,
                  phi=None,
                  theta=None,
                  ivar=Symbol('t'),

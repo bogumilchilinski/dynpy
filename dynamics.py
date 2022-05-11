@@ -333,12 +333,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         kwargs=system._kwargs()
         
-        new_system=cls(**kwargs)
+        new_system=cls(*cls._default_args,system = system)
         
         new_system._kinetic_energy = system._kinetic_energy
         new_system._potential_energy = system._potential_energy
         new_system._dissipative_potential = system._dissipative_potential
-
+        
         return new_system
 
     @classmethod
@@ -451,8 +451,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         new_sys=LagrangesDynamicSystem(**self_dict)
         
 
-        
-        return type(self)(0,system=new_sys)
+        return type(self).from_system(new_sys)
+        #return type(self)(0,system=new_sys)
 
     def remove(self, *args):
 
@@ -549,9 +549,15 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         #display(new_system._eoms)
         
-        #print('subs is ran for '+str(type(self)))
+        ########### new wersion
+        new_sys = type(self).from_system(new_system)
+        ########### new wersion        
         
-        new_sys = type(self)(0,system=new_system)#(f'{self._label} for {args} and {kwargs}')
+        
+#         ########## old wersion
+#         new_sys = type(self)(0,system=new_system)#(f'{self._label} for {args} and {kwargs}')
+#         ########## old wersion        
+        
         new_sys._label=f'{self._label} for {args} and {kwargs}'
 
 
@@ -569,9 +575,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         new_sys._given_data=given_data
         new_sys._nonlinear_base_system = copy.copy(self._nonlinear_base_system)
-        display(new_sys._eoms)
-        print(new_sys._kinetic_energy)
-        print(new_sys._potential_energy)
+#         display(new_sys._eoms)
+#         print(new_sys._kinetic_energy)
+#         print(new_sys._potential_energy)
         #print(new_sys)
         #display(new_system._eoms)
         #display(new_system.forcelist)
