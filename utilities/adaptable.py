@@ -103,7 +103,7 @@ class DataMethods:
 
         plot_options = NoEscape(
             'anchor=north west,ymajorgrids=true,xmajorgrids=true,grid style=dashed,legend style={font=\small},'
-            + y_axis_description) + NoEscape(',height=') + height + NoEscape(
+            + NoEscape(y_axis_description)) + NoEscape(',height=') + height + NoEscape(
                 ',width=') + width + NoEscape(
                     f',xmin={min(self.index)},xmax={max(self.index)}')
 
@@ -472,7 +472,7 @@ class EntryWithUnit:
         right_par = self._right_par
 
         if unit:
-            return f'{entry_str} {left_par}{unit:Lx}{right_par}'
+            return f'{entry_str} {left_par}{unit:~L}{right_par}'
         else:
             return f'{self._obj}'
 
@@ -996,8 +996,16 @@ class BasicFormattingTools(DataMethods):
 
             #print('index2transform',col_idx.get_level_values(-1).unique())
             if len(col_idx.get_level_values(-1).unique())==1:
-                ylabel = latex_backend(
-                    EntryWithUnit(col_idx.get_level_values(-1).unique()[0]))
+                
+                label_raw=(EntryWithUnit(col_idx.get_level_values(-1).unique()[0]))
+                if isinstance(label_raw,str):
+                    ylabel = label_raw
+                else: 
+                    ylabel = latex_backend(NoEscape(
+                        EntryWithUnit(NoEscape(col_idx.get_level_values(-1).unique()[0]))
+                            ))
+                #print('detect')
+                #print(ylabel)
 
                 y_axis_description = 'ylabel={' + ylabel + '},'
 
@@ -1010,7 +1018,7 @@ class BasicFormattingTools(DataMethods):
                 
                 ylabel = ', '.join(ylabel_list)
 
-                y_axis_description = 'ylabel={' + ylabel + '},'                
+                y_axis_description = 'ylabel={' + NoEscape(ylabel) + '},'                
                 
 
             plotted_frame._ylabel=ylabel
@@ -1020,7 +1028,7 @@ class BasicFormattingTools(DataMethods):
             
         elif self._ylabel is not None:
             ylabel = self._ylabel
-            y_axis_description = 'ylabel={' + ylabel + '},'
+            y_axis_description = 'ylabel={' + NoEscape(ylabel) + '},'
             
 
         else:
@@ -1044,7 +1052,9 @@ class BasicFormattingTools(DataMethods):
         if picture is None:
             picture = self.__class__._picture
             
-            
+        #print(ylabel)
+        #print(type(ylabel))
+        #print(y_axis_description)
         fig = plotted_frame.to_standalone_figure(
             filename,
             labels_list=labels_list,
