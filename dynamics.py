@@ -1837,9 +1837,7 @@ class HarmonicOscillator(LinearDynamicSystem):
         else:
             omg = omg.coeff(self.ivar)
             
-        fund_mat = -self.inertia_matrix(
-        ) * omg**2 + sym.I * omg * self.damping_matrix(
-        ) + self.stiffness_matrix()
+
         
 
             
@@ -1850,14 +1848,81 @@ class HarmonicOscillator(LinearDynamicSystem):
             k=self.stiffness_matrix()[0]
             c=self.damping_matrix()[0]
             
-            amp = [(comp_sin+comp_cos)[0]**2/((k - m*omg**2)**2 + 2*c**2*omg**2)]
+            amp = [(comp_sin**2+comp_cos**2)[0]/((k - m*omg**2)**2 + 2*c**2*omg**2)]
             
         else:
+            fund_mat = -self.inertia_matrix(
+            ) * omg**2 + sym.I * omg * self.damping_matrix(
+            ) + self.stiffness_matrix()
 
-            amp=(fund_mat.inv() * (comp_sin)).T*(fund_mat.inv() * (comp_sin))  +  (fund_mat.inv() * (comp_cos)).T*(fund_mat.inv() * (comp_cos))
+            amp=((fund_mat.inv()*comp_cos).applyfunc(lambda elem: elem**2) + (fund_mat.inv()*comp_sin).applyfunc(lambda elem: elem**2)   )
 
         return sqrt(amp[0])
 
+    def _frf(self,excitation_freq=Symbol('Omega',ositive=True)):
+        '''
+        Returns the Frequency Response Function of the system for the given excitation amplitude working correctly for systems with defined stiffenes matrix.
+        '''
+
+
+        self.Omega = excitation_freq
+        omg = self.Omega
+
+        #solution = self.steady_solution()[0].expand()
+        sin_fun=list(self.external_forces().atoms(sin))
+        cos_fun=list(self.external_forces().atoms(cos))
+
+        if len(sin_fun) == 1: 
+        
+            omg_sin=list(set((sin_fun[0]).args)-{self.ivar})[0]
+
+            comp_sin = self.external_forces().applyfunc(lambda comp: comp.coeff(sin_fun[0]))
+        else:
+            comp_sin=(self.external_forces()*S.Zero).doit()
+            omg_sin=S.Zero
+            
+            
+        if len(cos_fun) == 1: 
+            omg_cos=list(set(cos_fun[0].args)-{self.ivar})[0]
+
+            comp_cos = self.external_forces().applyfunc(lambda comp: comp.coeff(cos_fun[0]))
+        else:
+            comp_cos=(self.external_forces()*S.Zero).doit()
+            omg_cos=S.Zero
+
+        if omg_sin == 0:
+            omg = omg_cos
+        else:
+            omg = omg_sin
+            
+        if excitation_freq is not None:
+            omg = excitation_freq
+        else:
+            omg = omg.coeff(self.ivar)
+            
+
+        
+
+            
+            
+        if len(self.q)==1:
+            
+            m=self.inertia_matrix()[0]
+            k=self.stiffness_matrix()[0]
+            c=self.damping_matrix()[0]
+            
+            amp = Matrix([(comp_sin**2+comp_cos**2)[0]/((k - m*omg**2)**2 + 2*c**2*omg**2)])
+            
+        else:
+            fund_mat = -self.inertia_matrix(
+            ) * omg**2 + sym.I * omg * self.damping_matrix(
+            ) + self.stiffness_matrix()
+
+            amp=((fund_mat.inv()*comp_cos).applyfunc(lambda elem: elem**2) + (fund_mat.inv()*comp_sin).applyfunc(lambda elem: elem**2)   )
+
+        return amp.applyfunc(lambda elem: sqrt(elem))
+    
+    
     def dynamic_amplification_factor(self,
                                      excitation_amp=None,
                                      excitation_freq=Symbol('Omega', positive=True)):

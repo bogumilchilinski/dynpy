@@ -446,7 +446,7 @@ class EngineWithTMD(ComposedSystem):
     
     
     def max_dynamic_force_pin(self):
-        return self.frequency_response_function()*self.k_m+self.max_static_force_pin()
+        return self._frf()[0]*self.k_m+self.max_static_force_pin()
     
     def static_force_pin_diameter(self):
         kt=Symbol('k_t', positive=True)
