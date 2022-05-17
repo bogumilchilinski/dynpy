@@ -111,6 +111,7 @@ var_dynamic = {x:'przemieszczenie poziome wózka',
               }
 
 
+
 symbols_description={**var_static,**var_dynamic}
 
 
@@ -367,7 +368,7 @@ rapidchair_1dof=rapidchair_3dof.subs(rcdof1,method='direct').shranked([phi_rc])(
 
 chair5dof_rc3dof=Chair5DOFwithRC3DOF()
 
-### system parametes
+### system parameters
 m_fr, m_rear,m_3, k_r, k_rt, k_f, k_ft, k_rot = symbols('m_fr, m_r, M, k_r, k_rt, k_f, k_ft k_rot',positive=True)
 m,k,g,F_1,F_2,Omega,F,R,v0,u0,l_l,l_r= symbols('m,k,g,F_1,F_2,Omega, F_0 R, v_0,u_0,l_l,l_r',positive=True)
 I_ch, I_w , z_c3,l_fr,l_rear= symbols('I_chair, I_wheel, z_c3, l_fr, l_r',positive=True)
@@ -399,7 +400,7 @@ V_fr = S.One/2*k_ft*(z_fr-amplitude*cos(2*pi/(length/speed)*(t-axw/speed)))**2  
 V_pion= S.One/2 * k_r*(z-z_rear)**2 + S.One/2 * k_f*(z-z_fr)**2  ##### te
 #+++++++++++++++++++++
 
-##                k_rear                                    k_fr
+##               k_rear                                    k_fr
 V_obr = S.One/2 * k_r * (z+l_l*phi-z_rear)**2 + S.One/2 * k_f * (z-l_r*phi-z_fr)**2 - S.One/2 * m_3 * z_c3 * g *phi**2
 
 Ekinetic=T_body+T_rot+T_rear+T_fr+T_wheel
@@ -417,6 +418,9 @@ FL_SIMPLECHAIR = [(Pl, 0.5*(1*sign(cos(Omega*t)-pm  )+1)*2*F*N.x)]+[(points_list
 class SimpleChair5DOF(dyn.HarmonicOscillator):
     def __init__(self, Lagrangian=L_simple, qs=qs_5dof, forcelist=FL_SIMPLECHAIR, bodies=None, frame=N,
                        hol_coneqs=None, nonhol_coneqs=None,label=None,ivar=sym.Symbol('t'),**kwargs):
+        
+
+        self.m = m_3
         
         super().__init__( Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,
                  hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs,label=label,ivar=ivar,**kwargs)
@@ -452,6 +456,7 @@ class SimpleChair5DOF(dyn.HarmonicOscillator):
                    length:0.19,
                    speed:1.7,
                    axw:0.47}
+        
         return default_data_dict       
     
     def get_table_values(self):

@@ -28,7 +28,7 @@ class OdeComputationalCase:
     Arguments
     =========
     odes_system: Symbol object
-        Ordinary differential equation in symbolic form
+        System of first order ordinary differential equations in symbolic form
 
     ivar=None (optional): Symbol object
         Independent variable
@@ -96,15 +96,23 @@ class OdeComputationalCase:
         self.t_span = t_span
 
         if evaluate:
+            
             self.form_numerical_rhs()
+            self._evaluated=True
         else:
             self.__numerical_odes = None
+            self._evaluated=False
 
         if label == None:
             label = self._label = self.__class__.__name__ + ' with ' + str(
                 len(self.dvars)) + ' equations'
         self._label = label
 
+    @property
+    def parameters(self):
+        return self.odes_system.free_symbols-{self.ivar}
+        
+        
     def __call__(self, label=None):
 
         #         if len(args)>0:
@@ -127,6 +135,14 @@ class OdeComputationalCase:
     def __repr__(self):
 
         return self.__str__()
+    
+    @property
+    def ics_dvars(self):
+
+
+
+        return self.dvars
+    
 
     def __fortran_odes_rhs(self):
         '''
@@ -136,10 +152,15 @@ class OdeComputationalCase:
             var: Symbol('temp_sym_' + str(i))
             for i, var in enumerate(self.dvars)
         }
+        
+        ivar_temp = Symbol('temp_ivar')
+        #subs_dict[self.ivar] = ivar_temp
 
-        args_list = [self.ivar] + list(subs_dict.values()) + self.params
+        args_list = [ivar_temp] + list(subs_dict.values()) + self.params
 
-        return autowrap(((self.odes_system).subs(subs_dict, simultaneous=True)),
+#         display(self.odes_system.subs(subs_dict, simultaneous=True))
+        
+        return autowrap(((self.odes_system).subs({self.ivar:ivar_temp,**subs_dict}, simultaneous=True)),
                         args=args_list)
 
 
@@ -197,8 +218,8 @@ class OdeComputationalCase:
             
         if type(params_values) == type(None):
             
-            self.params = list(self.odes_system.free_symbols)
-            self.params.remove(self.ivar)
+            self.params = list(self.odes_system.free_symbols - {self.ivar,Symbol('t')})
+            
             
             print(self.params)
             print(self.params_values)
@@ -209,8 +230,8 @@ class OdeComputationalCase:
             self.params_values = params_values
             self.params = list(self.params_values.keys())
             
-            self.params = self.odes_system.free_symbols
-            self.params.remove(self.ivar)
+            self.params = self.odes_system.free_symbols - {self.ivar,Symbol('t')}
+            
             
             self.params=list(self.params)
             
@@ -249,10 +270,16 @@ class OdeComputationalCase:
                          ic_list=None,
                          t_eval=None,
                          params_values=None,
-                         method='RK45'):
+                         method='RK45',
+                         derivatives=False):
         '''
         Returns the result of the computations of solve_ivp integrator from scipy.integrate module.
         '''
+        
+        if not self._evaluated:
+            self.form_numerical_rhs()
+            self._evaluated=True
+        
         
         with timer() as t:
             solution = solver.solve_ivp(
@@ -272,9 +299,12 @@ class OdeComputationalCase:
             for vel in velocities:
                 solution_tdf[vel].to_numpy()
                 gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
-            solution_tdf[vel.diff(self.ivar)] = gradient
+                solution_tdf[vel.diff(self.ivar)] = gradient
             print('_'*100,t.elapse)
             comp_time=t.elapse
+            
+            #if derivatives:
+            
 
 
 

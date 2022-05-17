@@ -47,14 +47,14 @@
      \tikzstyle{close}=[draw=none,minimum width=0.75cm,minimum height=0.3cm]
       \coordinate (origo) at (0,0);
 
-\node (I_1) [fill=gray,draw,outer sep=0pt,thick,minimum width=0.5cm,xshift=-0.03cm, minimum height=4.5cm,xshift=-1cm,label=above:{$I$}]  at (origo) {};
-\node (I_2) [fill=gray,draw,outer sep=0pt,thick,minimum width=0.5cm, minimum height=4.5cm,xshift=-4.5cm,label=above:{$I$}]  at (I_1) {};
+\node (I_1) [fill=gray,draw,outer sep=0pt,thick,minimum width=0.5cm,xshift=-0.03cm, minimum height=4.5cm,xshift=-1cm,label=above:{$I_1$}]  at (origo) {};
+\node (I_2) [fill=gray,draw,outer sep=0pt,thick,minimum width=0.5cm, minimum height=4.5cm,xshift=-4.5cm,label=above:{$I_2$}]  at (I_1) {};
 \node (I_0) [fill=gray,draw,outer sep=0pt,thick,minimum width=0.5cm, minimum height=4.5cm,xshift=-9cm]  at (I_1) {};
 
 
 
 
-\draw[thick,double=white,double distance=0.4cm,line cap=rect] (origo) node (start){} --++(-3cm,0) node[xshift=-0.5cm,above=+0.3cm] (Label1){$k_1, c_1$} -- ++ (-1cm,0) node (P_load){} -- ++ (-2.5cm,0) node[xshift=-1cm,above=+0.3cm] (Label2){$k_2, c_2$} -- ++ (-5.5cm,0) node (shaft_end){};
+\draw[thick,double=white,double distance=0.4cm,line cap=rect] (origo) node (start){} --++(-3cm,0) node[xshift=-0.5cm,above=+0.3cm] (Label1){$G,I_1, l_1, c_1$} -- ++ (-1cm,0) node (P_load){} -- ++ (-2.5cm,0) node[xshift=-1cm,above=+0.3cm] (Label2){$G,I_2, l_2, c_2$} -- ++ (-5.5cm,0) node (shaft_end){};
 
 \draw [thin, loosely dashdotted] ([xshift=0.25cm]start.east) --([xshift=-0.25cm]shaft_end.west);
 
@@ -79,6 +79,7 @@
 \node (floating_support) [ground,outer sep=0pt,thick,anchor=north west,xshift=-0.1cm,yshift=-0.1cm,minimum height=0.05cm ,minimum width=0.7cm]  at (support_start) {};
 
 \draw [thick] (floating_support.north west) -- (floating_support.north east);
+
 
 
 \end{tikzpicture}

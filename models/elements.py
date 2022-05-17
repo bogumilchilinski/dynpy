@@ -1,4 +1,4 @@
-from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Derivative, Expr)
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Derivative,Integral, Expr,Function,latex)
 from numbers import Number
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
@@ -16,7 +16,6 @@ class GeometryOfPoint:
     def __init__(self, *args , frame=base_frame, base_origin=base_origin , ivar=Symbol('t')):
         
         #print(type(args),args)
-        
         #name = str(args[0])
 
         if isinstance(args[0], Point):
@@ -80,6 +79,7 @@ class Element(LagrangesDynamicSystem):
 
         return IP.display.Image(base64.b64decode(encoded_string))
 
+    
 class MaterialPoint(Element):
     """
     Model of a Material point with changing point of mass:
@@ -90,9 +90,6 @@ class MaterialPoint(Element):
     real_name = 'material_point.png'
     def __init__(self, m, pos1 , qs=None, frame=base_frame, ivar=Symbol('t')):
         
-        
-
-        
         if not qs:
             self.qs = [pos1]
 
@@ -100,15 +97,20 @@ class MaterialPoint(Element):
             
         if isinstance(pos1, Point):
             
-            
             Lagrangian = S.Half * m * ((base_origin.pos_from(pos1).diff(ivar,frame).magnitude())**2)
+            #Lagrangian = S.Half * m * ((base_origin.vel(frame).magnitude())**2)
             
         else:
             Lagrangian = S.Half * m * diff(pos1,ivar)**2
 
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar,frame=frame)
+        
+        self._kinetic_energy = Lagrangian
+        
+        
 
+        
 class Spring(Element):
     """
     Model of a Spring:
@@ -119,21 +121,20 @@ class Spring(Element):
     scheme_name = 'spring.png'
     real_name = 'spring.png'
     def __init__(self, stiffness, pos1, pos2=0,l_0=0 ,  qs=None,ivar=Symbol('t'), frame = base_frame):
-        
 
-        
 
         pos1=GeometryOfPoint(pos1).get_point()
         pos2=GeometryOfPoint(pos2).get_point()
 
         if not qs:
             self.qs = [pos1]
-                
-        Lagrangian = (-S.Half * stiffness * ((pos2.pos_from(pos1)).magnitude() -l_0  )**2 )
-            
-            
+
+        Lagrangian = (-S.Half * stiffness * ((pos2.pos_from(pos1)).magnitude() - l_0  )**2 )
+
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, frame=frame)
+        
+        self._potential_energy = - Lagrangian
 
 
 class GravitationalForce(Element):
@@ -151,9 +152,9 @@ class GravitationalForce(Element):
         Lagrangian = -(m * g * (pos1))
 
 
-
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
+        self._potential_energy = - Lagrangian
 
 class Disk(Element):
     """
@@ -177,8 +178,10 @@ class Disk(Element):
 
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, frame=frame)
+        self._kinetic_energy = Lagrangian
 
         
+
 class RigidBody2D(Element):
     """
     Model of a 2DoF Rigid body:
@@ -201,7 +204,8 @@ class RigidBody2D(Element):
 
         
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, frame=frame)
-  
+        
+        self._kinetic_energy = Lagrangian
         
 class Damper(Element):
     """
@@ -240,7 +244,7 @@ class Damper(Element):
         #print(forcelist)
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
-
+        self._dissipative_potential = D
         
 class PID(Element):
     """
@@ -309,7 +313,7 @@ class Excitation(Element):
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
         
 
-class Force(LagrangesDynamicSystem):
+class Force(Element):
     """
     Creates enforcement.
     """
@@ -322,7 +326,7 @@ class Force(LagrangesDynamicSystem):
                  ivar=Symbol('t'),
                  frame = base_frame):
 
-        if qs == None:
+        if qs is None:
             qs = [pos1]
             
         else:
@@ -330,21 +334,55 @@ class Force(LagrangesDynamicSystem):
     
         if isinstance(pos1, Point):
             P = pos1
-            if qs==None:
+            if qs is None:
                 diffs=P.vel(frame).magnitude().atoms(Derivative)
                 
                 qs= [deriv.args[0] for deriv in diffs]
                 print(qs)
         else:
+            
             P = Point('P')
             P.set_vel(frame,pos1.diff(ivar)*frame.x)
-            force=-force*frame.x
+            force=+force*frame.x
 
         forcelist=[(P,force)]
         
+        #display(forcelist)
+        
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
         
+class ProportionalController(Element):
+    def __init__(self, Kp, pos1, RV=0, qs=None, ivar=Symbol('t'), frame=base_frame):
+        if qs==None:
+            qs = [pos1]
+        self.Kp = Kp
+        P_term = Spring(stiffness = self.Kp, pos1 = qs[0],pos2=RV, qs = qs)
+        super().__init__(P_term, qs=qs)
 
+
+class IntegralController(Element):
+    def __init__(self, Ki, pos1, aux_arg=None, RV=0, qs=None, ivar=Symbol('t'), frame=base_frame):          # aux_arg --> auxiliary argument
+        if aux_arg==None:
+            #aux_arg = dynamicsymbols(f'\\int~{latex(pos1)}dt')[0]
+            aux_arg = Function(f'{latex(Integral(pos1,ivar))}')(ivar)
+        qs = [pos1, aux_arg]
+        self.Ki = Ki
+
+        aux_integral = MaterialPoint(1, aux_arg, qs = qs)
+
+        Force1 = Force(-self.Ki*aux_arg, pos1=pos1, qs=qs)
+        Force2 = Force(pos1.diff(ivar), pos1=aux_arg, qs=qs)
+        I_term = aux_integral + Force1 + Force2
+        super().__init__(I_term, qs=qs)
+
+
+class DerivativeController(Element):
+    def __init__(self, Kd, pos1, RV=0, qs=None, ivar=Symbol('t'), frame=base_frame):
+        if qs==None:
+            qs = [pos1]
+        self.Kd = Kd
+        D_term = Damper(c=self.Kd, pos1 = qs[0], pos2=RV, qs = qs)
+        super().__init__(D_term, qs=qs)
         
 ###################################################################################################################################
 

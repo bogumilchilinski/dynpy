@@ -52,6 +52,10 @@ class ContinuousSystem:
             label = self.__class__.__name__ + ' on ' + str(self.q)
 
         self._label = label
+        self._given_data={}
+        
+        self._nonlinear_base_system=None
+        
 
     @property
     def BC(self):
@@ -79,6 +83,9 @@ class ContinuousSystem:
         return self.__str__()
 
     def subs(self, *args, **kwargs):
+        
+        given_data=args[0]
+        
         L_new = self.L.subs(*args)
         q_new = self.q.subs(*args)
 
@@ -94,8 +101,12 @@ class ContinuousSystem:
                                       spatial_var=self.r,
                                       derivative_order=self.diff_ord,
                                       label=self._label)
+        
+        new_sys = type(self)(0, q_new, system=new_system)
+        new_sys._given_data=given_data
+        new_sys._nonlinear_base_system = self._nonlinear_base_system
 
-        return type(self)(0, q_new, system=new_system)
+        return new_sys
 
     @property
     def _eoms(self):
@@ -262,7 +273,7 @@ class ContinuousSystem:
             bc_dict = self.bc_dict
 
         if arg is None:
-            arg = selg._mode_symbol
+            arg = self._mode_symbol
 
 
         roots = solve(self.char_poly(bc_dict, sep_expr, spatial_comp), arg)
@@ -279,7 +290,7 @@ class ContinuousSystem:
         seq=SeqFormula(first_root + (index -1) * spatial_span,
                           (index, 1, oo))
 
-        display(seq)
+#         display(seq)
         
         return seq
 

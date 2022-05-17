@@ -103,7 +103,7 @@ class DataMethods:
 
         self.to_standalone_plot(filename,labels_list,colors_list,height, width,x_axis_description,y_axis_description,subplots,legend_pos,extra_commands=extra_commands,options=options)
         fig = Figure(position='H')
-        fig.add_image(filename,width=width)
+        fig.add_image(filename,width=NoEscape(r'0.9\textwidth'))
         
         return fig
     
@@ -172,7 +172,7 @@ class TimeDomainMethods(DataMethods):
         except:
             obj=None
         else:
-            obj = None
+            obj = self._comp_time
             
         return obj
         

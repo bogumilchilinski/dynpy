@@ -12,22 +12,28 @@ import sympy.physics.mechanics as me
 from pylatex import (Alignat, Axis, Command, Document, Eqref, Figure, Label,
                      TextColor, Marker, Math, NewLine, NewPage, Package, Plot,
                      Quantity, Ref, Section, Subsection, Table, Tabular, TikZ,
-                     Description,LongTable)
+                     Description, LongTable)
 from pylatex.base_classes import Environment
 from pylatex.package import Package
 from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
-from sympy import Matrix, symbols, Symbol, Eq, Expr
+from sympy import Matrix, symbols, Symbol, Eq, Expr, Number, Equality, Add, Mul,Subs
 from sympy.core.relational import Relational
 
-from sympy import Symbol, Function, Derivative, latex
+from sympy import Symbol, Function, Derivative, latex, sin, cos, tan, exp, atan, ImmutableMatrix, sign
 
 from sympy.physics.vector.printing import vlatex, vpprint
 
-from IPython.display import display, Markdown, Latex
+from IPython.display import display, Latex
+from IPython.display import Markdown as IPMarkdown
 
+from .adaptable import *
 from .timeseries import TimeDataFrame, TimeSeries
+
+import pypandoc as ppd
+
 import copy
+import inspect
 
 from collections.abc import Iterable
 
@@ -41,686 +47,52 @@ def plots_no():
 
 plots_no_gen = plots_no()
 
-
-class EntryWithUnit:
-    _units={}
-    _latex_backend=latex
-
-    
-    @classmethod
-    def set_default_units(cls, units={}):
-
-        cls._units = units
-        return cls
-    
-    def __init__(self,obj,units=None,latex_backend=None,**kwargs):
-        self._obj =obj
-        self._unit=None
-        self._left_par = '['
-        self._right_par = ']'
-        
-        if units is not None:
-            self._units= units
-        else:
-            self._units= self.__class__._units
-
-            
-        if latex_backend is not None:
-            self._latex_backend= latex_backend
-        else:
-            self._latex_backend= self.__class__._latex_backend
-            
-        if isinstance(self._obj,Relational):
-            self._left_par = ''
-            self._right_par = ''
-            self._quantity = self._obj.lhs
-        else:
-            self._quantity=self._obj
-            
-        self._set_quantity_unit()
-        
-    def _set_quantity_unit(self):
-        if self._quantity in self._units:
-            self._unit = self._units[self._quantity]
-        else:
-            self._unit=None
-
-            
-    def __str__(self):
-        entry_str=self._obj.__str__()
-        unit = self._unit
-        left_par=self._left_par
-        right_par=self._right_par
-        
-        if unit:
-            return f'{entry_str} {left_par}{unit.__str__()}{right_par}'
-        else:
-            return f'{entry_str}'
-
-    def __repr__(self):
-        entry_str=self._obj.__repr__()
-        unit = self._unit
-        left_par=self._left_par
-        right_par=self._right_par
-        
-        if unit:
-            return f'{entry_str} {left_par}{unit.__repr__()}{right_par}'
-        else:
-            return f'{entry_str}'
-        
-    def _latex(self,*args):
-        entry_str=self._latex_backend(self._obj)
-        unit = self._unit
-        left_par=self._left_par
-        right_par=self._right_par
-        
-        
-        if unit:
-            return f'{entry_str} {left_par}{unit:~L}{right_par}'
-        else:
-            return f'{self._obj}'
-
-
-class BasicFormattingTools:
-    
-    
-    _latex_backend=vlatex
-    _label_formatter = lambda obj: f'${vlatex(obj)}$' if isinstance(obj,(Expr,Eq,EntryWithUnit)) else obj
-    _unit_selector = EntryWithUnit
-    _domain=None
-    _units={}
-    _applying_func = lambda x: x.copy().swaplevel(axis=1)
-    _init_ops=True
-
-    _default_sep = ', '
-    
-    @classmethod
-    def set_default_column_separator(cls, sep=', '):
-        cls._default_sep = sep
-
-        return cls
-
-    @classmethod
-    def set_default_units(cls, units={}):
-
-        cls._units = units
-        return cls
-
-    @classmethod
-    def set_default_unit_selector(cls, selector=EntryWithUnit):
-
-        cls._unit_selector = selector
-        return cls
-    
-    def set_multiindex_axis(self,axis=0):
-        
-        if axis == 'index':
-            axis = 0
-        elif axis == 'colums':
-            axis = 1
-            
-        
-        idx = self.axes[axis]
-        
-        if isinstance(idx,pd.MultiIndex):
-       
-            new_obj = self.copy()
-            
-        else:
-            midx = pd.MultiIndex.from_tuples(idx)
-            new_obj = self.copy().set_axis(midx,axis=axis)
-
-        return new_obj
-
-    
-    def set_multiindex_columns(self):
-        
-        return self.set_multiindex_axis(axis=1)
-    
-    def set_flat_index_axis(self,axis=0):
-        
-        if axis == 'index':
-            axis = 0
-        elif axis == 'colums':
-            axis = 1
-
-        idx = self.axes[axis]
-        
-        if isinstance(idx,pd.MultiIndex):
-            midx = idx.to_flat_index()
-            new_obj = self.copy().set_axis(midx,axis=axis)
-
-        else:
-
-            new_obj = self.copy()
-
-        return new_obj
-    
-
-    def switch_axis_type(self,axis=0):
-        
-        if axis == 'index':
-            axis = 0
-        elif axis == 'colums':
-            axis = 1
-            
-        
-        idx = self.axes[axis]
-        
-        if isinstance(idx,pd.MultiIndex):
-            
-            new_obj = self.set_flat_index_axis(axis=axis)
-            
-        else:
-            new_obj = self.copy().set_multiindex_axis(axis=axis)
-
-        return new_obj
-    
-    
-    def switch_index_type(self):
-
-        return self.switch_axis_type(axis=0)
-
-    
-
-    def __call__(self):
-        return self.copy()
-    
-    
-    
-    def applying_method(self,data,func=None,**kwargs):
-        if func:
-            #print('func is used')
-            ops_func = func
-
-        elif self.__class__._applying_func is not None:
-            print('class func is used')
-
-            ops_func = self.__class__._applying_func
-        else:
-            #print('identity is used')
-            ops_func = lambda data: data
-
-        
-        return ops_func(data)
-        
-    
-class AdaptableSeries(TimeSeries,BasicFormattingTools):
-
-    r'''
-    Basic class for formatting data plots. It provides methods for setting options 
-    
-    Arguments
-    =========
-
-    Methods
-    =======
-
-    Example
-    =======
-
-    '''
-    
-    @property
-    def _common_constructor_frame(self):
-        return AdaptableDataFrame#._init_without_ops
-    
-    
-    @property
-    def _common_constructor_series(self):
-        return self.__class__#._init_without_ops
-    
-    _cols_name = None
-
-
-    @classmethod
-    def _init_with_ops(cls,data=None, index=None, dtype=None, name=None, copy=False, fastpath=False,**kwargs):
-        print(f'pure init of {cls}')
-        return cls(data=data, index=index,  dtype=dtype,name=name, copy=copy,fastpath=fastpath,func=lambda obj: obj)
-        
-    
-    def __init__(self,data=None, index=None, dtype=None, name=None, copy=False, fastpath=False,**kwargs):
-
-        super().__init__(data=data, index=index,  dtype=dtype,name=name, copy=copy,fastpath=fastpath)
-        
-
-    
-
-    @property
-    def _constructor(self):
-        return self._common_constructor_series
-
-    @property
-    def _constructor_expanddim(self):
-        return self._common_constructor_frame
-
-    @property
-    def _constructor_sliced(self):
-        return self._common_constructor_series
-
-
-
-class AdaptableDataFrame(TimeDataFrame,BasicFormattingTools):
-    
-    @property
-    def _common_constructor_series(self):
-        return AdaptableSeries#._init_without_ops
-    
-    
-    @property
-    def _common_constructor_frame(self):
-        return self.__class__#._init_without_ops
-    
-
-    _units = {}
-    _ylabel = None
-
-    _data_filtter = lambda frame: frame.copy()
-    _cols_name = None
-    _domain=None
-    r'''
-    Basic class for formatting data plots. It provides methods for setting options 
-    
-    Arguments
-    =========
-
-    Methods
-    =======
-
-    Example
-    =======
-
-    '''
-
-    _default_sep = ', '
-
-    @classmethod
-    def _init_with_ops(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
-
-        raw_frame= cls(data=data, index=index, columns=columns, dtype=dtype, copy=copy,func=lambda obj: obj)
-        
-        print('_init_with_ops')
-        display(raw_frame)
-        
-        new_frame=raw_frame.applying_method(raw_frame,**kwargs)
-        
-        print('_init_without_ops')
-        display(new_frame)        
-        
-       
-        return cls(data=new_frame, index=index, columns=columns, dtype=dtype, copy=copy,func=lambda obj: obj)
-
-    @classmethod
-    def formatted(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
-        return cls._init_with_ops(data=data, index=index, columns=columns, dtype=dtype, copy=copy,**kwargs)
-    
-    
-    def __init__(self,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
-        #_try_evat='test'
-        #print(f'custom init of {type(self)}')
-        
-        super().__init__(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
-        
-
-    
-    def switch_columns_type(self):
-
-
-        return self.switch_axis_type(axis=1)
-    
-    
-
-    
-    
-#     @classmethod
-#     def set_column_separator(cls, sep=', '):
-#         cls._default_sep = sep
-
-#         return cls
+# class AbstractFrameFormatter(AdaptableDataFrame):
+#     _applying_func=lambda x: (x*100)
 
 #     @classmethod
-#     def set_columns_name(cls, name=None):
-#         cls._cols_name = name
+#     def _apply_func(cls,func=None,**kwargs):
 
-#         return cls
+#         if func:
+#             ops_to_apply=func
+#         elif cls._applying_func:
+#             ops_to_apply=cls._applying_func
+#         else:
+#             ops_to_apply=lambda obj: obj
+
+#         return ops_to_apply
+
+#     def __new__(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
+
+#         ops_to_apply=cls._apply_func(**kwargs)
+
+#         return ops_to_apply(BasicFormattedFrame(data=data, index=index, columns=columns, dtype=dtype, copy=copy))
+
+# class AbstractSeriesFormatted(AdaptableSeries):
+#     _applying_func=lambda x: (x*100)
 
 #     @classmethod
-#     def set_data_filtter(cls, filtter=lambda frame: frame.copy()):
+#     def _apply_func(cls,func=None,**kwargs):
 
-#         cls._data_filtter = filtter
-#         #print(cls._data_filtter)
-#         return cls
-
-
-
-#     def _match_unit(self, sym, latex_#printer=vlatex):
-
-#         units = self.__class__._units
-
-#         if isinstance(sym, Eq):
-#             sym_check = sym.lhs
+#         if func:
+#             ops_to_apply=func
+#         elif cls._applying_func:
+#             ops_to_apply=cls._applying_func
 #         else:
-#             sym_check = sym
-#         #print(f'variable is {sym}')
-#         #print(f'units are {units}')
-#         if sym_check in units:
-#             #print(f'{sym} is in units_dict')
-#             #print('matched unit', f'{units[sym_check]:~L}')
-#             return f'{latex_#printer(sym)}~[{units[sym_check]:~L}]'
+#             ops_to_apply=lambda obj: obj
 
-#             #return f'{latex(sym)}'
-#         else:
-#             return f'{latex_#printer(sym)}'
+#         return ops_to_apply
 
-    def _format_entry(self, obj,formatter=None):
-        if formatter is not None:
-            return formatter(obj)
-        else:
-            return self.__class__._label_formatter(obj)
+#     # def __new__(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
 
-    def _modify_axis(self,func,axis=0):
-        
-        new_obj = self.copy()
-        
-        new_obj_idx= new_obj.axes[axis]
-        
-        display(new_obj_idx)
-        display(new_obj_idx.to_frame().applymap(func))
+#     #     ops_to_apply=cls._apply_func(**kwargs)
 
-        idx_frame = new_obj_idx.to_frame().applymap(func)
-        
-        if isinstance(new_obj_idx,pd.MultiIndex):
-            new_obj_idx = pd.MultiIndex.from_frame(idx_frame)
-        else:
-            
-            display(idx_frame)
-            display(list(idx_frame))
-            
-            new_obj_idx = pd.Index(idx_frame,name=new_obj_idx.name)
-            
+#     #     return ops_to_apply(BasicFormattedSeries(data=data, index=index, columns=columns, dtype=dtype, copy=copy))
 
 
-        return new_obj.set_axis(new_obj_idx ,axis=axis)
-
-    def fit_units_to_columns(self,selector=None):
-        if selector is None:
-            selector = self.__class__._unit_selector
-            
-            
-        new_frame=self._modify_axis(selector.set_default_units(self.__class__._units),axis=1)
-        
-        return new_frame
-            
-    
-    
-    def format_columns_names(self,formatter=None):
-        if formatter is None:
-            
-            formatter = self.__class__._label_formatter
-        new_obj = self.copy()
-        
-        new_obj_idx= new_obj.columns.to_frame()
-        
-        display(new_obj_idx)
-        display(new_obj_idx.applymap(formatter))
-
-        new_obj_idx = new_obj_idx.applymap(formatter)
-
-
-        return new_obj.set_axis(new_obj_idx ,axis=1)
-
-    @property
-    def _constructor(self):
-        return self._common_constructor_frame
-
-    @property
-    def _constructor_expanddim(self):
-        return self._common_constructor_frame
-
-    @property
-    def _constructor_sliced(self):
-        return self._common_constructor_series
-
-#     def set_multiindex(self, names=None):
-
-#         midx = pd.MultiIndex.from_tuples(self.columns, names=names)
-
-#         new_obj = self.__class__(self)
-#         new_obj.columns = midx
-
-#         return new_obj
-
-#     def cut_coord(self, coord):
-
-#         new_frame = self.set_multiindex()
-
-#         return new_frame[coord]
-
-#     def format_index(self):
-#         if isinstance(self.index, pd.MultiIndex):
-
-#             idx = self.index.tolist()
-
-#         else:
-#             idx = self.index
-#         #print('idx', idx)
-#         new_idx = idx.copy()
-#         #print('new idx', new_idx)
-
-#         new_obj = self.copy()
-#         new_obj.index = new_idx
-
-#         #print('new_obj.index', new_obj.index.name)
-
-#         if not new_obj.index.name:
-#             new_obj.index.name = Symbol('f')
-
-#         #print('new_obj.index', new_obj.index.name)
-
-#         new_obj.index.name = f'${self._match_unit(new_obj.index.name)}$'
-#         #new_obj.index.name = 'cos'
-
-#         ##print('new_obj.index.name',new_obj.index.name)
-
-#         return new_obj
-
-#     def set_ylabel(self, label=None):
-#         if isinstance(self.index, pd.MultiIndex):
-
-#             if label == None:
-#                 new_obj = self.copy()
-
-#                 for label in new_obj.columns.tolist():
-#                     if label in self.__class__._units:
-
-#                         y_unit_str = f'[${type(self)._units[label]}$]'
-
-#                     else:
-#                         y_unit_str = ''
-
-#                 label = f'$ {latex(label[0])} $, {y_unit_str}'
-
-#                 new_obj.columns = label
-
-#         return new_obj
-
-#     def set_xlabel(self, label=None):
-#         if isinstance(self.index, pd.MultiIndex):
-
-#             if label == None:
-#                 new_obj = self.copy()
-
-#                 for label in new_obj.index.tolist():
-#                     if label in self.__class__._units:
-
-#                         x_unit_str = f'[${type(self)._units[label]}$]'
-
-#                     else:
-#                         x_unit_str = ''
-
-#                 label = latex(self.index.name) + f'{x_unit_str}'
-
-#                 new_obj.index.name = label
-
-#         return new_obj
-
-
-# #     def format_axis_label(self):
-
-# #         new_obj = self.copy()
-
-# #         new_obj.columns = self.set_ylabel
-# #         new_obj.index = self.set_xlabel
-
-# #         return new_obj
-
-#     def set_legend(self, legend=[]):
-#         if legend == None:
-#             pass
-
-#     def _filtter(self, filtter=None):
-#         filtter = self.__class__._data_filtter
-
-#         return filtter
-
-#     def __call__(self):
-
-#         filtter = self._filtter()
-#         #print('on __call__', filtter)
-
-#         #         display('old data',self)
-#         #         display('new data',filtter(self))
-
-#         return self.__class__(filtter(
-#             self)).format_labels().format_index()  #.set_ylabel().set_xlabel()
-
-    def plot(self, *args, **kwargs):
-
-        if not 'ylabel' in kwargs:
-            kwargs['ylabel'] = self.__class__._ylabel
-
-        return super().plot(*args, **kwargs)
-
-    
-class ComputationalErrorFrame(AdaptableDataFrame):
-    _applying_func = lambda obj: obj.join(((obj[obj.columns[1]]-obj[obj.columns[0]]).div(obj[obj.columns[0]],axis=0))).set_axis(list(obj.columns)+[Symbol('\\delta')],axis=1)
-
-    
-    @property
-    def _common_constructor_series(self):
-        return ComputationalErrorSeries
-    
-
-class ComputationalErrorSeries(AdaptableSeries):
-    @property
-    def _common_constructor_series(self):
-        return ComputationalErrorFrame
-
-    
-    
-class LatexDataFrame(AdaptableDataFrame):
-    _applying_func = lambda obj: (obj).fit_units_to_columns().set_multiindex_columns().format_columns_names().set_multiindex_columns()
-
-    
-    @property
-    def _common_constructor_series(self):
-        return LatexSeries
-    
-
-class LatexSeries(AdaptableSeries):
-    @property
-    def _common_constructor_series(self):
-        return LatexDataFrame
-    
-class ParametersSummaryFrame(AdaptableDataFrame):
-    _applying_func = lambda frame: frame.abs().max().reset_index().pivot(columns=['level_0', 'level_2'], index=['level_1'])[0]
-
-    
-    @property
-    def _common_constructor_series(self):
-        return ParameterSummarySeries
-
-
-    
-    
-#     def _filtter(self, filtter=None):
-#         if self.columns.nlevels == 2:
-#             filtter = lambda frame: frame.abs().max().reset_index(
-#                 level=1).pivot(columns=['level_1'])
-#         else:
-#             filtter = 
-
-#         return filtter
-
-class ParameterSummarySeries(AdaptableSeries):
-    @property
-    def _common_constructor_series(self):
-        return ParameterSummaryFrame
-    
-    
-class NumericalAnalysisDataFrame(AdaptableDataFrame):
-    _applying_func = None
-
-    
-    @property
-    def _common_constructor_series(self):
-        return NumericalAnalisysSeries
-    
-    
-    
-
-class NumericalAnalisysSeries(AdaptableSeries):
-    @property
-    def _common_constructor_series(self):
-        return NumericalAnalysisDataFrame
-    
-class AbstractFrameFormatter(AdaptableDataFrame):
-    _applying_func=lambda x: (x*100)
-
-    @classmethod
-    def _apply_func(cls,func=None,**kwargs):
-        
-        if func:
-            ops_to_apply=func
-        elif cls._applying_func:
-            ops_to_apply=cls._applying_func
-        else:
-            ops_to_apply=lambda obj: obj
-        
-        return ops_to_apply
-    
-    def __new__(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
-        
-        ops_to_apply=cls._apply_func(**kwargs)
-       
-        return ops_to_apply(BasicFormattedFrame(data=data, index=index, columns=columns, dtype=dtype, copy=copy))
-
-
-class AbstractSeriesFormatted(AdaptableSeries):
-    _applying_func=lambda x: (x*100)
-
-    @classmethod
-    def _apply_func(cls,func=None,**kwargs):
-        
-        if func:
-            ops_to_apply=func
-        elif cls._applying_func:
-            ops_to_apply=cls._applying_func
-        else:
-            ops_to_apply=lambda obj: obj
-        
-        return ops_to_apply
-    
-    def __new__(cls,data=None, index=None, columns=None, dtype=None, copy=None,**kwargs):
-        
-        ops_to_apply=cls._apply_func(**kwargs)
-       
-        return ops_to_apply(BasicFormattedSeries(data=data, index=index, columns=columns, dtype=dtype, copy=copy))
-    
-    
 class BaseSeriesFormatter(TimeSeries):
     _cols_name = None
-    _domain=None
+    _domain = None
     r'''
     Basic class for formatting data plots. It provides methods for setting options 
     
@@ -813,7 +185,7 @@ class BaseFrameFormatter(TimeDataFrame):
     _label_formatter = None
     _data_filtter = lambda frame: frame.copy()
     _cols_name = None
-    _domain=None
+    _domain = None
     r'''
     Basic class for formatting data plots. It provides methods for setting options 
     
@@ -1085,8 +457,7 @@ class FFTSeriesFormatter(BaseSeriesFormatter):
     def _constructor_sliced(self):
         return FFTSeriesFormatter
 
-    
-    def format_index(self,domain=Symbol('f')):
+    def format_index(self, domain=Symbol('f')):
         if isinstance(self.index, pd.MultiIndex):
 
             idx = self.index.tolist()
@@ -1113,10 +484,12 @@ class FFTSeriesFormatter(BaseSeriesFormatter):
 
         return new_obj
 
-class FFTFrameFormatter(BaseFrameFormatter):
-    _domain = Symbol('f')   
 
-    _data_filtter = lambda obj: obj.to_frequency_domain().double_sided_rms().truncate(0,0.5)
+class FFTFrameFormatter(BaseFrameFormatter):
+    _domain = Symbol('f')
+
+    _data_filtter = lambda obj: obj.to_frequency_domain().double_sided_rms(
+    ).truncate(0, 0.5)
     r'''
     Basic class for formatting data plots. It provides methods for setting options 
     
@@ -1142,7 +515,7 @@ class FFTFrameFormatter(BaseFrameFormatter):
     def _constructor_sliced(self):
         return FFTSeriesFormatter
 
-    def format_index(self,domain=Symbol('f')):
+    def format_index(self, domain=Symbol('f')):
         if isinstance(self.index, pd.MultiIndex):
 
             idx = self.index.tolist()
@@ -1168,7 +541,7 @@ class FFTFrameFormatter(BaseFrameFormatter):
         ##print('new_obj.index.name',new_obj.index.name)
 
         return new_obj
-    
+
 
 class PivotSeriesSummary(BaseSeriesFormatter):
     _default_sep = ' \n '
@@ -1185,15 +558,11 @@ class PivotSeriesSummary(BaseSeriesFormatter):
     def _constructor_sliced(self):
         return PivotSeriesSummary
 
-    
-
-    
 
 class PivotFrameSummary(BaseFrameFormatter):
     #    _data_filtter = lambda frame: frame.abs().max().reset_index(level=1).pivot(columns=['level_1'])
     #    _label_formatter = lambda entry: f'${latex(entry)}$'
     _default_sep = ' \n '
-    
 
     @property
     def _constructor(self):
@@ -1341,8 +710,8 @@ class PivotPlotFrameSummary(BaseFrameFormatter):
         new_obj.index = new_idx
 
         new_obj.index.name = f'${self._match_unit(list(idx)[0].lhs)}$'
-        
-        self.__class__._domain=list(idx)[0].lhs
+
+        self.__class__._domain = list(idx)[0].lhs
 
         return new_obj
 
@@ -1354,46 +723,9 @@ class PivotPlotFrameSummary(BaseFrameFormatter):
             filtter = lambda frame: frame.abs().max().reset_index().pivot(
                 columns=['level_0', 'level_2'], index=['level_1'])[0]
 
-        
-            
         return filtter
 
-    
-    
-class MarkersRegister:
-    
-    _markers = pd.DataFrame()
-    _instance_list=[]
-    _first_instace_marker=None
-    _last_instance_marker=None
-    
-    def __init__(self,marker_str='auto_marker'):
-        
-        self.__class__._instance_list.append(self)
-        self._first_instace_marker=None
-        self._last_instance_marker=None
 
-        
-class AutoMarker:
-    def __init__(self,obj,marker_str=None,marker_prefix=None):
-        
-        if marker_str:
-            self._str=marker_str
-        else:
-            self._str=str(obj)
-            
-            
-        if marker_prefix:
-            self._prefix=marker_prefix            
-        elif isinstance(obj,[Expr,Eq,Matrix]):
-            self._prefix='eq'
-        else:
-            self._prefix='fig'            
-        
-        self._marker = Marker(self._marker_str,prefix=self._prefix)
-        
-        MarkersRegister._markers[obj]=self._marker
-    
 class ReportModule:
     r'''
     Basic class for maintaining global options of a report module. It provides methods for setting options common with every class inheriting from ReportModule instance. 
@@ -1448,9 +780,7 @@ class ReportModule:
     _subplot = False
     _hold = False
     _out_formatter = BaseFrameFormatter  # lambda data: data
-    _height=NoEscape(r'6cm')
-
-    
+    _height = NoEscape(r'6cm')
 
     @classmethod
     def set_output_formatter(cls, formatter=BaseFrameFormatter):
@@ -1548,7 +878,7 @@ class ReportModule:
             self._out_format = output_formatter
         else:
             self._out_format = self.__class__._out_formatter
-            
+
         #print(f'Report module init - formatter is {self._out_format}')
 
     def _apply_formatter(self, data):
@@ -1558,10 +888,8 @@ class ReportModule:
                 FFTFrameFormatter, PivotPlotFrameSummary):
             #print('Base frmatter is working')
 
-
             #print('data.index', data.index)
             #print('data.index.name', data.index.name)
-
 
             result = self._out_format(data)()
 
@@ -1642,8 +970,6 @@ class ReportModule:
             #self.__class__._frame =  None
 
         return None
-    
-
 
     def __str__(self):
         return self._container.__str__()
@@ -1762,12 +1088,19 @@ class DataStorage:
 
         return cls
 
+
 class NumericalDataSet:
-    def __init__(self,numerical_data,key=None, *args, keys_map=None,label='Experimental data', **kwargs):
+    def __init__(self,
+                 numerical_data,
+                 key=None,
+                 *args,
+                 keys_map=None,
+                 label='Experimental data',
+                 **kwargs):
 
         data_to_plot = numerical_data
-        
-        self._key=key
+
+        self._key = key
 
         self._keys_map = {key: key for key in data_to_plot.keys()}
 
@@ -1775,51 +1108,43 @@ class NumericalDataSet:
             self._keys_map = keys_map
 
         self._data_to_plot = data_to_plot
-        self._label=label
-        
-        self.dvars=list( list(data_to_plot.values())[0].columns)
+        self._label = label
+
+        self.dvars = list(list(data_to_plot.values())[0].columns)
 
     def __call__(self, analysis, *args, **kwargs):
         step_val = analysis._current_value
 
     def __str__(self):
         return self._label
-        
-    def numerized(self,
-                 params_values={},
-                 **kwargs):
-        
 
-        
-        if params_values=={}:
+    def numerized(self, params_values={}, **kwargs):
+
+        if params_values == {}:
             return copy.copy(self)
         else:
-        
+
             return copy.copy(self)
-    
-    
-    
+
     def compute_solution(self,
                          t_span=None,
                          ic_list=None,
                          t_eval=None,
                          params_values=None,
                          method='RK45'):
-        
-#         #print('compute_solution')
-#         display(params_values)
-#         display(ic_list)
-        
+
+        #         #print('compute_solution')
+        #         display(params_values)
+        #         display(ic_list)
+
         if ic_list:
             #print('class ics has been taken')
-            self.ics=ic_list
-            
+            self.ics = ic_list
 
-        
         display(self._data_to_plot)
-        
+
         return self._data_to_plot[params_values[self._key]]
-    
+
 
 class SimulationalBlock(ReportModule):
     r'''
@@ -1833,7 +1158,6 @@ class SimulationalBlock(ReportModule):
     ics_list: iterable
         List containing values of initial conditions. 
     dynamic_system: Lagrange's method object
-        Dynamic model prepared basing on Sympy's Lagrange's method object.
     reference_data: dict
         Dictionary containing default values of systems's parameters.
     **kwargs
@@ -1971,6 +1295,9 @@ class SimulationalBlock(ReportModule):
         else:
             case_data = analysis._current_data
 
+        print('$' * 100)
+        display(case_data)
+
         if self._dynamic_system:
             dynamic_system = self._dynamic_system
         else:
@@ -2089,7 +1416,7 @@ class Summary(ReportModule):
                  label=None,
                  subplots=False,
                  height=None,
-                extra_commands=None):
+                 extra_commands=None):
 
         if subplots:
             self._subplot = subplots
@@ -2115,7 +1442,7 @@ class Summary(ReportModule):
         if block:
 
             self._frame = block._frame
-            
+
             self._last_result = block._last_result
         if caption:
             self._caption = caption
@@ -2131,13 +1458,11 @@ class Summary(ReportModule):
             self._height = height
         else:
             self._height = self.__class__._height
-            
 
         if extra_commands is not None:
             self._extra_commands = extra_commands
         else:
             self._extra_commands = None
-            
 
     def holded(self, hold=True):
         self.__class__._hold = hold
@@ -2158,13 +1483,10 @@ class Summary(ReportModule):
             self.__class__._frame.index.name = analysis._last_result.index.name
             self._frame.index.name = analysis._last_result.index.name
 
-            print('_'*100,analysis._last_result._get_comp_time())            
-
-
+            print('_' * 100, analysis._last_result._get_comp_time())
 
         #print('summary plot - call')
         #print((self._block), type((self._block)))
-
 
         result_of_plot = None
 
@@ -2172,7 +1494,7 @@ class Summary(ReportModule):
             ##print()
 
             result_to_add = type(self._block)._last_result
-            print('_'*100,result_to_add._get_comp_time())
+            print('_' * 100, result_to_add._get_comp_time())
             columns_to_add = result_to_add.columns
 
             #print('plot index', result_to_add.index.name)
@@ -2198,7 +1520,6 @@ class Summary(ReportModule):
                 self.__class__._frame.index.name = result_to_add.index.name
 
         plt.clf()
-
 
         return result_of_plot
 
@@ -2284,14 +1605,14 @@ class Summary(ReportModule):
 
             else:
                 y_unit_str = ''
-                
+
             new_data = self._apply_formatter(data[self._coord])
-            
+
             if new_data.__class__._domain:
                 ivar = new_data.__class__._domain
             else:
                 ivar = data[self._coord].index.name
-            
+
             if ivar in units:
                 x_unit_str = f'x unit = {units[ivar]:~Lx}'.replace('[]', '')
 
@@ -2301,29 +1622,25 @@ class Summary(ReportModule):
             #print('y_unit_str', y_unit_str)
 
             if extra_commands is None:
-                extra_commands= self._extra_commands
-            
+                extra_commands = self._extra_commands
+
             fig = new_data.to_standalone_figure(
-                    filepath,
-                    colors_list=colors_list,
-                    subplots=self._subplot,
-                    height=self._height
-                ,
-                    width=NoEscape(r'0.9\textwidth'),
-                    x_axis_description=
-                    f',xlabel=${NoEscape(vlatex(ivar))}$, {x_unit_str},'.replace('$$','$'),
-                    y_axis_description=
-                    f'ylabel=${NoEscape(vlatex(self._coord))}$, {y_unit_str},',
-                    legend_pos=legend_pos,
-                    extra_commands=extra_commands,
-                )
-            fig.add_caption(NoEscape(self._caption))
-            fig.append(
-                Label(self._label)
+                filepath,
+                colors_list=colors_list,
+                subplots=self._subplot,
+                height=self._height,
+                width=NoEscape(r'0.9\textwidth'),
+                x_axis_description=
+                f',xlabel=${NoEscape(vlatex(ivar))}$, {x_unit_str},'.replace(
+                    '$$', '$'),
+                y_axis_description=
+                f'ylabel=${NoEscape(vlatex(self._coord))}$, {y_unit_str},',
+                legend_pos=legend_pos,
+                extra_commands=extra_commands,
             )
-            
-            
-            
+            fig.add_caption(NoEscape(self._caption))
+            fig.append(Label(self._label))
+
             self._container.append(fig)
 
         return result
@@ -2402,9 +1719,7 @@ class Summary(ReportModule):
                                             '\\toprule \n \\midrule').replace(
                                                 '\\bottomrule',
                                                 '\\midrule \n \\bottomrule')))
-            tab.append(
-                Label(self._label)
-            )
+            tab.append(Label(self._label))
 
             self._container.append(tab)
 
@@ -2650,8 +1965,8 @@ class AccelerationComparison(ReportModule):
                          'blue', 'red', 'green', 'orange', 'violet', 'magenta',
                          'cyan'
                      ],
-                    extra_commands=None,
-                    options=None):
+                     extra_commands=None,
+                     options=None):
 
         self.subplots = subplots
         if analysis:
@@ -2758,8 +2073,7 @@ class AccelerationComparison(ReportModule):
                     legend_pos=legend_pos + ',' +
                     f'legend columns= {legend_columns}',
                     extra_commands=extra_commands,
-                    options=options
-                )
+                    options=options)
                 #ndp.add_data_plot(filename=f'{self._path}/{self.__class__.__name__}_data_{next(plots_no_gen)}.png',width='11cm')
 
                 ########### for tikz
@@ -2914,8 +2228,6 @@ class FFTComparison(AccelerationComparison):
             key: value.to_frequency_domain().double_sided_rms()
             for key, value in data.items()
         }
-
-
 
         return super()._prepare_data(coordinate=None, xlim=xlim)
 
@@ -3282,12 +2594,472 @@ class ReportText(ReportModule):
 
     def __repr__(self):
 
-        display(Markdown(self._text))
+        display(IPMarkdown(self._text))
 
         #return (self._text)
         return ''
 
+    
+class Verbatim(Environment):
+    pass
 
+class Minted(Environment):
+    packages=[Package('minted')]
+    content_separator = "\n"
+
+class LstListing(Environment):
+    packages=[Package('lstlisting')]
+    
+    
+class PyVerbatim(Environment):
+    packages=[Package('pythontex')]
+    content_separator = "\n"
+    #inspect.getsource(system.__class__)
+
+    
+
+class BeamerTemplate(Document):
+
+    latex_name = 'document'
+    packages = [
+                  Package('microtype'),
+                  Package('polski',options=['MeX']),
+                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('listings'),
+                  #Package('titlesec'),
+                  Package('fancyhdr'),
+                  Command('pagestyle', arguments=['fancy']),
+                  Command('fancyhf', arguments=['']),
+                  #Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
+                  #Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
+                  #Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
+                  #Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']), 
+                  Command('usetheme', arguments=['Madrid']),
+
+            ]
+    
+    
+    def __init__(self,
+                 default_filepath='default_filepath',
+                 *,
+                 title=None,
+                 documentclass='beamer',
+                 document_options=None,
+                 fontenc='T1',
+                 inputenc='utf8',
+                 font_size='normalsize',
+                 lmodern=False,
+                 textcomp=True,
+                 microtype=True,
+                 page_numbers=True,
+                 indent=None,
+                 geometry_options=None,
+                 data=None):
+
+        super().__init__(
+            default_filepath=default_filepath,
+            documentclass=documentclass,
+            document_options=document_options,
+            fontenc=fontenc,
+            inputenc=inputenc,
+            font_size=font_size,
+            lmodern=lmodern,
+            textcomp=textcomp,
+            microtype=microtype,
+            page_numbers=page_numbers,
+            indent=indent,
+            geometry_options=geometry_options,
+            data=data, 
+            )
+        self.title = title
+        
+        if self.title is not None:
+            self.packages.append(Command('title', arguments=[self.title]))
+        self.append(Command('frame', arguments=[NoEscape(r'\titlepage')]))
+
+class Frame(Environment,ReportModule):
+
+    
+    r"""A base class for LaTeX environments.
+    This class implements the basics of a LaTeX environment. A LaTeX
+    environment looks like this:
+    .. code-block:: latex
+        \begin{environment_name}
+            Some content that is in the environment
+        \end{environment_name}
+    The text that is used in the place of environment_name is by default the
+    name of the class in lowercase.
+    However, this default can be overridden in 2 ways:
+    1. setting the _latex_name class variable when declaring the class
+    2. setting the _latex_name attribute when initialising object
+    """
+
+    #: Set to true if this full container should be equivalent to an empty
+    #: string if it has no content.
+    omit_if_empty = False
+
+    def __init__(self, title=None, options=None, arguments=None, start_arguments=None,
+                 **kwargs):
+        r"""
+        Args
+        ----
+        options: str or list or  `~.Options`
+            Options to be added to the ``\begin`` command
+        arguments: str or list or `~.Arguments`
+            Arguments to be added to the ``\begin`` command
+        start_arguments: str or list or `~.Arguments`
+            Arguments to be added before the options
+        """
+
+        self.title = title
+        self.options = options
+        self.arguments = arguments
+        self.start_arguments = start_arguments
+
+        
+        
+        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
+        
+        if self.title is not None:
+            self.append(
+                Command('frametitle', arguments=[self.title])
+                )
+
+
+    
+    
+class TitlePage(Environment,ReportModule):
+    pass
+            
+class Frame(Environment,ReportModule):
+
+    
+    r"""A base class for LaTeX environments.
+    This class implements the basics of a LaTeX environment. A LaTeX
+    environment looks like this:
+    .. code-block:: latex
+        \begin{environment_name}
+            Some content that is in the environment
+        \end{environment_name}
+    The text that is used in the place of environment_name is by default the
+    name of the class in lowercase.
+    However, this default can be overridden in 2 ways:
+    1. setting the _latex_name class variable when declaring the class
+    2. setting the _latex_name attribute when initialising object
+    """
+
+    #: Set to true if this full container should be equivalent to an empty
+    #: string if it has no content.
+    omit_if_empty = False
+
+    def __init__(self, title=None, options=None, arguments=None, start_arguments=None,
+                 **kwargs):
+        r"""
+        Args
+        ----
+        options: str or list or  `~.Options`
+            Options to be added to the ``\begin`` command
+        arguments: str or list or `~.Arguments`
+            Arguments to be added to the ``\begin`` command
+        start_arguments: str or list or `~.Arguments`
+            Arguments to be added before the options
+        """
+
+        self.title = title
+        self.options = options
+        self.arguments = arguments
+        self.start_arguments = start_arguments
+
+        
+        
+        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
+        
+        if self.title is not None:
+            self.append(
+                Command('frametitle', arguments=[self.title])
+                )
+
+
+class Markdown(Environment,ReportModule):
+    packages = [
+                  Package('markdown'),
+        ]
+    
+    r"""A base class for LaTeX environments.
+    This class implements the basics of a LaTeX environment. A LaTeX
+    environment looks like this:
+    .. code-block:: latex
+        \begin{environment_name}
+            Some content that is in the environment
+        \end{environment_name}
+    The text that is used in the place of environment_name is by default the
+    name of the class in lowercase.
+    However, this default can be overridden in 2 ways:
+    1. setting the _latex_name class variable when declaring the class
+    2. setting the _latex_name attribute when initialising object
+    """
+
+    #: Set to true if this full container should be equivalent to an empty
+    #: string if it has no content.
+    omit_if_empty = False
+
+    def __init__(self, markdown=None, options=None, arguments=None, start_arguments=None,
+                 **kwargs):
+        r"""
+        Args
+        ----
+        options: str or list or  `~.Options`
+            Options to be added to the ``\begin`` command
+        arguments: str or list or `~.Arguments`
+            Arguments to be added to the ``\begin`` command
+        start_arguments: str or list or `~.Arguments`
+            Arguments to be added before the options
+        """
+
+        self.markdown = markdown
+        self.options = options
+        self.arguments = arguments
+        self.start_arguments = start_arguments
+
+        
+        
+        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
+        
+        if self.markdown is not None:
+            self.append(
+
+                NoEscape(markdown)
+                )
+
+    def dumps(self):
+        return NoEscape(ppd.convert_text(self.markdown,to='latex',format='md'))
+            
+    def _repr_markdown_(self):
+        return self.markdown
+
+    def reported(self):
+        
+        
+        latex_code=ppd.convert_text(self.markdown,to='latex',format='md')
+        
+        self.cls_container.append(NoEscape(latex_code))
+        
+        return copy.copy(self)
+        
+    
+class Block(Environment,ReportModule):
+    
+    packages = [
+                  Package('markdown'),
+        ]
+    content_separator = "\n"
+    
+    r"""A base class for LaTeX environments.
+    This class implements the basics of a LaTeX environment. A LaTeX
+    environment looks like this:
+    .. code-block:: latex
+        \begin{environment_name}
+            Some content that is in the environment
+        \end{environment_name}
+    The text that is used in the place of environment_name is by default the
+    name of the class in lowercase.
+    However, this default can be overridden in 2 ways:
+    1. setting the _latex_name class variable when declaring the class
+    2. setting the _latex_name attribute when initialising object
+    """
+
+    #: Set to true if this full container should be equivalent to an empty
+    #: string if it has no content.
+    omit_if_empty = False
+
+    def __init__(self,header=None, data=None, options=None, arguments=None, start_arguments=None,
+                 **kwargs):
+        r"""
+        Args
+        ----
+        arguments: str or `list`
+            The arguments for the container command
+        options: str, list or `~.Options`
+            The options for the preamble command
+        data: str or `~.LatexObject`
+            The data to place inside the preamble command
+        """
+
+
+
+
+
+        
+        self.data = data
+        self.options = options
+        self.arguments = arguments
+        self.header = header
+
+        if type(self.header) is not list:
+            header_list = [self.header]
+        else:
+            header_list = self.header
+            
+            
+            
+        
+        super().__init__(options=options, arguments=header_list, start_arguments=start_arguments,**kwargs)
+        
+        if self.data is not None:
+            self.append(
+
+                data
+                )
+            
+    def _repr_markdown_(self):
+        return self.dumps()
+
+    def reported(self):
+        
+        
+        #latex_code=ppd.convert_text(self.markdown,to='latex',format='md')
+        
+        self.cls_container.append(self)
+        
+        return copy.deepcopy(self)            
+
+class AlertBlock(Block):
+    pass
+
+class ExampleBlock(Block):
+    pass
+    
+
+class Picture(Figure,ReportModule):
+    """A class that represents a figure environment."""
+
+    #: By default floats are positioned inside a separate paragraph.
+    #: Setting this to option to `False` will change that.
+    separate_paragraph = True
+
+
+    
+    _latex_name = 'figure'
+    def __init__(self, image=None, position=None, caption=None,width=NoEscape('0.8\\textwidth'), **kwargs):
+        """
+        Args
+        ----
+        position: str
+            Define the positioning of a floating environment, for instance
+            ``'h'``. See the references for more information.
+        width: str
+            Documentation entry
+            
+        References
+        ----------
+            * https://www.sharelatex.com/learn/Positioning_of_Figures
+        """
+    
+        self.image = image
+        self.caption = caption
+        self.width = width
+        
+        super().__init__(position=position,**kwargs)
+        
+        if self.image is not None:
+            self.add_image(NoEscape(self.image),width=width)
+            
+        if self.caption is not None:
+            self.add_caption(NoEscape(self.caption))
+            
+    def __repr__(self):
+
+        if self.image is not None:
+            path = (self.image)
+        else:
+            path = 'nothing to preview :('
+        
+        repr_string=f'''
+        \n++++++++++ IMAGE +++++++
+        \n++                    ++
+        \n++  path:{path}       ++
+        \n++                    ++
+        \n++++++++++ IMAGE +++++++
+        
+        '''
+        
+        return repr_string
+    
+    def reported(self):
+        self.cls_container.append(self)
+        
+        return copy.deepcopy(self)
+    
+class ObjectCode(PyVerbatim,ReportModule):
+    _latex_name='pyverbatim'
+    
+    r"""A base class for LaTeX environments.
+    This class implements the basics of a LaTeX environment. A LaTeX
+    environment looks like this:
+    .. code-block:: latex
+        \begin{environment_name}
+            Some content that is in the environment
+        \end{environment_name}
+    The text that is used in the place of environment_name is by default the
+    name of the class in lowercase.
+    However, this default can be overridden in 2 ways:
+    1. setting the _latex_name class variable when declaring the class
+    2. setting the _latex_name attribute when initialising object
+    """
+
+    #: Set to true if this full container should be equivalent to an empty
+    #: string if it has no content.
+    omit_if_empty = False
+
+    def __init__(self, inspected_obj=None, options=None, arguments=None, start_arguments=None,
+                 **kwargs):
+        r"""
+        Args
+        ----
+        options: str or list or  `~.Options`
+            Options to be added to the ``\begin`` command
+        arguments: str or list or `~.Arguments`
+            Arguments to be added to the ``\begin`` command
+        start_arguments: str or list or `~.Arguments`
+            Arguments to be added before the options
+        """
+
+        self.inspected_obj = inspected_obj
+        self.options = options
+        self.arguments = arguments
+        self.start_arguments = start_arguments
+
+        
+        
+        super().__init__(options=None, arguments=None, start_arguments=None,**kwargs)
+        
+        if self.inspected_obj is not None:
+            self.append(NoEscape(
+                inspect.getsource(self.inspected_obj)
+                ))
+    
+    def __repr__(self):
+
+        if self.inspected_obj is not None:
+            code = (inspect.getsource(self.inspected_obj))
+        else:
+            code = 'nothing to print :('
+        
+        repr_string=f'''
+        \n++++++++++ CODE +++++++
+        \n{code}
+        \n++++++++++ CODE +++++++
+        
+        '''
+        
+        return repr_string
+    
+    def reported(self):
+        self.cls_container.append(self)
+        
+        return copy.deepcopy(self)
+    
+    
 class SympyFormula(ReportModule):
     r'''
     This class appends a sympy expression to the existing document container. 
@@ -3312,6 +3084,7 @@ class SympyFormula(ReportModule):
     '''
 
     _color = None
+    _break_mode = 'autobreak'
 
     @classmethod
     def set_text_color(cls, color=None):
@@ -3330,26 +3103,45 @@ class SympyFormula(ReportModule):
         self._text = 'Figures {first_marker}-{last_marker}'
         self._backend = backend
 
-        if not marker == None:
-            self._marker = marker
-        else:
-            self._marker = Marker('formula', prefix='eq')
+        self._marker = marker
 
         if not expr == None:
             self._expr = expr
 
-        super().__init__()
+        super().__init__(**kwargs)
 
-        self._eq = DMath()
-        self._eq.append(NoEscape(self._backend(self._expr)))
-        self._eq.append(Label(self._marker))
+        if self._break_mode == 'autobreak':
+            if isinstance(expr, (Matrix, ImmutableMatrix)):
+
+                self._eq = Equation()
+                self._eq.append(NoEscape(self._backend(self._expr)))
+
+            elif isinstance(expr, (Eq, Relational)):
+
+                if isinstance(expr.lhs,
+                              (Matrix, ImmutableMatrix)) or isinstance(
+                                  expr.rhs, (Matrix, ImmutableMatrix)):
+
+                    self._eq = Equation()
+                    self._eq.append(NoEscape(self._backend(self._expr)))
+
+                else:
+                    self._eq = Align()
+                    with self._eq.create(AutoBreak()) as eq:
+                        eq.append_formula(expr)
+
+            else:
+
+                self._eq = Align()
+                with self._eq.create(AutoBreak()) as eq:
+                    eq.append_formula(expr)
+            auto_mrk = AutoMarker(self._expr).marker
+            self._eq.append(Label(auto_mrk))
 
         if self.__class__._color:
 
             self._container.append(TextColor(self.__class__._color, self._eq))
-
         else:
-
             self._container.append(self._eq)
 
     def __call__(self, analysis):
@@ -3571,24 +3363,7 @@ class SystemDynamicsAnalyzer(ReportModule):
         return self._current_result
 
 
-class CompoundMatrix(Matrix):
-    r'''
-    dfa
-    
-    Arguments
-    =========
 
-    Methods
-    =======
-
-    Example
-    =======
-    '''
-    def symbolic_form(self, symbol_str):
-
-        nrows, ncols = self.shape
-
-        matrix_filling = symbols()
 
 
 class InlineMath(Math):
@@ -3650,10 +3425,67 @@ class NumbersList(NoEscape):
         return list_str
 
 
+class DescriptionsRegistry:
+
+    _descriptions = {}
+    _described_elements = {}
+
+    @classmethod
+    def set_descriptions(cls, description={}):
+        cls._descriptions = description
+
+    @classmethod
+    def reset_registry(cls):
+        cls._described_elements = {}
+
+    def __init__(self, description_dict=None, method='add'):
+        if description_dict is not None: self._descriptions = description_dict
+
+    def _get_description(self, items):
+        symbols_list = self._descriptions.keys()
+
+        missing_symbols_desc = {
+            sym: '???'
+            for sym in items if sym not in symbols_list
+        }
+
+        self._descriptions = {**self._descriptions, **missing_symbols_desc}
+        self.__class__._descriptions = {
+            **self.__class__._descriptions,
+            **missing_symbols_desc
+        }
+
+        #syms_to_desc={sym for sym in items if sym not in self._described_elements.keys()}
+        syms_to_desc = {
+            sym: self._descriptions[sym]
+            for sym in items if sym not in self._described_elements.keys()
+        }
+
+        self._described_elements = {**self._described_elements, **syms_to_desc}
+        self.__class__._described_elements = {
+            **self.__class__._described_elements,
+            **syms_to_desc
+        }
+
+        return syms_to_desc
+
+
 class SymbolsDescription(Description):
     """A class representing LaTeX description environment of Symbols explained in description_dict."""
     _latex_name = 'description'
+    cls_container = []
+    _description_head = 'where:'
 
+    @classmethod
+    def set_container(cls, container=[]):
+        cls.cls_container = container
+        return cls
+
+    @classmethod
+    def set_default_header(cls, header='where:'):
+        cls._description_head = header
+        return cls
+    
     def __init__(self,
                  description_dict=None,
                  expr=None,
@@ -3668,26 +3500,125 @@ class SymbolsDescription(Description):
                          start_arguments=start_arguments,
                          **kwargs)
 
-        if description_dict and expr:
+        self._added_symbols = self._symbols_to_add_dict()
 
-            symbols_set = expr.atoms(Symbol, Function, Derivative)
+        self.add_items(self._added_symbols)
+
+    def _symbols_to_add_dict(self):
+
+        description_dict = self.description_dict
+        expr = self.expr
+
+        if description_dict is not None and expr is not None:
+
+            symbols_set = expr.atoms(
+                Symbol, Function, Derivative) - expr.atoms(sin, cos, tan, exp)
 
             symbols_to_add = {
                 sym: desc
                 for sym, desc in description_dict.items() if sym in symbols_set
             }
 
-            self.add_items(symbols_to_add)
+            return symbols_to_add
 
-        if description_dict:
-            self.add_items(description_dict)
+        elif (description_dict is None) and (expr is not None):
+
+            symbols_set = set()
+            if isinstance(expr, Iterable):
+                for elem in expr:
+                    symbols_set |= elem.atoms(Symbol, Function,
+                                              Derivative) - elem.atoms(
+                                                  sin, cos, tan, exp, atan, sign)
+            #print(symbols_set)
+            else:
+                symbols_set |= expr.atoms(Symbol, Function,
+                                          Derivative) - expr.atoms(
+                                              sin, cos, tan, exp, atan, sign)
+
+            description_dict = DescriptionsRegistry()._get_description(
+                symbols_set)
+
+            #print(description_dict)
+
+            symbols_to_add = {
+                sym: desc
+                for sym, desc in description_dict.items()
+            }
+
+            ##print('symbols')
+            #print(symbols_to_add)
+
+            return symbols_to_add
+
+        else:
+            return {}
+
+    def reported(self, container=None):
+        if container:
+            self._container = container
+        else:
+            self._container = type(self).cls_container
+
+
+#         self._container.append(self)
+        entries = [
+            f'${vlatex(key)}$ - {value}'
+            for key, value in self._added_symbols.items()
+        ]
+
+        end_sign = '.'
+        if len(entries) == 0: end_sign = ''
+
+        if len(entries) != 0:
+
+            self._container.append(NoEscape(self._description_head) + '\n')
+            self._container.append(self)
+        #return (self._text)
+        return copy.deepcopy(self)
 
     def add_items(self, description_dict):
 
+        end_symbol = '.'
+
+        if len(description_dict.keys()) > 0:
+            last_key = list(description_dict.keys())[-1]
+            end_symbol = ';'
+
         for label, entry in description_dict.items():
 
+            if label == last_key: end_symbol = '.'
+
             self.add_item(NoEscape(InlineMath(vlatex(label)).dumps()),
-                          NoEscape(vlatex(entry)))
+                          NoEscape(f'- {vlatex(entry)}{end_symbol}'))
+
+    def __repr__(self):
+
+        entries = [
+            f'${vlatex(key)}$ - {value}'
+            for key, value in self._added_symbols.items()
+        ]
+
+        end_sign = '.'
+        head = self._description_head + '  \n'
+
+        if len(entries) == 0:
+            end_sign = ''
+            head = ''
+
+        text = head + ',  \n'.join(entries) + end_sign
+
+        display(IPMarkdown(text))
+
+        #return (self._text)
+        return ''
+
+
+class Align(Environment):
+    """A class to wrap LaTeX's alltt environment."""
+
+    packages = [Package('mathtools')]
+    escape = False
+    content_separator = "\n"
 
 
 class Equation(Environment):
@@ -3697,13 +3628,157 @@ class Equation(Environment):
     escape = False
     content_separator = "\n"
 
+class CompositeMatrix(Equation):
 
+    
+    r"""A class representing a composite matrix surrounded by Equation environment
+    .. code-block:: latex
+        \begin{environment_name}
+            Some content that is in the environment
+        \end{environment_name}
+    The text that is used in the place of environment_name is by default the
+    name of the class in lowercase.
+    However, this default can be overridden in 2 ways:
+    1. setting the _latex_name class variable when declaring the class
+    2. setting the _latex_name attribute when initialising object
+    """
+
+    #: Set to true if this full container should be equivalent to an empty
+    #: string if it has no content.
+    omit_if_empty = False
+    _latex_name='equation'
+
+    def __init__(self,matrix=None,repr_sym='A', options=None, arguments=None, start_arguments=None,
+                 **kwargs):
+        r"""
+        Args
+        ----
+        options: str or list or  `~.Options`
+            Options to be added to the ``\begin`` command
+        arguments: str or list or `~.Arguments`
+            Arguments to be added to the ``\begin`` command
+        start_arguments: str or list or `~.Arguments`
+            Arguments to be added before the options
+        """
+
+        self.matrix = matrix
+        self.repr_sym='A'
+        self.options = options
+        self.arguments = arguments
+        self.start_arguments = start_arguments
+
+        
+        
+        super().__init__(options=None, arguments=None, start_arguments=None,**kwargs)
+        
+        if self.matrix is not None:
+            
+            display(self._sym_matrix)
+            self.append(NoEscape(
+                latex(self._sym_matrix)
+                ))
+    
+    @property
+    def _sym_matrix(self):
+        subs_list = [(elem,Symbol(f'{self.repr_sym}_{no}'))   for no,elem in enumerate(self.matrix) if elem != 0] 
+        
+        return self.matrix.subs(subs_list)
+    
+    def __repr__(self):
+
+        if self.inspected_obj is not None:
+            code = (inspect.getsource(self.inspected_obj))
+        else:
+            code = 'nothing to print :('
+        
+        repr_string=f'''
+        \n++++++++++ CODE +++++++
+        \n{code}
+        \n++++++++++ CODE +++++++
+        
+        '''
+        
+        return repr_string
+    
+    def reported(self):
+        self.cls_container.append(self)
+        
+        return copy.deepcopy(self)
+    
 class DMath(Environment):
     """A class to wrap LaTeX's alltt environment."""
 
-    packages = [Package('breqn'), Package('flexisym')]
+    packages = [Package('flexisym'), Package('breqn')]
     escape = False
     content_separator = "\n"
+
+
+class AutoBreak(Environment):
+    """A class to wrap LaTeX's alltt environment."""
+
+    packages = [Package('mathtools'), Package('autobreak')]
+    escape = False
+    content_separator = "\n"
+    latex_backend = vlatex
+
+    def _split_expr(self, expr):
+
+        if isinstance(expr, Equality):
+
+            elems = [expr.lhs, Symbol('='), expr.rhs]
+
+        elif isinstance(expr, Add):
+
+            elems = list(expr.args)
+            #elems = sum(([obj,Symbol('+')] for obj in elems),[]  )[0:-1]
+            #elems=[]
+
+            #for obj in list(expr.args):
+            #    display(obj.args)
+            #    elems += [obj,Symbol('+')]
+
+        else:
+            elems = [expr]
+
+        #print('elems')
+        #display(elems)
+
+        if len(elems) > 1:
+            #print('elems')
+            #display(elems)
+            elems = sum([self._split_expr(obj) for obj in elems], [])
+        else:
+            elems = [expr]
+
+        return elems
+
+    def append_formula(self, expr):
+
+        terms = self._split_expr(expr)
+
+        new_terms = []
+
+        for no, obj in enumerate(terms):
+
+            if terms[no - 1] == Symbol('='):
+                new_terms += [obj]
+
+            elif isinstance(obj, Mul) and not (
+                (any([elem.is_negative for elem in obj.args]))):
+
+                new_terms += [Symbol('+'), obj]
+
+            elif obj == Symbol('='):
+                new_terms += [obj]
+
+            elif isinstance(obj, (Symbol, Function, Number,Derivative,Subs,Expr)):
+                new_terms += [Symbol('+'), obj]
+
+            else:
+                new_terms += [obj]
+
+        for term in new_terms[1:]:
+            self.append(self.__class__.latex_backend(term))
 
 
 # class EqRef(Environment):
@@ -4497,25 +4572,6 @@ class DataPlot(Figure):
             plt.show()
 
 
-class DataTable(Table):
-    _latex_name = 'table'
-
-    def __init__(self, numerical_data, position=None):
-        super().__init__(position=position)
-        ##print(numerical_data)
-        self._numerical_data = numerical_data
-        self.position = position
-
-    def add_table(self, numerical_data=None, index=False, longtable=False):
-        self.append(NoEscape('%%%%%%%%%%%%%% Table %%%%%%%%%%%%%%%'))
-        #         if numerical_data!=None:
-        #             self._numerical_data=numerical_data
-
-        tab = self._numerical_data
-        self.append(
-            NoEscape(tab.to_latex(index=index, escape=False, longtable=longtable)))
-
-
 class ReportSection(Section):
 
     _latex_name = 'section'
@@ -4732,9 +4788,9 @@ class ReportSection(Section):
                 subsec.append(
                     NoEscape(str(initial_description).format(**format_dict)))
 
-#                 print(
-#                     np.array_split(range(len(row['simulations'].columns)),
-#                                    plots_no))
+                #                 print(
+                #                     np.array_split(range(len(row['simulations'].columns)),
+                #                                    plots_no))
 
                 for no, control_list in enumerate(
                         np.array_split(range(len(row['simulations'].columns)),
