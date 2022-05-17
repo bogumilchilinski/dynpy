@@ -669,6 +669,32 @@ class GeneralSolutionComponent(ReportComponent):
                                 '''))
 
         AutoBreak.latex_backend = latex_store
+
+        
+        
+class FrequencyResponseFunctionComponent(ReportComponent):
+    
+    title="Charakterystyka Amplitudowo-Częstotliwościowa"
+
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(f'''
+                           xxx:
+                           '''))
+
+        display(SympyFormula( Eq(Symbol('V'),
+                     dyn_sys.frequency_response_function() ), marker=None))
+
+        display(ReportText(f'''
+                           yyyyy
+                           '''))  
+        
+FRFComponent = FrequencyResponseFunctionComponent
         
 class SteadySolutionComponent(ReportComponent):
     
