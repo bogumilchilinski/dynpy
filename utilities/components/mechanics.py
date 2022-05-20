@@ -684,18 +684,44 @@ class FrequencyResponseFunctionComponent(ReportComponent):
 
 
         display(ReportText(f'''
-                           xxx:
+                           funkcja odpowiedzi częstotliwościowej:
                            '''))
 
-        display(SympyFormula( Eq(Symbol('V'),
+        display(SympyFormula( Eq(Symbol('frf'),
                      dyn_sys.frequency_response_function() ), marker=None))
 
         display(ReportText(f'''
-                           yyyyy
+                           jest to suma kwadratów amplitud pod pierwiastkiem
                            '''))  
         
 FRFComponent = FrequencyResponseFunctionComponent
+
+class FrequencyResponseFunctionComponentToSecond(ReportComponent):
+    
+    title="sens mocy układu"
+
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(f'''
+                           sens mocy układu:
+                           '''))
+
+        display(SympyFormula( Eq(Symbol('frf^2'),
+                     dyn_sys.frequency_response_function().doit()**2 ), marker=None))
+
+        display(ReportText(f'''
+                           Charakterystyka Amplitudowo-Częstotliwościowa podniesiona do kwadratu
+                           '''))  
         
+
+
+        
+
 class SteadySolutionComponent(ReportComponent):
     
     title="Rozwiązanie szczególne"

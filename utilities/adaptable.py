@@ -527,7 +527,7 @@ class AutoMarker:
                 prefix = 'fig'
         
         elif isinstance(elem,(pd.DataFrame,pd.Series)):
-            elem_id = elem.to_latex()
+            elem_id = elem.style.to_latex()
             prefix = 'fig'
             
         elif isinstance(elem,Matrix):
@@ -553,7 +553,7 @@ class AutoMarker:
                 prefix = 'fig'
         
         elif isinstance(elem,(pd.DataFrame,pd.Series)):
-            elem_id = elem.to_latex()
+            elem_id = elem.style.to_latex()
             prefix = 'fig'
             
         elif isinstance(elem,Matrix):
@@ -1156,10 +1156,10 @@ class BasicFormattingTools(DataMethods):
             tab.append(Label(label))
 
         if label is not None:
-            AutoMarker.add_marker(self.to_latex(),label)
+            AutoMarker.add_marker(self.style.to_latex(),label)
             tab.append(Label(label))
         else:
-            auto_mrk=AutoMarker(self.to_latex()).marker
+            auto_mrk=AutoMarker(self.style.to_latex()).marker
             tab.append(Label(auto_mrk))
             
 
@@ -1274,7 +1274,7 @@ class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
 
     def _get_str_key(self):
         #return self.to_latex()+f'subplot={self._subplot}, self._caption{self._caption} '
-        return self.to_latex()+f'subplot={self._subplot}'
+        return self.style.to_latex()+f'subplot={self._subplot}'
     
 class LatexDataFrame(AdaptableDataFrame):
     _applying_func = lambda obj: (obj).fit_units_to_axes().format_axes_names()

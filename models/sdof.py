@@ -1723,43 +1723,41 @@ class NonlinearEngine(ComposedSystem):
         >>> qs = dynamicsymbols('z') 
         >>> SDoFNonlinearEngine()
     """
-
+    M=Symbol('M', positive=True)
+    k_m=Symbol('k_m', positive=True)
+    m_e=Symbol('m_e', positive=True)
+    e=Symbol('e', positive=True)
+    d=Symbol('d', positive=True)
+    l_0=Symbol('l_0', positive=True)
+    z=dynamicsymbols('z')
+    phi=dynamicsymbols('phi')
+    Omega=Symbol('\Omega',positive=True)
     def __init__(self,
-                 M=Symbol('M', positive=True),
-                 k_m=Symbol('k_m', positive=True),
-                 m_e=Symbol('m_e', positive=True),
-                 e=Symbol('e', positive=True),
-                 beta=Symbol('beta', positive=True),
-                 d=Symbol('d', positive=True),
-                 l_0=Symbol('l_0', positive=True),
-                 z=dynamicsymbols('z'),
-                 phi=dynamicsymbols('phi'),
+                 M=None,
+                 k_m=None,
+                 m_e=None,
+                 e=None,
+                 d=None,
+                 l_0=None,
+                 z=None,
+                 phi=None,
                  ivar=Symbol('t', positive=True),
-                 Omega=Symbol('\Omega',positive=True),
+                 Omega=None,
                  **kwargs):
+        if M is not None: self.M = M
+        if k_m is not None: self.k_m = k_m
+        if d is not None: self.d = d
+        if phi is not None: self.phi = phi
+        if m_e is not None: self.m_e = m_e
+        if e is not None: self.e = e
+        if l_0 is not None: self.l_0 = l_0
+        if z is not None: self.z=z
+        if Omega is not None: self.Omega=Omega
 
-        self.M = M
-        self.k_m = k_m
-        self.m_e = m_e
-        self.beta = beta
-        self.d=d
-        self.e = e
-        self.l_0 = l_0
-        self.z = z
-        self.phi = phi
-        self.Omega = Omega
-        N = ReferenceFrame('N')
-        O = Point('O')
 
-        P1 = Point('P1')
-        P1.set_pos(O, 0 * N.x + 0 * N.y)
-
-        P2 = Point('P2')
-        P2.set_pos(O, d  * N.x + (z ) * N.y)
-
-        self.MaterialPoint_1 = MaterialPoint(M, z, qs=[z])
-        self.MaterialPoint_2 = MaterialPoint(m_e, z + e * cos(phi), qs=[z])
-        self.Spring = Spring(2 * k_m, pos1=P1, pos2=P2, l_0=l_0, qs=[z])
+        self.MaterialPoint_1 = MaterialPoint(self.M, self.z, qs=[self.z])
+        self.MaterialPoint_2 = MaterialPoint(self.m_e, self.z + self.e * cos(self.phi), qs=[self.z])
+        self.Spring = Spring(2 * self.k_m, pos1=(self.z**2+self.d**2)**0.5-self.l_0, qs=[self.z])
 
         system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2
         super().__init__(system,**kwargs)
