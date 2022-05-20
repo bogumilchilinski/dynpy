@@ -115,7 +115,7 @@ class ComposedSystem(HarmonicOscillator):
         return parameters_dict
 
 
-class Shaft(ComposedSystem):
+class DDoFShaft(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
     =========
             I = Moment of Inertia
@@ -164,14 +164,17 @@ class Shaft(ComposedSystem):
     k_2=Symbol('k_2', positive=True)
     k_1=Symbol('k_1', positive=True)
     
-    Ms=Symbol('M_s',positive=True)
+    T_1=Symbol('T_1',positive=True)
+    T_2=Symbol('T_2',positive=True)
+    
     Omega=Symbol('Omega',positive=True)
  
     theta=dynamicsymbols('theta')
     phi_1=dynamicsymbols('\\varphi_1')                 
     phi_2=dynamicsymbols('\\varphi_2')                 
     phi=dynamicsymbols('\\varphi')
-                 
+
+    
 
     def __init__(self,
                  l=None,
@@ -179,7 +182,8 @@ class Shaft(ComposedSystem):
                  I_m2=None,
                  k_2=None,
                  k_1=None,
-                 Ms=None,
+                 T_1=None,
+                 T_2=None,
                  l_1=None,
                  l_2=None,
                  I_1=None,
@@ -202,7 +206,9 @@ class Shaft(ComposedSystem):
         if  I_m1 is not None: self.I_m1 = I_m1
         if  I_m2 is not None: self.I_m2 = I_m2
             
-        if Ms is not None: self.Ms = Ms
+        if T_1 is not None: self.T_1 = T_1
+        if T_2 is not None: self.T_2 = T_2
+            
         #if Omega is not None: self.Omega = Omega
         if  k_1 is not None: self.k_1 = k_1
         if  k_2 is not None: self.k_2 = k_2
@@ -210,7 +216,7 @@ class Shaft(ComposedSystem):
         if  phi_2 is not None: self.phi_2 = phi_2 
         if  phi is not None: self.phi = phi 
         if  theta is not None: self.theta = theta 
-        if d is not None: self.d=d    
+        #if d is not None: self.d=d    
             
         theta = self.theta
         self.qs = [self.phi_1,self.phi_2]
@@ -226,8 +232,8 @@ class Shaft(ComposedSystem):
         self.disc_2 = Disk(self.I_m2, pos1=self.phi_2, qs=self.qs)
         self.spring_2 = Spring(self.k_2, pos1=self.phi_1, pos2=theta,
                                qs=self.qs)  # right spring
-        self.moment_disc1=Force(self.Ms, pos1=self.phi_1)
-        self.moment_disc2=Force(self.Ms, pos1=self.phi_2)
+        self.moment_disc1=Force(self.T_1, pos1=self.phi_1)
+        self.moment_disc2=Force(self.T_2, pos1=self.phi_2)
         
         system = self.disc_1 + self.disc_2 + self.spring_1 + self.spring_2 + self.moment_disc1 + self.moment_disc2
         
@@ -246,7 +252,7 @@ class Shaft(ComposedSystem):
     def get_default_data(self):
 
 
-        m0, l0 , G, l,  d = symbols('m_0 l_0 G l d', positive=True)
+        m0, l0 , G, l,  d, T0 = symbols('m_0 l_0 G l d T_0', positive=True)
         theta0, Omega = symbols('theta_0, Omega', positive=True)
 
         default_data_dict = {
@@ -256,9 +262,10 @@ class Shaft(ComposedSystem):
             self.I_2: [S.Half**no*(l0**4) for no in range(1,8)],
             self.l_1: [S.Half**(no-6)*l0 for no in range(1,8)],
             self.l_2: [S.Half**(no-6)*l0 for no in range(1,8)],
-            self.Ms: [S.Half**(no-6)*l0*0 for no in range(1,8)],
-
-            self.theta:[theta0* cos(Omega * self.ivar) ],
+            self.T_1: [T0 * (no) for no in range(1,12)],
+            self.T_2: [T0 * (no) for no in range(1,12)],
+            
+            self.theta:[theta0* cos(self.Omega * self.ivar) ],
         }
 
         return default_data_dict
@@ -273,21 +280,21 @@ class Shaft(ComposedSystem):
 
     def max_static_disk_1_bearing_force(self):
         d=Symbol('d',positive=True)
-        return abs(2*self.static_load()[0]/d)
+        return abs(2*self.static_load().doit()[0]/d)
     
     def max_dynamic_disk_1_bearing_force(self):
         d=Symbol('d',positive=True)
-        acc_amp = self.frequency_response_function()*self.Omega**2
+        acc_amp = self._frf()[0]*self.Omega**2
 
         return  abs(2*(self.I_m1*acc_amp)/d) + self.max_static_disk_1_bearing_force()#.subs(self._given_data)
 
     def max_static_disk_2_bearing_force(self):
         d=Symbol('d',positive=True)
-        return abs(2*self.static_load()[1]/d)
+        return abs(2*self.static_load().doit()[1]/d)
     
     def max_dynamic_disk_2_bearing_force(self):
         d=Symbol('d',positive=True)
-        acc_amp = self.frequency_response_function()*self.Omega**2
+        acc_amp = self._frf()[1]*self.Omega**2
 
         return  abs(2*(self.I_m2*acc_amp)/d) + self.max_static_disk_2_bearing_force()#.subs(self._given_data)
     
@@ -375,6 +382,7 @@ class EngineWithTMD(ComposedSystem):
 
     m0 = Symbol('m_0', positive=True)
     k0 = Symbol('k_0', positive=True)
+    e0 = Symbol('e_0', positive=True)
     
     def __init__(self,
                  M = None,
@@ -425,14 +433,15 @@ class EngineWithTMD(ComposedSystem):
 
     def get_default_data(self):
 
-        m0, k0, e0 = self.m0,self.k0,self.e
+        m0, k0, e0 = self.m0,self.k0,self.e0
 
         default_data_dict = {
-            self.M: [m0*no for no in range(10,20) ],
-            self.k_m: [k0*no for no in range(1,8)],
-            self.m_TMD: [m0*no/5 for no in range(1,8)],
-            self.k_TMD: [k0*no for no in range(1,8)],
             self.phi:[self.Omega*self.ivar],
+            self.M: [m0*no for no in range(10,20) ],
+            self.k_m: [1.0*k0*no for no in range(1,8)],
+            self.m_TMD: [m0*no/5 for no in range(1,8)],
+            self.k_TMD: [1.0*k0*no for no in range(1,8)],
+
             self.m_e: [m0*no for no in range(1,8)],
             self.e:[e0*no/10 for no in range(1,8)]
         }
@@ -1100,108 +1109,108 @@ class UndampedVehicleSuspension(ComposedSystem):
 #         return self.sym_desc_dict
 
 
-class DDoFShaft(ComposedSystem):
-    """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
-    =========
-            I = Moment of Inertia
-                -Moment of Inertia in case of both disc
+# class DDoFShaft(ComposedSystem):
+#     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
+#     =========
+#             I = Moment of Inertia
+#                 -Moment of Inertia in case of both disc
 
-            k_1 =Right spring coefficient
-                -Right spring carrying the system
+#             k_1 =Right spring coefficient
+#                 -Right spring carrying the system
 
-            k_2 =Left spring coefficient
-                -Left spring carrying the system
+#             k_2 =Left spring coefficient
+#                 -Left spring carrying the system
 
-            ivar = symbol object
-                -Independant time variable
+#             ivar = symbol object
+#                 -Independant time variable
 
-            qs = dynamicsymbol object
-                -Generalized coordinates
+#             qs = dynamicsymbol object
+#                 -Generalized coordinates
 
-    Example
-    =======
-    A mass oscillating up and down while being held up by a spring with a spring constant k
+#     Example
+#     =======
+#     A mass oscillating up and down while being held up by a spring with a spring constant k
 
-    >>> t = symbols('t')
-    >>> I, k1, k2 = symbols('I, k_1, k_2')
-    >>> qs = dynamicsymbols('phi_1, phi_2') # Generalized Coordinates
-    >>> DDoFShaft()
+#     >>> t = symbols('t')
+#     >>> I, k1, k2 = symbols('I, k_1, k_2')
+#     >>> qs = dynamicsymbols('phi_1, phi_2') # Generalized Coordinates
+#     >>> DDoFShaft()
 
-    -defines the symbols and dynamicsymbols
-    -finally determines the instance of the system using class DDoFShaft
-    """
+#     -defines the symbols and dynamicsymbols
+#     -finally determines the instance of the system using class DDoFShaft
+#     """
 
-    scheme_name = 'ddof_shaft.png'
-    real_name = 'ddof_shaft_real.png'
+#     scheme_name = 'ddof_shaft.png'
+#     real_name = 'ddof_shaft_real.png'
 
-    def __init__(self,
-                 l=Symbol('l', positive=True),
-                 I=Symbol('I', positive=True),
-                 k_2=Symbol('k_2', positive=True),
-                 k_1=Symbol('k_1', positive=True),
-                 input_displacement=dynamicsymbols('theta'),
-                 phi_1=dynamicsymbols('\\varphi_1'),                 
-                 phi_2=dynamicsymbols('\\varphi_2'),                 
-                 phi=dynamicsymbols('\\varphi'),
-                 ivar=Symbol('t'),
-                 qs=dynamicsymbols('\\varphi_1, \\varphi_2'),
-                 **kwargs):
+#     def __init__(self,
+#                  l=Symbol('l', positive=True),
+#                  I=Symbol('I', positive=True),
+#                  k_2=Symbol('k_2', positive=True),
+#                  k_1=Symbol('k_1', positive=True),
+#                  input_displacement=dynamicsymbols('theta'),
+#                  phi_1=dynamicsymbols('\\varphi_1'),                 
+#                  phi_2=dynamicsymbols('\\varphi_2'),                 
+#                  phi=dynamicsymbols('\\varphi'),
+#                  ivar=Symbol('t'),
+#                  qs=dynamicsymbols('\\varphi_1, \\varphi_2'),
+#                  **kwargs):
 
 
-        theta = input_displacement
+#         theta = input_displacement
         
-        self.phi_1=phi_1
-        self.phi_2=phi_2        
+#         self.phi_1=phi_1
+#         self.phi_2=phi_2        
         
 
-        self.k_2 = k_2  # left spring
-        self.k_1 = k_1  # right spring
-        self.I = I  # moment of inertia of a rod
-        self.input_displacement = input_displacement
-        self.qs = qs
+#         self.k_2 = k_2  # left spring
+#         self.k_1 = k_1  # right spring
+#         self.I = I  # moment of inertia of a rod
+#         self.input_displacement = input_displacement
+#         self.qs = qs
         
-        self.phi=phi
+#         self.phi=phi
 
-        self.disc_1 = Disk(I, pos1=phi_1, qs=qs)
-        self.spring_1 = Spring(k_1, phi_1, phi_2, qs=qs)  # left spring
-        self.disc_2 = Disk(I, pos1=phi_2, qs=qs)
-        self.spring_2 = Spring(k_2, pos1=phi_2, pos2=theta,
-                               qs=qs)  # right spring
-        system = self.disc_1 + self.disc_2 + self.spring_1 + self.spring_2
+#         self.disc_1 = Disk(I, pos1=phi_1, qs=qs)
+#         self.spring_1 = Spring(k_1, phi_1, phi_2, qs=qs)  # left spring
+#         self.disc_2 = Disk(I, pos1=phi_2, qs=qs)
+#         self.spring_2 = Spring(k_2, pos1=phi_2, pos2=theta,
+#                                qs=qs)  # right spring
+#         system = self.disc_1 + self.disc_2 + self.spring_1 + self.spring_2
 
-        super().__init__(system,**kwargs)
+#         super().__init__(system,**kwargs)
 
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.I: r'Moment of Inertia',
-            self.k_1: r'',
-            self.k_2: r'',
-        }
-        return self.sym_desc_dict
+#     def symbols_description(self):
+#         self.sym_desc_dict = {
+#             self.I: r'Moment of Inertia',
+#             self.k_1: r'',
+#             self.k_2: r'',
+#         }
+#         return self.sym_desc_dict
 
     
-    def get_default_data(self):
+#     def get_default_data(self):
 
 
-        m0, l0 , G, l = symbols('m_0 l_0 G l', positive=True)
-        theta0, Omega = symbols('theta_0, Omega', positive=True)
+#         m0, l0 , G, l = symbols('m_0 l_0 G l', positive=True)
+#         theta0, Omega = symbols('theta_0, Omega', positive=True)
 
-        default_data_dict = {
-            self.I: [S.Half*m0*l**2,S.One*m0*l**2,(S.Half**2)*m0*l**2,2*m0*l**2,3*m0*l**2,4*m0*l**2,5*m0*l**2,6*m0*l**2,7*m0*l**2,8*m0*l**2,9*m0*l**2],
+#         default_data_dict = {
+#             self.I: [S.Half*m0*l**2,S.One*m0*l**2,(S.Half**2)*m0*l**2,2*m0*l**2,3*m0*l**2,4*m0*l**2,5*m0*l**2,6*m0*l**2,7*m0*l**2,8*m0*l**2,9*m0*l**2],
             
             
 
-            self.k_1: [1 * G * l**4 /(10* l), 2 *  G * l**4 /(10* l), S.Half *  G * l**4 /(10* l), 4 *  G * l**4 /(10* l), (S.Half**2) *  G * l**4 /(10* l), 3 *  G * l**4 /(10* l), 5 *  G * l**4 /(10* l), 6 *  G * l**4 /(10* l), 7 *  G * l**4 /(10* l), 8 *  G * l**4 /(10* l), 9 *  G * l**4 /(10* l)],
-            self.k_2: [1 * G * l**4 /(10* l), 2 *  G * l**4 /(10* l), S.Half *  G * l**4 /(10* l), 4 *  G * l**4 /(10* l), (S.Half**2) *  G * l**4 /(10* l), 3 *  G * l**4 /(10* l), 5 *  G * l**4 /(10* l), 6 *  G * l**4 /(10* l), 7 *  G * l**4 /(10* l), 8 *  G * l**4 /(10* l), 9 *  G * l**4 /(10* l)],
+#             self.k_1: [1 * G * l**4 /(10* l), 2 *  G * l**4 /(10* l), S.Half *  G * l**4 /(10* l), 4 *  G * l**4 /(10* l), (S.Half**2) *  G * l**4 /(10* l), 3 *  G * l**4 /(10* l), 5 *  G * l**4 /(10* l), 6 *  G * l**4 /(10* l), 7 *  G * l**4 /(10* l), 8 *  G * l**4 /(10* l), 9 *  G * l**4 /(10* l)],
+#             self.k_2: [1 * G * l**4 /(10* l), 2 *  G * l**4 /(10* l), S.Half *  G * l**4 /(10* l), 4 *  G * l**4 /(10* l), (S.Half**2) *  G * l**4 /(10* l), 3 *  G * l**4 /(10* l), 5 *  G * l**4 /(10* l), 6 *  G * l**4 /(10* l), 7 *  G * l**4 /(10* l), 8 *  G * l**4 /(10* l), 9 *  G * l**4 /(10* l)],
 
-            l:[1 * l0, 2 * l0, S.Half * l0, 4 * l0, (S.Half**2) * l0, 3 * l0, (S.Half**2) * l0, 5 * l0, (S.Half**2) * l0, 6 * l0, (S.Half**2) * l0, 7 * l0, (S.Half**2) * l0, 8 * l0, (S.Half**2) * l0, 9 * l0, (S.Half**2) * l0],
+#             l:[1 * l0, 2 * l0, S.Half * l0, 4 * l0, (S.Half**2) * l0, 3 * l0, (S.Half**2) * l0, 5 * l0, (S.Half**2) * l0, 6 * l0, (S.Half**2) * l0, 7 * l0, (S.Half**2) * l0, 8 * l0, (S.Half**2) * l0, 9 * l0, (S.Half**2) * l0],
             
-#             self.phi_1:[self.phi, 0],
-#             self.phi_2:[self.phi],
-            self.input_displacement:[theta0* cos(Omega * self.ivar) ],
-        }
+# #             self.phi_1:[self.phi, 0],
+# #             self.phi_2:[self.phi],
+#             self.input_displacement:[theta0* cos(Omega * self.ivar) ],
+#         }
 
-        return default_data_dict
+#         return default_data_dict
     
 
 class DDoFDampedShaft(ComposedSystem):

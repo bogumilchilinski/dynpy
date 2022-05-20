@@ -1837,7 +1837,7 @@ class HarmonicOscillator(LinearDynamicSystem):
         else:
             omg = omg.coeff(self.ivar)
             
-
+        #omg = omg.coeff(self.ivar)
         
 
             
@@ -1859,7 +1859,7 @@ class HarmonicOscillator(LinearDynamicSystem):
 
         return sqrt(amp[0])
 
-    def _frf(self,excitation_freq=Symbol('Omega',ositive=True)):
+    def _frf(self,excitation_freq=Symbol('Omega',positive=True)):
         '''
         Returns the Frequency Response Function of the system for the given excitation amplitude working correctly for systems with defined stiffenes matrix.
         '''
@@ -1900,7 +1900,7 @@ class HarmonicOscillator(LinearDynamicSystem):
         else:
             omg = omg.coeff(self.ivar)
             
-
+        #omg = omg.coeff(self.ivar)
         
 
             
