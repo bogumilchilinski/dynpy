@@ -115,7 +115,7 @@ class ComposedSystem(HarmonicOscillator):
         return parameters_dict
 
 
-class DDoFShaft(ComposedSystem):
+class DoubleDiskShaft(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
     =========
             I = Moment of Inertia
@@ -174,7 +174,13 @@ class DDoFShaft(ComposedSystem):
     phi_2=dynamicsymbols('\\varphi_2')                 
     phi=dynamicsymbols('\\varphi')
 
-    
+    m0 = Symbol('m_0', positive=True)
+    l0 = Symbol('l_0', positive=True)
+    G = Symbol('G', positive=True)
+    T0 = Symbol('T_0', positive=True)
+
+    theta0 = Symbol('theta_0', positive=True)
+    Omega =Symbol('Omega', positive=True)
 
     def __init__(self,
                  l=None,
@@ -230,7 +236,7 @@ class DDoFShaft(ComposedSystem):
         self.spring_1 = Spring(self.k_1, self.phi_1, self.phi_2, qs=self.qs)  # left spring
         
         self.disc_2 = Disk(self.I_m2, pos1=self.phi_2, qs=self.qs)
-        self.spring_2 = Spring(self.k_2, pos1=self.phi_1, pos2=theta,
+        self.spring_2 = Spring(self.k_2, pos1=self.phi_2, pos2=theta,
                                qs=self.qs)  # right spring
         self.moment_disc1=Force(self.T_1, pos1=self.phi_1)
         self.moment_disc2=Force(self.T_2, pos1=self.phi_2)
@@ -251,9 +257,8 @@ class DDoFShaft(ComposedSystem):
 
     def get_default_data(self):
 
-
-        m0, l0 , G, l,  d, T0 = symbols('m_0 l_0 G l d T_0', positive=True)
-        theta0, Omega = symbols('theta_0, Omega', positive=True)
+        m0, l0 , G, l,  d, T0 = self.m0, self.l0 , self.G, self.l,  self.d, self.T0
+        theta0, Omega = self.theta0, self.Omega
 
         default_data_dict = {
             self.I_m1: [S.Half*m0*(l0**2)*no for no in range(1,8)],
@@ -264,12 +269,10 @@ class DDoFShaft(ComposedSystem):
             self.l_2: [S.Half**(no-6)*l0 for no in range(1,8)],
             self.T_1: [T0 * (no) for no in range(1,12)],
             self.T_2: [T0 * (no) for no in range(1,12)],
-            
             self.theta:[theta0* cos(self.Omega * self.ivar) ],
         }
 
         return default_data_dict
-   
 
     def disc_1_force(self):
         t=self.ivar
@@ -1213,78 +1216,78 @@ class UndampedVehicleSuspension(ComposedSystem):
 #         return default_data_dict
     
 
-class DDoFDampedShaft(ComposedSystem):
+# class DDoFDampedShaft(ComposedSystem):
 
 
-    scheme_name = 'ddof_damped_shaft.png'
-    real_name = 'ddof_shaft_real.png'
+#     scheme_name = 'ddof_damped_shaft.png'
+#     real_name = 'ddof_shaft_real.png'
 
-    def __init__(self,
-                 I=Symbol('I', positive=True),
-                 k_2=Symbol('k_2', positive=True),
-                 k_1=Symbol('k_1', positive=True),
-                 c_1=Symbol('c_1', positive=True),
-                 c_2=Symbol('c_1', positive=True),
-                 input_displacement=dynamicsymbols('theta'),
-                 ivar=Symbol('t'),
-                 qs=dynamicsymbols('\\varphi_1, \\varphi_2'),
-                 **kwargs):
+#     def __init__(self,
+#                  I=Symbol('I', positive=True),
+#                  k_2=Symbol('k_2', positive=True),
+#                  k_1=Symbol('k_1', positive=True),
+#                  c_1=Symbol('c_1', positive=True),
+#                  c_2=Symbol('c_1', positive=True),
+#                  input_displacement=dynamicsymbols('theta'),
+#                  ivar=Symbol('t'),
+#                  qs=dynamicsymbols('\\varphi_1, \\varphi_2'),
+#                  **kwargs):
 
-        phi1, phi2 = qs
-        theta = input_displacement
+#         phi1, phi2 = qs
+#         theta = input_displacement
 
-        self.k_2 = k_2  # left spring
-        self.k_1 = k_1  # right spring
-        self.c_1 = c_1  # right spring
-        self.c_2 = c_2  # right spring
-        self.I = I  # moment of inertia of a rod
-        self.input_displacement = input_displacement
-        self.qs = qs
+#         self.k_2 = k_2  # left spring
+#         self.k_1 = k_1  # right spring
+#         self.c_1 = c_1  # right spring
+#         self.c_2 = c_2  # right spring
+#         self.I = I  # moment of inertia of a rod
+#         self.input_displacement = input_displacement
+#         self.qs = qs
 
-        self.disc_1 = Disk(I, pos1=phi1, qs=qs)
-        self.spring_1 = Spring(k_2, phi1, phi2, qs=qs)  # left spring
-        self.disc_2 = Disk(I, pos1=phi2, qs=qs)
-        self.spring_2 = Spring(k_1, pos1=phi2, pos2=theta,
-                               qs=qs)  # right spring
-        self.damper_1 = Damper(c_2, phi1, phi2, qs=qs)  # left spring
-        self.damper_2 = Damper(c_1, pos1=phi2, pos2=theta,
-                               qs=qs)  # right spring
-        system = self.disc_1 + self.disc_2 + self.spring_1 + self.spring_2 + self.damper_1 + self.damper_2
+#         self.disc_1 = Disk(I, pos1=phi1, qs=qs)
+#         self.spring_1 = Spring(k_2, phi1, phi2, qs=qs)  # left spring
+#         self.disc_2 = Disk(I, pos1=phi2, qs=qs)
+#         self.spring_2 = Spring(k_1, pos1=phi2, pos2=theta,
+#                                qs=qs)  # right spring
+#         self.damper_1 = Damper(c_2, phi1, phi2, qs=qs)  # left spring
+#         self.damper_2 = Damper(c_1, pos1=phi2, pos2=theta,
+#                                qs=qs)  # right spring
+#         system = self.disc_1 + self.disc_2 + self.spring_1 + self.spring_2 + self.damper_1 + self.damper_2
 
-        super().__init__(system,**kwargs)
+#         super().__init__(system,**kwargs)
 
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.I: r'Moment of Inertia',
-            self.k_1: r'',
-            self.k_2: r'',
-        }
-        return self.sym_desc_dict
-    def get_default_data(self):
+#     def symbols_description(self):
+#         self.sym_desc_dict = {
+#             self.I: r'Moment of Inertia',
+#             self.k_1: r'',
+#             self.k_2: r'',
+#         }
+#         return self.sym_desc_dict
+#     def get_default_data(self):
 
-        I0, k0, lamb = symbols('I_0 k_0 lambda', positive=True)
+#         I0, k0, lamb = symbols('I_0 k_0 lambda', positive=True)
 
-        default_data_dict = {
-            self.k_2: [2 * k0, 4 * k0,6*k0,8*k0,10*k0],
-            self.k_1: [k0, 3 * k0,5*k0,7*k0,9*k0],
-            self.I: [2 * I0, S.Half * I0, 4 * I0, S.Half**2 * I0,3 * I0,3* S.Half * I0, 9 * I0, 3*S.Half**2 * I0],
-            self.c_1: [lamb * self.k_1],
-            self.c_2: [lamb * self.k_2],
-        }
-        return default_data_dict
+#         default_data_dict = {
+#             self.k_2: [2 * k0, 4 * k0,6*k0,8*k0,10*k0],
+#             self.k_1: [k0, 3 * k0,5*k0,7*k0,9*k0],
+#             self.I: [2 * I0, S.Half * I0, 4 * I0, S.Half**2 * I0,3 * I0,3* S.Half * I0, 9 * I0, 3*S.Half**2 * I0],
+#             self.c_1: [lamb * self.k_1],
+#             self.c_2: [lamb * self.k_2],
+#         }
+#         return default_data_dict
 
-    def get_random_parameters(self):
+#     def get_random_parameters(self):
 
 
 
-        default_data_dict = self.get_default_data()
+#         default_data_dict = self.get_default_data()
 
-        parameters_dict = {
-            key: random.choice(items_list)
-            for key, items_list in default_data_dict.items()
-            }
+#         parameters_dict = {
+#             key: random.choice(items_list)
+#             for key, items_list in default_data_dict.items()
+#             }
           
-        return parameters_dict
+#         return parameters_dict
 
 
 
