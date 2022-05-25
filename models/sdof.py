@@ -783,7 +783,7 @@ class BeamBridge(ComposedSystem):
                  k_beam=Symbol('k_beam', positive=True),
                  ivar=Symbol('t'),
                  g=Symbol('g', positive=True),
-                 Omega=Symbol('Omega', positive=True),
+                 Omega=Symbol('\Omega', positive=True),
                  F_0=Symbol('F_0', positive=True),
                  z=dynamicsymbols('z'),
                  **kwargs):
@@ -1736,7 +1736,8 @@ class NonlinearEngine(ComposedSystem):
     l_0=Symbol('l_0', positive=True)
     z=dynamicsymbols('z')
     phi=dynamicsymbols('phi')
-    Omega=Symbol('\Omega',positive=True)
+    Omega=Symbol('Omega',positive=True)
+    g=Symbol('g',positive=True)
     def __init__(self,
                  M=None,
                  k_m=None,
@@ -1748,6 +1749,7 @@ class NonlinearEngine(ComposedSystem):
                  phi=None,
                  ivar=Symbol('t', positive=True),
                  Omega=None,
+                 g=None,
                  **kwargs):
         if M is not None: self.M = M
         if k_m is not None: self.k_m = k_m
@@ -1758,13 +1760,14 @@ class NonlinearEngine(ComposedSystem):
         if l_0 is not None: self.l_0 = l_0
         if z is not None: self.z=z
         if Omega is not None: self.Omega=Omega
+        if g is not None: self.g=g
 
-
-        self.MaterialPoint_1 = MaterialPoint(self.M, self.z, qs=[self.z])
-        self.MaterialPoint_2 = MaterialPoint(self.m_e, self.z + self.e * cos(self.phi), qs=[self.z])
-        self.Spring = Spring(2 * self.k_m, pos1=(self.z**2+self.d**2)**0.5-self.l_0, qs=[self.z])
-
-        system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2
+        self.materialPoint_1 = MaterialPoint(self.M, self.z, qs=[self.z])
+        self.materialPoint_2 = MaterialPoint(self.m_e, self.z + self.e * cos(self.phi), qs=[self.z])
+        self.spring = Spring(2 * self.k_m, pos1=(self.z**2+self.d**2)**0.5-self.l_0, qs=[self.z])
+        self.gravity_force1 = GravitationalForce(self.M, self.g, self.z, qs=[self.z])
+        self.gravity_force2 = GravitationalForce(self.m_e, self.g, self.z + self.e * cos(self.phi), qs=[self.z])
+        system = self.spring + self.materialPoint_1 + self.materialPoint_2 + self.gravity_force1 + self.gravity_force2
         super().__init__(system,**kwargs)
 
     def symbols_description(self):
@@ -1778,6 +1781,14 @@ class NonlinearEngine(ComposedSystem):
         }
         
         return self.sym_desc_dict
+    def linearized(self):
+        
+        return type(self).from_system(super().linearized())
+    
+    def max_static_force(self):
+        return abs(self.static_load().doit()[0]/2)
+    def max_dynamic_force(self):
+        return self.frequency_response_function()*self.stiffness_matrix()[0]+self.max_static_force()
     def get_default_data(self):
 
         m0, k0, e0, l0 = symbols('m_0 k_0 e_0 l_0', positive=True)
