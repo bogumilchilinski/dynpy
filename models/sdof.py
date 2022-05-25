@@ -28,7 +28,7 @@ class ComposedSystem(HarmonicOscillator):
     m0=Symbol('m_0',positive=True)
     k0=Symbol('k_0',positive=True)
     F0=Symbol('F_0',positive=True)
-    Omega0=Symbol('Omega_0',positive=True)
+    Omega0=Symbol('\Omega_0',positive=True)
 
     @classmethod
     def _scheme(cls):
@@ -783,7 +783,7 @@ class BeamBridge(ComposedSystem):
                  k_beam=Symbol('k_beam', positive=True),
                  ivar=Symbol('t'),
                  g=Symbol('g', positive=True),
-                 Omega=Symbol('\Omega', positive=True),
+                 Omega=Symbol('Omega', positive=True),
                  F_0=Symbol('F_0', positive=True),
                  z=dynamicsymbols('z'),
                  **kwargs):
