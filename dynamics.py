@@ -265,6 +265,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self._kinetic_energy = 0
         self._potential_energy = 0
         self._dissipative_potential = 0
+        
+        self._components ={}
 
         if system:
             # print(system._kinetic_energy)
@@ -280,6 +282,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             self._kinetic_energy = Lagrangian._kinetic_energy
             self._potential_energy = Lagrangian._potential_energy
             self._dissipative_potential = Lagrangian._dissipative_potential
+            self._components = {**self._components, **Lagrangian._components }
 
 
         if isinstance(Lagrangian, me.LagrangesMethod):
@@ -327,6 +330,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self._given_data={}
         
         self._nonlinear_base_system=None
+        
+        self._components =  {self._label:copy.copy(self),**self._components}
 
     @classmethod
     def from_system(cls, system):
