@@ -999,7 +999,7 @@ class BasicFormattingTools(DataMethods):
                 ylabel = latex_backend(
                     EntryWithUnit(col_idx.get_level_values(-1).unique()[0]))
 
-                y_axis_description = 'ylabel={' + ylabel + '},'
+                y_axis_description = 'ylabel={$' + ylabel + '$},'
 
 
                 plotted_frame = plotted_frame.droplevel(-1, axis=1)
@@ -1010,7 +1010,7 @@ class BasicFormattingTools(DataMethods):
                 
                 ylabel = ', '.join(ylabel_list)
 
-                y_axis_description = 'ylabel={' + ylabel + '},'                
+                y_axis_description = 'ylabel={$' + ylabel + '$},'                
                 
 
             plotted_frame._ylabel=ylabel
@@ -1020,7 +1020,7 @@ class BasicFormattingTools(DataMethods):
             
         elif self._ylabel is not None:
             ylabel = self._ylabel
-            y_axis_description = 'ylabel={' + ylabel + '},'
+            y_axis_description = 'ylabel={$' + ylabel + '$},'
             
 
         else:
@@ -1028,7 +1028,7 @@ class BasicFormattingTools(DataMethods):
             y_axis_description = ''
 
         if x_axis_description is None:
-            x_axis_description = ',xlabel={' + plotted_frame.index.name  +  '},'
+            x_axis_description = ',xlabel={$' + plotted_frame.index.name  +  '$},'
         
             
             
@@ -1621,7 +1621,7 @@ class SpectrumFrame(AdaptableDataFrame, SpectralMethods):
                      smooth=False):
 
         if y_axis_description == None:
-            y_axis_description = 'ylabel=$' + self.name + '$,'
+            y_axis_description = 'ylabel={$' + self.name + '$},'
 
         return super().to_tikz_plot(filename=filename,
                                     labels_list=labels_list,
@@ -1748,7 +1748,7 @@ class TimeSeries(AdaptableSeries, TimeDomainMethods):
                      smooth=False):
 
         if y_axis_description == None:
-            y_axis_description = 'ylabel=$' + self.name + '$,'
+            y_axis_description = 'ylabel={$' + self.name + '$},'
 
         aux_DataFrame = TimeDataFrame(data=self, index=self.index)
         dumped_tex = aux_DataFrame.to_tikz_plot(
