@@ -1713,7 +1713,7 @@ class Summary(ReportModule):
             tab.add_caption(NoEscape(self._caption))
             tab.append(
                 NoEscape(
-                    self._apply_formatter(data[self._coord]).to_latex(
+                    self._apply_formatter(data[self._coord]).style.to_latex(
                         escape=False,
                         caption='').replace('\\toprule',
                                             '\\toprule \n \\midrule').replace(
@@ -2407,7 +2407,7 @@ class SummaryTable(ReportModule):
 
         display(data_table)
 
-        latex_table = NoEscape(data_table.to_latex())
+        latex_table = NoEscape(data_table.style.to_latex())
 
         if analysis:
             analysis._container.append(NoEscape(latex_table))

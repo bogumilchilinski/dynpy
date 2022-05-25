@@ -28,7 +28,7 @@ class ComposedSystem(HarmonicOscillator):
     m0=Symbol('m_0',positive=True)
     k0=Symbol('k_0',positive=True)
     F0=Symbol('F_0',positive=True)
-    Omega0=Symbol('Omega_0',positive=True)
+    Omega0=Symbol('\Omega_0',positive=True)
 
     @classmethod
     def _scheme(cls):
@@ -824,7 +824,7 @@ class BeamBridgeDamped(ComposedSystem):
                  ivar=Symbol('t'),
                  g=Symbol('g', positive=True),
                  Omega=Symbol('Omega', positive=True),
-                 F_0=Symbol('F_0', positive=True),
+                 F=Symbol('F', positive=True),
                  c=Symbol('c', positive=True),
                  l=Symbol('l', positive=True),
                  module=Symbol('E', positive=True),
@@ -839,7 +839,7 @@ class BeamBridgeDamped(ComposedSystem):
         self.lam=lam
         self.g = g
         self.Omega = Omega
-        self.F_0 = F_0
+        self.F = F
         self.l=l
         self.z = z
         self.module=module
@@ -849,7 +849,7 @@ class BeamBridgeDamped(ComposedSystem):
         self.mass = MaterialPoint(m, z, qs=[z])
         self.spring = Spring(k_beam, z, qs=[z])
         self.gravity_force = GravitationalForce(m, g, z)
-        self.force = Force(-F_0 * sin(Omega * ivar), pos1=z)
+        self.force = Force(-F * sin(Omega * ivar), pos1=z)
         self.damper = Damper(c, pos1=z, qs=[z])
         composed_system = (self.mass + self.spring + self.gravity_force + self.force + self.damper)
 
@@ -869,7 +869,7 @@ class BeamBridgeDamped(ComposedSystem):
     def get_default_data(self):
 
 #         E0, I0, l0, m0, k0,c0, lam0= symbols('E_0 I_0 l_0 m_0 k_0 c_0 lambda_0', positive=True)
-        E0, I0, l0, m0, lam0 = symbols('E_0 I_0 l_0 m_0 lambda_0', positive=True)
+        E0, I0, l0, m0, lam0, F0 = symbols('E_0 I_0 l_0 m_0 lambda_0 F_0', positive=True)
         default_data_dict = {
             
 #             self.lam:[10],
@@ -884,6 +884,7 @@ class BeamBridgeDamped(ComposedSystem):
             self.inertia:[I0,2*I0,3*I0,4*I0,5*I0,6*I0,7*I0,8*I0,9*I0,10*I0,11*I0,12*I0,13*I0,14*I0,15*I0,16*I0,17*I0,18*I0,19*I0,],
             self.l:[l0,2*l0,3*l0,4*l0,5*l0,6*l0,7*l0,8*l0,9*l0,10*l0,11*l0,12*l0,13*l0,14*l0,15*l0,16*l0,17*l0,18*l0,19*l0,],
             self.lam:[lam0,2*lam0,3*lam0,4*lam0,5*lam0,6*lam0,7*lam0,8*lam0,9*lam0],
+            self.F:[F0,2*F0,3*F0,4*F0,5*F0,6*F0,7*F0,8*F0,9*F0]
         }
 
         return default_data_dict
@@ -1200,7 +1201,7 @@ class ExcitedPendulum(ComposedSystem):
     def __init__(
             self,
             dummy=Symbol('dummy',positive=True),
-            m1=Symbol('m', positive=True),
+            m=Symbol('m', positive=True),
             g=Symbol('g', positive=True),
             l=Symbol('l', positive=True),
             F=Symbol('F', positive=True),
@@ -1210,19 +1211,22 @@ class ExcitedPendulum(ComposedSystem):
             **kwargs
     ):
         phi = angle
-
+        self.phi = phi
+        
         if qs == None:
             qs = [angle]
         else:
             qs = qs
 
-        self.m1 = m1
+        self.m = m
         self.g = g
         self.l = l
         self.F = F
 
-        self.pendulum = Pendulum(m1, g, l, angle=phi)
-        self.force = Force(-F * l * cos(phi), pos1=phi, qs=qs)
+        Omega = Symbol('Omega',positive=True)
+        self.Omega=Omega
+        self.pendulum = Pendulum(m, g, l, angle=phi)
+        self.force = Force(F * l * sin(Omega*ivar), pos1=phi, qs=qs)
         system = self.pendulum + self.force
 
         super().__init__(system,**kwargs)
@@ -1310,6 +1314,7 @@ class DampedPendulum(ComposedSystem):
             **kwargs
     ):
         phi = angle
+        self.phi = phi
 
         if qs == None:
             qs = [angle]
@@ -1723,45 +1728,46 @@ class NonlinearEngine(ComposedSystem):
         >>> qs = dynamicsymbols('z') 
         >>> SDoFNonlinearEngine()
     """
-
+    M=Symbol('M', positive=True)
+    k_m=Symbol('k_m', positive=True)
+    m_e=Symbol('m_e', positive=True)
+    e=Symbol('e', positive=True)
+    d=Symbol('d', positive=True)
+    l_0=Symbol('l_0', positive=True)
+    z=dynamicsymbols('z')
+    phi=dynamicsymbols('phi')
+    Omega=Symbol('Omega',positive=True)
+    g=Symbol('g',positive=True)
     def __init__(self,
-                 M=Symbol('M', positive=True),
-                 k_m=Symbol('k_m', positive=True),
-                 m_e=Symbol('m_e', positive=True),
-                 e=Symbol('e', positive=True),
-                 beta=Symbol('beta', positive=True),
-                 d=Symbol('d', positive=True),
-                 l_0=Symbol('l_0', positive=True),
-                 z=dynamicsymbols('z'),
-                 phi=dynamicsymbols('phi'),
+                 M=None,
+                 k_m=None,
+                 m_e=None,
+                 e=None,
+                 d=None,
+                 l_0=None,
+                 z=None,
+                 phi=None,
                  ivar=Symbol('t', positive=True),
-                 Omega=Symbol('\Omega',positive=True),
+                 Omega=None,
+                 g=None,
                  **kwargs):
+        if M is not None: self.M = M
+        if k_m is not None: self.k_m = k_m
+        if d is not None: self.d = d
+        if phi is not None: self.phi = phi
+        if m_e is not None: self.m_e = m_e
+        if e is not None: self.e = e
+        if l_0 is not None: self.l_0 = l_0
+        if z is not None: self.z=z
+        if Omega is not None: self.Omega=Omega
+        if g is not None: self.g=g
 
-        self.M = M
-        self.k_m = k_m
-        self.m_e = m_e
-        self.beta = beta
-        self.d=d
-        self.e = e
-        self.l_0 = l_0
-        self.z = z
-        self.phi = phi
-        self.Omega = Omega
-        N = ReferenceFrame('N')
-        O = Point('O')
-
-        P1 = Point('P1')
-        P1.set_pos(O, 0 * N.x + 0 * N.y)
-
-        P2 = Point('P2')
-        P2.set_pos(O, d  * N.x + (z ) * N.y)
-
-        self.MaterialPoint_1 = MaterialPoint(M, z, qs=[z])
-        self.MaterialPoint_2 = MaterialPoint(m_e, z + e * cos(phi), qs=[z])
-        self.Spring = Spring(2 * k_m, pos1=P1, pos2=P2, l_0=l_0, qs=[z])
-
-        system = self.Spring + self.MaterialPoint_1 + self.MaterialPoint_2
+        self.materialPoint_1 = MaterialPoint(self.M, self.z, qs=[self.z])
+        self.materialPoint_2 = MaterialPoint(self.m_e, self.z + self.e * cos(self.phi), qs=[self.z])
+        self.spring = Spring(2 * self.k_m, pos1=(self.z**2+self.d**2)**0.5-self.l_0, qs=[self.z])
+        self.gravity_force1 = GravitationalForce(self.M, self.g, self.z, qs=[self.z])
+        self.gravity_force2 = GravitationalForce(self.m_e, self.g, self.z + self.e * cos(self.phi), qs=[self.z])
+        system = self.spring + self.materialPoint_1 + self.materialPoint_2 + self.gravity_force1 + self.gravity_force2
         super().__init__(system,**kwargs)
 
     def symbols_description(self):
@@ -1775,6 +1781,14 @@ class NonlinearEngine(ComposedSystem):
         }
         
         return self.sym_desc_dict
+    def linearized(self):
+        
+        return type(self).from_system(super().linearized())
+    
+    def max_static_force(self):
+        return abs(self.static_load().doit()[0]/2)
+    def max_dynamic_force(self):
+        return self.frequency_response_function()*self.stiffness_matrix()[0]+self.max_static_force()
     def get_default_data(self):
 
         m0, k0, e0, l0 = symbols('m_0 k_0 e_0 l_0', positive=True)
