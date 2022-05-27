@@ -28,14 +28,14 @@ class ComposedSystem(HarmonicOscillator):
     @classmethod
     def _scheme(cls):
 
-        path = __file__.replace('systems.py', 'images/') + cls.scheme_name
+        path = __file__.replace('continuous.py', 'images/') + cls.scheme_name
 
         return path
 
     @classmethod
     def _real_example(cls):
 
-        path = __file__.replace('systems.py', 'images/') + cls.real_name
+        path = __file__.replace('continuous.py', 'images/') + cls.real_name
 
         return path
 
@@ -84,14 +84,14 @@ class ContinuousSystem(ContinuousSystem):
     @classmethod
     def _scheme(cls):
 
-        path = __file__.replace('systems.py', 'images/') + cls.scheme_name
+        path = __file__.replace('continuous.py', 'images/') + cls.scheme_name
 
         return path
 
     @classmethod
     def _real_example(cls):
 
-        path = __file__.replace('systems.py', 'images/') + cls.real_name
+        path = __file__.replace('continuous.py', 'images/') + cls.real_name
 
         return path
 
@@ -136,14 +136,14 @@ class PlaneStressProblem(PlaneStressProblem):
     @classmethod
     def _scheme(cls):
 
-        path = __file__.replace('systems.py', 'images/') + cls.scheme_name
+        path = __file__.replace('continuous.py', 'images/') + cls.scheme_name
 
         return path
 
     @classmethod
     def _real_example(cls):
 
-        path = __file__.replace('systems.py', 'images/') + cls.real_name
+        path = __file__.replace('continuous.py', 'images/') + cls.real_name
 
         return path
 
@@ -179,73 +179,6 @@ class PlaneStressProblem(PlaneStressProblem):
         return parameters_dict    
 
 
-class BeamBridgeTMD(ComposedSystem):
-
-    scheme_name = 'bridge_tmd.png'
-    real_name = 'beam_bridge_real.PNG'
-
-    def __init__(self,
-                 m=Symbol('m', positive=True),
-                 m_TMD=Symbol('m_TMD', positive=True),
-                 k_beam=Symbol('k_beam', positive=True),
-                 k_TMD=Symbol('k_TMD', positive=True),
-                 ivar=Symbol('t'),
-                 g=Symbol('g', positive=True),
-                 Omega=Symbol('Omega', positive=True),
-                 F_0=Symbol('F_0', positive=True),
-                 z=dynamicsymbols('z'),
-                 z_TMD=dynamicsymbols('z_TMD'),
-                 **kwargs):
-
-        self.m = m
-        self.k_beam = k_beam
-        self.g = g
-        self.Omega = Omega
-        self.F_0 = F_0
-        self.m_TMD = m_TMD
-        self.k_TMD = k_TMD
-        self.z_TMD = z_TMD
-        self.z = z
-
-        self.mass = MaterialPoint(m, z, qs=[z])
-        self.spring = Spring(k_beam, z, qs=[z])
-        self.gravity_force = GravitationalForce(self.m, self.g, z)
-        self.gravity_TMD = GravitationalForce(self.m_TMD, self.g, z_TMD)
-        self.force = Force(-F_0 * sin(Omega * ivar), pos1=z)
-        self.TMD = MaterialPoint(m_TMD, pos1=z_TMD, qs=[z_TMD])
-        self.spring_TMD = Spring(k_TMD, z, z_TMD, qs=[z, z_TMD])
-        composed_system = (self.mass + self.spring + self.gravity_force + self.force +
-                  self.TMD + self.spring_TMD + self.gravity_TMD)
-
-        super().__init__(composed_system,**kwargs)
-
-
-
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.m: r'mass of system on the spring',
-            self.k_beam: r'Beam stiffness',
-            self.g: r'gravitational field acceleration'
-        }
-
-        return self.sym_desc_dict
-
-    def get_default_data(self):
-
-        E, I, l, m0, k0 = symbols('E I l_beam m_0 k_0', positive=True)
-
-        default_data_dict = {
-            self.m: [20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0],
-            self.k_beam: [
-                2 * 48 * E * I / l**3, 3 * 48 * E * I / l**3,
-                4 * 48 * E * I / l**3, 5 * 48 * E * I / l**3,
-                6 * 48 * E * I / l**3
-            ],
-            self.m_TMD: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
-            self.k_TMD: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
-        }
-
-        return default_data_dict
 
 class CSBeam(ContinuousSystem):
     """
@@ -339,11 +272,11 @@ class CSBeam(ContinuousSystem):
         
 
         default_data_dict = {
-            self.E: [2.5*E_0,1.25*E_0,0.75*E_0,1.35*E_0,1*E_0,2*E_0,3*E_0,4*E_0,5*E_0,6*E_0,7*E_0,8*E_0,9*E_0 ],
-            self.A: [1 * A_0, 2 * A_0, S.Half * A_0, 1 * A_0, 2 * A_0,3*A_0,4*A_0,5*A_0,6*A_0,7*A_0,8*A_0,9*A_0,10*A_0,11*A_0],
-            self.I: [1 * I_0, 2 * I_0, S.Half * I_0, 1 * I_0, 2 * I_0,3*I_0,4*I_0,5*I_0,6*I_0,7*I_0,8*I_0,9*I_0,10*I_0,11*I_0],
-           self.BC: [ {sup_ls:0,mb_ls:0,sup_rs:0,mb_rs:0},{fix_ls:0,v_ls:0,sup_rs:0,mb_rs:0}, ],
-           self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 1 * L_0, 3 * L_0,4*L_0,5*L_0,6*L_0,7*L_0,8*L_0,9*L_0,10*L_0,11*L_0],
+           self.E: [2.5*E_0,1.25*E_0,0.75*E_0,1.35*E_0,1*E_0,2*E_0,3*E_0,4*E_0,5*E_0,6*E_0,7*E_0,8*E_0,9*E_0 ],
+           self.A: [1 * A_0, 2 * A_0, S.Half * A_0, 1 * A_0, 2 * A_0,3*A_0,4*A_0,5*A_0,6*A_0,7*A_0,8*A_0,9*A_0,10*A_0,11*A_0],
+           self.I: [1 * I_0, 2 * I_0, S.Half * I_0, 1 * I_0, 2 * I_0,3*I_0,4*I_0,5*I_0,6*I_0,7*I_0,8*I_0,9*I_0,10*I_0,11*I_0],
+           self.BC: [{sup_ls:0,mb_ls:0,sup_rs:0,mb_rs:0},{fix_ls:0,v_ls:0,sup_rs:0,mb_rs:0},{sup_ls:0,mb_ls:0,sup_rs:0,mb_rs:0},{fix_ls:0,v_ls:0,sup_rs:0,mb_rs:0},{sup_ls:0,mb_ls:0,sup_rs:0,mb_rs:0}],
+           self.l:[0.8*L_0,1.2*L_0,1.4*L_0,2 * L_0, S.Half * L_0, 3 * L_0,4*L_0,5*L_0,6*L_0,7*L_0,8*L_0,9*L_0,10*L_0,11*L_0],
 
         }
 
@@ -603,11 +536,10 @@ class CSShaft(ContinuousSystem):
 
 
         default_data_dict = {
-            self.G: [2.5*G_0,1.25*G_0,0.75*G_0,1.35*G_0 ],
-            
-
-           self.BC: [{fix_ls:0,free_rs:0},{fix_ls:0,fix_rs:0} ],
-           self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 3 * L_0, 2 * L_0],
+           self.G: [2.5*G_0,1.25*G_0,0.75*G_0,1.35*G_0,1.5*G_0,1.45*G_0],
+           self.I: [L_0**4/120, L_0**4/20,L_0**4/600,L_0**4/100,L_0**4/2],
+           self.BC: [{fix_ls:0,fix_rs:0},{free_ls:0,fix_rs:0},{fix_ls:0,free_rs:0},{free_ls:0,free_rs:0},{fix_ls:0,free_rs:0}],
+           self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 3 * L_0, 1.35 * L_0,  1.15 * L_0, 1.65 * L_0,  1.55 * L_0,  0.85 * L_0],
 
 
         }
@@ -649,16 +581,46 @@ class CSCylinder(PlaneStressProblem):
                  **kwargs
                 ):
         
-
+        self.disp_func = disp_func
+        self.coords = coords
+        self.ra = Symbol('r_a',positive=True)
+        self.rb = Symbol('r_b',positive=True)
+        
 
         
         super().__init__(disp_func=disp_func,stress_tensor=stress_tensor,bc_dict=bc_dict,coords=coords,E=E,nu=nu,D=D,volumetric_load=volumetric_load,**kwargs)
         
+    def get_default_data(self):
+
+        r_0, p_0 = symbols('r_0, p_0', positive=True)
+        p0=p_0
+        
+        func_r=self.disp_func[0]
+        r=self.coords[0]
+        nu=self.poisson
+        E=self.E_module
+        D=self.D
+        ra=self.ra
+        rb=self.rb
+        
+        in_p0=Subs((func_r.diff(r)+nu*func_r/r)*D,r,ra)
+        out_p0=Subs((func_r.diff(r)+nu*func_r/r)*D,r,rb)
+
+        default_data_dict = {
+           self.ra: [S.One*r_0,2.05*r_0,0.5*r_0,0.75*r_0,1.5*r_0,0.75*r_0],
+           self.rb: [S.One*r_0,3.15*r_0,1.5*r_0,0.85*r_0,1.35*r_0,0.55*r_0],
+           self.BC: [{in_p0:p0,out_p0:S.Zero},{in_p0:S.Zero,out_p0:p0},{in_p0:p0,out_p0:p0},{in_p0:-p0,out_p0:S.Zero},{in_p0:S.Zero,out_p0:-p0},{in_p0:-p0,out_p0:-p0}],
+        }
 
         
+        return default_data_dict
+
+    
+    
 class CSPlate(PlaneStressProblem):
     
-    scheme_name = 'plate_point_load.PNG'
+#     scheme_name = 'plate_point_load.PNG'
+    scheme_name = 'plate_scheme.PNG'
     real_name = 'reservoir.jpg'
     
     def __init__(self,
@@ -670,31 +632,47 @@ class CSPlate(PlaneStressProblem):
                  bc_dict=None,
                  coords=[Symbol('r'), Symbol('\\varphi')],
                  E=Symbol('E', positive=True),
-                 nu=Symbol('\\nu', positive=True),      
+                 nu=Symbol('\\nu', positive=True),
                  D=Symbol('D_h', positive=True),
                  h=Symbol('h', positive=True),
                  volumetric_load=0,
                  **kwargs
                 ):
 
-#         print('__init')
-#         print(type(self))
-#         display(disp_func)
+        self.disp_func = disp_func
+        self.coords = coords
+        self.ra = Symbol('r_a',positive=True)
+        self.rb = Symbol('r_b',positive=True)
         
         super().__init__(disp_func=disp_func,stress_tensor=stress_tensor,bc_dict=bc_dict,coords=coords,E=E,nu=nu,D=D,volumetric_load=volumetric_load,**kwargs)
-        
-#         print('__init - after super')
-#         print(type(self))
-#         display(self.u)
+
         self._h=h
         
         self._subs_dict = {E:D*(1-nu**2)*12/(h**3)} 
         self.E_module=(h**3)/12*E
 #         self.u = Matrix([Function('\\psi')(Symbol('r')), 0])
-        
-#         print('__init - after super')
-#         print(type(self))
-#         display(self.u)
 
-# <<<<<<< HEAD
-# OK
+    def get_default_data(self):
+
+        r_0, m_0 = symbols('r_0, m_0', positive=True)
+        m0=m_0
+        
+        func_r=self.disp_func[0]
+        r=self.coords[0]
+        nu=self.poisson
+        E=self.E_module
+        D=self.D
+        ra=self.ra
+        rb=self.rb
+        
+        in_m0=Subs((func_r.diff(r)+nu*func_r/r)*D,r,ra)
+        out_m0=Subs((func_r.diff(r)+nu*func_r/r)*D,r,rb)
+
+        default_data_dict = {
+           self.ra: [S.One*r_0,2.4*r_0,0.6*r_0,0.8*r_0,1.6*r_0,0.9*r_0],
+           self.rb: [S.One*r_0,3.0*r_0,1.*r_0,0.2*r_0,1.4*r_0,0.6*r_0],
+           self.BC: [{in_m0:m0,out_m0:S.Zero},{in_m0:S.Zero,out_m0:m0},{in_m0:m0,out_m0:m0},{in_m0:-m0,out_m0:S.Zero},{in_m0:S.Zero,out_m0:-m0},{in_m0:-m0,out_m0:-m0}],
+        }
+
+        
+        return default_data_dict
