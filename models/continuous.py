@@ -28,14 +28,14 @@ class ComposedSystem(HarmonicOscillator):
     @classmethod
     def _scheme(cls):
 
-        path = __file__.replace('systems.py', 'images/') + cls.scheme_name
+        path = __file__.replace('continuous.py', 'images/') + cls.scheme_name
 
         return path
 
     @classmethod
     def _real_example(cls):
 
-        path = __file__.replace('systems.py', 'images/') + cls.real_name
+        path = __file__.replace('continuous.py', 'images/') + cls.real_name
 
         return path
 

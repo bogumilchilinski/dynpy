@@ -1224,7 +1224,7 @@ class ExcitedPendulum(ComposedSystem):
         -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
         -determine the instance of the pendulum by using class SDoFExcitedPendulum()
     """
-    scheme_name = 'horizontal_forced_pendulum.png'
+    scheme_name = 'damped_excited_pendulum.PNG'
     real_name = 'pendulum2_real.jpg'
 
     def __init__(
@@ -1255,7 +1255,7 @@ class ExcitedPendulum(ComposedSystem):
         Omega = Symbol('Omega',positive=True)
         self.Omega=Omega
         self.pendulum = Pendulum(m, g, l, angle=phi)
-        self.force = Force(F * l * sin(Omega*ivar), pos1=phi, qs=qs)
+        self.force = Force(-F * l * sin(Omega*ivar), pos1=phi, qs=qs)
         system = self.pendulum + self.force
 
         super().__init__(system,**kwargs)
