@@ -196,12 +196,12 @@ class ReportComponent(Subsection):
                 
 
         ReportText.set_container(self)
-        ReportText.set_directory('./SDAresults')
+        #ReportText.set_directory('./SDAresults')
         SympyFormula.set_container(self)
         LatexDataFrame.set_default_container(self)
         Markdown.set_container(self)
         LatexDataFrame.set_picture_mode(True)
-        LatexDataFrame.set_directory('./SDAresults')
+        #LatexDataFrame.set_directory('./SDAresults')
         
         
         self.append_elements()
@@ -328,7 +328,60 @@ class SchemeComponent(ExemplaryPictureComponent):
 
         display(ReportText(f'''Analizując przedstawiony układ można stwierdzić, że jego liczba stopni swobody to {len(system.q)}.
                             '''))
+
+
+
+class NumericalAnalysisComponent(ExemplaryPictureComponent):
+    title="Symulacja numeryczna"
+
+    _default_ics = None
+    _default_parameters = {}
+    _default_tspan = np.linspace(0,1,1000)
+    
+    @classmethod
+    def set_default_ics(cls,default_ics=None):
+        
+        if default_ics is None:
+            cls._default_ics = default_ics
+        
+        return cls
+
+    @classmethod
+    def set_default_parameters(cls,default_parameters=None):
+        
+        if default_parameters is None:
+            cls._default_parameters = default_parameters
+        
+        return cls
+    
+    @classmethod
+    def set_default_tspan(cls,default_tspan=None):
+        
+        if default_tspan is None:
+            cls._default_tspan = default_tspan
+        
+        return cls
+    
+
+    def append_elements(self):
+        
+        system = self._system
+
+        display(ReportText(f'''Dla Damiana :P
+                            '''))
+        if self._default_ics is None:
+            ics = list(system.Y*0.0)
+        else:
+            ics = self._default_ics
             
+        sym_res = system.subs(self._default_parameters).numerized().compute_solution(self._default_tspan,ics)
+
+        LatexDataFrame.formatted(sym_res).plotted(preview=True)
+        
+
+        display(ReportText(f'''Dla Damiana :P
+                            '''))
+
 class KineticEnergyComponent(ReportComponent):
     
     title="Energia kinetyczna"
@@ -669,7 +722,59 @@ class GeneralSolutionComponent(ReportComponent):
                                 '''))
 
         AutoBreak.latex_backend = latex_store
+
         
+        
+class FrequencyResponseFunctionComponent(ReportComponent):
+    
+    title="Charakterystyka Amplitudowo-Częstotliwościowa"
+
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(f'''
+                           funkcja odpowiedzi częstotliwościowej:
+                           '''))
+
+        display(SympyFormula( Eq(Symbol('frf'),
+                     dyn_sys.frequency_response_function() ), marker=None))
+
+        display(ReportText(f'''
+                           jest to suma kwadratów amplitud pod pierwiastkiem
+                           '''))  
+        
+FRFComponent = FrequencyResponseFunctionComponent
+
+class FrequencyResponseFunctionComponentToSecond(ReportComponent):
+    
+    title="sens mocy układu"
+
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(f'''
+                           sens mocy układu:
+                           '''))
+
+        display(SympyFormula( Eq(Symbol('frf^2'),
+                     dyn_sys.frequency_response_function().doit()**2 ), marker=None))
+
+        display(ReportText(f'''
+                           Charakterystyka Amplitudowo-Częstotliwościowa podniesiona do kwadratu
+                           '''))  
+        
+
+
+        
+
 class SteadySolutionComponent(ReportComponent):
     
     title="Rozwiązanie szczególne"
@@ -703,3 +808,47 @@ class SteadySolutionComponent(ReportComponent):
 
         display(ReportText(f'''Rozwiązanie szczególne związane jest obecnością wielkości wymuszających ruch (drgania) analizowanego układu.
                                 '''))
+        
+class MaxStaticForce(ReportComponent):
+    
+    title="Maksymalna siła statyczna"
+
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(f'''
+                           Wartość maksymalna siły statycznej działającej na pojedynczy element mocujący:
+                           '''))
+
+        display(SympyFormula( Eq(Symbol('F_s'),
+                     dyn_sys.max_static_force().doit() ), marker=None))
+
+        display(ReportText(f'''
+                           Wartość maksymalna siły statycznej działającej na pojedynczy element mocujący.
+                           '''))  
+        
+class MaxDynamicForce(ReportComponent):
+    
+    title="Maksymalna siła statyczna"
+
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(f'''
+                           Wartość maksymalna siły dynamicznej działającej na pojedynczy element mocujący:
+                           '''))
+
+        display(SympyFormula( Eq(Symbol('F_d'),
+                     dyn_sys.max_dynamic_force().doit() ), marker=None))
+
+        display(ReportText(f'''
+                           Wartość maksymalna siły dynamicznej działającej na pojedynczy element mocujący:
+                           '''))  

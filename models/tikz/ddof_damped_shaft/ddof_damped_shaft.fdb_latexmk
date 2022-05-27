@@ -1,11 +1,6 @@
 # Fdb version 3
-<<<<<<< HEAD
-["pdflatex"] 1645131685 "car_dmp.tex" "car_dmp.pdf" "car_dmp" 1645131686
-  "/dev/null" 1645018436 0 d41d8cd98f00b204e9800998ecf8427e ""
-=======
-["pdflatex"] 1647296827 "car_dmp.tex" "car_dmp.pdf" "car_dmp" 1647296829
-  "/dev/null" 1647257177 0 d41d8cd98f00b204e9800998ecf8427e ""
->>>>>>> 8b5973a5b15b3641061e17d5ad28296fb6de6011
+["pdflatex"] 1652206316 "ddof_damped_shaft.tex" "ddof_damped_shaft.pdf" "ddof_damped_shaft" 1652206318
+  "/dev/null" 1652197777 0 d41d8cd98f00b204e9800998ecf8427e ""
   "/etc/texmf/web2c/texmf.cnf" 1590581910 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecrm1000.tfm" 1136768653 3584 adb004a0c8e7c46ee66cad73671f37b4 ""
@@ -199,6 +194,7 @@
   "/usr/share/texlive/texmf-dist/tex/latex/xkeyval/xkeyval.sty" 1417732693 4962 9c1069474ff71dbc47d5006555e352d3 ""
   "/usr/share/texlive/texmf-dist/web2c/texmf.cnf" 1581979058 38841 ce3692aa899bb693b90b87eaa5d4d84e ""
   "/usr/share/texmf/fonts/enc/dvips/lm/lm-mathit.enc" 1254938640 2405 5dcf2c1b967ee25cc46c58cd52244aed ""
+  "/usr/share/texmf/fonts/enc/dvips/lm/lm-rm.enc" 1254938640 2327 9d6df24f9c4f7368395224341a95523a ""
   "/usr/share/texmf/fonts/tfm/public/lm/ec-lmr10.tfm" 1254938640 12056 7e13df7fe4cbce21b072ba7c4f4deb6e ""
   "/usr/share/texmf/fonts/tfm/public/lm/lmex10.tfm" 1254938640 992 ce925c9346c7613270a79afbee98c070 ""
   "/usr/share/texmf/fonts/tfm/public/lm/lmmi10.tfm" 1254938640 1528 6d36b2385e0ca062a654de6ac59cb34f ""
@@ -211,7 +207,8 @@
   "/usr/share/texmf/fonts/tfm/public/lm/rm-lmr5.tfm" 1254938640 11804 aefb10c002e6492c25236524a447f969 ""
   "/usr/share/texmf/fonts/tfm/public/lm/rm-lmr7.tfm" 1254938640 11852 5a9022f105fd1ee2797df861e79ae9a0 ""
   "/usr/share/texmf/fonts/type1/public/lm/lmmi10.pfb" 1254938640 30388 702fae6a5f0e6e9c48a1d872b442ffcf ""
-  "/usr/share/texmf/fonts/type1/public/lm/lmmi7.pfb" 1254938640 30789 be3ebdf20b6442cc4aaf81a81e17daf4 ""
+  "/usr/share/texmf/fonts/type1/public/lm/lmr10.pfb" 1254938640 119235 f35b44530a1d90eb90fe15d9cba67ea0 ""
+  "/usr/share/texmf/fonts/type1/public/lm/lmr7.pfb" 1254938640 121145 68312a933e2c689ed40ec0aba373e279 ""
   "/usr/share/texmf/tex/latex/lm/lmodern.sty" 1256929440 1606 c17281c7cff2bbd7ff0173e1433487ec ""
   "/usr/share/texmf/tex/latex/lm/omllmm.fd" 1256929440 888 44447a3a3af84a22454ef89500942d93 ""
   "/usr/share/texmf/tex/latex/lm/omslmsy.fd" 1256929440 805 af340a8260c447aa315cfc740ff0152f ""
@@ -221,22 +218,13 @@
   "/usr/share/texmf/web2c/texmf.cnf" 1581979058 38841 ce3692aa899bb693b90b87eaa5d4d84e ""
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1590748799 4770781 1ed1abab22da9c3e2cc82e4db562318b ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1590748886 8256264 954d301c1bc5de4ed644a8052052631e ""
-<<<<<<< HEAD
-  "car_dmp.aux" 1645131686 662 b2b94621371df8d9296b8bf5bec1b851 "pdflatex"
-  "car_dmp.out" 1645131686 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-=======
-  "car_dmp.aux" 1647296829 662 b2b94621371df8d9296b8bf5bec1b851 "pdflatex"
-  "car_dmp.out" 1647296829 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
->>>>>>> 8b5973a5b15b3641061e17d5ad28296fb6de6011
-  "car_dmp.tex" 1618906133 4999 405c384cae2b071b10db12891a7d634f ""
-  "pythontex-files-car_dmp/car_dmp.pytxmcr" 0 -1 0 ""
+  "ddof_damped_shaft.aux" 1652206317 662 b2b94621371df8d9296b8bf5bec1b851 "pdflatex"
+  "ddof_damped_shaft.out" 1652206317 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "ddof_damped_shaft.tex" 1652206312 3752 ac0b42333db89e92a3188d946a76a5ff ""
+  "pythontex-files-ddof_damped_shaft/ddof_damped_shaft.pytxmcr" 0 -1 0 ""
   (generated)
-  "car_dmp.pytxcode"
-<<<<<<< HEAD
-=======
-  "car_dmp.pdf"
->>>>>>> 8b5973a5b15b3641061e17d5ad28296fb6de6011
-  "car_dmp.aux"
-  "car_dmp.log"
-  "car_dmp.out"
-  "car_dmp.pdf"
+  "ddof_damped_shaft.pytxcode"
+  "ddof_damped_shaft.pdf"
+  "ddof_damped_shaft.aux"
+  "ddof_damped_shaft.out"
+  "ddof_damped_shaft.log"

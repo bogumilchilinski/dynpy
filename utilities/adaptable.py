@@ -103,7 +103,7 @@ class DataMethods:
 
         plot_options = NoEscape(
             'anchor=north west,ymajorgrids=true,xmajorgrids=true,grid style=dashed,legend style={font=\small},'
-            + y_axis_description) + NoEscape(',height=') + height + NoEscape(
+            + NoEscape(y_axis_description)) + NoEscape(',height=') + height + NoEscape(
                 ',width=') + width + NoEscape(
                     f',xmin={min(self.index)},xmax={max(self.index)}')
 
@@ -472,7 +472,7 @@ class EntryWithUnit:
         right_par = self._right_par
 
         if unit:
-            return f'{entry_str} {left_par}{unit:Lx}{right_par}'
+            return f'{entry_str} {left_par}{unit:~L}{right_par}'
         else:
             return f'{self._obj}'
 
@@ -527,7 +527,7 @@ class AutoMarker:
                 prefix = 'fig'
         
         elif isinstance(elem,(pd.DataFrame,pd.Series)):
-            elem_id = elem.to_latex()
+            elem_id = elem.style.to_latex()
             prefix = 'fig'
             
         elif isinstance(elem,Matrix):
@@ -553,7 +553,7 @@ class AutoMarker:
                 prefix = 'fig'
         
         elif isinstance(elem,(pd.DataFrame,pd.Series)):
-            elem_id = elem.to_latex()
+            elem_id = elem.style.to_latex()
             prefix = 'fig'
             
         elif isinstance(elem,Matrix):
@@ -996,10 +996,18 @@ class BasicFormattingTools(DataMethods):
 
             #print('index2transform',col_idx.get_level_values(-1).unique())
             if len(col_idx.get_level_values(-1).unique())==1:
-                ylabel = latex_backend(
-                    EntryWithUnit(col_idx.get_level_values(-1).unique()[0]))
+                
+                label_raw=(EntryWithUnit(col_idx.get_level_values(-1).unique()[0]))
+                if isinstance(label_raw,str):
+                    ylabel = label_raw
+                else: 
+                    ylabel = latex_backend(NoEscape(
+                        EntryWithUnit(NoEscape(col_idx.get_level_values(-1).unique()[0]))
+                            ))
+                #print('detect')
+                #print(ylabel)
 
-                y_axis_description = 'ylabel={' + ylabel + '},'
+                y_axis_description = 'ylabel={$' + ylabel + '$},'
 
 
                 plotted_frame = plotted_frame.droplevel(-1, axis=1)
@@ -1010,7 +1018,11 @@ class BasicFormattingTools(DataMethods):
                 
                 ylabel = ', '.join(ylabel_list)
 
-                y_axis_description = 'ylabel={' + ylabel + '},'                
+
+                #y_axis_description = 'ylabel={$' + ylabel + '$},'                
+
+                y_axis_description = 'ylabel={' + NoEscape(ylabel) + '},'                
+
                 
 
             plotted_frame._ylabel=ylabel
@@ -1020,7 +1032,11 @@ class BasicFormattingTools(DataMethods):
             
         elif self._ylabel is not None:
             ylabel = self._ylabel
-            y_axis_description = 'ylabel={' + ylabel + '},'
+
+            #y_axis_description = 'ylabel={$' + ylabel + '$},'
+
+            y_axis_description = 'ylabel={' + NoEscape(ylabel) + '},'
+
             
 
         else:
@@ -1028,7 +1044,7 @@ class BasicFormattingTools(DataMethods):
             y_axis_description = ''
 
         if x_axis_description is None:
-            x_axis_description = ',xlabel={' + plotted_frame.index.name  +  '},'
+            x_axis_description = ',xlabel={$' + plotted_frame.index.name  +  '$},'
         
             
             
@@ -1044,7 +1060,9 @@ class BasicFormattingTools(DataMethods):
         if picture is None:
             picture = self.__class__._picture
             
-            
+        #print(ylabel)
+        #print(type(ylabel))
+        #print(y_axis_description)
         fig = plotted_frame.to_standalone_figure(
             filename,
             labels_list=labels_list,
@@ -1146,10 +1164,10 @@ class BasicFormattingTools(DataMethods):
             tab.append(Label(label))
 
         if label is not None:
-            AutoMarker.add_marker(self.to_latex(),label)
+            AutoMarker.add_marker(self.style.to_latex(),label)
             tab.append(Label(label))
         else:
-            auto_mrk=AutoMarker(self.to_latex()).marker
+            auto_mrk=AutoMarker(self.style.to_latex()).marker
             tab.append(Label(auto_mrk))
             
 
@@ -1264,7 +1282,7 @@ class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
 
     def _get_str_key(self):
         #return self.to_latex()+f'subplot={self._subplot}, self._caption{self._caption} '
-        return self.to_latex()+f'subplot={self._subplot}'
+        return self.style.to_latex()+f'subplot={self._subplot}'
     
 class LatexDataFrame(AdaptableDataFrame):
     _applying_func = lambda obj: (obj).fit_units_to_axes().format_axes_names()
@@ -1459,8 +1477,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
             ics_series = (self[case_data].T[t0])
 
             print(ics_series)
-            
-            
+
             ics_list = [
                 np.float(ics_series[coord])
                 for coord in numerized_model.ics_dvars
@@ -1622,7 +1639,7 @@ class SpectrumFrame(AdaptableDataFrame, SpectralMethods):
                      smooth=False):
 
         if y_axis_description == None:
-            y_axis_description = 'ylabel=$' + self.name + '$,'
+            y_axis_description = 'ylabel={$' + self.name + '$},'
 
         return super().to_tikz_plot(filename=filename,
                                     labels_list=labels_list,
@@ -1749,7 +1766,7 @@ class TimeSeries(AdaptableSeries, TimeDomainMethods):
                      smooth=False):
 
         if y_axis_description == None:
-            y_axis_description = 'ylabel=$' + self.name + '$,'
+            y_axis_description = 'ylabel={$' + self.name + '$},'
 
         aux_DataFrame = TimeDataFrame(data=self, index=self.index)
         dumped_tex = aux_DataFrame.to_tikz_plot(

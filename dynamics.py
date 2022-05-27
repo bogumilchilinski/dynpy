@@ -205,6 +205,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     '''
     _hint=[]
+    _default_args = (0,[Function('x')(Symbol('t'))])
     _default_subs_method='direct'
     scheme_name = 'engine.png'
     real_name = 'engine_real.PNG'
@@ -264,6 +265,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self._kinetic_energy = 0
         self._potential_energy = 0
         self._dissipative_potential = 0
+        
+        self._components ={}
 
         if system:
             # print(system._kinetic_energy)
@@ -271,14 +274,15 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             system=None
             
             
-            # self._kinetic_energy = Lagrangian._kinetic_energy
-            # self._potential_energy = Lagrangian._potential_energy
+#             self._kinetic_energy = Lagrangian._kinetic_energy
+#             self._potential_energy = Lagrangian._potential_energy
 
         if isinstance(Lagrangian, LagrangesDynamicSystem):
 
             self._kinetic_energy = Lagrangian._kinetic_energy
             self._potential_energy = Lagrangian._potential_energy
             self._dissipative_potential = Lagrangian._dissipative_potential
+            self._components = {**self._components, **Lagrangian._components }
 
 
         if isinstance(Lagrangian, me.LagrangesMethod):
@@ -326,20 +330,38 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self._given_data={}
         
         self._nonlinear_base_system=None
+        
+        self._components =  {self._label:copy.copy(self),**self._components}
 
     @classmethod
     def from_system(cls, system):
         
         kwargs=system._kwargs()
         
-        new_system=cls(**kwargs)
+        new_system=cls(*cls._default_args,system = system)
         
         new_system._kinetic_energy = system._kinetic_energy
         new_system._potential_energy = system._potential_energy
         new_system._dissipative_potential = system._dissipative_potential
 
         return new_system
-        #LM=me.LagrangesMethod(Lagrangian=Lagrangian, qs=qs, forcelist=forcelist, bodies=bodies, frame=frame,hol_coneqs=hol_coneqs, nonhol_coneqs=nonhol_coneqs)
+
+    @classmethod
+    def from_default_data(cls):
+        
+        system=cls(*cls._default_args)
+
+        return system
+    
+    @classmethod
+    def from_random_data(cls):
+        
+        system=cls.from_default_data()
+        subs_dict=system.get_random_parameters()
+        
+        return system.subs(subs_dict)
+    
+        
     
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -415,8 +437,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         systems_sum._potential_energy = sum([energy for energy in [self._potential_energy,other._potential_energy] if energy is not None])
         systems_sum._dissipative_potential = sum([energy for energy in [self._dissipative_potential,other._dissipative_potential] if energy is not None])
         
-        # print(systems_sum._kinetic_energy)
-        # print(systems_sum._potential_energy)
+
 
         return systems_sum
 
@@ -426,17 +447,21 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         
 
-        
+        system=self
         self_dict = self._kwargs()
         self_dict['qs'] = flatten(args)
         
 
 
         new_sys=LagrangesDynamicSystem(**self_dict)
+        new_system=type(self).from_system(new_sys)
         
+        new_system._kinetic_energy = system._kinetic_energy
+        new_system._potential_energy = system._potential_energy
+        new_system._dissipative_potential = system._dissipative_potential
 
-        
-        return type(self)(0,system=new_sys)
+        return new_system
+        #return type(self)(0,system=new_sys)
 
     def remove(self, *args):
 
@@ -446,10 +471,16 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self_dict['qs'] = [
             coord for coord in self.q if coord not in bounded_coordinates
         ]
+        systems_sum=LagrangesDynamicSystem(**self_dict)
+        systems_sum._given_data={**other._given_data,**self._given_data}
+        
+        systems_sum._kinetic_energy = sum([energy for energy in [self._kinetic_energy,other._kinetic_energy] if energy is not None])
+        systems_sum._potential_energy = sum([energy for energy in [self._potential_energy,other._potential_energy] if energy is not None])
+        systems_sum._dissipative_potential = sum([energy for energy in [self._dissipative_potential,other._dissipative_potential] if energy is not None])
 
-        return LagrangesDynamicSystem(**self_dict)
+        return systems_sum
 
-    def subs(self, *args, simultaneous=False, **kwargs):
+    def subs(self, *args, **kwargs):
         """
         Returns class instance with substituted numerical values
         """
@@ -458,8 +489,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         hol_coneqs = list(self._hol_coneqs)
         
-#         if 'simultaneous' in kwargs.keys():
-#             simultaneous = kwargs['simultaneous']
+        simultaneous = False
+        if 'simultaneous' in kwargs.keys():
+            simultaneous = kwargs['simultaneous']
+        
+        
 
         if 'method' in kwargs.keys():
             method = kwargs['method']
@@ -524,9 +558,15 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         #display(new_system._eoms)
         
-        #print('subs is ran for '+str(type(self)))
+        ########### new wersion
+        new_sys = type(self).from_system(new_system)
+        ########### new wersion        
         
-        new_sys = type(self)(0,system=new_system)#(f'{self._label} for {args} and {kwargs}')
+        
+#         ########## old wersion
+#         new_sys = type(self)(0,system=new_system)#(f'{self._label} for {args} and {kwargs}')
+#         ########## old wersion        
+        
         new_sys._label=f'{self._label} for {args} and {kwargs}'
 
 
@@ -537,11 +577,16 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         new_sys._dissipative_potential = (self._dissipative_potential*S.One).subs(*args,simultaneous=simultaneous, **kwargs) 
 #         else:
 #             new_sys._dissipative_potential = self._dissipative_potential
-        
+
+#         new_sys._kinetic_energy = sum([energy for energy in [self._kinetic_energy,other._kinetic_energy] if energy is not None])
+#         new_sys._potential_energy = sum([energy for energy in [self._potential_energy,other._potential_energy] if energy is not None])
+#         new_sys._dissipative_potential = sum([energy for energy in [self._dissipative_potential,other._dissipative_potential] if energy is not None])
 
         new_sys._given_data=given_data
         new_sys._nonlinear_base_system = copy.copy(self._nonlinear_base_system)
-        
+
+#         print(new_sys._kinetic_energy)
+#         print(new_sys._potential_energy)
         #print(new_sys)
         #display(new_system._eoms)
         #display(new_system.forcelist)
@@ -1797,9 +1842,7 @@ class HarmonicOscillator(LinearDynamicSystem):
         else:
             omg = omg.coeff(self.ivar)
             
-        fund_mat = -self.inertia_matrix(
-        ) * omg**2 + sym.I * omg * self.damping_matrix(
-        ) + self.stiffness_matrix()
+        #omg = omg.coeff(self.ivar)
         
 
             
@@ -1810,14 +1853,81 @@ class HarmonicOscillator(LinearDynamicSystem):
             k=self.stiffness_matrix()[0]
             c=self.damping_matrix()[0]
             
-            amp = [(comp_sin+comp_cos)[0]**2/((k - m*omg**2)**2 + 2*c**2*omg**2)]
+            amp = [(comp_sin**2+comp_cos**2)[0]/((k - m*omg**2)**2 + 2*c**2*omg**2)]
             
         else:
+            fund_mat = -self.inertia_matrix(
+            ) * omg**2 + sym.I * omg * self.damping_matrix(
+            ) + self.stiffness_matrix()
 
-            amp=(fund_mat.inv() * (comp_sin)).T*(fund_mat.inv() * (comp_sin))  +  (fund_mat.inv() * (comp_cos)).T*(fund_mat.inv() * (comp_cos))
+            amp=((fund_mat.inv()*comp_cos).applyfunc(lambda elem: elem**2) + (fund_mat.inv()*comp_sin).applyfunc(lambda elem: elem**2)   )
 
         return sqrt(amp[0])
 
+    def _frf(self,excitation_freq=Symbol('Omega',positive=True)):
+        '''
+        Returns the Frequency Response Function of the system for the given excitation amplitude working correctly for systems with defined stiffenes matrix.
+        '''
+
+
+        self.Omega = excitation_freq
+        omg = self.Omega
+
+        #solution = self.steady_solution()[0].expand()
+        sin_fun=list(self.external_forces().atoms(sin))
+        cos_fun=list(self.external_forces().atoms(cos))
+
+        if len(sin_fun) == 1: 
+        
+            omg_sin=list(set((sin_fun[0]).args)-{self.ivar})[0]
+
+            comp_sin = self.external_forces().applyfunc(lambda comp: comp.coeff(sin_fun[0]))
+        else:
+            comp_sin=(self.external_forces()*S.Zero).doit()
+            omg_sin=S.Zero
+            
+            
+        if len(cos_fun) == 1: 
+            omg_cos=list(set(cos_fun[0].args)-{self.ivar})[0]
+
+            comp_cos = self.external_forces().applyfunc(lambda comp: comp.coeff(cos_fun[0]))
+        else:
+            comp_cos=(self.external_forces()*S.Zero).doit()
+            omg_cos=S.Zero
+
+        if omg_sin == 0:
+            omg = omg_cos
+        else:
+            omg = omg_sin
+            
+        if excitation_freq is not None:
+            omg = excitation_freq
+        else:
+            omg = omg.coeff(self.ivar)
+            
+        #omg = omg.coeff(self.ivar)
+        
+
+            
+            
+        if len(self.q)==1:
+            
+            m=self.inertia_matrix()[0]
+            k=self.stiffness_matrix()[0]
+            c=self.damping_matrix()[0]
+            
+            amp = Matrix([(comp_sin**2+comp_cos**2)[0]/((k - m*omg**2)**2 + 2*c**2*omg**2)])
+            
+        else:
+            fund_mat = -self.inertia_matrix(
+            ) * omg**2 + sym.I * omg * self.damping_matrix(
+            ) + self.stiffness_matrix()
+
+            amp=((fund_mat.inv()*comp_cos).applyfunc(lambda elem: elem**2) + (fund_mat.inv()*comp_sin).applyfunc(lambda elem: elem**2)   )
+
+        return amp.applyfunc(lambda elem: sqrt(elem))
+    
+    
     def dynamic_amplification_factor(self,
                                      excitation_amp=None,
                                      excitation_freq=Symbol('Omega', positive=True)):
