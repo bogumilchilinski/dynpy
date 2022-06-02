@@ -1002,7 +1002,20 @@ class Pendulum(ComposedSystem):
             self.l: r'Pendulum length',
         }
         return self.sym_desc_dict
+    
+    def frequency_response_function(self,
+                                    frequency=Symbol('Omega',positive=True),
+                                    amplitude=Symbol('a',positive=True), 
+                                    exciting_force=Symbol('f_0', positive=True), 
+                                    epsilon=Symbol('\\epsilon', positive=True)):
+        
+        omega = ComposedSystem(self.linearized()).natural_frequencies()[0]
 
+        return -frequency**2 + omega**2 + 0.75*epsilon*amplitude**2-exciting_force/amplitude
+    
+    def amplitude_from_frf(self, amplitude=Symbol('a',positive=True)):
+        
+        return solve(Eq(self.frequency_response_function(),0),amplitude)
     
 class PulledPendulum(ComposedSystem):
     """
