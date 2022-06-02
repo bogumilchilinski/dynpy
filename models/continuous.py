@@ -95,6 +95,17 @@ class ContinuousSystem(ContinuousSystem):
 
         return path
 
+    
+    
+    @classmethod
+    def from_random_data(cls):
+        
+        system=cls()
+        subs_dict=system.get_random_parameters()
+        
+        return system.subs(subs_dict)
+    
+    
     @classmethod
     def preview(cls, example=False):
         if example:
@@ -235,7 +246,7 @@ class CSBeam(ContinuousSystem):
         
         self._sep_expr=2*self.L.subs({self.w.diff(self.time):0,(self.w.diff(self.loc,2)):1}) .doit()  *Symbol('k',positive=True)**4 
         
-        print(self._sep_expr)
+#         print(self._sep_expr)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -291,6 +302,66 @@ class CSBeam(ContinuousSystem):
 
         return data_dict
     
+    def bending_moment(self,
+                   mode_no,
+                   bc_dict=None,
+                   sep_expr=None,
+                   arg=None,
+                   spatial_comp=Function('X')(Symbol('x')),
+                   index=Symbol('n', integer=True, positive=True)):
+        E_0, I_0, L_0 = symbols('E_0, I_0, L_0', positive=True)
+        amp = Symbol('w_0',positive=True)
+        
+        mode = self.eigenmodes(mode_no,
+                   bc_dict=bc_dict,
+                   sep_expr=sep_expr,
+                   arg=arg,
+                   spatial_comp=spatial_comp,
+                   index=index)
+
+        return abs(mode.diff(self.loc,2)*Symbol('E',positive=True)*Symbol('I',positive=True))*amp
+
+    def mode_cross_section_side(self,
+                                mode_no,
+                                bc_dict=None,
+                                sep_expr=None,
+                                arg=None,
+                                spatial_comp=Function('X')(Symbol('x')),
+                                index=Symbol('n', integer=True, positive=True)):
+        
+        Re,k_b,b,h = symbols('R_e k_b b h', positive=True)
+        
+        bending_moment =self.bending_moment(mode_no,
+                   bc_dict=bc_dict,
+                   sep_expr=sep_expr,
+                   arg=arg,
+                   spatial_comp=spatial_comp,
+                   index=index)
+        
+#         h = sqrt(6*bending_moment/Re/k_a/b)
+#         b = 6*bending_moment/Re/k_a/h**2
+#         return b*h
+        return (6*bending_moment/Re/k_b)**(1/3)
+
+    def mode_moment_of_inertia(self,
+                                mode_no,
+                                bc_dict=None,
+                                sep_expr=None,
+                                arg=None,
+                                spatial_comp=Function('X')(Symbol('x')),
+                                index=Symbol('n', integer=True, positive=True)):
+        
+        Re,k_b,b,h = symbols('Re k_b b h', positive=True)
+        
+        bending_moment =self.bending_moment(mode_no,
+                   bc_dict=bc_dict,
+                   sep_expr=sep_expr,
+                   arg=arg,
+                   spatial_comp=spatial_comp,
+                   index=index)
+        
+        return (bending_moment/Re/k_b)
+    
     
 class CSRod(ContinuousSystem):
     """
@@ -322,6 +393,14 @@ class CSRod(ContinuousSystem):
     scheme_name = 'rod_scheme.PNG'
     real_name = 'rod_real.PNG'
 
+    @classmethod
+    def from_random_data(cls):
+        
+        system=cls()
+        subs_dict=system.get_random_parameters()
+        
+        return system.subs(subs_dict)
+    
     def __init__(self,
                 E=Symbol('E',positive=True),
                 A=Symbol('A',positive=True),
@@ -374,10 +453,9 @@ class CSRod(ContinuousSystem):
 
 
         default_data_dict = {
-            self.E: [2.5*E_0,1.25*E_0,0.75*E_0,1.35*E_0 ],
-            self.A: [1 * A_0, 2 * A_0, S.Half * A_0, 1 * A_0, 2 * A_0],
-            
-           self.BC: [ {fix_ls:0,free_rs:0},{free_ls:0,free_rs:0},{fix_ls:0,fix_rs:0} ],
+           self.E: [2.5*E_0,1.25*E_0,0.75*E_0,1.35*E_0 ],
+           self.A: [1 * A_0, 2 * A_0, S.Half * A_0, 1 * A_0, 2 * A_0],
+           self.BC: [{fix_ls:0,fix_rs:0},{free_ls:0,fix_rs:0},{fix_ls:0,free_rs:0},{free_ls:0,free_rs:0},{fix_ls:0,free_rs:0}],
            self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 1 * L_0, 2 * L_0],
             }
 
@@ -392,6 +470,55 @@ class CSRod(ContinuousSystem):
 
         return data_dict
 
+    
+    def normal_force(self,
+                   mode_no,
+                   bc_dict=None,
+                   sep_expr=None,
+                   arg=None,
+                   spatial_comp=Function('X')(Symbol('x')),
+                   index=Symbol('n', integer=True, positive=True)):
+        E_0, A_0, L_0 = symbols('E_0, A_0, L_0', positive=True)
+        amp = Symbol('u_0',positive=True)
+        
+        mode = self.eigenmodes(mode_no,
+                   bc_dict=bc_dict,
+                   sep_expr=sep_expr,
+                   arg=arg,
+                   spatial_comp=spatial_comp,
+                   index=index)
+#         display(self._given_data)
+        
+#         display(mode)
+        
+        
+        
+        return Abs(mode.diff(self.loc)*Symbol('E',positive=True)*Symbol('A',positive=True))*amp
+    
+
+
+    
+    def determine_section_side_for_mode(self,
+                   mode_no,
+                   bc_dict=None,
+                   sep_expr=None,
+                   arg=None,
+                   spatial_comp=Function('X')(Symbol('x')),
+                   index=Symbol('n', integer=True, positive=True)):
+        
+        sigma_n = symbols('sigma_n', positive=True)
+        Re,k_n,b,h = symbols('R_e k_n b h', positive=True)
+        
+        force =self.normal_force(mode_no,
+                   bc_dict=bc_dict,
+                   sep_expr=sep_expr,
+                   arg=arg,
+                   spatial_comp=spatial_comp,
+                   index=index)
+        
+        return sqrt(Abs(force)/(Re*k_n))
+    
+    
 class CSString(ContinuousSystem):
 
 
@@ -424,6 +551,15 @@ class CSString(ContinuousSystem):
         super().__init__(L_rod,q=self.w,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc,**kwargs)
 
         self._sep_expr=2*self.L.subs({self.w.diff(self.time):0,(self.w.diff(self.loc)):1}) .doit()  *Symbol('k',positive=True)**2 
+
+        
+    @classmethod
+    def from_random_data(cls):
+        
+        system=cls()
+        subs_dict=system.get_random_parameters()
+        
+        return system.subs(subs_dict)
         
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -510,6 +646,15 @@ class CSShaft(ContinuousSystem):
         super().__init__(L_shaft,q=self.phi,bc_dict=bc_dict,t_var=self.time, spatial_var=self.loc,**kwargs)
 
         self._sep_expr=2*self.L.subs({self.phi.diff(self.time):0,(self.phi.diff(self.loc)):1}) .doit()  *Symbol('k',positive=True)**2 
+
+        
+    @classmethod
+    def from_random_data(cls):
+        
+        system=cls()
+        subs_dict=system.get_random_parameters()
+        
+        return system.subs(subs_dict)
         
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -539,7 +684,7 @@ class CSShaft(ContinuousSystem):
            self.G: [2.5*G_0,1.25*G_0,0.75*G_0,1.35*G_0,1.5*G_0,1.45*G_0],
            self.I: [L_0**4/120, L_0**4/20,L_0**4/600,L_0**4/100,L_0**4/2],
            self.BC: [{fix_ls:0,fix_rs:0},{free_ls:0,fix_rs:0},{fix_ls:0,free_rs:0},{free_ls:0,free_rs:0},{fix_ls:0,free_rs:0}],
-           self.l:[1 * L_0, 2 * L_0, S.Half * L_0, 3 * L_0, 1.35 * L_0,  1.15 * L_0, 1.65 * L_0,  1.55 * L_0,  0.85 * L_0],
+           self.l:[L_0 *(no+5)*S.One*10 for no in range(1,8)],
 
 
         }
@@ -552,11 +697,49 @@ class CSShaft(ContinuousSystem):
         
         data_dict=super().get_random_parameters()
 
-        data_dict[self.I]  = (L_0**4 * random.choice([0.1, 0.01, 0.011, 0.11, 1.1,11 ])/ (data_dict[self.G]/G_0) ).n(3)
+        data_dict[self.I]  = (L_0**4 * random.choice([ 1.1,11,110,10,111 ])/ (data_dict[self.G]/G_0) ).n(3)
 
         
         
         return data_dict
+    
+    def twisting_moment(self,
+                   mode_no,
+                   bc_dict=None,
+                   sep_expr=None,
+                   arg=None,
+                   spatial_comp=Function('X')(Symbol('x')),
+                   index=Symbol('n', integer=True, positive=True)):
+        G_0, I_0, L_0 = symbols('G_0, I_0, L_0', positive=True)
+        amp = Symbol('\\phi_0',positive=True)
+        
+        mode = self.eigenmodes(mode_no,
+                   bc_dict=bc_dict,
+                   sep_expr=sep_expr,
+                   arg=arg,
+                   spatial_comp=spatial_comp,
+                   index=index)
+
+        return abs(mode.diff(self.loc)*Symbol('G',positive=True)*Symbol('I',positive=True))*amp
+    
+    def mode_cross_section_diameter(self,
+                                mode_no,
+                                bc_dict=None,
+                                sep_expr=None,
+                                arg=None,
+                                spatial_comp=Function('X')(Symbol('x')),
+                                index=Symbol('n', integer=True, positive=True)):
+        
+        Re,k_t,d = symbols('R_e k_t d', positive=True)
+        
+        twisting_moment = self.twisting_moment(mode_no,
+                   bc_dict=bc_dict,
+                   sep_expr=sep_expr,
+                   arg=arg,
+                   spatial_comp=spatial_comp,
+                   index=index)
+        
+        return (16*twisting_moment/pi/Re/k_t)**(1/3)
 
 
 class CSCylinder(PlaneStressProblem):

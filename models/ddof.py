@@ -569,15 +569,16 @@ class DoubleDiskShaft(ComposedSystem):
         theta0, Omega = self.theta0, self.Omega
 
         default_data_dict = {
-            self.I_m1: [S.Half*m0*(l0**2)*no for no in range(1,8)],
-            self.I_m2: [S.Half*m0*(l0**2)*no for no in range(1,3)],
-            self.I_1: [S.Half**(no)*(l0**4) for no in range(1,8)],
-            self.I_2: [S.Half**no*(l0**4) for no in range(1,8)],
-            self.l_1: [S.Half**(no-6)*l0 for no in range(1,8)],
-            self.l_2: [S.Half**(no-6)*l0 for no in range(1,8)],
+            self.I_m1: [S.Half*m0*(l0**2)*no for no in range(1,9)],
+            self.I_m2: [S.Half*m0*(l0**2)*no for no in range(1,9)],
+            self.I_1: [S.Half**(no)*(l0**4) for no in range(1,9)],
+            self.I_2: [S.Half**no*(l0**4) for no in range(1,9)],
+            self.l_1: [S.Half**(no-6)*l0 for no in range(1,9)],
+            self.l_2: [S.Half**(no-6)*l0 for no in range(1,9)],
             self.T_1: [T0 * (no) for no in range(1,12)],
             self.T_2: [T0 * (no) for no in range(1,12)],
             self.theta:[theta0* cos(self.Omega * self.ivar) ],
+            
         }
 
         return default_data_dict
@@ -733,7 +734,7 @@ class EngineWithTMD(ComposedSystem):
         self.Spring_1 = Spring(2 * self.k_m, pos1=self.z, qs=[self.z])
         self.Spring_2 = Spring(self.k_TMD, pos1=self.z, pos2=self.z_TMD, qs=[self.z_TMD])
 
-        composed_system = self.Spring_1 + self.Spring_2 + self.MaterialPoint_1 + self.MaterialPoint_2 + self.MaterialPoint_3 + self.gravity_force1 + self.gravity_force2
+        composed_system = self.Spring_1 + self.Spring_2 + self.MaterialPoint_1 + self.MaterialPoint_2 + self.MaterialPoint_3 
 
         super().__init__(composed_system,**kwargs)
 
@@ -760,13 +761,13 @@ class EngineWithTMD(ComposedSystem):
 
         default_data_dict = {
             self.phi:[self.Omega*self.ivar],
-            self.M: [m0*no for no in range(10,20) ],
-            self.k_m: [1.0*k0*no for no in range(1,8)],
-            self.m_TMD: [m0*no/5 for no in range(1,8)],
-            self.k_TMD: [1.0*k0*no for no in range(1,8)],
+            self.M: [m0*no for no in range(10,100) ],
+            self.k_m: [1.0*k0*no for no in range(1,20)],
+            self.m_TMD: [m0*no/5 for no in range(1,20)],
+            self.k_TMD: [1.0*k0*no for no in range(1,20)],
 
-            self.m_e: [m0*no for no in range(1,8)],
-            self.e:[e0*no/10 for no in range(1,8)],
+            self.m_e: [m0*no for no in range(1,20)],
+            self.e:[e0*no/10 for no in range(1,20)],
         }
 
         return default_data_dict
@@ -829,7 +830,7 @@ class BeamBridgeTMD(ComposedSystem):
         self.TMD = MaterialPoint(m_TMD, pos1=z_TMD, qs=[z_TMD])
         self.spring_TMD = Spring(k_TMD, z, z_TMD, qs=[z, z_TMD])
         composed_system = (self.mass + self.spring + self.gravity_force + self.force +
-                  self.TMD + self.spring_TMD + self.gravity_TMD)
+                  self.TMD + self.spring_TMD )
 
         super().__init__(composed_system,**kwargs)
 
@@ -1337,83 +1338,156 @@ class VehicleSuspension(ComposedSystem):
 #         return default_data_dict
     
 class UndampedVehicleSuspension(ComposedSystem):
+
     scheme_name = 'car_undamped.png'
     real_name = 'car_real.jpg'
 
-    def __init__(self,
-                 m=Symbol('m', positive=True),
-                 I=Symbol('I', positive=True),
-                 l_rod=Symbol('l_{rod}', positive=True),
-                 l_l=Symbol('l_l', positive=True),
-                 l_r=Symbol('l_r', positive=True),
-                 k_r=Symbol('k_r', positive=True),
-                 k_l=Symbol('k_l', positive=True),
-                 F_engine=Symbol('F_{engine}', positive=True),
-                 ivar=Symbol('t', positive=True),
-                 qs=dynamicsymbols('z, \\varphi'),
-                 c_l=Symbol('c_l', positive=True),
-                 c_r=Symbol('c_r', positive=True),
-                 l_cl=Symbol('l_{cl}', positive=True),
-                 l_cr=Symbol('l_{cr}', positive=True),
+    m=Symbol('m', positive=True)
+    I=Symbol('I', positive=True)
+    l_rod=Symbol('l_{rod}', positive=True)
+    l_l=Symbol('l_l', positive=True)
+    l_r=Symbol('l_r', positive=True)
+    k_r=Symbol('k_r', positive=True)
+    k_l=Symbol('k_l', positive=True)
+    F_engine=Symbol('F_{engine}', positive=True)
+    ivar=Symbol('t', positive=True)
+    c_l=Symbol('c_l', positive=True)
+    c_r=Symbol('c_r', positive=True)
+    c=Symbol('c', positive=True)
+    l_cl=Symbol('l_{cl}', positive=True)
+    l_cr=Symbol('l_{cr}', positive=True)
+    l_l=Symbol('l_{l}', positive=True)
+    lam=Symbol('\lambda', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    L=Symbol('L', positive=True)
 
+    z,phi=dynamicsymbols('z, \\varphi')
+
+    #default symbols for substitution
+    m0=Symbol('m_0', positive=True)
+    l0=Symbol('l_0', positive=True)
+    c0=Symbol('c_0', positive=True)
+    k0=Symbol('k_0', positive=True)
+    lam0=Symbol('\lambda_0', positive=True)
+    Omega0=Symbol('Omega_0', positive=True)
+    F0=Symbol('F_0', positive=True)
+    
+    def __init__(self,
+                 m=None,
+                 I=None,
+                 l_rod=None,
+                 L=None,
+                 l_r=None,
+                 k_r=None,
+                 k_l=None,
+                 F_engine=None,
+                 c_l=None,
+                 c_r=None,
+                 c=None,
+                 l_cl=None,
+                 l_l=None,
+                 l_cr=None,
+                 theta=None,
+                 phi=None,
+                 z=None,
+                 Omega=None,
+                 ivar=Symbol('t'),
+                 qs=None,
+                 lam=None,
                  **kwargs):
 
-        z, phi = qs
+        if  m is not None: self.m =m # mass of a rod
+        if  I is not None: self.I = I # moment of inertia of a rod
+        if  l_rod is not None: self.l_rod =l_rod# length of a rod
+        if  l_r is not None: self.l_r = l_r 
+        if  l_l is not None: self.l_l = l_l 
+        if  k_r is not None: self.k_r =k_r# left spring
+        if  k_l is not None: self.k_l = k_l# right spring
+        if  F_engine is not None: self.F_engine = F_engine
+        if  c_l is not None: self.c_l =c_l
+        if  c_r is not None: self.c_r =  c_r
+        if  c is not None: self.c =  c
+        if  theta is not None: self.theta = theta
+        if  L is not None: self.L = L
+        if  phi is not None: self.phi = phi
+        if z is not None: self.z=z
+        if lam is not None: self.lam=lam
+        if Omega is not None: self.Omega=Omega
+            # self.z, self.phi = self.qs
+        self.qs = [self.z,self.phi]
+        self.ivar=ivar
 
-        self.m = m  # mass of a rod
-
-        self.l_rod = l_rod  # length of a rod
-        self.k_r = k_r  # left spring
-        self.k_l = k_l  # right spring
-        self.I = I  # moment of inertia of a rod
-        self.F_engine = F_engine
-
-
-        self.c_l = c_l
-        self.c_r = c_r
-        self.l_cl = l_cl
-        self.l_cr = l_cr
-        self.l_l = l_l
-        self.l_r = l_r
+        self.damper_l = Damper(c=self.c_l, pos1=self.z + self.phi * self.l_l, qs=self.qs)  # left damper
+        self.damper_r = Damper(c=self.c_r, pos1=self.z - self.phi * self.l_r, qs=self.qs)  # right damper
         
-        self.damper_l = Damper(c=c_l, pos1=z + phi * l_l,
-                               qs=qs)  # left damper
-        self.damper_r = Damper(c=c_r, pos1=z - phi * l_r,
-                               qs=qs)  # right damper
-        
-        self.body = RigidBody2D(m, I, pos_lin=z, pos_rot=phi, qs=qs)  # rod
-        self.spring_1 = Spring(k_l, pos1=z + phi * l_l, qs=qs)  # left spring
-        self.spring_2 = Spring(k_r, pos1=z - phi * l_r, qs=qs)  # right spring
-        self.force = Force(F_engine, pos1=z - l_r * phi, qs=qs)
+        self.body = RigidBody2D(self.m, self.I, pos_lin=self.z, pos_rot=self.phi, qs=self.qs)  # rod
+        self.spring_1 = Spring(self.k_l, pos1=self.z + self.phi * self.l_l, qs=self.qs)  # left spring
+        self.spring_2 = Spring(self.k_r, pos1=self.z - self.phi * self.l_r, qs=self.qs)  # right spring
+        self.force = Force(self.F_engine, pos1=self.z - self.l_r * self.phi, qs=self.qs)
+       
         system = self.body + self.spring_1 + self.spring_2 + self.force
 
         super().__init__(system,**kwargs)
+        
+    def max_static_force_pin(self):
+        return abs(self.static_load().doit()[0])/2
+    
+    def static_force_pin_diameter(self):
+        kt=Symbol('k_t', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_static_force_pin())/(pi*kt*Re))**(1/2)
+
+    def max_dynamic_force_pin(self):
+        return (self._frf()[0].subs(self.lam0,0) + self._frf()[1].subs(self.lam0,0)*self.l_rod/2)*self.stiffness_matrix()[0]
+
+    def dynamic_bearing_force(self):
+        L=Symbol('L')#wymagana trwałość
+        return self.max_dynamic_force_pin() * L**(S.One/3)
+    
+    def dynamic_force_pin_diameter(self):
+        kt=Symbol('k_t', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_dynamic_force_pin())/(pi*kt*Re))**(1/2)
+    
 
     def get_default_data(self):
 
-        m0, l0, c0, k_0, l_l0, omega, F_0 = symbols('m_0 l_0 c_0 k_0 l_l0 Omega F_0',
-                                            positive=True)
+        #m0, l0, c0, k_0, l_l0, omega, F_0 = symbols('m_0 l_0 c_0 k_0 l_l0 Omega F_0', positive=True)
+        c0, k_0, l_l0, omega, F_0 = symbols('c_0 k_0 l_l0 Omega F_0', positive=True)
+        m0, l0  = self.m0,self.l0
+        c0, k0= self.c0,self.k0
+        lam0=self.lam0
+        Omega0=self.Omega0
+        F0=self.F0
 
         default_data_dict = {
-            self.I: [self.m*self.l_rod**2],
-            self.l_rod:[l0,2*l0,3*l0,4*l0,5*l0,6*l0,7*l0,8*l0,9*l0],
-            self.m: [m0,2*m0,3*m0,4*m0,5*m0,6*m0,7*m0,8*m0,9*m0],
-            self.c_r: [c0, 2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0, 7 * c0, 8 * c0, 9 * c0],
-            self.k_l: [k_0,2 * k_0, 3 * k_0, 4 * k_0, 5 * k_0, 6 * k_0, 7 * k_0, 8 * k_0, 9 * k_0],
-            self.k_r: [k_0,2 * k_0, 3 * k_0, 4 * k_0, 5 * k_0, 6 * k_0, 7 * k_0, 8 * k_0, 9 * k_0],
+            self.l_rod:[l0*S.One*no for no in range(1, 8)],
+            self.I: [S.One/12*self.m *self.l_rod**2],
+            self.l_rod:[l0*S.One*no for no in range(1, 8)],
+            #self.m: [m0,2*m0,3*m0,4*m0,5*m0,6*m0,7*m0,8*m0,9*m0],
+            self.m: [m0*S.One*no for no in range(1,8)],
+            #self.c_r: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0],
+#             self.c_r: [self.lam*(self.k_r)],
+            #self.k: [k0*S.One*no for no in range(1,8)],
+#             self.lam: [lam0/10*S.One*no for no in range(1,8)],
+            self.k_l: [k0*S.One*no for no in range(1,8)],
+            self.k_r: [k0*S.One*no for no in range(1,8)],
             
             
-            self.c_l: [c0, 2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0, 7 * c0, 8 * c0, 9 * c0],
-            self.l_r: [0.2*self.l_rod,0.25 * self.l_rod, 0.3 * self.l_rod, 0.4 * self.l_rod, 0.5 * self.l_rod,0.35 * self.l_rod, 0.45 * self.l_rod],
-            self.l_l: [0.2*self.l_rod,0.25 * self.l_rod, 0.3 * self.l_rod, 0.4 * self.l_rod, 0.5 * self.l_rod,0.35 * self.l_rod, 0.45 * self.l_rod],
-
-            self.F_engine: [
-                2 * F_0 * sin(omega * self.ivar),
-                3 * F_0 * sin(omega * self.ivar),
-                4 * F_0 * sin(omega * self.ivar),
-                5 * F_0 * sin(omega * self.ivar),
-                6 * F_0 * sin(omega * self.ivar)
-            ]
+#             self.c_l: [self.lam*(self.k_l)],
+            self.l_r: [l0*S.One*no for no in range(1, 8)],
+            self.l_l: [l0*S.One*no for no in range(1, 8)],
+           
+            self.Omega: [Omega0*S.One*no for no in range(1,2)],
+            self.F_engine: [F0*cos(self.Omega*self.ivar)*S.One*no for no in range(1,8)],
+            
+          #  self.F_engine: [
+           #     2 * F_0 * sin(omega * self.ivar),
+            #    3 * F_0 * sin(omega * self.ivar),
+             #   4 * F_0 * sin(omega * self.ivar),
+              #  5 * F_0 * sin(omega * self.ivar),
+                #6 * F_0 * sin(omega * self.ivar)
+          #  ]
         }
 
         return default_data_dict
