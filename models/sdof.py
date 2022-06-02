@@ -28,7 +28,7 @@ class ComposedSystem(HarmonicOscillator):
     m0=Symbol('m_0',positive=True)
     k0=Symbol('k_0',positive=True)
     F0=Symbol('F_0',positive=True)
-    Omega0=Symbol('\Omega_0',positive=True)
+    Omega0=Symbol('Omega_0',positive=True)
 
     @classmethod
     def _scheme(cls):
@@ -784,21 +784,31 @@ class BeamBridge(ComposedSystem):
                  ivar=Symbol('t'),
                  g=Symbol('g', positive=True),
                  Omega=Symbol('Omega', positive=True),
-                 F_0=Symbol('F_0', positive=True),
+                 F=Symbol('F', positive=True),
+                 l=Symbol('l', positive=True),
+                 module=Symbol('E', positive=True),
+                 inertia=Symbol('I', positive=True),
                  z=dynamicsymbols('z'),
                  **kwargs):
 
         self.m = m
+
         self.k_beam = k_beam
+
         self.g = g
         self.Omega = Omega
-        self.F_0 = F_0
+        self.F = F
+        self.l=l
+        self.z = z
+        self.module=module
+        self.inertia=inertia
 
         self.mass = MaterialPoint(m, z, qs=[z])
         self.spring = Spring(k_beam, z, qs=[z])
-        self.gravity_force = GravitationalForce(self.m, self.g, z)
-        self.force = Force(-F_0 * sin(Omega * ivar), pos1=z)
-        composed_system = self.mass + self.spring + self.gravity_force + self.force
+        self.gravity_force = GravitationalForce(m, g, z)
+        self.force = Force(-F * sin(Omega * ivar), pos1=z)
+
+        composed_system = (self.mass + self.spring + self.gravity_force + self.force)
 
         super().__init__(composed_system,**kwargs)
 
@@ -811,7 +821,26 @@ class BeamBridge(ComposedSystem):
         }
 
         return self.sym_desc_dict
+    def get_default_data(self):
 
+#         E0, I0, l0, m0, k0,c0, lam0= symbols('E_0 I_0 l_0 m_0 k_0 c_0 lambda_0', positive=True)
+        E0, I0, l0, m0, lam0, F0 = symbols('E_0 I_0 l_0 m_0 lambda_0 F_0', positive=True)
+        default_data_dict = {
+            
+#             self.lam:[10],
+#             self.c:[self.k_beam*self.lam],
+            self.k_beam: [S.One*48*self.module * self.inertia / self.l**3],
+            self.m: [10* m0, 20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0, 70 * m0, 80 * m0, 90 * m0],
+#             self.l:[l0,2*l0,3*l0,4*l0,5*l0,6*l0,7*l0,8*l0,9*l0],
+#             self.E:[E0,2*E0,3*E0,4*E0,5*E0,6*E0,7*E0,8*E0,9*E0],
+#             self.I:[I0,2*I0,3*I0,4*I0,5*I0,6*I0,7*I0,8*I0,9*I0],
+#,100* m0, 200 * m0, 300 * m0, 400 * m0, 500 * m0, 600 * m0, 700 * m0, 800 * m0, 900 * m0 
+            self.module:[E0,2*E0,3*E0,4*E0,5*E0,6*E0,7*E0,8*E0,9*E0,10*E0,11*E0,12*E0,13*E0,14*E0,15*E0,16*E0,17*E0,18*E0,19*E0,],
+            self.inertia:[I0,2*I0,3*I0,4*I0,5*I0,6*I0,7*I0,8*I0,9*I0,10*I0,11*I0,12*I0,13*I0,14*I0,15*I0,16*I0,17*I0,18*I0,19*I0,],
+            self.l:[l0,2*l0,3*l0,4*l0,5*l0,6*l0,7*l0,8*l0,9*l0,10*l0,11*l0,12*l0,13*l0,14*l0,15*l0,16*l0,17*l0,18*l0,19*l0,],
+#             self.lam:[lam0,2*lam0,3*lam0,4*lam0,5*lam0,6*lam0,7*lam0,8*lam0,9*lam0],
+            self.F:[F0,2*F0,3*F0,4*F0,5*F0,6*F0,7*F0,8*F0,9*F0]
+        }
 
 class BeamBridgeDamped(ComposedSystem):
 
@@ -1208,7 +1237,7 @@ class ExcitedPendulum(ComposedSystem):
         -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
         -determine the instance of the pendulum by using class SDoFExcitedPendulum()
     """
-    scheme_name = 'horizontal_forced_pendulum.png'
+    scheme_name = 'damped_excited_pendulum.PNG'
     real_name = 'pendulum2_real.jpg'
 
     def __init__(
@@ -1239,7 +1268,7 @@ class ExcitedPendulum(ComposedSystem):
         Omega = Symbol('Omega',positive=True)
         self.Omega=Omega
         self.pendulum = Pendulum(m, g, l, angle=phi)
-        self.force = Force(F * l * sin(Omega*ivar), pos1=phi, qs=qs)
+        self.force = Force(-F * l * sin(Omega*ivar), pos1=phi, qs=qs)
         system = self.pendulum + self.force
 
         super().__init__(system,**kwargs)
