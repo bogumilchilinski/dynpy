@@ -3611,8 +3611,8 @@ class SymbolsDescription(Description):
 
         text = head + ',  \n'.join(entries) + end_sign
 
-        print(text)
-        print(text)
+        #print(text)
+        #print(text)
         
         display(IPMarkdown(text))
 

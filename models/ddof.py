@@ -2296,4 +2296,67 @@ class NonLinearVeeEnginePerpendicularSprings(ComposedSystem):
         }
 
         return self.sym_desc_dict
+#
+class QuarterOfVehicle(ComposedSystem):
+    
+    def __init__(self,
+                 k_d=None,
+                 k_u=None,
+                 m_d=None,
+                 m_u=None,
+                 c=None,
+                 omega=None,
+                 A_0=None,
+                 x_1 =None,
+                 x_2=None,
+                 qs=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+    
 
+        self.qs = [self.x_1,self.x_2]
+    
+        if m_d is not None: self.m_d = m_d
+        if k_d is not None: self.k_d = k_d
+        if m_u is not None: self.m_u = m_u
+        if k_u is not None:self.k_u = k_u
+        if c is not None: self.c=c
+        if omega is not None: self.omega=omega
+        if A_0 is not None: self.A_0=A_0
+        if x_1 is not None: self.x_1 = x_1
+        if x_2 is not None : self.x_2 = x_2
+        if qs is not None: self.qs = qs
+
+
+        
+        self.material_point_1 = MaterialPoint(self.m_d, self.x_1, qs=self.qs)
+        self.spring_1 = Spring(self.k_d,self.x_1,self.A_0*sin(ivar*self.omega),qs=self.qs)
+        self.material_point_2 = MaterialPoint(self.m_u, self.x_2, qs=self.qs)
+        self.spring_2 = Spring(self.k_u,self.x_1,self.x_2,qs=self.qs)
+        self.damper_1=Damper(self.c,self.x_1,self.x_2, qs=self.qs)
+
+
+        system =  self.material_point_1 + self.spring_1+ self.material_point_2+self.spring_2+self.damper_1
+        super().__init__(system,**kwargs)
+
+
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m_d: r'unsprung mass',
+            self.m_u: r'sprung mass',
+            self.k_d: r'wheel spring stiffness coefficient',
+            self.k_u: r'body spring stiffness coefficient',
+            self.c: r'współczynnik tłumienia zawieszenia',
+            self.A_0: r'amplitude',
+            self.x_1: r'wheel displacement',
+            self.x_2: r'body displacement',
+            self.x_1.diff(t): r'wheel velocity',
+            self.x_2.diff(t): r'body velocity',
+            self.omega: r'circular frequency',
+            self.ivar: r'time',
+            
+        }
+        return self.sym_desc_dict 
+
+       
