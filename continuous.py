@@ -7,6 +7,10 @@ from sympy.physics.vector.printing import vpprint, vlatex
 
 
 class ContinuousSystem:
+    
+
+    
+    
     def __init__(self,
                  L,
                  q,
@@ -102,7 +106,7 @@ class ContinuousSystem:
                                       derivative_order=self.diff_ord,
                                       label=self._label)
         
-        new_sys = type(self)(0, q_new, system=new_system)
+        new_sys = type(self)(L_new, q_new, system=new_system)
         new_sys._given_data=given_data
         new_sys._nonlinear_base_system = self._nonlinear_base_system
 
@@ -277,8 +281,8 @@ class ContinuousSystem:
 
 
         roots = solve(self.char_poly(bc_dict, sep_expr, spatial_comp), arg)
-        print('+++++++++++++ roots from eigs')
-        print(roots)
+#         print('+++++++++++++ roots from eigs')
+#         print(roots)
 
         if len(roots) == 1:
             spatial_span = roots[0]

@@ -530,38 +530,58 @@ class BoxerEnginePerpendicularSprings(ComposedSystem):
 
     
 class NonLinearInlineEnginePerpendicularSprings(ComposedSystem):
-    scheme_name = 'nonlin_inline_engine_perpendicular_springs.png'
+    scheme_name = 'nonlinear_inline_engine_perpendicular_springs.png'
     real_name = 'paccar.jpg'
-
+    M=Symbol('M', positive=True)
+    k_m=Symbol('k_m', positive=True)
+    m_e=Symbol('m_e', positive=True)
+    e=Symbol('e', positive=True)
+    l=Symbol('l',positive=True)
+    g=Symbol('g',positive=True)
+    z=dynamicsymbols('z')
+    phi=dynamicsymbols('phi')
+    Omega=Symbol('Omega',positive=True)
+    ivar=Symbol('t')
+    d=Symbol('d', positive=True)
     def __init__(self,
-                 M=Symbol('M', positive=True),
-                 k_m=Symbol('k_m', positive=True),
-                 m_e=Symbol('m_e', positive=True),
-                 e=Symbol('e', positive=True),
-                 l=Symbol('l',positive=True),
-                 z=dynamicsymbols('z'),
-                 phi=dynamicsymbols('phi'),
-                 Omega=Symbol('\Omega',positive=True),
-                 ivar=Symbol('t'),
-                 d=Symbol('d', positive=True),
+                 M=None,
+                 k_m=None,
+                 m_e=None,
+                 e=None,
+                 l=None,
+                 g=None,
+                 z=None,
+                 phi=None,
+                 Omega=None,
+                 ivar=None,
+                 d=None,
                  **kwargs):
-        self.t=ivar
-        self.M = M
-        self.k_m = k_m
-        self.m_e = m_e
-        self.e = e
-        self.phi=phi
-        self.Omega=Omega
-        self.d=d
-        self.l=l
-        self.MaterialPoint_1 = MaterialPoint(M, pos1=z, qs=[z])
-        self.MaterialPoint_2 = MaterialPoint(m_e,
-                                             pos1=z + e * cos(phi),
-                                             qs=[z])
-        self.SpringVer = Spring(2 * k_m, pos1=z, qs=[z])
-        self.SpringHor = Spring(2 * k_m, pos1=(sqrt(d**2+z**2)-l), qs=[z])
-        system = self.SpringVer + self.SpringHor + self.MaterialPoint_1 + self.MaterialPoint_2
+        if M is not None: self.M=M
+        if k_m is not None: self.k_m=k_m
+        if m_e is not None: self.m_e=m_e
+        if e is not None: self.e=e
+        if phi is not None: self.phi=phi
+        if Omega is not None: self.Omega=Omega
+        if d is not None: self.d=d
+        if l is not None: self.l=l
+        if g is not None: self.g=g
+        if ivar is not None: self.ivar=ivar
+
+        self.MaterialPoint_1 = MaterialPoint(self.M, pos1=self.z, qs=[self.z])
+        self.MaterialPoint_2 = MaterialPoint(self.m_e,
+                                             pos1=self.z + self.e * cos(self.phi),
+                                             qs=[self.z])
+        self.SpringVer = Spring(2 * self.k_m, pos1=self.z, qs=[self.z])
+        self.SpringHor = Spring(2 * self.k_m, pos1=(sqrt(self.d**2+self.z**2)-self.l), qs=[self.z])
+        self.gravity_force1 = GravitationalForce(self.M, self.g, self.z, qs=[self.z])
+        self.gravity_force2 = GravitationalForce(self.m_e, self.g, self.z + self.e * cos(self.phi), qs=[self.z])
+        system = self.SpringVer + self.SpringHor + self.MaterialPoint_1 + self.MaterialPoint_2+self.gravity_force1+self.gravity_force2
         super().__init__(system,**kwargs)
+        
+    def linearized(self):
+        
+        return type(self).from_system(super().linearized())
+        
     def get_default_data(self):
 
         m0, k0, e0, l0 = symbols('m_0 k_0 e_0 l_0', positive=True)
@@ -575,7 +595,7 @@ class NonLinearInlineEnginePerpendicularSprings(ComposedSystem):
             self.l:[l0],
 #             self.g:[g],
 #             self.phi:[self.Omega*self.t],
-            self.phi:[self.Omega*self.t]
+            self.phi:[self.Omega*self.ivar]
         }
 
         return default_data_dict
@@ -599,6 +619,22 @@ class NonLinearInlineEnginePerpendicularSprings(ComposedSystem):
             self.e: r'',
         }
         return self.sym_desc_dict
+    def max_static_force_pin(self):
+        return abs(self.static_load().doit()[0])
+    
+    
+    def max_dynamic_force_pin(self):
+        return self.frequency_response_function()*self.stiffness_matrix()[0]+self.max_static_force_pin()
+    
+    def static_force_pin_diameter(self):
+        kt=Symbol('k_t', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_static_force_pin())/(pi*kt*Re))**(1/2)
+    
+    def dynamic_force_pin_diameter(self):
+        kt=Symbol('k_t', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_dynamic_force_pin())/(pi*kt*Re))**(1/2)
     
 class NonLinearBoxerEnginePerpendicularSprings(ComposedSystem):
     scheme_name = 'nonlin_boxer_engine_perpendicular_springs.png'
@@ -650,6 +686,7 @@ class NonLinearBoxerEnginePerpendicularSprings(ComposedSystem):
         }
 
         return default_data_dict
+
     def get_random_parameters(self):
 
         default_data_dict = self.get_default_data()
@@ -1532,33 +1569,46 @@ class Winch(ComposedSystem):
 
     scheme_name = 'sdof_winch.PNG'
     real_name = 'winch_mechanism_real.PNG'
-
+    r=Symbol('r', positive=True)
+    l=Symbol('l', positive=True)
+    m=Symbol('m', positive=True)
+    g=Symbol('g', positive=True)
+    ivar=Symbol('t')
+    phi=dynamicsymbols('\\varphi')
+    Omega=Symbol('Omega',positive=True)
+    F=Symbol('F',positive=True)
     def __init__(self,
-                 r=Symbol('r', positive=True),
-                 l=Symbol('l', positive=True),
-                 m=Symbol('m', positive=True),
-                 g=Symbol('g', positive=True),
-                 ivar=Symbol('t'),
-                 phi=dynamicsymbols('\\varphi'),
+                 r=None,
+                 l=None,
+                 m=None,
+                 g=None,
+                 ivar=None,
+                 phi=None,
+                 Omega=None,
+                 F=None,
                  **kwargs):
 
-        self.r = r
-        self.l = l
-        self.m = m
-        self.g = g
-        self.phi = phi
+        if r is not None: self.r=r
+        if l is not None: self.l=l
+        if m is not None: self.m=m
+        if g is not None: self.g=g
+        if ivar is not None: self.ivar=ivar
+        if phi is not None: self.phi=phi
+        if Omega is not None: self.Omega=Omega
+        if F is not None: self.F=F
+        x = self.r * cos(self.phi) + (self.l + self.r * self.phi) * sin(self.phi)
+        y = -self.r * sin(self.phi) + (self.l + self.r * self.phi) * cos(self.phi)
 
-        x = r * cos(phi) + (l + r * phi) * sin(phi)
-        y = -r * sin(phi) + (l + r * phi) * cos(phi)
-
-        self.material_point_1 = MaterialPoint(m, x, qs=[phi])
-        self.material_point_2 = MaterialPoint(m, y, qs=[phi])
-        self.gravity = GravitationalForce(m, g, pos1=-y, qs=[phi])
-
-        system = self.material_point_1 + self.material_point_2 + self.gravity
+        self.material_point_1 = MaterialPoint(self.m, x, qs=[self.phi])
+        self.material_point_2 = MaterialPoint(self.m, y, qs=[self.phi])
+        self.gravity = GravitationalForce(self.m, self.g, pos1=-y, qs=[self.phi])
+        self.force = Force(-self.F * (self.l+self.r*self.phi) * sin(self.Omega*self.ivar), pos1=self.phi, qs=[self.phi])
+        system = self.material_point_1 + self.material_point_2 + self.gravity + self.force
 
         super().__init__(system,**kwargs)
-
+    def linearized(self):
+        
+        return type(self).from_system(super().linearized())
     def symbols_description(self):
         self.sym_desc_dict = {
             self.r: r'Winch radius',
@@ -1578,6 +1628,26 @@ class Winch(ComposedSystem):
             self.l: [2 * l0, S.Half * l0, 4 * l0, S.Half**2 * l0, 3 * l0, 3 * S.Half * l0, 9 * l0, 3*S.Half**2 * l0],
         }
         return default_data_dict
+    
+    def max_static_force_pin(self):
+        return (self.m * self.g).subs(self._given_data)
+    
+    
+    def max_dynamic_force_pin(self):
+
+        omg_amp = ComposedSystem(self.linearized()).frequency_response_function()*self.Omega
+
+        return (self.m*self.l* (omg_amp)**2 + self.max_static_force_pin())
+    
+    def static_force_pin_diameter(self):
+        kr=Symbol('k_r', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_static_force_pin())/(pi*kr*Re))**(1/2)
+    
+    def dynamic_force_pin_diameter(self):
+        kr=Symbol('k_r', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_dynamic_force_pin())/(pi*kr*Re))**(1/2)
 
 class Engine(ComposedSystem):
     scheme_name = 'engine.png'
