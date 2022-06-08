@@ -64,7 +64,7 @@ class LeafSpring(ComposedSystem):
         self.mass = MaterialPoint(m, z, qs=[z])
         self.spring = Spring(k_beam, z, qs=[z])
         self.gravity_force = GravitationalForce(m, g, z)
-        self.force = Force(-F_0 * sin(Omega * ivar), pos1=z)
+#         self.force = Force(-F_0 * sin(Omega * ivar), pos1=z)
         self.damper = Damper(c, pos1=z, qs=[z])
         composed_system = (self.mass + self.spring + self.damper)
 

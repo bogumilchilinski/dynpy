@@ -4,7 +4,7 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, asin, diff, sqrt, S, diag,
 
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
-from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
+from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
 
 from .elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame,base_origin
 from ..continuous import ContinuousSystem, PlaneStressProblem
@@ -957,9 +957,6 @@ class BeamBridgeDamped(ComposedSystem):
 
 
 
-
-    
-
 class DampedSpringMassSystem(ComposedSystem):
 
     scheme_name = '???'
@@ -977,13 +974,13 @@ class DampedSpringMassSystem(ComposedSystem):
         self.m = m
         self.k = k
         self.c = c
+
         self.mass = MaterialPoint(m, z, qs=[z])
         self.spring = Spring(k, z, qs=[z])
         self.damper = Damper(c,pos1=z, qs=[z])
         system = self.mass + self.spring + self.damper
 
         super().__init__(system,**kwargs)
-
 
 class DampedHarmonicOscillator(DampedSpringMassSystem):
     pass
@@ -1076,12 +1073,36 @@ class Pendulum(ComposedSystem):
                                     epsilon=Symbol('\\epsilon', positive=True)):
         
         omega = ComposedSystem(self.linearized()).natural_frequencies()[0]
-
+        
         return -frequency**2 + omega**2 + 0.75*epsilon*amplitude**2-exciting_force/amplitude
     
     def amplitude_from_frf(self, amplitude=Symbol('a',positive=True)):
         
         return solve(Eq(self.frequency_response_function(),0),amplitude)
+    
+    
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.LinearizationComponent,
+        mech_comp.GoverningEquationComponent,
+        mech_comp.FundamentalMatrixComponent,
+        mech_comp.GeneralSolutionComponent,
+        mech_comp.SteadySolutionComponent,
+            
+            
+        ]
+        
+        return comp_list
+    
+    
     
 class PulledPendulum(ComposedSystem):
     """

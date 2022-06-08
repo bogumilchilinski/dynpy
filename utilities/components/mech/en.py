@@ -1,219 +1,4 @@
-from sympy import *
-import sympy as sym
-import itertools as itools
-from pylatex import (Document, Package, Command
-                     #Section, Subsection, Subsubsection, Itemize,  HorizontalSpace, Description, Marker
-                    )
-from pylatex.base_classes.containers import Container
-#from pylatex.section import Paragraph, Chapter
-from pylatex.utils import (#italic, 
-                           NoEscape)
-
-from ..adaptable import *
-from ..report import *
-
-
-class MultivariableTaylorSeries(Expr):
-    
-    def __new__(cls,expr, variables,*args, n=2, x0=None):
-        
-        obj=super().__new__(cls,expr,variables,*args)
-        obj._vars = variables
-        obj._order = n
-        obj._op_point = x0
-        
-        obj._expr_symbol = None
-        
-        return obj
-
-    def _set_default_op_point(self):
-        '''
-        It sets 0 as op_point if x0 (look __new__) is not provided. For lack of op_point, the result is the same as MacLaurina series 
-        '''
-        
-        if self._op_point is None:
-            self._op_point = {coord:0 for coord in self._vars}
-        
-        return self._op_point
-    
-    def _args_shifted(self,*args):
-        
-        self._set_default_op_point()
-        
-        args_shifted = {
-            arg: arg - arg_shift
-            for arg, arg_shift in self._op_point.items()
-        }
-        
-        return args_shifted
-
-    def _diff_orders_dict(self):
-            
-        order_max = self._order
-        args = self._vars
-        args_shifted = self._args_shifted()
-        
-            
-        diff_orders_list = sum([
-            list(itools.combinations_with_replacement(args, order))
-            for order in range(1, order_max + 1, 1)
-        ], [])
-        
-        
-        diff_orders_dict = {
-            comp: (sym.Mul(*comp).subs(args_shifted) / sym.Mul(*[
-                sym.factorial(elem) for elem in sym.Poly(sym.Mul(*comp), *args).terms()[0][0]
-            ])).doit()
-            for comp in diff_orders_list
-        }
-
-        return diff_orders_dict
-
-    
-    def _diff_symbols_dict(self):
-        
-        diff_orders_dict=self._diff_orders_dict()
-        expr=self.args[0]
-        op_point=self._op_point
-        
-        
-        
-        return {S.Zero:Subs(expr,list(op_point.keys()),list(op_point.values())),**{args_tmp:Subs(Derivative(expr,*args_tmp,evaluate=False),list(op_point.keys()),list(op_point.values())) 
-            for args_tmp, poly in diff_orders_dict.items()}}
-
-    def _diff_expr_dict(self):
-        
-        diff_orders_dict=self._diff_orders_dict()
-        expr=self.args[0]
-        op_point=self._op_point
-        
-        return {S.Zero:expr.subs(op_point),**{args_tmp:expr.diff(*args_tmp).subs(op_point)
-            for args_tmp, poly in diff_orders_dict.items()}}
-    
-    def _components_dict(self):
-        
-        diff_orders_dict=self._diff_orders_dict()
-        derivatives_dict=self._diff_symbols_dict()
-        
-        expr=self.args[0]
-        op_point=self._op_point
-        
-        return {
-                Subs(expr,list(op_point.keys()),list(op_point.values())):expr.subs(op_point),
-                **{derivatives_dict[args_tmp] : expr.diff(*args_tmp).subs(op_point) for args_tmp, poly in diff_orders_dict.items()}
-        }
-        
-    def _series(self):
-        diff_orders_dict=self._diff_orders_dict()
-        diff_dict=self._diff_symbols_dict()
-        
-        expr=self.args[0]
-        op_point=self._op_point
-        
-        return expr.subs(op_point).doit()+Add(*[expr.diff(*args_tmp).subs(op_point).doit() * poly for args_tmp, poly in diff_orders_dict.items()],evaluate=False)
-    
-    def _symbolic_sum(self):
-        diff_orders_dict=self._diff_orders_dict()
-        diff_dict=self._diff_symbols_dict()
-        
-        expr=self.args[0]
-        op_point=self._op_point
-        
-        return Subs(expr,list(op_point.keys()),list(op_point.values()))+Add(*[Mul(diff_dict[args_tmp]  ,poly,evaluate=True) for args_tmp, poly in diff_orders_dict.items()],evaluate=False)
-    
-    def _latex(self,*args):
-        
-        diff_orders_dict=self._diff_orders_dict()
-        diff_dict=self._diff_symbols_dict()
-        
-        expr=self.args[0]
-        op_point=self._op_point
-        
-        return '+'.join([latex(Mul(diff_dict[args_tmp]  ,poly,evaluate=True)) for args_tmp, poly in diff_orders_dict.items()])
-
-    
-    def calculation_steps(self,expr_symbol=None,form=None):
-
-        obj = self
-        
-        if expr_symbol is None:
-            obj._expr_symbol = self.args[0]
-            
-        obj_sym = self.__class__(expr_symbol,self._vars, n=self._order, x0=self._op_point)
-        
-        expr_dict=(self._diff_expr_dict())
-        diffs_dict=(obj_sym._diff_symbols_dict())
-        
-
-        
-        
-        return [Eq(diffs_dict[key],expr_dict[key].doit())   for  key  in diffs_dict.keys()]
-    
-    def __str__(self,*args):
-        return (self.args[0]).__str__()
-    
-    def __repr__(self,*args):
-        return (self.args[0]).__repr__()
-
-    
-    
-    
-    def doit(self,*args):
-        return self._series()
-
-
-class ReportComponent(Subsection):
-
-    latex_name = 'subsection'
-    packages=[
-              Package('standalone'),
-              Package('siunitx')
-             ]
-    
-    title='Report generic component'
-
-    def __init__(self, system,title=None, numbering=False, *, label=True, **kwargs):
-        """
-        Args
-        ----
-        title: str
-            The section title.
-        numbering: bool
-            Add a number before the section title.
-        label: Label or bool or str
-            Can set a label manually or use a boolean to set
-            preference between automatic or no label
-        """
-
-        self._system=system
-        
-        if title is None:
-            title = self.title
-        
-        super().__init__(title=title, numbering=numbering, label=label, **kwargs)
-
-
-                
-
-        ReportText.set_container(self)
-        #ReportText.set_directory('./SDAresults')
-        SympyFormula.set_container(self)
-        LatexDataFrame.set_default_container(self)
-        Markdown.set_container(self)
-        LatexDataFrame.set_picture_mode(True)
-        #LatexDataFrame.set_directory('./SDAresults')
-        
-        
-        self.append_elements()
-        
-    def append_elements(self):
-        pass
-
-    def as_frame(self):
-        frame=Frame(title=self.title,options=['allowframebreaks'])
-        #frame.packages +(self.packages)
-        frame+=(list(self))
-        return frame
+from ..mechanics import *
 
 
 
@@ -286,10 +71,12 @@ class TitlePageComponent(Environment):
             #self.append(NewLine())
             self.append(Command('MyDate'))
 
- 
 
-
+            
+######################### Initial point
     
+    
+# Damian
 class ExemplaryPictureComponent(ReportComponent):
     
     title="Przykład rzeczywistego obiektu"
@@ -309,7 +96,7 @@ class ExemplaryPictureComponent(ReportComponent):
         Należy pamiętać, że stopień odwzorowania (poziom abstrakcji) modelu zależy od tego do czego planuje się go używać.
                             '''))            
 
-        
+# Boogi        
 class SchemeComponent(ExemplaryPictureComponent):
     title="Schemat układu"
 
@@ -380,6 +167,7 @@ class NumericalAnalysisComponent(ExemplaryPictureComponent):
         display(ReportText(f'''Dla Damiana :P
                             '''))
 
+# Boogi
 class KineticEnergyComponent(ReportComponent):
     
     title="Energia kinetyczna"
@@ -409,7 +197,7 @@ class KineticEnergyComponent(ReportComponent):
     
     
     
-class PotentialEnergyComponent(ReportComponent):
+class PotentialEnergyComponent(ReportComponent):#Jaś fasola
     
     title="Energia potencjalna"
 
@@ -430,8 +218,9 @@ class PotentialEnergyComponent(ReportComponent):
         display(ReportText(f'''
                            Zaprezentowana zależność opisuje oddziaływanie potencjalnych pól sił w których znajduje się obiekt.
                            '''))        
-        
-class DissipationComponent(ReportComponent):  # Marcel
+
+# Marcel
+class DissipationComponent(ReportComponent):
     
     title="Dyssypacyjna funkcja Rayleigh'a"
     
@@ -457,7 +246,7 @@ class DissipationComponent(ReportComponent):  # Marcel
                            który poddany różniczkowaniu względem wektora prędkości uogólnionych pozwala na określenie sił wiskotycznego tłumienia.
                            '''))
 
-            
+# Boogi          
 class LagrangianComponent(ReportComponent):
     
     title="Lagrangian (funkcja Lagrange'a)  układu"
@@ -528,7 +317,7 @@ class LagrangianComponent(ReportComponent):
         frame+=(list(self))
         return frame
     
-    
+# Amadi & Damian
 class GoverningEquationComponent(ReportComponent):
     
     title="Równania ruchu"
@@ -561,7 +350,7 @@ class GoverningEquationComponent(ReportComponent):
                            '''))
 
 
-class LinearizationComponent(ReportComponent):
+class LinearizationComponent(ReportComponent): # Szymon
     
     title="Linearyzacja równań ruchu"
     
@@ -650,7 +439,7 @@ class LinearizationComponent(ReportComponent):
         AutoBreak.latex_backend = latex_store
 
 
-    
+# Marcel & Monika
 class FundamentalMatrixComponent(ReportComponent):
     
     title="Wyznaczanie macierzy fundamentalnej"
@@ -689,6 +478,7 @@ class FundamentalMatrixComponent(ReportComponent):
 
         AutoBreak.latex_backend = latex_store
 
+# Mateusz
 class GeneralSolutionComponent(ReportComponent):
     
     title="Rozwiązanie ogólne"
@@ -722,7 +512,7 @@ class GeneralSolutionComponent(ReportComponent):
         AutoBreak.latex_backend = latex_store
 
         
-        
+# Grześ
 class FrequencyResponseFunctionComponent(ReportComponent):
     
     title="Charakterystyka Amplitudowo-Częstotliwościowa"
@@ -746,6 +536,8 @@ class FrequencyResponseFunctionComponent(ReportComponent):
                            '''))  
         
 FRFComponent = FrequencyResponseFunctionComponent
+
+
 
 class FrequencyResponseFunctionComponentToSecond(ReportComponent):
     
@@ -772,7 +564,7 @@ class FrequencyResponseFunctionComponentToSecond(ReportComponent):
 
 
         
-
+# Marcel & Monika
 class SteadySolutionComponent(ReportComponent):
     
     title="Rozwiązanie szczególne"
@@ -807,6 +599,8 @@ class SteadySolutionComponent(ReportComponent):
         display(ReportText(f'''Rozwiązanie szczególne związane jest obecnością wielkości wymuszających ruch (drgania) analizowanego układu.
                                 '''))
         
+        
+#### Amadi
 class MaxStaticForce(ReportComponent):
     
     title="Maksymalna siła statyczna"
@@ -829,6 +623,7 @@ class MaxStaticForce(ReportComponent):
                            Wartość maksymalna siły statycznej działającej na pojedynczy element mocujący.
                            '''))  
         
+#### Amadi
 class MaxDynamicForce(ReportComponent):
     
     title="Maksymalna siła statyczna"

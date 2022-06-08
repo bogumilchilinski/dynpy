@@ -685,7 +685,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return eqns.subs({coord:0 for coord in self.q_0.values()})
     
     @property
-    def report_components(self):
+    def _report_components(self):
         
         comp_list=[
         mech_comp.TitlePageComponent,
@@ -695,7 +695,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         mech_comp.PotentialEnergyComponent,
         mech_comp.LagrangianComponent,
         mech_comp.GoverningEquationComponent,
-        mech_comp.FundamentalMatrixComponent,
+        #mech_comp.FundamentalMatrixComponent,
         mech_comp.GeneralSolutionComponent,
         mech_comp.SteadySolutionComponent,
             
@@ -710,16 +710,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
       
         sys=self
         doc = ExampleTemplate()
-        # doc.append(mech_comp.TitlePageComponent(sys))
-        # doc.append(mech_comp.SchemeComponent(sys))
-        # doc.append(mech_comp.ExemplaryPictureComponent(sys))
-        # doc.append(mech_comp.KineticEnergyComponent(sys))
-        # doc.append(mech_comp.PotentialEnergyComponent(sys))
-        # doc.append(mech_comp.LagrangianComponent(sys))
-        # doc.append(mech_comp.GoverningEquationComponent(sys))
-        # doc.append(mech_comp.FundamentalMatrixComponent(sys))
-        # doc.append(mech_comp.GeneralSolutionComponent(sys))
-        # doc.append(mech_comp.SteadySolutionComponent(sys))
+
+        for comp in self._report_components:
+            doc.append(comp(sys))
     
     
         return doc
