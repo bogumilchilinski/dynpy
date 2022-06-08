@@ -335,7 +335,6 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     @classmethod
     def from_system(cls, system):
-        
         kwargs=system._kwargs()
         
         new_system=cls(*cls._default_args,system = system)

@@ -807,7 +807,7 @@ class BeamBridgeTMD(ComposedSystem):
                  ivar=Symbol('t'),
                  g=Symbol('g', positive=True),
                  Omega=Symbol('Omega', positive=True),
-                 F_0=Symbol('F_0', positive=True),
+                 F=Symbol('F', positive=True),
                  z=dynamicsymbols('z'),
                  z_TMD=dynamicsymbols('z_TMD'),
                  **kwargs):
@@ -816,7 +816,7 @@ class BeamBridgeTMD(ComposedSystem):
         self.k_beam = k_beam
         self.g = g
         self.Omega = Omega
-        self.F_0 = F_0
+        self.F = F
         self.m_TMD = m_TMD
         self.k_TMD = k_TMD
         self.z_TMD = z_TMD
@@ -826,7 +826,7 @@ class BeamBridgeTMD(ComposedSystem):
         self.spring = Spring(k_beam, z, qs=[z])
         self.gravity_force = GravitationalForce(self.m, self.g, z)
         self.gravity_TMD = GravitationalForce(self.m_TMD, self.g, z_TMD)
-        self.force = Force(F_0 * sin(Omega * ivar), pos1=z)
+        self.force = Force(F * sin(Omega * ivar), pos1=z)
         self.TMD = MaterialPoint(m_TMD, pos1=z_TMD, qs=[z_TMD])
         self.spring_TMD = Spring(k_TMD, z, z_TMD, qs=[z, z_TMD])
         composed_system = (self.mass + self.spring + self.gravity_force + self.force +
@@ -847,7 +847,7 @@ class BeamBridgeTMD(ComposedSystem):
 
     def get_default_data(self):
 
-        E, I, l, m0, k0 = symbols('E I l_beam m_0 k_0', positive=True)
+        E, I, l, m0, k0,F0 = symbols('E I l_beam m_0 k_0 F_0', positive=True)
 
         default_data_dict = {
             self.m: [10*m0, 20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0, 70 * m0, 80 * m0, 90 * m0],
@@ -861,6 +861,7 @@ class BeamBridgeTMD(ComposedSystem):
             ],
             self.m_TMD: [1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0],
             self.k_TMD: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
+            self.F:[F0*no for no in range(0,10)]
         }
 
         return default_data_dict
