@@ -466,8 +466,8 @@ class CSRod(ContinuousSystem):
         E_0, A_0, L_0 = symbols('E_0, A_0, L_0', positive=True)
 
         data_dict=super().get_random_parameters()
-        data_dict[self.A]  = (L_0**2 * random.choice([0.125, 0.0125, 0.00125, 0.123, 0.0128 ])/ (data_dict[self.E]/E_0) ).n(3)
-
+#         data_dict[self.A]  = (L_0**2 * random.choice([0.125, 0.0125, 0.00125, 0.123, 0.0128 ])/ (data_dict[self.E]/E_0) ).n(3)
+        data_dict[self.A]  = (L_0**2 * random.uniform(0.00125, 0.125)/ (data_dict[self.E]/E_0) ).n(3)
         return data_dict
 
     
