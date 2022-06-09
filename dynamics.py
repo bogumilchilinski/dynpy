@@ -35,7 +35,7 @@ from pylatex.utils import italic, NoEscape
 
 from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim)
 from .utilities.templates.document import *
-from .utilities.components import mechanics as mech_comp
+from .utilities.components.mech import en as mech_comp
 
 
 from .utilities.adaptable import AutoMarker

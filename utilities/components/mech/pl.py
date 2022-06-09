@@ -79,17 +79,18 @@ class TitlePageComponent(Environment):
 # Damian
 class ExemplaryPictureComponent(ReportComponent):
     
-    title="Example of an real object"
+    title="Przykład rzeczywistego obiektu"
     packages=[Package('float')] 
     @property
     def header_text(self):
-        #"Ilustracja przedstawia schemat rzeczywistego obiektu mechanicznego, wyznaczony na podstawie uprzedniej analizy rzeczywistego obiektu."
-        return "The picture represents a real object."
+        
+        return "Ilustracja przedstawia schemat rzeczywistego obiektu mechanicznego, wyznaczony na podstawie uprzedniej analizy rzeczywistego obiektu."
     @property
     def footer_text(self):
 
 
-        return "A real example is shown for better understanding of the schematic view and purpose of the system."
+        return "Model dynamiczny układu określa się na podstawie analizy rozważanego przypadku. Należy pamiętać, że stopień odwzorowania (poziom abstrakcji) modelu zależy od tego do czego planuje się go używać."
+    
     def append_elements(self):
         
         system = self._system
@@ -103,21 +104,20 @@ class ExemplaryPictureComponent(ReportComponent):
 
 # Boogi        
 class SchemeComponent(ExemplaryPictureComponent):
-    title="Scheme of the system"
+    title="Schemat systemu"
 
     @property
     def header_text(self):
-        #"Ilustracja przedstawia schemat rzeczywistego obiektu mechanicznego, wyznaczony na podstawie uprzedniej analizy rzeczywistego obiektu."
-        return "Scheme of the real object is presented in the figure. It was obtained by the analysis of real mechanism."
+        #
+        return "Ilustracja przedstawia schemat rzeczywistego obiektu mechanicznego, wyznaczony na podstawie uprzedniej analizy rzeczywistego obiektu."
 
         
     @property
     def footer_text(self):
         
         system = self._system
-        
-        #"Analizując przedstawiony układ można stwierdzić, że jego liczba stopni swobody to {len(system.q)}."
-        return f"Analysis of the scheme allows to claim its number of degrees of freedom which is {len(system.q)}"
+
+        return f"Analizując przedstawiony układ można stwierdzić, że jego liczba stopni swobody to {len(system.q)}."
     
     
     def append_elements(self):
@@ -187,12 +187,12 @@ class NumericalAnalysisComponent(ExemplaryPictureComponent):
 # Boogi
 class KineticEnergyComponent(ReportComponent):
     
-    title="Kinetic energy"
+    title="Energia kinetyczna"
 
     @property
     def header_text(self):
         #"Energia kinetyczna układu wyrażona jest wzorem:"
-        return "Kinetic energy of the system has a following form!:"
+        return "Energia kinetyczna układu wyrażona jest wzorem:"
 
         
     @property
@@ -221,17 +221,17 @@ class KineticEnergyComponent(ReportComponent):
     
 class PotentialEnergyComponent(ReportComponent):#Jaś fasola
     
-    title="Potential energy"
+    title="Energia potencjalna"
     @property
     def header_text(self):
-        #"Energia potencjalna układu wyrażona jest wzorem:"
-        return "Potential energy of the system has a following form!:"
+        
+        return "Energia potencjalna układu wyrażona jest wzorem:"
 
         
     @property
     def footer_text(self):
-        #"Zaprezentowana zależność opisuje oddziaływanie potencjalnych pól sił w których znajduje się obiekt."
-        return "The presented relationship describes the interaction of potential force fields in which the object is located."
+        
+        return "Zaprezentowana zależność opisuje oddziaływanie potencjalnych pól sił w których znajduje się obiekt."
 
     def append_elements(self):
 
@@ -247,31 +247,29 @@ class PotentialEnergyComponent(ReportComponent):#Jaś fasola
 
         display(ReportText(  self.footer_text   ))
 
-# Marcel
+# Marcel spolszczone
 class DissipationComponent(ReportComponent):
     
-    #"Dyssypacyjna funkcja Rayleigh'a"
-    title="Dissipative Rayleigh function"
+    
+    title="Dyssypacyjna funkcja Rayleigh'a"
     
     
     @property
     def header_text(self):
-        #"Energia rozpraszana tłumieniem wyrażona jest wzorem:"
-        return "The energy dissipated by attenuation is given by the formula:"
+        
+        return "Energia rozpraszana tłumieniem wyrażona jest wzorem:"
 
         
     @property
     def footer_text(self):
-        #" Podana zależność stanowi potencjał dysynpacyjny Rayleigh'a, który poddany różniczkowaniu względem wektora prędkości uogólnionych pozwala na określenie sił wiskotycznego tłumienia."
-        return "The given dependence is the Rayleigh dissipation potential, which when differentiated against the generalized velocity vector allows to determine the viscous damping forces."
+        
+        return "Podana zależność stanowi potencjał dysynpacyjny Rayleigh'a, który poddany różniczkowaniu względem wektora prędkości uogólnionych pozwala na określenie sił wiskotycznego tłumienia."
     
     def append_elements(self):
         
         system = self._system
         dyn_sys=system
         dyn_sys_lin = dyn_sys
-
-        
 
 
         display(ReportText( self.header_text  ))
@@ -390,20 +388,19 @@ class GoverningEquationComponent(ReportComponent):
     def entry_text_one(self):
         system = self._system
         dyn_sys=system
-        return f"Using the calculated derivatives, the equation of motion is based on the appropriate formula. System equation of motion is described by the formula ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})"
+        return f"Wykorzystując obliczone pochodne, wyznacza się równanie ruchu na podstawie odpowiedniego wzoru. Równanie ruchu układu przedstawia zależność: ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})"
     
     @property
     def entry_text_two(self):
         system = self._system
         dyn_sys=system
-        #f"przedstawiają zależności ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})-({AutoMarker(Eq(dyn_sys._eoms[-1].simplify().expand(),0))})"
-        return f"Using the calculated derivatives, the equations of motions are based on the appropriate formulas. System equations of motions are described by the formulas ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})-     ({AutoMarker(Eq(dyn_sys._eoms[-1].simplify().expand(),0))})"
+        
+        return f"Wykorzystując obliczone pochodne, wyznacza się równania ruchu na podstawie odpowiedniego wzoru. Równania ruchu układu przedstawiają zależności: ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})-     ({AutoMarker(Eq(dyn_sys._eoms[-1].simplify().expand(),0))})"
 
     @property
     def footer_text(self):
         #f''' Wyznaczone równania stanowią matematyczny opis dynamiczny właściwości układu. Dalsza analiza pozwala na skuteczną analizę działania modelowanego obiektu i określenie jego parametrów mechanicznych. '''
-        return f''' The determined equations constitute a mathematical dynamic description of the properties of the system.
-                    Further analysis allows for an effective analysis of the modeled object's operation and determination of its mechanical parameters. '''
+        return f'''  Wyznaczone równania stanowią matematyczny opis dynamiczny właściwości układu. Dalsza analiza pozwala na skuteczną analizę działania modelowanego obiektu i określenie jego parametrów mechanicznych. '''
     
     def append_elements(self):
         
@@ -421,32 +418,30 @@ class GoverningEquationComponent(ReportComponent):
 
         display(ReportText(self.footer_text))   
 
-     
 class LinearizedGoverningEquationComponent(ReportComponent):
     #Równania ruchu
     title="Equation of motion"
-    
+
     @property
     def entry_text_one(self):
         system = self._system
         dyn_sys=system
         dyn_sys_lin = dyn_sys.linearized()
-        #f"przedstawia zależność ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})"
-        return f"Using the calculated derivatives, the equation of motion is based on the appropriate formula. Linearized system equation of motion is described by the formula ({AutoMarker(Eq(dyn_sys_lin._eoms[0].simplify().expand(),0))})"
+        
+        return f"Wykorzystując obliczone pochodne, wyznacza się równanie ruchu na podstawie odpowiedniego wzoru. Zlinearyzowane równanie ruchu układu przedstawia zależność: ({AutoMarker(Eq(dyn_sys_lin._eoms[0].simplify().expand(),0))})"
     
     @property
     def entry_text_two(self):
         system = self._system
         dyn_sys=system
         dyn_sys_lin = dyn_sys.linearized()
-        #f"przedstawiają zależności ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})-({AutoMarker(Eq(dyn_sys._eoms[-1].simplify().expand(),0))})"
-        return f"Using the calculated derivatives, the equations of motions are based on the appropriate formulas. Linearized system equations of motions are described by the formulas ({AutoMarker(Eq(dyn_sys_lin._eoms[0].simplify().expand(),0))})-({AutoMarker(Eq(dyn_sys_lin._eoms[-1].simplify().expand(),0))})"
+        
+        return f"Wykorzystując obliczone pochodne, wyznacza się równania ruchu na podstawie odpowiedniego wzoru. Zlinearyzowane równania ruchu układu przedstawiają zależności: ({AutoMarker(Eq(dyn_sys_lin._eoms[0].simplify().expand(),0))})-({AutoMarker(Eq(dyn_sys_lin._eoms[-1].simplify().expand(),0))})"
     
     @property
     def footer_text(self):
-        #f''' Wyznaczone równania stanowią matematyczny opis dynamiczny właściwości układu. Dalsza analiza pozwala na skuteczną analizę działania modelowanego obiektu i określenie jego parametrów mechanicznych. '''
-        return f''' The determined equations constitute a mathematical dynamic description of the properties of the system.
-                    Further analysis allows for an effective analysis of the modeled object's operation and determination of its mechanical parameters. '''
+        
+        return f''' Wyznaczone równania stanowią matematyczny opis dynamiczny właściwości układu. Dalsza analiza pozwala na skuteczną analizę działania modelowanego obiektu i określenie jego parametrów mechanicznych. '''
     
     def append_elements(self):
         
@@ -572,30 +567,26 @@ class LinearizationComponent(ReportComponent): # Szymon
         AutoBreak.latex_backend = latex_store
 
 
-# Marcel & Monika
+# Marcel & Monika spolszczone
 class FundamentalMatrixComponent(ReportComponent):
     
-    #title="Wyznaczanie macierzy fundamentalnej"
-    title="Determining fundemental matrix component";
+    title="Wyznaczanie macierzy fundamentalnej";
+
     
     @property
     def header_text(self):
-        #"Z równań ruchu wyznaczono macierz mas i sztywności układu:"
-        # google tlumacz
-        return "The matrix of masses and stiffnesses of the system was determined from the equations of motion:"
+        return "Z równań ruchu wyznaczono macierz mas i sztywności układu::"
 
         
     @property
     def body_text(self):
-        #"Macierz fundamentalna, na podstawie której wyznaczono równanie charakterystyczne rozważanego układu ${latex(Delta)}$, przedstawiają się następująco:"
-        # google tlumacz
-        return "The fundamental matrix, on the basis of which the characteristic equation of the considered system ${latex (Delta)}$ was determined, is as follows:"
+
+        return "Macierz fundamentalna, na podstawie której wyznaczono równanie charakterystyczne rozważanego układu ${latex(Delta)}$, przedstawiają się następująco::"
     
     @property
     def footer_text(self):
-        #" Macierz fundamentalna pozwala określić rozwiązanie ustalone. Natomiast bazując na równaniu charakterystycznym określa się częstości własne układu."
-        # google tlumacz
-        return "The fundamental matrix allows you to define a fixed solution. On the other hand, based on the characteristic equation, the eigenfrequencies of the system are determined."
+
+        return "Macierz fundamentalna pozwala określić rozwiązanie ustalone. Natomiast bazując na równaniu charakterystycznym określa się częstości własne układu."
     
     
     def append_elements(self):
@@ -632,17 +623,16 @@ class FundamentalMatrixComponent(ReportComponent):
 
 # Mateusz
 class GeneralSolutionComponent(ReportComponent):
-    #"Rozwiązanie ogólne"
-    title="General solution"
+    title="Rozwiązanie ogólne"
     
     @property
     def header_text(self):
-        #'Rozwiązanie ogólne przedstawia wyrażenie:'
-        return "General solution is presented by expression:"
+        
+        return 'Rozwiązanie ogólne przedstawia wyrażenie:'
     @property
     def footer_text(self):
-        #'Rozwiązanie ogólne opisuje ruch analizowanego układu (przedstawia przemieszczenie w funkcji czasu) i wynika z rozważań dotyczących drgań swobodnych układu.'
-        return "General solution describes motion of the analised system - presents displacement i function of time - and is given by considerations about free vibrations of the system"
+        
+        return 'Rozwiązanie ogólne opisuje ruch analizowanego układu (przedstawia przemieszczenie w funkcji czasu) i wynika z rozważań dotyczących drgań swobodnych układu.'
     
     def append_elements(self):
 
@@ -788,8 +778,8 @@ class MaxStaticForce(ReportComponent):
 
     @property
     def header_text(self):
-        #"Wartość maksymalna siły statycznej działającej na pojedynczy element mocujący:"
-        return "Maximum value of the static force acting on a single element:"
+        
+        return "Wartość maksymalna siły statycznej działającej na pojedynczy element mocujący:"
     
     
     def append_elements(self):
@@ -812,8 +802,8 @@ class MaxDynamicForce(ReportComponent):
 
     @property
     def header_text(self):
-        #"Wartość maksymalna siły dynamicznej działającej na pojedynczy element mocujący:"
-        return "Maximum value of the dynamic force acting on a single element:"
+       
+        return "Wartość maksymalna siły dynamicznej działającej na pojedynczy element mocujący:"
     
     def append_elements(self):
 

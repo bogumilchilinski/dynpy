@@ -95,7 +95,6 @@ class ComposedSystem(HarmonicOscillator):
         return IP.display.Image(base64.b64decode(encoded_string))
 
 
-    
     def get_default_data(self):
         return None
 
@@ -104,7 +103,6 @@ class ComposedSystem(HarmonicOscillator):
         default_data_dict = self.get_default_data()
 
 
-        
         if default_data_dict:
             parameters_dict = {
                 key: random.choice(items_list)
@@ -115,6 +113,9 @@ class ComposedSystem(HarmonicOscillator):
 
         return parameters_dict
 
+
+    
+    
 class CoupledPendulum(ComposedSystem):
     """
     Model of a DDoF Coupled Pendulum.

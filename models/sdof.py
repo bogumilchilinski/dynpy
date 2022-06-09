@@ -120,6 +120,31 @@ class ComposedSystem(HarmonicOscillator):
             parameters_dict=None
 
         return parameters_dict
+    
+    
+    
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.GoverningEquationComponent,
+        mech_comp.FundamentalMatrixComponent,
+        mech_comp.GeneralSolutionComponent,
+        mech_comp.SteadySolutionComponent,
+            
+            
+        ]
+        
+        return comp_list
+    
+    
+    
 
 class NonlinearComposedSystem(ComposedSystem):
     
@@ -141,6 +166,101 @@ class NonlinearComposedSystem(ComposedSystem):
     def amplitude_from_frf(self, amplitude=Symbol('a',positive=True)):
         
         return solveset(self.frequency_response_function(),amplitude)
+
+    
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.LinearizationComponent,
+        mech_comp.GoverningEquationComponent,
+        mech_comp.FundamentalMatrixComponent,
+        mech_comp.GeneralSolutionComponent,
+        mech_comp.SteadySolutionComponent,
+            
+            
+        ]
+        
+        return comp_list
+
+class MaterialPointMovement(ComposedSystem):
+    
+    m=Symbol('m',positive=True)
+    g=Symbol('g',positive=True)
+    c=Symbol('c',positive=True)
+    r=Symbol('r',positive=True)
+    phi=dynamicsymbols('\\varphi')
+    
+    c0=Symbol('C0',positive=True)
+    r0= Symbol('r0',positive=True)
+    phi0=dynamicsymbols('phi0')
+    
+    def __init__(self,
+                 m=None,
+                 g=None,
+                 c=None,
+                 r=None,
+                 phi=None,
+                 ivar=None,
+                 **kwargs):
+        
+        if m is not None: self.m = m
+        if g is not None: self.g = g
+        if c is not None: self.c = c
+        if r is not None: self.r = r
+        if phi is not None: self.phi = phi
+        if ivar is not None: self.ivar= ivar
+            
+        self.qs = [self.phi]
+
+        
+        self._mass_x = MaterialPoint(self.m,pos1=self.r*sin(self.phi),qs=self.qs)
+        self._mass_y = MaterialPoint(self.m,pos1=self.r*cos(self.phi),qs=self.qs)
+
+        self._gravity_ = GravitationalForce(self.m,self.g,pos1=self.r*cos(self.phi),qs=self.qs)
+        
+
+        
+        composed_system =self._mass_x + self._mass_y + self._gravity_
+        
+        super().__init__(composed_system,**kwargs)
+    
+    
+    def symbols_description(self):
+        self.sym_desc_dict = {
+                        self.m: r'Mass',
+                        self.g: r'Gravity constant',
+                        self.c: r'',
+        }
+        
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        m0, c0,r0,phi0= self.m0,self.c0,self.r0,self.phi0
+
+        default_data_dict = {
+            self.m: [m0*no for no in range (1,8)],
+            self.c: [C0*no for no in range (1,8)],
+            self.r: [r0*no for no in range (1,8)],
+            self.phi: [phi0*no for no in range (1,8)
+],
+
+        }
+
+        return default_data_dict
+    
+    def max_static_force(self):
+        return S.Zero
+    
+    def max_dynamic_force(self):
+        return S.Zero
     
 class BlowerToothedBelt(ComposedSystem):
 
@@ -1125,20 +1245,6 @@ class Pendulum(NonlinearComposedSystem):
         }
         return self.sym_desc_dict
 
-    def frequency_response_function(self,
-                                    frequency=Symbol('Omega',positive=True),
-                                    amplitude=Symbol('a',positive=True), 
-                                    exciting_force=Symbol('f_0', positive=True), 
-                                    epsilon=Symbol('\\epsilon', positive=True)):
-        
-        omega = ComposedSystem(self.linearized()).natural_frequencies()[0]
-        
-        return -frequency**2 + omega**2 + 0.75*epsilon*amplitude**2-exciting_force/amplitude
-    
-    def amplitude_from_frf(self, amplitude=Symbol('a',positive=True)):
-        
-        return solve(Eq(self.frequency_response_function(),0),amplitude)
-
     @property
     def _report_components(self):
         
@@ -1149,16 +1255,18 @@ class Pendulum(NonlinearComposedSystem):
         mech_comp.KineticEnergyComponent,
         mech_comp.PotentialEnergyComponent,
         mech_comp.LagrangianComponent,
-        mech_comp.LinearizationComponent,
-        mech_comp.GoverningEquationComponent,
-        mech_comp.FundamentalMatrixComponent,
-        mech_comp.GeneralSolutionComponent,
-        mech_comp.SteadySolutionComponent,
+#         mech_comp.LinearizationComponent,
+#         mech_comp.GoverningEquationComponent,
+#         mech_comp.FundamentalMatrixComponent,
+#         mech_comp.GeneralSolutionComponent,
+#         mech_comp.SteadySolutionComponent,
             
             
         ]
         
         return comp_list
+
+
     
     
     
