@@ -468,58 +468,52 @@ class LinearizedGoverningEquationComponent(ReportComponent):
         
 
 class LinearizationComponent(ReportComponent): # Szymon
-        
-    title="Linearyzacja równań ruchu"
-    
+
+    title="Linearization of equation of motion"
+
     @property
     def entry_text(self):
-        #"Linearyzaja równań polega na znalezieniu ich rozwinięcia w szereg Taylora względem współrzędnych, prędkości i przyspieszeń uogólnionych w otoczeniu punktu równowagi.
-        #        Celem uproszczenia wprowadzono następujące oznaczenia:""
         return "Linearization of governing equations is about finding Taylor series with respect to generalized coordinates, velocities and accelerations in the neighbourhood of the equilibrium point. Following symbols have been introduced to make a simplification."
 
     @property
     def equilibrium_point_text(self):
-        #"Punkty równowagi rozważanego układu są następujące:""
         return "Equilibrium points of the system have following forms:"
-    @property    
+
+    @property
     def eom_text(self):
         dyn_sys= self._system
-        #f'''Równanie ruchu dla współrzędnej ${latex(dyn_sys.q[no])}$ można przestawić jako:'''
         return '''Equation of motion for coordinate ${coord}$ can be presented as:'''
-    @property    
+
+    @property
     def lagrange_text(self):
         dyn_sys= self._system
-        #"Formalnie należy obliczyć pochodne cząstkowe wielkości uogólnionych ze składników równań Lagrange'a"
-
         return "Proper computings requires finding derivatives of generalized coordinates, which are components of Lagrange's equations"
 
     @property
     def derivative_text(self):
-        #"Poszczególne pochodne mają następującą postać:"
         return "The calculated derivatives have a following form:"
 
-    @property    
+    @property
     def linearized_eq_text(self):
-        #"Po podstawieniu obliczonych pochodnych, otrzumuje się następujące zlinearyzowane równanie:""
         return "The following equation (linearized) can be obtained after substitution of calculated derivatives."
-    
+
     def append_elements(self):
-        
+
         system = self._system
         ReportText.set_directory('./SDAresults')
         latex_store=AutoBreak.latex_backend
         AutoBreak.latex_backend = latex_store
         mrk_lagrangian_nonlin = Marker('lagrangLin',prefix='eq')
         mrk_lagrangian_lin = Marker('lagrangLin',prefix='eq')
-        
+
         t=system.ivar
-        
+
         dyn_sys=system
         dyn_sys_lin=dyn_sys.linearized()
         coords=tuple(list(dyn_sys.Y) + list(dyn_sys.q.diff(t,t)))
         op_point = {coord: 0 for coord in coords}
         op_point.update(dyn_sys._op_points(subs=True)[0])
-        
+
         display(ReportText(self.entry_text))
 
 
@@ -554,9 +548,9 @@ class LinearizationComponent(ReportComponent): # Szymon
             display(ReportText( self.lagrange_text ))
 
 
-            display((SympyFormula(  Eq(comps.MultivariableTaylorSeries(eq_sym,coords,n=1,x0=op_point)._symbolic_sum(),0) , marker=None,backend=latex  )  ))
+            display((SympyFormula(  Eq(MultivariableTaylorSeries(eq_sym,coords,n=1,x0=op_point)._symbolic_sum(),0) , marker=None,backend=latex  )  ))
 
-            diff_list=comps.MultivariableTaylorSeries(eom,coords,n=1,x0=op_point).calculation_steps(expr_symbol=eq_sym)
+            diff_list=MultivariableTaylorSeries(eom,coords,n=1,x0=op_point).calculation_steps(expr_symbol=eq_sym)
 
             display(ReportText( self.derivative_text ))
 
@@ -565,7 +559,7 @@ class LinearizationComponent(ReportComponent): # Szymon
                 display((SympyFormula(  diff_eq , marker=mrk_lagrangian_lin,backend=latex  )  ))
 
             display(ReportText( self.linearized_eq_text ))
-            display((SympyFormula(  Eq(comps.MultivariableTaylorSeries(eom,coords,n=1,x0=op_point).doit().expand().simplify().expand(),0,evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
+            display((SympyFormula(  Eq(MultivariableTaylorSeries(eom,coords,n=1,x0=op_point).doit().expand().simplify().expand(),0,evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
 
 
 
@@ -676,8 +670,8 @@ class GeneralSolutionComponent(ReportComponent):
         
 # Grześ
 class FrequencyResponseFunctionComponent(ReportComponent):
-    #"amplitude-frequency characteristic"
-    title="Charakterystyka Amplitudowo-Częstotliwościowa"
+    #"Charakterystyka Amplitudowo-Częstotliwościowa"
+    title="amplitude-frequency characteristic"
     
     @property
     def header_text(self):
