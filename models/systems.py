@@ -2721,7 +2721,7 @@ class DDoFTwoDisksWithThreeSprings(ComposedSystem):
 
 class DDoFTwoNonLinearTrolleys(ComposedSystem):
     scheme_name = 'ddof_nonlin_trolleys.PNG'
-    real_name = 'dwa_wozki_XD.PNG'
+    real_name = 'tension_leg_platform.png'
 
     def __init__(self,
                  g=Symbol('g', positive=True),
