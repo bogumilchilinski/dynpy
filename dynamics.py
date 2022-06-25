@@ -342,6 +342,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         new_system._kinetic_energy = system._kinetic_energy
         new_system._potential_energy = system._potential_energy
         new_system._dissipative_potential = system._dissipative_potential
+        new_system._given_data = system._given_data
 
         return new_system
 
@@ -458,6 +459,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         new_system._kinetic_energy = system._kinetic_energy
         new_system._potential_energy = system._potential_energy
         new_system._dissipative_potential = system._dissipative_potential
+        new_system._given_data = system._given_data
+        
 
         return new_system
         #return type(self)(0,system=new_sys)

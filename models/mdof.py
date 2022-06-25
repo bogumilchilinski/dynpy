@@ -37,7 +37,7 @@ class ComposedSystem(HarmonicOscillator):
             path = __file__.replace('ddof.py', 'images/') + cls.scheme_name
         if 'mdof.py' in __file__: 
             path = __file__.replace('mdof.py', 'images/') + cls.scheme_name
-        print(path)
+
         return path
 
     @classmethod
@@ -51,7 +51,7 @@ class ComposedSystem(HarmonicOscillator):
         if 'mdof.py' in __file__: 
             path = __file__.replace('mdof.py', 'images/') + cls.real_name
             
-        print(path)
+
         return path
 
 
@@ -850,6 +850,11 @@ class MDoFTripleShaft(ComposedSystem):
         k_2=(G*I_0)/l_2
         k_3=(G*I_0)/l_3
 
+        self.I_m0 = I_0
+        self.I_m1 = I_1
+        self.I_m2 = I_2
+        self.I_m3 = I_3
+        
         self.disk_1 = Disk(I_1, pos1=phi_1, qs=qs) + Force(-M_1 * cos(Omega * ivar + delta), pos1 = phi_1, qs = [phi_1])
         self.spring_1 = Spring(k_1, pos1=theta, pos2=phi_1, qs=qs)  # left rod
         self.disk_2 = Disk(I_2, pos1=phi_2, qs=qs) + Force(-M_2 * cos(Omega * ivar + delta), pos1 = phi_2, qs = [phi_2])
@@ -892,11 +897,11 @@ class MDoFTripleShaft(ComposedSystem):
             self.l_2: [1 * l0, 2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0, 9 * l0],
             self.l_3: [1 * l0, 2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0, 9 * l0],
 
-            self.d_1: [1 * d0, 2 * d0, 3 * d0, 4 * d0, 5 * d0, 6 * d0, 7 * d0, 8 * d0, 9 * d0],
-            self.d_2: [1 * d0, 2 * d0, 3 * d0, 4 * d0, 5 * d0, 6 * d0, 7 * d0, 8 * d0, 9 * d0],
-            self.d_3: [1 * d0, 2 * d0, 3 * d0, 4 * d0, 5 * d0, 6 * d0, 7 * d0, 8 * d0, 9 * d0],
-            self.d: [1 * d0, 2 * d0, 3 * d0, 4 * d0, 5 * d0, 6 * d0, 7 * d0, 8 * d0, 9 * d0],
-            self.G: [G0, 2*G0,3*G0,4*G0,5*G0,6*G0,7*G0,8*G0,9*G0],
+            self.d_1: [S.One * d0 * n for n in range(3,10)],
+            self.d_2: [S.One * d0 * n for n in range(3,10)],
+            self.d_3: [S.One * d0 * n for n in range(3,10)],
+            self.d: [d0],
+            self.G: [G0, 2*S.One*G0,3*S.Half*G0],
             self.phi_1:[self.phi_l,0],
             self.phi_2:[self.phi_l,self.phi_r],
             self.phi_3:[self.phi_r,0],
@@ -905,9 +910,9 @@ class MDoFTripleShaft(ComposedSystem):
 
             self.input_displacement:[0],
             
-            self.M_1:[1*M0,2*M0,3*M0,4*M0,5*M0,6*M0,7*M0,8*M0,9*M0],
-            self.M_2:[1*M0,2*M0,3*M0,4*M0,5*M0,6*M0,7*M0,8*M0,9*M0],
-            self.M_3:[1*M0,2*M0,3*M0,4*M0,5*M0,6*M0,7*M0,8*M0,9*M0],
+            self.M_1:[M0],
+            self.M_2:[M0],
+            self.M_3:[M0],
             
 
         }
@@ -934,6 +939,58 @@ class MDoFTripleShaft(ComposedSystem):
             
 
         return parameters_dict
+    
+    def max_static_disk_1_bearing_force(self):
+        d=Symbol('d',positive=True)
+        return abs(2*self.static_load().doit()[0]/d)
+    
+    def max_dynamic_disk_1_bearing_force(self):
+        d=Symbol('d',positive=True)
+
+        
+        frf = self._frf()
+        acc_amp = (self.phi_1).subs(self._given_data).subs({self.phi_l:frf[0],self.phi_r:frf[1]})
+        
+
+        return  abs(2*(self.I_m1*acc_amp)/d) + self.max_static_disk_1_bearing_force()#.subs(self._given_data)
+
+    def max_static_disk_2_bearing_force(self):
+        d=Symbol('d',positive=True)
+        return abs(2*self.static_load().doit()[1]/d)
+    
+    def max_dynamic_disk_2_bearing_force(self):
+        d=Symbol('d',positive=True)
+
+        
+        frf = self._frf()
+        acc_amp = (self.phi_2).subs(self._given_data).subs({self.phi_l:frf[0],self.phi_r:frf[1]})
+
+        return  abs(2*(self.I_m2*acc_amp)/d) + self.max_static_disk_2_bearing_force()#.subs(self._given_data)
+    
+    
+    def static_disk_1_key_length(self):
+        kd=Symbol('k_d', positive=True)
+        h=Symbol('h', positive=True)
+        return (2*self.max_static_disk_1_bearing_force())/(kd*h)
+    
+    def dynamic_disk_1_key_length(self):
+        kd=Symbol('k_d', positive=True)
+        h=Symbol('h', positive=True)
+        return (2*self.max_dynamic_disk_1_bearing_force())/(kd*h)
+    
+    
+    def static_disk_2_key_length(self):
+        kd=Symbol('k_d', positive=True)
+        h=Symbol('h', positive=True)
+        return (2*self.max_static_disk_2_bearing_force())/(kd*h)
+    
+    def dynamic_disk_2_key_length(self):
+        kd=Symbol('k_d', positive=True)
+        h=Symbol('h', positive=True)
+        return (2*self.max_dynamic_disk_2_bearing_force())/(kd*h)
+    
+    
+    
 class ForcedTrolleysWithSprings(ComposedSystem):
     scheme_name = 'mdof_three_trolleys.PNG'
     real_name = 'three_carriages.PNG'
@@ -2409,12 +2466,12 @@ class TriplePendulum(ComposedSystem):
                  l_2=Symbol('l_2', positive=True),
                  l_3=Symbol('l_3', positive=True),
                  g=Symbol('g', positive=True),
-                 phi_1=dynamicsymbols('varphi_1'),
-                 phi_2=dynamicsymbols('varphi_2'),
-                 phi_3=dynamicsymbols('varphi_3'),
-                 phi_u=dynamicsymbols('varphi_u'),
-                 phi_l=dynamicsymbols('varphi_l'),
-                 qs=dynamicsymbols('varphi_1 varphi_2 varphi_3'),
+                 phi_1=dynamicsymbols('\\varphi_1'),
+                 phi_2=dynamicsymbols('\\varphi_2'),
+                 phi_3=dynamicsymbols('\\varphi_3'),
+                 phi_u=dynamicsymbols('\\varphi_u'),
+                 phi_l=dynamicsymbols('\\varphi_l'),
+                 qs=dynamicsymbols('\\varphi_1 \\varphi_2 \\varphi_3'),
                  ivar=Symbol('t'),
                  **kwargs):
 
@@ -2453,14 +2510,13 @@ class TriplePendulum(ComposedSystem):
         m0, l0 = symbols('m_0 l_0', positive=True)
 
         default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.m1: [m0*no for no in range(1,9)],
+            self.m2: [m0*no for no in range(1,9)],
+            self.m3: [m0*no for no in range(1,9)],
 
-            self.l_1: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-            self.l_2: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-            self.l_3: [2 * l0, 4 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-
+            self.l_1: [l0*no for no in range(1,9)],
+            self.l_2: [l0*no for no in range(1,9)],
+            self.l_3: [l0*no for no in range(1,9)],
             self.phi_1:[self.phi_u,0],
             self.phi_2:[self.phi_u,self.phi_l],
             self.phi_3:[self.phi_l],
@@ -2481,7 +2537,7 @@ class TriplePendulum(ComposedSystem):
 
             parameters_dict[self.phi_2] = self.phi_u
 
-
+#         display(parameters_dict)
         return parameters_dict
 
 class LinearizedTriplePendulum(ComposedSystem):
@@ -2675,6 +2731,12 @@ class TripleShaft(ComposedSystem):
         I_1=S.Half*m_1*(d_1/2)**2
         I_2=S.Half*m_2*(d_2/2)**2
         I_3=S.Half*m_3*(d_3/2)**2
+        
+        self.I_m0 = I_0
+        self.I_m1 = I_1
+        self.I_m2 = I_2
+        self.I_m3 = I_3
+        
 
         k_1=(G*I_0)/l_1
         k_2=(G*I_0)/l_1
@@ -2764,7 +2826,54 @@ class TripleShaft(ComposedSystem):
 
         return parameters_dict
     
+    def max_static_disk_1_bearing_force(self):
+        d=Symbol('d',positive=True)
+        return abs(2*self.static_load().doit()[0]/d)
     
+    def max_dynamic_disk_1_bearing_force(self):
+        d=Symbol('d',positive=True)
+
+        
+        frf = self._frf()
+        acc_amp = (self.phi_1).subs(self._given_data).subs({self.phi_l:frf[0],self.phi_r:frf[1]})
+        
+
+        return  abs(2*(self.I_m1*acc_amp)/d) + self.max_static_disk_1_bearing_force()#.subs(self._given_data)
+
+    def max_static_disk_2_bearing_force(self):
+        d=Symbol('d',positive=True)
+        return abs(2*self.static_load().doit()[1]/d)
+    
+    def max_dynamic_disk_2_bearing_force(self):
+        d=Symbol('d',positive=True)
+
+        
+        frf = self._frf()
+        acc_amp = (self.phi_2).subs(self._given_data).subs({self.phi_l:frf[0],self.phi_r:frf[1]})
+
+        return  abs(2*(self.I_m2*acc_amp)/d) + self.max_static_disk_2_bearing_force()#.subs(self._given_data)
+    
+    
+    def static_disk_1_key_length(self):
+        kd=Symbol('k_d', positive=True)
+        h=Symbol('h', positive=True)
+        return (2*self.max_static_disk_1_bearing_force())/(kd*h)
+    
+    def dynamic_disk_1_key_length(self):
+        kd=Symbol('k_d', positive=True)
+        h=Symbol('h', positive=True)
+        return (2*self.max_dynamic_disk_1_bearing_force())/(kd*h)
+    
+    
+    def static_disk_2_key_length(self):
+        kd=Symbol('k_d', positive=True)
+        h=Symbol('h', positive=True)
+        return (2*self.max_static_disk_2_bearing_force())/(kd*h)
+    
+    def dynamic_disk_2_key_length(self):
+        kd=Symbol('k_d', positive=True)
+        h=Symbol('h', positive=True)
+        return (2*self.max_dynamic_disk_2_bearing_force())/(kd*h)
 
 class LagrangeIOnMathFunction(ComposedSystem):
 
@@ -3027,3 +3136,262 @@ class MDoFElasticPendulum(ComposedSystem):
             hint=[self.phi]
         
         return super().linearized(x0=x0, op_point=True, hint=hint, label=label)
+    
+class MDoFForcedDisksWithParallelSprings(ComposedSystem):
+
+    _default_subs_method='direct'
+    scheme_name = 'MDOF_Forced_Disks_With_Parallel_Springs.PNG'
+    real_name = 'three_rollers_real.png'
+
+    def __init__(self,
+                 R=Symbol('R', positive=True),
+                 m=Symbol('m', positive=True),
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 m3=Symbol('m_3', positive=True),
+                 k_l=Symbol('k_l', positive=True),
+                 k_cl=Symbol('k_cl', positive=True),
+                 k_12=Symbol('k_12', positive=True),
+                 k_c12=Symbol('k_c12', positive=True),
+                 k_23=Symbol('k_23', positive=True),
+                 k_c23=Symbol('k_c23', positive=True),
+                 k_r=Symbol('k_r', positive=True),
+                 k_cr=Symbol('k_cr', positive=True),
+                 F_0=Symbol('F_0', positive=True),
+                 Omega=Symbol('Omega', positive=True),
+                 x_l=dynamicsymbols('x_l'),
+                 x_c=dynamicsymbols('x_c'),
+                 x_r=dynamicsymbols('x_r'),
+                 x_1=dynamicsymbols('x_1'),
+                 x_2=dynamicsymbols('x_2'),
+                 qs=dynamicsymbols('x_l x_c x_r'),
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        self.m = m
+        self.m1 = m1
+        self.m2 = m2
+        self.m3 = m3
+        self.R = R
+        self.k_l = k_l
+        self.k_cl = k_cl
+        self.k_12 = k_12
+        self.k_c12 = k_c12
+        self.k_23 = k_23
+        self.k_c23 = k_c23
+        self.k_r = k_r
+        self.k_cr = k_cr
+        self.x_l = x_l
+        self.x_c = x_c
+        self.x_r = x_r
+        self.x_1 = x_1
+        self.x_2 = x_2
+        self.Omega = Omega
+        self.ivar = ivar
+
+        self.Disk1 = MaterialPoint(m, x_l, qs=[x_l]) + MaterialPoint(
+            m / 2, x_l, qs=[x_l]) + MaterialPoint(m1, x_l, qs=[x_l]) + Spring(
+                k_l, pos1=x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[
+                    x_l
+                ]) + Spring(k_cl, pos1=x_l, qs=[x_l]) + Force(2*F_0 * cos(Omega * ivar), pos1=x_l, qs=[x_l])
+
+        self.Disk2 = MaterialPoint(m, x_c, qs=[x_c]) + MaterialPoint(
+            m / 2, x_c, qs=[x_c]) + MaterialPoint(m2, x_c, qs=[
+                x_c
+            ]) + Spring(k_12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(
+                k_c12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(
+                    k_12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(
+                        k_23, pos1=x_c, pos2=x_r, qs=[x_c, x_r]) + Spring(
+                            k_c23, pos1=x_c, pos2=x_r, qs=[x_c, x_r]) + Spring(
+                                k_23, pos1=x_c, pos2=x_r, qs=[x_c, x_r])
+
+        self.Disk3 = MaterialPoint(m, x_r, qs=[x_r]) + MaterialPoint(
+            m / 2, x_r, qs=[x_r]) + MaterialPoint(m3, x_r, qs=[x_r]) + Spring(
+                k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[
+                    x_r
+                ]) + Spring(k_cr, pos1=x_r, qs=[x_r]) + Force(F_0 * cos(Omega * ivar), pos1=x_r, qs=[x_r])
+
+
+        system = self.Disk1 + self.Disk2 + self.Disk3
+        super().__init__(system(qs),**kwargs)
+
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+
+            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_cl: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_c12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_c23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_cr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+
+            self.x_l: [self.x_1, 0],
+            self.x_c: [self.x_1, self.x_2],
+            self.x_r: [self.x_2, 0],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.x_l] != self.x_1 or parameters_dict[
+                self.x_c] != self.x_1:
+
+            parameters_dict[self.x_l] = self.x_1
+
+        if parameters_dict[self.x_c] != self.x_2 or parameters_dict[
+                self.x_r] != self.x_2:
+
+            parameters_dict[self.x_r] = self.x_2
+
+        return parameters_dict
+    
+    def max_static_force_pin(self):
+        return 0
+    
+    
+    def max_dynamic_force_pin(self):
+        amp=self._frf()[0]
+        #amp = abs(((self.steady_solution_amp(self.external_forces().subs(self.ivar, 0), Matrix([0, 0]))[0])[1]).n(3))
+        return (self.k_cl*self.x_l).subs(self._given_data).subs(self.x_1,amp)  +self.max_static_force_pin()
+    
+    def static_force_pin_diameter(self):
+        kt=Symbol('k_t', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_static_force_pin())/(pi*kt*Re))**(1/2)
+    
+    def dynamic_force_pin_diameter(self):
+        kt=Symbol('k_t', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_dynamic_force_pin())/(pi*kt*Re))**(1/2)
+    
+    
+class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
+    scheme_name = 'three_pendulums_forced.PNG'
+    real_name = 'lifting_tandem.png'
+
+    def __init__(self,
+                 R=Symbol('R', positive=True),
+                 phi_1=dynamicsymbols('\\varphi_1'),
+                 phi_2=dynamicsymbols('\\varphi_2'),
+                 phi_3=dynamicsymbols('\\varphi_3'),
+                 phi_l=dynamicsymbols('\\varphi_l'),
+                 phi_c=dynamicsymbols('\\varphi_c'),
+                 phi_r=dynamicsymbols('\\varphi_r'),
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 m3=Symbol('m_3', positive=True),
+                 k_1=Symbol('k_1', positive=True),
+                 k_2=Symbol('k_2', positive=True),
+                 k_3=Symbol('k_3', positive=True),
+                 k_4=Symbol('k_4', positive=True),
+                 l=Symbol('l', positive=True),
+                 g=Symbol('g', positive=True),
+                 Omega=Symbol('Omega', positive=True),
+                 F=Symbol('F',positive=True),
+                 qs=dynamicsymbols('\\varphi_l, \\varphi_c, \\varphi_r'),
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        self.m1 = m1
+        self.m2 = m2
+        self.m3 = m3
+        self.k_1 = k_1
+        self.k_2 = k_2
+        self.k_3 = k_3
+        self.k_4 = k_4
+        self.l = l
+        self.phi_1 = phi_1
+        self.phi_2 = phi_2
+        self.phi_3 = phi_3
+        self.phi_l = phi_l
+        self.phi_c = phi_c
+        self.phi_r = phi_r
+        self.g = g
+        self.Omega = Omega
+        self.F = F
+
+        self.Pendulum1 = Pendulum(m1, g, l, angle=phi_l, qs=[phi_l]).linearized() + Force(F * l * cos(Omega * ivar), pos1=phi_l, qs=[phi_l])
+        self.Pendulum2 = Pendulum(m2, g, l, angle=phi_c, qs=[phi_c]).linearized()
+        self.Pendulum3 = Pendulum(m3, g, l, angle=phi_r, qs=[phi_r]).linearized() + Force(2* F * l* cos(Omega * ivar), pos1=phi_r, qs=[phi_r])
+        self.Spring1 = Spring(k_1, pos1=(phi_l * (l/2)), pos2=(phi_c * (l/2)), qs=[phi_l, phi_c])
+        self.Spring2 = Spring(k_2, pos1=(phi_c * (l/2)), pos2=(phi_r * (l/2)), qs=[phi_c, phi_r])
+        self.Spring3 = Spring(k_3, pos1=(phi_l * l), pos2=(phi_c * l), qs=[phi_l, phi_c])
+        self.Spring4 = Spring(k_4, pos1=(phi_c * l), pos2=(phi_r * l), qs=[phi_c, phi_r])
+
+        system = self.Pendulum1 + self.Pendulum2 + self.Pendulum3 + self.Spring1 + self.Spring2 + self.Spring3 + self.Spring4
+        super().__init__(system(qs),**kwargs)
+
+
+    def get_default_data(self):
+
+        m0, k0, l0, F0 = symbols('m_0 k_0 l_0 F_0', positive=True)
+
+        default_data_dict = {
+#             self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#             self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#             self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+
+            self.m1: [m0*no for no in range(1,9)],
+            self.m2: [m0*no for no in range(1,9)],
+            self.m3: [m0*no for no in range(1,9)],
+
+            self.l: [l0*no for no in range(1,9)],
+            self.F: [F0*no for no in range(1,9)],
+
+            self.k_1: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_2: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_3: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_4: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+
+            self.phi_l: [self.phi_1, 0],
+            self.phi_c: [self.phi_1, self.phi_2],
+            self.phi_r: [self.phi_2, 0],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.phi_l] != self.phi_1 or parameters_dict[self.phi_c] != self.phi_1:
+
+            parameters_dict[self.phi_l] = self.phi_1
+
+        if parameters_dict[self.phi_c] != self.phi_2 or parameters_dict[self.phi_r] != self.phi_2:
+
+            parameters_dict[self.phi_r] = self.phi_2
+
+
+        return parameters_dict
+
+    def max_static_cable_force(self):
+        return (self.m1 * self.g).subs(self._given_data)
+
+    def max_dynamic_cable_force(self):
+
+        omg_amp = ComposedSystem(self.linearized())._frf()[0]*self.Omega
+
+        return self.m1*self.l* (omg_amp)**2 + self.max_static_cable_force()

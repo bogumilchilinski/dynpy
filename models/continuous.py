@@ -586,7 +586,8 @@ class CSString(ContinuousSystem):
 
 
         default_data_dict = {
-            self.Ty: [2.5*T0,1.25*T0,0.75*T0,1.35*T0 ],
+            self.Ty:[T0 * random.uniform(0.75, 2.5)],
+            
             self.A: [1 * A_0, 2 * A_0, S.Half * A_0, 1 * A_0, 2 * A_0],
             
            self.BC: [{fix_ls:0,fix_rs:0} ],
