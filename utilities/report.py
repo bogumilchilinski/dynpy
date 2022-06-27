@@ -3574,6 +3574,9 @@ class SymbolsDescription(Description):
             for key, value in self._added_symbols.items()
         ]
 
+        #display(entries)
+        #print(entries)
+
         end_sign = '.'
         if len(entries) == 0: end_sign = ''
 
@@ -3596,9 +3599,10 @@ class SymbolsDescription(Description):
 
             if label == last_key: end_symbol = '.'
 
-            self.add_item(NoEscape(InlineMath(vlatex(label)).dumps()),
-                          NoEscape(f'- {vlatex(entry)}{end_symbol}'))
-
+#             self.add_item(NoEscape(InlineMath(vlatex(label)).dumps()),
+#                           NoEscape(f'- {vlatex(entry)}{end_symbol}'))
+            self.add_item(NoEscape(InlineMath((label)).dumps()),
+                          NoEscape(f'- {(entry)}{end_symbol}'))
     def __repr__(self):
 
         entries = [
@@ -3615,6 +3619,9 @@ class SymbolsDescription(Description):
 
         text = head + ',  \n'.join(entries) + end_sign
 
+        #print(text)
+        #print(text)
+        
         display(IPMarkdown(text))
 
         #return (self._text)

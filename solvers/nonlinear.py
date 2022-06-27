@@ -851,6 +851,16 @@ class MultiTimeScaleSolution(ODESystem):
                              order=self._order,
                              params_values=params_values)
 
+    def frequency_response_function(self,
+                                    frequency=Symbol('Omega',positive=True),
+                                    amplitude=Symbol('a',positive=True), 
+                                    exciting_force=Symbol('f_0', positive=True)):
+        
+        epsilon = self.eps
+        omega = self.omega
+
+        return -frequency**2 + omega**2 + 0.75*epsilon*amplitude**2-exciting_force/amplitude
+
 
 class WeakNonlinearProblemSolution(LinearODESolution):
 
@@ -1903,3 +1913,4 @@ class MultiTimeScaleMethod(LinearODESolution):
         return self.__call__(ivar=t_span,
                              order=self._order,
                              params_values=params_values)
+    

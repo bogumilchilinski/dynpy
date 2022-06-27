@@ -35,7 +35,7 @@ from pylatex.utils import italic, NoEscape
 
 from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim)
 from .utilities.templates.document import *
-from .utilities.components import mechanics as mech_comp
+from .utilities.components.mech import en as mech_comp
 
 
 from .utilities.adaptable import AutoMarker
@@ -335,7 +335,6 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     @classmethod
     def from_system(cls, system):
-        
         kwargs=system._kwargs()
         
         new_system=cls(*cls._default_args,system = system)
@@ -343,6 +342,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         new_system._kinetic_energy = system._kinetic_energy
         new_system._potential_energy = system._potential_energy
         new_system._dissipative_potential = system._dissipative_potential
+        new_system._given_data = system._given_data
 
         return new_system
 
@@ -459,6 +459,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         new_system._kinetic_energy = system._kinetic_energy
         new_system._potential_energy = system._potential_energy
         new_system._dissipative_potential = system._dissipative_potential
+        new_system._given_data = system._given_data
+        
 
         return new_system
         #return type(self)(0,system=new_sys)
@@ -685,7 +687,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return eqns.subs({coord:0 for coord in self.q_0.values()})
     
     @property
-    def report_components(self):
+    def _report_components(self):
         
         comp_list=[
         mech_comp.TitlePageComponent,
@@ -695,7 +697,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         mech_comp.PotentialEnergyComponent,
         mech_comp.LagrangianComponent,
         mech_comp.GoverningEquationComponent,
-        mech_comp.FundamentalMatrixComponent,
+        #mech_comp.FundamentalMatrixComponent,
         mech_comp.GeneralSolutionComponent,
         mech_comp.SteadySolutionComponent,
             
@@ -710,16 +712,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
       
         sys=self
         doc = ExampleTemplate()
-        # doc.append(mech_comp.TitlePageComponent(sys))
-        # doc.append(mech_comp.SchemeComponent(sys))
-        # doc.append(mech_comp.ExemplaryPictureComponent(sys))
-        # doc.append(mech_comp.KineticEnergyComponent(sys))
-        # doc.append(mech_comp.PotentialEnergyComponent(sys))
-        # doc.append(mech_comp.LagrangianComponent(sys))
-        # doc.append(mech_comp.GoverningEquationComponent(sys))
-        # doc.append(mech_comp.FundamentalMatrixComponent(sys))
-        # doc.append(mech_comp.GeneralSolutionComponent(sys))
-        # doc.append(mech_comp.SteadySolutionComponent(sys))
+
+        for comp in self._report_components:
+            doc.append(comp(sys))
     
     
         return doc

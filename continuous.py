@@ -7,6 +7,10 @@ from sympy.physics.vector.printing import vpprint, vlatex
 
 
 class ContinuousSystem:
+    
+
+    
+    
     def __init__(self,
                  L,
                  q,
@@ -102,7 +106,7 @@ class ContinuousSystem:
                                       derivative_order=self.diff_ord,
                                       label=self._label)
         
-        new_sys = type(self)(0, q_new, system=new_system)
+        new_sys = type(self)(L_new, q_new, system=new_system)
         new_sys._given_data=given_data
         new_sys._nonlinear_base_system = self._nonlinear_base_system
 
@@ -277,8 +281,8 @@ class ContinuousSystem:
 
 
         roots = solve(self.char_poly(bc_dict, sep_expr, spatial_comp), arg)
-        print('+++++++++++++ roots from eigs')
-        print(roots)
+#         print('+++++++++++++ roots from eigs')
+#         print(roots)
 
         if len(roots) == 1:
             spatial_span = roots[0]
@@ -425,6 +429,7 @@ class PlaneStressProblem:
 
         self._label = label
         self._subs_dict = {}
+        self._given_data={}
 
     @property
     def BC(self):
@@ -455,21 +460,19 @@ class PlaneStressProblem:
         
 #         print('u_old')
 #         display(self.u)
-        
+        given_data=args[0]
+    
         E_new, nu_new, u_new, stress_new, vol_load_new, D_new = Tuple(
             self.E_module, self.poisson, self.u, self.stress,
             self.volumetric_load,self.D).subs(*args)
 
-        
-        
-        
+
         bc_trap = self.BC.subs(*args)
 
         if bc_trap == self.BC:
             bc_trap = self.bc_dict
-#         print('u_new')
-#         display(u_new)
-            
+
+
         new_system = type(self)(disp_func=u_new,
                                         stress_tensor=stress_new,
                                         bc_dict=bc_trap,
@@ -482,7 +485,11 @@ class PlaneStressProblem:
                                         system=None,
                                         **kwargs)
 
-        return type(self)(system=new_system)
+        
+        new_sys = type(self)(system=new_system)
+        new_sys._given_data=given_data
+        
+        return new_sys
 
     @property
     def _eoms(self):
