@@ -1411,6 +1411,25 @@ class PulledPendulum(ComposedSystem):
             self.l: r'Pendulum length',
         }
         return self.sym_desc_dict
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+#         mech_comp.LinearizationComponent,
+        mech_comp.GoverningEquationComponent,
+        mech_comp.FundamentalMatrixComponent,
+        mech_comp.GeneralSolutionComponent,
+        mech_comp.SteadySolutionComponent,
+            
+            
+        ]
+        return comp_list
 # wymienić obrazek na taki, gdzie nie ma wymuszenia i symbole na obrazku będą zgodne z tymi w klasie
 
 class FreePendulum(ComposedSystem):

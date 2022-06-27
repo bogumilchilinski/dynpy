@@ -3135,8 +3135,16 @@ class SympyFormula(ReportModule):
                 self._eq = Align()
                 with self._eq.create(AutoBreak()) as eq:
                     eq.append_formula(expr)
-            auto_mrk = AutoMarker(self._expr).marker
-            self._eq.append(Label(auto_mrk))
+
+            if self._marker:
+                marker = self._marker
+            else:
+                auto_mrk = AutoMarker(self._expr).marker
+                marker = auto_mrk
+
+            
+            self._eq.append(Label(marker))
+            self._marker = marker
 
         if self.__class__._color:
 
