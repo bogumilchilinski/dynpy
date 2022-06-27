@@ -2436,21 +2436,21 @@ class DoublePendulum(ComposedSystem):
 
         return default_data_dict    
 
-    def get_random_parameters(self):
+#     def get_random_parameters(self):
 
-        default_data_dict = self.get_default_data()
+#         default_data_dict = self.get_default_data()
 
-        parameters_dict = {
-            key: random.choice(items_list)
-            for key, items_list in default_data_dict.items()
-        }
+#         parameters_dict = {
+#             key: random.choice(items_list)
+#             for key, items_list in default_data_dict.items()
+#         }
 
-        if parameters_dict[self.phi_2] == parameters_dict[self.phi_3]:
+#         if parameters_dict[self.phi_2] == parameters_dict[self.phi_3]:
 
-            parameters_dict[self.phi_2] = self.phi_u
+#             parameters_dict[self.phi_2] = self.phi_u
 
 
-        return parameters_dict
+#         return parameters_dict
 
     
 class TriplePendulum(ComposedSystem):
