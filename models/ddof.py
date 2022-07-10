@@ -424,6 +424,50 @@ class DampedVehicleSuspension(ComposedSystem):
 
         return default_data_dict
 
+    
+class DampedSymmetricalVehicleSuspension(DampedVehicleSuspension):
+    def get_default_data(self):
+
+        #m0, l0, c0, k_0, l_l0, omega, F_0 = symbols('m_0 l_0 c_0 k_0 l_l0 Omega F_0', positive=True)
+        c0, k_0, l_l0, omega, F_0 = symbols('c_0 k_0 l_l0 Omega F_0', positive=True)
+        m0, l0  = self.m0,self.l0
+        c0, k0= self.c0,self.k0
+        lam0=self.lam0
+        Omega0=self.Omega0
+        F0=self.F0
+
+        default_data_dict = {
+            self.l_rod:[l0*S.One*no for no in range(1, 8)],
+            self.I: [S.One/12*self.m *self.l_rod**2],
+            self.l_rod:[l0*S.One*no for no in range(1, 8)],
+            #self.m: [m0,2*m0,3*m0,4*m0,5*m0,6*m0,7*m0,8*m0,9*m0],
+            self.m: [m0*S.One*no for no in range(1,8)],
+            #self.c_r: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0],
+            self.c_r: [self.lam*(self.k_r)],
+            #self.k: [k0*S.One*no for no in range(1,8)],
+            self.lam: [lam0/10*S.One*no for no in range(1,8)],
+            self.k_l: [self.k_r],
+            self.k_r: [k0*S.One*no for no in range(1,8)],
+            
+            
+            self.c_l: [self.lam*(self.k_l)],
+            self.l_r: [self.l_l],
+            self.l_l: [l0*S.One*no for no in range(1, 8)],
+           
+            self.Omega: [Omega0*S.One*no for no in range(1,2)],
+            self.F_engine: [F0*cos(self.Omega*self.ivar)*S.One*no for no in range(1,8)],
+            
+          #  self.F_engine: [
+           #     2 * F_0 * sin(omega * self.ivar),
+            #    3 * F_0 * sin(omega * self.ivar),
+             #   4 * F_0 * sin(omega * self.ivar),
+              #  5 * F_0 * sin(omega * self.ivar),
+                #6 * F_0 * sin(omega * self.ivar)
+          #  ]
+        }
+
+        return default_data_dict
+    
 class DoubleDiskShaft(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
     =========

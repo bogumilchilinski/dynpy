@@ -3135,8 +3135,16 @@ class SympyFormula(ReportModule):
                 self._eq = Align()
                 with self._eq.create(AutoBreak()) as eq:
                     eq.append_formula(expr)
-            auto_mrk = AutoMarker(self._expr).marker
-            self._eq.append(Label(auto_mrk))
+
+            if self._marker:
+                marker = self._marker
+            else:
+                auto_mrk = AutoMarker(self._expr).marker
+                marker = auto_mrk
+
+            
+            self._eq.append(Label(marker))
+            self._marker = marker
 
         if self.__class__._color:
 
@@ -3725,7 +3733,7 @@ class AutoBreak(Environment):
 
     packages = [Package('mathtools'), Package('autobreak')]
     escape = False
-    content_separator = "\n"
+    content_separator = " "
     latex_backend = vlatex
 
     def _split_expr(self, expr):
@@ -3770,22 +3778,35 @@ class AutoBreak(Environment):
             if terms[no - 1] == Symbol('='):
                 new_terms += [obj]
 
+            elif isinstance(obj, Mul) and  (
+                (any([elem.is_negative for elem in obj.args]))):
+                #print(' any negative')
+                #display(obj)
+                new_terms += [Symbol('\n -'), -obj]
+                
             elif isinstance(obj, Mul) and not (
                 (any([elem.is_negative for elem in obj.args]))):
-
-                new_terms += [Symbol('+'), obj]
+                #print(' not any negative')
+                #display(obj)
+                new_terms += [Symbol('\n +'), obj]
 
             elif obj == Symbol('='):
                 new_terms += [obj]
 
             elif isinstance(obj, (Symbol, Function, Number,Derivative,Subs,Expr)):
-                new_terms += [Symbol('+'), obj]
+                new_terms += [Symbol('\n +'), obj]
 
             else:
                 new_terms += [obj]
 
+        prev_term=''
+        self.append('\n')
         for term in new_terms[1:]:
+#             print('+++',self.__class__.latex_backend(term))
+#             print('++ prev +++',prev_term)
             self.append(self.__class__.latex_backend(term))
+            #prev_term=self.__class__.latex_backend(term)
+        self.append('\n')
 
 
 # class EqRef(Environment):
