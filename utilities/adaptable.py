@@ -396,7 +396,7 @@ class SpectralMethods(DataMethods):
 
 class EntryWithUnit:
     _units = {}
-    _latex_backend = vlatex
+    _latex_backend = lambda obj: obj if isinstance(obj,str) else vlatex(obj)
 
     @classmethod
     def set_default_units(cls, units={}):
