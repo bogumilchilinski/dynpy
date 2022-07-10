@@ -1,4 +1,4 @@
-from ..mechanics import *
+from  ..mechanics import *
 
 
 
@@ -130,6 +130,17 @@ class SchemeComponent(ExemplaryPictureComponent):
             fig.add_image(system._scheme(),width='8cm')
 
         display(ReportText( self.footer_text ))
+#Pati
+class DamperPlot(ExemplaryPictureComponent):
+    title="Siła tłumienia"
+  
+
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
 
 
 
@@ -699,7 +710,7 @@ class FrequencyResponseFunctionComponent(ReportComponent):
 FRFComponent = FrequencyResponseFunctionComponent
 
 
-
+#Pati
 class FrequencyResponseFunctionComponentToSecond(ReportComponent):
     
     title="sens mocy układu"
@@ -710,18 +721,112 @@ class FrequencyResponseFunctionComponentToSecond(ReportComponent):
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
-
-        display(ReportText(f'''
-                           sens mocy układu:
-                           '''))
+    @property
+    def header_text(self):
+        #"sens mocy układu:"
+        return "system power sense:"
 
         display(SympyFormula( Eq(Symbol('frf^2'),
                      dyn_sys.frequency_response_function().doit()**2 ), marker=None))
+    @property
+    def footer_text(self):
+        #"Charakterystyka Amplitudowo-Częstotliwościowa podniesiona do kwadratu"
+        return "The amplitude-frequency response squared"
+#Pati        
+class SpringForce(ReportComponent):
+    
+    title="Siła od sprężyny"
 
-        display(ReportText(f'''
-                           Charakterystyka Amplitudowo-Częstotliwościowa podniesiona do kwadratu
-                           '''))  
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+    @property
+    def header_text(self): 
+        #"Siła od sprężyny wyrażona jest wzorem:""
+        return "The spring force is given by the formula:"
+
+        display(SympyFormula( Eq(Symbol('F'),-1*system.k*system.x,evaluate=False)))
+    @property
+    def header_text(self): 
+        #"zamiast x używam steady solution"
+        return "I use steady solution instead of x"
+
+        display(SympyFormula( Eq(Symbol('F'),-1*system.k*system.steady_solution(),evaluate=False)))
+
+    @property
+    def footer_text(self):
+           #"Siła od sprężyny, zwana również siłą naciągu, pojawia sie przy ściskaniu lub rozciaganiu. Siła, która działa jest przeciwnie skierowana do ruch i chce przywrócić do pierwotnego jej położenia. Zależy od sztywności sprężyny k oraz od tego o ile została rozciagnieta bądź skrócona x."
+            return "Spring force, also known as pull force, occurs when compressed or stretched. The force that acts is opposite to the movement and wants to return it to its original position. It depends on the spring stiffness k and how much it is stretched or shortened x."
+
+#Pati
+class DamperForce(ReportComponent):
+    
+    title="Siła tłumienia"
+
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+    @property
+    def header_text(self): 
+        #"Siła tłumienia wyrażona jest wzorem:"
+        return "The damping force is given by the formula:"
+
+        display(SympyFormula( Eq(Symbol('F'),-1*system.c*system.v,evaluate=False)))
+
+    @property
+    def header_text(self): 
+             #"zastępuje prędkość jako pochodna steady stolution po czasie:"
+        return "replaces velocity as a derivative of the steady solution over time:"
+
+        display(SympyFormula( Eq(Symbol('F'),-1*system.c*system.steady_solution().diff(system.ivar),evaluate=False)))
+
+    @property
+    def footer_text(self):
+         #"Siła tłumienia zmniejsza amplitude drgań, ma zwrot przeciwny do prędkości. Zależy od współczynnika tłumienia b oraz od prędkości v."
+        return "Siła tłumienia zmniejsza amplitude drgań, ma zwrot przeciwny do prędkości. Zależy od współczynnika tłumienia b oraz od prędkości v."
+#Pati
+class LogarithmicDecrement(ReportComponent):
+    
+    title="logarytmiczny dekrement tłumienia liczony z amplitud"
+
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+    @property
+    def header_text(self): 
+        #"Logarytmiczny dekrement tłumienia wyrażona jest wzorem przy pomocy amplitud:"
+        return "The logarithmic decrement of damping is given by the formula in terms of amplitudes."
+
+        display(SympyFormula( Eq(Symbol('delta'),log(system.A_n1/system.A_n2))))
+
+    @property
+    def footer_text(self): 
+            #"Zaprezentowana zależność opisuje bezwymaiarową wielkość charakteryzującą intensywność tłumienia drgań swobodnych w przypadku podkrytycznym. Jest to wielkość stała dla rozpaywanego                                  układu drgającego i nie zależy od warrunków początkowych. Zależy natomiast od maksymalnych wychyleń w chwilach różniących się o okres drań tłumionych."
+            return "The presented dependence describes a dimensionless quantity characterizing the intensity of damping of free vibrations in the subcritical case. It is a constant value for the considered oscillating system and does not depend on the initial conditions. However, it depends on the maximum deflections at moments differing by the period of damped bastards."
+    @property
+    def header_text(self): 
+           #"Logarytmiczny dekrement tłumienia u wyrażona jest wzorem przy pomocy okresu drgań tłumionych:"
+        return "The logarithmic damping decrement u is given by the formula using the period of damped vibrations:"
+
+        display(SympyFormula( Eq(Symbol('delta'),2*pi*system.damping_coefficient()*(system.natural_frequencies())**-1,evaluate=False)))
         
+    @property
+    def footer_text(self): 
+           #"Zaprezentowana zależność opisuje bezwymaiarową wielkość charakteryzującą intensywność tłumienia drgań swobodnych w przypadku podkrytycznym. Jest to wielkość stała dla rozpaywanego układu drgającego i nie zależy od warrunków początkowych.Zależy natomiast od okresu drań tłumionych i współczynnika h."
+        return "The presented dependence describes a dimensionless quantity characterizing the intensity of damping of free vibrations in the subcritical case. It is a constant value for the considered vibrating system and does not depend on the initial conditions, but it depends on the period of damped vibrations and the coefficient h."
+
 
 
         

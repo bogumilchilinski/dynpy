@@ -13,7 +13,7 @@ from pylatex import (Alignat, Axis, Command, Document, Eqref, Figure, Label,
                      TextColor, Marker, Math, NewLine, NewPage, Package, Plot,
                      Quantity, Ref, Section, Subsection, Table, Tabular, TikZ,
                      Description, LongTable)
-from pylatex.base_classes import Environment
+from pylatex.base_classes import Environment, Options
 from pylatex.package import Package
 from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic

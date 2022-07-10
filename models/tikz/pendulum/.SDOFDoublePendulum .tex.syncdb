@@ -1,0 +1,1 @@
+{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-interaction=nonstopmode","-output-directory=/tmp/710c89be7be9049529421eb4e2a5c45cf8d5c2fc","SDOFDoublePendulum .tex"]}

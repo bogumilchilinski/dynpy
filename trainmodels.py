@@ -82,14 +82,14 @@ class LeafSpring(ComposedSystem):
             self.c:self.k_beam*self.lam,
             self.k_beam: S.One*48*self.module * self.inertia / self.l**3,
             self.inertia: b*h**3/12,
-            self.m:b*h*self.l*rho
+#             self.m:b*h*self.l*rho
         }
 
         return default_data_dict
     
     def get_numerical_data(self):
         b,h,rho=symbols('b h rho', positive=True)
-        default_data_dict = {self.module:2.1*10**11,self.rho:7800,self.b:0.08,self.h:9*0.012,self.l:1.5,self.lam:0.1
+        default_data_dict = {self.m:3000,self.module:2.1*10**11,self.rho:7800,self.b:0.08,self.h:9*0.012,self.l:1.5,self.lam:0.1
         }
 
         return default_data_dict

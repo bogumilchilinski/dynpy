@@ -48,29 +48,26 @@ class DataMethods:
         if fontsize is not None:
             cls._label_fontsize = fontsize
         return cls
-    
+
     @classmethod
     def set_default_legend_fontsize(cls,fontsize=None):
         if fontsize is not None:
             cls._legend_fontsize = fontsize
         return cls
-    
-    
+
     @classmethod
     def set_default_figure_generator(cls,figure_generator=None):
         if figure_generator is not None:
             cls._figure_gen = figure_generator
         return cls
-    
+
     @classmethod
     def set_default_image_parameters(cls,image_parameters=None):
         if image_parameters is not None:
             cls._image_parameters = image_parameters
         return cls    
-    
-    
-    
-    
+
+
     def _pylatex_tikz(self,
                       filename,
                       labels_list=None,
