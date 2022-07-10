@@ -27,6 +27,19 @@ def plots_no():
 default_colors = ['red', 'blue', 'orange', 'teal', 'black', 'green']
 
 
+class DataAxis(Axis):
+    
+    def __init__(self,plotdata=None, options=None, *, data=None):
+        """
+        Args
+        ----
+        options: str, list or `~.Options`
+            Options to format the axis environment.
+        """
+        self._plotdata  = plotdata
+        
+        super().__init__(options=options, data=data)
+
 class DataMethods:
     
     _figure_gen = lambda: Figure(position='H')
@@ -615,7 +628,7 @@ class BasicFormattingTools(DataMethods):
 
     _floats_no_gen = plots_no()
 
-    _latex_backend = vlatex
+    _latex_backend = lambda obj: obj if isinstance(obj,str) else vlatex(obj)
     _label_formatter = lambda obj: f'${_latex_backend(obj)}$' if isinstance(
         obj, (Expr, Eq, EntryWithUnit)) else obj
     _unit_selector = EntryWithUnit
@@ -990,13 +1003,17 @@ class BasicFormattingTools(DataMethods):
         
         col_idx = plotted_frame.columns
 
-        latex_backend = self.__class__._latex_backend
+
+        
+        latex_backend =  self.__class__._latex_backend
 
         if y_axis_description is None and isinstance(col_idx, pd.MultiIndex):
+            
 
             #print('index2transform',col_idx.get_level_values(-1).unique())
             if len(col_idx.get_level_values(-1).unique())==1:
                 
+                #print('tu jestem')
                 label_raw=(EntryWithUnit(col_idx.get_level_values(-1).unique()[0]))
                 if isinstance(label_raw,str):
                     ylabel = label_raw
@@ -1008,6 +1025,7 @@ class BasicFormattingTools(DataMethods):
                 #print(ylabel)
 
                 y_axis_description = 'ylabel={$' + ylabel + '$},'
+                y_axis_description = y_axis_description.replace('$$','$')
 
 
                 plotted_frame = plotted_frame.droplevel(-1, axis=1)
@@ -1069,7 +1087,7 @@ class BasicFormattingTools(DataMethods):
             colors_list=colors_list,
             height=height,
             width=width,
-            x_axis_description=x_axis_description,
+            x_axis_description=x_axis_description.replace('$$','$'),
             y_axis_description=y_axis_description,
             subplots=subplots,
             legend_pos=legend_pos,
