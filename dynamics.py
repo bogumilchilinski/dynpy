@@ -209,23 +209,26 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     _default_subs_method='direct'
     scheme_name = 'engine.png'
     real_name = 'engine_real.PNG'
+    _default_folder_path = "./dynpy/models/images/"
+    
     reportclass= ExampleTemplate
+    _components = None
+    
+    ivar = Symbol('t')
 
     @classmethod
     def _scheme(cls):
 
-        path = __file__.replace('.py', '/images/') + cls.scheme_name
         
-        path = './dynpy/models/images/' + cls.scheme_name
+        path = cls._default_folder_path  + cls.scheme_name
 
         return path
 
     @classmethod
     def _real_example(cls):
 
-        path = __file__.replace('.py', '/images/') + cls.real_name
 
-        path = './dynpy/models/images/' + cls.real_name
+        path = cls._default_folder_path + cls.real_name
         
         return path
 
@@ -265,11 +268,19 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self._kinetic_energy = 0
         self._potential_energy = 0
         self._dissipative_potential = 0
-        
-        self._components ={}
+        self._components = None
+
+
 
         if system:
             # print(system._kinetic_energy)
+            
+            if system._components is not None:
+                comps=list(system._components.values())
+                self._components = {**system._components}
+                print('abc',comps)
+                system = sum(comps[1:],comps[0])
+            
             Lagrangian=system
             system=None
             
@@ -282,7 +293,6 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             self._kinetic_energy = Lagrangian._kinetic_energy
             self._potential_energy = Lagrangian._potential_energy
             self._dissipative_potential = Lagrangian._dissipative_potential
-            self._components = {**self._components, **Lagrangian._components }
 
 
         if isinstance(Lagrangian, me.LagrangesMethod):
@@ -331,8 +341,29 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         self._nonlinear_base_system=None
         
-        self._components =  {self._label:copy.copy(self),**self._components}
+    def _init_from_components(self):
+        composed_system = self._elements_sum
+        self.__init__(None,system = composed_system)
 
+    @property
+    def components(self):
+
+        components = {}
+
+
+        return components
+        
+    @property
+    def _elements_sum(self):
+
+        comps=list(self.components.values())
+
+        system = sum(comps[1:],comps[0])
+        
+        system._components = {**self.components}
+
+        return system
+        
     @classmethod
     def from_system(cls, system):
         kwargs=system._kwargs()
@@ -613,19 +644,29 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         Returns the label of the object or class instance with reduced Degrees of Freedom.
         """
 
-        
-        if isinstance(args[0], str):
-            if label:
-                self._label=label
+        if len(args) > 1:
+            if isinstance(args[0], str):
+                if label:
+                    self._label=label
+                else:
+                    self._label=args[0]
+
+
+                return self
+
             else:
-                self._label=args[0]
-                
-                
-            return self
-        
+                #print(flatten(*args))
+                system =  self.shranked(*args)
+                if label:
+                    system._label = label
+                return system
         else:
-            #print(flatten(*args))
-            return self.shranked(*args)
+            self._label=label
+            return self
+            
+            
+        
+            
             
 
 
