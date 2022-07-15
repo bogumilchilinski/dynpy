@@ -62,8 +62,13 @@ class ComposedSystem(HarmonicOscillator):
         return path
 
 
-    def _init_from_components(self):
-        composed_system = self._elements_sum
+    def _init_from_components(self,*args,system=None,**kwargs):
+        
+        if system is None:
+            composed_system = self._elements_sum
+        else:
+            composed_system = system
+            
         print('CS',composed_system._components)
         super().__init__(None,system = composed_system)
         
@@ -99,7 +104,7 @@ class ComposedSystem(HarmonicOscillator):
             self.qs = [self.z]
 
 
-        self._init_from_components()
+        self._init_from_components(system=system)
 
 
     @property
@@ -143,6 +148,9 @@ class ComposedSystem(HarmonicOscillator):
     def get_default_data(self):
         return None
 
+    def get_numerical_data(self):
+        return None
+    
     def get_random_parameters(self):
 
         default_data_dict = self.get_default_data()
@@ -157,6 +165,21 @@ class ComposedSystem(HarmonicOscillator):
 
         return parameters_dict
 
+    def get_numerical_parameters(self):
+
+        default_data_dict = self.get_numerical_data()
+
+        if default_data_dict:
+            parameters_dict = {
+                key: random.choice(items_list)
+                for key, items_list in default_data_dict.items()
+            }
+        else:
+            parameters_dict = None
+
+        return parameters_dict
+    
+    
     @property
     def _report_components(self):
 
