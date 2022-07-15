@@ -275,11 +275,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         if system:
             # print(system._kinetic_energy)
             
-            if system._components is not None:
-                comps=list(system._components.values())
-                self._components = {**system._components}
-                print('abc',comps)
-                system = sum(comps[1:],comps[0])
+#             if system._components is not None:
+#                 comps=list(system._components.values())
+#                 self._components = {**system._components}
+#                 print('abc',comps)
+#                 system = sum(comps[1:],comps[0])
             
             Lagrangian=system
             system=None
@@ -356,11 +356,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     @property
     def _elements_sum(self):
 
-        comps=list(self.components.values())
+        comps=list(self.elements.values())
 
         system = sum(comps[1:],comps[0])
         
-        system._components = {**self.components}
+        system._components = {**self.elements}
 
         return system
         
