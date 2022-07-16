@@ -1,1 +1,1 @@
-{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-interaction=nonstopmode","-output-directory=/tmp/dd546ac2c87da3b4d0715828f951a47ff36512da","MDOFTriplePendulum.tex"]}
+{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-interaction=nonstopmode","-output-directory=/tmp/ed5b6b66af8e6985b615ccd46511f2e54b1ca88f","MDOFTriplePendulum.tex"]}

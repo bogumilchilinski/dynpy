@@ -23,8 +23,8 @@ class ComposedSystem(HarmonicOscillator):
     """
     scheme_name = 'damped_car_new.PNG'
     real_name = 'car_real.jpg'
-    detail_scheme_name = 'damped_car_new.PNG'
-    detail_real_name = 'car_real.jpg'
+    detail_scheme_name = 'sruba_pasowana.png'
+    detail_real_name = 'buick_regal_3800.jpg'
     _default_args = ()
     _default_folder_path = "./dynpy/models/images/"
 
@@ -3490,7 +3490,190 @@ class KinematicClutchWithSprings(ComposedSystem):
         return (2 * self.max_static_bearing_force()) / (kd * h)
 
     def dynamic_key_length(self):
+
         kd = Symbol('k_d', positive=True)
         h = Symbol('h', positive=True)
         return (2 * self.max_dynamic_bearing_force()) / (kd * h)
+
+
+    
+class DampedMeasuringTool(ComposedSystem):
+
+    scheme_name = 'measure_tool.PNG'
+    real_name = 'measure_tool_real.PNG'
+    #detail_scheme_name = 
+    #detail_real_name = 
+    
+    m=Symbol('m', positive=True)
+    l=Symbol('l', positive=True)
+    k=Symbol('k', positive=True)
+    k_t=Symbol('k_t', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    phi=dynamicsymbols('\\varphi')
+    c=Symbol('c', positive=True)
+    c_t=Symbol('c_t', positive=True)
+    lam=Symbol('lambda', positive=True)
+    l0=Symbol('l_0', positive=True)
+    lam0=Symbol('lambda_0', positive=True)
+    
+    def __init__(self,
+                 m=None,
+                 l=None,
+                 k=None,
+                 k_t=None,
+                 ivar=Symbol('t'),
+                 Omega=None,
+                 F=None,
+                 phi=None,
+                 qs=None,
+                 c=None,
+                 c_t=None,
+                 lam=None,
+                 l0=None,
+                 lam0=None,
+                 **kwargs
+                 ):
+        if l is not None: self.l=l
+        if m is not None: self.m = m
+        if k is not None: self.k = k
+        if k_t is not None: self.k_t = k_t
+        if F is not None: self.F=F
+        if Omega is not None: self.Omega=Omega
+        if phi is not None: self.phi=phi
+        if c is not None: self.c=c
+        if c_t is not None: self.ct=ct
+        if lam is not None: self.lam=lam
+        if l0 is not None: self.l0=l0
+        if lam0 is not None: self.lam0=lam0
+        
+        self.qs = [self.phi]
+        self.ivar = ivar
+        
+        self._moment_of_inertia = MaterialPoint((S.One/3)*self.m*self.l**2, self.phi, qs=[self.phi])
+        self._upper_spring = Spring(self.k,pos1=self.l*self.phi, qs=[self.phi])
+        self._lower_spring = Spring(self.k, pos1= self.l*self.phi, qs=[self.phi])
+        self._spiral_spring=Spring(self.k_t, self.phi, qs=[self.phi])
+        self._force = Force(self.F*self.l, pos1=self.phi)
+        self._springs_damping= Damper(2*self.c ,pos1=self.l*self.phi, qs=[self.phi])
+        self._spiral_spring_damping= Damper(self.c_t ,pos1=self.phi, qs=[self.phi])
+        composed_system = self._moment_of_inertia + self._upper_spring + self._lower_spring + self._spiral_spring + self._force + self._springs_damping +self._spiral_spring_damping
+
+        super().__init__(composed_system,**kwargs)
+        
+    def get_default_data(self):
+
+        m0, k0, F0, Omega0, lam0, l0 = self.m0, self.k0, self.F0, self.Omega0, self.lam0, self.l0
+
+        default_data_dict = {
+            self.c: [self.lam*(self.k)],
+            self.c_t: [self.lam*(self.k_t)],
+            self.m: [m0*S.One*no for no in range(1,8)],
+            self.k: [k0*S.One*no for no in range(1,8)],
+            self.k_t: [k0*l0**2*S.One*no for no in range(1,8)],
+            self.F: [F0*S.One*no*cos(self.Omega*self.ivar) for no in range(1,8)],
+            self.Omega: [self.Omega],
+            self.lam: [self.lam],
+            self.l: [l0*S.One*no for no in range(1, 8)],}
+
+        return default_data_dict
+    
+    
+    def steady_state(self):
+        return 3* (S.One/2 * self.damping_coefficient())**(-1)
+
+    
+    def max_static_force_pin(self):
+        return abs(self.static_load().doit()[0])
+    
+    
+    def max_dynamic_force_pin(self):
+        lin_sys=self.linearized()
+        
+        dyn_comp = (lin_sys.frequency_response_function()*self.l*self.k).subs(self._given_data)
+
+        total_force=(dyn_comp+self.max_static_force_pin())
+
+        return total_force
+    
+    def static_force_pin_diameter(self):
+        kt=Symbol('k_t', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_static_force_pin())/(pi*kt*Re))**(1/2)
+    
+    def dynamic_force_pin_diameter(self):
+        kt=Symbol('k_t', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_dynamic_force_pin())/(pi*kt*Re))**(1/2)
+    
+# class DampedShaft(ComposedSystem):
+
+
+#     def __init__(self,
+#                  I=Symbol('I', positive=True),
+#                  k_2=Symbol('k_2', positive=True),
+#                  k_1=Symbol('k_1', positive=True),
+#                  c_1=Symbol('c_1', positive=True),
+#                  c_2=Symbol('c_1', positive=True),
+#                  input_displacement=dynamicsymbols('theta'),
+#                  ivar=Symbol('t'),
+#                  qs=dynamicsymbols('\\varphi_1, \\varphi_2'),
+#                  **kwargs):
+
+#         phi1, phi2 = qs
+#         theta = input_displacement
+
+#         self.k_2 = k_2  # left spring
+#         self.k_1 = k_1  # right spring
+#         self.c_1 = c_1  # right spring
+#         self.c_2 = c_2  # right spring
+#         self.I = I  # moment of inertia of a rod
+#         self.input_displacement = input_displacement
+#         self.qs = qs
+
+#         self.disc_1 = Disk(I, pos1=phi1, qs=qs)
+#         self.spring_1 = Spring(k_2, phi1, phi2, qs=qs)  # left spring
+#         self.disc_2 = Disk(I, pos1=phi2, qs=qs)
+#         self.spring_2 = Spring(k_1, pos1=phi2, pos2=theta,
+#                                qs=qs)  # right spring
+#         self.damper_1 = Damper(c_2, phi1, phi2, qs=qs)  # left spring
+#         self.damper_2 = Damper(c_1, pos1=phi2, pos2=theta,
+#                                qs=qs)  # right spring
+#         system = self.disc_1 + self.disc_2 + self.spring_1 + self.spring_2 + self.damper_1 + self.damper_2
+
+#         super().__init__(system,**kwargs)
+
+#     def symbols_description(self):
+#         self.sym_desc_dict = {
+#             self.I: r'Moment of Inertia',
+#             self.k_1: r'',
+#             self.k_2: r'',
+#         }
+#         return self.sym_desc_dict
+#     def get_default_data(self):
+
+#         I0, k0, lamb = symbols('I_0 k_0 lambda', positive=True)
+
+#         default_data_dict = {
+#             self.k_2: [2 * k0, 4 * k0,6*k0,8*k0,10*k0],
+#             self.k_1: [k0, 3 * k0,5*k0,7*k0,9*k0],
+#             self.I: [2 * I0, S.Half * I0, 4 * I0, S.Half**2 * I0,3 * I0,3* S.Half * I0, 9 * I0, 3*S.Half**2 * I0],
+#             self.c_1: [lamb * self.k_1],
+#             self.c_2: [lamb * self.k_2],
+#         }
+#         return default_data_dict
+
+#     def get_random_parameters(self):
+
+
+
+#         default_data_dict = self.get_default_data()
+
+#         parameters_dict = {
+#             key: random.choice(items_list)
+#             for key, items_list in default_data_dict.items()
+#             }
+          
+#         return parameters_dict
+
 
