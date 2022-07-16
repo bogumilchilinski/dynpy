@@ -1214,285 +1214,364 @@ class BeamBridge(ComposedSystem):
     scheme_name = 'beam_bridge.PNG'
     real_name = 'beam_bridge_real.PNG'
 
+    m=Symbol('m', positive=True)
+    k_beam=Symbol('k_beam', positive=True)
+    g=Symbol('g', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    l=Symbol('l', positive=True)
+    module=Symbol('E', positive=True)
+    inertia=Symbol('I', positive=True)
+    z=dynamicsymbols('z')
+    E0 =Symbol('E_0', positive=True)
+    I0 =Symbol('I_0', positive=True)
+    l0 =Symbol('l_0', positive=True)
+    m0 =Symbol('m_0', positive=True)
+    lam0 =Symbol('lam_0', positive=True)
+    F0 =Symbol('F_0', positive=True)
+    
     def __init__(self,
-                 m=Symbol('m', positive=True),
-                 k_beam=Symbol('k_beam', positive=True),
+                 m=None,
+                 k_beam=None,
                  ivar=Symbol('t'),
-                 g=Symbol('g', positive=True),
-                 Omega=Symbol('Omega', positive=True),
-                 F=Symbol('F', positive=True),
-                 l=Symbol('l', positive=True),
-                 module=Symbol('E', positive=True),
-                 inertia=Symbol('I', positive=True),
-                 z=dynamicsymbols('z'),
+                 g=None,
+                 Omega=None,
+                 F=None,
+                 l=None,
+                 module=None,
+                 inertia=None,
+                 z=None,
                  **kwargs):
 
-        self.m = m
+        if m is not None: self.m = m
+        if k_beam is not None: self.k_beam = k_beam
+        if g is not None: self.g = g
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        if l is not None: self.l = l
+        if z is not None: self.z = z
+        if module is not None: self.module = module
+        if inertia is not None: self.inertia = inertia
+        self.ivar=ivar
+        
+        self._init_from_components(**kwargs)
 
-        self.k_beam = k_beam
+        
+    @property
+    def components(self):
 
-        self.g = g
-        self.Omega = Omega
-        self.F = F
-        self.l = l
-        self.z = z
-        self.module = module
-        self.inertia = inertia
+        components = {}
 
-        self.mass = MaterialPoint(m, z, qs=[z])
-        self.spring = Spring(k_beam, z, qs=[z])
-        self.gravity_force = GravitationalForce(m, g, z)
-        self.force = Force(-F * sin(Omega * ivar), pos1=z)
+        self._mass = MaterialPoint(self.m, self.z, qs=[self.z])(label='Material point')
+        self._spring = Spring(self.k_beam, self.z, qs=[self.z])(label='Beam')
+        self._gravity_force = GravitationalForce(self.m, self.g, self.z)(label='Gravity field')
+        self._force = Force(-self.F * sin(self.Omega * self.ivar), pos1=self.z)(label='External force')
 
-        composed_system = (self.mass + self.spring + self.gravity_force +
-                           self.force)
 
-        super().__init__(composed_system, **kwargs)
+        components['_mass'] = self._mass
+        components['_spring'] = self._spring
+        components['_gravity_force'] = self._gravity_force
+        components['_force'] = self._force
+
+        return components
 
     def symbols_description(self):
         self.sym_desc_dict = {
-            self.m: r'mass of system on the spring',
+            self.m: r'Mass of system on the spring',
             self.k_beam: r'Beam stiffness',
-            self.g: r'gravitational field acceleration'
+            self.g: r'Gravitational field acceleration',
+            self.Omega: r'Excitation frequency',
+            self.F: r'Force acting on a bridge',
+            self.l: r'Lenght of a beam',
+            self.module: r'Youngs modulus',
+            self.inertia: r'Interia of a beam'
         }
 
         return self.sym_desc_dict
 
     def get_default_data(self):
 
-        #         E0, I0, l0, m0, k0,c0, lam0= symbols('E_0 I_0 l_0 m_0 k_0 c_0 lambda_0', positive=True)
-        E0, I0, l0, m0, lam0, F0 = symbols('E_0 I_0 l_0 m_0 lambda_0 F_0',
-                                           positive=True)
+        #E0, I0, l0, m0, k0,c0, lam0= symbols('E_0 I_0 l_0 m_0 k_0 c_0 lambda_0', positive=True)
+        E0, I0, l0, m0, lam0, F0 = self.E0, self.I0, self.l0, self.m0, self.lam0, self.F0
         default_data_dict = {
 
-            #             self.lam:[10],
-            #             self.c:[self.k_beam*self.lam],
-            self.k_beam: [S.One * 48 * self.module * self.inertia / self.l**3],
-            self.m: [
-                10 * m0, 20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0, 70 * m0,
-                80 * m0, 90 * m0
-            ],
-            #             self.l:[l0,2*l0,3*l0,4*l0,5*l0,6*l0,7*l0,8*l0,9*l0],
-            #             self.E:[E0,2*E0,3*E0,4*E0,5*E0,6*E0,7*E0,8*E0,9*E0],
-            #             self.I:[I0,2*I0,3*I0,4*I0,5*I0,6*I0,7*I0,8*I0,9*I0],
-            #,100* m0, 200 * m0, 300 * m0, 400 * m0, 500 * m0, 600 * m0, 700 * m0, 800 * m0, 900 * m0
-            self.module: [
-                E0,
-                2 * E0,
-                3 * E0,
-                4 * E0,
-                5 * E0,
-                6 * E0,
-                7 * E0,
-                8 * E0,
-                9 * E0,
-                10 * E0,
-                11 * E0,
-                12 * E0,
-                13 * E0,
-                14 * E0,
-                15 * E0,
-                16 * E0,
-                17 * E0,
-                18 * E0,
-                19 * E0,
-            ],
-            self.inertia: [
-                I0,
-                2 * I0,
-                3 * I0,
-                4 * I0,
-                5 * I0,
-                6 * I0,
-                7 * I0,
-                8 * I0,
-                9 * I0,
-                10 * I0,
-                11 * I0,
-                12 * I0,
-                13 * I0,
-                14 * I0,
-                15 * I0,
-                16 * I0,
-                17 * I0,
-                18 * I0,
-                19 * I0,
-            ],
-            self.l: [
-                l0,
-                2 * l0,
-                3 * l0,
-                4 * l0,
-                5 * l0,
-                6 * l0,
-                7 * l0,
-                8 * l0,
-                9 * l0,
-                10 * l0,
-                11 * l0,
-                12 * l0,
-                13 * l0,
-                14 * l0,
-                15 * l0,
-                16 * l0,
-                17 * l0,
-                18 * l0,
-                19 * l0,
-            ],
-            #             self.lam:[lam0,2*lam0,3*lam0,4*lam0,5*lam0,6*lam0,7*lam0,8*lam0,9*lam0],
-            self.F: [
-                F0, 2 * F0, 3 * F0, 4 * F0, 5 * F0, 6 * F0, 7 * F0, 8 * F0,
-                9 * F0
-            ]
+            #self.lam:[10],
+            #self.c:[self.k_beam*self.lam],
+            self.m: [S.One*no*m0*10 for no in range (2,8)],
+            self.module: [S.One*E0*no for no in range (10,20)],
+            self.inertia: [S.One*no*I0 for no in range (10,20)],
+            self.l: [S.One*no*l0 for no in range (10,25)],
+            #self.lam:[lam0,2*lam0,3*lam0,4*am0,5*lam0,6*lam0,7*lam0,8*lam0,9*lam0],
+            self.F: [S.One*no*F0 for no in range (10,25)],
+            self.k_beam: [S.One * 48 * self.module * self.inertia / self.l**3]
         }
         return default_data_dict
+
 
 #Amadi
 class BeamBridgeDamped(ComposedSystem):
+    """Ready to use model of damped bridge represented by the mass supported by elastic beam.
+        Arguments:
+        =========
+            m = Symbol object
+                -Mass embedded on beam.
 
+            k = Symbol object
+                -Bending stiffness of the beam
+
+            g = Symbol object
+                -Gravitational field acceleration
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+        Example
+        =======
+        A mass hanged on the elastic beam with the stiffness k in the gravitational field
+
+        >>> t = symbols('t')
+        >>> m, k = symbols('m, k')
+        >>> qs = dynamicsymbols('z') # Generalized Coordinates
+        >>> mass = SDoFHarmonicOscillator(m,k, qs=[z],) # Initialization of LagrangesDynamicSystem instance
+
+        -We define the symbols and dynamicsymbols
+        -Kinetic energy T and potential energy v are evaluated to calculate the lagrangian L
+        -Reference frame was created with point P defining the position and the velocity determined on the z axis
+        -external forces assigned
+        -Next we determine the instance of the system using class LagrangeDynamicSystem
+        -We call out the instance of the class
+        -If necessary assign values for the default arguments
+
+
+    """
     scheme_name = 'bridge_dmp.png'
     real_name = 'beam_bridge_real.PNG'
 
+    m=Symbol('m', positive=True)
+    k_beam=Symbol('k_beam', positive=True)
+    g=Symbol('g', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    l=Symbol('l', positive=True)
+    module=Symbol('E', positive=True)
+    inertia=Symbol('I', positive=True)
+    z=dynamicsymbols('z')
+    c=Symbol('c', positive=True)
+    E0 =Symbol('E_0', positive=True)
+    I0 =Symbol('I_0', positive=True)
+    l0 =Symbol('l_0', positive=True)
+    m0 =Symbol('m_0', positive=True)
+    lam0 =Symbol('lambda_0', positive=True)
+    F0 =Symbol('F_0', positive=True)
+    lam =Symbol('lambda', positive=True)
+    
+    
     def __init__(self,
-                 m=Symbol('m', positive=True),
-                 k_beam=Symbol('k_beam', positive=True),
+                 m=None,
+                 k_beam=None,
                  ivar=Symbol('t'),
-                 g=Symbol('g', positive=True),
-                 Omega=Symbol('Omega', positive=True),
-                 F=Symbol('F', positive=True),
-                 c=Symbol('c', positive=True),
-                 l=Symbol('l', positive=True),
-                 module=Symbol('E', positive=True),
-                 inertia=Symbol('I', positive=True),
-                 lam=Symbol('lambda', positive=True),
-                 z=dynamicsymbols('z'),
+                 g=None,
+                 Omega=None,
+                 F=None,
+                 l=None,
+                 module=None,
+                 inertia=None,
+                 z=None,
+                 c=None,
+                 lam=None,
                  **kwargs):
 
-        self.m = m
-        self.c = c
-        self.k_beam = k_beam
-        self.lam = lam
-        self.g = g
-        self.Omega = Omega
-        self.F = F
-        self.l = l
-        self.z = z
-        self.module = module
-        self.inertia = inertia
-        #         c=self.lam*k_beamhaft
+        if m is not None: self.m = m
+        if k_beam is not None: self.k_beam = k_beam
+        if g is not None: self.g = g
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        if l is not None: self.l = l
+        if z is not None: self.z = z
+        if module is not None: self.module = module
+        if inertia is not None: self.inertia = inertia
+        if c is not None: self.c=c
+        if lam is not None: self.lam=lam
+        self.ivar=ivar
+        
+        self._init_from_components(**kwargs)
+        
 
-        self.mass = MaterialPoint(m, z, qs=[z])
-        self.spring = Spring(k_beam, z, qs=[z])
-        self.gravity_force = GravitationalForce(m, g, z)
-        self.force = Force(-F * sin(Omega * ivar), pos1=z)
-        self.damper = Damper(c, pos1=z, qs=[z])
-        composed_system = (self.mass + self.spring + self.gravity_force +
-                           self.force + self.damper)
+    @property
+    def components(self):
 
-        super().__init__(composed_system, **kwargs)
+        components = {}
+
+        self._mass = MaterialPoint(self.m, self.z, qs=[self.z])(label='Material point')
+        self._spring = Spring(self.k_beam, self.z, qs=[self.z])(label='Beam stiffness')
+        self._gravity_force = GravitationalForce(self.m, self.g, self.z)(label='Gravity field')
+        self._force = Force(-self.F * sin(self.Omega * self.ivar), pos1=self.z)(label='External force')
+        self._damper = Damper(self.c, pos1=self.z, qs=[self.z])(label='Damping of a beam')
+
+
+        components['_mass'] = self._mass
+        components['_spring'] = self._spring
+        components['_gravity_force'] = self._gravity_force
+        components['_force'] = self._force
+        components['_damper'] = self._damper
+
+        return components
 
     def symbols_description(self):
         self.sym_desc_dict = {
-            self.m: r'mass of system on the spring',
+            self.m: r'Mass of system on the spring',
             self.k_beam: r'Beam stiffness',
-            self.g: r'gravitational field acceleration'
+            self.g: r'Gravitational field acceleration',
+            self.Omega: r'Excitation frequency',
+            self.F: r'Force acting on a bridge',
+            self.l: r'Lenght of a beam',
+            self.module: r'Youngs modulus',
+            self.inertia: r'Interia of a beam',
+            self.c: r'Damping coefficient'
         }
 
         return self.sym_desc_dict
 
     def get_default_data(self):
 
-        #         E0, I0, l0, m0, k0,c0, lam0= symbols('E_0 I_0 l_0 m_0 k_0 c_0 lambda_0', positive=True)
-        E0, I0, l0, m0, lam0, F0 = symbols('E_0 I_0 l_0 m_0 lambda_0 F_0',
-                                           positive=True)
+        #E0, I0, l0, m0, k0,c0, lam0= symbols('E_0 I_0 l_0 m_0 k_0 c_0 lambda_0', positive=True)
+        E0, I0, l0, m0, lam0, F0 = self.E0, self.I0, self.l0, self.m0, self.lam0, self.F0
         default_data_dict = {
 
-            #             self.lam:[10],
-            self.c: [self.k_beam * self.lam],
+            #self.lam:[10,
+            self.m: [S.One*no*m0*10 for no in range (2,8)],
+            self.module: [S.One*E0*no for no in range (10,20)],
+            self.inertia: [S.One*no*I0 for no in range (10,20)],
+            self.l: [S.One*no*l0 for no in range (10,25)],
+            self.lam:[S.One* no * lam0 for no in range (1,5)],
+            self.F: [S.One*no*F0 for no in range (10,25)],
             self.k_beam: [S.One * 48 * self.module * self.inertia / self.l**3],
-            self.m: [
-                10 * m0, 20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0, 70 * m0,
-                80 * m0, 90 * m0
-            ],
-            #             self.l:[l0,2*l0,3*l0,4*l0,5*l0,6*l0,7*l0,8*l0,9*l0],
-            #             self.E:[E0,2*E0,3*E0,4*E0,5*E0,6*E0,7*E0,8*E0,9*E0],
-            #             self.I:[I0,2*I0,3*I0,4*I0,5*I0,6*I0,7*I0,8*I0,9*I0],
-            #,100* m0, 200 * m0, 300 * m0, 400 * m0, 500 * m0, 600 * m0, 700 * m0, 800 * m0, 900 * m0
-            self.module: [
-                E0,
-                2 * E0,
-                3 * E0,
-                4 * E0,
-                5 * E0,
-                6 * E0,
-                7 * E0,
-                8 * E0,
-                9 * E0,
-                10 * E0,
-                11 * E0,
-                12 * E0,
-                13 * E0,
-                14 * E0,
-                15 * E0,
-                16 * E0,
-                17 * E0,
-                18 * E0,
-                19 * E0,
-            ],
-            self.inertia: [
-                I0,
-                2 * I0,
-                3 * I0,
-                4 * I0,
-                5 * I0,
-                6 * I0,
-                7 * I0,
-                8 * I0,
-                9 * I0,
-                10 * I0,
-                11 * I0,
-                12 * I0,
-                13 * I0,
-                14 * I0,
-                15 * I0,
-                16 * I0,
-                17 * I0,
-                18 * I0,
-                19 * I0,
-            ],
-            self.l: [
-                l0,
-                2 * l0,
-                3 * l0,
-                4 * l0,
-                5 * l0,
-                6 * l0,
-                7 * l0,
-                8 * l0,
-                9 * l0,
-                10 * l0,
-                11 * l0,
-                12 * l0,
-                13 * l0,
-                14 * l0,
-                15 * l0,
-                16 * l0,
-                17 * l0,
-                18 * l0,
-                19 * l0,
-            ],
-            self.lam: [
-                lam0, 2 * lam0, 3 * lam0, 4 * lam0, 5 * lam0, 6 * lam0,
-                7 * lam0, 8 * lam0, 9 * lam0
-            ],
-            self.F: [
-                F0, 2 * F0, 3 * F0, 4 * F0, 5 * F0, 6 * F0, 7 * F0, 8 * F0,
-                9 * F0
-            ]
+            self.c:[self.k_beam*self.lam]
+            
+        }
+        return default_data_dict
+    
+    
+
+class SDOFSemiSubmersiblePlatform(ComposedSystem):
+
+    #scheme_name = '.PNG'
+    #real_name = '.jpg'
+    
+    z=dynamicsymbols('z')
+    m=Symbol('m', positive=True)
+    m_p=Symbol('m_p', positive=True)
+    k_1=Symbol('k', positive=True)
+    c_1=Symbol('c', positive=True)
+    c_2=Symbol('c_water', positive=True)
+    F_load=Symbol('F_{load}', positive=True)
+    g=Symbol('g', positive=True)
+    p_p=Symbol('P_p', positive=True)
+    rho=Symbol('rho', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    
+    def __init__(self,
+                 m=None,
+                 m_p=None,
+                 k_1=None,
+                 c_1=None,
+                 c_2=None,
+                 F_load=None,
+                 ivar=Symbol('t', positive=True),
+                 z=None,
+                 g=None,
+                 p_p=None,
+                 rho=None,
+                 Omega=None,
+                 F=None,
+                 **kwargs):
+        
+        if z is not None: self.z=z
+        if m is not None: self.m = m
+        if k_1 is not None: self.k_1 = k_1
+        if c_1 is not None: self.c_1 = c_1
+        if c_2 is not None: self.c_2 = c_2
+        if F_load is not None: self.F_load = F_load
+        if g is not None: self.g=g
+        if rho is not None: self.rho=rho
+        if p_p is not None: self.p_p=p_p
+        if Omega is not None: self.Omega=Omega
+        if F is not None: self.F = F
+        self.ivar=ivar
+        
+        self._init_from_components(**kwargs)
+        
+    @property
+    def components(self):
+
+        components = {}
+        
+        self._platform = MaterialPoint(self.m, pos1=self.z, qs=[self.z])(label='Material point - mass of the platform')
+        self._spring_1 = Spring(self.k_1, pos1=self.z, pos2=(self.k_1*self.z)/(self.p_p*self.rho), qs=[self.z])(label='Spring - stiffness of the platform')
+        self._spring_2 = Spring(self.p_p*self.rho, pos1=(self.k_1*self.z)/(self.p_p*self.rho), qs=[self.z])(label='Spring - buoyancy')
+        self._damper = Damper(self.c_1, pos1=self.z, pos2=(self.k_1*self.z)/(self.p_p*self.rho), qs=[self.z])(label='Damper - damping of the platform')
+        self._water = Damper(self.c_2, pos1=(self.k_1*self.z)/(self.p_p*self.rho), qs=[self.z])(label='Damper - damping of the water')
+        self._force = Force(-self.F_load, pos1=self.z, qs=[self.z])(label='Force - load on the platform')
+        self._MassOfPlatform = Force(-self.m*self.g, pos1=self.z, qs=[self.z])(label='Force - weight of the platform in gravitational field')
+        self._excitation = Force(self.F*sin(self.Omega*self.ivar), pos1=(self.k_1*self.z)/(self.p_p*self.rho), qs=[self.z])(label='Force - Force caused by the waves')
+        
+        components['_platform'] = self._platform
+        components['_spring_1'] = self._spring_1
+        components['_spring_2'] = self._spring_2
+        components['_damper'] = self._damper
+        components['_water'] = self._water
+        components['_force'] = self._force
+        components['_MassOfPlatform'] = self._water
+        components['_excitation'] = self._excitation
+        
+        return components
+
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass of a platform',
+            self.g: r'Gravity field acceleration',
+            self.Omega: r'Excitation frequency',
+            self.c_1: r'Platform damping coefficient',
+            self.c_2: r'Water damping coefficient',
+            self.rho: r'Water density',
+            self.k_1: r'Platform stiffness coefficient',
+            self.p_p: r'Area submerged in water',
+            self.F_load: r'Force caused by a load on a rig',
+            self.F: r'Force caused by a waves',
+            self.ivar: r'Time'
+        }
+        return self.sym_desc_dict
+    
+    
+    def get_default_data(self):
+
+        m0, Omega0, k0, p_p0, F0, lam0 = Symbol('m_0', positive=True), Symbol('Omega0', positive=True), Symbol('k0', positive=True), Symbol('p_{p0}', positive=True), Symbol('F0', positive=True), Symbol('lambda0', positive=True)
+        c_2 = self.c_2
+        g=self.g
+        rho=self.rho
+
+        default_data_dict = {
+            self.m: [S.One * m0 * no * 1000 for no in range(20, 30)],
+            self.g: [S.One * g * no for no in range(1, 2)],
+            self.Omega: [S.One * Omega0 * no for no in range(1, 2)],
+            self.c_2: [S.One * c_2 * no for no in range(1, 2)],
+            self.rho: [S.One * rho * no for no in range(1, 2)],
+            self.k_1: [S.One * k0 * no * 10000 for no in range(5, 10)],
+            self.c_1: [S.One * k0 * lam0 * no * 10000 for no in range(5, 10)],
+            self.p_p: [S.One * p_p0 * no for no in range(9, 16)],
+            self.F_load: [S.One * F0 * no * 1000 for no in range(5, 10)],
+            self.F: [S.One * F0 * no * 1000 for no in range(1, 10)]
         }
 
         return default_data_dict
 
+    
+    
 #Laura
 class DampedSpringMassSystem(ComposedSystem):
 
@@ -3414,3 +3493,4 @@ class KinematicClutchWithSprings(ComposedSystem):
         kd = Symbol('k_d', positive=True)
         h = Symbol('h', positive=True)
         return (2 * self.max_dynamic_bearing_force()) / (kd * h)
+
