@@ -6,7 +6,7 @@ from sympy.physics.vector import vpprint, vlatex
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
 from ..utilities.templates import tikz
 
-from dgeometry import GeometryScene,np
+#from dgeometry import GeometryScene,np
 
 from pylatex import TikZ,TikZNode
 
