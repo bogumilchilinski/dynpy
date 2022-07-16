@@ -644,7 +644,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         Returns the label of the object or class instance with reduced Degrees of Freedom.
         """
 
-        if len(args) > 1:
+        if len(args) > 0:
             if isinstance(args[0], str):
                 if label:
                     self._label=label
@@ -672,7 +672,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     def __str__(self):
 
-        return self._label
+        return str(self._label)
 
     def __repr__(self):
 
@@ -1135,7 +1135,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             'ivar': self.ivar,
             'dvars': self.Y,
             'params': params,
-            'label': 'Numerical model of ' + self.__str__(),
+            'label': 'Numerical model of ' + str(self.__str__()),
         }
 
     
