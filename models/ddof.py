@@ -10,7 +10,7 @@ from .elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody
 from .sdof import Pendulum, EngineVerticalSpringGravity
 from ..continuous import ContinuousSystem, PlaneStressProblem
 
-
+import os
 
 import base64
 import random
@@ -28,55 +28,30 @@ class ComposedSystem(HarmonicOscillator):
     detail_scheme_name = 'damped_car_new.PNG'
     detail_real_name = 'car_real.jpg'
     _default_args = ()
+    _default_folder_path = "./dynpy/models/images/"
     
     @classmethod
     def _scheme(cls):
-        if 'systems.py' in __file__: 
-            path = __file__.replace('systems.py', 'images/') + cls.scheme_name
-        if 'sdof.py' in __file__: 
-            path = __file__.replace('sdof.py', 'images/') + cls.scheme_name
-        if 'ddof.py' in __file__: 
-            path = __file__.replace('ddof.py', 'images/') + cls.scheme_name
-        if 'mdof.py' in __file__: 
-            path = __file__.replace('mdof.py', 'images/') + cls.scheme_name
+
+        path = cls._default_folder_path + cls.scheme_name
+        
         return path
 
     @classmethod
     def _real_example(cls):
-        if 'systems.py' in __file__: 
-            path = __file__.replace('systems.py', 'images/') + cls.real_name
-        if 'sdof.py' in __file__: 
-            path = __file__.replace('sdof.py', 'images/') + cls.real_name
-        if 'ddof.py' in __file__: 
-            path = __file__.replace('ddof.py', 'images/') + cls.real_name
-        if 'mdof.py' in __file__: 
-            path = __file__.replace('mdof.py', 'images/') + cls.real_name
+        path = cls._default_folder_path + cls.real_name
 
         return path
     
     @classmethod
     def _detail_real(cls):
-        if 'systems.py' in __file__: 
-            path = __file__.replace('systems.py', 'images/') + cls.detail_real_name
-        if 'sdof.py' in __file__: 
-            path = __file__.replace('sdof.py', 'images/') + cls.detail_real_name
-        if 'ddof.py' in __file__: 
-            path = __file__.replace('ddof.py', 'images/') + cls.detail_real_name
-        if 'mdof.py' in __file__: 
-            path = __file__.replace('mdof.py', 'images/') + cls.detail_real_name
+        path = cls._default_folder_path + cls.detail_real_name
 
         return path
     
     @classmethod
     def _detail_scheme(cls):
-        if 'systems.py' in __file__: 
-            path = __file__.replace('systems.py', 'images/') + cls.detail_scheme_name
-        if 'sdof.py' in __file__: 
-            path = __file__.replace('sdof.py', 'images/') + cls.detail_scheme_name
-        if 'ddof.py' in __file__: 
-            path = __file__.replace('ddof.py', 'images/') + cls.detail_scheme_name
-        if 'mdof.py' in __file__: 
-            path = __file__.replace('mdof.py', 'images/') + cls.detail_scheme_name
+        path = cls._default_folder_path + cls.detail_scheme_name
 
         return path
 

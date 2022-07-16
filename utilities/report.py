@@ -13,7 +13,7 @@ from pylatex import (Alignat, Axis, Command, Document, Eqref, Figure, Label,
                      TextColor, Marker, Math, NewLine, NewPage, Package, Plot,
                      Quantity, Ref, Section, Subsection, Table, Tabular, TikZ,
                      Description, LongTable)
-from pylatex.base_classes import Environment
+from pylatex.base_classes import Environment, Options
 from pylatex.package import Package
 from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
@@ -3733,7 +3733,7 @@ class AutoBreak(Environment):
 
     packages = [Package('mathtools'), Package('autobreak')]
     escape = False
-    content_separator = "\n"
+    content_separator = " "
     latex_backend = vlatex
 
     def _split_expr(self, expr):
@@ -3778,22 +3778,35 @@ class AutoBreak(Environment):
             if terms[no - 1] == Symbol('='):
                 new_terms += [obj]
 
+            elif isinstance(obj, Mul) and  (
+                (any([elem.is_negative for elem in obj.args]))):
+                #print(' any negative')
+                #display(obj)
+                new_terms += [Symbol('\n -'), -obj]
+                
             elif isinstance(obj, Mul) and not (
                 (any([elem.is_negative for elem in obj.args]))):
-
-                new_terms += [Symbol('+'), obj]
+                #print(' not any negative')
+                #display(obj)
+                new_terms += [Symbol('\n +'), obj]
 
             elif obj == Symbol('='):
                 new_terms += [obj]
 
             elif isinstance(obj, (Symbol, Function, Number,Derivative,Subs,Expr)):
-                new_terms += [Symbol('+'), obj]
+                new_terms += [Symbol('\n +'), obj]
 
             else:
                 new_terms += [obj]
 
+        prev_term=''
+        self.append('\n')
         for term in new_terms[1:]:
+#             print('+++',self.__class__.latex_backend(term))
+#             print('++ prev +++',prev_term)
             self.append(self.__class__.latex_backend(term))
+            #prev_term=self.__class__.latex_backend(term)
+        self.append('\n')
 
 
 # class EqRef(Environment):

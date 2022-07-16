@@ -26,33 +26,7 @@ class ComposedSystem(HarmonicOscillator):
     scheme_name = 'damped_car_new.PNG'
     real_name = 'car_real.jpg'
     _default_args = ()
-    
-    @classmethod
-    def _scheme(cls):
-        if 'systems.py' in __file__: 
-            path = __file__.replace('systems.py', 'images/') + cls.scheme_name
-        if 'sdof.py' in __file__: 
-            path = __file__.replace('sdof.py', 'images/') + cls.scheme_name
-        if 'ddof.py' in __file__: 
-            path = __file__.replace('ddof.py', 'images/') + cls.scheme_name
-        if 'mdof.py' in __file__: 
-            path = __file__.replace('mdof.py', 'images/') + cls.scheme_name
-
-        return path
-
-    @classmethod
-    def _real_example(cls):
-        if 'systems.py' in __file__: 
-            path = __file__.replace('systems.py', 'images/') + cls.real_name
-        if 'sdof.py' in __file__: 
-            path = __file__.replace('sdof.py', 'images/') + cls.real_name
-        if 'ddof.py' in __file__: 
-            path = __file__.replace('ddof.py', 'images/') + cls.real_name
-        if 'mdof.py' in __file__: 
-            path = __file__.replace('mdof.py', 'images/') + cls.real_name
-            
-
-        return path
+    _default_folder_path = "./dynpy/models/images/"
 
 
     @classmethod
@@ -1841,9 +1815,8 @@ class DoubleTrolleyWithNonlinearSprings(ComposedSystem):
                           + Spring(k_cl*(1-mu*x_l**2), pos1=x_l, qs=[x_l]) 
                           + MaterialPoint(m, x_l/2, qs = [x_l]) + MaterialPoint(m/2, x_l/2, qs = [x_l]) + MaterialPoint(m, x_l/2, qs = [x_l]) 
                           + MaterialPoint(m/2, x_l/2, qs = [x_l]))
-        
-        
-       
+
+
         self.Trolley_2 = (MaterialPoint(m2, x_r, qs=[x_r]) + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) 
                           + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) + Spring(k_cc*(1-mu*(x_r - x_l)**2), pos1=x_l, pos2=x_r, qs=[x_l, x_r]) 
                           + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_cr*(1-mu*x_r**2), pos1=x_r, qs=[x_r]) 

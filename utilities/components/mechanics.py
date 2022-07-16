@@ -443,7 +443,6 @@ class DissipationComponent(ReportComponent):  # Marcel
 
         
 
-
         display(ReportText(f'''
                            Energia rozpraszana tłumieniem wyrażona jest wzorem:
                            
@@ -456,15 +455,96 @@ class DissipationComponent(ReportComponent):  # Marcel
                            Podana zależność stanowi potencjał dysynpacyjny Rayleigh'a, 
                            który poddany różniczkowaniu względem wektora prędkości uogólnionych pozwala na określenie sił wiskotycznego tłumienia.
                            '''))
+        
+class SpringForce(ReportComponent):
+    
+    title="Siła od sprężyny"
 
-            
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(f'''
+                           Siła od sprężyny wyrażona jest wzorem:
+                           '''))
+        display(SympyFormula( Eq(Symbol('F'),-1*system.k*system.x,evaluate=False)))
+        
+        display(ReportText(f'''
+                           zamiast x używam steady solution
+                           '''))
+
+        display(SympyFormula( Eq(Symbol('F'),-1*system.k*system.steady_solution(),evaluate=False)))
+
+
+        display(ReportText(f'''
+                           Siła od sprężyny, zwana również siłą naciągu, pojawia sie przy ściskaniu lub rozciaganiu. Siła, która działa jest przeciwnie skierowana do ruch i chce przywrócić do pierwotnego jej położenia. Zależy od sztywności sprężyny k oraz od tego o ile została rozciagnieta bądź skrócona x.
+                           '''))
+class DamperForce(ReportComponent):
+    
+    title="Siła tłumienia"
+
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(f'''
+                           Siła tłumienia wyrażona jest wzorem:
+                           '''))
+
+        display(SympyFormula( Eq(Symbol('F'),-1*system.c*system.v,evaluate=False)))
+
+        display(ReportText(f'''
+                           zastępuje prędkość jako pochodna steady stolution po czasie:
+                           '''))
+
+        display(SympyFormula( Eq(Symbol('F'),-1*system.c*system.steady_solution().diff(system.ivar),evaluate=False)))
+
+        display(ReportText(f'''
+                           Siła tłumienia zmniejsza amplitude drgań, ma zwrot przeciwny do prędkości. Zależy od współczynnika tłumienia b oraz od prędkości v.
+                           '''))                
+class LogarithmicDecrement(ReportComponent):
+    
+    title="logarytmiczny dekrement tłumienia liczony z amplitud"
+
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(f'''
+                           Logarytmiczny dekrement tłumienia wyrażona jest wzorem przy pomocy amplitud:
+                           '''))
+
+        display(SympyFormula( Eq(Symbol('delta'),log(system.A_n1/system.A_n2))))
+
+
+        display(ReportText(f'''
+                           Zaprezentowana zależność opisuje bezwymaiarową wielkość charakteryzującą intensywność tłumienia drgań swobodnych w przypadku podkrytycznym. Jest to wielkość stała dla rozpaywanego                                  układu drgającego i nie zależy od warrunków początkowych. Zależy natomiast od maksymalnych wychyleń w chwilach różniących się o okres drań tłumionych.
+                           '''))
+        display(ReportText(f'''
+                           Logarytmiczny dekrement tłumienia u wyrażona jest wzorem przy pomocy okresu drgań tłumionych:
+                           '''))
+        display(SympyFormula( Eq(Symbol('delta'),2*pi*system.damping_coefficient()*(system.natural_frequencies())**-1,evaluate=False)))
+        
+        display(ReportText(f'''
+                           Zaprezentowana zależność opisuje bezwymaiarową wielkość charakteryzującą intensywność tłumienia drgań swobodnych w przypadku podkrytycznym. Jest to wielkość stała dla rozpaywanego układu drgającego i nie zależy od warrunków początkowych.Zależy natomiast od okresu drań tłumionych i współczynnika h.
+                           '''))
+
+
 class LagrangianComponent(ReportComponent):
     
     title="Lagrangian (funkcja Lagrange'a)  układu"
-        
 
     def append_elements(self):
-        
+
         system = self._system
         dyn_sys=system
         dyn_sys_lin = dyn_sys.linearized()

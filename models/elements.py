@@ -4,12 +4,20 @@ from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
+from ..utilities.templates import tikz
+
+#from dgeometry import GeometryScene,np
+
+from pylatex import TikZ,TikZNode
+
 
 import base64
 import IPython as IP
 
 base_frame=ReferenceFrame('N')
 base_origin=Point('O')
+
+
 
 class GeometryOfPoint:
 
@@ -63,23 +71,80 @@ class GeometryOfPoint:
 class Element(LagrangesDynamicSystem):
     """Base class for all elements
     """
+
+    scheme_name = 'damper.PNG'
+    real_name = 'damper.PNG'
+    _default_folder_path = "./dynpy/models/images/"
+    
+
+    
     @classmethod
-    def preview(cls,real=False):
-        if real:
-            path = __file__.replace('elements.py', 'images/') + cls.real_name
-            with open(f"{path}", "rb") as image_file:
-                encoded_string = base64.b64encode(image_file.read())
-            image_file.close()
+    def _scheme(cls):
+
+        path = cls._default_folder_path + cls.scheme_name
+        
+        return path
+
+    @classmethod
+    def _real_example(cls):
+        path = cls._default_folder_path + cls.real_name
+
+        return path
+    
+    @classmethod
+    def _detail_real(cls):
+        path = cls._default_folder_path + cls.detail_real_name
+
+        return path
+    
+    @classmethod
+    def _detail_scheme(cls):
+        path = cls._default_folder_path + cls.detail_scheme_name
+
+        return path
+
+    @classmethod
+    def preview(cls, example=False):
+        if example:
+            path = cls._real_example()
 
         else:
-            path = __file__.replace('elements.py', 'images/') + cls.scheme_name
-            with open(f"{path}", "rb") as image_file:
-                encoded_string = base64.b64encode(image_file.read())
-            image_file.close()
+            path = cls._scheme()
+
+        with open(f"{path}", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+        image_file.close()
 
         return IP.display.Image(base64.b64decode(encoded_string))
 
+    def _plot_2d(self, language='en'):
+
+
+        
+        class_name = self.__class__.__name__
+
+        span = np.linspace(0, len(class_name), 100)
+
+        res = GeometryScene.ax_2d.plot(span,
+                                       np.cos(5 * len(class_name) * span),
+                                       label=class_name)
+
+    def _tikz_scheme(self, language='en'):
+        
+        class_name = self.__class__.__name__
+        
+        schm = tikz.TikzStandalone()
+        tk_node = TikZ()
+
+        with schm.create(TikZ()) as tkz:
+            with tkz.create(TikZNode('Material Point',options=['draw'],text=f'{class_name}')) as node:
+                pass
+            
+        return schm
     
+
+        
+#Pati
 class MaterialPoint(Element):
     """
     Model of a Material point with changing point of mass:
@@ -110,16 +175,16 @@ class MaterialPoint(Element):
         
         
 
-        
+#Mateusz
 class Spring(Element):
     """
-    Model of a Spring:
-    """
-    """
-    Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s), which analytically display the dynamics of displacing spring after            cummulating PE.
+    Model of a Spring: Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s),
+    which analytically display the dynamics of displacing spring after cummulating PE.
     """
     scheme_name = 'spring.png'
-    real_name = 'spring.png'
+    scheme_name = 'damper.PNG'
+    real_name = 'damper.PNG'
+    
     def __init__(self, stiffness, pos1, pos2=0,l_0=0 ,  qs=None,ivar=Symbol('t'), frame = base_frame):
 
 
@@ -155,6 +220,7 @@ class GravitationalForce(Element):
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
         self._potential_energy = - Lagrangian
+
 
 class Disk(Element):
     """
@@ -213,8 +279,8 @@ class Damper(Element):
 
     Creates a singular model, after inputing correct values of the damping coefficient - c and general coordinates, which establishes a damping force directly proportional to the velocity, in time, of an inertial virbating element.
     """
-    scheme_name = 'damper.png'
-    real_name = 'damper.png'
+    scheme_name = 'damper.PNG'
+    real_name = 'damper.PNG'
     def __init__(self, c, pos1, pos2=0, qs=None, ivar=Symbol('t'), frame=base_frame):
         
         if not qs:
