@@ -69,10 +69,10 @@ class ComposedSystem(HarmonicOscillator):
         else:
             composed_system = system
             
-        print('CS',composed_system._components)
+        #print('CS',composed_system._components)
         super().__init__(None,system = composed_system)
         
-        print('self',self._components)
+        #print('self',self._components)
         if self._components is None:
             comps = {}
         else:
