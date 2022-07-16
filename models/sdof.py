@@ -21,8 +21,8 @@ class ComposedSystem(HarmonicOscillator):
     """
     scheme_name = 'damped_car_new.PNG'
     real_name = 'car_real.jpg'
-    detail_scheme_name = 'damped_car_new.PNG'
-    detail_real_name = 'car_real.jpg'
+    detail_scheme_name = 'sruba_pasowana.png'
+    detail_real_name = 'buick_regal_3800.jpg'
     _default_args = ()
 
     m0=Symbol('m_0',positive=True)
@@ -2822,6 +2822,117 @@ class SDOFDampedShaft(ComposedSystem):
         kd=Symbol('k_d', positive=True)
         h=Symbol('h', positive=True)
         return (2*self.max_dynamic_bearing_force())/(kd*h)
+    
+    
+class DampedMeasuringTool(ComposedSystem):
+
+    scheme_name = 'measure_tool.PNG'
+    real_name = 'measure_tool_real.PNG'
+    #detail_scheme_name = 
+    #detail_real_name = 
+    
+    m=Symbol('m', positive=True)
+    l=Symbol('l', positive=True)
+    k=Symbol('k', positive=True)
+    k_t=Symbol('k_t', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    phi=dynamicsymbols('\\varphi')
+    c=Symbol('c', positive=True)
+    c_t=Symbol('c_t', positive=True)
+    lam=Symbol('lambda', positive=True)
+    l0=Symbol('l_0', positive=True)
+    lam0=Symbol('lambda_0', positive=True)
+    
+    def __init__(self,
+                 m=None,
+                 l=None,
+                 k=None,
+                 k_t=None,
+                 ivar=Symbol('t'),
+                 Omega=None,
+                 F=None,
+                 phi=None,
+                 qs=None,
+                 c=None,
+                 c_t=None,
+                 lam=None,
+                 l0=None,
+                 lam0=None,
+                 **kwargs
+                 ):
+        if l is not None: self.l=l
+        if m is not None: self.m = m
+        if k is not None: self.k = k
+        if k_t is not None: self.k_t = k_t
+        if F is not None: self.F=F
+        if Omega is not None: self.Omega=Omega
+        if phi is not None: self.phi=phi
+        if c is not None: self.c=c
+        if c_t is not None: self.ct=ct
+        if lam is not None: self.lam=lam
+        if l0 is not None: self.l0=l0
+        if lam0 is not None: self.lam0=lam0
+        
+        self.qs = [self.phi]
+        self.ivar = ivar
+        
+        self._moment_of_inertia = MaterialPoint((S.One/3)*self.m*self.l**2, self.phi, qs=[self.phi])
+        self._upper_spring = Spring(self.k,pos1=self.l*self.phi, qs=[self.phi])
+        self._lower_spring = Spring(self.k, pos1= self.l*self.phi, qs=[self.phi])
+        self._spiral_spring=Spring(self.k_t, self.phi, qs=[self.phi])
+        self._force = Force(self.F*self.l, pos1=self.phi)
+        self._springs_damping= Damper(2*self.c ,pos1=self.l*self.phi, qs=[self.phi])
+        self._spiral_spring_damping= Damper(self.c_t ,pos1=self.phi, qs=[self.phi])
+        composed_system = self._moment_of_inertia + self._upper_spring + self._lower_spring + self._spiral_spring + self._force + self._springs_damping +self._spiral_spring_damping
+
+        super().__init__(composed_system,**kwargs)
+        
+    def get_default_data(self):
+
+        m0, k0, F0, Omega0, lam0, l0 = self.m0, self.k0, self.F0, self.Omega0, self.lam0, self.l0
+
+        default_data_dict = {
+            self.c: [self.lam*(self.k)],
+            self.c_t: [self.lam*(self.k_t)],
+            self.m: [m0*S.One*no for no in range(1,8)],
+            self.k: [k0*S.One*no for no in range(1,8)],
+            self.k_t: [k0*l0**2*S.One*no for no in range(1,8)],
+            self.F: [F0*S.One*no*cos(self.Omega*self.ivar) for no in range(1,8)],
+            self.Omega: [self.Omega],
+            self.lam: [self.lam],
+            self.l: [l0*S.One*no for no in range(1, 8)],}
+
+        return default_data_dict
+    
+    
+    def steady_state(self):
+        return 3* (S.One/2 * self.damping_coefficient())**(-1)
+
+    
+    def max_static_force_pin(self):
+        return abs(self.static_load().doit()[0])
+    
+    
+    def max_dynamic_force_pin(self):
+        lin_sys=self.linearized()
+        
+        dyn_comp = (lin_sys.frequency_response_function()*self.l*self.k).subs(self._given_data)
+
+        total_force=(dyn_comp+self.max_static_force_pin())
+
+        return total_force
+    
+    def static_force_pin_diameter(self):
+        kt=Symbol('k_t', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_static_force_pin())/(pi*kt*Re))**(1/2)
+    
+    def dynamic_force_pin_diameter(self):
+        kt=Symbol('k_t', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_dynamic_force_pin())/(pi*kt*Re))**(1/2)
+    
 # class DampedShaft(ComposedSystem):
 
 

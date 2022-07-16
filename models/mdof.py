@@ -2627,6 +2627,158 @@ class LinearizedTriplePendulum(ComposedSystem):
 
 
         return parameters_dict
+
+class ForcedTriplePendulum(ComposedSystem):
+    scheme_name = 'forced_triple_pendulum.png'
+    real_name = 'TriplePendulum_real.jpg'
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 m3=Symbol('m_3', positive=True),
+                 l_1=Symbol('l_1', positive=True),
+                 l_2=Symbol('l_2', positive=True),
+                 l_3=Symbol('l_3', positive=True),
+                 F1=Symbol('F_1', positive=True),
+                 F2=Symbol('F_2', positive=True),
+                 F3=Symbol('F_3', positive=True),
+                 g=Symbol('g', positive=True),
+                 Omega=Symbol('Omega', positive=True),
+                 phi_1=dynamicsymbols('\\varphi_1'),
+                 phi_2=dynamicsymbols('\\varphi_2'),
+                 phi_3=dynamicsymbols('\\varphi_3'),
+                 phi_u=dynamicsymbols('\\varphi_u'),
+                 phi_l=dynamicsymbols('\\varphi_l'),
+                 phi=dynamicsymbols('\\varphi'),
+                 qs=dynamicsymbols('\\varphi_1 \\varphi_2 \\varphi_3'),
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        self.m1 = m1
+        self.m2 = m2
+        self.m3 = m3
+        self.F1 = F1
+        self.F2 = F2
+        self.F3 = F3
+        self.l_1 = l_1
+        self.l_2 = l_2
+        self.l_3 = l_3
+        self.phi_1 = phi_1
+        self.phi_2 = phi_2
+        self.phi_3 = phi_3
+        self.phi_u = phi_u
+        self.phi_l = phi_l
+        self.phi = phi
+        self.g = g
+        
+        self.Omega = Omega
+
+        x_2 = sin(phi_1)*l_1 + sin(phi_2)*l_2
+        y_2 = cos(phi_1)*l_1 + cos(phi_2)*l_2
+        x_3 = x_2 + sin(phi_3)*l_3
+        y_3 = y_2 + cos(phi_3)*l_3
+
+        self.Pendulum1 = Pendulum(m1, g, l_1, angle=phi_1, qs=[phi_1])
+        self.material_point_11 = MaterialPoint(m2, x_2, qs=[phi_1, phi_2])
+        self.material_point_21 = MaterialPoint(m2, y_2, qs=[phi_1, phi_2])
+        self.gravity_1 = GravitationalForce(m2, g, pos1=-y_2, qs=[phi_2])
+        self.material_point_12 = MaterialPoint(m3, x_3, qs=[phi_1, phi_2, phi_3])
+        self.material_point_22 = MaterialPoint(m3, y_3, qs=[phi_1, phi_2, phi_3])
+        self.gravity_2 = GravitationalForce(m3, g, pos1=-y_3, qs=[phi_3])
+        self.Force1 = Force(F1*l_1, pos1=phi_1, qs=[phi_1])
+        self.Force2 = Force(F2*l_2 , pos1=(phi_2), qs=[phi_1, phi_2])
+        self.Force3 = Force(F3*l_3 , pos1=(phi_3), qs=[phi_1, phi_2, phi_3])
+        
+        system = self.Pendulum1 + self.material_point_11 + self.material_point_12 + self.material_point_21 + self.material_point_22 + self.gravity_1 + self.gravity_2 + self.Force1 + self.Force2 + self.Force3
+        super().__init__(system(qs),**kwargs)
+
+    def get_default_data(self):
+
+
+        m0, l0, F0 = symbols('m_0 l_0 F0', positive=True)
+        Omega, ivar = self.Omega,self.ivar
+        
+        
+
+        default_data_dict = {
+            self.m1: [m0*no for no in range(1,9)],
+            self.m2: [m0*no for no in range(1,9)],
+            self.m3: [m0*no for no in range(1,9)],
+
+            self.l_1: [l0*no for no in range(1,9)],
+            self.l_2: [l0*no for no in range(1,9)],
+            self.l_3: [l0*no for no in range(1,9)],
+            self.phi_1:[self.phi_u,0],
+            self.phi_2:[self.phi_u,self.phi_l],
+            self.phi_3:[self.phi_l],
+            self.F1: [F0*no*  sin(Omega * ivar) for no in range(1,2)],
+            self.F2: [F0*no * sin(Omega * ivar) for no in range(1,2)],
+            self.F3: [F0*no * sin(Omega * ivar) for no in range(1,2)],
+        }
+
+        return default_data_dict    
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.phi_2] == parameters_dict[self.phi_3]:
+
+            parameters_dict[self.phi_2] = self.phi_u
+
+#         display(parameters_dict)
+        return parameters_dict
+    
+class SDoFForcedTriplePendulum(ForcedTriplePendulum):
+    
+    def get_default_data(self):
+
+
+        m0, l0, F0 = symbols('m_0 l_0 F0', positive=True)
+        Omega, ivar = self.Omega,self.ivar
+        
+        
+
+        default_data_dict = {
+            self.m1: [m0*no for no in range(1,9)],
+            self.m2: [m0*no for no in range(1,9)],
+            self.m3: [m0*no for no in range(1,9)],
+
+            self.l_1: [l0*no for no in range(1,9)],
+            self.l_2: [l0*no for no in range(1,9)],
+            self.l_3: [l0*no for no in range(1,9)],
+            self.phi_1:[self.phi,0],
+            self.phi_2:[self.phi,0],
+            self.phi_3:[self.phi],
+            self.F1: [F0*no*  sin(Omega * ivar) for no in range(1,3)],
+            self.F2: [F0*no * sin(Omega * ivar) for no in range(1,3)],
+            self.F3: [F0*no * sin(Omega * ivar) for no in range(1,3)],
+        }
+
+        return default_data_dict    
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.phi_1] != parameters_dict[self.phi_2]:
+
+            parameters_dict[self.phi_1] = self.phi
+            parameters_dict[self.phi_2] = self.phi
+
+#         display(parameters_dict)
+        return parameters_dict
     
 class TripleShaft(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.

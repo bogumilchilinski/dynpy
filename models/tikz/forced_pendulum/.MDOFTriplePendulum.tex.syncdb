@@ -1,0 +1,1 @@
+{"key":"build_command","value":"latexmk -pdf -f -g -bibtex -deps -synctex=1 -interaction=nonstopmode -output-directory=/tmp/2116728b0d59d4dd6e0d8a78680771a682b7c102 'MDOFTriplePendulum.tex'"}
