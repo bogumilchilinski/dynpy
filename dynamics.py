@@ -354,11 +354,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
             
             Lagrangian=system
-            #system=None
-            
-            
-#             self._kinetic_energy = Lagrangian._kinetic_energy
-#             self._potential_energy = Lagrangian._potential_energy
+
 
         if isinstance(Lagrangian, LagrangesDynamicSystem):
 
@@ -428,7 +424,28 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
 
         return components
+
+    @property
+    def _components_str(self):
+
+        comps =[(str(comp).replace('\n','\n \t'))  for comp in (self.components.values())]
+
+        if len(comps) == 0:
+            return ''
+        else:
+            return '\t-' + ',\n \t-'.join(comps) + '.'
         
+    def __str__(self):
+        
+        comps_str=self._components_str
+
+        return str(f'{(self._label)} composed of: \n{comps_str}')
+
+    def __repr__(self):
+
+        return (self.__str__())
+    
+    
     @property
     def _elements_sum(self):
 
@@ -471,6 +488,20 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         subs_dict=system.get_random_parameters()
         
         return system.subs(subs_dict)
+
+    
+    def all_symbols_description(self):
+        
+        comps = self.components
+        
+        sym_desc_dict = {}
+        for comp in comps.values():
+            sym_desc_dict = {**sym_desc_dict,**comp.symbols_description()}
+        
+        sym_desc_dict = {**sym_desc_dict,**self.symbols_description()}
+
+        return sym_desc_dict
+
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -748,13 +779,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             
 
 
-    def __str__(self):
 
-        return str(self._label)
-
-    def __repr__(self):
-
-        return self.__str__()
 
     def lagrangian(self):
         """
