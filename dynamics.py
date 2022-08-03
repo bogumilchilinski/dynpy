@@ -351,13 +351,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
 
         if system:
-            # print(system._kinetic_energy)
-            
-#             if system._components is not None:
-#                 comps=list(system._components.values())
-#                 self._components = {**system._components}
-#                 print('abc',comps)
-#                 system = sum(comps[1:],comps[0])
+
             
             Lagrangian=system
             #system=None
@@ -459,6 +453,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return new_system
 
+    
+    def copy(self):
+        return type(self).from_system(self)
+    
     @classmethod
     def from_default_data(cls):
         
@@ -468,14 +466,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     
     @classmethod
     def from_random_data(cls):
-        
+
         system=cls.from_default_data()
         subs_dict=system.get_random_parameters()
         
         return system.subs(subs_dict)
-    
-        
-    
+
     def symbols_description(self):
         self.sym_desc_dict = {
 
