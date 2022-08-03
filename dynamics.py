@@ -269,6 +269,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self._potential_energy = 0
         self._dissipative_potential = 0
         self._components = None
+        self._evaluate = evaluate
 
 
 
@@ -340,6 +341,77 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self._given_data={}
         
         self._nonlinear_base_system=None
+
+    def _init_from_system(self,system=None):
+        self._kinetic_energy = 0
+        self._potential_energy = 0
+        self._dissipative_potential = 0
+        self._components = None
+
+
+
+        if system:
+
+            
+            Lagrangian=system
+
+
+        if isinstance(Lagrangian, LagrangesDynamicSystem):
+
+            self._kinetic_energy = Lagrangian._kinetic_energy
+            self._potential_energy = Lagrangian._potential_energy
+            self._dissipative_potential = Lagrangian._dissipative_potential
+
+
+        if isinstance(Lagrangian, me.LagrangesMethod):
+#             print('standart init')
+            
+            bodies = Lagrangian._bodies
+            frame = Lagrangian.inertial
+            forcelist = Lagrangian.forcelist
+            hol_coneqs = (Lagrangian._hol_coneqs)
+            nonhol_coneqs = list(
+                Lagrangian.coneqs)[len((Lagrangian._hol_coneqs)):]
+            qs = Lagrangian.q
+            Lagrangian = sum(Lagrangian._L)
+
+
+
+        
+        self.ivar = system.ivar
+        #         self.forcelist=forcelist
+        self.system = system
+        self.frame = frame
+
+        super().__init__(Lagrangian=Lagrangian,
+                         qs=qs,
+                         forcelist=forcelist,
+                         bodies=bodies,
+                         frame=frame,
+                         hol_coneqs=hol_coneqs,
+                         nonhol_coneqs=nonhol_coneqs)
+
+            
+        self.L = self._L
+
+        if system._evaluate == True:
+            self.__governing_equations = self.form_lagranges_equations()
+        else:
+            self.__governing_equations = None
+
+        self.governing_equations = self.__governing_equations
+
+        if system._label == None:
+            label = self.__class__.__name__ + ' with ' + str(len(self.q)) + 'DOF'
+        else:
+            label = self._label
+
+        self._label = label
+        self._evaluate = system._evaluate
+        self._given_data={}
+        
+        self._nonlinear_base_system=None
+        
         
     def _init_from_components(self):
         composed_system = self._elements_sum
@@ -352,7 +424,28 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
 
         return components
+
+    @property
+    def _components_str(self):
+
+        comps =[(str(comp).replace('\n','\n \t'))  for comp in (self.components.values())]
+
+        if len(comps) == 0:
+            return ''
+        else:
+            return '\t-' + ',\n \t-'.join(comps) + '.'
         
+    def __str__(self):
+        
+        comps_str=self._components_str
+
+        return str(f'{(self._label)} composed of: \n{comps_str}')
+
+    def __repr__(self):
+
+        return (self.__str__())
+    
+    
     @property
     def _elements_sum(self):
 
@@ -392,7 +485,17 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         return system.subs(subs_dict)
     
+    def all_symbols_description(self):
         
+        comps = self.components
+        
+        sym_desc_dict = {}
+        for comp in comps.values():
+            sym_desc_dict = {**sym_desc_dict,**comp.symbols_description()}
+        
+        sym_desc_dict = {**sym_desc_dict,**self.symbols_description()}
+
+        return sym_desc_dict
     
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -670,13 +773,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             
 
 
-    def __str__(self):
 
-        return str(self._label)
-
-    def __repr__(self):
-
-        return self.__str__()
 
     def lagrangian(self):
         """

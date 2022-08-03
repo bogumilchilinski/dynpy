@@ -1,0 +1,1 @@
+{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-interaction=nonstopmode","-output-directory=/tmp/df0b4c971a61c7f720e1075d23880cb874b504d5","TripleShaft.tex"]}
