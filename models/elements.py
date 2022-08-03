@@ -3,6 +3,8 @@ from numbers import Number
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 
+import numpy as np
+
 from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
 from ..utilities.templates import tikz
 
@@ -17,6 +19,49 @@ import IPython as IP
 base_frame=ReferenceFrame('N')
 base_origin=Point('O')
 
+import matplotlib.pyplot as plt
+
+class GeometryScene:
+
+
+    ax_2d=None
+    ax_3d=None
+
+
+
+    def __init__(self,height=12,width=12,figsize=(12,9)):
+
+        plt.figure(figsize=figsize)
+        ax_2d = plt.subplot(121)
+        #ax_2d.set(ylabel=(r'<-x | z ->'),xlabel='y')
+
+        plt.xlim(-0.1*width, width)
+        plt.ylim(-height, height)
+        plt.grid(False)
+        
+        plt.axis('off')
+        
+      
+        
+        #ax_2d.set_yticks(  range(-12,12,2) )
+        #ax_2d.set_yticklabels(  list(map(lambda tick: str(abs(tick)),range(-12,12,2)))  )
+
+        ax_3d = plt.subplot(122, projection='3d')
+        #ax_3d.set(xlabel='x',ylabel='y',zlabel='z')
+
+        #plt.xlim(0, 16)
+        #plt.ylim(0, 16)
+
+
+        #ax_3d.set_zlim(0, 16)
+
+        ax_3d.view_init(30,80)
+        plt.tight_layout()  
+        plt.axis("off")
+
+
+        self.__class__.ax_2d=ax_2d 
+        self.__class__.ax_3d=ax_3d 
 
 
 class GeometryOfPoint:
@@ -141,15 +186,18 @@ class Element(LagrangesDynamicSystem):
                 pass
             
         return schm
-    
+    def __str__(self):
+        
+
+        return f'{(self._label)}'    
 
         
 #Pati
 class MaterialPoint(Element):
     """
     Model of a Material point with changing point of mass:
-    """
-    """Creates a material point of an inertial body, after inputing correct values of mass -m and general coordinates, which follows a linear motion.
+
+    Creates a material point of an inertial body, after inputing correct values of mass -m and general coordinates, which follows a linear motion.
     """
     scheme_name = 'material_point.png'
     real_name = 'material_point.png'
@@ -195,11 +243,12 @@ class Spring(Element):
             self.qs = [pos1]
 
         Lagrangian = (-S.Half * stiffness * ((pos2.pos_from(pos1)).magnitude() - l_0  )**2 )
-
+        
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, frame=frame)
-        
+
         self._potential_energy = - Lagrangian
+        
 
 
 class GravitationalForce(Element):
