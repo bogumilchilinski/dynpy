@@ -536,6 +536,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return new_system
 
+    
+    def copy(self):
+        return type(self).from_system(self)
+    
     @classmethod
     def from_default_data(cls):
         
@@ -545,11 +549,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     
     @classmethod
     def from_random_data(cls):
-        
+
         system=cls.from_default_data()
         subs_dict=system.get_random_parameters()
         
         return system.subs(subs_dict)
+
     
     def all_symbols_description(self):
         
@@ -562,7 +567,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         sym_desc_dict = {**sym_desc_dict,**self.symbols_description()}
 
         return sym_desc_dict
-    
+
+
     def symbols_description(self):
         self.sym_desc_dict = {
 
