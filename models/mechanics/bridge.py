@@ -383,8 +383,8 @@ class BeamBridge(ComposedSystem):
         components = {}
 
         self._mass = MaterialPoint(self.m, self.z,
-                                   qs=[self.z])(label='Material point')
-        self._spring = Spring(self.k_beam, self.z, qs=[self.z])(label='Beam')
+                                   qs=[self.z])(label='Mass of a beam')
+        self._spring = Spring(self.k_beam, self.z, qs=[self.z])(label='Beam stiffness')
         self._gravity_force = GravitationalForce(self.m, self.g,
                                                  self.z)(label='Gravity field')
         self._force = Force(-self.F * sin(self.Omega * self.ivar),
@@ -429,6 +429,16 @@ class BeamBridge(ComposedSystem):
         }
         return default_data_dict
 
+    def get_numerical_data(self):
+
+        default_data_dict = {
+            self.m: [S.One * no * 1000 for no in range(20, 80)],
+            self.k_beam: [S.One * 50 * no for no in range(10, 20)],
+            self.F: [S.One * no  for no in range(10, 25)],
+            self.Omega: [2 * 3.14 * 10],
+            self.g:[9.81]
+        }
+        return default_data_dict
 
 #Amadi
 class BeamBridgeDamped(ComposedSystem):
@@ -526,7 +536,7 @@ class BeamBridgeDamped(ComposedSystem):
         components = {}
 
         self._mass = MaterialPoint(self.m, self.z,
-                                   qs=[self.z])(label='Material point')
+                                   qs=[self.z])(label='Mass of a beam')
         self._spring = Spring(self.k_beam, self.z,
                               qs=[self.z])(label='Beam stiffness')
         self._gravity_force = GravitationalForce(self.m, self.g,
@@ -577,54 +587,106 @@ class BeamBridgeDamped(ComposedSystem):
         }
         return default_data_dict
 
+    
+    def get_numerical_data(self):
+
+        default_data_dict = {
+            self.m: [S.One * no * 1000 for no in range(20, 80)],
+            self.k_beam: [S.One * 50 * no for no in range(10, 20)],
+            self.F: [S.One * no  for no in range(10, 25)],
+            self.Omega: [S.One * 2 * 3.14 * 10],
+            self.g:[S.One * 9.81],
+            self.c:[S.One * no for no in range(5,20)],
+        }
+        return default_data_dict
+    
+    
+#Amadi
 class BeamBridgeTMD(ComposedSystem):
 
     scheme_name = 'bridge_tmd.png'
     real_name = 'beam_bridge_real.PNG'
     detail_real_name = 'real_bidge_tmd.jpg'
 
+    m=Symbol('m', positive=True)
+    m_TMD=Symbol('m_TMD', positive=True)
+    k_beam=Symbol('k_beam', positive=True)
+    k_TMD=Symbol('k_TMD', positive=True)
+    g=Symbol('g', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    z=dynamicsymbols('z')
+    z_TMD=dynamicsymbols('z_TMD')
+    module = Symbol('E', positive=True)
+    inertia = Symbol('I', positive=True)
+    E0 = Symbol('E_0', positive=True)
+    I0 = Symbol('I_0', positive=True)
+    l0 = Symbol('l_0', positive=True)
+    m0 = Symbol('m_0', positive=True)
+    F0 = Symbol('F_0', positive=True)
+    l=Symbol('l', positive=True)
+    
     def __init__(self,
-                 m=Symbol('m', positive=True),
-                 m_TMD=Symbol('m_TMD', positive=True),
-                 k_beam=Symbol('k_beam', positive=True),
-                 k_TMD=Symbol('k_TMD', positive=True),
+                 m=None,
+                 m_TMD=None,
+                 k_beam=None,
+                 k_TMD=None,
                  ivar=Symbol('t'),
-                 g=Symbol('g', positive=True),
-                 Omega=Symbol('Omega', positive=True),
-                 F=Symbol('F', positive=True),
-                 z=dynamicsymbols('z'),
-                 z_TMD=dynamicsymbols('z_TMD'),
+                 g=None,
+                 Omega=None,
+                 F=None,
+                 z=None,
+                 z_TMD=None,
                  **kwargs):
 
-        self.m = m
-        self.k_beam = k_beam
-        self.g = g
-        self.Omega = Omega
-        self.F = F
-        self.m_TMD = m_TMD
-        self.k_TMD = k_TMD
-        self.z_TMD = z_TMD
-        self.z = z
+        if m is not None: self.m = m
+        if k_beam is not None: self.k_beam = k_beam
+        if g is not None: self.g = g
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        if m_TMD is not None: self.m_TMD = m_TMD
+        if k_TMD is not None: self.k_TMD = k_TMD
+        if z_TMD is not None: self.z_TMD = z_TMD
+        if z is not None: self.z = z
+        self.ivar=ivar
+        
+        self._init_from_components(**kwargs)
 
-        self.mass = MaterialPoint(m, z, qs=[z])
-        self.spring = Spring(k_beam, z, qs=[z])
-        self.gravity_force = GravitationalForce(self.m, self.g, z)
-        self.gravity_TMD = GravitationalForce(self.m_TMD, self.g, z_TMD)
-        self.force = Force(F * sin(Omega * ivar), pos1=z)
-        self.TMD = MaterialPoint(m_TMD, pos1=z_TMD, qs=[z_TMD])
-        self.spring_TMD = Spring(k_TMD, z, z_TMD, qs=[z, z_TMD])
-        composed_system = (self.mass + self.spring + self.gravity_force + self.force +
-                  self.TMD + self.spring_TMD )
+    @property
+    def components(self):
 
-        super().__init__(composed_system,**kwargs)
+        components = {}
+       
+        self._mass = MaterialPoint(self.m, self.z, qs=[self.z])(label='Mass of a beam')
+        self._spring = Spring(self.k_beam, self.z, qs=[self.z])(label='Beam stiffness')
+        self._gravity_force = GravitationalForce(self.m, self.g, self.z)(label='Gravity field')
+        self._gravity_TMD = GravitationalForce(self.m_TMD, self.g, self.z_TMD)(label='Gravity field')
+        self._force = Force(self.F * sin(self.Omega * self.ivar), pos1=self.z)(label='External force')
+        self._TMD = MaterialPoint(self.m_TMD, pos1=self.z_TMD, qs=[self.z_TMD])(label='Mass of a TMD')
+        self._spring_TMD = Spring(self.k_TMD, self.z, self.z_TMD, qs=[self.z, self.z_TMD])(label='Spring stiffness of a TMD')
 
+        components['_mass'] = self._mass
+        components['_spring'] = self._spring
+        components['_gravity_force'] = self._gravity_force
+        components['_force'] = self._force
+        components['_gravity_TMD'] = self._gravity_TMD
+        components['_TMD'] = self._TMD
+        components['_spring_TMD'] = self._spring_TMD
 
+        return components
 
     def symbols_description(self):
         self.sym_desc_dict = {
-            self.m: r'mass of system on the spring',
-            self.k_beam: r'Beam stiffness',
-            self.g: r'gravitational field acceleration'
+        self.m: r'Mass of beam',
+        self.k_beam: r'Beam stiffness',
+        self.g: r'Gravitational field acceleration',
+        self.Omega: r'Excitation frequency',
+        self.F: r'Force acting on a bridge',
+        self.l: r'Lenght of a beam',
+        self.module: r'Youngs modulus',
+        self.inertia: r'Interia of a beam',
+        self.m_TMD: r'Mass of TMD',
+        self.k_TMD: r'Spring stiffness of a TMD'
         }
 
         return self.sym_desc_dict
@@ -634,131 +696,165 @@ class BeamBridgeTMD(ComposedSystem):
         E, I, l, m0, k0,F0 = symbols('E I l_beam m_0 k_0 F_0', positive=True)
 
         default_data_dict = {
-            self.m: [10*m0, 20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0, 70 * m0, 80 * m0, 90 * m0],
-            self.k_beam: [1 * 48 * E * I / l**3,
-                2 * 48 * E * I / l**3, 3 * 48 * E * I / l**3,
-                4 * 48 * E * I / l**3, 5 * 48 * E * I / l**3,
-                6 * 48 * E * I / l**3,
-                7 * 48 * E * I / l**3,
-                8 * 48 * E * I / l**3,
-                9 * 48 * E * I / l**3
-            ],
-            self.m_TMD: [1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0],
-            self.k_TMD: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
-            self.F:[F0*no for no in range(0,10)]
+            self.m: [S.One * no * self.m0 * 1000 for no in range(20, 80)],
+            self.module: [S.One * self.E0 * no for no in range(10, 20)],
+            self.inertia: [S.One * no * self.I0 for no in range(10, 20)],
+            self.l: [S.One * no * self.l0 for no in range(10, 25)],
+            self.k_beam: [S.One * 48 * self.module * self.inertia / self.l**3],
+            self.m_TMD: [S.One * no * self.m0 * 50 for no in range(20, 80)],
+            self.k_TMD: [S.One * no * self.k0 for no in range(15, 20)],
+            self.F: [S.One * no * self.F0 for no in range(10, 25)]
         }
 
         return default_data_dict
+    
+    def get_numerical_data(self):
 
+        default_data_dict = {
+            self.m: [S.One * no * 1000 for no in range(20, 80)],
+            self.k_beam: [S.One * 50 * no for no in range(10, 20)],
+            self.m_TMD: [S.One * no * 50  for no in range(20, 80)],
+            self.k_TMD: [S.One * no  for no in range(15, 20)],
+            self.F: [S.One * no  for no in range(10, 25)],
+            self.Omega: [2 * 3.14 * 10],
+            self.g:[9.81]
+        }
+        return default_data_dict
 
 class BeamBridgeDampedTMD(ComposedSystem):
 
     scheme_name = 'bridge_tmd_dmp.png'
     real_name = 'beam_bridge_real.PNG'
     detail_real_name = 'real_bidge_tmd.jpg'
-    
+
+    c_TMD=Symbol('c_TMD', positive=True)
+    c=Symbol('c', positive=True)
+    m=Symbol('m', positive=True)
+    m_TMD=Symbol('m_TMD', positive=True)
+    k_beam=Symbol('k_beam', positive=True)
+    k_TMD=Symbol('k_TMD', positive=True)
+    g=Symbol('g', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    z=dynamicsymbols('z')
+    z_TMD=dynamicsymbols('z_TMD')
+    module = Symbol('E', positive=True)
+    inertia = Symbol('I', positive=True)
+    E0 = Symbol('E_0', positive=True)
+    I0 = Symbol('I_0', positive=True)
+    l0 = Symbol('l_0', positive=True)
+    m0 = Symbol('m_0', positive=True)
+    F0 = Symbol('F_0', positive=True)
+    l=Symbol('l', positive=True)
+    lam=Symbol('lambda', positive=True)
+    lam0=Symbol('lambda_0', positive=True)
+
     def __init__(self,
-                 m=Symbol('m', positive=True),
-                 m_TMD=Symbol('m_TMD', positive=True),
-                 k_beam=Symbol('k_beam', positive=True),
-                 k_TMD=Symbol('k_TMD', positive=True),
+                 m=None,
+                 m_TMD=None,
+                 k_beam=None,
+                 k_TMD=None,
                  ivar=Symbol('t'),
-                 g=Symbol('g', positive=True),
-                 Omega=Symbol('Omega', positive=True),
-                 F_0=Symbol('F_0', positive=True),
-                 c_TMD=Symbol('c_TMD', positive=True),
-                 c=Symbol('c', positive=True),
-                 z_TMD=BeamBridgeTMD().z_TMD,
-                 z=BeamBridgeTMD().z,
+                 g=None,
+                 Omega=None,
+                 F=None,
+                 c_TMD=None,
+                 c=None,
+                 z_TMD=None,
+                 z=None,
                  **kwargs):
-        qs = z, z_TMD
         
-        self.m = m
-        self.k_beam = k_beam
-        self.g = g
-        self.Omega = Omega
-        self.F_0 = F_0
-        self.m_TMD = m_TMD
-        self.k_TMD = k_TMD
-        self.z_TMD = z_TMD
-        self.z = z
-        self.c = c
-        self.c_TMD = c_TMD
-
-        self.mass = MaterialPoint(m, z, qs=[z])
-        self.spring = Spring(k_beam, z, qs=[z])
-        self.gravity_force = GravitationalForce(self.m, self.g, z)
-        self.gravity_TMD = GravitationalForce(self.m_TMD, self.g, z_TMD)
-        self.force = Force(F_0 * sin(Omega * ivar), pos1=z)
-        self.TMD = MaterialPoint(m_TMD, pos1=z_TMD, qs=[z_TMD])
-        self.spring_TMD = Spring(k_TMD, z, z_TMD, qs=[z, z_TMD])
+        if m is not None: self.m = m
+        if k_beam is not None: self.k_beam = k_beam
+        if g is not None: self.g = g
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        if m_TMD is not None: self.m_TMD = m_TMD
+        if k_TMD is not None: self.k_TMD = k_TMD
+        if z_TMD is not None: self.z_TMD = z_TMD
+        if z is not None: self.z = z
+        if c is not None: self.c = c
+        if c_TMD is not None: self.c_TMD = c_TMD
+        self.ivar=ivar
         
-        self.damper_TMD = Damper(c=c_TMD, pos1=z - z_TMD, qs=qs)  # left damper
-        self.damper = Damper(c=c, pos1=z, qs=qs)
-        composed_system = self.mass + self.spring + self.gravity_force + self.force + self.TMD + self.spring_TMD + self.gravity_TMD + self.damper + self.damper_TMD
+        self._init_from_components(**kwargs)
 
-        super().__init__(composed_system,**kwargs)
+    @property
+    def components(self):
+
+        components = {}
+
+        self._mass = MaterialPoint(self.m, self.z, qs=[self.z])(label='Mass of a beam')
+        self._spring = Spring(self.k_beam, self.z, qs=[self.z])(label='Beam stiffness')
+        self._gravity_force = GravitationalForce(self.m, self.g, self.z)(label='Gravity field')
+        self._gravity_TMD = GravitationalForce(self.m_TMD, self.g, self.z_TMD)(label='Gravity field')
+        self._force = Force(self.F * sin(self.Omega * self.ivar), pos1=self.z)(label='External force')
+        self._TMD = MaterialPoint(self.m_TMD, pos1=self.z_TMD, qs=[self.z_TMD])(label='Mass of a TMD')
+        self._spring_TMD = Spring(self.k_TMD, self.z, self.z_TMD, qs=[self.z, self.z_TMD])(label='Spring stiffness of a TMD')
+        self._damper_TMD = Damper(self.c_TMD, pos1=self.z - self.z_TMD, qs=[self.z, self.z_TMD])(label='Damper of a TMD')
+        self._damper = Damper(self.c, pos1=self.z, qs=[self.z, self.z_TMD])(label='Damper of a bridge')
+
+        components['_mass'] = self._mass
+        components['_spring'] = self._spring
+        components['_gravity_force'] = self._gravity_force
+        components['_force'] = self._force
+        components['_gravity_TMD'] = self._gravity_TMD
+        components['_TMD'] = self._TMD
+        components['_spring_TMD'] = self._spring_TMD
+        components['_damper_TMD'] = self._damper_TMD
+        components['_damper'] = self._damper
+
+        return components
 
     def symbols_description(self):
         self.sym_desc_dict = {
-            self.m: r'mass of system on the spring',
-            self.k_beam: r'Beam stiffness',
-            self.g: r'gravitational field acceleration'
+        self.m: r'Mass of beam',
+        self.k_beam: r'Beam stiffness',
+        self.g: r'Gravitational field acceleration',
+        self.Omega: r'Excitation frequency',
+        self.F: r'Force acting on a bridge',
+        self.l: r'Lenght of a beam',
+        self.module: r'Youngs modulus',
+        self.inertia: r'Interia of a beam',
+        self.m_TMD: r'Mass of TMD',
+        self.k_TMD: r'Spring stiffness of a TMD',
+        self.c: r'Damping coefficient of a bridge',
+        self.c_TMD: r'Damping coefficient of a TMD'
         }
 
         return self.sym_desc_dict
 
-    def get_default_data(self,real=False):
+    def get_default_data(self):
 
-        E, I, l, m0, k0, lamb = symbols('E I l_beam m_0 k_0 lambda',
-                                        positive=True)
+        E, I, l, m0, k0,F0 = symbols('E I l_beam m_0 k_0 F_0', positive=True)
 
-        if real is False:
-            
-            default_data_dict = {
-                self.m: [10 * m0, 20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0, 70*m0, 80*m0, 90*m0],
-                self.c: [lamb * self.k_beam],
-                self.k_beam: [10 * 48 * E * I / l**3,
-                    20 * 48 * E * I / l**3, 30 * 48 * E * I / l**3,
-                    40 * 48 * E * I / l**3, 50 * 48 * E * I / l**3,
-                    60 * 48 * E * I / l**3, 70 * 48 * E * I / l**3, 80 * 48 * E * I / l**3, 90 * 48 * E * I / l**3
-                ],
-                self.c_TMD: [lamb * self.k_TMD],
-                self.m_TMD: [m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7*m0, 8*m0, 9*m0],
-                self.k_TMD: [
-                    1 * 48 * E * I / l**3, 2 * 48 * E * I / l**3,
-                    3 * 48 * E * I / l**3, 4 * 48 * E * I / l**3,
-                    5 * 48 * E * I / l**3, 6 * 48 * E * I / l**3, 7 * 48 * E * I / l**3, 8 * 48 * E * I / l**3, 9 * 48 * E * I / l**3
-                ],
-            }
-        else:
-            numerized_dict = {m0:100 , lamb:2 , E:200000, I:0.48, l:3}
-            default_data_dict = {
-                self.m: [20 * m0, 30 * m0, 40 * m0, 50 * m0, 60 * m0],
-                self.c: [lamb * self.k_beam],
-                self.k_beam: [
-                    20 * 48 * E * I / l**3, 30 * 48 * E * I / l**3,
-                    40 * 48 * E * I / l**3, 50 * 48 * E * I / l**3,
-                    60 * 48 * E * I / l**3],
-                self.c_TMD: [lamb * self.k_TMD],
-                self.m_TMD: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
-                self.k_TMD: [
-                    1 * 48 * E * I / l**3, 3 * 48 * E * I / l**3,
-                    3 * 48 * E * I / l**3, 5 * 48 * E * I / l**3,
-                    5 * 48 * E * I / l**3]
-            }
-
-            values_of_dict = flatten([default_data_dict[self.m], default_data_dict[self.c],
-                                      default_data_dict[self.k_beam], default_data_dict[self.c_TMD],
-                                      default_data_dict[self.m_TMD], default_data_dict[self.k_TMD]
-                                     ])
-
-            for i in range(len(values_of_dict)):
-                    default_data_dict = display(values_of_dict[i].subs(numerized_dict))
+        default_data_dict = {
+            self.m: [S.One * no * self.m0 * 10 for no in range(2, 8)],
+            self.module: [S.One * self.E0 * no for no in range(10, 20)],
+            self.inertia: [S.One * no * self.I0 for no in range(10, 20)],
+            self.l: [S.One * no * self.l0 for no in range(10, 25)],
+            self.k_beam: [S.One * 48 * self.module * self.inertia / self.l**3],
+            self.m_TMD: [S.One * no * self.m0 for no in range(2, 8)],
+            self.k_TMD: [S.One * no * self.k0 for no in range(15, 20)],
+            self.F: [S.One * no * self.F0 for no in range(10, 25)],
+            self.lam: [S.One * no * self.lam0 / 1000 for no in range(1, 8)],
+            self.c: [S.One * self.k_beam * self.lam * 10],
+            self.c_TMD: [S.One * self.k_TMD * self.lam]
+        }
 
         return default_data_dict
 
+    def get_numerical_data(self):
 
-    def get_real_data(self):
-        
-        return self.get_default_data(True)
+        default_data_dict = {
+            self.m: [S.One * no * 1000 for no in range(20, 80)],
+            self.k_beam: [S.One * 50 * no for no in range(10, 20)],
+            self.m_TMD: [S.One * no * 50  for no in range(20, 80)],
+            self.k_TMD: [S.One * no  for no in range(15, 20)],
+            self.F: [S.One * no  for no in range(10, 25)],
+            self.Omega: [S.One * 2 * 3.14 * 10],
+            self.g:[S.One * 9.81],
+            self.c:[S.One * no for no in range(5,20)],
+            self.c_TMD:[S.One * no for no in range(5,10)]
+        }
+        return default_data_dict

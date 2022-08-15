@@ -1,67 +1,28 @@
-from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Derivative,Integral, Expr,Function,latex)
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Derivative,Integral, Expr,Function,latex, Heaviside, atan, pi)
 from numbers import Number
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 
 import numpy as np
 
-from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator
+from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator, GeometryScene
 from ..utilities.templates import tikz
 
 #from dgeometry import GeometryScene,np
 
 from pylatex import TikZ,TikZNode
-
+import matplotlib.pyplot as plt
 
 import base64
+import random
 import IPython as IP
 
 base_frame=ReferenceFrame('N')
 base_origin=Point('O')
 
-import matplotlib.pyplot as plt
-
-class GeometryScene:
-
-
-    ax_2d=None
-    ax_3d=None
 
 
 
-    def __init__(self,height=12,width=12,figsize=(12,9)):
-
-        plt.figure(figsize=figsize)
-        ax_2d = plt.subplot(121)
-        #ax_2d.set(ylabel=(r'<-x | z ->'),xlabel='y')
-
-        plt.xlim(-0.1*width, width)
-        plt.ylim(-height, height)
-        plt.grid(False)
-        
-        plt.axis('off')
-        
-      
-        
-        #ax_2d.set_yticks(  range(-12,12,2) )
-        #ax_2d.set_yticklabels(  list(map(lambda tick: str(abs(tick)),range(-12,12,2)))  )
-
-        ax_3d = plt.subplot(122, projection='3d')
-        #ax_3d.set(xlabel='x',ylabel='y',zlabel='z')
-
-        #plt.xlim(0, 16)
-        #plt.ylim(0, 16)
-
-
-        #ax_3d.set_zlim(0, 16)
-
-        ax_3d.view_init(30,80)
-        plt.tight_layout()  
-        plt.axis("off")
-
-
-        self.__class__.ax_2d=ax_2d 
-        self.__class__.ax_3d=ax_3d 
 
 
 class GeometryOfPoint:
@@ -148,6 +109,41 @@ class Element(LagrangesDynamicSystem):
 
         return path
 
+    
+    def get_default_data(self):
+        return {}
+
+    def get_numerical_data(self):
+        return {}
+    
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        if default_data_dict:
+            parameters_dict = {
+                key: random.choice(items_list)
+                for key, items_list in default_data_dict.items()
+            }
+        else:
+            parameters_dict = None
+
+        return parameters_dict
+
+    def get_numerical_parameters(self):
+
+        default_data_dict = self.get_numerical_data()
+
+        if default_data_dict:
+            parameters_dict = {
+                key: random.choice(items_list)
+                for key, items_list in default_data_dict.items()
+            }
+        else:
+            parameters_dict = None
+
+        return parameters_dict
+    
     @classmethod
     def preview(cls, example=False):
         if example:
@@ -162,30 +158,7 @@ class Element(LagrangesDynamicSystem):
 
         return IP.display.Image(base64.b64decode(encoded_string))
 
-    def _plot_2d(self, language='en'):
 
-
-        
-        class_name = self.__class__.__name__
-
-        span = np.linspace(0, len(class_name), 100)
-
-        res = GeometryScene.ax_2d.plot(span,
-                                       np.cos(5 * len(class_name) * span),
-                                       label=class_name)
-
-    def _tikz_scheme(self, language='en'):
-        
-        class_name = self.__class__.__name__
-        
-        schm = tikz.TikzStandalone()
-        tk_node = TikZ()
-
-        with schm.create(TikZ()) as tkz:
-            with tkz.create(TikZNode('Material Point',options=['draw'],text=f'{class_name}')) as node:
-                pass
-            
-        return schm
     def __str__(self):
         
 
@@ -229,27 +202,112 @@ class Spring(Element):
     Model of a Spring: Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s),
     which analytically display the dynamics of displacing spring after cummulating PE.
     """
-    scheme_name = 'spring.png'
-    scheme_name = 'damper.PNG'
-    real_name = 'damper.PNG'
+    scheme_name = 'spring.PNG'
+    real_name = 'spring_real.png'
     
-    def __init__(self, stiffness, pos1, pos2=0,l_0=0 ,  qs=None,ivar=Symbol('t'), frame = base_frame):
+    stiffness=Symbol('k',positive=True)
+    l_s=Symbol('l_s', positive=True)
+    k0 =Symbol('k_0',positive=True)
+    
+    def __init__(self, stiffness, pos1, pos2=0, l_s=None ,  qs=None, ivar=Symbol('t'), frame = base_frame):
 
-
-        pos1=GeometryOfPoint(pos1).get_point()
-        pos2=GeometryOfPoint(pos2).get_point()
+        if stiffness is not None: self.stiffness=stiffness
+        if pos1 is not None: self._pos1=pos1
+        self._pos2=pos2
+        if l_s is not None: self.l_s=l_s
+        else:
+            l_s=0
+            self.l_s=l_s
 
         if not qs:
-            self.qs = [pos1]
+            qs = [pos1]
 
-        Lagrangian = (-S.Half * stiffness * ((pos2.pos_from(pos1)).magnitude() - l_0  )**2 )
-        
+        Lagrangian = (-S.Half * self.stiffness * ((self.pos2.pos_from(self.pos1)).magnitude() - self.l_s  )**2 )
+
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, frame=frame)
 
         self._potential_energy = - Lagrangian
-        
 
+    @property
+    def pos1(self):
+        return GeometryOfPoint(self._pos1).get_point()
+
+    @property
+    def pos2(self):
+        return GeometryOfPoint(self._pos2).get_point()
+
+    def spring_force(self):
+        if self.pos2==0:
+            force = (self.stiffness * self.pos1)
+        else:
+            force = self.stiffness * (self.pos2.pos_from(self.pos1)).magnitude() - self.l_s
+        return force
+
+    def _plot_2d(self, language='en'):
+
+        class_name = self.__class__.__name__
+
+        coords=[(0,0),(0,3),(3,6),(-3,12),(0,15),(0,18)]
+        x_coords = [ x+5 for x,y in coords]
+        y_coords = [ y-10 for x,y in coords]
+
+        res = GeometryScene.ax_2d.plot(x_coords,y_coords, label=class_name)
+        
+        
+    def get_default_data(self):
+
+        k0= self.k0
+        self.default_data_dict={
+            self.stiffness: [S.One / 100 *  k0 * no for no in range(80, 135)],
+        }
+        return {**super().get_default_data(),**self.default_data_dict}
+        
+    def get_numerical_data(self):
+
+        self.default_numerical_dict={
+            self.stiffness: [S.One / 100 *  50e3 * no for no in range(80, 135)],
+        }
+        
+        return {**super().get_numerical_data(),**self.default_numerical_dict}
+    
+    @classmethod 
+    def from_default(cls,
+                 stiffness=None,
+                 pos1=None,
+                 frame=base_frame,
+                 qs=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+        if stiffness is not None: cls.stiffness=stiffness
+        if pos1 is None: pos1= dynamicsymbols('z') 
+        if not qs: 
+            qs = [pos1] 
+        ivar=cls.ivar
+
+        return cls(stiffness=stiffness, pos1=pos1, qs=qs,ivar=ivar, frame = frame)
+
+class EngineMount(Spring):
+
+    """
+    Model of a Engine Mount: Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s),
+    which analytically display the dynamics of displacing spring after cummulating PE.
+    """
+    real_path='buick_regal_3800.jpg'
+
+    def pin_diameter(self):
+        #średnica sworznia ze wzoru na ścinanie
+        kt=Symbol('k_t', positive=True)
+        Re=Symbol('R_e', positive=True)
+
+        return sqrt((4*S.One*self.spring_force())/(pi*kt*Re)).doit()
+
+    def get_numerical_data(self):
+        self.default_data_dict={
+
+        }
+        return default_data_dict
+    
 
 class GravitationalForce(Element):
     """
@@ -334,7 +392,7 @@ class Damper(Element):
         
         if not qs:
             self.qs = [pos1]
-        
+
         if isinstance(pos1, Point):
             pos1=GeometryOfPoint(pos1,frame=frame).get_point()
             pos2=GeometryOfPoint(pos2,frame=frame).get_point()
@@ -361,46 +419,7 @@ class Damper(Element):
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
         self._dissipative_potential = D
         
-class PID(Element):
-    """
-    Model of a PID controller:
 
-Creates a model of a PID controller (proportional , integral , derivative) which initates a smoother control over delivered system oscillatory system in form of Lagrange method. Taking into account that a PID regulator is ment for a SISO system the model is built for sDoF system, hence in case of building a mDoF the process will require using two PIDs.
-    """
-    scheme_name = ''
-    real_name = ''
-    def __init__(self, kp, ki, kd, pos1, qs=None, ivar=Symbol('t'), frame=base_frame):
-
-        if qs:
-            qs = [pos1]
-
-        dpos1 = diff(pos1, ivar)
-
-        In = pos1  # In - error
-        u = pos1*ki + dpos1*kp + d2pos1*kd
-        G = In - u
-        
-        forcelist = [(P, G*frame.x)]
-        
-        pos1=GeometryOfPoint(pos1,frame=frame).get_point()
-        
-        if isinstance(pos1, Point):
-            D = S.Half * c * ((pos1.vel(frame)-pos2.vel(frame)).magnitude()**2).doit()  #pos1*ki + pos1.vel(frame)*kp + d2pos1*kd
-        else:
-            D = S.Half * c * (diff(pos1-pos2,ivar))**2
-
-        points_dict={}
-        for coord in qs:
-            
-            coord_vel=diff(coord,ivar)
-            
-            P_tmp = Point(f'P_{str(coord)}')
-            P_tmp.set_vel(frame, coord_vel * frame.x)
-            points_dict[coord_vel]=P_tmp
-
-        forcelist = [ (point_dmp,-diff(G,coord_vel)*frame.x)  for coord_vel,point_dmp in points_dict.items() ]
-        
-        super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
 
         
 class Excitation(Element):
@@ -466,69 +485,154 @@ class Force(Element):
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
         
-class ProportionalController(Element):
-    def __init__(self, Kp, pos1, RV=0, qs=None, ivar=Symbol('t'), frame=base_frame):
-        if qs==None:
-            qs = [pos1]
-        self.Kp = Kp
-        P_term = Spring(stiffness = self.Kp, pos1 = qs[0],pos2=RV, qs = qs)
-        super().__init__(P_term, qs=qs)
 
+class CombustionEngine(Force):
 
-class IntegralController(Element):
-    def __init__(self, Ki, pos1, aux_arg=None, RV=0, qs=None, ivar=Symbol('t'), frame=base_frame):          # aux_arg --> auxiliary argument
-        if aux_arg==None:
-            #aux_arg = dynamicsymbols(f'\\int~{latex(pos1)}dt')[0]
-            aux_arg = Function(f'{latex(Integral(pos1,ivar))}')(ivar)
-        qs = [pos1, aux_arg]
-        self.Ki = Ki
+    eta= Symbol('eta', positive = True)
+    n_engine = Symbol('n')
+    omega=Symbol('omega')
 
-        aux_integral = MaterialPoint(1, aux_arg, qs = qs)
+    def __init__(self, omega, characteristic=None, eta = None, qs=None, ivar=Symbol('t'),frame = base_frame):
 
-        Force1 = Force(-self.Ki*aux_arg, pos1=pos1, qs=qs)
-        Force2 = Force(pos1.diff(ivar), pos1=aux_arg, qs=qs)
-        I_term = aux_integral + Force1 + Force2
-        super().__init__(I_term, qs=qs)
+        if characteristic is None:
+            self._characteristic= self.characteristic
+        else:
+            self._characteristic =  characteristic
+        if eta is not None: self.eta = eta
+        if omega is not None: self.omega = omega
+            
 
+        super().__init__(self.eta*self._characteristic, omega.integrate(ivar), qs=qs, ivar=ivar)
 
-class DerivativeController(Element):
-    def __init__(self, Kd, pos1, RV=0, qs=None, ivar=Symbol('t'), frame=base_frame):
-        if qs==None:
-            qs = [pos1]
-        self.Kd = Kd
-        D_term = Damper(c=self.Kd, pos1 = qs[0], pos2=RV, qs = qs)
-        super().__init__(D_term, qs=qs)
+    @property
+    def characteristic(self):
+        n_engine = self.omega*60/(2*np.pi)
+        return -4e-5*self.n_engine**2 + 0.2157*self.n_engine + 113.07
+
+    @classmethod
+    def from_data(cls, data, n, degree=5, eta = None, qs=None, ivar=Symbol('t'),frame = base_frame):
+
+        omega = 2*3.14/60*n
         
-###################################################################################################################################
+        x = data.index.to_numpy()
+        y = data.iloc[:,0].to_numpy()
 
+        coeffs=reversed((np.polyfit(x, y, degree)))
 
         
-#class NonlinSpring__RefFrme_Pt(Element):
-   # """
-    #Model of a Nonlinear Spring with whole ReferenceFrame, Point packed in the class  -- Please Advise! ... qs = [ ] must be supplied in the calling sequence:
-    #"""
-    #"""
-    #Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s), which analytically display the dynamics of displacing spring after            cummulating PE. The class work in two modes. In coordinate mode and Point mode where the Point mode may be supplemented with parameter.
-    #"""
+        omega_min = 2*3.14/60*x[0]
+        omega_max = 2*3.14/60*x[-1]
+        
+        char_slope = 10
+        
+        window   =   ((S.One/2+atan(char_slope*(omega-omega_min))/np.pi))    -  ((S.One/2+atan(char_slope*(omega-omega_max))/np.pi))
+        #window = Heaviside(omega-omega_min) - Heaviside(omega-omega_max)
+        
+        omega = 2*3.14/60*n
+        
+        char_poly  =window *sum([ coeff * n ** no for no, coeff in enumerate(coeffs)])
+        
 
-    #def __init__(self, k, l_0, pos1, pos2=0, qs=None, ivar=Symbol('t'), frame=base_frame):
+        
+        obj = cls(omega = omega, characteristic = char_poly, eta=eta, qs = qs, ivar = ivar, frame = frame)
+        obj._char_poly  =  char_poly
+        
+        return obj
 
-        #if pos1 == qs or pos2 == qs:
+    @classmethod
+    def from_rpm(cls, n, eta = None, qs=None, ivar=Symbol('t'),frame = base_frame):
+        omega = 2*3.14/60*n
+        return cls(omega = omega, eta = eta, qs=qs, ivar=ivar, frame = frame)
+    
+class IntegralElement(Force):
 
-            #if qs == None:
-                #self.qs = [pos1]
-            #elif not pos2 == 0:
-                #qs = [pos1,pos2]
+    k_I = Symbol('k_I', positive=True)
+    error = dynamicsymbols('e')
+    target = dynamicsymbols('target')
+    reference = S.Zero
+    
+    def __init__(self, k_I, error, target=None, reference = None,  qs=None, ivar=Symbol('t'), frame = base_frame):
+        
+        if reference is not None: self.reference = reference
+        
+        if target is None and isinstance(error,Function):
+               target=error
 
-        #else:
-            #pos1 is type(Point) or pos2 is type(Point)
+        super().__init__(k_I*(self.reference - error).integrate(ivar), target, qs=qs, ivar=ivar)
 
-        #P1 = Point('P1')
-        #P1.set_pos(P1 , frame.x*pos1)
 
-        #P2 = Point('P2')
-        #P2.set_pos(P1, frame.x*pos1 + frame.y*pos2)
+class DerivativeElement(Force):
+    
+    k_D = Symbol('k_D', positive=True)
+    error = dynamicsymbols('e')
+    target = dynamicsymbols('target')
+    reference = S.Zero
+    
+    def __init__(self, k_D, error, target=None, reference = None,  qs=None, ivar=Symbol('t'), frame = base_frame):
+        
+        if reference is not None: self.reference = reference
+        
+        if target is None and isinstance(error,Function):
+               target=error
 
-        #L = - S.Half * k *  (P1.pos_from(P2).magnitude()-l_0)**2
+        super().__init__(k_D*diff((self.reference - error),ivar), target, qs=qs, ivar=ivar)
 
-        #super().__init__(Lagrangian=L, qs=qs, ivar=ivar, frame=frame)
+
+class ProportionalElement(Force):
+
+    k_P = Symbol('k_P', positive=True)
+    error = Symbol('e', positive=True)
+    target = Symbol('target', positive=True)
+    reference = S.Zero
+    
+    def __init__(self, k_P, error, target=None, reference = None,  qs=None, ivar=Symbol('t'), frame = base_frame):
+        
+        if reference is not None: self.reference = reference
+        
+        if target is None and isinstance(error,Function):
+               target=error
+
+        super().__init__(k_P*(self.reference - error), target, qs=qs, ivar=ivar)
+
+        
+        
+class PID(Element):
+    """
+    Model of a PID controller:
+
+Creates a model of a PID controller (proportional , integral , derivative) which initates a smoother control over delivered system oscillatory system in form of Lagrange method. Taking into account that a PID regulator is ment for a SISO system the model is built for sDoF system, hence in case of building a mDoF the process will require using two PIDs.
+    """
+    scheme_name = ''
+    real_name = ''
+    def __init__(self, kp, ki, kd, pos1, qs=None, ivar=Symbol('t'), frame=base_frame):
+
+        if qs:
+            qs = [pos1]
+
+        dpos1 = diff(pos1, ivar)
+
+        In = pos1  # In - error
+        u = pos1*ki + dpos1*kp + d2pos1*kd
+        G = In - u
+        
+        forcelist = [(P, G*frame.x)]
+        
+        pos1=GeometryOfPoint(pos1,frame=frame).get_point()
+        
+        if isinstance(pos1, Point):
+            D = S.Half * c * ((pos1.vel(frame)-pos2.vel(frame)).magnitude()**2).doit()  #pos1*ki + pos1.vel(frame)*kp + d2pos1*kd
+        else:
+            D = S.Half * c * (diff(pos1-pos2,ivar))**2
+
+        points_dict={}
+        for coord in qs:
+            
+            coord_vel=diff(coord,ivar)
+            
+            P_tmp = Point(f'P_{str(coord)}')
+            P_tmp.set_vel(frame, coord_vel * frame.x)
+            points_dict[coord_vel]=P_tmp
+
+        forcelist = [ (point_dmp,-diff(G,coord_vel)*frame.x)  for coord_vel,point_dmp in points_dict.items() ]
+        
+        super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)

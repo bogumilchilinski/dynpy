@@ -334,23 +334,19 @@ class TMD(SpringMassSystem):
 
     m=Symbol('m_E', positive=True)
     k=Symbol('k_E', positive=True)
-    ivar=Symbol('t', positive=True)
-    
     z=dynamicsymbols('z')
     
     def __init__(self,
                  m=None,
                  k=None,
                  z=None,
-                 ivar=None,
+                 ivar=Symbol('t', positive=True),
                  **kwargs):
 
-        
-        
         if m is not None: self.m = m
         if k is not None: self.k = k
-        if ivar is not None: self.ivar = ivar
         if z is not None: self.z = z
+        self.ivar = ivar
         
    
         self.qs = [self.z]

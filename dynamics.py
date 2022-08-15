@@ -42,8 +42,51 @@ from .utilities.adaptable import AutoMarker
 import inspect
 import copy
 
+from pylatex import TikZ,TikZNode
+import matplotlib.pyplot as plt
 
 
+class GeometryScene:
+
+
+    ax_2d=None
+    ax_3d=None
+
+
+
+    def __init__(self,height=12,width=12,figsize=(12,9)):
+
+        plt.figure(figsize=figsize)
+        ax_2d = plt.subplot(121)
+        #ax_2d.set(ylabel=(r'<-x | z ->'),xlabel='y')
+
+        plt.xlim(-0.1*width, width)
+        plt.ylim(-height, height)
+        plt.grid(False)
+        
+        plt.axis('off')
+        
+      
+        
+        #ax_2d.set_yticks(  range(-12,12,2) )
+        #ax_2d.set_yticklabels(  list(map(lambda tick: str(abs(tick)),range(-12,12,2)))  )
+
+        ax_3d = plt.subplot(122, projection='3d')
+        #ax_3d.set(xlabel='x',ylabel='y',zlabel='z')
+
+        #plt.xlim(0, 16)
+        #plt.ylim(0, 16)
+
+
+        #ax_3d.set_zlim(0, 16)
+
+        ax_3d.view_init(30,80)
+        plt.tight_layout()  
+        plt.axis("off")
+
+
+        self.__class__.ax_2d=ax_2d
+        self.__class__.ax_3d=ax_3d
     
 
 def multivariable_taylor_series(expr, args, n=2, x0=None):
@@ -246,7 +289,30 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return Image(base64.b64decode(encoded_string))
 
+    def _plot_2d(self, language='en'):
 
+
+        
+        class_name = self.__class__.__name__
+
+        span = np.linspace(0, len(class_name), 100)
+
+        res = GeometryScene.ax_2d.plot(span,
+                                       np.cos(5 * len(class_name) * span),
+                                       label=class_name)
+
+    def _tikz_scheme(self, language='en'):
+        
+        class_name = self.__class__.__name__
+        
+        schm = tikz.TikzStandalone()
+        tk_node = TikZ()
+
+        with schm.create(TikZ()) as tkz:
+            with tkz.create(TikZNode('Material Point',options=['draw'],text=f'{class_name}')) as node:
+                pass
+            
+        return schm
 
 
     def __init__(self,
