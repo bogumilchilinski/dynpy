@@ -174,14 +174,29 @@ class MaterialPoint(Element):
     """
     scheme_name = 'material_point.png'
     real_name = 'material_point.png'
-    def __init__(self, m, pos1 , qs=None, frame=base_frame, ivar=Symbol('t')):
-        
+    
+    m=Symbol('M',positive=True)
+    pos1=Symbol('pos1',positive=True)
+    
+    z=dynamicsymbols('z')
+    
+    def __init__(self,
+                 m, 
+                 pos1 ,
+                 qs=None,
+                 frame=base_frame,
+                 ivar=Symbol('t'),
+                 **kwargs):
+        if m is not None: self.m=m
+        if pos1 is not None: self.pos1=pos1
         if not qs:
             self.qs = [pos1]
 
         pos1=GeometryOfPoint(pos1).get_point()
             
         if isinstance(pos1, Point):
+            
+            v=((base_origin.pos_from(pos1).diff(self.ivar,frame).magnitude())**2)
             
             Lagrangian = S.Half * m * ((base_origin.pos_from(pos1).diff(ivar,frame).magnitude())**2)
             #Lagrangian = S.Half * m * ((base_origin.vel(frame).magnitude())**2)
@@ -193,6 +208,68 @@ class MaterialPoint(Element):
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar,frame=frame)
         
         self._kinetic_energy = Lagrangian
+    def symbols_description(self):
+        self.sym_desc_dict={
+            self.m :r'Mass of body',
+            self.pos1 :r'Instantenous position of the body'
+        }
+        return {**super().symbols_description(),**self.sym_desc_dict}
+    
+    def get_default_data(self):
+        t=self.ivar
+        m0=Symbol('m0',positive=True)
+        self.default_data_dict={
+            self.m:[m0],   
+        }
+        return {**super().get_default_data(),**self.default_data_dict}
+    
+
+    def get_numerical_data(self):
+
+        self.default_data_dict={
+            self.m:[5* no/100 for no in range(80,120)],
+        }
+        return default_data_dict
+
+    @classmethod
+    def from_velocity(cls,
+                      m,
+                      velocity,
+                      qs=None,
+                      z=None,
+                      ivar=Symbol('t'),
+                      frame = base_frame,
+                      **kwargs):
+        pos1=Integral(velocity,ivar)
+        return cls(m=m, pos1=pos1, qs=qs, ivar=ivar, frame = frame)
+    @classmethod
+    def from_default(cls,
+                      m=None,
+                      pos1=None,
+                      qs=None,
+                      ivar=Symbol('t'),
+                      frame = base_frame,
+                      **kwargs):
+        if m is None: m=cls.m
+        if pos1 is None: pos1=dynamicsymbols('x')
+        if not qs:
+            qs=[pos1]
+        ivar=cls.ivar
+        return cls(m=m, pos1=pos1, qs=qs, ivar=ivar, frame = frame)
+    
+    def _plot_2d(self, language='en'):
+      
+        class_name =self.__class__.__name__ 
+        coords = [(0,0),(0,10),(5,10),(5,0),(0,0)]
+        x_coords = [  x for x,y in  coords ]
+        y_coords = [  y for x,y in coords]
+        
+#         my_fun=lambda arg: arg[1]
+#         y_coords = list(map(my_fun,  coords))   #[  y for x,y in coords]
+#         print(y_coords)
+    
+        res = GeometryScene.ax_2d.plot(x_coords,y_coords,label=class_name)
+        GeometryScene.ax_2d.text(2.5,5,f'${self.m}$',rotation='horizontal',multialignment='center')
         
         
 
@@ -253,8 +330,9 @@ class Spring(Element):
         y_coords = [ y-10 for x,y in coords]
 
         res = GeometryScene.ax_2d.plot(x_coords,y_coords, label=class_name)
-        print(res)
-        
+
+        res = GeometryScene.ax_2d.text(x_coords[-1],y_coords[-1], str(self))        
+
         
     def get_default_data(self):
 
