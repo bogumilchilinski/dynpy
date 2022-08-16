@@ -289,7 +289,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return Image(base64.b64decode(encoded_string))
 
-    def _plot_2d(self, language='en'):
+    def _plot_2d(self, language='en',*args,**kwargs):
 
 
         
@@ -300,7 +300,24 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         res = GeometryScene.ax_2d.plot(span,
                                        np.cos(5 * len(class_name) * span),
                                        label=class_name)
+        res = GeometryScene.ax_2d.text(0,0,str(self))  
 
+    def _preview_scheme(self, language='en',*args,**kwargs):
+
+
+        GeometryScene()
+        
+        components = self.components
+        
+        if components == {}:
+            self._plot_2d(language=language,*args,**kwargs)
+        
+        for  label,comp in self.components.items():
+            comp._plot_2d(language=language,*args,**kwargs)
+
+        
+        
+        
     def _tikz_scheme(self, language='en'):
         
         class_name = self.__class__.__name__
