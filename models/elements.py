@@ -253,6 +253,7 @@ class Spring(Element):
         y_coords = [ y-10 for x,y in coords]
 
         res = GeometryScene.ax_2d.plot(x_coords,y_coords, label=class_name)
+        print(res)
         
         
     def get_default_data(self):
