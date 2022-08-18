@@ -164,7 +164,15 @@ class Element(LagrangesDynamicSystem):
 
         return f'{(self._label)}'    
 
+    def _tikz_2d(self, language='en',*args,**kwargs):
+
+
         
+        class_name = self.__class__.__name__
+
+
+        #print(f'{class_name} element check', self.scheme_options )
+        return [TikZNode('Material Point',options=['draw'],text=f'{class_name}')]
 #Pati
 class MaterialPoint(Element):
     """
@@ -257,12 +265,21 @@ class MaterialPoint(Element):
         ivar=cls.ivar
         return cls(m=m, pos1=pos1, qs=qs, ivar=ivar, frame = frame)
     
-    def _plot_2d(self, language='en'):
+    def _plot_2d(self, language='en',*args,**kwargs):
       
-        class_name =self.__class__.__name__ 
+        class_name =self.__class__.__name__
+        
+        sch_opt=self.scheme_options
+        
+        x_shift,y_shift = 0,0
+        
+        if sch_opt is not None:
+            if 'at' in sch_opt:
+                x_shift,y_shift = sch_opt['at']
+        
         coords = [(0,0),(0,10),(5,10),(5,0),(0,0)]
-        x_coords = [  x for x,y in  coords ]
-        y_coords = [  y for x,y in coords]
+        x_coords = [  x+x_shift for x,y in  coords ]
+        y_coords = [  y+y_shift for x,y in coords]
         
 #         my_fun=lambda arg: arg[1]
 #         y_coords = list(map(my_fun,  coords))   #[  y for x,y in coords]
@@ -320,19 +337,36 @@ class Spring(Element):
         else:
             force = self.stiffness * (self.pos2.pos_from(self.pos1)).magnitude() - self.l_s
         return force
+    
 
-    def _plot_2d(self, language='en'):
+    def _plot_2d(self, language='en',*args,**kwargs):
 
         class_name = self.__class__.__name__
 
         coords=[(0,0),(0,3),(3,6),(-3,12),(0,15),(0,18)]
-        x_coords = [ x+5 for x,y in coords]
-        y_coords = [ y-10 for x,y in coords]
 
-        res = GeometryScene.ax_2d.plot(x_coords,y_coords, label=class_name)
+        sch_opt=self.scheme_options
+        x_shift,y_shift = 0,0
+        
+        if sch_opt is not None:
+            if 'at' in sch_opt:
+                x_shift,y_shift = sch_opt['at']
 
-        res = GeometryScene.ax_2d.text(x_coords[-1],y_coords[-1], str(self))        
+        x_span = np.arange(0,21,1)
 
+
+        x_coords = np.sin(x_span*np.pi/2)+x_shift
+        y_coords = (x_span*0.8)+y_shift
+        
+        x_end=x_coords[-1]
+        y_end=y_coords[-1]
+
+        print(y_coords)
+        
+        res = GeometryScene.ax_2d.plot(x_coords,y_coords,label=class_name)
+        res =GeometryScene.ax_2d.text(x_end,y_end,self._label)
+
+        
         
     def get_default_data(self):
 
@@ -372,8 +406,8 @@ class EngineMount(Spring):
     Model of a Engine Mount: Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s),
     which analytically display the dynamics of displacing spring after cummulating PE.
     """
-    real_path='buick_regal_3800.jpg'
-
+    real_path='buick_regal_3800.jpg'#buick_regal_3800.jpg
+    scheme_name = 'spring.PNG'
     def pin_diameter(self):
         #średnica sworznia ze wzoru na ścinanie
         kt=Symbol('k_t', positive=True)
@@ -381,11 +415,43 @@ class EngineMount(Spring):
 
         return sqrt((4*S.One*self.spring_force())/(pi*kt*Re)).doit()
 
+    def pin_force(self):
+
+        return self.spring_force()
+
     def get_numerical_data(self):
         self.default_data_dict={
 
         }
         return default_data_dict
+    
+    def _plot_2d(self, language='en',*args,**kwargs):
+
+        class_name = self.__class__.__name__
+
+        coords=[(0,0),(0,3),(3,6),(-3,12),(0,15),(0,18)]
+
+        sch_opt=self.scheme_options
+        x_shift,y_shift = 0,0
+        
+        if sch_opt is not None:
+            if 'at' in sch_opt:
+                x_shift,y_shift = sch_opt['at']
+
+        x_span = np.arange(0,21,1)
+
+
+        x_coords = np.sin(x_span*np.pi/2)+x_shift
+        y_coords = (x_span*0.4)+y_shift
+        
+        x_end=x_coords[-1]
+        y_end=y_coords[-1]
+
+        print(y_coords)
+        
+        res = GeometryScene.ax_2d.plot(x_coords,y_coords,label=class_name)
+        res = GeometryScene.ax_2d.plot(x_end,y_end,'*r')
+        res =GeometryScene.ax_2d.text(x_end,y_end,"pin")
     
 
 class GravitationalForce(Element):

@@ -332,24 +332,27 @@ class TMD(SpringMassSystem):
     scheme_name = 'tmd_engine_vertical_spring_nogravity.png'
     real_name = 'tmd_engine_real.jpg'
 
-    m=Symbol('m_E', positive=True)
-    k=Symbol('k_E', positive=True)
+    m_E=Symbol('m_E', positive=True)
+    k_E=Symbol('k_E', positive=True)
     z=dynamicsymbols('z')
+    z_E=dynamicsymbols('z_E')
     
     def __init__(self,
-                 m=None,
-                 k=None,
+                 m_E=None,
+                 k_E=None,
                  z=None,
+                 z_E=None,
                  ivar=Symbol('t', positive=True),
                  **kwargs):
 
-        if m is not None: self.m = m
-        if k is not None: self.k = k
+        if m_E is not None: self.m_E = m_E
+        if k_E is not None: self.k_E = k_E
         if z is not None: self.z = z
+        if z_E is not None: self.z_E = z_E
         self.ivar = ivar
         
    
-        self.qs = [self.z]
+        self.qs = [self.z_E]
 
         self._init_from_components(**kwargs)
 
@@ -358,8 +361,8 @@ class TMD(SpringMassSystem):
 
         components = {}
         
-        self._material_point = MaterialPoint(self.m, self.z, qs=self.qs)(label='Material point - mass of the TMD')
-        self._spring = Spring(self.k, self.z, qs=self.qs)(label='Spring - stiffness of the spring')
+        self._material_point = MaterialPoint(self.m_E, self.z_E, qs=self.qs)(label='Material point - mass of the TMD')
+        self._spring = Spring(self.k_E, pos1=self.z_E, pos2=self.z, qs=self.qs)(label='Spring - stiffness of the spring')
         
         components['_material_point'] = self._material_point
         components['_spring'] = self._spring

@@ -329,6 +329,206 @@ class NonlinearComposedSystem(ComposedSystem):
 
         return amp[0] * k_m + self.max_static_force_pin()
 
+############################### Nowa podstawowa klasa dla silników
+class FreeEngine(ComposedSystem):
+    """Base class for all engine systems. This class consists only of the engine block and crank system, involving the gravity factor.
+    =========
+            M = Symbol object
+                - Mass of the engine housing
+            m_e = Symbol object
+                - Reduced mass of the crank system
+            e = Symbol object
+                - Length of the crank - radius of the circular motion
+            g = Symbol object
+                - Gravitational field acceleration
+            z = Symbol object
+                - Vertical coordinate z
+            ivar = Symbol object
+                - Independant time variable
+            qs = Dynamicsymbol object
+                - Generalized coordinates
+    
+    """
+    scheme_name = 'engine_block.png'
+    real_name = 'engine_real.PNG'
+
+    M = Symbol('M', positive=True)  #Mass of the engine housing
+    g = Symbol('g', positive=True)  #Gravity constant
+    z = dynamicsymbols('z')  #Displacement coordinate
+    m_e = Symbol('m_e', positive=True)  #Reduced mass of the crank system
+    e = Symbol('e', positive=True)  #Length of the crank - radius of the circular motion
+    phi = dynamicsymbols('\\varphi')
+    ivar = Symbol('t', positive=True)
+    m0 = Symbol('m0', positive=True)
+    m_e0 = Symbol('m_e0', positive=True)
+    e0 = Symbol('e_0', positive=True)
+
+    def __init__(self,
+                 M=None,
+                 m_e=None,
+                 e=None,
+                 g=None,
+                 z=None,
+                 phi=None,
+                 ivar=None,
+                 **kwargs):
+
+        if M is not None: self.M = M
+        if m_e is not None: self.m_e = m_e
+        if e is not None: self.e = e
+        if g is not None: self.g = g
+        if z is not None: self.z = z
+        if phi is not None: self.phi = phi
+        if ivar is not None: self.ivar = ivar
+        self.qs = [self.z]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+        components = {}
+        M, m_e, e, z, phi = self.M, self.m_e, self.e, self.z, self.phi
+
+        self._engine_housing = MaterialPoint(M, pos1=z, qs=[z])(label='Engine hounsing')
+        self._crank = MaterialPoint(m_e, pos1=z + e * cos(phi), qs=[z])(label='Position of reduced mass of the crank system')
+        self._housing_gravity = GravitationalForce(self.M, self.g, self.z)(label='Gravitational Force of housing')
+        self._crank_gravity = GravitationalForce(self.m_e, self.g, self.z)(label='Gravitational Force of crank')
+
+        components['_engine_housing'] = self._engine_housing
+        components['_crank'] = self._crank
+        components['_housing_gravity'] = self._housing_gravity
+        components['_crank_gravity'] = self._crank_gravity
+
+        return components
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.M: r'Mass of the engine block',
+            self.m_e: r'Reduced mass of the crank system',
+            self.e: r'Length of the crank - radius of the circular motion',
+            self.g: r'Gravity constant',
+            self.z: r'Displacement coordinate'
+        }
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        t = self.ivar
+        
+        default_data_dict = {
+            self.M: [10 * self.m0 * no / 100 for no in range(10, 150)],
+            self.m_e: [self.m0 * no / 100 for no in range(80, 120)],
+            self.e: [self.e0 * no / 100 for no in range(80, 120)],
+            self.phi: [2 * 3.14 * self.ivar]
+        }
+        return default_data_dict
+
+    def get_numerical_data(self):
+
+        default_data_dict = {
+            self.M: [4 * no for no in range(10, 150)],
+            self.m_e: [0.5 * no for no in range(80, 120)],
+            self.e: [2/100 * no for no in range(5, 15)],
+            self.phi: [2 * 3.14 * 10 * self.ivar],
+            self.g: [9.81]
+        }
+        return default_data_dict
+    
+class EngineVerticalSpringGravity(FreeEngine):
+    """Ready to use model of engine represented by the rotating mass of a crankshaft and mass of the engine.
+        Arguments:
+        =========
+            M = Symbol object
+                -Mass of an engine.
+
+            m_e = Symbol object
+                -Mass of a crankshaft.
+
+            k_m = Symbol object
+                -Stifness of the engine mounts
+                
+                
+            phi = Dynamicsymbol object
+                -rotation angle
+                
+            e =  Symbol object
+                -offset of the rotating mass
+
+            g = Symbol object
+                -Gravitational field acceleration
+                
+            z = Symbol object
+                -vertical Z coordinate
+                
+            q = Symbol object
+                -Directional coefficent
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+
+    """
+
+    scheme_name = 'engine_vertical_spring_gravity.png'
+    real_name = 'paccar.jpg'
+    detail_scheme_name = 'sruba_pasowana.png'
+    detail_real_name = 'buick_regal_3800.jpg'
+
+    M = Symbol('M', positive=True)
+    m_e = Symbol('m_e', positive=True)
+    phi = dynamicsymbols('varphi')
+    g = Symbol('g', positive=True)
+    k_m = Symbol('k_m', positive=True)
+    c_m = Symbol('c_m', positive=True)
+    e = Symbol('e', positive=True)
+    z = dynamicsymbols('z')
+
+    Omega = Symbol('Omega', positive=True)
+
+    #m0 = Symbol('m_0', positive=True)
+
+    def __init__(self,
+                 M=None,
+                 m_e=None,
+                 k_m=None,
+                 e=None,
+                 g=None,
+                 phi=None,
+                 z=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if M is not None: self.M = M
+        if m_e is not None: self.m_e = m_e
+        if phi is not None: self.phi = phi
+        if g is not None: self.g = g
+        if k_m is not None: self.k_m = k_m
+        if e is not None: self.e = e
+        if z is not None: self.z = z
+
+        self.qs = [self.z]
+        self.ivar = ivar
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self._engine_block = FreeEngine(self.M, self.m_e, self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine')
+
+        self._left_mount  = EngineMount(self.k_m, self.z, qs=[self.z])(label='Left engine mount')
+        self._right_mount = EngineMount(self.k_m, self.z, qs=[self.z])(label='Right engine mount')
+        
+
+        components['_engine_block'] = self._engine_block
+        components['_left_mount'] = self._left_mount
+        components['_right_mount'] = self._right_mount
+        return components
 
 #dobrać dane numeryczne
 #####
@@ -415,13 +615,13 @@ class Engine(ComposedSystem):
         M, k_m, m_e, e, z, phi = self.M, self.k_m, self.m_e, self.e, self.z, self.phi
 
         self._engine_block = MaterialPoint(M, pos1=z,
-                                           qs=[z])(label='Engine block')
+                                           qs=[z])(label='Engine block',scheme_options={'at':(4,0)})
         self._crank = MaterialPoint(m_e, pos1=z + e * cos(phi),
-                                    qs=[z])(label='Centroid of cranksystem')
-        self._spring_left = Spring(2 * k_m, pos1=z,
-                                   qs=[z])(label='Left engine mount')
-        self._spring_right = Spring(2 * k_m, pos1=z,
-                                    qs=[z])(label='Right engine mount')
+                                    qs=[z])(label='Centroid of cranksystem',scheme_options={'at':(4,0)})
+        self._spring_left = Spring(k_m, pos1=z,
+                                   qs=[z])(label='Left engine mount',scheme_options={'at':(5,-18)})
+        self._spring_right = Spring(k_m, pos1=z,
+                                    qs=[z])(label='Right engine mount',scheme_options={'at':(9,-18)})
 
         components['_engine_block'] = self._engine_block
         components['_crank'] = self._crank
@@ -555,10 +755,10 @@ class EngineVerticalSpringGravity(Engine):
         components = {}
 
         self._mass = MaterialPoint(self.M, pos1=self.z,
-                                   qs=[self.z])(label='Engine block')
+                                   qs=[self.z])(label='Engine block',scheme_options={'at':(10,20)})
         self._crank = MaterialPoint(self.m_e,
                                     pos1=self.z + self.e * cos(self.phi),
-                                    qs=[self.z])(label='Mass of cranksystem')
+                                    qs=[self.z])(label='Mass of cranksystem',scheme_options={'at':(10,20)})
 
         self._left_junction = Spring(self.k_m, self.z,
                                      qs=[self.z])(label='Left Engine mount')
@@ -650,8 +850,7 @@ class BoxerEnginePerpendicularSprings(ComposedSystem):
             return self.sym_desc_dict
 
 
-#Laura & Pati
-class DampedEngineVerticalSpringGravity(ComposedSystem):
+class DampedEngineVerticalSpringGravity(FreeEngine):
     scheme_name = 'damped_engine_vertical_spring_gravity.png'
     real_name = 'paccar.jpg'
     detail_scheme_name = 'sruba_pasowana.png'
@@ -678,16 +877,14 @@ class DampedEngineVerticalSpringGravity(ComposedSystem):
             m_e=None,
             e=None,
             l=None,
-            x=None,  #szczerze nw co to bo wsp uogolniona to z i phi wiec możemy potem zakomentować i zobaczyc czy zadziała bez oki? #to chyba jakiś relikt, możecie tak zrobić i jak zadziała to wywalić ~Damian
             z=None,
             Omega=None,
             phi=None,
             c_m=None,
             g=None,
             lam=None,
-            #to co niżej MUSI BYĆ
-            ivar=Symbol('t'),  #wazne bo to czas
-            qs=None,  #ważne bo to jest wsp uogólniona block
+            ivar=Symbol('t'),
+            qs=None,
             **kwargs):
 
         if phi is not None: self.phi = phi
@@ -710,32 +907,23 @@ class DampedEngineVerticalSpringGravity(ComposedSystem):
 
         components = {}
 
-        print('print', self.M, self.m_e, self.k_m, self.e, self.l, self.z,
-              self.Omega)
-        self._materialPoint_1 = MaterialPoint(self.M, pos1=self.z,
-                                              qs=[self.z
-                                                  ])(label='Engine block')
-        self._materialPoint_2 = MaterialPoint(
-            self.m_e, pos1=self.z + self.e * cos(self.phi),
-            qs=[self.z])(label='Unbalanced mass in cranksystem')
-        self._springVer = Spring(2 * self.k_m, pos1=self.z,
-                                 qs=[self.z])(label='Engine mounts')
-        self._gravity_force1 = GravitationalForce(self.M,
-                                                  self.g,
-                                                  self.z,
-                                                  qs=[self.z
-                                                      ])(label='Gravity field')
-        self._gravity_force2 = GravitationalForce(
-            self.m_e, self.g, self.z + self.e * cos(self.phi),
-            qs=[self.z])(label='Gravity field')
-        self._damping = Damper((2 * self.c_m), pos1=self.z,
-                               qs=[self.z])(label='Damping in engine mounts')
-        components['_materialPoint_1'] = self._materialPoint_1
-        components['_materialPoint_2'] = self._materialPoint_2
-        components['_springVer'] = self._springVer
-        components['_gravity_force1'] = self._gravity_force1
-        components['_gravity_force2'] = self._gravity_force2
-        components['_damping'] = self._damping
+        #print('print', self.M, self.m_e, self.k_m, self.e, self.l, self.z,self.Omega)
+        
+        self._engine = FreeEngine(self.M, self.m_e, self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine')
+        
+        self._left_spring = Spring(self.k_m, pos1=self.z, qs=[self.z])(label='Left engine mount')
+        
+        self._right_spring = Spring(self.k_m, pos1=self.z, qs=[self.z])(label='Right engine mount')
+
+        self._left_damper = Damper((self.c_m), pos1=self.z, qs=[self.z])(label='Damping in left engine mount')
+        
+        self._right_damper = Damper((self.c_m), pos1=self.z, qs=[self.z])(label='Damping in right engine mount')
+        
+        components['_engine'] = self._engine
+        components['_left_spring'] = self._left_spring
+        components['_right_spring'] = self._right_spring
+        components['_left_damper'] = self._left_damper
+        components['_right_damper'] = self._right_damper
 
         return components
 

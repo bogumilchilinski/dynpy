@@ -35,6 +35,7 @@ from pylatex.utils import italic, NoEscape
 
 from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim)
 from .utilities.templates.document import *
+from .utilities.templates import tikz
 from .utilities.components.mech import en as mech_comp
 
 
@@ -56,7 +57,7 @@ class GeometryScene:
 
     def __init__(self,height=12,width=12,figsize=(12,9)):
 
-        plt.figure(figsize=figsize)
+        #plt.figure(figsize=figsize)
         ax_2d = plt.subplot(121)
         #ax_2d.set(ylabel=(r'<-x | z ->'),xlabel='y')
 
@@ -302,6 +303,25 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                                        label=class_name)
         res = GeometryScene.ax_2d.text(0,0,str(self))  
 
+        
+    def _tikz_2d(self, language='en',*args,**kwargs):
+
+
+        
+        class_name = self.__class__.__name__
+        
+        components = self.components
+        
+
+        if components == {}:
+            return [TikZNode(f'{class_name}',options=['draw'],text=f'{class_name}')]
+        else:
+            return [comp._tikz_2d(language=language,*args,**kwargs)[0] for comp in (self.components.values())]
+
+
+        
+        
+        
     def _preview_scheme(self, language='en',*args,**kwargs):
 
 
@@ -318,16 +338,15 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         
         
-    def _tikz_scheme(self, language='en'):
+    def _tikz_scheme(self, language='en',*args,**kwargs):
         
         class_name = self.__class__.__name__
         
         schm = tikz.TikzStandalone()
-        tk_node = TikZ()
 
+        
         with schm.create(TikZ()) as tkz:
-            with tkz.create(TikZNode('Material Point',options=['draw'],text=f'{class_name}')) as node:
-                pass
+            tkz+= self._tikz_2d(language=language,*args,**kwargs)
             
         return schm
 
@@ -343,7 +362,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                  label=None,
                  ivar=sym.Symbol('t'),
                  evaluate=True,
-                 system = None):
+                 system = None,
+                 scheme_options=None,
+                 **kwargs):
         """
         Supply the following for the initialization of DynamicSystem in the same way as LagrangesMethod
         """
@@ -354,7 +375,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self._components = None
         self._evaluate = evaluate
 
-
+        self._scheme_options  = scheme_options
 
         if system:
             # print(system._kinetic_energy)
@@ -494,7 +515,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self._given_data={}
         
         self._nonlinear_base_system=None
+
         
+    @property    
+    def scheme_options(self):
+        return self._scheme_options
         
     def _init_from_components(self):
         composed_system = self._elements_sum
@@ -831,11 +856,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
 
 
-    def __call__(self, *args, label=None):
+    def __call__(self, label=None, scheme_options=None, *args):
         """
         Returns the label of the object or class instance with reduced Degrees of Freedom.
         """
-
         if len(args) > 0:
             if isinstance(args[0], str):
                 if label:
@@ -844,20 +868,23 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                     self._label=args[0]
 
 
-                return self
+                system = self
 
             else:
                 #print(flatten(*args))
                 system =  self.shranked(*args)
                 if label:
                     system._label = label
-                return system
+                
         else:
             self._label=label
-            return self
+            system = self
+            
+        if scheme_options is not None:
+            system._scheme_options = scheme_options
             
             
-        
+        return system
             
             
 
