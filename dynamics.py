@@ -292,8 +292,6 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     def _plot_2d(self, language='en',*args,**kwargs):
 
-
-        
         class_name = self.__class__.__name__
 
         span = np.linspace(0, len(class_name), 100)
@@ -330,10 +328,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         components = self.components
         
         if components == {}:
+            #print(f'jesteś tu if dla {self}')
             self._plot_2d(language=language,*args,**kwargs)
-        
-        for  label,comp in self.components.items():
-            comp._plot_2d(language=language,*args,**kwargs)
+        else:
+            #print(f'jesteś tu else dla {self}')
+            for  label,comp in self.components.items():
+                comp._preview_scheme(language=language,*args,**kwargs)
 
         
         

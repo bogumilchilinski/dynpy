@@ -361,7 +361,7 @@ class Spring(Element):
         x_end=x_coords[-1]
         y_end=y_coords[-1]
 
-        print(y_coords)
+        #print(y_coords)
         
         res = GeometryScene.ax_2d.plot(x_coords,y_coords,label=class_name)
         res =GeometryScene.ax_2d.text(x_end,y_end,self._label)
@@ -447,7 +447,7 @@ class EngineMount(Spring):
         x_end=x_coords[-1]
         y_end=y_coords[-1]
 
-        print(y_coords)
+        #print(y_coords)
         
         res = GeometryScene.ax_2d.plot(x_coords,y_coords,label=class_name)
         res = GeometryScene.ax_2d.plot(x_end,y_end,'*r')
