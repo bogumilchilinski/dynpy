@@ -534,116 +534,9 @@ class Engine(FreeEngine):
 ######################
 #Szymon #Grześ
 #####################
-#TODO
-class EngineVerticalSpringGravity(Engine):
-    """Ready to use model of engine represented by the rotating mass of a crankshaft and mass of the engine.
-        Arguments:
-        =========
-            M = Symbol object
-                -Mass of an engine.
-
-            m_e = Symbol object
-                -Mass of a crankshaft.
-
-            k_m = Symbol object
-                -Stifness of the engine mounts
-                
-                
-            phi = Dynamicsymbol object
-                -rotation angle
-                
-            e =  Symbol object
-                -offset of the rotating mass
-
-            g = Symbol object
-                -Gravitational field acceleration
-                
-            z = Symbol object
-                -vertical Z coordinate
-                
-            q = Symbol object
-                -Directional coefficent
-
-            ivar = symbol object
-                -Independant time variable
-
-            qs = dynamicsymbol object
-                -Generalized coordinates
-
-
-    """
-
-    scheme_name = 'engine_vertical_spring_gravity.png'
-    real_name = 'paccar.jpg'
-    detail_scheme_name = 'sruba_pasowana.png'
-    detail_real_name = 'buick_regal_3800.jpg'
-
-    M = Symbol('M', positive=True)
-    m_e = Symbol('m_e', positive=True)
-    phi = dynamicsymbols('varphi')
-    g = Symbol('g', positive=True)
-    k_m = Symbol('k_m', positive=True)
-    c_m = Symbol('c_m', positive=True)
-    e = Symbol('e', positive=True)
-    z = dynamicsymbols('z')
-
-    Omega = Symbol('Omega', positive=True)
-
-    #m0 = Symbol('m_0', positive=True)
-
-    def __init__(self,
-                 M=None,
-                 m_e=None,
-                 k_m=None,
-                 e=None,
-                 g=None,
-                 phi=None,
-                 z=None,
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        if M is not None: self.M = M
-        if m_e is not None: self.m_e = m_e
-        if phi is not None: self.phi = phi
-        if g is not None: self.g = g
-        if k_m is not None: self.k_m = k_m
-        if e is not None: self.e = e
-        if z is not None: self.z = z
-
-        self.qs = [self.z]
-        self.ivar = ivar
-
-        self._init_from_components(**kwargs)
-
-    @property
-    def components(self):
-
-        components = {}
-
-        self._mass = MaterialPoint(self.M, pos1=self.z,
-                                   qs=[self.z])(label='Engine block',scheme_options={'at':(10,20)})
-        self._crank = MaterialPoint(self.m_e,
-                                    pos1=self.z + self.e * cos(self.phi),
-                                    qs=[self.z])(label='Mass of cranksystem',scheme_options={'at':(10,20)})
-
-        self._left_junction = Spring(self.k_m, self.z,
-                                     qs=[self.z])(label='Left Engine mount')
-
-        self._right_junction = Spring(self.k_m, self.z,
-                                      qs=[self.z])(label='Right Engine mount')
-        self._GravitationalForce = GravitationalForce(
-            self.M, self.g, self.z)(label='Gravitational Force')
-
-        components['_mass'] = self._mass
-        components['_crank'] = self._crank
-        components['_left_junction'] = self._left_junction
-        components['_right_junction'] = self._right_junction
-        components['_gravitational_force'] = self._GravitationalForce
-        return components
-
 
 #DONE  # Is it duplicate?
-class EngineVerticalSpringGravity(FreeEngine):
+class EngineVerticalSpringGravity(Engine):
     """Ready to use model of engine represented by the rotating mass of a crankshaft and mass of the engine.
         Arguments:
         =========
@@ -740,10 +633,8 @@ class EngineVerticalSpringGravity(FreeEngine):
         return components
 
 
-    
-    
 #TODO #DDOF #Tomek 
-class BoxerEnginePerpendicularSprings(FreeEngine):
+class BoxerEnginePerpendicularSprings(Engine):
     scheme_name = 'boxer_engine_perpendicular_springs.png'
     real_name = 'f6c_valkyrie.jpg'
 
@@ -816,7 +707,7 @@ class BoxerEnginePerpendicularSprings(FreeEngine):
             return self.sym_desc_dict
 
 #DONE
-class DampedEngineVerticalSpringGravity(FreeEngine):
+class DampedEngineVerticalSpringGravity(Engine):
     scheme_name = 'damped_engine_vertical_spring_gravity.png'
     real_name = 'paccar.jpg'
     detail_scheme_name = 'sruba_pasowana.png'
@@ -1028,10 +919,8 @@ class InlineEnginePerpendicularSprings(Engine):
         return self.sym_desc_dict
 
 
-#Pioter #TODO
-class NonLinearInlineEnginePerpendicularSpringsGravity(Engine,
-                                                       NonlinearComposedSystem
-                                                       ):
+#Pioter #TODO - PATI zrobi
+class NonLinearInlineEnginePerpendicularSpringsGravity(FreeEngine):
 
     scheme_name = 'nonlinear_inline_engine_perpendicular_springs.png'
     real_name = 'paccar.jpg'
@@ -1075,27 +964,26 @@ class NonLinearInlineEnginePerpendicularSpringsGravity(Engine,
         if l is not None: self.l = l
         if g is not None: self.g = g
         if ivar is not None: self.ivar = ivar
+        self.qs = [self.z]
 
-        self.MaterialPoint_1 = MaterialPoint(self.M, pos1=self.z,
-                                             qs=[self.z])(label='Engine block')
-        self.MaterialPoint_2 = MaterialPoint(
-            self.m_e, pos1=self.z + self.e * cos(self.phi),
-            qs=[self.z])(label='Unbalanced mass in cranksystem')
-        self.SpringVer = Spring(2 * self.k_m, pos1=self.z,
-                                qs=[self.z])(label='Vertical engine mounts')
-        self.SpringHor = Spring(2 * self.k_m,
-                                pos1=(sqrt(self.d**2 + self.z**2) - self.l),
-                                qs=[self.z])(label='Horizontal engine mounts')
-        self.gravity_force1 = GravitationalForce(self.M,
-                                                 self.g,
-                                                 self.z,
-                                                 qs=[self.z
-                                                     ])(label='Gravity field')
-        self.gravity_force2 = GravitationalForce(
-            self.m_e, self.g, self.z + self.e * cos(self.phi),
-            qs=[self.z])(label='Gravity field')
-        system = self.SpringVer + self.SpringHor + self.MaterialPoint_1 + self.MaterialPoint_2 + self.gravity_force1 + self.gravity_force2
-        super().__init__(system, **kwargs)
+        self._init_from_components(**kwargs)
+    @property
+    def components(self):
+        components = {}
+        M, k_m, m_e, e, z, phi = self.M, self.k_m, self.m_e, self.e, self.z, self.phi
+
+        self._engine = FreeEngine(self.M, self.m_e, self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine')
+        
+        self._springVer  = Spring(self.k_m, self.z, qs=[self.z])(label='Left engine mount')
+        
+        self._springHor = Spring(self.k_m, self.z, qs=[self.z])(label='Right engine mount')
+
+        components['_engine'] = self._engine
+        components['_springVer'] = self._springVer
+        components['_springHor'] = self._springHor
+
+        return components
+
 
     def linearized(self):
 
@@ -1136,7 +1024,7 @@ class NonLinearInlineEnginePerpendicularSpringsGravity(Engine,
         }
         return self.sym_desc_dict
 
-# TODO
+#TODO-PATI ZROBI
 class NonLinearBoxerEnginePerpendicularSprings(NonlinearComposedSystem):
     scheme_name = 'nonlin_boxer_engine_perpendicular_springs.png'
     real_name = 'f6c_valkyrie.jpg'
@@ -1322,8 +1210,8 @@ class DampedEngine(Engine):
 
         return components
 
-#TODO
-class NonlinearEngine(Engine, NonlinearComposedSystem):
+#DONE #Amadi
+class NonlinearEngine(Engine):
     """
     Model of an exemplary Engine with nonlinear suspension aligned horizontally.
 
@@ -1396,6 +1284,7 @@ class NonlinearEngine(Engine, NonlinearComposedSystem):
         if z is not None: self.z = z
         if Omega is not None: self.Omega = Omega
         if g is not None: self.g = g
+        self.qs = [self.z]
         self._init_from_components(**kwargs)
 
     @property
@@ -1403,31 +1292,20 @@ class NonlinearEngine(Engine, NonlinearComposedSystem):
 
         components = {}
 
-        self.material_point_1 = MaterialPoint(self.M, self.z,
-                                              qs=[self.z
-                                                  ])(label='Engine block')
+        self._engine = FreeEngine(self.M, self.m_e, self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine')
 
-        self.material_point_2 = MaterialPoint(
-            self.m_e, self.z + self.e * cos(self.phi),
-            qs=[self.z])(label='Unbalanced mass in cranksystem')
-
-        self.spring = Spring(2 * self.k_m,
+        self._spring_left = Spring(self.k_m,
                              pos1=(self.z**2 + self.d**2)**0.5 - self.l_0,
-                             qs=[self.z])(label='Nonlinear engine mount')
+                             qs=[self.z])(label='Nonlinear left engine mount')
 
-        self.gravity_force1 = GravitationalForce(
-            self.M, self.g, self.z, qs=[self.z])(label='Gravitational Force')
+        self._spring_right = Spring(self.k_m,
+                             pos1=(self.z**2 + self.d**2)**0.5 - self.l_0,
+                             qs=[self.z])(label='Nonlinear right engine mount')
 
-        self.gravity_force2 = GravitationalForce(
-            self.m_e, self.g, self.z + self.e * cos(self.phi),
-            qs=[self.z])(label='Gravitational Force')
 
-        components['_material_point_1'] = self.material_point_1
-        components['_material_point_2'] = self.material_point_2
-        components['_spring_ver_left'] = self.spring
-        components['_spring_hor_left'] = self.gravity_force1
-        components['_spring_ver_right'] = self.gravity_force2
-        #         components['_spring_hor_right'] = self._spring_hor_right
+        components['_engine'] = self._engine
+        components['_spring_left'] = self._spring_left
+        components['_spring_right'] = self._spring_right
 
         return components
 
@@ -1454,6 +1332,8 @@ class NonlinearEngine(Engine, NonlinearComposedSystem):
 
         return default_data_dict
 
+    
+    
 # DONE
 class StraightNonlinearEngine(NonlinearEngine):
     """
