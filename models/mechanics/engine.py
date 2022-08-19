@@ -9,6 +9,7 @@ from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
 
 from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin, EngineMount
 from ..continuous import ContinuousSystem, PlaneStressProblem
+from dynpy.models.mechanics.tmd import TMD
 
 import base64
 import random
@@ -433,107 +434,10 @@ class FreeEngine(ComposedSystem):
             self.g: [9.81]
         }
         return default_data_dict
-    
-class EngineVerticalSpringGravity(FreeEngine):
-    """Ready to use model of engine represented by the rotating mass of a crankshaft and mass of the engine.
-        Arguments:
-        =========
-            M = Symbol object
-                -Mass of an engine.
-
-            m_e = Symbol object
-                -Mass of a crankshaft.
-
-            k_m = Symbol object
-                -Stifness of the engine mounts
-                
-                
-            phi = Dynamicsymbol object
-                -rotation angle
-                
-            e =  Symbol object
-                -offset of the rotating mass
-
-            g = Symbol object
-                -Gravitational field acceleration
-                
-            z = Symbol object
-                -vertical Z coordinate
-                
-            q = Symbol object
-                -Directional coefficent
-
-            ivar = symbol object
-                -Independant time variable
-
-            qs = dynamicsymbol object
-                -Generalized coordinates
-
-
-    """
-
-    scheme_name = 'engine_vertical_spring_gravity.png'
-    real_name = 'paccar.jpg'
-    detail_scheme_name = 'sruba_pasowana.png'
-    detail_real_name = 'buick_regal_3800.jpg'
-
-    M = Symbol('M', positive=True)
-    m_e = Symbol('m_e', positive=True)
-    phi = dynamicsymbols('varphi')
-    g = Symbol('g', positive=True)
-    k_m = Symbol('k_m', positive=True)
-    c_m = Symbol('c_m', positive=True)
-    e = Symbol('e', positive=True)
-    z = dynamicsymbols('z')
-
-    Omega = Symbol('Omega', positive=True)
-
-    #m0 = Symbol('m_0', positive=True)
-
-    def __init__(self,
-                 M=None,
-                 m_e=None,
-                 k_m=None,
-                 e=None,
-                 g=None,
-                 phi=None,
-                 z=None,
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        if M is not None: self.M = M
-        if m_e is not None: self.m_e = m_e
-        if phi is not None: self.phi = phi
-        if g is not None: self.g = g
-        if k_m is not None: self.k_m = k_m
-        if e is not None: self.e = e
-        if z is not None: self.z = z
-
-        self.qs = [self.z]
-        self.ivar = ivar
-
-        self._init_from_components(**kwargs)
-
-    @property
-    def components(self):
-
-        components = {}
-
-        self._engine_block = FreeEngine(self.M, self.m_e, self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine')
-
-        self._left_mount  = EngineMount(self.k_m, self.z, qs=[self.z])(label='Left engine mount')
-        self._right_mount = EngineMount(self.k_m, self.z, qs=[self.z])(label='Right engine mount')
-        
-
-        components['_engine_block'] = self._engine_block
-        components['_left_mount'] = self._left_mount
-        components['_right_mount'] = self._right_mount
-        return components
-
 #dobrać dane numeryczne
 #####
-#Sav
-class Engine(ComposedSystem):
+#DONE #Sav
+class Engine(FreeEngine):
     """Ready to use model of engine represented by the rotating mass of a crankshaft and mass of the engine.
         Arguments:
         =========
@@ -630,6 +534,7 @@ class Engine(ComposedSystem):
 ######################
 #Szymon #Grześ
 #####################
+#TODO
 class EngineVerticalSpringGravity(Engine):
     """Ready to use model of engine represented by the rotating mass of a crankshaft and mass of the engine.
         Arguments:
@@ -737,8 +642,108 @@ class EngineVerticalSpringGravity(Engine):
         return components
 
 
-#Tomek
-class BoxerEnginePerpendicularSprings(ComposedSystem):
+#DONE  # Is it duplicate?
+class EngineVerticalSpringGravity(FreeEngine):
+    """Ready to use model of engine represented by the rotating mass of a crankshaft and mass of the engine.
+        Arguments:
+        =========
+            M = Symbol object
+                -Mass of an engine.
+
+            m_e = Symbol object
+                -Mass of a crankshaft.
+
+            k_m = Symbol object
+                -Stifness of the engine mounts
+                
+                
+            phi = Dynamicsymbol object
+                -rotation angle
+                
+            e =  Symbol object
+                -offset of the rotating mass
+
+            g = Symbol object
+                -Gravitational field acceleration
+                
+            z = Symbol object
+                -vertical Z coordinate
+                
+            q = Symbol object
+                -Directional coefficent
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+
+    """
+
+    scheme_name = 'engine_vertical_spring_gravity.png'
+    real_name = 'paccar.jpg'
+    detail_scheme_name = 'sruba_pasowana.png'
+    detail_real_name = 'buick_regal_3800.jpg'
+
+    M = Symbol('M', positive=True)
+    m_e = Symbol('m_e', positive=True)
+    phi = dynamicsymbols('varphi')
+    g = Symbol('g', positive=True)
+    k_m = Symbol('k_m', positive=True)
+    c_m = Symbol('c_m', positive=True)
+    e = Symbol('e', positive=True)
+    z = dynamicsymbols('z')
+
+    Omega = Symbol('Omega', positive=True)
+
+    #m0 = Symbol('m_0', positive=True)
+
+    def __init__(self,
+                 M=None,
+                 m_e=None,
+                 k_m=None,
+                 e=None,
+                 g=None,
+                 phi=None,
+                 z=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if M is not None: self.M = M
+        if m_e is not None: self.m_e = m_e
+        if phi is not None: self.phi = phi
+        if g is not None: self.g = g
+        if k_m is not None: self.k_m = k_m
+        if e is not None: self.e = e
+        if z is not None: self.z = z
+
+        self.qs = [self.z]
+        self.ivar = ivar
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self._engine_block = FreeEngine(self.M, self.m_e, self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine')
+
+        self._left_mount  = EngineMount(self.k_m, self.z, qs=[self.z])(label='Left engine mount')
+        self._right_mount = EngineMount(self.k_m, self.z, qs=[self.z])(label='Right engine mount')
+        
+
+        components['_engine_block'] = self._engine_block
+        components['_left_mount'] = self._left_mount
+        components['_right_mount'] = self._right_mount
+        return components
+
+
+    
+    
+#TODO #DDOF #Tomek 
+class BoxerEnginePerpendicularSprings(FreeEngine):
     scheme_name = 'boxer_engine_perpendicular_springs.png'
     real_name = 'f6c_valkyrie.jpg'
 
@@ -810,7 +815,7 @@ class BoxerEnginePerpendicularSprings(ComposedSystem):
             }
             return self.sym_desc_dict
 
-
+#DONE
 class DampedEngineVerticalSpringGravity(FreeEngine):
     scheme_name = 'damped_engine_vertical_spring_gravity.png'
     real_name = 'paccar.jpg'
@@ -933,7 +938,7 @@ class DampedEngineVerticalSpringGravity(FreeEngine):
         return default_data_dict
 
 
-#Mateusz
+#TODO #DDOF #Mateusz
 class InlineEnginePerpendicularSprings(Engine):
     scheme_name = 'inline_engine_perpendicular_springs.png'
     real_name = 'paccar.jpg'
@@ -1023,7 +1028,7 @@ class InlineEnginePerpendicularSprings(Engine):
         return self.sym_desc_dict
 
 
-#Pioter
+#Pioter #TODO
 class NonLinearInlineEnginePerpendicularSpringsGravity(Engine,
                                                        NonlinearComposedSystem
                                                        ):
@@ -1131,7 +1136,7 @@ class NonLinearInlineEnginePerpendicularSpringsGravity(Engine,
         }
         return self.sym_desc_dict
 
-
+# TODO
 class NonLinearBoxerEnginePerpendicularSprings(NonlinearComposedSystem):
     scheme_name = 'nonlin_boxer_engine_perpendicular_springs.png'
     real_name = 'f6c_valkyrie.jpg'
@@ -1221,7 +1226,7 @@ class NonLinearBoxerEnginePerpendicularSprings(NonlinearComposedSystem):
         return self.sym_desc_dict
 
 
-#Sav
+#Sav #DONE
 class DampedEngine(Engine):
     """Ready to use model of engine represented by the rotating mass of a crankshaft and mass of the engine.
         Arguments:
@@ -1317,7 +1322,7 @@ class DampedEngine(Engine):
 
         return components
 
-#marcel
+#TODO
 class NonlinearEngine(Engine, NonlinearComposedSystem):
     """
     Model of an exemplary Engine with nonlinear suspension aligned horizontally.
@@ -1449,7 +1454,7 @@ class NonlinearEngine(Engine, NonlinearComposedSystem):
 
         return default_data_dict
 
-
+# DONE
 class StraightNonlinearEngine(NonlinearEngine):
     """
     Model of an exemplary Engine with nonlinear suspension aligned horizontally.
@@ -1518,7 +1523,7 @@ class StraightNonlinearEngine(NonlinearEngine):
         return default_data_dict
 
 
-#Dominik
+#TODO #DDOF #Dominik 
 class NonLinearVeeEnginePerpendicularSprings(Engine):
     scheme_name = 'nonlin_vee_engine_perpendicular_springs.png'
     real_name = '440_magnum_v8.jpg'
@@ -1628,8 +1633,7 @@ class NonLinearVeeEnginePerpendicularSprings(Engine):
 
         return self.sym_desc_dict
 
-
-#MARCEL
+# DONE
 class EngineWithTMD(Engine):
     """
     Model of a DDoF Coupled Pendulum.
@@ -1678,12 +1682,12 @@ class EngineWithTMD(Engine):
 
     M = Symbol('M', positive=True)
     k_m = Symbol('k_m', positive=True)
-    k_TMD = Symbol('k_TMD', positive=True)
+    k_E = Symbol('k_TMD', positive=True)
     m_e = Symbol('m_e', positive=True)
-    m_TMD = Symbol('m_TMD', positive=True)
+    m_E = Symbol('m_TMD', positive=True)
     e = Symbol('e', positive=True)
     z = dynamicsymbols('z', positive=True)
-    z_TMD = dynamicsymbols('z_TMD', positive=True)
+    z_E = dynamicsymbols('z_TMD', positive=True)
     phi = dynamicsymbols('varphi', positive=True)
     Omega = Symbol('Omega', positive=True)
     ivar = Symbol('t', positive=True)
@@ -1696,12 +1700,12 @@ class EngineWithTMD(Engine):
     def __init__(self,
                  M=None,
                  k_m=None,
-                 k_TMD=None,
+                 k_E=None,
                  m_e=None,
-                 m_TMD=None,
+                 m_E=None,
                  e=None,
                  z=None,
-                 z_TMD=None,
+                 z_E=None,
                  phi=None,
                  g=None,
                  Omega=None,
@@ -1709,12 +1713,12 @@ class EngineWithTMD(Engine):
                  **kwargs):
         if M is not None: self.M = M
         if k_m is not None: self.k_m = k_m
-        if k_TMD is not None: self.k_TMD = k_TMD
+        if k_E is not None: self.k_TMD = k_TMD
         if phi is not None: self.phi = phi
         if m_e is not None: self.m_e = m_e
         if e is not None: self.e = e
-        if m_TMD is not None: self.m_TMD = m_TMD
-        if z_TMD is not None: self.z_TMD = z_TMD
+        if m_E is not None: self.m_TMD = m_TMD
+        if z_E is not None: self.z_TMD = z_TMD
         if z is not None: self.z = z
         if Omega is not None: self.Omega = Omega
         if g is not None: self.g = g
@@ -1725,17 +1729,10 @@ class EngineWithTMD(Engine):
     def components(self):
         components = {}
 
-        self.mass_damper = MaterialPoint(self.m_TMD,
-                                         pos1=self.z_TMD,
-                                         qs=[self.z_TMD])(label='Mass Damper')
-        self.absorber_gravity_force = GravitationalForce(
-            self.m_TMD, self.g, self.z_TMD,
-            qs=[self.z])(label='Mass Damper Gravitational Force')
-        self.absorber_spring = Spring(self.k_TMD,
-                                      pos1=self.z,
-                                      pos2=self.z_TMD,
-                                      qs=[self.z_TMD])(label='Absorber Spring')
-        self.engine = EngineVerticalSpringGravity(
+        
+        
+        
+        self._engine = EngineVerticalSpringGravity(
             M=self.M,
             m_e=self.m_e,
             k_m=self.k_m,
@@ -1744,10 +1741,11 @@ class EngineWithTMD(Engine):
             phi=self.phi,
             z=self.z)(label='Engine(damped object)')
 
-        components['mass damper'] = self.mass_damper
-        components['absorber_gravity_force'] = self.absorber_gravity_force
-        components['absorber_spring'] = self.absorber_spring
-        components['engine'] = self.engine
+        self._TMD = TMD(self.m_E, self.k_E,self.z, self.z_E)(label='TMD(damping object)')
+        
+        components['_engine'] = self._engine
+        components['_TMD'] = self._TMD
+
 
         return components
 

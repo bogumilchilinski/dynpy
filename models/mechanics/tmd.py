@@ -376,3 +376,4 @@ class TMD(SpringMassSystem):
         }
 
         return self.sym_desc_dict
+
