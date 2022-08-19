@@ -7,7 +7,7 @@ from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
 
-from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin
+from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin, EngineMount
 from ..continuous import ContinuousSystem, PlaneStressProblem
 
 import base64
@@ -614,56 +614,17 @@ class Engine(ComposedSystem):
         components = {}
         M, k_m, m_e, e, z, phi = self.M, self.k_m, self.m_e, self.e, self.z, self.phi
 
-        self._engine_block = MaterialPoint(M, pos1=z,
-                                           qs=[z])(label='Engine block',scheme_options={'at':(4,0)})
-        self._crank = MaterialPoint(m_e, pos1=z + e * cos(phi),
-                                    qs=[z])(label='Centroid of cranksystem',scheme_options={'at':(4,0)})
-        self._spring_left = Spring(k_m, pos1=z,
-                                   qs=[z])(label='Left engine mount',scheme_options={'at':(5,-18)})
-        self._spring_right = Spring(k_m, pos1=z,
-                                    qs=[z])(label='Right engine mount',scheme_options={'at':(9,-18)})
+        self._engine = FreeEngine(self.M, self.m_e, self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine')
+        
+        self._left_mount  = EngineMount(self.k_m, self.z, qs=[self.z])(label='Left engine mount')
+        
+        self._right_mount = EngineMount(self.k_m, self.z, qs=[self.z])(label='Right engine mount')
 
-        components['_engine_block'] = self._engine_block
-        components['_crank'] = self._crank
-        components['_spring_left'] = self._spring_left
-        components['_spring_right'] = self._spring_right
+        components['_engine'] = self._engine
+        components['_left_mount'] = self._left_mount
+        components['_right_mount'] = self._right_mount
 
         return components
-
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.M: r'Mass of engine block',
-            self.k_m: r'Spring stiffness coefficient',
-            self.m_e: r'',
-            self.e: r'',
-        }
-        return self.sym_desc_dict
-
-    def get_default_data(self):
-
-        t = self.ivar
-
-        default_data_dict = {
-            self.M: [10 * self.m0 * no / 100 for no in range(80, 120)],
-            self.k_m: [self.k0 * no / 100 for no in range(80, 120)],
-            self.m_e: [self.m0 * no / 100 for no in range(80, 120)],
-            self.e: [e * no / 100 for no in range(80, 120)],
-            self.phi: [2 * 3.14 * omega * t * self.ivar]
-        }
-        return deafault_data_dict
-
-    def get_numerical_data(self):
-
-        default_data_dict = {
-            self.M: [8 * no for no in range(80, 120)],  #mass of engine block
-            self.k_m: [5 * no for no in range(80, 120)],  #sztywnosc sprezyny
-            self.m_e: [0.5 * no for no in range(80, 120)],  #mass of particle
-            self.e:
-            [30 * no
-             for no in range(80, 120)],  #distance -motion radius of a particle
-            self.phi: [2 * 3.14 * 10 * self.ivar]
-        }
-        return default_data_dict
 
 
 ######################
@@ -1312,6 +1273,7 @@ class DampedEngine(Engine):
                  k_m=None,
                  c_m=None,
                  m_e=None,
+                 g=None,
                  e=None,
                  z=None,
                  phi=None,
@@ -1319,44 +1281,41 @@ class DampedEngine(Engine):
                  **kwargs):
 
         if c_m is not None: self.c_m = c_m
-        super().__init__(M=M,
-                         k_m=k_m,
-                         m_e=m_e,
-                         e=e,
-                         z=z,
-                         phi=phi,
-                         ivar=ivar,
-                         **kwargs)
+        if M is not None: self.M = M
+        if k_m is not None: self.k_m = k_m
+        if m_e is not None: self.m_e = m_e
+        if g is not None: self.g = g
+        if e is not None: self.e = e
+        if z is not None: self.z = z
+        if phi is not None: self.phi = phi
+        if ivar is not None: self.ivar = ivar
+        self.qs = [self.z]
+
+        self._init_from_components(**kwargs)
 
     @property
     def components(self):
-        components = super().components
+        components={}
+        self._engine = FreeEngine(self.M, self.m_e, self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine')
+        
+        self._left_mount  = EngineMount(self.k_m, self.z, qs=[self.z])(label='Left engine mount')
+        
+        self._right_mount = EngineMount(self.k_m, self.z, qs=[self.z])(label='Right engine mount')
+
 
         self.damper_left = Damper(2 * self.c_m, pos1=self.z,
                                   qs=[self.z])(label='Damping in left mount')
         self.damper_right = Damper(2 * self.c_m, pos1=self.z,
                                    qs=[self.z])(label='Damping in right mount')
 
+        
+        components['_engine'] = self._engine
+        components['_left_mount'] = self._left_mount
+        components['_right_mount'] = self._right_mount
         components['damper_left'] = self.damper_left
         components['damper_right'] = self.damper_right
 
         return components
-
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.c_m: r'mass of damper?',
-        }
-        return {**super().symbols_description(), **self.sym_desc_dict}
-
-    def get_default_data(self):
-
-        t = self.ivar
-        return {**super().get_default_data(), **self.default_data_dict}
-
-    def get_numerical_data(self):
-
-        return {**super().get_numerical_data(), **self.default_data_dict}
-
 
 #marcel
 class NonlinearEngine(Engine, NonlinearComposedSystem):

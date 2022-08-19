@@ -439,7 +439,7 @@ class CarMovementConstantThrottle(ComposedSystem):
     
     @property
     def current_gear(self):
-        return 0.686
+        return 1.024
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -487,8 +487,8 @@ class CarMovementConstantThrottle(ComposedSystem):
             self.J_s: [0.2],
             self.alpha: [0],
             self.a_h: [4],
-            self.P: [210],
-            self.I: [0],
+            self.P: [2100],
+            self.I: [10],
             self.D: [100],
         }
 
