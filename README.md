@@ -1,3 +1,3 @@
 # Introduction
 
-It's a module allows to enginering calculations on dynamical systems. 
+It's a module that allows to enginering calculations on dynamical systems. 
