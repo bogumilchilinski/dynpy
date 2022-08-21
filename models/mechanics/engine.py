@@ -329,7 +329,7 @@ class NonlinearComposedSystem(ComposedSystem):
         k_m = self.k_m
 
         return amp[0] * k_m + self.max_static_force_pin()
-#Mateusz
+#DONE #Mateusz
 ############################### Nowa podstawowa klasa dla silników o 1 stopniu swobody
 class FreeEngine(ComposedSystem):
     """Base class for all engine systems. This class consists only of the engine block and crank system, involving the gravity factor.
@@ -434,7 +434,7 @@ class FreeEngine(ComposedSystem):
             self.g: [9.81]
         }
         return default_data_dict
-#Mateusz
+#DONE #Mateusz
 ################### Podstawowa klasa dla silników o 2 stopniach swobody
 class FreeEngineDDOF(FreeEngine):
     """Base class for all engine systems with 2 degrees of freedom. This class consists only of the engine block and crank system, involving the gravity factor.
@@ -935,7 +935,7 @@ class DampedEngineVerticalSpringGravity(Engine):
         return default_data_dict
 
 
-#TODO #DDOF #Mateusz ##DONE
+##DONE #DDOF #Mateusz
 class InlineEnginePerpendicularSprings(Engine):
     scheme_name = 'inline_engine_perpendicular_springs_DDOF.png'
     real_name = 'paccar.jpg'
@@ -1008,7 +1008,7 @@ class InlineEnginePerpendicularSprings(Engine):
         return self.sym_desc_dict
 
 
-#Pioter #TODO - PATI zrobi
+#Pioter #DONE - PATI zrobione
 class NonLinearInlineEnginePerpendicularSpringsGravity(FreeEngine):
 
     scheme_name = 'nonlinear_inline_engine_perpendicular_springs.png'
@@ -1113,43 +1113,66 @@ class NonLinearInlineEnginePerpendicularSpringsGravity(FreeEngine):
         }
         return self.sym_desc_dict
 
-#TODO-PATI ZROBI
-class NonLinearBoxerEnginePerpendicularSprings(NonlinearComposedSystem):
+#DONE-PATI ZROBI
+class NonLinearBoxerEnginePerpendicularSprings(FreeEngine):
     scheme_name = 'nonlin_boxer_engine_perpendicular_springs.png'
     real_name = 'f6c_valkyrie.jpg'
-
+    M = Symbol('M', positive=True)
+    k_m=Symbol('k_m', positive=True)
+    m_e=Symbol('m_e', positive=True)
+    e=Symbol('e', positive=True)
+    l=Symbol('l', positive=True)
+    x=dynamicsymbols('x')
+    phi=Symbol('phi', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    ivar=Symbol('t')
+    d=Symbol('d', positive=True)
+        
     def __init__(self,
-                 M=Symbol('M', positive=True),
-                 k_m=Symbol('k_m', positive=True),
-                 m_e=Symbol('m_e', positive=True),
-                 e=Symbol('e', positive=True),
-                 l=Symbol('l', positive=True),
-                 x=dynamicsymbols('x'),
-                 phi=dynamicsymbols('phi'),
-                 Omega=Symbol('\Omega', positive=True),
-                 ivar=Symbol('t'),
-                 d=Symbol('d', positive=True),
+                 M=None,
+                 k_m=None,
+                 m_e=None,
+                 e=None,
+                 l=None,
+                 x=None,
+                 phi=None,
+                 Omega=None,
+                 ivar=None,
+                 d=None,
                  **kwargs):
-        self.t = ivar
-        self.M = M
-        self.k_m = k_m
-        self.m_e = m_e
-        self.e = e
-        self.phi = phi
-        self.Omega = Omega
-        self.d = d
-        self.l = l
-        self.MaterialPoint_1 = MaterialPoint(M, pos1=x,
-                                             qs=[x])(label='Engine block')
-        self.MaterialPoint_2 = MaterialPoint(
-            m_e, pos1=x + e * sin(phi),
-            qs=[x])(label='Unbalanced mass of cranksystem')
-        self.SpringHor = Spring(2 * k_m, pos1=x,
-                                qs=[x])(label='Horizontal engine mounts')
-        self.SpringVer = Spring(2 * k_m, pos1=(sqrt(d**2 + x**2) - l),
-                                qs=[x])(label='Vertical engine mounts')
-        system = self.SpringVer + self.SpringHor + self.MaterialPoint_1 + self.MaterialPoint_2
-        super().__init__(system, **kwargs)
+        if M is not None: self.M = M
+        if k_m is not None: self.k_m = k_m
+        if m_e is not None: self.m_e = m_e
+        if e is not None: self.e = e
+        if l is not None: self.l = l
+        if x is not None: self.x = x            
+        if phi is not None: self.phi = phi
+        if Omega is not None: self.Omega = Omega
+        if d is not None: self.d = d
+        if ivar is not None: self.ivar = ivar
+        self.qs = [self.x]
+        
+        self._init_from_components(**kwargs)
+        
+    @property
+    def components(self):
+        components = {}
+        self.g=0
+        M, k_m, m_e, e, x, phi = self.M, self.k_m, self.m_e, self.e, self.x, self.phi
+        
+        self._engine = FreeEngine(self.M, self.m_e,g=0, z= self.x, phi = self.phi, qs=[self.x])(label='Engine')
+        
+        self._springVer  = Spring(self.k_m, self.x, qs=[self.x])(label='Left engine mount')
+        
+        self._springHor = Spring(self.k_m, self.x, qs=[self.x])(label='Right engine mount')
+
+        components['_engine'] = self._engine
+        components['_springVer'] = self._springVer
+        components['_springHor'] = self._springHor
+
+        return components
+
+
 
     def get_default_data(self):
 
@@ -1174,6 +1197,7 @@ class NonLinearBoxerEnginePerpendicularSprings(NonlinearComposedSystem):
             #             self.g:[g],
             #             self.phi:[self.Omega*self.t],
             self.phi: [self.Omega * self.t]
+            
         }
 
         return default_data_dict
@@ -1299,8 +1323,8 @@ class DampedEngine(Engine):
 
         return components
 
-#DONE #Amadi
-class NonlinearEngine(Engine):
+#DONE #Amadi #Sav
+class NonlinearEngine(Engine, NonlinearComposedSystem):
     """
     Model of an exemplary Engine with nonlinear suspension aligned horizontally.
 
@@ -1373,7 +1397,6 @@ class NonlinearEngine(Engine):
         if z is not None: self.z = z
         if Omega is not None: self.Omega = Omega
         if g is not None: self.g = g
-        self.qs = [self.z]
         self._init_from_components(**kwargs)
 
     @property
@@ -1382,44 +1405,28 @@ class NonlinearEngine(Engine):
         components = {}
 
         self._engine = FreeEngine(self.M, self.m_e, self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine')
-
-        self._spring_left = Spring(self.k_m,
+        
+        self._left_mount  = EngineMount(self.k_m, self.z, qs=[self.z])(label='Left engine mount')
+        
+        self._right_mount = EngineMount(self.k_m, self.z, qs=[self.z])(label='Right engine mount')
+        self._spring_left = EngineMount(2 * self.k_m,
                              pos1=(self.z**2 + self.d**2)**0.5 - self.l_0,
-                             qs=[self.z])(label='Nonlinear left engine mount')
-
-        self._spring_right = Spring(self.k_m,
+                             qs=[self.z])(label='Nonlinear engine mount left')
+        self._spring_right = EngineMount(2 * self.k_m,
                              pos1=(self.z**2 + self.d**2)**0.5 - self.l_0,
-                             qs=[self.z])(label='Nonlinear right engine mount')
+                             qs=[self.z])(label='Nonlinear engine mount right')
 
+            
 
-        components['_engine'] = self._engine
+        components['_engine'] = self._engine  
         components['_spring_left'] = self._spring_left
         components['_spring_right'] = self._spring_right
+        components['_left_mount'] = self._left_mount
+        components['_right_mount'] = self._right_mount
+
 
         return components
 
-    def get_default_data(self):
-
-        m0, k0, e0, l, omega = symbols('m_0 k_0 e_0 l Omega', positive=True)
-
-        default_data_dict = {}
-        return {**super().get_default_data(), **default_data_dict}
-
-    def get_numerical_data(self):
-
-        m0, k0, e0, g, lam = symbols('m_0 k_0 e_0 g lambda', positive=True)
-        m0, k0 = self.m0, self.k0
-        m0 = 10
-        k0 = 10
-        default_data_dict = {
-            self.M: [m0 * no for no in range(10, 100)],
-            self.m_e: [m0 * no for no in range(1, 20)],
-            self.k_m: [1.0 * k0 * no for no in range(1, 20)],
-            self.e: [e0 * no / 10 for no in range(1, 20)],
-            self.phi: [self.Omega * self.ivar],
-        }
-
-        return default_data_dict
 
     
     
