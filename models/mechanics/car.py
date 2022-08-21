@@ -398,6 +398,7 @@ class CarMovementConstantThrottle(ComposedSystem):
         self.f = self.m_red*self.g*self.f_0
         self.F = (self.T*self.i*self.i_c*self.eta)/self.r_d
         self.n = (diff(self.x,self.ivar)*self.i*self.i_c*60 )/(2*np.pi*self.r_d)
+        self.error = -7.21914962310842e-24*self.ivar**10 + 4.09285356849447e-20*self.ivar**9 - 9.80641183997517e-17*self.ivar**8 + 1.29051452578393e-13*self.ivar**7 - 1.01472654714565e-10*self.ivar**6 + 4.85741460232082e-8*self.ivar**5 - 1.37892965900947e-5*self.ivar**4 + 0.00213941785802763*self.ivar**3 - 0.148427605950237*self.ivar**2 + 7.13838237925456*self.ivar - 67.8916383683618 - self.x + 67
 
         self._init_from_components(**kwargs)
 
@@ -487,9 +488,9 @@ class CarMovementConstantThrottle(ComposedSystem):
             self.J_s: [0.2],
             self.alpha: [0],
             self.a_h: [4],
-            self.P: [2100],
+            self.P: [2100], #2100
             self.I: [10],
-            self.D: [100],
+            self.D: [100], #100
         }
 
         return default_data_dict

@@ -521,9 +521,23 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     def scheme_options(self):
         return self._scheme_options
         
-    def _init_from_components(self):
-        composed_system = self._elements_sum
-        self.__init__(None,system = composed_system)
+    def _init_from_components(self, system=None, *args, **kwargs):
+
+        if system is None:
+            composed_system = self._elements_sum
+        else:
+            composed_system = system
+
+        #print('CS',composed_system._components)
+        super(LagrangesDynamicSystem,self).__init__(None, system=composed_system)
+
+        #print('self',self._components)
+        if self._components is None:
+            comps = {}
+        else:
+            comps = self._components
+
+        self._components = {**comps, **self.components}
 
     @property
     def components(self):
@@ -542,6 +556,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             return ''
         else:
             return '\t-' + ',\n \t-'.join(comps) + '.'
+
+    @property
+    def elements(self):
+        return {**self.components}
         
     def __str__(self):
         

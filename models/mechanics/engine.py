@@ -329,8 +329,8 @@ class NonlinearComposedSystem(ComposedSystem):
         k_m = self.k_m
 
         return amp[0] * k_m + self.max_static_force_pin()
-
-############################### Nowa podstawowa klasa dla silników
+#Mateusz
+############################### Nowa podstawowa klasa dla silników o 1 stopniu swobody
 class FreeEngine(ComposedSystem):
     """Base class for all engine systems. This class consists only of the engine block and crank system, involving the gravity factor.
     =========
@@ -409,6 +409,115 @@ class FreeEngine(ComposedSystem):
             self.e: r'Length of the crank - radius of the circular motion',
             self.g: r'Gravity constant',
             self.z: r'Displacement coordinate'
+        }
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        t = self.ivar
+        
+        default_data_dict = {
+            self.M: [10 * self.m0 * no / 100 for no in range(10, 150)],
+            self.m_e: [self.m0 * no / 100 for no in range(80, 120)],
+            self.e: [self.e0 * no / 100 for no in range(80, 120)],
+            self.phi: [2 * 3.14 * self.ivar]
+        }
+        return default_data_dict
+
+    def get_numerical_data(self):
+
+        default_data_dict = {
+            self.M: [4 * no for no in range(10, 150)],
+            self.m_e: [0.5 * no for no in range(80, 120)],
+            self.e: [2/100 * no for no in range(5, 15)],
+            self.phi: [2 * 3.14 * 10 * self.ivar],
+            self.g: [9.81]
+        }
+        return default_data_dict
+#Mateusz
+################### Podstawowa klasa dla silników o 2 stopniach swobody
+class FreeEngineDDOF(FreeEngine):
+    """Base class for all engine systems with 2 degrees of freedom. This class consists only of the engine block and crank system, involving the gravity factor.
+    =========
+            M = Symbol object
+                - Mass of the engine housing
+            m_e = Symbol object
+                - Reduced mass of the crank system
+            e = Symbol object
+                - Length of the crank - radius of the circular motion
+            g = Symbol object
+                - Gravitational field acceleration
+            x = Symbol object
+                - Vertical coordinate x
+            z = Symbol object
+                - Vertical coordinate z
+            ivar = Symbol object
+                - Independant time variable
+            qs = Dynamicsymbol object
+                - Generalized coordinates
+    
+    """
+    scheme_name = 'engine_block_DDOF.png'
+    real_name = 'engine_real.PNG'
+
+    M = Symbol('M', positive=True)  #Mass of the engine housing
+    g = Symbol('g', positive=True)  #Gravity constant
+    z = dynamicsymbols('z')  #Displacement coordinate z
+    x = dynamicsymbols('x')  #Displacement coordinate x
+    m_e = Symbol('m_e', positive=True)  #Reduced mass of the crank system
+    e = Symbol('e', positive=True)  #Length of the crank - radius of the circular motion
+    phi = dynamicsymbols('\\varphi')
+    ivar = Symbol('t', positive=True)
+    m0 = Symbol('m0', positive=True)
+    m_e0 = Symbol('m_e0', positive=True)
+    e0 = Symbol('e_0', positive=True)
+
+    def __init__(self,
+                 M=None,
+                 m_e=None,
+                 e=None,
+                 g=None,
+                 z=None,
+                 x=None,
+                 phi=None,
+                 ivar=None,
+                 **kwargs):
+
+        if M is not None: self.M = M
+        if m_e is not None: self.m_e = m_e
+        if e is not None: self.e = e
+        if g is not None: self.g = g
+        if z is not None: self.z = z
+        if x is not None: self.x = x
+        if phi is not None: self.phi = phi
+        if ivar is not None: self.ivar = ivar
+        self.qs = [self.z, self.x]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+        components = {}
+        M, m_e, e, g, z, x, phi = self.M, self.m_e, self.e, self.g, self.z, self.x, self.phi
+
+        self._engine_block_1DOF = FreeEngine(M, m_e, e, g, z, phi)(label='Engine block with 1 DOF')
+        self._engine_housing_horizontal_component = MaterialPoint(M, pos1=x, qs=[x])(label='Engine hounsing horizontal component')
+        self._crank_horizontal_component = MaterialPoint(m_e, pos1=x + e * sin(phi), qs=[x])(label='Position of reduced mass of the crank system in direction x')
+
+        components['_engine_block_1DOF'] = self._engine_block_1DOF
+        components['_engine_housing_horizontal_component'] = self._engine_housing_horizontal_component
+        components['_crank_horizontal_component'] = self._crank_horizontal_component
+
+        return components
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.M: r'Mass of the engine block',
+            self.m_e: r'Reduced mass of the crank system',
+            self.e: r'Length of the crank - radius of the circular motion',
+            self.g: r'Gravity constant',
+            self.z: r'Displacement coordinate z',
+            self.x: r'Displacement coordinate x'
         }
         return self.sym_desc_dict
 
@@ -531,9 +640,6 @@ class Engine(FreeEngine):
         return components
 
 
-######################
-#Szymon #Grześ
-#####################
 
 #DONE  # Is it duplicate?
 class EngineVerticalSpringGravity(Engine):
@@ -829,9 +935,9 @@ class DampedEngineVerticalSpringGravity(Engine):
         return default_data_dict
 
 
-#TODO #DDOF #Mateusz
+#TODO #DDOF #Mateusz ##DONE
 class InlineEnginePerpendicularSprings(Engine):
-    scheme_name = 'inline_engine_perpendicular_springs.png'
+    scheme_name = 'inline_engine_perpendicular_springs_DDOF.png'
     real_name = 'paccar.jpg'
 
     M = Symbol('M', positive=True)
@@ -874,34 +980,14 @@ class InlineEnginePerpendicularSprings(Engine):
 
         components = {}
 
-        self._material_point_1 = MaterialPoint(
-            self.M, pos1=self.z,
-            qs=[self.z])(label='First material point - engine block')
-        self._material_point_2 = MaterialPoint(
-            self.m_e, pos1=self.z + self.e * cos(self.phi), qs=[self.z]
-        )(label=
-          'Second material point - reduced unbalanced mass of the crank system'
-          )
-        self._spring_ver_left = Spring(
-            self.k_m,
-            pos1=(self.z**2 + self.x**2)**(1 / 2) - self.z,
-            qs=[self.z])(label='Left vertical engine mount')
-        self._spring_hor_left = Spring(
-            self.k_m,
-            pos1=(self.z**2 + self.x**2)**(1 / 2) - (self.x + self.l),
-            qs=[self.x])(label='Left horizontal engine mount')
-        self._spring_ver_right = Spring(
-            self.k_m,
-            pos1=(self.z**2 + (self.x + self.l)**2)**(1 / 2) - self.z,
-            qs=[self.z])(label='Right vertical engine mount')
-        self._spring_hor_right = Spring(
-            self.k_m,
-            pos1=(self.z**2 +
-                  (self.x + self.l)**2)**(1 / 2) - (self.x + self.l),
-            qs=[self.x])(label='Right horizontal engine mount')
+        self._engine_block_DDOF = FreeEngineDDOF(self.M, self.m_e, self.e, self.g, self.z, self.x, self.phi)
+        
+        self._spring_ver_left = Spring(self.k_m,pos1=(self.z**2 + self.x**2)**(1 / 2) - self.z,qs=[self.z])(label='Left vertical engine mount')
+        self._spring_hor_left = Spring(self.k_m,pos1=(self.z**2 + self.x**2)**(1 / 2) - (self.x + self.l),qs=[self.x])(label='Left horizontal engine mount')
+        self._spring_ver_right = Spring(self.k_m,pos1=(self.z**2 + (self.x + self.l)**2)**(1 / 2) - self.z,qs=[self.z])(label='Right vertical engine mount')
+        self._spring_hor_right = Spring(self.k_m,pos1=(self.z**2 +(self.x + self.l)**2)**(1 / 2) - (self.x + self.l),qs=[self.x])(label='Right horizontal engine mount')
 
-        components['_material_point_1'] = self._material_point_1
-        components['_material_point_2'] = self._material_point_2
+        components['_engine_block_DDOF'] = self._engine_block_DDOF
         components['_spring_ver_left'] = self._spring_ver_left
         components['_spring_hor_left'] = self._spring_hor_left
         components['_spring_ver_right'] = self._spring_ver_right
@@ -912,9 +998,12 @@ class InlineEnginePerpendicularSprings(Engine):
     def symbols_description(self):
         self.sym_desc_dict = {
             self.M: r'Mass of the engine block',
-            self.k_m: r'Spring stiffness coefficient',
             self.m_e: r'Reduced mass of the crank system',
-            self.e: r'Radius of circular motion of the material point',
+            self.k_m: r'Spring stiffness coefficient',
+            self.e: r'Length of the crank - radius of the circular motion',
+            self.g: r'Gravity constant',
+            self.z: r'Displacement coordinate z',
+            self.x: r'Displacement coordinate x'
         }
         return self.sym_desc_dict
 

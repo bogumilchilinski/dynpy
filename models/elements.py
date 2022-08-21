@@ -109,6 +109,24 @@ class Element(LagrangesDynamicSystem):
 
         return path
 
+    def _init_from_components(self, *args, system=None, **kwargs):
+
+        if system is None:
+            composed_system = self._elements_sum
+        else:
+            composed_system = system
+
+        #print('CS',composed_system._components)
+        super().__init__(None, system=composed_system)
+
+        #print('self',self._components)
+        if self._components is None:
+            comps = {}
+        else:
+            comps = self._components
+
+        self._components = {**comps, **self.components}
+    
     
     def get_default_data(self):
         return {}
@@ -213,7 +231,7 @@ class MaterialPoint(Element):
             Lagrangian = S.Half * m * diff(pos1,ivar)**2
 
 
-        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar,frame=frame)
+        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar,frame=frame,**kwargs)
         
         self._kinetic_energy = Lagrangian
     def symbols_description(self):
@@ -303,7 +321,7 @@ class Spring(Element):
     l_s=Symbol('l_s', positive=True)
     k0 =Symbol('k_0',positive=True)
     
-    def __init__(self, stiffness, pos1, pos2=0, l_s=None ,  qs=None, ivar=Symbol('t'), frame = base_frame):
+    def __init__(self, stiffness, pos1, pos2=0, l_s=None ,  qs=None, ivar=Symbol('t'), frame = base_frame,**kwargs):
 
         if stiffness is not None: self.stiffness=stiffness
         if pos1 is not None: self._pos1=pos1
@@ -319,7 +337,7 @@ class Spring(Element):
         Lagrangian = (-S.Half * self.stiffness * ((self.pos2.pos_from(self.pos1)).magnitude() - self.l_s  )**2 )
 
 
-        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, frame=frame)
+        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, frame=frame,**kwargs)
 
         self._potential_energy = - Lagrangian
 
