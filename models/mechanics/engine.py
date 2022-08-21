@@ -531,7 +531,7 @@ class Engine(FreeEngine):
         return components
 
 #DONE  
-# class EngineVerticalSpringGravity(FreeEngine):
+class EngineVerticalSpringGravity(FreeEngine):
     """Ready to use model of engine represented by the rotating mass of a crankshaft and mass of the engine.
         Arguments:
         =========
