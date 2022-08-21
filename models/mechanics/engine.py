@@ -545,7 +545,7 @@ class FreeEngineDDOF(FreeEngine):
         return default_data_dict
 #dobrać dane numeryczne
 #####
-#DONE #Sav
+#DONE #Sav 
 class Engine(FreeEngine):
     """Ready to use model of engine represented by the rotating mass of a crankshaft and mass of the engine.
         Arguments:
@@ -629,9 +629,9 @@ class Engine(FreeEngine):
 
         self._engine = FreeEngine(self.M, self.m_e, self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine')
         
-        self._left_mount  = EngineMount(self.k_m, self.z, qs=[self.z])(label='Left engine mount')
+        self._left_mount  = EngineMount(self.k_m, self.z, qs=[self.z])(label='Left engine mount',scheme_options={'at':(1,-8)})
         
-        self._right_mount = EngineMount(self.k_m, self.z, qs=[self.z])(label='Right engine mount')
+        self._right_mount = EngineMount(self.k_m, self.z, qs=[self.z])(label='Right engine mount',scheme_options={'at':(4,-8)})
 
         components['_engine'] = self._engine
         components['_left_mount'] = self._left_mount
@@ -640,9 +640,9 @@ class Engine(FreeEngine):
         return components
 
 
-
-#DONE  # Is it duplicate?
+#DONE 
 class EngineVerticalSpringGravity(Engine):
+
     """Ready to use model of engine represented by the rotating mass of a crankshaft and mass of the engine.
         Arguments:
         =========
@@ -1605,7 +1605,7 @@ class NonLinearVeeEnginePerpendicularSprings(Engine):
 # DONE
 class EngineWithTMD(Engine):
     """
-    Model of a DDoF Coupled Pendulum.
+    Model of a DDoF Engine with Tuned Mass Damper attached
 
         Arguments:
         =========
