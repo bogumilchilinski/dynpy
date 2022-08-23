@@ -17,337 +17,28 @@ import IPython as IP
 import numpy as np
 import inspect
 
+from .trolley import ComposedSystem, NonlinearComposedSystem
 
-class ComposedSystem(HarmonicOscillator):
-    """Base class for all systems
-
-    """
-    scheme_name = 'damped_car_new.PNG'
-    real_name = 'car_real.jpg'
-    detail_scheme_name = 'sruba_pasowana.png'
-    detail_real_name = 'buick_regal_3800.jpg'
-    _default_args = ()
-    _default_folder_path = "./dynpy/models/images/"
-
-    z = dynamicsymbols('z')
-
-    m0 = Symbol('m_0', positive=True)
-    k0 = Symbol('k_0', positive=True)
-    F0 = Symbol('F_0', positive=True)
-    Omega0 = Symbol('Omega_0', positive=True)
-
-    @classmethod
-    def _scheme(cls):
-
-        path = cls._default_folder_path + cls.scheme_name
-
-        return path
-
-    @classmethod
-    def _real_example(cls):
-        path = cls._default_folder_path + cls.real_name
-
-        return path
-
-    @classmethod
-    def _detail_real(cls):
-        path = cls._default_folder_path + cls.detail_real_name
-
-        return path
-
-    @classmethod
-    def _detail_scheme(cls):
-        path = cls._default_folder_path + cls.detail_scheme_name
-
-        return path
-
-    def _init_from_components(self, *args, system=None, **kwargs):
-
-        if system is None:
-            composed_system = self._elements_sum
-        else:
-            composed_system = system
-
-        #print('CS',composed_system._components)
-        super().__init__(None, system=composed_system)
-
-        #print('self',self._components)
-        if self._components is None:
-            comps = {}
-        else:
-            comps = self._components
-
-        self._components = {**comps, **self.components}
-
-    def __init__(self,
-                 Lagrangian=None,
-                 m0=None,
-                 qs=None,
-                 forcelist=None,
-                 bodies=None,
-                 frame=None,
-                 hol_coneqs=None,
-                 nonhol_coneqs=None,
-                 label=None,
-                 ivar=None,
-                 evaluate=True,
-                 system=None,
-                 **kwargs):
-
-        if ivar is not None: self.ivar = ivar
-        if m0 is not None: self.m0 = m0
-
-        if qs is not None:
-            self.qs = qs
-        else:
-            self.qs = [self.z]
-
-        self._init_from_components(system=system, **kwargs)
-
-    @property
-    def components(self):
-
-        components = {}
-
-        self._material_point = MaterialPoint(self.m0, self.qs[0],
-                                             self.qs)('Material Point')
-        components['_material_point'] = self._material_point
-
-        return components
-
-    @property
-    def elements(self):
-
-        return {**super().components, **self.components}
-
-    @classmethod
-    def preview(cls, example=False):
-        if example:
-            path = cls._real_example()
-
-        elif example == 'detail_scheme_name':
-            path = cls._detail_scheme()
-        elif example == 'detail_real_name':
-            path = cls._detail_real()
-        else:
-            path = cls._scheme()
-        print(path)
-        with open(f"{path}", "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read())
-        image_file.close()
-
-        return IP.display.Image(base64.b64decode(encoded_string))
-
-    def _components_default_data(self):
-        
-        data=[elem.get_default_data()   for elem in self.elements.values()]
-
-        
-        return {key:value for elem in data for key, value in elem.items()}    
-    
-    def _components_numerical_data(self):
-        
-        data=[elem.get_numerical_data()   for elem in self.elements.values()]
-        
-        
-        return {key:value for elem in data for key, value in elem.items()}    
-    
-    
-    def get_default_data(self):
-        return self._components_default_data()
-
-    def get_numerical_data(self):
-        return self._components_numerical_data()
-
-    def get_random_parameters(self):
-
-        default_data_dict = self.get_default_data()
-
-        if default_data_dict:
-            parameters_dict = {
-                key: random.choice(items_list)
-                for key, items_list in default_data_dict.items()
-            }
-        else:
-            parameters_dict = None
-
-        return parameters_dict
-
-    def get_numerical_parameters(self):
-
-        default_data_dict = self.get_numerical_data()
-
-        if default_data_dict:
-            parameters_dict = {
-                key: random.choice(items_list)
-                for key, items_list in default_data_dict.items()
-            }
-        else:
-            parameters_dict = None
-
-        return parameters_dict
-
-    @property
-    def _report_components(self):
-
-        comp_list = [
-            mech_comp.TitlePageComponent,
-            mech_comp.SchemeComponent,
-            mech_comp.ExemplaryPictureComponent,
-            mech_comp.KineticEnergyComponent,
-            mech_comp.PotentialEnergyComponent,
-            mech_comp.LagrangianComponent,
-            mech_comp.GoverningEquationComponent,
-            mech_comp.FundamentalMatrixComponent,
-            mech_comp.GeneralSolutionComponent,
-            mech_comp.SteadySolutionComponent,
-        ]
-
-        return comp_list
-
-    def linearized(self):
-
-        return type(self).from_system(super().linearized())
-
-    def tensioner_belt_force(self):
-        return self.k_tensioner * self.steady_solution()
-
-    def left_belt_force(self):
-        return self.k_belt * self.steady_solution()
-
-    def right_belt_force(self):
-        return self.k_belt * self.steady_solution()
-
-
-#     def max_static_force_pin(self):
-#         return abs(self.static_load().doit()[0])
-
-#     def max_dynamic_force_pin(self):
-#         return self.frequency_response_function() * self.stiffness_matrix(
-#         )[0] + self.max_static_force_pin()
-
-    def max_static_force_pin(self):
-        return abs(self.static_load().doit()[0]) / 2
-
-    def max_dynamic_force_pin(self):
-        return self._frf()[0] * self.k_m + self.max_static_force_pin()
-
-    def static_force_pin_diameter(self):
-        kt = Symbol('k_t', positive=True)
-        Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_static_force_pin()) / (pi * kt * Re))**(1 / 2)
-
-    def dynamic_force_pin_diameter(self):
-        kt = Symbol('k_t', positive=True)
-        Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
-        Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_static_force_pin()) / (pi * kt * Re))**(1 / 2)
-
-    def dynamic_force_pin_diameter(self):
-        kt = Symbol('k_t', positive=True)
-        Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
-
-
-class CompoundSystem(ComposedSystem):
-
-    z = dynamicsymbols('z')
-    _p = Symbol('p')
-
-    @property
-    def components(self):
-
-        components = {}
-
-        self._material_point = MaterialPoint(self._p, self.qs[0],
-                                             self.qs)('Material Point')
-        components['_material_point'] = self._material_point
-
-        return components
-
-
-class NonlinearComposedSystem(ComposedSystem):
-
-    def frequency_response_function(self,
-                                    frequency=Symbol('Omega', positive=True),
-                                    amplitude=Symbol('a', positive=True)):
-
-        omega = ComposedSystem(self.linearized()).natural_frequencies()[0]
-        eps = self.small_parameter()
-
-        exciting_force = self.external_forces()[0]
-
-        comps = exciting_force.atoms(sin, cos)
-        exciting_amp = sum([exciting_force.coeff(comp) for comp in comps])
-        inertia = self.inertia_matrix()[0]
-
-        return amplitude * (-frequency**2 + omega**2) * inertia + S(
-            3) / 4 * eps * amplitude**3 - exciting_amp
-
-    def amplitude_from_frf(self, amplitude=Symbol('a', positive=True)):
-
-        return solveset(self.frequency_response_function(), amplitude)
-
-    @property
-    def _report_components(self):
-
-        comp_list = [
-            mech_comp.TitlePageComponent,
-            mech_comp.SchemeComponent,
-            mech_comp.ExemplaryPictureComponent,
-            mech_comp.KineticEnergyComponent,
-            mech_comp.PotentialEnergyComponent,
-            mech_comp.LagrangianComponent,
-            mech_comp.LinearizationComponent,
-            mech_comp.GoverningEquationComponent,
-            mech_comp.FundamentalMatrixComponent,
-            mech_comp.GeneralSolutionComponent,
-            mech_comp.SteadySolutionComponent,
-        ]
-
-        return comp_list
-
-    def max_static_force_pin(self):
-        return abs(self.static_load().doit()[0]) / 2
-
-    def max_dynamic_force_pin(self):
-        lin_sys = ComposedSystem(self.linearized())
-        #k_m = self._given_data[self.k_m]
-        k_m = self.k_m
-        #         display(lin_sys.stiffness_matrix()[0])
-
-        return lin_sys.frequency_response_function() * (
-            lin_sys.stiffness_matrix()[0]) / 2 + self.max_static_force_pin()
-
-    def max_dynamic_nonlinear_force_pin(self):
-        lin_sys = ComposedSystem(self.linearized())
-
-        amp = list(self.amplitude_from_frf())
-        display(amp)
-        #k_m = self._given_data[self.k_m]
-        k_m = self.k_m
-
-        return amp[0] * k_m + self.max_static_force_pin()
 #DONE #Mateusz
 ############################### Nowa podstawowa klasa dla silników o 1 stopniu swobody
 class FreeEngine(ComposedSystem):
-    """Base class for all engine systems. This class consists only of the engine block and crank system, involving the gravity factor.
+    """
+    Base class for all engine systems. This class consists only of the engine block and crank system, involving the gravity factor.
     =========
-            M = Symbol object
-                - Mass of the engine housing
-            m_e = Symbol object
-                - Reduced mass of the crank system
-            e = Symbol object
-                - Length of the crank - radius of the circular motion
-            g = Symbol object
-                - Gravitational field acceleration
-            z = Symbol object
-                - Vertical coordinate z
-            ivar = Symbol object
-                - Independant time variable
-            qs = Dynamicsymbol object
-                - Generalized coordinates
+    M = Symbol object
+        - Mass of the engine housing
+    m_e = Symbol object
+        - Reduced mass of the crank system
+    e = Symbol object
+        - Length of the crank - radius of the circular motion
+    g = Symbol object
+        - Gravitational field acceleration
+    z = Symbol object
+        - Vertical coordinate z
+    ivar = Symbol object
+        - Independant time variable
+    qs = Dynamicsymbol object
+        - Generalized coordinates
     
     """
     scheme_name = 'engine_block.png'
@@ -547,38 +238,42 @@ class FreeEngineDDOF(FreeEngine):
 #####
 #DONE #Sav 
 class Engine(FreeEngine):
-    """Ready to use model of engine represented by the rotating mass of a crankshaft and mass of the engine.
-        Arguments:
-        =========
-            M = Symbol object
-                -Mass of an engine.
+    """
+    Ready to use model of engine represented by the rotating mass of a crankshaft and mass of the engine.
+    ==========
+    
+    Arguments:
+    ==========
 
-            m_e = Symbol object
-                -Mass of a crankshaft.
+        M = Symbol object
+            -Mass of an engine.
 
-            k_m = Symbol object
-                -Stifness of the engine mounts
-                
-            phi = Dynamicsymbol object
-                -rotation angle
-                
-            e =  Symbol object
-                -offset of the rotating mass
+        m_e = Symbol object
+            -Mass of a crankshaft.
 
-            g = Symbol object
-                -Gravitational field acceleration
-                
-            z = Symbol object
-                -vertical Z coordinate
-                
-            q = Symbol object
-                -Directional coefficent
+        k_m = Symbol object
+            -Stifness of the engine mounts
+            
+        phi = Dynamicsymbol object
+            -rotation angle
+            
+        e =  Symbol object
+            -offset of the rotating mass
 
-            ivar = symbol object
-                -Independant time variable
+        g = Symbol object
+            -Gravitational field acceleration
+            
+        z = Symbol object
+            -vertical Z coordinate
+            
+        q = Symbol object
+            -Directional coefficent
 
-            qs = dynamicsymbol object
-                -Generalized coordinates
+        ivar = symbol object
+            -Independant time variable
+
+        qs = dynamicsymbol object
+            -Generalized coordinates
 
 
     """
@@ -1009,7 +704,7 @@ class InlineEnginePerpendicularSprings(Engine):
 
 
 #Pioter #DONE - PATI zrobione
-class NonLinearInlineEnginePerpendicularSpringsGravity(FreeEngine):
+class NonLinearInlineEnginePerpendicularSpringsGravity(Engine):
 
     scheme_name = 'nonlinear_inline_engine_perpendicular_springs.png'
     real_name = 'paccar.jpg'
@@ -1114,7 +809,7 @@ class NonLinearInlineEnginePerpendicularSpringsGravity(FreeEngine):
         return self.sym_desc_dict
 
 #DONE-PATI ZROBI
-class NonLinearBoxerEnginePerpendicularSprings(FreeEngine):
+class NonLinearBoxerEnginePerpendicularSprings(Engine):
     scheme_name = 'nonlin_boxer_engine_perpendicular_springs.png'
     real_name = 'f6c_valkyrie.jpg'
     M = Symbol('M', positive=True)
@@ -1499,7 +1194,7 @@ class StraightNonlinearEngine(NonlinearEngine):
         return default_data_dict
 
 
-#TODO #DDOF #Dominik 
+#TODO #DDOF
 class NonLinearVeeEnginePerpendicularSprings(Engine):
     scheme_name = 'nonlin_vee_engine_perpendicular_springs.png'
     real_name = '440_magnum_v8.jpg'

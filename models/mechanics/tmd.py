@@ -295,37 +295,40 @@ class NonlinearComposedSystem(ComposedSystem):
         return comp_list
     
 class TMD(SpringMassSystem):
-    """Ready to use sample Single Degree of Freedom System of Tuned Mass Damper
-        Arguments:
-        =========
-            m = Mass
-                -Mass of TMD
+    """
+    Ready to use sample Single Degree of Freedom System of Tuned Mass Damper
+    =========
 
-            k = Spring coefficient
-                -Spring carrying the TMD
+    Arguments:
+    =========
+        m = Mass
+            -Mass of TMD
 
-            ivar = symbol object
-                -Independant time variable
+        k = Spring coefficient
+            -Spring carrying the TMD
 
-            qs = dynamicsymbol object
-                -Generalized coordinates
+        ivar = symbol object
+            -Independant time variable
 
-        Example
-        =======
-        A mass oscillating up and down while being held up by a spring with a spring constant k
+        qs = dynamicsymbol object
+            -Generalized coordinates
 
-        >>> t = symbols('t')
-        >>> m, k = symbols('m, k')
-        >>> qs = dynamicsymbols('z') # Generalized Coordinates
-        >>> mass = SDoFHarmonicOscillator(m,k, qs=[z],) # Initialization of LagrangesDynamicSystem instance
+    Example
+    =======
+    A mass oscillating up and down while being held up by a spring with a spring constant k
 
-        -We define the symbols and dynamicsymbols
-        -Kinetic energy T and potential energy v are evaluated to calculate the lagrangian L
-        -Reference frame was created with point P defining the position and the velocity determined on the z axis
-        -external forces assigned
-        -Next we determine the instance of the system using class LagrangeDynamicSystem
-        -We call out the instance of the class
-        -If necessary assign values for the default arguments
+    >>> t = symbols('t')
+    >>> m, k = symbols('m, k')
+    >>> qs = dynamicsymbols('z') # Generalized Coordinates
+    >>> mass = SDoFHarmonicOscillator(m,k, qs=[z],) # Initialization of LagrangesDynamicSystem instance
+
+    -We define the symbols and dynamicsymbols
+    -Kinetic energy T and potential energy v are evaluated to calculate the lagrangian L
+    -Reference frame was created with point P defining the position and the velocity determined on the z axis
+    -external forces assigned
+    -Next we determine the instance of the system using class LagrangeDynamicSystem
+    -We call out the instance of the class
+    -If necessary assign values for the default arguments
 
 
     """
@@ -340,8 +343,8 @@ class TMD(SpringMassSystem):
     def __init__(self,
                  m_E=None,
                  k_E=None,
-                 z=None,
                  z_E=None,
+                 z=None,
                  ivar=Symbol('t', positive=True),
                  **kwargs):
 

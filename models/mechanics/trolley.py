@@ -17,7 +17,6 @@ import numpy as np
 import inspect
 
 
-
 class ComposedSystem(HarmonicOscillator):
     """Base class for all systems
 
@@ -29,9 +28,8 @@ class ComposedSystem(HarmonicOscillator):
     _default_args = ()
     _default_folder_path = "./dynpy/models/images/"
 
-    
     z = dynamicsymbols('z')
-    
+
     m0 = Symbol('m_0', positive=True)
     k0 = Symbol('k_0', positive=True)
     F0 = Symbol('F_0', positive=True)
@@ -62,28 +60,27 @@ class ComposedSystem(HarmonicOscillator):
 
         return path
 
+    def _init_from_components(self, *args, system=None, **kwargs):
 
-    def _init_from_components(self,*args,system=None,**kwargs):
-        
         if system is None:
             composed_system = self._elements_sum
         else:
             composed_system = system
-            
+
         #print('CS',composed_system._components)
-        super().__init__(None,system = composed_system)
-        
+        super().__init__(None, system=composed_system)
+
         #print('self',self._components)
         if self._components is None:
             comps = {}
         else:
-            comps=self._components
+            comps = self._components
 
-        self._components = {**comps,**self.components}
+        self._components = {**comps, **self.components}
 
     def __init__(self,
                  Lagrangian=None,
-                 m0 = None,
+                 m0=None,
                  qs=None,
                  forcelist=None,
                  bodies=None,
@@ -93,8 +90,8 @@ class ComposedSystem(HarmonicOscillator):
                  label=None,
                  ivar=None,
                  evaluate=True,
-                 system=None):
-
+                 system=None,
+                 **kwargs):
 
         if ivar is not None: self.ivar = ivar
         if m0 is not None: self.m0 = m0
@@ -104,9 +101,7 @@ class ComposedSystem(HarmonicOscillator):
         else:
             self.qs = [self.z]
 
-
-        self._init_from_components(system=system)
-
+        self._init_from_components(system=system, **kwargs)
 
     @property
     def components(self):
@@ -121,13 +116,9 @@ class ComposedSystem(HarmonicOscillator):
 
     @property
     def elements(self):
-        
-        
-        return {**super().components,**self.components}
 
+        return {**super().components, **self.components}
 
-
-    
     @classmethod
     def preview(cls, example=False):
         if example:
@@ -146,12 +137,27 @@ class ComposedSystem(HarmonicOscillator):
 
         return IP.display.Image(base64.b64decode(encoded_string))
 
+    def _components_default_data(self):
+        
+        data=[elem.get_default_data()   for elem in self.elements.values()]
+
+        
+        return {key:value for elem in data for key, value in elem.items()}    
+    
+    def _components_numerical_data(self):
+        
+        data=[elem.get_numerical_data()   for elem in self.elements.values()]
+        
+        
+        return {key:value for elem in data for key, value in elem.items()}    
+    
+    
     def get_default_data(self):
-        return None
+        return self._components_default_data()
 
     def get_numerical_data(self):
-        return None
-    
+        return self._components_numerical_data()
+
     def get_random_parameters(self):
 
         default_data_dict = self.get_default_data()
@@ -179,8 +185,7 @@ class ComposedSystem(HarmonicOscillator):
             parameters_dict = None
 
         return parameters_dict
-    
-    
+
     @property
     def _report_components(self):
 
@@ -199,9 +204,6 @@ class ComposedSystem(HarmonicOscillator):
 
         return comp_list
 
-
-    
-    
     def linearized(self):
 
         return type(self).from_system(super().linearized())
@@ -215,12 +217,19 @@ class ComposedSystem(HarmonicOscillator):
     def right_belt_force(self):
         return self.k_belt * self.steady_solution()
 
+
+#     def max_static_force_pin(self):
+#         return abs(self.static_load().doit()[0])
+
+#     def max_dynamic_force_pin(self):
+#         return self.frequency_response_function() * self.stiffness_matrix(
+#         )[0] + self.max_static_force_pin()
+
     def max_static_force_pin(self):
-        return abs(self.static_load().doit()[0])
+        return abs(self.static_load().doit()[0]) / 2
 
     def max_dynamic_force_pin(self):
-        return self.frequency_response_function() * self.stiffness_matrix(
-        )[0] + self.max_static_force_pin()
+        return self._frf()[0] * self.k_m + self.max_static_force_pin()
 
     def static_force_pin_diameter(self):
         kt = Symbol('k_t', positive=True)
@@ -231,26 +240,79 @@ class ComposedSystem(HarmonicOscillator):
         kt = Symbol('k_t', positive=True)
         Re = Symbol('R_e', positive=True)
         return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
+        Re = Symbol('R_e', positive=True)
+        return ((4 * self.max_static_force_pin()) / (pi * kt * Re))**(1 / 2)
+
+    def dynamic_force_pin_diameter(self):
+        kt = Symbol('k_t', positive=True)
+        Re = Symbol('R_e', positive=True)
+        return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
 
 
-class CompoundSystem(ComposedSystem):
 
-    z = dynamicsymbols('z')
-    _p = Symbol('p')
 
+class NonlinearComposedSystem(ComposedSystem):
+
+    def frequency_response_function(self,
+                                    frequency=Symbol('Omega', positive=True),
+                                    amplitude=Symbol('a', positive=True)):
+
+        omega = ComposedSystem(self.linearized()).natural_frequencies()[0]
+        eps = self.small_parameter()
+
+        exciting_force = self.external_forces()[0]
+
+        comps = exciting_force.atoms(sin, cos)
+        exciting_amp = sum([exciting_force.coeff(comp) for comp in comps])
+        inertia = self.inertia_matrix()[0]
+
+        return amplitude * (-frequency**2 + omega**2) * inertia + S(
+            3) / 4 * eps * amplitude**3 - exciting_amp
+
+    def amplitude_from_frf(self, amplitude=Symbol('a', positive=True)):
+
+        return solveset(self.frequency_response_function(), amplitude)
 
     @property
-    def components(self):
+    def _report_components(self):
 
-        components = {}
+        comp_list = [
+            mech_comp.TitlePageComponent,
+            mech_comp.SchemeComponent,
+            mech_comp.ExemplaryPictureComponent,
+            mech_comp.KineticEnergyComponent,
+            mech_comp.PotentialEnergyComponent,
+            mech_comp.LagrangianComponent,
+            mech_comp.LinearizationComponent,
+            mech_comp.GoverningEquationComponent,
+            mech_comp.FundamentalMatrixComponent,
+            mech_comp.GeneralSolutionComponent,
+            mech_comp.SteadySolutionComponent,
+        ]
 
-        self._material_point = MaterialPoint(self._p, self.qs[0],
-                                             self.qs)('Material Point')
-        components['_material_point'] = self._material_point
+        return comp_list
 
-        return components
+    def max_static_force_pin(self):
+        return abs(self.static_load().doit()[0]) / 2
 
+    def max_dynamic_force_pin(self):
+        lin_sys = ComposedSystem(self.linearized())
+        #k_m = self._given_data[self.k_m]
+        k_m = self.k_m
+        #         display(lin_sys.stiffness_matrix()[0])
 
+        return lin_sys.frequency_response_function() * (
+            lin_sys.stiffness_matrix()[0]) / 2 + self.max_static_force_pin()
+
+    def max_dynamic_nonlinear_force_pin(self):
+        lin_sys = ComposedSystem(self.linearized())
+
+        amp = list(self.amplitude_from_frf())
+        display(amp)
+        #k_m = self._given_data[self.k_m]
+        k_m = self.k_m
+
+        return amp[0] * k_m + self.max_static_force_pin()
     
 
     
