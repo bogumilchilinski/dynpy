@@ -297,7 +297,7 @@ class NonlinearComposedSystem(ComposedSystem):
 class TMD(SpringMassSystem):
     """
     Ready to use sample Single Degree of Freedom System of Tuned Mass Damper
-    =========
+    
 
     Arguments:
     =========
