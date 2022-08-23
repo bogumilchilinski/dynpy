@@ -345,7 +345,7 @@ class TMD(SpringMassSystem):
                  k_E=None,
                  z_E=None,
                  z=None,
-                 ivar=Symbol('t', positive=True),
+                 ivar=Symbol('t'),
                  **kwargs):
 
         if m_E is not None: self.m_E = m_E
