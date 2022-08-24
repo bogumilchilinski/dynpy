@@ -245,7 +245,7 @@ class MaterialPoint(Element):
         t=self.ivar
         m0=Symbol('m0',positive=True)
         self.default_data_dict={
-            self.m:[m0],   
+            self.m:[m0],
         }
         return {**super().get_default_data(),**self.default_data_dict}
     
@@ -255,7 +255,7 @@ class MaterialPoint(Element):
         self.default_data_dict={
             self.m:[5* no/100 for no in range(80,120)],
         }
-        return default_data_dict
+        return self.default_data_dict
 
     @classmethod
     def from_velocity(cls,
@@ -382,7 +382,7 @@ class Spring(Element):
         #print(y_coords)
         
         res = GeometryScene.ax_2d.plot(x_coords,y_coords,label=class_name)
-        res =GeometryScene.ax_2d.text(x_end,y_end,self._label)
+        res =GeometryScene.ax_2d.text(x_end,y_end,'$' + latex(self.stiffness) + '$')
 
         
         
@@ -462,14 +462,15 @@ class EngineMount(Spring):
         x_coords = np.sin(x_span*np.pi/2)+x_shift
         y_coords = (x_span*0.4)+y_shift
         
-        x_end=x_coords[-1]
-        y_end=y_coords[-1]
+        x_end=x_coords[0]+2
+        y_end=y_coords[0]/2
 
         #print(y_coords)
         
         res = GeometryScene.ax_2d.plot(x_coords,y_coords,label=class_name)
         res = GeometryScene.ax_2d.plot(x_end,y_end,'*r')
         res =GeometryScene.ax_2d.text(x_end,y_end,"pin")
+        res =GeometryScene.ax_2d.text(x_end,y_end,'$' + latex(self.stiffness) + '$')
     
 
 class GravitationalForce(Element):

@@ -162,7 +162,8 @@ class ComposedSystem(HarmonicOscillator):
 
     def get_random_parameters(self):
 
-        default_data_dict = self.get_default_data()
+        
+        default_data_dict = {**self._components_default_data(),**self.get_default_data()}
 
         if default_data_dict:
             parameters_dict = {
@@ -176,7 +177,7 @@ class ComposedSystem(HarmonicOscillator):
 
     def get_numerical_parameters(self):
 
-        default_data_dict = self.get_numerical_data()
+        default_data_dict = {**self._components_numerical_data(),**self.get_numerical_data()}
 
         if default_data_dict:
             parameters_dict = {

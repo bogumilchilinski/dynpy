@@ -81,7 +81,7 @@ class FreeEngine(ComposedSystem):
         components = {}
         M, m_e, e, z, phi = self.M, self.m_e, self.e, self.z, self.phi
 
-        self._engine_housing = MaterialPoint(M, pos1=z, qs=[z])(label='Engine hounsing')
+        self._engine_housing = MaterialPoint(M, pos1=z, qs=[z])(label='Engine housing')
         self._crank = MaterialPoint(m_e, pos1=z + e * cos(phi), qs=[z])(label='Position of reduced mass of the crank system')
         self._housing_gravity = GravitationalForce(self.M, self.g, self.z)(label='Gravitational Force of housing')
         self._crank_gravity = GravitationalForce(self.m_e, self.g, self.z)(label='Gravitational Force of crank')
@@ -434,7 +434,7 @@ class EngineVerticalSpringGravity(Engine):
         return components
 
 
-#TODO #DDOF #Tomek 
+#TODO #DDOF #DO POPRAWY !!!
 class BoxerEnginePerpendicularSprings(Engine):
     scheme_name = 'boxer_engine_perpendicular_springs.png'
     real_name = 'f6c_valkyrie.jpg'
@@ -1194,7 +1194,7 @@ class StraightNonlinearEngine(NonlinearEngine):
         return default_data_dict
 
 
-#TODO #DDOF
+#TODO #DDOF # DO POPRAWY !!!
 class NonLinearVeeEnginePerpendicularSprings(Engine):
     scheme_name = 'nonlin_vee_engine_perpendicular_springs.png'
     real_name = '440_magnum_v8.jpg'
@@ -1304,7 +1304,7 @@ class NonLinearVeeEnginePerpendicularSprings(Engine):
 
         return self.sym_desc_dict
 
-# DONE
+# DONE #Amadi Sprawdza
 class EngineWithTMD(Engine):
     """
     Model of a DDoF Engine with Tuned Mass Damper attached
@@ -1357,11 +1357,11 @@ class EngineWithTMD(Engine):
     m_e = Symbol('m_e', positive=True)
     m_E = Symbol('m_TMD', positive=True)
     e = Symbol('e', positive=True)
-    z = dynamicsymbols('z', positive=True)
-    z_E = dynamicsymbols('z_TMD', positive=True)
-    phi = dynamicsymbols('varphi', positive=True)
+    z = dynamicsymbols('z')
+    z_E = dynamicsymbols('z_TMD')
+    phi = dynamicsymbols('varphi')
     Omega = Symbol('Omega', positive=True)
-    ivar = Symbol('t', positive=True)
+    ivar = Symbol('t')
     Re = Symbol('R_e', positive=True)
     g = Symbol('g', positive=True)
     m0 = Symbol('m_0', positive=True)
@@ -1445,8 +1445,8 @@ class EngineWithTMD(Engine):
             self.phi: [self.Omega * self.ivar],
             self.M: [m0 * no for no in range(10, 100)],
             self.k_m: [1.0 * k0 * no for no in range(1, 20)],
-            self.m_TMD: [m0 * no / 5 for no in range(1, 20)],
-            self.k_TMD: [1.0 * k0 * no for no in range(1, 20)],
+            self.m_E: [m0 * no / 5 for no in range(1, 20)],
+            self.k_E: [1.0 * k0 * no for no in range(1, 20)],
             self.m_e: [m0 * no for no in range(1, 20)],
             self.e: [e0 * no / 10 for no in range(1, 20)],
         }
@@ -1463,8 +1463,8 @@ class EngineWithTMD(Engine):
             self.M: [m0 * no for no in range(75, 100)],
             self.m_e: [m0 * no for no in range(1, 20)],
             self.k_m: [1.0 * k0 * no for no in range(1, 20)],
-            self.m_TMD: [0.01 * no for no in range(7, 14)],
-            self.k_TMD: [1.0 * k0 * no for no in range(1, 20)],
+            self.m_E: [0.01 * no for no in range(7, 14)],
+            self.k_E: [1.0 * k0 * no for no in range(1, 20)],
             self.e: [e0 * no / 10 for no in range(1, 20)],
             self.phi: [self.Omega * self.ivar],
         }
