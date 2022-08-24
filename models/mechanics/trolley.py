@@ -34,7 +34,9 @@ class ComposedSystem(HarmonicOscillator):
     k0 = Symbol('k_0', positive=True)
     F0 = Symbol('F_0', positive=True)
     Omega0 = Symbol('Omega_0', positive=True)
+    ivar=Symbol('t')
 
+    
     @classmethod
     def _scheme(cls):
 
@@ -457,23 +459,30 @@ class ForcedSpringMassSystem(SpringMassSystem):
                  **kwargs):
 
 
+        if m is not None: self.m = m
+        if k is not None: self.k = k
+        if ivar is not None: self.ivar = ivar
+        if z is not None: self.z = z
         if F is not None: self.F = F
         if g is not None: self.g = g
 
 
+        self.qs = [self.z]
 
-        super().__init__(m=m,k=k,z=z,ivar=ivar,**kwargs)
+        self._init_from_components(**kwargs)
 
     @property
     def components(self):
 
-        components = super().components
+        components = {}  # przerobić na kompozycję
+       
         
-
+        self._undamped_trolley = SpringMassSystem(self.m, self.k, self.z)
         self.force = Force(self.F, self.z, qs=self.qs)
         self.gravitational_force = GravitationalForce(self.m, self.g, self.z, qs = self.qs)
         
 
+        components['_undamped_trolley'] = self._undamped_trolley
         components['force'] = self.force
         components['gravitational_force'] = self.gravitational_force
         

@@ -16,264 +16,9 @@ import IPython as IP
 import numpy as np
 import inspect
 
+from .trolley import ComposedSystem, NonlinearComposedSystem
 
-class ComposedSystem(HarmonicOscillator):
-    """Base class for all systems
-
-    """
-    scheme_name = 'damped_car_new.PNG'
-    real_name = 'car_real.jpg'
-    detail_scheme_name = 'sruba_pasowana.png'
-    detail_real_name = 'buick_regal_3800.jpg'
-    _default_args = ()
-    _default_folder_path = "./dynpy/models/images/"
-
-    
-    z = dynamicsymbols('z')
-    
-    m0 = Symbol('m_0', positive=True)
-    k0 = Symbol('k_0', positive=True)
-    F0 = Symbol('F_0', positive=True)
-    Omega0 = Symbol('Omega_0', positive=True)
-
-    @classmethod
-    def _scheme(cls):
-
-        path = cls._default_folder_path + cls.scheme_name
-
-        return path
-
-    @classmethod
-    def _real_example(cls):
-        path = cls._default_folder_path + cls.real_name
-
-        return path
-
-    @classmethod
-    def _detail_real(cls):
-        path = cls._default_folder_path + cls.detail_real_name
-
-        return path
-
-    @classmethod
-    def _detail_scheme(cls):
-        path = cls._default_folder_path + cls.detail_scheme_name
-
-        return path
-
-
-    def _init_from_components(self,*args,system=None,**kwargs):
-        
-        if system is None:
-            composed_system = self._elements_sum
-        else:
-            composed_system = system
-            
-        #print('CS',composed_system._components)
-        super().__init__(None,system = composed_system)
-        
-        #print('self',self._components)
-        if self._components is None:
-            comps = {}
-        else:
-            comps=self._components
-
-        self._components = {**comps,**self.components}
-
-    def __init__(self,
-                 Lagrangian=None,
-                 m0 = None,
-                 qs=None,
-                 forcelist=None,
-                 bodies=None,
-                 frame=None,
-                 hol_coneqs=None,
-                 nonhol_coneqs=None,
-                 label=None,
-                 ivar=None,
-                 evaluate=True,
-                 system=None):
-
-
-        if ivar is not None: self.ivar = ivar
-        if m0 is not None: self.m0 = m0
-
-        if qs is not None:
-            self.qs = qs
-        else:
-            self.qs = [self.z]
-
-
-        self._init_from_components(system=system)
-
-
-    @property
-    def components(self):
-
-        components = {}
-
-        self._material_point = MaterialPoint(self.m0, self.qs[0],
-                                             self.qs)('Material Point')
-        components['_material_point'] = self._material_point
-
-        return components
-
-    @property
-    def elements(self):
-        
-        
-        return {**super().components,**self.components}
-
-
-
-    
-    @classmethod
-    def preview(cls, example=False):
-        if example:
-            path = cls._real_example()
-
-        elif example == 'detail_scheme_name':
-            path = cls._detail_scheme()
-        elif example == 'detail_real_name':
-            path = cls._detail_real()
-        else:
-            path = cls._scheme()
-        print(path)
-        with open(f"{path}", "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read())
-        image_file.close()
-
-        return IP.display.Image(base64.b64decode(encoded_string))
-
-    def get_default_data(self):
-        return None
-
-    def get_numerical_data(self):
-        return None
-    
-    def get_random_parameters(self):
-
-        default_data_dict = self.get_default_data()
-
-        if default_data_dict:
-            parameters_dict = {
-                key: random.choice(items_list)
-                for key, items_list in default_data_dict.items()
-            }
-        else:
-            parameters_dict = None
-
-        return parameters_dict
-
-    def get_numerical_parameters(self):
-
-        default_data_dict = self.get_numerical_data()
-
-        if default_data_dict:
-            parameters_dict = {
-                key: random.choice(items_list)
-                for key, items_list in default_data_dict.items()
-            }
-        else:
-            parameters_dict = None
-
-        return parameters_dict
-    
-    
-    @property
-    def _report_components(self):
-
-        comp_list = [
-            mech_comp.TitlePageComponent,
-            mech_comp.SchemeComponent,
-            mech_comp.ExemplaryPictureComponent,
-            mech_comp.KineticEnergyComponent,
-            mech_comp.PotentialEnergyComponent,
-            mech_comp.LagrangianComponent,
-            mech_comp.GoverningEquationComponent,
-            mech_comp.FundamentalMatrixComponent,
-            mech_comp.GeneralSolutionComponent,
-            mech_comp.SteadySolutionComponent,
-        ]
-
-        return comp_list
-
-
-    
-    
-    def linearized(self):
-
-        return type(self).from_system(super().linearized())
-
-    def tensioner_belt_force(self):
-        return self.k_tensioner * self.steady_solution()
-
-    def left_belt_force(self):
-        return self.k_belt * self.steady_solution()
-
-    def right_belt_force(self):
-        return self.k_belt * self.steady_solution()
-
-    def max_static_force_pin(self):
-        return abs(self.static_load().doit()[0])
-
-    def max_dynamic_force_pin(self):
-        return self.frequency_response_function() * self.stiffness_matrix(
-        )[0] + self.max_static_force_pin()
-
-    def static_force_pin_diameter(self):
-        kt = Symbol('k_t', positive=True)
-        Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_static_force_pin()) / (pi * kt * Re))**(1 / 2)
-
-    def dynamic_force_pin_diameter(self):
-        kt = Symbol('k_t', positive=True)
-        Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
-
-
-class NonlinearComposedSystem(ComposedSystem):
-
-    def frequency_response_function(self,
-                                    frequency=Symbol('Omega', positive=True),
-                                    amplitude=Symbol('a', positive=True)):
-
-        omega = ComposedSystem(self.linearized()).natural_frequencies()[0]
-        eps = self.small_parameter()
-
-        exciting_force = self.external_forces()[0]
-
-        comps = exciting_force.atoms(sin, cos)
-        exciting_amp = sum([exciting_force.coeff(comp) for comp in comps])
-        inertia = self.inertia_matrix()[0]
-
-        return amplitude * (-frequency**2 + omega**2) * inertia + S(
-            3) / 4 * eps * amplitude**3 - exciting_amp
-
-    def amplitude_from_frf(self, amplitude=Symbol('a', positive=True)):
-
-        return solveset(self.frequency_response_function(), amplitude)
-
-    @property
-    def _report_components(self):
-
-        comp_list = [
-            mech_comp.TitlePageComponent,
-            mech_comp.SchemeComponent,
-            mech_comp.ExemplaryPictureComponent,
-            mech_comp.KineticEnergyComponent,
-            mech_comp.PotentialEnergyComponent,
-            mech_comp.LagrangianComponent,
-            mech_comp.LinearizationComponent,
-            mech_comp.GoverningEquationComponent,
-            mech_comp.FundamentalMatrixComponent,
-            mech_comp.GeneralSolutionComponent,
-            mech_comp.SteadySolutionComponent,
-        ]
-
-        return comp_list
-    
-    
+#DONE
 class Pendulum(NonlinearComposedSystem):
     """
     Model of a sDoF mathematical Pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
@@ -317,7 +62,6 @@ class Pendulum(NonlinearComposedSystem):
     l=Symbol('l', positive=True)
     angle=dynamicsymbols('\\varphi')
     qs=None
-    ivar=Symbol('t', positive=True)
     
     def __init__(self,
                  m=None,
@@ -337,7 +81,7 @@ class Pendulum(NonlinearComposedSystem):
         if l is not None: self.l = l
         if angle is not None: self.angle = angle
         if ivar is not None: self.ivar = ivar
-        if t is not None: self.t = t
+
         
         self.qs = [self.angle]
 
@@ -350,11 +94,12 @@ class Pendulum(NonlinearComposedSystem):
 
         components = {}
         
-        self.gravitationalforce = GravitationalForce(self.m, self.g, l * (1 - cos(angle)), qs = self.qs)
+        self.gravitationalforce = GravitationalForce(self.m, self.g, self.l * (1 - cos(self.angle)), qs = self.qs)
         self.material_point = MaterialPoint(self.m * self.l**2, pos1=self.angle, qs=self.qs)
         
+        components['gravitationalforce'] = self.gravitationalforce        
         components['material_point'] = self.material_point
-        components['gravitationalforce'] = self.gravitationalforce
+
         
         return components
         
@@ -414,6 +159,7 @@ class Pendulum(NonlinearComposedSystem):
 
         return comp_list
 
+#DONE
 class PulledPendulum(ComposedSystem):
     """
     Model of a sDoF mathematical Pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
@@ -473,23 +219,28 @@ class PulledPendulum(ComposedSystem):
         if l is not None: self.l = l
         if angle is not None: self.angle = angle
         if ivar is not None: self.ivar = ivar
-        if t is not None: self.t = t
+        
+
         
         self.qs = [self.angle]
 
         self._init_from_components(**kwargs)
         
+    @property
+    def components(self):
+        
+        components = {}
+        
+        self._pendulum = Pendulum(self.m,self.phi,qs=[phi])
+        self._force = Force(-2 * self.m * self.l * (self.g / self.l * cos(pi)),
+                           angle,qs=[phi])
+        
+        
+        components['_pendulum'] = self._pendulum
+        components['force'] = self.force
 
-        self.potential = GravitationalForce(self.m,
-                                            self.g,
-                                            l * (1 - cos(angle)),
-                                            qs=qs)
-        self.kinen = MaterialPoint(self.m * self.l**2, pos1=qs[0], qs=[angle])
-        self.force = Force(-2 * self.m * self.l * (self.g / self.l * cos(pi)),
-                           angle)
-        print(self.kinen)
-        system = self.potential + self.kinen + self.force
-        super().__init__(system, **kwargs)
+        
+        return components
 
     def get_default_data(self):
 
@@ -542,9 +293,8 @@ class PulledPendulum(ComposedSystem):
 
 # wymienić obrazek na taki, gdzie nie ma wymuszenia i symbole na obrazku będą zgodne z tymi w klasie
 
-
-# Sav
-class FreePendulum(ComposedSystem):
+#DONE
+class FreePendulum(Pendulum):
     """
     Model of a sDoF free pendulum.
 
@@ -572,7 +322,7 @@ class FreePendulum(ComposedSystem):
         >>> t = symbols('t')
         >>> m, g, l = symbols('m, g, l')
         >>> qs = dynamicsymbols('varphi') # Generalized Coordinates
-        >>> SDOFFreePendulum()
+        >>> FreePendulum()
 
         -We define the symbols and dynamicsymbols
         -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
@@ -581,45 +331,8 @@ class FreePendulum(ComposedSystem):
     scheme_name = 'free_sdof_pendulum.png'
     real_name = 'pendulum_real.jpg'
 
-    def __init__(self,
-                 m=Symbol('m', positive=True),
-                 g=Symbol('g', positive=True),
-                 l=Symbol('l', positive=True),
-                 angle=dynamicsymbols('varphi'),
-                 qs=None,
-                 ivar=Symbol('t'),
-                 **kwargs):
 
-        self.m = m
-        self.g = g
-        self.l = l
-
-        self.pendulum = Pendulum(m, g, l, angle=angle)
-        system = self.pendulum
-
-        super().__init__(system, **kwargs)
-
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.m: r'Mass of pendulum',
-            self.g: r'Gravity constant',
-            self.l: r'Pendulum length',
-        }
-        return self.sym_desc_dict
-
-    def get_default_data(self):
-
-        m0, l0 = symbols('m_0 l_0', positive=True)
-
-        default_data_dict = {
-            self.m:
-            [2 * m0, 1 * m0, S.Half * m0, S.Half**2 * m0, 3 * S.Half * m0],
-            self.l:
-            [2 * l0, 1 * l0, S.Half * l0, S.Half**2 * l0, 3 * S.Half * l0],
-        }
-        return default_data_dict
-
-
+#TO_DO
 class ExcitedPendulum(ComposedSystem):
     """
     Model of a sDoF Excited Pendulum.
@@ -744,7 +457,7 @@ class ExcitedPendulum(ComposedSystem):
         }
         return default_data_dict
 
-
+#TO_DO
 class DampedPendulum(ComposedSystem):
     """
     Model of a sDoF damped Pendulum.
@@ -832,7 +545,7 @@ class DampedPendulum(ComposedSystem):
         }
         return self.sym_desc_dict
 
-
+#TO_DO
 class ExcitedDampedPendulum(ComposedSystem):
 
     scheme_name = 'damped_excited_pendulum.PNG'
@@ -879,7 +592,7 @@ class ExcitedDampedPendulum(ComposedSystem):
         }
         return self.sym_desc_dict
 
-
+#TO_DO
 class PendulumKinematicExct(ComposedSystem):
 
     scheme_name = 'kin_exct_pendulum.PNG'

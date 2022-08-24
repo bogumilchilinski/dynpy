@@ -1412,7 +1412,7 @@ class EngineWithTMD(Engine):
             phi=self.phi,
             z=self.z)(label='Engine(damped object)')
 
-        self._TMD = TMD(self.m_E, self.k_E,self.z, self.z_E)(label='TMD(damping object)')
+        self._TMD = TMD(self.m_E, self.k_E, self.z_E,self.z)(label='TMD(damping object)')
         
         components['_engine'] = self._engine
         components['_TMD'] = self._TMD
