@@ -163,6 +163,10 @@ class ComposedSystem(HarmonicOscillator):
     def get_random_parameters(self):
 
         
+        print('preview for',self)
+        display(self._components_default_data())
+        display(self.get_default_data())
+        
         default_data_dict = {**self._components_default_data(),**self.get_default_data()}
 
         if default_data_dict:

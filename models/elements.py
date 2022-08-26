@@ -439,9 +439,9 @@ class EngineMount(Spring):
 
     def get_numerical_data(self):
         self.default_data_dict={
-
+            self.stiffness: [1e5 * no for no in range(1,8)]
         }
-        return default_data_dict
+        return self.default_data_dict
     
     def _plot_2d(self, language='en',*args,**kwargs):
 
@@ -484,13 +484,21 @@ class GravitationalForce(Element):
 
         if not qs:
             qs=[pos1]
+        self.g = g
 
         Lagrangian = -(m * g * (pos1))
+        
 
 
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar)
 
         self._potential_energy = - Lagrangian
+        
+    def get_numerical_data(self):
+        self.default_data_dict={
+            self.g: [9.81]
+        }
+        return self.default_data_dict
 
 
 class Disk(Element):
@@ -500,7 +508,7 @@ class Disk(Element):
     """
     scheme_name = 'disk.png'
     real_name = 'disk.png'
-    def __init__(self, I, pos1 , qs=None, frame=base_frame, ivar=Symbol('t')):
+    def __init__(self, I, pos1 , qs=None,  frame=base_frame, ivar=Symbol('t')):
         
         if not qs:
             self.qs = [pos1]

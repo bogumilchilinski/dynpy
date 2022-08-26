@@ -19,6 +19,32 @@ import inspect
 
 from .trolley import ComposedSystem, NonlinearComposedSystem
 
+#####
+
+class EngineHousing(MaterialPoint):
+    """
+    Model of a EngineHousing composed of material point with changing point of mass:
+
+    Creates a material point of an inertial body, after inputing correct values of mass -m and general coordinates, which follows a linear motion.
+    """
+    scheme_name = 'material_point.png'
+    real_name = 'material_point.png'
+
+    def get_default_data(self):
+        m0=Symbol('m0',positive=True)
+        default_data_dict={
+            self.m:[10 * m0 * no / 100 for no in range(10, 150)],
+        }
+        return default_data_dict
+
+    def get_numerical_data(self):
+
+        self.default_data_dict={
+            self.m:[5* no/100 for no in range(80,120)],
+        }
+        return self.default_data_dict
+
+    
 #DONE #Mateusz
 ############################### Nowa podstawowa klasa dla silników o 1 stopniu swobody
 class FreeEngine(ComposedSystem):
@@ -81,7 +107,7 @@ class FreeEngine(ComposedSystem):
         components = {}
         M, m_e, e, z, phi = self.M, self.m_e, self.e, self.z, self.phi
 
-        self._engine_housing = MaterialPoint(M, pos1=z, qs=[z])(label='Engine housing')
+        self._engine_housing = EngineHousing(M, pos1=z, qs=[z])(label='Engine housing')
         self._crank = MaterialPoint(m_e, pos1=z + e * cos(phi), qs=[z])(label='Position of reduced mass of the crank system')
         self._housing_gravity = GravitationalForce(self.M, self.g, self.z)(label='Gravitational Force of housing')
         self._crank_gravity = GravitationalForce(self.m_e, self.g, self.z)(label='Gravitational Force of crank')
@@ -108,8 +134,8 @@ class FreeEngine(ComposedSystem):
         t = self.ivar
         
         default_data_dict = {
-            self.M: [10 * self.m0 * no / 100 for no in range(10, 150)],
-            self.m_e: [self.m0 * no / 100 for no in range(80, 120)],
+#             self.M: [10 * self.m0 * no / 100 for no in range(10, 150)],
+#             self.m_e: [self.m0 * no / 100 for no in range(80, 120)],
             self.e: [self.e0 * no / 100 for no in range(80, 120)],
             self.phi: [2 * 3.14 * self.ivar]
         }
@@ -118,11 +144,11 @@ class FreeEngine(ComposedSystem):
     def get_numerical_data(self):
 
         default_data_dict = {
-            self.M: [4 * no for no in range(10, 150)],
-            self.m_e: [0.5 * no for no in range(80, 120)],
+#             self.M: [4 * no for no in range(10, 150)],
+#             self.m_e: [0.5 * no for no in range(80, 120)],
             self.e: [2/100 * no for no in range(5, 15)],
             self.phi: [2 * 3.14 * 10 * self.ivar],
-            self.g: [9.81]
+#             self.g: [9.81]
         }
         return default_data_dict
 #DONE #Mateusz
@@ -139,7 +165,7 @@ class FreeEngineDDOF(FreeEngine):
             g = Symbol object
                 - Gravitational field acceleration
             x = Symbol object
-                - Vertical coordinate x
+                - Vertical coordinate x,,
             z = Symbol object
                 - Vertical coordinate z
             ivar = Symbol object
@@ -192,7 +218,7 @@ class FreeEngineDDOF(FreeEngine):
         M, m_e, e, g, z, x, phi = self.M, self.m_e, self.e, self.g, self.z, self.x, self.phi
 
         self._engine_block_1DOF = FreeEngine(M, m_e, e, g, z, phi)(label='Engine block with 1 DOF')
-        self._engine_housing_horizontal_component = MaterialPoint(M, pos1=x, qs=[x])(label='Engine hounsing horizontal component')
+        self._engine_housing_horizontal_component = EngineHousing(M, pos1=x, qs=[x])(label='Engine hounsing horizontal component')
         self._crank_horizontal_component = MaterialPoint(m_e, pos1=x + e * sin(phi), qs=[x])(label='Position of reduced mass of the crank system in direction x')
 
         components['_engine_block_1DOF'] = self._engine_block_1DOF
@@ -212,32 +238,32 @@ class FreeEngineDDOF(FreeEngine):
         }
         return self.sym_desc_dict
 
-    def get_default_data(self):
+#     def get_default_data(self):
 
-        t = self.ivar
+#         t = self.ivar
         
-        default_data_dict = {
-            self.M: [10 * self.m0 * no / 100 for no in range(10, 150)],
-            self.m_e: [self.m0 * no / 100 for no in range(80, 120)],
-            self.e: [self.e0 * no / 100 for no in range(80, 120)],
-            self.phi: [2 * 3.14 * self.ivar]
-        }
-        return default_data_dict
+#         default_data_dict = {
+#             self.M: [10 * self.m0 * no / 100 for no in range(10, 150)],
+#             self.m_e: [self.m0 * no / 100 for no in range(80, 120)],
+#             self.e: [self.e0 * no / 100 for no in range(80, 120)],
+#             self.phi: [2 * 3.14 * self.ivar]
+#         }
+#         return default_data_dict
 
-    def get_numerical_data(self):
+#     def get_numerical_data(self):
 
-        default_data_dict = {
-            self.M: [4 * no for no in range(10, 150)],
-            self.m_e: [0.5 * no for no in range(80, 120)],
-            self.e: [2/100 * no for no in range(5, 15)],
-            self.phi: [2 * 3.14 * 10 * self.ivar],
-            self.g: [9.81]
-        }
-        return default_data_dict
+#         default_data_dict = {
+#             self.M: [4 * no for no in range(10, 150)],
+#             self.m_e: [0.5 * no for no in range(80, 120)],
+#             self.e: [2/100 * no for no in range(5, 15)],
+#             self.phi: [2 * 3.14 * 10 * self.ivar],
+#             self.g: [9.81]
+#         }
+#         return default_data_dict
 #dobrać dane numeryczne
 #####
 #DONE #Sav 
-class Engine(FreeEngine):
+class Engine(ComposedSystem):
     """
     Ready to use model of engine represented by the rotating mass of a crankshaft and mass of the engine.
     ==========
@@ -422,10 +448,10 @@ class EngineVerticalSpringGravity(Engine):
 
         components = {}
 
-        self._engine_block = FreeEngine(self.M, self.m_e, self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine')
+        self._engine_block = FreeEngine(self.M, self.m_e, self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine', scheme_options = {'at':(0,0)})
 
-        self._left_mount  = EngineMount(self.k_m, self.z, qs=[self.z])(label='Left engine mount')
-        self._right_mount = EngineMount(self.k_m, self.z, qs=[self.z])(label='Right engine mount')
+        self._left_mount  = EngineMount(self.k_m, self.z, qs=[self.z])(label='Left engine mount', scheme_options = {'at':(0,-8)})
+        self._right_mount = EngineMount(self.k_m, self.z, qs=[self.z])(label='Right engine mount', scheme_options = {'at':(5,-8)})
         
 
         components['_engine_block'] = self._engine_block
