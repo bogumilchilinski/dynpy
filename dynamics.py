@@ -1398,6 +1398,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                                                         n=n + 1,
                                                         x0=x0)
         
+        display(*self.forcelist)
+
         approx_sys =LagrangesDynamicSystem(lagrangian_approx,
                                       self.q,
                                       forcelist=self.forcelist,
