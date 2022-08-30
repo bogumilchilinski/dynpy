@@ -225,9 +225,7 @@ class ComposedSystem(HarmonicOscillator):
 
         return comp_list
 
-    def linearized(self):
 
-        return type(self).from_system(super().linearized())
 
     def tensioner_belt_force(self):
         return self.k_tensioner * self.steady_solution()

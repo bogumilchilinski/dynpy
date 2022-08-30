@@ -482,11 +482,19 @@ class EntryWithUnit:
 
     def _latex(self, *args):
 
+        print('abc')
+        
         entry_str = self._latex_backend(self._obj)
         unit = self._unit
         left_par = self._left_par
         right_par = self._right_par
 
+        
+        #print('abc')
+        #display(entry_str)
+        #print(self._obj)
+        #display(unit)
+        
         if unit:
             return f'{entry_str} {left_par}{unit:~L}{right_par}'
         else:

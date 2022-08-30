@@ -47,6 +47,9 @@ from pylatex import TikZ,TikZNode
 import matplotlib.pyplot as plt
 
 
+base_frame=me.ReferenceFrame('N')
+base_origin=me.Point('O')
+
 class GeometryScene:
 
 
@@ -1398,11 +1401,16 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                                                         n=n + 1,
                                                         x0=x0)
         
-        display(*self.forcelist)
+        
 
+        linearized_forces=[(point,MultivariableTaylorSeries((force&base_frame.x).doit(),self.Y,n=n,x0=x0).doit()*base_frame.x)  for  point,force   in   self.forcelist]
+        
+
+        
+        
         approx_sys =LagrangesDynamicSystem(lagrangian_approx,
                                       self.q,
-                                      forcelist=self.forcelist,
+                                      forcelist=linearized_forces,
                                       frame=self.frame,
                                       label=label,
                                       ivar=self.ivar)
@@ -1449,7 +1457,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         lin_sys = LinearDynamicSystem(linearized_sys.lagrangian(),
                                    self.q,
-                                   forcelist=self.forcelist,
+                                   forcelist=linearized_sys.forcelist,
                                    frame=self.frame,
                                    label=label,
                                    ivar=self.ivar)

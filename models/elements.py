@@ -5,7 +5,7 @@ from sympy.physics.vector import vpprint, vlatex
 
 import numpy as np
 
-from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator, GeometryScene
+from ..dynamics import LagrangesDynamicSystem, HarmonicOscillator, GeometryScene,base_frame,base_origin
 from ..utilities.templates import tikz
 
 #from dgeometry import GeometryScene,np
@@ -17,8 +17,6 @@ import base64
 import random
 import IPython as IP
 
-base_frame=ReferenceFrame('N')
-base_origin=Point('O')
 
 
 
