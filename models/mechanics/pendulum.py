@@ -203,7 +203,7 @@ class PulledPendulum(ComposedSystem):
     l=Symbol('l', positive=True),
     angle=dynamicsymbols('\\varphi'),
     qs=None,
-    ivar=Symbol('t', positive=True)
+    ivar=Symbol('t')
 
     
     def __init__(self,
@@ -606,13 +606,11 @@ class PendulumKinematicExct(ComposedSystem):
     x_e = dynamicsymbols('x_e')
 
     def __init__(self,
-                 l0=None,
                  l=None,
                  m=None,
                  g=None,
                  phi=None,
                  x_e=None,
-                 qs=None,
                  ivar=Symbol('t'),
                  **kwargs):
         if l is not None: self.l = l
@@ -620,20 +618,29 @@ class PendulumKinematicExct(ComposedSystem):
         if g is not None: self.g = g
         if phi is not None: self.phi = phi
         if x_e is not None: self.x_e = x_e
-
         self.ivar = ivar
-        self.qs = [self.phi]
+        self.qs = [self.x_e, self.phi]
 
-        x = self.l * sin(self.phi) + self.x_e
-        y = self.l * cos(self.phi)
+        self.x = self.l * sin(self.phi) + self.x_e
+        self.y = self.l * cos(self.phi)
 
-        self.material_point_1 = MaterialPoint(self.m, x, qs=self.qs)
-        self.material_point_2 = MaterialPoint(self.m, y, qs=self.qs)
-        self.gravity = GravitationalForce(self.m, self.g, pos1=-y, qs=self.qs)
+        self._init_from_components(**kwargs)
 
-        system = self.material_point_1 + self.material_point_2 + self.gravity
+    @property
+    def components(self):
 
-        super().__init__(system, **kwargs)
+        components = {}
+
+        self._material_point_1 = MaterialPoint(self.m, self.x, qs=self.qs)
+        self._material_point_2 = MaterialPoint(self.m, self.y, qs=self.qs)
+        self._gravity = GravitationalForce(self.m, self.g, pos1=-self.y, qs=self.qs)
+
+        components['_material_point_1'] = self._material_point_1
+        components['_material_point_2'] = self._material_point_2
+        components['_gravity'] = self._gravity
+
+        return components
+
 
     def symbols_description(self):
         self.sym_desc_dict = {
