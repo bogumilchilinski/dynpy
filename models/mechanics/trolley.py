@@ -103,6 +103,7 @@ class ComposedSystem(HarmonicOscillator):
         else:
             self.qs = [self.z]
 
+        
         self._init_from_components(system=system, **kwargs)
 
     @property

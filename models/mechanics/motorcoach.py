@@ -179,7 +179,7 @@ class FourDOFTrolleySuspension(ComposedSystem):
         #self.force = Force(-self.F_engine, pos1=self.z - self.l_p * self.phi, qs=[self.z, self.phi])
         system = self.body +self.battery+self.spring_1 + self.spring_2 +self.damper_1+self.damper_2 + self.right_wheel + self.left_wheel + self.spring_pw+ self.spring_lw+self.damper_lw+self.damper_pw
 
-        super().__init__(system=system,**kwargs)
+        super().__init__(**{'system':system,**kwargs})
         
 
 
@@ -377,7 +377,7 @@ class DDOFTrolleySuspension(ComposedSystem):
         
         #super().__init__(system_new,**kwargs)
 
-        super().__init__(system=system,**kwargs)
+        super().__init__(**{'system':system,**kwargs})
         
 
 
@@ -587,7 +587,7 @@ class DDOFTrolleySuspension2(ComposedSystem):
         
         #super().__init__(system_new,**kwargs)
 
-        super().__init__(system=system,**kwargs)        
+        super().__init__(**{'system':system,**kwargs})        
 
     def symbols_description(self):
         self.sym_desc_dict = {
