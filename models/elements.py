@@ -250,7 +250,7 @@ class MaterialPoint(Element):
     
     def get_default_data(self):
         t=self.ivar
-        m0=Symbol('m0',positive=True)
+        m0=Symbol('m_0',positive=True)
         self.default_data_dict={
             self.m:[m0],
         }

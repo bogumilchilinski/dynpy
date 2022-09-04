@@ -34,6 +34,9 @@ class ComposedSystem(HarmonicOscillator):
     m0 = Symbol('m_0', positive=True)
     k0 = Symbol('k_0', positive=True)
     F0 = Symbol('F_0', positive=True)
+    l0 = Symbol('l_0', positive=True)
+    c0 = Symbol('c_0', positive=True)
+    lam0 = Symbol('lambda_0', positive=True)
     Omega0 = Symbol('Omega_0', positive=True)
 
     @classmethod
@@ -310,7 +313,7 @@ class UndampedVehicleSuspension(ComposedSystem):
     k_r=Symbol('k_l', positive=True)
                 
     F_engine=Symbol('F_{engine}', positive=True)
-                
+    Omega=Symbol('Omega',positive=True)
     ivar=Symbol('t', positive=True)
 
     l_l=Symbol('l_{l}', positive=True)
@@ -409,7 +412,7 @@ class UndampedVehicleSuspension(ComposedSystem):
     def get_default_data(self):
 
         #m0, l0, k_0, l_l0, omega, F_0 = symbols('m_0 l_0  k_0 l_l0 Omega F_0', positive=True)
-        k_0, l_l0, omega, F_0 = symbols(' k_0 l_l0 Omega F_0', positive=True)
+        k_0, Omega0, l_l0, F_0 = symbols(' k_0 Omega0 l_l0 F_0', positive=True)
         m0, l0  = self.m0,self.l0
         k0= self.k0
         lam0=self.lam0
@@ -456,7 +459,7 @@ class DampedVehicleSuspension(UndampedVehicleSuspension):
                 
     l_cl=Symbol('l_{cl}', positive=True)
     l_cr=Symbol('l_{cr}', positive=True)
-
+    lam=Symbol('lambda',positive=True)
     phi=dynamicsymbols('\\varphi')
     z=dynamicsymbols('z')
 
@@ -489,7 +492,7 @@ class DampedVehicleSuspension(UndampedVehicleSuspension):
 
         self.qs = [self.phi,self.z]
 
-        super().__init__(m=m,I=I,k=k, l_rod= l_rod,L=L,l_r=l_r,k_r=k_r,k_l=k_l, F_engine= F_engine,z=z,l_l=l_l,ivar=ivar,**kwargs)
+        super().__init__(m=m,I=I, l_rod= l_rod,l_r=l_r,k_r=k_r,k_l=k_l, F_engine= F_engine,z=z,l_l=l_l,ivar=ivar,**kwargs)
 
 
     @property
@@ -498,7 +501,7 @@ class DampedVehicleSuspension(UndampedVehicleSuspension):
         components =super().components
 
         
-        self._damper_l = Damper(self.c_l, pos1=self.z + phi * self.l_l,
+        self._damper_l = Damper(self.c_l, pos1=self.z + self.phi * self.l_l,
                                qs=self.qs)(label='left damper')
         self._damper_r = Damper(c=self.c_r, pos1=self.z - self.phi * self.l_r,
                                qs=self.qs)(label='right damper')
@@ -550,7 +553,7 @@ class DampedVehicleSuspension(UndampedVehicleSuspension):
     def get_default_data(self):
 
         #m0, l0, c0, k_0, l_l0, omega, F_0 = symbols('m_0 l_0 c_0 k_0 l_l0 Omega F_0', positive=True)
-        c0, k_0, l_l0, omega, F_0 = symbols('c_0 k_0 l_l0 Omega F_0', positive=True)
+        c0, k_0, l_l0, Omega0, F_0 = symbols('c_0 k_0 l_l0 Omega0 F_0', positive=True)
         m0, l0  = self.m0,self.l0
         c0, k0= self.c0,self.k0
         lam0=self.lam0
@@ -576,11 +579,52 @@ class DampedVehicleSuspension(UndampedVehicleSuspension):
             self.l_l: [l0*S.One*no for no in range(1, 8)],
            
             self.Omega: [Omega0*S.One*no for no in range(1,2)],
-            self.F_engine: [F0*sin(self.Omega*self.ivar)*S.One*no for no in range(1,8)],
+            self.F_engine: [F0*sin(self.Omega*self.ivar)*S.One*no for no in range(1,8)],}
             
 
 
         return default_data_dict
 
+class DampedSymmetricalVehicleSuspension(DampedVehicleSuspension):
+    def get_default_data(self):
 
+        #m0, l0, c0, k_0, l_l0, omega, F_0 = symbols('m_0 l_0 c_0 k_0 l_l0 Omega F_0', positive=True)
+        c0, k_0, l_l0, Omega0, F_0 = symbols('c_0 k_0 l_l0 Omega0 F_0', positive=True)
+        m0, l0  = self.m0,self.l0
+        c0, k0= self.c0,self.k0
+        lam0=self.lam0
+        Omega0=self.Omega0
+        F0=self.F0
+
+        default_data_dict = {
+            self.l_rod:[l0*S.One*no for no in range(1, 8)],
+            self.I: [S.One/12*self.m *self.l_rod**2],
+            self.l_rod:[l0*S.One*no for no in range(1, 8)],
+            #self.m: [m0,2*m0,3*m0,4*m0,5*m0,6*m0,7*m0,8*m0,9*m0],
+            self.m: [m0*S.One*no for no in range(1,8)],
+            #self.c_r: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0],
+            self.c_r: [self.lam*(self.k_r)],
+            #self.k: [k0*S.One*no for no in range(1,8)],
+            self.lam: [lam0/10*S.One*no for no in range(1,8)],
+            self.k_l: [self.k_r],
+            self.k_r: [k0*S.One*no for no in range(1,8)],
+            
+            
+            self.c_l: [self.lam*(self.k_l)],
+            self.l_r: [self.l_l],
+            self.l_l: [l0*S.One*no for no in range(1, 8)],
+           
+            self.Omega: [Omega0*S.One*no for no in range(1,2)],
+            self.F_engine: [F0*cos(self.Omega*self.ivar)*S.One*no for no in range(1,8)],
+            
+          #  self.F_engine: [
+           #     2 * F_0 * sin(omega * self.ivar),
+            #    3 * F_0 * sin(omega * self.ivar),
+             #   4 * F_0 * sin(omega * self.ivar),
+              #  5 * F_0 * sin(omega * self.ivar),
+                #6 * F_0 * sin(omega * self.ivar)
+          #  ]
+        }
+
+        return default_data_dict
 
