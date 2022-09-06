@@ -736,3 +736,104 @@ class SprungTrolley(ComposedSystem):
 
         return self.sym_desc_dict
 
+    
+class NonLinearTrolley(NonlinearComposedSystem):
+    
+    scheme_name = 'nonlin_trolley.PNG'
+    real_name = 'nonlin_trolley_real.PNG'
+
+    m=Symbol('m', positive=True)
+    k=Symbol('k', positive=True)
+    d=Symbol('d', positive=True)
+    l_0=Symbol('l_0', positive=True)
+    x=dynamicsymbols('x')
+   
+    def __init__(self,
+                 m=None,
+                 k=None,
+                 d=None,
+                 l_0=None,
+                 x=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m is not None: self.m = m
+        if k is not None: self.k= k
+        if d is not None: self.d = d
+        if l_0 is not None: self.l_0 = l_0
+        if x is not None: self.x = x
+
+        self.qs = [self.x]
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self._trolley = MaterialPoint(self.m, self.x, qs=[self.x])
+        #self._disk = Disk(S.One/2 * self.m1*self.R**2,pos1 = self.x / self.R, qs=[self.x]) ??? returns diffrend eoms than soultion above
+            
+        self._spring = Spring(self.k, pos1 = sqrt(self.x**2 + self.d**2), pos2 = - self.l_0 , qs=[self.x])
+
+
+        components['trolley'] = self._trolley
+        components['spring'] = self._spring
+        
+        return components
+
+    def get_default_data(self):
+
+        m0, k0, l0= symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m: [
+                0.5 * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0,
+                7 * m0, 8 * m0, 9 * m0
+            ],
+            self.d: [
+                5 * l0, 2 * l0, 3 * S.Half * l0, 4 * l0, 6 * l0, 7 * l0,
+                8 * l0, 9 * l0
+            ],
+            self.k: [
+                1 * k0, 3 * k0, 2 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0,
+                9 * k0
+            ],
+            self.l_0: [
+                1 * l0, 3 * l0, 2 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0,
+                9 * l0,
+            ],
+        }
+
+        return default_data_dict
+
+    def get_numerical_data(self): ### Brakowało numerical data. Przez to komenda get numerical parameters nie działa
+
+        m0, k0, l0, c0= symbols('m_0 k_0 l_0 c_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [
+                0.5 * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0,
+                7 * m0, 8 * m0, 9 * m0
+            ],
+            self.d: [
+                5 * l0, 2 * l0, 3 * S.Half * l0, 4 * l0, 6 * l0, 7 * l0,
+                8 * l0, 9 * l0
+            ],
+            self.kl: [
+                1 * k0, 3 * k0, 2 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0,
+                9 * k0
+            ],
+            self.l_0: [
+                1 * l0, 3 * l0, 2 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0,
+                9 * l0,
+            ], ### Brakowało nawiasu
+            self.c:  [
+                1 * c0, 3 * c0, 2 * c0, 4 * c0, 5 * c0, 6 * c0, 7 * c0, 8 * c0,
+                9 * c0
+            ],
+        }
+
+        return default_data_dict
+
+    

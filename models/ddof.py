@@ -2637,7 +2637,8 @@ class DDoFTwoNonLinearDisks(ComposedSystem):
         self.Spring = Spring(kc, xl, xr, qs=[xl, xr])
 
         system = self.Disk1 + self.Spring + self.Disk2
-        super().__init__(system(qs),**kwargs)
+        
+        super().__init__(system(qs=qs),**kwargs)
 
     def get_default_data(self):
 

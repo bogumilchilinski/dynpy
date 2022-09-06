@@ -877,10 +877,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
 
 
-    def __call__(self, label=None, scheme_options=None, *args):
+    def __call__(self, label=None, scheme_options=None, qs=None ,*args):
         """
         Returns the label of the object or class instance with reduced Degrees of Freedom.
         """
+        
+        
         if len(args) > 0:
             if isinstance(args[0], str):
                 if label:
@@ -898,12 +900,17 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                     system._label = label
                 
         else:
+            
+            
             self._label=label
             system = self
             
         if scheme_options is not None:
             system._scheme_options = scheme_options
             
+            
+        if qs is not None:
+            system = system.shranked(*qs)
             
         return system
             

@@ -619,7 +619,7 @@ class PendulumKinematicExct(ComposedSystem):
         if phi is not None: self.phi = phi
         if x_e is not None: self.x_e = x_e
         self.ivar = ivar
-        self.qs = [self.x_e, self.phi]
+        self.qs = [self.phi]
 
         self.x = self.l * sin(self.phi) + self.x_e
         self.y = self.l * cos(self.phi)

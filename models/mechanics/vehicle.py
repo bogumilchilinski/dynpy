@@ -524,8 +524,29 @@ class DampedVehicleSuspension(UndampedVehicleSuspension):
 #       return self.max_dynamic_force_pin() * self.sqrt(L)
     
     def max_dynamic_force_pin(self):
-        return self.frequency_response_function()*self.stiffness_matrix()[0]
-            
+        return abs(self.frequency_response_function()*self.stiffness_matrix()[0])
+
+    def max_static_force_pin(self):
+        return abs(self.static_load().doit()[0])
+    
+    def static_force_pin_diameter(self):
+        kt=Symbol('k_t', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_static_force_pin())/(pi*kt*Re))**(1/2)
+
+#     def max_dynamic_force_pin(self):
+#         return (self._frf()[0].subs(self.lam0,0) + self._frf()[1].subs(self.lam0,0)*self.l_rod/2)*self.stiffness_matrix()[0]
+
+    def dynamic_bearing_force(self):
+        L=Symbol('L')#wymagana trwałość
+        return self.max_dynamic_force_pin() * L**(S.One/3)
+    
+    def dynamic_force_pin_diameter(self):
+        kt=Symbol('k_t', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_dynamic_force_pin())/(pi*kt*Re))**(1/2)
+    
+    
     def dynamic_bearing_force(self):
         L=Symbol('L')
         return self.max_dynamic_force_pin() * self.sqrt(L)
