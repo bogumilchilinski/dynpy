@@ -17,7 +17,7 @@ import IPython as IP
 import numpy as np
 import inspect
 
-from .trolley import ComposedSystem, NonlinearComposedSystem
+from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
 
 #####
 
