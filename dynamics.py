@@ -1388,6 +1388,14 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         '''
         pass
 
+    @property
+    def _coords_with_acceleration(self): ## dodać helpa
+        
+        coords_list = list(self.Y) + [diff(self.q,self.ivar,self.ivar)]
+        coords_mat = Matrix(coords_list)
+        
+        return coords_mat
+    
     def approximated(self, n=3, x0=None, op_point=False, hint=[], label=None):
         """
         Returns approximated N-th order function calculated with Taylor series method as an instance of the class
@@ -1409,8 +1417,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                                                         x0=x0)
         
         
-
-        linearized_forces=[(point,MultivariableTaylorSeries((force&base_frame.x).doit(),self.Y,n=n,x0=x0).doit()*base_frame.x)  for  point,force   in   self.forcelist]
+#         coords_list = list(self.Y) + [diff(self.q,self.ivar,self.ivar)]
+#         coords_mat = Matrix(coords_list)
+        
+        linearized_forces=[(point,MultivariableTaylorSeries((force&base_frame.x).doit(),self.coords_with_acceleration,n=n,x0=x0).doit()*base_frame.x)  for  point,force   in   self.forcelist]
         
 
         

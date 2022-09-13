@@ -17,7 +17,7 @@ import numpy as np
 import inspect
 
 
-from .trolley import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
+from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
 
 
 #dane numeryczne

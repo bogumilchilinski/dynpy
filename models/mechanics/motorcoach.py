@@ -46,7 +46,7 @@ mechanics_printing(pretty_print=True)
 t,f= symbols('t, f')
 
 
-from .trolley import ComposedSystem, NonlinearComposedSystem
+from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
 
 class FourDOFTrolleySuspension(ComposedSystem):
 

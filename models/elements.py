@@ -715,7 +715,24 @@ class Damper(Element):
     def force(self):
         
         return self.c * diff(self.q[0],self.ivar)
+     
+    def _plot_2d(self, language='en',*args,**kwargs):
 
+        class_name = self.__class__.__name__
+
+        sch_opt=self.scheme_options
+        
+        comps = self.components
+        
+        x_shift,y_shift = 0,0
+        
+        if sch_opt is not None:
+            if 'at' in sch_opt:
+                x_shift,y_shift = sch_opt['at']
+
+        res = GeometryScene.ax_2d.plot(np.array([0,0,1,-1]) + x_shift+2,np.array([-1,2,2,2]) +  y_shift, label=class_name, color = 'k') + GeometryScene.ax_2d.plot(np.array([1.5,1.5,0,0,0,-1.5,-1.5]) + x_shift+2,np.array([1,3,3,5,3,3,1]) + y_shift, label=class_name, color = 'k')
+        
+        text = GeometryScene.ax_2d.text(np.array([1.5]),np.array([3]),f'{class_name}',multialignment='center')
         
 class Excitation(Element):
     """
@@ -781,13 +798,73 @@ class Force(Element):
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
         
 
+# class CombustionEngine(Force):
+
+#     eta= Symbol('eta', positive = True)
+#     n_engine = Symbol('n')
+#     omega=Symbol('omega')
+
+#     def __init__(self, omega, characteristic=None, eta = None, qs=None, ivar=Symbol('t'),frame = base_frame):
+
+#         if characteristic is None:
+#             self._characteristic= self.characteristic
+#         else:
+#             self._characteristic =  characteristic
+#         if eta is not None: self.eta = eta
+#         if omega is not None: self.omega = omega
+            
+
+#         super().__init__(self.eta*self._characteristic, omega.integrate(ivar), qs=qs, ivar=ivar)
+
+#     @property
+#     def characteristic(self):
+#         n_engine = self.omega*60/(2*np.pi)
+#         return -4e-5*self.n_engine**2 + 0.2157*self.n_engine + 113.07
+
+#     @classmethod
+#     def from_data(cls, data, n, degree=5, eta = None, qs=None, ivar=Symbol('t'),frame = base_frame):
+
+#         omega = 2*3.14/60*n
+        
+#         x = data.index.to_numpy()
+#         y = data.iloc[:,0].to_numpy()
+
+#         coeffs=reversed((np.polyfit(x, y, degree)))
+
+        
+#         omega_min = 2*3.14/60*x[0]
+#         omega_max = 2*3.14/60*x[-1]
+        
+#         char_slope = 10
+        
+#         window   =   ((S.One/2+atan(char_slope*(omega-omega_min))/np.pi))    -  ((S.One/2+atan(char_slope*(omega-omega_max))/np.pi))
+#         #window = Heaviside(omega-omega_min) - Heaviside(omega-omega_max)
+        
+#         omega = 2*3.14/60*n
+        
+#         char_poly  =window *sum([ coeff * n ** no for no, coeff in enumerate(coeffs)])
+        
+
+        
+#         obj = cls(omega = omega, characteristic = char_poly, eta=eta, qs = qs, ivar = ivar, frame = frame)
+#         obj._char_poly  =  char_poly
+        
+#         return obj
+
+#     @classmethod
+#     def from_rpm(cls, n, eta = None, qs=None, ivar=Symbol('t'),frame = base_frame):
+#         omega = 2*3.14/60*n
+#         return cls(omega = omega, eta = eta, qs=qs, ivar=ivar, frame = frame)
+
 class CombustionEngine(Force):
 
     eta= Symbol('eta', positive = True)
     n_engine = Symbol('n')
     omega=Symbol('omega')
+    n_min = Symbol('n_min')
+    n_max = Symbol('n_max')
 
-    def __init__(self, omega, characteristic=None, eta = None, qs=None, ivar=Symbol('t'),frame = base_frame):
+    def __init__(self, omega, characteristic=None, eta = None, n_min=None , n_max=None, qs=None, ivar=Symbol('t'),frame = base_frame):
 
         if characteristic is None:
             self._characteristic= self.characteristic
@@ -795,7 +872,8 @@ class CombustionEngine(Force):
             self._characteristic =  characteristic
         if eta is not None: self.eta = eta
         if omega is not None: self.omega = omega
-            
+        if n_min is not None: self.n_min = n_min
+        if n_max is not None: self.n_max = n_max
 
         super().__init__(self.eta*self._characteristic, omega.integrate(ivar), qs=qs, ivar=ivar)
 
@@ -818,7 +896,7 @@ class CombustionEngine(Force):
         omega_min = 2*3.14/60*x[0]
         omega_max = 2*3.14/60*x[-1]
         
-        char_slope = 10
+        char_slope = 10e60
         
         window   =   ((S.One/2+atan(char_slope*(omega-omega_min))/np.pi))    -  ((S.One/2+atan(char_slope*(omega-omega_max))/np.pi))
         #window = Heaviside(omega-omega_min) - Heaviside(omega-omega_max)
@@ -833,12 +911,76 @@ class CombustionEngine(Force):
         obj._char_poly  =  char_poly
         
         return obj
+    
+    @classmethod
+    def from_data_gearbox(cls, data, n, degree=5, eta = None, n_min=None , n_max=None , qs=None, ivar=Symbol('t'),frame = base_frame):
 
+        omega = 2*3.14/60*n
+        
+        x = data.index.to_numpy()
+        y = data.iloc[:,0].to_numpy()
+
+        coeffs=reversed((np.polyfit(x, y, degree)))
+
+        if n_min is not None:
+            omega_min =  2*3.14/60*n_min
+        else:
+            omega_min = 2*3.14/60*x[0]
+        if n_min is not None:
+            omega_max =  2*3.14/60*n_max
+        else:
+            omega_max = 2*3.14/60*x[0]
+        
+        char_slope = 10e60
+        
+        window   =   ((S.One/2+atan(char_slope*(omega-omega_min))/np.pi))    -  ((S.One/2+atan(char_slope*(omega-omega_max))/np.pi))
+        #window = Heaviside(omega-omega_min) - Heaviside(omega-omega_max)
+        
+        omega = 2*3.14/60*n
+        
+        char_poly  =window *sum([ coeff * n ** no for no, coeff in enumerate(coeffs)])
+        
+        obj = cls(omega = omega, characteristic = char_poly, eta=eta, qs = qs, ivar = ivar, frame = frame)
+        obj._char_poly  =  char_poly
+        
+        return obj
+    
+    @classmethod
+    def from_data_raw(cls, data, n, degree=5, eta = None, qs=None, ivar=Symbol('t'),frame = base_frame):
+
+        omega = 2*3.14/60*n
+        
+        x = data.index.to_numpy()
+        y = data.iloc[:,0].to_numpy()
+
+        coeffs=reversed((np.polyfit(x, y, degree)))
+
+        
+        omega_min = 2*3.14/60*x[0]
+        omega_max = 2*3.14/60*x[-1]
+        
+        char_slope = 10e60
+        
+        window = 1
+        #window   =   ((S.One/2+atan(char_slope*(omega-omega_min))/np.pi))    -  ((S.One/2+atan(char_slope*(omega-omega_max))/np.pi))
+        #window = Heaviside(omega-omega_min) - Heaviside(omega-omega_max)
+        
+        omega = 2*3.14/60*n
+        
+        char_poly  =window *sum([ coeff * n ** no for no, coeff in enumerate(coeffs)])
+        
+
+        
+        obj = cls(omega = omega, characteristic = char_poly, eta=eta, qs = qs, ivar = ivar, frame = frame)
+        obj._char_poly  =  char_poly
+        
+        return obj
+    
     @classmethod
     def from_rpm(cls, n, eta = None, qs=None, ivar=Symbol('t'),frame = base_frame):
         omega = 2*3.14/60*n
         return cls(omega = omega, eta = eta, qs=qs, ivar=ivar, frame = frame)
-
+    
 class IntegralElement(Force):
     """
     Model of an Integral Element :
