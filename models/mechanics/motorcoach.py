@@ -43,7 +43,7 @@ ix = pd.IndexSlice
 
 mechanics_printing(pretty_print=True)
 
-t,f = symbols('t, f')
+t,f= symbols('t, f')
 
 
 from .trolley import ComposedSystem, NonlinearComposedSystem
@@ -85,6 +85,7 @@ class FourDOFTrolleySuspension(ComposedSystem):
     ivar=Symbol('t')
     f=Symbol('f', positive=True)
     
+    
     def __init__(self,
                  m=None,
                  m_k=None,
@@ -118,6 +119,7 @@ class FourDOFTrolleySuspension(ComposedSystem):
                  z_l=None,
                  z_p=None,
                  z_b=None,
+                
             
                  **kwargs):
         
@@ -152,6 +154,7 @@ class FourDOFTrolleySuspension(ComposedSystem):
         if omega is not None: self.omega=omega
         if I is not None: self.I = I  # moment of inertia of a rod
         if F_engine is not None: self.F_engine = F_engine
+        
         
         self.s=self.A*sin(ivar*self.omega)
         
@@ -211,7 +214,8 @@ class FourDOFTrolleySuspension(ComposedSystem):
             self.A: r'Amplituda siły wymuszającej',
             self.omega: r'Częstość siły wymuszającej',
             self.ivar: r'Czas',
-            self.f: r'Częstotliwość wymuszenia'
+            self.f: r'Częstotliwość wymuszenia',
+            
             
         }
         return self.sym_desc_dict
@@ -226,7 +230,7 @@ units_dict = {sys4.m:ureg.kilogram,
               sys4.m_l:ureg.kilogram,
               sys4.m_b:ureg.kilogram,
               sys4.m_k:ureg.kilogram,
-              sys4.A:(ureg.kilogram*ureg.meter / ureg.second**2),
+              sys4.A:ureg.meter,
               sys4.k_l:(ureg.newton / ureg.meter),
               sys4.k_lw:(ureg.newton / ureg.meter),
               sys4.k_p:(ureg.newton / ureg.meter),
@@ -243,11 +247,13 @@ units_dict = {sys4.m:ureg.kilogram,
               sys4.I:(ureg.kilogram*ureg.meter*ureg.meter),
               sys4.phi:ureg.radian,
               sys4.z:ureg.meter,
+              sys4.z.diff(t,t):ureg.meter/ureg.second**2,
               sys4.z_lw:ureg.meter,
               sys4.z_pw:ureg.meter,
               sys4.z_b:ureg.meter,
               t:ureg.second,
               f:ureg.hertz,
+              
              }
 
 unit=units_dict
@@ -417,11 +423,11 @@ sys2=DDOFTrolleySuspension()
 
 
 
-units_dict = {sys2.m:ureg.kilogram,
+units_dict1 = {sys2.m:ureg.kilogram,
               sys2.m_p:ureg.kilogram,
               sys2.m_l:ureg.kilogram,
               sys2.m_b:ureg.kilogram,
-              sys2.A:(ureg.kilogram*ureg.meter / ureg.second**2),
+              sys2.A:ureg.meter,
               sys2.k_l:(ureg.newton / ureg.meter),
               sys2.k_lw:(ureg.newton / ureg.meter),
               sys2.k_p:(ureg.newton / ureg.meter),
@@ -438,6 +444,7 @@ units_dict = {sys2.m:ureg.kilogram,
               sys2.I:(ureg.kilogram*ureg.meter*ureg.meter),
               sys2.phi:ureg.radian,
               sys2.z:ureg.meter,
+              sys2.z.diff(t,t):ureg.meter/ureg.second**2,
               sys2.z_lw:ureg.meter,
               sys2.z_pw:ureg.meter,
               sys2.z_b:ureg.meter,
@@ -445,7 +452,7 @@ units_dict = {sys2.m:ureg.kilogram,
               f:ureg.hertz,
              }
 
-unit=units_dict
+unit1=units_dict1
         
 class DDOFTrolleySuspension2(ComposedSystem):
 
@@ -625,11 +632,11 @@ class DDOFTrolleySuspension2(ComposedSystem):
                  
 sys22=DDOFTrolleySuspension2()      
                  
-units_dict = {sys22.m:ureg.kilogram,
+units_dict2 = {sys22.m:ureg.kilogram,
               sys22.m_p:ureg.kilogram,
               sys22.m_l:ureg.kilogram,
               sys22.m_b:ureg.kilogram,
-              sys22.A:(ureg.kilogram*ureg.meter / ureg.second**2),
+              sys22.A:ureg.meter,
               sys22.k_l:(ureg.newton / ureg.meter),
               sys22.k_lw:(ureg.newton / ureg.meter),
               sys22.k_p:(ureg.newton / ureg.meter),
@@ -646,6 +653,7 @@ units_dict = {sys22.m:ureg.kilogram,
               sys22.I:(ureg.kilogram*ureg.meter*ureg.meter),
               sys22.phi:ureg.radian,
               sys22.z:ureg.meter,
+              sys22.z.diff(t,t):ureg.meter/ureg.second**2,
               sys22.z_lw:ureg.meter,
               sys22.z_pw:ureg.meter,
               sys22.z_b:ureg.meter,
@@ -657,6 +665,6 @@ units_dict = {sys22.m:ureg.kilogram,
               sys22.c_p_zas:(ureg.newton*ureg.second / ureg.meter),
              }
 
-unit=units_dict
+unit2=units_dict2
    
 

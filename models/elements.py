@@ -838,56 +838,239 @@ class CombustionEngine(Force):
     def from_rpm(cls, n, eta = None, qs=None, ivar=Symbol('t'),frame = base_frame):
         omega = 2*3.14/60*n
         return cls(omega = omega, eta = eta, qs=qs, ivar=ivar, frame = frame)
-    
-class IntegralElement(Force):
 
+class IntegralElement(Force):
+    """
+    Model of an Integral Element :
+        Creates a additional force which allows to control output value.
+
+     Examples
+        =======
+        An implementation of the control system's integral element:
+        
+        Example No.1 - error is defined as the expresion:
+        >>> t = symbols('t')
+        >>> I,reference = symbols('I reference')
+        >>> x = dynamicsymbols('x') # Generalized Coordinates
+        >>> error = reference - x
+        >>> IntegralElement(I , error = error , target = x , qs=[x])
+        
+        Example No.2 - direct parameter regulation:
+        >>> t = symbols('t')
+        >>> I, reference= symbols('I, reference')
+        >>> x = dynamicsymbols('x') # Generalized Coordinates
+        >>> IntegralElement(I , error = x  , reference = reference , qs=[x])
+        
+        Example No.3 - indirect parameter regulation:
+        >>> t = symbols('t')
+        >>> I, reference= symbols('I, reference')
+        >>> x = dynamicsymbols('x') # Generalized Coordinates
+        >>> vel = diff(x,t)
+        >>> IntegralElement(I , error = vel , target = x , reference = reference, qs=[x])
+
+        -We define the symbols and dynamicsymbols
+        -We choose regulation strategy
+        -We initiate an object IntegralElement in proper way
+    
+    """
     k_I = Symbol('k_I', positive=True)
     error = dynamicsymbols('e')
     target = dynamicsymbols('target')
     reference = S.Zero
-    
-    def __init__(self, k_I, error, target=None, reference = None,  qs=None, ivar=Symbol('t'), frame = base_frame):
-        
+
+    def __init__(self, k_I, error = None, target = None, reference = None,  qs=None, ivar=Symbol('t'), frame = base_frame):
+
         if reference is not None: self.reference = reference
+        if error is not None: self.error = error
+
+        if target is None and isinstance(self.error,Function):
+               target=self.error
+
+        if isinstance(self.error,Expr) and self.reference == S.Zero:
+            super().__init__(k_I*self.error.integrate(ivar), target, qs=qs, ivar=ivar)
+        else:
+            super().__init__(k_I*(self.reference - self.error).integrate(ivar), target, qs=qs, ivar=ivar)
+
+
+    def _plot_2d(self, language='en'):
+
+        class_name = self.__class__.__name__
+
+        x_coords = np.array([0,0,5,5,0])
+        y_coords = np.array([0,3,3,0,0])
+
+        res = GeometryScene.ax_2d.plot(x_coords,y_coords, label=class_name, color = 'k') + GeometryScene.ax_2d.plot([-1,0],[1.5,1.5], label=class_name, color = 'k') + GeometryScene.ax_2d.plot([6,5],[1.5,1.5], label=class_name, color = 'k')
         
-        if target is None and isinstance(error,Function):
-               target=error
+        text = GeometryScene.ax_2d.text(np.array([1]),np.array([1.5]),f'{class_name}',multialignment='center')
+        
+    def _tikz_scheme(self, language='en'):
 
-        super().__init__(k_I*(self.reference - error).integrate(ivar), target, qs=qs, ivar=ivar)
+        class_name = self.__class__.__name__
 
-
+        schm = tikz.TikzStandalone()
+        tk_node = TikZ()
+        
+        with schm.create(TikZ()) as tkz:
+            with tkz.create(TikZNode('Integral Element', options=['draw'] , text = f'{class_name}')) as node:
+                pass
+            with tkz.create(TikZNode('Integral Element', options=['draw'] , text = f'{class_name}')) as node:
+                pass
+        return schm
+        
 class DerivativeElement(Force):
+    """
+    Model of an Derivative Element :
+        Creates a additional force which allows to control output value.
+
+     Examples
+        =======
+        An implementation of the control system's derivative element:
+        
+        Example No.1 - error is defined as the expresion:
+        >>> t = symbols('t')
+        >>> I,reference = symbols('I reference')
+        >>> x = dynamicsymbols('x') # Generalized Coordinates
+        >>> error = reference - x
+        >>> DerivativeElement(I , error = error , target = x , qs=[x])
+        
+        Example No.2 - direct parameter regulation:
+        >>> t = symbols('t')
+        >>> I, reference= symbols('I, reference')
+        >>> x = dynamicsymbols('x') # Generalized Coordinates
+        >>> DerivativeElement(I , error = x  , reference = reference , qs=[x])
+        
+        Example No.3 - indirect parameter regulation:
+        >>> t = symbols('t')
+        >>> I, reference= symbols('I, reference')
+        >>> x = dynamicsymbols('x') # Generalized Coordinates
+        >>> vel = diff(x,t)
+        >>> DerivativeElement(I , error = vel , target = x , reference = reference, qs=[x])
+
+        -We define the symbols and dynamicsymbols
+        -We choose regulation strategy
+        -We initiate an object DerivativeElement in proper way
     
+    """
     k_D = Symbol('k_D', positive=True)
     error = dynamicsymbols('e')
     target = dynamicsymbols('target')
     reference = S.Zero
     
-    def __init__(self, k_D, error, target=None, reference = None,  qs=None, ivar=Symbol('t'), frame = base_frame):
+    def __init__(self, k_D, error = None, target=None, reference = None,  qs=None, ivar=Symbol('t'), frame = base_frame):
         
         if reference is not None: self.reference = reference
-        
-        if target is None and isinstance(error,Function):
-               target=error
+        if error is not None: self.error = error
 
-        super().__init__(k_D*diff((self.reference - error),ivar), target, qs=qs, ivar=ivar)
+        if target is None and isinstance(self.error,Function):
+               target=self.error
+
+        if isinstance(self.error,Expr) and self.reference == S.Zero:
+            super().__init__(k_D*diff(self.error,ivar), target, qs=qs, ivar=ivar)
+        else:
+            super().__init__(k_D*diff((self.reference - self.error),ivar), target, qs=qs, ivar=ivar)
+
+    def _plot_2d(self, language='en'):
+
+        class_name = self.__class__.__name__
+
+        x_coords = np.array([0,0,5,5,0])
+        y_coords = np.array([0,3,3,0,0])
+
+        res = GeometryScene.ax_2d.plot(x_coords,y_coords, label=class_name, color = 'k') + GeometryScene.ax_2d.plot([-1,0],[1.5,1.5], label=class_name, color = 'k') + GeometryScene.ax_2d.plot([6,5],[1.5,1.5], label=class_name, color = 'k')
+        
+        text = GeometryScene.ax_2d.text(np.array([1.2]),np.array([1.5]),f'{class_name}',multialignment='center')
+        
+    def _tikz_scheme(self, language='en'):
+
+        class_name = self.__class__.__name__
+
+        schm = tikz.TikzStandalone()
+        tk_node = TikZ()
+        
+        with schm.create(TikZ()) as tkz:
+            with tkz.create(TikZNode('Derivative Element', options=['draw'] , text = f'{class_name}')) as node:
+                pass
+            with tkz.create(TikZNode('Derivative Element', options=['draw'] , text = f'{class_name}')) as node:
+                pass
+        return schm
 
 
 class ProportionalElement(Force):
+    """
+    Model of an Proportional Element :
+        Creates a additional force which allows to control output value.
 
+     Examples
+        =======
+        An implementation of the control system's proportional element:
+        
+        Example No.1 - error is defined as the expresion:
+        >>> t = symbols('t')
+        >>> I,reference = symbols('I reference')
+        >>> x = dynamicsymbols('x') # Generalized Coordinates
+        >>> error = reference - x
+        >>> ProportionalElement(I , error = error , target = x , qs=[x])
+        
+        Example No.2 - direct parameter regulation:
+        >>> t = symbols('t')
+        >>> I, reference= symbols('I, reference')
+        >>> x = dynamicsymbols('x') # Generalized Coordinates
+        >>> ProportionalElement(I , error = x  , reference = reference , qs=[x])
+        
+        Example No.3 - indirect parameter regulation:
+        >>> t = symbols('t')
+        >>> I, reference= symbols('I, reference')
+        >>> x = dynamicsymbols('x') # Generalized Coordinates
+        >>> vel = diff(x,t)
+        >>> ProportionalElement(I , error = vel , target = x , reference = reference, qs=[x])
+
+        -We define the symbols and dynamicsymbols
+        -We choose regulation strategy
+        -We initiate an object ProportionalElement in proper way
+    
+    """
     k_P = Symbol('k_P', positive=True)
     error = Symbol('e', positive=True)
     target = Symbol('target', positive=True)
     reference = S.Zero
     
-    def __init__(self, k_P, error, target=None, reference = None,  qs=None, ivar=Symbol('t'), frame = base_frame):
-        
-        if reference is not None: self.reference = reference
-        
-        if target is None and isinstance(error,Function):
-               target=error
+    def __init__(self, k_P, error = None, target=None, reference = None,  qs=None, ivar=Symbol('t'), frame = base_frame):
 
-        super().__init__(k_P*(self.reference - error), target, qs=qs, ivar=ivar)
+        if reference is not None: self.reference = reference
+        if error is not None: self.error = error
+
+        if target is None and isinstance(self.error,Function):
+               target=self.error
+
+        if isinstance(self.error,Expr) and self.reference == S.Zero:
+            super().__init__(k_P*(self.error), target, qs=qs, ivar=ivar)
+        else:
+            super().__init__(k_P*(self.reference - self.error), target, qs=qs, ivar=ivar)
+
+    def _plot_2d(self, language='en'):
+
+        class_name = self.__class__.__name__
+
+        x_coords = np.array([0,0,5,5,0])
+        y_coords = np.array([0,3,3,0,0])
+
+        res = GeometryScene.ax_2d.plot(x_coords,y_coords, label=class_name, color = 'k') + GeometryScene.ax_2d.plot([-1,0],[1.5,1.5], label=class_name, color = 'k') + GeometryScene.ax_2d.plot([6,5],[1.5,1.5], label=class_name, color = 'k')
+        
+        text = GeometryScene.ax_2d.text(np.array([1]),np.array([1.5]),f'{class_name}',multialignment='center')
+        
+    def _tikz_scheme(self, language='en'):
+
+        class_name = self.__class__.__name__
+
+        schm = tikz.TikzStandalone()
+        tk_node = TikZ()
+        
+        with schm.create(TikZ()) as tkz:
+            with tkz.create(TikZNode('Proportional Element', options=['draw'] , text = f'{class_name}')) as node:
+                pass
+            with tkz.create(TikZNode('Proportional Element', options=['draw'] , text = f'{class_name}')) as node:
+                pass
+        return schm
 
         
         

@@ -31,8 +31,30 @@ from .numerical import OdeComputationalCase
 
 
 class MultivariableTaylorSeries(Expr):
-    
+    """_summary_
+
+    Args:
+        Expr (_type_): _description_
+    """
     def __new__(cls,expr, variables,*args, n=2, x0=None):
+        """_summary_
+
+        Parameters
+        ----------
+        expr : _type_
+            _description_
+        variables : _type_
+            _description_
+        n : int, optional
+            _description_, by default 2
+        x0 : _type_, optional
+            _description_, by default None
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
         
         obj=super().__new__(cls,expr,variables,*args)
         obj._vars = variables
