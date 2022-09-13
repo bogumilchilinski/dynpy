@@ -510,7 +510,7 @@ class DataTable(Table):
         self._numerical_data = numerical_data
         self.position = position
 
-    def add_table(self, numerical_data=None, index=False, longtable=False):
+    def add_table(self, numerical_data=None, index=False, longtable=False,multirow=True):
         self.append(NoEscape('\\centering'))
         self.append(NoEscape('%%%%%%%%%%%%%% Table %%%%%%%%%%%%%%%'))
         #         if numerical_data!=None:
@@ -520,7 +520,7 @@ class DataTable(Table):
         self.append(
             NoEscape(
                 tab.to_latex(index=index, escape=False,
-                             longtable=longtable).replace(
+                             longtable=longtable,multirow=multirow).replace(
                                  '\\toprule',
                                  '\\toprule \n \\midrule').replace(
                                      '\\bottomrule',
@@ -1142,6 +1142,7 @@ class BasicFormattingTools(DataMethods):
                  index=True,
                  label=None,
                  caption=None,
+                 multirow=True,
                  *args,
                  **kwargs):
 
@@ -1153,7 +1154,7 @@ class BasicFormattingTools(DataMethods):
         if caption is not None:
             tab.add_caption(NoEscape(caption))
 
-        tab.add_table(index=index)
+        tab.add_table(index=index,multirow=multirow)
 
         if label is not None:
             tab.append(Label(label))
