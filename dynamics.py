@@ -51,6 +51,8 @@ base_frame=me.ReferenceFrame('N')
 base_origin=me.Point('O')
 
 class GeometryScene:
+    """_summary_
+    """
 
 
     ax_2d=None
@@ -59,6 +61,13 @@ class GeometryScene:
 
 
     def __init__(self,height=12,width=12,figsize=(12,9)):
+        """_summary_
+
+        Args:
+            height (int, optional): _description_. Defaults to 12.
+            width (int, optional): _description_. Defaults to 12.
+            figsize (tuple, optional): _description_. Defaults to (12,9).
+        """
 
         #plt.figure(figsize=figsize)
         ax_2d = plt.subplot(121)
