@@ -359,12 +359,7 @@ class MaterialPointMovement(ComposedSystem):
 
 from .mechanics.tensioner import BlowerToothedBelt, DampedBlowerToothedBelt
 
-from .mechanics.engine import (
-    Engine, DampedEngine, BoxerEnginePerpendicularSprings,
-    InlineEnginePerpendicularSprings, EngineVerticalSpringGravity,
-    DampedEngineVerticalSpringGravity,
-    NonLinearInlineEnginePerpendicularSpringsGravity,
-    NonLinearBoxerEnginePerpendicularSprings)
+
 
 from .mechanics.trolley import SpringMassSystem, SpringDamperMassSystem
 
@@ -664,119 +659,6 @@ class DampedHarmonicOscillator(SpringDamperMassSystem):
     pass
 
 
-#Patryk
-# class Pendulum(NonlinearComposedSystem):
-#     """
-#     Model of a sDoF mathematical Pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
-
-#         Arguments:
-#         =========
-#             m = Mass
-#                 -Mass of system on spring
-
-#             g = gravitional field
-#                 -value of gravitional's field acceleration
-
-#             l = lenght
-#                 -Dimension of pendulum's strong
-
-#             ivar = symbol object
-#                 -Independant time variable
-
-#             qs = dynamicsymbol object
-#                 -Generalized coordinates
-
-#         Example
-#         =======
-#         A mass oscillating up and down while being held up by a spring with a spring constant kinematicly
-
-#         >>> t = symbols('t')
-#         >>> m, g, l = symbols('m, g, l')
-#         >>> qs = dynamicsymbols('varphi') # Generalized Coordinates
-#         >>> Pendulum()
-
-#         -We define the symbols and dynamicsymbols
-#         -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
-#         -determine the instance of the pendulum by using class Pendulum()
-#     """
-#     scheme_name = 'undamped_pendulum.png'
-#     real_name = 'pendulum_real.jpg'
-
-#     def __init__(self,
-#                  m=Symbol('m', positive=True),
-#                  g=Symbol('g', positive=True),
-#                  l=Symbol('l', positive=True),
-#                  angle=dynamicsymbols('\\varphi'),
-#                  qs=None,
-#                  ivar=Symbol('t'),
-#                  **kwargs):
-
-#         if qs == None:
-#             qs = [angle]
-#         else:
-#             qs = qs
-
-#         self.m = m
-#         self.g = g
-#         self.l = l
-
-#         self.potential = GravitationalForce(self.m,
-#                                             self.g,
-#                                             l * (1 - cos(angle)),
-#                                             qs=qs)
-#         self.kinen = MaterialPoint(self.m * self.l**2, pos1=qs[0], qs=[angle])
-#         print(self.kinen)
-#         system = self.potential + self.kinen
-#         super().__init__(system, **kwargs)
-
-#     def get_default_data(self):
-
-#         m0, l0 = symbols('m_0 l_0', positive=True)
-
-#         default_data_dict = {
-#             self.m: [
-#                 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0,
-#                 9 * m0, 10 * m0, 11 * m0, 12 * m0, 13 * m0, 14 * m0, 15 * m0,
-#                 16 * m0, 17 * m0, 18 * m0, 19 * m0, 20 * m0, 21 * m0, 22 * m0,
-#                 23 * m0, 24 * m0, 25 * m0, 26 * m0, 27 * m0, 28 * m0, 29 * m0,
-#                 30 * m0
-#             ],
-#             self.l: [
-#                 1 * l0, 2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0,
-#                 9 * l0, 10 * l0, 11 * l0, 12 * l0, 13 * l0, 14 * l0, 15 * l0,
-#                 16 * l0, 17 * l0, 18 * l0, 19 * l0, 20 * l0, 21 * l0, 22 * l0,
-#                 23 * l0, 24 * l0, 25 * l0, 26 * l0, 27 * l0, 28 * l0, 29 * l0,
-#                 30 * l0
-#             ],
-#         }
-#         return default_data_dict
-
-#     def symbols_description(self):
-#         self.sym_desc_dict = {
-#             self.m: r'Mass of pendulum',
-#             self.g: r'Gravity constant',
-#             self.l: r'Pendulum length',
-#         }
-#         return self.sym_desc_dict
-
-#     @property
-#     def _report_components(self):
-
-#         comp_list = [
-#             mech_comp.TitlePageComponent,
-#             mech_comp.SchemeComponent,
-#             mech_comp.ExemplaryPictureComponent,
-#             mech_comp.KineticEnergyComponent,
-#             mech_comp.PotentialEnergyComponent,
-#             mech_comp.LagrangianComponent,
-#             #         mech_comp.LinearizationComponent,
-#             #         mech_comp.GoverningEquationComponent,
-#             #         mech_comp.FundamentalMatrixComponent,
-#             #         mech_comp.GeneralSolutionComponent,
-#             #         mech_comp.SteadySolutionComponent,
-#         ]
-
-#         return comp_list
 
 
 
@@ -1095,6 +977,14 @@ class StraightNonlinearEngine(NonlinearEngine):
         }
         return default_data_dict
 
+    
+from .mechanics.engine import (
+    Engine, DampedEngine, BoxerEnginePerpendicularSprings,
+    InlineEnginePerpendicularSprings, EngineVerticalSpringGravity,
+    DampedEngineVerticalSpringGravity,
+    NonLinearInlineEnginePerpendicularSpringsGravity,
+    NonLinearBoxerEnginePerpendicularSprings)
+    
 
 class ForcedNonLinearTrolley(ComposedSystem):
     scheme_name = 'sdof_nonlin_trolley.PNG'
@@ -1332,61 +1222,6 @@ class NonLinearDisc(NonlinearComposedSystem):
         return default_data_dict
 
 
-#Tomek
-# class ForcedNonLinearDisc(NonlinearComposedSystem):
-#     scheme_name = 'nonlinear_disc.png'
-#     real_name = 'roller_tightener.png'
-
-#     def __init__(self,
-#                  m1=Symbol('m', positive=True),
-#                  kl=Symbol('k', positive=True),
-#                  R=Symbol('R', positive=True),
-#                  d=Symbol('d', positive=True),
-#                  l_0=Symbol('l_0', positive=True),
-#                  F=Symbol('F', positive=True),
-#                  Omega=Symbol('Omega', positive=True),
-#                  ivar=Symbol('t'),
-#                  x=dynamicsymbols('x'),
-#                  qs=dynamicsymbols('x'),
-#                  **kwargs):
-
-#         self.m1 = m1
-#         self.kl = kl
-#         self.R = R
-#         self.l_0 = l_0
-#         self.d = d
-#         self.x = x
-#         self.F = F
-
-#         self.disk1 = MaterialPoint(m1, x, qs=[x]) + MaterialPoint(
-#             m1 / 2 * R**2, x / R, qs=[x]) + Spring(
-#                 kl, pos1=(sqrt(x**2 + d**2) - l_0), qs=[x])
-#         self.force = Force(F * cos(Omega * ivar), pos1=x, qs=[x])
-
-#         system = self.disk1 + self.force
-#         super().__init__(system, **kwargs)
-
-#     def get_default_data(self):
-
-#         m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
-
-#         default_data_dict = {
-#             self.m1: [
-#                 0.5 * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0,
-#                 7 * m0, 8 * m0, 9 * m0
-#             ],
-#             self.d: [
-#                 5 * l0, 2 * l0, 3 * S.Half * l0, 4 * l0, 6 * l0, 7 * l0,
-#                 8 * l0, 9 * l0
-#             ],
-#             self.kl: [
-#                 1 * k0, 3 * k0, 2 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0,
-#                 9 * k0
-#             ],
-#             self.l_0: [l0],
-#         }
-
-#         return default_data_dict
 
 
 #Sav

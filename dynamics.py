@@ -47,7 +47,12 @@ from pylatex import TikZ,TikZNode
 import matplotlib.pyplot as plt
 
 
+base_frame=me.ReferenceFrame('N')
+base_origin=me.Point('O')
+
 class GeometryScene:
+    """_summary_
+    """
 
 
     ax_2d=None
@@ -56,6 +61,13 @@ class GeometryScene:
 
 
     def __init__(self,height=12,width=12,figsize=(12,9)):
+        """_summary_
+
+        Args:
+            height (int, optional): _description_. Defaults to 12.
+            width (int, optional): _description_. Defaults to 12.
+            figsize (tuple, optional): _description_. Defaults to (12,9).
+        """
 
         #plt.figure(figsize=figsize)
         ax_2d = plt.subplot(121)
@@ -874,10 +886,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
 
 
-    def __call__(self, label=None, scheme_options=None, *args):
+    def __call__(self, label=None, scheme_options=None, qs=None ,*args):
         """
         Returns the label of the object or class instance with reduced Degrees of Freedom.
         """
+        
+        
         if len(args) > 0:
             if isinstance(args[0], str):
                 if label:
@@ -895,12 +909,17 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                     system._label = label
                 
         else:
+            
+            
             self._label=label
             system = self
             
         if scheme_options is not None:
             system._scheme_options = scheme_options
             
+            
+        if qs is not None:
+            system = system.shranked(*qs)
             
         return system
             
@@ -1378,6 +1397,14 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         '''
         pass
 
+    @property
+    def _coords_with_acceleration(self): ## dodać helpa
+        
+        coords_list = list(self.Y) + [diff(self.q,self.ivar,self.ivar)]
+        coords_mat = Matrix(coords_list)
+        
+        return coords_mat
+    
     def approximated(self, n=3, x0=None, op_point=False, hint=[], label=None):
         """
         Returns approximated N-th order function calculated with Taylor series method as an instance of the class
@@ -1398,9 +1425,18 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                                                         n=n + 1,
                                                         x0=x0)
         
+        
+#         coords_list = list(self.Y) + [diff(self.q,self.ivar,self.ivar)]
+#         coords_mat = Matrix(coords_list)
+        
+        linearized_forces=[(point,MultivariableTaylorSeries((force&base_frame.x).doit(),self.coords_with_acceleration,n=n,x0=x0).doit()*base_frame.x)  for  point,force   in   self.forcelist]
+        
+
+        
+        
         approx_sys =LagrangesDynamicSystem(lagrangian_approx,
                                       self.q,
-                                      forcelist=self.forcelist,
+                                      forcelist=linearized_forces,
                                       frame=self.frame,
                                       label=label,
                                       ivar=self.ivar)
@@ -1447,7 +1483,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         lin_sys = LinearDynamicSystem(linearized_sys.lagrangian(),
                                    self.q,
-                                   forcelist=self.forcelist,
+                                   forcelist=linearized_sys.forcelist,
                                    frame=self.frame,
                                    label=label,
                                    ivar=self.ivar)

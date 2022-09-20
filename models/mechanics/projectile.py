@@ -16,7 +16,7 @@ import IPython as IP
 import numpy as np
 import inspect
 
-from .car import ComposedSystem
+from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
 
 class MissileTrajectoryAirless(ComposedSystem):
     

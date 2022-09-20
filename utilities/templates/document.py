@@ -1,4 +1,4 @@
-from pylatex import (Document, Package, Command, NewPage
+from pylatex import (Document, Package, Command, NewPage, Tabularx
                      #Section, Subsection, Subsubsection, Itemize,  HorizontalSpace, Description, Marker
                     )
 #from pylatex.section import Paragraph, Chapter
@@ -244,3 +244,118 @@ class SzymonTemplate(Document):
         #self.append(Command('maketitle'))
         self.append(NewPage())
         # tu implementować co tam potrzeba
+        
+class QuotationTemplate(Document):
+    packages = [
+                  Package('geometry',options=['left=1in','top=1in','right=1in','bottom=1in']),
+                  Package('inputenc',options=['utf8']),
+                  Package('hyperref',options=['colorlinks']),
+                  Package('graphicx'),
+                  Package('tabularx'),
+                  Package('multirow'),
+                  Package('ragged2e'),
+                  Package('hhline'),
+                  Package('array'),
+                  Package('booktabs'),
+                  Package('polski',options=['MeX']),]
+
+    def __init__(self,
+                 title='Wycena zlecenia',
+                 default_filepath='default_filepath',
+                 *,
+                 documentclass='report',
+                 document_options=None,
+                 fontenc='T1',
+                 inputenc='utf8',
+                 font_size='normalsize',
+                 lmodern=False,
+                 textcomp=True,
+                 microtype=True,
+                 page_numbers=True,
+                 indent=None,
+                 geometry_options=None,#['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
+                 data=None):
+
+        super().__init__(
+#             title=title,
+            default_filepath=default_filepath,
+            documentclass=documentclass,
+            document_options=document_options,
+            fontenc=fontenc,
+            inputenc=inputenc,
+            font_size=font_size,
+            lmodern=lmodern,
+            textcomp=textcomp,
+            microtype=microtype,
+            page_numbers=page_numbers,
+            indent=indent,
+            geometry_options=geometry_options,
+            data=data,
+        )
+#         label=self.label
+#         self.title=title
+        self.preamble.append(Command('hypersetup', 'urlcolor=blue'))
+        self.preamble.append(Command('newcolumntype', arguments='R',options='1',extra_arguments=NoEscape('>{\\raggedleft\\let\\newline\\\\\\arraybackslash\\hspace{0pt}}m{#1}')))
+#         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
+# #         self.append(Command('maketitle'))
+#         self.append(NewPage())
+        # tu implementować co tam potrzeba
+        
+class QuotationTemplate(Document):
+    packages = [
+                  Package('geometry',options=['left=1in','top=1in','right=1in','bottom=1in']),
+                  Package('inputenc',options=['utf8']),
+                  Package('hyperref',options=['colorlinks']),
+                  Package('graphicx'),
+                  Package('tabularx'),
+                  Package('multirow'),
+                  Package('ragged2e'),
+                  Package('hhline'),
+                  Package('array'),
+                  Package('booktabs'),
+                  Package('polski',options=['MeX']),]
+
+    def __init__(self,
+                 title='Wycena zlecenia',
+                 default_filepath='default_filepath',
+                 *,
+                 documentclass='report',
+                 document_options=None,
+                 fontenc='T1',
+                 inputenc='utf8',
+                 font_size='normalsize',
+                 lmodern=False,
+                 textcomp=True,
+                 microtype=True,
+                 page_numbers=True,
+                 indent=None,
+                 geometry_options=None,#['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
+                 data=None):
+
+        super().__init__(
+#             title=title,
+            default_filepath=default_filepath,
+            documentclass=documentclass,
+            document_options=document_options,
+            fontenc=fontenc,
+            inputenc=inputenc,
+            font_size=font_size,
+            lmodern=lmodern,
+            textcomp=textcomp,
+            microtype=microtype,
+            page_numbers=page_numbers,
+            indent=indent,
+            geometry_options=geometry_options,
+            data=data,
+        )
+#         label=self.label
+#         self.title=title
+        self.preamble.append(Command('hypersetup', 'urlcolor=blue'))
+        self.preamble.append(Command('newcolumntype', arguments='R',options='1',extra_arguments=NoEscape('>{\\raggedleft\\let\\newline\\\\\\arraybackslash\\hspace{0pt}}m{#1}')))
+#         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
+# #         self.append(Command('maketitle'))
+#         self.append(NewPage())
+        # tu implementować co tam potrzeba
+        
+class ScheduleTemplate(QuotationTemplate):
+    null=0

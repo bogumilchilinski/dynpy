@@ -17,7 +17,7 @@ import IPython as IP
 import numpy as np
 import inspect
 
-from .trolley import ComposedSystem, NonlinearComposedSystem
+from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
 
 #####
 
@@ -31,7 +31,7 @@ class EngineHousing(MaterialPoint):
     real_name = 'material_point.png'
 
     def get_default_data(self):
-        m0=Symbol('m0',positive=True)
+        m0=Symbol('m_0',positive=True)
         default_data_dict={
             self.m:[10 * m0 * no / 100 for no in range(10, 150)],
         }
@@ -77,8 +77,8 @@ class FreeEngine(ComposedSystem):
     e = Symbol('e', positive=True)  #Length of the crank - radius of the circular motion
     phi = dynamicsymbols('\\varphi')
     ivar = Symbol('t', positive=True)
-    m0 = Symbol('m0', positive=True)
-    m_e0 = Symbol('m_e0', positive=True)
+    m0 = Symbol('m_0', positive=True)
+
     e0 = Symbol('e_0', positive=True)
 
     def __init__(self,
@@ -314,7 +314,7 @@ class Engine(ComposedSystem):
     z = dynamicsymbols('z')  #generalized coordinate
     phi = dynamicsymbols('\\varphi')
     ivar = Symbol('t', positive=True)
-    m0 = Symbol('m0', positive=True)
+    m0 = Symbol('m_0', positive=True)
     k_m0 = Symbol('k_m0', positive=True)
     m_e0 = Symbol('m_e0', positive=True)
     e0 = Symbol('e_0', positive=True)
@@ -573,7 +573,7 @@ class DampedEngineVerticalSpringGravity(Engine):
 
         if phi is not None: self.phi = phi
         if z is not None: self.z = z
-        self.Omega = Omega
+        if Omega is not None: self.Omega = Omega
         self.t = ivar
         if M is not None: self.M = M
         if k_m is not None: self.k_m
