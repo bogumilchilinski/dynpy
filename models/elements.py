@@ -126,7 +126,16 @@ class Element(LagrangesDynamicSystem):
             comps = self._components
 
         self._components = {**comps, **self.components}
+
+    def _all_default_data(self):
+
+        
+        return self.get_default_data()
     
+    def _all_numerical_data(self):
+        
+        return self.get_numerical_data()
+        
     
     def get_default_data(self):
         return {}

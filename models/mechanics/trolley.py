@@ -141,31 +141,45 @@ class ComposedSystem(HarmonicOscillator):
 
     def _components_default_data(self):
         
-        data=[elem.get_default_data()   for elem in self.elements.values()]
+        data=[elem._all_default_data()   for elem in self.elements.values()]
 
         
         return {key:value for elem in data for key, value in elem.items()}    
     
     def _components_numerical_data(self):
         
-        data=[elem.get_numerical_data()   for elem in self.elements.values()]
+        data=[elem._all_numerical_data()   for elem in self.elements.values()]
         
         
         return {key:value for elem in data for key, value in elem.items()}    
     
+    def _all_default_data(self):
+        
+        
+
+        
+        return {**self._components_default_data(),**self.get_default_data()}    
+    
+    def _all_numerical_data(self):
+        
+        return {**self._components_numerical_data(),**self.get_numerical_data()}  
+    
     
     def get_default_data(self):
-        return self._components_default_data()
+        return {}
 
     def get_numerical_data(self):
-        return self._components_numerical_data()
+        return {}
 
+    
+    
+    
     def get_random_parameters(self):
 
         
-        print('preview for',self)
-        display(self._components_default_data())
-        display(self.get_default_data())
+        #print('preview for',self)
+        #display(self._all_default_data())
+        #display(self.get_default_data())
         
         default_data_dict = {**self._components_default_data(),**self.get_default_data()}
 
