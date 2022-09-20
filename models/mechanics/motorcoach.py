@@ -8,13 +8,12 @@ from sympy.physics.vector import vpprint, vlatex
 from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
 
 from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin
-from  ..continuous import ContinuousSystem, PlaneStressProblem
 from dynpy import * # enables mechanical models for mathematical modelling
 
 
 from sympy import * # provides mathematical interface for symbolic calculations
 
-from sympy.plotting import plot
+
 from sympy.physics.mechanics import *
 
 import sympy as sym
@@ -25,13 +24,10 @@ import matplotlib.pyplot as plt
 import math
 
 from dynpy.utilities.report import SystemDynamicsAnalyzer
-#import dynpy.reportcreator
-#from dynpy.reportcreator import *
 
 import pandas as pd
 
 from dynpy.utilities.adaptable import *
-from dynpy.models.elements import MaterialPoint, GravitationalForce, Spring, Damper,Force
 
 
 from pint import UnitRegistry
