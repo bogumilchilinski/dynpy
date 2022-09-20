@@ -8,366 +8,659 @@ from sympy.physics.vector import vpprint, vlatex
 from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
 
 from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin
-from  ..continuous import ContinuousSystem, PlaneStressProblem
+from dynpy import * # enables mechanical models for mathematical modelling
 
-import base64
-import random
-import IPython as IP
+
+from sympy import * # provides mathematical interface for symbolic calculations
+
+
+from sympy.physics.mechanics import *
+
+import sympy as sym
 import numpy as np
-import inspect
+import numpy.fft as fft
+
+import matplotlib.pyplot as plt
+import math
+
+from dynpy.utilities.report import SystemDynamicsAnalyzer
+
+import pandas as pd
+
+from dynpy.utilities.adaptable import *
+
+
+from pint import UnitRegistry
+ureg = UnitRegistry()
+
+ix = pd.IndexSlice
+
+
+
+mechanics_printing(pretty_print=True)
+
+t,f= symbols('t, f')
+
 
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
 
-class UndampedChairWith5DOF(ComposedSystem):
+class DampedChair4DOF(ComposedSystem):
 
-    scheme_name = 'damped_car_new.PNG'
+    scheme_name = 'car.PNG'
     real_name = 'car_real.jpg'
     
+    z,phi,z_pw,z_lw=dynamicsymbols('z, \\varphi z_pw z_lw')
     m=Symbol('m', positive=True)
+    m_b=Symbol('m_b', positive=True)
+    m_k=Symbol('m_k', positive=True)
+    m_p=Symbol('m_p', positive=True)
+    m_l=Symbol('m_l', positive=True)
     I=Symbol('I', positive=True)
     l_rod=Symbol('l_{rod}', positive=True)
     l_l=Symbol('l_l', positive=True)
-    l_r=Symbol('l_r', positive=True)
-                
-    r=Symbol('k_r', positive=True)
-                
-    k_l=Symbol('k_l', positive=True)
-    k_r=Symbol('k_l', positive=True)
-                
+    l_k=Symbol('l_k', positive=True)
+    l_p=Symbol('l_p', positive=True)
+    l_b=Symbol('l_b', positive=True)
+    k_l=Symbol('k_l1', positive=True)
+    k_lw=Symbol('k_lw', positive=True)
+    k_p=Symbol('k_p1', positive=True)
+    k_pw=Symbol('k_pw', positive=True)
+    c_l=Symbol('c_l', positive=True)
+    c_p=Symbol('c_p', positive=True)
+    c_lw=Symbol('c_lw', positive=True)
+    c_pw=Symbol('c_pw', positive=True)
     F_engine=Symbol('F_{engine}', positive=True)
-    Omega=Symbol('Omega',positive=True)
-    ivar=Symbol('t', positive=True)
-
-    l_l=Symbol('l_{l}', positive=True)
+    k_p=Symbol('k_p', positive=True)
+    k_l=Symbol('k_l', positive=True)
+    A=Symbol('A', positive=True)
+    omega=Symbol('omega', positive=True)
+    z_l=Symbol('z_l', positive=True)
+    z_p=Symbol('z_p',positive=True)
+    z_b=Symbol('z_b',positive=True)
+    s=Symbol('s', positive=True)
+    ivar=Symbol('t')
+    f=Symbol('f', positive=True)
     
-          
-    #qs=dynamicsymbols('z, \\varphi')
-    phi=dynamicsymbols(' \\varphi')
-    z=dynamicsymbols('z')
-
-
+    
     def __init__(self,
                  m=None,
+                 m_k=None,
+                 m_p=None,
+                 m_l=None,
+                 m_b=None,
                  I=None,
                  l_rod=None,
-                 l_r=None,
-                 k_r=None,
-                 k_l=None,
-                 F_engine=None,
                  l_l=None,
-                 phi=None,
-                 z=None,
+                 l_p=None,
+                 l_b=None,
+                 l_k=None,
+                 k_l=None,
+                 k_lw=None,
+                 k_p=None,
+                 k_pw=None,
+                 c_l=None,
+                 c_p=None,
+                 c_lw=None,
+                 c_pw=None,
+                 f=None,
+                 F_engine=None,
                  ivar=Symbol('t'),
-                 qs=None,
+                 z=None,
+                 s=None,
+                 phi=None,
+                 z_pw=None,
+                 z_lw=None,
+                 A=None,
+                 omega=None,
+                 z_l=None,
+                 z_p=None,
+                 z_b=None,
+                
+            
+                 **kwargs):
+        
+        if z is not None: self.z=z
+        if z_lw is not None: self.z_lw=z_lw
+        if z_pw is not None: self.z_pw=z_pw
+        if z_l is not None: self.z_lw=z_lw
+        if z_p is not None: self.z_pw=z_pw
+        if z_b is not None: self.z_b=z_b
+        if phi is not None: self.phi=phi
+
+        if m is not None: self.m = m  # mass of a rod
+        if m_p is not None: self.m_p = m_p
+        if m_l is not None: self.m_l = m_l
+        if m_b is not None: self.m_b = m_b
+        if m_k is not None: self.m_k = m_k
+        if l_l is not None: self.l_l = l_l  # offset of left spring
+        if l_p is not None: self.l_p = l_p #offset of right spring
+        if l_b is not None: self.l_b = l_b  
+        if l_k is not None: self.l_k = l_k  
+        if l_rod is not None: self.l_rod = l_rod
+        if k_l is not None: self.k_l1 = k_l1
+        if k_lw is not None: self.k_lw = k_lw
+        if k_p is not None: self.k_p1 = k_p1
+        if k_pw is not None: self.k_pw = k_pw
+        if c_l is not None: self.c_l=c_l
+        if c_p is not None: self.c_p=c_p
+        if c_lw is not None: self.c_lw=c_lw
+        if c_pw is not None: self.c_pw=c_pw
+        if A is not None: self.A=A
+        if f is not None: self.f=f
+        if omega is not None: self.omega=omega
+        if I is not None: self.I = I  # moment of inertia of a rod
+        if F_engine is not None: self.F_engine = F_engine
+        
+        
+        self.s=self.A*sin(ivar*self.omega)
+        
+       
+        
+        self.right_wheel = MaterialPoint(self.m_p, pos1=self.z_pw, qs=[self.z_pw])
+        self.left_wheel = MaterialPoint(self.m_l, pos1=self.z_lw, qs=[self.z_lw])
+        self.spring_pw = Spring(self.k_pw, pos1=self.z_pw, pos2=self.s, qs=[self.z_pw])
+        self.spring_lw = Spring(self.k_lw, pos1=self.z_lw, pos2=self.s, qs=[self.z_lw])
+        self.damper_pw = Damper(self.c_pw, pos1=self.z_pw, pos2=self.s, qs=[self.z_pw])
+        self.damper_lw = Damper(self.c_lw, pos1=self.z_lw, pos2=self.s, qs=[self.z_lw])
+        
+   
+        
+        self.body = RigidBody2D(self.m, self.I, pos_lin=self.z, pos_rot=self.phi, qs=[self.z, self.phi])  # rod
+        self.battery= MaterialPoint(self.m_b, pos1=self.z-self.phi*self.l_b, qs=[self.z, self.phi])
+#         self.pasazer= MaterialPoint(self.m_k, pos1=self.z+self.phi*self.l_k, qs=[self.z, self.phi])
+        self.spring_1 = Spring(self.k_l, pos1=self.z+self.phi*self.l_l , pos2 = self.z_lw , qs=[self.z, self.phi, self.z_lw])  # left spring
+        self.spring_2 = Spring(self.k_p, pos1=self.z-self.phi*self.l_p , pos2 = self.z_pw , qs=[self.z, self.phi, self.z_pw])
+        self.damper_1= Damper(self.c_l, pos1=self.z+self.phi*self.l_l , pos2 = self.z_lw , qs=[self.z, self.phi, self.z_lw])
+        self.damper_2 = Damper(self.c_p, pos1=self.z-self.phi*self.l_p , pos2 = self.z_pw , qs=[self.z, self.phi, self.z_pw])
+        #self.force_1 = Force(self.A*sin(ivar*self.omega), pos1=self.z_lw , qs=[self.z_lw])
+        #self.force_2 = Force(self.A*sin(ivar*self.omega), pos1=self.z_pw, qs=[self.z_pw])
+        
+        #self.force = Force(-self.F_engine, pos1=self.z - self.l_p * self.phi, qs=[self.z, self.phi])
+        system = self.body +self.battery+self.spring_1 + self.spring_2 +self.damper_1+self.damper_2 + self.right_wheel + self.left_wheel + self.spring_pw+ self.spring_lw+self.damper_lw+self.damper_pw
+
+        super().__init__(**{'system':system,**kwargs})
+        
+
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Masa resorowana',
+            self.m_p: r'Masa przedniej osi',
+            self.m_l: r'Masa tylnej osi',
+            self.m_b: r'Masa baterii trakcyjnej',
+            self.m_b: r'Masa pasazera',
+            self.I: r'Moment bezwładności',
+            self.l_rod: r'Długość osi',
+            self.l_p: r'Odległość przedniej osi do środka ciężkości autobusu',
+            self.l_l: r'Odległość tylnej osi do środka ciężkości autobusu',
+            self.l_b: r'Odległość środka cieżkości baterii do środka ciężkości autobusu',
+            self.k_p: r'Współczynnik sztywności dla sprężyny przedniej nadwozia',
+            self.k_l: r'Współczynnik sztywności dla sprężyny tylnej nadwozia',
+            self.k_pw: r'Współczynnik sztywności dla przedniej opony',
+            self.k_lw:  r'Współczynnik sztywności dla tylnej opony',
+            self.c_l:  r'Współczynnik tłumienia dla amortzatora przedniego n',
+            self.c_l: r'Współczynnik tłumienia dla amortzatora tylnego',
+            self.c_lw:  r'Współczynnik tłumienia dla tylnej opony',
+            self.c_pw:  r'Współczynnik tłumienia dla przedniej opony',
+            self.phi:  r'Kąt obrotu masy resorowanej',
+            self.z: r'Przemieszczenie pionowe środka cieżkości masy resorowanej',
+            self.z_pw:  r'Przemieszczenie pionowe przedniego koła',
+            self.z_lw: r'Przemieszczenie pionowe tylnego koła',
+            self.z_b: r'Przemieszczenie pionowe baterii',
+            self.A: r'Amplituda siły wymuszającej',
+            self.omega: r'Częstość siły wymuszającej',
+            self.ivar: r'Czas',
+            self.f: r'Częstotliwość wymuszenia',
+            
+            
+        }
+        return self.sym_desc_dict
+    
+sys4=DampedChair4DOF()
+y=[sys4.q,sys4.z, sys4.z.diff(t,t)]
+ic_list = [0.1,0.1,0,0,0.1,0.1,0,0]
+
+
+units_dict = {sys4.m:ureg.kilogram,
+              sys4.m_p:ureg.kilogram,
+              sys4.m_l:ureg.kilogram,
+              sys4.m_b:ureg.kilogram,
+              sys4.m_k:ureg.kilogram,
+              sys4.A:ureg.meter,
+              sys4.k_l:(ureg.newton / ureg.meter),
+              sys4.k_lw:(ureg.newton / ureg.meter),
+              sys4.k_p:(ureg.newton / ureg.meter),
+              sys4.k_pw:(ureg.newton / ureg.meter),
+              sys4.c_l:(ureg.newton*ureg.second / ureg.meter),
+              sys4.c_lw:(ureg.newton*ureg.second / ureg.meter),
+              sys4.c_p:(ureg.newton*ureg.second / ureg.meter),
+              sys4.c_pw:(ureg.newton*ureg.second / ureg.meter),
+              sys4.omega:ureg.radian,
+              sys4.l_l:ureg.meter,
+              sys4.l_p:ureg.meter,
+              sys4.l_b:ureg.meter,
+              sys4.l_rod:ureg.meter,
+              sys4.I:(ureg.kilogram*ureg.meter*ureg.meter),
+              sys4.phi:ureg.radian,
+              sys4.z:ureg.meter,
+              sys4.z.diff(t,t):ureg.meter/ureg.second**2,
+              sys4.z_lw:ureg.meter,
+              sys4.z_pw:ureg.meter,
+              sys4.z_b:ureg.meter,
+              t:ureg.second,
+              f:ureg.hertz,
+              
+             }
+
+unit=units_dict
+        
+class DampedChairDDOF(ComposedSystem):
+
+   
+    
+    z,phi,z_pw,z_lw=dynamicsymbols('z, \\varphi z_pw z_lw')
+    m=Symbol('m', positive=True)
+    m_b=Symbol('m_b', positive=True)
+    m_p=Symbol('m_p', positive=True)
+    m_l=Symbol('m_l', positive=True)
+    I=Symbol('I', positive=True)
+    l_rod=Symbol('l_{rod}', positive=True)
+    l_l=Symbol('l_l', positive=True)
+    l_p=Symbol('l_p', positive=True)
+    l_b=Symbol('l_b', positive=True)
+    k_l=Symbol('k_l1', positive=True)
+    k_lw=Symbol('k_lw', positive=True)
+    k_p=Symbol('k_p1', positive=True)
+    k_pw=Symbol('k_pw', positive=True)
+    c_l=Symbol('c_l', positive=True)
+    c_p=Symbol('c_p', positive=True)
+    c_lw=Symbol('c_lw', positive=True)
+    c_pw=Symbol('c_pw', positive=True)
+    F_engine=Symbol('F_{engine}', positive=True)
+    k_p=Symbol('k_p', positive=True)
+    k_l=Symbol('k_l', positive=True)
+    A=Symbol('A', positive=True)
+    omega=Symbol('omega', positive=True)
+    z_l=Symbol('z_l', positive=True)
+    z_p=Symbol('z_p',positive=True)
+    z_b=Symbol('z_b',positive=True)
+    s=Symbol('s', positive=True)
+    ivar=Symbol('t')
+    
+    def __init__(self,
+                  m=None,
+                 m_p=None,
+                 m_l=None,
+                 m_b=None,
+                 I=None,
+                 l_rod=None,
+                 l_l=None,
+                 l_p=None,
+                 l_b=None,
+                 k_l=None,
+                 k_lw=None,
+                 k_p=None,
+                 k_pw=None,
+                 c_l=None,
+                 c_p=None,
+                 c_lw=None,
+                 c_pw=None,
+                 F_engine=None,
+                 ivar=Symbol('t'),
+                 z=None,
+                 s=None,
+                 phi=None,
+                 z_pw=None,
+                 z_lw=None,
+                 A=None,
+                 omega=None,
+                 z_l=None,
+                 z_p=None,
+                 z_b=None,
+                 **kwargs):
+        
+        if z is not None: self.z=z
+        if phi is not None: self.phi=phi
+        
+
+        if m is not None: self.m = m  # mass of a rod
+        if m_p is not None: self.m_w = m_w
+        if m_l is not None: self.m_w = m_w
+        if m_b is not None: self.m_b = m_b
+        if l_l is not None: self.l_l = l_l  # offset of left spring
+        if l_p is not None: self.l_p = l_p #offset of right spring
+        if l_b is not None: self.l_p = l_b  
+        if l_rod is not None: self.l_rod = l_rod
+        if k_l is not None: self.k_l1 = k_l1
+        if k_lw is not None: self.k_lw = k_lw
+        if k_p is not None: self.k_p1 = k_p1
+        if k_pw is not None: self.k_pw = k_pw
+        if c_l is not None: self.c_l=c_l
+        if c_p is not None: self.c_p=c_p
+        if c_lw is not None: self.c_lw=c_lw
+        if c_pw is not None: self.c_pw=c_pw
+        if A is not None: self.A=A
+        if omega is not None: self.omega=omega
+        if I is not None: self.I = I  # moment of inertia of a rod
+        if F_engine is not None: self.F_engine = F_engine
+            
+        self.s=self.A*sin(ivar*self.omega)
+        
+        self.z_l=self.z+self.phi*self.l_l
+        self.z_p=self.z-self.phi*self.l_p
+        self.z_lw=(self.k_l*self.z_l)/(self.k_lw+self.k_l)
+        self.z_pw=(self.k_p*self.z_p)/(self.k_pw+self.k_p)
+        
+        
+        self.right_wheel = MaterialPoint(self.m_p, pos1=self.z_pw, qs=[self.z, self.phi])
+        self.left_wheel = MaterialPoint(self.m_l, pos1=self.z_lw, qs=[self.z, self.phi])
+        self.spring_pw = Spring(self.k_pw, pos1=self.z_pw, pos2=self.s, qs=[self.z, self.phi])
+        self.spring_lw = Spring(self.k_lw, pos1=self.z_lw, pos2=self.s, qs=[self.z, self.phi])
+        self.damper_pw = Damper(self.c_pw, pos1=self.z_pw, pos2=self.s, qs=[self.z, self.phi])
+        self.damper_lw = Damper(self.c_lw, pos1=self.z_lw, pos2=self.s, qs=[self.z, self.phi])
+        #self.spring=Spring(k,pos1,po2,qs)
+        
+        self.body = RigidBody2D(self.m, self.I, pos_lin=self.z, pos_rot=self.phi, qs=[self.z, self.phi])  # rod
+        self.battery= MaterialPoint(self.m_b, pos1=self.z+self.phi*self.l_b, qs=[self.z, self.phi])
+        self.spring_1 = Spring(self.k_l, pos1=self.z_l , pos2 = self.z_lw , qs=[self.z, self.phi])  # left spring
+        self.spring_2 = Spring(self.k_p, pos1=self.z_p, pos2=self.z_pw, qs=[self.z, self.phi])
+        self.damper_1=Damper(self.c_l, pos1=self.z_p , pos2 = self.z_lw , qs=[self.z, self.phi])
+        self.damper_2 = Damper(self.c_p, pos1=self.z_l , pos2 = self.z_pw , qs=[self.z, self.phi])
+
+        #self.force = Force(-self.F_engine, pos1=self.z - self.l_p * self.phi, qs=[self.z, self.phi])
+        system = self.body +self.battery+ self.spring_1 + self.spring_2 + self.damper_1+ self.damper_2 + self.right_wheel + self.left_wheel + self.spring_pw + self.spring_lw+self.damper_lw+self.damper_pw
+        
+#         display(type(system))
+        
+#         system_new = system.subs({self.z_lw:self.z_l2,self.z_pw:self.z_p2}) 
+        
+#         display(type(system_new))
+#         display(type(self.body))
+        
+        #super().__init__(system_new,**kwargs)
+
+        super().__init__(**{'system':system,**kwargs})
+        
+
+
+        
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Masa resorowana',
+            self.m_p: r'Masa przedniej osi',
+            self.m_l: r'Masa tylnej osi',
+            self.m_b: r'Masa baterii trakcyjnej',
+            self.I: r'Moment bezwładności',
+            self.l_rod: r'Długość osi',
+            self.l_p: r'Odległość od przedniej osi do środka ciężkości autobusu',
+            self.l_l: r'Odległość od tylnej osi do środka ciężkości autobusu',
+            self.l_b: r'Odległość od środka cieżkości baterii do środka ciężkości autobusu',
+            self.k_p: r'Współczynnik sztywności dla sprężyny przedniej nadwozia',
+            self.k_l: r'Współczynnik sztywności dla sprężyny tylnej nadwozia',
+            self.k_pw: r'Współczynnik sztywności dla przedniej opony',
+            self.k_lw:  r'Współczynnik sztywności dla tylnej opony',
+            self.c_l:  r'Współczynnik tłumienia dla amortzatora przedniego n',
+            self.c_l: r'Współczynnik tłumienia dla amortzatora tylnego',
+            self.c_lw:  r'Współczynnik tłumienia dla tylnej opony',
+            self.c_pw:  r'Współczynnik tłumienia dla przedniej opony',
+            self.phi:  r'Kąt obrotu masy resorowanej',
+            self.z: r'Przemieszczenie pionowe środka cieżkości masy resorowanej',
+            self.z_pw:  r'Przemieszczenie pionowe przedniego koła',
+            self.z_lw: r'Przemieszczenie pionowe tylnego koła',
+            self.z_b: r'Przemieszczenie pionowe baterii',
+            self.A: r'Amplituda siły wymuszającej',
+            self.omega: r'Częstość siły wymuszającej',
+            self.ivar: r'Czas',
+            
+        }
+        return self.sym_desc_dict
+    
+sys2=DampedChairDDOF()
+
+
+
+units_dict1 = {sys2.m:ureg.kilogram,
+              sys2.m_p:ureg.kilogram,
+              sys2.m_l:ureg.kilogram,
+              sys2.m_b:ureg.kilogram,
+              sys2.A:ureg.meter,
+              sys2.k_l:(ureg.newton / ureg.meter),
+              sys2.k_lw:(ureg.newton / ureg.meter),
+              sys2.k_p:(ureg.newton / ureg.meter),
+              sys2.k_pw:(ureg.newton / ureg.meter),
+              sys2.c_l:(ureg.newton*ureg.second / ureg.meter),
+              sys2.c_lw:(ureg.newton*ureg.second / ureg.meter),
+              sys2.c_p:(ureg.newton*ureg.second / ureg.meter),
+              sys2.c_pw:(ureg.newton*ureg.second / ureg.meter),
+              sys2.omega:ureg.radian,
+              sys2.l_l:ureg.meter,
+              sys2.l_p:ureg.meter,
+              sys2.l_b:ureg.meter,
+              sys2.l_rod:ureg.meter,
+              sys2.I:(ureg.kilogram*ureg.meter*ureg.meter),
+              sys2.phi:ureg.radian,
+              sys2.z:ureg.meter,
+              sys2.z.diff(t,t):ureg.meter/ureg.second**2,
+              sys2.z_lw:ureg.meter,
+              sys2.z_pw:ureg.meter,
+              sys2.z_b:ureg.meter,
+              t:ureg.second,
+              f:ureg.hertz,
+             }
+
+unit1=units_dict1
+        
+class DampedChairSimplifiedDDOF2(ComposedSystem):
+
+   
+    
+    z,phi,z_pw,z_lw=dynamicsymbols('z, \\varphi z_pw z_lw')
+    m=Symbol('m', positive=True)
+    m_b=Symbol('m_b', positive=True)
+    m_p=Symbol('m_p', positive=True)
+    m_l=Symbol('m_l', positive=True)
+    I=Symbol('I', positive=True)
+    l_rod=Symbol('l_{rod}', positive=True)
+    l_l=Symbol('l_l', positive=True)
+    l_p=Symbol('l_p', positive=True)
+    l_b=Symbol('l_b', positive=True)
+    k_l=Symbol('k_l1', positive=True)
+    k_lw=Symbol('k_lw', positive=True)
+    k_p=Symbol('k_p1', positive=True)
+    k_pw=Symbol('k_pw', positive=True)
+    c_l=Symbol('c_l', positive=True)
+    c_p=Symbol('c_p', positive=True)
+    c_lw=Symbol('c_lw', positive=True)
+    c_pw=Symbol('c_pw', positive=True)
+    F_engine=Symbol('F_{engine}', positive=True)
+    k_p=Symbol('k_p', positive=True)
+    k_l=Symbol('k_l', positive=True)
+    A=Symbol('A', positive=True)
+    omega=Symbol('omega', positive=True)
+    z_l=Symbol('z_l', positive=True)
+    z_p=Symbol('z_p',positive=True)
+    z_b=Symbol('z_b',positive=True)
+    s=Symbol('s', positive=True)
+    k_l_zas=Symbol('k_l_zas', positive=True)
+    k_p_zas=Symbol('k_p_zas', positive=True)
+    c_l_zas=Symbol('c_l_zas', positive=True)
+    c_p_zas=Symbol('c_lp_zas', positive=True)
+    ivar=Symbol('t')
+    
+    def __init__(self,
+                 m=None,
+                 m_p=None,
+                 m_l=None,
+                 m_b=None,
+                 I=None,
+                 l_rod=None,
+                 l_l=None,
+                 l_p=None,
+                 l_b=None,
+                 k_l=None,
+                 k_lw=None,
+                 k_p=None,
+                 k_pw=None,
+                 c_l=None,
+                 c_p=None,
+                 c_lw=None,
+                 c_pw=None,
+                 F_engine=None,
+                 ivar=Symbol('t'),
+                 z=None,
+                 phi=None,
+                 z_pw=None,
+                 z_lw=None,
+                 A=None,
+                 omega=None,
+                 z_l=None,
+                 z_p=None,
+                 z_b=None,
+                 s=None,
+                 k_l_zas=None,
+                 k_p_zas=None,
+                 c_l_zas=None,
+                 c_p_zas=None,
                  
                  **kwargs):
-  
-        if  m is not None: self.m =m # mass of a rod
-        if  I is not None: self.I = I # moment of inertia of a rod
-        if  l_rod is not None: self.l_rod =l_rod# length of a rod
-        if  l_r is not None: self.l_r = l_r 
-        if  l_l is not None: self.l_l = l_l 
-        if  k_r is not None: self.k_r =k_r# left spring
-        if  k_l is not None: self.k_l = k_l# right spring
-        if  F_engine is not None: self.F_engine = F_engine
-        if  phi is not None: self.phi = phi
-        if z is not None: self.z=z    
-          
-            # self.z, self.phi = self.qs
-        self.qs = [self.phi,self.z]
+        if z is not None: self.z=z
+        if z_lw is not None: self.z_lw=z_lw
+        if z_pw is not None: self.z_pw=z_pw
+        if z_l is not None: self.z_lw=z_lw
+        if z_p is not None: self.z_pw=z_pw
+        if z_b is not None: self.z_b=z_b
+        if phi is not None: self.phi=phi
 
-        self._init_from_components(**kwargs)
-
-
-    @property
-    def components(self):
-
-        components = {}
-
-        self._body = RigidBody2D(self.m, self.I, pos_lin=self.z, pos_rot=self.phi, qs=self.qs)(label='rod')
-        self._spring_l = Spring(self.k_l, pos1=self.z + self.phi * self.l_l, qs=self.qs)(label='left spring')
-        self._spring_r = Spring(self.k_r, pos1=self.z - self.phi * self.l_r, qs=self.qs)(label='right spring')
-        self._force = Force(self.F_engine, pos1=self.z - self.l_r * self.phi, qs=self.qs)(label='force')
-
-
-        components['_body'] = self._body
-        components['_spring_l'] = self._spring_l
-        components['_spring_r'] = self._spring_r
-        components['_force'] = self._force
+        if m is not None: self.m = m  # mass of a rod
+        if m_p is not None: self.m_w = m_w
+        if m_l is not None: self.m_w = m_w
+        if m_b is not None: self.m_b = m_b
+        if l_l is not None: self.l_l = l_l  # offset of left spring
+        if l_p is not None: self.l_p = l_p #offset of right spring
+        if l_b is not None: self.l_p = l_b  
+        if l_rod is not None: self.l_rod = l_rod
+        if k_l is not None: self.k_l1 = k_l1
+        if k_lw is not None: self.k_lw = k_lw
+        if k_p is not None: self.k_p1 = k_p1
+        if k_pw is not None: self.k_pw = k_pw
+        if c_l is not None: self.c_l=c_l
+        if c_p is not None: self.c_p=c_p
+        if c_lw is not None: self.c_lw=c_lw
+        if c_pw is not None: self.c_pw=c_pw
+        if A is not None: self.A=A
+        if omega is not None: self.omega=omega
+        if I is not None: self.I = I  # moment of inertia of a rod
+        if F_engine is not None: self.F_engine = F_engine
         
+                 
+        self.s=self.A*sin(ivar*self.omega)
         
+        self.k_l_zas=(self.k_l*self.k_lw)/(self.k_l+self.k_lw)
+        self.k_p_zas=(self.k_p*self.k_pw)/(self.k_p+self.k_pw)
+        self.c_l_zas=(self.c_l*self.c_lw)/(self.c_l+self.c_lw)
+        self.c_p_zas=(self.c_p*self.c_pw)/(self.c_p+self.c_pw)
         
-        return components
+        self.z_l=self.z+self.phi*self.l_l
+        self.z_p=self.z-self.phi*self.l_p
+        self.z_lw=(self.k_l*self.z_l)/(self.k_lw+self.k_l)
+        self.z_pw=(self.k_p*self.z_p)/(self.k_pw+self.k_p)
+        
+        #self.right_wheel = MaterialPoint(self.m_w, pos1=self.z_pw, qs=[self.z, self.phi])
+        #self.left_wheel = MaterialPoint(self.m_w, pos1=self.z_lw, qs=[self.z, self.phi])
+        #self.spring_pw = Spring(self.k_pw, pos1=self.z_pw, pos2=self.s, qs=[self.z, self.phi])
+        #self.spring_lw = Spring(self.k_lw, pos1=self.z_lw, pos2=self.s, qs=[self.z, self.phi])
+        #self.spring=Spring(k,pos1,po2,qs)
+        
+        self.body = RigidBody2D(self.m, self.I, pos_lin=self.z, pos_rot=self.phi, qs=[self.z, self.phi])  # rod
+        self.battery= MaterialPoint(self.m_b, pos1=self.z+self.phi*self.l_b, qs=[self.z, self.phi])
+        self.spring_1 = Spring(self.k_l_zas, pos1=self.z_l , pos2 = self.s , qs=[self.z, self.phi])  # left spring
+        self.spring_2 = Spring(self.k_p_zas, pos1=self.z_p, pos2=self.s, qs=[self.z, self.phi])
+        self.damper_1=Damper(self.c_l_zas, pos1=self.z_p , pos2 = self.s, qs=[self.z, self.phi])
+        self.damper_2 = Damper(self.c_p_zas, pos1=self.z_l , pos2 = self.s , qs=[self.z, self.phi])
 
+        #self.force = Force(-self.F_engine, pos1=self.z - self.l_p * self.phi, qs=[self.z, self.phi])
+        system = self.body +self.battery+ self.spring_1 + self.spring_2 + self.damper_1+ self.damper_2 
         
-#    def max_dynamic_force_pin(self):
-#        return self.frequency_response_function()*self.stiffness_matrix()[0]
-    
-#    def dynamic_bearing_force(self):
-       
-#       return self.max_dynamic_force_pin() * self.sqrt(L)
-    
-    def max_dynamic_force_pin(self):
-        return self.frequency_response_function()*self.stiffness_matrix()[0]
-            
-    def dynamic_bearing_force(self):
-        L=Symbol('L')
-        return self.max_dynamic_force_pin() * self.sqrt(L)
-    
+#         display(type(system))
+        
+#         system_new = system.subs({self.z_lw:self.z_l2,self.z_pw:self.z_p2}) 
+        
+#         display(type(system_new))
+#         display(type(self.body))
+        
+        #super().__init__(system_new,**kwargs)
+
+        super().__init__(**{'system':system,**kwargs})        
+
     def symbols_description(self):
         self.sym_desc_dict = {
-            self.m: r'Mass',
-            self.I: r'',
-            self.l_rod: r'',
-            self.l_r: r'',
-            self.k_r: r'',
-            self.F_engine: r'',
-            self.k_l: r'',
-            self.l_cl: r'',
-            self.l_l: r'',
-            self.phi: r'',
-            self.Z: r'',
-            self.ivar: r'',
-            self.qs: r'',
+            self.m: r'Masa resorowana',
+            self.m_p: r'Masa przedniej osi',
+            self.m_l: r'Masa tylnej osi',
+            self.m_b: r'Masa baterii trakcyjnej',
+            self.I: r'Moment bezwładności',
+            self.l_rod: r'Długość osi',
+            self.l_p: r'Odległość od przedniej osi do środka ciężkości autobusu',
+            self.l_l: r'Odległość od tylnej osi do środka ciężkości autobusu',
+            self.l_b: r'Odległość od środka cieżkości baterii do środka ciężkości autobusu',
+            self.k_p: r'Współczynnik sztywności dla sprężyny przedniej nadwozia',
+            self.k_l: r'Współczynnik sztywności dla sprężyny tylnej nadwozia',
+            self.k_pw: r'Współczynnik sztywności dla przedniej opony',
+            self.k_lw:  r'Współczynnik sztywności dla tylnej opony',
+            self.c_l:  r'Współczynnik tłumienia dla amortzatora przedniego n',
+            self.c_l: r'Współczynnik tłumienia dla amortzatora tylnego',
+            self.c_lw:  r'Współczynnik tłumienia dla tylnej opony',
+            self.c_pw:  r'Współczynnik tłumienia dla przedniej opony',
+            self.phi:  r'Kąt obrotu masy resorowanej',
+            self.z: r'Przemieszczenie pionowe środka cieżkości masy resorowanej',
+            self.z_pw:  r'Przemieszczenie pionowe przedniego koła',
+            self.z_lw: r'Przemieszczenie pionowe tylnego koła',
+            self.z_b: r'Przemieszczenie pionowe baterii',
+            self.A: r'Amplituda siły wymuszającej',
+            self.omega: r'Częstość siły wymuszającej',
+            self.ivar: r'Czas',
+            self.k_l_zas: r'Zastępcza wartość współczynnika sztywności zawieszenia tylnej osi',
+            self.k_p_zas: r'Zastępcza wartość współczynnika sztywności zawieszenia przedniej osi',
+            self.c_l_zas: r'Zastępcza wartość współczynnika tłumienia zawieszenia tylnej osi',
+            self.c_p_zas: r'Zastępcza wartość współczynnika tłumienia zawieszenia przedniej osi',
         }
-    
-    def get_default_data(self):
+        return self.sym_desc_dict
+                 
+sys22=DampedChairSimplifiedDDOF2()      
+                 
+units_dict2 = {sys22.m:ureg.kilogram,
+              sys22.m_p:ureg.kilogram,
+              sys22.m_l:ureg.kilogram,
+              sys22.m_b:ureg.kilogram,
+              sys22.A:ureg.meter,
+              sys22.k_l:(ureg.newton / ureg.meter),
+              sys22.k_lw:(ureg.newton / ureg.meter),
+              sys22.k_p:(ureg.newton / ureg.meter),
+              sys22.k_pw:(ureg.newton / ureg.meter),
+              sys22.c_l:(ureg.newton*ureg.second / ureg.meter),
+              sys22.c_lw:(ureg.newton*ureg.second / ureg.meter),
+              sys22.c_p:(ureg.newton*ureg.second / ureg.meter),
+              sys22.c_pw:(ureg.newton*ureg.second / ureg.meter),
+              sys22.omega:ureg.radian,
+              sys22.l_l:ureg.meter,
+              sys22.l_p:ureg.meter,
+              sys22.l_b:ureg.meter,
+              sys22.l_rod:ureg.meter,
+              sys22.I:(ureg.kilogram*ureg.meter*ureg.meter),
+              sys22.phi:ureg.radian,
+              sys22.z:ureg.meter,
+              sys22.z.diff(t,t):ureg.meter/ureg.second**2,
+              sys22.z_lw:ureg.meter,
+              sys22.z_pw:ureg.meter,
+              sys22.z_b:ureg.meter,
+              t:ureg.second,
+              f:ureg.hertz,
+              sys22.k_p_zas:(ureg.newton / ureg.meter),
+              sys22.k_l_zas:(ureg.newton / ureg.meter),
+              sys22.c_l_zas:(ureg.newton*ureg.second / ureg.meter),
+              sys22.c_p_zas:(ureg.newton*ureg.second / ureg.meter),
+             }
 
-        #m0, l0, k_0, l_l0, omega, F_0 = symbols('m_0 l_0  k_0 l_l0 Omega F_0', positive=True)
-        k_0, Omega0, l_l0, F_0 = symbols(' k_0 Omega0 l_l0 F_0', positive=True)
-        m0, l0  = self.m0,self.l0
-        k0= self.k0
-        lam0=self.lam0
-        Omega0=self.Omega0
-        F0=self.F0
-#numerical_data
-#moduł tmd w nowym module to co z Madim
-        default_data_dict = {
-            self.l_rod:[l0*S.One/100*no for no in range(70, 120)],# do poprawy /100
-            self.I: [S.One/12*self.m *self.l_rod],
-            self.l_rod:[l0*S.One*no for no in range(1, 8)],
-            #self.m: [m0,2*m0,3*m0,4*m0,5*m0,6*m0,7*m0,8*m0,9*m0],
-            self.m: [m0*S.One*no for no in range(1,8)],
-            #self.k: [k0*S.One*no for no in range(1,8)],
-            self.lam: [lam0/10*S.One*no for no in range(1,8)],
-            self.k_l: [k0*S.One*no for no in range(1,8)],
-            self.k_r: [k0*S.One*no for no in range(1,8)],
-
-            self.l_r: [l0*S.One*no for no in range(1, 8)],
-            self.l_l: [l0*S.One*no for no in range(1, 8)],
-           
-            self.Omega: [Omega0*S.One*no for no in range(1,2)],
-            self.F_engine: [F0*sin(self.Omega*self.ivar)*S.One*no for no in range(1,8)],
-            
-          #  self.F_engine: [
-           #     2 * F_0 * sin(omega * self.ivar),
-            #    3 * F_0 * sin(omega * self.ivar),
-             #   4 * F_0 * sin(omega * self.ivar),
-              #  5 * F_0 * sin(omega * self.ivar),
-                #6 * F_0 * sin(omega * self.ivar)
-          #  ]
-        }
-
-        return default_data_dict
-    
-    
-class DampedChairWith5DOF(UndampedChairWith5DOF):
-
-    scheme_name = 'damped_car_new.PNG'
-    real_name = 'car_real.jpg'
-
-    c_l=Symbol('c_l', positive=True)
-    c_r=Symbol('c_r', positive=True)
-                
-    l_cl=Symbol('l_{cl}', positive=True)
-    l_cr=Symbol('l_{cr}', positive=True)
-    lam=Symbol('lambda',positive=True)
-    phi=dynamicsymbols('\\varphi')
-    z=dynamicsymbols('z')
-
-
-    def __init__(self,
-                 m=None,
-                 I=None,
-                 l_rod=None,
-                 l_r=None,
-                 k_r=None,
-                 k_l=None,
-                 F_engine=None,
-                 c_l=None,
-                 c_r=None,
-                 l_cl=None,
-                 l_l=None,
-                 l_cr=None,
-                 phi=None,
-                 z=None,
-                 ivar=Symbol('t'),
-                 qs=None,
-                 **kwargs):
-
-        if  l_cr is not None: self.l_cr = l_cr
-        if  l_cl is not None: self.l_cl = l_cl
-
-        if  c_l is not None: self.c_l =c_l
-        if  c_r is not None: self.c_r =  c_r
-
-
-        self.qs = [self.phi,self.z]
-
-        super().__init__(m=m,I=I, l_rod= l_rod,l_r=l_r,k_r=k_r,k_l=k_l, F_engine= F_engine,z=z,l_l=l_l,ivar=ivar,**kwargs)
-
-
-    @property
-    def components(self):
-
-        components =super().components
-
-        
-        self._damper_l = Damper(self.c_l, pos1=self.z + self.phi * self.l_l,
-                               qs=self.qs)(label='left damper')
-        self._damper_r = Damper(c=self.c_r, pos1=self.z - self.phi * self.l_r,
-                               qs=self.qs)(label='right damper')
-
-
-
-        components['_damper_l'] = self._damper_l
-        components['_damper_r'] = self._damper_r
-       
-
-        
-        return components
-
-        
-#    def max_dynamic_force_pin(self):
-#        return self.frequency_response_function()*self.stiffness_matrix()[0]
-    
-#    def dynamic_bearing_force(self):
-       
-#       return self.max_dynamic_force_pin() * self.sqrt(L)
-    
-    def max_dynamic_force_pin(self):
-        return abs(self.frequency_response_function()*self.stiffness_matrix()[0])
-
-    def max_static_force_pin(self):
-        return abs(self.static_load().doit()[0])
-    
-    def static_force_pin_diameter(self):
-        kt=Symbol('k_t', positive=True)
-        Re=Symbol('R_e', positive=True)
-        return ((4*self.max_static_force_pin())/(pi*kt*Re))**(1/2)
-
-#     def max_dynamic_force_pin(self):
-#         return (self._frf()[0].subs(self.lam0,0) + self._frf()[1].subs(self.lam0,0)*self.l_rod/2)*self.stiffness_matrix()[0]
-
-    def dynamic_bearing_force(self):
-        L=Symbol('L')#wymagana trwałość
-        return self.max_dynamic_force_pin() * L**(S.One/3)
-    
-    def dynamic_force_pin_diameter(self):
-        kt=Symbol('k_t', positive=True)
-        Re=Symbol('R_e', positive=True)
-        return ((4*self.max_dynamic_force_pin())/(pi*kt*Re))**(1/2)
-    
-    
-    def dynamic_bearing_force(self):
-        L=Symbol('L')
-        return self.max_dynamic_force_pin() * self.sqrt(L)
-    
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.m: r'Mass',
-            self.I: r'',
-            self.l_rod: r'',
-            self.l_r: r'',
-            self.k_r: r'',
-            self.F_engine: r'',
-            self.k_l: r'',
-            self.c_l: r'',
-            self.c_r: r'',
-            self.l_cl: r'',
-            self.l_l: r'',
-            self.c_r: r'',
-            self.phi: r'',
-            self.Z: r'',
-            self.ivar: r'',
-            self.qs: r'',
-        }
-    
-    def get_default_data(self):
-
-        #m0, l0, c0, k_0, l_l0, omega, F_0 = symbols('m_0 l_0 c_0 k_0 l_l0 Omega F_0', positive=True)
-        c0, k_0, l_l0, Omega0, F_0 = symbols('c_0 k_0 l_l0 Omega0 F_0', positive=True)
-        m0, l0  = self.m0,self.l0
-        c0, k0= self.c0,self.k0
-        lam0=self.lam0
-        Omega0=self.Omega0
-        F0=self.F0
-
-        default_data_dict = {
-            self.l_rod:[l0*S.One*no for no in range(1, 8)],
-            self.I: [S.One/12*self.m *self.l_rod],
-            self.l_rod:[l0*S.One*no for no in range(1, 8)],
-            #self.m: [m0,2*m0,3*m0,4*m0,5*m0,6*m0,7*m0,8*m0,9*m0],
-            self.m: [m0*S.One*no for no in range(1,8)],
-            #self.c_r: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0],
-            self.c_r: [self.lam*(self.k_r)],
-            #self.k: [k0*S.One*no for no in range(1,8)],
-            self.lam: [lam0/10*S.One*no for no in range(1,8)],
-            self.k_l: [k0*S.One*no for no in range(1,8)],
-            self.k_r: [k0*S.One*no for no in range(1,8)],
-            
-            
-            self.c_l: [self.lam*(self.k_l)],
-            self.l_r: [l0*S.One*no for no in range(1, 8)],
-            self.l_l: [l0*S.One*no for no in range(1, 8)],
-           
-            self.Omega: [Omega0*S.One*no for no in range(1,2)],
-            self.F_engine: [F0*sin(self.Omega*self.ivar)*S.One*no for no in range(1,8)],}
-            
-
-
-        return default_data_dict
-
-class DampedSymmetricalVehicleSuspension(DampedChairWith5DOF):
-    def get_default_data(self):
-
-        #m0, l0, c0, k_0, l_l0, omega, F_0 = symbols('m_0 l_0 c_0 k_0 l_l0 Omega F_0', positive=True)
-        c0, k_0, l_l0, Omega0, F_0 = symbols('c_0 k_0 l_l0 Omega0 F_0', positive=True)
-        m0, l0  = self.m0,self.l0
-        c0, k0= self.c0,self.k0
-        lam0=self.lam0
-        Omega0=self.Omega0
-        F0=self.F0
-
-        default_data_dict = {
-            self.l_rod:[l0*S.One*no for no in range(1, 8)],
-            self.I: [S.One/12*self.m *self.l_rod**2],
-            self.l_rod:[l0*S.One*no for no in range(1, 8)],
-            #self.m: [m0,2*m0,3*m0,4*m0,5*m0,6*m0,7*m0,8*m0,9*m0],
-            self.m: [m0*S.One*no for no in range(1,8)],
-            #self.c_r: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0],
-            self.c_r: [self.lam*(self.k_r)],
-            #self.k: [k0*S.One*no for no in range(1,8)],
-            self.lam: [lam0/10*S.One*no for no in range(1,8)],
-            self.k_l: [self.k_r],
-            self.k_r: [k0*S.One*no for no in range(1,8)],
-            
-            
-            self.c_l: [self.lam*(self.k_l)],
-            self.l_r: [self.l_l],
-            self.l_l: [l0*S.One*no for no in range(1, 8)],
-           
-            self.Omega: [Omega0*S.One*no for no in range(1,2)],
-            self.F_engine: [F0*cos(self.Omega*self.ivar)*S.One*no for no in range(1,8)],
-            
-          #  self.F_engine: [
-           #     2 * F_0 * sin(omega * self.ivar),
-            #    3 * F_0 * sin(omega * self.ivar),
-             #   4 * F_0 * sin(omega * self.ivar),
-              #  5 * F_0 * sin(omega * self.ivar),
-                #6 * F_0 * sin(omega * self.ivar)
-          #  ]
-        }
-
-        return default_data_dict
+unit2=units_dict2
+   
 
