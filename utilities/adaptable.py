@@ -503,6 +503,7 @@ class EntryWithUnit:
 
 class DataTable(Table):
     _latex_name = 'table'
+    packages=[Package('booktabs'),Package('longtable')]
 
     def __init__(self, numerical_data, position='H'):
         super().__init__(position=position)
@@ -510,7 +511,7 @@ class DataTable(Table):
         self._numerical_data = numerical_data
         self.position = position
 
-    def add_table(self, numerical_data=None, index=False, longtable=False,multirow=True):
+    def add_table(self, numerical_data=None, index=False, longtable=False,multirow=True, column_format=None):
         self.append(NoEscape('\\centering'))
         self.append(NoEscape('%%%%%%%%%%%%%% Table %%%%%%%%%%%%%%%'))
         #         if numerical_data!=None:
@@ -520,7 +521,7 @@ class DataTable(Table):
         self.append(
             NoEscape(
                 tab.to_latex(index=index, escape=False,
-                             longtable=longtable,multirow=multirow).replace(
+                             longtable=longtable,multirow=multirow,column_format=column_format).replace(
                                  '\\toprule',
                                  '\\toprule \n \\midrule').replace(
                                      '\\bottomrule',
@@ -1143,6 +1144,8 @@ class BasicFormattingTools(DataMethods):
                  label=None,
                  caption=None,
                  multirow=True,
+                 column_format=None,
+                 longtable=None,
                  *args,
                  **kwargs):
 
@@ -1154,7 +1157,7 @@ class BasicFormattingTools(DataMethods):
         if caption is not None:
             tab.add_caption(NoEscape(caption))
 
-        tab.add_table(index=index,multirow=multirow)
+        tab.add_table(index=index,multirow=multirow,column_format=column_format,longtable=longtable,**kwargs)
 
         if label is not None:
             tab.append(Label(label))

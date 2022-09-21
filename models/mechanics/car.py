@@ -473,9 +473,9 @@ class CarMovementConstantThrottle(ComposedSystem):
             self.J_s: [0.2],
             self.alpha: [0],
             self.a_h: [4],
-            self.P: [350], #2100
+            self.P: [210], #2100 # 350
             self.I: [10],
-            self.D: [20], #100
+            self.D: [10], #100 # 100
         }
 
         return default_data_dict

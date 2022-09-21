@@ -303,7 +303,7 @@ class QuotationTemplate(Document):
         
 class QuotationTemplate(Document):
     packages = [
-                  Package('geometry',options=['left=1in','top=1in','right=1in','bottom=1in']),
+                  Package('geometry',options=['left=1cm','top=1cm','right=1cm','bottom=1cm']),
                   Package('inputenc',options=['utf8']),
                   Package('hyperref',options=['colorlinks']),
                   Package('graphicx'),
@@ -358,4 +358,166 @@ class QuotationTemplate(Document):
         # tu implementować co tam potrzeba
         
 class ScheduleTemplate(QuotationTemplate):
-    null=0
+    pass
+    
+class LandscapeScheduleTemplate(ScheduleTemplate):
+    def __init__(self,
+                 title='Wycena zlecenia',
+                 default_filepath='default_filepath',
+                 *,
+                 documentclass='report',
+                 document_options='landscape',
+                 fontenc='T1',
+                 inputenc='utf8',
+                 font_size='normalsize',
+                 lmodern=False,
+                 textcomp=True,
+                 microtype=True,
+                 page_numbers=True,
+                 indent=None,
+                 geometry_options=None,#['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
+                 data=None):
+
+        super().__init__(
+#             title=title,
+            default_filepath=default_filepath,
+            documentclass=documentclass,
+            document_options=document_options,
+            fontenc=fontenc,
+            inputenc=inputenc,
+            font_size=font_size,
+            lmodern=lmodern,
+            textcomp=textcomp,
+            microtype=microtype,
+            page_numbers=page_numbers,
+            indent=indent,
+            geometry_options=geometry_options,
+            data=data,
+        )
+#         label=self.label
+#         self.title=title
+        self.preamble.append(Command('hypersetup', 'urlcolor=blue'))
+        self.preamble.append(Command('newcolumntype', arguments='R',options='1',extra_arguments=NoEscape('>{\\raggedleft\\let\\newline\\\\\\arraybackslash\\hspace{0pt}}m{#1}')))
+        
+class BeamerTemplate(Document):
+
+    latex_name = 'document'
+    packages = [
+                  Package('microtype'),
+                  Package('polski',options=['MeX']),
+                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('listings'),
+                  #Package('titlesec'),
+                  #Package('fancyhdr'),
+                  #Command('pagestyle', arguments=['fancy']),
+                  Command('author', arguments=['Szymon Kozłowski & Bogumił Chiliński']),
+                  #Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
+                  #Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
+                  #Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
+                  #Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']), 
+                  Command('usetheme', arguments=['Madrid']),
+                  Command('graphicspath', arguments=[NoEscape('{../}')])
+
+            ]
+    
+    
+    def __init__(self,
+                 default_filepath='default_filepath',
+                 *,
+                 title=None,
+                 documentclass='beamer',
+                 document_options=None,
+                 fontenc='T1',
+                 inputenc='utf8',
+                 font_size='normalsize',
+                 lmodern=False,
+                 textcomp=True,
+                 microtype=True,
+                 page_numbers=True,
+                 indent=None,
+                 geometry_options=None,
+                 data=None):
+
+        super().__init__(
+            default_filepath=default_filepath,
+            documentclass=documentclass,
+            document_options=document_options,
+            fontenc=fontenc,
+            inputenc=inputenc,
+            font_size=font_size,
+            lmodern=lmodern,
+            textcomp=textcomp,
+            microtype=microtype,
+            page_numbers=page_numbers,
+            indent=indent,
+            geometry_options=geometry_options,
+            data=data, 
+            )
+        self.title = title
+        
+        if self.title is not None:
+            self.packages.append(Command('title', arguments=[self.title]))
+        self.append(Command('frame', arguments=[NoEscape(r'\titlepage')]))
+
+class PosterTemplate(Document):
+
+    latex_name = 'document'
+    packages = [
+                  Package('microtype'),
+                  Package('polski',options=['MeX']),
+                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('listings'),
+                  #Package('titlesec'),
+                  #Package('fancyhdr'),
+                  #Command('pagestyle', arguments=['fancy']),
+                  Command('author', arguments=['Szymon Kozłowski & Bogumił Chiliński']),
+                  #Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
+                  #Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
+                  #Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
+                  #Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']), 
+                  Command('usetheme', arguments=['Simple']),
+                  Command('graphicspath', arguments=[NoEscape('{../}')])
+
+            ]
+    
+    
+    def __init__(self,
+                 default_filepath='default_filepath',
+                 *,
+                 title=None,
+                 documentclass='tikzposter',
+                 document_options=None,
+                 fontenc='T1',
+                 inputenc='utf8',
+                 font_size='normalsize',
+                 lmodern=False,
+                 textcomp=True,
+                 microtype=True,
+                 page_numbers=True,
+                 indent=None,
+                 geometry_options=None,
+                 data=None):
+
+        super().__init__(
+            default_filepath=default_filepath,
+            documentclass=documentclass,
+            document_options=document_options,
+            fontenc=fontenc,
+            inputenc=inputenc,
+            font_size=font_size,
+            lmodern=lmodern,
+            textcomp=textcomp,
+            microtype=microtype,
+            page_numbers=page_numbers,
+            indent=indent,
+            geometry_options=geometry_options,
+            data=data, 
+            )
+        self.title = title
+        title_with_box = NoEscape(r'\parbox{0.9\linewidth}{\centering ' +self.title+ ' }')
+        
+        if self.title is not None:
+            self.packages.append(Command('title', arguments=[title_with_box]))
+
+        #self.append(Command('frame', arguments=[NoEscape(r'\titlepage')]))
+        self.append(Command('maketitle'))

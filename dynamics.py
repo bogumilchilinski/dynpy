@@ -1429,7 +1429,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 #         coords_list = list(self.Y) + [diff(self.q,self.ivar,self.ivar)]
 #         coords_mat = Matrix(coords_list)
         
-        linearized_forces=[(point,MultivariableTaylorSeries((force&base_frame.x).doit(),self.coords_with_acceleration,n=n,x0=x0).doit()*base_frame.x)  for  point,force   in   self.forcelist]
+        linearized_forces=[(point,MultivariableTaylorSeries((force&base_frame.x).doit(),self._coords_with_acceleration,n=n,x0=x0).doit()*base_frame.x)  for  point,force   in   self.forcelist]
         
 
         
