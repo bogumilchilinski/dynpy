@@ -573,12 +573,18 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     def elements(self):
         return {**self.components}
         
-    def __str__(self):
+    def system_description(self):
         
         comps_str=self._components_str
 
         return str(f'{(self._label)} composed of: \n{comps_str}')
 
+    def __str__(self):
+        
+        comps_str=self._components_str
+
+        return str(f'{(self._label)}')
+    
     def __repr__(self):
 
         return (self.__str__())
