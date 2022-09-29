@@ -1,5 +1,6 @@
 from ..mechanics import *
 from pylatex import Document, Package, Command, NewPage, Tabularx, VerticalSpace
+from pylatex.base_classes import  ContainerCommand
 
 
 class CompanyDataComponent(ReportComponent):
