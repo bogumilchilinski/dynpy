@@ -234,7 +234,7 @@ class DampedChair4DOF(ComposedSystem):
         if pm is not None: self.pm=pm
             
         self.s=self.A*sin(ivar*self.omega)
-        self.qs=[self.z_fr,self.z_rear,self.x,self.x,self.phi]
+        self.qs=[self.z_fr,self.z_rear,self.x,self.z,self.phi]
        
         
         self.right_wheel = MaterialPoint(self.m_fr, pos1=self.z_fr, qs=[self.z_fr])
@@ -276,16 +276,16 @@ class DampedChair4DOF(ComposedSystem):
                    self.l_l:0.2,
                    self.l_r:0.4,
                    
-                   self.k_f:607500,
-                   self.k_ft:475000,
-                   self.k_r:580000,
-                   self.k_rt:400000,
+                   self.k_f:10700,
+                   self.k_ft:150000,
+                   self.k_r:10700,
+                   self.k_rt:109000,
                    self.M:75,
                    self.I_ch:9.479342+self.M*0.39*0.39,
                    self.m_rear:1.5,
                    self.m_fr:0.6,
                    self.pm:0.1,
-                   self.Omega:0.055*np.pi*2,
+                   self.Omega:0.3*np.pi*2,
                    self.R:0.3,
                    self.z_c3:0.4,
                    self.g:9.81,
@@ -299,12 +299,12 @@ class DampedChair4DOF(ComposedSystem):
                    self.length:0.19,
                    self.speed:1.7,
                    self.axw:0.47,
-                   self.c_pw:0.001,
-                   self.c_lw:0.001,
-                   self.c_p:0.001,
-                   self.c_l:0.001,
-                   self.c:0.001,
-                   self.A:0.01,
+                   self.c_ft:107,
+                   self.c_rt:5500,
+                   self.c_fs:107,
+                   self.c_rs:107,
+                   self.c:100,
+                   self.A:0.005,
                    self.omega:0.01,
                           }
         
