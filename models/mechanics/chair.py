@@ -37,8 +37,6 @@ ix = pd.IndexSlice
 
 
 
-mechanics_printing(pretty_print=True)
-
 t,f= symbols('t, f')
 
 
@@ -110,7 +108,9 @@ class DampedChair4DOF(ComposedSystem):
     M_m=Symbol('M_m',positive=True)
     K_m=Symbol('K_m',positive=True)
     C_m=Symbol('C_m',positive=True)
-
+    T=Symbol('T')
+    V=Symbol('V')
+    D=Symbol('D')
     def __init__(self,
                  m=None,
                  M=None,
@@ -260,7 +260,7 @@ class DampedChair4DOF(ComposedSystem):
         self.damper_2 = Damper(self.c_fs, pos1=self.z-self.phi*self.l_r , pos2 = self.z_fr , qs=[self.z, self.phi, self.z_fr])
         self.damper_x=Damper(self.c,pos1=self.x,qs=[self.x])
         self.force_1 = Force(self.F*(sign(cos(self.Omega*self.ivar)-self.pm)+1), pos1=self.x , qs=[self.x])
-        self.gravitational_force = GravitationalForce(self.M, self.g, self.z*cos(self.phi), qs = self.qs)
+        self.gravitational_force = GravitationalForce(self.M, self.g, (self.z+self.z_c3)*cos(self.phi), qs = self.qs)
 #         self.force_2 = Force(self.A*sin(ivar*self.omega), pos1=self.z_pw, qs=[self.z_pw])
         
         #self.force = Force(-self.F_engine, pos1=self.z - self.l_p * self.phi, qs=[self.z, self.phi])
@@ -276,9 +276,9 @@ class DampedChair4DOF(ComposedSystem):
                    self.l_l:0.2,
                    self.l_r:0.4,
                    
-                   self.k_f:10700,
-                   self.k_ft:150000,
-                   self.k_r:10700,
+                   self.k_f:750000,
+                   self.k_ft:300000,
+                   self.k_r:750000,
                    self.k_rt:109000,
                    self.M:75,
                    self.I_ch:9.479342+self.M*0.39*0.39,
@@ -287,13 +287,13 @@ class DampedChair4DOF(ComposedSystem):
                    self.pm:0.1,
                    self.Omega:0.3*np.pi*2,
                    self.R:0.3,
-                   self.z_c3:0.4,
+
                    self.g:9.81,
                    self.I_w:self.m_rear*self.R**2,
                    self.l_fr:0.2,
                    self.l_rear:0.01,
                    self.u0:0.005,
-
+                   self.z_c3:0.01,
                    self.l_bumps:0.15,
                    self.amplitude:0.0165,
                    self.length:0.19,
@@ -304,8 +304,8 @@ class DampedChair4DOF(ComposedSystem):
                    self.c_fs:107,
                    self.c_rs:107,
                    self.c:100,
-                   self.A:0.005,
-                   self.omega:0.01,
+                   self.A:0.001,
+                   self.omega:4*np.pi,
                           }
         
         return default_data_dict  
@@ -345,7 +345,11 @@ class DampedChair4DOF(ComposedSystem):
 #               self.k_w:'RapidChair drive wheel striffness',
 #               self.k_fix:'fastening stiffness',
 #               self.k_tire:'RapidChair drive wheel tire striffness',
-              self.c:'damping coefficient',
+              self.c:'horizontal damping coefficient',
+              self.c_fs:'vertical damping coefficient of front suspension',
+              self.c_rs:'vertical damping coefficient of rear suspension',
+              self.c_ft:'vertical damping coefficient of caster band',
+              self.c_rt:'vertical damping coefficient of rear tire',
 #               self.c_mu:'inertia damping decrement',
 #               self.c_lam:'stiffness damping decrement',
               self.xm_3:'center of mass location in x axis',
@@ -400,7 +404,11 @@ class DampedChair4DOF(ComposedSystem):
 #                self.V:'overall potential energy',
                Symbol('L',positive=True):'''Lagrange's function''',
                Symbol('v',positive=True):'''steady state velocity''',
-               self.ivar:'time'
+               self.ivar:'time',
+               self.T:'total kinetic energy',
+               self.V:'total potential energy',
+               self.D:'total dissipative potential',
+               self.omega:'frequency of road profile'
         }
         return self.sym_desc_dict
 #     def symbols_description(self):

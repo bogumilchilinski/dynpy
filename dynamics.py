@@ -1418,7 +1418,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         # print('x0',x0)
         if not x0:
-            x0 = {coord: 0 for coord in self.Y}
+            x0 = {coord: 0 for coord in self._coords_with_acceleration}
 
         #display(self._op_points(hint=hint, subs=True))
         if op_point:
@@ -1434,6 +1434,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
 #         coords_list = list(self.Y) + [diff(self.q,self.ivar,self.ivar)]
 #         coords_mat = Matrix(coords_list)
+
+        display(self._coords_with_acceleration)
+
         
         linearized_forces=[(point,MultivariableTaylorSeries((force&base_frame.x).doit(),self._coords_with_acceleration,n=n,x0=x0).doit()*base_frame.x)  for  point,force   in   self.forcelist]
         
