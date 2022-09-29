@@ -1028,6 +1028,7 @@ class BasicFormattingTools(DataMethods):
                 y_axis_description = y_axis_description.replace('$$', '$')
 
                 plotted_frame = plotted_frame.droplevel(-1, axis=1)
+                plotted_frame._ylabel = ylabel
             else:
                 print(' a tu jestem w else')
                 ylabel_list = [
@@ -1043,16 +1044,18 @@ class BasicFormattingTools(DataMethods):
 
                 y_axis_description = 'ylabel={$' + NoEscape(ylabel) + '$},'
 
-            plotted_frame._ylabel = ylabel
+                plotted_frame._ylabel = ylabel
 
-        elif self._ylabel is not None:
-            ylabel = self._ylabel
+        elif plotted_frame._ylabel is not None:
+            ylabel = plotted_frame._ylabel
 
             #y_axis_description = 'ylabel={$' + ylabel + '$},'
 
             y_axis_description = 'ylabel={$' + NoEscape(ylabel) + '$},'
+            plotted_frame._ylabel = ylabel
 
         else:
+            print('pure else')
 
             y_axis_description = ''
 
@@ -1071,9 +1074,9 @@ class BasicFormattingTools(DataMethods):
         if picture is None:
             picture = self.__class__._picture
 
-        print(ylabel)
-        print(type(ylabel))
-        print(y_axis_description)
+        #print(ylabel)
+        #print(type(ylabel))
+        #print(y_axis_description)
         fig = plotted_frame.to_standalone_figure(
             filename,
             labels_list=labels_list,
@@ -1134,8 +1137,9 @@ class BasicFormattingTools(DataMethods):
         if preview:
             plotted_frame.plot(ylabel=ylabel, subplots=subplots)
             print('==============')
-
-            plt.ylabel(y_axis_description.replace('$$', '$'))
+            print(y_axis_description.replace('$$', '$'))
+            print('==============')
+            plt.ylabel((  f'${plotted_frame._ylabel}$'  ).replace('$$', '$'))
             plt.show()
             display(Markdown(caption))
             container.append(fig)
