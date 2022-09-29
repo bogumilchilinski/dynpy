@@ -1006,10 +1006,10 @@ class BasicFormattingTools(DataMethods):
 
         if y_axis_description is None and isinstance(col_idx, pd.MultiIndex):
 
-            #print('index2transform',col_idx.get_level_values(-1).unique())
+            print('index2transform',col_idx.get_level_values(-1).unique())
             if len(col_idx.get_level_values(-1).unique()) == 1:
 
-                #print('tu jestem')
+                print('tu jestem')
                 label_raw = (EntryWithUnit(
                     col_idx.get_level_values(-1).unique()[0]))
                 if isinstance(label_raw, str):
@@ -1029,6 +1029,7 @@ class BasicFormattingTools(DataMethods):
 
                 plotted_frame = plotted_frame.droplevel(-1, axis=1)
             else:
+                print(' a tu jestem w else')
                 ylabel_list = [
                     latex_backend(EntryWithUnit(label))
                     for label in col_idx.get_level_values(-1).unique()
@@ -1036,11 +1037,11 @@ class BasicFormattingTools(DataMethods):
 
                 #print('ylabels',ylabel_list)
 
-                ylabel = ', '.join(ylabel_list)
+                ylabel = ', '.join(set(ylabel_list))
 
                 #y_axis_description = 'ylabel={$' + ylabel + '$},'
 
-                y_axis_description = 'ylabel={' + NoEscape(ylabel) + '},'
+                y_axis_description = 'ylabel={$' + NoEscape(ylabel) + '$},'
 
             plotted_frame._ylabel = ylabel
 
@@ -1049,7 +1050,7 @@ class BasicFormattingTools(DataMethods):
 
             #y_axis_description = 'ylabel={$' + ylabel + '$},'
 
-            y_axis_description = 'ylabel={' + NoEscape(ylabel) + '},'
+            y_axis_description = 'ylabel={$' + NoEscape(ylabel) + '$},'
 
         else:
 
@@ -1070,9 +1071,9 @@ class BasicFormattingTools(DataMethods):
         if picture is None:
             picture = self.__class__._picture
 
-        #print(ylabel)
-        #print(type(ylabel))
-        #print(y_axis_description)
+        print(ylabel)
+        print(type(ylabel))
+        print(y_axis_description)
         fig = plotted_frame.to_standalone_figure(
             filename,
             labels_list=labels_list,
@@ -1080,7 +1081,7 @@ class BasicFormattingTools(DataMethods):
             height=height,
             width=width,
             x_axis_description=x_axis_description.replace('$$', '$'),
-            y_axis_description=y_axis_description,
+            y_axis_description=y_axis_description.replace('$$', '$'),
             subplots=subplots,
             legend_pos=legend_pos,
             extra_commands=extra_commands,
@@ -1132,6 +1133,9 @@ class BasicFormattingTools(DataMethods):
 
         if preview:
             plotted_frame.plot(ylabel=ylabel, subplots=subplots)
+            print('==============')
+
+            plt.ylabel(y_axis_description.replace('$$', '$'))
             plt.show()
             display(Markdown(caption))
             container.append(fig)
