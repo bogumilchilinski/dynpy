@@ -3143,6 +3143,9 @@ class CrankSystem(ComposedSystem):
         }
 
         return default_data_dict
+    
+    
+    
 class MDoFElasticPendulum(ComposedSystem):
     """
     Model of a Double Degree of Freedom Involute Pendulum (Winch)

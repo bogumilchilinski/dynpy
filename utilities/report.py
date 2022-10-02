@@ -2940,7 +2940,7 @@ class Picture(Figure,ReportModule):
 
     
     _latex_name = 'figure'
-    def __init__(self, image=None, position=None, caption=None,width=NoEscape('0.8\\textwidth'), **kwargs):
+    def __init__(self, image=None, position=None, caption=None,width=NoEscape('0.8\\textwidth'),marker=None, **kwargs):
         """
         Args
         ----
@@ -2958,6 +2958,7 @@ class Picture(Figure,ReportModule):
         self.image = image
         self.caption = caption
         self.width = width
+        self.marker = marker
         
         super().__init__(position=position,**kwargs)
         
@@ -2966,6 +2967,9 @@ class Picture(Figure,ReportModule):
             
         if self.caption is not None:
             self.add_caption(NoEscape(self.caption))
+
+        if self.marker is not None:
+            self.append(Ref(self.marker))
             
     def __repr__(self):
 

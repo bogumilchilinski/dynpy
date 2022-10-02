@@ -16,329 +16,8 @@ import IPython as IP
 import numpy as np
 import inspect
 
-
-class ComposedSystem(HarmonicOscillator):
-    """Base class for all systems
-
-    """
-    scheme_name = 'damped_car_new.PNG'
-    real_name = 'car_real.jpg'
-    detail_scheme_name = 'sruba_pasowana.png'
-    detail_real_name = 'buick_regal_3800.jpg'
-    _default_args = ()
-    _default_folder_path = "./dynpy/models/images/"
-
-    z = dynamicsymbols('z')
-
-    m0 = Symbol('m_0', positive=True)
-    k0 = Symbol('k_0', positive=True)
-    F0 = Symbol('F_0', positive=True)
-    Omega0 = Symbol('Omega_0', positive=True)
-    ivar=Symbol('t')
-
-    
-    @classmethod
-    def _scheme(cls):
-
-        path = cls._default_folder_path + cls.scheme_name
-
-        return path
-
-    @classmethod
-    def _real_example(cls):
-        path = cls._default_folder_path + cls.real_name
-
-        return path
-
-    @classmethod
-    def _detail_real(cls):
-        path = cls._default_folder_path + cls.detail_real_name
-
-        return path
-
-    @classmethod
-    def _detail_scheme(cls):
-        path = cls._default_folder_path + cls.detail_scheme_name
-
-        return path
-
-    def _init_from_components(self, *args, system=None, **kwargs):
-
-        if system is None:
-            composed_system = self._elements_sum
-        else:
-            composed_system = system
-
-        #print('CS',composed_system._components)
-        super(HarmonicOscillator,self).__init__(None, system=composed_system)
-
-        #print('self',self._components)
-        if self._components is None:
-            comps = {}
-        else:
-            comps = self._components
-
-        self._components = {**comps, **self.components}
-
-    def __init__(self,
-                 Lagrangian=None,
-                 m0=None,
-                 qs=None,
-                 forcelist=None,
-                 bodies=None,
-                 frame=None,
-                 hol_coneqs=None,
-                 nonhol_coneqs=None,
-                 label=None,
-                 ivar=None,
-                 evaluate=True,
-                 system=None,
-                 **kwargs):
-
-        if ivar is not None: self.ivar = ivar
-        if m0 is not None: self.m0 = m0
-
-        if qs is not None:
-            self.qs = qs
-        else:
-            self.qs = [self.z]
-
-        
-        self._init_from_components(system=system, **kwargs)
-
-    @property
-    def components(self):
-
-        components = {}
-
-        self._material_point = MaterialPoint(self.m0, self.qs[0],
-                                             self.qs)('Material Point')
-        components['_material_point'] = self._material_point
-
-        return components
-
-    @property
-    def elements(self):
-
-        return {**super().components, **self.components}
-
-    @classmethod
-    def preview(cls, example=False):
-        if example:
-            path = cls._real_example()
-
-        elif example == 'detail_scheme_name':
-            path = cls._detail_scheme()
-        elif example == 'detail_real_name':
-            path = cls._detail_real()
-        else:
-            path = cls._scheme()
-        print(path)
-        with open(f"{path}", "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read())
-        image_file.close()
-
-        return IP.display.Image(base64.b64decode(encoded_string))
-
-    def _components_default_data(self):
-        
-        data=[elem._all_default_data()   for elem in self.elements.values()]
-
-        
-        return {key:value for elem in data for key, value in elem.items()}    
-    
-    def _components_numerical_data(self):
-        
-        data=[elem._all_numerical_data()   for elem in self.elements.values()]
-        
-        
-        return {key:value for elem in data for key, value in elem.items()}    
-    
-    def _all_default_data(self):
-        
-        
-
-        
-        return {**self._components_default_data(),**self.get_default_data()}    
-    
-    def _all_numerical_data(self):
-        
-        return {**self._components_numerical_data(),**self.get_numerical_data()}  
-    
-    
-    def get_default_data(self):
-        return {}
-
-    def get_numerical_data(self):
-        return {}
-
-    
-    
-    
-    def get_random_parameters(self):
-
-        
-        #print('preview for',self)
-        #display(self._all_default_data())
-        #display(self.get_default_data())
-        
-        default_data_dict = {**self._components_default_data(),**self.get_default_data()}
-
-        if default_data_dict:
-            parameters_dict = {
-                key: random.choice(items_list)
-                for key, items_list in default_data_dict.items()
-            }
-        else:
-            parameters_dict = None
-
-        return parameters_dict
-
-    def get_numerical_parameters(self):
-
-        default_data_dict = {**self._components_numerical_data(),**self.get_numerical_data()}
-
-        if default_data_dict:
-            parameters_dict = {
-                key: random.choice(items_list)
-                for key, items_list in default_data_dict.items()
-            }
-        else:
-            parameters_dict = None
-
-        return parameters_dict
-
-    @property
-    def _report_components(self):
-
-        comp_list = [
-            mech_comp.TitlePageComponent,
-            mech_comp.SchemeComponent,
-            mech_comp.ExemplaryPictureComponent,
-            mech_comp.KineticEnergyComponent,
-            mech_comp.PotentialEnergyComponent,
-            mech_comp.LagrangianComponent,
-            mech_comp.GoverningEquationComponent,
-            mech_comp.FundamentalMatrixComponent,
-            mech_comp.GeneralSolutionComponent,
-            mech_comp.SteadySolutionComponent,
-        ]
-
-        return comp_list
-
-    def linearized(self): #it was missing
-
-        return type(self).from_system(super().linearized())
-
-    
-    def tensioner_belt_force(self):
-        return self.k_tensioner * self.steady_solution()
-
-    def left_belt_force(self):
-        return self.k_belt * self.steady_solution()
-
-    def right_belt_force(self):
-        return self.k_belt * self.steady_solution()
-
-
-#     def max_static_force_pin(self):
-#         return abs(self.static_load().doit()[0])
-
-#     def max_dynamic_force_pin(self):
-#         return self.frequency_response_function() * self.stiffness_matrix(
-#         )[0] + self.max_static_force_pin()
-
-    def max_static_force_pin(self):
-        return abs(self.static_load().doit()[0]) / 2
-
-    def max_dynamic_force_pin(self):
-        return self._frf()[0] * self.k_m + self.max_static_force_pin()
-
-    def static_force_pin_diameter(self):
-        kt = Symbol('k_t', positive=True)
-        Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_static_force_pin()) / (pi * kt * Re))**(1 / 2)
-
-    def dynamic_force_pin_diameter(self):
-        kt = Symbol('k_t', positive=True)
-        Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
-        Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_static_force_pin()) / (pi * kt * Re))**(1 / 2)
-
-    def dynamic_force_pin_diameter(self):
-        kt = Symbol('k_t', positive=True)
-        Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
-
-
-
-
-class NonlinearComposedSystem(ComposedSystem):
-
-    def frequency_response_function(self,
-                                    frequency=Symbol('Omega', positive=True),
-                                    amplitude=Symbol('a', positive=True)):
-
-        omega = ComposedSystem(self.linearized()).natural_frequencies()[0]
-        eps = self.small_parameter()
-
-        exciting_force = self.external_forces()[0]
-
-        comps = exciting_force.atoms(sin, cos)
-        exciting_amp = sum([exciting_force.coeff(comp) for comp in comps])
-        inertia = self.inertia_matrix()[0]
-
-        return amplitude * (-frequency**2 + omega**2) * inertia + S(
-            3) / 4 * eps * amplitude**3 - exciting_amp
-
-    def amplitude_from_frf(self, amplitude=Symbol('a', positive=True)):
-
-        return solveset(self.frequency_response_function(), amplitude)
-
-    @property
-    def _report_components(self):
-
-        comp_list = [
-            mech_comp.TitlePageComponent,
-            mech_comp.SchemeComponent,
-            mech_comp.ExemplaryPictureComponent,
-            mech_comp.KineticEnergyComponent,
-            mech_comp.PotentialEnergyComponent,
-            mech_comp.LagrangianComponent,
-            mech_comp.LinearizationComponent,
-            mech_comp.GoverningEquationComponent,
-            mech_comp.FundamentalMatrixComponent,
-            mech_comp.GeneralSolutionComponent,
-            mech_comp.SteadySolutionComponent,
-        ]
-
-        return comp_list
-
-    def max_static_force_pin(self):
-        return abs(self.static_load().doit()[0]) / 2
-
-    def max_dynamic_force_pin(self):
-        lin_sys = ComposedSystem(self.linearized())
-        #k_m = self._given_data[self.k_m]
-        k_m = self.k_m
-        #         display(lin_sys.stiffness_matrix()[0])
-
-        return lin_sys.frequency_response_function() * (
-            lin_sys.stiffness_matrix()[0]) / 2 + self.max_static_force_pin()
-
-    def max_dynamic_nonlinear_force_pin(self):
-        lin_sys = ComposedSystem(self.linearized())
-
-        amp = list(self.amplitude_from_frf())
-        display(amp)
-        #k_m = self._given_data[self.k_m]
-        k_m = self.k_m
-
-        return amp[0] * k_m + self.max_static_force_pin()
-    
-
-    
+from .pendulum import Pendulum, PendulumKinematicExct
+from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
 
 #Patryk
 #dane domyślne i numeryczne
@@ -836,4 +515,189 @@ class NonLinearTrolley(NonlinearComposedSystem):
 
         return default_data_dict
 
+#Zrobione Amadi
+class TrolleyWithPendulum(ComposedSystem):
+
+    scheme_name = 'kin_exct_pendulum.PNG'
+    real_name = 'elastic_pendulum_real.PNG'
+
+    l = Symbol('l', positive=True)
+    m_t = Symbol('m_trolley', positive=True)
+    m_p = Symbol('m_pendulum', positive=True)
+    k = Symbol('k', positive=True)
+    g = Symbol('g', positive=True)
+    Omega = Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    phi = dynamicsymbols('\\varphi')
+    x = dynamicsymbols('x')
+
+    def __init__(self,
+                 l=None,
+                 m_t=None,
+                 m_p=None,
+                 k=None,
+                 g=None,
+                 Omega=None,
+                 phi=None,
+                 x=None,
+                 F=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+        if l is not None: self.l = l
+        if m_t is not None: self.m_t = m_t
+        if m_p is not None: self.m_p = m_p
+        if g is not None: self.g = g
+        if phi is not None: self.phi = phi
+        if x is not None: self.x = x
+        if k is not None: self.k = k
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        self.ivar = ivar
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+        components = {}
+
+        self._trolley = SpringMassSystem(self.m_t, self.k, self.x, self.ivar)(label='Trolley')
+        self._pendulum = PendulumKinematicExct(self.l, self.m_p, self.g, self.phi, self.x, self.ivar)(label='Pendulum')
+        self._force=Force(self.F*sin(self.Omega*self.ivar), pos1=self.x, qs=[self.x, self.phi])(label='Force')
+
+        components['_trolley'] = self._trolley
+        components['_pendulum'] = self._pendulum
+        components['_force'] = self._force
+
+        return components
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.l: r'Pendulum length',
+            self.k: r'Stiffness of a beam showed as a spring stiffness in trolley member',
+            self.x: r'Kinematic lateral excitation',
+            self.phi: r'Angle of a pendulum',
+            self.m_p: r'Mass of pendulum',
+            self.m_t: r'Mass of trolley',
+            self.g: r'Gravity constant',
+            self.F: r'Force',
+            self.Omega: r'Excitation frequency',
+        }
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        m0, l0, F0, Omega0, k0 = symbols('m_0 l_0 F_0 Omega_0 k_0', positive=True)
+
+        default_data_dict = {
+            self.m_t: [S.One * m0 * no for no in range(20, 30)],
+            self.m_p: [S.One * m0 * no for no in range(1, 10)],
+            self.l: [S.Half * l0 * no for no in range(1, 10)],
+            self.F: [S.One * F0 * no for no in range(50, 100)],
+            self.Omega: [S.One * Omega0],
+            self.g: [S.One * self.g],
+            self.k: [S.One * k0 * no for no in range(50, 100)],
+            self.x: [self.x]
+        }
+        return default_data_dict
     
+    def get_numerical_data(self):
+
+        default_data_dict = {
+            self.m_t: [no for no in range(20, 30)],
+            self.m_p: [no for no in range(1, 10)],
+            self.l: [1/2 * no for no in range(1, 10)],
+            self.F: [no for no in range(50, 100)],
+            self.Omega: [3.14 * no for no in range(1,6)],
+            self.k: [no for no in range(50, 100)],
+            self.g: [9.81]
+        }
+        return default_data_dict
+
+#Zrobione Amadi
+class DampedTrolleyWithPendulum(TrolleyWithPendulum):
+
+    scheme_name = 'kin_exct_pendulum.PNG'
+    real_name = 'elastic_pendulum_real.PNG'
+
+    l = Symbol('l', positive=True)
+    m_t = Symbol('m_trolley', positive=True)
+    m_p = Symbol('m_pendulum', positive=True)
+    k = Symbol('k', positive=True)
+    g = Symbol('g', positive=True)
+    Omega = Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    phi = dynamicsymbols('\\varphi')
+    x = dynamicsymbols('x')
+    c = Symbol('c', positive=True)
+
+    def __init__(self,
+                 l=None,
+                 m_t=None,
+                 m_p=None,
+                 k=None,
+                 g=None,
+                 Omega=None,
+                 phi=None,
+                 x=None,
+                 F=None,
+                 c=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+        if l is not None: self.l = l
+        if m_t is not None: self.m_t = m_t
+        if m_p is not None: self.m_p = m_p
+        if g is not None: self.g = g
+        if phi is not None: self.phi = phi
+        if x is not None: self.x = x
+        if k is not None: self.k = k
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        if c is not None: self.c = c
+        self.ivar = ivar
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+        components = {}
+
+        self._TrolleyWithPendulum = TrolleyWithPendulum(self.l, self.m_t, self.m_p, self.k, self.g, self.Omega, self.phi, self.x, self.F, self.ivar)(label='Trolley')
+        self._trolley_damper=Damper(self.c, pos1=self.x, qs=[self.x, self.phi])(label='Trolley damper')
+        self._pendulum_damper=Damper(self.c, pos1=self.phi, qs=[self.x, self.phi])(label='Pendulum damper')
+
+        components['_TrolleyWithPendulum'] = self._TrolleyWithPendulum
+        components['_trolley_damper'] = self._trolley_damper
+        components['_pendulum_damper'] = self._pendulum_damper
+
+        return components
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.l: r'Pendulum length',
+            self.k: r'Stiffness of a beam showed as a spring stiffness in trolley member',
+            self.x: r'Kinematic lateral excitation',
+            self.phi: r'Angle of a pendulum',
+            self.m_p: r'Mass of pendulum',
+            self.m_t: r'Mass of trolley',
+            self.g: r'Gravity constant',
+            self.F: r'Force',
+            self.Omega: r'Excitation frequency',
+            self.c: r'Damping coefficient'
+        }
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        m0, l0, F0, Omega0, k0, lam, lam0 = symbols('m_0 l_0 F_0 Omega_0 k_0 lambda lambda_0', positive=True)
+
+        default_data_dict = {
+            self.c: [S.One * self.k * lam],
+            lam: [S.One * lam0 / 1000 * no for no in range(1, 10)]
+        }
+        return default_data_dict
+    
+    def get_numerical_data(self):
+
+        default_data_dict = {
+            self.c: [no for no in range(5, 25)]
+        }
+        return default_data_dict

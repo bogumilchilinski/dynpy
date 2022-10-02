@@ -51,6 +51,8 @@ base_frame=me.ReferenceFrame('N')
 base_origin=me.Point('O')
 
 class GeometryScene:
+    """_summary_
+    """
 
 
     ax_2d=None
@@ -59,6 +61,13 @@ class GeometryScene:
 
 
     def __init__(self,height=12,width=12,figsize=(12,9)):
+        """_summary_
+
+        Args:
+            height (int, optional): _description_. Defaults to 12.
+            width (int, optional): _description_. Defaults to 12.
+            figsize (tuple, optional): _description_. Defaults to (12,9).
+        """
 
         #plt.figure(figsize=figsize)
         ax_2d = plt.subplot(121)
@@ -564,12 +573,18 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     def elements(self):
         return {**self.components}
         
-    def __str__(self):
+    def system_description(self):
         
         comps_str=self._components_str
 
         return str(f'{(self._label)} composed of: \n{comps_str}')
 
+    def __str__(self):
+        
+        comps_str=self._components_str
+
+        return str(f'{(self._label)}')
+    
     def __repr__(self):
 
         return (self.__str__())
@@ -1388,6 +1403,14 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         '''
         pass
 
+    @property
+    def _coords_with_acceleration(self): ## dodać helpa
+        
+        coords_list = list(self.Y) + [diff(self.q,self.ivar,self.ivar)]
+        coords_mat = Matrix(coords_list)
+        
+        return coords_mat
+    
     def approximated(self, n=3, x0=None, op_point=False, hint=[], label=None):
         """
         Returns approximated N-th order function calculated with Taylor series method as an instance of the class
@@ -1395,7 +1418,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         # print('x0',x0)
         if not x0:
-            x0 = {coord: 0 for coord in self.Y}
+            x0 = {coord: 0 for coord in self._coords_with_acceleration}
 
         #display(self._op_points(hint=hint, subs=True))
         if op_point:
@@ -1409,8 +1432,13 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                                                         x0=x0)
         
         
+#         coords_list = list(self.Y) + [diff(self.q,self.ivar,self.ivar)]
+#         coords_mat = Matrix(coords_list)
 
-        linearized_forces=[(point,MultivariableTaylorSeries((force&base_frame.x).doit(),self.Y,n=n,x0=x0).doit()*base_frame.x)  for  point,force   in   self.forcelist]
+        display(self._coords_with_acceleration)
+
+        
+        linearized_forces=[(point,MultivariableTaylorSeries((force&base_frame.x).doit(),self._coords_with_acceleration,n=n,x0=x0).doit()*base_frame.x)  for  point,force   in   self.forcelist]
         
 
         

@@ -503,6 +503,7 @@ class EntryWithUnit:
 
 class DataTable(Table):
     _latex_name = 'table'
+    packages=[Package('booktabs'),Package('longtable')]
 
     def __init__(self, numerical_data, position='H'):
         super().__init__(position=position)
@@ -510,7 +511,7 @@ class DataTable(Table):
         self._numerical_data = numerical_data
         self.position = position
 
-    def add_table(self, numerical_data=None, index=False, longtable=False):
+    def add_table(self, numerical_data=None, index=False, longtable=False,multirow=True, column_format=None):
         self.append(NoEscape('\\centering'))
         self.append(NoEscape('%%%%%%%%%%%%%% Table %%%%%%%%%%%%%%%'))
         #         if numerical_data!=None:
@@ -520,7 +521,7 @@ class DataTable(Table):
         self.append(
             NoEscape(
                 tab.to_latex(index=index, escape=False,
-                             longtable=longtable).replace(
+                             longtable=longtable,multirow=multirow,column_format=column_format).replace(
                                  '\\toprule',
                                  '\\toprule \n \\midrule').replace(
                                      '\\bottomrule',
@@ -994,21 +995,39 @@ class BasicFormattingTools(DataMethods):
         if width is None:
             width = self._default_width
 
-        #print(self._ylabel)
+        print('self++++++++++++++')
+        print(self._ylabel)
+        print('self++++++++++++++')
+        self._raw_title=' '
 
         plotted_frame = self.copy()
-        #print('copy',plotted_frame._ylabel)
+        plotted_frame._ylabel = self._ylabel
+        plotted_frame._raw_title = self._raw_title
+        print('copy',plotted_frame._ylabel)
 
         col_idx = plotted_frame.columns
 
         latex_backend = self.__class__._latex_backend
 
+        # title recognition
+        #+++++++++++++++++++
+        if isinstance(col_idx, pd.MultiIndex):
+            if len(col_idx.get_level_values(0).unique()) == 1:
+                
+                plotted_frame._raw_title = col_idx.get_level_values(0).unique()[0]
+                plotted_frame = plotted_frame.droplevel(0, axis=1)
+
+
+                
+
+        col_idx = plotted_frame.columns
+
         if y_axis_description is None and isinstance(col_idx, pd.MultiIndex):
 
-            #print('index2transform',col_idx.get_level_values(-1).unique())
+            print('index2transform',col_idx.get_level_values(-1).unique())
             if len(col_idx.get_level_values(-1).unique()) == 1:
 
-                #print('tu jestem')
+                print('tu jestem')
                 label_raw = (EntryWithUnit(
                     col_idx.get_level_values(-1).unique()[0]))
                 if isinstance(label_raw, str):
@@ -1027,7 +1046,9 @@ class BasicFormattingTools(DataMethods):
                 y_axis_description = y_axis_description.replace('$$', '$')
 
                 plotted_frame = plotted_frame.droplevel(-1, axis=1)
+                plotted_frame._ylabel = ylabel
             else:
+                print(' a tu jestem w else')
                 ylabel_list = [
                     latex_backend(EntryWithUnit(label))
                     for label in col_idx.get_level_values(-1).unique()
@@ -1035,23 +1056,26 @@ class BasicFormattingTools(DataMethods):
 
                 #print('ylabels',ylabel_list)
 
-                ylabel = ', '.join(ylabel_list)
+                ylabel = ', '.join(set(ylabel_list))
 
                 #y_axis_description = 'ylabel={$' + ylabel + '$},'
 
-                y_axis_description = 'ylabel={' + NoEscape(ylabel) + '},'
+                y_axis_description = 'ylabel={$' + NoEscape(ylabel) + '$},'
 
-            plotted_frame._ylabel = ylabel
+                plotted_frame._ylabel = ylabel
 
-        elif self._ylabel is not None:
-            ylabel = self._ylabel
+        elif plotted_frame._ylabel is not None:
+            ylabel = plotted_frame._ylabel
 
             #y_axis_description = 'ylabel={$' + ylabel + '$},'
 
-            y_axis_description = 'ylabel={' + NoEscape(ylabel) + '},'
+            y_axis_description = 'ylabel={$' + NoEscape(ylabel) + '$},'
+            plotted_frame._ylabel = ylabel
 
         else:
+            print('pure else')
 
+            ylabel = plotted_frame._ylabel
             y_axis_description = ''
 
         if x_axis_description is None:
@@ -1079,7 +1103,7 @@ class BasicFormattingTools(DataMethods):
             height=height,
             width=width,
             x_axis_description=x_axis_description.replace('$$', '$'),
-            y_axis_description=y_axis_description,
+            y_axis_description=y_axis_description.replace('$$', '$'),
             subplots=subplots,
             legend_pos=legend_pos,
             extra_commands=extra_commands,
@@ -1117,7 +1141,7 @@ class BasicFormattingTools(DataMethods):
 
         #################################33 to as method
 
-        ylabel = plotted_frame._ylabel
+        #ylabel = plotted_frame._ylabel
 
         if label is not None:
             AutoMarker.add_marker(plotted_frame._get_str_key(), label)
@@ -1131,10 +1155,21 @@ class BasicFormattingTools(DataMethods):
 
         if preview:
             plotted_frame.plot(ylabel=ylabel, subplots=subplots)
+            print('==============')
+            print(y_axis_description.replace('$$', '$'))
+            print('==============')
+            plt.ylabel((  f'${ylabel}$'  ).replace('$$', '$'))
+            plt.title(plotted_frame._raw_title)
             plt.show()
             display(Markdown(caption))
             container.append(fig)
-
+            
+            
+        print('==============')
+        print(ylabel)
+        print('==============')    
+    
+        plotted_frame._ylabel = ylabel
         return plotted_frame  #.plot(ylabel=ylabel,subplots=subplots)
 
     def reported(self,
@@ -1142,6 +1177,9 @@ class BasicFormattingTools(DataMethods):
                  index=True,
                  label=None,
                  caption=None,
+                 multirow=True,
+                 column_format=None,
+                 longtable=None,
                  *args,
                  **kwargs):
 
@@ -1153,7 +1191,7 @@ class BasicFormattingTools(DataMethods):
         if caption is not None:
             tab.add_caption(NoEscape(caption))
 
-        tab.add_table(index=index)
+        tab.add_table(index=index,multirow=multirow,column_format=column_format,longtable=longtable,**kwargs)
 
         if label is not None:
             tab.append(Label(label))
@@ -1272,6 +1310,7 @@ class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
         self._caption = None
         self._prepared_fig = None
         self._ylabel = None
+        self._raw_title = None
 
     def _get_str_key(self):
         #return self.to_latex()+f'subplot={self._subplot}, self._caption{self._caption} '
