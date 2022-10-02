@@ -2182,9 +2182,9 @@ class TwoNonLinearTrolleys(ComposedSystem):
             self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
             self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
             self.d: [1 * l0, 2 * l0, S.Half * l0, 3 * S.Half * l0, 1 * l0],
-            self.k1: [S.Half * k0, S.Half * k0, 1 * k0, 3 * S.Half * k0, 2 * k0],
-            self.k2: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k3: [S.Half * k0, 1 * k0, 3 * S.Half * k0, 2 * k0, 5 * S.Half * k0],
+            self.k1: [k0*no for no in range(5,10)],
+            self.k2: [k0*no for no in range(5,10)],
+            self.k3: [k0*no for no in range(5,10)],
             self.x1: [self.x, 0],
             self.x2: [self.x, S.Zero],
         }
@@ -2202,7 +2202,12 @@ class TwoNonLinearTrolleys(ComposedSystem):
 
         if parameters_dict[self.x1] == S.Zero:
             parameters_dict[self.x2] = self.x
-
+            print('aaaaaaaaaaaaaaaa')
+        if parameters_dict[self.k2]+parameters_dict[self.k3] - parameters_dict[self.k2] * parameters_dict[
+                self.l_0] / parameters_dict[self.d] == 0 or parameters_dict[self.k1]+parameters_dict[self.k3] - parameters_dict[self.k1] * parameters_dict[
+                self.l_0] / parameters_dict[self.d]:
+            print('HERE')
+            parameters_dict[self.d] = 2 * parameters_dict[self.d]
         return parameters_dict
 
     def symbols_description(self):
@@ -2494,7 +2499,7 @@ class DDoFTwoNonLinearTrolleys(ComposedSystem):
         self.Spring = Spring(k3, x1, x2,qs=[x1,x2])
 
         system = self.Trolley1 + self.Spring + self.Trolley2
-        super().__init__(system(qs),**kwargs)
+        super().__init__(system(qs=qs),**kwargs)
 
     def get_default_data(self):
 

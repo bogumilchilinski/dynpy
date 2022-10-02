@@ -297,7 +297,7 @@ class BlowerToothedBelt(ComposedSystem):
         self.qs = [self.z]
         self.ivar = ivar
 
-        self._init_from_components()
+        self._init_from_components(**kwargs)
 
     @property
     def components(self):
@@ -392,7 +392,7 @@ class DampedBlowerToothedBelt(BlowerToothedBelt):
 
         self.qs = [self.z]
         
-        self._init_from_components()
+        self._init_from_components(**kwargs)
         
     @property
     def components(self):
@@ -424,14 +424,15 @@ class DampedBlowerToothedBelt(BlowerToothedBelt):
         m0, k0, F0, Omega0, lam0, z0 = self.m0, self.k0, self.F0, self.Omega0, self.lam0, self.z0
 
         default_data_dict = {
-            self.k_belt: [k0 * S.One * no for no in range(1, 8)],
-            self.lam: [lam0/10*S.One*no for no in range(1,8)],
+
+            #self.lam: [lam0/10*S.One*no for no in range(1,8)],
             self.c_belt: [self.lam * (self.k_belt)],
             self.c_tensioner: [self.lam * (self.k_tensioner)],
             self.m: [m0 / 10 * S.One * no for no in range(1, 8)],
+            self.k_belt: [k0 * S.One * no for no in range(1, 8)],
             self.k_tensioner: [k0 * S.One * no for no in range(4, 8)],
             self.F: [F0 * S.One * no for no in range(1, 8)],
-            self.Omega: [Omega0*S.One*no for no in range(1,2)],
+            #self.Omega: [Omega0*S.One*no for no in range(1,2)],
             #self.Q: [Q*S.One*no for no in range(1,8)],
             
             self.z0: [F0 / k0 * S.One / 4 * no for no in range(1, 2)],
