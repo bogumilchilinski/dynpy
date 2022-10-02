@@ -70,7 +70,7 @@ class DampedChair4DOF(ComposedSystem):
     k_ft=Symbol('k_ft', positive=True)
     c_rs=Symbol('c_rs', positive=True)
     c_fs=Symbol('c_fs', positive=True)
-    c_rt=Symbol('c_rt', positive=True)
+    c_rt=Symbol('c_r_t', positive=True)
     c_ft=Symbol('c_ft', positive=True)
     c=Symbol('c', positive=True)
     F_engine=Symbol('F_{engine}', positive=True)
@@ -259,12 +259,14 @@ class DampedChair4DOF(ComposedSystem):
         self.damper_1= Damper(self.c_rs, pos1=self.z+self.phi*self.l_l , pos2 = self.z_rear , qs=[self.z, self.phi, self.z_rear])
         self.damper_2 = Damper(self.c_fs, pos1=self.z-self.phi*self.l_r , pos2 = self.z_fr , qs=[self.z, self.phi, self.z_fr])
         self.damper_x=Damper(self.c,pos1=self.x,qs=[self.x])
+        self.damper_z=Damper(self.c,pos1=self.z,qs=[self.z])
+        self.damper_phi=Damper(self.c,pos1=self.phi,qs=[self.phi])
         self.force_1 = Force(self.F*(sign(cos(self.Omega*self.ivar)-self.pm)+1), pos1=self.x , qs=[self.x])
         self.gravitational_force = GravitationalForce(self.M, self.g, (self.z+self.z_c3)*cos(self.phi), qs = self.qs)
 #         self.force_2 = Force(self.A*sin(ivar*self.omega), pos1=self.z_pw, qs=[self.z_pw])
         
         #self.force = Force(-self.F_engine, pos1=self.z - self.l_p * self.phi, qs=[self.z, self.phi])
-        system = self.body_hor + self.body_ver + self.body_rot  +self.spring_1 + self.spring_2 +self.damper_1+self.damper_2 + self.right_wheel + self.left_wheel + self.spring_pw+ self.spring_lw+self.damper_lw+self.damper_pw+self.damper_x +self.force_1+self.front_wheel_hor+self.front_wheel_rot + self.rear_wheel_hor + self.gravitational_force
+        system = self.body_hor + self.body_ver + self.body_rot  +self.spring_1 + self.spring_2 +self.damper_1+self.damper_2 + self.right_wheel + self.left_wheel + self.spring_pw+ self.spring_lw+self.damper_lw+self.damper_pw+self.damper_x +self.force_1+self.front_wheel_hor+self.front_wheel_rot + self.rear_wheel_hor + self.gravitational_force + self.damper_z + self.damper_phi
 
         super().__init__(**{'system':system,**kwargs})
         
@@ -485,6 +487,8 @@ units_dict = {
                sys4.k:(ureg.newton / ureg.meter),
                t:ureg.second,
                 f:ureg.hertz,
+                sys4.z:ureg.meter,
+                sys4.phi: ureg.radian
               }
 
 # units_dict = {sys4.m:ureg.kilogram,

@@ -995,14 +995,32 @@ class BasicFormattingTools(DataMethods):
         if width is None:
             width = self._default_width
 
-        #print(self._ylabel)
+        print('self++++++++++++++')
+        print(self._ylabel)
+        print('self++++++++++++++')
+        self._raw_title=' '
 
         plotted_frame = self.copy()
-        #print('copy',plotted_frame._ylabel)
+        plotted_frame._ylabel = self._ylabel
+        plotted_frame._raw_title = self._raw_title
+        print('copy',plotted_frame._ylabel)
 
         col_idx = plotted_frame.columns
 
         latex_backend = self.__class__._latex_backend
+
+        # title recognition
+        #+++++++++++++++++++
+        if isinstance(col_idx, pd.MultiIndex):
+            if len(col_idx.get_level_values(0).unique()) == 1:
+                
+                plotted_frame._raw_title = col_idx.get_level_values(0).unique()[0]
+                plotted_frame = plotted_frame.droplevel(0, axis=1)
+
+
+                
+
+        col_idx = plotted_frame.columns
 
         if y_axis_description is None and isinstance(col_idx, pd.MultiIndex):
 
@@ -1057,6 +1075,7 @@ class BasicFormattingTools(DataMethods):
         else:
             print('pure else')
 
+            ylabel = plotted_frame._ylabel
             y_axis_description = ''
 
         if x_axis_description is None:
@@ -1122,7 +1141,7 @@ class BasicFormattingTools(DataMethods):
 
         #################################33 to as method
 
-        ylabel = plotted_frame._ylabel
+        #ylabel = plotted_frame._ylabel
 
         if label is not None:
             AutoMarker.add_marker(plotted_frame._get_str_key(), label)
@@ -1139,11 +1158,18 @@ class BasicFormattingTools(DataMethods):
             print('==============')
             print(y_axis_description.replace('$$', '$'))
             print('==============')
-            plt.ylabel((  f'${plotted_frame._ylabel}$'  ).replace('$$', '$'))
+            plt.ylabel((  f'${ylabel}$'  ).replace('$$', '$'))
+            plt.title(plotted_frame._raw_title)
             plt.show()
             display(Markdown(caption))
             container.append(fig)
-
+            
+            
+        print('==============')
+        print(ylabel)
+        print('==============')    
+    
+        plotted_frame._ylabel = ylabel
         return plotted_frame  #.plot(ylabel=ylabel,subplots=subplots)
 
     def reported(self,
@@ -1284,6 +1310,7 @@ class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
         self._caption = None
         self._prepared_fig = None
         self._ylabel = None
+        self._raw_title = None
 
     def _get_str_key(self):
         #return self.to_latex()+f'subplot={self._subplot}, self._caption{self._caption} '
