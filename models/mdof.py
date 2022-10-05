@@ -3464,7 +3464,7 @@ class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
         self.Spring4 = Spring(k_4, pos1=(phi_c * l), pos2=(phi_r * l), qs=[phi_c, phi_r])
 
         system = self.Pendulum1 + self.Pendulum2 + self.Pendulum3 + self.Spring1 + self.Spring2 + self.Spring3 + self.Spring4
-        super().__init__(system(qs),**kwargs)
+        super().__init__(system(qs=qs),**kwargs)
 
 
     def get_default_data(self):
