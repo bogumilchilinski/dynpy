@@ -260,7 +260,7 @@ class DataMethods:
         doc.append(tikz_pic)
 
         if picture:
-            doc.generate_pdf(filename, clean_tex=False)
+            doc.generate_pdf(filename, clean_tex=False,compiler_args=['--lualatex'])
         else:
             doc.generate_tex(filename)
 
