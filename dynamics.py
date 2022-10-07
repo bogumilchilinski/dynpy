@@ -1404,12 +1404,20 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         pass
 
     @property
+    def _coords_with_acceleration_list(self): ## dodać helpa
+        
+        coords_list = list(self.Y) + list(diff(self.q,self.ivar,self.ivar))
+        
+        return coords_list
+    
+    @property
     def _coords_with_acceleration(self): ## dodać helpa
         
-        coords_list = list(self.Y) + [diff(self.q,self.ivar,self.ivar)]
-        coords_mat = Matrix(coords_list)
+        coords_mat = Matrix(self._coords_with_acceleration_list)
         
         return coords_mat
+
+
     
     def approximated(self, n=3, x0=None, op_point=False, hint=[], label=None):
         """
@@ -1435,7 +1443,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 #         coords_list = list(self.Y) + [diff(self.q,self.ivar,self.ivar)]
 #         coords_mat = Matrix(coords_list)
 
-        display(self._coords_with_acceleration)
+        #display(self._coords_with_acceleration)
 
         
         linearized_forces=[(point,MultivariableTaylorSeries((force&base_frame.x).doit(),self._coords_with_acceleration,n=n,x0=x0).doit()*base_frame.x)  for  point,force   in   self.forcelist]
