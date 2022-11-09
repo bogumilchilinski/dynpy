@@ -33,14 +33,14 @@ class EngineHousing(MaterialPoint):
     def get_default_data(self):
         m0=Symbol('m_0',positive=True)
         default_data_dict={
-            self.m:[10 * m0 * no / 100 for no in range(10, 150)],
+            self.m:[S.One *10 * m0 * no / 100 for no in range(75, 120)],
         }
         return default_data_dict
 
     def get_numerical_data(self):
 
         self.default_data_dict={
-            self.m:[5* no/100 for no in range(80,120)],
+            self.m:[10* no/100 for no in range(80,120)],
         }
         return self.default_data_dict
 
@@ -80,6 +80,7 @@ class FreeEngine(ComposedSystem):
     m0 = Symbol('m_0', positive=True)
 
     e0 = Symbol('e_0', positive=True)
+    omega = Symbol('Omega', positive=True)    
 
     def __init__(self,
                  M=None,
@@ -136,8 +137,8 @@ class FreeEngine(ComposedSystem):
         default_data_dict = {
 #             self.M: [10 * self.m0 * no / 100 for no in range(10, 150)],
 #             self.m_e: [self.m0 * no / 100 for no in range(80, 120)],
-            self.e: [self.e0 * no / 100 for no in range(80, 120)],
-            self.phi: [2 * 3.14 * self.ivar]
+            self.e: [S.One *self.e0 * no / 100 for no in range(80, 120)],
+            self.phi: [self.omega * self.ivar]
         }
         return default_data_dict
 
@@ -348,7 +349,7 @@ class Engine(ComposedSystem):
         components = {}
         M, k_m, m_e, e, z, phi = self.M, self.k_m, self.m_e, self.e, self.z, self.phi
 
-        self._engine = FreeEngine(self.M, self.m_e, self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine')
+        self._engine = FreeEngine(self.M, self.m_e,self.e ,self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine')
         
         self._left_mount  = EngineMount(self.k_m, self.z, qs=[self.z])(label='Left engine mount',scheme_options={'at':(1,-8)})
         
@@ -448,7 +449,7 @@ class EngineVerticalSpringGravity(Engine):
 
         components = {}
 
-        self._engine_block = FreeEngine(self.M, self.m_e, self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine', scheme_options = {'at':(0,0)})
+        self._engine_block = FreeEngine(self.M, self.m_e,self.e, self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine', scheme_options = {'at':(0,0)})
 
         self._left_mount  = EngineMount(self.k_m, self.z, qs=[self.z])(label='Left engine mount', scheme_options = {'at':(0,-8)})
         self._right_mount = EngineMount(self.k_m, self.z, qs=[self.z])(label='Right engine mount', scheme_options = {'at':(5,-8)})
