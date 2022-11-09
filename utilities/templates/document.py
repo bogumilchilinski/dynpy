@@ -424,11 +424,13 @@ class BeamerTemplate(Document):
                  default_filepath='default_filepath',
                  *,
                  title=None,
+                 author=None,
+                 initials=None,
                  documentclass='beamer',
                  document_options=None,
                  fontenc='T1',
                  inputenc='utf8',
-                 font_size='normalsize',
+                 font_size='footnotesize',
                  lmodern=False,
                  textcomp=True,
                  microtype=True,
@@ -453,9 +455,18 @@ class BeamerTemplate(Document):
             data=data, 
             )
         self.title = title
+        self.author = author
+        self.initials = initials
         
         if self.title is not None:
-            self.packages.append(Command('title', arguments=[self.title]))
+            self.packages.append(Command('title', arguments=[self.title], options=['']))
+            
+        if self.author is not None:
+            if self.initials is not None:
+                self.packages.append(Command('author', arguments=[self.author], options=[self.initials]))
+            else:
+                self.packages.append(Command('author', arguments=[self.author], options=['']))
+            
         self.append(Command('frame', arguments=[NoEscape(r'\titlepage')]))
 
 class DGBeamer(Document):

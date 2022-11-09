@@ -1,0 +1,1 @@
+{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-interaction=nonstopmode","-output-directory=/tmp/b4334c1cfcf20a5b2b82bafd5f9ece6e4a8661e6","Raport - wal.tex"]}
