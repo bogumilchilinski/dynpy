@@ -561,7 +561,7 @@ class TrolleyWithPendulum(ComposedSystem):
 
         self._trolley = SpringMassSystem(self.m_t, self.k, self.x, self.ivar)(label='Trolley')
         self._pendulum = PendulumKinematicExct(self.l, self.m_p, self.g, self.phi, self.x, self.ivar)(label='Pendulum')
-        self._force=Force(self.F*sin(self.Omega*self.ivar), pos1=self.x, qs=[self.x, self.phi])(label='Force')
+        self._force=Force(2*self.F+self.F*sin(self.Omega*self.ivar)+3*self.F*cos(self.Omega*self.ivar), pos1=self.x, qs=[self.x, self.phi])(label='Force')
 
         components['_trolley'] = self._trolley
         components['_pendulum'] = self._pendulum
