@@ -1,5 +1,6 @@
 {
     "projectManager.git.baseFolders": [
         "modules"
-    ]
+    ],
+    "python.analysis.typeCheckingMode": "off"
 }
