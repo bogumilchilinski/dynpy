@@ -1127,7 +1127,97 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         return latex(Eq(self.lhs,self.rhs ,evaluate=False   ))    
     
+class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     
+    @cached_property    
+    def eigenvalues(self):
+        '''
+        Determines the system eigenvalues matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
+        '''
+
+
+        return self._auxiliary_fundamental_matrix.diagonalize()[1]
+  
+    @cached_property    
+    def modes(self):
+        '''
+        Determines the system eigenvalues matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
+        '''
+
+
+        return self._auxiliary_fundamental_matrix.diagonalize()[0]  
+    
+    @cached_property
+    def _general_solution(self):
+
+        '''
+        Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
+        '''
+
+        C = numbered_symbols('C', start=1)
+        C_list = []
+
+        for i in range(len(self.dvars) ):
+            C_list += [next(C)]
+
+        args_list = self.dvars[0].args
+
+        if len(self.dvars[0].args) > 1:
+
+            params = {*args_list} - {self.ivar}
+
+            C_list = [Function(str(C_tmp)) for C_tmp in C_list]
+            C_list = [(C_tmp)(*params) for C_tmp in C_list]
+
+        #         print('o tu')
+        #         display(self.odes_system)
+
+        #self.__class__._const_list |= set(C_list)
+
+        modes = self.modes
+        eigs = self.eigenvalues
+
+        Y_mat = Matrix(self.dvars)
+
+        solution = modes*Matrix([C_list[no]*exp(eigs[no,no]  *self.ivar) for   no   in range(len(self.dvars))]  )#.applyfunc(lambda elem: elem.rewrite(sin))
+
+        if len(self.dvars) >= 2:
+            no = int(len(self.dvars)/2)
+        
+            solution=  solution[no:] + solution[:no]
+
+        return AnalyticalSolution(self.dvars,solution)#.subs( const_dict )
+                                 
+
+                                 
+    @cached_property
+    def _steady_solution(self):
+        '''
+        It applies generic form solution for the following differential equation
+        \dot Y + A Y = F \cos(\Omega t)
+        
+        The generic form is:
+        
+        C = (A^{-1} \Omega^2 + A)^{-1}  F 
+        D =  \Omega A^{-1} * C
+        '''
+        
+        A = self._fundamental_matrix
+        b = self._free_terms
+        
+        omg = Symbol('Omega',positive=True)
+
+                                 
+        cos_amp = (A.inv() * omg**2 + A).inv() * b
+        sin_amp = omg*A.inv() * cos_amp 
+
+        sol =cos_amp  * cos(omg * self.ivar) + sin_amp * sin(omg * self.ivar)
+        
+        
+
+
+
+        return AnalyticalSolution(self.dvars,sol)   
     
 class FirstOrderODE:
     """
