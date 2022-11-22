@@ -514,7 +514,22 @@ class ODESystem(AnalyticalSolution):
 
         return cls._constructor(odes , dvars, odes_rhs , ivar,ode_order=ode_order ,parameters=parameters)
 
-    
+    @classmethod
+    def from_dynamic_system(cls,dyn_system, ode_order = None, parameters = None):
+
+        sys = dyn_system
+        ds_lhs = sys.Y.diff(sys.ivar)
+        ds_rhs = sys.rhs()
+        dvars = sys.Y
+        ivar = sys.ivar
+        
+        if parameters == None:
+            parameters = sys._parameters
+
+        if ode_order == None:
+            ode_order = cls._ode_order
+
+        return cls._constructor(ds_lhs, dvars, ds_rhs, ivar, ode_order = ode_order, parameters = parameters)
 
     
     @classmethod
