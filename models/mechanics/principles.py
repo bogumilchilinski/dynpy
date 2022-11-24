@@ -744,7 +744,7 @@ class LagrangeIOnMathFunction(ComposedSystem):
     
 class CrankSystem(ComposedSystem):
 
-    scheme_name = 'crank_mechanism.png'
+    scheme_name = 'crank_mechanismlow.jpg'
     real_name = 'crank_slider_real.jpg'
 
     def __init__(self,
