@@ -4760,7 +4760,7 @@ class CrankSystem(ComposedSystem):
         self.crank = MaterialPoint(I, phi, qs=[phi])
         composed_system = (self.crank)
 
-        super().__init__(composed_system,**kwargs)
+        super(HarmonicOscillator).__init__(composed_system,**kwargs)
 
     @property
     def _dbeta(self):
