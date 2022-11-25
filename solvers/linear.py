@@ -1141,11 +1141,17 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     @cached_property    
     def modes(self):
         '''
-        Determines the system eigenvalues matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
+        Determines the system eigenvalues matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix. 
         '''
 
+        n=int(len(self.dvars)/2)
+        modes=self._auxiliary_fundamental_matrix.diagonalize()[0]
 
-        return self._auxiliary_fundamental_matrix.diagonalize()[0]  
+        mat1=modes[0:n,:]
+        mat2=modes[n:len(self.dvars),:]
+        mat=mat1.row_insert(0, mat2)
+
+        return mat
     
     @cached_property
     def _general_solution(self):
