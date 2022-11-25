@@ -16,17 +16,28 @@ import IPython as IP
 import numpy as np
 import inspect
 
+import matplotlib.pyplot as plt
+
+
+def plots_no():
+    num = 0
+    while True:
+        yield num
+        num += 1
 
 class ComposedSystem(HarmonicOscillator):
     """Base class for all systems
 
     """
+    _case_no = plots_no()
+    
     scheme_name = 'damped_car_new.PNG'
     real_name = 'car_real.jpg'
     detail_scheme_name = 'sruba_pasowana.png'
     detail_real_name = 'buick_regal_3800.jpg'
     _default_args = ()
     _default_folder_path = "./dynpy/models/images/"
+    _path = None
 
     z = dynamicsymbols('z')
 
@@ -705,6 +716,9 @@ class LagrangeIOnMathFunction(ComposedSystem):
     scheme_name = 'mat_point_parabola.PNG'
     real_name = 'tautochrone_curve_small.gif'
 
+    
+    
+    
     def __init__(self,
                  m=Symbol('m', positive=True),
                  g=Symbol('g', positive=True),
@@ -747,6 +761,109 @@ class CrankSystem(ComposedSystem):
     scheme_name = 'crank_mechanismlow.jpg'
     real_name = 'crank_slider_real.jpg'
 
+    
+    _default_folder_path = "./dynpy/models/images/"
+
+
+
+    def _detail_scheme(self):
+
+        self.preview()
+
+        return self._path
+    
+    
+    def preview(self, example=False):
+        
+
+        if self._path:
+            path = self._path
+            
+        else:
+
+            plt.figure(figsize=(10,10))
+
+
+            plt.xlim(-0.5,1)
+            plt.ylim(-0.25,1.25)
+            plt.grid(True)
+            
+            if (self._given_data)=={}:
+            
+                path = self.__class__._default_folder_path + self.__class__.scheme_name
+            else:
+                
+
+                
+                h_num=float(self.h.subs(self._given_data))
+                r_num=float(self.r.subs(self._given_data))
+                phi_num=float(self.phi.subs(self._given_data))
+                a_num=float(self.a.subs(self._given_data))
+                b_num=float(self.b.subs(self._given_data))                
+                
+                pOx = 0
+                pOy = 0
+                plt.text(-0.05+(pOx),(-0.05+pOy),'O')
+                
+                pAx=0
+                pAy=h_num
+                plt.text(-0.05+(pAx),(+0.05+pAy),'A')
+                
+                plt.plot([pOx,pAx],[pOy,pAy],'b',linewidth=2)
+                plt.text(-0.05+(pOx+pAx)/2,(pOy+pAy)/2,'h')
+                
+                pBx = pAx + r_num*np.sin(phi_num)
+                pBy = pAy + r_num*np.cos(phi_num)
+                plt.text(+0.05+(pBx),(+0.00+pBy),'B')
+                
+                plt.plot([pBx,pAx],[pBy,pAy],'r',linewidth=2)
+                plt.text((pBx+pAx)/2,0.05+(pBy+pAy)/2,'r')
+                
+                lBO = ((pBx-pOx)**2 + (pBy-pOy)**2)**0.5
+                
+                p1x = 1.1*(h_num+r_num)*pBx/lBO
+                p1y = 1.1*(h_num+r_num)*pBy/lBO
+                
+                plt.plot([p1x,pOx],[p1y,pOy],'g',linewidth=2)
+
+                pCx = a_num*pBx/lBO
+                pCy = a_num*pBy/lBO
+                plt.text(+0.05+(pCx),(+0.05+pCy),'C')
+                
+                plt.plot([pOx,pCx],[pOy,pCy],'m',linewidth=2)
+                plt.text(0.05+(pOx+pCx)/2,(pOy+pCy)/2,'a')
+                
+#                 pDx = pCx+(b_num**2 - pCy**2)**0.5        # poprawna wartość położenia D
+                pDx = (pCx+(b_num**2 - pCy**2)**0.5)*1.15   # celowo wprowadzony błąd
+                pDy = 0
+                plt.text(+0.05+(pDx),(+0.00+pDy),'D')
+                
+                plt.plot([pCx,pDx],[pCy,pDy],'k',linewidth=2)
+                plt.text((pCx+pDx)/2,0.05+(pCy+pDy)/2,'b')
+            
+                path = self.__class__._default_folder_path + 'previews/' + self.__class__.__name__ + str(
+                                            next(self.__class__._case_no)) + '.png'
+
+                plt.savefig(path)
+                self._path=path
+
+                plt.close()
+
+        
+
+#        print('check' * 100)
+        print(self._path)
+#        print('check' * 100)
+        plt.close()
+
+        with open(f"{path}", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+        image_file.close()
+
+        return IP.display.Image(base64.b64decode(encoded_string))
+    
+    
+    
     def __init__(self,
                  I=Symbol('I', positive=True),
                  r=Symbol('r', positive=True),
