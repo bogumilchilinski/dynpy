@@ -1141,7 +1141,8 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     @cached_property    
     def modes(self):
         '''
-        Determines the system eigenvalues matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix. 
+        Returns reversed modal vector components by changing place of last n/2 rows of matrix to first row.
+        Modes matrix computed by Sympy .diagonalize() method.
         '''
 
         n=int(len(self.dvars)/2)
