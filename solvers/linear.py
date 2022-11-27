@@ -1141,8 +1141,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     @cached_property    
     def modes(self):
         '''
-        Returns reversed modal vector components by changing place of last n/2 rows of matrix to first row.
-        Modes matrix computed by Sympy .diagonalize() method.
+        Returns reversed modes matrix (computed by Sympy's .diagonalize() method) by changing place of last n/2 rows of matrix to first row.
         '''
 
         n=int(len(self.dvars)/2)
