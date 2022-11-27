@@ -1198,6 +1198,46 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
 
         return AnalyticalSolution(self.dvars,solution)#.subs( const_dict )
                                  
+    def _sin_comp(self,omega,amp): 
+        '''
+        It applies generic form solution for the following differential equation
+        \dot Y + A Y = F \sin(\Omega t)
+        
+        The generic form is:
+        
+        D = (A^{-1} \Omega^2 + A)^{-1}  F 
+        C =  - \Omega A^{-1} * D
+        '''
+           
+        A = self._fundamental_matrix
+        b = amp
+        
+                                 
+        sin_comp = (A.inv() * omega**2 + A).inv()*b
+        cos_comp = -omega*A.inv() * sin_comp
+          
+        return cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar)                      
+
+    
+    def _cos_comp(self,omega,amp):
+        
+        '''
+        It applies generic form solution for the following differential equation
+        \dot Y + A Y = F \cos(\Omega t)
+        
+        The generic form is:
+        
+        C = (A^{-1} \Omega^2 + A)^{-1}  F 
+        D =  \Omega A^{-1} * C
+        '''
+        
+        A = self._fundamental_matrix
+        b = amp
+        
+        cos_comp = (A.inv() * omega**2 + A).inv()*b
+        sin_comp = omega*A.inv() * cos_comp
+          
+        return cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar)  
 
                                  
     @cached_property
@@ -1212,22 +1252,15 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         D =  \Omega A^{-1} * C
         '''
         
+
         A = self._fundamental_matrix
         b = self._free_terms
         
         omg = Symbol('Omega',positive=True)
 
-                                 
-        cos_amp = (A.inv() * omg**2 + A).inv() * b
-        sin_amp = omg*A.inv() * cos_amp 
+        sol = self._cos_comp(omg,b) + self._sin_comp(omg,0*b)
 
-        sol =cos_amp  * cos(omg * self.ivar) + sin_amp * sin(omg * self.ivar)
-        
-        
-
-
-
-        return AnalyticalSolution(self.dvars,sol)   
+        return AnalyticalSolution(self.dvars,sol)  
     
 class FirstOrderODE:
     """
