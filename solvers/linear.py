@@ -1161,6 +1161,15 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         return latex(Eq(self.lhs,self.rhs ,evaluate=False   ))    
     
 class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
+ 
+    @cached_property
+    def _auxiliary_fundamental_matrix(self):
+        
+        dvars = list(reversed(list(self.dvars)))
+        odes = list(reversed(list(self.odes_rhs)))
+    
+        
+        return Matrix(odes).jacobian(dvars)  
     
     @cached_property    
     def eigenvalues(self):
@@ -1174,17 +1183,15 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     @cached_property    
     def modes(self):
         '''
-        Returns reversed modes matrix (computed by Sympy's .diagonalize() method) by changing place of last n/2 rows of matrix to first row.
+        Returns reversed modes matrix (computed by Sympy's .diagonalize() method) by changing order of all rows.
         '''
 
-        n=int(len(self.dvars)/2)
         modes=self._auxiliary_fundamental_matrix.diagonalize()[0]
+        rows_no = modes.shape[0]
+        
+        rows_list = [modes[row,:] for row in reversed(range(rows_no))]
 
-        mat1=modes[0:n,:]
-        mat2=modes[n:len(self.dvars),:]
-        mat=mat1.row_insert(0, mat2)
-
-        return mat
+        return Matrix(rows_list)
     
     @cached_property
     def _general_solution(self):
@@ -1220,13 +1227,50 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
 
         solution = modes*Matrix([C_list[no]*exp(eigs[no,no]  *self.ivar) for   no   in range(len(self.dvars))]  )#.applyfunc(lambda elem: elem.rewrite(sin))
 
-        if len(self.dvars) >= 2:
-            no = int(len(self.dvars)/2)
-        
-            solution=  solution[no:] + solution[:no]
+
 
         return AnalyticalSolution(self.dvars,solution)#.subs( const_dict )
                                  
+    def _sin_comp(self,omega,amp): 
+        '''
+        It applies generic form solution for the following differential equation
+        \dot Y + A Y = F \sin(\Omega t)
+        
+        The generic form is:
+        
+        D = (A^{-1} \Omega^2 + A)^{-1}  F 
+        C =  - \Omega A^{-1} * D
+        '''
+           
+        A = self._fundamental_matrix
+        b = amp
+        
+                                 
+        sin_comp = (A.inv() * omega**2 + A).inv()*b
+        cos_comp = -omega*A.inv() * sin_comp
+          
+        return cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar)                      
+
+    
+    def _cos_comp(self,omega,amp):
+        
+        '''
+        It applies generic form solution for the following differential equation
+        \dot Y + A Y = F \cos(\Omega t)
+        
+        The generic form is:
+        
+        C = (A^{-1} \Omega^2 + A)^{-1}  F 
+        D =  \Omega A^{-1} * C
+        '''
+        
+        A = self._fundamental_matrix
+        b = amp
+        
+        cos_comp = (A.inv() * omega**2 + A).inv()*b
+        sin_comp = omega*A.inv() * cos_comp
+          
+        return cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar)  
 
                                  
     @cached_property
@@ -1241,22 +1285,15 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         D =  \Omega A^{-1} * C
         '''
         
+
         A = self._fundamental_matrix
         b = self._free_terms
         
         omg = Symbol('Omega',positive=True)
 
-                                 
-        cos_amp = (A.inv() * omg**2 + A).inv() * b
-        sin_amp = omg*A.inv() * cos_amp 
+        sol = self._cos_comp(omg,b) + self._sin_comp(omg,0*b)
 
-        sol =cos_amp  * cos(omg * self.ivar) + sin_amp * sin(omg * self.ivar)
-        
-        
-
-
-
-        return AnalyticalSolution(self.dvars,sol)   
+        return AnalyticalSolution(self.dvars,sol)  
     
 class FirstOrderODE:
     """
