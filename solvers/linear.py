@@ -975,47 +975,75 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         return self.odes_rhs.subs({coord:0 for coord in self.dvars})
 
 
+#     @cached_property
+#     def _auxiliary_fundamental_matrix(self):
+        
+#         odes_list = list(self.odes_rhs)
+#         dvars_list = list(self.dvars)
+        
+#         if len(self.dvars) >= 2:
+#             no = int(len(self.dvars)/2)
+        
+#             odes=  odes_list[no:] + odes_list[:no] 
+#             dvars = dvars_list[no:] + dvars_list[:no]
+#         else:
+#             odes=odes_list
+#             dvars=dvars_list
+        
+#         odes = Matrix(odes)
+#         dvars = Matrix(dvars)
+        
+#         return odes.jacobian(dvars)
+
+    @cached_property
+    def _auxiliary_dvars(self):
+        
+        dvars = list(reversed(list(self.dvars)))
+    
+        
+        return Matrix(dvars)  
+
     @cached_property
     def _auxiliary_fundamental_matrix(self):
         
-        odes_list = list(self.odes_rhs)
-        dvars_list = list(self.dvars)
+        dvars = list(reversed(list(self.dvars)))
+        odes = list(reversed(list(self.odes_rhs)))
+    
         
-        if len(self.dvars) >= 2:
-            no = int(len(self.dvars)/2)
+        return Matrix(odes).jacobian(dvars)  
+    
+#     @cached_property
+#     def _auxiliary_free_terms(self):
         
-            odes=  odes_list[no:] + odes_list[:no] 
-            dvars = dvars_list[no:] + dvars_list[:no]
-        else:
-            odes=odes_list
-            dvars=dvars_list
+#         odes_list = list(self.odes_rhs)
+#         dvars = self.dvars
         
-        odes = Matrix(odes)
-        dvars = Matrix(dvars)
+#         if len(self.dvars) >= 2:
+#             no = int(len(self.dvars)/2)
         
-        return odes.jacobian(dvars)
+#             odes=  odes_list[no:] + odes_list[:no] 
+
+#         else:
+#             odes=odes_list
+
+#         odes = Matrix(odes)
+        
+
+        
+#         return odes.subs({coord:0 for coord in dvars})
     
     @cached_property
     def _auxiliary_free_terms(self):
-        
-        odes_list = list(self.odes_rhs)
+
+
         dvars = self.dvars
-        
-        if len(self.dvars) >= 2:
-            no = int(len(self.dvars)/2)
-        
-            odes=  odes_list[no:] + odes_list[:no] 
 
-        else:
-            odes=odes_list
+        odes_list = list(reversed(list(self.odes_rhs)))
 
-        odes = Matrix(odes)
-        
+        odes = Matrix(odes_list)
 
         
         return odes.subs({coord:0 for coord in dvars})   
-    
-    
     
     def _const_mapper(self,const_set,parameters=None):
         
@@ -1062,16 +1090,18 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         
         A = self._auxiliary_fundamental_matrix
+        dvars = self._auxiliary_dvars
         
-        sol = AnalyticalSolution(self.dvars,linodesolve(A,t=self.ivar,b=0*self.dvars))#.applyfunc(self.solution_map)
+        sol = AnalyticalSolution(dvars,linodesolve(A,t=self.ivar,b=0*self.dvars))#.applyfunc(self.solution_map)
         
         dummies_set= sol.atoms(Dummy)
         const_dict = self._const_mapper(dummies_set)
 
-        if len(self.dvars) >= 2:
-            no = int(len(self.dvars)/2)
+#         if len(self.dvars) >= 2:
+#             no = int(len(self.dvars)/2)
         
-            sol=  sol[no:] + sol[:no]
+#             sol=  sol[no:] + sol[:no]
+        sol = list(reversed(list(sol)))
 
         return AnalyticalSolution(self.dvars,sol).subs( const_dict )
                                  
@@ -1085,17 +1115,20 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         A = self._auxiliary_fundamental_matrix
         b = self._auxiliary_free_terms
-                                 
+        dvars = self._auxiliary_dvars                                 
 
-        sol = AnalyticalSolution(self.dvars,linodesolve(A,t=self.ivar,b=b)).applyfunc(self.solution_map)
+        sol = AnalyticalSolution(dvars,linodesolve(A,t=self.ivar,b=b)).applyfunc(self.solution_map)
         
         dummies_set= sol.atoms(Dummy)
 
 
-        if len(self.dvars) >= 2:
-            no = int(len(self.dvars)/2)
+#         if len(self.dvars) >= 2:
+#             no = int(len(self.dvars)/2)
         
-            sol=  sol[no:] + sol[:no] 
+#             sol=  sol[no:] + sol[:no] 
+        sol = list(reversed(list(sol)))
+    
+
 
         return AnalyticalSolution(self.dvars,sol).subs({dum_sym:0 for dum_sym in dummies_set})
 
