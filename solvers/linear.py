@@ -207,7 +207,7 @@ class MultivariableTaylorSeries(Expr):
 
 
 
-class AnalyticalSolution(Matrix):
+class AnalyticalSolution(ImmutableMatrix):
     def __new__(cls, data,rhs=None ,evaluate=True, **options):
 
         
