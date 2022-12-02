@@ -847,7 +847,7 @@ class ODESystem(AnalyticalSolution):
         
         ode=self.as_first_ode_linear_system()
         
-        return OdeComputationalCase(odes_system=ode.rhs,dvars=ode.dvars,ivar=ode.ivar)
+        return OdeComputationalCase(odes_system=ode.rhs,ivar=ode.ivar,dvars=ode.dvars,params= parameters)
     
     # def numerized(self,parameters={},ic_list=[]):
     #     '''
