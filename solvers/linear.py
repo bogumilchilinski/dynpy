@@ -720,11 +720,7 @@ class ODESystem(AnalyticalSolution):
         else:
             return FirstOrderODESystem(lin_eqns,dvars=self.dvars,ivar=self.ivar)
 
-    def numerized(self,parameters={},ic_list=[]):
-        '''
-        Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
-        '''
-        return OdeComputationalCase(odes_system=self.odes_rhs,dvars=self.dvars,ivar=self.ivar)
+
         
 
     def linearized(self, x0=None, op_point=False, hint=[], label=None):
@@ -887,6 +883,11 @@ class ODESystem(AnalyticalSolution):
         
         return OdeComputationalCase(odes_system=ode.rhs,dvars=ode.dvars,ivar=ode.ivar)
     
+    # def numerized(self,parameters={},ic_list=[]):
+    #     '''
+    #     Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
+    #     '''
+    #     return OdeComputationalCase(odes_system=self.odes_rhs,dvars=self.dvars,ivar=self.ivar)    
     
 
 class FirstOrderODESystem(ODESystem):
