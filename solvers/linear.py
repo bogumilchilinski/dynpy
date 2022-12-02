@@ -342,6 +342,14 @@ class AnalyticalSolution(ImmutableMatrix):
 
         return obj
 
+    def __rmul__(self,other):
+
+        obj = super().__rmul__(other)
+        obj._lhs=self._lhs
+
+        return obj
+    
+    
     def doit(self,**hints):
 
         obj = super().doit(**hints)
@@ -355,6 +363,17 @@ class AnalyticalSolution(ImmutableMatrix):
         obj._lhs=self._lhs
         
         return obj
+
+    def expand(self,deep=True, modulus=None, power_base=True, power_exp=True,mul=True, log=True, multinomial=True, basic=True, **hints):
+        
+
+        obj = super().expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
+        obj._lhs = self._lhs.expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
+        obj._dvars=self._dvars
+        obj._ivar = self.ivar
+        
+        return obj
+    
     
     def __call__(self,t,params={}):
         
@@ -409,7 +428,7 @@ class AnalyticalSolution(ImmutableMatrix):
     
 
     def as_matrix(self):
-        return Matrix( self.lhs-self.rhs )
+        return Matrix( self.rhs )
     
     def as_eq(self):
         return Eq(self.lhs,self.rhs)
@@ -456,6 +475,9 @@ class AnalyticalSolution(ImmutableMatrix):
         numerized_sol.index.name = ivar
         
         return numerized_sol
+    
+
+    
     
     
 class ODESolution(AnalyticalSolution):
@@ -811,6 +833,18 @@ class ODESystem(AnalyticalSolution):
         obj._ode_order = self.ode_order
         
         return obj
+
+    def expand(self,deep=True, modulus=None, power_base=True, power_exp=True,mul=True, log=True, multinomial=True, basic=True, **hints):
+        
+
+        obj = super().expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
+        obj._lhs = self._lhs.expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
+        obj._dvars=self._dvars
+        obj._ivar = self.ivar
+        obj._ode_order = self.ode_order
+        
+        return obj
+    
     
     def copy(self):
         
@@ -839,7 +873,7 @@ class ODESystem(AnalyticalSolution):
             return print('False')
 
 
-    def numerized(self,parameters={},ic_list=[]):
+    def numerized(self,parameters={},ic_list=[],**kwrags):
         '''
         Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
         '''

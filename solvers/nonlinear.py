@@ -449,13 +449,16 @@ class MultiTimeScaleSolution(ODESystem):
                          solution.subs({
                              self.t_list[1]: self.eps  * self.ivar,
                              self.t_list[0]: self.ivar
-                         })]
+                         }).rhs   ]
             
         #display(*list(SimplifiedExpr._subs_container.values()))
-
-        return AnalyticalSolution(Matrix(list(self.dvars) +  list(self.dvars.diff(self.ivar)) ) ,
-                                  sum(sol_list,
-                                      Matrix(2*len(self.dvars)*[0])  )).applyfunc(lambda obj: obj.expand().doit())
+        result = (sum(sol_list, Matrix(2*len(self.dvars)*[0])  )).applyfunc(lambda obj: obj.expand().doit())
+        
+        new_res = AnalyticalSolution(Matrix(list(self.dvars) +  list(self.dvars.diff(self.ivar)) ) , result)
+        print(new_res._lhs)
+        return new_res
+    
+    
 
     def nth_eoms_approximation(self, order=3):
 
