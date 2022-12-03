@@ -28,7 +28,7 @@ from functools import cached_property
 
 from .numerical import OdeComputationalCase
 
-
+from timer import timer
 
 class MultivariableTaylorSeries(Expr):
     """_summary_
@@ -459,24 +459,72 @@ class AnalyticalSolution(ImmutableMatrix):
 
         return latex(Eq(self._lhs_repr,self.rhs,evaluate=False))
 
-    def numerized(self,t_span=[],parameters={}):
+    def numerized(self,parameters={},t_span=[],**kwargs):
         
         ivar = Symbol('t')
         
-        solution = self.rhs.subs(parameters)
+        solution = self.subs(parameters).doit()
         
-        sol_func = lambdify(ivar, solution, 'numpy')
-        
-        numerized_data = (sol_func(t_span))
-        
-        dvars = self.lhs
-        
-        numerized_sol  = TimeDataFrame(data={dvar:data[0] for dvar,data in zip(dvars,numerized_data)},index=t_span)
-        numerized_sol.index.name = ivar
-        
-        return numerized_sol
-    
 
+        
+        return solution
+    
+    def compute_solution(self,
+                         t_span=None,
+                         ic_list=None,
+                         t_eval=None,
+                         params_values=None,
+                         method='RK45',
+                         derivatives=False):
+        '''
+        Returns the result of the computations of solve_ivp integrator from scipy.integrate module.
+        '''
+
+
+#         if not self._evaluated:
+#             self.form_numerical_rhs()
+#             self._evaluated=True
+        
+        
+        with timer() as t:
+            
+            solution = self
+            ivar = list(self.dvars[0].args)[0]
+            
+            print('num'*3)
+            display(solution)
+
+            sol_func = lambdify(ivar, solution, 'numpy')
+
+            numerized_data = (sol_func(t_span))
+
+            dvars = self.lhs
+
+            numerized_sol  = TimeDataFrame(data={dvar:data[0] for dvar,data in zip(dvars,numerized_data)},index=t_span)
+            numerized_sol.index.name = ivar 
+            
+
+
+            solution_tdf = numerized_sol
+
+
+
+            velocities = self.dvars[int(len(self.dvars)/2) :]
+            for vel in velocities:
+                solution_tdf[vel].to_numpy()
+                gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
+                solution_tdf[vel.diff(ivar)] = gradient
+            print('_'*100,t.elapse)
+            comp_time=t.elapse
+            
+            #if derivatives:
+            
+
+
+
+        solution_tdf._set_comp_time(comp_time)
+        solution_tdf.index.name = ivar
+        return solution_tdf
     
     
     
@@ -517,6 +565,17 @@ class ODESolution(AnalyticalSolution):
         
         return num_sys
 
+    @property
+    def ics_dvars(self):
+
+
+
+        return self.dvars
+    
+    @cached_property
+    def dvars(self):
+        return self.lhs
+    
 class ODESystem(AnalyticalSolution):
     
     _ivar = Symbol('t')

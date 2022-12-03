@@ -19,7 +19,7 @@ import sympy.physics.mechanics as me
 
 from sympy.simplify.fu import TR8, TR10, TR7, TR3, TR0
 
-from .linear import LinearODESolution, FirstOrderODE, AnalyticalSolution, FirstOrderLinearODESystem, FirstOrderODESystem, ODESystem
+from .linear import LinearODESolution, FirstOrderODE, AnalyticalSolution, FirstOrderLinearODESystem, FirstOrderODESystem, ODESystem, ODESolution
 
 from timer import timer
 from collections.abc import Iterable
@@ -437,8 +437,12 @@ class MultiTimeScaleSolution(ODESystem):
 
         sol_list = []
         gen_sol = self._general_sol(order)
-        C_const_sol = self.secular_eq[self.eps].as_first_ode_linear_system(
-        ).expand().linearized().solution.as_dict()
+        
+        if self.eps in self.secular_eq:
+            C_const_sol = self.secular_eq[self.eps].as_first_ode_linear_system(
+            ).expand().linearized().solution.as_dict()
+        else:
+            C_const_sol={}
 
         for order, approx_sol in enumerate(gen_sol):
 
@@ -454,7 +458,7 @@ class MultiTimeScaleSolution(ODESystem):
         #display(*list(SimplifiedExpr._subs_container.values()))
         result = (sum(sol_list, Matrix(2*len(self.dvars)*[0])  )).applyfunc(lambda obj: obj.expand().doit())
         
-        new_res = AnalyticalSolution(Matrix(list(self.dvars) +  list(self.dvars.diff(self.ivar)) ) , result)
+        new_res = ODESolution(Matrix(list(self.dvars) +  list(self.dvars.diff(self.ivar)) ) , result)
         print(new_res._lhs)
         return new_res
     
