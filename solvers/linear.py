@@ -255,6 +255,7 @@ class AnalyticalSolution(ImmutableMatrix):
         if isinstance(matrix_eq,Eq):
             
             eq = matrix_eq
+            
         else:
             print ('TypeError: matrix_eq is not Eq')
             return None
@@ -516,6 +517,13 @@ class ODESystem(AnalyticalSolution):
 
     @classmethod
     def from_dynamic_system(cls,dyn_system, ode_order = None, parameters = None):
+        """Class method that creates an ODESystem object from a dynamic system object.
+
+        Arguments:
+            dyn_system - dynamic system object;
+            ode_order - order of a differential equation. Default value is equal to one;
+            parameters - parameters that could be implemented into newly created ODESystem object. Default value is None;
+        """
 
         sys = dyn_system
         ds_lhs = sys.Y.diff(sys.ivar)
@@ -524,7 +532,7 @@ class ODESystem(AnalyticalSolution):
         ivar = sys.ivar
         
         if parameters == None:
-            parameters = sys._parameters
+            parameters = cls._parameters
 
         if ode_order == None:
             ode_order = cls._ode_order
