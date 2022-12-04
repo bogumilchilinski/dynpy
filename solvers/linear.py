@@ -28,7 +28,7 @@ from functools import cached_property
 
 from .numerical import OdeComputationalCase
 
-
+from timer import timer
 
 class MultivariableTaylorSeries(Expr):
     """_summary_
@@ -343,6 +343,14 @@ class AnalyticalSolution(ImmutableMatrix):
 
         return obj
 
+    def __rmul__(self,other):
+
+        obj = super().__rmul__(other)
+        obj._lhs=self._lhs
+
+        return obj
+    
+    
     def doit(self,**hints):
 
         obj = super().doit(**hints)
@@ -356,6 +364,17 @@ class AnalyticalSolution(ImmutableMatrix):
         obj._lhs=self._lhs
         
         return obj
+
+    def expand(self,deep=True, modulus=None, power_base=True, power_exp=True,mul=True, log=True, multinomial=True, basic=True, **hints):
+        
+
+        obj = super().expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
+        obj._lhs = self._lhs.expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
+        obj._dvars=self._dvars
+        obj._ivar = self.ivar
+        
+        return obj
+    
     
     def __call__(self,t,params={}):
         
@@ -410,7 +429,7 @@ class AnalyticalSolution(ImmutableMatrix):
     
 
     def as_matrix(self):
-        return Matrix( self.lhs-self.rhs )
+        return Matrix( self.rhs )
     
     def as_eq(self):
         return Eq(self.lhs,self.rhs)
@@ -441,22 +460,73 @@ class AnalyticalSolution(ImmutableMatrix):
 
         return latex(Eq(self._lhs_repr,self.rhs,evaluate=False))
 
-    def numerized(self,t_span=[],parameters={}):
+    def numerized(self,parameters={},t_span=[],**kwargs):
         
         ivar = Symbol('t')
         
-        solution = self.rhs.subs(parameters)
+        solution = self.subs(parameters).doit()
         
-        sol_func = lambdify(ivar, solution, 'numpy')
+
         
-        numerized_data = (sol_func(t_span))
+        return solution
+    
+    def compute_solution(self,
+                         t_span=None,
+                         ic_list=None,
+                         t_eval=None,
+                         params_values=None,
+                         method='RK45',
+                         derivatives=False):
+        '''
+        Returns the result of the computations of solve_ivp integrator from scipy.integrate module.
+        '''
+
+
+#         if not self._evaluated:
+#             self.form_numerical_rhs()
+#             self._evaluated=True
         
-        dvars = self.lhs
         
-        numerized_sol  = TimeDataFrame(data={dvar:data[0] for dvar,data in zip(dvars,numerized_data)},index=t_span)
-        numerized_sol.index.name = ivar
-        
-        return numerized_sol
+        with timer() as t:
+            
+            solution = self
+            ivar = list(self.dvars[0].args)[0]
+            
+            print('num'*3)
+            display(solution)
+
+            sol_func = lambdify(ivar, solution, 'numpy')
+
+            numerized_data = (sol_func(t_span))
+
+            dvars = self.lhs
+
+            numerized_sol  = TimeDataFrame(data={dvar:data[0] for dvar,data in zip(dvars,numerized_data)},index=t_span)
+            numerized_sol.index.name = ivar 
+            
+
+
+            solution_tdf = numerized_sol
+
+
+
+            velocities = self.dvars[int(len(self.dvars)/2) :]
+            for vel in velocities:
+                solution_tdf[vel].to_numpy()
+                gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
+                solution_tdf[vel.diff(ivar)] = gradient
+            print('_'*100,t.elapse)
+            comp_time=t.elapse
+            
+            #if derivatives:
+            
+
+
+
+        solution_tdf._set_comp_time(comp_time)
+        solution_tdf.index.name = ivar
+        return solution_tdf
+    
     
     
 class ODESolution(AnalyticalSolution):
@@ -496,6 +566,17 @@ class ODESolution(AnalyticalSolution):
         
         return num_sys
 
+    @property
+    def ics_dvars(self):
+
+
+
+        return self.dvars
+    
+    @cached_property
+    def dvars(self):
+        return self.lhs
+    
 class ODESystem(AnalyticalSolution):
     
     _ivar = Symbol('t')
@@ -706,11 +787,7 @@ class ODESystem(AnalyticalSolution):
         else:
             return FirstOrderODESystem(lin_eqns,dvars=self.dvars,ivar=self.ivar)
 
-    def numerized(self,parameters={},ic_list=[]):
-        '''
-        Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
-        '''
-        return OdeComputationalCase(odes_system=self.odes_rhs,dvars=self.dvars,ivar=self.ivar)
+
         
 
     def linearized(self, x0=None, op_point=False, hint=[], label=None):
@@ -823,6 +900,18 @@ class ODESystem(AnalyticalSolution):
         obj._ode_order = self.ode_order
         
         return obj
+
+    def expand(self,deep=True, modulus=None, power_base=True, power_exp=True,mul=True, log=True, multinomial=True, basic=True, **hints):
+        
+
+        obj = super().expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
+        obj._lhs = self._lhs.expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
+        obj._dvars=self._dvars
+        obj._ivar = self.ivar
+        obj._ode_order = self.ode_order
+        
+        return obj
+    
     
     def copy(self):
         
@@ -851,7 +940,7 @@ class ODESystem(AnalyticalSolution):
             return print('False')
 
 
-    def numerized(self,parameters={},ic_list=[]):
+    def numerized(self,parameters={},ic_list=[],**kwrags):
         '''
         Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
         '''
@@ -859,8 +948,13 @@ class ODESystem(AnalyticalSolution):
         
         ode=self.as_first_ode_linear_system()
         
-        return OdeComputationalCase(odes_system=ode.rhs,dvars=ode.dvars,ivar=ode.ivar)
+        return OdeComputationalCase(odes_system=ode.rhs,ivar=ode.ivar,dvars=ode.dvars,params= parameters)
     
+    # def numerized(self,parameters={},ic_list=[]):
+    #     '''
+    #     Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
+    #     '''
+    #     return OdeComputationalCase(odes_system=self.odes_rhs,dvars=self.dvars,ivar=self.ivar)    
     
 
 class FirstOrderODESystem(ODESystem):

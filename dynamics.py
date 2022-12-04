@@ -892,7 +892,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
 
 
-    def __call__(self, label=None, scheme_options=None, qs=None ,*args):
+    def __call__(self, *args,label=None, scheme_options=None, qs=None ):
         """
         Returns the label of the object or class instance with reduced Degrees of Freedom.
         """
