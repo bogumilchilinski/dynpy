@@ -1205,7 +1205,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
 #             sol=  sol[no:] + sol[:no]
         sol = list(reversed(list(sol)))
 
-        return AnalyticalSolution(self.dvars,sol).subs( const_dict )
+        return ODESolution(self.dvars,sol).subs( const_dict )
                                  
 
                                  
@@ -1232,7 +1232,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
     
 
 
-        return AnalyticalSolution(self.dvars,sol).subs({dum_sym:0 for dum_sym in dummies_set})
+        return ODESolution(self.dvars,sol).subs({dum_sym:0 for dum_sym in dummies_set})
 
     @cached_property
     def const_set(self):
