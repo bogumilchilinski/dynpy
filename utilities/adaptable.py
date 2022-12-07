@@ -8,8 +8,8 @@ from sympy.core.relational import Relational
 
 from sympy.physics.mechanics import vlatex
 
-from IPython.display import display, Markdown, Latex
-
+from IPython.display import display, Latex
+from IPython.display import Markdown as IPMarkdown
 import pandas as pd
 
 import matplotlib.pyplot as plt
@@ -1161,7 +1161,7 @@ class BasicFormattingTools(DataMethods):
             plt.ylabel((  f'${ylabel}$'  ).replace('$$', '$'))
             plt.title(plotted_frame._raw_title)
             plt.show()
-            display(Markdown(caption))
+            display(IPMarkdown(caption))
             container.append(fig)
             
             

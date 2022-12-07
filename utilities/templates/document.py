@@ -1,6 +1,7 @@
 from pylatex import (Document, Package, Command, NewPage, Tabularx
                      #Section, Subsection, Subsubsection, Itemize,  HorizontalSpace, Description, Marker
                     )
+
 #from pylatex.section import Paragraph, Chapter
 from pylatex.utils import (#italic, 
                            NoEscape)
