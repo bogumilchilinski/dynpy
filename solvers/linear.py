@@ -28,7 +28,7 @@ from functools import cached_property
 
 from .numerical import OdeComputationalCase
 
-
+from timer import timer
 
 class MultivariableTaylorSeries(Expr):
     """_summary_
@@ -207,7 +207,7 @@ class MultivariableTaylorSeries(Expr):
 
 
 
-class AnalyticalSolution(Matrix):
+class AnalyticalSolution(ImmutableMatrix):
     def __new__(cls, data,rhs=None ,evaluate=True, **options):
 
         
@@ -255,6 +255,7 @@ class AnalyticalSolution(Matrix):
         if isinstance(matrix_eq,Eq):
             
             eq = matrix_eq
+            
         else:
             print ('TypeError: matrix_eq is not Eq')
             return None
@@ -342,6 +343,14 @@ class AnalyticalSolution(Matrix):
 
         return obj
 
+    def __rmul__(self,other):
+
+        obj = super().__rmul__(other)
+        obj._lhs=self._lhs
+
+        return obj
+    
+    
     def doit(self,**hints):
 
         obj = super().doit(**hints)
@@ -355,6 +364,17 @@ class AnalyticalSolution(Matrix):
         obj._lhs=self._lhs
         
         return obj
+
+    def expand(self,deep=True, modulus=None, power_base=True, power_exp=True,mul=True, log=True, multinomial=True, basic=True, **hints):
+        
+
+        obj = super().expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
+        obj._lhs = self._lhs.expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
+        obj._dvars=self._dvars
+        obj._ivar = self.ivar
+        
+        return obj
+    
     
     def __call__(self,t,params={}):
         
@@ -409,7 +429,7 @@ class AnalyticalSolution(Matrix):
     
 
     def as_matrix(self):
-        return Matrix( self.lhs-self.rhs )
+        return Matrix( self.rhs )
     
     def as_eq(self):
         return Eq(self.lhs,self.rhs)
@@ -440,23 +460,81 @@ class AnalyticalSolution(Matrix):
 
         return latex(Eq(self._lhs_repr,self.rhs,evaluate=False))
 
-    def numerized(self,t_span=[],parameters={}):
+    def numerized(self,parameters={},t_span=[],**kwargs):
         
         ivar = Symbol('t')
         
-        solution = self.rhs.subs(parameters)
+        solution = self.subs(parameters).doit()
         
-        sol_func = lambdify(ivar, solution, 'numpy')
+
         
-        numerized_data = (sol_func(t_span))
-        
-        dvars = self.lhs
-        
-        numerized_sol  = TimeDataFrame(data={dvar:data[0] for dvar,data in zip(dvars,numerized_data)},index=t_span)
-        numerized_sol.index.name = ivar
-        
-        return numerized_sol
+        return solution
     
+    def compute_solution(self,
+                         t_span=None,
+                         ic_list=None,
+                         t_eval=None,
+                         params_values=None,
+                         method='RK45',
+                         derivatives=False):
+        '''
+        Returns the result of the computations of solve_ivp integrator from scipy.integrate module.
+        '''
+
+
+#         if not self._evaluated:
+#             self.form_numerical_rhs()
+#             self._evaluated=True
+        
+        
+        with timer() as t:
+            
+            solution = self
+            ivar = list(self.dvars[0].args)[0]
+            
+            print('num'*3)
+            display(solution)
+
+            sol_func = lambdify(ivar, solution, 'numpy')
+
+            numerized_data = (sol_func(t_span))
+
+            dvars = self.lhs
+
+            numerized_sol  = TimeDataFrame(data={dvar:data[0] for dvar,data in zip(dvars,numerized_data)},index=t_span)
+            numerized_sol.index.name = ivar 
+            
+
+
+            solution_tdf = numerized_sol
+
+
+
+            velocities = self.dvars[int(len(self.dvars)/2) :]
+            for vel in velocities:
+                solution_tdf[vel].to_numpy()
+                gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
+                solution_tdf[vel.diff(ivar)] = gradient
+            print('_'*100,t.elapse)
+            comp_time=t.elapse
+            
+            #if derivatives:
+            
+
+
+
+        solution_tdf._set_comp_time(comp_time)
+        solution_tdf.index.name = ivar
+        return solution_tdf
+    
+    def __str__(self):
+        return "Analytical Solution of ODE"
+    def __repr__(self):
+        return self.__str__()
+    
+    def _format_str(self, printer=None):
+
+        return self.__str__()
     
 class ODESolution(AnalyticalSolution):
     
@@ -495,6 +573,21 @@ class ODESolution(AnalyticalSolution):
         
         return num_sys
 
+    @property
+    def ics_dvars(self):
+
+
+
+        return self.dvars
+    
+    @cached_property
+    def dvars(self):
+        return self.lhs
+    
+
+
+    
+    
 class ODESystem(AnalyticalSolution):
     
     _ivar = Symbol('t')
@@ -514,7 +607,29 @@ class ODESystem(AnalyticalSolution):
 
         return cls._constructor(odes , dvars, odes_rhs , ivar,ode_order=ode_order ,parameters=parameters)
 
-    
+    @classmethod
+    def from_dynamic_system(cls,dyn_system, ode_order = None, parameters = None):
+        """Class method that creates an ODESystem object from a dynamic system object.
+
+        Arguments:
+            dyn_system - dynamic system object;
+            ode_order - order of a differential equation. Default value is equal to one;
+            parameters - parameters that could be implemented into newly created ODESystem object. Default value is None;
+        """
+
+        sys = dyn_system
+        ds_lhs = sys.Y.diff(sys.ivar)
+        ds_rhs = sys.rhs()
+        dvars = sys.Y
+        ivar = sys.ivar
+        
+        if parameters == None:
+            parameters = cls._parameters
+
+        if ode_order == None:
+            ode_order = cls._ode_order
+
+        return cls._constructor(ds_lhs, dvars, ds_rhs, ivar, ode_order = ode_order, parameters = parameters)
 
     
     @classmethod
@@ -683,11 +798,7 @@ class ODESystem(AnalyticalSolution):
         else:
             return FirstOrderODESystem(lin_eqns,dvars=self.dvars,ivar=self.ivar)
 
-    def numerized(self,parameters={},ic_list=[]):
-        '''
-        Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
-        '''
-        return OdeComputationalCase(odes_system=self.odes_rhs,dvars=self.dvars,ivar=self.ivar)
+
         
 
     def linearized(self, x0=None, op_point=False, hint=[], label=None):
@@ -800,6 +911,18 @@ class ODESystem(AnalyticalSolution):
         obj._ode_order = self.ode_order
         
         return obj
+
+    def expand(self,deep=True, modulus=None, power_base=True, power_exp=True,mul=True, log=True, multinomial=True, basic=True, **hints):
+        
+
+        obj = super().expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
+        obj._lhs = self._lhs.expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
+        obj._dvars=self._dvars
+        obj._ivar = self.ivar
+        obj._ode_order = self.ode_order
+        
+        return obj
+    
     
     def copy(self):
         
@@ -828,7 +951,7 @@ class ODESystem(AnalyticalSolution):
             return print('False')
 
 
-    def numerized(self,parameters={},ic_list=[]):
+    def numerized(self,parameters={},ic_list=[],**kwrags):
         '''
         Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
         '''
@@ -836,8 +959,13 @@ class ODESystem(AnalyticalSolution):
         
         ode=self.as_first_ode_linear_system()
         
-        return OdeComputationalCase(odes_system=ode.rhs,dvars=ode.dvars,ivar=ode.ivar)
+        return OdeComputationalCase(odes_system=ode.rhs,ivar=ode.ivar,dvars=ode.dvars,params= parameters)
     
+    # def numerized(self,parameters={},ic_list=[]):
+    #     '''
+    #     Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
+    #     '''
+    #     return OdeComputationalCase(odes_system=self.odes_rhs,dvars=self.dvars,ivar=self.ivar)    
     
 
 class FirstOrderODESystem(ODESystem):
@@ -960,47 +1088,75 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         return self.odes_rhs.subs({coord:0 for coord in self.dvars})
 
 
+#     @cached_property
+#     def _auxiliary_fundamental_matrix(self):
+        
+#         odes_list = list(self.odes_rhs)
+#         dvars_list = list(self.dvars)
+        
+#         if len(self.dvars) >= 2:
+#             no = int(len(self.dvars)/2)
+        
+#             odes=  odes_list[no:] + odes_list[:no] 
+#             dvars = dvars_list[no:] + dvars_list[:no]
+#         else:
+#             odes=odes_list
+#             dvars=dvars_list
+        
+#         odes = Matrix(odes)
+#         dvars = Matrix(dvars)
+        
+#         return odes.jacobian(dvars)
+
+    @cached_property
+    def _auxiliary_dvars(self):
+        
+        dvars = list(reversed(list(self.dvars)))
+    
+        
+        return Matrix(dvars)  
+
     @cached_property
     def _auxiliary_fundamental_matrix(self):
         
-        odes_list = list(self.odes_rhs)
-        dvars_list = list(self.dvars)
+        dvars = list(reversed(list(self.dvars)))
+        odes = list(reversed(list(self.odes_rhs)))
+    
         
-        if len(self.dvars) >= 2:
-            no = int(len(self.dvars)/2)
+        return Matrix(odes).jacobian(dvars)  
+    
+#     @cached_property
+#     def _auxiliary_free_terms(self):
         
-            odes=  odes_list[no:] + odes_list[:no] 
-            dvars = dvars_list[no:] + dvars_list[:no]
-        else:
-            odes=odes_list
-            dvars=dvars_list
+#         odes_list = list(self.odes_rhs)
+#         dvars = self.dvars
         
-        odes = Matrix(odes)
-        dvars = Matrix(dvars)
+#         if len(self.dvars) >= 2:
+#             no = int(len(self.dvars)/2)
         
-        return odes.jacobian(dvars)
+#             odes=  odes_list[no:] + odes_list[:no] 
+
+#         else:
+#             odes=odes_list
+
+#         odes = Matrix(odes)
+        
+
+        
+#         return odes.subs({coord:0 for coord in dvars})
     
     @cached_property
     def _auxiliary_free_terms(self):
-        
-        odes_list = list(self.odes_rhs)
+
+
         dvars = self.dvars
-        
-        if len(self.dvars) >= 2:
-            no = int(len(self.dvars)/2)
-        
-            odes=  odes_list[no:] + odes_list[:no] 
 
-        else:
-            odes=odes_list
+        odes_list = list(reversed(list(self.odes_rhs)))
 
-        odes = Matrix(odes)
-        
+        odes = Matrix(odes_list)
 
         
         return odes.subs({coord:0 for coord in dvars})   
-    
-    
     
     def _const_mapper(self,const_set,parameters=None):
         
@@ -1047,18 +1203,20 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         
         A = self._auxiliary_fundamental_matrix
+        dvars = self._auxiliary_dvars
         
-        sol = AnalyticalSolution(self.dvars,linodesolve(A,t=self.ivar,b=0*self.dvars))#.applyfunc(self.solution_map)
+        sol = AnalyticalSolution(dvars,linodesolve(A,t=self.ivar,b=0*self.dvars))#.applyfunc(self.solution_map)
         
         dummies_set= sol.atoms(Dummy)
         const_dict = self._const_mapper(dummies_set)
 
-        if len(self.dvars) >= 2:
-            no = int(len(self.dvars)/2)
+#         if len(self.dvars) >= 2:
+#             no = int(len(self.dvars)/2)
         
-            sol=  sol[no:] + sol[:no]
+#             sol=  sol[no:] + sol[:no]
+        sol = list(reversed(list(sol)))
 
-        return AnalyticalSolution(self.dvars,sol).subs( const_dict )
+        return ODESolution(self.dvars,sol).subs( const_dict )
                                  
 
                                  
@@ -1070,19 +1228,22 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         A = self._auxiliary_fundamental_matrix
         b = self._auxiliary_free_terms
-                                 
+        dvars = self._auxiliary_dvars                                 
 
-        sol = AnalyticalSolution(self.dvars,linodesolve(A,t=self.ivar,b=b)).applyfunc(self.solution_map)
+        sol = AnalyticalSolution(dvars,linodesolve(A,t=self.ivar,b=b)).applyfunc(self.solution_map)
         
         dummies_set= sol.atoms(Dummy)
 
 
-        if len(self.dvars) >= 2:
-            no = int(len(self.dvars)/2)
+#         if len(self.dvars) >= 2:
+#             no = int(len(self.dvars)/2)
         
-            sol=  sol[no:] + sol[:no] 
+#             sol=  sol[no:] + sol[:no] 
+        sol = list(reversed(list(sol)))
+    
 
-        return AnalyticalSolution(self.dvars,sol).subs({dum_sym:0 for dum_sym in dummies_set})
+
+        return ODESolution(self.dvars,sol).subs({dum_sym:0 for dum_sym in dummies_set})
 
     @cached_property
     def const_set(self):
@@ -1112,7 +1273,140 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         return latex(Eq(self.lhs,self.rhs ,evaluate=False   ))    
     
+class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
+ 
+    @cached_property
+    def _auxiliary_fundamental_matrix(self):
+        
+        dvars = list(reversed(list(self.dvars)))
+        odes = list(reversed(list(self.odes_rhs)))
     
+        
+        return Matrix(odes).jacobian(dvars)  
+    
+    @cached_property    
+    def eigenvalues(self):
+        '''
+        Determines the system eigenvalues matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
+        '''
+
+
+        return self._auxiliary_fundamental_matrix.diagonalize()[1]
+  
+    @cached_property    
+    def modes(self):
+        '''
+        Returns reversed modes matrix (computed by Sympy's .diagonalize() method) by changing order of all rows.
+        '''
+
+        modes=self._auxiliary_fundamental_matrix.diagonalize()[0]
+        rows_no = modes.shape[0]
+        
+        rows_list = [modes[row,:] for row in reversed(range(rows_no))]
+
+        return Matrix(rows_list)
+    
+    @cached_property
+    def _general_solution(self):
+
+        '''
+        Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
+        '''
+
+        C = numbered_symbols('C', start=1)
+        C_list = []
+
+        for i in range(len(self.dvars) ):
+            C_list += [next(C)]
+
+        args_list = self.dvars[0].args
+
+        if len(self.dvars[0].args) > 1:
+
+            params = {*args_list} - {self.ivar}
+
+            C_list = [Function(str(C_tmp)) for C_tmp in C_list]
+            C_list = [(C_tmp)(*params) for C_tmp in C_list]
+
+        #         print('o tu')
+        #         display(self.odes_system)
+
+        #self.__class__._const_list |= set(C_list)
+
+        modes = self.modes
+        eigs = self.eigenvalues
+
+        Y_mat = Matrix(self.dvars)
+
+        solution = modes*Matrix([C_list[no]*exp(eigs[no,no]  *self.ivar) for   no   in range(len(self.dvars))]  )#.applyfunc(lambda elem: elem.rewrite(sin))
+
+
+
+        return AnalyticalSolution(self.dvars,solution)#.subs( const_dict )
+                                 
+    def _sin_comp(self,omega,amp): 
+        '''
+        It applies generic form solution for the following differential equation
+        \dot Y + A Y = F \sin(\Omega t)
+        
+        The generic form is:
+        
+        D = (A^{-1} \Omega^2 + A)^{-1}  F 
+        C =  - \Omega A^{-1} * D
+        '''
+           
+        A = self._fundamental_matrix
+        b = amp
+        
+                                 
+        sin_comp = (A.inv() * omega**2 + A).inv()*b
+        cos_comp = -omega*A.inv() * sin_comp
+          
+        return cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar)                      
+
+    
+    def _cos_comp(self,omega,amp):
+        
+        '''
+        It applies generic form solution for the following differential equation
+        \dot Y + A Y = F \cos(\Omega t)
+        
+        The generic form is:
+        
+        C = (A^{-1} \Omega^2 + A)^{-1}  F 
+        D =  \Omega A^{-1} * C
+        '''
+        
+        A = self._fundamental_matrix
+        b = amp
+        
+        cos_comp = (A.inv() * omega**2 + A).inv()*b
+        sin_comp = omega*A.inv() * cos_comp
+          
+        return cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar)  
+
+                                 
+    @cached_property
+    def _steady_solution(self):
+        '''
+        It applies generic form solution for the following differential equation
+        \dot Y + A Y = F \cos(\Omega t)
+        
+        The generic form is:
+        
+        C = (A^{-1} \Omega^2 + A)^{-1}  F 
+        D =  \Omega A^{-1} * C
+        '''
+        
+
+        A = self._fundamental_matrix
+        b = self._free_terms
+        
+        omg = Symbol('Omega',positive=True)
+
+        sol = self._cos_comp(omg,b) + self._sin_comp(omg,0*b)
+
+        return AnalyticalSolution(self.dvars,sol)  
     
 class FirstOrderODE:
     """

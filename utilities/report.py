@@ -2936,11 +2936,12 @@ class Picture(Figure,ReportModule):
     #: By default floats are positioned inside a separate paragraph.
     #: Setting this to option to `False` will change that.
     separate_paragraph = True
-
+    _default_width = NoEscape('0.8\\textwidth')
+    packages=[Package('float')]
 
     
     _latex_name = 'figure'
-    def __init__(self, image=None, position=None, caption=None,width=NoEscape('0.8\\textwidth'),marker=None, **kwargs):
+    def __init__(self, image=None, position='H', caption=None,width=None,height=None,marker=None, **kwargs):
         """
         Args
         ----
@@ -2957,19 +2958,26 @@ class Picture(Figure,ReportModule):
     
         self.image = image
         self.caption = caption
-        self.width = width
+        
+        if width is not None:
+            self.width = width
+        else:
+            self.width = self._default_width
+
+        self.height = height
+            
         self.marker = marker
         
         super().__init__(position=position,**kwargs)
         
         if self.image is not None:
-            self.add_image(NoEscape(self.image),width=width)
+            self.add_image(NoEscape(self.image),width=self.width)
             
         if self.caption is not None:
             self.add_caption(NoEscape(self.caption))
 
         if self.marker is not None:
-            self.append(Ref(self.marker))
+            self.append(Label(self.marker))
             
     def __repr__(self):
 
@@ -2988,6 +2996,16 @@ class Picture(Figure,ReportModule):
         '''
         
         return repr_string
+
+    def _repr_markdown_(self):
+        
+        if self.image is not None:
+            path = (self.image)
+            return f'![image preview]({path})'
+        else:
+            return 'Nothing to plot'
+        
+
     
     def reported(self):
         self.cls_container.append(self)
@@ -3441,11 +3459,17 @@ class DescriptionsRegistry:
 
     _descriptions = {}
     _described_elements = {}
+    _description_mode = 'one occurence'
 
     @classmethod
     def set_descriptions(cls, description={}):
         cls._descriptions = description
 
+    @classmethod
+    def set_description_mode(cls, description_mode= 'one occurrence'):
+        cls._description_mode = description_mode
+        
+        
     @classmethod
     def reset_registry(cls):
         cls._described_elements = {}
@@ -3453,7 +3477,7 @@ class DescriptionsRegistry:
     def __init__(self, description_dict=None, method='add'):
         if description_dict is not None: self._descriptions = description_dict
 
-    def _get_description(self, items):
+    def _get_description(self, items,description_mode=None):
         symbols_list = self._descriptions.keys()
 
         missing_symbols_desc = {
@@ -3468,10 +3492,22 @@ class DescriptionsRegistry:
         }
 
         #syms_to_desc={sym for sym in items if sym not in self._described_elements.keys()}
-        syms_to_desc = {
-            sym: self._descriptions[sym]
-            for sym in items if sym not in self._described_elements.keys()
-        }
+        if self._description_mode == 'one occurence':
+            syms_to_desc = {
+                sym: self._descriptions[sym]
+                for sym in items if sym not in self._described_elements.keys()
+            }
+        elif self._description_mode == 'all':
+            syms_to_desc = {
+                sym: self._descriptions[sym]
+                for sym in items
+            }
+            
+        else:
+            syms_to_desc = {
+                sym: self._descriptions[sym]
+                for sym in items
+            }
 
         self._described_elements = {**self._described_elements, **syms_to_desc}
         self.__class__._described_elements = {
@@ -3562,6 +3598,17 @@ class SymbolsDescription(Description):
 
             return symbols_to_add
 
+        elif description_dict is not None and expr is None:
+
+
+
+            symbols_to_add = {
+                sym: desc
+                for sym, desc in description_dict.items() 
+            }
+
+            return symbols_to_add
+        
         else:
             return {}
 

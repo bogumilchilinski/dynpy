@@ -115,6 +115,7 @@ class FourDOFTrolleySuspension(ComposedSystem):
                  z_l=None,
                  z_p=None,
                  z_b=None,
+            
                 
             
                  **kwargs):
@@ -150,7 +151,7 @@ class FourDOFTrolleySuspension(ComposedSystem):
         if omega is not None: self.omega=omega
         if I is not None: self.I = I  # moment of inertia of a rod
         if F_engine is not None: self.F_engine = F_engine
-        
+
         
         self.s=self.A*sin(ivar*self.omega)
         
@@ -191,9 +192,9 @@ class FourDOFTrolleySuspension(ComposedSystem):
             self.m_b: r'Masa pasazera',
             self.I: r'Moment bezwładności',
             self.l_rod: r'Długość osi',
-            self.l_p: r'Odległość przedniej osi do środka ciężkości autobusu',
-            self.l_l: r'Odległość tylnej osi do środka ciężkości autobusu',
-            self.l_b: r'Odległość środka cieżkości baterii do środka ciężkości autobusu',
+            self.l_p: r'Odległość środka ciężkości masy nadwozia autobusu do punktu styku przednich kół w kierunku poziomym',
+            self.l_l: r'Odległość środka ciężkości masy nadwozia autobusu do punktu styku tylnych kół w kierunku poziomym',
+            self.l_b: r'Odległość środka ciężkości masy nadwozia autobusu do środka ciężkości baterii',
             self.k_p: r'Współczynnik sztywności dla sprężyny przedniej nadwozia',
             self.k_l: r'Współczynnik sztywności dla sprężyny tylnej nadwozia',
             self.k_pw: r'Współczynnik sztywności dla przedniej opony',
@@ -288,6 +289,8 @@ class DDOFTrolleySuspension(ComposedSystem):
     z_b=Symbol('z_b',positive=True)
     s=Symbol('s', positive=True)
     ivar=Symbol('t')
+    k_mr=Symbol('k_mr',positive=True)
+    m_nr=Symbol('m_nr')
     
     def __init__(self,
                   m=None,
@@ -319,6 +322,8 @@ class DDOFTrolleySuspension(ComposedSystem):
                  z_l=None,
                  z_p=None,
                  z_b=None,
+                 k_mr=None,
+                 m_nr=None,
                  **kwargs):
         
         if z is not None: self.z=z
@@ -344,7 +349,10 @@ class DDOFTrolleySuspension(ComposedSystem):
         if A is not None: self.A=A
         if omega is not None: self.omega=omega
         if I is not None: self.I = I  # moment of inertia of a rod
-        if F_engine is not None: self.F_engine = F_engine
+        if F_engine is not None: self.F_engine = F_engine     
+        if k_mr is not None: self.k_mr=k_mr
+        if m_nr is not None: self.m_nr=m_nr
+            
             
         self.s=self.A*sin(ivar*self.omega)
         
@@ -413,6 +421,8 @@ class DDOFTrolleySuspension(ComposedSystem):
             self.A: r'Amplituda siły wymuszającej',
             self.omega: r'Częstość siły wymuszającej',
             self.ivar: r'Czas',
+            self.k_mr: r'Zastępcza sztywność mas resorowanych',
+            self.m_nr: r'Zastępcza masa nierosowana',
             
         }
         return self.sym_desc_dict
@@ -449,6 +459,8 @@ units_dict1 = {sys2.m:ureg.kilogram,
               sys2.F_engine:ureg.newton,
               t:ureg.second,
               f:ureg.hertz,
+              sys2.k_mr:(ureg.newton / ureg.meter),
+              sys2.m_nr:ureg.kilogram,
              }
 
 unit1=units_dict1

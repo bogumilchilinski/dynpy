@@ -561,7 +561,7 @@ class TrolleyWithPendulum(ComposedSystem):
 
         self._trolley = SpringMassSystem(self.m_t, self.k, self.x, self.ivar)(label='Trolley')
         self._pendulum = PendulumKinematicExct(self.l, self.m_p, self.g, self.phi, self.x, self.ivar)(label='Pendulum')
-        self._force=Force(self.F*sin(self.Omega*self.ivar), pos1=self.x, qs=[self.x, self.phi])(label='Force')
+        self._force=Force(2*self.F+self.F*sin(self.Omega*self.ivar)+3*self.F*cos(self.Omega*self.ivar), pos1=self.x, qs=[self.x, self.phi])(label='Force')
 
         components['_trolley'] = self._trolley
         components['_pendulum'] = self._pendulum
@@ -701,3 +701,712 @@ class DampedTrolleyWithPendulum(TrolleyWithPendulum):
             self.c: [no for no in range(5, 25)]
         }
         return default_data_dict
+### Nieliniowe
+class ForcedNonLinearTrolley(NonlinearComposedSystem):
+    
+    scheme_name = 'nonlin_trolley.PNG'
+    real_name = 'nonlin_trolley_real.PNG'
+
+    m=Symbol('m', positive=True)
+    k=Symbol('k', positive=True)
+    d=Symbol('d', positive=True)
+    l_0=Symbol('l_0', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    F=Symbol('F',positive=True)
+    x=dynamicsymbols('x')
+   
+    def __init__(self,
+                 m=None,
+                 k=None,
+                 d=None,
+                 l_0=None,
+                 Omega=None,
+                 F=None,
+                 x=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m is not None: self.m = m
+        if k is not None: self.k= k
+        if d is not None: self.d = d
+        if l_0 is not None: self.l_0 = l_0
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        if x is not None: self.x = x
+
+        self.qs = [self.x]
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self._trolley = MaterialPoint(self.m, self.x, qs=[self.x])
+        self._spring = Spring(self.k, pos1 = sqrt(self.x**2 + self.d**2), pos2 = - self.l_0 , qs=[self.x])
+        self._force = Force(self.F*sin(self.Omega*self.ivar), pos1 = self.x, qs=[self.x])
+
+
+        components['trolley'] = self._trolley
+        components['spring'] = self._spring
+        components['force'] = self._force
+        
+        return components
+
+    def get_default_data(self):
+
+        m0, k0, l0= symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m: [
+                0.5 * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0,
+                7 * m0, 8 * m0, 9 * m0
+            ],
+            self.d: [
+                5 * l0, 2 * l0, 3 * S.Half * l0, 4 * l0, 6 * l0, 7 * l0,
+                8 * l0, 9 * l0
+            ],
+            self.k: [
+                1 * k0, 3 * k0, 2 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0,
+                9 * k0
+            ],
+            self.l_0: [
+                1 * l0, 3 * l0, 2 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0,
+                9 * l0,
+            ],
+        }
+
+        return default_data_dict
+
+    def get_numerical_data(self): ### Brakowało numerical data. Przez to komenda get numerical parameters nie działa
+
+        m0, k0, l0, c0= symbols('m_0 k_0 l_0 c_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [
+                0.5 * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0,
+                7 * m0, 8 * m0, 9 * m0
+            ],
+            self.d: [
+                5 * l0, 2 * l0, 3 * S.Half * l0, 4 * l0, 6 * l0, 7 * l0,
+                8 * l0, 9 * l0
+            ],
+            self.kl: [
+                1 * k0, 3 * k0, 2 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0,
+                9 * k0
+            ],
+            self.l_0: [
+                1 * l0, 3 * l0, 2 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0,
+                9 * l0,
+            ], ### Brakowało nawiasu
+            self.c:  [
+                1 * c0, 3 * c0, 2 * c0, 4 * c0, 5 * c0, 6 * c0, 7 * c0, 8 * c0,
+                9 * c0
+            ],
+        }
+
+        return default_data_dict
+### NotODE
+class TrolleysWithSprings(NonlinearComposedSystem):
+    
+    scheme_name = 'nonlin_trolley.PNG'
+    real_name = 'nonlin_trolley_real.PNG'
+
+    m_1=Symbol('m_1', positive=True)
+    m_2=Symbol('m_2', positive=True)
+    k=Symbol('k', positive=True)
+    #Omega=Symbol('Omega', positive=True)
+    #F=Symbol('F', positive=True)
+    x_1=dynamicsymbols('x_1')
+    x_2=dynamicsymbols('x_2')
+   
+    def __init__(self,
+                 m_1=None,
+                 m_2=None,
+                 k=None,
+                 #Omega=None,
+                 #F=None,
+                 x_1=None,
+                 x_2=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m_1 is not None: self.m_1 = m_1
+        if m_2 is not None: self.m_2 = m_2
+        if k is not None: self.k= k
+        #if Omega is not None: self.Omega = Omega
+        #if F is not None: self.F = F
+        if x_1 is not None: self.x_1 = x_1
+        if x_2 is not None: self.x_2 = x_2
+
+        self.qs = [self.x_1, self.x_2]
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self._trolley1 = MaterialPoint(self.m_1, self.x_1, qs=[self.x_1])
+        self._spring1 = Spring(self.k, pos1 = self.x_1, qs=[self.x_1])
+        #self._force = Force(self.F*sin(self.Omega*self.ivar), pos1 = self.x_1, qs=[self.x_1])
+
+        self._spring12 = Spring(self.k, pos1 = self.x_1, pos2 = self.x_2, qs=[self.x_1, self.x_2])
+        self._trolley2 = MaterialPoint(self.m_2, self.x_2, qs=[self.x_2])
+        self._spring2 = Spring(self.k, pos1 = self.x_2, qs=[self.x_2])
+
+
+        components['trolley_1'] = self._trolley1
+        components['spring_1'] = self._spring1
+        components['spring_12'] = self._spring12
+        components['trolley_2'] = self._trolley2
+        components['spring_2'] = self._spring2
+        #components['force'] = self._force
+        
+        return components
+
+class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
+    
+    scheme_name = 'nonlin_trolley.PNG'
+    real_name = 'nonlin_trolley_real.PNG'
+
+    m_1=Symbol('m_1', positive=True)
+    m_2=Symbol('m_2', positive=True)
+    k=Symbol('k', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    x_1=dynamicsymbols('x_1')
+    x_2=dynamicsymbols('x_2')
+   
+    def __init__(self,
+                 m_1=None,
+                 m_2=None,
+                 k=None,
+                 Omega=None,
+                 F=None,
+                 x_1=None,
+                 x_2=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m_1 is not None: self.m_1 = m_1
+        if m_2 is not None: self.m_2 = m_2
+        if k is not None: self.k= k
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        if x_1 is not None: self.x_1 = x_1
+        if x_2 is not None: self.x_2 = x_2
+
+        self.qs = [self.x_1, self.x_2]
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self._trolley1 = MaterialPoint(self.m_1, self.x_1, qs=[self.x_1])
+        self._spring1 = Spring(self.k, pos1 = self.x_1, qs=[self.x_1])
+        self._force = Force(self.F*sin(self.Omega*self.ivar), pos1 = self.x_1, qs=[self.x_1])
+
+        self._spring12 = Spring(self.k, pos1 = self.x_1, pos2 = self.x_2, qs=[self.x_1, self.x_2])
+        self._trolley2 = MaterialPoint(self.m_2, self.x_2, qs=[self.x_2])
+        self._spring2 = Spring(self.k, pos1 = self.x_2, qs=[self.x_2])
+
+
+        components['trolley_1'] = self._trolley1
+        components['spring_1'] = self._spring1
+        components['spring_12'] = self._spring12
+        components['trolley_2'] = self._trolley2
+        components['spring_2'] = self._spring2
+        components['force'] = self._force
+        
+        return components
+
+class ForcedDampedTrolleysWithSprings(NonlinearComposedSystem): ### 4 ODE
+    
+    scheme_name = 'nonlin_trolley.PNG'
+    real_name = 'nonlin_trolley_real.PNG'
+
+    m_1=Symbol('m_1', positive=True)
+    m_2=Symbol('m_2', positive=True)
+    k=Symbol('k', positive=True)
+    c=Symbol('c', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    x_1=dynamicsymbols('x_1')
+    x_2=dynamicsymbols('x_2')
+   
+    def __init__(self,
+                 m_1=None,
+                 m_2=None,
+                 k=None,
+                 c=None,
+                 Omega=None,
+                 F=None,
+                 x_1=None,
+                 x_2=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m_1 is not None: self.m_1 = m_1
+        if m_2 is not None: self.m_2 = m_2
+        if k is not None: self.k= k
+        if c is not None: self.c= c
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        if x_1 is not None: self.x_1 = x_1
+        if x_2 is not None: self.x_2 = x_2
+
+        self.qs = [self.x_1, self.x_2]
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self._trolley1 = MaterialPoint(self.m_1, self.x_1, qs=[self.x_1])
+        self._spring1 = Spring(self.k, pos1 = self.x_1, qs=[self.x_1])
+        self._damper1 = Damper(self.c, pos1 = self.x_1, qs=[self.x_1])
+        self._force = Force(self.F*sin(self.Omega*self.ivar), pos1 = self.x_1, qs=[self.x_1])
+
+        self._spring12 = Spring(self.k, pos1 = self.x_1, pos2 = self.x_2, qs=[self.x_1, self.x_2])
+        self._damper12 = Damper(self.c, pos1 = self.x_1, pos2 = self.x_2, qs=[self.x_1, self.x_2])
+        
+        self._trolley2 = MaterialPoint(self.m_2, self.x_2, qs=[self.x_2])
+        self._spring2 = Spring(self.k, pos1 = self.x_2, qs=[self.x_2])
+        self._damper2 = Damper(self.c, pos1 = self.x_2, qs=[self.x_2])
+
+
+        components['trolley_1'] = self._trolley1
+        components['spring_1'] = self._spring1
+        components['damper_1'] = self._damper1
+        components['spring_12'] = self._spring12
+        components['damper_12'] = self._damper12
+        components['trolley_2'] = self._trolley2
+        components['spring_2'] = self._spring2
+        components['damper_2'] = self._damper2
+        components['force'] = self._force
+        
+        return components
+    
+### Nieliniowe
+class ForcedTrolleysWithNonLinearSprings(NonlinearComposedSystem):
+    
+    scheme_name = 'nonlin_trolley.PNG'
+    real_name = 'nonlin_trolley_real.PNG'
+
+    m_1=Symbol('m_1', positive=True)
+    m_2=Symbol('m_2', positive=True)
+    k=Symbol('k', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    mu = Symbol('\\mu', positive=True)
+    x_1=dynamicsymbols('x_1')
+    x_2=dynamicsymbols('x_2')
+   
+    def __init__(self,
+                 m_1=None,
+                 m_2=None,
+                 k=None,
+                 Omega=None,
+                 F=None,
+                 mu=None,
+                 x_1=None,
+                 x_2=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m_1 is not None: self.m_1 = m_1
+        if m_2 is not None: self.m_2 = m_2
+        if k is not None: self.k= k
+        if mu is not None: self.mu= mu
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        if x_1 is not None: self.x_1 = x_1
+        if x_2 is not None: self.x_2 = x_2
+
+        self.qs = [self.x_1, self.x_2]
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self._trolley1 = MaterialPoint(self.m_1, self.x_1, qs=[self.x_1])
+        self._spring1 = Spring(self.k*(self.mu*self.x_1**2), pos1 = self.x_1, qs=[self.x_1])
+        self._force = Force(self.F*sin(self.Omega*self.ivar), pos1 = self.x_1, qs=[self.x_1])
+
+        self._spring12 = Spring(self.k*(self.mu*(self.x_1-self.x_2)**2), pos1 = self.x_1, pos2 = self.x_2, qs=[self.x_1, self.x_2])
+        self._trolley2 = MaterialPoint(self.m_2, self.x_2, qs=[self.x_2])
+        self._spring2 = Spring(self.k*(self.mu*self.x_2**2), pos1 = self.x_2, qs=[self.x_2])
+
+
+        components['trolley_1'] = self._trolley1
+        components['spring_1'] = self._spring1
+        components['spring_12'] = self._spring12
+        components['trolley_2'] = self._trolley2
+        components['spring_2'] = self._spring2
+        components['force'] = self._force
+        
+        return components
+    
+class ForcedTrolleyWithSpring(ComposedSystem): ### 1 ODE
+    
+    scheme_name = 'nonlin_trolley.PNG'
+    real_name = 'nonlin_trolley_real.PNG'
+
+    m=Symbol('m', positive=True)
+    k=Symbol('k', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    F=Symbol('F',positive=True)
+    x=dynamicsymbols('x')
+   
+    def __init__(self,
+                 m=None,
+                 k=None,
+                 Omega=None,
+                 F=None,
+                 x=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m is not None: self.m = m
+        if k is not None: self.k= k
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        if x is not None: self.x = x
+
+        self.qs = [self.x]
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self._trolley = MaterialPoint(self.m, self.x, qs=[self.x])
+        self._spring = Spring(self.k, pos1 = self.x , qs=[self.x])
+        self._force = Force(self.F*sin(self.Omega*self.ivar), pos1 = self.x, qs=[self.x])
+
+
+        components['trolley'] = self._trolley
+        components['spring'] = self._spring
+        components['force'] = self._force
+        
+        return components
+
+    def get_default_data(self):
+
+        m0, k0, l0= symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m: [
+                0.5 * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0,
+                7 * m0, 8 * m0, 9 * m0
+            ],
+            self.d: [
+                5 * l0, 2 * l0, 3 * S.Half * l0, 4 * l0, 6 * l0, 7 * l0,
+                8 * l0, 9 * l0
+            ],
+            self.k: [
+                1 * k0, 3 * k0, 2 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0,
+                9 * k0
+            ],
+            self.l_0: [
+                1 * l0, 3 * l0, 2 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0,
+                9 * l0,
+            ],
+        }
+
+        return default_data_dict
+
+    def get_numerical_data(self): ### Brakowało numerical data. Przez to komenda get numerical parameters nie działa
+
+        m0, k0, l0, c0= symbols('m_0 k_0 l_0 c_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [
+                0.5 * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0,
+                7 * m0, 8 * m0, 9 * m0
+            ],
+            self.d: [
+                5 * l0, 2 * l0, 3 * S.Half * l0, 4 * l0, 6 * l0, 7 * l0,
+                8 * l0, 9 * l0
+            ],
+            self.kl: [
+                1 * k0, 3 * k0, 2 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0,
+                9 * k0
+            ],
+            self.l_0: [
+                1 * l0, 3 * l0, 2 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0,
+                9 * l0,
+            ], ### Brakowało nawiasu
+            self.c:  [
+                1 * c0, 3 * c0, 2 * c0, 4 * c0, 5 * c0, 6 * c0, 7 * c0, 8 * c0,
+                9 * c0
+            ],
+        }
+
+        return default_data_dict
+    
+class ForcedDampedTrolleyWithSpring(ComposedSystem): ### 2 ODE
+    
+    scheme_name = 'nonlin_trolley.PNG'
+    real_name = 'nonlin_trolley_real.PNG'
+
+    m=Symbol('m', positive=True)
+    k=Symbol('k', positive=True)
+    c=Symbol('c', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    F=Symbol('F',positive=True)
+    x=dynamicsymbols('x')
+   
+    def __init__(self,
+                 m=None,
+                 k=None,
+                 c=None,
+                 Omega=None,
+                 F=None,
+                 x=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m is not None: self.m = m
+        if k is not None: self.k= k
+        if c is not None: self.c= c
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        if x is not None: self.x = x
+
+        self.qs = [self.x]
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self._trolley = MaterialPoint(self.m, self.x, qs=[self.x])
+        self._spring = Spring(self.k, pos1 = self.x , qs=[self.x])
+        self._damper = Damper(self.c, pos1 = self.x , qs=[self.x])
+        self._force = Force(self.F*sin(self.Omega*self.ivar), pos1 = self.x, qs=[self.x])
+
+
+        components['trolley'] = self._trolley
+        components['spring'] = self._spring
+        components['damper'] = self._damper
+        components['force'] = self._force
+        
+        return components
+
+    def get_default_data(self):
+
+        m0, k0, l0= symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m: [
+                0.5 * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0,
+                7 * m0, 8 * m0, 9 * m0
+            ],
+            self.d: [
+                5 * l0, 2 * l0, 3 * S.Half * l0, 4 * l0, 6 * l0, 7 * l0,
+                8 * l0, 9 * l0
+            ],
+            self.k: [
+                1 * k0, 3 * k0, 2 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0,
+                9 * k0
+            ],
+            self.l_0: [
+                1 * l0, 3 * l0, 2 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0,
+                9 * l0,
+            ],
+        }
+
+        return default_data_dict
+
+    def get_numerical_data(self): ### Brakowało numerical data. Przez to komenda get numerical parameters nie działa
+
+        m0, k0, l0, c0= symbols('m_0 k_0 l_0 c_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [
+                0.5 * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0,
+                7 * m0, 8 * m0, 9 * m0
+            ],
+            self.d: [
+                5 * l0, 2 * l0, 3 * S.Half * l0, 4 * l0, 6 * l0, 7 * l0,
+                8 * l0, 9 * l0
+            ],
+            self.kl: [
+                1 * k0, 3 * k0, 2 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0,
+                9 * k0
+            ],
+            self.l_0: [
+                1 * l0, 3 * l0, 2 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0,
+                9 * l0,
+            ], ### Brakowało nawiasu
+            self.c:  [
+                1 * c0, 3 * c0, 2 * c0, 4 * c0, 5 * c0, 6 * c0, 7 * c0, 8 * c0,
+                9 * c0
+            ],
+        }
+
+        return default_data_dict
+    
+class ForcedThreeTrolleysWithSprings(ComposedSystem): ### 5, 7 ODE
+    
+    scheme_name = 'nonlin_trolley.PNG'
+    real_name = 'nonlin_trolley_real.PNG'
+
+    m_1=Symbol('m_1', positive=True)
+    m_2=Symbol('m_2', positive=True)
+    m_3=Symbol('m_3', positive=True)
+    k=Symbol('k', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    x_1=dynamicsymbols('x_1')
+    x_2=dynamicsymbols('x_2')
+    x_3=dynamicsymbols('x_3')
+   
+    def __init__(self,
+                 m_1=None,
+                 m_2=None,
+                 m_3=None,
+                 k=None,
+                 Omega=None,
+                 F=None,
+                 x_1=None,
+                 x_2=None,
+                 x_3=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m_1 is not None: self.m_1 = m_1
+        if m_2 is not None: self.m_2 = m_2
+        if m_3 is not None: self.m_3 = m_3
+        if k is not None: self.k= k
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        if x_1 is not None: self.x_1 = x_1
+        if x_2 is not None: self.x_2 = x_2
+        if x_3 is not None: self.x_3 = x_3
+
+        self.qs = [self.x_1, self.x_2, self.x_3]
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self._trolley1 = MaterialPoint(self.m_1, self.x_1, qs=[self.x_1])
+        self._spring1 = Spring(self.k, pos1 = self.x_1, qs=[self.x_1])
+        self._force = Force(self.F*sin(self.Omega*self.ivar), pos1 = self.x_1, qs=[self.x_1])
+        
+        self._spring12 = Spring(self.k, pos1 = self.x_1, pos2 = self.x_2, qs=[self.x_1, self.x_2])
+        self._trolley2 = MaterialPoint(self.m_2, self.x_2, qs=[self.x_2])
+        self._spring2 = Spring(self.k, pos1 = self.x_2, qs=[self.x_2])
+        
+        self._spring23 = Spring(self.k, pos1 = self.x_2, pos2 = self.x_3, qs=[self.x_2, self.x_3])
+        self._trolley3 = MaterialPoint(self.m_3, self.x_3, qs=[self.x_3])
+        self._spring3 = Spring(self.k, pos1 = self.x_3, qs=[self.x_3])
+
+        components['trolley_1'] = self._trolley1
+        components['spring_1'] = self._spring1
+        components['spring_12'] = self._spring12
+        components['trolley_2'] = self._trolley2
+        components['spring_2'] = self._spring2
+        components['spring_23'] = self._spring23
+        components['trolley_3'] = self._trolley3
+        components['spring_3'] = self._spring3
+        components['force'] = self._force
+        
+        return components
+    
+class ForcedDampedThreeTrolleysWithSprings(ComposedSystem): ### 6, 8 ODE
+    
+    scheme_name = 'nonlin_trolley.PNG'
+    real_name = 'nonlin_trolley_real.PNG'
+
+    m_1=Symbol('m_1', positive=True)
+    m_2=Symbol('m_2', positive=True)
+    m_3=Symbol('m_3', positive=True)
+    k=Symbol('k', positive=True)
+    c=Symbol('c', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    x_1=dynamicsymbols('x_1')
+    x_2=dynamicsymbols('x_2')
+    x_3=dynamicsymbols('x_3')
+   
+    def __init__(self,
+                 m_1=None,
+                 m_2=None,
+                 m_3=None,
+                 k=None,
+                 c=None,
+                 Omega=None,
+                 F=None,
+                 x_1=None,
+                 x_2=None,
+                 x_3=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m_1 is not None: self.m_1 = m_1
+        if m_2 is not None: self.m_2 = m_2
+        if m_3 is not None: self.m_3 = m_3
+        if k is not None: self.k= k
+        if c is not None: self.c= c
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        if x_1 is not None: self.x_1 = x_1
+        if x_2 is not None: self.x_2 = x_2
+        if x_3 is not None: self.x_3 = x_3
+
+        self.qs = [self.x_1, self.x_2, self.x_3]
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self._trolley1 = MaterialPoint(self.m_1, self.x_1, qs=[self.x_1])
+        self._spring1 = Spring(self.k, pos1 = self.x_1, qs=[self.x_1])
+        self._damper1 = Damper(self.c, pos1 = self.x_1, qs=[self.x_1])
+        self._force = Force(self.F*sin(self.Omega*self.ivar), pos1 = self.x_1, qs=[self.x_1])
+        
+        self._spring12 = Spring(self.k, pos1 = self.x_1, pos2 = self.x_2, qs=[self.x_1, self.x_2])
+        self._damper12 = Damper(self.c, pos1 = self.x_1, pos2 = self.x_2, qs=[self.x_1, self.x_2])
+        
+        self._trolley2 = MaterialPoint(self.m_2, self.x_2, qs=[self.x_2])
+        self._spring2 = Spring(self.k, pos1 = self.x_2, qs=[self.x_2])
+        self._damper2 = Damper(self.c, pos1 = self.x_2, qs=[self.x_2])
+        
+        self._spring23 = Spring(self.k, pos1 = self.x_2, pos2 = self.x_3, qs=[self.x_2, self.x_3])
+        self._damper23 = Damper(self.c, pos1 = self.x_2, pos2 = self.x_3, qs=[self.x_2, self.x_3])
+        
+        self._trolley3 = MaterialPoint(self.m_3, self.x_3, qs=[self.x_3])
+        self._spring3 = Spring(self.k, pos1 = self.x_3, qs=[self.x_3])
+        self._damper3 = Damper(self.c, pos1 = self.x_3, qs=[self.x_3])
+
+        components['trolley_1'] = self._trolley1
+        components['spring_1'] = self._spring1
+        components['damper_1'] = self._damper1
+        components['spring_12'] = self._spring12
+        components['damper_12'] = self._damper12
+        components['trolley_2'] = self._trolley2
+        components['spring_2'] = self._spring2
+        components['damper_2'] = self._damper2
+        components['spring_23'] = self._spring23
+        components['damper_23'] = self._damper23
+        components['trolley_3'] = self._trolley3
+        components['spring_3'] = self._spring3
+        components['damper_3'] = self._damper3
+        components['force'] = self._force
+        
+        return components

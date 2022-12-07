@@ -425,11 +425,13 @@ class BeamerTemplate(Document):
                  default_filepath='default_filepath',
                  *,
                  title=None,
+                 author=None,
+                 initials=None,
                  documentclass='beamer',
                  document_options=None,
                  fontenc='T1',
                  inputenc='utf8',
-                 font_size='normalsize',
+                 font_size='footnotesize',
                  lmodern=False,
                  textcomp=True,
                  microtype=True,
@@ -454,9 +456,18 @@ class BeamerTemplate(Document):
             data=data, 
             )
         self.title = title
+        self.author = author
+        self.initials = initials
         
         if self.title is not None:
-            self.packages.append(Command('title', arguments=[self.title]))
+            self.packages.append(Command('title', arguments=[self.title], options=['']))
+            
+        if self.author is not None:
+            if self.initials is not None:
+                self.packages.append(Command('author', arguments=[self.author], options=[self.initials]))
+            else:
+                self.packages.append(Command('author', arguments=[self.author], options=['']))
+            
         self.append(Command('frame', arguments=[NoEscape(r'\titlepage')]))
 
 class DGBeamer(Document):
@@ -526,15 +537,17 @@ class PosterTemplate(Document):
                   Package('polski',options=['MeX']),
                   #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
                   Package('listings'),
+                  Package('siunitx'),
                   #Package('titlesec'),
                   #Package('fancyhdr'),
                   #Command('pagestyle', arguments=['fancy']),
-                  Command('author', arguments=['Szymon Kozłowski & Bogumił Chiliński']),
+                  Command('author', arguments=['Anna Mackojć & Bogumił Chiliński']),
                   #Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
                   #Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
                   #Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
                   #Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']), 
                   Command('usetheme', arguments=['Simple']),
+                  Command('institute', arguments=['Institute of Machine Design Fundamentals, Warsaw University Of Technology']),        
                   Command('graphicspath', arguments=[NoEscape('{../}')])
 
             ]

@@ -332,7 +332,11 @@ class DataMethods:
         img_params = self.__class__._image_parameters
 
         if picture:
-            fig.add_image(filename, width=NoEscape(r'0.9\textwidth'))
+            
+            width = width
+            #width=NoEscape(r'0.8\textwidth')
+            
+            fig.add_image(filename, width=width)
         else:
             fig.append(Command(command='input', arguments=filename))
 
@@ -1200,7 +1204,10 @@ class BasicFormattingTools(DataMethods):
             AutoMarker.add_marker(self.style.to_latex(), label)
             tab.append(Label(label))
         else:
-            auto_mrk = AutoMarker(self.style.to_latex()).marker
+            #old version
+            #auto_mrk = AutoMarker(self.style.to_latex()).marker
+            #new option
+            auto_mrk = AutoMarker(self).marker
             tab.append(Label(auto_mrk))
 
         container.append(tab)
@@ -1480,7 +1487,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
                             ics=None,
                             backend=None):
 
-        display(self.columns.droplevel(coord_level_name).unique())
+        #display(self.columns.droplevel(coord_level_name).unique())
 
         computed_data = self.copy()
 
@@ -1505,7 +1512,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
             ics_series = (self[case_data].T[t0])
 
-            print(ics_series)
+            #print(ics_series)
 
             ics_list = [
                 np.float(ics_series[coord])
