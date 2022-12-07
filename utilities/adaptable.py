@@ -1487,7 +1487,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
                             ics=None,
                             backend=None):
 
-        display(self.columns.droplevel(coord_level_name).unique())
+        #display(self.columns.droplevel(coord_level_name).unique())
 
         computed_data = self.copy()
 
@@ -1512,7 +1512,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
             ics_series = (self[case_data].T[t0])
 
-            print(ics_series)
+            #print(ics_series)
 
             ics_list = [
                 np.float(ics_series[coord])

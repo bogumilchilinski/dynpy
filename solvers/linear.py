@@ -526,7 +526,14 @@ class AnalyticalSolution(ImmutableMatrix):
         solution_tdf.index.name = ivar
         return solution_tdf
     
+    def __str__(self):
+        return "Analytical Solution of ODE"
+    def __repr__(self):
+        return self.__str__()
     
+    def _format_str(self, printer=None):
+
+        return self.__str__()
     
 class ODESolution(AnalyticalSolution):
     
@@ -575,6 +582,10 @@ class ODESolution(AnalyticalSolution):
     @cached_property
     def dvars(self):
         return self.lhs
+    
+
+
+    
     
 class ODESystem(AnalyticalSolution):
     
