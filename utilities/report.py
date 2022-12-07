@@ -2937,11 +2937,11 @@ class Picture(Figure,ReportModule):
     #: Setting this to option to `False` will change that.
     separate_paragraph = True
     _default_width = NoEscape('0.8\\textwidth')
-
+    packages=[Package('float')]
 
     
     _latex_name = 'figure'
-    def __init__(self, image=None, position=None, caption=None,width=None,height=None,marker=None, **kwargs):
+    def __init__(self, image=None, position='H', caption=None,width=None,height=None,marker=None, **kwargs):
         """
         Args
         ----
@@ -2996,6 +2996,16 @@ class Picture(Figure,ReportModule):
         '''
         
         return repr_string
+
+    def _repr_markdown_(self):
+        
+        if self.image is not None:
+            path = (self.image)
+            return f'![image preview]({path})'
+        else:
+            return 'Nothing to plot'
+        
+
     
     def reported(self):
         self.cls_container.append(self)
