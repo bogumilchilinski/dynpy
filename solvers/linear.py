@@ -1388,15 +1388,32 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     @cached_property
     def _get_excitation_comps(self):
         '''
-        It applies generic form solution for the following differential equation
-        \dot Y + A Y = F \cos(\Omega t)
-        
-        The generic form is:
-        
-        C = (A^{-1} \Omega^2 + A)^{-1}  F 
-        D =  \Omega A^{-1} * C
+        It expands the free terms vector to sequnece of harmonic (sin and cos) components.
         '''
-        pass
+        terms = self._free_terms.expand().applyfunc(lambda row: (TR8(row).expand()))
+
+        #         sin_components=ext_forces.atoms(sin)
+        #         cos_components=ext_forces.atoms(cos)
+
+        #        display('sin cos reco',)
+        components = [
+            comp for comp in terms.atoms(sin, cos, exp) if comp.has(self.ivar)
+        ]
+
+        # #        display('ext_forces',ext_forces)
+
+        # steady_sol = Matrix([0 for gen_coord in self.dvars])
+
+        # for comp in components:
+        #     #display(comp)
+
+        #     omg = (comp.args[0].diff(self.ivar)).doit()
+        #     #            display(omg)
+        #     amp_vector = Matrix([row.coeff(comp) for row in ext_forces])
+
+        #     #display(amp_vector)
+        display(terms)
+        return components
                                  
     @cached_property
     def _steady_solution(self):
