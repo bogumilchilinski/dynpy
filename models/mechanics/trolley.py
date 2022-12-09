@@ -1256,7 +1256,7 @@ class ForcedDampedTrolleyWithSpring(ComposedSystem): ### 2 ODE
 
         return default_data_dict
     
-class ForcedThreeTrolleysWithSprings(ComposedSystem): ### 5, 7 ODE
+class ForcedThreeTrolleysWithSprings(ComposedSystem): ### 7 ODE
     
     scheme_name = 'nonlin_trolley.PNG'
     real_name = 'nonlin_trolley_real.PNG'
@@ -1325,8 +1325,37 @@ class ForcedThreeTrolleysWithSprings(ComposedSystem): ### 5, 7 ODE
         components['force'] = self._force
         
         return components
+
+class ForcedDisconnectedTrolleysWithSprings(ForcedThreeTrolleysWithSprings): ### 5 ODE
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self._trolley1 = MaterialPoint(self.m_1, self.x_1, qs=[self.x_1])
+        self._spring1 = Spring(self.k, pos1 = self.x_1, qs=[self.x_1])
+        self._force = Force(self.F*sin(self.Omega*self.ivar), pos1 = self.x_1, qs=[self.x_1])
+        
+        self._spring12 = Spring(self.k, pos1 = self.x_1, qs=[self.x_1])
+        #self._trolley2 = MaterialPoint(self.m_2, self.x_2, qs=[self.x_2])
+        self._spring23 = Spring(self.k, pos1= -self.x_3, qs=[self.x_3])
+        
+        self._trolley3 = MaterialPoint(self.m_3, self.x_3, qs=[self.x_3])
+        self._spring3 = Spring(self.k, pos1 = self.x_3, qs=[self.x_3])
+
+        components['trolley_1'] = self._trolley1
+        components['spring_1'] = self._spring1
+        components['spring_12'] = self._spring12
+        #components['trolley_2'] = self._trolley2
+        components['spring_23'] = self._spring23
+        components['trolley_3'] = self._trolley3
+        components['spring_3'] = self._spring3
+        components['force'] = self._force
+        
+        return components    
     
-class ForcedDampedThreeTrolleysWithSprings(ComposedSystem): ### 6, 8 ODE
+class ForcedDampedThreeTrolleysWithSprings(ComposedSystem): ### 8 ODE
     
     scheme_name = 'nonlin_trolley.PNG'
     real_name = 'nonlin_trolley_real.PNG'
@@ -1384,8 +1413,6 @@ class ForcedDampedThreeTrolleysWithSprings(ComposedSystem): ### 6, 8 ODE
         self._damper12 = Damper(self.c, pos1 = self.x_1, pos2 = self.x_2, qs=[self.x_1, self.x_2])
         
         self._trolley2 = MaterialPoint(self.m_2, self.x_2, qs=[self.x_2])
-        self._spring2 = Spring(self.k, pos1 = self.x_2, qs=[self.x_2])
-        self._damper2 = Damper(self.c, pos1 = self.x_2, qs=[self.x_2])
         
         self._spring23 = Spring(self.k, pos1 = self.x_2, pos2 = self.x_3, qs=[self.x_2, self.x_3])
         self._damper23 = Damper(self.c, pos1 = self.x_2, pos2 = self.x_3, qs=[self.x_2, self.x_3])
@@ -1400,8 +1427,46 @@ class ForcedDampedThreeTrolleysWithSprings(ComposedSystem): ### 6, 8 ODE
         components['spring_12'] = self._spring12
         components['damper_12'] = self._damper12
         components['trolley_2'] = self._trolley2
-        components['spring_2'] = self._spring2
-        components['damper_2'] = self._damper2
+        components['spring_23'] = self._spring23
+        components['damper_23'] = self._damper23
+        components['trolley_3'] = self._trolley3
+        components['spring_3'] = self._spring3
+        components['damper_3'] = self._damper3
+        components['force'] = self._force
+        
+        return components
+    
+
+class ForcedDampedDisconnectedTrolleysWithSprings(ForcedDampedThreeTrolleysWithSprings): ### 6 ODE
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self._trolley1 = MaterialPoint(self.m_1, self.x_1, qs=[self.x_1])
+        self._spring1 = Spring(self.k, pos1 = self.x_1, qs=[self.x_1])
+        self._damper1 = Damper(self.c, pos1 = self.x_1, qs=[self.x_1])
+        self._force = Force(self.F*sin(self.Omega*self.ivar), pos1 = self.x_1, qs=[self.x_1])
+        
+        self._spring12 = Spring(self.k, pos1 = self.x_1, qs=[self.x_1])
+        self._damper12 = Damper(self.c, pos1 = self.x_1, qs=[self.x_1])
+        
+        #self._trolley2 = MaterialPoint(self.m_2, self.x_2, qs=[self.x_2])
+        
+        self._spring23 = Spring(self.k, pos1 = -self.x_3, qs=[self.x_3])
+        self._damper23 = Damper(self.c, pos1 = -self.x_3, qs=[self.x_3])
+        
+        self._trolley3 = MaterialPoint(self.m_3, self.x_3, qs=[self.x_3])
+        self._spring3 = Spring(self.k, pos1 = self.x_3, qs=[self.x_3])
+        self._damper3 = Damper(self.c, pos1 = self.x_3, qs=[self.x_3])
+
+        components['trolley_1'] = self._trolley1
+        components['spring_1'] = self._spring1
+        components['damper_1'] = self._damper1
+        components['spring_12'] = self._spring12
+        components['damper_12'] = self._damper12
+        #components['trolley_2'] = self._trolley2
         components['spring_23'] = self._spring23
         components['damper_23'] = self._damper23
         components['trolley_3'] = self._trolley3
