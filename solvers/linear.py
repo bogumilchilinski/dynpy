@@ -1389,6 +1389,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     def _get_excitation_comps(self):
         '''
         It expands the free terms vector to sequnece of harmonic (sin and cos) components.
+        It's supporting method for steady_solution() method
         '''
         terms = self._free_terms.expand().applyfunc(lambda row: (TR8(row).expand()))
 

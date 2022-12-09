@@ -1089,7 +1089,8 @@ class ForcedTrolleyWithSpring(ComposedSystem): ### 1 ODE
 
         self._trolley = MaterialPoint(self.m, self.x, qs=[self.x])
         self._spring = Spring(self.k, pos1 = self.x , qs=[self.x])
-        self._force = Force(self.F*sin(self.Omega*self.ivar), pos1 = self.x, qs=[self.x])
+        self._force = Force(self.F*sin(self.Omega*self.ivar)+2*self.F*cos(2*self.Omega*self.ivar)+3*self.F, pos1 = self.x, qs=[self.x])
+
 
 
         components['trolley'] = self._trolley
@@ -1192,7 +1193,7 @@ class ForcedDampedTrolleyWithSpring(ComposedSystem): ### 2 ODE
         self._trolley = MaterialPoint(self.m, self.x, qs=[self.x])
         self._spring = Spring(self.k, pos1 = self.x , qs=[self.x])
         self._damper = Damper(self.c, pos1 = self.x , qs=[self.x])
-        self._force = Force(self.F*sin(self.Omega*self.ivar), pos1 = self.x, qs=[self.x])
+        self._force = Force(self.F*sin(self.Omega*self.ivar)+2*self.F*cos(2*self.Omega*self.ivar)+3*self.F*sin(3*self.Omega*self.ivar), pos1 = self.x, qs=[self.x])
 
 
         components['trolley'] = self._trolley

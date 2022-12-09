@@ -72,10 +72,11 @@ class BlowerToothedBelt(ComposedSystem):
         components = {}
 
         self._mass = MaterialPoint(self.m, self.z, qs=[self.z])(label = 'Material point')
-        self._upper_belt = Spring(self.k_belt, self.z, qs=[self.z])(label = 'Upper belt stiffness')
-        self._lower_belt = Spring(self.k_belt, self.z, qs=[self.z])(label = 'Lower belt stiffness')
-        self._tensioner = Spring(self.k_tensioner, self.z, qs=[self.z])(label = 'Tensioner stiffness')
-        self._force = Force(self.F * sin(self.Omega * self.ivar), pos1=self.z) + Force(-self.Q, pos1=self.z)(label = 'Force')
+        self._upper_belt = Spring(self.k_belt, self.z, pos2=0, qs=[self.z])(label = 'Upper belt stiffness')
+        self._lower_belt = Spring(self.k_belt, self.z, pos2=0, qs=[self.z])(label = 'Lower belt stiffness')
+        self._tensioner = Spring(self.k_tensioner, self.z, pos2=self.z0, qs=[self.z])(label = 'Tensioner stiffness')
+        self._force = Force(self.F * sin(self.Omega * self.ivar), pos1=self.z)(label = 'Force')  # + Force(-self.Q, pos1=self.z)
+
 
 
         components['_mass'] = self._mass
@@ -167,13 +168,13 @@ class DampedBlowerToothedBelt(BlowerToothedBelt):
         components = {}
 
         self._mass = MaterialPoint(self.m, self.z, qs=[self.z])(label = 'Material point')
-        self._upper_belt = Spring(self.k_belt, self.z, pos2=self.z0, qs=[self.z])(label = 'Upper belt stiffness')
-        self._lower_belt = Spring(self.k_belt, self.z, pos2=self.z0, qs=[self.z])(label = 'Lower belt stiffness')
+        self._upper_belt = Spring(self.k_belt, self.z, pos2=0, qs=[self.z])(label = 'Upper belt stiffness')
+        self._lower_belt = Spring(self.k_belt, self.z, pos2=0, qs=[self.z])(label = 'Lower belt stiffness')
         self._tensioner = Spring(self.k_tensioner, self.z, pos2=self.z0, qs=[self.z])(label = 'Tensioner stiffness')
         self._force = Force(self.F * sin(self.Omega * self.ivar), pos1=self.z)(label = 'Force')  # + Force(-self.Q, pos1=self.z)
-        self._upper_belt_damping = Damper(self.c_belt, pos1=self.z, qs=[self.z])(label = 'Upper belt damping')
-        self._lower_belt_damping = Damper(self.c_belt, pos1=self.z, qs=[self.z])(label = 'Lower belt damping')
-        self._tensioner_damping = Damper(self.c_tensioner, pos1=self.z, qs=[self.z])(label = 'Tensioner damping')
+        self._upper_belt_damping = Damper(self.c_belt, pos1=self.z, pos2=0, qs=[self.z])(label = 'Upper belt damping')
+        self._lower_belt_damping = Damper(self.c_belt, pos1=self.z, pos2=0, qs=[self.z])(label = 'Lower belt damping')
+        self._tensioner_damping = Damper(self.c_tensioner, pos1=self.z, pos2=self.z0, qs=[self.z])(label = 'Tensioner damping')
         
         components['_mass'] = self._mass
         components['_upper_belt'] = self._upper_belt
