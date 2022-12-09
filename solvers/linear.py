@@ -1385,6 +1385,18 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
           
         return cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar)  
 
+    @cached_property
+    def _get_excitation_comps(self):
+        '''
+        It applies generic form solution for the following differential equation
+        \dot Y + A Y = F \cos(\Omega t)
+        
+        The generic form is:
+        
+        C = (A^{-1} \Omega^2 + A)^{-1}  F 
+        D =  \Omega A^{-1} * C
+        '''
+        pass
                                  
     @cached_property
     def _steady_solution(self):
