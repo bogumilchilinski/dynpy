@@ -1316,7 +1316,7 @@ class Shaft(ComposedSystem):
         system = self.disc_1 + self.spring_2 + self.moment
         self.system = system
 
-        super().__init__(system, **kwargs)
+        super(HarmonicOscillator,self).__init__(system, **kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
