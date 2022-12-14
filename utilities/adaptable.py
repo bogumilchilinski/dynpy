@@ -1083,7 +1083,14 @@ class BasicFormattingTools(DataMethods):
             y_axis_description = ''
 
         if x_axis_description is None:
-            x_axis_description = ',xlabel={$' + plotted_frame.index.name + '$},'
+            
+            _xlabel = plotted_frame.index.name
+            if isinstance(_xlabel,str):
+                xlabel_desc = _xlabel
+            else:
+                xlabel_desc = latex(_xlabel)
+            
+            x_axis_description = ',xlabel={$' + xlabel_desc + '$},'
 
         plotted_frame = plotted_frame.set_str_index_columns()
         plotted_frame = plotted_frame.rename_axis(None, axis=1)

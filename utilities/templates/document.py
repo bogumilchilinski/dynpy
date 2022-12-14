@@ -157,7 +157,7 @@ class ExampleTemplate(Document):
         self.append(NewPage())
         # tu implementować co tam potrzeba
         
-class SzymonTemplate(Document):
+class ThesisTemplate(Document):
     
     latex_name = 'document'
     packages = [

@@ -609,11 +609,11 @@ class ODESystem(AnalyticalSolution):
 
     @classmethod
     def from_dynamic_system(cls,dyn_system, ode_order = None, parameters = None):
-        """Class method that creates an ODESystem object from a dynamic system object.
+        """Class method that creates an ODESystem object from a dynamic system object. It also checks parameters and takes default class variables if it is needed.
 
         Arguments:
             dyn_system - dynamic system object;
-            ode_order - order of a differential equation. Default value is equal to one;
+            ode_order - order of a differential equation. Default value is None;
             parameters - parameters that could be implemented into newly created ODESystem object. Default value is None;
         """
 
