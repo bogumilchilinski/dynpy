@@ -307,8 +307,20 @@ class DampedChair4DOF(ComposedSystem):
                    self.c_fs:107,
                    self.c_rs:107,
                    self.c:100,
-                   self.A:0.001,
+                   self.A:0.001*10,
                    self.omega:4*np.pi,
+                          }
+        
+        return default_data_dict  
+    def get_table_values(self):
+        default_data_dict={
+                   
+                   self.c:100,
+                   self.c_rt:5500,
+                   self.m_rear:1.5,
+                   self.M:75,
+                   self.k_f:750000,
+                   self.k_r:750000,
                           }
         
         return default_data_dict  
@@ -457,9 +469,9 @@ units_dict = {
                    #dyn_sys.c_lam:0.0001,
                    sys4.l_l:ureg.meter,
                    sys4.l_r:ureg.meter,
-                   sys4.k_f:ureg.kilogram/ureg.second**2,
+                   sys4.k_f:ureg.newton/ureg.meter,
                    sys4.k_ft:ureg.kilogram/ureg.second**2,
-                   sys4.k_r:ureg.kilogram/ureg.second**2,
+                   sys4.k_r:ureg.newton/ureg.meter,
                    sys4.k_rt:ureg.kilogram/ureg.second**2,
                    sys4.c:ureg.newton*ureg.second/ureg.meter,
                     sys4.c_fs:ureg.newton*ureg.second/ureg.meter,
@@ -491,7 +503,9 @@ units_dict = {
                 sys4.z:ureg.meter,
                 sys4.phi: ureg.radian,
                 sys4.z.diff(t,2):ureg.meter/ureg.second**2,
-                sys4.phi.diff(t,2): ureg.radian/ureg.second**2
+                sys4.phi.diff(t,2): ureg.radian/ureg.second**2,
+                sys4.pm:ureg.meter/ureg.meter,
+                sys4.u0:ureg.meter,
               }
 
 # units_dict = {sys4.m:ureg.kilogram,
