@@ -18,6 +18,9 @@ import inspect
 
 from .pendulum import Pendulum, PendulumKinematicExct
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
+from pint import UnitRegistry
+ureg = UnitRegistry()
+
 
 #Patryk
 #dane domyślne i numeryczne
@@ -939,6 +942,33 @@ class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
         default_data_dict.update({self.G: [4*default_data_dict[self.F][0]*cos(0.5*default_data_dict[self.Omega][0]*self.ivar) , default_data_dict[self.F][0]*cos(0.75*default_data_dict[self.Omega][0]*self.ivar)**2 , 1.5*default_data_dict[self.F][0]*2*cos(1.25*default_data_dict[self.Omega][0]*self.ivar) , 3*default_data_dict[self.F][0]*cos(2*default_data_dict[self.Omega][0]*self.ivar)**2]})
 
         return default_data_dict
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m_1: r'masa wózka nr 1',
+            self.m_2: r'masa wózka nr 2',
+            self.k: r'sztywność sprężyny',
+            self.Omega: r'częstotliwość wymuszenia',
+            self.F: r'wartość stałej siły wymuszającej',
+            self.G: r'wartość zmiennej siły wymuszającej',
+            self.x_1: 'przemieszczenie wózka nr 1',
+            self.x_2: 'przemieszczenie wózka nr 2',
+        }
+        return self.sym_desc_dict
+    
+    def unit_dict(self):
+        self.sym_desc_dict = {
+            self.m_1: r'masa wózka nr 1',
+            self.m_2: r'masa wózka nr 2',
+            self.k: r'sztywność sprężyny',
+            self.Omega: r'częstotliwość wymuszenia',
+            self.F: r'wartość stałej siły wymuszającej',
+            self.G: r'wartość zmiennej siły wymuszającej',
+            self.x_1: 'przemieszczenie wózka nr 1',
+            self.x_2: 'przemieszczenie wózka nr 2',
+        }
+        return self.sym_desc_dict
+
     
 class ForcedDampedTrolleysWithSprings(NonlinearComposedSystem): ### 4 ODE
     
@@ -1150,6 +1180,29 @@ class ForcedTrolleyWithSpring(ComposedSystem): ### 1 ODE
         default_data_dict.update({self.G: [4*default_data_dict[self.F][0]*cos(0.5*default_data_dict[self.Omega][0]*self.ivar) , default_data_dict[self.F][0]*cos(0.75*default_data_dict[self.Omega][0]*self.ivar)**2 , 1.5*default_data_dict[self.F][0]*2*cos(1.25*default_data_dict[self.Omega][0]*self.ivar) , 3*default_data_dict[self.F][0]*cos(2*default_data_dict[self.Omega][0]*self.ivar)**2]})
 
         return default_data_dict
+
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'masa wózka',
+            self.k: r'sztywność sprężyny',
+            self.Omega: r'częstotliwość wymuszenia',
+            self.F: r'wartość stałej siły wymuszającej',
+            self.G: r'wartość zmiennej siły wymuszającej',
+            self.x: 'przemieszczenie wózka nr 1',
+        }
+        return self.sym_desc_dict
+    
+    def unit_dict(self):
+        unit_dict = {
+            self.m: ureg.kilogram,
+            self.k: ureg.newton/ureg.meter,
+            self.Omega: ureg.hertz,
+            self.F: ureg.newton,
+            self.G: ureg.newton,
+            self.x: ureg.meter,
+        }
+        return unit_dict
     
 class ForcedDampedTrolleyWithSpring(ComposedSystem): ### 2 ODE
     
@@ -1840,7 +1893,6 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
         }
         return self.sym_desc_dict
 
-dyn_sys_RD = VariableMassTrolleyWithPendulumRayleighDamping()
 
 
     
