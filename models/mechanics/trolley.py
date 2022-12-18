@@ -21,6 +21,7 @@ from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, bas
 from pint import UnitRegistry
 ureg = UnitRegistry()
 
+from functools import cached_property
 
 #Patryk
 #dane domyślne i numeryczne
@@ -1011,7 +1012,7 @@ class ForcedDampedTrolleysWithSprings(NonlinearComposedSystem): ### 4 ODE
         self.qs = [self.x_1, self.x_2]
         self._init_from_components(**kwargs)
 
-    @property
+    @cached_property
     def components(self):
 
         components = {}
@@ -1601,7 +1602,7 @@ class VariableMassTrolleyWithPendulum(ComposedSystem):
         #self.m_tf = self.m_f#((S.One/2-atan(self.flow_coeff*(self.ivar-self.t0))/pi))
         #self.m_pf = self.m_f#((S.One/2+atan(self.flow_coeff*(self.ivar-self.t0))/pi))
 
-    @property
+    @cached_property
     def components(self):
         components = {}
 
@@ -1785,7 +1786,7 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
 
 
 
-    @property
+    @cached_property
     def components(self):
         components = {}
         
@@ -1794,11 +1795,14 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
 
         self._trolley = VariableMassTrolleyWithPendulum(m_tf = m_tf_eq, m_pf = m_pf_eq)(label='Trolley')
         
-        damping_matrix = self.alpha*self._trolley.inertia_matrix() + self.beta*self._trolley.stiffness_matrix()
+        #damping_matrix = self.alpha*self._trolley.inertia_matrix() + self.beta*self._trolley.stiffness_matrix()
         
-        self._trolley_damping = Damper((damping_matrix[0]+damping_matrix[2]), pos1 = self.x , qs = [self.x,self.phi])(label='Trolley dapming')
-        self._pendulum_damping = Damper((damping_matrix[1]+damping_matrix[3]), pos1 = self.phi , qs = [self.x,self.phi])(label='Pendulum dapming')
+#         self._trolley_damping = Damper((damping_matrix[0]+damping_matrix[2]), pos1 = self.x , qs = [self.x,self.phi])(label='Trolley dapming')
+#         self._pendulum_damping = Damper((damping_matrix[1]+damping_matrix[3]), pos1 = self.phi , qs = [self.x,self.phi])(label='Pendulum dapming')
 
+        self._trolley_damping = Damper(self.alpha, pos1 = self.x , qs = [self.x,self.phi])(label='Trolley dapming')
+        self._pendulum_damping = Damper(self.beta, pos1 = self.phi , qs = [self.x,self.phi])(label='Pendulum dapming')
+        
         components['_trolley'] = self._trolley
         components['_trolley_damping'] = self._trolley_damping
         components['_pendulum_damping'] = self._pendulum_damping
