@@ -1606,8 +1606,8 @@ class VariableMassTrolleyWithPendulum(ComposedSystem):
     def components(self):
         components = {}
 
-        self._trolley = SpringMassSystem((self.m_t + self.m_tf), self.k, self.x, self.ivar)(label='Trolley')
-        self._pendulum = PendulumKinematicExct(self.l, (self.m_p + self.m_pf), self.g, self.phi, self.x, self.ivar)(label='Pendulum')
+        self._trolley = SpringMassSystem(self.m_t + self.m_tf, self.k, self.x, self.ivar)(label='Trolley')
+        self._pendulum = PendulumKinematicExct(self.l, self.m_p + self.m_pf, self.g, self.phi, self.x, self.ivar)(label='Pendulum')
         self._force=Force(self.F*sin(self.Omega*self.ivar), pos1=self.x, qs=[self.x, self.phi])(label='Force')
 
         components['_trolley'] = self._trolley
@@ -1645,37 +1645,25 @@ class VariableMassTrolleyWithPendulum(ComposedSystem):
             self.x: [self.x]
         }
         return default_data_dict
-    
-#     def get_numerical_data(self):
 
-#         default_data_dict = {
-#             self.m_t: [no for no in range(20, 30)],
-#             self.m_p: [no for no in range(1, 10)],
-#             self.l: [1/2 * no for no in range(1, 10)],
-#             self.F: [0.1*no for no in range(50, 100)],
-#             self.Omega: [3.14 * no for no in range(1,2)],
-#             self.k: [no for no in range(50, 100)],
-#             self.g: [9.81]
-#         }
-#         return default_data_dict
-    
     def get_numerical_data(self):
 
         default_data_dict = {
             self.m_p: [10],
             self.m_f: [50],
-            self.m_tf: [50],
-            self.m_pf: [50],
+#             self.m_tf: [50],
+#             self.m_pf: [50],
             self.F: [5],
             self.flow_coeff: [5],
             self.t0: [10],
             self.Omega: [3.14 * 0.5],
             self.g: [9.81],
-            self.k: [2]
+            #self.k: [2]
         }
         default_data_dict.update({self.m_t: [10.0*default_data_dict[self.m_p][0]],
-                                  self.l: [0.99*default_data_dict[self.g][0]/(default_data_dict[self.Omega][0]*default_data_dict[self.Omega][0])],
-                                  self.k: [2.0*default_data_dict[self.m_p][0]*default_data_dict[self.g][0]/(default_data_dict[self.g][0]/default_data_dict[self.Omega][0]**2)]})
+                                  #self.l: [0.99*default_data_dict[self.g][0]/(default_data_dict[self.Omega][0]*default_data_dict[self.Omega][0])],
+                                  #self.k: [2.0*default_data_dict[self.m_p][0]*default_data_dict[self.g][0]/(default_data_dict[self.g][0]/default_data_dict[self.Omega][0]**2)]
+                                 })
         return default_data_dict
 
     def symbols_description(self):
@@ -1708,10 +1696,12 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
     m_t = Symbol('m_t', positive=True)
     m_t0 = Symbol('m_t0', positive=True)
     m_tf = Symbol('m_tf', positive=True)
+    m_tf_eq = Symbol('m_tf_eq', positive=True)
 
     m_p = Symbol('m_p', positive=True)
     m_p0 = Symbol('m_p0', positive=True)
     m_pf = Symbol('m_pf', positive=True)
+    m_pf_eq = Symbol('m_pf_eq', positive=True)
     
     flow_coeff = Symbol('\\lambda', positive=True)
     
@@ -1739,9 +1729,11 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
                  m_t=None,
                  m_t0=None,
                  m_tf=None,
+                 m_tf_eq=None,
                  m_p=None,
                  m_p0=None,
                  m_pf=None,
+                 m_pf_eq=None,
                  m_0=None,
                  flow_coeff=None,
                  t0=None,
@@ -1763,9 +1755,11 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
         if m_t is not None: self.m_t = m_t
         if m_t0 is not None: self.m_t0 = m_t0
         if m_tf is not None: self.m_tf = m_tf
+        if m_pf_eq is not None: self.m_tf_eq = m_tf_eq
         if m_p is not None: self.m_p = m_p
         if m_p0 is not None: self.m_p0 = m_p0
         if m_pf is not None: self.m_pf = m_pf
+        if m_pf_eq is not None: self.m_pf_eq = m_pf_eq
         if m_0 is not None: self.m_0 = m_0
         if flow_coeff is not None: self.flow_coeff = flow_coeff
         if rayleigh_damping_matrix is not None: self.rayleigh_damping_matrix = rayleigh_damping_matrix
@@ -1790,18 +1784,18 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
     def components(self):
         components = {}
         
-        m_tf_eq = self.m_f*((S.One/2-atan(self.flow_coeff*(self.ivar-self.t0))/pi))
-        m_pf_eq = self.m_f*((S.One/2+atan(self.flow_coeff*(self.ivar-self.t0))/pi))
+        self.m_tf_eq = self.m_f*((S.One/2-atan(self.flow_coeff*(self.ivar-self.t0))/pi))
+        self.m_pf_eq = self.m_f*((S.One/2+atan(self.flow_coeff*(self.ivar-self.t0))/pi))
 
-        self._trolley = VariableMassTrolleyWithPendulum(m_tf = m_tf_eq, m_pf = m_pf_eq)(label='Trolley')
+        self._trolley = VariableMassTrolleyWithPendulum(m_tf = self.m_tf, m_pf = self.m_pf)(label='Trolley')
         
         #damping_matrix = self.alpha*self._trolley.inertia_matrix() + self.beta*self._trolley.stiffness_matrix()
         
 #         self._trolley_damping = Damper((damping_matrix[0]+damping_matrix[2]), pos1 = self.x , qs = [self.x,self.phi])(label='Trolley dapming')
 #         self._pendulum_damping = Damper((damping_matrix[1]+damping_matrix[3]), pos1 = self.phi , qs = [self.x,self.phi])(label='Pendulum dapming')
 
-        self._trolley_damping = Damper(self.alpha, pos1 = self.x , qs = [self.x,self.phi])(label='Trolley dapming')
-        self._pendulum_damping = Damper(self.beta, pos1 = self.phi , qs = [self.x,self.phi])(label='Pendulum dapming')
+        self._trolley_damping = Damper(self.b, pos1 = self.x , qs = [self.x,self.phi])(label='Trolley dapming')
+        self._pendulum_damping = Damper(self.b/2, pos1 = self.phi , qs = [self.x,self.phi])(label='Pendulum dapming')
         
         components['_trolley'] = self._trolley
         components['_trolley_damping'] = self._trolley_damping
@@ -1809,46 +1803,19 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
 
         return components
 
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.l: r'Pendulum length',
-            self.k: r'Stiffness of a beam showed as a spring stiffness in trolley member',
-            self.x: r'Kinematic lateral excitation',
-            self.phi: r'Angle of a pendulum',
-            self.m_p: r'Mass of pendulum',
-            self.m_t: r'Mass of trolley',
-            self.g: r'Gravity constant',
-            self.F: r'Force',
-            self.Omega: r'Excitation frequency',
-        }
-        return self.sym_desc_dict
+#     def get_default_data(self):
 
-    def get_default_data(self):
-
-        m0, l0, F0, Omega0, k0 = symbols('m_0 l_0 F_0 Omega_0 k_0', positive=True)
-
-        default_data_dict = {
-            self.m_t: [S.One * m0 * no for no in range(20, 30)],
-            self.m_p: [S.One * m0 * no for no in range(1, 10)],
-            self.l: [S.Half * l0 * no for no in range(1, 10)],
-            self.F: [S.One * F0 * no for no in range(50, 100)],
-            self.Omega: [S.One * Omega0],
-            self.g: [S.One * self.g],
-            self.k: [S.One * k0 * no for no in range(50, 100)],
-            self.x: [self.x]
-        }
-        return default_data_dict
-    
-#     def get_numerical_data(self):
+#         m0, l0, F0, Omega0, k0 = symbols('m_0 l_0 F_0 Omega_0 k_0', positive=True)
 
 #         default_data_dict = {
-#             self.m_t: [no for no in range(20, 30)],
-#             self.m_p: [no for no in range(1, 10)],
-#             self.l: [1/2 * no for no in range(1, 10)],
-#             self.F: [0.1*no for no in range(50, 100)],
-#             self.Omega: [3.14 * no for no in range(1,2)],
-#             self.k: [no for no in range(50, 100)],
-#             self.g: [9.81]
+#             self.m_t: [S.One * m0 * no for no in range(20, 30)],
+#             self.m_p: [S.One * m0 * no for no in range(1, 10)],
+#             self.l: [S.Half * l0 * no for no in range(1, 10)],
+#             self.F: [S.One * F0 * no for no in range(50, 100)],
+#             self.Omega: [S.One * Omega0],
+#             self.g: [S.One * self.g],
+#             self.k: [S.One * k0 * no for no in range(50, 100)],
+#             self.x: [self.x]
 #         }
 #         return default_data_dict
     
@@ -1857,21 +1824,27 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
         default_data_dict = {
             self.m_p: [10],
             self.m_f: [50],
-            self.m_tf: [50],
-            self.m_pf: [50],
-            self.alpha: [0.8],
-            self.beta: [0.6],
-            self.b: [0.02],
+            #self.alpha: [0.8],
+            #self.beta: [2.5],
+            self.b: [2.5],
             self.F: [250],
             self.flow_coeff: [10],
             self.t0: [30],
-            self.Omega: [3.14 * 0.5],
+            self.Omega: [3.14 * 0.65],
             self.g: [9.81],
-            self.k: [2]
+            #self.k: [2]
         }
         default_data_dict.update({self.m_t: [10.0*default_data_dict[self.m_p][0]],
                                   self.l: [0.99*default_data_dict[self.g][0]/(default_data_dict[self.Omega][0]*default_data_dict[self.Omega][0])],
-                                  self.k: [2.0*default_data_dict[self.m_p][0]*default_data_dict[self.g][0]/(default_data_dict[self.g][0]/default_data_dict[self.Omega][0]**2)]})
+                                  self.k: [2.0*default_data_dict[self.m_p][0]*default_data_dict[self.g][0]/(default_data_dict[self.g][0]/default_data_dict[self.Omega][0]**2)],
+                                  self.m_tf: [default_data_dict[self.m_f][0]*((S.One/2-atan(default_data_dict[self.flow_coeff][0]*(self.ivar-default_data_dict[self.t0][0]))/pi))],
+                                  self.m_pf: [default_data_dict[self.m_f][0]*((S.One/2+atan(default_data_dict[self.flow_coeff][0]*(self.ivar-default_data_dict[self.t0][0]))/pi))],
+                                          })
+        
+        default_data_dict.update({self.m_t+self.m_tf: [default_data_dict[self.m_t][0]+default_data_dict[self.m_tf][0]],
+                                  self.m_p+self.m_pf: [default_data_dict[self.m_p][0]+default_data_dict[self.m_pf][0]],
+                                          })
+        
         return default_data_dict
     
 
