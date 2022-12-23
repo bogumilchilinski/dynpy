@@ -168,7 +168,7 @@ class SzymonTemplate(Document):
                   Package('listings'),
                   Package('titlesec'),
                   Package('fancyhdr'),
-                  
+                  #try
         
                   Command('newcommand{\praca}', arguments=['Praca dyplomowa']),
                   Command('newcommand{\dyplom}', arguments=['Inżynierska']),
