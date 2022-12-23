@@ -609,11 +609,11 @@ class ODESystem(AnalyticalSolution):
 
     @classmethod
     def from_dynamic_system(cls,dyn_system, ode_order = None, parameters = None):
-        """Class method that creates an ODESystem object from a dynamic system object.
+        """Class method that creates an ODESystem object from a dynamic system object. It also checks parameters and takes default class variables if it is needed.
 
         Arguments:
             dyn_system - dynamic system object;
-            ode_order - order of a differential equation. Default value is equal to one;
+            ode_order - order of a differential equation. Default value is None;
             parameters - parameters that could be implemented into newly created ODESystem object. Default value is None;
         """
 
@@ -1385,6 +1385,36 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
           
         return cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar)  
 
+    @cached_property
+    def _get_excitation_comps(self):
+        '''
+        It expands the free terms vector to sequnece of harmonic (sin and cos) components.
+        It's supporting method for steady_solution() method
+        '''
+        terms = self._free_terms.expand().applyfunc(lambda row: (TR8(row).expand()))
+
+        #         sin_components=ext_forces.atoms(sin)
+        #         cos_components=ext_forces.atoms(cos)
+
+        #        display('sin cos reco',)
+        components = [
+            comp for comp in terms.atoms(sin, cos, exp) if comp.has(self.ivar)
+        ]
+
+        # #        display('ext_forces',ext_forces)
+
+        # steady_sol = Matrix([0 for gen_coord in self.dvars])
+
+        # for comp in components:
+        #     #display(comp)
+
+        #     omg = (comp.args[0].diff(self.ivar)).doit()
+        #     #            display(omg)
+        #     amp_vector = Matrix([row.coeff(comp) for row in ext_forces])
+
+        #     #display(amp_vector)
+        display(terms)
+        return components
                                  
     @cached_property
     def _steady_solution(self):

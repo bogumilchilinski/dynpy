@@ -8,8 +8,8 @@ from sympy.core.relational import Relational
 
 from sympy.physics.mechanics import vlatex
 
-from IPython.display import display, Markdown, Latex
-
+from IPython.display import display, Latex
+from IPython.display import Markdown as IPMarkdown
 import pandas as pd
 
 import matplotlib.pyplot as plt
@@ -1083,7 +1083,14 @@ class BasicFormattingTools(DataMethods):
             y_axis_description = ''
 
         if x_axis_description is None:
-            x_axis_description = ',xlabel={$' + plotted_frame.index.name + '$},'
+            
+            _xlabel = plotted_frame.index.name
+            if isinstance(_xlabel,str):
+                xlabel_desc = _xlabel
+            else:
+                xlabel_desc = latex(_xlabel)
+            
+            x_axis_description = ',xlabel={$' + xlabel_desc + '$},'
 
         plotted_frame = plotted_frame.set_str_index_columns()
         plotted_frame = plotted_frame.rename_axis(None, axis=1)
@@ -1165,7 +1172,7 @@ class BasicFormattingTools(DataMethods):
             plt.ylabel((  f'${ylabel}$'  ).replace('$$', '$'))
             plt.title(plotted_frame._raw_title)
             plt.show()
-            display(Markdown(caption))
+            display(IPMarkdown(caption))
             container.append(fig)
             
             

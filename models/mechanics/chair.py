@@ -47,7 +47,7 @@ class DampedChair4DOF(ComposedSystem):
     scheme_name = 'chair5dof.jpg'
     real_name = 'gtm.png'
     
-    z,phi,z_fr,z_rear,x=dynamicsymbols('z, varphi z_f z_r x')
+    z,phi,z_fr,z_rear,x=dynamicsymbols('z varphi z_f z_r x')
     M=Symbol('M', positive=True)
     m=Symbol('m', positive=True)
     m_b=Symbol('m_b', positive=True)
@@ -70,7 +70,7 @@ class DampedChair4DOF(ComposedSystem):
     k_ft=Symbol('k_ft', positive=True)
     c_rs=Symbol('c_rs', positive=True)
     c_fs=Symbol('c_fs', positive=True)
-    c_rt=Symbol('c_r_t', positive=True)
+    c_rt=Symbol('c_rt', positive=True)
     c_ft=Symbol('c_ft', positive=True)
     c=Symbol('c', positive=True)
     F_engine=Symbol('F_{engine}', positive=True)
@@ -111,6 +111,7 @@ class DampedChair4DOF(ComposedSystem):
     T=Symbol('T')
     V=Symbol('V')
     D=Symbol('D')
+#     xt=dynamicsymbols('qwe') #dummy variable for deleting t symbol from descriptions
     def __init__(self,
                  m=None,
                  M=None,
@@ -171,7 +172,7 @@ class DampedChair4DOF(ComposedSystem):
                  l_ramp=None,
                  axw=None,
                  pm=None,
-                
+#                  xt=None,
                  **kwargs):
         
         if z is not None: self.z=z
@@ -232,7 +233,7 @@ class DampedChair4DOF(ComposedSystem):
         if l_ramp is not None: self.l_ramp=l_ramp
         if axw is not None: self.axw=axw
         if pm is not None: self.pm=pm
-            
+#         if xt is not None: self.xt=xt
         self.s=self.A*sin(ivar*self.omega)
         self.qs=[self.z_fr,self.z_rear,self.x,self.z,self.phi]
        
@@ -306,8 +307,20 @@ class DampedChair4DOF(ComposedSystem):
                    self.c_fs:107,
                    self.c_rs:107,
                    self.c:100,
-                   self.A:0.001,
+                   self.A:0.001*10,
                    self.omega:4*np.pi,
+                          }
+        
+        return default_data_dict  
+    def get_table_values(self):
+        default_data_dict={
+                   
+                   self.c:100,
+                   self.c_rt:5500,
+                   self.m_rear:1.5,
+                   self.M:75,
+                   self.k_f:750000,
+                   self.k_r:750000,
                           }
         
         return default_data_dict  
@@ -333,7 +346,7 @@ class DampedChair4DOF(ComposedSystem):
               self.u0:'road profil amplitude',
               self.I_ch:'''wheelchair's moment of inertia''',
               self.I_w:'''rear wheel moment of inertia''',
-              self.z_c3:'''vertical distance between wheelchair's center of mass and center of rotation''',
+              self.z_c3:'''vertical distance between wheelchair's center of mass and constant reference height''',
               self.l_fr:'front wheelchair spring initial length',
               self.l_rear:'rear wheelchair spring initial length',
 #               self.m_RC:'RapidChair drive rocker arm mass',
@@ -347,7 +360,7 @@ class DampedChair4DOF(ComposedSystem):
 #               self.k_w:'RapidChair drive wheel striffness',
 #               self.k_fix:'fastening stiffness',
 #               self.k_tire:'RapidChair drive wheel tire striffness',
-              self.c:'horizontal damping coefficient',
+              self.c:'general resistance to motion coefficient',
               self.c_fs:'vertical damping coefficient of front suspension',
               self.c_rs:'vertical damping coefficient of rear suspension',
               self.c_ft:'vertical damping coefficient of caster band',
@@ -456,9 +469,9 @@ units_dict = {
                    #dyn_sys.c_lam:0.0001,
                    sys4.l_l:ureg.meter,
                    sys4.l_r:ureg.meter,
-                   sys4.k_f:ureg.kilogram/ureg.second**2,
+                   sys4.k_f:ureg.newton/ureg.meter,
                    sys4.k_ft:ureg.kilogram/ureg.second**2,
-                   sys4.k_r:ureg.kilogram/ureg.second**2,
+                   sys4.k_r:ureg.newton/ureg.meter,
                    sys4.k_rt:ureg.kilogram/ureg.second**2,
                    sys4.c:ureg.newton*ureg.second/ureg.meter,
                     sys4.c_fs:ureg.newton*ureg.second/ureg.meter,
@@ -488,7 +501,11 @@ units_dict = {
                t:ureg.second,
                 f:ureg.hertz,
                 sys4.z:ureg.meter,
-                sys4.phi: ureg.radian
+                sys4.phi: ureg.radian,
+                sys4.z.diff(t,2):ureg.meter/ureg.second**2,
+                sys4.phi.diff(t,2): ureg.radian/ureg.second**2,
+                sys4.pm:ureg.meter/ureg.meter,
+                sys4.u0:ureg.meter,
               }
 
 # units_dict = {sys4.m:ureg.kilogram,

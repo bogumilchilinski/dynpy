@@ -1,6 +1,7 @@
 from pylatex import (Document, Package, Command, NewPage, Tabularx
                      #Section, Subsection, Subsubsection, Itemize,  HorizontalSpace, Description, Marker
                     )
+
 #from pylatex.section import Paragraph, Chapter
 from pylatex.utils import (#italic, 
                            NoEscape)
@@ -156,7 +157,7 @@ class ExampleTemplate(Document):
         self.append(NewPage())
         # tu implementować co tam potrzeba
         
-class SzymonTemplate(Document):
+class ThesisTemplate(Document):
     
     latex_name = 'document'
     packages = [
@@ -168,8 +169,8 @@ class SzymonTemplate(Document):
                   Package('listings'),
                   Package('titlesec'),
                   Package('fancyhdr'),
-                  #try
-        
+                  Package('graphicx'),
+
                   Command('newcommand{\praca}', arguments=['Praca dyplomowa']),
                   Command('newcommand{\dyplom}', arguments=['Inżynierska']),
                   Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']),
@@ -184,6 +185,7 @@ class SzymonTemplate(Document):
                   Command('newcommand{\\rok}', arguments=['Rok składania pracy']),
                   Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']),
                   Command('newcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']),
+                  Command('graphicspath{{../}}')
     ]
 
 
@@ -195,7 +197,7 @@ class SzymonTemplate(Document):
                  title='Basic title',
                  default_filepath='default_filepath',
                  *,
-                 documentclass='report',
+                 documentclass='article',
                  document_options=None,
                  fontenc='T1',
                  inputenc='utf8',
@@ -241,6 +243,7 @@ class SzymonTemplate(Document):
         self.packages.append(Command('newcommand{\\rok}', arguments=['Rok składania pracy']))
         self.packages.append(Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']))
         self.packages.append(Command('newcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']))
+        self.packages.append(Command('graphicspath{{../}}'))
         #self.append(Command('maketitle'))
         self.append(NewPage())
         # tu implementować co tam potrzeba
