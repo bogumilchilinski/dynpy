@@ -1492,7 +1492,8 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
                             model_level_name=0,
                             coord_level_name=-1,
                             ics=None,
-                            backend=None):
+                            backend=None,
+                            dependencies=None):
 
         #display(self.columns.droplevel(coord_level_name).unique())
 
@@ -1519,13 +1520,29 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
             ics_series = (self[case_data].T[t0])
 
-            #print(ics_series)
+            #print('xxxxxxxxxxxxxxxxxxx',ics_series)
+            
+            default_ics=model.default_ics()
 
-            ics_list = [
-                np.float(ics_series[coord])
-                for coord in numerized_model.ics_dvars
-            ]
 
+            ics_list = []
+            for coord in numerized_model.ics_dvars:
+                given_value = (ics_series[coord])
+                
+                # print('given',given_value,type(given_value))
+                # print('cond: ',given_value is None,np.isnan( given_value))
+                if given_value is None:
+                    ics_val = default_ics[coord]
+                elif np.isnan( given_value):
+                    ics_val = default_ics[coord]
+                else:
+                    ics_val = given_value
+                    
+                # print('selected value \n',ics_val)
+                ics_list.append(ics_val)
+
+
+            # print('ics list \n',ics_list)
             result = numerized_model.compute_solution(t_span, ics_list)
 
             computed_data[case_data] = result[computed_data[case_data].columns]
@@ -1536,6 +1553,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
             computed_data._comp_time[case_data] = sim_time
 
         return (computed_data)
+
 
 
 class NumericalAnalisysSeries(AdaptableSeries):

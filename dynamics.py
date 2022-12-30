@@ -388,6 +388,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self._evaluate = evaluate
 
         self._scheme_options  = scheme_options
+        self._default_ics=None
 
         if system:
             # print(system._kinetic_energy)
@@ -1295,7 +1296,13 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return Eq(Symbol('H'), (ham_sum-self.lagrangian()).subs(mom_subs[0]))
 
     def default_ics(self,critical_point=False):
-        return {coord:0 for coord in self.Y}
+        
+        if isinstance(self._default_ics,dict):
+            ics_instance={coord:self._default_ics[coord] for coord in self.Y if coord in self._default_ics}
+            
+            return {**{coord:0 for coord in self.Y},**ics_instance}
+        else:
+            return {coord:0 for coord in self.Y}
     
     def _op_points(self,
                    static_disp_dict=None,
