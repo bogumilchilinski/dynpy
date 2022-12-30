@@ -538,6 +538,26 @@ class AnalyticalSolution(ImmutableMatrix):
     
 class ODESolution(AnalyticalSolution):
     
+    _default_ics = None
+    _integration_consts = None #container for integration constants
+
+
+    def _spot_constant(self):
+        """
+        Auxiliary method to spot or get integration constants from the system
+
+        Returns
+        -------
+        list
+            Containter with integration constants
+        """
+        
+        const_list = self._integration_consts
+        if const_list is None:
+            const_list =  [expr for expr  in self.rhs.atoms(Symbol) if 'C' in str(expr) ]
+        
+        return const_list
+    
     def constant(self,initial_conditions_matrix, msm_params):
         
         self.initial_conditions_matrix = initial_conditions_matrix
@@ -579,14 +599,22 @@ class ODESolution(AnalyticalSolution):
 
 
         return self.dvars
+
+    def default_ics(self,critical_point=False):
+        
+        if isinstance(self._default_ics,dict):
+            ics_instance={coord:self._default_ics[coord] for coord in self.dvars if coord in self._default_ics}
+            
+            return {**{coord:0 for coord in self.dvars},**ics_instance}
+        else:
+            return {coord:0 for coord in self.dvars}
     
     @cached_property
     def dvars(self):
         return self.lhs
     
-
-
     
+
     
 class ODESystem(AnalyticalSolution):
     
@@ -1342,7 +1370,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
 
 
 
-        return AnalyticalSolution(self.dvars,solution)#.subs( const_dict )
+        return ODESolution(self.dvars,solution)#.subs( const_dict )
                                  
     def _sin_comp(self,omega,amp): 
         '''
@@ -1436,7 +1464,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
 
         sol = self._cos_comp(omg,b) + self._sin_comp(omg,0*b)
 
-        return AnalyticalSolution(self.dvars,sol)  
+        return ODESolution(self.dvars,sol)  
     
 class FirstOrderODE:
     """
