@@ -336,7 +336,7 @@ class DampedChair4DOF(ComposedSystem):
               self.k_rot:'rotational stiffness',
               self.m:'wheelchair mass',
               self.k:'wheelchair stiffness',
-              self.g:'acceleration of gravity',
+              self.g:'gravitational acceleration',
               self.F_1:'initial force',
               self.F_2:'initial force',
               self.Omega:'initial frequency',
