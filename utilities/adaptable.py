@@ -1522,7 +1522,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
             #print('xxxxxxxxxxxxxxxxxxx',ics_series)
             
-            default_ics=model.default_ics()
+#             default_ics=model.default_ics()
 
 
             ics_list = []
@@ -1532,9 +1532,9 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
                 # print('given',given_value,type(given_value))
                 # print('cond: ',given_value is None,np.isnan( given_value))
                 if given_value is None:
-                    ics_val = default_ics[coord]
+                    ics_val = model.default_ics()[coord]
                 elif np.isnan( given_value):
-                    ics_val = default_ics[coord]
+                    ics_val = model.default_ics()[coord]
                 else:
                     ics_val = given_value
                     
