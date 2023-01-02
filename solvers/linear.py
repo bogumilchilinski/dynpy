@@ -537,7 +537,8 @@ class AnalyticalSolution(ImmutableMatrix):
         return self.__str__()
     
 class ODESolution(AnalyticalSolution):
-    
+
+    _ics = None    
     _default_ics = None
     _integration_consts = None #container for integration constants
 
@@ -612,8 +613,50 @@ class ODESolution(AnalyticalSolution):
     @cached_property
     def dvars(self):
         return self.lhs
+
+
+
+    def set_ics(self,ics):
+        
+        obj = copy.copy(self)
+        
+        if isinstance(ics,dict):
+            obj._ics = ics
+            
+        return obj
     
+            
     
+    @property
+    def _ics_dict(self):
+        """
+        Property which manages the values of solutions intial conditions
+
+        Returns
+        -------
+        dict
+            descrption of returned data - its structure
+        """
+        
+        
+        #self._ics = {coord:1 for coord in self.dvar}
+        
+        if self._ics is None:
+            return self._ics
+        else:
+            return self.default_ics
+        
+    def _calculate_constant(self):
+        """_summary_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
+        
+        const_dict = {}
+        return const_dict          
 
     
 class ODESystem(AnalyticalSolution):
