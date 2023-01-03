@@ -492,8 +492,8 @@ class AnalyticalSolution(ImmutableMatrix):
             solution = self
             ivar = list(self.dvars[0].args)[0]
             
-            print('num'*3)
-            display(solution)
+#             print('num'*3)
+#             display(solution)
 
             sol_func = lambdify(ivar, solution, 'numpy')
 
