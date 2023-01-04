@@ -541,7 +541,7 @@ class ODESolution(AnalyticalSolution):
     _ics = None    
     _default_ics = None
     _integration_consts = None #container for integration constants
-
+    ivar=Symbol('t')
 
     def _spot_constant(self):
         """
