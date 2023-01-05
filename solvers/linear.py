@@ -6,6 +6,9 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
 
 from sympy.matrices.matrices import MatrixBase
 
+
+###  exemplary comment
+
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 import sympy as sym
