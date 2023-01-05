@@ -1,5 +1,5 @@
 """
-This module provides basic tools for dynamic analysis of mechanical systems - it's change to generate synchronization conflict
+This module provides basic tools for analysis of dynamic system (described by time-depended functions)
 """
 
 from .dynamics import (LagrangesDynamicSystem, LinearDynamicSystem,
