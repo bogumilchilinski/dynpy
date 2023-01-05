@@ -91,7 +91,7 @@ class SimplifiedExpr:
     def __repr__(self,*args):
         return 'instance of SimplifiedExpr'
 
-class PerturbetionODESolution(ODESolution):
+class PerturbationODESolution(ODESolution):
     _eps = Symbol('varepsilon')
     
     def set_small_parameter(self,eps,inplace = False):
@@ -101,8 +101,19 @@ class PerturbetionODESolution(ODESolution):
         return obj
     
     @property
-    def eps(self):
+    def small_parameter(self):
         return self._eps
+
+    @small_parameter.setter
+    def small_parameter(self,eps):
+        
+        self._eps = eps
+        
+        return self._eps
+    
+    @property
+    def eps(self):
+        return self.small_parameter
     
     def _calculate_constant(self,ics=None):
         """_summary_
@@ -484,7 +495,8 @@ class MultiTimeScaleSolution(ODESystem):
         #display(*list(SimplifiedExpr._subs_container.values()))
         result = (sum(sol_list, Matrix(2*len(self.dvars)*[0])  )).applyfunc(lambda obj: obj.expand().doit())
         
-        new_res = PerturbetionODESolution(Matrix(list(self.dvars) +  list(self.dvars.diff(self.ivar)) ) , result).set_small_parameter(self.eps)
+        new_res = PerturbationODESolution(Matrix(list(self.dvars) +  list(self.dvars.diff(self.ivar)) ) , result)#.set_small_parameter(self.eps)
+        new_res.small_parameter = self.eps
         print(new_res._lhs)
         return new_res
     
