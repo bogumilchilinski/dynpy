@@ -1722,6 +1722,12 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
     x = dynamicsymbols('x')
     
     b = Symbol('b', positive=True)
+    
+    omega = Symbol('omega', positive=True)
+    Ek = Symbol('E_k', positive=True)
+    Ep = Symbol('E_p', positive=True)
+    
+    f = Symbol('f', positive=True)
 
     def __init__(self,
                  l=None,
@@ -1743,10 +1749,14 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
                  beta=None,
                  b=None,
                  Omega=None,
+                 omega=None,
+                 Ek=None,
+                 Ep=None,
                  rayleigh_damping_matrix=None,
+                 F=None,
+                 f=None,
                  phi=None,
                  x=None,
-                 F=None,
                  ivar=Symbol('t'),
                  **kwargs):
         
@@ -1770,7 +1780,11 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
         if x is not None: self.x = x
         if k is not None: self.k = k
         if Omega is not None: self.Omega = Omega
+        if omega is not None: self.omega = omega
+        if Ek is not None: self.Ek = Ek
+        if Ep is not None: self.Ep = Ep
         if F is not None: self.F = F
+        if f is not None: self.f = f
         self.ivar = ivar
         self.trans_expr = ((S.One/2-atan(self.flow_coeff*(self.ivar-self.t0))/pi))
         self.alpha = self.b
@@ -1865,8 +1879,17 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
             self.b: r'współczynnik tłumienia',
             self.alpha: r'współczynnik tłumienia Rayleigha przy macierzy bezwładności',
             self.beta: r'współczynnik tłumienia Rayleigha przy macierzy sztywności',
-            self.x: 'przemieszczenie wózka',
-            self.phi: 'kąt wychylenia wahadła',
+            self.x: r'przemieszczenie wózka',
+            self.phi: r'kąt wychylenia wahadła',
+            self.omega: r'częstość własna układu',
+            self.Ek: r'energia kinetyczna układu',
+            self.Ep: r'energia potencjalna układu',
+            self.f: r'częstotliwość',
+            self.ivar: r'czas',
+            diff(self.x,self.ivar): 'prędkość wózka',
+            diff(self.x,self.ivar,self.ivar): r'przyspieszenie wózka',
+            diff(self.phi,self.ivar): r'prędkość kątowa wahadła',
+            diff(self.phi,self.ivar,self.ivar): r'przyspieszenie kątowe wahadła',
         }
         return self.sym_desc_dict
 
