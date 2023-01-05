@@ -370,8 +370,8 @@ class AnalyticalSolution(ImmutableMatrix):
 
         obj = super().expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
         obj._lhs = self._lhs.expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
-        obj._dvars=self._dvars
-        obj._ivar = self.ivar
+        #obj._dvars=self._dvars
+        #obj._ivar = self.ivar
         
         return obj
     
@@ -541,7 +541,32 @@ class ODESolution(AnalyticalSolution):
     _ics = None    
     _default_ics = None
     _integration_consts = None #container for integration constants
-    ivar=Symbol('t')
+    _ivar=Symbol('t')
+
+    @property
+    def _dvars(self):
+        return self.lhs
+ 
+    def expand(self,deep=True, modulus=None, power_base=True, power_exp=True,mul=True, log=True, multinomial=True, basic=True, **hints):
+        
+
+        obj = super().expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
+        
+
+        obj._ivar = self.ivar
+        
+        return obj
+    
+    @property
+    def ivar(self):
+        return self._ivar
+    
+    @ivar.setter
+    def ivar(self,ivar):
+        if ivar is not None:
+            self._ivar = ivar
+        
+        return self._ivar
 
     def _spot_constant(self):
         """
@@ -558,41 +583,7 @@ class ODESolution(AnalyticalSolution):
             const_list =  [expr for expr  in self.rhs.atoms(Symbol) if 'C' in str(expr) ]
         
         return const_list
-    
-    def constant(self,initial_conditions_matrix, msm_params):
-        
-        self.initial_conditions_matrix = initial_conditions_matrix
-        self.msm_params = msm_params
 
-        constant_dict=solve((self.subs(t,0).subs(eps,0).subs(msm_params).doit().applyfunc(lambda row: row.doit()).rhs-initial_conditions_matrix).subs(msm_params).n())
-        
-        return constant_dict
-    
-    def generate_ana_sol(self, msm_params, t_span, l_w, l_wnum=None):
-        self.msm_params = msm_params
-        self.t_span = t_span
-        self.l_w = l_w
-        self.l_wnum = l_wnum
-        
-        if isinstance(l_wnum,None):
-            l_wnum = l_w
-        
-        ana_sol = self.subs(msm_params).subs(l_w,l_wnum).subs(self.constant()).n().numerized(t_span)
-        
-        return ana_sol
-
-    def generate_num_sys(self, msm_params, t_span, l_w, l_wnum=None):
-        self.msm_params = msm_params
-        self.t_span = t_span
-        self.l_w = l_w
-        self.l_wnum = l_wnum
-        
-        if isinstance(l_wnum,None):
-            l_wnum = l_w
-        
-        num_sys=self.subs(msm_params).subs(l_w,l_wnum).numerized().compute_solution(t_span ,self.generate_ana_sol().iloc[0,:].to_numpy(),params_values=msm_params)
-        
-        return num_sys
 
     @property
     def ics_dvars(self):
@@ -645,8 +636,8 @@ class ODESolution(AnalyticalSolution):
             return self._ics
         else:
             return self.default_ics
-        
-    def _calculate_constant(self):
+
+    def _get_constant_eqns(self,ics=None):
         """_summary_
 
         Returns
@@ -655,8 +646,52 @@ class ODESolution(AnalyticalSolution):
             _description_
         """
         
-        const_dict = {}
-        return const_dict          
+        if ics is None:
+            ics = self._ics_dict
+        
+        if isinstance(ics,dict):
+            ics_list = [ics[coord]  for coord  in self.dvars]
+        elif isinstance(ics,(list,tuple)):
+            ics_list = ics
+        #ics_list = [ics[coord]  for coord  in self.dvars]
+        return Matrix(ics_list) - self.rhs.subs(self.ivar,0)
+        
+    def _calculate_constant(self,ics=None):
+        """_summary_
+
+        Returns
+        -------
+        _type_
+            _description_
+        """
+
+        const_eqns=self._get_constant_eqns(ics)
+        const_list = self._spot_constant()
+        
+        return solve(const_eqns,const_list)
+    
+    def with_ics(self,ics,ivar0=0):
+
+        const_dict=self._calculate_constant(ics)
+        
+        return self.subs(const_dict)
+    
+    def __call__(self,ivar=None,ics=None,params={}):
+        
+        
+        #self.ivar = ivar
+        
+        
+        if ivar is None or isinstance(ivar, Symbol):
+
+            
+            return self.with_ics(ics=ics)
+            
+        else:
+            
+            const_dict=self._calculate_constant(ics)
+            
+            return self.subs(const_dict)         
 
     
 class ODESystem(AnalyticalSolution):

@@ -91,7 +91,33 @@ class SimplifiedExpr:
     def __repr__(self,*args):
         return 'instance of SimplifiedExpr'
 
+class PerturbetionODESolution(ODESolution):
+    _eps = Symbol('varepsilon')
+    
+    def set_small_parameter(self,eps,inplace = False):
+        obj = copy.copy(self)
+        obj._eps = eps
+        
+        return obj
+    
+    @property
+    def eps(self):
+        return self._eps
+    
+    def _calculate_constant(self,ics=None):
+        """_summary_
 
+        Returns
+        -------
+        _type_
+            _description_
+        """
+
+        const_eqns=self._get_constant_eqns(ics).subs(self.eps,0).doit()
+        const_list = self._spot_constant()
+        
+        return solve(const_eqns,const_list)
+    
 
 class NthOrderODEsApproximation(FirstOrderLinearODESystem):
     _ode_order=1
@@ -293,7 +319,7 @@ class MultiTimeScaleSolution(ODESystem):
             (self.approximation_function(comp_ord, order) * self.eps**comp_ord
              for comp_ord in range(order + 1)), sym.zeros(dvars_no, 1))
 
-        return AnalyticalSolution(self.dvars, solution)
+        return ODESolution(self.dvars, solution)
 
     def eoms_approximation(self, order=3, odes_system=None):
 
@@ -458,7 +484,7 @@ class MultiTimeScaleSolution(ODESystem):
         #display(*list(SimplifiedExpr._subs_container.values()))
         result = (sum(sol_list, Matrix(2*len(self.dvars)*[0])  )).applyfunc(lambda obj: obj.expand().doit())
         
-        new_res = ODESolution(Matrix(list(self.dvars) +  list(self.dvars.diff(self.ivar)) ) , result)
+        new_res = PerturbetionODESolution(Matrix(list(self.dvars) +  list(self.dvars.diff(self.ivar)) ) , result)
         print(new_res._lhs)
         return new_res
     
