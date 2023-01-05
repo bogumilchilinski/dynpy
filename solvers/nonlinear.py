@@ -484,7 +484,7 @@ class MultiTimeScaleSolution(ODESystem):
         #display(*list(SimplifiedExpr._subs_container.values()))
         result = (sum(sol_list, Matrix(2*len(self.dvars)*[0])  )).applyfunc(lambda obj: obj.expand().doit())
         
-        new_res = PerturbetionODESolution(Matrix(list(self.dvars) +  list(self.dvars.diff(self.ivar)) ) , result)
+        new_res = PerturbetionODESolution(Matrix(list(self.dvars) +  list(self.dvars.diff(self.ivar)) ) , result).set_small_parameter(self.eps)
         print(new_res._lhs)
         return new_res
     
