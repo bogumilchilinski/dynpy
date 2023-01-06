@@ -1522,7 +1522,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
             #print('xxxxxxxxxxxxxxxxxxx',ics_series)
             
-            default_ics=model.default_ics()
+#             default_ics=model.default_ics()
 
 
             ics_list = []
@@ -1532,9 +1532,9 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
                 # print('given',given_value,type(given_value))
                 # print('cond: ',given_value is None,np.isnan( given_value))
                 if given_value is None:
-                    ics_val = default_ics[coord]
+                    ics_val = model.default_ics()[coord]
                 elif np.isnan( given_value):
-                    ics_val = default_ics[coord]
+                    ics_val = model.default_ics()[coord]
                 else:
                     ics_val = given_value
                     
@@ -1544,6 +1544,20 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
             # print('ics list \n',ics_list)
             result = numerized_model.compute_solution(t_span, ics_list)
+            result_array = result.T.to_numpy()
+            
+            
+            ######### extra dependencies handling - it should be reimplemented with new method #####
+            if isinstance(dependencies,dict):
+                
+                for key, expr in dependencies.items():
+                    lambdified_expr = lambdify((result.index.name,list(result.columns)),expr.subs(params_dict).expand().doit(),'numpy')
+                    
+
+                    single_data = lambdified_expr(t_span,result_array)
+                    
+                    result[key] = single_data
+            #### END ##### extra dependencies handling 
 
             computed_data[case_data] = result[computed_data[case_data].columns]
 
