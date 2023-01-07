@@ -128,22 +128,22 @@ class MultivariableTaylorSeries(Expr):
             for args_tmp, poly in diff_orders_dict.items()}}
 
     def _diff_expr_dict(self):
-        
+
         diff_orders_dict=self._diff_orders_dict()
         expr=self.args[0]
         op_point=self._op_point
-        
+
         return {S.Zero:expr.subs(op_point),**{args_tmp:expr.diff(*args_tmp).subs(op_point)
             for args_tmp, poly in diff_orders_dict.items()}}
-    
+
     def _components_dict(self):
-        
+
         diff_orders_dict=self._diff_orders_dict()
         derivatives_dict=self._diff_symbols_dict()
-        
+
         expr=self.args[0]
         op_point=self._op_point
-        
+
         return {
                 Subs(expr,list(op_point.keys()),list(op_point.values())):expr.subs(op_point),
                 **{derivatives_dict[args_tmp] : expr.diff(*args_tmp).subs(op_point) for args_tmp, poly in diff_orders_dict.items()}
