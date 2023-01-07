@@ -1,5 +1,5 @@
 """
-This module provides basic tools for dynamic analysis of mechanical systems - extra comment to raise an error
+This module provides basic tools for solving differential equations
 """
 
 
