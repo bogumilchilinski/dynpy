@@ -332,10 +332,10 @@ class DataMethods:
         img_params = self.__class__._image_parameters
 
         if picture:
-            
-            width = width
+
+            width = self.__class__._image_parameters['width']
             #width=NoEscape(r'0.8\textwidth')
-            
+
             fig.add_image(filename, width=width)
         else:
             fig.append(Command(command='input', arguments=filename))
