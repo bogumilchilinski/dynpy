@@ -290,7 +290,7 @@ class MaterialPointMovement(ComposedSystem):
     r = Symbol('r', positive=True)
     phi = dynamicsymbols('\\varphi')
 
-    c0 = Symbol('C0', positive=True)
+    c0 = Symbol('c0', positive=True)
     r0 = Symbol('r0', positive=True)
     phi0 = dynamicsymbols('phi0')
 
@@ -343,7 +343,20 @@ class MaterialPointMovement(ComposedSystem):
 
         default_data_dict = {
             self.m: [m0 * no for no in range(1, 8)],
-            self.c: [C0 * no for no in range(1, 8)],
+            self.c: [c0 * no for no in range(1, 8)],
+            self.r: [r0 * no for no in range(1, 8)],
+            self.phi: [phi0 * no for no in range(1, 8)],
+        }
+
+        return default_data_dict
+    
+    def get_numerical_data(self):
+
+        m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+
+        default_data_dict = {
+            self.m: [m0 * no for no in range(1, 8)],
+            self.c: [c0 * no for no in range(1, 8)],
             self.r: [r0 * no for no in range(1, 8)],
             self.phi: [phi0 * no for no in range(1, 8)],
         }
@@ -361,7 +374,7 @@ from .mechanics.tensioner import BlowerToothedBelt, DampedBlowerToothedBelt
 
 
 
-from .mechanics.trolley import SpringMassSystem, SpringDamperMassSystem
+from .mechanics.trolley import SpringMassSystem, SpringDamperMassSystem, ForcedTrolleyWithSpring, ForcedDampedTrolleyWithSpring, ForcedTrolleysWithSprings
 
 from .mechanics.bridge import BeamBridge
 

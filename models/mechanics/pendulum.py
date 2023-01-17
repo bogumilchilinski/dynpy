@@ -63,6 +63,9 @@ class Pendulum(NonlinearComposedSystem):
     angle=dynamicsymbols('\\varphi')
     qs=None
     
+    m0 = Symbol('m0', positive=True)
+    l0 = Symbol('l0', positive=True)
+    
     def __init__(self,
                  m=None,
                  g=None,
@@ -118,9 +121,6 @@ class Pendulum(NonlinearComposedSystem):
         return default_data_dict
 
     def get_numerical_data(self):
-
-       
-        m0, l0 = self.m0, self.l0
         
         
         default_data_dict = {

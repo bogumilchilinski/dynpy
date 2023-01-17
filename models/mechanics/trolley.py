@@ -18,6 +18,8 @@ import inspect
 
 from .pendulum import Pendulum, PendulumKinematicExct
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
+from ...utilities.components.mech import en as mech_comp
+
 from pint import UnitRegistry
 ureg = UnitRegistry()
 
@@ -970,6 +972,26 @@ class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
         }
         return self.sym_desc_dict
 
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.GoverningEquationComponent,
+        #mech_comp.FundamentalMatrixComponent,
+        #mech_comp.GeneralSolutionComponent,
+        #mech_comp.SteadySolutionComponent,
+            
+            
+        ]
+        
+        return comp_list
+    
     
 class ForcedDampedTrolleysWithSprings(NonlinearComposedSystem): ### 4 ODE
     
@@ -1204,6 +1226,26 @@ class ForcedTrolleyWithSpring(ComposedSystem): ### 1 ODE
             self.x: ureg.meter,
         }
         return unit_dict
+    
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.GoverningEquationComponent,
+        #mech_comp.FundamentalMatrixComponent,
+        #mech_comp.GeneralSolutionComponent,
+        #mech_comp.SteadySolutionComponent,
+            
+            
+        ]
+        
+        return comp_list
     
 class ForcedDampedTrolleyWithSpring(ComposedSystem): ### 2 ODE
     
