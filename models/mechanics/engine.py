@@ -9,7 +9,7 @@ from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
 
 from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin, EngineMount
 from ..continuous import ContinuousSystem, PlaneStressProblem
-from dynpy.models.mechanics.tmd import TMD
+from .tmd import TMD
 
 import base64
 import random
@@ -34,7 +34,7 @@ class EngineHousing(MaterialPoint):
     def get_default_data(self):
         m0=Symbol('m_0',positive=True)
         default_data_dict={
-            self.m:[S.One *10 * m0 * no / 100 for no in range(75, 120)],
+            self.m:[S.One *10 * m0 * no  for no in range(75, 120)],
         }
         return default_data_dict
 
@@ -138,7 +138,7 @@ class FreeEngine(ComposedSystem):
         default_data_dict = {
 #             self.M: [10 * self.m0 * no / 100 for no in range(10, 150)],
 #             self.m_e: [self.m0 * no / 100 for no in range(80, 120)],
-            self.e: [S.One *self.e0 * no / 100 for no in range(80, 120)],
+            self.e: [S.One *self.e0 * no  for no in range(8, 12)],
             self.phi: [self.omega * self.ivar]
         }
         return default_data_dict
@@ -1441,20 +1441,24 @@ class EngineWithTMD(Engine):
             z=self.z)(label='Engine (damped object)')
 
         self._TMD = TMD(self.m_E, self.k_E, self.z_E,self.z)(label='TMD (damper)')
+        self._TMD_gravity = GravitationalForce(self.m_E,self.g,self.z_E)(label='Gravitational force for TMD')
         
         components['_engine'] = self._engine
         components['_TMD'] = self._TMD
+        components['_TMD_gravity'] = self._TMD_gravity
 
 
         return components
 
-    def equilibrium_equation(self, static_disp_dict=None):
-        static_disp_dict = {
-            self.z: Symbol('z_0', positive=True),
-            self.z_E: Symbol('z_{TMD0}', positive=True)
-        }
+    def equilibrium_equation(self, static_disp_dict=None, **kwargs):
+        
+        if static_disp_dict is None:
+            static_disp_dict = {
+                self.z: Symbol('z_0', positive=True),
+                self.z_E: Symbol('z_{TMD0}', positive=True)
+            }
 
-        return super().equilibrium_equation(static_disp_dict=static_disp_dict)
+        return super().equilibrium_equation(static_disp_dict=static_disp_dict,**kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -1471,12 +1475,12 @@ class EngineWithTMD(Engine):
 
         default_data_dict = {
             self.phi: [self.Omega * self.ivar],
-            self.M: [S.One *m0 * no for no in range(10, 100)],
-            self.k_m: [S.One * k0 * no for no in range(1, 20)],
-            self.m_E: [S.One *m0 * no / 5 for no in range(1, 20)],
-            self.k_E: [S.One * k0 * no for no in range(1, 20)],
-            self.m_e: [S.One *m0 * no for no in range(1, 20)],
-            self.e: [S.One *e0 * no / 10 for no in range(1, 20)],
+            # self.M: [S.One *m0 * no for no in range(10, 100)],
+            # self.k_m: [S.One * k0 * no for no in range(1, 20)],
+            # self.m_E: [S.One *m0 * no / 5 for no in range(1, 20)],
+            # self.k_E: [S.One * k0 * no for no in range(1, 20)],
+            # self.m_e: [S.One *m0 * no for no in range(1, 20)],
+            # self.e: [S.One *e0 * no / 10 for no in range(1, 20)],
         }
 
         return default_data_dict
@@ -1498,3 +1502,13 @@ class EngineWithTMD(Engine):
         }
 
         return default_data_dict
+
+
+    def max_static_force_pin(self):
+        
+        force = self._engine._left_mount.force().subs(self._op_points()[0])
+        #force_old = abs(   sum(self.static_load().doit())  ) / 2
+        
+        #display(force -force_old) #checking display
+        
+        return force

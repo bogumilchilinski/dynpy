@@ -23,7 +23,8 @@ from sympy.simplify.fu import TR8, TR10, TR7, TR3
 
 from .solvers.numerical import OdeComputationalCase
 
-from .solvers.linear import LinearODESolution, FirstOrderODE,MultivariableTaylorSeries,FirstOrderODESystem
+from .solvers.linear import (LinearODESolution, FirstOrderODE,MultivariableTaylorSeries,FirstOrderODESystem,ODESystem,
+                            cached_property,FirstOrderLinearODESystemWithHarmonics)
 
 from .solvers.nonlinear import WeakNonlinearProblemSolution, MultiTimeScaleMethod
 
@@ -949,7 +950,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return Eq( self.Y.diff(self.ivar),self.rhs()  )
 
-    def equilibrium_equation(self, static_disp_dict=None):
+    def equilibrium_equation(self, static_disp_dict=None,coordinates=False):
         """
         Finds the equilibrium conditions of the considered problem based on the system governing equations stated in the class instance.
         """
@@ -972,7 +973,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         #trig_comp={}
         
 
-        return self.governing_equations.subs(static_disp_dict).subs({comp:0 for comp  in trig_comps if comp.has(self.ivar)})
+        return self.governing_equations.subs(static_disp_dict).subs({comp:0 for comp  in trig_comps if comp.has(self.ivar)}).subs({coord.diff(self.ivar):0   for coord in list(self.Y)})
 
     
     def static_load(self):
@@ -1320,20 +1321,20 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         #display(hint)
 
         eqns_to_solve = self.equilibrium_equation(
-            static_disp_dict=static_disp_dict).doit()
+            static_disp_dict={}).doit()
         #print('op point - new')
         #display(eqns_to_solve )
         
         hint= [eq.subs(self.q_0) for eq  in hint]
         
         combined_eqns=list(eqns_to_solve) + list(flatten([hint]))
-        display(combined_eqns)
+        #display(combined_eqns)
                                                  
         
         roots = solve(combined_eqns,
-                      list(self.q_0.values()),
+                      self.q,
                       dict=dict)
-        display(list(self.q_0.values()))
+        
         #display(roots)
 
         if subs:
@@ -1522,6 +1523,19 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         Returns Equations of Motion of the system
         """
         return self.governing_equations
+    
+    
+    @cached_property
+    def _ode_system(self):
+        return ODESystem.from_dynamic_system(self)
+    
+    
+    @cached_property
+    def _fodes_system(self):
+        fode = ODESystem.from_dynamic_system(self).as_first_ode_linear_system()
+        #solver changing due to the computational simplicity reasons
+        return FirstOrderLinearODESystemWithHarmonics(fode,fode.dvars)
+    
     
     def _to_acc(self,expand=True):
         """
