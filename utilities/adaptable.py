@@ -3,7 +3,7 @@ import numpy as np
 from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, Plot, Figure, Alignat, Package, Quantity, Command, Label, Table, Marker, Ref
 from pylatex.utils import italic, NoEscape
 
-from sympy import Matrix, ImmutableMatrix, symbols, Symbol, Eq, Expr, latex, Float, Function, Number
+from sympy import Matrix, ImmutableMatrix, symbols, Symbol, Eq, Expr, latex, Float, Function, Number, lambdify
 from sympy.core.relational import Relational
 
 from sympy.physics.mechanics import vlatex
@@ -332,10 +332,10 @@ class DataMethods:
         img_params = self.__class__._image_parameters
 
         if picture:
-            
-            width = width
+
+            width = self.__class__._image_parameters['width']
             #width=NoEscape(r'0.8\textwidth')
-            
+
             fig.add_image(filename, width=width)
         else:
             fig.append(Command(command='input', arguments=filename))
@@ -1558,7 +1558,6 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
                 
                 for key, expr in dependencies.items():
                     lambdified_expr = lambdify((result.index.name,list(result.columns)),expr.subs(params_dict).expand().doit(),'numpy')
-                    
 
                     single_data = lambdified_expr(t_span,result_array)
                     
