@@ -644,7 +644,7 @@ class BasicFormattingTools(DataMethods):
     _default_sep = ', '
     _container = []
     _default_path = './tikzplots'
-    _picture = False
+    _picture = True
 
     _subplot = False
     _caption = 'Default caption'
@@ -689,6 +689,12 @@ class BasicFormattingTools(DataMethods):
 
     @classmethod
     def set_default_container(cls, container=[]):
+        cls._container = container
+
+        return cls
+
+    @classmethod
+    def set_container(cls, container=[]):
         cls._container = container
 
         return cls
