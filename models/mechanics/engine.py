@@ -18,6 +18,7 @@ import numpy as np
 import inspect
 
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
+from functools import cached_property
 
 #####
 
@@ -69,7 +70,7 @@ class FreeEngine(ComposedSystem):
     """
     scheme_name = 'engine_block.png'
     real_name = 'engine_real.PNG'
-
+    
     M = Symbol('M', positive=True)  #Mass of the engine housing
     g = Symbol('g', positive=True)  #Gravity constant
     z = dynamicsymbols('z')  #Displacement coordinate
@@ -103,7 +104,7 @@ class FreeEngine(ComposedSystem):
 
         self._init_from_components(**kwargs)
 
-    @property
+    @cached_property
     def components(self):
         components = {}
         M, m_e, e, z, phi = self.M, self.m_e, self.e, self.z, self.phi
@@ -213,7 +214,7 @@ class FreeEngineDDOF(FreeEngine):
 
         self._init_from_components(**kwargs)
 
-    @property
+    @cached_property
     def components(self):
         components = {}
         M, m_e, e, g, z, x, phi = self.M, self.m_e, self.e, self.g, self.z, self.x, self.phi
@@ -344,7 +345,7 @@ class Engine(ComposedSystem):
 
         self._init_from_components(**kwargs)
 
-    @property
+    @cached_property
     def components(self):
         components = {}
         M, k_m, m_e, e, z, phi = self.M, self.k_m, self.m_e, self.e, self.z, self.phi
@@ -444,7 +445,7 @@ class EngineVerticalSpringGravity(Engine):
 
         self._init_from_components(**kwargs)
 
-    @property
+    @cached_property
     def components(self):
 
         components = {}
@@ -1374,7 +1375,7 @@ class EngineWithTMD(Engine):
         -We define the symbols and dynamicsymbols
         -determine the instance of the pendulum by using class SDoFCouplePendulum()
         """
-    scheme_name = 'tmd_engine_vertical_spring_nogravity.png'
+    scheme_name = 'tmd_engine_vertical_spring_gravity.png'
     real_name = 'tmd_engine_real.jpg'
     detail_scheme_name = 'sruba_pasowana.png'
 
@@ -1423,7 +1424,7 @@ class EngineWithTMD(Engine):
         self.ivar = ivar
         self._init_from_components(**kwargs)
 
-    @property
+    @cached_property
     def components(self):
         components = {}
 
@@ -1450,7 +1451,7 @@ class EngineWithTMD(Engine):
     def equilibrium_equation(self, static_disp_dict=None):
         static_disp_dict = {
             self.z: Symbol('z_0', positive=True),
-            self.z_TMD: Symbol('z_{TMD0}', positive=True)
+            self.z_E: Symbol('z_{TMD0}', positive=True)
         }
 
         return super().equilibrium_equation(static_disp_dict=static_disp_dict)
@@ -1470,12 +1471,12 @@ class EngineWithTMD(Engine):
 
         default_data_dict = {
             self.phi: [self.Omega * self.ivar],
-            self.M: [m0 * no for no in range(10, 100)],
-            self.k_m: [1.0 * k0 * no for no in range(1, 20)],
-            self.m_E: [m0 * no / 5 for no in range(1, 20)],
-            self.k_E: [1.0 * k0 * no for no in range(1, 20)],
-            self.m_e: [m0 * no for no in range(1, 20)],
-            self.e: [e0 * no / 10 for no in range(1, 20)],
+            self.M: [S.One *m0 * no for no in range(10, 100)],
+            self.k_m: [S.One * k0 * no for no in range(1, 20)],
+            self.m_E: [S.One *m0 * no / 5 for no in range(1, 20)],
+            self.k_E: [S.One * k0 * no for no in range(1, 20)],
+            self.m_e: [S.One *m0 * no for no in range(1, 20)],
+            self.e: [S.One *e0 * no / 10 for no in range(1, 20)],
         }
 
         return default_data_dict

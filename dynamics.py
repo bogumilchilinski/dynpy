@@ -1327,13 +1327,13 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         hint= [eq.subs(self.q_0) for eq  in hint]
         
         combined_eqns=list(eqns_to_solve) + list(flatten([hint]))
-        #display(combined_eqns)
+        display(combined_eqns)
                                                  
         
         roots = solve(combined_eqns,
                       list(self.q_0.values()),
                       dict=dict)
-        
+        display(list(self.q_0.values()))
         #display(roots)
 
         if subs:

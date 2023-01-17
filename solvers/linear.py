@@ -701,7 +701,7 @@ class ODESystem(AnalyticalSolution):
     
     _ivar = Symbol('t')
     _parameters = None
-    _ode_order = 1
+    _ode_order = 2
     
     @classmethod
     def from_ode_system(cls,ode_system):
@@ -727,9 +727,9 @@ class ODESystem(AnalyticalSolution):
         """
 
         sys = dyn_system
-        ds_lhs = sys.Y.diff(sys.ivar)
-        ds_rhs = sys.rhs()
-        dvars = sys.Y
+        ds_lhs = sys._eoms
+
+        dvars = sys.q
         ivar = sys.ivar
         
         if parameters == None:
@@ -738,7 +738,7 @@ class ODESystem(AnalyticalSolution):
         if ode_order == None:
             ode_order = cls._ode_order
 
-        return cls._constructor(ds_lhs, dvars, ds_rhs, ivar, ode_order = ode_order, parameters = parameters)
+        return cls._constructor(ds_lhs, dvars, ivar=ivar, ode_order = ode_order, parameters = parameters)
 
     
     @classmethod
@@ -1456,20 +1456,20 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     def _sin_comp(self,omega,amp): 
         '''
         It applies generic form solution for the following differential equation
-        \dot Y + A Y = F \sin(\Omega t)
+        \dot Y  =  A Y  + F \sin(\Omega t)
         
         The generic form is:
         
-        D = (A^{-1} \Omega^2 + A)^{-1}  F 
-        C =  - \Omega A^{-1} * D
+        D = -(A^{-1} \Omega^2 + A)^{-1}  F 
+        C =   \Omega A^{-1} * D
         '''
            
         A = self._fundamental_matrix
         b = amp
         
                                  
-        sin_comp = (A.inv() * omega**2 + A).inv()*b
-        cos_comp = -omega*A.inv() * sin_comp
+        sin_comp = -(A.inv() * omega**2 + A).inv()*b
+        cos_comp = +omega*A.inv() * sin_comp
           
         return cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar)                      
 
@@ -1478,19 +1478,19 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         
         '''
         It applies generic form solution for the following differential equation
-        \dot Y + A Y = F \cos(\Omega t)
+        \dot Y  =  A Y  + F \cos(\Omega t)
         
         The generic form is:
         
-        C = (A^{-1} \Omega^2 + A)^{-1}  F 
-        D =  \Omega A^{-1} * C
+        C = -(A^{-1} \Omega^2 + A)^{-1}  F 
+        D =  -\Omega A^{-1} * C
         '''
         
         A = self._fundamental_matrix
         b = amp
         
-        cos_comp = (A.inv() * omega**2 + A).inv()*b
-        sin_comp = omega*A.inv() * cos_comp
+        cos_comp = -(A.inv() * omega**2 + A).inv()*b
+        sin_comp = -omega*A.inv() * cos_comp
           
         return cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar)  
 
@@ -1498,17 +1498,17 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     def _get_excitation_comps(self):
         '''
         It expands the free terms vector to sequnece of harmonic (sin and cos) components.
-        It's supporting method for steady_solution() method
         '''
         terms = self._free_terms.expand().applyfunc(lambda row: (TR8(row).expand()))
 
-        #         sin_components=ext_forces.atoms(sin)
-        #         cos_components=ext_forces.atoms(cos)
+        #base = sin,cos,exp,
+        base = Function,
 
-        #        display('sin cos reco',)
         components = [
-            comp for comp in terms.atoms(sin, cos, exp) if comp.has(self.ivar)
+            (comp,terms.applyfunc(lambda row: row.coeff(comp))) for comp in terms.atoms(*base) if comp.has(self.ivar)
         ]
+        
+        rest = (terms - sum([coeff*comp  for comp,coeff in components],Matrix([0]*len(self.dvars)))).doit()
 
         # #        display('ext_forces',ext_forces)
 
@@ -1522,8 +1522,10 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         #     amp_vector = Matrix([row.coeff(comp) for row in ext_forces])
 
         #     #display(amp_vector)
-        display(terms)
-        return components
+        #display(rest)
+        return components+[(S.One,rest)]
+
+
                                  
     @cached_property
     def _steady_solution(self):
@@ -1541,11 +1543,20 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         A = self._fundamental_matrix
         b = self._free_terms
         
-        omg = Symbol('Omega',positive=True)
+        sol = 0*b
+        
+        for elem,coeff in self._get_excitation_comps:
+            if type(elem) == cos:
+                omg = (elem.args[0].diff(self.ivar)).doit()
+                sol += self._cos_comp(omg,coeff) + self._sin_comp(omg,0*b)
+            elif type(elem) == sin:
+                omg = (elem.args[0].diff(self.ivar)).doit()
+                sol += self._cos_comp(omg,0*b) + self._sin_comp(omg,coeff)
 
-        sol = self._cos_comp(omg,b) + self._sin_comp(omg,0*b)
-
-        return ODESolution(self.dvars,sol)  
+            elif elem == S.One:
+                sol += self._cos_comp(0,coeff) + self._sin_comp(0,coeff)
+            
+        return ODESolution(self.dvars,sol)
     
 class FirstOrderODE:
     """

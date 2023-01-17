@@ -1461,7 +1461,7 @@ class UndampedVehicleSuspension(ComposedSystem):
         return ((4*self.max_static_force_pin())/(pi*kt*Re))**(1/2)
 
     def max_dynamic_force_pin(self):
-        return (self._frf()[0].subs(self.lam0,0) + self._frf()[1].subs(self.lam0,0)*self.l_rod/2)*self.stiffness_matrix()[0]
+        return (self._frf()[0].subs(self.lam0,0) + self._frf()[1].subs(self.lam0,0)*self.l_l)*self.k_l
 
     def dynamic_bearing_force(self):
         L=Symbol('L')#wymagana trwałość
