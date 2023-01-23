@@ -374,7 +374,7 @@ from .mechanics.tensioner import BlowerToothedBelt, DampedBlowerToothedBelt
 
 
 
-from .mechanics.trolley import SpringMassSystem, SpringDamperMassSystem, ForcedTrolleyWithSpring, ForcedDampedTrolleyWithSpring, ForcedTrolleysWithSprings
+from .mechanics.trolley import SpringMassSystem, SpringDamperMassSystem, ForcedTrolleyWithSpring, ForcedDampedTrolleyWithSpring, ForcedTrolleysWithSprings, TrolleyWithPendulum
 
 from .mechanics.bridge import BeamBridge
 

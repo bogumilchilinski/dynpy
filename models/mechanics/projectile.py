@@ -66,8 +66,8 @@ class MissileTrajectoryAirless(ComposedSystem):
         components['_mass_x'] = self._mass_x
         components['_mass_y'] = self._mass_y
         components['_gravity'] = self._gravity
-        components['_drag_x'] = self._drag_x
-        components['_drag_y'] = self._drag_y
+        #components['_drag_x'] = self._drag_x
+        #components['_drag_y'] = self._drag_y
         return components
 
     def get_default_data(self):
@@ -83,8 +83,28 @@ class MissileTrajectoryAirless(ComposedSystem):
 
         return default_data_dict
 
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.GoverningEquationComponent,
+        mech_comp.FundamentalMatrixComponent,
+        #mech_comp.GeneralSolutionComponent,
+        #mech_comp.SteadySolutionComponent,
+            
+            
+        ]
+        
+        return comp_list
+    
 
-class MissileTrajectory(ComposedSystem):
+class MissileTrajectory(MissileTrajectoryAirless):
     
     m=Symbol('m',positive=True)
     g=Symbol('g',positive=True)
@@ -113,7 +133,9 @@ class MissileTrajectory(ComposedSystem):
         self.qs = [self.x,self.y]
         
         self._init_from_components(**kwargs)
-       
+
+
+        
     @property
     def components(self):
 
@@ -139,6 +161,7 @@ class MissileTrajectory(ComposedSystem):
         components['_gravity'] = self._gravity
         components['_drag_x'] = self._drag_x
         components['_drag_y'] = self._drag_y
+        
         return components
 
     def get_default_data(self):
@@ -165,7 +188,7 @@ class MissileTrajectory(ComposedSystem):
         return default_data_dict
 
     
-class MissileTrajectoryAerodynamic(ComposedSystem):
+class MissileTrajectoryAerodynamic(MissileTrajectoryAirless):
     
     m=Symbol('m',positive=True)
     g=Symbol('g',positive=True)
@@ -247,16 +270,16 @@ class MissileTrajectoryAerodynamic(ComposedSystem):
         
         return default_data_dict
         
-    def get_numerical_data(self):
+#     def get_numerical_data(self):
 
-        default_data_dict = {
-            self.m: [140],
-            self.g: [10],
-            self.c: [0.95],
-            self.area:[1]
-            self.ro:[1]
-            selfc_x:[1]
-            }
+#         default_data_dict = {
+#             self.m: [140],
+#             self.g: [10],
+#             self.c: [0.95],
+#             self.area:[1]
+#             self.ro:[1]
+#             selfc_x:[1]
+#             }
         
 
         return default_data_dict

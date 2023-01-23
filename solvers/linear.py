@@ -698,7 +698,31 @@ class ODESolution(AnalyticalSolution):
 
     
 class ODESystem(AnalyticalSolution):
+    """
+    This class creates an object as ordinary differential equation (ODE) in general form and provides methods for basic operations.
+
+    Example
+    =======
     
+        >>>from dynpy.solvers.linear import *
+        >>>import sympy
+
+        >>>t, omega = symbols('t omega')
+        >>>x = Function('x')(t)
+
+        >>>ode = ODESystem(odes=Matrix([x.diff(t, t) + omega**2 * x]), dvars=Matrix([x]), ode_order=2)
+        >>>display(ode)
+
+        >>>fode = ode.as_first_ode_linear_system()
+        >>>display(fode)
+
+        >>>sym_sol = fode.solution
+        >>>display(sym_sol)
+
+        >>>num_sol = sym_sol.subs({Symbol('C_1'): 2, Symbol('C_2'): 2, Symbol('omega'): 2, Symbol('fi'): 2}).numerized().compute_solution(np.linspace(0, 5, 100))
+        >>>display(num_sol)
+        >>>display(num_sol.plot())
+    """ 
     _ivar = Symbol('t')
     _parameters = None
     _ode_order = 2
@@ -750,7 +774,32 @@ class ODESystem(AnalyticalSolution):
     
     
     def __new__(cls, odes,dvars,odes_rhs=None , ivar=None ,ode_order=None,evaluate=True, parameters = None, **options):
+        """
+        Arguments
+        =========
         
+            odes : Any type
+                An expression representing left-hand side of ODE. Prefered type is Martix.
+                
+            dvars : The same type as odes
+                Represents the dependent variable.
+
+        Default Arguments
+        =================
+        
+            odes_rhs : The same type as odes
+                An expression representing right-hand side of ODE, if odes_rhs is provided ODESystem converts equation into general form.
+                
+            ivar: Symbol
+                Represents the independent variable and it's sympy.symbol('t') by default.
+             
+            ode_order : int 
+                Value that represents order of ODE and it's 1 by default. If order of the ODE is NOT 1, ode_order MUST be changed.
+            
+            evaluate=True
+            parameters=None
+            **options
+        """
 
 
         if ivar is None:
@@ -872,7 +921,7 @@ class ODESystem(AnalyticalSolution):
     
 
     def as_first_ode_linear_system(self):
-        
+        """Creates an object of FirstOrderLinearODESystem class."""
         
         return FirstOrderLinearODESystem.from_ode_system(self)
 
