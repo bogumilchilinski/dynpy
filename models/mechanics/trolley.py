@@ -884,6 +884,11 @@ class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
     G=Symbol('G', positive=True)
     x_1=dynamicsymbols('x_1')
     x_2=dynamicsymbols('x_2')
+    
+    m0=Symbol('m_0', positive=True)
+    k0=Symbol('k_0', positive=True)
+    Omega0=Symbol('Omega_0', positive=True)
+    F0=Symbol('F_0', positive=True)
    
     def __init__(self,
                  m_1=None,
@@ -891,6 +896,10 @@ class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
                  k=None,
                  Omega=None,
                  F=None,
+                 m0=None,
+                 k0=None,
+                 Omega0=None,
+                 F0=None,
                  G=None,
                  x_1=None,
                  x_2=None,
@@ -905,6 +914,11 @@ class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
         if G is not None: self.G = G
         if x_1 is not None: self.x_1 = x_1
         if x_2 is not None: self.x_2 = x_2
+            
+        if m0 is not None: self.m0 = m0
+        if k0 is not None: self.k0= k0
+        if Omega0 is not None: self.Omega0 = Omega0
+        if F0 is not None: self.F0 = F0
 
         self.qs = [self.x_1, self.x_2]
         self._init_from_components(**kwargs)
@@ -932,6 +946,21 @@ class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
         
         return components
 
+    def get_default_data(self):
+
+        m0, k0, Omega0, F0 =  self.m0, self.k0, self.Omega0, self.F0
+        
+        default_data_dict = {
+            self.m_1 : [100*m0],
+            self.m_2 : [200*m0],
+            self.k : [50*k0],
+            self.Omega : [0.5 * 3.14*Omega0, 1 * 3.14*Omega0, 2 * 3.14*Omega0, 4 * 3.14*Omega0],
+            self.F : [0.5 * 100*F0, 1 * 100*F0, 2 * 100*F0, 4 * 100*F0]
+        }
+        default_data_dict.update({self.G: [4*default_data_dict[self.F][0]*cos(0.5*default_data_dict[self.Omega][0]*self.ivar) , default_data_dict[self.F][0]*cos(0.75*default_data_dict[self.Omega][0]*self.ivar)**2 , 1.5*default_data_dict[self.F][0]*2*cos(1.25*default_data_dict[self.Omega][0]*self.ivar) , 3*default_data_dict[self.F][0]*cos(2*default_data_dict[self.Omega][0]*self.ivar)**2]})
+
+        return default_data_dict
+    
     def get_numerical_data(self):
 
         default_data_dict = {
@@ -983,8 +1012,8 @@ class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
         mech_comp.PotentialEnergyComponent,
         mech_comp.LagrangianComponent,
         mech_comp.GoverningEquationComponent,
-        #mech_comp.FundamentalMatrixComponent,
-        #mech_comp.GeneralSolutionComponent,
+        mech_comp.FundamentalMatrixComponent,
+        mech_comp.GeneralSolutionComponent,
         #mech_comp.SteadySolutionComponent,
             
             
@@ -1154,12 +1183,21 @@ class ForcedTrolleyWithSpring(ComposedSystem): ### 1 ODE
     F=Symbol('F',positive=True)
     G=Symbol('G',positive=True)
     x=dynamicsymbols('x')
+    
+    m0=Symbol('m_0', positive=True)
+    k0=Symbol('k_0', positive=True)
+    Omega0=Symbol('Omega_0', positive=True)
+    F0=Symbol('F_0', positive=True)
    
     def __init__(self,
                  m=None,
                  k=None,
                  Omega=None,
                  F=None,
+                 m0=None,
+                 k0=None,
+                 Omega0=None,
+                 F0=None,
                  G=None,
                  x=None,
                  ivar=Symbol('t'),
@@ -1171,6 +1209,11 @@ class ForcedTrolleyWithSpring(ComposedSystem): ### 1 ODE
         if F is not None: self.F = F
         if G is not None: self.G = G
         if x is not None: self.x = x
+            
+        if m0 is not None: self.m0 = m0
+        if k0 is not None: self.k0= k0
+        if Omega0 is not None: self.Omega0 = Omega0
+        if F0 is not None: self.F0 = F0
 
         self.qs = [self.x]
         self._init_from_components(**kwargs)
@@ -1192,6 +1235,20 @@ class ForcedTrolleyWithSpring(ComposedSystem): ### 1 ODE
         
         return components
 
+    def get_default_data(self):
+
+        m0, k0, Omega0, F0 =  self.m0, self.k0, self.Omega0, self.F0
+        
+        default_data_dict = {
+            self.m : [100*m0],
+            self.k : [50*k0],
+            self.Omega : [0.5 * 3.14*Omega0, 1 * 3.14*Omega0, 2 * 3.14*Omega0, 4 * 3.14*Omega0],
+            self.F : [0.5 * 100*F0, 1 * 100*F0, 2 * 100*F0, 4 * 100*F0]
+        }
+        default_data_dict.update({self.G: [4*default_data_dict[self.F][0]*cos(0.5*default_data_dict[self.Omega][0]*self.ivar) , default_data_dict[self.F][0]*cos(0.75*default_data_dict[self.Omega][0]*self.ivar)**2 , 1.5*default_data_dict[self.F][0]*2*cos(1.25*default_data_dict[self.Omega][0]*self.ivar) , 3*default_data_dict[self.F][0]*cos(2*default_data_dict[self.Omega][0]*self.ivar)**2]})
+
+        return default_data_dict
+    
     def get_numerical_data(self):
 
         default_data_dict = {

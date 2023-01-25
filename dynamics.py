@@ -998,7 +998,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         mech_comp.GoverningEquationComponent,
         #mech_comp.FundamentalMatrixComponent,
         mech_comp.GeneralSolutionComponent,
-        mech_comp.SteadySolutionComponent,
+        #mech_comp.SteadySolutionComponent,
             
             
         ]

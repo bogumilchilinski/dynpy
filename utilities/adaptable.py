@@ -44,7 +44,7 @@ class DataAxis(Axis):
 class DataMethods:
 
     _figure_gen = lambda: Figure(position='H')
-    _image_parameters = {'width': NoEscape('0.9\textwidth')}
+    _image_parameters = {'width': NoEscape(r'0.9\textwidth')}
     _legend_fontsize = r' '
     _label_fontsize = r'\small '
     _template = Document(documentclass='standalone',
