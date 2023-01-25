@@ -9,7 +9,7 @@ from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
 
 from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin
 from  ..continuous import ContinuousSystem, PlaneStressProblem
-from dynpy.models.mechanics.tmd import TMD
+from dynpy.models.mechanics.tmd import TunedMassDamper
 
 import base64
 import random
@@ -626,7 +626,7 @@ class BeamBridgeTMD(BeamBridge):
         components = {}
 
         self._beam_bridge = BeamBridge(self.m, self.k_beam, self.ivar, self.g, self.Omega, self.F)(label='Beam Bridge')
-        self._TMD = TMD(self.m_TMD, self.k_TMD, self.z_TMD,self.z)(label='TMD (damper)')
+        self._TMD = TunedMassDamper(self.m_TMD, self.k_TMD, self.z_TMD,self.z)(label='TMD (damper)')
 
         components['_beam_bridge'] = self._beam_bridge
         components['_TMD'] = self._TMD
@@ -724,7 +724,7 @@ class BeamBridgeDampedTMD(BeamBridge):
 
         
         self._beam_bridge_damped = BeamBridgeDamped(self.m, self.k_beam, self.ivar, self.g, self.Omega, self.F, self.c)(label='Beam Bridge Damped')
-        self._TMD = TMD(self.m_TMD, self.k_TMD, self.z_TMD,self.z)(label='TMD (damper)')
+        self._TMD = TunedMassDamper(self.m_TMD, self.k_TMD, self.z_TMD,self.z)(label='TMD (damper)')
         self._damper_TMD = Damper(self.c_TMD, pos1=self.z - self.z_TMD, qs=[self.z, self.z_TMD])(label='Damper of a TMD')
         
         components['_beam_bridge_damped'] = self._beam_bridge_damped

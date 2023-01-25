@@ -21,7 +21,7 @@ from .principles import ComposedSystem, NonlinearComposedSystem,  base_frame, ba
 
 
     
-class TMD(SpringMassSystem):
+class TunedMassDamper(SpringMassSystem):
     """
     Ready to use sample Single Degree of Freedom System of Tuned Mass Damper
     

@@ -9,7 +9,7 @@ from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
 
 from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin, EngineMount
 from ..continuous import ContinuousSystem, PlaneStressProblem
-from .tmd import TMD
+from .tmd import TunedMassDamper
 
 import base64
 import random
@@ -1022,7 +1022,7 @@ class DampedEngine(Engine):
 
         self._init_from_components(**kwargs)
 
-    @property
+    @cached_property
     def components(self):
         components={}
         self._engine = FreeEngine(self.M, self.m_e, self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine')
@@ -1122,7 +1122,7 @@ class NonlinearEngine(Engine, NonlinearComposedSystem):
         if g is not None: self.g = g
         self._init_from_components(**kwargs)
 
-    @property
+    @cached_property
     def components(self):
 
         components = {}
@@ -1440,7 +1440,7 @@ class EngineWithTMD(Engine):
             phi=self.phi,
             z=self.z)(label='Engine (damped object)')
 
-        self._TMD = TMD(self.m_E, self.k_E, self.z_E,self.z)(label='TMD (damper)')
+        self._TMD = TunedMassDamper(self.m_E, self.k_E, self.z_E,self.z)(label='TMD (damper)')
         self._TMD_gravity = GravitationalForce(self.m_E,self.g,self.z_E)(label='Gravitational force for TMD')
         
         components['_engine'] = self._engine
