@@ -1,6 +1,9 @@
 from numpy import (fft)
 import numpy as np
-from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, Plot, Figure, Alignat, Package, Quantity, Command, Label, Table, Marker, Ref
+from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, Plot, Figure, Alignat, Package, Quantity, Command, Label, Table, Marker, Ref,TikZCoordinate
+from pylatex.base_classes import Environment, Options
+
+
 from pylatex.utils import italic, NoEscape
 
 from sympy import Matrix, ImmutableMatrix, symbols, Symbol, Eq, Expr, latex, Float, Function, Number, lambdify
@@ -15,6 +18,268 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import copy
 #from number impo
+
+
+class ReportModule:
+    r'''
+    Basic class for maintaining global options of a report module. It provides methods for setting options common with every class inheriting from ReportModule instance. 
+    
+    Arguments
+    =========
+        container: obj
+            Python's build-in list or Pylatex container object such as Document() or Section().
+        path: str
+            Path for saving plots.
+    Methods
+    =======
+        set_container(cls,container=None):
+            Classmethod; sets Pylatex container object such as Document() or Section(). None by default.
+        set_caption(cls,caption=''):
+            Classmethod; sets caption for images plotted under current instance. Empty string by default.
+        set_directory
+            Classmethod; sets directory for saving generated plots. Directory must already exist. Default path: './SDA_results'.
+        set_units_dict
+            Classmethod; sets dictionary which matches symbols to their units. Empty dict by default.
+    Example
+    =======
+        >>>from modules.utilities.report import ReportModule
+        >>>from pylatex import Document
+        >>>from sympy import Symbol
+        >>>import pint
+        
+        >>>ureg = pint.UnitRegistry()
+        >>>m=Symbol('m')
+        >>>doc=Document
+        >>>unit_dict={m:ureg.kilogram}
+        
+        >>>RM=ReportModule()
+        
+        >>>RM.set_container(doc)
+        
+        >>>RM.set_caption('This is caption.')
+        
+        >>>RM.set_directory('./my_directory')
+        
+        >>>RM.set_units_dict(unit_dict)
+    '''
+
+    cls_container = []
+    cls_path = '.'
+    _caption = 'Figure describes the numerical data'
+    _label = 'fig:markerIsMissing'
+    _units = {}
+    _autoreport = False
+    #_frame = TimeDataFrame()
+    _frame = pd.DataFrame()
+    _list = []
+    _subplot = False
+    _hold = False
+    _out_formatter = None #BaseFrameFormatter  # lambda data: data
+    _height = NoEscape(r'6cm')
+
+    @classmethod
+    def set_output_formatter(cls, formatter=None):
+    #def set_output_formatter(cls, formatter=BaseFrameFormatter):
+        cls._out_formatter = formatter
+        return cls
+
+    @classmethod
+    def set_container(cls, container=None):
+        cls.cls_container = container
+        return cls
+
+    @classmethod
+    def set_caption(cls, caption=''):
+        cls._caption = caption
+        return cls
+
+    @classmethod
+    def set_reporting_mode(cls, mode=True):
+        cls._autoreporting = mode
+
+        return cls
+
+    @classmethod
+    def set_ploting_mode(cls, subplots=False):
+        cls._subplot = subplots
+
+        return cls
+
+    @classmethod
+    def set_plot_height(cls, height=None):
+        cls._height = height
+
+        return cls
+#     def _reset_storage(self, *args, **kwargs):
+
+#         new_obj=copy.copy(self)
+
+#         new_obj._storage = {}
+#         new_obj._dict = {}
+#         new_obj._frame = TimeDataFrame()
+#         new_obj._list = []
+#         new_obj._subplot=False
+
+#         return copy.copy(self)
+
+    @classmethod
+    def _reset_storage(cls, *args, **kwargs):
+
+        cls._storage = {}
+        cls._dict = {}
+        cls._frame = TimeDataFrame()
+        cls._list = []
+        cls._subplot = False
+
+        return cls
+
+    @classmethod
+    def set_directory(cls, path='./SDA_results'):
+
+        cls.cls_path = path
+        return cls
+
+    @classmethod
+    def set_units_dict(cls, units={}):
+
+        cls._units = units
+        return cls
+
+    def __init__(self,
+                 container=None,
+                 path=None,
+                 autoreporting=False,
+                 output_formatter=None):
+        if container:
+            self._container = container
+        else:
+            self._container = type(self).cls_container
+
+        if path:
+            self._path = path
+        else:
+            self._path = type(self).cls_path
+
+        self._autoreporting = autoreporting
+
+        self._storage = None
+        self._story_point = []
+        self._frame = pd.DataFrame()
+
+        self._last_result = None
+        self._list = []
+
+        if output_formatter:
+
+            self._out_format = output_formatter
+        else:
+            self._out_format = self.__class__._out_formatter
+
+        #print(f'Report module init - formatter is {self._out_format}')
+
+    def _apply_formatter(self, data):
+
+        #print(type(self._out_format))
+        if (self._out_format is BaseFrameFormatter, PivotFrameSummary,
+                FFTFrameFormatter, PivotPlotFrameSummary):
+            #print('Base frmatter is working')
+
+            #print('data.index', data.index)
+            #print('data.index.name', data.index.name)
+
+            result = self._out_format(data)()
+
+            #             #print('#'*100)
+            #             display(result)
+            #             #print(result.index.name)
+            if not result.index.name:
+                result.index.name = ''
+
+            return result
+        else:
+            #print('callable is working')
+            return self._out_format(data)
+
+    @property
+    def frame(self):
+
+        if (self._frame) is not None:
+
+            time_frame = TimeDataFrame(self._frame)
+
+        else:
+
+            time_frame = TimeDataFrame(self.__class__._frame)
+
+        if time_frame.columns != [] and time_frame.columns != pd.Index([]):
+
+            time_frame.columns = pd.MultiIndex.from_tuples(time_frame.columns)
+            time_frame.columns.set_names(['model', 'parameter', 'coordinate'],
+                                         inplace=True)
+
+        return time_frame
+
+
+#     @classmethod
+#     @property
+#     def frame(cls):
+
+#         if (cls._frame) is not None:
+
+#             time_frame = TimeDataFrame(cls._frame)
+
+#         else:
+#             time_frame = TimeDataFrame()
+
+#         if time_frame.columns != [] and time_frame.columns != pd.Index([]):
+
+#             time_frame.columns = pd.MultiIndex.from_tuples(time_frame.columns)
+#             time_frame.columns.set_names(['model', 'parameter', 'coordinate'],
+#                                          inplace=True)
+
+#         return time_frame
+
+    def set_frame(self, key, frame):
+        #print('self frame is modified')
+        self._frame[key] = frame
+
+        return frame
+
+    def set_class_frame(self, key, frame):
+        #print('class frame is modified')
+
+        self.__class__._frame[key] = frame
+
+        return frame
+
+    def clear_frame(self, obj=True):
+
+        if not self.__class__._hold:
+
+            if obj and (self._frame is not None):
+                #print('self cleaner')
+                self._frame = type(self._frame)()
+                #self._frame = None
+            if (not obj) and (self.__class__._frame is not None):
+                #print('class cleaner')
+                self.__class__._frame = type(self.__class__._frame)()
+            #self.__class__._frame =  None
+
+        return None
+
+    def __str__(self):
+        return self._container.__str__()
+
+    def __repr__(self):
+        return self._container.__repr__()
+
+    def reported(self, mode=True):
+
+        new_obj = copy.copy(self)
+
+        new_obj._autoreporting = mode
+
+        return new_obj
 
 
 def plots_no():
