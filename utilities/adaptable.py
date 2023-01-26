@@ -27,9 +27,81 @@ def plots_no():
 default_colors = ['red', 'blue', 'orange', 'teal', 'black', 'green']
 
 
-class DataAxis(Axis):
+class BaseIndexTransformer:
+    """_summary_
 
-    def __init__(self, plotdata=None, options=None, *, data=None):
+    Returns
+    -------
+    _type_
+        _description_
+    
+    maintenance by BCh
+    """
+    
+    corrd_level=-1
+    name_level='auto'
+    
+    def __init__(self,data):
+        
+        self._data = data
+        
+    @property
+    def index(self):
+        return self._data.index
+    
+
+    @property
+    def columns(self):
+        return self._data.columns
+    
+    def get_columns_str(self):
+        
+        print('cols to transform')
+        print(self.columns,type(self.columns))
+        print('cols to transform')
+        if isinstance(self.columns,pd.MultiIndex):
+            labels = list(self.columns.to_flat_index())
+        else:
+            labels = [self.index]
+        
+        return '; '.join([', '.join([str(entry) for entry in label])   for label in labels])
+
+
+class DataAxis(Axis, ReportModule):
+    """
+    Args
+    ----
+    options: str, list or `~.Options`
+    Options to format the axis environment.
+    
+    maintenance by BCh
+    """
+    _latex_name = 'axis'
+    _handle = 'plotEntry'
+    _at = None
+
+    _x_axis_name = 'x'
+    _y_axis_name = 'y'
+    _legend_fontsize = r'\small '
+    _default_colours = default_colors
+
+    _height = NoEscape(r'5cm')
+    _width = '0.9\\textwidth'
+    _x_axis_empty = False
+
+    _default_transformer = BaseIndexTransformer
+
+    def __init__(self,
+                 plotdata=None,
+                 height=None,
+                 width=None,
+                 options=None,
+                 *,
+                 x_axis_empty = None,
+                 colour =None,
+                 at=None,
+                 handle=None,
+                 data=None):
         """
         Args
         ----
@@ -38,7 +110,432 @@ class DataAxis(Axis):
         """
         self._plotdata = plotdata
 
+        if handle is not None:
+            self._handle = handle
+
+        if at is not None:
+            self._at = at
+
+        self._colour = colour
+
+        if height is not None:
+            self._height = height
+
+        if width is not None:
+            self._width = width
+
+        if x_axis_empty is not None:
+            self._x_axis_empty = x_axis_empty
+
+
+        if options is None:
+            options = self._axis_options
+
+
         super().__init__(options=options, data=data)
+
+        if plotdata is not None:
+            for data in self._plots:
+                self.append(data)
+
+
+    @property
+    def handle(self):
+        return self._handle
+
+    @property
+    def at(self):
+        return self._at
+
+    @property
+    def _axis_options(self):
+
+        kwargs = {
+            'height': NoEscape(self._height),
+            'anchor': 'north west',
+            'ymajorgrids': 'true',
+            'xmajorgrids': 'true',
+            #'ylabel': self.y_axis_name,
+
+        }
+
+        if self.handle:
+            kwargs['name'] = self.handle
+
+        #if self.at is not None:
+        #    kwargs['at'] = NoEscape('{(0,0)}')
+
+        print('+++++++++++++++ _axis_options')
+        print(self.at)
+
+        if self._x_axis_empty:
+            ax_options = [NoEscape('xticklabels=\empty'),
+                         ]
+        else:
+            ax_options = [NoEscape(f'xlabel= {self.x_axis_name}'),
+                         ]
+
+        base_options = ['grid style=dashed',
+                       NoEscape('legend style={font=\small}'),
+                       NoEscape(f'at={self.at}'),
+                       #NoEscape('at={(0,0)}'),
+
+                       NoEscape(f'width={self._width}'),
+                       NoEscape(f'xmin={min(self.plotdata.index)}'),
+                       NoEscape(f'xmax={max(self.plotdata.index)}'),
+                       NoEscape(f'ylabel= {self.y_axis_name}'),
+                       ] + ax_options
+        
+        return Options(*base_options, **kwargs)
+
+    @property
+    def plotdata(self):
+        """
+        Returns data which is used for plot
+        """
+
+        return self._plotdata
+
+    @property
+    def height(self):
+        """
+        Returns dataframe index as numpy array related to data for plot
+        """
+        return self._height
+
+    @property
+    def width(self):
+        """
+        Returns dataframe index as numpy array related to data for plot
+        """
+        return self._width
+
+    @property
+    def _index(self):
+        """
+        Returns dataframe index as numpy array related to data for plot
+        """
+        return self._plotdata.index.to_numpy()
+
+    @property
+    def _index_limits(self):
+        """
+        Returns minimum and maximum index limits
+        """
+        if isinstance(self.plotdata, (pd.DataFrame, pd.Series)):
+            xmin = min(self.plotdata.index)
+            xmax = max(self.plotdata.index)
+        else:
+            xmin = None
+            xmax = None
+
+        return xmin, xmax
+
+    @property
+    def x_axis_name(self):
+        """
+        Returns name of plot "x" axis. If name is not given, returns default axis name.
+        """
+        if isinstance(self.plotdata, (pd.DataFrame, pd.Series)):
+            name = self.plotdata.index.name
+        else:
+            name = None
+
+        return name if name is not None else self._x_axis_name
+
+    @property
+    def _data_description(self):
+        return self._default_transformer(self.plotdata)
+    
+    
+    @property
+    def y_axis_name(self):
+        """
+        Returns y axis name of the plot. If name is not defined, sets name of the axis to default "y"
+        """
+
+        if isinstance(self.plotdata, (pd.DataFrame)):
+            cols_name = self.plotdata.columns.name
+
+            print('DataAxis plot data')
+            print(type(self.plotdata.columns),self.plotdata.columns)
+
+            if isinstance(self.plotdata.columns,pd.MultiIndex):
+                print('jestem tutaj')
+                name = self.plotdata.columns.to_flat_index()[0][-1]
+            else:
+                name = cols_name
+
+        elif isinstance(self.plotdata, (pd.Series)):
+            name = self.plotdata.name
+        else:
+            name = None
+
+        return name if name is not None else self._y_axis_name
+
+    def _preview(self):
+        """
+        Allows to create a preview of prepared plot
+        """
+
+        self.plotdata.plot(ylabel=self.y_axis_name)
+
+    @property
+    def _transformer(self):
+        return self._default_transformer
+
+    @property
+    def labels(self):
+        """
+        Returns plot dataframe columns' labels.
+        """
+        
+        trans_class = self._transformer
+        
+        if isinstance(self.plotdata, (pd.DataFrame)):
+            labels = [trans_class(self.plotdata).get_columns_str()]
+        elif isinstance(self.plotdata, (pd.Series)):
+            labels = [self.plotdata.name]
+        else:
+            labels = ['Data']
+
+        return labels
+
+    #Zaprogramować zabezpieczenie metody na data integrity!!!
+    @property
+    def _coordinates(self):
+        """
+        Returns data list which is prepared for plots.
+        """
+        data = self.plotdata
+        if isinstance(data, pd.DataFrame):
+            data_for_plot_list = [
+                zip(self._index, plot_data)
+                for label, plot_data in list(data.items())
+            ]
+        else:
+            data_for_plot_list = [zip(self._index, data.to_numpy())]
+
+        return data_for_plot_list
+
+    @property
+    def legend_fontsize(self):
+        """
+        Returns size of the font used in plot's legend.
+        """
+        return self._legend_fontsize
+
+    def _label_colour(self, no):
+        """
+        Returns colour of the label used in plot.
+        """
+        if self._colour:
+            colour = self._colour
+        else:
+            indicator = no % len(self._default_colours)
+            colour = self._default_colours[indicator]
+        return colour
+
+    @property
+    def _plots(self):
+
+        coords_pack = self._coordinates
+        labels = self.labels
+        colours = [
+            self._label_colour(no) for no, elem in enumerate(coords_pack)
+        ]
+
+        #return list(zip(coords_pack,labels,colours))
+        if self.at is not None:
+            plot_list = [
+            Plot(name=NoEscape(
+                NoEscape(self.legend_fontsize) + NoEscape(str(label))),
+                 coordinates=list(coords),
+                 options=Options('solid', color=colour))
+            for coords, label, colour in (zip(coords_pack, labels, colours))
+            ]
+        else:
+            plot_list = [
+            Plot(name=NoEscape(
+                NoEscape(self.legend_fontsize) + NoEscape(str(label))),
+                 coordinates=list(coords),
+                 options=Options('solid', color=colour))
+            for coords, label, colour in (zip(coords_pack, labels, colours))
+            ]            
+        
+        return plot_list
+    
+    def _repr_markdown_(self):
+        self._preview()
+        return ' '
+    
+
+class TikZPlot(TikZ, ReportModule):
+    """
+    Args
+    ----
+    options: str, list or `~.Options`
+    Options to format the axis environment.
+    
+    maintenance by BCh
+    """
+    _latex_name = 'tikzpicture'
+
+    _x_axis_name = 'x'
+    _y_axis_name = 'y'
+    _legend_fontsize = r'\small '
+    _default_colours = default_colors
+
+    _subplots = False
+    _height = 5
+    _width = 0.9
+
+    _subplots_gap = 0.0
+    
+
+    def __init__(self,
+                 plotdata=None,
+                 subplots=None,
+                 height=None,
+                 width=None,
+                 options=None,
+                 *,
+                 arguments=None, start_arguments=None,
+                 **kwargs):
+        """
+        Args
+        ----
+        options: str, list or `~.Options`
+            Options to format the axis environment.
+        """
+        self._plotdata = plotdata
+        self._subplots = subplots
+
+        if options is None:
+            options = self._axis_options
+
+        if height is not None:
+            self._height = height
+
+        if width is not None:
+            self._width = width
+            
+        self._selected_colours = None
+
+
+        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
+
+
+        
+        if plotdata is not None:
+            if self.subplots:
+                
+                
+                plots_no=len(plotdata.columns)
+                empty_axis_list = [True]*(plots_no-1)+[False]
+                colours_list = self._default_colours*plots_no
+                
+                self._selected_colours = colours_list
+                labels=self.ylabel_list
+                
+                for no,(column,pos,empty_axis) in enumerate(zip(plotdata.columns,self.grid_nodes,empty_axis_list)):
+                    
+                    data=plotdata[[column]]
+                    #data.columns.name = labels[no]
+                    
+                    
+                    ax_data = DataAxis(data,height=self.subplot_height,x_axis_empty=empty_axis,colour=colours_list[no],at = pos,handle=f'subplot{no}')
+
+                    self.append(ax_data)
+            else:
+                self.append(DataAxis(plotdata))
+
+    @property
+    def ylabel_list(self):
+
+        plotdata = self._plotdata
+
+        if plotdata is not None:
+
+            if isinstance(plotdata.columns,pd.MultiIndex):
+                return plotdata.columns.levels
+            else:
+
+                return plotdata.columns.unique().to_list()
+
+        else:
+
+            return []
+
+    @property
+    def subplots(self):
+        if self._subplots is None:
+            return self.__class__._subplots
+        else:
+            return self._subplots
+                
+    @property
+    def _axis_options(self):
+
+        return None
+        return Options('grid style=dashed',
+                       NoEscape('legend style={font=\small}'),
+                       NoEscape(f'width={self._width}'),
+                       NoEscape(f'xmin={min(self._plotdata.index)}'),
+                       NoEscape(f'xmax={max(self._plotdata.index)}'),
+                       height=NoEscape(self._height),
+                       anchor='north west',
+                       ymajorgrids='true',
+                       xmajorgrids='true',
+                       xlabel=self._x_axis_name,
+                       ylabel=self._y_axis_name)
+    
+    @property
+    def grid_nodes(self):
+        coordinates = []
+        i = 0
+        for column in self._plotdata.columns:
+            y_coordinate = i * (self._height/len(self._plotdata.columns))
+            position = "{"+f"(0cm , -{round(y_coordinate,2)}cm)"+"}"
+            coordinates.append(position)
+            i += 1
+        return coordinates
+
+    @property
+    def subplot_height(self):
+        return NoEscape(f'{self._height/len(self._plotdata.columns)+1.5-self._subplots_gap}cm')
+    
+    @property
+    def height(self):
+        """
+        Returns dataframe index as numpy array related to data for plot
+        """
+        if isinstance(self._height,float) or isinstance(self._height,int):
+            return NoEscape(f'{self._height}cm')
+        if isinstance(self._height,tuple):
+            return NoEscape(f'{self._height[0]}'+self._height[1])
+        if isinstance(self._height,str):
+            return NoEscape(self._height)
+        if isinstance(self._height,NoEscape):
+            return self._height
+
+    @property
+    def width(self):
+        """
+        Returns dataframe index as numpy array related to data for plot
+        """
+        if isinstance(self._width,float) or isinstance(self._width,int):
+            return f'{self._width}\\textwidth'
+        if isinstance(self._width,tuple):
+            return f'{self._width[0]}'+self._width[1]
+        if isinstance(self._width,str):
+            return self._width
+    
+    def _repr_markdown_(self):
+        
+        self._plotdata.plot(subplots=self.subplots,color=self._selected_colours)
+        
+        return ' '
 
 
 class DataMethods:
