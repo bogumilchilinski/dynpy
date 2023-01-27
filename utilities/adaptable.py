@@ -296,7 +296,17 @@ default_colors = ['red', 'blue', 'orange', 'teal', 'black', 'green']
 
 
 class BaseIndexTransformer:
+
+    """_summary_
+
+    Returns
+    -------
+    _type_
+        _description_
     
+    maintenance by BCh
+    """
+
     _coord_level=-1
     _name_level='auto'
 
@@ -380,6 +390,8 @@ class DataAxis(Axis, ReportModule):
     ----
     options: str, list or `~.Options`
     Options to format the axis environment.
+
+    maintenance by BCh
     """
     _latex_name = 'axis'
     _handle = 'plotEntry'
@@ -700,6 +712,8 @@ class TikZPlot(TikZ, ReportModule):
     ----
     options: str, list or `~.Options`
     Options to format the axis environment.
+
+    maintenance by BCh
     """
     _latex_name = 'tikzpicture'
 
