@@ -292,24 +292,18 @@ def plots_no():
 default_colors = ['red', 'blue', 'orange', 'teal', 'black', 'green']
 
 
-class BaseIndexTransformer:
-    """_summary_
+default_colors = ['red', 'blue', 'orange', 'teal', 'black', 'green']
 
-    Returns
-    -------
-    _type_
-        _description_
+
+class BaseIndexTransformer:
     
-    maintenance by BCh
-    """
-    
-    corrd_level=-1
-    name_level='auto'
-    
+    _coord_level=-1
+    _name_level='auto'
+
     def __init__(self,data):
-        
+
         self._data = data
-        
+
     @property
     def index(self):
         return self._data.index
@@ -318,19 +312,67 @@ class BaseIndexTransformer:
     @property
     def columns(self):
         return self._data.columns
+
+    
+    def _spot_axis_label(self):
+
+        cols = self.columns
+        lvl_to_drop = self._coord_level
+        
+        if isinstance(cols,pd.MultiIndex):
+            ylabel = list(cols.get_level_values(lvl_to_drop).unique())
+
+        else:
+            ylabel = [cols.name]
+
+        return ylabel
+
+
+    def _spot_labels(self):
+        
+        cols = self.columns
+        lvl_to_drop = self._coord_level
+
+        print('spotting check', cols)
+        
+        
+        if isinstance(cols,pd.MultiIndex):
+            print('multi')
+            if len(self._spot_axis_label() )==1:
+                cols = cols.droplevel(lvl_to_drop)
+
+
+            labels = list(cols.to_flat_index())
+            
+            if len(labels)==1:
+                labels = labels,
+            
+            
+        else:
+            print('other')
+            labels = [(entry,)  for entry in cols]
+
+        print('result of spot',labels)
+            
+        return labels
+    
     
     def get_columns_str(self):
         
-        print('cols to transform')
-        print(self.columns,type(self.columns))
-        print('cols to transform')
-        if isinstance(self.columns,pd.MultiIndex):
-            labels = list(self.columns.to_flat_index())
-        else:
-            labels = [self.index]
-        
-        return '; '.join([', '.join([str(entry) for entry in label])   for label in labels])
 
+        
+        cols = self.columns
+        lvl_to_drop = self._coord_level
+        
+        labels = self._spot_labels()
+        
+        return [', '.join([str(entry) for entry in label])   for label in labels]
+
+    def get_axis_str(self):
+        
+        return ', '.join([str(entry) for entry in self._spot_axis_label()])
+    
+    
 
 class DataAxis(Axis, ReportModule):
     """
@@ -338,8 +380,6 @@ class DataAxis(Axis, ReportModule):
     ----
     options: str, list or `~.Options`
     Options to format the axis environment.
-    
-    maintenance by BCh
     """
     _latex_name = 'axis'
     _handle = 'plotEntry'
@@ -410,7 +450,11 @@ class DataAxis(Axis, ReportModule):
 
     @property
     def at(self):
-        return self._at
+        
+        if self._at is not None:
+            return self._at
+        else:
+            return None #return '(0,0)'
 
     @property
     def _axis_options(self):
@@ -427,8 +471,9 @@ class DataAxis(Axis, ReportModule):
         if self.handle:
             kwargs['name'] = self.handle
 
-        #if self.at is not None:
-        #    kwargs['at'] = NoEscape('{(0,0)}')
+        at_option = []
+        if self.at is not None:
+            at_option = [NoEscape(f'at={self.at}')]
 
         print('+++++++++++++++ _axis_options')
         print(self.at)
@@ -442,14 +487,14 @@ class DataAxis(Axis, ReportModule):
 
         base_options = ['grid style=dashed',
                        NoEscape('legend style={font=\small}'),
-                       NoEscape(f'at={self.at}'),
+
                        #NoEscape('at={(0,0)}'),
 
                        NoEscape(f'width={self._width}'),
                        NoEscape(f'xmin={min(self.plotdata.index)}'),
                        NoEscape(f'xmax={max(self.plotdata.index)}'),
                        NoEscape(f'ylabel= {self.y_axis_name}'),
-                       ] + ax_options
+                       ] + at_option + ax_options
         
         return Options(*base_options, **kwargs)
 
@@ -523,11 +568,17 @@ class DataAxis(Axis, ReportModule):
             cols_name = self.plotdata.columns.name
 
             print('DataAxis plot data')
+
             print(type(self.plotdata.columns),self.plotdata.columns)
 
             if isinstance(self.plotdata.columns,pd.MultiIndex):
                 print('jestem tutaj')
-                name = self.plotdata.columns.to_flat_index()[0][-1]
+                
+                name = self._data_description.get_axis_str()
+                
+                
+            elif isinstance(self.plotdata.columns,pd.Index): #temporary solution for further improvement - must be rewritten
+                name = ', '.join(self.plotdata.columns.unique())
             else:
                 name = cols_name
 
@@ -536,7 +587,7 @@ class DataAxis(Axis, ReportModule):
         else:
             name = None
 
-        return name if name is not None else self._y_axis_name
+        return '{'+name+'}' if name is not None else '{'+self._y_axis_name +'}'
 
     def _preview(self):
         """
@@ -558,7 +609,10 @@ class DataAxis(Axis, ReportModule):
         trans_class = self._transformer
         
         if isinstance(self.plotdata, (pd.DataFrame)):
-            labels = [trans_class(self.plotdata).get_columns_str()]
+            print('labels checkpoint',self.plotdata.columns)
+            labels = self._data_description.get_columns_str()
+            print('labels output',labels)
+            
         elif isinstance(self.plotdata, (pd.Series)):
             labels = [self.plotdata.name]
         else:
@@ -606,6 +660,10 @@ class DataAxis(Axis, ReportModule):
 
         coords_pack = self._coordinates
         labels = self.labels
+        
+        
+        print(' _plots method analysis = labels',labels)
+        
         colours = [
             self._label_colour(no) for no, elem in enumerate(coords_pack)
         ]
@@ -635,14 +693,13 @@ class DataAxis(Axis, ReportModule):
         return ' '
     
 
+
 class TikZPlot(TikZ, ReportModule):
     """
     Args
     ----
     options: str, list or `~.Options`
     Options to format the axis environment.
-    
-    maintenance by BCh
     """
     _latex_name = 'tikzpicture'
 
@@ -656,7 +713,7 @@ class TikZPlot(TikZ, ReportModule):
     _width = 0.9
 
     _subplots_gap = 0.0
-    
+
 
     def __init__(self,
                  plotdata=None,
@@ -694,7 +751,7 @@ class TikZPlot(TikZ, ReportModule):
         
         if plotdata is not None:
             if self.subplots:
-                
+                print('subplots is working - True')
                 
                 plots_no=len(plotdata.columns)
                 empty_axis_list = [True]*(plots_no-1)+[False]
@@ -713,6 +770,8 @@ class TikZPlot(TikZ, ReportModule):
 
                     self.append(ax_data)
             else:
+                
+                print('subplots is working - False')
                 self.append(DataAxis(plotdata))
 
     @property
@@ -738,7 +797,7 @@ class TikZPlot(TikZ, ReportModule):
             return self.__class__._subplots
         else:
             return self._subplots
-                
+
     @property
     def _axis_options(self):
 
