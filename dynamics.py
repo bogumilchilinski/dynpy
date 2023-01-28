@@ -1478,7 +1478,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         =========
             System = Created system based on symbolical represent of mechanical parts of it
             
-            op_point - boolean, which points out if the operating point will be evaluated
+            op_point - dictionary, which is used to determine points around which the eoms would be linearized
             
             x0 - setting operating point
             
