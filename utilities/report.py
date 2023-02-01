@@ -2721,9 +2721,13 @@ class Picture(Figure,ReportModule):
 
         if self.marker is not None:
             self.append(Label(self.marker))
+        else:
+            self.append(Label(AutoMarker(self).marker  ))
             
     def __repr__(self):
 
+        #self.reported()
+        
         if self.image is not None:
             path = (self.image)
         else:
@@ -2741,10 +2745,23 @@ class Picture(Figure,ReportModule):
         return repr_string
 
     def _repr_markdown_(self):
+        from wand.image import Image as WImage
+
+        self.cls_container.append(self)
+       
         
         if self.image is not None:
             path = (self.image)
-            return f'![image preview]({path})'
+            if 'pdf' in path:
+                from wand.image import Image as WImage            
+
+
+                img = WImage(filename=path)
+                display(img)
+                return ''
+            else:
+            
+                return f'![image preview]({path})'
         else:
             return 'Nothing to plot'
         
@@ -2805,6 +2822,8 @@ class ObjectCode(PyVerbatim,ReportModule):
     
     def __repr__(self):
 
+        self.reported()
+        
         if self.inspected_obj is not None:
             code = (inspect.getsource(self.inspected_obj))
         else:

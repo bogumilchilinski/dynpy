@@ -18,6 +18,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import copy
 #from number impo
+from dynpy.utilities.templates import tikz
+
+
+
 
 
 class ReportModule:
@@ -64,6 +68,7 @@ class ReportModule:
     '''
 
     cls_container = []
+    _container = []
     cls_path = '.'
     _caption = 'Figure describes the numerical data'
     _label = 'fig:markerIsMissing'
@@ -110,17 +115,9 @@ class ReportModule:
         cls._height = height
 
         return cls
-#     def _reset_storage(self, *args, **kwargs):
 
-#         new_obj=copy.copy(self)
-
-#         new_obj._storage = {}
-#         new_obj._dict = {}
-#         new_obj._frame = TimeDataFrame()
-#         new_obj._list = []
-#         new_obj._subplot=False
-
-#         return copy.copy(self)
+    def _get_str_key(self):
+        return self.dumps()
 
     @classmethod
     def _reset_storage(cls, *args, **kwargs):
@@ -220,24 +217,7 @@ class ReportModule:
         return time_frame
 
 
-#     @classmethod
-#     @property
-#     def frame(cls):
 
-#         if (cls._frame) is not None:
-
-#             time_frame = TimeDataFrame(cls._frame)
-
-#         else:
-#             time_frame = TimeDataFrame()
-
-#         if time_frame.columns != [] and time_frame.columns != pd.Index([]):
-
-#             time_frame.columns = pd.MultiIndex.from_tuples(time_frame.columns)
-#             time_frame.columns.set_names(['model', 'parameter', 'coordinate'],
-#                                          inplace=True)
-
-#         return time_frame
 
     def set_frame(self, key, frame):
         #print('self frame is modified')
@@ -273,14 +253,15 @@ class ReportModule:
     def __repr__(self):
         return self._container.__repr__()
 
-    def reported(self, mode=True):
+    def reported(self):
+        self.cls_container.append(self)
+        
+        return copy.deepcopy(self)
 
-        new_obj = copy.copy(self)
-
-        new_obj._autoreporting = mode
-
-        return new_obj
-
+    
+    def _report(self):
+        self.cls_container.append(self)
+    
 
 def plots_no():
     num = 0
@@ -292,7 +273,6 @@ def plots_no():
 default_colors = ['red', 'blue', 'orange', 'teal', 'black', 'green']
 
 
-default_colors = ['red', 'blue', 'orange', 'teal', 'black', 'green']
 
 
 class BaseIndexTransformer:
@@ -343,11 +323,9 @@ class BaseIndexTransformer:
         cols = self.columns
         lvl_to_drop = self._coord_level
 
-        print('spotting check', cols)
-        
-        
+
         if isinstance(cols,pd.MultiIndex):
-            print('multi')
+
             if len(self._spot_axis_label() )==1:
                 cols = cols.droplevel(lvl_to_drop)
 
@@ -359,11 +337,10 @@ class BaseIndexTransformer:
             
             
         else:
-            print('other')
+
             labels = [(entry,)  for entry in cols]
 
-        print('result of spot',labels)
-            
+
         return labels
     
     
@@ -487,8 +464,6 @@ class DataAxis(Axis, ReportModule):
         if self.at is not None:
             at_option = [NoEscape(f'at={self.at}')]
 
-        print('+++++++++++++++ _axis_options')
-        print(self.at)
 
         if self._x_axis_empty:
             ax_options = [NoEscape('xticklabels=\empty'),
@@ -579,16 +554,13 @@ class DataAxis(Axis, ReportModule):
         if isinstance(self.plotdata, (pd.DataFrame)):
             cols_name = self.plotdata.columns.name
 
-            print('DataAxis plot data')
 
-            print(type(self.plotdata.columns),self.plotdata.columns)
 
             if isinstance(self.plotdata.columns,pd.MultiIndex):
-                print('jestem tutaj')
+
                 
                 name = self._data_description.get_axis_str()
-                
-                
+
             elif isinstance(self.plotdata.columns,pd.Index): #temporary solution for further improvement - must be rewritten
                 name = ', '.join(self.plotdata.columns.unique())
             else:
@@ -621,9 +593,9 @@ class DataAxis(Axis, ReportModule):
         trans_class = self._transformer
         
         if isinstance(self.plotdata, (pd.DataFrame)):
-            print('labels checkpoint',self.plotdata.columns)
+
             labels = self._data_description.get_columns_str()
-            print('labels output',labels)
+
             
         elif isinstance(self.plotdata, (pd.Series)):
             labels = [self.plotdata.name]
@@ -673,8 +645,7 @@ class DataAxis(Axis, ReportModule):
         coords_pack = self._coordinates
         labels = self.labels
         
-        
-        print(' _plots method analysis = labels',labels)
+
         
         colours = [
             self._label_colour(no) for no, elem in enumerate(coords_pack)
@@ -696,9 +667,12 @@ class DataAxis(Axis, ReportModule):
                  coordinates=list(coords),
                  options=Options('solid', color=colour))
             for coords, label, colour in (zip(coords_pack, labels, colours))
-            ]            
+            ]
         
         return plot_list
+    
+
+    
     
     def _repr_markdown_(self):
         self._preview()
@@ -728,7 +702,16 @@ class TikZPlot(TikZ, ReportModule):
 
     _subplots_gap = 0.0
 
-
+    _in_figure = False
+    _figure_gen = lambda: Figure(position='H')
+    _image_parameters = {'width': NoEscape(r'0.9\textwidth')}
+    
+    _floats_no_gen = plots_no()    
+    _default_path = './tikzplots'
+    _filename = None
+    _picture = True
+    _caption = 'Default caption'
+    
     def __init__(self,
                  plotdata=None,
                  subplots=None,
@@ -765,7 +748,7 @@ class TikZPlot(TikZ, ReportModule):
         
         if plotdata is not None:
             if self.subplots:
-                print('subplots is working - True')
+
                 
                 plots_no=len(plotdata.columns)
                 empty_axis_list = [True]*(plots_no-1)+[False]
@@ -780,13 +763,16 @@ class TikZPlot(TikZ, ReportModule):
                     #data.columns.name = labels[no]
                     
                     
-                    ax_data = DataAxis(data,height=self.subplot_height,x_axis_empty=empty_axis,colour=colours_list[no],at = pos,handle=f'subplot{no}')
+                    ax_data = self.axis_type(data,height=self.subplot_height,x_axis_empty=empty_axis,colour=colours_list[no],at = pos,handle=f'subplot{no}')
 
                     self.append(ax_data)
             else:
                 
-                print('subplots is working - False')
-                self.append(DataAxis(plotdata))
+                self.append(self.axis_type(plotdata))
+
+    @property
+    def axis_type(self):
+        return DataAxis
 
     @property
     def ylabel_list(self):
@@ -868,10 +854,70 @@ class TikZPlot(TikZ, ReportModule):
             return f'{self._width[0]}'+self._width[1]
         if isinstance(self._width,str):
             return self._width
+
+    def in_figure(self,filename=None,caption=None):
+
+        obj = copy.copy(self)
+        obj._in_figure = True
+
+        if caption is not None:
+            obj._caption = caption
+
+        obj._filename = filename
+
+        return obj
+
+    @property    
+    def filename(self):
+    
+        if self._filename is None:
+            filename = f'{self.__class__._default_path}/plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
+        else:
+            filename = self._filename
+
+        return  filename
+
+    
+    def _report(self):
+        if self._in_figure is True:
+            standalone_plot = tikz.TikzStandalone()
+            standalone_plot.append(self)
+            
+            filename = self.filename
+
+
+            fig = self.__class__._figure_gen()
+            fig.packages.append(Package('float'))
+            
+            img_params = self.__class__._image_parameters
+
+            if self._picture:
+
+                standalone_plot.generate_pdf(filename, clean_tex=False,compiler_args=['--lualatex'])
+
+
+
+                width = self.__class__._image_parameters['width']
+
+
+                fig.add_image(filename, width=width)
+            else:
+                standalone_plot.generate_tex(filename)
+                
+                fig.append(Command(command='input', arguments=filename))
+
+
+            
+            fig.add_caption(self._caption)
+            
+            self.cls_container.append(fig)
+        else:
+            self.cls_container.append(self)
     
     def _repr_markdown_(self):
         
         self._plotdata.plot(subplots=self.subplots,color=self._selected_colours)
+        self._report()
         
         return ' '
 
@@ -1177,7 +1223,10 @@ class DataMethods:
 
         return fig
 
-
+    def to_pylatex_tikz(self,height=None,subplots=None):
+        return TikZPlot(LatexDataFrame.formatted(self),height=height,subplots=subplots)
+    
+    
 class SpectralMethods(DataMethods):
 
     def is_uniformly_distributed(self):
@@ -1386,6 +1435,8 @@ class AutoMarker:
     @classmethod
     def add_marker(cls, elem, marker):
 
+        from .report import Picture
+        
         if isinstance(elem, (AdaptableDataFrame)):
             elem_id = elem._get_str_key()
             if elem._subplot is None:
@@ -1393,6 +1444,10 @@ class AutoMarker:
             else:
                 prefix = 'fig'
 
+        elif isinstance(elem, Picture):
+            elem_id = elem._get_str_key()
+            prefix = 'fig'
+                
         elif isinstance(elem, (pd.DataFrame, pd.Series)):
             elem_id = elem.style.to_latex()
             prefix = 'fig'
@@ -1405,9 +1460,11 @@ class AutoMarker:
 
         cls._markers_dict[elem_id] = marker
 
-        return None
+        return elem_id, prefix
 
     def __init__(self, elem, prefix='eq', name=None, sufix=None):
+
+        from .report import Picture
 
         if isinstance(elem, (AdaptableDataFrame)):
             elem_id = elem._get_str_key()
@@ -1415,6 +1472,10 @@ class AutoMarker:
                 prefix = 'tab'
             else:
                 prefix = 'fig'
+
+        elif isinstance(elem, Picture):
+            elem_id = elem._get_str_key()
+            prefix = 'fig'
 
         elif isinstance(elem, (pd.DataFrame, pd.Series)):
             elem_id = elem.style.to_latex()
@@ -1435,6 +1496,8 @@ class AutoMarker:
 
     def _get_marker(self, elem=None):
 
+        
+        
         if elem is None:
             elem = self._elem_id
 
@@ -1457,10 +1520,10 @@ class AutoMarker:
         return self._marker
 
     def __repr__(self):
-        return f'AutoMarker for {self._marker}'
+        return f'AutoMarker for {self.marker}'
 
     def __str__(self):
-        return Ref(self._marker).dumps()
+        return Ref(self.marker).dumps()
 
 
 class BasicFormattingTools(DataMethods):
@@ -1480,6 +1543,8 @@ class BasicFormattingTools(DataMethods):
     _container = []
     _default_path = './tikzplots'
     _picture = True
+
+
 
     _subplot = False
     _caption = 'Default caption'
@@ -2061,6 +2126,7 @@ class BasicFormattingTools(DataMethods):
         container.append(tab)
 
         return self.copy()
+
 
 
 class AdaptableSeries(pd.Series, BasicFormattingTools):

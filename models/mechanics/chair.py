@@ -328,9 +328,9 @@ class DampedChair4DOF(ComposedSystem):
         self.sym_desc_dict = {
               self.m_fr:'front wheel mass',
               self.m_rear:'rear wheel mass',
-              self.M:'''mass of the main body including user ''',
+              self.M:'''mass of the main body including user''',
               self.k_r:'rear wheel stiffness',
-              self.k_rt:'rear wheel tire stiffness ',
+              self.k_rt:'rear wheel tire stiffness',
               self.k_f:'front wheel stiffness',
               self.k_ft:'front wheel tire stiffness',
               self.k_rot:'rotational stiffness',
