@@ -863,9 +863,35 @@ class TikZPlot(TikZ, ReportModule):
         if caption is not None:
             obj._caption = caption
 
-        obj._filename = filename
+        standalone_plot = tikz.TikzStandalone()
+        standalone_plot.append(self)
 
-        return obj
+        filename = self.filename
+
+
+        fig = self.__class__._figure_gen()
+        fig.packages.append(Package('float'))
+
+        img_params = self.__class__._image_parameters
+
+        if self._picture:
+            from .report import Picture
+
+            standalone_plot.generate_pdf(filename, clean_tex=False,compiler_args=['--lualatex'])
+
+
+
+            width = self.__class__._image_parameters['width']
+
+
+            fig = Picture(filename+'.pdf', width=width)
+        else:
+            standalone_plot.generate_tex(filename)
+
+            fig.append(Command(command='input', arguments=filename))
+
+
+        return fig
 
     @property    
     def filename(self):
@@ -892,6 +918,7 @@ class TikZPlot(TikZ, ReportModule):
             img_params = self.__class__._image_parameters
 
             if self._picture:
+                from .report import Picture
 
                 standalone_plot.generate_pdf(filename, clean_tex=False,compiler_args=['--lualatex'])
 
@@ -899,8 +926,8 @@ class TikZPlot(TikZ, ReportModule):
 
                 width = self.__class__._image_parameters['width']
 
-
-                fig.add_image(filename, width=width)
+                
+                fig = Picture(filename+'.pdf', width=width)
             else:
                 standalone_plot.generate_tex(filename)
                 
@@ -913,10 +940,12 @@ class TikZPlot(TikZ, ReportModule):
             self.cls_container.append(fig)
         else:
             self.cls_container.append(self)
+            
+        display(fig)
     
     def _repr_markdown_(self):
         
-        self._plotdata.plot(subplots=self.subplots,color=self._selected_colours)
+        #self._plotdata.plot(subplots=self.subplots,color=self._selected_colours)
         self._report()
         
         return ' '
@@ -1460,7 +1489,7 @@ class AutoMarker:
 
         cls._markers_dict[elem_id] = marker
 
-        return elem_id, prefix
+#         return elem_id, prefix
 
     def __init__(self, elem, prefix='eq', name=None, sufix=None):
 

@@ -2680,7 +2680,9 @@ class Picture(Figure,ReportModule):
     #: Setting this to option to `False` will change that.
     separate_paragraph = True
     _default_width = NoEscape('0.8\\textwidth')
-    packages=[Package('float')]
+    packages=[Package('float'),
+              Package('graphicx'),
+             Command('graphicspath{{../}}'),]
 
     
     _latex_name = 'figure'
@@ -2756,7 +2758,11 @@ class Picture(Figure,ReportModule):
                 from wand.image import Image as WImage            
 
 
-                img = WImage(filename=path)
+                img = WImage(filename=path,resolution=144)
+                
+                hsize,vsize = img.size
+                
+                img.resize(hsize,vsize)
                 display(img)
                 return ''
             else:
