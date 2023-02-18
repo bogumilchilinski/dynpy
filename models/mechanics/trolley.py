@@ -18,6 +18,7 @@ import inspect
 
 from .pendulum import Pendulum, PendulumKinematicExct
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
+from .tmd import TunedMassDamperRelativeMotion
 from ...utilities.components.mech import en as mech_comp
 
 from pint import UnitRegistry
@@ -567,7 +568,7 @@ class TrolleyWithPendulum(ComposedSystem):
 
         self._trolley = SpringMassSystem(self.m_t, self.k, self.x, self.ivar)(label='Trolley')
         self._pendulum = PendulumKinematicExct(self.l, self.m_p, self.g, self.phi, self.x, self.ivar)(label='Pendulum')
-        self._force=Force(2*self.F+self.F*sin(self.Omega*self.ivar)+3*self.F*cos(self.Omega*self.ivar), pos1=self.x, qs=[self.x, self.phi])(label='Force')
+        self._force=Force(self.F*sin(self.Omega*self.ivar), pos1=self.x, qs=[self.x, self.phi])(label='Force')
 
         components['_trolley'] = self._trolley
         components['_pendulum'] = self._pendulum
@@ -1992,7 +1993,93 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
         }
         return self.sym_desc_dict
 
+#Amadi
+class TrolleyWithTMD(ComposedSystem):
 
+    scheme_name = 'kin_exct_pendulum.PNG'
+    real_name = 'elastic_pendulum_real.PNG'
+
+    
+    m = Symbol('m_trolley', positive=True)
+    m_TMD = Symbol('m_TMD', positive=True)
+    k = Symbol('k', positive=True)
+    g = Symbol('g', positive=True)
+    Omega = Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    x_e = dynamicsymbols('x_e')
+    x = dynamicsymbols('x')
+
+    def __init__(self,
+                 m=None,
+                 m_TMD=None,
+                 k=None,
+                 Omega=None,
+                 x_e=None,
+                 x=None,
+                 F=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+        if m_TMD is not None: self.m_TMD = m_TMD
+        if m is not None: self.m = m
+        if x_e is not None: self.x_e = x_e
+        if x is not None: self.x = x
+        if k is not None: self.k = k
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        self.ivar = ivar
+        self._init_from_components(**kwargs)
+        
+
+    @property
+    def components(self):
+        components = {}
+
+        self._trolley = SpringMassSystem(self.m, self.k, self.x, self.ivar)(label='Trolley')
+        self._TMD = TunedMassDamperRelativeMotion(self.m_TMD, self.k, self.x_e, self.x, self.ivar)(label='Tuned Mass Damper')
+        self._force=Force(self.F*sin(self.Omega*self.ivar), pos1=self.x, qs=[self.x, self.x_e])(label='Force')
+
+        components['_trolley'] = self._trolley
+        components['_TMD'] = self._TMD
+        components['_force'] = self._force
+
+        return components
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.k: r'Stiffness of a beam showed as a spring stiffness in trolley member',
+            self.x: r'Kinematic lateral excitation',
+            self.x_e: r'Angle of a pendulum',
+            self.m: r'Mass of trolley',
+            self.m_TMD: r'Mass of TMD',
+            self.F: r'Force',
+            self.Omega: r'Excitation frequency',
+        }
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        m0, F0, Omega0, k0 = symbols('m_0 F_0 Omega_0 k_0', positive=True)
+
+        default_data_dict = {
+            self.m: [S.One * m0 * no for no in range(20, 30)],
+            self.m_TMD: [S.One * m0 * no for no in range(1, 10)],
+            self.F: [S.One * F0 * no for no in range(50, 100)],
+            self.Omega: [S.One * Omega0],
+            self.k: [S.One * k0 * no for no in range(50, 100)],
+            self.x: [self.x]
+        }
+        return default_data_dict
+    
+    def get_numerical_data(self):
+
+        default_data_dict = {
+            self.m: [no for no in range(20, 30)],
+            self.m_TMD: [no for no in range(1, 10)],
+            self.F: [no for no in range(50, 100)],
+            self.Omega: [3.14 * no for no in range(1,6)],
+            self.k: [no for no in range(50, 100)],
+        }
+        return default_data_dict
 
     
     
