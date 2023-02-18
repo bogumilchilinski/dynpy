@@ -95,9 +95,10 @@ class ExemplaryPictureComponent(ReportComponent):
         system = self._system
 
         display(ReportText(self.header_text))
+        
 
-        with self.create(Figure(position='H')) as fig:
-            fig.add_image(system._real_example(),width='8cm')
+        display(Picture(system._real_example(),width='8cm'))
+
 
         display(ReportText(self.footer_text))
 
@@ -125,9 +126,10 @@ class SchemeComponent(ExemplaryPictureComponent):
         system = self._system
 
         display(ReportText(  self.header_text ))
-          
-        with self.create(Figure(position='H')) as fig:
-            fig.add_image(system._scheme(),width='8cm')
+
+        display(Picture(system._scheme(),width='8cm'))
+        
+
 
         display(ReportText( self.footer_text ))
 #Pati

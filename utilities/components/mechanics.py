@@ -201,6 +201,7 @@ class ReportComponent(Subsection):
         LatexDataFrame.set_default_container(self)
         Markdown.set_container(self)
         LatexDataFrame.set_picture_mode(True)
+        Picture.set_container(self)
         #LatexDataFrame.set_directory('./SDAresults')
         
         
