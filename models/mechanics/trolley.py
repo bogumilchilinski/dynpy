@@ -18,6 +18,7 @@ import inspect
 
 from .pendulum import Pendulum, PendulumKinematicExct
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
+from .tmd import TunedMassDamperRelativeMotion
 from ...utilities.components.mech import en as mech_comp
 
 from pint import UnitRegistry
@@ -567,7 +568,7 @@ class TrolleyWithPendulum(ComposedSystem):
 
         self._trolley = SpringMassSystem(self.m_t, self.k, self.x, self.ivar)(label='Trolley')
         self._pendulum = PendulumKinematicExct(self.l, self.m_p, self.g, self.phi, self.x, self.ivar)(label='Pendulum')
-        self._force=Force(2*self.F+self.F*sin(self.Omega*self.ivar)+3*self.F*cos(self.Omega*self.ivar), pos1=self.x, qs=[self.x, self.phi])(label='Force')
+        self._force=Force(self.F*sin(self.Omega*self.ivar), pos1=self.x, qs=[self.x, self.phi])(label='Force')
 
         components['_trolley'] = self._trolley
         components['_pendulum'] = self._pendulum
@@ -884,6 +885,11 @@ class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
     G=Symbol('G', positive=True)
     x_1=dynamicsymbols('x_1')
     x_2=dynamicsymbols('x_2')
+    
+    m0=Symbol('m_0', positive=True)
+    k0=Symbol('k_0', positive=True)
+    Omega0=Symbol('Omega_0', positive=True)
+    F0=Symbol('F_0', positive=True)
    
     def __init__(self,
                  m_1=None,
@@ -891,6 +897,10 @@ class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
                  k=None,
                  Omega=None,
                  F=None,
+                 m0=None,
+                 k0=None,
+                 Omega0=None,
+                 F0=None,
                  G=None,
                  x_1=None,
                  x_2=None,
@@ -905,6 +915,11 @@ class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
         if G is not None: self.G = G
         if x_1 is not None: self.x_1 = x_1
         if x_2 is not None: self.x_2 = x_2
+            
+        if m0 is not None: self.m0 = m0
+        if k0 is not None: self.k0= k0
+        if Omega0 is not None: self.Omega0 = Omega0
+        if F0 is not None: self.F0 = F0
 
         self.qs = [self.x_1, self.x_2]
         self._init_from_components(**kwargs)
@@ -932,6 +947,21 @@ class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
         
         return components
 
+    def get_default_data(self):
+
+        m0, k0, Omega0, F0 =  self.m0, self.k0, self.Omega0, self.F0
+        
+        default_data_dict = {
+            self.m_1 : [100*m0],
+            self.m_2 : [200*m0],
+            self.k : [50*k0],
+            self.Omega : [0.5 * 3.14*Omega0, 1 * 3.14*Omega0, 2 * 3.14*Omega0, 4 * 3.14*Omega0],
+            self.F : [0.5 * 100*F0, 1 * 100*F0, 2 * 100*F0, 4 * 100*F0]
+        }
+        default_data_dict.update({self.G: [4*default_data_dict[self.F][0]*cos(0.5*default_data_dict[self.Omega][0]*self.ivar) , default_data_dict[self.F][0]*cos(0.75*default_data_dict[self.Omega][0]*self.ivar)**2 , 1.5*default_data_dict[self.F][0]*2*cos(1.25*default_data_dict[self.Omega][0]*self.ivar) , 3*default_data_dict[self.F][0]*cos(2*default_data_dict[self.Omega][0]*self.ivar)**2]})
+
+        return default_data_dict
+    
     def get_numerical_data(self):
 
         default_data_dict = {
@@ -983,8 +1013,8 @@ class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
         mech_comp.PotentialEnergyComponent,
         mech_comp.LagrangianComponent,
         mech_comp.GoverningEquationComponent,
-        #mech_comp.FundamentalMatrixComponent,
-        #mech_comp.GeneralSolutionComponent,
+        mech_comp.FundamentalMatrixComponent,
+        mech_comp.GeneralSolutionComponent,
         #mech_comp.SteadySolutionComponent,
             
             
@@ -1154,12 +1184,21 @@ class ForcedTrolleyWithSpring(ComposedSystem): ### 1 ODE
     F=Symbol('F',positive=True)
     G=Symbol('G',positive=True)
     x=dynamicsymbols('x')
+    
+    m0=Symbol('m_0', positive=True)
+    k0=Symbol('k_0', positive=True)
+    Omega0=Symbol('Omega_0', positive=True)
+    F0=Symbol('F_0', positive=True)
    
     def __init__(self,
                  m=None,
                  k=None,
                  Omega=None,
                  F=None,
+                 m0=None,
+                 k0=None,
+                 Omega0=None,
+                 F0=None,
                  G=None,
                  x=None,
                  ivar=Symbol('t'),
@@ -1171,6 +1210,11 @@ class ForcedTrolleyWithSpring(ComposedSystem): ### 1 ODE
         if F is not None: self.F = F
         if G is not None: self.G = G
         if x is not None: self.x = x
+            
+        if m0 is not None: self.m0 = m0
+        if k0 is not None: self.k0= k0
+        if Omega0 is not None: self.Omega0 = Omega0
+        if F0 is not None: self.F0 = F0
 
         self.qs = [self.x]
         self._init_from_components(**kwargs)
@@ -1192,6 +1236,20 @@ class ForcedTrolleyWithSpring(ComposedSystem): ### 1 ODE
         
         return components
 
+    def get_default_data(self):
+
+        m0, k0, Omega0, F0 =  self.m0, self.k0, self.Omega0, self.F0
+        
+        default_data_dict = {
+            self.m : [100*m0],
+            self.k : [50*k0],
+            self.Omega : [0.5 * 3.14*Omega0, 1 * 3.14*Omega0, 2 * 3.14*Omega0, 4 * 3.14*Omega0],
+            self.F : [0.5 * 100*F0, 1 * 100*F0, 2 * 100*F0, 4 * 100*F0]
+        }
+        default_data_dict.update({self.G: [4*default_data_dict[self.F][0]*cos(0.5*default_data_dict[self.Omega][0]*self.ivar) , default_data_dict[self.F][0]*cos(0.75*default_data_dict[self.Omega][0]*self.ivar)**2 , 1.5*default_data_dict[self.F][0]*2*cos(1.25*default_data_dict[self.Omega][0]*self.ivar) , 3*default_data_dict[self.F][0]*cos(2*default_data_dict[self.Omega][0]*self.ivar)**2]})
+
+        return default_data_dict
+    
     def get_numerical_data(self):
 
         default_data_dict = {
@@ -1935,7 +1993,93 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
         }
         return self.sym_desc_dict
 
+#Amadi
+class TrolleyWithTMD(ComposedSystem):
 
+    scheme_name = 'kin_exct_pendulum.PNG'
+    real_name = 'elastic_pendulum_real.PNG'
+
+    
+    m = Symbol('m_trolley', positive=True)
+    m_TMD = Symbol('m_TMD', positive=True)
+    k = Symbol('k', positive=True)
+    g = Symbol('g', positive=True)
+    Omega = Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    x_e = dynamicsymbols('x_e')
+    x = dynamicsymbols('x')
+
+    def __init__(self,
+                 m=None,
+                 m_TMD=None,
+                 k=None,
+                 Omega=None,
+                 x_e=None,
+                 x=None,
+                 F=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+        if m_TMD is not None: self.m_TMD = m_TMD
+        if m is not None: self.m = m
+        if x_e is not None: self.x_e = x_e
+        if x is not None: self.x = x
+        if k is not None: self.k = k
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        self.ivar = ivar
+        self._init_from_components(**kwargs)
+        
+
+    @property
+    def components(self):
+        components = {}
+
+        self._trolley = SpringMassSystem(self.m, self.k, self.x, self.ivar)(label='Trolley')
+        self._TMD = TunedMassDamperRelativeMotion(self.m_TMD, self.k, self.x_e, self.x, self.ivar)(label='Tuned Mass Damper')
+        self._force=Force(self.F*sin(self.Omega*self.ivar), pos1=self.x, qs=[self.x, self.x_e])(label='Force')
+
+        components['_trolley'] = self._trolley
+        components['_TMD'] = self._TMD
+        components['_force'] = self._force
+
+        return components
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.k: r'Stiffness of a beam showed as a spring stiffness in trolley member',
+            self.x: r'Kinematic lateral excitation',
+            self.x_e: r'Angle of a pendulum',
+            self.m: r'Mass of trolley',
+            self.m_TMD: r'Mass of TMD',
+            self.F: r'Force',
+            self.Omega: r'Excitation frequency',
+        }
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        m0, F0, Omega0, k0 = symbols('m_0 F_0 Omega_0 k_0', positive=True)
+
+        default_data_dict = {
+            self.m: [S.One * m0 * no for no in range(20, 30)],
+            self.m_TMD: [S.One * m0 * no for no in range(1, 10)],
+            self.F: [S.One * F0 * no for no in range(50, 100)],
+            self.Omega: [S.One * Omega0],
+            self.k: [S.One * k0 * no for no in range(50, 100)],
+            self.x: [self.x]
+        }
+        return default_data_dict
+    
+    def get_numerical_data(self):
+
+        default_data_dict = {
+            self.m: [no for no in range(20, 30)],
+            self.m_TMD: [no for no in range(1, 10)],
+            self.F: [no for no in range(50, 100)],
+            self.Omega: [3.14 * no for no in range(1,6)],
+            self.k: [no for no in range(50, 100)],
+        }
+        return default_data_dict
 
     
     

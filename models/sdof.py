@@ -374,7 +374,7 @@ from .mechanics.tensioner import BlowerToothedBelt, DampedBlowerToothedBelt
 
 
 
-from .mechanics.trolley import SpringMassSystem, SpringDamperMassSystem, ForcedTrolleyWithSpring, ForcedDampedTrolleyWithSpring, ForcedTrolleysWithSprings
+from .mechanics.trolley import SpringMassSystem, SpringDamperMassSystem, ForcedTrolleyWithSpring, ForcedDampedTrolleyWithSpring, ForcedTrolleysWithSprings, TrolleyWithPendulum
 
 from .mechanics.bridge import BeamBridge
 
@@ -1210,7 +1210,7 @@ class NonLinearDisc(NonlinearComposedSystem):
                 kl, pos1=(sqrt(x**2 + d**2) - l_0), qs=[x])
 
         system = self.Disk1
-        super().__init__(system, **kwargs)
+        super(HarmonicOscillator,self).__init__(system, **kwargs)
 
     def get_default_data(self):
 

@@ -252,7 +252,7 @@ class MaterialPoint(Element):
         t=self.ivar
         m0=Symbol('m_0',positive=True)
         self.default_data_dict={
-            self.m:[m0],
+            self.m:[m0*no for no in range(1,3)],
         }
         return {**super().get_default_data(),**self.default_data_dict}
     
@@ -397,7 +397,7 @@ class Spring(Element):
 
         k0= self.k0
         self.default_data_dict={
-            self.stiffness: [S.One / 100 *  k0 * no for no in range(80, 135)],
+            self.stiffness: [S.One *  k0 * no for no in range(80, 135)],
         }
         return {**super().get_default_data(),**self.default_data_dict}
         

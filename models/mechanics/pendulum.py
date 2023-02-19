@@ -159,6 +159,27 @@ class Pendulum(NonlinearComposedSystem):
 
         return comp_list
 
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.GoverningEquationComponent,
+        #mech_comp.FundamentalMatrixComponent,
+        #mech_comp.GeneralSolutionComponent,
+        #mech_comp.SteadySolutionComponent,
+            
+            
+        ]
+        
+        return comp_list
+    
+    
 #DONE
 class PulledPendulum(ComposedSystem):
     """
