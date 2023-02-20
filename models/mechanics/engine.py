@@ -373,11 +373,10 @@ class Engine(ComposedSystem):
         mech_comp.PotentialEnergyComponent,
         mech_comp.LagrangianComponent,
         mech_comp.GoverningEquationComponent,
+        mech_comp.SpringForce
         #mech_comp.FundamentalMatrixComponent,
         #mech_comp.GeneralSolutionComponent,
         #mech_comp.SteadySolutionComponent,
-            
-            
         ]
         
         return comp_list
@@ -1530,5 +1529,6 @@ class EngineWithTMD(Engine):
         #force_old = abs(   sum(self.static_load().doit())  ) / 2
         
         #display(force -force_old) #checking display
+        #self._left_mount.force()
         
         return force

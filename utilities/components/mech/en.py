@@ -751,19 +751,34 @@ class SpringForce(ReportComponent):
         #"Siła od sprężyny wyrażona jest wzorem:""
         return "The spring force is given by the formula:"
 
-        display(SympyFormula( Eq(Symbol('F'),-1*system.k*system.x,evaluate=False)))
-    @property
-    def header_text(self): 
-        #"zamiast x używam steady solution"
-        return "I use steady solution instead of x"
-
-        display(SympyFormula( Eq(Symbol('F'),-1*system.k*system.steady_solution(),evaluate=False)))
+#     @property
+#     def middle_text(self): 
+#         #"zamiast x używam steady solution"
+#         return "I use steady solution instead of x"
 
     @property
     def footer_text(self):
            #"Siła od sprężyny, zwana również siłą naciągu, pojawia sie przy ściskaniu lub rozciaganiu. Siła, która działa jest przeciwnie skierowana do ruch i chce przywrócić do pierwotnego jej położenia. Zależy od sztywności sprężyny k oraz od tego o ile została rozciagnieta bądź skrócona x."
             return "Spring force, also known as pull force, occurs when compressed or stretched. The force that acts is opposite to the movement and wants to return it to its original position. It depends on the spring stiffness k and how much it is stretched or shortened x."
 
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(  self.header_text   ))
+
+        display(SympyFormula( Eq(Symbol('F'),system._left_mount.force(),evaluate=False)))
+
+#         display(ReportText(  self.middle_text   ))
+
+#        display(SympyFormula( Eq(Symbol('F'),-1*system.k*system.steady_solution(),evaluate=False)))
+
+        display(ReportText(  self.footer_text   ))
+        
+        
 #Pati
 class DamperForce(ReportComponent):
     
