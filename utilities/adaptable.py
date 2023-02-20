@@ -1418,7 +1418,7 @@ class EntryWithUnit:
             return f'{self._obj}'
 
 
-class DataTable(Table):
+class DataTable(Table,ReportModule):
     _latex_name = 'table'
     packages=[Package('booktabs'),Package('longtable')]
 
@@ -1427,6 +1427,7 @@ class DataTable(Table):
         ##print(numerical_data)
         self._numerical_data = numerical_data
         self.position = position
+
 
     def add_table(self, numerical_data=None, index=False, longtable=False,multirow=True, column_format=None):
         self.append(NoEscape('\\centering'))
@@ -1437,8 +1438,12 @@ class DataTable(Table):
         tab = self._numerical_data
         self.append(
             NoEscape(
-                tab.to_latex(index=index, escape=False,
-                             longtable=longtable,multirow=multirow,column_format=column_format).replace(
+                tab.style.to_latex(#index=index, 
+                                   #escape=False,
+                             #longtable=longtable,
+#                    multirow=multirow,
+                    hrules=True,
+                    column_format=column_format).replace(
                                  '\\toprule',
                                  '\\toprule \n \\midrule').replace(
                                      '\\bottomrule',
