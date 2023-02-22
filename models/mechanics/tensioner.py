@@ -33,7 +33,7 @@ class BlowerToothedBelt(ComposedSystem):
     Omega=Symbol('Omega', positive=True)
     F=Symbol('F', positive=True)
     Q=Symbol('Q', positive=True)
-    P0 = Symbol('P_0', positive=True)
+    z0 = Symbol('z_0', positive=True)
     z=dynamicsymbols('z')
     
     #F0 = Symbol('F_0', positive=True)
@@ -47,7 +47,7 @@ class BlowerToothedBelt(ComposedSystem):
                  Omega=None,
                  F=None,
                  Q=None,
-                 P0=None,
+                 z0=None,
                  z=None,
                  **kwargs):
         
@@ -59,7 +59,7 @@ class BlowerToothedBelt(ComposedSystem):
         if Q is not None: self.Q = Q
         if z is not None: self.z = z
         if ivar is not None: self.ivar = ivar
-        if P0 is not None: self.P0 = P0
+        if z0 is not None: self.z0 = z0
             
         self.qs = [self.z]
         self.ivar = ivar
@@ -89,7 +89,7 @@ class BlowerToothedBelt(ComposedSystem):
     def get_default_data(self):
 
         #m0, k0, F0, Omega0 = symbols('m_0 k_0 F_0 Omega_0', positive=True)
-        m0, k0, F0, Omega0 = self.m0, self.F0, self.k0, self.Omega0
+        m0, k0, F0, Omega0 = self.m0, self.k0, self.F0, self.Omega0
 
         default_data_dict = {
             self.m: [0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0],
@@ -97,7 +97,8 @@ class BlowerToothedBelt(ComposedSystem):
             self.k_tensioner: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
             self.F: [F0, 2 * F0, 3 * F0, 4 * F0, 5 * F0, 6 * F0],
             #self.Omega: [Omega0, 2 * Omega0, 3 * Omega0, 4 * Omega0, 5 * Omega0, 6 * Omega0],
-            self.Q: [2 * F0, 3 * F0, 4 * F0, 5 * F0, 6 * F0, F0],
+            #self.Q: [2 * F0, 3 * F0, 4 * F0, 5 * F0, 6 * F0, F0],
+            self.z0: [F0 / k0 * S.One / 4 * no for no in range(1, 2)],
         }
 
         return default_data_dict
@@ -113,6 +114,7 @@ class BlowerToothedBelt(ComposedSystem):
             self.F: [500 * no for no in range(1, 8)],
             self.Omega: [0.02*no for no in range(1,4)],
             self.Q: [200* no for no in range(1,8)],
+            self.z0: [0.2 * no for no in range(1, 2)],
         }
 
         return default_data_dict
