@@ -2724,7 +2724,15 @@ class Picture(Figure,ReportModule):
         if self.marker is not None:
             self.append(Label(self.marker))
         else:
-            self.append(Label(AutoMarker(self).marker  ))
+            auto_mrk = AutoMarker(self).marker
+            marker = auto_mrk
+            
+            self.marker = marker
+            
+            self.append(Label(marker))
+            
+    def _get_str_key(self):
+        return self.image + '_caption:'+str(self.caption    )     
             
     def __repr__(self):
 

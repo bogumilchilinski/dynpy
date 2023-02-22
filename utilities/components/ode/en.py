@@ -72,10 +72,65 @@ class TitlePageComponent(Environment):
             self.append(Command('MyDate'))
 
 
-            
-######################### Initial point
+class ODESystemComponent(ReportComponent):
     
+    title="Differential quations"
+    @property
+    def header_text(self):
+        #"Energia potencjalna układu wyrażona jest wzorem:"
+        return "The investigated differential equations are as follows"
+
+        
+    @property
+    def footer_text(self):
+        #"Zaprezentowana zależność opisuje oddziaływanie potencjalnych pól sił w których znajduje się obiekt."
+        return "Eigenvalues and modal method is used to solve this type equations"
+
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+
+
+
+        display(ReportText(  self.header_text   ))
+
+        display(SympyFormula(  system))
+
+        display(ReportText(  self.footer_text   ))
+
+
+class VariablesComponent(ReportComponent):
     
+    title="Differential quations"
+    @property
+    def header_text(self):
+        #"Energia potencjalna układu wyrażona jest wzorem:"
+        return "The investigated differential equations are as follows"
+
+        
+    @property
+    def footer_text(self):
+        #"Zaprezentowana zależność opisuje oddziaływanie potencjalnych pól sił w których znajduje się obiekt."
+        return "Eigenvalues and modal method is used to solve this type equations"
+
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+
+
+
+        display(ReportText(  self.header_text   ))
+
+        display(SympyFormula(  system.ivar))
+        display(SympyFormula(  system.dvar))
+
+        display(ReportText(  self.footer_text   ))
+        
+#########################olc components from perioua module
+    
+     
 # Damian
 class ExemplaryPictureComponent(ReportComponent):
     
@@ -95,10 +150,9 @@ class ExemplaryPictureComponent(ReportComponent):
         system = self._system
 
         display(ReportText(self.header_text))
-        
 
-        display(Picture(system._real_example(),width='8cm'))
-
+        with self.create(Figure(position='H')) as fig:
+            fig.add_image(system._real_example(),width='8cm')
 
         display(ReportText(self.footer_text))
 
@@ -126,10 +180,9 @@ class SchemeComponent(ExemplaryPictureComponent):
         system = self._system
 
         display(ReportText(  self.header_text ))
-
-        display(Picture(system._scheme(),width='8cm'))
-        
-
+          
+        with self.create(Figure(position='H')) as fig:
+            fig.add_image(system._scheme(),width='8cm')
 
         display(ReportText( self.footer_text ))
 #Pati
@@ -386,12 +439,6 @@ class LagrangianComponent(ReportComponent):
         frame+=(list(self))
         return frame
 
-        
-    def as_frame(self):
-        frame=Frame(title=self.title,options=['allowframebreaks'])
-        #frame.packages +(self.packages)
-        frame+=(list(self))
-        return frame
     
 # Amadi & Damian
 class GoverningEquationComponent(ReportComponent):
@@ -432,9 +479,8 @@ class GoverningEquationComponent(ReportComponent):
         for eq in dyn_sys._eoms:
             display(SympyFormula( Eq(eq.simplify().expand(),0) , marker=None))
 
-        display(ReportText(self.footer_text))   
+        display(ReportText(self.footer_text))
 
-        
 class LinearizedGoverningEquationComponent(ReportComponent):
     #Równania ruchu
     title="Equation of motion"
@@ -751,35 +797,19 @@ class SpringForce(ReportComponent):
         #"Siła od sprężyny wyrażona jest wzorem:""
         return "The spring force is given by the formula:"
 
+        display(SympyFormula( Eq(Symbol('F'),-1*system.k*system.x,evaluate=False)))
     @property
-    def middle_text(self): 
+    def header_text(self): 
         #"zamiast x używam steady solution"
-        return "steady solution was used instead of x"
+        return "I use steady solution instead of x"
+
+        display(SympyFormula( Eq(Symbol('F'),-1*system.k*system.steady_solution(),evaluate=False)))
 
     @property
     def footer_text(self):
            #"Siła od sprężyny, zwana również siłą naciągu, pojawia sie przy ściskaniu lub rozciaganiu. Siła, która działa jest przeciwnie skierowana do ruch i chce przywrócić do pierwotnego jej położenia. Zależy od sztywności sprężyny k oraz od tego o ile została rozciagnieta bądź skrócona x."
-        return "Spring force, also known as pull force, occurs when compressed or stretched. The force that acts is opposite to the movement and wants to return it to its original position. It depends on the spring stiffness k and how much it is stretched or shortened x."
+            return "Spring force, also known as pull force, occurs when compressed or stretched. The force that acts is opposite to the movement and wants to return it to its original position. It depends on the spring stiffness k and how much it is stretched or shortened x."
 
-    def append_elements(self):
-
-
-        system = self._system
-        dyn_sys=system
-        dyn_sys_lin = dyn_sys
-
-
-        display(ReportText(self.header_text))
-
-        display(SympyFormula( Eq(Symbol('F'),-1*system._left_mount.stiffness*system.z,evaluate=False)))
-
-        display(ReportText(self.middle_text))
-        
-        display(SympyFormula( Eq(Symbol('F'),-1*system._left_mount.stiffness*system.steady_solution(),evaluate=False)))
-        
-        display(ReportText(self.footer_text))
-        
-FRFComponent = FrequencyResponseFunctionComponent
 #Pati
 class DamperForce(ReportComponent):
     
@@ -943,46 +973,3 @@ class MaxDynamicForce(ReportComponent):
 
         display(SympyFormula( Eq(Symbol('F_d'),
                      dyn_sys.max_dynamic_force().doit() ), marker=None))
-        
-        
-#### Amadi
-class DynamicPinDiameter(ReportComponent):
-    
-    title="Minimum diameter of pin due to dynamic force"
-
-    @property
-    def header_text(self):
-        return "Minimum diameter of the pin due to dynamic force formula:"
-    
-    def append_elements(self):
-
-        system = self._system
-        dyn_sys=system
-        dyn_sys_lin = dyn_sys
-
-
-        display(ReportText(self.header_text))
-
-        display(SympyFormula( Eq(Symbol('d'),
-                     dyn_sys.dynamic_force_pin_diameter().doit() ), marker=None))
-        
-#### Amadi
-class StaticPinDiameter(ReportComponent):
-    
-    title="Minimum diameter of pin due to static force"
-
-    @property
-    def header_text(self):
-        return "Minimum diameter of the pin due to static force formula:"
-    
-    def append_elements(self):
-
-        system = self._system
-        dyn_sys=system
-        dyn_sys_lin = dyn_sys
-
-
-        display(ReportText(self.header_text))
-
-        display(SympyFormula( Eq(Symbol('d'),
-                     dyn_sys.static_force_pin_diameter().doit() ), marker=None))

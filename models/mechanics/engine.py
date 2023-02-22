@@ -1696,5 +1696,6 @@ class EngineWithTMD(Engine):
         #force_old = abs(   sum(self.static_load().doit())  ) / 2
         
         #display(force -force_old) #checking display
+        #self._left_mount.force()
         
         return force
