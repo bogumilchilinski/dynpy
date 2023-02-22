@@ -576,17 +576,16 @@ class EngineConstantVelocityVerticalSpringGravity(Engine):
         components['_right_mount'] = self._right_mount
         return components
     
-    def get_default_data(self):
+    # def get_default_data(self):
 
-        m0, e0, Omega0 = symbols('m_0 e_0 Omega_0',positive=True)
+    #     m0, e0, Omega0 = symbols('m_0 e_0 Omega_0',positive=True)
         
-        default_data_dict = {
-            self.M: [10 * m0 * no / 100 for no in range(10, 150)],
-            self.m_e: [m0 * no / 100 for no in range(80, 120)],
-            self.e: [e0 * no / 100 for no in range(80, 120)],
-            self.Omega: [Omega0 * 2 * 3.14 * no for no in range(1,20)]
-        }
-        return default_data_dict
+    #     default_data_dict = {
+    #         self.M: [10 * m0 * no / 100 for no in range(10, 150)],
+    #         self.m_e: [m0 * no / 100 for no in range(80, 120)],
+    #         self.e: [e0 * no / 100 for no in range(80, 120)],
+    #     }
+    #     return default_data_dict
 
     def get_numerical_data(self):
 
