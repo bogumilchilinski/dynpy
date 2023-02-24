@@ -131,7 +131,56 @@ class BlowerToothedBelt(ComposedSystem):
         }
 
         return self.sym_desc_dict
+
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.GoverningEquationComponent,
+        mech_comp.FundamentalMatrixComponent,
+        mech_comp.GeneralSolutionComponent,
+        mech_comp.SteadySolutionComponent,
+        mech_comp.TensionerForce,
+        mech_comp.MaxStaticForce,
+        mech_comp.MaxDynamicForce,
+        mech_comp.StaticPinDiameter,
+        mech_comp.DynamicPinDiameter,
+
+        ]
+
+        return comp_list
     
+    def tensioner_belt_force(self):
+        return self.k_tensioner * self.steady_solution()
+
+    def left_belt_force(self):
+        return self.k_belt * self.steady_solution()
+
+    def right_belt_force(self):
+        return self.k_belt * self.steady_solution()
+
+    def max_static_force(self):
+        return abs(self.static_load().doit()[0])
+
+    def max_dynamic_force(self):
+        return self.frequency_response_function() * self._tensioner.stiffness + self.max_static_force()
+
+    def static_force_pin_diameter(self):
+        kt = Symbol('k_shear', positive=True)
+        Re = Symbol('R_e', positive=True)
+        return ((4 * self.max_static_force()) / (pi * kt * Re))**(1 / 2)
+
+    def dynamic_force_pin_diameter(self):
+        kt = Symbol('k_shear', positive=True)
+        Re = Symbol('R_e', positive=True)
+        return ((4 * self.max_dynamic_force()) / (pi * kt * Re))**(1 / 2)
+
 #dziedziczenie po BlowerToothedBelt - POPRAWIONE
 class DampedBlowerToothedBelt(BlowerToothedBelt):
 
@@ -243,15 +292,32 @@ class DampedBlowerToothedBelt(BlowerToothedBelt):
         }
 
         return self.sym_desc_dict
+    
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.GoverningEquationComponent,
+        mech_comp.FundamentalMatrixComponent,
+        mech_comp.GeneralSolutionComponent,
+        mech_comp.SteadySolutionComponent,
+        mech_comp.TensionerForce,
+        mech_comp.TensionerDamperForce,
+        mech_comp.MaxStaticForce,
+        mech_comp.MaxDynamicForce,
+        mech_comp.StaticPinDiameter,
+        mech_comp.DynamicPinDiameter,
 
-    def tensioner_belt_force(self):
-        return self.k_tensioner * self.steady_solution()
+        ]
 
-    def left_belt_force(self):
-        return self.k_belt * self.steady_solution()
+        return comp_list
 
-    def right_belt_force(self):
-        return self.k_belt * self.steady_solution()
 
     def tensioner_damper_force(self):
         return self.c_tensioner * self.steady_solution().diff(self.ivar)
@@ -261,20 +327,3 @@ class DampedBlowerToothedBelt(BlowerToothedBelt):
 
     def right_belt_damper_force(self):
         return self.c_belt * self.steady_solution().diff(self.ivar)
-
-    def max_static_force_pin(self):
-        return abs(self.static_load().doit()[0])
-
-    def max_dynamic_force_pin(self):
-        return self.frequency_response_function() * self.stiffness_matrix(
-        )[0] + self.max_static_force_pin()
-
-    def static_force_pin_diameter(self):
-        kt = Symbol('k_t', positive=True)
-        Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_static_force_pin()) / (pi * kt * Re))**(1 / 2)
-
-    def dynamic_force_pin_diameter(self):
-        kt = Symbol('k_t', positive=True)
-        Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)

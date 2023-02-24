@@ -111,8 +111,8 @@ class FreeEngine(ComposedSystem):
 
         self._engine_housing = EngineHousing(M, pos1=z, qs=[z])(label='Engine housing')
         self._crank = MaterialPoint(m_e, pos1=z + e * cos(phi), qs=[z])(label='Position of reduced mass of the crank system')
-        self._housing_gravity = GravitationalForce(self.M, self.g, self.z)(label='Gravitational Force of housing')
-        self._crank_gravity = GravitationalForce(self.m_e, self.g, self.z)(label='Gravitational Force of crank')
+        self._housing_gravity = GravitationalForce(m=self.M, g=self.g, pos1=self.z, qs=[self.z])(label='Gravitational Force of housing')
+        self._crank_gravity = GravitationalForce(m=self.m_e, g=self.g, pos1=self.z+self.e*cos(self.phi), qs=[self.z])(label='Gravitational Force of crank')
 
         components['_engine_housing'] = self._engine_housing
         components['_crank'] = self._crank
@@ -632,8 +632,7 @@ class EngineConstantVelocityVerticalSpringGravity(Engine):
         return abs(self.static_load().doit()[0])
 
     def max_dynamic_force(self):
-        return self.frequency_response_function() * self.stiffness_matrix(
-        )[0] + self.max_static_force_pin()
+        return self.frequency_response_function() * self._left_mount.stiffness + self.max_static_force_pin()
 
     def static_force_pin_diameter(self):
         kt = Symbol('k_t', positive=True)

@@ -37,24 +37,24 @@ class TitlePageComponent(Environment):
             
             self.append(NoEscape('\centering'))
 
-            self.append(NoEscape('\\Huge DRGANIA MECHANICZNE \n \n'))
+            self.append(NoEscape('\\Huge Mechanical Vibration \n \n'))
             
             self.append(Command('vspace',arguments='1cm'))
 
             
             
             if len(system.q)==1:
-                dof_str = 'JEDNYM STOPNIU SWOBODY'
+                dof_str = 'Single Degree of Freedom'
             else:
-                dof_str = 'WIELU STOPNIACH SWOBODY'
+                dof_str = 'Multi Degree of Freedom'
                 
             if system._dissipative_potential==0 or system._dissipative_potential is None:
-                damping_str = 'NIETŁUMIONE'
+                damping_str = 'UNDAMPED'
             else:
-                damping_str = 'TŁUMIONE'
+                damping_str = 'DAMPED'
 
            
-            self.append(NoEscape(f'\\Large {damping_str} UKŁADY O {dof_str} \n \n'))    
+            self.append(NoEscape(f'\\Large {dof_str} {damping_str} SYSTEM \n \n'))    
             
             self.append(Command('vspace',arguments='1cm'))
             
@@ -737,7 +737,7 @@ class FrequencyResponseFunctionComponentToSecond(ReportComponent):
 #Pati        
 class SpringForce(ReportComponent):
     
-    title="Siła od sprężyny"
+    title="Spring force"
 
     def append_elements(self):
 
@@ -754,12 +754,12 @@ class SpringForce(ReportComponent):
     @property
     def middle_text(self): 
         #"zamiast x używam steady solution"
-        return "steady solution was used instead of x"
+        return "steady solution was used instead of z"
 
     @property
     def footer_text(self):
            #"Siła od sprężyny, zwana również siłą naciągu, pojawia sie przy ściskaniu lub rozciaganiu. Siła, która działa jest przeciwnie skierowana do ruch i chce przywrócić do pierwotnego jej położenia. Zależy od sztywności sprężyny k oraz od tego o ile została rozciagnieta bądź skrócona x."
-        return "Spring force, also known as pull force, occurs when compressed or stretched. The force that acts is opposite to the movement and wants to return it to its original position. It depends on the spring stiffness k and how much it is stretched or shortened x."
+        return "Spring force, also known as pull force, occurs when compressed or stretched. The force that acts is opposite to the movement and wants to return it to its original position. It depends on the spring stiffness k and how much it is stretched or shortened z."
 
     def append_elements(self):
 
@@ -986,3 +986,83 @@ class StaticPinDiameter(ReportComponent):
 
         display(SympyFormula( Eq(Symbol('d'),
                      dyn_sys.static_force_pin_diameter().doit() ), marker=None))
+        
+#### Amadi
+class TensionerForce(ReportComponent):
+    
+    title="Tensioner force"
+
+
+    @property
+    def header_text(self): 
+        #"Siła od sprężyny wyrażona jest wzorem:""
+        return "The tensioner force modelled as a spring is given by the formula:"
+
+    @property
+    def middle_text(self): 
+        #"zamiast x używam steady solution"
+        return "steady solution was used instead of z"
+
+    @property
+    def footer_text(self):
+           #"Siła od sprężyny, zwana również siłą naciągu, pojawia sie przy ściskaniu lub rozciaganiu. Siła, która działa jest przeciwnie skierowana do ruch i chce przywrócić do pierwotnego jej położenia. Zależy od sztywności sprężyny k oraz od tego o ile została rozciagnieta bądź skrócona x."
+        return "Spring force, also known as pull force, occurs when compressed or stretched. The force that acts is opposite to the movement and wants to return it to its original position. It depends on the spring stiffness k and how much it is stretched or shortened z."
+
+    def append_elements(self):
+
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('F'),-1*system._tensioner.stiffness*(system.z0-system.z),evaluate=False)))
+
+        display(ReportText(self.middle_text))
+        
+        display(SympyFormula( Eq(Symbol('F'),-1*system._tensioner.stiffness*system.steady_solution(),evaluate=False)))
+        
+        display(ReportText(self.footer_text))
+        
+#### Amadi
+class TensionerDamperForce(ReportComponent):
+    
+    title="Tensioner damping force"
+
+
+    @property
+    def header_text(self): 
+        #"Siła tłumienia wyrażona jest wzorem:"
+        return "The damping force is given by the formula:"
+
+
+    @property
+    def middle_text(self): 
+             #"zastępuje prędkość jako pochodna steady stolution po czasie:"
+        return "replaces velocity as a derivative of the steady solution over time:"
+
+
+    @property
+    def footer_text(self):
+         #"Siła tłumienia zmniejsza amplitude drgań, ma zwrot przeciwny do prędkości. Zależy od współczynnika tłumienia b oraz od prędkości v."
+        return "The damping force, which reduces the amplitude of vibrations, has a direction opposite to the velocity. It depends on the damping coefficient c and the speed V."
+
+    def append_elements(self):
+
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('F'),-1*system._tensioner_damping.c*Symbol('V'),evaluate=False)))
+
+        display(ReportText(self.middle_text))
+        
+        display(SympyFormula( Eq(Symbol('F'),-1*system._tensioner_damping.c*system.steady_solution().diff(system.ivar),evaluate=False)))
+        
+        display(ReportText(self.footer_text))
