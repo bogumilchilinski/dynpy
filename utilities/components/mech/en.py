@@ -1,5 +1,5 @@
 from  ..mechanics import *
-
+from sympy.physics.mechanics import dynamicsymbols
 
 
 class TitlePageComponent(Environment):
@@ -205,7 +205,7 @@ class KineticEnergyComponent(ReportComponent):
     @property
     def header_text(self):
         #"Energia kinetyczna układu wyrażona jest wzorem:"
-        return "Kinetic energy of the system has a following form!:"
+        return "Kinetic energy of the system has a following form:"
 
         
     @property
@@ -238,7 +238,7 @@ class PotentialEnergyComponent(ReportComponent):#Jaś fasola
     @property
     def header_text(self):
         #"Energia potencjalna układu wyrażona jest wzorem:"
-        return "Potential energy of the system has a following form!:"
+        return "Potential energy of the system has a following form:"
 
         
     @property
@@ -1066,3 +1066,84 @@ class TensionerDamperForce(ReportComponent):
         display(SympyFormula( Eq(Symbol('F'),-1*system._tensioner_damping.c*system.steady_solution().diff(system.ivar),evaluate=False)))
         
         display(ReportText(self.footer_text))
+        
+
+#### Amadi
+class StaticKeyLength(ReportComponent):
+    
+    title="Minimum length of key due to static force"
+
+    @property
+    def header_text(self):
+        return "Minimum length of the key due to static force formula:"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('l'),
+                     dyn_sys.static_key_length().doit() ), marker=None))
+        
+#### Amadi
+class DynamicKeyLength(ReportComponent):
+    
+    title="Minimum length of key due to dynamic force"
+
+    @property
+    def header_text(self):
+        return "Minimum length of the key due to dynamic force formula:"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('l'),
+                     dyn_sys.dynamic_key_length().doit() ), marker=None))
+        
+        
+class PendulumLongitudinalForce(ReportComponent):
+    
+    title="Pendulum's cable longitudinal force value"
+
+    @property
+    def header_text(self):
+        return "Pendulum's cable static force is represented by formula:"
+    
+    @property
+    def middle_text(self):
+        return "Pendulum's maximum angular velocity has following form:"
+    
+    @property
+    def footer_text(self):
+        return "Sum of static force and maximum angular velocity represents pendulum's cable longitudinal force:"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('F_s'),
+                     dyn_sys.max_static_cable_force().doit() ), marker=None))
+        
+        display(ReportText(self.middle_text))
+
+        display(SympyFormula( Eq(Eq(dynamicsymbols('varphi_max').diff(dyn_sys.ivar) , Symbol('A_omega'), evaluate=False),
+                     dyn_sys.linearized().frequency_response_function() * dyn_sys.Omega, evaluate=False ), marker=None))
+        
+        display(ReportText(self.footer_text))
+
+        display(SympyFormula( Eq(Symbol('T'),
+                     dyn_sys.max_dynamic_cable_force().doit() ), marker=None))

@@ -70,8 +70,9 @@ class UndampedVehicleSuspension(ComposedSystem):
                  l_r=None,
                  k_r=None,
                  k_l=None,
-                 F_engine=None,
                  l_l=None,
+                 F_engine=None,
+                 Omega=None,
                  phi=None,
                  z=None,
                  ivar=Symbol('t'),
@@ -87,6 +88,7 @@ class UndampedVehicleSuspension(ComposedSystem):
         if  k_r is not None: self.k_r =k_r# left spring
         if  k_l is not None: self.k_l = k_l# right spring
         if  F_engine is not None: self.F_engine = F_engine
+        if  Omega is not None: self.Omega = Omega
         if  phi is not None: self.phi = phi
         if z is not None: self.z=z    
           
@@ -103,7 +105,7 @@ class UndampedVehicleSuspension(ComposedSystem):
         self._body = RigidBody2D(self.m, self.I, pos_lin=self.z, pos_rot=self.phi, qs=self.qs)(label='rod')
         self._spring_l = Spring(self.k_l, pos1=self.z + self.phi * self.l_l, qs=self.qs)(label='left spring')
         self._spring_r = Spring(self.k_r, pos1=self.z - self.phi * self.l_r, qs=self.qs)(label='right spring')
-        self._force = Force(self.F_engine, pos1=self.z - self.l_r * self.phi, qs=self.qs)(label='force')
+        self._force = Force(self.F_engine*cos(self.Omega), pos1=self.z - self.l_r * self.phi, qs=self.qs)(label='force')
 
 
         components['_body'] = self._body
@@ -131,7 +133,7 @@ class UndampedVehicleSuspension(ComposedSystem):
     
     
     def max_static_force_pin(self):
-        return abs(self.static_load().doit()[0])/2
+        return (abs(self.static_load().doit()[0])/2)
     
     def static_force_pin_diameter(self):
         kt=Symbol('k_t', positive=True)
@@ -146,10 +148,7 @@ class UndampedVehicleSuspension(ComposedSystem):
         
         amps = self._frf()
         force = self.components['_spring_l'].force().doit().expand()#.doit()
-        #print('in class method')
-        #display(force)
-        #print('in class method')
-        
+        display(self.components['_spring_l'].force())
         return self.components['_spring_l'].force().subs({coord:amp for amp,coord in zip(amps,self.q)})
 
 
@@ -193,8 +192,8 @@ class UndampedVehicleSuspension(ComposedSystem):
             self.l_r: [l0*S.One*no for no in range(1, 8)],
             #self.l_l: [l0*S.One*no for no in range(1, 8)],
            
-            self.Omega: [self.Omega],
-            self.F_engine: [F0*cos(self.Omega*self.ivar)*S.One*no for no in range(1,8)],
+#             self.Omega: [self.Omega],
+            self.F_engine: [F0*S.One*no for no in range(1,8)],
             
           #  self.F_engine: [
            #     2 * F_0 * sin(omega * self.ivar),
@@ -206,6 +205,26 @@ class UndampedVehicleSuspension(ComposedSystem):
         }
 
         return default_data_dict
+    
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.GoverningEquationComponent,
+#        mech_comp.FundamentalMatrixComponent,
+#        mech_comp.GeneralSolutionComponent,
+#        mech_comp.SteadySolutionComponent,
+#        mech_comp.SpringForce,
+            
+        ]
+        
+        return comp_list
     
 class DampedVehicleSuspension(UndampedVehicleSuspension):
 
@@ -363,6 +382,26 @@ class DampedVehicleSuspension(UndampedVehicleSuspension):
 
 
         return default_data_dict
+    
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.GoverningEquationComponent,
+#        mech_comp.FundamentalMatrixComponent,
+#        mech_comp.GeneralSolutionComponent,
+#        mech_comp.SteadySolutionComponent,
+#        mech_comp.SpringForce,
+            
+        ]
+        
+        return comp_list
 
 class DampedSymmetricalVehicleSuspension(DampedVehicleSuspension):
     def get_default_data(self):
