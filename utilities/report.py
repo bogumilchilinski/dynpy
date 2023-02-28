@@ -2578,7 +2578,7 @@ class Markdown(Environment,ReportModule):
         return NoEscape(ppd.convert_text(self.markdown,to='latex',format='md'))
             
     def _repr_markdown_(self):
-        return self.markdown
+        return self.reported().markdown
 
     def reported(self):
         
@@ -2724,7 +2724,15 @@ class Picture(Figure,ReportModule):
         if self.marker is not None:
             self.append(Label(self.marker))
         else:
-            self.append(Label(AutoMarker(self).marker  ))
+            auto_mrk = AutoMarker(self).marker
+            marker = auto_mrk
+            
+            self.marker = marker
+            
+            self.append(Label(marker))
+            
+    def _get_str_key(self):
+        return self.image + '_caption:'+str(self.caption    )     
             
     def __repr__(self):
 

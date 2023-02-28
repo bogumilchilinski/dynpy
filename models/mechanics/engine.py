@@ -111,8 +111,8 @@ class FreeEngine(ComposedSystem):
 
         self._engine_housing = EngineHousing(M, pos1=z, qs=[z])(label='Engine housing')
         self._crank = MaterialPoint(m_e, pos1=z + e * cos(phi), qs=[z])(label='Position of reduced mass of the crank system')
-        self._housing_gravity = GravitationalForce(self.M, self.g, self.z)(label='Gravitational Force of housing')
-        self._crank_gravity = GravitationalForce(self.m_e, self.g, self.z)(label='Gravitational Force of crank')
+        self._housing_gravity = GravitationalForce(m=self.M, g=self.g, pos1=self.z, qs=[self.z])(label='Gravitational Force of housing')
+        self._crank_gravity = GravitationalForce(m=self.m_e, g=self.g, pos1=self.z+self.e*cos(self.phi), qs=[self.z])(label='Gravitational Force of crank')
 
         components['_engine_housing'] = self._engine_housing
         components['_crank'] = self._crank
@@ -373,15 +373,14 @@ class Engine(ComposedSystem):
         mech_comp.PotentialEnergyComponent,
         mech_comp.LagrangianComponent,
         mech_comp.GoverningEquationComponent,
-        #mech_comp.FundamentalMatrixComponent,
-        #mech_comp.GeneralSolutionComponent,
-        #mech_comp.SteadySolutionComponent,
-            
+#        mech_comp.FundamentalMatrixComponent,
+#        mech_comp.GeneralSolutionComponent,
+#        mech_comp.SteadySolutionComponent,
+#        mech_comp.SpringForce,
             
         ]
         
         return comp_list
-    
     
 #DONE 
 class EngineVerticalSpringGravity(Engine):
@@ -480,6 +479,171 @@ class EngineVerticalSpringGravity(Engine):
         components['_left_mount'] = self._left_mount
         components['_right_mount'] = self._right_mount
         return components
+
+class EngineConstantVelocityVerticalSpringGravity(Engine):
+
+    """Ready to use model of engine represented by the rotating mass of a crankshaft and mass of the engine.
+        Arguments:
+        =========
+            M = Symbol object
+                -Mass of an engine.
+
+            m_e = Symbol object
+                -Mass of a crankshaft.
+
+            k_m = Symbol object
+                -Stifness of the engine mounts
+                
+                
+            phi = Dynamicsymbol object
+                -rotation angle
+                
+            e =  Symbol object
+                -offset of the rotating mass
+
+            g = Symbol object
+                -Gravitational field acceleration
+                
+            z = Symbol object
+                -vertical Z coordinate
+                
+            q = Symbol object
+                -Directional coefficent
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+
+    """
+
+    scheme_name = 'engine_vertical_spring_gravity.png'
+    real_name = 'paccar.jpg'
+    detail_scheme_name = 'sruba_pasowana.png'
+    detail_real_name = 'buick_regal_3800.jpg'
+
+    M = Symbol('M', positive=True)
+    m_e = Symbol('m_e', positive=True)
+    g = Symbol('g', positive=True)
+    k_m = Symbol('k_m', positive=True)
+    c_m = Symbol('c_m', positive=True)
+    e = Symbol('e', positive=True)
+    z = dynamicsymbols('z')
+
+    Omega = Symbol('Omega', positive=True)
+
+    #m0 = Symbol('m_0', positive=True)
+
+    def __init__(self,
+                 M=None,
+                 m_e=None,
+                 k_m=None,
+                 e=None,
+                 g=None,
+                 z=None,
+                 Omega=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if M is not None: self.M = M
+        if m_e is not None: self.m_e = m_e
+        if g is not None: self.g = g
+        if k_m is not None: self.k_m = k_m
+        if e is not None: self.e = e
+        if z is not None: self.z = z
+        if Omega is not None: self.Omega=Omega
+
+        self.qs = [self.z]
+        self.ivar = ivar
+
+        self._init_from_components(**kwargs)
+
+    @cached_property
+    def components(self):
+
+        components = {}
+
+        self._engine_block = FreeEngine(self.M, self.m_e,self.e, self.g, z= self.z, phi = self.Omega*self.ivar, qs=[self.z])(label='Engine', scheme_options = {'at':(0,0)})
+
+        self._left_mount  = EngineMount(self.k_m, self.z, qs=[self.z])(label='Left engine mount', scheme_options = {'at':(0,-8)})
+        self._right_mount = EngineMount(self.k_m, self.z, qs=[self.z])(label='Right engine mount', scheme_options = {'at':(5,-8)})
+        
+
+        components['_engine_block'] = self._engine_block
+        components['_left_mount'] = self._left_mount
+        components['_right_mount'] = self._right_mount
+        return components
+    
+    # def get_default_data(self):
+
+    #     m0, e0, Omega0 = symbols('m_0 e_0 Omega_0',positive=True)
+        
+    #     default_data_dict = {
+    #         self.M: [10 * m0 * no / 100 for no in range(10, 150)],
+    #         self.m_e: [m0 * no / 100 for no in range(80, 120)],
+    #         self.e: [e0 * no / 100 for no in range(80, 120)],
+    #     }
+    #     return default_data_dict
+
+    def get_numerical_data(self):
+
+        default_data_dict = {
+            self.M: [4 * no for no in range(10, 150)],
+            self.m_e: [0.5 * no for no in range(80, 120)],
+            self.e: [2/100 * no for no in range(5, 15)],
+            self.Omega: [2 * 3.14 * no for no in range(1,20)],
+            self.g: [9.81]
+        }
+        return default_data_dict
+    
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.GoverningEquationComponent,
+        mech_comp.FundamentalMatrixComponent,
+        mech_comp.GeneralSolutionComponent,
+        mech_comp.SteadySolutionComponent,
+        mech_comp.SpringForce,
+        mech_comp.MaxStaticForce,
+        mech_comp.MaxDynamicForce,
+        mech_comp.StaticPinDiameter,
+        mech_comp.DynamicPinDiameter,
+
+        ]
+
+        return comp_list
+    
+    def left_engine_mount_force(self):
+        return self._left_mount.stiffness * self.steady_solution()
+
+    def right_engine_mount_force(self):
+        return self._right_mount.stiffness * self.steady_solution()
+
+    def max_static_force(self):
+        return abs(self.static_load().doit()[0])
+
+    def max_dynamic_force(self):
+        return self.frequency_response_function() * self._left_mount.stiffness + self.max_static_force_pin()
+
+    def static_force_pin_diameter(self):
+        kt = Symbol('k_t', positive=True)
+        Re = Symbol('R_e', positive=True)
+        return ((4 * self.max_static_force_pin()) / (pi * kt * Re))**(1 / 2)
+
+    def dynamic_force_pin_diameter(self):
+        kt = Symbol('k_t', positive=True)
+        Re = Symbol('R_e', positive=True)
+        return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
+    
 
 
 #TODO #DDOF #DO POPRAWY !!!
@@ -1530,5 +1694,6 @@ class EngineWithTMD(Engine):
         #force_old = abs(   sum(self.static_load().doit())  ) / 2
         
         #display(force -force_old) #checking display
+        #self._left_mount.force()
         
         return force

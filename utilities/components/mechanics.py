@@ -471,18 +471,19 @@ class SpringForce(ReportComponent):
         display(ReportText(f'''
                            Siła od sprężyny wyrażona jest wzorem:
                            '''))
-        display(SympyFormula( Eq(Symbol('F'),-1*system.k*system.x,evaluate=False)))
+        display(SympyFormula( Eq(Symbol('F'),-1*system._left_mount.stiffness*system.z,evaluate=False)))
         
         display(ReportText(f'''
                            zamiast x używam steady solution
                            '''))
 
-        display(SympyFormula( Eq(Symbol('F'),-1*system.k*system.steady_solution(),evaluate=False)))
+        display(SympyFormula( Eq(Symbol('F'),-1*system._left_mount.stiffness*system.steady_solution(),evaluate=False)))
 
 
         display(ReportText(f'''
                            Siła od sprężyny, zwana również siłą naciągu, pojawia sie przy ściskaniu lub rozciaganiu. Siła, która działa jest przeciwnie skierowana do ruch i chce przywrócić do pierwotnego jej położenia. Zależy od sztywności sprężyny k oraz od tego o ile została rozciagnieta bądź skrócona x.
                            '''))
+        
 class DamperForce(ReportComponent):
     
     title="Siła tłumienia"
