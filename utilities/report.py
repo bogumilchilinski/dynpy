@@ -2578,7 +2578,7 @@ class Markdown(Environment,ReportModule):
         return NoEscape(ppd.convert_text(self.markdown,to='latex',format='md'))
             
     def _repr_markdown_(self):
-        return self.markdown
+        return self.reported().markdown
 
     def reported(self):
         

@@ -938,10 +938,15 @@ class TikZPlot(TikZ, ReportModule):
             fig.add_caption(self._caption)
             
             self.cls_container.append(fig)
+            display(fig)
+            
         else:
             self.cls_container.append(self)
+            self._plotdata.plot(subplots=self.subplots,
+                                #color=self._selected_colours
+                               )
             
-        display(fig)
+        
     
     def _repr_markdown_(self):
         
