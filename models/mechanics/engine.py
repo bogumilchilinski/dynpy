@@ -623,10 +623,10 @@ class EngineConstantVelocityVerticalSpringGravity(Engine):
         return comp_list
     
     def left_engine_mount_force(self):
-        return self._left_mount.stiffness * self.steady_solution()
+        return self._left_mount.stiffness * self.steady_solution()[0]
 
     def right_engine_mount_force(self):
-        return self._right_mount.stiffness * self.steady_solution()
+        return self._right_mount.stiffness * self.steady_solution()[0]
 
     def max_static_force(self):
         return abs(self.static_load().doit()[0])

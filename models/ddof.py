@@ -615,8 +615,8 @@ class DoubleDiskShaft(ComposedSystem):
         mech_comp.LagrangianComponent,
         mech_comp.GoverningEquationComponent,
         mech_comp.FundamentalMatrixComponent,
-        mech_comp.GeneralSolutionComponent,
-        #mech_comp.SteadySolutionComponent,
+        mech_comp.MDoFGeneralSolutionComponent,
+#        mech_comp.MDoFSteadySolutionComponent,
 
         ]
 

@@ -673,7 +673,7 @@ class GeneralSolutionComponent(ReportComponent):
 
         display(ReportText(self.header_text))
         display((SympyFormula(  Eq(Symbol('X'),HarmonicOscillator(dyn_sys_lin.linearized(
-                                            )).general_solution().n(3),
+                                            )).general_solution()[0].n(3),
                                             evaluate=False) , marker='a',backend=latex  )  ))
 
         display(ReportText(self.footer_text))
@@ -775,7 +775,7 @@ class SpringForce(ReportComponent):
 
         display(ReportText(self.middle_text))
         
-        display(SympyFormula( Eq(Symbol('F'),-1*system._left_mount.stiffness*system.steady_solution(),evaluate=False)))
+        display(SympyFormula( Eq(Symbol('F'),-1*system._left_mount.stiffness*system.steady_solution()[0],evaluate=False)))
         
         display(ReportText(self.footer_text))
         
@@ -890,7 +890,7 @@ class SteadySolutionComponent(ReportComponent):
 
         display((SympyFormula(  Eq(Symbol('X_s'),
                             HarmonicOscillator(dyn_sys_lin.linearized(
-                            )).steady_solution().n(3),
+                            )).steady_solution()[0].n(3),
                             evaluate=False) , marker='b',backend=latex  )  ))
 
         AutoBreak.latex_backend = latex_store
@@ -1022,7 +1022,7 @@ class TensionerForce(ReportComponent):
 
         display(ReportText(self.middle_text))
         
-        display(SympyFormula( Eq(Symbol('F'),-1*system._tensioner.stiffness*system.steady_solution(),evaluate=False)))
+        display(SympyFormula( Eq(Symbol('F'),-1*system._tensioner.stiffness*system.steady_solution()[0],evaluate=False)))
         
         display(ReportText(self.footer_text))
         
@@ -1063,7 +1063,7 @@ class TensionerDamperForce(ReportComponent):
 
         display(ReportText(self.middle_text))
         
-        display(SympyFormula( Eq(Symbol('F'),-1*system._tensioner_damping.c*system.steady_solution().diff(system.ivar),evaluate=False)))
+        display(SympyFormula( Eq(Symbol('F'),-1*system._tensioner_damping.c*system.steady_solution()[0].diff(system.ivar),evaluate=False)))
         
         display(ReportText(self.footer_text))
         
@@ -1147,3 +1147,92 @@ class PendulumLongitudinalForce(ReportComponent):
 
         display(SympyFormula( Eq(Symbol('T'),
                      dyn_sys.max_dynamic_cable_force().doit() ), marker=None))
+        
+        
+class MDoFGeneralSolutionComponent(ReportComponent):
+    #"Rozwiązanie ogólne"
+    title="General solution"
+    
+    @property
+    def header_text(self):
+        #'Rozwiązanie ogólne przedstawia wyrażenie:'
+        return "General solution is presented by expression:"
+    @property
+    def footer_text(self):
+        #'Rozwiązanie ogólne opisuje ruch analizowanego układu (przedstawia przemieszczenie w funkcji czasu) i wynika z rozważań dotyczących drgań swobodnych układu.'
+        return "General solution describes motion of the analised system - presents displacement i function of time - and is given by considerations about free vibrations of the system"
+    
+    def append_elements(self):
+
+        from ....dynamics import LagrangesDynamicSystem, HarmonicOscillator
+        #from dynpy import LagrangesDynamicSystem, HarmonicOscillator
+
+        system = self._system
+        ReportText.set_directory('./SDAresults')
+
+        latex_store=AutoBreak.latex_backend
+        
+        
+        AutoBreak.latex_backend = latex_store
+        
+        t=system.ivar
+        
+
+        dyn_sys=system
+        dyn_sys_lin=dyn_sys.linearized()
+
+
+        display(ReportText(self.header_text))
+        for gen_sol in HarmonicOscillator(dyn_sys_lin.linearized()).general_solution().n(3):
+                 display((SympyFormula(Eq(Symbol('X'), gen_sol, evaluate=False) , marker='a',backend=latex)))
+
+        display(ReportText(self.footer_text))
+
+        AutoBreak.latex_backend = latex_store
+
+class MDoFSteadySolutionComponent(ReportComponent):
+    
+        #"Rozwiązanie szczególne"
+    title="Steady solution"
+    _phi=False
+    
+    @property
+    def header_text(self):
+        #"Rozwiązanie szczególne przedstawia wyrażenie:"
+        # google tlumacz
+        return "The steady solution is given by the formula:"
+
+        
+    @property
+    def footer_text(self):
+        #" Rozwiązanie szczególne związane jest obecnością wielkości wymuszających ruch (drgania) analizowanego układu."
+        # google tlumacz
+        return "The specific solution is related to the presence of quantities that force motion (vibrations) of the analyzed system."
+    
+    def append_elements(self,phi=_phi):
+
+        from ....dynamics import LagrangesDynamicSystem, HarmonicOscillator
+        
+        system = self._system
+        ReportText.set_directory('./SDAresults')
+
+        latex_store=AutoBreak.latex_backend
+        AutoBreak.latex_backend = latex_store
+        
+        t=system.ivar
+        
+
+        dyn_sys=system
+        dyn_sys_lin=dyn_sys.linearized()
+
+
+
+        display(ReportText(self.header_text ))
+        
+        for steady_sol in dyn_sys_lin.linearized()._ode_system().steady_solution().n(3):
+            
+            display((SympyFormula(  Eq(Symbol('X_s'), steady_sol, evaluate=False) , marker='b',backend=latex)))
+
+        AutoBreak.latex_backend = latex_store
+
+        display(ReportText(self.footer_text ))

@@ -166,7 +166,7 @@ class SDoFShaft(ComposedSystem):
 
     def disc_force(self):
         t = self.ivar
-        return self.I * self.steady_solution().diff(t, t)
+        return self.I * self.steady_solution()[0].diff(t, t)
 
     def max_static_force(self):
         d = Symbol('d', positive=True)
@@ -186,9 +186,9 @@ class SDoFShaft(ComposedSystem):
 #         d = Symbol('d', positive=True)
 #         acc_amp = self.frequency_response_function() * self.Omega**2
 
-        return abs(
-            2 * (self.I * acc_amp) /
-            d) + self.max_static_bearing_force()  #.subs(self._given_data)
+#         return abs(
+#             2 * (self.I * acc_amp) /
+#             d) + self.max_static_bearing_force()  #.subs(self._given_data)
 
     def static_key_length(self):
         kd = Symbol('k_d', positive=True)

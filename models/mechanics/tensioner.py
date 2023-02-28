@@ -157,13 +157,13 @@ class BlowerToothedBelt(ComposedSystem):
         return comp_list
     
     def tensioner_belt_force(self):
-        return self.k_tensioner * self.steady_solution()
+        return self.k_tensioner * self.steady_solution()[0]
 
     def left_belt_force(self):
-        return self.k_belt * self.steady_solution()
+        return self.k_belt * self.steady_solution()[0]
 
     def right_belt_force(self):
-        return self.k_belt * self.steady_solution()
+        return self.k_belt * self.steady_solution()[0]
 
     def max_static_force(self):
         return abs(self.static_load().doit()[0])
@@ -320,10 +320,10 @@ class DampedBlowerToothedBelt(BlowerToothedBelt):
 
 
     def tensioner_damper_force(self):
-        return self.c_tensioner * self.steady_solution().diff(self.ivar)
+        return self.c_tensioner * self.steady_solution()[0].diff(self.ivar)
 
     def left_belt_damper_force(self):
-        return self.c_belt * self.steady_solution().diff(self.ivar)
+        return self.c_belt * self.steady_solution()[0].diff(self.ivar)
 
     def right_belt_damper_force(self):
-        return self.c_belt * self.steady_solution().diff(self.ivar)
+        return self.c_belt * self.steady_solution()[0].diff(self.ivar)
