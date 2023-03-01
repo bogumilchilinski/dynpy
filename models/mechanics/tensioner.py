@@ -92,7 +92,7 @@ class BlowerToothedBelt(ComposedSystem):
         m0, k0, F0, Omega0 = self.m0, self.k0, self.F0, self.Omega0
 
         default_data_dict = {
-            self.m: [0.2 * m0, 0.3 * m0, 0.4 * m0, 0.5 * m0, 0.6 * m0],
+            self.m: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
             self.k_belt: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
             self.k_tensioner: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
             self.F: [F0, 2 * F0, 3 * F0, 4 * F0, 5 * F0, 6 * F0],
