@@ -590,7 +590,7 @@ class EngineConstantVelocityVerticalSpringGravity(Engine):
     def get_numerical_data(self):
 
         default_data_dict = {
-            self.M: [4 * no for no in range(10, 150)],
+            self.M: [3 * no for no in range(10, 150)],
             self.m_e: [0.5 * no for no in range(80, 120)],
             self.e: [2/100 * no for no in range(5, 15)],
             self.Omega: [2 * 3.14 * no for no in range(1,20)],
@@ -1687,6 +1687,30 @@ class EngineWithTMD(Engine):
 
         return default_data_dict
 
+
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.GoverningEquationComponent,
+        mech_comp.FundamentalMatrixComponent,
+        mech_comp.MDoFGeneralSolutionComponent,
+        mech_comp.MDoFSteadySolutionComponent,
+#         mech_comp.SpringForce,
+#         mech_comp.MaxStaticForce,
+#         mech_comp.MaxDynamicForce,
+#         mech_comp.StaticPinDiameter,
+#         mech_comp.DynamicPinDiameter,
+
+        ]
+
+        return comp_list
 
     def max_static_force_pin(self):
         
