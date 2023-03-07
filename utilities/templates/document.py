@@ -90,7 +90,7 @@ class ExampleTemplate(Document):
                   Command('pagestyle', arguments=['fancy']),
                   Command('fancyhf', arguments=['']),
                   Command('fancyhead',  arguments=['B. Chiliński, A. Mackojć, D. Sierociński'],options=['R']),
-                  Command('fancyhead', arguments=['Drgania mechaniczne, 2022'],options=['L']),
+                  Command('fancyhead', arguments=['Mechanical vibration, 2023'],options=['L']),
                   Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
                   
         
@@ -149,7 +149,7 @@ class ExampleTemplate(Document):
             data=data,
         )
 #         label=self.label
-        self.title=title
+        self.title='Mechanical vibration'
         #self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
         self.packages.append(Command('author', arguments=['Bogumił Chiliński, Anna Mackojć, Damian Sierociński']))
         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))

@@ -603,12 +603,28 @@ class DoubleDiskShaft(ComposedSystem):
 
         return default_data_dict
 
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.GoverningEquationComponent,
+        mech_comp.FundamentalMatrixComponent,
+        mech_comp.MDoFGeneralSolutionComponent,
+        mech_comp.MDoFSteadySolutionComponent,
+
+        ]
+
+        return comp_list
+    
     def disc_1_force(self):
         t=self.ivar
         return self.I_m1 * self.steady_solution().diff(t,t)
-  
-
-
 
     def max_static_disk_1_bearing_force(self):
         d=Symbol('d',positive=True)

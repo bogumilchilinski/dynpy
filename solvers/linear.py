@@ -32,6 +32,12 @@ from .numerical import OdeComputationalCase
 
 from timer import timer
 
+
+from ..utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim)
+from ..utilities.templates.document import *
+from ..utilities.templates import tikz
+from ..utilities.components.ode import en as ode
+
 class MultivariableTaylorSeries(Expr):
     """_summary_
 
@@ -528,6 +534,30 @@ class AnalyticalSolution(ImmutableMatrix):
         solution_tdf._set_comp_time(comp_time)
         solution_tdf.index.name = ivar
         return solution_tdf
+    
+    
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        ode.ODESystemComponent,
+            
+        ]
+        
+        return comp_list
+    
+    @property
+    def report(self):
+
+      
+        sys=self
+        doc = ExampleTemplate()
+
+        for comp in self._report_components:
+            doc.append(comp(sys))
+    
+    
+        return doc
     
     def __str__(self):
         return "Analytical Solution of ODE"
@@ -1142,8 +1172,18 @@ class ODESystem(AnalyticalSolution):
     #     '''
     #     Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
     #     '''
-    #     return OdeComputationalCase(odes_system=self.odes_rhs,dvars=self.dvars,ivar=self.ivar)    
+    #     return OdeComputationalCase(odes_system=self.odes_rhs,dvars=self.dvars,ivar=self.ivar)
     
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        ode.ODESystemComponent,
+        ode.VariablesComponent,
+            
+        ]
+        
+        return comp_list
 
 
 class FirstOrderODESystem(ODESystem):

@@ -1529,6 +1529,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     def _ode_system(self):
         return ODESystem.from_dynamic_system(self)
     
+        
+    
     
     @cached_property
     def _fodes_system(self):
@@ -2212,12 +2214,12 @@ class HarmonicOscillator(LinearDynamicSystem):
 
 
         self.Omega = excitation_freq
+        
         omg = self.Omega
-
+        
         #solution = self.steady_solution()[0].expand()
         sin_fun=list(self.external_forces().atoms(sin))
         cos_fun=list(self.external_forces().atoms(cos))
-
         if len(sin_fun) == 1: 
         
             omg_sin=list(set((sin_fun[0]).args)-{self.ivar})[0]

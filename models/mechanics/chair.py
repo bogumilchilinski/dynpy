@@ -319,7 +319,7 @@ class DampedChair4DOF(ComposedSystem):
                    self.c_rt:5500,
                    self.m_rear:1.5,
                    self.M:75,
-                   self.k_f:750000,
+                   self.k_ft:300000,
                    self.k_r:750000,
                           }
         

@@ -1,5 +1,5 @@
 from  ..mechanics import *
-
+from sympy.physics.mechanics import dynamicsymbols
 
 
 class TitlePageComponent(Environment):
@@ -37,24 +37,24 @@ class TitlePageComponent(Environment):
             
             self.append(NoEscape('\centering'))
 
-            self.append(NoEscape('\\Huge DRGANIA MECHANICZNE \n \n'))
+            self.append(NoEscape('\\Huge Mechanical Vibration \n \n'))
             
             self.append(Command('vspace',arguments='1cm'))
 
             
             
             if len(system.q)==1:
-                dof_str = 'JEDNYM STOPNIU SWOBODY'
+                dof_str = 'Single Degree of Freedom'
             else:
-                dof_str = 'WIELU STOPNIACH SWOBODY'
+                dof_str = 'Multi Degree of Freedom'
                 
             if system._dissipative_potential==0 or system._dissipative_potential is None:
-                damping_str = 'NIETŁUMIONE'
+                damping_str = 'UNDAMPED'
             else:
-                damping_str = 'TŁUMIONE'
+                damping_str = 'DAMPED'
 
            
-            self.append(NoEscape(f'\\Large {damping_str} UKŁADY O {dof_str} \n \n'))    
+            self.append(NoEscape(f'\\Large {dof_str} {damping_str} SYSTEM \n \n'))    
             
             self.append(Command('vspace',arguments='1cm'))
             
@@ -95,9 +95,10 @@ class ExemplaryPictureComponent(ReportComponent):
         system = self._system
 
         display(ReportText(self.header_text))
+        
 
-        with self.create(Figure(position='H')) as fig:
-            fig.add_image(system._real_example(),width='8cm')
+        display(Picture(system._real_example(),width='8cm'))
+
 
         display(ReportText(self.footer_text))
 
@@ -125,9 +126,10 @@ class SchemeComponent(ExemplaryPictureComponent):
         system = self._system
 
         display(ReportText(  self.header_text ))
-          
-        with self.create(Figure(position='H')) as fig:
-            fig.add_image(system._scheme(),width='8cm')
+
+        display(Picture(system._scheme(),width='8cm'))
+        
+
 
         display(ReportText( self.footer_text ))
 #Pati
@@ -203,7 +205,7 @@ class KineticEnergyComponent(ReportComponent):
     @property
     def header_text(self):
         #"Energia kinetyczna układu wyrażona jest wzorem:"
-        return "Kinetic energy of the system has a following form!:"
+        return "Kinetic energy of the system has a following form:"
 
         
     @property
@@ -236,7 +238,7 @@ class PotentialEnergyComponent(ReportComponent):#Jaś fasola
     @property
     def header_text(self):
         #"Energia potencjalna układu wyrażona jest wzorem:"
-        return "Potential energy of the system has a following form!:"
+        return "Potential energy of the system has a following form:"
 
         
     @property
@@ -432,7 +434,7 @@ class GoverningEquationComponent(ReportComponent):
 
         display(ReportText(self.footer_text))   
 
-     
+        
 class LinearizedGoverningEquationComponent(ReportComponent):
     #Równania ruchu
     title="Equation of motion"
@@ -671,7 +673,7 @@ class GeneralSolutionComponent(ReportComponent):
 
         display(ReportText(self.header_text))
         display((SympyFormula(  Eq(Symbol('X'),HarmonicOscillator(dyn_sys_lin.linearized(
-                                            )).general_solution().n(3),
+                                            )).general_solution()[0].n(3),
                                             evaluate=False) , marker='a',backend=latex  )  ))
 
         display(ReportText(self.footer_text))
@@ -735,7 +737,7 @@ class FrequencyResponseFunctionComponentToSecond(ReportComponent):
 #Pati        
 class SpringForce(ReportComponent):
     
-    title="Siła od sprężyny"
+    title="Spring force"
 
     def append_elements(self):
 
@@ -749,19 +751,35 @@ class SpringForce(ReportComponent):
         #"Siła od sprężyny wyrażona jest wzorem:""
         return "The spring force is given by the formula:"
 
-        display(SympyFormula( Eq(Symbol('F'),-1*system.k*system.x,evaluate=False)))
     @property
-    def header_text(self): 
+    def middle_text(self): 
         #"zamiast x używam steady solution"
-        return "I use steady solution instead of x"
-
-        display(SympyFormula( Eq(Symbol('F'),-1*system.k*system.steady_solution(),evaluate=False)))
+        return "steady solution was used instead of z"
 
     @property
     def footer_text(self):
            #"Siła od sprężyny, zwana również siłą naciągu, pojawia sie przy ściskaniu lub rozciaganiu. Siła, która działa jest przeciwnie skierowana do ruch i chce przywrócić do pierwotnego jej położenia. Zależy od sztywności sprężyny k oraz od tego o ile została rozciagnieta bądź skrócona x."
-            return "Spring force, also known as pull force, occurs when compressed or stretched. The force that acts is opposite to the movement and wants to return it to its original position. It depends on the spring stiffness k and how much it is stretched or shortened x."
+        return "Spring force, also known as pull force, occurs when compressed or stretched. The force that acts is opposite to the movement and wants to return it to its original position. It depends on the spring stiffness k and how much it is stretched or shortened z."
 
+    def append_elements(self):
+
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('F'),-1*system._left_mount.stiffness*system.z,evaluate=False)))
+
+        display(ReportText(self.middle_text))
+        
+        display(SympyFormula( Eq(Symbol('F'),-1*system._left_mount.stiffness*system.steady_solution()[0],evaluate=False)))
+        
+        display(ReportText(self.footer_text))
+        
+FRFComponent = FrequencyResponseFunctionComponent
 #Pati
 class DamperForce(ReportComponent):
     
@@ -872,7 +890,7 @@ class SteadySolutionComponent(ReportComponent):
 
         display((SympyFormula(  Eq(Symbol('X_s'),
                             HarmonicOscillator(dyn_sys_lin.linearized(
-                            )).steady_solution().n(3),
+                            )).steady_solution()[0].n(3),
                             evaluate=False) , marker='b',backend=latex  )  ))
 
         AutoBreak.latex_backend = latex_store
@@ -925,3 +943,299 @@ class MaxDynamicForce(ReportComponent):
 
         display(SympyFormula( Eq(Symbol('F_d'),
                      dyn_sys.max_dynamic_force().doit() ), marker=None))
+        
+        
+#### Amadi
+class DynamicPinDiameter(ReportComponent):
+    
+    title="Minimum diameter of pin due to dynamic force"
+
+    @property
+    def header_text(self):
+        return "Minimum diameter of the pin due to dynamic force formula:"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('d'),
+                     dyn_sys.dynamic_force_pin_diameter().doit() ), marker=None))
+        
+#### Amadi
+class StaticPinDiameter(ReportComponent):
+    
+    title="Minimum diameter of pin due to static force"
+
+    @property
+    def header_text(self):
+        return "Minimum diameter of the pin due to static force formula:"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('d'),
+                     dyn_sys.static_force_pin_diameter().doit() ), marker=None))
+        
+#### Amadi
+class TensionerForce(ReportComponent):
+    
+    title="Tensioner force"
+
+
+    @property
+    def header_text(self): 
+        #"Siła od sprężyny wyrażona jest wzorem:""
+        return "The tensioner force modelled as a spring is given by the formula:"
+
+    @property
+    def middle_text(self): 
+        #"zamiast x używam steady solution"
+        return "steady solution was used instead of z"
+
+    @property
+    def footer_text(self):
+           #"Siła od sprężyny, zwana również siłą naciągu, pojawia sie przy ściskaniu lub rozciaganiu. Siła, która działa jest przeciwnie skierowana do ruch i chce przywrócić do pierwotnego jej położenia. Zależy od sztywności sprężyny k oraz od tego o ile została rozciagnieta bądź skrócona x."
+        return "Spring force, also known as pull force, occurs when compressed or stretched. The force that acts is opposite to the movement and wants to return it to its original position. It depends on the spring stiffness k and how much it is stretched or shortened z."
+
+    def append_elements(self):
+
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('F'),-1*system._tensioner.stiffness*(system.z0-system.z),evaluate=False)))
+
+        display(ReportText(self.middle_text))
+        
+        display(SympyFormula( Eq(Symbol('F'),-1*system._tensioner.stiffness*system.steady_solution()[0],evaluate=False)))
+        
+        display(ReportText(self.footer_text))
+        
+#### Amadi
+class TensionerDamperForce(ReportComponent):
+    
+    title="Tensioner damping force"
+
+
+    @property
+    def header_text(self): 
+        #"Siła tłumienia wyrażona jest wzorem:"
+        return "The damping force is given by the formula:"
+
+
+    @property
+    def middle_text(self): 
+             #"zastępuje prędkość jako pochodna steady stolution po czasie:"
+        return "replaces velocity as a derivative of the steady solution over time:"
+
+
+    @property
+    def footer_text(self):
+         #"Siła tłumienia zmniejsza amplitude drgań, ma zwrot przeciwny do prędkości. Zależy od współczynnika tłumienia b oraz od prędkości v."
+        return "The damping force, which reduces the amplitude of vibrations, has a direction opposite to the velocity. It depends on the damping coefficient c and the speed V."
+
+    def append_elements(self):
+
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('F'),-1*system._tensioner_damping.c*Symbol('V'),evaluate=False)))
+
+        display(ReportText(self.middle_text))
+        
+        display(SympyFormula( Eq(Symbol('F'),-1*system._tensioner_damping.c*system.steady_solution()[0].diff(system.ivar),evaluate=False)))
+        
+        display(ReportText(self.footer_text))
+        
+
+#### Amadi
+class StaticKeyLength(ReportComponent):
+    
+    title="Minimum length of key due to static force"
+
+    @property
+    def header_text(self):
+        return "Minimum length of the key due to static force formula:"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('l'),
+                     dyn_sys.static_key_length().doit() ), marker=None))
+        
+#### Amadi
+class DynamicKeyLength(ReportComponent):
+    
+    title="Minimum length of key due to dynamic force"
+
+    @property
+    def header_text(self):
+        return "Minimum length of the key due to dynamic force formula:"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('l'),
+                     dyn_sys.dynamic_key_length().doit() ), marker=None))
+        
+        
+class PendulumLongitudinalForce(ReportComponent):
+    
+    title="Pendulum's cable longitudinal force value"
+
+    @property
+    def header_text(self):
+        return "Pendulum's cable static force is represented by formula:"
+    
+    @property
+    def middle_text(self):
+        return "Pendulum's maximum angular velocity has following form:"
+    
+    @property
+    def footer_text(self):
+        return "Sum of static force and maximum angular velocity represents pendulum's cable longitudinal force:"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('F_s'),
+                     dyn_sys.max_static_cable_force().doit() ), marker=None))
+        
+        display(ReportText(self.middle_text))
+
+        display(SympyFormula( Eq(Eq(dynamicsymbols('varphi_max').diff(dyn_sys.ivar) , Symbol('A_omega'), evaluate=False),
+                     dyn_sys.linearized().frequency_response_function() * dyn_sys.Omega, evaluate=False ), marker=None))
+        
+        display(ReportText(self.footer_text))
+
+        display(SympyFormula( Eq(Symbol('T'),
+                     dyn_sys.max_dynamic_cable_force().doit() ), marker=None))
+        
+        
+class MDoFGeneralSolutionComponent(ReportComponent):
+    #"Rozwiązanie ogólne"
+    title="General solution"
+    
+    @property
+    def header_text(self):
+        #'Rozwiązanie ogólne przedstawia wyrażenie:'
+        return "General solution is presented by expression:"
+    @property
+    def footer_text(self):
+        #'Rozwiązanie ogólne opisuje ruch analizowanego układu (przedstawia przemieszczenie w funkcji czasu) i wynika z rozważań dotyczących drgań swobodnych układu.'
+        return "General solution describes motion of the analised system - presents displacement i function of time - and is given by considerations about free vibrations of the system"
+    
+    def append_elements(self):
+
+        from ....dynamics import LagrangesDynamicSystem, HarmonicOscillator
+        #from dynpy import LagrangesDynamicSystem, HarmonicOscillator
+
+        system = self._system
+        ReportText.set_directory('./SDAresults')
+
+        latex_store=AutoBreak.latex_backend
+        
+        
+        AutoBreak.latex_backend = latex_store
+        
+        t=system.ivar
+        
+
+        dyn_sys=system
+        dyn_sys_lin=dyn_sys.linearized()
+
+
+        display(ReportText(self.header_text))
+
+        for gen_sol in HarmonicOscillator(dyn_sys_lin.linearized()).general_solution().n(3):
+                 display((SympyFormula(Eq(Symbol('X'), gen_sol, evaluate=False) , marker='a',backend=latex)))
+
+        display(ReportText(self.footer_text))
+
+        AutoBreak.latex_backend = latex_store
+
+class MDoFSteadySolutionComponent(ReportComponent):
+    
+        #"Rozwiązanie szczególne"
+    title="Steady solution"
+    _phi=False
+    
+    @property
+    def header_text(self):
+        #"Rozwiązanie szczególne przedstawia wyrażenie:"
+        # google tlumacz
+        return "The steady solution is given by the formula:"
+
+        
+    @property
+    def footer_text(self):
+        #" Rozwiązanie szczególne związane jest obecnością wielkości wymuszających ruch (drgania) analizowanego układu."
+        # google tlumacz
+        return "The specific solution is related to the presence of quantities that force motion (vibrations) of the analyzed system."
+    
+    def append_elements(self,phi=_phi):
+
+        from ....dynamics import LagrangesDynamicSystem, HarmonicOscillator
+        
+        system = self._system
+        ReportText.set_directory('./SDAresults')
+
+        latex_store=AutoBreak.latex_backend
+        AutoBreak.latex_backend = latex_store
+        
+        t=system.ivar
+        
+
+        dyn_sys=system
+        dyn_sys_lin=dyn_sys.linearized()
+
+
+
+        display(ReportText(self.header_text ))
+
+        steady_sol=dyn_sys_lin._fodes_system.steady_solution
+
+        for q in dyn_sys_lin.q:
+
+            display((SympyFormula(  Eq(Symbol('X_s'), steady_sol.as_dict()[q], evaluate=False) , marker='b',backend=latex)))
+
+        AutoBreak.latex_backend = latex_store
+
+        display(ReportText(self.footer_text ))

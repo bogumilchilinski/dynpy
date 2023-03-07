@@ -252,13 +252,12 @@ class PulledPendulum(ComposedSystem):
         
         components = {}
         
-        self._pendulum = Pendulum(self.m,self.phi,qs=[phi])
-        self._force = Force(-2 * self.m * self.l * (self.g / self.l * cos(pi)),
-                           angle,qs=[phi])
+        self._pendulum = Pendulum(self.m,self.g,self.l,self.angle,self.ivar)(label="Pendulum")
+#         self._force = Force(-2 * self.m * self.l * (self.g / self.l * cos(pi)),self.angle,qs=self.qs)
         
         
         components['_pendulum'] = self._pendulum
-        components['force'] = self.force
+#         components['force'] = self.force
 
         
         return components
@@ -712,8 +711,7 @@ class PendulumKinematicExct(ComposedSystem):
 
     def max_dynamic_cable_force(self):
 
-        omg_amp = ComposedSystem(
-            self.linearized()).frequency_response_function() * self.Omega
+        omg_amp = self.linearized().frequency_response_function() * self.Omega
 
         return (self.m * self.l * (omg_amp)**2 + self.max_static_cable_force())
 
@@ -726,6 +724,27 @@ class PendulumKinematicExct(ComposedSystem):
         kr = Symbol('k_r', positive=True)
         Re = Symbol('R_e', positive=True)
         return ((4 * self.max_dynamic_cable_force()) / (pi * kr * Re))**(1 / 2)
+    
+
+    @property
+    def _report_components(self):
+
+        comp_list = [
+            mech_comp.TitlePageComponent,
+            mech_comp.SchemeComponent,
+            mech_comp.ExemplaryPictureComponent,
+            mech_comp.KineticEnergyComponent,
+            mech_comp.PotentialEnergyComponent,
+            mech_comp.LagrangianComponent,
+            #mech_comp.LinearizationComponent,
+            mech_comp.GoverningEquationComponent,
+            mech_comp.FundamentalMatrixComponent,
+            mech_comp.GeneralSolutionComponent,
+            mech_comp.SteadySolutionComponent,
+            mech_comp.PendulumLongitudinalForce,
+        ]
+
+        return comp_list
     
     
 class MDoFElasticPendulum(ComposedSystem):
