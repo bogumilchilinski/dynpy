@@ -2,14 +2,13 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, re, pi, latex,
                    dsolve, solve, fraction, factorial, Add, Mul, exp, zeros, shape,
                    numbered_symbols, integrate, ImmutableMatrix,Expr,Dict,Subs,Derivative,Dummy,
-                   lambdify, Pow, Integral)
+                   lambdify, Pow, Integral, init_printing)
 
 from sympy.matrices.matrices import MatrixBase
 
 
 ###  exemplary comment
-
-from sympy.physics.mechanics import dynamicsymbols
+from sympy.physics.mechanics import dynamicsymbols, init_vprinting
 from sympy.physics.vector.printing import vpprint, vlatex
 import sympy as sym
 from sympy.utilities.autowrap import autowrap, ufuncify
@@ -545,6 +544,7 @@ class ODESolution(AnalyticalSolution):
     _default_ics = None
     _integration_consts = None #container for integration constants
     _ivar=Symbol('t')
+    _dvars_str = None
 
     @property
     def _dvars(self):
@@ -618,9 +618,23 @@ class ODESolution(AnalyticalSolution):
             obj._ics = ics
             
         return obj
-    
-            
-    
+
+###method owner - Franciszek, supervisior - Bogumił
+##------------------TEST------------------
+    def ics_dynamic_symbols(self):
+        symbols_list = ['v', 'a']
+        ics_dynamic_symbols = [Symbol(f'{coor}_{self._dvars_str}0') for coor in symbols_list]
+        ics_dynamic_symbols = Matrix([Symbol(f'{self._dvars_str}')] + ics_dynamic_symbols)
+        # ics_dynamic_symbols = Matrix([Symbol(f'{self._dvars_str}_{index}diif') for index in range(len(self.dvars))])
+        return ics_dynamic_symbols
+
+    # def test(self):
+    #     temp = self.ics_dynamic_symbols()
+    #     # dupa_temp = {self.dvars[index]:temp[index] for index in range(len(self.dvars))}
+    #     dupa_temp = [temp[index] for index in range(len(self.dvars))]
+    #     return dupa_temp      
+##------------------TEST------------------
+
     @property
     def _ics_dict(self):
         """
@@ -650,7 +664,8 @@ class ODESolution(AnalyticalSolution):
         """
         
         if ics is None:
-            ics = self._ics_dict
+            temp = self.ics_dynamic_symbols()
+            ics_list = [temp[index] for index in range(len(self.dvars))]
         
         if isinstance(ics,dict):
             ics_list = [ics[coord]  for coord  in self.dvars]
@@ -673,8 +688,8 @@ class ODESolution(AnalyticalSolution):
         
         return solve(const_eqns,const_list)
     
-    def with_ics(self,ics,ivar0=0):
-
+    def with_ics(self, ics=None, ivar0=0, dvars_str=None):
+        self._dvars_str = dvars_str
         const_dict=self._calculate_constant(ics)
         
         return self.subs(const_dict)
@@ -726,7 +741,7 @@ class ODESystem(AnalyticalSolution):
     _ivar = Symbol('t')
     _parameters = None
     _ode_order = 2
-    
+
     @classmethod
     def from_ode_system(cls,ode_system):
 
@@ -919,11 +934,15 @@ class ODESystem(AnalyticalSolution):
     def as_matrix(self):
         return Matrix(self._lhs_repr - self.rhs) 
     
-
-    def as_first_ode_linear_system(self):
+###method owner - Franciszek, supervisior - Bogumił
+    def _as_fode(self):
         """Creates an object of FirstOrderLinearODESystem class."""
         
         return FirstOrderLinearODESystem.from_ode_system(self)
+    
+    def as_first_ode_linear_system(self):
+        
+        return self._as_fode()
 
     def approximated(self, n=3, x0=None, op_point=False, hint=[], label=None):
         """
@@ -1125,6 +1144,7 @@ class ODESystem(AnalyticalSolution):
     #     '''
     #     return OdeComputationalCase(odes_system=self.odes_rhs,dvars=self.dvars,ivar=self.ivar)    
     
+
 
 class FirstOrderODESystem(ODESystem):
     
