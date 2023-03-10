@@ -30,13 +30,13 @@ from functools import cached_property
 
 from .numerical import OdeComputationalCase
 
-from timer import timer
+# from timer import timer
 
 
 from ..utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim)
 from ..utilities.templates.document import *
 from ..utilities.templates import tikz
-from ..utilities.components.ode import en as ode
+# from ..utilities.components.ode import en as ode
 
 class MultivariableTaylorSeries(Expr):
     """_summary_
@@ -216,7 +216,7 @@ class MultivariableTaylorSeries(Expr):
 
 
 class AnalyticalSolution(ImmutableMatrix):
-    def __new__(cls, data,rhs=None ,evaluate=True, **options):
+    def __new__(cls, data, rhs=None, evaluate=True, **options):
 
         
         
@@ -227,7 +227,7 @@ class AnalyticalSolution(ImmutableMatrix):
         if isinstance(data,Matrix) and isinstance(data[0],Eq):
             return cls.from_eqns_matrix(data,**options)
         else:
-            return cls._constructor(data,rhs ,evaluate=evaluate, **options)
+            return cls._constructor(data, rhs, evaluate=evaluate, **options)
 
         return obj
 
@@ -235,7 +235,7 @@ class AnalyticalSolution(ImmutableMatrix):
 
     
     @classmethod
-    def _constructor(cls, lhs,rhs=None ,evaluate=True, **options):
+    def _constructor(cls, lhs, rhs=None, evaluate=True, **options):
         
         if not isinstance(lhs,Iterable): 
             lhs = Matrix([lhs])
@@ -246,7 +246,7 @@ class AnalyticalSolution(ImmutableMatrix):
         elif not isinstance(rhs,Iterable):
             rhs = Matrix([rhs])
 
-        obj = super().__new__(cls,rhs,evaluate=evaluate, **options)
+        obj = super().__new__(cls, rhs ,evaluate=evaluate, **options)
 
         obj._lhs=lhs
 
@@ -297,7 +297,7 @@ class AnalyticalSolution(ImmutableMatrix):
             values.append(value)
             
         obj = cls._constructor(Matrix(dvars),Matrix(values),evaluate=True ,**options)
-
+    
         return obj
     
     
@@ -650,20 +650,15 @@ class ODESolution(AnalyticalSolution):
         return obj
 
 ###method owner - Franciszek, supervisior - Bogumił
-##------------------TEST------------------
+##------------------ TEST ------------------
     def ics_dynamic_symbols(self):
         symbols_list = ['v', 'a']
         ics_dynamic_symbols = [Symbol(f'{coor}_{self._dvars_str}0') for coor in symbols_list]
-        ics_dynamic_symbols = Matrix([Symbol(f'{self._dvars_str}')] + ics_dynamic_symbols)
+        ics_dynamic_symbols = Matrix([Symbol(f'{self._dvars_str}0')] + ics_dynamic_symbols)
         # ics_dynamic_symbols = Matrix([Symbol(f'{self._dvars_str}_{index}diif') for index in range(len(self.dvars))])
         return ics_dynamic_symbols
-
-    # def test(self):
-    #     temp = self.ics_dynamic_symbols()
-    #     # dupa_temp = {self.dvars[index]:temp[index] for index in range(len(self.dvars))}
-    #     dupa_temp = [temp[index] for index in range(len(self.dvars))]
-    #     return dupa_temp      
-##------------------TEST------------------
+ 
+##------------------ TEST ------------------
 
     @property
     def _ics_dict(self):
