@@ -646,25 +646,30 @@ class DampedMeasuringTool(ComposedSystem):
         self.qs = [self.phi]
         self.ivar = ivar
 
-        self._moment_of_inertia = MaterialPoint(
-            (S.One / 3) * self.m * self.l**2, self.phi, qs=[self.phi])
-        self._upper_spring = Spring(self.k,
-                                    pos1=self.l * self.phi,
-                                    qs=[self.phi])
-        self._lower_spring = Spring(self.k,
-                                    pos1=self.l * self.phi,
-                                    qs=[self.phi])
+        self._init_from_components(**kwargs)
+        
+    @property
+    def components(self):
+        components = {}
+
+        self._moment_of_inertia = MaterialPoint((S.One / 3) * self.m * self.l**2, self.phi, qs=[self.phi])
+        self._upper_spring = Spring(self.k, pos1=self.l * self.phi, qs=[self.phi])
+        self._lower_spring = Spring(self.k, pos1=self.l * self.phi, qs=[self.phi])
         self._spiral_spring = Spring(self.k_t, self.phi, qs=[self.phi])
         self._force = Force(self.F * self.l, pos1=self.phi)
-        self._springs_damping = Damper(2 * self.c,
-                                       pos1=self.l * self.phi,
-                                       qs=[self.phi])
-        self._spiral_spring_damping = Damper(self.c_t,
-                                             pos1=self.phi,
-                                             qs=[self.phi])
-        composed_system = self._moment_of_inertia + self._upper_spring + self._lower_spring + self._spiral_spring + self._force + self._springs_damping + self._spiral_spring_damping
+        self._springs_damping = Damper(2 * self.c, pos1=self.l * self.phi, qs=[self.phi])
+        self._spiral_spring_damping = Damper(self.c_t, pos1=self.phi, qs=[self.phi])
 
-        super().__init__(composed_system, **kwargs)
+
+        components['_moment_of_inertia'] = self._moment_of_inertia
+        components['_upper_spring'] = self._upper_spring
+        components['_lower_spring'] = self._lower_spring
+        components['_spiral_spring'] = self._spiral_spring
+        components['_force'] = self._force
+        components['_springs_damping'] = self._springs_damping
+        components['_spiral_spring_damping'] = self._spiral_spring_damping
+
+        return components
 
     def get_default_data(self):
 

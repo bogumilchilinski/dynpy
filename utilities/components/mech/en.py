@@ -919,7 +919,7 @@ class MaxStaticForce(ReportComponent):
         display(ReportText(self.header_text))
 
         display(SympyFormula( Eq(Symbol('F_s'),
-                     dyn_sys.max_static_force().doit() ), marker=None))
+                     dyn_sys.max_static_force().doit()/2 ), marker=None))
         
 #### Amadi
 class MaxDynamicForce(ReportComponent):

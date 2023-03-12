@@ -178,17 +178,17 @@ class SDoFShaft(ComposedSystem):
 #             self.natural_frequencies()[0]) * self.stiffness_matrix()[0]
         return self.subs({self.theta:theta0*cos(Omega*self.ivar)}).frequency_response_function() * self.spring_2.stiffness *2/d + self.max_static_force()
 
-#     def max_static_bearing_force(self):
-#         d = Symbol('d', positive=True)
-#         return abs(2 * self.static_load()[0] / d)
+    def max_static_bearing_force(self):
+        d = Symbol('d', positive=True)
+        return abs(2 * self.static_load()[0] / d)
 
-#     def max_dynamic_bearing_force(self):
-#         d = Symbol('d', positive=True)
-#         acc_amp = self.frequency_response_function() * self.Omega**2
+    def max_dynamic_bearing_force(self):
+        d = Symbol('d', positive=True)
+        acc_amp = self.frequency_response_function() * self.Omega**2
 
-#         return abs(
-#             2 * (self.I * acc_amp) /
-#             d) + self.max_static_bearing_force()  #.subs(self._given_data)
+        return abs(
+            2 * (self.I * acc_amp) /
+            d) + self.max_static_bearing_force()  #.subs(self._given_data)
 
     def static_key_length(self):
         kd = Symbol('k_d', positive=True)
@@ -440,7 +440,7 @@ class DoubleDiskShaft(ComposedSystem):
         self.spring_1 = Spring(self.k_1, self.phi_1, self.phi_2, qs=self.qs)  # left spring
         
         self.disc_2 = Disk(self.I_m2, pos1=self.phi_2, qs=self.qs)
-        self.spring_2 = Spring(self.k_2, pos1=self.phi_2, pos2=theta,
+        self.spring_2 = Spring(self.k_2, pos1=self.phi_2, pos2=self.theta,
                                qs=self.qs)  # right spring
         self.moment_disc1=Force(self.T_1, pos1=self.phi_1)
         self.moment_disc2=Force(self.T_2, pos1=self.phi_2)
@@ -495,8 +495,8 @@ class DoubleDiskShaft(ComposedSystem):
         mech_comp.LagrangianComponent,
         mech_comp.GoverningEquationComponent,
         mech_comp.FundamentalMatrixComponent,
-        mech_comp.MDoFGeneralSolutionComponent,
-        mech_comp.MDoFSteadySolutionComponent,
+        #mech_comp.MDoFGeneralSolutionComponent,
+        #mech_comp.MDoFSteadySolutionComponent,
 
         ]
 
