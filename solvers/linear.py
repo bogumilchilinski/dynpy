@@ -5,7 +5,7 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    lambdify, Pow, Integral)
 
 from sympy.matrices.matrices import MatrixBase
-
+from numbers import Number
 
 ###  exemplary comment
 
@@ -499,12 +499,16 @@ class AnalyticalSolution(ImmutableMatrix):
         with timer() as t:
             
             solution = self
+            
             ivar = list(self.dvars[0].args)[0]
+            solution_fixed=solution+Matrix([exp(-ivar)*exp(-(1e6+t_span[0])) if isinstance(expr,Number) else 0  for expr in solution])
+            
+            
             
 #             print('num'*3)
 #             display(solution)
 
-            sol_func = lambdify(ivar, solution, 'numpy')
+            sol_func = lambdify(ivar, solution_fixed, 'numpy')
 
             numerized_data = (sol_func(t_span))
 
