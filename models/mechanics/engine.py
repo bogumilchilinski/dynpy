@@ -590,7 +590,7 @@ class EngineConstantVelocityVerticalSpringGravity(Engine):
     def get_numerical_data(self):
 
         default_data_dict = {
-            self.M: [4 * no for no in range(10, 150)],
+            self.M: [4 * no for no in range(10, 100)],
             self.m_e: [0.5 * no for no in range(80, 120)],
             self.e: [2/100 * no for no in range(5, 15)],
             self.Omega: [2 * 3.14 * no for no in range(1,20)],
@@ -779,19 +779,19 @@ class DampedEngineVerticalSpringGravity(Engine):
 
         #print('print', self.M, self.m_e, self.k_m, self.e, self.l, self.z,self.Omega)
         
-        self._engine = FreeEngine(self.M, self.m_e, self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine')
+        self._engine = FreeEngine(self.M, self.m_e, self.e, self.g, z= self.z, phi = self.phi, qs=[self.z])(label='Engine')
         
-        self._left_spring = Spring(self.k_m, pos1=self.z, qs=[self.z])(label='Left engine mount')
+        self._left_mount = Spring(self.k_m, pos1=self.z, qs=[self.z])(label='Left engine mount')
         
-        self._right_spring = Spring(self.k_m, pos1=self.z, qs=[self.z])(label='Right engine mount')
+        self._right_mount = Spring(self.k_m, pos1=self.z, qs=[self.z])(label='Right engine mount')
 
         self._left_damper = Damper((self.c_m), pos1=self.z, qs=[self.z])(label='Damping in left engine mount')
         
         self._right_damper = Damper((self.c_m), pos1=self.z, qs=[self.z])(label='Damping in right engine mount')
         
         components['_engine'] = self._engine
-        components['_left_spring'] = self._left_spring
-        components['_right_spring'] = self._right_spring
+        components['_left_mount'] = self._left_mount
+        components['_right_mount'] = self._right_mount
         components['_left_damper'] = self._left_damper
         components['_right_damper'] = self._right_damper
 
@@ -813,12 +813,11 @@ class DampedEngineVerticalSpringGravity(Engine):
 
         default_data_dict = {
             self.c_m: [lam * self.k_m],
-            self.M: [S.One * no * 10 for no in range(5, 8)],
+            self.M: [S.One * m0 * no * 10 for no in range(5, 8)],
             self.m_e: [S.One / 2 * m0 * no for no in range(1, 8)],
             self.k_m: [S.One / 100 * k0 * no for no in range(80, 135)],
             self.e: [S.One / 10 * e0 * no for no in range(7, 14)],
-            self.phi:
-            [S.One / 10 * Omega * self.ivar * no for no in range(7, 14)],
+            self.phi: [S.One * Omega * self.ivar],
         }
 
         return default_data_dict
@@ -834,12 +833,154 @@ class DampedEngineVerticalSpringGravity(Engine):
             self.m_e: [S.One / 2 * 2 * no for no in range(1, 8)],
             self.k_m: [S.One / 100 * 50e3 * no for no in range(80, 135)],
             self.e: [0.01 * no for no in range(7, 14)],
-            self.phi:
-            [S.One / 10 * 10 * self.ivar * no for no in range(7, 14)],
+            self.phi: [S.One / 10  * self.ivar * no for no in range(7, 14)],
             self.g: [9.81],
         }
 
         return default_data_dict
+
+class DampedEngineConstantVelocityVerticalSpringGravity(EngineConstantVelocityVerticalSpringGravity):
+    scheme_name = 'damped_engine_vertical_spring_gravity.png'
+    real_name = 'paccar.jpg'
+    detail_scheme_name = 'sruba_pasowana.png'
+    detail_real_name = 'buick_regal_3800.jpg'
+    M = Symbol('M', positive=True)
+    k_m = Symbol('k_m', positive=True)
+    m_e = Symbol('m_e', positive=True)
+    e = Symbol('e', positive=True)
+    l = Symbol('l', positive=True)
+    z = dynamicsymbols('z')
+    Omega = Symbol('Omega', positive=True)
+    phi = dynamicsymbols('varphi')
+    ivar = Symbol('t')
+    c_m = Symbol('c_m', positive=True)
+    g = Symbol('g', positive=True)
+    lam = Symbol('lambda', positive=True)
+
+    m0 = Symbol('m_0', positive=True)
+
+    def __init__(
+            self,
+            M=None,
+            k_m=None,
+            m_e=None,
+            e=None,
+            l=None,
+            z=None,
+            Omega=None,
+            phi=None,
+            c_m=None,
+            g=None,
+            lam=None,
+            ivar=Symbol('t'),
+            qs=None,
+            **kwargs):
+
+        if phi is not None: self.phi = phi
+        if z is not None: self.z = z
+        if Omega is not None: self.Omega = Omega
+        self.t = ivar
+        if M is not None: self.M = M
+        if k_m is not None: self.k_m
+        if c_m is not None: self.c_m
+        if m_e is not None: self.m_e = m_e
+        if e is not None: self.e = e
+        if g is not None: self.g = g
+        if lam is not None: self.lam = lam
+        self.qs = [self.phi, self.z]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        #print('print', self.M, self.m_e, self.k_m, self.e, self.l, self.z,self.Omega)
+        
+        self._engine = FreeEngine(self.M, self.m_e, self.e, self.g, z= self.z, phi = self.Omega*self.ivar, qs=[self.z])(label='Engine')
+        
+        self._left_mount = Spring(self.k_m, pos1=self.z, qs=[self.z])(label='Left engine mount')
+        
+        self._right_mount = Spring(self.k_m, pos1=self.z, qs=[self.z])(label='Right engine mount')
+
+        self._left_damper = Damper((self.c_m), pos1=self.z, qs=[self.z])(label='Damping in left engine mount')
+        
+        self._right_damper = Damper((self.c_m), pos1=self.z, qs=[self.z])(label='Damping in right engine mount')
+        
+        components['_engine'] = self._engine
+        components['_left_mount'] = self._left_mount
+        components['_right_mount'] = self._right_mount
+        components['_left_damper'] = self._left_damper
+        components['_right_damper'] = self._right_damper
+
+        return components
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.M: r'Mass of engine block',
+            self.k_m: r'Spring stiffness coefficient',
+            self.m_e: r'',
+            self.e: r'',
+        }
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        m0, k0, e0, g, lam = symbols('m_0 k_0 e_0 g lambda', positive=True)
+        m0, k0, Omega = self.m0, self.k0, self.Omega
+
+        default_data_dict = {
+            self.c_m: [lam * self.k_m],
+            self.M: [S.One * m0 * no * 10 for no in range(5, 8)],
+            self.m_e: [S.One / 2 * m0 * no for no in range(1, 8)],
+            self.k_m: [S.One / 100 * k0 * no for no in range(80, 135)],
+            self.e: [S.One / 10 * e0 * no for no in range(7, 14)],
+            self.phi: [S.One * Omega * self.ivar],
+        }
+
+        return default_data_dict
+
+    def get_numerical_data(self):
+
+        m0, k0, e0, g, lam = symbols('m_0 k_0 e_0 g lambda', positive=True)
+        m0, k0 = self.m0, self.k0
+
+        default_data_dict = {
+            self.c_m: [0.01 * self.k_m],
+            self.M: [2 * no * 10 for no in range(5, 8)],
+            self.m_e: [S.One / 2 * 2 * no for no in range(1, 8)],
+            self.k_m: [S.One / 100 * 50e3 * no for no in range(80, 135)],
+            self.e: [0.01 * no for no in range(7, 14)],
+            self.phi: [S.One / 10 * self.ivar * no for no in range(7, 14)],
+            self.g: [9.81],
+        }
+
+        return default_data_dict
+    
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.GoverningEquationComponent,
+        mech_comp.FundamentalMatrixComponent,
+        mech_comp.GeneralSolutionComponent,
+        mech_comp.SteadySolutionComponent,
+        mech_comp.SpringForce,
+        mech_comp.MaxStaticForce,
+        mech_comp.MaxDynamicForce,
+        mech_comp.StaticPinDiameter,
+        mech_comp.DynamicPinDiameter,
+
+        ]
+
+        return comp_list
 
 
 ##DONE #DDOF #Mateusz
@@ -1687,6 +1828,30 @@ class EngineWithTMD(Engine):
 
         return default_data_dict
 
+
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.GoverningEquationComponent,
+        mech_comp.FundamentalMatrixComponent,
+        mech_comp.MDoFGeneralSolutionComponent,
+        mech_comp.MDoFSteadySolutionComponent,
+#         mech_comp.SpringForce,
+#         mech_comp.MaxStaticForce,
+#         mech_comp.MaxDynamicForce,
+#         mech_comp.StaticPinDiameter,
+#         mech_comp.DynamicPinDiameter,
+
+        ]
+
+        return comp_list
 
     def max_static_force_pin(self):
         

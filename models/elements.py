@@ -347,6 +347,7 @@ class Spring(Element):
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, frame=frame,**kwargs)
 
         self._potential_energy = - Lagrangian
+        self._frame = frame
 
     @property
     def pos1(self):
@@ -359,6 +360,9 @@ class Spring(Element):
     def force(self):
         if self.pos2==0:
             force = (self.stiffness * self.pos1)
+        elif  self.l_s == 0:
+            force = self.stiffness * (self.pos2.pos_from(self.pos1)) & self._frame.x
+            
         else:
             force = self.stiffness * (self.pos2.pos_from(self.pos1)).magnitude() - self.l_s
         return force

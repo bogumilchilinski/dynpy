@@ -702,7 +702,9 @@ class PendulumKinematicExct(ComposedSystem):
                 23 * l0, 24 * l0, 25 * l0, 26 * l0, 27 * l0, 28 * l0, 29 * l0,
                 30 * l0
             ],
-            self.x_e: [x0 * sin(self.Omega * self.ivar)]
+            self.x_e: [x0 * sin(self.Omega * self.ivar)],
+            x0: [l0 / (n*20) for n in range(1,11)],
+            
         }
         return default_data_dict
 
@@ -725,6 +727,20 @@ class PendulumKinematicExct(ComposedSystem):
         Re = Symbol('R_e', positive=True)
         return ((4 * self.max_dynamic_cable_force()) / (pi * kr * Re))**(1 / 2)
     
+    def force_in_cable(self):
+
+        data=self._given_data
+        dyn_sys=self.subs(data)
+        dyn_sys_lin=dyn_sys.linearized()
+        phi=dyn_sys_lin._fodes_system.steady_solution[0]
+
+        m=data[self.m]
+        l=data[self.l]
+
+        force_in_cable = m*self.g*(1-S.One/2*phi**2) + m * l * phi.diff(self.ivar)**2
+        force_subs=force_in_cable#.subs({self.Omega:0.999*dyn_sys_lin.natural_frequencies()[0]})
+
+        return force_subs.doit().expand()
 
     @property
     def _report_components(self):
@@ -795,49 +811,69 @@ class MDoFElasticPendulum(ComposedSystem):
         -determine the instance of the pendulum by using class SDoFCouplePendulum()
     """
 
+        
+    k = Symbol('k', positive=True)
+    l = Symbol('l', positive=True)
+    m = Symbol('m', positive=True)
+    g = Symbol('g', positive=True)
+    z = dynamicsymbols('z')
+    phi = dynamicsymbols('\\varphi')
+
     scheme_name = 'elastic_pendulum.PNG'
     real_name = 'elastic_pendulum_real.PNG'
 
     def __init__(self,
-                 k=Symbol('k', positive=True),
-                 l=Symbol('l', positive=True),
-                 m=Symbol('m', positive=True),
-                 g=Symbol('g', positive=True),
+                 k=None,
+                 l=None,
+                 m=None,
+                 g=None,
+                 z=None,
+                 phi=None,
                  ivar=Symbol('t'),
-                 z=dynamicsymbols('z'),
-                 phi=dynamicsymbols('\\varphi'),
                  **kwargs):
 
-        self.k = k
-        self.l = l
-        self.m = m
-        self.g = g
-        self.phi = phi
-        self.z = z
+        if k is not None: self.k = k
+        if l is not None: self.l = l
+        if m is not None: self.m = m
+        if g is not None: self.g = g
+        if phi is not None: self.phi = phi
+        if z is not None: self.z = z
+        self.ivar = ivar
+        self.qs = [self.phi, self.z]
 
-        x = (l + z) * sin(phi)
-        y = (l + z) * cos(phi)
+        self.x = (self.l + self.z) * sin(self.phi)
+        self.y = (self.l + self.z) * cos(self.phi)
+        
+#         self.frame = base_frame
 
-        self.frame = base_frame
+#         self.payload = Point('payload')
 
-        self.payload = Point('payload')
+#         self.payload.set_vel(self.frame,
+#         sqrt(diff(self.z, self.ivar)**2 + (diff(self.phi, self.ivar) * (l + self.z))**2) * self.frame(self.x))
 
-        self.payload.set_vel(
-            self.frame,
-            sqrt(diff(z, ivar)**2 + (diff(phi, ivar) * (l + z))**2) *
-            self.frame.x)
+        self._init_from_components(**kwargs)
 
+    @property
+    def components(self):
 
-        self.spring = Spring(k, z, qs=[phi, z])
-        self.material_point_1 = HarmonicOscillator(
-                                              S.Half*m * (diff(z, ivar)**2 + (diff(phi, ivar) * (l + z))**2),
-                                              qs=[phi, z],
-                                             )
-        # self.material_point_2 = MaterialPoint(m, y, qs=[phi, z])
-        self.gravity = GravitationalForce(m, g, pos1=-y, qs=[phi, z])
-        system = (self.spring + self.gravity + self.material_point_1)
+        components = {}
 
-        super().__init__(system,**kwargs)
+        self._spring = Spring(self.k, self.z, qs=[self.phi, self.z])
+        self._material_point_1 = MaterialPoint(self.m , pos1 = self.z , ivar = self.ivar, qs=[self.phi,self.z])
+        self._material_point_2 = MaterialPoint(self.m * (self.l + self.z)**2 , pos1 = self.phi , ivar = self.ivar, qs=[self.phi,self.z])
+        
+        #self._material_point_1 = HarmonicOscillator(S.Half*self.m * (diff(self.z, self.ivar)**2 + (diff(self.phi, self.ivar) * (self.l + self.z))**2) , qs=[self.phi, self.z])
+        
+        #self._material_point_1 = HarmonicOscillator(S.Half*self.m * (diff(self.z, self.ivar)**2 + (diff(self.phi, self.ivar) * (self.l + self.z))**2) , qs=[self.phi, self.z])
+        
+        self._gravity = GravitationalForce(self.m, self.g, pos1=-self.y, qs=[self.phi, self.z])
+        
+        components['_spring'] = self._spring
+        components['_material_point_1'] = self._material_point_1
+        components['_material_point_2'] = self._material_point_2
+        components['_gravity'] = self._gravity
+
+        return components
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -863,11 +899,28 @@ class MDoFElasticPendulum(ComposedSystem):
 
         if hint is None:
             hint=[self.phi]
-        
-        return super().linearized(x0=x0, op_point=True, hint=hint, label=label)
+            
+        temp_sys = HarmonicOscillator(Lagrangian = self.lagrangian, system=self)
+
+        return temp_sys.linearized(x0=x0, op_point=True, hint=hint, label=label)
     
-    
-    
+    @property
+    def _report_components(self):
+
+        comp_list = [
+            mech_comp.TitlePageComponent,
+            mech_comp.SchemeComponent,
+            mech_comp.ExemplaryPictureComponent,
+            mech_comp.KineticEnergyComponent,
+            mech_comp.PotentialEnergyComponent,
+            mech_comp.LagrangianComponent,
+            #         mech_comp.LinearizationComponent,
+            mech_comp.GoverningEquationComponent,
+            mech_comp.FundamentalMatrixComponent,
+            mech_comp.GeneralSolutionComponent,
+            #mech_comp.SteadySolutionComponent,
+        ]
+        return comp_list
 class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
     scheme_name = 'three_pendulums_forced.PNG'
     real_name = 'lifting_tandem.png'

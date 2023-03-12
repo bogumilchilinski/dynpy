@@ -919,7 +919,7 @@ class MaxStaticForce(ReportComponent):
         display(ReportText(self.header_text))
 
         display(SympyFormula( Eq(Symbol('F_s'),
-                     dyn_sys.max_static_force().doit() ), marker=None))
+                     dyn_sys.max_static_force().doit()/2 ), marker=None))
         
 #### Amadi
 class MaxDynamicForce(ReportComponent):
@@ -1183,6 +1183,7 @@ class MDoFGeneralSolutionComponent(ReportComponent):
 
 
         display(ReportText(self.header_text))
+
         for gen_sol in HarmonicOscillator(dyn_sys_lin.linearized()).general_solution().n(3):
                  display((SympyFormula(Eq(Symbol('X'), gen_sol, evaluate=False) , marker='a',backend=latex)))
 
@@ -1228,10 +1229,12 @@ class MDoFSteadySolutionComponent(ReportComponent):
 
 
         display(ReportText(self.header_text ))
-        
-        for steady_sol in dyn_sys_lin.linearized()._ode_system().steady_solution().n(3):
-            
-            display((SympyFormula(  Eq(Symbol('X_s'), steady_sol, evaluate=False) , marker='b',backend=latex)))
+
+        steady_sol=dyn_sys_lin._fodes_system.steady_solution
+
+        for q in dyn_sys_lin.q:
+
+            display((SympyFormula(  Eq(Symbol('X_s'), steady_sol.as_dict()[q], evaluate=False) , marker='b',backend=latex)))
 
         AutoBreak.latex_backend = latex_store
 

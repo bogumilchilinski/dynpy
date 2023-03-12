@@ -616,7 +616,7 @@ class DoubleDiskShaft(ComposedSystem):
         mech_comp.GoverningEquationComponent,
         mech_comp.FundamentalMatrixComponent,
         mech_comp.MDoFGeneralSolutionComponent,
-#        mech_comp.MDoFSteadySolutionComponent,
+        mech_comp.MDoFSteadySolutionComponent,
 
         ]
 
@@ -1517,7 +1517,7 @@ class UndampedVehicleSuspension(ComposedSystem):
             self.l_r: [l0*S.One*no for no in range(1, 8)],
             self.l_l: [l0*S.One*no for no in range(1, 8)],
            
-            self.Omega: [Omega0*S.One*no for no in range(1,2)],
+#             self.Omega: [Omega0*S.One*no for no in range(1,2)],
             self.F_engine: [F0*cos(self.Omega*self.ivar)*S.One*no for no in range(1,8)],
             
           #  self.F_engine: [
