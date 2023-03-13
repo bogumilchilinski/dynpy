@@ -1529,6 +1529,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     def _ode_system(self):
         return ODESystem.from_dynamic_system(self)
     
+        
+    
     
     @cached_property
     def _fodes_system(self):

@@ -44,7 +44,7 @@ class UndampedVehicleSuspension(ComposedSystem):
                 
     F_engine=Symbol('F_{engine}', positive=True)
     Omega=Symbol('Omega',positive=True)
-    ivar=Symbol('t', positive=True)
+    ivar=Symbol('t')
 
 
     
@@ -105,7 +105,7 @@ class UndampedVehicleSuspension(ComposedSystem):
         self._body = RigidBody2D(self.m, self.I, pos_lin=self.z, pos_rot=self.phi, qs=self.qs)(label='rod')
         self._spring_l = Spring(self.k_l, pos1=self.z + self.phi * self.l_l, qs=self.qs)(label='left spring')
         self._spring_r = Spring(self.k_r, pos1=self.z - self.phi * self.l_r, qs=self.qs)(label='right spring')
-        self._force = Force(self.F_engine*cos(self.Omega), pos1=self.z - self.l_r * self.phi, qs=self.qs)(label='force')
+        self._force = Force(self.F_engine, pos1=self.z - self.l_r * self.phi, qs=self.qs)(label='force')
 
 
         components['_body'] = self._body
@@ -148,6 +148,7 @@ class UndampedVehicleSuspension(ComposedSystem):
         
         amps = self._frf()
         force = self.components['_spring_l'].force().doit().expand()#.doit()
+        
         display(self.components['_spring_l'].force())
         return self.components['_spring_l'].force().subs({coord:amp for amp,coord in zip(amps,self.q)})
 
@@ -172,6 +173,7 @@ class UndampedVehicleSuspension(ComposedSystem):
         lam0=self.lam0
         Omega0=self.Omega0
         F0=self.F0
+        Omega = self.Omega
 
         default_data_dict = {
             self.l_l: [self.l_r],
@@ -193,15 +195,15 @@ class UndampedVehicleSuspension(ComposedSystem):
             #self.l_l: [l0*S.One*no for no in range(1, 8)],
            
 #             self.Omega: [self.Omega],
-            self.F_engine: [F0*S.One*no for no in range(1,8)],
+            self.F_engine: [4*no*F0*S.One*abs(cos(pi/2*no))  + F0*S.One*no*cos(self.Omega*self.ivar) for no in range(1,8)],
             
-          #  self.F_engine: [
-           #     2 * F_0 * sin(omega * self.ivar),
-            #    3 * F_0 * sin(omega * self.ivar),
-             #   4 * F_0 * sin(omega * self.ivar),
-              #  5 * F_0 * sin(omega * self.ivar),
-                #6 * F_0 * sin(omega * self.ivar)
-          #  ]
+#            self.F_engine: [
+#                2 * F_0 * sin(Omega * self.ivar),
+#                3 * F_0 * sin(Omega * self.ivar),
+#                4 * F_0 * sin(omega * self.ivar),
+#                5 * F_0 * sin(omega * self.ivar),
+#                 6 * F_0 * sin(omega * self.ivar)
+#            ]
         }
 
         return default_data_dict
@@ -221,7 +223,6 @@ class UndampedVehicleSuspension(ComposedSystem):
 #        mech_comp.GeneralSolutionComponent,
 #        mech_comp.SteadySolutionComponent,
 #        mech_comp.SpringForce,
-            
         ]
         
         return comp_list
@@ -376,7 +377,7 @@ class DampedVehicleSuspension(UndampedVehicleSuspension):
             self.l_r: [l0*S.One*no for no in range(1, 8)],
             self.l_l: [l0*S.One*no for no in range(1, 8)],
            
-            self.Omega: [Omega0*S.One*no for no in range(1,2)],
+#             self.Omega: [Omega0*S.One*no for no in range(1,2)],
             self.F_engine: [F0*sin(self.Omega*self.ivar)*S.One*no for no in range(1,8)],}
             
 
