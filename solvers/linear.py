@@ -30,13 +30,13 @@ from functools import cached_property
 
 from .numerical import OdeComputationalCase
 
-# from timer import timer
+from timer import timer
 
 
 from ..utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim)
 from ..utilities.templates.document import *
 from ..utilities.templates import tikz
-# from ..utilities.components.ode import en as ode
+from ..utilities.components.ode import en as ode
 
 class MultivariableTaylorSeries(Expr):
     """_summary_
