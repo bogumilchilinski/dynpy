@@ -5,7 +5,7 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    lambdify, Pow, Integral, init_printing)
 
 from sympy.matrices.matrices import MatrixBase
-
+from numbers import Number
 
 ###  exemplary comment
 from sympy.physics.mechanics import dynamicsymbols, init_vprinting
@@ -30,13 +30,13 @@ from functools import cached_property
 
 from .numerical import OdeComputationalCase
 
-# from timer import timer
+from timer import timer
 
 
 from ..utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim)
 from ..utilities.templates.document import *
 from ..utilities.templates import tikz
-# from ..utilities.components.ode import en as ode
+from ..utilities.components.ode import en as ode
 
 class MultivariableTaylorSeries(Expr):
     """_summary_
@@ -498,12 +498,16 @@ class AnalyticalSolution(ImmutableMatrix):
         with timer() as t:
             
             solution = self
+            
             ivar = list(self.dvars[0].args)[0]
+            solution_fixed=solution+Matrix([exp(-ivar)*exp(-(1e6+t_span[0])) if isinstance(expr,Number) else 0  for expr in solution])
+            
+            
             
 #             print('num'*3)
 #             display(solution)
 
-            sol_func = lambdify(ivar, solution, 'numpy')
+            sol_func = lambdify(ivar, solution_fixed, 'numpy')
 
             numerized_data = (sol_func(t_span))
 
@@ -2199,7 +2203,7 @@ class LinearODESolution:
 
     def general_solution(self, initial_conditions=None):
         '''
-        Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
+        Solves the problem in the symbolic way and returns matrix of solution (in the form of equations (objects of Eq class)).
         '''
 
         #         print('------------------- linear gen sol ----------------')
