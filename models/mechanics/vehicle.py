@@ -105,16 +105,15 @@ class UndampedVehicleSuspension(ComposedSystem):
         self._body = RigidBody2D(self.m, self.I, pos_lin=self.z, pos_rot=self.phi, qs=self.qs)(label='rod')
         self._spring_l = Spring(self.k_l, pos1=self.z + self.phi * self.l_l, qs=self.qs)(label='left spring')
         self._spring_r = Spring(self.k_r, pos1=self.z - self.phi * self.l_r, qs=self.qs)(label='right spring')
-        self._force = Force(self.F_engine, pos1=self.z - self.l_r * self.phi, qs=self.qs)(label='force')
-
+        self._force = Force(self.F_engine*cos(self.Omega*self.ivar), pos1=self.z - self.l_r * self.phi, qs=self.qs)(label='force')
+        self._static_force = Force(self.F_engine, pos1=self.z - self.l_r * self.phi, qs=self.qs)(label='force')
 
         components['_body'] = self._body
         components['_spring_l'] = self._spring_l
         components['_spring_r'] = self._spring_r
         components['_force'] = self._force
-        
-        
-        
+        components['_static_force'] = self._static_force
+
         return components
 
     
@@ -141,16 +140,17 @@ class UndampedVehicleSuspension(ComposedSystem):
         return ((4*self.max_static_force_pin())/(pi*kt*Re))**(1/2)
 
 #     def max_dynamic_force_pin(self):
-#         return (self._frf()[0] + self._frf()[1]*self.l_l)*self.k_l
+#         frf=self._frf
+#         return (frf[0] + frf[1]*self.l_l)*self.k_l
 
     
     def max_dynamic_force_pin(self):
         
         amps = self._frf()
         force = self.components['_spring_l'].force().doit().expand()#.doit()
-        
-        display(self.components['_spring_l'].force())
-        return self.components['_spring_l'].force().subs({coord:amp for amp,coord in zip(amps,self.q)})
+
+        display(abs(self.components['_spring_l'].force()))
+        return abs((self.components['_spring_l'].force().subs({coord:amp for amp,coord in zip(amps,self.q)}))).doit()
 
 
 
@@ -195,8 +195,8 @@ class UndampedVehicleSuspension(ComposedSystem):
             #self.l_l: [l0*S.One*no for no in range(1, 8)],
            
 #             self.Omega: [self.Omega],
-            self.F_engine: [4*no*F0*S.One*abs(cos(pi/2*no))  + F0*S.One*no*cos(self.Omega*self.ivar) for no in range(1,8)],
-            
+            #self.F_engine: [4*no*F0*S.One*abs(cos(pi/2*no))  + F0*S.One*no*cos(self.Omega*self.ivar) for no in range(1,8)],
+            self.F_engine: [4 * no * F0 * S.One for no in range(1,8)],
 #            self.F_engine: [
 #                2 * F_0 * sin(Omega * self.ivar),
 #                3 * F_0 * sin(Omega * self.ivar),
