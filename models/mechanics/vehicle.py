@@ -139,18 +139,29 @@ class UndampedVehicleSuspension(ComposedSystem):
         Re=Symbol('R_e', positive=True)
         return ((4*self.max_static_force_pin())/(pi*kt*Re))**(1/2)
 
+
 #     def max_dynamic_force_pin(self):
 #         frf=self._frf
 #         return (frf[0] + frf[1]*self.l_l)*self.k_l
 
     
+#     def max_dynamic_force_pin(self):
+        
+#         amps = self._frf()
+#         force = self.components['_spring_l'].force().doit().expand()#.doit()
+#         data=self._given_data
+#         display(abs(self.components['_spring_l'].force()))
+#         return abs((self.components['_spring_l'].force().subs({coord:amp for amp,coord in zip(amps,self.q)})).subs(data)).doit()
+    
+
     def max_dynamic_force_pin(self):
         
-        amps = self._frf()
+        amps = self._fodes_system.steady_solution.as_dict()
         force = self.components['_spring_l'].force().doit().expand()#.doit()
-
+        data=self._given_data
+        
         display(abs(self.components['_spring_l'].force()))
-        return abs((self.components['_spring_l'].force().subs({coord:amp for amp,coord in zip(amps,self.q)}))).doit()
+        return (self.components['_spring_l'].force().subs(amps)).subs(data).expand().doit().coeff(cos(self.Omega * self.ivar).subs(data))
 
 
 

@@ -169,7 +169,9 @@ class BlowerToothedBelt(ComposedSystem):
         return abs(self.static_load().doit()[0])
 
     def max_dynamic_force(self):
-        return self.frequency_response_function() * self._tensioner.stiffness + self.max_static_force()
+        steady_sol=self.steady_solution()[0]
+        data=self._given_data
+        return (steady_sol * self._tensioner.stiffness + self.max_static_force()).subs(data)
 
     def static_force_pin_diameter(self):
         kt = Symbol('k_shear', positive=True)

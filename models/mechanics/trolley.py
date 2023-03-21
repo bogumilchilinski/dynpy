@@ -601,9 +601,13 @@ class TrolleyWithPendulum(ComposedSystem):
             self.F: [S.One * F0 * no for no in range(50, 100)],
             self.Omega: [S.One * Omega0],
             self.g: [S.One * self.g],
-            self.k: [S.One * k0 * no for no in range(50, 100)],
+            self.k: [S.One * self.g * m0 / l0 * no for no in range(1, 30)],
             self.x: [self.x]
         }
+        
+        #default_data_dict.update({self.k: S.One * self.g * default_data_dict[self.m_t][0]+default_data_dict[self.l][0],
+        #                         })
+        
         return default_data_dict
     
     def get_numerical_data(self):
