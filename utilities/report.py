@@ -3017,11 +3017,7 @@ class SympyFormula(ReportModule):
             self._eq.append(Label(marker))
             self._marker = marker
 
-        if self.__class__._color:
 
-            self._container.append(TextColor(self.__class__._color, self._eq))
-        else:
-            self._container.append(self._eq)
 
     def __call__(self, analysis):
 
@@ -3035,12 +3031,26 @@ class SympyFormula(ReportModule):
 
         return self._backend(self._expr)
 
-    def __repr__(self):
+#     def __repr__(self):
 
-        display(self._expr)
+#         display(self._expr)
 
-        return ''
+#         return ''
 
+    def _repr_markdown_(self):
+        return f'\\begin{{equation}}\n  {self.reported()._backend(self._expr)} \n \\end{{equation}}'
+
+    def reported(self):
+        
+        
+        if self.__class__._color:
+
+            self._container.append(TextColor(self.__class__._color, self._eq))
+        else:
+            self._container.append(self._eq)
+        
+        return copy.copy(self)
+    
     def _latex(self):
 
         return self._backend(self._expr)
