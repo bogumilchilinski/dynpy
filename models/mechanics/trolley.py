@@ -613,14 +613,15 @@ class TrolleyWithPendulum(ComposedSystem):
     def get_numerical_data(self):
 
         m_taipei = 700 * 1e3
+        omg_nat = 2*pi/10
         
         default_data_dict = {
             self.m_t: [m_taipei for no in range(20, 30)],
             self.m_p: [0.01*m_taipei for no in range(1, 10)],
-            self.l: [50 for no in range(1, 10)],
-            self.F: [2*pi/16 for no in range(50, 100)],
-            self.Omega: [2*pi/16 * no for no in range(1,6)],
-            self.k: [m_taipei*(2*pi/16)**2 for no in range(50, 100)],
+            self.l: [9.81/omg_nat**2 for no in range(1, 10)],
+            self.F: [300 * 1e3  for no in range(50, 100)],
+            self.Omega: [omg_nat   for no in range(1,6)],
+            self.k: [m_taipei*(omg_nat)**2 for no in range(50, 100)],
             self.g: [9.81]
         }
         return default_data_dict
