@@ -2749,10 +2749,13 @@ class Picture(Figure,ReportModule):
     packages=[Package('float'),
               Package('graphicx'),
              Command('graphicspath{{../}}'),]
+    
+    _position = 'H'
 
     
+    
     _latex_name = 'figure'
-    def __init__(self, image=None, position='H', caption=None,width=None,height=None,marker=None, **kwargs):
+    def __init__(self, image=None, position=None, caption=None,width=None,height=None,marker=None, **kwargs):
         """
         Args
         ----
@@ -2779,7 +2782,11 @@ class Picture(Figure,ReportModule):
             
         self.marker = marker
         
-        super().__init__(position=position,**kwargs)
+        if position:
+            self._position = position
+        
+        
+        super().__init__(position=self._position,**kwargs)
         
         if self.image is not None:
             self.add_image(NoEscape(self.image),width=self.width)

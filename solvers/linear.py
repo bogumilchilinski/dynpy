@@ -2,14 +2,13 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, re, pi, latex,
                    dsolve, solve, fraction, factorial, Add, Mul, exp, zeros, shape,
                    numbered_symbols, integrate, ImmutableMatrix,Expr,Dict,Subs,Derivative,Dummy,
-                   lambdify, Pow, Integral)
+                   lambdify, Pow, Integral, init_printing)
 
 from sympy.matrices.matrices import MatrixBase
-
+from numbers import Number
 
 ###  exemplary comment
-
-from sympy.physics.mechanics import dynamicsymbols
+from sympy.physics.mechanics import dynamicsymbols, init_vprinting
 from sympy.physics.vector.printing import vpprint, vlatex
 import sympy as sym
 from sympy.utilities.autowrap import autowrap, ufuncify
@@ -217,7 +216,7 @@ class MultivariableTaylorSeries(Expr):
 
 
 class AnalyticalSolution(ImmutableMatrix):
-    def __new__(cls, data,rhs=None ,evaluate=True, **options):
+    def __new__(cls, data, rhs=None, evaluate=True, **options):
 
         
         
@@ -228,7 +227,7 @@ class AnalyticalSolution(ImmutableMatrix):
         if isinstance(data,Matrix) and isinstance(data[0],Eq):
             return cls.from_eqns_matrix(data,**options)
         else:
-            return cls._constructor(data,rhs ,evaluate=evaluate, **options)
+            return cls._constructor(data, rhs, evaluate=evaluate, **options)
 
         return obj
 
@@ -236,7 +235,7 @@ class AnalyticalSolution(ImmutableMatrix):
 
     
     @classmethod
-    def _constructor(cls, lhs,rhs=None ,evaluate=True, **options):
+    def _constructor(cls, lhs, rhs=None, evaluate=True, **options):
         
         if not isinstance(lhs,Iterable): 
             lhs = Matrix([lhs])
@@ -247,7 +246,7 @@ class AnalyticalSolution(ImmutableMatrix):
         elif not isinstance(rhs,Iterable):
             rhs = Matrix([rhs])
 
-        obj = super().__new__(cls,rhs,evaluate=evaluate, **options)
+        obj = super().__new__(cls, rhs ,evaluate=evaluate, **options)
 
         obj._lhs=lhs
 
@@ -298,7 +297,7 @@ class AnalyticalSolution(ImmutableMatrix):
             values.append(value)
             
         obj = cls._constructor(Matrix(dvars),Matrix(values),evaluate=True ,**options)
-
+    
         return obj
     
     
@@ -499,12 +498,16 @@ class AnalyticalSolution(ImmutableMatrix):
         with timer() as t:
             
             solution = self
+            
             ivar = list(self.dvars[0].args)[0]
+            solution_fixed=solution+Matrix([exp(-ivar)*exp(-(1e6+t_span[0])) if isinstance(expr,Number) else 0  for expr in solution])
+            
+            
             
 #             print('num'*3)
 #             display(solution)
 
-            sol_func = lambdify(ivar, solution, 'numpy')
+            sol_func = lambdify(ivar, solution_fixed, 'numpy')
 
             numerized_data = (sol_func(t_span))
 
@@ -575,6 +578,7 @@ class ODESolution(AnalyticalSolution):
     _default_ics = None
     _integration_consts = None #container for integration constants
     _ivar=Symbol('t')
+    _dvars_str = None
 
     @property
     def _dvars(self):
@@ -648,9 +652,18 @@ class ODESolution(AnalyticalSolution):
             obj._ics = ics
             
         return obj
-    
-            
-    
+
+###method owner - Franciszek, supervisior - Bogumił
+##------------------ TEST ------------------
+    def ics_dynamic_symbols(self):
+        symbols_list = ['v', 'a']
+        ics_dynamic_symbols = [Symbol(f'{coor}_{self._dvars_str}0') for coor in symbols_list]
+        ics_dynamic_symbols = Matrix([Symbol(f'{self._dvars_str}0')] + ics_dynamic_symbols)
+        # ics_dynamic_symbols = Matrix([Symbol(f'{self._dvars_str}_{index}diif') for index in range(len(self.dvars))])
+        return ics_dynamic_symbols
+
+##------------------ TEST ------------------
+
     @property
     def _ics_dict(self):
         """
@@ -680,7 +693,8 @@ class ODESolution(AnalyticalSolution):
         """
         
         if ics is None:
-            ics = self._ics_dict
+            temp = self.ics_dynamic_symbols()
+            ics_list = [temp[index] for index in range(len(self.dvars))]
         
         if isinstance(ics,dict):
             ics_list = [ics[coord]  for coord  in self.dvars]
@@ -703,8 +717,8 @@ class ODESolution(AnalyticalSolution):
         
         return solve(const_eqns,const_list)
     
-    def with_ics(self,ics,ivar0=0):
-
+    def with_ics(self, ics=None, ivar0=0, dvars_str=None):
+        self._dvars_str = dvars_str
         const_dict=self._calculate_constant(ics)
         
         return self.subs(const_dict)
@@ -756,7 +770,7 @@ class ODESystem(AnalyticalSolution):
     _ivar = Symbol('t')
     _parameters = None
     _ode_order = 2
-    
+
     @classmethod
     def from_ode_system(cls,ode_system):
 
@@ -949,11 +963,15 @@ class ODESystem(AnalyticalSolution):
     def as_matrix(self):
         return Matrix(self._lhs_repr - self.rhs) 
     
-
-    def as_first_ode_linear_system(self):
+###method owner - Franciszek, supervisior - Bogumił
+    def _as_fode(self):
         """Creates an object of FirstOrderLinearODESystem class."""
         
         return FirstOrderLinearODESystem.from_ode_system(self)
+    
+    def as_first_ode_linear_system(self):
+        
+        return self._as_fode()
 
     def approximated(self, n=3, x0=None, op_point=False, hint=[], label=None):
         """
@@ -1166,6 +1184,47 @@ class ODESystem(AnalyticalSolution):
         
         return comp_list
 
+    @cached_property
+    def _general_solution(self):
+
+        fode = self._as_fode()
+        #solver changing due to the computational simplicity reasons
+
+        fode_sys=FirstOrderLinearODESystem(fode,fode.dvars)        
+
+        return fode_sys.general_solution
+
+    @cached_property
+    def _steady_solution(self):
+
+        fode = self._as_fode()
+        #solver changing due to the computational simplicity reasons
+
+        fode_sys=FirstOrderLinearODESystemWithHarmonics(fode,fode.dvars)        
+
+        return fode_sys.steady_solution
+
+
+    
+    
+    @cached_property
+    def general_solution(self):
+
+        return self._general_solution
+
+
+    @cached_property
+    def steady_solution(self):
+
+        return self._steady_solution
+    
+    @property
+    def solution(self):
+
+        return self.general_solution + self.steady_solution    
+    
+    
+
 class FirstOrderODESystem(ODESystem):
     
 
@@ -1218,7 +1277,44 @@ class FirstOrderODESystem(ODESystem):
         
         return obj
     
+#     @cached_property
+#     def _general_solution(self):
 
+        
+
+
+#         return ODESolution(self.dvars,sol).subs( const_dict )
+                                 
+
+                                 
+#     @cached_property
+#     def _steady_solution(self):
+                                 
+        
+
+    
+
+
+#         return ODESolution(self.dvars,sol).subs({dum_sym:0 for dum_sym in dummies_set})
+
+
+    
+    
+#     @cached_property
+#     def general_solution(self):
+
+#         return self._general_solution
+
+
+#     @cached_property
+#     def steady_solution(self):
+
+#         return self._steady_solution
+    
+#     @property
+#     def solution(self):
+
+#         return self.general_solution + self.steady_solution
 
     
     
@@ -2184,7 +2280,7 @@ class LinearODESolution:
 
     def general_solution(self, initial_conditions=None):
         '''
-        Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
+        Solves the problem in the symbolic way and returns matrix of solution (in the form of equations (objects of Eq class)).
         '''
 
         #         print('------------------- linear gen sol ----------------')

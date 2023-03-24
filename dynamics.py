@@ -1529,6 +1529,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     def _ode_system(self):
         return ODESystem.from_dynamic_system(self)
     
+        
+    
     
     @cached_property
     def _fodes_system(self):
@@ -2194,7 +2196,7 @@ class HarmonicOscillator(LinearDynamicSystem):
             k=self.stiffness_matrix()[0]
             c=self.damping_matrix()[0]
             
-            amp = [(comp_sin**2+comp_cos**2)[0]/((k - m*omg**2)**2 + 2*c**2*omg**2)]
+            amp = [(comp_sin**2+comp_cos**2)[0]/((k - m*omg**2)**2 + c**2*omg**2)]
             
         else:
             fund_mat = -self.inertia_matrix(
@@ -2257,7 +2259,7 @@ class HarmonicOscillator(LinearDynamicSystem):
             k=self.stiffness_matrix()[0]
             c=self.damping_matrix()[0]
             
-            amp = Matrix([(comp_sin**2+comp_cos**2)[0]/((k - m*omg**2)**2 + 2*c**2*omg**2)])
+            amp = Matrix([(comp_sin**2+comp_cos**2)[0]/((k - m*omg**2)**2 + c**2*omg**2)])
             
         else:
             fund_mat = -self.inertia_matrix(

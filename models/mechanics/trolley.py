@@ -525,8 +525,8 @@ class NonLinearTrolley(NonlinearComposedSystem):
 #Zrobione Amadi
 class TrolleyWithPendulum(ComposedSystem):
 
-    scheme_name = 'kin_exct_pendulum.PNG'
-    real_name = 'elastic_pendulum_real.PNG'
+    scheme_name = 'trolley_pendulum_tmd.png'
+    real_name = 'taipei101.png'
 
     l = Symbol('l', positive=True)
     m_t = Symbol('m_trolley', positive=True)
@@ -601,20 +601,26 @@ class TrolleyWithPendulum(ComposedSystem):
             self.F: [S.One * F0 * no for no in range(50, 100)],
             self.Omega: [S.One * Omega0],
             self.g: [S.One * self.g],
-            self.k: [S.One * k0 * no for no in range(50, 100)],
+            self.k: [S.One * self.g * m0 / l0 * no for no in range(1, 30)],
             self.x: [self.x]
         }
+        
+        #default_data_dict.update({self.k: S.One * self.g * default_data_dict[self.m_t][0]+default_data_dict[self.l][0],
+        #                         })
+        
         return default_data_dict
     
     def get_numerical_data(self):
 
+        m_taipei = 700 * 1e3
+        
         default_data_dict = {
-            self.m_t: [no for no in range(20, 30)],
-            self.m_p: [no for no in range(1, 10)],
-            self.l: [1/2 * no for no in range(1, 10)],
-            self.F: [no for no in range(50, 100)],
-            self.Omega: [3.14 * no for no in range(1,6)],
-            self.k: [no for no in range(50, 100)],
+            self.m_t: [m_taipei for no in range(20, 30)],
+            self.m_p: [0.01*m_taipei for no in range(1, 10)],
+            self.l: [50 for no in range(1, 10)],
+            self.F: [2*pi/16 for no in range(50, 100)],
+            self.Omega: [2*pi/16 * no for no in range(1,6)],
+            self.k: [m_taipei*(2*pi/16)**2 for no in range(50, 100)],
             self.g: [9.81]
         }
         return default_data_dict

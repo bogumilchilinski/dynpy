@@ -2187,9 +2187,9 @@ class ForcedDisksWithParallelSprings(ComposedSystem):
             self.k_r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
             self.k_cr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
 
-            self.x_l: [self.x_1, 0],
-            self.x_c: [self.x_1, self.x_2],
-            self.x_r: [self.x_2, 0],
+            self.x_l: [self.x_1],
+            self.x_c: [0],
+            self.x_r: [self.x_2],
         }
 
         return default_data_dict
@@ -2218,26 +2218,26 @@ class ForcedDisksWithParallelSprings(ComposedSystem):
 
 #         return default_data_dict
 
-    def get_random_parameters(self):
+#     def get_random_parameters(self):
 
-        default_data_dict = self.get_default_data()
+#         default_data_dict = self.get_default_data()
 
-        parameters_dict = {
-            key: random.choice(items_list)
-            for key, items_list in default_data_dict.items()
-        }
+#         parameters_dict = {
+#             key: random.choice(items_list)
+#             for key, items_list in default_data_dict.items()
+#         }
 
-        if parameters_dict[self.x_l] != self.x_1 or parameters_dict[
-                self.x_c] != self.x_1:
+#         if parameters_dict[self.x_l] != self.x_1 or parameters_dict[
+#                 self.x_c] != self.x_1:
 
-            parameters_dict[self.x_l] = self.x_1
+#             parameters_dict[self.x_l] = self.x_1
 
-        if parameters_dict[self.x_c] != self.x_2 or parameters_dict[
-                self.x_r] != self.x_2:
+#         if parameters_dict[self.x_c] != self.x_2 or parameters_dict[
+#                 self.x_r] != self.x_2:
 
-            parameters_dict[self.x_r] = self.x_2
+#             parameters_dict[self.x_r] = self.x_2
 
-        return parameters_dict
+#         return parameters_dict
 
 
 
@@ -3362,40 +3362,40 @@ class MDoFForcedDisksWithParallelSprings(ComposedSystem):
             self.k_r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
             self.k_cr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
 
-            self.x_l: [self.x_1, 0],
-            self.x_c: [self.x_1, self.x_2],
-            self.x_r: [self.x_2, 0],
+            self.x_l: [self.x_1],
+            self.x_c: [0],
+            self.x_r: [self.x_2],
         }
 
         return default_data_dict
 
-    def get_random_parameters(self):
+#     def get_random_parameters(self):
 
-        default_data_dict = self.get_default_data()
+#         default_data_dict = self.get_default_data()
 
-        parameters_dict = {
-            key: random.choice(items_list)
-            for key, items_list in default_data_dict.items()
-        }
+#         parameters_dict = {
+#             key: random.choice(items_list)
+#             for key, items_list in default_data_dict.items()
+#         }
 
-        if parameters_dict[self.x_l] != self.x_1 or parameters_dict[
-                self.x_c] != self.x_1:
+#         if parameters_dict[self.x_l] != self.x_1 or parameters_dict[
+#                 self.x_c] != self.x_1:
 
-            parameters_dict[self.x_l] = self.x_1
+#             parameters_dict[self.x_l] = self.x_1
 
-        if parameters_dict[self.x_c] != self.x_2 or parameters_dict[
-                self.x_r] != self.x_2:
+#         if parameters_dict[self.x_c] != self.x_2 or parameters_dict[
+#                 self.x_r] != self.x_2:
 
-            parameters_dict[self.x_r] = self.x_2
+#             parameters_dict[self.x_r] = self.x_2
 
-        return parameters_dict
+#         return parameters_dict
     
     def max_static_force_pin(self):
         return 0
     
     
     def max_dynamic_force_pin(self):
-        amp=self._frf()[0]
+        amp=self._frf()[0].n(4)
         #amp = abs(((self.steady_solution_amp(self.external_forces().subs(self.ivar, 0), Matrix([0, 0]))[0])[1]).n(3))
         return (self.k_cl*self.x_l).subs(self._given_data).subs(self.x_1,amp)  +self.max_static_force_pin()
     
