@@ -599,7 +599,7 @@ class TrolleyWithPendulum(ComposedSystem):
             self.m_p: [S.One * m0 * no for no in range(1, 10)],
             self.l: [S.Half * l0 * no for no in range(1, 10)],
             self.F: [S.One * F0 * no for no in range(50, 100)],
-            self.Omega: [S.One * Omega0],
+            self.Omega: [S.One * self.Omega],
             self.g: [S.One * self.g],
             self.k: [S.One * self.g * m0 / l0 * no for no in range(1, 30)],
             self.x: [self.x]
@@ -625,6 +625,45 @@ class TrolleyWithPendulum(ComposedSystem):
         }
         return default_data_dict
 
+    def max_static_cable_force(self):
+        data=self._given_data
+        ans=self.force_in_cable()
+        free_coeff=ans.subs({(cos(self.Omega*self.ivar))**2:0, (sin(self.Omega*self.ivar))**2:0}).subs(data)
+        return abs(free_coeff)
+
+    def max_dynamic_cable_force(self):
+        ans = self.force_in_cable()
+        #display(abs(self.components['_spring_l'].force()))
+        data=self._given_data
+        sin_coeff=ans.coeff((sin(self.Omega*self.ivar))**2).subs(data)
+        display(sin_coeff)
+        cos_coeff=ans.coeff((cos(self.Omega*self.ivar))**2).subs(data)
+        display(cos_coeff)
+        free_coeff=ans.subs({(cos(self.Omega*self.ivar))**2:0, (sin(self.Omega*self.ivar))**2:0}).subs(data)
+        display(free_coeff)
+        return sqrt(sin_coeff**2 + cos_coeff**2) + abs(free_coeff)
+
+    def static_cable_diameter(self):
+        kr = Symbol('k_r', positive=True)
+        Re = Symbol('R_e', positive=True)
+        return ((4 * self.max_static_cable_force()) / (pi * kr * Re))**(1 / 2)
+
+    def dynamic_cable_diameter(self):
+        kr = Symbol('k_r', positive=True)
+        Re = Symbol('R_e', positive=True)
+        return ((4 * self.max_dynamic_cable_force()) / (pi * kr * Re))**(1 / 2)
+    
+    def force_in_cable(self):
+        data=self._given_data
+        dyn_sys=self.subs(data)
+        dyn_sys_lin=dyn_sys.linearized()
+        phi=dyn_sys_lin._fodes_system.steady_solution[1]
+        
+        force_in_cable = self.m_p*self.g*(1-S.One/2*phi**2) + self.m_p * self.l * phi.diff(self.ivar)**2
+        force_subs=force_in_cable.subs(data)
+        
+        return force_subs.doit().expand()
+    
 #Zrobione Amadi
 class DampedTrolleyWithPendulum(TrolleyWithPendulum):
 

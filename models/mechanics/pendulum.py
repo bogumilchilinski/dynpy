@@ -734,13 +734,14 @@ class PendulumKinematicExct(ComposedSystem):
         dyn_sys_lin=dyn_sys.linearized()
         phi=dyn_sys_lin._fodes_system.steady_solution[0]
 
-        m=data[self.m]
-        l=data[self.l]
+#         m=data[self.m]
+#         l=data[self.l]
 
-        force_in_cable = m*self.g*(1-S.One/2*phi**2) + m * l * phi.diff(self.ivar)**2
-        force_subs=force_in_cable#.subs({self.Omega:0.999*dyn_sys_lin.natural_frequencies()[0]})
+        force_in_cable = self.m*self.g*(1-S.One/2*phi**2) + self.m * self.l * phi.diff(self.ivar)**2
+        force_subs=force_in_cable.subs(data)#.subs({self.Omega:0.999*dyn_sys_lin.natural_frequencies()[0]})
 
         return force_subs.doit().expand()
+
 
     @property
     def _report_components(self):

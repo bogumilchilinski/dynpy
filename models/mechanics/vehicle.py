@@ -123,16 +123,16 @@ class UndampedVehicleSuspension(ComposedSystem):
 #    def dynamic_bearing_force(self):
        
 #       return self.max_dynamic_force_pin() * self.sqrt(L)
-    def max_static_force_pin(self):
-        return self.components['_spring_l'].subs({coord:0 for coord in self.q})
+
+#     def max_static_force_pin(self):
+#         return self.components['_spring_l'].subs({coord:0 for coord in self.q})
 
     
-
-    
-    
-    
     def max_static_force_pin(self):
-        return (abs(self.static_load().doit()[0])/2)
+        data=self._given_data
+        ans=self.dynamic_force()
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        return abs(free_coeff)
     
     def static_force_pin_diameter(self):
         kt=Symbol('k_t', positive=True)
@@ -153,17 +153,30 @@ class UndampedVehicleSuspension(ComposedSystem):
 #         display(abs(self.components['_spring_l'].force()))
 #         return abs((self.components['_spring_l'].force().subs({coord:amp for amp,coord in zip(amps,self.q)})).subs(data)).doit()
     
-
-    def max_dynamic_force_pin(self):
+    
+    def dynamic_force(self):
         
         amps = self._fodes_system.steady_solution.as_dict()
         force = self.components['_spring_l'].force().doit().expand()#.doit()
         data=self._given_data
         
-        display(abs(self.components['_spring_l'].force()))
-        return (self.components['_spring_l'].force().subs(amps)).subs(data).expand().doit().coeff(cos(self.Omega * self.ivar).subs(data))
+        #display(abs(self.components['_spring_l'].force()))
+        return (self.components['_spring_l'].force().subs(amps)).subs(data).expand().doit()
 
+    def max_dynamic_force_pin(self):
+        
+        ans = self.dynamic_force()
+        
+        #display(abs(self.components['_spring_l'].force()))
+        data=self._given_data
+        sin_coeff=ans.coeff(sin(self.Omega*self.ivar)).subs(data)
+        #display(sincoeff)
+        cos_coeff=ans.coeff(cos(self.Omega*self.ivar)).subs(data)
+        #display(coscoeff)
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        #display(freecoeff)
 
+        return sqrt(sin_coeff**2 + cos_coeff**2) + abs(free_coeff)
 
     def dynamic_bearing_force(self):
         L=Symbol('L')#wymagana trwałość
@@ -172,7 +185,11 @@ class UndampedVehicleSuspension(ComposedSystem):
     def dynamic_force_pin_diameter(self):
         kt=Symbol('k_t', positive=True)
         Re=Symbol('R_e', positive=True)
-        return ((4*self.max_dynamic_force_pin())/(pi*kt*Re))**(1/2)
+        
+        
+        load = abs(self.max_dynamic_force_pin())
+        
+        return ((4*load)/(pi*kt*Re))**(1/2)
     
 
     def get_default_data(self):
