@@ -67,6 +67,7 @@ class ReportModule:
         >>>RM.set_units_dict(unit_dict)
     '''
 
+    _cls_container = []
     cls_container = []
     _container = []
     cls_path = '.'
@@ -142,6 +143,15 @@ class ReportModule:
         cls._units = units
         return cls
 
+#     @property
+#     def _cls_container(self):
+#         return self.__class__._cls_container
+    
+#     @property
+#     def _container(self):
+#         return self.__class__._cls_container
+    
+    
     def __init__(self,
                  container=None,
                  path=None,
