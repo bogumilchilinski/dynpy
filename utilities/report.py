@@ -47,6 +47,17 @@ def plots_no():
 
 plots_no_gen = plots_no()
 
+
+class CurrentContainer:
+    def __init__(self,container):
+        self._container = container
+        ReportText.set_container(self._container)
+        Picture.set_container(self._container)
+        SympyFormula.set_container(self._container)
+        Markdown.set_container(self._container)
+        
+
+
 # class AbstractFrameFormatter(AdaptableDataFrame):
 #     _applying_func=lambda x: (x*100)
 
