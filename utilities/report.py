@@ -56,6 +56,15 @@ class CurrentContainer:
         SympyFormula.set_container(self._container)
         Markdown.set_container(self._container)
         
+        
+        LatexDataFrame.set_container(self._container)
+        LatexDataFrame.set_picture_mode(True)
+
+        ObjectCode.set_container(self._container)
+        Block.set_container(self._container)
+        AlertBlock.set_container(self._container)
+        ExampleBlock.set_container(self._container)
+
 
 
 # class AbstractFrameFormatter(AdaptableDataFrame):
