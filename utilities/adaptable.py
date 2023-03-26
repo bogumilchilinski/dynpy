@@ -548,7 +548,7 @@ class DataAxis(Axis, ReportModule):
         else:
             name = None
 
-        return name if name is not None else self._x_axis_name
+        return '{'+name+'}' if name is not None else '{'+self._x_axis_name +'}'
 
     @property
     def _data_description(self):
@@ -1269,7 +1269,10 @@ class DataMethods:
 
     def to_pylatex_tikz(self,height=None,subplots=None):
         return TikZPlot(LatexDataFrame.formatted(self),height=height,subplots=subplots)
+
     
+    def to_latex_dataframe(self):
+        return LatexDataFrame.formatted(self)
     
 class SpectralMethods(DataMethods):
 
