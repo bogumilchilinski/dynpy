@@ -156,6 +156,63 @@ class ExampleTemplate(Document):
         #self.append(Command('maketitle'))
         self.append(NewPage())
         # tu implementować co tam potrzeba
+
+        
+class BPASTSPaper(Document):
+    
+    latex_name = 'document'
+    packages = [
+                    Package('natbib', options=['numbers']),
+                    Package('booktabs'),
+                    Package('float'),
+                    Package('standalone'),
+                    Package('siunitx'),
+                    Package('bpasts', options=['accepted']),
+
+    ]
+
+
+    def __init__(self,
+                 title='Basic title',
+                 default_filepath='default_filepath',
+                 *,
+                 documentclass='article',
+                 document_options=['10pt','twoside','twocolumn','a4paper'],
+                 fontenc='T1',
+                 inputenc='utf8',
+                 font_size='normalsize',
+                 lmodern=False,
+                 textcomp=True,
+                 microtype=True,
+                 page_numbers=True,
+                 indent=None,
+                 geometry_options=None,#['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
+                 data=None):
+
+        super().__init__(
+            default_filepath=default_filepath,
+            documentclass=documentclass,
+            document_options=document_options,
+            fontenc=fontenc,
+            inputenc=inputenc,
+            font_size=font_size,
+            lmodern=lmodern,
+            textcomp=textcomp,
+            microtype=microtype,
+            page_numbers=page_numbers,
+            indent=indent,
+            geometry_options=geometry_options,
+            data=data,
+        )
+#         label=self.label
+        self.title=title
+        self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
+        self.packages.append(Command('author', arguments=['Anna Mackojć, Bogumił Chiliński']))
+        self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
+        self.append(Command('maketitle'))
+        #self.append(NewPage())
+        # tu implementować co tam potrzeba
+        
         
 class ThesisTemplate(Document):
     
