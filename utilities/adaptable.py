@@ -21,6 +21,8 @@ import copy
 from dynpy.utilities.templates import tikz
 
 
+from pint import UnitRegistry
+ureg = UnitRegistry()
 
 
 
@@ -1431,7 +1433,12 @@ class EntryWithUnit:
         #display(unit)
         
         if unit:
-            return f'{entry_str} {left_par}{unit:~L}{right_par}'
+            if isinstance(unit,str):
+                return f'{entry_str} {left_par}{unit}{right_par}'
+            elif str(unit) == str(ureg.dimensionless):
+                return f'{entry_str} {left_par}-{right_par}'                
+            else:
+                return f'{entry_str} {left_par}{unit:~L}{right_par}'
         else:
             return f'{self._obj}'
 
