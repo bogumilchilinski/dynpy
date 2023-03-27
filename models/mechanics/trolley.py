@@ -562,7 +562,7 @@ class TrolleyWithPendulum(ComposedSystem):
         self.ivar = ivar
         self._init_from_components(**kwargs)
 
-    @property
+    @cached_property
     def components(self):
         components = {}
 
@@ -630,18 +630,18 @@ class TrolleyWithPendulum(ComposedSystem):
         data=self._given_data
         ans=self.force_in_cable()
         free_coeff=ans.subs({(cos(self.Omega*self.ivar))**2:0, (sin(self.Omega*self.ivar))**2:0}).subs(data)
-        return abs(free_coeff)
+        #display(free_coeff)
+        return (abs(free_coeff)).subs(data)
 
     def max_dynamic_cable_force(self):
         ans = self.force_in_cable()
-        #display(abs(self.components['_spring_l'].force()))
         data=self._given_data
-        sin_coeff=ans.coeff((sin(self.Omega*self.ivar))**2).subs(data)
-        display(sin_coeff)
-        cos_coeff=ans.coeff((cos(self.Omega*self.ivar))**2).subs(data)
-        display(cos_coeff)
-        free_coeff=ans.subs({(cos(self.Omega*self.ivar))**2:0, (sin(self.Omega*self.ivar))**2:0}).subs(data)
-        display(free_coeff)
+        sin_coeff=(ans.coeff((sin(self.Omega*self.ivar))**2)).subs(data)
+        #display(sin_coeff)
+        cos_coeff=(ans.coeff((cos(self.Omega*self.ivar))**2)).subs(data)
+        #display(cos_coeff)
+        free_coeff=(ans.subs({(cos(self.Omega*self.ivar))**2:0, (sin(self.Omega*self.ivar))**2:0})).subs(data)
+        #display(free_coeff)
         return sqrt(sin_coeff**2 + cos_coeff**2) + abs(free_coeff)
 
     def static_cable_diameter(self):
@@ -662,7 +662,8 @@ class TrolleyWithPendulum(ComposedSystem):
         
         force_in_cable = self.m_p*self.g*(1-S.One/2*phi**2) + self.m_p * self.l * phi.diff(self.ivar)**2
         force_subs=force_in_cable.subs(data)
-        
+        #force_subs=force_in_cable.subs({self.Omega:sqrt(self.g/self.l)}).subs(data)
+        #display(force_subs.doit().expand())
         return force_subs.doit().expand()
     
 #Zrobione Amadi
