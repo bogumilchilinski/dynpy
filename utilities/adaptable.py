@@ -773,12 +773,12 @@ class TikZPlot(TikZ, ReportModule):
                     #data.columns.name = labels[no]
                     
                     
-                    ax_data = self.axis_type(data,height=self.subplot_height,x_axis_empty=empty_axis,colour=colours_list[no],at = pos,handle=f'subplot{no}')
+                    ax_data = self.axis_type(data,height=self.subplot_height,width=self.width,x_axis_empty=empty_axis,colour=colours_list[no],at = pos,handle=f'subplot{no}')
 
                     self.append(ax_data)
             else:
                 
-                self.append(self.axis_type(plotdata))
+                self.append(self.axis_type(plotdata,height=self.height,width=self.width))
 
     @property
     def axis_type(self):
@@ -1267,8 +1267,8 @@ class DataMethods:
 
         return fig
 
-    def to_pylatex_tikz(self,height=None,subplots=None):
-        return TikZPlot(LatexDataFrame.formatted(self),height=height,subplots=subplots)
+    def to_pylatex_tikz(self,height=None,width=None,subplots=None):
+        return TikZPlot(LatexDataFrame.formatted(self),height=height,width=width,subplots=subplots)
 
     
     def to_latex_dataframe(self):
