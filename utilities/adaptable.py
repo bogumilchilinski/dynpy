@@ -344,8 +344,10 @@ class BaseIndexTransformer:
 
             labels = list(cols.to_flat_index())
             
-            if len(labels)==1:
-                labels = labels,
+            #print('len',len(labels),labels,type(labels))
+            
+#             if len(labels)==1:
+#                 labels =[(labels[0],)]
             
             
         else:
@@ -353,6 +355,7 @@ class BaseIndexTransformer:
             labels = [(entry,)  for entry in cols]
 
 
+        #print('len',len(labels),labels,type(labels))
         return labels
     
     
@@ -896,7 +899,7 @@ class TikZPlot(TikZ, ReportModule):
             width = self.__class__._image_parameters['width']
 
 
-            fig = Picture(filename+'.pdf', width=width)
+            fig = Picture(filename+'.pdf', width=width, caption = caption)
         else:
             standalone_plot.generate_tex(filename)
 

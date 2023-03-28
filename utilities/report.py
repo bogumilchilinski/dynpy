@@ -2865,12 +2865,13 @@ class Picture(Figure,ReportModule):
                 
                 img.resize(hsize,vsize)
                 display(img)
+                display(f'Fig. X: {self.caption}')
                 return ''
             else:
             
-                return f'![image preview]({path})'
+                return f'![image preview]({path}) \n \n Fig. X: {self.caption}'
         else:
-            return 'Nothing to plot'
+            return f'Nothing to plot \n \n Fig. X: {self.caption}'
         
 
     

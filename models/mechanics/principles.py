@@ -17,7 +17,7 @@ import numpy as np
 import inspect
 
 import matplotlib.pyplot as plt
-
+from functools import cached_property, lru_cache
 
 def plots_no():
     num = 0
@@ -236,7 +236,8 @@ class ComposedSystem(HarmonicOscillator):
         ]
 
         return comp_list
-
+    
+    @lru_cache
     def linearized(self): #it was missing
 
         return type(self).from_system(super().linearized())
