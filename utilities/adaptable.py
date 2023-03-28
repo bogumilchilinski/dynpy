@@ -344,7 +344,7 @@ class BaseIndexTransformer:
 
             labels = list(cols.to_flat_index())
             
-            print('len',len(labels),labels,type(labels))
+            #print('len',len(labels),labels,type(labels))
             
 #             if len(labels)==1:
 #                 labels =[(labels[0],)]
@@ -355,7 +355,7 @@ class BaseIndexTransformer:
             labels = [(entry,)  for entry in cols]
 
 
-        print('len',len(labels),labels,type(labels))
+        #print('len',len(labels),labels,type(labels))
         return labels
     
     
@@ -368,7 +368,7 @@ class BaseIndexTransformer:
         
         labels = self._spot_labels()
         
-        return [', '.join([str(entry) for entry in label]).replace(r'//','/')   for label in labels]
+        return [', '.join([str(entry) for entry in label])   for label in labels]
 
     def get_axis_str(self):
         
