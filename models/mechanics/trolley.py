@@ -1165,7 +1165,7 @@ class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
 class ForcedDampedTrolleysWithSprings(ComposedSystem):
     
     scheme_name = 'MDOF_Damped_Trolleys_With_Springs.PNG'
-    real_name = 'DoubleTrolley_real.png'
+    real_name = 'two_trolleys_damped_with_springs_real.png'
 
     m_1=Symbol('m_1', positive=True)
     m_2=Symbol('m_2', positive=True)
