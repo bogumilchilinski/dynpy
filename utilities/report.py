@@ -2851,7 +2851,11 @@ class Picture(Figure,ReportModule):
         from wand.image import Image as WImage
 
         self.cls_container.append(self)
-       
+        
+        if self.caption == None:
+            caption = ''
+        else: 
+            caption = self.caption
         
         if self.image is not None:
             path = (self.image)
@@ -2865,13 +2869,13 @@ class Picture(Figure,ReportModule):
                 
                 img.resize(hsize,vsize)
                 display(img)
-                display(f'Fig. X: {self.caption}')
+                display(f'Fig. X: {caption}')
                 return ''
             else:
             
-                return f'![image preview]({path}) \n \n Fig. X: {self.caption}'
+                return f'![image preview]({path}) \n \n Fig. X: {caption}'
         else:
-            return f'Nothing to plot \n \n Fig. X: {self.caption}'
+            return f'Nothing to plot \n \n Fig. X: {caption}'
         
 
     
