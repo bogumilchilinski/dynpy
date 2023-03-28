@@ -16,6 +16,8 @@ from IPython.display import display
 
 import sympy.physics.mechanics as me
 
+from .linear import ODESystem
+
 from sympy.simplify.fu import TR8, TR10, TR7, TR3
 from timer import timer
 
@@ -314,4 +316,5 @@ class OdeComputationalCase:
 
 
     
-    
+class NumericalODE(ODESystem):
+    pass
