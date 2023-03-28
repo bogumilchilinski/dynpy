@@ -2868,9 +2868,9 @@ class Picture(Figure,ReportModule):
                 return ''
             else:
             
-                return f'![image preview]({path})'
+                return f'![image preview]({path}) \n \n {self.caption}'
         else:
-            return 'Nothing to plot'
+            return f'Nothing to plot \n \n {self.caption}'
         
 
     

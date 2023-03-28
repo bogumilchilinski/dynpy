@@ -896,7 +896,7 @@ class TikZPlot(TikZ, ReportModule):
             width = self.__class__._image_parameters['width']
 
 
-            fig = Picture(filename+'.pdf', width=width)
+            fig = Picture(filename+'.pdf', width=width, caption = caption)
         else:
             standalone_plot.generate_tex(filename)
 
