@@ -1263,20 +1263,21 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
 
     def get_default_data(self):
 
-        m0, k0, lam, Omega0, F0= symbols('m_0 k_0 lambda Omega_0 F0', positive=True)
+        m0, k0, lam, Omega0, F0 = symbols('m_0 k_0 lambda Omega_0 F0', positive=True)
 
         default_data_dict = {
-            self.m_2: [S.One * self.m_1],
-            self.m_1: [S.One * m0 * no for no in range(20, 30)],
-            self.m: [S.One * m0 * no for no in range(1,5)],
             self.c_r: [S.One * lam * self.k_c],
             self.c_l: [S.One * lam * self.k_c],
             self.c_c: [S.One * lam * self.k_c],
+            self.Omega: [S.One * Omega0],
+            self.F: [S.One * F0 * no for no in range(5,25)],
+            self.m: [S.One * m0 * no for no in range(1,5)],
+            self.m_2: [S.One * self.m_1],
+            self.m_1: [S.One * m0 * no for no in range(20, 30)],
             self.k_l: [S.One * self.k_c],
             self.k_r: [S.One * self.k_c],
             self.k_c: [S.One * k0 * no for no in range(60, 90)],
-            self.Omega: [S.One * Omega0],
-            self.F: [S.One * F0 * no for no in range(5,25)],
+            
         }
 
         return default_data_dict
