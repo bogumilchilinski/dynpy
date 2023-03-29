@@ -2429,3 +2429,7 @@ class LinearODESolution:
         return self.general_solution(
             initial_conditions=initial_conditions) + self.steady_solution(
                 initial_conditions=initial_conditions)
+
+
+# class NumericalODE(ODESystem):
+#     pass
