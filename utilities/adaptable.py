@@ -447,6 +447,21 @@ class DataAxis(Axis, ReportModule):
             for data in self._plots:
                 self.append(data)
 
+    
+    @classmethod
+    def set_default_colours(cls, colour=None):
+        cls._default_colours = colour
+        return cls
+
+    @classmethod
+    def set_width(cls, width=None):
+        cls._width = width
+        return cls
+    
+    @classmethod
+    def set_height(cls, height=None):
+        cls._height = height
+        return cls 
 
     @property
     def handle(self):
