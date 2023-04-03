@@ -198,6 +198,8 @@ class Element(LagrangesDynamicSystem):
 
         #print(f'{class_name} element check', self.scheme_options )
         return [TikZNode('Material Point',options=['draw'],text=f'{class_name}')]
+
+    
 #Pati
 class MaterialPoint(Element):
     """

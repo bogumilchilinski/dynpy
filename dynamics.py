@@ -51,6 +51,8 @@ import matplotlib.pyplot as plt
 base_frame=me.ReferenceFrame('N')
 base_origin=me.Point('O')
 
+from functools import cached_property, lru_cache
+
 class GeometryScene:
     """_summary_
     """
@@ -768,6 +770,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return systems_sum
 
+    #@lru_cache
     def subs(self, *args, **kwargs):
         """
         Returns class instance with substituted numerical values

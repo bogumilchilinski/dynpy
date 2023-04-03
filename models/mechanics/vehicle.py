@@ -36,23 +36,15 @@ class UndampedVehicleSuspension(ComposedSystem):
     l_rod=Symbol('l_{rod}', positive=True)
     l_l=Symbol('l_l', positive=True)
     l_r=Symbol('l_r', positive=True)
-                
     r=Symbol('k_r', positive=True)
-                
     k_l=Symbol('k_l', positive=True)
     k_r=Symbol('k_r', positive=True)
-                
     F_engine=Symbol('F_{engine}', positive=True)
     Omega=Symbol('Omega',positive=True)
     ivar=Symbol('t')
-
-
-    
-          
     #qs=dynamicsymbols('z, \\varphi')
     phi=dynamicsymbols('\\varphi')
     z=dynamicsymbols('z')
-
     #default symbols for substitution
     m0=Symbol('m_0', positive=True)
     l0=Symbol('l_0', positive=True)
@@ -77,9 +69,8 @@ class UndampedVehicleSuspension(ComposedSystem):
                  z=None,
                  ivar=Symbol('t'),
                  qs=None,
-                 
                  **kwargs):
-  
+
         if  m is not None: self.m =m # mass of a rod
         if  I is not None: self.I = I # moment of inertia of a rod
         if  l_rod is not None: self.l_rod =l_rod# length of a rod
@@ -90,9 +81,8 @@ class UndampedVehicleSuspension(ComposedSystem):
         if  F_engine is not None: self.F_engine = F_engine
         if  Omega is not None: self.Omega = Omega
         if  phi is not None: self.phi = phi
-        if z is not None: self.z=z    
-          
-            # self.z, self.phi = self.qs
+        if z is not None: self.z=z
+        # self.z, self.phi = self.qs
         self.qs = [self.z,self.phi]
 
         self._init_from_components(**kwargs)
@@ -123,36 +113,60 @@ class UndampedVehicleSuspension(ComposedSystem):
 #    def dynamic_bearing_force(self):
        
 #       return self.max_dynamic_force_pin() * self.sqrt(L)
-    def max_static_force_pin(self):
-        return self.components['_spring_l'].subs({coord:0 for coord in self.q})
+
+#     def max_static_force_pin(self):
+#         return self.components['_spring_l'].subs({coord:0 for coord in self.q})
 
     
-
-    
-    
-    
     def max_static_force_pin(self):
-        return (abs(self.static_load().doit()[0])/2)
+        data=self._given_data
+        ans=self.dynamic_force()
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        return abs(free_coeff)
     
     def static_force_pin_diameter(self):
         kt=Symbol('k_t', positive=True)
         Re=Symbol('R_e', positive=True)
         return ((4*self.max_static_force_pin())/(pi*kt*Re))**(1/2)
 
+
 #     def max_dynamic_force_pin(self):
 #         frf=self._frf
 #         return (frf[0] + frf[1]*self.l_l)*self.k_l
 
     
+#     def max_dynamic_force_pin(self):
+        
+#         amps = self._frf()
+#         force = self.components['_spring_l'].force().doit().expand()#.doit()
+#         data=self._given_data
+#         display(abs(self.components['_spring_l'].force()))
+#         return abs((self.components['_spring_l'].force().subs({coord:amp for amp,coord in zip(amps,self.q)})).subs(data)).doit()
+    
+    
+    def dynamic_force(self):
+        
+        amps = self._fodes_system.steady_solution.as_dict()
+        force = self.components['_spring_l'].force().doit().expand()#.doit()
+        data=self._given_data
+        
+        #display(abs(self.components['_spring_l'].force()))
+        return (self.components['_spring_l'].force().subs(amps)).subs(data).expand().doit()
+
     def max_dynamic_force_pin(self):
         
-        amps = self._frf()
-        force = self.components['_spring_l'].force().doit().expand()#.doit()
+        ans = self.dynamic_force()
+        
+        #display(abs(self.components['_spring_l'].force()))
+        data=self._given_data
+        sin_coeff=ans.coeff(sin(self.Omega*self.ivar)).subs(data)
+        #display(sincoeff)
+        cos_coeff=ans.coeff(cos(self.Omega*self.ivar)).subs(data)
+        #display(coscoeff)
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        #display(freecoeff)
 
-        display(abs(self.components['_spring_l'].force()))
-        return abs((self.components['_spring_l'].force().subs({coord:amp for amp,coord in zip(amps,self.q)}))).doit()
-
-
+        return sqrt(sin_coeff**2 + cos_coeff**2) + abs(free_coeff)
 
     def dynamic_bearing_force(self):
         L=Symbol('L')#wymagana trwałość
@@ -161,7 +175,11 @@ class UndampedVehicleSuspension(ComposedSystem):
     def dynamic_force_pin_diameter(self):
         kt=Symbol('k_t', positive=True)
         Re=Symbol('R_e', positive=True)
-        return ((4*self.max_dynamic_force_pin())/(pi*kt*Re))**(1/2)
+        
+        
+        load = abs(self.max_dynamic_force_pin())
+        
+        return ((4*load)/(pi*kt*Re))**(1/2)
     
 
     def get_default_data(self):
@@ -197,13 +215,6 @@ class UndampedVehicleSuspension(ComposedSystem):
 #             self.Omega: [self.Omega],
             #self.F_engine: [4*no*F0*S.One*abs(cos(pi/2*no))  + F0*S.One*no*cos(self.Omega*self.ivar) for no in range(1,8)],
             self.F_engine: [4 * no * F0 * S.One for no in range(1,8)],
-#            self.F_engine: [
-#                2 * F_0 * sin(Omega * self.ivar),
-#                3 * F_0 * sin(Omega * self.ivar),
-#                4 * F_0 * sin(omega * self.ivar),
-#                5 * F_0 * sin(omega * self.ivar),
-#                 6 * F_0 * sin(omega * self.ivar)
-#            ]
         }
 
         return default_data_dict
@@ -226,6 +237,112 @@ class UndampedVehicleSuspension(ComposedSystem):
         ]
         
         return comp_list
+    
+class UndampedSymmetricalVehicleSuspension(UndampedVehicleSuspension):
+
+    scheme_name = 'car_undamped.png'
+    real_name = 'car_real.jpg'
+
+    m=Symbol('m', positive=True)
+    I=Symbol('I', positive=True)
+    l_rod=Symbol('l_{rod}', positive=True)
+    l_l=Symbol('l_l', positive=True)
+    l_r=Symbol('l_r', positive=True)
+    r=Symbol('k_r', positive=True)
+    k_l=Symbol('k_l', positive=True)
+    k_r=Symbol('k_r', positive=True)
+    F_engine=Symbol('F_{engine}', positive=True)
+    Omega=Symbol('Omega',positive=True)
+    ivar=Symbol('t')
+    #qs=dynamicsymbols('z, \\varphi')
+    phi=dynamicsymbols('\\varphi')
+    z=dynamicsymbols('z')
+    #default symbols for substitution
+    m0=Symbol('m_0', positive=True)
+    l0=Symbol('l_0', positive=True)
+    c0=Symbol('c_0', positive=True)
+    k0=Symbol('k_0', positive=True)
+    lam0=Symbol('\lambda_0', positive=True)
+    Omega0=Symbol('Omega_0', positive=True)
+    F0=Symbol('F_0', positive=True)
+    
+
+    def __init__(self,
+                 m=None,
+                 I=None,
+                 l_rod=None,
+                 l_r=None,
+                 k_r=None,
+                 k_l=None,
+                 l_l=None,
+                 F_engine=None,
+                 Omega=None,
+                 phi=None,
+                 z=None,
+                 ivar=Symbol('t'),
+                 qs=None,
+                 **kwargs):
+
+        if  m is not None: self.m =m # mass of a rod
+        if  I is not None: self.I = I # moment of inertia of a rod
+        if  l_rod is not None: self.l_rod =l_rod# length of a rod
+        if  l_r is not None: self.l_r = l_r 
+        if  l_l is not None: self.l_l = l_l 
+        if  k_r is not None: self.k_r =k_r# left spring
+        if  k_l is not None: self.k_l = k_l# right spring
+        if  F_engine is not None: self.F_engine = F_engine
+        if  Omega is not None: self.Omega = Omega
+        if  phi is not None: self.phi = phi
+        if z is not None: self.z=z
+        # self.z, self.phi = self.qs
+        self.qs = [self.z,self.phi]
+
+        self._init_from_components(**kwargs)
+
+    @cached_property
+    def components(self):
+
+        components = {}
+
+        self._body = RigidBody2D(self.m, self.I, pos_lin=self.z, pos_rot=self.phi, qs=self.qs)(label='rod')
+        self._spring_l = Spring(self.k_l, pos1=self.z + self.phi * self.l_l, qs=self.qs)(label='left spring')
+        self._spring_r = Spring(self.k_r, pos1=self.z - self.phi * self.l_r, qs=self.qs)(label='right spring')
+        self._force = Force(self.F_engine*cos(self.Omega*self.ivar), pos1=self.z - self.l_r * self.phi, qs=self.qs)(label='force')
+        self._static_force = Force(self.F_engine, pos1=self.z - self.l_r * self.phi, qs=self.qs)(label='force')
+
+        components['_body'] = self._body
+        components['_spring_l'] = self._spring_l
+        components['_spring_r'] = self._spring_r
+        components['_force'] = self._force
+        components['_static_force'] = self._static_force
+
+        return components
+
+    def get_default_data(self):
+
+        #m0, l0, c0, k_0, l_l0, omega, F_0 = symbols('m_0 l_0 c_0 k_0 l_l0 Omega F_0', positive=True)
+        c0, k_0, l_l0, omega, F_0 = symbols('c_0 k_0 l_l0 Omega F_0', positive=True)
+        m0, l0  = self.m0,self.l0
+        c0, k0= self.c0,self.k0
+        lam0=self.lam0
+        Omega0=self.Omega0
+        F0=self.F0
+        Omega = self.Omega
+
+        default_data_dict = {
+            self.l_l: [self.l_r],
+            self.l_rod:[l0*S.One*no for no in range(1, 8)],
+            self.I: [S.One/12*self.m *self.l_rod**2],
+            self.m: [m0*S.One*no for no in range(1,50)],
+            self.k_l: [self.k_r],
+            self.k_r: [k0*S.One*no for no in range(1,40)],
+            self.l_r: [l0*S.One*no for no in range(1, 8)],
+#           self.Omega: [self.Omega],
+            self.F_engine: [4 * no * F0 * S.One for no in range(1,8)],
+        }
+
+        return default_data_dict
+
     
 class DampedVehicleSuspension(UndampedVehicleSuspension):
 

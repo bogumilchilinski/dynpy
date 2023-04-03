@@ -21,6 +21,8 @@ import copy
 from dynpy.utilities.templates import tikz
 
 
+from pint import UnitRegistry
+ureg = UnitRegistry()
 
 
 
@@ -67,6 +69,7 @@ class ReportModule:
         >>>RM.set_units_dict(unit_dict)
     '''
 
+    _cls_container = []
     cls_container = []
     _container = []
     cls_path = '.'
@@ -142,6 +145,15 @@ class ReportModule:
         cls._units = units
         return cls
 
+#     @property
+#     def _cls_container(self):
+#         return self.__class__._cls_container
+    
+#     @property
+#     def _container(self):
+#         return self.__class__._cls_container
+    
+    
     def __init__(self,
                  container=None,
                  path=None,
@@ -332,8 +344,10 @@ class BaseIndexTransformer:
 
             labels = list(cols.to_flat_index())
             
-            if len(labels)==1:
-                labels = labels,
+            #print('len',len(labels),labels,type(labels))
+            
+#             if len(labels)==1:
+#                 labels =[(labels[0],)]
             
             
         else:
@@ -341,6 +355,7 @@ class BaseIndexTransformer:
             labels = [(entry,)  for entry in cols]
 
 
+        #print('len',len(labels),labels,type(labels))
         return labels
     
     
@@ -382,7 +397,7 @@ class DataAxis(Axis, ReportModule):
     _height = NoEscape(r'5cm')
     _width = '0.9\\textwidth'
     _x_axis_empty = False
-
+    _legend_pos = 'north east'
     _default_transformer = BaseIndexTransformer
 
     def __init__(self,
@@ -432,6 +447,21 @@ class DataAxis(Axis, ReportModule):
             for data in self._plots:
                 self.append(data)
 
+    
+    @classmethod
+    def set_default_colours(cls, colour=None):
+        cls._default_colours = colour
+        return cls
+
+    @classmethod
+    def set_width(cls, width=None):
+        cls._width = width
+        return cls
+    
+    @classmethod
+    def set_height(cls, height=None):
+        cls._height = height
+        return cls 
 
     @property
     def handle(self):
@@ -473,6 +503,7 @@ class DataAxis(Axis, ReportModule):
                          ]
 
         base_options = ['grid style=dashed',
+                        f'legend pos={self._legend_pos}',
                        NoEscape('legend style={font=\small}'),
 
                        #NoEscape('at={(0,0)}'),
@@ -538,7 +569,7 @@ class DataAxis(Axis, ReportModule):
         else:
             name = None
 
-        return name if name is not None else self._x_axis_name
+        return '{'+name+'}' if name is not None else '{'+self._x_axis_name +'}'
 
     @property
     def _data_description(self):
@@ -704,11 +735,13 @@ class TikZPlot(TikZ, ReportModule):
 
     _in_figure = False
     _figure_gen = lambda: Figure(position='H')
-    _image_parameters = {'width': NoEscape(r'0.9\textwidth')}
+    _image_parameters = {'width': None}
     
     _floats_no_gen = plots_no()    
     _default_path = './tikzplots'
     _filename = None
+    _prefix = None
+    
     _picture = True
     _caption = 'Default caption'
     
@@ -763,12 +796,12 @@ class TikZPlot(TikZ, ReportModule):
                     #data.columns.name = labels[no]
                     
                     
-                    ax_data = self.axis_type(data,height=self.subplot_height,x_axis_empty=empty_axis,colour=colours_list[no],at = pos,handle=f'subplot{no}')
+                    ax_data = self.axis_type(data,height=self.subplot_height,width=self.width,x_axis_empty=empty_axis,colour=colours_list[no],at = pos,handle=f'subplot{no}')
 
                     self.append(ax_data)
             else:
                 
-                self.append(self.axis_type(plotdata))
+                self.append(self.axis_type(plotdata,height=self.height,width=self.width))
 
     @property
     def axis_type(self):
@@ -884,7 +917,7 @@ class TikZPlot(TikZ, ReportModule):
             width = self.__class__._image_parameters['width']
 
 
-            fig = Picture(filename+'.pdf', width=width)
+            fig = Picture(filename+'.pdf', width=width, caption = caption)
         else:
             standalone_plot.generate_tex(filename)
 
@@ -896,8 +929,12 @@ class TikZPlot(TikZ, ReportModule):
     @property    
     def filename(self):
     
-        if self._filename is None:
+        if self._filename is None and self._prefix is None:
             filename = f'{self.__class__._default_path}/plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
+            
+        elif self._filename is None and self._prefix is not None:
+            filename = f'{self.__class__._default_path}/{self._prefix}_plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
+            
         else:
             filename = self._filename
 
@@ -1257,9 +1294,12 @@ class DataMethods:
 
         return fig
 
-    def to_pylatex_tikz(self,height=None,subplots=None):
-        return TikZPlot(LatexDataFrame.formatted(self),height=height,subplots=subplots)
+    def to_pylatex_tikz(self,height=None,width=None,subplots=None):
+        return TikZPlot(LatexDataFrame.formatted(self),height=height,width=width,subplots=subplots)
+
     
+    def to_latex_dataframe(self):
+        return LatexDataFrame.formatted(self)
     
 class SpectralMethods(DataMethods):
 
@@ -1418,17 +1458,27 @@ class EntryWithUnit:
         #display(unit)
         
         if unit:
-            return f'{entry_str} {left_par}{unit:~L}{right_par}'
+            if isinstance(unit,str):
+                return f'{entry_str} {left_par}{unit}{right_par}'
+            elif str(unit) == str(ureg.dimensionless):
+                return f'{entry_str} {left_par}-{right_par}'                
+            else:
+                return f'{entry_str} {left_par}{unit:~L}{right_par}'
         else:
             return f'{self._obj}'
 
 
 class DataTable(Table,ReportModule):
+
+    _position = 'H'
     _latex_name = 'table'
     packages=[Package('booktabs'),Package('longtable')]
 
-    def __init__(self, numerical_data, position='H'):
-        super().__init__(position=position)
+    def __init__(self, numerical_data, position=None):
+        
+        if position is not None: self._position = position
+        
+        super().__init__(position=self._position)
         ##print(numerical_data)
         self._numerical_data = numerical_data
         self.position = position

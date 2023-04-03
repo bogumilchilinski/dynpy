@@ -166,11 +166,42 @@ class BlowerToothedBelt(ComposedSystem):
         return self.k_belt * self.steady_solution()[0]
 
     def max_static_force(self):
-        return abs(self.static_load().doit()[0])
+        data=self._given_data
+        ans=self.dynamic_force()
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+#        abs(self.static_load().doit()[0])
+        return abs(free_coeff)
 
+    
+    def dynamic_force(self):
+
+        amps = self._fodes_system.steady_solution.as_dict()
+        force_in_tensioner = self.components['_tensioner'].force().doit().expand()#.doit()
+        data=self._given_data
+        #display(abs(self.components['_tensioner'].force()))
+        #ans=(self.components['_tensioner'].force().subs(amps)).expand().doit()
+        
+        ##### new force implementation
+        ans = force_in_tensioner.subs(amps).expand().doit()
+
+        return ans.subs(data)
+    
+    
     def max_dynamic_force(self):
-        return self.frequency_response_function() * self._tensioner.stiffness + self.max_static_force()
 
+        ans=self.dynamic_force()
+        data=self._given_data
+        sin_coeff=ans.coeff(sin(self.Omega*self.ivar)).subs(data)
+        #display(sincoeff)
+        cos_coeff=ans.coeff(cos(self.Omega*self.ivar)).subs(data)
+        #display(coscoeff)
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        #display(freecoeff)
+
+        return sqrt(sin_coeff**2 + cos_coeff**2) + abs(free_coeff)
+
+    
+    
     def static_force_pin_diameter(self):
         kt = Symbol('k_shear', positive=True)
         Re = Symbol('R_e', positive=True)
@@ -179,7 +210,9 @@ class BlowerToothedBelt(ComposedSystem):
     def dynamic_force_pin_diameter(self):
         kt = Symbol('k_shear', positive=True)
         Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_dynamic_force()) / (pi * kt * Re))**(1 / 2)
+        data=self._given_data
+        load = abs(self.max_dynamic_force())
+        return (((4 * load) / (pi * kt * Re))**(1 / 2)).subs(data)
 
 #dziedziczenie po BlowerToothedBelt - POPRAWIONE
 class DampedBlowerToothedBelt(BlowerToothedBelt):

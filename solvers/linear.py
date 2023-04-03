@@ -661,7 +661,7 @@ class ODESolution(AnalyticalSolution):
         ics_dynamic_symbols = Matrix([Symbol(f'{self._dvars_str}0')] + ics_dynamic_symbols)
         # ics_dynamic_symbols = Matrix([Symbol(f'{self._dvars_str}_{index}diif') for index in range(len(self.dvars))])
         return ics_dynamic_symbols
- 
+
 ##------------------ TEST ------------------
 
     @property
@@ -1184,6 +1184,46 @@ class ODESystem(AnalyticalSolution):
         
         return comp_list
 
+    @cached_property
+    def _general_solution(self):
+
+        fode = self._as_fode()
+        #solver changing due to the computational simplicity reasons
+
+        fode_sys=FirstOrderLinearODESystem(fode,fode.dvars)        
+
+        return fode_sys.general_solution
+
+    @cached_property
+    def _steady_solution(self):
+
+        fode = self._as_fode()
+        #solver changing due to the computational simplicity reasons
+
+        fode_sys=FirstOrderLinearODESystemWithHarmonics(fode,fode.dvars)        
+
+        return fode_sys.steady_solution
+
+
+    
+    
+    @cached_property
+    def general_solution(self):
+
+        return self._general_solution
+
+
+    @cached_property
+    def steady_solution(self):
+
+        return self._steady_solution
+    
+    @property
+    def solution(self):
+
+        return self.general_solution + self.steady_solution    
+    
+    
 
 class FirstOrderODESystem(ODESystem):
     
@@ -1237,7 +1277,44 @@ class FirstOrderODESystem(ODESystem):
         
         return obj
     
+#     @cached_property
+#     def _general_solution(self):
 
+        
+
+
+#         return ODESolution(self.dvars,sol).subs( const_dict )
+                                 
+
+                                 
+#     @cached_property
+#     def _steady_solution(self):
+                                 
+        
+
+    
+
+
+#         return ODESolution(self.dvars,sol).subs({dum_sym:0 for dum_sym in dummies_set})
+
+
+    
+    
+#     @cached_property
+#     def general_solution(self):
+
+#         return self._general_solution
+
+
+#     @cached_property
+#     def steady_solution(self):
+
+#         return self._steady_solution
+    
+#     @property
+#     def solution(self):
+
+#         return self.general_solution + self.steady_solution
 
     
     
@@ -2352,3 +2429,7 @@ class LinearODESolution:
         return self.general_solution(
             initial_conditions=initial_conditions) + self.steady_solution(
                 initial_conditions=initial_conditions)
+
+
+# class NumericalODE(ODESystem):
+#     pass

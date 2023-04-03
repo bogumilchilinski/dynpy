@@ -24,7 +24,7 @@ from ...utilities.components.mech import en as mech_comp
 from pint import UnitRegistry
 ureg = UnitRegistry()
 
-from functools import cached_property
+from functools import cached_property, lru_cache
 
 #Patryk
 #dane domyślne i numeryczne
@@ -562,7 +562,7 @@ class TrolleyWithPendulum(ComposedSystem):
         self.ivar = ivar
         self._init_from_components(**kwargs)
 
-    @property
+    @cached_property
     def components(self):
         components = {}
 
@@ -599,28 +599,168 @@ class TrolleyWithPendulum(ComposedSystem):
             self.m_p: [S.One * m0 * no for no in range(1, 10)],
             self.l: [S.Half * l0 * no for no in range(1, 10)],
             self.F: [S.One * F0 * no for no in range(50, 100)],
-            self.Omega: [S.One * Omega0],
+            self.Omega: [S.One * self.Omega],
             self.g: [S.One * self.g],
-            self.k: [S.One * k0 * no for no in range(50, 100)],
+            self.k: [S.One * self.g * m0 / l0 * no for no in range(1, 30)],
             self.x: [self.x]
         }
+        
+        #default_data_dict.update({self.k: S.One * self.g * default_data_dict[self.m_t][0]+default_data_dict[self.l][0],
+        #                         })
+        
         return default_data_dict
     
     def get_numerical_data(self):
 
         m_taipei = 700 * 1e3
+        omg_nat = 2*pi/10
         
         default_data_dict = {
             self.m_t: [m_taipei for no in range(20, 30)],
             self.m_p: [0.01*m_taipei for no in range(1, 10)],
-            self.l: [50 for no in range(1, 10)],
-            self.F: [2*pi/16 for no in range(50, 100)],
-            self.Omega: [2*pi/16 * no for no in range(1,6)],
-            self.k: [m_taipei*(2*pi/16)**2 for no in range(50, 100)],
+            self.l: [9.81/omg_nat**2 for no in range(1, 10)],
+            self.F: [300 * 1e3  for no in range(50, 100)],
+            self.Omega: [omg_nat   for no in range(1,6)],
+            self.k: [m_taipei*(omg_nat)**2 for no in range(50, 100)],
             self.g: [9.81]
         }
         return default_data_dict
 
+    @lru_cache
+    def max_static_cable_force(self):
+        data=self._given_data
+        ans=self.force_in_cable()
+        free_coeff=ans.subs({(cos(self.Omega*self.ivar))**2:0, (sin(self.Omega*self.ivar))**2:0}).subs(data)
+        #display(free_coeff)
+        return (abs(free_coeff)).subs(data)
+
+    @lru_cache
+    def max_dynamic_cable_force(self):
+        ans = self.force_in_cable()
+        data=self._given_data
+        sin_coeff=(ans.coeff((sin(self.Omega*self.ivar))**2)).subs(data)
+        #display(sin_coeff)
+        cos_coeff=(ans.coeff((cos(self.Omega*self.ivar))**2)).subs(data)
+        #display(cos_coeff)
+        free_coeff=(ans.subs({(cos(self.Omega*self.ivar))**2:0, (sin(self.Omega*self.ivar))**2:0})).subs(data)
+        #display(free_coeff)
+        return sqrt(sin_coeff**2 + cos_coeff**2) + abs(free_coeff)
+
+    @lru_cache
+    def static_cable_diameter(self):
+        kr = Symbol('k_r', positive=True)
+        Re = Symbol('R_e', positive=True)
+        return ((4 * self.max_static_cable_force()) / (pi * kr * Re))**(1 / 2)
+
+    @lru_cache
+    def dynamic_cable_diameter(self):
+        kr = Symbol('k_r', positive=True)
+        Re = Symbol('R_e', positive=True)
+        return ((4 * self.max_dynamic_cable_force()) / (pi * kr * Re))**(1 / 2)
+
+    @lru_cache  
+    def force_in_cable(self):
+        data=self._given_data
+        dyn_sys=self#.subs(data)
+        dyn_sys_lin=dyn_sys.linearized()
+        phi=dyn_sys_lin._fodes_system.steady_solution[1]
+        
+        force_in_cable = self.m_p*self.g*(1-S.One/2*phi**2) + self.m_p * self.l * phi.diff(self.ivar)**2
+        force_subs=force_in_cable.subs(data)
+        #force_subs=force_in_cable.subs({self.Omega:sqrt(self.g/self.l)}).subs(data)
+        #display(force_subs.doit().expand())
+        return force_subs.doit().expand()
+    
+# class DampedTrolleysWithSprings(ComposedSystem):
+#     scheme_name = 'MDOF_Damped_Trolleys_With_Springs.PNG'
+#     real_name = 'two_damped_trolleys.png'
+
+#     def __init__(self,
+#                  R=Symbol('R', positive=True),
+#                  m=Symbol('m', positive=True),
+#                  m1=Symbol('m_1', positive=True),
+#                  m2=Symbol('m_2', positive=True),
+#                  k_l=Symbol('k_l', positive=True),
+#                  c_cl=Symbol('c_cl', positive=True),
+#                  k_c=Symbol('k_c', positive=True),
+#                  c_cc=Symbol('c_cc', positive=True),
+#                  k_r=Symbol('k_r', positive=True),
+#                  c_cr=Symbol('c_cr', positive=True),
+#                  x_l=dynamicsymbols('x_l'),
+#                  x_r=dynamicsymbols('x_r'),
+#                  x=dynamicsymbols('x'),
+#                  qs=dynamicsymbols('x_l x_r'),
+#                  ivar=Symbol('t'),
+#                  **kwargs):
+
+#         self.m1 = m1
+#         self.m2 = m2
+#         self.m = m
+#         self.k_l = k_l
+#         self.c_cl = c_cl
+#         self.k_c = k_c
+#         self.c_cc = c_cc
+#         self.k_r = k_r
+#         self.c_cr = c_cr
+#         self.x_l = x_l
+#         self.x_r = x_r
+#         self.x = x
+#         self.R = R
+
+#         self.Trolley_1 = (MaterialPoint(m1, x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[x_l]) 
+#                           + Spring(k_l, pos1=x_l, qs=[x_l]) + Damper(c_cl, pos1=x_l, qs=[x_l]) 
+#                           + MaterialPoint(m, x_l/2, qs = [x_l]) + MaterialPoint(m/2, x_l/2, qs = [x_l]) + MaterialPoint(m, x_l/2, qs = [x_l]) 
+#                           + MaterialPoint(m/2, x_l/2, qs = [x_l]))
+
+#         self.Trolley_2 = (MaterialPoint(m2, x_r, qs=[x_r]) + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) 
+#                           + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) 
+#                           + Damper(c_cc, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) 
+#                           + Damper(c_cr, pos1=x_r, qs=[x_r]) + MaterialPoint(m, x_r/2, qs = [x_r]) + MaterialPoint(m/2, x_r/2, qs = [x_r]) + MaterialPoint(m, x_r/2, qs = [x_r]) 
+#                           + MaterialPoint(m/2, x_r/2, qs = [x_r]))
+
+#         system = self.Trolley_1 + self.Trolley_2
+#         super().__init__(system(qs),**kwargs)
+
+#     def get_default_data(self):
+
+#         m0, k0, l0, lam = symbols('m k l_0 lambda', positive=True)
+
+#         default_data_dict = {
+#             self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#             self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#             self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+
+#             self.k_l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+#             self.k_c: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+#             self.k_r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+
+#             self.c_cr: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
+#             self.c_cc: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
+#             self.c_cl: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
+
+#             self.x_l: [self.x, 0],
+#             self.x_r: [self.x, 0],
+#         }
+
+#         return default_data_dict
+
+#     def get_random_parameters(self):
+
+#         default_data_dict = self.get_default_data()
+
+#         parameters_dict = {
+#             key: random.choice(items_list)
+#             for key, items_list in default_data_dict.items()
+#         }
+
+#         if parameters_dict[self.x_l] == 0 and parameters_dict[self.x_r]==0:
+
+#             parameters_dict[self.x_l] = self.x
+
+
+#         return parameters_dict
+
+    
 #Zrobione Amadi
 class DampedTrolleyWithPendulum(TrolleyWithPendulum):
 
@@ -1018,36 +1158,42 @@ class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
         mech_comp.FundamentalMatrixComponent,
         mech_comp.GeneralSolutionComponent,
         #mech_comp.SteadySolutionComponent,
-            
-            
         ]
-        
         return comp_list
     
     
-class ForcedDampedTrolleysWithSprings(NonlinearComposedSystem): ### 4 ODE
+class ForcedDampedTrolleysWithSprings(ComposedSystem):
     
-    scheme_name = 'nonlin_trolley.PNG'
-    real_name = 'nonlin_trolley_real.PNG'
+    scheme_name = 'MDOF_Damped_Trolleys_With_Springs.PNG'
+    real_name = 'two_trolleys_damped_with_springs_real.png'
 
     m_1=Symbol('m_1', positive=True)
     m_2=Symbol('m_2', positive=True)
-    k=Symbol('k', positive=True)
-    c=Symbol('c', positive=True)
+    m=Symbol('m', positive=True)
+    R=Symbol('R', positive=True)
+    k_l=Symbol('k_l', positive=True)
+    k_r=Symbol('k_r', positive=True)
+    k_c=Symbol('k_c', positive=True)
+    c_l=Symbol('c_cl', positive=True)
+    c_r=Symbol('c_cr', positive=True)
+    c_c=Symbol('c_cc', positive=True)
     Omega=Symbol('Omega', positive=True)
     F=Symbol('F', positive=True)
-    G=Symbol('G', positive=True)
-    x_1=dynamicsymbols('x_1')
-    x_2=dynamicsymbols('x_2')
+    x_1=dynamicsymbols('x_l')
+    x_2=dynamicsymbols('x_r')
    
     def __init__(self,
                  m_1=None,
                  m_2=None,
-                 k=None,
-                 c=None,
+                 m=None,
+                 k_l=None,
+                 k_r=None,
+                 k_c=None,
+                 c_l=None,
+                 c_r=None,
+                 c_c=None,
                  Omega=None,
                  F=None,
-                 G=None,
                  x_1=None,
                  x_2=None,
                  ivar=Symbol('t'),
@@ -1055,11 +1201,15 @@ class ForcedDampedTrolleysWithSprings(NonlinearComposedSystem): ### 4 ODE
 
         if m_1 is not None: self.m_1 = m_1
         if m_2 is not None: self.m_2 = m_2
-        if k is not None: self.k= k
-        if c is not None: self.c= c
+        if m is not None: self.m = m
+        if k_l is not None: self.k_l = k_l
+        if k_r is not None: self.k_r = k_r
+        if k_c is not None: self.k_c = k_c
+        if c_l is not None: self.c_l = c_l
+        if c_r is not None: self.c_r = c_r
+        if c_c is not None: self.c_c = c_c
         if Omega is not None: self.Omega = Omega
         if F is not None: self.F = F
-        if G is not None: self.G = G
         if x_1 is not None: self.x_1 = x_1
         if x_2 is not None: self.x_2 = x_2
 
@@ -1072,29 +1222,66 @@ class ForcedDampedTrolleysWithSprings(NonlinearComposedSystem): ### 4 ODE
         components = {}
 
         self._trolley1 = MaterialPoint(self.m_1, self.x_1, qs=[self.x_1])
-        self._spring1 = Spring(self.k, pos1 = self.x_1, qs=[self.x_1])
-        self._damper1 = Damper(self.c, pos1 = self.x_1, qs=[self.x_1])
-        self._force = Force(self.F*sin(self.Omega*self.ivar) + self.G, pos1 = self.x_1, qs=[self.x_1])
+        self._wheel11 = MaterialPoint(self.m, self.x_1, qs = [self.x_1])
+        self._wheel11_disk = Disk(I=1/2*self.m*self.R**2, pos1=self.x_1/self.R, qs=[self.x_1])
+        self._wheel12= MaterialPoint(self.m, self.x_1, qs = [self.x_1])
+        self._wheel12_disk = Disk(I=1/2*self.m*self.R**2, pos1=self.x_1/self.R, qs=[self.x_1])
+        self._spring1 = Spring(2*self.k_l, pos1 = self.x_1, qs=[self.x_1])
+        self._damper1 = Damper(self.c_l, pos1 = self.x_1, qs=[self.x_1])
+        self._force = Force(self.F*sin(self.Omega*self.ivar) + self.F, pos1 = self.x_1, qs=[self.x_1])
 
-        self._spring12 = Spring(self.k, pos1 = self.x_1, pos2 = self.x_2, qs=[self.x_1, self.x_2])
-        self._damper12 = Damper(self.c, pos1 = self.x_1, pos2 = self.x_2, qs=[self.x_1, self.x_2])
-        
+        self._spring12 = Spring(2*self.k_c, pos1 = self.x_1, pos2 = self.x_2, qs=[self.x_1, self.x_2])
+        self._damper12 = Damper(self.c_c, pos1 = self.x_1, pos2 = self.x_2, qs=[self.x_1, self.x_2])
+        self._wheel21 = MaterialPoint(self.m, self.x_2, qs = [self.x_2])
+        self._wheel21_disk = Disk(I=1/2*self.m*self.R**2, pos1=self.x_2/self.R, qs=[self.x_2])
+        self._wheel22 = MaterialPoint(self.m, self.x_2, qs = [self.x_2])
+        self._wheel22_disk = Disk(I=1/2*self.m*self.R**2, pos1=self.x_2/self.R, qs=[self.x_2])
         self._trolley2 = MaterialPoint(self.m_2, self.x_2, qs=[self.x_2])
-        self._spring2 = Spring(self.k, pos1 = self.x_2, qs=[self.x_2])
-        self._damper2 = Damper(self.c, pos1 = self.x_2, qs=[self.x_2])
+        self._spring2 = Spring(2*self.k_r, pos1 = self.x_2, qs=[self.x_2])
+        self._damper2 = Damper(self.c_r, pos1 = self.x_2, qs=[self.x_2])
 
 
         components['trolley_1'] = self._trolley1
         components['spring_1'] = self._spring1
         components['damper_1'] = self._damper1
         components['spring_12'] = self._spring12
+        components['wheel12'] = self._wheel12
+        components['wheel11'] = self._wheel11
+        components['wheel11_disk'] = self._wheel11_disk
+        components['wheel12_disk'] = self._wheel12_disk
         components['damper_12'] = self._damper12
         components['trolley_2'] = self._trolley2
         components['spring_2'] = self._spring2
         components['damper_2'] = self._damper2
+        components['wheel22'] = self._wheel22
+        components['wheel21'] = self._wheel21
+        components['wheel22_disk'] = self._wheel22_disk
+        components['wheel21_disk'] = self._wheel21_disk
         components['force'] = self._force
         
         return components
+
+    def get_default_data(self):
+
+        m0, k0, lam, Omega0, F0 = symbols('m_0 k_0 lambda Omega_0 F0', positive=True)
+
+        default_data_dict = {
+            self.c_r: [S.One * lam * self.k_c],
+            self.c_l: [S.One * lam * self.k_c],
+            self.c_c: [S.One * lam * self.k_c],
+            self.Omega: [S.One * Omega0],
+            self.F: [S.One * F0 * no for no in range(5,25)],
+            self.m: [S.One * m0 * no for no in range(1,5)],
+            self.m_2: [S.One * self.m_1],
+            self.m_1: [S.One * m0 * no for no in range(20, 30)],
+            self.k_l: [S.One * self.k_c],
+            self.k_r: [S.One * self.k_c],
+            self.k_c: [S.One * k0 * no for no in range(60, 90)],
+            
+        }
+
+        return default_data_dict
+    
     
     def get_numerical_data(self):
 

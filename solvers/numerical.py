@@ -156,13 +156,18 @@ class OdeComputationalCase:
         ivar_temp = Symbol('temp_ivar')
         #subs_dict[self.ivar] = ivar_temp
 
-        args_list = [ivar_temp] + list(subs_dict.values()) + self.params
+        #Zmiana Franek
+        # args_list = [ivar_temp] + list(subs_dict.values()) + self.params
+        args_list = [ivar_temp] + list(subs_dict.values()) + list(self.params)
 
 #         display(self.odes_system.subs(subs_dict, simultaneous=True))
-        
+
+        #Zmiana Franek
         return autowrap(((self.odes_system).subs({self.ivar:ivar_temp,**subs_dict}, simultaneous=True)),
                         args=args_list)
-
+#         return autowrap(((self.odes_system).subs({self.ivar[0]:ivar_temp,**subs_dict}, simultaneous=True)),
+#                         args=args_list)
+        
 
     def __numpy_odes_rhs(self):
         '''
@@ -172,8 +177,9 @@ class OdeComputationalCase:
             var: Symbol('temp_sym_' + str(i))
             for i, var in enumerate(self.dvars)
         }
-
-        args_list = [self.ivar] + list(subs_dict.values()) + self.params
+        #Zmiana Franek
+        # args_list = [self.ivar] + list(subs_dict.values()) + self.params
+        args_list = list(self.ivar) + list(subs_dict.values()) + list(self.params)
 
         return lambdify( args_list ,
                          ((self.odes_system).subs(subs_dict, simultaneous=True)).n(),
@@ -206,8 +212,13 @@ class OdeComputationalCase:
         '''
 #         print('input parames')
 #         display(params_values)
-        if type(ic_list) == type(None):
-            ic_list = list(Matrix(self.dvars).subs(self.ic_point))
+
+        #Zmiana Franek
+        # if type(ic_list) == type(None):
+        if ic_list is None:
+            #Zmiana Franek
+            # ic_list = list(Matrix(self.dvars).subs(self.ic_point))
+            ic_list = self.ic_point
         if len(ic_list) != len(self.dvars):
             raise IndexError('Number of initial conditions is not correct.')
         if type(t_span) == type(None):
@@ -218,8 +229,9 @@ class OdeComputationalCase:
             
         if type(params_values) == type(None):
             
+            #Zmiana Franek
             self.params = list(self.odes_system.free_symbols - {self.ivar,Symbol('t')})
-            
+            # self.params = list(self.odes_system.free_symbols - {self.ivar[0],Symbol('t')})
             
             print(self.params)
             print(self.params_values)
@@ -313,5 +325,4 @@ class OdeComputationalCase:
         return solution_tdf
 
 
-    
     

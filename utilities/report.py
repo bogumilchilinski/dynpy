@@ -12,7 +12,7 @@ import sympy.physics.mechanics as me
 from pylatex import (Alignat, Axis, Command, Document, Eqref, Figure, Label,
                      TextColor, Marker, Math, NewLine, NewPage, Package, Plot,
                      Quantity, Ref, Section, Subsection, Table, Tabular, TikZ,
-                     Description, LongTable)
+                     Description, LongTable,FlushRight,FlushLeft, Center)
 from pylatex.base_classes import Environment, Options
 from pylatex.package import Package
 from pylatex.section import Chapter
@@ -46,6 +46,31 @@ def plots_no():
 
 
 plots_no_gen = plots_no()
+
+
+class CurrentContainer:
+    def __init__(self,container):
+        self._container = container
+        
+        ReportText.set_container(self._container)
+        Picture.set_container(self._container)
+        SympyFormula.set_container(self._container)
+        Markdown.set_container(self._container)
+        
+        
+        LatexDataFrame.set_container(self._container)
+        LatexDataFrame.set_picture_mode(True)
+
+        ObjectCode.set_container(self._container)
+        Block.set_container(self._container)
+        AlertBlock.set_container(self._container)
+        ExampleBlock.set_container(self._container)
+
+    def set_filename_prefix(self,prefix):
+
+        TikZPlot._prefix = prefix
+
+        return copy.copy(self)
 
 # class AbstractFrameFormatter(AdaptableDataFrame):
 #     _applying_func=lambda x: (x*100)
@@ -2289,6 +2314,7 @@ class ReportText(ReportModule):
     '''
 
     _color = None
+    _alignment = None
 
     @classmethod
     def set_text_color(cls, color=None):
@@ -2297,12 +2323,36 @@ class ReportText(ReportModule):
 
         return cls
 
-    def __init__(self, text=None, key_dict=DataStorage._dict, **kwargs):
+    @classmethod
+    def set_text_alignment(cls, align=None):
+
+        if align == 'right':
+            
+            cls._alignment = FlushRight
+            
+        elif align == 'center':
+            
+            cls._alignment = Center
+
+        elif align == 'left':
+            
+            cls._alignment = FlushLeft
+            
+            
+        else:
+            cls._alignment = align
+
+        return cls
+    
+    def __init__(self, text=None,alignment=None, key_dict=DataStorage._dict, **kwargs):
 
         self._text = 'Figures {first_marker}-{last_marker}'
 
         if text:
             self._text = text
+
+        if alignment:
+            self._alignment = alignment
 
         try:
             self._text = self._text.format(**DataStorage._dict)
@@ -2316,12 +2366,10 @@ class ReportText(ReportModule):
 
         if self.__class__._color:
 
-            self._container.append(
-                TextColor(self.__class__._color, NoEscape(self._text)))
-
+            self._text_formatted = TextColor(self.__class__._color, NoEscape(self._text))
         else:
+            self._text_formatted = self._text
 
-            self._container.append(NoEscape(self._text))
 
     def __call__(self, analysis):
 
@@ -2337,11 +2385,54 @@ class ReportText(ReportModule):
 
     def __repr__(self):
 
-        display(IPMarkdown(self._text))
 
         #return (self._text)
-        return ''
+        return self._text
 
+    @property
+    def _alignment_env(self):
+        
+        align = self._alignment
+
+        if align == 'right':
+            
+            _alignment = FlushRight
+            
+        elif align == 'center':
+            
+            _alignment = Center
+
+        elif align == 'left':
+            
+            _alignment = FlushLeft
+            
+            
+        else:
+            _alignment = align
+
+        return  _alignment
+    
+    
+    def _repr_markdown_(self):
+        if self.__class__._color:
+            print(f'Color text {self.__class__._color}')
+        return self.reported()._text
+
+    def reported(self):
+
+        text_to_add =NoEscape(self._text_formatted)
+        
+        if self._alignment_env:
+            align_env=self._alignment_env()
+            align_env.append(text_to_add)
+            
+            text_to_add = align_env
+        
+        self.cls_container.append(text_to_add)
+        
+        return copy.copy(self)
+    
+    
     
 class Verbatim(Environment):
     pass
@@ -2765,7 +2856,11 @@ class Picture(Figure,ReportModule):
         from wand.image import Image as WImage
 
         self.cls_container.append(self)
-       
+        
+        if self.caption == None:
+            caption = ''
+        else: 
+            caption = self.caption
         
         if self.image is not None:
             path = (self.image)
@@ -2779,12 +2874,13 @@ class Picture(Figure,ReportModule):
                 
                 img.resize(hsize,vsize)
                 display(img)
+                display(f'Fig. X: {caption}')
                 return ''
             else:
             
-                return f'![image preview]({path})'
+                return f'![image preview]({path}) \n \n Fig. X: {caption}'
         else:
-            return 'Nothing to plot'
+            return f'Nothing to plot \n \n Fig. X: {caption}'
         
 
     
@@ -2951,11 +3047,7 @@ class SympyFormula(ReportModule):
             self._eq.append(Label(marker))
             self._marker = marker
 
-        if self.__class__._color:
 
-            self._container.append(TextColor(self.__class__._color, self._eq))
-        else:
-            self._container.append(self._eq)
 
     def __call__(self, analysis):
 
@@ -2969,12 +3061,26 @@ class SympyFormula(ReportModule):
 
         return self._backend(self._expr)
 
-    def __repr__(self):
+#     def __repr__(self):
 
-        display(self._expr)
+#         display(self._expr)
 
-        return ''
+#         return ''
 
+    def _repr_markdown_(self):
+        return f'\\begin{{equation}}\n  {self.reported()._backend(self._expr)} \n \\end{{equation}}'
+
+    def reported(self):
+        
+        
+        if self.__class__._color:
+
+            self._container.append(TextColor(self.__class__._color, self._eq))
+        else:
+            self._container.append(self._eq)
+        
+        return copy.copy(self)
+    
     def _latex(self):
 
         return self._backend(self._expr)
