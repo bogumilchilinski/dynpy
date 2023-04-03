@@ -163,10 +163,10 @@ class OdeComputationalCase:
 #         display(self.odes_system.subs(subs_dict, simultaneous=True))
 
         #Zmiana Franek
-        # return autowrap(((self.odes_system).subs({self.ivar:ivar_temp,**subs_dict}, simultaneous=True)),
-        #                 args=args_list)
-        return autowrap(((self.odes_system).subs({self.ivar[0]:ivar_temp,**subs_dict}, simultaneous=True)),
+        return autowrap(((self.odes_system).subs({self.ivar:ivar_temp,**subs_dict}, simultaneous=True)),
                         args=args_list)
+#         return autowrap(((self.odes_system).subs({self.ivar[0]:ivar_temp,**subs_dict}, simultaneous=True)),
+#                         args=args_list)
         
 
     def __numpy_odes_rhs(self):
@@ -230,8 +230,8 @@ class OdeComputationalCase:
         if type(params_values) == type(None):
             
             #Zmiana Franek
-            # self.params = list(self.odes_system.free_symbols - {self.ivar,Symbol('t')})
-            self.params = list(self.odes_system.free_symbols - {self.ivar[0],Symbol('t')})
+            self.params = list(self.odes_system.free_symbols - {self.ivar,Symbol('t')})
+            # self.params = list(self.odes_system.free_symbols - {self.ivar[0],Symbol('t')})
             
             print(self.params)
             print(self.params_values)
