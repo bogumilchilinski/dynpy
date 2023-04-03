@@ -397,7 +397,7 @@ class DataAxis(Axis, ReportModule):
     _height = NoEscape(r'5cm')
     _width = '0.9\\textwidth'
     _x_axis_empty = False
-
+    _legend_pos = 'north east'
     _default_transformer = BaseIndexTransformer
 
     def __init__(self,
@@ -488,6 +488,7 @@ class DataAxis(Axis, ReportModule):
                          ]
 
         base_options = ['grid style=dashed',
+                        f'legend pos={self._legend_pos}',
                        NoEscape('legend style={font=\small}'),
 
                        #NoEscape('at={(0,0)}'),
@@ -719,11 +720,13 @@ class TikZPlot(TikZ, ReportModule):
 
     _in_figure = False
     _figure_gen = lambda: Figure(position='H')
-    _image_parameters = {'width': NoEscape(r'0.9\textwidth')}
+    _image_parameters = {'width': None}
     
     _floats_no_gen = plots_no()    
     _default_path = './tikzplots'
     _filename = None
+    _prefix = None
+    
     _picture = True
     _caption = 'Default caption'
     
@@ -911,8 +914,12 @@ class TikZPlot(TikZ, ReportModule):
     @property    
     def filename(self):
     
-        if self._filename is None:
+        if self._filename is None and self._prefix is None:
             filename = f'{self.__class__._default_path}/plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
+            
+        elif self._filename is None and self._prefix is not None:
+            filename = f'{self.__class__._default_path}/{self._prefix}_plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
+            
         else:
             filename = self._filename
 
@@ -1447,11 +1454,16 @@ class EntryWithUnit:
 
 
 class DataTable(Table,ReportModule):
+
+    _position = 'H'
     _latex_name = 'table'
     packages=[Package('booktabs'),Package('longtable')]
 
-    def __init__(self, numerical_data, position='H'):
-        super().__init__(position=position)
+    def __init__(self, numerical_data, position=None):
+        
+        if position is not None: self._position = position
+        
+        super().__init__(position=self._position)
         ##print(numerical_data)
         self._numerical_data = numerical_data
         self.position = position
