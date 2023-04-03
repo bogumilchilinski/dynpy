@@ -1174,15 +1174,16 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
     k_l=Symbol('k_l', positive=True)
     k_r=Symbol('k_r', positive=True)
     k_c=Symbol('k_c', positive=True)
-    c_l=Symbol('c_cl', positive=True)
-    c_r=Symbol('c_cr', positive=True)
-    c_c=Symbol('c_cc', positive=True)
+    c_l=Symbol('c_l', positive=True)
+    c_r=Symbol('c_r', positive=True)
+    c_c=Symbol('c_c', positive=True)
     Omega=Symbol('Omega', positive=True)
     F=Symbol('F', positive=True)
     x_1=dynamicsymbols('x_l')
     x_2=dynamicsymbols('x_r')
    
     def __init__(self,
+                 R=None,
                  m_1=None,
                  m_2=None,
                  m=None,
@@ -1266,17 +1267,29 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
         m0, k0, lam, Omega0, F0 = symbols('m_0 k_0 lambda Omega_0 F0', positive=True)
 
         default_data_dict = {
-            self.c_r: [S.One * lam * self.k_c],
-            self.c_l: [S.One * lam * self.k_c],
-            self.c_c: [S.One * lam * self.k_c],
-            self.Omega: [S.One * Omega0],
-            self.F: [S.One * F0 * no for no in range(5,25)],
-            self.m: [S.One * m0 * no for no in range(1,5)],
-            self.m_2: [S.One * self.m_1],
-            self.m_1: [S.One * m0 * no for no in range(20, 30)],
             self.k_l: [S.One * self.k_c],
             self.k_r: [S.One * self.k_c],
+            self.c_r: [S.One * lam * self.k_r],
+            self.c_l: [S.One * lam * self.k_l],
+            self.c_c: [S.One * lam * self.k_c],
+
+            self.m_2: [S.One * self.m],
+            self.m_1: [S.One* self.m],
+            
+#             self.Omega: [S.One * Omega0],
+            self.F: [S.One * F0 * no for no in range(5,25)],
+            self.m: [S.One * m0 * no for no in range(1,5)],
+            self.m_2: [S.One * m0 * no for no in range(1,5)],
+            self.m_1: [S.One * m0 * no for no in range(1,5)],
+            
+            
+
             self.k_c: [S.One * k0 * no for no in range(60, 90)],
+            self.k_l: [S.One * k0 * no for no in range(60, 90)],
+            self.k_r: [S.One * k0 * no for no in range(60, 90)],            
+#             self.c_r: [S.One * lam * self.k_c],
+#             self.c_l: [S.One * lam * self.k_c],
+#             self.c_c: [S.One * lam * self.k_c],
             
         }
 
@@ -1296,6 +1309,24 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
         default_data_dict.update({self.G: [4*default_data_dict[self.F][0]*cos(0.5*default_data_dict[self.Omega][0]*self.ivar) , default_data_dict[self.F][0]*cos(0.75*default_data_dict[self.Omega][0]*self.ivar)**2 , 1.5*default_data_dict[self.F][0]*2*cos(1.25*default_data_dict[self.Omega][0]*self.ivar) , 3*default_data_dict[self.F][0]*cos(2*default_data_dict[self.Omega][0]*self.ivar)**2]})
 
         return default_data_dict
+    
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        parameters_dict[self.k_r] = parameters_dict[self.k_l]
+        parameters_dict[self.m_1] = parameters_dict[self.m]
+        parameters_dict[self.m_2] = parameters_dict[self.m]
+
+        return parameters_dict
+#     def subs(self, *args, **kwargs):
+        
+#         return super().subs(*args, **kwargs).subs(*args, **kwargs)
     
 ### Nieliniowe
 class ForcedTrolleysWithNonLinearSprings(NonlinearComposedSystem):

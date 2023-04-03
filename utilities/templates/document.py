@@ -207,7 +207,8 @@ class BPASTSPaper(Document):
 #         label=self.label
         self.title=title
         self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
-        self.packages.append(Command('author', arguments=['Anna Mackojć, Bogumił Chiliński']))
+        self.packages.append(Command('author', arguments=['Author']))
+        self.packages.append(Command('abauthor', arguments=['Author']))
         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
         self.append(Command('maketitle'))
         #self.append(NewPage())

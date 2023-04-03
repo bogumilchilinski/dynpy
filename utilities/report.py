@@ -51,6 +51,7 @@ plots_no_gen = plots_no()
 class CurrentContainer:
     def __init__(self,container):
         self._container = container
+        
         ReportText.set_container(self._container)
         Picture.set_container(self._container)
         SympyFormula.set_container(self._container)
@@ -65,7 +66,11 @@ class CurrentContainer:
         AlertBlock.set_container(self._container)
         ExampleBlock.set_container(self._container)
 
+    def set_filename_prefix(self,prefix):
 
+        TikZPlot._prefix = prefix
+
+        return copy.copy(self)
 
 # class AbstractFrameFormatter(AdaptableDataFrame):
 #     _applying_func=lambda x: (x*100)
@@ -2802,7 +2807,7 @@ class Picture(Figure,ReportModule):
             
         self.marker = marker
         
-        if position:
+        if position is not None:
             self._position = position
         
         
