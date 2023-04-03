@@ -1,5 +1,5 @@
 from ..mechanics import *
-
+from . import en
 
 
 class TitlePageComponent(Environment):
@@ -185,7 +185,7 @@ class NumericalAnalysisComponent(ExemplaryPictureComponent):
                             '''))
 
 # Boogi
-class KineticEnergyComponent(ReportComponent):
+class KineticEnergyComponent(en.KineticEnergyComponent):
     
     title="Energia kinetyczna"
 
@@ -198,24 +198,9 @@ class KineticEnergyComponent(ReportComponent):
     @property
     def footer_text(self):
         #"Wyznaczona wielkość określa energię układu wynikającą z jego własności inercyjnych (energię zmagazynowaną w elementach bezwładnych)."
-        return "Determined formula specify energy of the system related to its inertial properties."
+        return "Wyznaczona wielkość określa energię układu wynikającą z jego własności inercyjnych (energię zmagazynowaną w elementach bezwładnych)."
     
-    def append_elements(self):
-        
-        system = self._system
-        dyn_sys=system
-        dyn_sys_lin = dyn_sys
 
-
-
-
-        display(ReportText( self.header_text  ))
-        
-
-        display(SympyFormula( Eq(Symbol('T'),
-                     dyn_sys_lin._kinetic_energy) , marker=None))
-               
-        display(ReportText( self.footer_text  ))
     
     
     

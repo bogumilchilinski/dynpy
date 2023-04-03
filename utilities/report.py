@@ -2852,9 +2852,9 @@ class Picture(Figure,ReportModule):
 
         self.cls_container.append(self)
         
-        if self.caption == None:
+        if self.caption is None:
             caption = ''
-        else: 
+        else:
             caption = self.caption
         
         if self.image is not None:
