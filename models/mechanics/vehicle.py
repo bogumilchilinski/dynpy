@@ -551,7 +551,7 @@ class DampedSymmetricalVehicleSuspension(DampedVehicleSuspension):
             self.l_l: [l0*S.One*no for no in range(1, 8)],
            
 #             self.Omega: [Omega0*S.One*no for no in range(1,2)],
-            self.F_engine: [F0*cos(self.Omega*self.ivar)*S.One*no for no in range(1,8)],
+            self.F_engine: [F0 * S.One * no for no in range(1,20)],
             
           #  self.F_engine: [
            #     2 * F_0 * sin(omega * self.ivar),
