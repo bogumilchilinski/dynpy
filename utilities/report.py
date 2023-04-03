@@ -2716,7 +2716,7 @@ class Picture(Figure,ReportModule):
             
         self.marker = marker
         
-        if position:
+        if position is not None:
             self._position = position
         
         
