@@ -445,7 +445,7 @@ class BeamBridge(ComposedSystem):
             module: [S.One * E0 * no for no in range(10, 20)],
             inertia: [S.One * no * I0 for no in range(10, 20)],
             self.F: [S.One * no * F0 * 1000 for no in range(10, 25)],
-            self.Omega: [S.One * Omega0]
+#            self.Omega: [S.One * Omega0]
         }
         return default_data_dict
 
@@ -651,11 +651,13 @@ class BeamBridgeTMD(BeamBridge):
 
     def get_default_data(self):
 
-        m0, k0 = symbols('m_0 k_0', positive=True)
+        m0, k0, E, I, l, E0, I0= symbols('m_0 k_0 E I l E_0 I_0', positive=True)
 
         default_data_dict = {
             self.m_TMD: [S.One * no * m0 * 1000 for no in range(20, 80)],
-            self.k_TMD: [S.One * no * k0 * 1000 for no in range(15, 20)],
+            self.k_TMD: [S.One * 48 * E * I / l**3 * no for no in range (1000, 4000)],
+#             E: [S.One * no * E0 for no in range(10,50)],
+#             I: [S.One * no * I0 for no in range(20,80)],
         }
 
         return default_data_dict
@@ -669,6 +671,7 @@ class BeamBridgeTMD(BeamBridge):
         }
         return default_data_dict
 
+    
 class BeamBridgeDampedTMD(BeamBridge):
 
     scheme_name = 'bridge_tmd_dmp.png'
@@ -755,10 +758,11 @@ class BeamBridgeDampedTMD(BeamBridge):
         lam=Symbol('lambda', positive = True)
         m0=Symbol('m_0', positive = True)
         k0=Symbol('k_0', positive = True)
+        E, I = symbols('E I', positive=True)
         default_data_dict = {
             self.c_TMD: [S.One * self.k_TMD * lam],
             self.m_TMD: [S.One * no * m0 * 1000 for no in range(20, 80)],
-            self.k_TMD: [S.One * no * k0 * 1000 for no in range(15, 20)]
+            self.k_TMD: [S.One * no * (48 * E * I /self.l**3)* 1000 for no in range(10, 20)]
         }
 
         return default_data_dict

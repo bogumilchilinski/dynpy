@@ -550,8 +550,8 @@ class DampedSymmetricalVehicleSuspension(DampedVehicleSuspension):
             self.l_r: [self.l_l],
             self.l_l: [l0*S.One*no for no in range(1, 8)],
            
-            self.Omega: [Omega0*S.One*no for no in range(1,2)],
-            self.F_engine: [F0*cos(self.Omega*self.ivar)*S.One*no for no in range(1,8)],
+#             self.Omega: [Omega0*S.One*no for no in range(1,2)],
+            self.F_engine: [F0 * S.One * no for no in range(1,20)],
             
           #  self.F_engine: [
            #     2 * F_0 * sin(omega * self.ivar),
@@ -564,3 +564,17 @@ class DampedSymmetricalVehicleSuspension(DampedVehicleSuspension):
 
         return default_data_dict
 
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        parameters_dict[self.k_l] = parameters_dict[self.k_r]
+        parameters_dict[self.l_r] = parameters_dict[self.l_l]
+#        parameters_dict[self.m_2] = parameters_dict[self.m]
+
+        return parameters_dict
