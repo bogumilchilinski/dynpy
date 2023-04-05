@@ -653,8 +653,8 @@ class ODESolution(AnalyticalSolution):
             
         return obj
 
-###method owner - Franciszek, supervisior - Bogumił
-##------------------ TEST ------------------
+    ###method owner - Franciszek, supervisior - Bogumił
+    ##------------------ TEST ------------------
     def ics_dynamic_symbols(self):
         symbols_list = ['v', 'a']
         ics_dynamic_symbols = [Symbol(f'{coor}_{self._dvars_str}0') for coor in symbols_list]
@@ -662,7 +662,7 @@ class ODESolution(AnalyticalSolution):
         # ics_dynamic_symbols = Matrix([Symbol(f'{self._dvars_str}_{index}diif') for index in range(len(self.dvars))])
         return ics_dynamic_symbols
 
-##------------------ TEST ------------------
+    ##------------------ TEST ------------------
 
     @property
     def _ics_dict(self):
