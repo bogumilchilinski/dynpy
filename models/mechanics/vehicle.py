@@ -119,10 +119,17 @@ class UndampedVehicleSuspension(ComposedSystem):
 
     
     def max_static_force_pin(self):
+
+        ans=self.static_force()
+        
+        return abs(ans)
+
+
+    def static_force(self):
         data=self._given_data
         ans=self.dynamic_force()
         free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
-        return abs(free_coeff)
+        return (free_coeff)
     
     def static_force_pin_diameter(self):
         kt=Symbol('k_t', positive=True)
@@ -160,11 +167,11 @@ class UndampedVehicleSuspension(ComposedSystem):
         #display(abs(self.components['_spring_l'].force()))
         data=self._given_data
         sin_coeff=ans.coeff(sin(self.Omega*self.ivar)).subs(data)
-        #display(sincoeff)
+        #display(sin_coeff)
         cos_coeff=ans.coeff(cos(self.Omega*self.ivar)).subs(data)
-        #display(coscoeff)
+        #display(cos_coeff)
         free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
-        #display(freecoeff)
+        #display(free_coeff)
 
         return sqrt(sin_coeff**2 + cos_coeff**2) + abs(free_coeff)
 
@@ -346,7 +353,7 @@ class UndampedSymmetricalVehicleSuspension(UndampedVehicleSuspension):
     
 class DampedVehicleSuspension(UndampedVehicleSuspension):
 
-    scheme_name = 'damped_car_new.PNG'
+    scheme_name = 'damped_car.png'
     real_name = 'car_real.jpg'
 
     c_l=Symbol('c_l', positive=True)
@@ -390,7 +397,7 @@ class DampedVehicleSuspension(UndampedVehicleSuspension):
         super().__init__(m=m,I=I, l_rod= l_rod,l_r=l_r,k_r=k_r,k_l=k_l, F_engine= F_engine,z=z,l_l=l_l,ivar=ivar,**kwargs)
 
 
-    @property
+    @cached_property
     def components(self):
 
         components =super().components
@@ -410,24 +417,46 @@ class DampedVehicleSuspension(UndampedVehicleSuspension):
         
         return components
 
+#     def max_static_force_pin(self):
+#         data=self._given_data
+#         ans=self.dynamic_force()
+#         free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+#         return abs(free_coeff)
+    
+#     def static_force_pin_diameter(self):
+#         kt=Symbol('k_t', positive=True)
+#         Re=Symbol('R_e', positive=True)
+#         return ((4*self.max_static_force_pin())/(pi*kt*Re))**(1/2)
+    
+#     def dynamic_force(self):
         
-#    def max_dynamic_force_pin(self):
-#        return self.frequency_response_function()*self.stiffness_matrix()[0]
+#         amps = self._fodes_system.steady_solution.as_dict()
+#         force = self.components['_spring_l'].force().doit().expand()#.doit()
+#         data=self._given_data
+        
+#         #display(abs(self.components['_spring_l'].force()))
+#         return (self.components['_spring_l'].force().subs(amps)).subs(data).expand().doit()
+
+#     def max_dynamic_force_pin(self):
+        
+#         ans = self.dynamic_force()
+        
+#         #display(abs(self.components['_spring_l'].force()))
+#         data=self._given_data
+#         sin_coeff=ans.coeff(sin(self.Omega*self.ivar)).subs(data)
+#         #display(sincoeff)
+#         cos_coeff=ans.coeff(cos(self.Omega*self.ivar)).subs(data)
+#         #display(coscoeff)
+#         free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+#         #display(freecoeff)
+
+#         return sqrt(sin_coeff**2 + cos_coeff**2) + abs(free_coeff)
+
     
 #    def dynamic_bearing_force(self):
        
 #       return self.max_dynamic_force_pin() * self.sqrt(L)
     
-    def max_dynamic_force_pin(self):
-        return abs(self.frequency_response_function()*self.stiffness_matrix()[0])
-
-    def max_static_force_pin(self):
-        return abs(self.static_load().doit()[0])
-    
-    def static_force_pin_diameter(self):
-        kt=Symbol('k_t', positive=True)
-        Re=Symbol('R_e', positive=True)
-        return ((4*self.max_static_force_pin())/(pi*kt*Re))**(1/2)
 
 #     def max_dynamic_force_pin(self):
 #         return (self._frf()[0].subs(self.lam0,0) + self._frf()[1].subs(self.lam0,0)*self.l_rod/2)*self.stiffness_matrix()[0]
@@ -435,12 +464,7 @@ class DampedVehicleSuspension(UndampedVehicleSuspension):
     def dynamic_bearing_force(self):
         L=Symbol('L')#wymagana trwałość
         return self.max_dynamic_force_pin() * L**(S.One/3)
-    
-    def dynamic_force_pin_diameter(self):
-        kt=Symbol('k_t', positive=True)
-        Re=Symbol('R_e', positive=True)
-        return ((4*self.max_dynamic_force_pin())/(pi*kt*Re))**(1/2)
-    
+
     
     def dynamic_bearing_force(self):
         L=Symbol('L')
@@ -485,7 +509,7 @@ class DampedVehicleSuspension(UndampedVehicleSuspension):
             #self.c_r: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0],
             self.c_r: [self.lam*(self.k_r)],
             #self.k: [k0*S.One*no for no in range(1,8)],
-            self.lam: [lam0/10*S.One*no for no in range(1,8)],
+            #self.lam: [lam0/10*S.One*no for no in range(1,8)],
             self.k_l: [k0*S.One*no for no in range(1,8)],
             self.k_r: [k0*S.One*no for no in range(1,8)],
             
@@ -495,7 +519,7 @@ class DampedVehicleSuspension(UndampedVehicleSuspension):
             self.l_l: [l0*S.One*no for no in range(1, 8)],
            
 #             self.Omega: [Omega0*S.One*no for no in range(1,2)],
-            self.F_engine: [F0*sin(self.Omega*self.ivar)*S.One*no for no in range(1,8)],}
+            self.F_engine: [F0*S.One*no for no in range(1,20)],}
             
 
 
@@ -541,7 +565,7 @@ class DampedSymmetricalVehicleSuspension(DampedVehicleSuspension):
             #self.c_r: [2 * c0, 3 * c0, 4 * c0, 5 * c0, 6 * c0],
             self.c_r: [self.lam*(self.k_r)],
             #self.k: [k0*S.One*no for no in range(1,8)],
-            self.lam: [lam0/10*S.One*no for no in range(1,8)],
+            #self.lam: [lam0/10*S.One*no for no in range(1,8)],
             self.k_l: [self.k_r],
             self.k_r: [k0*S.One*no for no in range(1,8)],
             
@@ -551,15 +575,7 @@ class DampedSymmetricalVehicleSuspension(DampedVehicleSuspension):
             self.l_l: [l0*S.One*no for no in range(1, 8)],
            
 #             self.Omega: [Omega0*S.One*no for no in range(1,2)],
-            self.F_engine: [F0*cos(self.Omega*self.ivar)*S.One*no for no in range(1,8)],
-            
-          #  self.F_engine: [
-           #     2 * F_0 * sin(omega * self.ivar),
-            #    3 * F_0 * sin(omega * self.ivar),
-             #   4 * F_0 * sin(omega * self.ivar),
-              #  5 * F_0 * sin(omega * self.ivar),
-                #6 * F_0 * sin(omega * self.ivar)
-          #  ]
+            self.F_engine: [F0 * S.One * no for no in range(1,20)],
         }
 
         return default_data_dict

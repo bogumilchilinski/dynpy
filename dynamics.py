@@ -2035,7 +2035,7 @@ class HarmonicOscillator(LinearDynamicSystem):
     def damping_coefficient(self):
 
         return ((self.inertia_matrix().inv() *
-                 self.damping_matrix()))
+                 self.damping_matrix())).diagonalize()[1]
 
     def logarithmic_decrement(self):
 
