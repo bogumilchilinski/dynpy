@@ -157,8 +157,8 @@ class OdeComputationalCase:
         #subs_dict[self.ivar] = ivar_temp
 
         #Zmiana Franek
-        # args_list = [ivar_temp] + list(subs_dict.values()) + self.params
-        args_list = [ivar_temp] + list(subs_dict.values()) + list(self.params)
+        args_list = [ivar_temp] + list(subs_dict.values()) + self.params
+        #args_list = [ivar_temp] + list(subs_dict.values()) + list(self.params)
 
 #         display(self.odes_system.subs(subs_dict, simultaneous=True))
 
@@ -178,8 +178,8 @@ class OdeComputationalCase:
             for i, var in enumerate(self.dvars)
         }
         #Zmiana Franek
-        # args_list = [self.ivar] + list(subs_dict.values()) + self.params
-        args_list = list(self.ivar) + list(subs_dict.values()) + list(self.params)
+        args_list = [self.ivar] + list(subs_dict.values()) + self.params
+        #args_list = list(self.ivar) + list(subs_dict.values()) + list(self.params)
 
         return lambdify( args_list ,
                          ((self.odes_system).subs(subs_dict, simultaneous=True)).n(),
@@ -214,11 +214,11 @@ class OdeComputationalCase:
 #         display(params_values)
 
         #Zmiana Franek
-        # if type(ic_list) == type(None):
-        if ic_list is None:
+        if type(ic_list) == type(None):
+        #if ic_list is None:
             #Zmiana Franek
-            # ic_list = list(Matrix(self.dvars).subs(self.ic_point))
-            ic_list = self.ic_point
+            ic_list = list(Matrix(self.dvars).subs(self.ic_point))
+            #ic_list = self.ic_point
         if len(ic_list) != len(self.dvars):
             raise IndexError('Number of initial conditions is not correct.')
         if type(t_span) == type(None):

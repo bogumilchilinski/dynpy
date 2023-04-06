@@ -66,6 +66,8 @@ class CurrentContainer:
         AlertBlock.set_container(self._container)
         ExampleBlock.set_container(self._container)
 
+        SymbolsDescription.set_container(self._container)
+        
     def set_filename_prefix(self,prefix):
 
         TikZPlot._prefix = prefix
@@ -3353,15 +3355,17 @@ class DescriptionsRegistry:
     @classmethod
     def set_descriptions(cls, description={}):
         cls._descriptions = description
+        return cls
 
     @classmethod
     def set_description_mode(cls, description_mode= 'one occurrence'):
         cls._description_mode = description_mode
-        
+        return cls
         
     @classmethod
     def reset_registry(cls):
         cls._described_elements = {}
+        return cls
 
     def __init__(self, description_dict=None, method='add'):
         if description_dict is not None: self._descriptions = description_dict
@@ -3544,7 +3548,9 @@ class SymbolsDescription(Description):
             self.add_item(NoEscape(InlineMath((label)).dumps()),
                           NoEscape(f'- {(entry)}{end_symbol}'))
     def __repr__(self):
-
+        
+        #self.reported()
+        
         entries = [
             f'${vlatex(key)}$ - {value}'
             for key, value in self._added_symbols.items()
