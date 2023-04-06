@@ -119,10 +119,17 @@ class UndampedVehicleSuspension(ComposedSystem):
 
     
     def max_static_force_pin(self):
+
+        ans=self.static_force()
+        
+        return abs(ans)
+
+
+    def static_force(self):
         data=self._given_data
         ans=self.dynamic_force()
         free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
-        return abs(free_coeff)
+        return (free_coeff)
     
     def static_force_pin_diameter(self):
         kt=Symbol('k_t', positive=True)

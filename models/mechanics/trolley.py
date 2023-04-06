@@ -1224,9 +1224,9 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
 
         self._trolley1 = MaterialPoint(self.m_1, self.x_1, qs=[self.x_1])
         self._wheel11 = MaterialPoint(self.m, self.x_1, qs = [self.x_1])
-        self._wheel11_disk = Disk(I=1/2*self.m*self.R**2, pos1=self.x_1/self.R, qs=[self.x_1])
+        self._wheel11_disk = Disk(I=S.Half*self.m*self.R**2, pos1=self.x_1/self.R, qs=[self.x_1])
         self._wheel12= MaterialPoint(self.m, self.x_1, qs = [self.x_1])
-        self._wheel12_disk = Disk(I=1/2*self.m*self.R**2, pos1=self.x_1/self.R, qs=[self.x_1])
+        self._wheel12_disk = Disk(I=S.Half*self.m*self.R**2, pos1=self.x_1/self.R, qs=[self.x_1])
         
         self._spring1_top = Spring(self.k_l, pos1 = self.x_1, qs=[self.x_1])
         self._spring1_bottom = Spring(self.k_l, pos1 = self.x_1, qs=[self.x_1])
@@ -1237,9 +1237,9 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
         self._spring12 = Spring(2*self.k_c, pos1 = self.x_1, pos2 = self.x_2, qs=[self.x_1, self.x_2])
         self._damper12 = Damper(self.c_c, pos1 = self.x_1, pos2 = self.x_2, qs=[self.x_1, self.x_2])
         self._wheel21 = MaterialPoint(self.m, self.x_2, qs = [self.x_2])
-        self._wheel21_disk = Disk(I=1/2*self.m*self.R**2, pos1=self.x_2/self.R, qs=[self.x_2])
+        self._wheel21_disk = Disk(I=S.Half*self.m*self.R**2, pos1=self.x_2/self.R, qs=[self.x_2])
         self._wheel22 = MaterialPoint(self.m, self.x_2, qs = [self.x_2])
-        self._wheel22_disk = Disk(I=1/2*self.m*self.R**2, pos1=self.x_2/self.R, qs=[self.x_2])
+        self._wheel22_disk = Disk(I=S.Half*self.m*self.R**2, pos1=self.x_2/self.R, qs=[self.x_2])
         self._trolley2 = MaterialPoint(self.m_2, self.x_2, qs=[self.x_2])
         self._spring2 = Spring(2*self.k_r, pos1 = self.x_2, qs=[self.x_2])
         self._damper2 = Damper(self.c_r, pos1 = self.x_2, qs=[self.x_2])
@@ -1298,6 +1298,41 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
         }
 
         return default_data_dict
+
+    
+#     def get_default_data(self):
+
+#         m0, k0, lam, Omega0, F0 = symbols('m_0 k_0 lambda Omega_0 F_0', positive=True)
+
+#         default_data_dict = {
+#             self.k_l: [S.One * self.k_c],
+#             self.k_r: [S.One * self.k_c],
+#             self.c_r: [S.One * lam * self.k_r],
+#             self.c_l: [S.One * lam * self.k_l],
+#             self.c_c: [S.One * lam * self.k_c],
+
+#             self.m_2: [S.One * self.m],
+#             self.m_1: [S.One* self.m],
+            
+# #             self.Omega: [S.One * Omega0],
+#             self.F: [S.One * F0 * 20],
+#             self.m: [S.One * m0 * 2],
+#             self.m_2: [S.One * m0 * no for no in range(1,5)],
+#             self.m_1: [S.One * m0 * no for no in range(1,5)],
+            
+            
+
+#             self.k_c: [S.One * k0 * no for no in  [74,74.01,74.02]],
+#             self.k_l: [S.One * k0 * 65],
+#             self.k_r: [S.One * k0 * 65],            
+# #             self.c_r: [S.One * lam * self.k_c],
+# #             self.c_l: [S.One * lam * self.k_c],
+# #             self.c_c: [S.One * lam * self.k_c],
+            
+#         }
+
+#         return default_data_dict    
+    
     
     
     def get_numerical_data(self):
@@ -1333,11 +1368,19 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
 #         return super().subs(*args, **kwargs).subs(*args, **kwargs)
 
 
+
     def max_static_force_pin(self):
+
+        ans=self.static_force()
+        
+        return abs(ans)
+
+
+    def static_force(self):
         data=self._given_data
         ans=self.dynamic_force()
         free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
-        return abs(free_coeff)
+        return (free_coeff)
     
     def static_force_pin_diameter(self):
         kt=Symbol('k_t', positive=True)
