@@ -1164,7 +1164,7 @@ class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
     
 class ForcedDampedTrolleysWithSprings(ComposedSystem):
     
-    scheme_name = 'MDOF_Damped_Trolleys_With_Springs.PNG'
+    scheme_name = 'MDOF_Damped_Trolleys_With_Springs.png'
     real_name = 'two_trolleys_damped_with_springs_real.png'
 
     m_1=Symbol('m_1', positive=True)
@@ -1227,7 +1227,10 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
         self._wheel11_disk = Disk(I=1/2*self.m*self.R**2, pos1=self.x_1/self.R, qs=[self.x_1])
         self._wheel12= MaterialPoint(self.m, self.x_1, qs = [self.x_1])
         self._wheel12_disk = Disk(I=1/2*self.m*self.R**2, pos1=self.x_1/self.R, qs=[self.x_1])
-        self._spring1 = Spring(2*self.k_l, pos1 = self.x_1, qs=[self.x_1])
+        
+        self._spring1_top = Spring(self.k_l, pos1 = self.x_1, qs=[self.x_1])
+        self._spring1_bottom = Spring(self.k_l, pos1 = self.x_1, qs=[self.x_1])
+        
         self._damper1 = Damper(self.c_l, pos1 = self.x_1, qs=[self.x_1])
         self._force = Force(self.F*sin(self.Omega*self.ivar) + self.F, pos1 = self.x_1, qs=[self.x_1])
 
@@ -1243,7 +1246,8 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
 
 
         components['trolley_1'] = self._trolley1
-        components['spring_1'] = self._spring1
+        components['spring_1_top'] = self._spring1_top
+        components['spring_1_bottom'] = self._spring1_bottom
         components['damper_1'] = self._damper1
         components['spring_12'] = self._spring12
         components['wheel12'] = self._wheel12
@@ -1264,7 +1268,7 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
 
     def get_default_data(self):
 
-        m0, k0, lam, Omega0, F0 = symbols('m_0 k_0 lambda Omega_0 F0', positive=True)
+        m0, k0, lam, Omega0, F0 = symbols('m_0 k_0 lambda Omega_0 F_0', positive=True)
 
         default_data_dict = {
             self.k_l: [S.One * self.k_c],
@@ -1327,7 +1331,55 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
 #     def subs(self, *args, **kwargs):
         
 #         return super().subs(*args, **kwargs).subs(*args, **kwargs)
+
+
+    def max_static_force_pin(self):
+        data=self._given_data
+        ans=self.dynamic_force()
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        return abs(free_coeff)
     
+    def static_force_pin_diameter(self):
+        kt=Symbol('k_t', positive=True)
+        Re=Symbol('R_e', positive=True)
+        return ((4*self.max_static_force_pin())/(pi*kt*Re))**(1/2)
+
+
+    
+    def dynamic_force(self):
+        
+        amps = self._fodes_system.steady_solution.as_dict()
+        #force = self.components['_spring_l'].force().doit().expand()#.doit()
+        data=self._given_data
+
+        
+        return (self.components['spring_1_top'].force().subs(amps)).subs(data).expand().doit()
+
+    def max_dynamic_force_pin(self):
+        
+        ans = self.dynamic_force()
+        
+        #display(abs(self.components['_spring_l'].force()))
+        data=self._given_data
+        sin_coeff=ans.coeff(sin(self.Omega*self.ivar)).subs(data)
+        #display(sin_coeff)
+        cos_coeff=ans.coeff(cos(self.Omega*self.ivar)).subs(data)
+        #display(cos_coeff)
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        #display(free_coeff)
+
+        return sqrt(sin_coeff**2 + cos_coeff**2) + abs(free_coeff)
+
+    
+    def dynamic_force_pin_diameter(self):
+        kt=Symbol('k_t', positive=True)
+        Re=Symbol('R_e', positive=True)
+        
+        
+        load = abs(self.max_dynamic_force_pin())
+        
+        return ((4*load)/(pi*kt*Re))**(1/2)
+
 ### Nieliniowe
 class ForcedTrolleysWithNonLinearSprings(NonlinearComposedSystem):
     

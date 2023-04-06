@@ -762,7 +762,7 @@ class BeamBridgeDampedTMD(BeamBridge):
         default_data_dict = {
             self.c_TMD: [S.One * self.k_TMD * lam],
             self.m_TMD: [S.One * no * m0 * 1000 for no in range(20, 80)],
-            self.k_TMD: [S.One * no * (48 * E * I /self.l***3)* 1000 for no in range(10, 20)]
+            self.k_TMD: [S.One * no * (48 * E * I /self.l**3)* 1000 for no in range(10, 20)]
         }
 
         return default_data_dict
