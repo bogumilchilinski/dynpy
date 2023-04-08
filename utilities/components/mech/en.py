@@ -1275,3 +1275,74 @@ class GuysComponent(ReportComponent):
 
 
         display(ReportText( self.footer_text))
+        
+
+class RightSpringForceComponent(ReportComponent):
+
+    title="Force in top right spring of the system"
+
+    @property
+    def header_text(self):
+        #"Energia kinetyczna układu wyrażona jest wzorem:"
+        return "Force in the right spring is determined by the formula:"
+
+
+    @property
+    def footer_text(self):
+        #"Wyznaczona wielkość określa energię układu wynikającą z jego własności inercyjnych (energię zmagazynowaną w elementach bezwładnych)."
+        return "Determined formula specifies force in the spring"
+
+    def append_elements(self):
+
+        system = self._system
+        kr=system.k_r
+        x_2=system.x_2
+        Fr=-kr*x_2
+        
+        display(ReportText( self.header_text))
+        
+        display(SympyFormula( Eq(Symbol('F_r'),
+                     Fr) , marker=None))
+
+        display(SympyFormula( Eq(Symbol('F_r'),
+                     system.right_spring_force()) , marker=None))
+
+        
+        display(ReportText( self.footer_text))
+        
+class CentralSpringForceComponent(ReportComponent):
+
+    title="Force in top centre spring of the system"
+
+    @property
+    def header_text(self):
+        #"Energia kinetyczna układu wyrażona jest wzorem:"
+        return "Force in the top centre spring is determined by the formula:"
+
+
+    @property
+    def footer_text(self):
+        #"Wyznaczona wielkość określa energię układu wynikającą z jego własności inercyjnych (energię zmagazynowaną w elementach bezwładnych)."
+        return "Determined formula specifies force in the spring"
+
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+        kc=system.k_c
+        x_1=system.x_1
+        x_2=system.x_2
+        Fc=-kc*(x_2-x_1)
+        
+        display(ReportText( self.header_text))
+        
+        display(SympyFormula( Eq(Symbol('F_c'),
+                     Fc) , marker=None))
+
+        display(SympyFormula( Eq(Symbol('F_c'),
+                     system.centre_spring_force()) , marker=None))
+
+
+        display(ReportText( self.footer_text))
+        

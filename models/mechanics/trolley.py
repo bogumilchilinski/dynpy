@@ -1422,6 +1422,41 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
         load = abs(self.max_dynamic_force_pin())
         
         return ((4*load)/(pi*kt*Re))**(1/2)
+    
+     
+    def right_spring_force(self):
+        k_r=self.k_r
+        x_r=self.x_2
+        sol_dict=self._fodes_system.steady_solution.as_dict()
+        Fr=(-k_r*x_r).subs(sol_dict).subs(self._given_data)
+        
+        return Fr
+    
+    def centre_spring_force(self):
+        k_c=self.k_c
+        x_r=self.x_2
+        x_l=self.x_1
+        sol_dict=self._fodes_system.steady_solution.as_dict()
+        Fc=(-k_c*(x_r-x_l)).subs(sol_dict).subs(self._given_data)
+        
+        return Fc
+    
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.RightSpringForceComponent,
+        mech_comp.CentralSpringForceComponent
+
+        ]
+
+        return comp_list
 
 ### Nieliniowe
 class ForcedTrolleysWithNonLinearSprings(NonlinearComposedSystem):
