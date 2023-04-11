@@ -178,8 +178,7 @@ class BlowerToothedBelt(ComposedSystem):
         amps = self._fodes_system.steady_solution.as_dict()
         force_in_tensioner = self.components['_tensioner'].force().doit().expand()#.doit()
         data=self._given_data
-        #display(abs(self.components['_tensioner'].force()))
-        #ans=(self.components['_tensioner'].force().subs(amps)).expand().doit()
+
         
         ##### new force implementation
         ans = force_in_tensioner.subs(amps).expand().doit()
