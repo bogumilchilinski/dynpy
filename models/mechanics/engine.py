@@ -2102,9 +2102,35 @@ class EngineWithTMD(Engine):
     def max_static_force_pin(self):
         
         force = self._engine._left_mount.force().subs(self._op_points()[0])
-        #force_old = abs(   sum(self.static_load().doit())  ) / 2
-        
-        #display(force -force_old) #checking display
-        #self._left_mount.force()
+
         
         return force
+    
+    def spring_force(self):
+        k_m=self.k_m
+        z=self.z
+        sol_dict=self._fodes_system.steady_solution.as_dict()
+        F_km=(k_m*z).subs(sol_dict).subs(self._given_data)
+        
+        return F_km
+    
+    def spring_force_tmd(self):
+        k_tmd=self.k_E
+        z_tmd=self.z_E
+        z=self.z
+        sol_dict=self._fodes_system.steady_solution.as_dict()
+        F_ktmd=(k_tmd*(z-z_tmd)).subs(sol_dict).subs(self._given_data)
+        
+        return F_ktmd
+    
+       
+    def z_tmd_tune_coefficient(self):
+        phi=self.phi
+        Omega=self.Omega
+        t=self.ivar
+        k_E=self.k_E
+        steady_z_tmd=self._fodes_system.steady_solution.subs(phi, Omega*t).doit()
+        coef_z_tmd=list(fraction(steady_z_tmd[1].coeff(cos(Omega*t))))
+        sol_z_tmd=solve(Eq(coef_z_tmd[0], 0), k_E)
+        
+        return sol_z_tmd
