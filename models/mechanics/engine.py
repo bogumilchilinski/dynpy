@@ -701,6 +701,26 @@ class EngineConstantVelocityVerticalSpringGravity(Engine):
         ]
 
         return comp_list
+
+    
+    
+    def static_force(self):
+        data=self._given_data
+        ans=self.dynamic_force()
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        return (free_coeff)
+    
+    def dynamic_force(self):
+        return self.spring_force().expand().doit().n(6)
+    
+    def spring_force(self):
+        k_m=self.k_m
+        z=self.z
+        sol_dict=self._fodes_system.steady_solution.as_dict()
+        F_km=(k_m*z).subs(sol_dict).subs(self._given_data)
+        
+        return F_km
+    
     
     def left_engine_mount_force(self):
         return self._left_mount.stiffness * self.steady_solution()[0]
@@ -2002,7 +2022,8 @@ class EngineWithTMD(Engine):
         
         
         
-        self._engine = EngineVerticalSpringGravity(
+        #self._engine = EngineVerticalSpringGravity(
+        self._engine = EngineConstantVelocityVerticalSpringGravity(
             M=self.M,
             m_e=self.m_e,
             k_m=self.k_m,
@@ -2046,12 +2067,12 @@ class EngineWithTMD(Engine):
 
         default_data_dict = {
             self.phi: [self.Omega * self.ivar],
-            # self.M: [S.One *m0 * no for no in range(10, 100)],
-            # self.k_m: [S.One * k0 * no for no in range(1, 20)],
-            # self.m_E: [S.One *m0 * no / 5 for no in range(1, 20)],
-            # self.k_E: [S.One * k0 * no for no in range(1, 20)],
-            # self.m_e: [S.One *m0 * no for no in range(1, 20)],
-            # self.e: [S.One *e0 * no / 10 for no in range(1, 20)],
+            self.M: [S.One *m0 * no for no in range(75, 100)],
+            self.k_m: [S.One * k0 * no for no in range(1, 20)],
+            self.m_E: [S.One * m0 * 0.1 * no for no in range(75, 125)],
+            self.k_E: [S.One * k0 * no/10 for no in range(1, 20)],
+            self.m_e: [S.One *m0 * no for no in range(1, 25)],
+            self.e: [S.One *e0 * no / 10 for no in range(1, 20)],
         }
 
         return default_data_dict
@@ -2063,16 +2084,31 @@ class EngineWithTMD(Engine):
         m0 = 10
         k0 = 10
         default_data_dict = {
-            self.M: [m0 * no for no in range(75, 100)],
-            self.m_e: [m0 * no for no in range(1, 20)],
-            self.k_m: [1.0 * k0 * no for no in range(1, 20)],
-            self.m_E: [0.01 * no for no in range(7, 14)],
-            self.k_E: [1.0 * k0 * no for no in range(1, 20)],
-            self.e: [e0 * no / 10 for no in range(1, 20)],
+            self.M: [no for no in range(75, 100)],
+            self.m_e: [no for no in range(1, 10)],
+            self.k_m: [1000 * no for no in range(1, 20)],
+            self.m_E: [0.1 * no for no in range(75, 125)],
+            self.k_E: [100 * no for no in range(1, 20)],
+            self.e: [no / 10 for no in range(1, 20)],
             self.phi: [self.Omega * self.ivar],
+            self.Omega:[S.One * no * 3.1415 for no in range(1, 10)],
         }
 
         return default_data_dict
+    
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        parameters_dict[self.m_E] = parameters_dict[self.M]+parameters_dict[self.m_e]/10
+        parameters_dict[self.k_E] = parameters_dict[self.k_m]/10
+
+        return parameters_dict
 
 
     @property
@@ -2099,12 +2135,20 @@ class EngineWithTMD(Engine):
 
         return comp_list
 
-    def max_static_force_pin(self):
-        
-        force = self._engine._left_mount.force().subs(self._op_points()[0])
+#     def max_static_force_pin(self):
 
-        
-        return force
+#         force = self._engine._left_mount.force().subs(self._op_points()[0])
+
+#         return force
+    
+    def static_force(self):
+        data=self._given_data
+        ans=self.dynamic_force()
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        return (free_coeff)
+    
+    def dynamic_force(self):
+        return self.spring_force().expand().doit().n(6)
     
     def spring_force(self):
         k_m=self.k_m
@@ -2129,8 +2173,11 @@ class EngineWithTMD(Engine):
         Omega=self.Omega
         t=self.ivar
         k_E=self.k_E
-        steady_z_tmd=self._fodes_system.steady_solution.subs(phi, Omega*t).doit()
-        coef_z_tmd=list(fraction(steady_z_tmd[1].coeff(cos(Omega*t))))
+        steady_z_tmd=type(self)()._fodes_system.steady_solution.subs(phi, Omega*t).doit()
+        #display(steady_z_tmd[1])
+        coef_z_tmd=list(fraction(steady_z_tmd[0].coeff(cos(Omega*t))))
+        #display(coef_z_tmd)
+        #display(coef_z_tmd[0])
         sol_z_tmd=solve(Eq(coef_z_tmd[0], 0), k_E)
         
-        return sol_z_tmd
+        return sol_z_tmd[0]

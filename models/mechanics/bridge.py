@@ -19,6 +19,8 @@ import inspect
 
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
 
+from functools import cached_property
+
 # class ComposedSystem(HarmonicOscillator):
 #     """Base class for all systems
 
@@ -269,7 +271,7 @@ class BeamStructure(MaterialPoint):
     def get_default_data(self):
         m0=Symbol('m_0',positive=True)
         default_data_dict={
-            self.m:[S.One * m0 * no * 10000  for no in range(100, 200)],
+            self.m:[S.One * m0 * no for no in range(100, 200)],
         }
         return default_data_dict
 
@@ -293,7 +295,7 @@ class BeamElasticity(Spring):
         I=Symbol('I',positive=True)
         l=Symbol('l',positive=True)
         default_data_dict={
-            self.stiffness:[S.One * 48 * E * I / l**3],
+            self.stiffness:[S.One * 48 * E * I / l**3 * no for no in range(50, 80)],
 
         }
         return default_data_dict
@@ -399,7 +401,7 @@ class BeamBridge(ComposedSystem):
 
         self._init_from_components(**kwargs)
 
-    @property
+    @cached_property
     def components(self):
 
         components = {}
@@ -431,6 +433,9 @@ class BeamBridge(ComposedSystem):
         return self.sym_desc_dict
 
     def get_default_data(self):
+        
+        m0, k0, E, I, l, E0, I0= symbols('m_0 k_0 E I l E_0 I_0', positive=True)
+        
         F0=Symbol('F_0',positive=True)
         Omega0=Symbol('Omega_0',positive=True)
         E0=Symbol('E_0',positive=True)
@@ -441,10 +446,11 @@ class BeamBridge(ComposedSystem):
         l=Symbol('l',positive=True)
         
         default_data_dict={
-            l: [S.One * no * l0 for no in range(10, 25)],
-            module: [S.One * E0 * no for no in range(10, 20)],
-            inertia: [S.One * no * I0 for no in range(10, 20)],
-            self.F: [S.One * no * F0 * 1000 for no in range(10, 25)],
+            l: [S.One * no * l0 for no in range(1, 4)],
+            #module: [S.One * E0 * no for no in range(10, 20)],
+            #inertia: [S.One * no * I0 for no in range(10, 20)],
+            self.F: [S.One * no * F0  for no in range(10, 25)],
+            #self.m :[S.One * no * m0 for no in range(10, 20)]
 #            self.Omega: [S.One * Omega0]
         }
         return default_data_dict
@@ -453,10 +459,27 @@ class BeamBridge(ComposedSystem):
 
         default_data_dict={
             self.F:[no * 1000 for no in range(10, 25)],
-            self.Omega: [2 * 3.14 * 100]
+            self.Omega: [3.14 * no for no in range(1,10)],
+            
         }
         return default_data_dict
 
+    
+    def dynamic_force(self):
+        k_beam=self.k_beam
+        z=self.z
+        sol_dict=self._fodes_system.steady_solution.as_dict()
+        F_kbeam=(k_beam*z).subs(sol_dict).subs(self._given_data)
+        
+        return F_kbeam.subs(self._given_data)
+    
+    def static_force(self):
+        data=self._given_data
+        ans=self.dynamic_force()
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        return (free_coeff)
+    
+    
 #Amadi
 class BeamBridgeDamped(BeamBridge):
     """Ready to use model of damped bridge represented by the mass supported by elastic beam.
@@ -620,16 +643,18 @@ class BeamBridgeTMD(BeamBridge):
         
         self._init_from_components(**kwargs)
 
-    @property
+    @cached_property
     def components(self):
 
         components = {}
 
         self._beam_bridge = BeamBridge(self.m, self.k_beam, self.ivar, self.g, self.Omega, self.F)(label='Beam Bridge')
         self._TMD = TunedMassDamper(self.m_TMD, self.k_TMD, self.z_TMD,self.z)(label='TMD (damper)')
-
+        self._TMD_gravity = GravitationalForce(self.m_TMD, self.g,self.z_TMD)(label='Gravity field for TMD')
+        
         components['_beam_bridge'] = self._beam_bridge
         components['_TMD'] = self._TMD
+        components['_TMD_gravity'] = self._TMD_gravity
 
         return components
 
@@ -654,23 +679,70 @@ class BeamBridgeTMD(BeamBridge):
         m0, k0, E, I, l, E0, I0= symbols('m_0 k_0 E I l E_0 I_0', positive=True)
 
         default_data_dict = {
-            self.m_TMD: [S.One * no * m0 * 1000 for no in range(20, 80)],
-            self.k_TMD: [S.One * 48 * E * I / l**3 * no for no in range (1000, 4000)],
+            self.m: [S.One * m0  * no for no in range(100, 200)],
+            self.m_TMD: [S.One * m0/10  * no for no in range(100, 200)],
+            self.k_TMD: [S.One * 48/10 * E * I / l**3 * no for no in range(50, 80)],
+            self.k_beam: [S.One * 48 * E * I / l**3 * no for no in range(50, 80)],
 #             E: [S.One * no * E0 for no in range(10,50)],
 #             I: [S.One * no * I0 for no in range(20,80)],
         }
 
         return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        parameters_dict[self.m_TMD] = parameters_dict[self.m]/10
+        parameters_dict[self.k_TMD] = parameters_dict[self.k_beam]/10
+
+        return parameters_dict
+    
     
     def get_numerical_data(self):
 
         default_data_dict = {
-            self.m_TMD: [S.One * no * 1000  for no in range(20, 80)],
-            self.k_TMD: [S.One * no * 1000 for no in range(15, 20)],
+            self.m_TMD: [no * 1000 for no in range(100, 200)],
+            self.k_TMD: [no * 100 for no in range(500, 800)],
+            self.g: [9.81],
 
         }
         return default_data_dict
 
+    def dynamic_force(self):
+        k_beam=self.k_beam
+        z=self.z
+        sol_dict=self._fodes_system.steady_solution.as_dict()
+        F_kbeam=(k_beam*z).subs(sol_dict).subs(self._given_data)
+        
+        return F_kbeam.subs(self._given_data)
+    
+    def static_force(self):
+        data=self._given_data
+        ans=self.dynamic_force()
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        return (free_coeff)
+    
+    def tmd_tune_coefficient(self):
+        
+        pure_system = type(self)()
+        
+        Omega=pure_system.Omega
+        t=self.ivar
+        k_TMD=pure_system.k_TMD
+        steady_z_tmd=pure_system._fodes_system.steady_solution.doit()
+        #display(steady_z_tmd[1])
+        coef_z_tmd=list(fraction(steady_z_tmd[0].coeff(sin(Omega*t))))
+        #display(coef_z_tmd)
+        #display(coef_z_tmd[0])
+        sol_z_tmd=solve(Eq(coef_z_tmd[0], 0), k_TMD)
+        
+        return sol_z_tmd[0].subs(self._given_data)
     
 class BeamBridgeDampedTMD(BeamBridge):
 
