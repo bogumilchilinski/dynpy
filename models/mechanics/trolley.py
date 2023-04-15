@@ -2432,4 +2432,207 @@ class TrolleyWithTMD(ComposedSystem):
         return default_data_dict
 
     
+class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
+
+    scheme_name = 'kin_exct_pendulum.PNG'
+    real_name = 'elastic_pendulum_real.PNG'
+
+    ivar=Symbol('t')
+    l = Symbol('l', positive=True)
+    rho = Symbol('rho', positive=True)
+    m_f = Symbol('m_f', positive=True)
+    m_t = Function('m_t')(ivar)
+    m_t0 = Symbol('m_t0', positive=True)
+    m_p = Function('m_p')(ivar)
+    m_p0 = Symbol('m_p0', positive=True)
+    lam = Symbol('\\lambda', positive=True)
+    t0 = Symbol('t_0', positive=True)
+    k = Symbol('k', positive=True)
+    omega0=Symbol('omega_0', positive=True)
+    g = Symbol('g', positive=True)
+    Omega = Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    phi = dynamicsymbols('\\varphi')
+    x = dynamicsymbols('x')
+
+    def __init__(self,
+                 l=None,
+                 rho=None,
+                 m_f=None,
+                 m_t=None,
+                 m_t0=None,
+                 m_p=None,
+                 m_p0=None,
+                 lam=None,
+                 t0=None,
+                 k=None,
+                 g=None,
+                 Omega=None,
+                 omega0=None,
+                 phi=None,
+                 x=None,
+                 F=None,
+                 ivar=ivar,
+                 **kwargs):
+        
+        if l is not None: self.l = l
+        if rho is not None: self.rho = rho
+        if m_f is not None: self.m_f = m_f
+        if m_t is not None: self.m_t = m_t
+        if m_t0 is not None: self.m_t0 = m_t0
+        if m_p is not None: self.m_p = m_p
+        if m_p0 is not None: self.m_p0 = m_p0
+        if lam is not None: self.lam = lam
+        if t0 is not None: self.t0 = t0
+        if g is not None: self.g = g
+        if phi is not None: self.phi = phi
+        if x is not None: self.x = x
+        if k is not None: self.k = k
+        if Omega is not None: self.Omega = Omega
+        if omega0 is not None: self.omega0 = omega0
+        if F is not None: self.F = F
+        self.ivar = ivar
+        self._init_from_components(**kwargs)
+
+        #self.trans_expr = ((S.One/2-atan(self.flow_coeff*(self.ivar-self.t0))/pi))
+        #self.m_tf = self.m_f#((S.One/2-atan(self.flow_coeff*(self.ivar-self.t0))/pi))
+        #self.m_pf = self.m_f#((S.One/2+atan(self.flow_coeff*(self.ivar-self.t0))/pi))
+
+    @cached_property
+    def components(self):
+        components = {}
+
+        self._trolley = SpringMassSystem(self.m_t, self.k, self.x, self.ivar)(label='Trolley')
+        self._trolley_damper = Damper(c=self.k*self.lam, pos1=self.x, pos2=0, qs=[self.x, self.phi])(label='Trolley damper')
+        self._pendulum = PendulumKinematicExct(self.l, self.m_p, self.g, self.phi, self.x, self.ivar)(label='Pendulum')
+        self._pendulum_damper = Damper(c=self.m_p*self.g*self.l*self.lam, pos1=self.phi, pos2=0, qs=[self.x, self.phi])(label='Pendulum damper')
+        self._force=Force(self.F*sin(self.Omega*self.ivar), pos1=self.x, qs=[self.x, self.phi])(label='Force')
+
+        components['_trolley'] = self._trolley
+        components['_trolley_damper'] = self._trolley_damper
+        components['_pendulum'] = self._pendulum
+        components['_pendulum_damper'] = self._pendulum_damper
+        components['_force'] = self._force
+
+        return components
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.l: r'Pendulum length',
+            self.k: r'Stiffness of a beam showed as a spring stiffness in trolley member',
+            self.x: r'Kinematic lateral excitation',
+            self.phi: r'Angle of a pendulum',
+            self.m_p: r'Mass of pendulum',
+            self.m_t: r'Mass of trolley',
+            self.g: r'Gravity constant',
+            self.F: r'Force',
+            self.Omega: r'Excitation frequency',
+        }
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        m0, l0, F0, Omega0, k0 = symbols('m_0 l_0 F_0 Omega_0 k_0', positive=True)
+
+        default_data_dict = {
+            self.m_t: [S.One * m0 * no for no in range(20, 30)],
+            self.m_p: [S.One * m0 * no for no in range(1, 10)],
+            self.l: [S.Half * l0 * no for no in range(1, 10)],
+            self.F: [S.One * F0 * no for no in range(50, 100)],
+            self.Omega: [S.One * Omega0],
+            self.g: [S.One * self.g],
+            self.k: [S.One * k0 * no for no in range(50, 100)],
+            self.x: [self.x]
+        }
+        return default_data_dict
+
+    def get_numerical_data(self):
+
+        default_data_dict = {
+            self.m_p: [10],
+            self.m_f: [50],
+#             self.m_tf: [50],
+#             self.m_pf: [50],
+            self.F: [5],
+            self.flow_coeff: [5],
+            self.t0: [10],
+            self.Omega: [3.14 * 0.5],
+            self.g: [9.81],
+            #self.k: [2]
+        }
+        default_data_dict.update({self.m_t: [10.0*default_data_dict[self.m_p][0]],
+                                  #self.l: [0.99*default_data_dict[self.g][0]/(default_data_dict[self.Omega][0]*default_data_dict[self.Omega][0])],
+                                  #self.k: [2.0*default_data_dict[self.m_p][0]*default_data_dict[self.g][0]/(default_data_dict[self.g][0]/default_data_dict[self.Omega][0]**2)]
+                                 })
+        return default_data_dict
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m_t0: r'masa początkowa wózka',
+            self.m_t: r'funkcja zmiany masy wózka',
+            self.m_p0: r'masa początkowa wahadła',
+            self.m_p: r'funkcja zmiany masy wahadła',
+            self.m_f: r'masa transferowanej cieczy',
+            self.k: r'sztywność sprężyny mocującej',
+            self.lam: r'''współczynnik w modelu tłumienia Rayleigh'a''',
+            self.l: r'długość wahadła',
+            self.Omega: r'częstotliwość wymuszenia',
+            self.omega0: r'częstość własna wózka',
+            self.F: r'wartość siły wymuszającej',
+            self.g: r'przyspieszenie ziemskie',
+            self.rho: r'współczynnik przepływu cieczy',
+            self.t0: r'czas aktywacji tłumienia',
+        }
+        return self.sym_desc_dict
+
+
+    def dimensionless(self):
+        subs_dict={
+            self.phi:Function('Phi')(ivar*self.omega0),
+            self.x:Function('X')(ivar*self.omega0)}
+
+        q=self.q.subs(subs_dict)
+
+        m_s=Symbol('m_s', positive=True)
+        chi=Symbol('chi', positive=True)
+        
+        dimensionless_eoms=(self.dimensionless_inertia_matrix/omega0**2*q.diff(ivar,2)+self.dimensionless_damping_matrix/omega0**2*q.diff(ivar)+self.dimensionless_stiffness_matrix/omega0**2*q-self.dimensionless_external_forces_mat/omega0**2)
+
+        wynik=dimensionless_eoms.subs({self.m_t:m_s-self.m_p, self.k:self.omega0**2*m_s,}).expand().doit()
+
+        return wynik.subs({self.g:self.l*self.omega0**2*chi}).doit()
+
+    def mass_transfer_function(self):
+
+        subs_dict={
+            self.m_t:self.m_t0 + self.m_f*(1/2-atan(self.rho*self.ivar/self.omega0 - self.rho*self.t0/self.omega0)/pi),
+            self.m_p:self.m_p0 + self.m_f*(1/2+atan(self.rho*self.ivar/self.omega0 - self.rho*self.t0/self.omega0)/pi),
+        }
+        return self.subs(subs_dict)
     
+    def dimensionless_inertia_matrix(self):
+        inertia_mat=self.inertia_matrix()
+        first_inertia_row=inertia_mat.row(0)/inertia_mat[0]
+        second_inertia_row=inertia_mat.row(1)/inertia_mat[3]
+        dimensionless_inertia_mat=Matrix([[first_inertia_row],[second_inertia_row]])
+        return dimensionless_inertia_mat.doit()
+    
+    def dimensionless_damping_matrix(self):
+        inertia_mat=self.inertia_matrix()
+        first_damping_row=self.damping_matrix().row(0)/inertia_mat[0]
+        second_damping_row=self.damping_matrix().row(1)/inertia_mat[3]
+        dimensionless_damping_mat=Matrix([[first_damping_row],[second_damping_row]])
+        return dimensionless_damping_mat.doit()
+    
+    def dimensionless_stiffness_matrix(self):
+        inertia_mat=self.inertia_matrix()
+        first_stiffness_row=self.stiffness_matrix().row(0)/inertia_mat[0]
+        second_stiffness_row=self.stiffness_matrix().row(1)/inertia_mat[3]
+        dimensionless_stiffness_mat=Matrix([[first_stiffness_row],[second_stiffness_row]])
+        return dimensionless_stiffness_mat.doit()
+    
+    def dimensionless_external_forces_matrix(self):
+        inertia_mat=self.inertia_matrix()
+        dimensionless_external_forces_mat=self.external_forces()/inertia_mat[0]
+        return dimensionless_external_forces_mat.doit()
+       
