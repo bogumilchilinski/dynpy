@@ -51,13 +51,13 @@
     \fill[black] (origo) circle (0.05);
     \draw[thick,gray,->] (origo) -- ++(2.5,0) node[black,right] {$x$};
     \draw[thick,gray,->] (origo) -- ++(0, 4) node (mary) [black,left] {$y$};
-    \draw[<->,line width=1.5pt] (-0.5,0)--(0.5,0) node[midway,above]{$x_{e}(t)$};
+    \draw[<->,line width=1.5pt] (-0.5,0)--(0.5,0) node[midway,below]{$x_{e}(t)$};
 
     % draw roof
     %\fill[pattern = north east lines] ($ (origo) + (-1,0) $) rectangle ($ (origo) + (1,0.3) $);
     %\draw[thick] ($ (origo) + (-1,0) $) -- ($ (origo) + (1,0) $);
 
-    \draw[thick] (origo) -- ++(90:3) coordinate (bob1) node[near end, right]{$m_{1}$};
+    \draw[thick] (origo) -- ++(60:3) coordinate (bob1) node[near end, right]{$m_{1}$};
     \node (l1_label) at ($(origo)+(315:1.5cm)$)   {$l_{1}$};
     \fill (bob1) circle (0.2);
 
