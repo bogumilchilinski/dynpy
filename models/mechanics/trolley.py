@@ -2434,8 +2434,8 @@ class TrolleyWithTMD(ComposedSystem):
     
 class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
 
-    scheme_name = 'kin_exct_pendulum.PNG'
-    real_name = 'elastic_pendulum_real.PNG'
+    scheme_name = 'trolley_pendulum_tmd.png'
+    real_name = 'taipei101.png'
 
     ivar=Symbol('t')
     l = Symbol('l', positive=True)
@@ -2454,6 +2454,13 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
     F=Symbol('F', positive=True)
     phi = dynamicsymbols('\\varphi')
     x = dynamicsymbols('x')
+    eps = Symbol('epsilon', positive=True)
+    m_s = Symbol('m_s', positive=True)
+    chi = Symbol('chi', positive=True)
+    psi = Symbol('psi', positive=True)
+    delta = Symbol('delta', positive=True)
+    Omega0=Symbol('Omega_0', positive=True)
+    tau=Symbol('tau', positive=True)
 
     def __init__(self,
                  l=None,
@@ -2472,6 +2479,13 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                  phi=None,
                  x=None,
                  F=None,
+                 eps=None,
+                 m_s=None,
+                 chi=None,
+                 psi=None,
+                 delta=None,
+                 Omega0=None,
+                 tau=None,
                  ivar=ivar,
                  **kwargs):
         
@@ -2491,6 +2505,13 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         if Omega is not None: self.Omega = Omega
         if omega0 is not None: self.omega0 = omega0
         if F is not None: self.F = F
+        if eps is not None: self.eps = eps
+        if m_s is not None: self.m_s = m_s
+        if chi is not None: self.chi = chi
+        if psi is not None: self.psi = psi
+        if delta is not None: self.delta = delta
+        if Omega0 is not None: self.Omega0 = Omega0
+        if tau is not None: self.tau = tau
         self.ivar = ivar
         self._init_from_components(**kwargs)
 
@@ -2582,6 +2603,13 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
             self.g: r'przyspieszenie ziemskie',
             self.rho: r'współczynnik przepływu cieczy',
             self.t0: r'czas aktywacji tłumienia',
+            self.eps: r'stosunek masy wahadła do masy dynamicznej wózka',
+            self.m_s: r'całkowita masa układu',
+            self.chi: r'stosunek kwadratu częstości własnych członów',
+            self.psi: r'stosunek częstotliwości wymuszenia do częstości własnej wózka',
+            self.delta: r'stosunek siły wymuszającej do sztywności sprężyny',
+            self.Omega0: r'częstość drgań własnych wahadła',
+            self.tau: 'bezwymiarowy czas',
         }
         return self.sym_desc_dict
 
@@ -2593,8 +2621,8 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
 
         q=self.q.subs(subs_dict)
 
-        m_s=Symbol('m_s', positive=True)
-        chi=Symbol('chi', positive=True)
+        m_s=self.m_s
+        chi=self.chi
         
         dimensionless_eoms=(self.dimensionless_inertia_matrix/omega0**2*q.diff(ivar,2)+self.dimensionless_damping_matrix/omega0**2*q.diff(ivar)+self.dimensionless_stiffness_matrix/omega0**2*q-self.dimensionless_external_forces_mat/omega0**2)
 
@@ -2636,3 +2664,17 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         dimensionless_external_forces_mat=self.external_forces()/inertia_mat[0]
         return dimensionless_external_forces_mat.doit()
        
+    def system_mass_ratio(self):
+        return Eq(self.eps, self.m_p/self.m_s)
+    
+    def excitation_freq_ratio(self):
+        return Eq(self.psi, self.Omega/self.omega0)
+    
+    def frequency_ratio(self):
+        return Eq(self.chi, self.Omega0**2/self.omega0**2)
+    
+    def force_amplitude_ratio(self):
+        return Eq(self.delta, self.F/self.k)
+    
+    def dimensionless_time(self):
+        return Eq(self.tau, self.ivar*self.omega0)
