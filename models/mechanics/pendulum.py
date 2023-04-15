@@ -741,8 +741,21 @@ class PendulumKinematicExct(ComposedSystem):
         force_subs=force_in_cable.subs(data)#.subs({self.Omega:0.999*dyn_sys_lin.natural_frequencies()[0]})
 
         return force_subs.doit().expand()
+    
+    def sin_coeff(self):
+        
+        phi=PendulumKinematicExct().phi
+        sin_coeff=PendulumKinematicExct()._eoms[0].expand().coeff(sin(phi))
 
-
+        return sin_coeff
+        
+    def cos_coeff(self):
+        
+        phi=PendulumKinematicExct().phi
+        cos_coeff=PendulumKinematicExct()._eoms[0].expand().coeff(cos(phi))
+        
+        return cos_coeff
+        
     @property
     def _report_components(self):
 
