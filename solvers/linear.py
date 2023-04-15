@@ -579,6 +579,7 @@ class ODESolution(AnalyticalSolution):
     _integration_consts = None #container for integration constants
     _ivar=Symbol('t')
     _dvars_str = None
+    _ivar0 = 0 
 
     @property
     def _dvars(self):
@@ -683,6 +684,18 @@ class ODESolution(AnalyticalSolution):
         else:
             return self.default_ics
 
+    @property
+    def ivar_0(self):
+        return self._ivar0
+
+    @ivar_0.setter
+    def ivar_0(self,ivar0):
+        if isinstance(ivar0,(Symbol,Number)):
+        
+            self._ivar0 = ivar0
+        else:
+            print(f'something went wrong - ivar0 = {ivar0} which is not proper type ')
+
     def _get_constant_eqns(self,ics=None):
         """_summary_
 
@@ -701,7 +714,7 @@ class ODESolution(AnalyticalSolution):
         elif isinstance(ics,(list,tuple)):
             ics_list = ics
         #ics_list = [ics[coord]  for coord  in self.dvars]
-        return Matrix(ics_list) - self.rhs.subs(self.ivar,0)
+        return Matrix(ics_list) - self.rhs.subs(self.ivar,self.ivar_0)
         
     def _calculate_constant(self,ics=None):
         """_summary_
@@ -719,7 +732,10 @@ class ODESolution(AnalyticalSolution):
     
     def with_ics(self, ics=None, ivar0=0, dvars_str=None):
         self._dvars_str = dvars_str
+        self.ivar_0 = ivar0
         const_dict=self._calculate_constant(ics)
+        
+        
         
         return self.subs(const_dict)
     
