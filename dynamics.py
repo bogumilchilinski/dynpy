@@ -952,7 +952,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
 
         return Eq( self.Y.diff(self.ivar),self.rhs()  )
-
+        
+        
     def equilibrium_equation(self, static_disp_dict=None,coordinates=False):
         """
         Finds the equilibrium conditions of the considered problem based on the system governing equations stated in the class instance.
@@ -978,6 +979,55 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         return self.governing_equations.subs(static_disp_dict).subs({comp:0 for comp  in trig_comps if comp.has(self.ivar)}).subs({coord.diff(self.ivar):0   for coord in list(self.Y)})
 
+    def equilibrium_equation_new(self, static_disp_dict=None,coordinates=False):
+        """
+        Finds the equilibrium conditions of the considered problem based on the system governing equations stated in the class instance.
+        """
+        if static_disp_dict is None:
+            
+            static_disp_dict =  { coord.diff(self.ivar) : 0 for coord in self.q }
+
+        self.q_0 = static_disp_dict
+        
+        eq_eqns=self.governing_equations.subs(static_disp_dict)
+        
+        
+        
+        trig_comps=eq_eqns.atoms(sin,cos)
+        #trig_comp={}
+        
+
+        return self.governing_equations.subs(static_disp_dict).subs({comp:0 for comp  in trig_comps if comp.has(self.ivar)}).subs({coord.diff(self.ivar):0   for coord in list(self.q)})
+
+    
+    def equilibrium_equation_demo(self, static_disp_dict=None, coordinates=False):
+        """
+        Finds the equilibrium conditions of the considered problem based on the system governing equations stated in the class instance.
+        """
+
+        if static_disp_dict is None:
+
+            if coordinates==False:
+                static_disp_dict = {
+                        q_tmp:Symbol(str(q_tmp).replace('(' + str(self.ivar) + ')', '{^s}'))for q_tmp in self.q
+                }
+                #self.q_0 = static_disp_dict
+                #eq_eqns = self.governing_equations.subs(static_disp_dict)
+                #trig_comps = eq_eqns.atoms(sin, cos)
+
+                #result = self.governing_equations.subs(static_disp_dict).subs({comp:0 for comp in trig_comps if comp.has(self.ivar)}).subs({coord.diff(self.ivar):0 for coord in list(self.Y)})
+
+            else:
+                static_disp_dict = { coord.diff(self.ivar) : 0 for coord in self.q }
+
+
+        self.q_0 = static_disp_dict
+        eq_eqns = self.governing_equations.subs(static_disp_dict)
+        trig_comps = eq_eqns.atoms(sin, cos)
+
+        result = self.governing_equations.subs(static_disp_dict).doit()#.subs({comp:0 for comp in trig_comps if comp.has(self.ivar)}).subs({coord.diff(self.ivar):0 for coord in list(self.q)})
+
+        return result
     
     def static_load(self):
         """

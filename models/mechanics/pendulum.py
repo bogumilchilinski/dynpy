@@ -744,27 +744,29 @@ class PendulumKinematicExct(ComposedSystem):
     
     def sin_coeff(self):
         
-        phi=PendulumKinematicExct().phi
-        sin_coeff=PendulumKinematicExct()._eoms[0].expand().coeff(sin(phi))
+        phi=self.phi
+        sin_coeff=self._eoms[0].expand().coeff(sin(phi))
 
         return sin_coeff
         
     def cos_coeff(self):
         
-        phi=PendulumKinematicExct().phi
-        cos_coeff=PendulumKinematicExct()._eoms[0].expand().coeff(cos(phi))
+        phi=self.phi
+        cos_coeff=self._eoms[0].expand().coeff(cos(phi))
         
         return cos_coeff
     
     def equilibrium_position(self):
-        x_e=PendulumKinematicExct().x_e
-        phi=PendulumKinematicExct().phi
-        pendulum=PendulumKinematicExct()
-        equilibrium=pendulum.equilibrium_equation().doit().subs(x_e, 0).doit()[0]
-        static_symbol=pendulum.q_0[phi]
-        sol = solveset(equilibrium, static_symbol)
         
-        return sol
+        x_e=self.x_e
+        phi=self.phi
+        equilibrium=self.equilibrium_equation_demo(coordinates=True).doit().subs(x_e, 0).doit()[0]
+        solution=solve(equilibrium, phi)
+        solution += [i*solution[1] for i in range(2, 10)]
+        
+        return solution
+    
+    
         
     @property
     def _report_components(self):
