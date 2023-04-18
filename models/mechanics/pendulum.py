@@ -788,6 +788,26 @@ class PendulumKinematicExct(ComposedSystem):
 
         return comp_list
     
+class KinematiclyExctitedIvertedPendulum(PendulumKinematicExct):
+    
+    scheme_name = 'Inverse_pendulum.png'
+    real_name = 'elastic_pendulum_real.PNG'
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self._material_point_1 = MaterialPoint(self.m, self.x, qs=self.qs)
+        self._material_point_2 = MaterialPoint(self.m, self.y, qs=self.qs)
+        self._gravity = GravitationalForce(self.m, self.g, pos1=self.y, qs=self.qs)
+
+        components['_material_point_1'] = self._material_point_1
+        components['_material_point_2'] = self._material_point_2
+        components['_gravity'] = self._gravity
+
+        return components
+    
     
 class MDoFElasticPendulum(ComposedSystem):
     """
