@@ -745,7 +745,7 @@ class PendulumKinematicExct(ComposedSystem):
     def sin_coeff(self):
         
         phi=self.phi
-        sin_coeff=self._eoms[0].expand().coeff(sin(phi))
+        sin_coeff=self._eoms[0].expand().coeff(sin(phi)) ## eoms[0]: m * L**2 * phi" + m * g * L * sin(phi)  == 0
 
         return sin_coeff
         
