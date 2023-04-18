@@ -973,11 +973,20 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         
         
-        trig_comps=eq_eqns.atoms(sin,cos)
+        trig_comps=eq_eqns.atoms(sin,cos,Function)-{sin(self.q[0]),cos(self.q[0])} - set(self.q)
         #trig_comp={}
+        #display(trig_comps)
+
+        trig_dict = {comp:0 for comp  in trig_comps if comp.has(self.ivar)}
+        
+        #display(trig_dict)
+
+        result = self.governing_equations.subs(static_disp_dict).subs(trig_dict).subs({coord.diff(self.ivar):0   for coord in list(self.Y)})
+        
         
 
-        return self.governing_equations.subs(static_disp_dict).subs({comp:0 for comp  in trig_comps if comp.has(self.ivar)}).subs({coord.diff(self.ivar):0   for coord in list(self.Y)})
+
+        return result
 
     def equilibrium_equation_new(self, static_disp_dict=None,coordinates=False):
         """
@@ -1375,13 +1384,14 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         eqns_to_solve = self.equilibrium_equation(
             static_disp_dict={}).doit()
-        #print('op point - new')
+        #print('op point - new',type(self))
         #display(eqns_to_solve )
         
         hint= [eq.subs(self.q_0) for eq  in hint]
         
         combined_eqns=list(eqns_to_solve) + list(flatten([hint]))
-        #display(combined_eqns)
+        #print('combined')
+        #display(combined_eqns,list(self.q_0.values()))
                                                  
         
         roots = solve(combined_eqns,
