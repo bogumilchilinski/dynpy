@@ -1494,21 +1494,27 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         Returns approximated N-th order function calculated with Taylor series method as an instance of the class
         """
-
+        x0_dict = {coord: 0 for coord in self._coords_with_acceleration}
         # print('x0',x0)
-        if not x0:
-            x0 = {coord: 0 for coord in self._coords_with_acceleration}
+        if op_point and x0 is None:
+            x0_dict.update(self._op_points(hint=hint, subs=True)[0])
+        elif isinstance(x0,int):
+            x0_dict = {coord: 0 for coord in self._coords_with_acceleration}
+            
+            x0_dict.update(self._op_points(hint=hint, subs=True)[x0])
+            #print('current op')
+            #display(self._op_points(hint=hint, subs=True))            
 
         #display(self._op_points(hint=hint, subs=True))
-        if op_point:
-            x0.update(self._op_points(hint=hint, subs=True)[0])
-            #print('current op')
-            #display(self._op_points(hint=hint, subs=True))
+        # if op_point and x0 is None:
+        #     x0.update(self._op_points(hint=hint, subs=True)[0])
+        #     #print('current op')
+        #     #display(self._op_points(hint=hint, subs=True))
 
         lagrangian_approx = multivariable_taylor_series(self.lagrangian(),
                                                         self.Y,
                                                         n=n + 1,
-                                                        x0=x0)
+                                                        x0=x0_dict)
         
         
 #         coords_list = list(self.Y) + [diff(self.q,self.ivar,self.ivar)]

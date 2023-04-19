@@ -238,13 +238,14 @@ class ComposedSystem(HarmonicOscillator):
         return comp_list
     
     @lru_cache
-    def linearized(self): #it was missing
+    # def linearized(self,): #it was missing
 
-        return type(self).from_system(super().linearized())
-    
-#     def linearized(self, x0=None, op_point=False, hint=[], label=None):
+    #     return type(self).from_system(super().linearized())
+ 
+    @lru_cache   
+    def linearized(self, x0=None, op_point=False, hint=[], label=None):
 
-#         return type(self).from_system(super().linearized(x0=x0,op_point=op_point,hint=hint,label=label))
+        return type(self).from_system(super().linearized(x0=x0,op_point=op_point,hint=hint,label=label))
 
     def tensioner_belt_force(self):
         return self.k_tensioner * self.steady_solution()
