@@ -2159,11 +2159,9 @@ class EngineWithTMD(Engine):
         return F_km
     
     def spring_force_tmd(self):
-        k_tmd=self.k_E
-        z_tmd=self.z_E
-        z=self.z
+        force_TMD=EngineWithTMD().components['_TMD'].components['_spring'].force()
         sol_dict=self._fodes_system.steady_solution.as_dict()
-        F_ktmd=(k_tmd*(z-z_tmd)).subs(sol_dict).subs(self._given_data)
+        F_ktmd=force_TMD.subs(sol_dict).subs(self._given_data)
         
         return F_ktmd
     

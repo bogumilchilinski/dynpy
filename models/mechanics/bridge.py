@@ -715,10 +715,10 @@ class BeamBridgeTMD(BeamBridge):
         return default_data_dict
 
     def dynamic_force(self):
-        k_beam=self.k_beam
-        z=self.z
+        
+        force=BeamBridgeTMD().components['_beam_bridge'].components['_spring'].force()
         sol_dict=self._fodes_system.steady_solution.as_dict()
-        F_kbeam=(k_beam*z).subs(sol_dict).subs(self._given_data)
+        F_kbeam=force.subs(sol_dict).subs(self._given_data)
         
         return F_kbeam.subs(self._given_data)
     
@@ -728,6 +728,13 @@ class BeamBridgeTMD(BeamBridge):
         free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
         return (free_coeff)
     
+    def dynamic_force_TMD(self):
+        force=BeamBridgeTMD().components['_TMD'].components['_spring'].force()
+        sol_dict=self._fodes_system.steady_solution.as_dict()
+        F_tmd=force.subs(sol_dict).subs(self._given_data)
+        
+        return F_tmd
+    
     def tmd_tune_coefficient(self):
         
         pure_system = type(self)()
@@ -736,10 +743,7 @@ class BeamBridgeTMD(BeamBridge):
         t=self.ivar
         k_TMD=pure_system.k_TMD
         steady_z_tmd=pure_system._fodes_system.steady_solution.doit()
-        #display(steady_z_tmd[1])
         coef_z_tmd=list(fraction(steady_z_tmd[0].coeff(sin(Omega*t))))
-        #display(coef_z_tmd)
-        #display(coef_z_tmd[0])
         sol_z_tmd=solve(Eq(coef_z_tmd[0], 0), k_TMD)
         
         return sol_z_tmd[0].subs(self._given_data)
