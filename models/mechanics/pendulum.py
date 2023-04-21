@@ -16,7 +16,7 @@ import IPython as IP
 import numpy as np
 import inspect
 
-from .principles import ComposedSystem, NonlinearComposedSystem,  base_frame, base_origin
+from .principles import ComposedSystem, NonlinearComposedSystem,  base_frame, base_origin,cached_property, lru_cache
 
 #DONE
 class Pendulum(NonlinearComposedSystem):
@@ -92,7 +92,7 @@ class Pendulum(NonlinearComposedSystem):
         
         
         
-    @property
+    @cached_property
     def components(self):
 
         components = {}
@@ -247,7 +247,7 @@ class PulledPendulum(ComposedSystem):
 
         self._init_from_components(**kwargs)
         
-    @property
+    @cached_property
     def components(self):
         
         components = {}
@@ -636,6 +636,7 @@ class PendulumKinematicExct(ComposedSystem):
     Omega = Symbol('Omega', positive=True)
     phi = dynamicsymbols('\\varphi')
     x_e = dynamicsymbols('x_e')
+    x_0 = Symbol('x_0', positive=True)
 
     def __init__(self,
                  l=None,
@@ -793,7 +794,7 @@ class KinematicallyExcitedIvertedPendulum(PendulumKinematicExct):
     scheme_name = 'Inverse_pendulum.png'
     real_name = 'elastic_pendulum_real.PNG'
 
-    @property
+    @cached_property
     def components(self):
 
         components = {}
