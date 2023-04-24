@@ -386,7 +386,8 @@ class AnalyticalSolution(ImmutableMatrix):
     
     def __call__(self,t,params={}):
         
-        solution = (self.nth_order_solution(order).rhs.subs(self.extra_params).subs(self.params_values))
+        solution = (self.nth_order_solution(
+            ).rhs.subs(self.extra_params).subs(self.params_values))
         
         solution = solution.applyfunc(lambda x: x.subs(self.extra_params).subs(self.params_values))
 
