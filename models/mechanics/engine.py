@@ -2151,14 +2151,18 @@ class EngineWithTMD(Engine):
         return self.spring_force().expand().doit().n(6)
     
     def spring_force(self):
-        k_m=self.k_m
-        z=self.z
+        
+        '''This method evaluates dynamic force in single spring of the engine. It works by substituting coordinates in spring force with steady solutions.'''
+        force_km=EngineWithTMD().components['_engine'].components['_left_mount'].force()
         sol_dict=self._fodes_system.steady_solution.as_dict()
-        F_km=(k_m*z).subs(sol_dict).subs(self._given_data)
+        F_km=(force_km).subs(sol_dict).subs(self._given_data)
         
         return F_km
     
     def spring_force_tmd(self):
+        
+        '''This method evaluates dynamic force in spring between tuned mass damper and engine. It works by substituting coordinates in spring force with steady solutions.'''
+        
         force_TMD=EngineWithTMD().components['_TMD'].components['_spring'].force()
         sol_dict=self._fodes_system.steady_solution.as_dict()
         F_ktmd=force_TMD.subs(sol_dict).subs(self._given_data)
@@ -2167,15 +2171,15 @@ class EngineWithTMD(Engine):
     
        
     def z_tmd_tune_coefficient(self):
+        
+        '''This method calculates the tuned mass damper tune coefficient. It assumes that nominator of steady solution is equal to 0 and then solves the equation with respect to k_TMD (stiffness of the tune mass damper spring).'''
+
         phi=self.phi
         Omega=self.Omega
         t=self.ivar
         k_E=self.k_E
         steady_z_tmd=type(self)()._fodes_system.steady_solution.subs(phi, Omega*t).doit()
-        #display(steady_z_tmd[1])
         coef_z_tmd=list(fraction(steady_z_tmd[0].coeff(cos(Omega*t))))
-        #display(coef_z_tmd)
-        #display(coef_z_tmd[0])
         sol_z_tmd=solve(Eq(coef_z_tmd[0], 0), k_E)
         
         return sol_z_tmd[0]

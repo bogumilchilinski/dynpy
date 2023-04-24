@@ -247,4 +247,136 @@ class ForcedNonLinearDiscSpring(NonlinearComposedSystem): ### Miałeś bład z t
 
         return default_data_dict
 
+    #Grzes robi
+class DDoFTwoNonLinearDisksNew(ComposedSystem):
+    scheme_name = 'sdof_nonlin_disc.png'
+    real_name = 'roller_tightener.png'
+    
+    m1=Symbol('m_1', positive=True)
+    m2=Symbol('m_2', positive=True)
+    kl=Symbol('k_l', positive=True)
+    kc=Symbol('k_c', positive=True)
+    kr=Symbol('k_r', positive=True)
+    R=Symbol('R', positive=True)
+    d=Symbol('d', positive=True)
+    l_0=Symbol('l_0', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    ivar=Symbol('t')
+    xl=dynamicsymbols('x_l')
+    xr=dynamicsymbols('x_r')
+    x=dynamicsymbols('x')
+    qs=dynamicsymbols('x_l, x_r')
+    F_l=Symbol('F_l', positive=True)
+    F_r=Symbol('F_r', positive=True)
+    
+    def __init__(self,
+                 m1=None,
+                 m2=None,
+                 kl=None,
+                 kc=None,
+                 kr=None,
+                 R=None,
+                 ivar=Symbol('t'),
+                 d=None,
+                 l_0=None,
+                 xl=None,
+                 xr=None,
+                 x=None,
+                 F_l=None,
+                 F_r=None,
+                 Omega=None,
+                 **kwargs):
+
+        if m1 is not None: self.m1=m1
+        if m2 is not None: self.m2=m2
+        if kl is not None: self.kl = kl
+        if kc is not None: self.kc = kc
+        if kr is not None: self.kr = kr
+        if R is not None: self.R = R
+        if d is not None: self.d = d
+        if l_0 is not None: self.l_0 = l_0
+        if xl is not None: self.xl=xl
+        if xr is not None: self.xr=xr
+        if x is not None: self.x=x
+        if F_l is not None: self.F_l=F_l
+        if F_r is not None: self.F_r=F_r
+        self.ivar=ivar
+        
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self.disk1_lin = MaterialPoint(self.m1, self.xl, qs=[self.xl]) #+ MaterialPoint(self.m1/2*self.R**2, self.xl/self.R, qs=[self.xl])
+        self.disk1_rot = MaterialPoint(self.m1/2*self.R**2, self.xl/self.R, qs=[self.xl])
+        self.disk2_lin = MaterialPoint(self.m2, self.xr, qs=[self.xr]) #+ MaterialPoint(self.m2/2*self.R**2, self.xr/self.R, qs=[self.xr])
+        self.disk2_rot = MaterialPoint(self.m2/2*self.R**2, self.xr/self.R, qs=[self.xr])
+        self.spring_l = Spring(self.kl, pos1=(sqrt(self.xl**2 + self.d**2) - self.l_0), qs=[self.xl])
+        self.spring_r = Spring(self.kr, pos1=(sqrt(self.xr**2 + self.d**2) - self.l_0), qs=[self.xr])
+        #self.spring_m = Spring(self.kc, pos1 = (sqrt(self.xl**2 + self.d**2) - self.l_0), pos2 = (sqrt(self.xr**2 + self.d**2) - self.l_0), qs=[self.xl, self.xr])
+        self.spring_m = Spring(self.kc, pos1 =self.xl, pos2 = self.xr, qs=[self.xl, self.xr])
+        self.force_l = Force(self.F_l * cos(self.Omega * self.ivar), pos1=self.xl, qs=[self.xl])
+        self.force_r = Force(self.F_r * cos(self.Omega * self.ivar), pos1=self.xr, qs=[self.xr])
+
+
+        components['_disk_1_lin'] = self.disk1_lin
+        components['_disk_1_rot'] = self.disk1_rot
+        components['_disk_2_lin'] = self.disk2_lin
+        components['_disk_2_rot'] = self.disk2_rot
+        components['_spring_l'] = self.spring_l
+        components['_spring_r'] = self.spring_r
+        components['_spring_m'] = self.spring_m
+        components['_force_l']=self.force_l
+        components['_force_r']=self.force_r
+        
+        return components
+
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
+            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+
+            self.d: [l0*S.Half*no for no in range(4,16)],
+
+            self.kl: [S.Half * k0, S.Half * k0, 1 * k0, 3 * S.Half * k0, 2 * k0],
+            self.kr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.kc: [S.Half * k0, 1 * k0, 3 * S.Half * k0, 2 * k0, 5 * S.Half * k0],
+
+            self.xl: [self.x, 0],
+            self.xr: [self.x, S.Zero],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+
+        if parameters_dict[self.xl] == S.Zero:
+            parameters_dict[self.xr] = self.x
+
+        return parameters_dict
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m1: r'Disk Mass',
+            self.m2: r'Disk Mass',
+            self.kl: 'Left Spring Stiffness',
+            self.kr: 'Right Spring Stiffness',
+            self.kc: 'Central Spring Stiffness',
+            self.l: r'Length',
+            self.l_0: r'initial Spring Length',
+        }
+        return self.sym_desc_dict
     

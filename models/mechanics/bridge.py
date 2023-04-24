@@ -716,6 +716,8 @@ class BeamBridgeTMD(BeamBridge):
 
     def dynamic_force(self):
         
+        '''This method counts dynamic force in in the beam of the investigated bridge without TMD. It works by substituting coordinates in beam force with steady solutions.'''
+        
         force=BeamBridgeTMD().components['_beam_bridge'].components['_spring'].force()
         sol_dict=self._fodes_system.steady_solution.as_dict()
         F_kbeam=force.subs(sol_dict).subs(self._given_data)
@@ -729,6 +731,7 @@ class BeamBridgeTMD(BeamBridge):
         return (free_coeff)
     
     def dynamic_force_TMD(self):
+        '''This method counts dynamic force in spring between tuned mass damper and beam. It works by substituting coordinates in spring force with steady solutions.'''
         force=BeamBridgeTMD().components['_TMD'].components['_spring'].force()
         sol_dict=self._fodes_system.steady_solution.as_dict()
         F_tmd=force.subs(sol_dict).subs(self._given_data)
@@ -736,6 +739,7 @@ class BeamBridgeTMD(BeamBridge):
         return F_tmd
     
     def tmd_tune_coefficient(self):
+        '''This method calculates the TMD tune coefficient. It assumes that nominator of steady solution is equal to 0 and then solves the equation with respect to k_TMD.'''
         
         pure_system = type(self)()
         

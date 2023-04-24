@@ -1243,40 +1243,7 @@ class MDoFSteadySolutionComponent(ReportComponent):
         
         
         
-# Grzes, Krzychu i Filip
-class GuysComponent(ReportComponent):
-
-    title="Kinetic energy"
-
-    @property
-    def header_text(self):
-        #"Energia kinetyczna układu wyrażona jest wzorem:"
-        return "Kinetic energy of the system has a following form:"
-
-
-    @property
-    def footer_text(self):
-        #"Wyznaczona wielkość określa energię układu wynikającą z jego własności inercyjnych (energię zmagazynowaną w elementach bezwładnych)."
-        return "Determined formula specify energy of the system related to its inertial properties."
-
-    def append_elements(self):
-
-        system = self._system
-        dyn_sys=system
-        dyn_sys_lin = dyn_sys
-
-        display(ReportText(" adnsnjncskj" ))
-
-        display(SympyFormula( Eq(Symbol('T'),
-                     T) , marker=None))
-
-        display(SympyFormula( Eq(Symbol('V'),
-                     dyn_sys_lin._kinetic_energy*10 + Symbol('Guys')) , marker=None))
-
-
-        display(ReportText( self.footer_text))
-        
-
+# Grzes, Krzychu
 class RightSpringForceComponent(ReportComponent):
 
     title="Force in top right spring of the system"

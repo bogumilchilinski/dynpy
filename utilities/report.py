@@ -73,6 +73,12 @@ class CurrentContainer:
         TikZPlot._prefix = prefix
 
         return copy.copy(self)
+    
+    def set_descriptions_registry(self,symbols_description_dict):
+
+        DescriptionsRegistry().reset_registry()
+        DescriptionsRegistry().set_descriptions(symbols_description_dict)
+
 
 # class AbstractFrameFormatter(AdaptableDataFrame):
 #     _applying_func=lambda x: (x*100)
@@ -2434,7 +2440,15 @@ class ReportText(ReportModule):
         
         return copy.copy(self)
     
-    
+class Aspect(Section,ReportModule):
+    packages=[#Package('float'),
+              #Package('fvextra'),
+              #Command('floatname', arguments=['listing'],extra_arguments=['Listing']), 
+             ]
+
+
+    latex_name = 'subparagraph'
+    content_separator = "\n"
     
 class Verbatim(Environment):
     pass
@@ -2448,10 +2462,76 @@ class LstListing(Environment):
     
     
 class PyVerbatim(Environment):
-    packages=[Package('pythontex')]
+    packages=[Package('pythontex'),
+              Package('fvextra'),
+              Command('fvset', arguments=[NoEscape(r'breaklines, commandchars=\\\{\},numbers=left')]), 
+             ]
     content_separator = "\n"
     #inspect.getsource(system.__class__)
 
+
+class Listing(Figure,ReportModule):
+    packages=[Package('float'),
+              Package('fvextra'),
+              Command('floatname', arguments=['listing'],extra_arguments=['Listing']), 
+             ]
+
+
+
+    content_separator = "\n"
+    
+    _default_width = NoEscape('0.8\\textwidth')
+    _position = 'H'
+    
+    def __init__(self, verbatim=None, position=None, caption=None,width=None,height=None,marker=None, **kwargs):
+        """
+        Args
+        ----
+        position: str
+            Define the positioning of a floating environment, for instance
+            ``'h'``. See the references for more information.
+        width: str
+            Documentation entry
+            
+        References
+        ----------
+            * https://www.sharelatex.com/learn/Positioning_of_Figures
+        """
+    
+        self.verbatim = verbatim
+        self.caption = caption
+        
+        if width is not None:
+            self.width = width
+        else:
+            self.width = self._default_width
+
+        self.height = height
+            
+        self.marker = marker
+        
+        if position is not None:
+            self._position = position
+        
+        
+        super().__init__(position=self._position,**kwargs)
+        
+        if self.verbatim is not None:
+            self.append(self.verbatim)
+            
+        if self.caption is not None:
+            self.add_caption(NoEscape(self.caption))
+
+        self.marker = marker
+#         if self.marker is not None:
+#             self.append(Label(self.marker))
+#         else:
+#             auto_mrk = AutoMarker(self).marker
+#             marker = auto_mrk
+            
+#             self.marker = marker
+            
+#             self.append(Label(marker))
     
 
 class BeamerTemplate(Document):
@@ -2958,7 +3038,12 @@ class ObjectCode(PyVerbatim,ReportModule):
         return repr_string
     
     def reported(self):
-        self.cls_container.append(self)
+        
+        lst_env = Aspect('Code of script')
+        
+        lst_env.append(self)
+        #lst_env=self
+        self.cls_container.append(lst_env)
         
         return copy.deepcopy(self)
     
@@ -3411,7 +3496,7 @@ class DescriptionsRegistry:
         return syms_to_desc
 
 
-class SymbolsDescription(Description):
+class SymbolsDescription(Description,ReportModule):
     """A class representing LaTeX description environment of Symbols explained in description_dict."""
     _latex_name = 'description'
     cls_container = []
@@ -3529,7 +3614,10 @@ class SymbolsDescription(Description):
             self._container.append(NoEscape(self._description_head) + '\n')
             self._container.append(self)
         #return (self._text)
-        return copy.deepcopy(self)
+        
+
+            
+        #return copy.copy(self)
 
     def add_items(self, description_dict):
 
@@ -3547,9 +3635,10 @@ class SymbolsDescription(Description):
 #                           NoEscape(f'- {vlatex(entry)}{end_symbol}'))
             self.add_item(NoEscape(InlineMath((label)).dumps()),
                           NoEscape(f'- {(entry)}{end_symbol}'))
-    def __repr__(self):
-        
-        #self.reported()
+
+    
+    def _repr_markdown_(self):
+        self._container = type(self).cls_container
         
         entries = [
             f'${vlatex(key)}$ - {value}'
@@ -3565,13 +3654,43 @@ class SymbolsDescription(Description):
 
         text = head + ',  \n'.join(entries) + end_sign
 
-        #print(text)
-        #print(text)
-        
-        display(IPMarkdown(text))
 
-        #return (self._text)
-        return ''
+        if len(entries) != 0:
+
+            self._container.append(NoEscape(self._description_head) + '\n')
+            self._container.append(copy.deepcopy(self))
+
+
+        return text
+        
+        
+    
+    def __repr__(self):
+        
+        #self.reported()
+
+        entries = [
+            f'${vlatex(key)}$ - {value}'
+            for key, value in self._added_symbols.items()
+        ]
+
+        end_sign = '.'
+        head = self._description_head + '  \n'
+
+        if len(entries) == 0:
+            end_sign = ''
+            head = ''
+
+        text = head + ',  \n'.join(entries) + end_sign
+        
+        self._container = type(self).cls_container
+#         if len(entries) != 0:
+
+#            self._container.append(NoEscape(self._description_head)+ 'try' + '\n')
+#             self._container.append(copy.deepcopy(self))
+
+        return text
+
 
 
 class Align(Environment):

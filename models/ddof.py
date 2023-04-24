@@ -2707,7 +2707,8 @@ class DDoFTwoNonLinearDisks(ComposedSystem):
             self.l_0: r'initial Spring Length',
         }
         return self.sym_desc_dict
-    
+
+
     
 class DDOFSemiSubmersiblePlatform(ComposedSystem):
 
