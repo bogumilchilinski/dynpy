@@ -261,6 +261,7 @@ class DDoFTwoNonLinearDisksNew(ComposedSystem):
     d=Symbol('d', positive=True)
     l_0=Symbol('l_0', positive=True)
     Omega=Symbol('Omega', positive=True)
+    omg=Symbol('omega', positive=True)
     ivar=Symbol('t')
     xl=dynamicsymbols('x_l')
     xr=dynamicsymbols('x_r')
@@ -285,6 +286,7 @@ class DDoFTwoNonLinearDisksNew(ComposedSystem):
                  F_l=None,
                  F_r=None,
                  Omega=None,
+                 omg=None,
                  **kwargs):
 
         if m1 is not None: self.m1=m1
@@ -300,6 +302,8 @@ class DDoFTwoNonLinearDisksNew(ComposedSystem):
         if x is not None: self.x=x
         if F_l is not None: self.F_l=F_l
         if F_r is not None: self.F_r=F_r
+        if omg is not None: self.omg=omg
+
         self.ivar=ivar
         
         self._init_from_components(**kwargs)

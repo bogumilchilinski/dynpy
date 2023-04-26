@@ -1461,7 +1461,10 @@ class EntryWithUnit:
             if isinstance(unit,str):
                 return f'{entry_str} {left_par}{unit}{right_par}'
             elif str(unit) == str(ureg.dimensionless):
-                return f'{entry_str} {left_par}-{right_par}'                
+                return f'{entry_str} {left_par}-{right_par}'
+            elif str(unit) == str(ureg.ohm):
+                ohm_string='\\mathrm{\\Omega}'
+                return f'{entry_str} {left_par}{ohm_string}{right_par}'     
             else:
                 return f'{entry_str} {left_par}{unit:~L}{right_par}'
         else:
