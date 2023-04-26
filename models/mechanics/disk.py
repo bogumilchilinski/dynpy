@@ -305,6 +305,7 @@ class DDoFTwoNonLinearDisksNew(ComposedSystem):
         if omg is not None: self.omg=omg
 
         self.ivar=ivar
+        self.qs=[self.xl, self.xr]
         
         self._init_from_components(**kwargs)
 
@@ -313,16 +314,16 @@ class DDoFTwoNonLinearDisksNew(ComposedSystem):
 
         components = {}
 
-        self.disk1_lin = MaterialPoint(self.m1, self.xl, qs=[self.xl]) #+ MaterialPoint(self.m1/2*self.R**2, self.xl/self.R, qs=[self.xl])
-        self.disk1_rot = MaterialPoint(self.m1/2*self.R**2, self.xl/self.R, qs=[self.xl])
-        self.disk2_lin = MaterialPoint(self.m2, self.xr, qs=[self.xr]) #+ MaterialPoint(self.m2/2*self.R**2, self.xr/self.R, qs=[self.xr])
-        self.disk2_rot = MaterialPoint(self.m2/2*self.R**2, self.xr/self.R, qs=[self.xr])
-        self.spring_l = Spring(self.kl, pos1=(sqrt(self.xl**2 + self.d**2) - self.l_0), qs=[self.xl])
-        self.spring_r = Spring(self.kr, pos1=(sqrt(self.xr**2 + self.d**2) - self.l_0), qs=[self.xr])
+        self.disk1_lin = MaterialPoint(self.m1, self.xl, qs=self.qs) #+ MaterialPoint(self.m1/2*self.R**2, self.xl/self.R, qs=[self.xl])
+        self.disk1_rot = MaterialPoint(self.m1/2*self.R**2, self.xl/self.R, qs=self.qs)
+        self.disk2_lin = MaterialPoint(self.m2, self.xr, qs=self.qs) #+ MaterialPoint(self.m2/2*self.R**2, self.xr/self.R, qs=[self.xr])
+        self.disk2_rot = MaterialPoint(self.m2/2*self.R**2, self.xr/self.R, qs=self.qs)
+        self.spring_l = Spring(self.kl, pos1=(sqrt(self.xl**2 + self.d**2) - self.l_0), qs=self.qs)
+        self.spring_r = Spring(self.kr, pos1=(sqrt(self.xr**2 + self.d**2) - self.l_0), qs=self.qs)
         #self.spring_m = Spring(self.kc, pos1 = (sqrt(self.xl**2 + self.d**2) - self.l_0), pos2 = (sqrt(self.xr**2 + self.d**2) - self.l_0), qs=[self.xl, self.xr])
-        self.spring_m = Spring(self.kc, pos1 =self.xl, pos2 = self.xr, qs=[self.xl, self.xr])
-        self.force_l = Force(self.F_l * cos(self.Omega * self.ivar), pos1=self.xl, qs=[self.xl])
-        self.force_r = Force(self.F_r * cos(self.Omega * self.ivar), pos1=self.xr, qs=[self.xr])
+        self.spring_m = Spring(self.kc, pos1 =self.xl, pos2 = self.xr, qs=self.qs)
+        self.force_l = Force(self.F_l * cos(self.Omega * self.ivar), pos1=self.xl, qs=self.qs)
+        self.force_r = Force(self.F_r * cos(self.Omega * self.ivar), pos1=self.xr, qs=self.qs)
 
 
         components['_disk_1_lin'] = self.disk1_lin
@@ -339,19 +340,18 @@ class DDoFTwoNonLinearDisksNew(ComposedSystem):
 
     def get_default_data(self):
 
-        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+        m0, k0, l0, F0 = symbols('m_0 k_0 l_0 F0', positive=True)
 
         default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-
-            self.d: [l0*S.Half*no for no in range(4,16)],
-
-            self.kl: [S.Half * k0, S.Half * k0, 1 * k0, 3 * S.Half * k0, 2 * k0],
-            self.kr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.kc: [S.Half * k0, 1 * k0, 3 * S.Half * k0, 2 * k0, 5 * S.Half * k0],
-
-            self.xl: [self.x, 0],
+            self.m1: [S.One *m0 * no for no in range(5, 15)],
+            self.m2: [S.One *m0 * no for no in range(5, 15)],
+            self.d: [self.l_0*S.Half*no for no in range(4,16)],
+            self.kl: [S.One *k0 * no for no in range(50, 75)],
+            self.kr: [S.One *k0 * no for no in range(50, 75)],
+            self.kc: [S.One *k0 * no for no in range(25, 50)],
+            self.F_l: [S.One *F0 * no for no in range(15, 30)],
+            self.F_r: [S.One *F0 * no for no in range(5, 15)],
+            self.xl: [self.x, S.Zero],
             self.xr: [self.x, S.Zero],
         }
 
@@ -369,6 +369,7 @@ class DDoFTwoNonLinearDisksNew(ComposedSystem):
 
         if parameters_dict[self.xl] == S.Zero:
             parameters_dict[self.xr] = self.x
+
 
         return parameters_dict
 
