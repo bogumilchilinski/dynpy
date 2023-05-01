@@ -334,20 +334,24 @@ class BaseIndexTransformer:
         
         cols = self.columns
         lvl_to_drop = self._coord_level
+        
 
+        #print('raw input',cols)
 
         if isinstance(cols,pd.MultiIndex):
 
             if len(self._spot_axis_label() )==1:
                 cols = cols.droplevel(lvl_to_drop)
 
-
+        if isinstance(cols,pd.MultiIndex):
             labels = list(cols.to_flat_index())
             
-            #print('len',len(labels),labels,type(labels))
             
-#             if len(labels)==1:
-#                 labels =[(labels[0],)]
+            
+#             #print('len',len(labels),labels,type(labels))
+            
+#             if not isinstance(labels[0],tuple):
+#                 labels =[(label,)  for label in labels]
             
             
         else:
