@@ -1173,11 +1173,14 @@ class ODESystem(AnalyticalSolution):
     
     def copy(self):
         
-        obj=copy.copy(self)
-        obj = self.cp
-        obj._lhs = copy.copy(self._lhs)
+        obj=copy.deepcopy(self)
+        #obj = super().copy()
+        obj._lhs = copy.copy(self.lhs)
+        obj._dvars=self._dvars
+        obj._ivar = self.ivar
+        obj._ode_order = self.ode_order
         
-        return self
+        return obj
     
     
     def _eval_applyfunc(self, f):
