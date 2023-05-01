@@ -16,6 +16,8 @@ import IPython as IP
 import numpy as np
 import inspect
 
+from functools import cached_property, lru_cache
+
 
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
 
@@ -34,7 +36,6 @@ class ForcedNonLinearDisc(NonlinearComposedSystem):
     Omega = Symbol('Omega', positive=True)
     ivar = Symbol('t')
     x = dynamicsymbols('x')
-    qs = dynamicsymbols('x')
 
     def __init__(self,
                  m1=None,
@@ -44,7 +45,6 @@ class ForcedNonLinearDisc(NonlinearComposedSystem):
                  l_0=None,
                  F=None,
                  x=None,
-                 qs=None,
                  ivar=Symbol('t'),
                  **kwargs):
 
@@ -56,43 +56,37 @@ class ForcedNonLinearDisc(NonlinearComposedSystem):
         if F is not None: self.F = F
         if x is not None: self.x = x
 
+        self.qs = [self.x]
         self._init_from_components(**kwargs)
 
-    @property
+    @cached_property
     def components(self):
 
         components = {}
 
-        self.disk1 = MaterialPoint(self.m1, self.x, qs=[self.x]) + MaterialPoint(
-            self.m1 / 2 * self.R**2, self.x / self.R, qs=[self.x]) + Spring(
-                self.kl, pos1=(sqrt(self.x**2 + self.d**2) - self.l_0), qs=[self.x])
-        self.force = Force(self.F * cos(self.Omega * self.ivar), pos1=self.x, qs=[self.x])
+        self.disk1_lin = MaterialPoint(self.m1, pos1=self.x, qs=self.qs)
+        self.disk1_rot= MaterialPoint(self.m1 / 2 * self.R**2, pos1=self.x/self.R, qs=self.qs)
+        self.spring = Spring(self.kl, pos1=(sqrt(self.x**2 + self.d**2) - self.l_0), qs=self.qs)
+        self.force = Force(self.F * cos(self.Omega * self.ivar), pos1=self.x, qs=self.qs)
 
 
 
-        components['disk1'] = self.disk1
-        components['force'] = self.force
+        components['_disk1_lin'] = self.disk1_lin
+        components['_disk1_rot'] = self.disk1_rot
+        components['_spring'] = self.spring
+        components['_force'] = self.force
 
         return components
 
     def get_default_data(self):
 
-        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+        m0, k0, l0, F0 = symbols('m_0 k_0 l_0 F_0', positive=True)
 
         default_data_dict = {
-            self.m1: [
-                0.5 * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0,
-                7 * m0, 8 * m0, 9 * m0
-            ],
-            self.d: [
-                5 * l0, 2 * l0, 3 * S.Half * l0, 4 * l0, 6 * l0, 7 * l0,
-                8 * l0, 9 * l0
-            ],
-            self.kl: [
-                1 * k0, 3 * k0, 2 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0,
-                9 * k0
-            ],
-            self.l_0: [l0],
+            self.m1: [S.One * no * m0 for no in range(5,15)],
+            self.d: [S.Half * no * self.l_0 for no in range (4,16)],
+            self.kl: [S.One * k0 * no for no in range (20,30)],
+            self.F: [S.One * F0 * no for no in range(10,20)]
         }
 
         return default_data_dict
@@ -163,7 +157,7 @@ class ForcedNonLinearDiscSpring(NonlinearComposedSystem): ### Miałeś bład z t
 
         self._init_from_components(**kwargs)
 
-    @property
+    @cached_property
     def components(self):
 
         components = {}
@@ -309,38 +303,42 @@ class DDoFTwoNonLinearDisksNew(ComposedSystem):
         
         self._init_from_components(**kwargs)
 
-    @property
+    @cached_property
     def components(self):
 
         components = {}
 
-        self.disk1_lin = MaterialPoint(self.m1, self.xl, qs=self.qs) #+ MaterialPoint(self.m1/2*self.R**2, self.xl/self.R, qs=[self.xl])
-        self.disk1_rot = MaterialPoint(self.m1/2*self.R**2, self.xl/self.R, qs=self.qs)
-        self.disk2_lin = MaterialPoint(self.m2, self.xr, qs=self.qs) #+ MaterialPoint(self.m2/2*self.R**2, self.xr/self.R, qs=[self.xr])
-        self.disk2_rot = MaterialPoint(self.m2/2*self.R**2, self.xr/self.R, qs=self.qs)
-        self.spring_l = Spring(self.kl, pos1=(sqrt(self.xl**2 + self.d**2) - self.l_0), qs=self.qs)
-        self.spring_r = Spring(self.kr, pos1=(sqrt(self.xr**2 + self.d**2) - self.l_0), qs=self.qs)
-        #self.spring_m = Spring(self.kc, pos1 = (sqrt(self.xl**2 + self.d**2) - self.l_0), pos2 = (sqrt(self.xr**2 + self.d**2) - self.l_0), qs=[self.xl, self.xr])
+        self.left_disk = ForcedNonLinearDisc(m1=self.m1, kl=self.kl, R=self.R, d=self.d, l_0=self.l_0, F=self.F_l, x=self.xl, ivar=self.ivar)
+        self.right_disk = ForcedNonLinearDisc(m1=self.m2, kl=self.kr, R=self.R, d=self.d, l_0=self.l_0, F=self.F_r, x=self.xr, ivar=self.ivar)
         self.spring_m = Spring(self.kc, pos1 =self.xl, pos2 = self.xr, qs=self.qs)
-        self.force_l = Force(self.F_l * cos(self.Omega * self.ivar), pos1=self.xl, qs=self.qs)
-        self.force_r = Force(self.F_r * cos(self.Omega * self.ivar), pos1=self.xr, qs=self.qs)
+#         self.disk1_lin = MaterialPoint(self.m1, self.xl, qs=self.qs) #+ MaterialPoint(self.m1/2*self.R**2, self.xl/self.R, qs=[self.xl])
+#         self.disk1_rot = MaterialPoint(self.m1/2*self.R**2, self.xl/self.R, qs=self.qs)
+#         self.disk2_lin = MaterialPoint(self.m2, self.xr, qs=self.qs) #+ MaterialPoint(self.m2/2*self.R**2, self.xr/self.R, qs=[self.xr])
+#         self.disk2_rot = MaterialPoint(self.m2/2*self.R**2, self.xr/self.R, qs=self.qs)
+#         self.spring_l = Spring(self.kl, pos1=(sqrt(self.xl**2 + self.d**2) - self.l_0), qs=self.qs)
+#         self.spring_r = Spring(self.kr, pos1=(sqrt(self.xr**2 + self.d**2) - self.l_0), qs=self.qs)
+#         self.force_l = Force(self.F_l * cos(self.Omega * self.ivar), pos1=self.xl, qs=self.qs)
+#         self.force_r = Force(self.F_r * cos(self.Omega * self.ivar), pos1=self.xr, qs=self.qs)
 
 
-        components['_disk_1_lin'] = self.disk1_lin
-        components['_disk_1_rot'] = self.disk1_rot
-        components['_disk_2_lin'] = self.disk2_lin
-        components['_disk_2_rot'] = self.disk2_rot
-        components['_spring_l'] = self.spring_l
-        components['_spring_r'] = self.spring_r
+#         components['_disk_1_lin'] = self.disk1_lin
+#         components['_disk_1_rot'] = self.disk1_rot
+#         components['_disk_2_lin'] = self.disk2_lin
+#         components['_disk_2_rot'] = self.disk2_rot
+#         components['_spring_l'] = self.spring_l
+#         components['_spring_r'] = self.spring_r
+#         components['_force_l']=self.force_l
+#         components['_force_r']=self.force_r
+        components['_left_disk'] = self.left_disk
+        components['_right_disk'] = self.right_disk
         components['_spring_m'] = self.spring_m
-        components['_force_l']=self.force_l
-        components['_force_r']=self.force_r
+
         
         return components
 
     def get_default_data(self):
 
-        m0, k0, l0, F0 = symbols('m_0 k_0 l_0 F0', positive=True)
+        m0, k0, l0, F0 = symbols('m_0 k_0 l_0 F_0', positive=True)
 
         default_data_dict = {
             self.m1: [S.One *m0 * no for no in range(5, 15)],

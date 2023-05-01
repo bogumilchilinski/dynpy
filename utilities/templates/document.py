@@ -303,7 +303,7 @@ class ThesisTemplate(Document):
         self.packages.append(Command('newcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']))
         self.packages.append(Command('graphicspath{{../}}'))
         #self.append(Command('maketitle'))
-        self.append(NewPage())
+        #self.append(NewPage())
         # tu implementować co tam potrzeba
         
 class QuotationTemplate(Document):

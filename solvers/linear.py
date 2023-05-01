@@ -38,6 +38,8 @@ from ..utilities.templates.document import *
 from ..utilities.templates import tikz
 from ..utilities.components.ode import en as ode
 
+import copy
+
 class MultivariableTaylorSeries(Expr):
     """_summary_
 
@@ -785,6 +787,7 @@ class ODESystem(AnalyticalSolution):
         >>>display(num_sol.plot())
     """ 
     _ivar = Symbol('t')
+    _simp_dict = None
     _parameters = None
     _ode_order = 2
 
@@ -916,6 +919,27 @@ class ODESystem(AnalyticalSolution):
 
             
         return obj
+    
+    def set_simp_deps(self,dependencies,inplace=False):
+        
+        if inplace is False:
+            obj = self.copy()
+        else:
+            obj = self
+        
+        obj._simp_dict  = dependencies
+        
+        return obj
+    
+    @cached_property
+    def _simp_deps(self):
+        
+        if self._simp_dict is None:
+            return {}
+        else:
+            return self._simp_dict
+
+
     
     @cached_property
     def ivar(self):
@@ -1149,9 +1173,11 @@ class ODESystem(AnalyticalSolution):
     
     def copy(self):
         
+        obj=copy.copy(self)
+        obj = self.cp
+        obj._lhs = copy.copy(self._lhs)
         
-        
-        return copy.copy(self)
+        return self
     
     
     def _eval_applyfunc(self, f):
@@ -1513,10 +1539,11 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         
         
-        A = self._auxiliary_fundamental_matrix
+        A = self._auxiliary_fundamental_matrix.applyfunc(lambda elem: elem.subs(self._simp_deps,simultaneous=True))
+        
         dvars = self._auxiliary_dvars
         
-        sol = AnalyticalSolution(dvars,linodesolve(A,t=self.ivar,b=0*self.dvars))#.applyfunc(self.solution_map)
+        sol = AnalyticalSolution(dvars,linodesolve(A,t=self.ivar,b=0*self.dvars)  )#.applyfunc(self.solution_map)
         
         dummies_set= sol.atoms(Dummy)
         const_dict = self._const_mapper(dummies_set)
@@ -1527,7 +1554,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
 #             sol=  sol[no:] + sol[:no]
         sol = list(reversed(list(sol)))
 
-        return ODESolution(self.dvars,sol).subs( const_dict )
+        return ODESolution(self.dvars,sol).applyfunc(lambda elem: elem.subs(self._simp_deps,simultaneous=True)).subs( const_dict )
                                  
 
                                  
