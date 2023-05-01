@@ -834,7 +834,7 @@ class ODESystem(AnalyticalSolution):
 
     
     
-    def __new__(cls, odes,dvars,odes_rhs=None , ivar=None ,ode_order=None,evaluate=True, parameters = None, **options):
+    def __new__(cls, odes, dvars, odes_rhs=None , ivar=None, ode_order=None, evaluate=True, parameters = None, **options):
         """
         Arguments
         =========
@@ -1240,7 +1240,32 @@ class ODESystem(AnalyticalSolution):
 
         return self.general_solution + self.steady_solution    
     
-    
+
+    # Derivative reset Method
+    def static_equation(self):
+        obj = super()
+        derivatives = list(obj.lhs.atoms(Derivative))
+        derivatives_values = {item: 0 for item in derivatives}
+        static_eqs = obj.subs(derivatives_values)
+        return static_eqs
+
+
+    # Calculating a critical point
+    def critical_point(self, params):
+        obj = super()
+        critical_point = solve(Eq(obj.lhs, obj.rhs), self.dvars[0])
+        critical_point = critical_point[self.dvars[0]]
+        return Eq(self.dvars[0], critical_point.subs(params))
+
+
+    # Designate Order Method
+    def spot_order(self):
+        obj = super()
+        derivatives = list(obj.lhs.atoms(Derivative))
+        derivatives_dict = {item:item.args[1][1] for item in derivatives}
+
+        return max(list(derivatives_dict.values()))
+        
 
 class FirstOrderODESystem(ODESystem):
     
