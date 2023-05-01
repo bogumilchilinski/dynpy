@@ -3435,7 +3435,7 @@ class DescriptionsRegistry:
 
     _descriptions = {}
     _described_elements = {}
-    _description_mode = 'one occurence'
+    _description_mode = 'one occurrence'
 
     @classmethod
     def set_descriptions(cls, description={}):
@@ -3443,7 +3443,7 @@ class DescriptionsRegistry:
         return cls
 
     @classmethod
-    def set_description_mode(cls, description_mode= 'one occurrence'):
+    def set_description_mode(cls, description_mode= 'single'):
         cls._description_mode = description_mode
         return cls
         
@@ -3470,7 +3470,7 @@ class DescriptionsRegistry:
         }
 
         #syms_to_desc={sym for sym in items if sym not in self._described_elements.keys()}
-        if self._description_mode == 'one occurence':
+        if self._description_mode == 'one occurrence' or self._description_mode == 'single':
             syms_to_desc = {
                 sym: self._descriptions[sym]
                 for sym in items if sym not in self._described_elements.keys()
