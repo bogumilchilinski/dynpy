@@ -40,6 +40,8 @@ from ..utilities.components.ode import en as ode
 
 import copy
 
+from .tools import CommonFactorDetector
+
 class MultivariableTaylorSeries(Expr):
     """_summary_
 
@@ -788,6 +790,10 @@ class ODESystem(AnalyticalSolution):
     """ 
     _ivar = Symbol('t')
     _simp_dict = None
+    _callback_dict = None
+    
+    _default_detector = None #CommonFactorDetector
+    
     _parameters = None
     _ode_order = 2
 
@@ -920,7 +926,7 @@ class ODESystem(AnalyticalSolution):
             
         return obj
     
-    def set_simp_deps(self,dependencies,inplace=False):
+    def set_simp_deps(self,dependencies,callback=None,inplace=False):
         
         if inplace is False:
             obj = self.copy()
@@ -929,17 +935,38 @@ class ODESystem(AnalyticalSolution):
         
         obj._simp_dict  = dependencies
         
+        if callback is not None:
+            obj._callback_dict = callback
+        
         return obj
     
     @cached_property
     def _simp_deps(self):
         
         if self._simp_dict is None:
-            return {}
+            
+            Detector = self._default_detector
+            
+            if Detector is None:
+                self._simp_dict = {}
+            else:
+                self._simp_dict = Detector(self._fundamental_matrix).subs_dict()
+
+
+            return self._simp_dict
         else:
             return self._simp_dict
 
-
+    @cached_property
+    def _callback_deps(self):
+        
+        if self._callback_dict is None:
+            
+            Detector = self._default_detector
+            
+            return self._simp_dict
+        else:
+            return self._callback_dict
     
     @cached_property
     def ivar(self):
@@ -1582,7 +1609,9 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
 #             sol=  sol[no:] + sol[:no]
         sol = list(reversed(list(sol)))
 
-        return ODESolution(self.dvars,sol).applyfunc(lambda elem: elem.subs(self._simp_deps,simultaneous=True)).subs( const_dict )
+        #display()
+        mapper = lambda elem: elem.subs(self._simp_deps,simultaneous=True).subs(self._callback_deps,simultaneous=True) 
+        return ODESolution(self.dvars,sol).applyfunc(mapper).subs( const_dict )
                                  
 
                                  
