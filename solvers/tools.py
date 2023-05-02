@@ -53,3 +53,9 @@ class CommonFactorDetector:
         num, denom  = self._const_spotter()
         
         return {num: denom / self._default_symbol}
+    
+    def callback_dict(self):
+        
+        num, denom  = self._const_spotter()
+        
+        return {self._default_symbol: denom / num}

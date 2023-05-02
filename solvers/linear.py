@@ -792,7 +792,8 @@ class ODESystem(AnalyticalSolution):
     _simp_dict = None
     _callback_dict = None
     
-    _default_detector = None #CommonFactorDetector
+    _default_detector = CommonFactorDetector #None
+    #_default_detector = None
     
     _parameters = None
     _ode_order = 2
@@ -964,7 +965,12 @@ class ODESystem(AnalyticalSolution):
             
             Detector = self._default_detector
             
-            return self._simp_dict
+            if Detector is None:
+                self._callback_dict = {}
+            else:
+                self._callback_dict = Detector(self._fundamental_matrix).callback_dict()
+            
+            return self._callback_dict
         else:
             return self._callback_dict
     
@@ -1480,25 +1486,6 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         return self.odes_rhs.subs({coord:0 for coord in self.dvars})
 
 
-#     @cached_property
-#     def _auxiliary_fundamental_matrix(self):
-        
-#         odes_list = list(self.odes_rhs)
-#         dvars_list = list(self.dvars)
-        
-#         if len(self.dvars) >= 2:
-#             no = int(len(self.dvars)/2)
-        
-#             odes=  odes_list[no:] + odes_list[:no] 
-#             dvars = dvars_list[no:] + dvars_list[:no]
-#         else:
-#             odes=odes_list
-#             dvars=dvars_list
-        
-#         odes = Matrix(odes)
-#         dvars = Matrix(dvars)
-        
-#         return odes.jacobian(dvars)
 
     @cached_property
     def _auxiliary_dvars(self):
@@ -1517,25 +1504,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         return Matrix(odes).jacobian(dvars)  
     
-#     @cached_property
-#     def _auxiliary_free_terms(self):
-        
-#         odes_list = list(self.odes_rhs)
-#         dvars = self.dvars
-        
-#         if len(self.dvars) >= 2:
-#             no = int(len(self.dvars)/2)
-        
-#             odes=  odes_list[no:] + odes_list[:no] 
 
-#         else:
-#             odes=odes_list
-
-#         odes = Matrix(odes)
-        
-
-        
-#         return odes.subs({coord:0 for coord in dvars})
     
     @cached_property
     def _auxiliary_free_terms(self):
@@ -1603,13 +1572,12 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         dummies_set= sol.atoms(Dummy)
         const_dict = self._const_mapper(dummies_set)
 
-#         if len(self.dvars) >= 2:
-#             no = int(len(self.dvars)/2)
-        
-#             sol=  sol[no:] + sol[:no]
+
         sol = list(reversed(list(sol)))
 
-        #display()
+        #print('self._callback_deps')
+        #display(self._callback_deps)
+        
         mapper = lambda elem: elem.subs(self._simp_deps,simultaneous=True).subs(self._callback_deps,simultaneous=True) 
         return ODESolution(self.dvars,sol).applyfunc(mapper).subs( const_dict )
                                  
