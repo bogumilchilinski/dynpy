@@ -929,6 +929,8 @@ class ODESystem(AnalyticalSolution):
     
     def set_simp_deps(self,dependencies,callback=None,inplace=False):
         
+
+        
         if inplace is False:
             obj = self.copy()
         else:
@@ -939,10 +941,13 @@ class ODESystem(AnalyticalSolution):
         if callback is not None:
             obj._callback_dict = callback
         
+        #print(obj._simp_dict)
         return obj
     
-    @cached_property
+    @property
     def _simp_deps(self):
+        
+        #display('_simp_deps',self._simp_dict)
         
         if self._simp_dict is None:
             
@@ -1564,6 +1569,8 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         
         A = self._auxiliary_fundamental_matrix.applyfunc(lambda elem: elem.subs(self._simp_deps,simultaneous=True))
+        
+        #display('A_subs',A,'subs dict',self._simp_deps)
         
         dvars = self._auxiliary_dvars
         

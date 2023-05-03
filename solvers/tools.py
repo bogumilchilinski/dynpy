@@ -45,17 +45,25 @@ class CommonFactorDetector:
         
         
         
-        return (list(num_common)+[S.One])[0],(list(denom_common)+[S.One])[0]
+        return (list(num_common)+[None])[0],(list(denom_common)+[None])[0]
 
 
     def subs_dict(self):
         
         num, denom  = self._const_spotter()
         
-        return {num: denom / self._default_symbol}
+        
+        
+        if num is not None and denom is not None:
+            return {num: denom / self._default_symbol}
+        else:
+            return {}
     
     def callback_dict(self):
         
         num, denom  = self._const_spotter()
         
-        return {self._default_symbol: denom / num}
+        if num is not None and denom is not None:
+            return {self._default_symbol: denom / num}
+        else:
+            return {}
