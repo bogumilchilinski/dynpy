@@ -808,8 +808,12 @@ class ODESystem(AnalyticalSolution):
         ivar = sys.ivar
         parameters = sys._parameters
         ode_order = sys.ode_order
-
-        return cls._constructor(odes , dvars, odes_rhs , ivar,ode_order=ode_order ,parameters=parameters)
+        
+        new_sys = cls._constructor(odes , dvars, odes_rhs , ivar,ode_order=ode_order ,parameters=parameters)
+        
+        #display('subs dict',sys._simp_dict,cls)
+        
+        return new_sys.set_simp_deps(sys._simp_dict,sys._callback_dict,inplace=True)
 
     @classmethod
     def from_dynamic_system(cls,dyn_system, ode_order = None, parameters = None):
@@ -1042,9 +1046,11 @@ class ODESystem(AnalyticalSolution):
     def as_matrix(self):
         return Matrix(self._lhs_repr - self.rhs) 
     
-###method owner - Franciszek, supervisior - Bogumił
+    ###method owner - Franciszek, supervisior - Bogumił
     def _as_fode(self):
         """Creates an object of FirstOrderLinearODESystem class."""
+        
+        #display('subs dict',self._simp_dict,type(self))
         
         return FirstOrderLinearODESystem.from_ode_system(self)
     
@@ -1134,7 +1140,7 @@ class ODESystem(AnalyticalSolution):
         obj._ivar = self.ivar
         obj._ode_order = self.ode_order
         
-        return obj
+        return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
     
     
     def __add__(self,other):
@@ -1147,7 +1153,7 @@ class ODESystem(AnalyticalSolution):
         obj._ivar = self.ivar
         obj._ode_order = self.ode_order
         
-        return obj
+        return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
 
     
     def __rsub__(self,other):
@@ -1160,7 +1166,7 @@ class ODESystem(AnalyticalSolution):
         obj._ivar = self.ivar
         obj._ode_order = self.ode_order
         
-        return obj
+        return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
 
     
     def __sub__(self,other):
@@ -1174,7 +1180,7 @@ class ODESystem(AnalyticalSolution):
         obj._ivar = self.ivar
         obj._ode_order = self.ode_order
         
-        return obj
+        return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
 
     
     
@@ -1185,7 +1191,7 @@ class ODESystem(AnalyticalSolution):
         obj._ivar = self.ivar
         obj._ode_order = self.ode_order
         
-        return obj
+        return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
     
     def doit(self,**hints):
         
@@ -1195,7 +1201,7 @@ class ODESystem(AnalyticalSolution):
         obj._ivar = self.ivar
         obj._ode_order = self.ode_order
         
-        return obj
+        return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
 
     def expand(self,deep=True, modulus=None, power_base=True, power_exp=True,mul=True, log=True, multinomial=True, basic=True, **hints):
         
@@ -1206,7 +1212,7 @@ class ODESystem(AnalyticalSolution):
         obj._ivar = self.ivar
         obj._ode_order = self.ode_order
         
-        return obj
+        return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
     
     
     def copy(self):
@@ -1218,7 +1224,7 @@ class ODESystem(AnalyticalSolution):
         obj._ivar = self.ivar
         obj._ode_order = self.ode_order
         
-        return obj
+        return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
     
     
     def _eval_applyfunc(self, f):
@@ -1230,7 +1236,7 @@ class ODESystem(AnalyticalSolution):
         obj._ode_order = self.ode_order
         
         
-        return obj
+        return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
     
 
     def is_linear(self):
@@ -1274,7 +1280,7 @@ class ODESystem(AnalyticalSolution):
         fode = self._as_fode()
         #solver changing due to the computational simplicity reasons
 
-        fode_sys=FirstOrderLinearODESystem(fode,fode.dvars)        
+        fode_sys= fode #FirstOrderLinearODESystem(fode,fode.dvars)        
 
         return fode_sys.general_solution
 
@@ -1470,8 +1476,12 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         f_ord_dvars=sys._fode_dvars
         ode_rhs = Matrix(list(f_ord_dvars[len(dvars):]) + list(sys.odes_rhs))
 
+    
+        new_sys = cls._constructor(f_ord_dvars.diff(ivar) , f_ord_dvars,ode_rhs, ivar = ivar,ode_order=ode_order ,parameters=parameters)
         
-        return cls._constructor(f_ord_dvars.diff(ivar) , f_ord_dvars,ode_rhs, ivar = ivar,ode_order=ode_order ,parameters=parameters)
+        #display('subs dict',sys._simp_dict,cls)
+        
+        return new_sys.set_simp_deps(sys._simp_dict,sys._callback_dict,inplace=True)
     
     
     @cached_property
