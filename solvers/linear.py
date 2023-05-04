@@ -304,13 +304,19 @@ class AnalyticalSolution(ImmutableMatrix):
     
         return obj
     
+    def _assign_properties(self,obj):
+        
+        obj._lhs=self._lhs        
+        
+        return obj
+    
     
     def subs(self,*args,**kwargs):
         
 
         
         obj = super().subs(*args,**kwargs)
-        obj._lhs=self._lhs
+        obj = self._assign_properties(obj)
         
         return obj
     
@@ -321,7 +327,7 @@ class AnalyticalSolution(ImmutableMatrix):
             other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
         
         obj = super().__add__(other)
-        obj._lhs=self._lhs
+        obj = self._assign_properties(obj)
         
         return obj
 
@@ -332,7 +338,7 @@ class AnalyticalSolution(ImmutableMatrix):
             other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
 
         obj = super().__rsub__(other)
-        obj._lhs=self._lhs
+        obj = self._assign_properties(obj)
 
         return obj
 
@@ -343,7 +349,7 @@ class AnalyticalSolution(ImmutableMatrix):
             other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
 
         obj = super().__sub__(other)
-        obj._lhs=self._lhs
+        obj = self._assign_properties(obj)
 
         return obj
 
@@ -351,14 +357,14 @@ class AnalyticalSolution(ImmutableMatrix):
     def __mul__(self,other):
 
         obj = super().__mul__(other)
-        obj._lhs=self._lhs
+        obj = self._assign_properties(obj)
 
         return obj
 
     def __rmul__(self,other):
 
         obj = super().__rmul__(other)
-        obj._lhs=self._lhs
+        obj = self._assign_properties(obj)
 
         return obj
     
@@ -366,14 +372,14 @@ class AnalyticalSolution(ImmutableMatrix):
     def doit(self,**hints):
 
         obj = super().doit(**hints)
-        obj._lhs=self._lhs
+        obj = self._assign_properties(obj)
 
         return obj
     
     def _eval_applyfunc(self, f):
         
         obj = super()._eval_applyfunc(f)
-        obj._lhs=self._lhs
+        obj = self._assign_properties(obj)
         
         return obj
 
@@ -381,7 +387,8 @@ class AnalyticalSolution(ImmutableMatrix):
         
 
         obj = super().expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
-        obj._lhs = self._lhs.expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
+        obj = self._assign_properties(obj)        
+        obj._lhs = obj._lhs.expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
         #obj._dvars=self._dvars
         #obj._ivar = self.ivar
         
@@ -590,6 +597,15 @@ class ODESolution(AnalyticalSolution):
     def _dvars(self):
         return self.lhs
  
+
+    def _assign_properties(self,obj):
+        
+        obj._lhs=self._lhs     
+        obj._ivar = self.ivar
+        
+        
+        return obj
+
     def expand(self,deep=True, modulus=None, power_base=True, power_exp=True,mul=True, log=True, multinomial=True, basic=True, **hints):
         
 
@@ -719,6 +735,8 @@ class ODESolution(AnalyticalSolution):
         elif isinstance(ics,(list,tuple)):
             ics_list = ics
         #ics_list = [ics[coord]  for coord  in self.dvars]
+
+        
         return Matrix(ics_list) - self.rhs.subs(self.ivar,self.ivar_0)
         
     def _calculate_constant(self,ics=None):
@@ -739,8 +757,7 @@ class ODESolution(AnalyticalSolution):
         self._dvars_str = dvars_str
         self.ivar_0 = ivar0
         const_dict=self._calculate_constant(ics)
-        
-        
+       
         
         return self.subs(const_dict)
     
@@ -759,7 +776,7 @@ class ODESolution(AnalyticalSolution):
             
             const_dict=self._calculate_constant(ics)
             
-            return self.subs(const_dict)         
+            return self.subs(const_dict)
 
     
 class ODESystem(AnalyticalSolution):
@@ -1290,7 +1307,7 @@ class ODESystem(AnalyticalSolution):
         fode = self._as_fode()
         #solver changing due to the computational simplicity reasons
 
-        fode_sys=FirstOrderLinearODESystemWithHarmonics(fode,fode.dvars)        
+        fode_sys=FirstOrderLinearODESystemWithHarmonics.from_ode_system(fode)      
 
         return fode_sys.steady_solution
 
@@ -1383,55 +1400,17 @@ class FirstOrderODESystem(ODESystem):
         return self.approximated(n=1, x0=x0, op_point=op_point, hint=hint, label=label)
 
 
-    def subs(self,*args,**kwargs):
+#     def subs(self,*args,**kwargs):
         
 
         
-        obj = super().subs(*args,**kwargs)
-        obj._lhs=self._lhs.subs(*args,**kwargs)
+#         obj = super().subs(*args,**kwargs)
+#         obj._lhs=self._lhs.subs(*args,**kwargs)
+#         obj.
         
-        return obj
-    
-#     @cached_property
-#     def _general_solution(self):
-
-        
-
-
-#         return ODESolution(self.dvars,sol).subs( const_dict )
-                                 
-
-                                 
-#     @cached_property
-#     def _steady_solution(self):
-                                 
-        
-
+#         return obj
     
 
-
-#         return ODESolution(self.dvars,sol).subs({dum_sym:0 for dum_sym in dummies_set})
-
-
-    
-    
-#     @cached_property
-#     def general_solution(self):
-
-#         return self._general_solution
-
-
-#     @cached_property
-#     def steady_solution(self):
-
-#         return self._steady_solution
-    
-#     @property
-#     def solution(self):
-
-#         return self.general_solution + self.steady_solution
-
-    
     
 class FirstOrderLinearODESystem(FirstOrderODESystem):
     
@@ -1596,7 +1575,11 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         #display(self._callback_deps)
         
         mapper = lambda elem: elem.subs(self._simp_deps,simultaneous=True).subs(self._callback_deps,simultaneous=True) 
-        return ODESolution(self.dvars,sol).applyfunc(mapper).subs( const_dict )
+        
+        ode_sol = ODESolution(self.dvars,sol).applyfunc(mapper).subs( const_dict )
+        ode_sol.ivar=self.ivar
+        
+        return ode_sol
                                  
 
                                  
@@ -1645,6 +1628,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
     @property
     def solution(self):
 
+        
         return self.general_solution + self.steady_solution
     
 
@@ -1720,9 +1704,11 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
 
         solution = modes*Matrix([C_list[no]*exp(eigs[no,no]  *self.ivar) for   no   in range(len(self.dvars))]  )#.applyfunc(lambda elem: elem.rewrite(sin))
 
+        ode_sol = ODESolution(self.dvars,solution)
+        ode_sol.ivar=self.ivar
+        
+        return ode_sol
 
-
-        return ODESolution(self.dvars,solution)#.subs( const_dict )
                                  
     def _sin_comp(self,omega,amp): 
         '''
@@ -1827,7 +1813,10 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
             elif elem == S.One:
                 sol += self._cos_comp(0,coeff) + self._sin_comp(0,coeff)
             
-        return ODESolution(self.dvars,sol)
+        ode_sol = ODESolution(self.dvars,sol)
+        ode_sol.ivar=self.ivar
+        
+        return ode_sol
     
 class FirstOrderODE:
     """
