@@ -2698,7 +2698,8 @@ class Frame(Environment,ReportModule):
 
 class Markdown(Environment,ReportModule):
     packages = [
-                  Package('markdown'),
+        Package('markdown'),
+        Package('hyperref'),
         ]
     
     r"""A base class for LaTeX environments.
