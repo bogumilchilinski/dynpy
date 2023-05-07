@@ -1448,7 +1448,7 @@ class EntryWithUnit:
 
     def _latex(self, *args):
 
-        print('abc')
+        #print('abc')
         
         entry_str = self._latex_backend(self._obj)
         unit = self._unit
