@@ -26,7 +26,9 @@ ureg = UnitRegistry()
 
 from functools import cached_property, lru_cache
 
-class sky_demo(ComposedSystem):
+
+
+class skyscraper(ComposedSystem):
     """Ready to use sample Single Degree of Freedom System with mass on spring
         Arguments:
         =========
@@ -65,18 +67,18 @@ class sky_demo(ComposedSystem):
     real_name = 'engine_real.PNG'
 
     m=Symbol('m', positive=True)
-    k=Symbol('k', positive=True)
+    k=Symbol('k_b', positive=True)
     F=Symbol('F', positive=True)
     c=Symbol('c',positive=True)
     ivar=Symbol('t', positive=True)
     g=Symbol('g',positive=True)
-    l=Symbol('l',positive=True)
+    h=Symbol('h',positive=True)
     
     x=dynamicsymbols('x')
     
     def __init__(self,
                  g=None,
-                 l=None,
+                 h=None,
                  m=None,
                  k=None,
                  F=None,
@@ -87,7 +89,7 @@ class sky_demo(ComposedSystem):
 
         
         if g is not None: self.g = g
-        if l is not None: self.l = l
+        if h is not None: self.h = h
         if m is not None: self.m = m
         if k is not None: self.k = k
         if F is not None: self.F = F
@@ -110,7 +112,7 @@ class sky_demo(ComposedSystem):
         self.stiffness = Spring(self.k, self.x, qs=self.qs)
         self.force = Force(self.F, self.x, qs=self.qs)
         self.damper= Damper(self.c, self.x, qs=self.qs)
-        self._gravity = GravitationalForce(self.m, self.g, pos1=self.l, qs=self.qs)
+        self._gravity = GravitationalForce(self.m, self.g, pos1=self.h, qs=self.qs)
         
         components['material_point'] = self.material_point
         components['stiffness'] = self.stiffness

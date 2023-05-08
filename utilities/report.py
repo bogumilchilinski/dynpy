@@ -3658,7 +3658,7 @@ class SymbolsDescription(Description,ReportModule):
 
         if len(entries) != 0:
 
-            self._container.append(NoEscape(self._description_head) + '\n')
+            self._container.append(NoEscape(self._description_head + '\n'))
             self._container.append(copy.deepcopy(self))
 
 
