@@ -2438,6 +2438,8 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
                    copy=copy,
                    func=lambda obj: obj)
 
+    
+    
     @classmethod
     def formatted(cls,
                   data=None,
@@ -2453,6 +2455,46 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
                                   copy=copy,
                                   **kwargs)
 
+    @classmethod
+    def from_model(cls,
+                  model,
+                  parameter,
+                  span,
+                  reference_data=None,
+                  coordinates=None,                                
+                  index=None,
+                  ics=None,
+                               ):
+        
+        
+        if coordinates is None:
+            coords = list(model.dvars)
+        else:
+            coords = coordinates
+
+        params_list = [Eq(parameter,value) for value in span]
+        
+        
+        if isinstance(model,(list,tuple)):
+            models_list = model
+        else:
+            models_list = [model]
+        
+        if reference_data is None:
+            prepared_models = models_list
+        else:
+            prepared_models = [sim_model.subs({**reference_data,parameter:parameter}) for sim_model in models_list]
+        
+        num_cases = pd.MultiIndex.from_product([prepared_models,params_list, coords])
+
+
+        
+        return cls(data=ics,
+                   index=index,
+                   columns=num_cases,
+                   )
+    
+    
     def __init__(self,
                  data=None,
                  index=None,
@@ -2474,6 +2516,9 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
         #         self._ics_list=ics
         self._comp_time = None
 
+        
+
+        
     @property
     def _constructor(self):
         return NumericalAnalysisDataFrame
@@ -2546,7 +2591,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
 
             # print('ics list \n',ics_list)
-            result = numerized_model.compute_solution(t_span, ics_list)
+            result = numerized_model.compute_solution(t_span, ics_list,params_values=params_dict)
             result_array = result.T.to_numpy()
             
             

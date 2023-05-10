@@ -5,6 +5,8 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    lambdify, Pow, Integral, init_printing)
 
 from sympy.matrices.matrices import MatrixBase
+from sympy.solvers.ode.systems import matrix_exp, matrix_exp_jordan_form
+
 from numbers import Number
 
 ###  exemplary comment
@@ -808,6 +810,8 @@ class ODESystem(AnalyticalSolution):
     _ivar = Symbol('t')
     _simp_dict = None
     _callback_dict = None
+
+    _default_ics = None
     
     _default_detector = CommonFactorDetector #None
     #_default_detector = None
@@ -947,6 +951,16 @@ class ODESystem(AnalyticalSolution):
 
             
         return obj
+
+    
+    def default_ics(self,critical_point=False):
+        
+        if isinstance(self._default_ics,dict):
+            ics_instance={coord:self._default_ics[coord] for coord in self.dvars if coord in self._default_ics}
+            
+            return {**{coord:0 for coord in self.dvars},**ics_instance}
+        else:
+            return {coord:0 for coord in self.dvars}
     
     def set_simp_deps(self,dependencies,callback=None,inplace=False):
         
@@ -1676,7 +1690,9 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         '''
         Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
         '''
-
+        
+        
+        
         C = numbered_symbols('C', start=1)
         C_list = []
 
@@ -1691,18 +1707,32 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
 
             C_list = [Function(str(C_tmp)) for C_tmp in C_list]
             C_list = [(C_tmp)(*params) for C_tmp in C_list]
+                
+                
+        
+        modal=True
 
-        #         print('o tu')
-        #         display(self.odes_system)
+        
+        if modal==True:
 
-        #self.__class__._const_list |= set(C_list)
 
-        modes = self.modes
-        eigs = self.eigenvalues
+            #         print('o tu')
+            #         display(self.odes_system)
 
-        Y_mat = Matrix(self.dvars)
+            #self.__class__._const_list |= set(C_list)
 
-        solution = modes*Matrix([C_list[no]*exp(eigs[no,no]  *self.ivar) for   no   in range(len(self.dvars))]  )#.applyfunc(lambda elem: elem.rewrite(sin))
+            modes = self.modes
+            eigs = self.eigenvalues
+
+            Y_mat = Matrix(self.dvars)
+
+            
+            solution = modes*Matrix([C_list[no]*exp(eigs[no,no]  *self.ivar) for   no   in range(len(self.dvars))]  )#.applyfunc(lambda elem: elem.rewrite(sin))
+            
+        else:
+            
+            A = self._fundamental_matrix
+            solution = (matrix_exp(A, self.ivar)*Matrix( C_list  ))
 
         ode_sol = ODESolution(self.dvars,solution)
         ode_sol.ivar=self.ivar
