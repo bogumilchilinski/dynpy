@@ -728,17 +728,19 @@ class PendulumKinematicExct(ComposedSystem):
         Re = Symbol('R_e', positive=True)
         return ((4 * self.max_dynamic_cable_force()) / (pi * kr * Re))**(1 / 2)
     
-    def force_in_cable(self):
+    def force_in_cable(self,op_point=0):
 
         data=self._given_data
         dyn_sys=self.subs(data)
-        dyn_sys_lin=dyn_sys.linearized()
+        dyn_sys_lin=dyn_sys.linearized(op_point)
         phi=dyn_sys_lin._fodes_system.steady_solution[0]
 
 #         m=data[self.m]
 #         l=data[self.l]
 
-        force_in_cable = self.m*self.g*(1-S.One/2*phi**2) + self.m * self.l * phi.diff(self.ivar)**2
+        op_point = pi*op_point  #quick workaround - wrong implementation
+
+        force_in_cable = self.m*self.g*(1-S.One/2*(phi - op_point )**2) + self.m * self.l * (phi  - op_point).diff(self.ivar)**2
         force_subs=force_in_cable.subs(data)#.subs({self.Omega:0.999*dyn_sys_lin.natural_frequencies()[0]})
 
         return force_subs.doit().expand()
