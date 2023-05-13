@@ -241,7 +241,7 @@ class ForcedNonLinearDiscSpring(NonlinearComposedSystem): ### Miałeś bład z t
 
         return default_data_dict
 
-    #Grzes robi
+    
 class DDoFTwoNonLinearDisksNew(ComposedSystem):
     scheme_name = 'sdof_nonlin_disc.png'
     real_name = 'roller_tightener.png'

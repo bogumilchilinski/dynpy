@@ -2,7 +2,7 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, re, pi, latex,
                    dsolve, solve, fraction, factorial, Add, Mul, exp, zeros, shape,
                    numbered_symbols, integrate, ImmutableMatrix,Expr,Dict,Subs,Derivative,Dummy,
-                   lambdify, Pow, Integral, init_printing)
+                   lambdify, Pow, Integral, init_printing, I)
 
 from sympy.matrices.matrices import MatrixBase
 from sympy.solvers.ode.systems import matrix_exp, matrix_exp_jordan_form
@@ -791,22 +791,24 @@ class ODESystem(AnalyticalSolution):
         >>>from dynpy.solvers.linear import *
         >>>import sympy
 
-        >>>t, omega = symbols('t omega')
+        >>>t = Symbols('t')
+        >>>Omega, omega = symbols('Omega omega',positive)
         >>>x = Function('x')(t)
 
-        >>>ode = ODESystem(odes=Matrix([x.diff(t, t) + omega**2 * x]), dvars=Matrix([x]), ode_order=2)
+        >>>ode = ODESystem(odes=Matrix([x.diff(t, t) + omega**2 * x - sin(Omega*t)]), dvars=Matrix([x]), ode_order=2)
         >>>display(ode)
 
         >>>fode = ode.as_first_ode_linear_system()
         >>>display(fode)
 
-        >>>sym_sol = fode.solution
+        >>>sym_sol = ode.solution
         >>>display(sym_sol)
 
         >>>num_sol = sym_sol.subs({Symbol('C_1'): 2, Symbol('C_2'): 2, Symbol('omega'): 2, Symbol('fi'): 2}).numerized().compute_solution(np.linspace(0, 5, 100))
         >>>display(num_sol)
         >>>display(num_sol.plot())
-    """ 
+    """
+    
     _ivar = Symbol('t')
     _simp_dict = None
     _callback_dict = None
@@ -1723,11 +1725,15 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
 
             modes = self.modes
             eigs = self.eigenvalues
+            
+
 
             Y_mat = Matrix(self.dvars)
 
             
-            solution = modes*Matrix([C_list[no]*exp(eigs[no,no]  *self.ivar) for   no   in range(len(self.dvars))]  )#.applyfunc(lambda elem: elem.rewrite(sin))
+            
+            #display(self.eigenfunctions())
+            solution = modes*Matrix([C_list[no]*self.eigenfunctions()[no] for   no   in range(len(self.dvars))]  )#.applyfunc(lambda elem: elem.rewrite(sin))
             
         else:
             
@@ -1737,7 +1743,40 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         ode_sol = ODESolution(self.dvars,solution)
         ode_sol.ivar=self.ivar
         
+        
+        
         return ode_sol
+    
+    
+    def eigenfunctions(self):
+        
+        
+        modes = self.modes
+        eigs = self.eigenvalues
+
+
+
+        Y_mat = Matrix(self.dvars)
+
+        eig_fun = []
+        for   no   in range(len(self.dvars)):
+
+            
+            if eigs[no,no].is_complex:
+                
+                h = re(eigs[no,no]).doit().expand().simplify()
+                omg  = im(eigs[no,no]).doit().expand().simplify()
+                
+#                 display(h)
+#                 display(omg)
+                
+                fun = (exp(h*self.ivar)*(cos(omg*self.ivar)+ I * sin(omg*self.ivar))/2).expand()
+            else:
+                fun = exp(eigs[no,no]*self.ivar)
+        
+            eig_fun += [fun]
+        
+        return eig_fun
 
                                  
     def _sin_comp(self,omega,amp): 
