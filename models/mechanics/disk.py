@@ -395,7 +395,7 @@ class TwoForcedNonLinearDisks(ComposedSystem):
     
     def spring_force(self):
 
-        sol_dict=self._fodes_system.steady_solution.as_dict()
+        sol_dict=self.linearized()._fodes_system.steady_solution.as_dict()
         
         F_km=self.spring_m.subs(sol_dict).subs(self._given_data)
         
