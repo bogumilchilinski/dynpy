@@ -709,14 +709,23 @@ class PendulumKinematicExct(ComposedSystem):
         }
         return default_data_dict
 
-    def max_static_cable_force(self):
-        return (self.m * self.g).subs(self._given_data)
+    def static_cable_force(self,op_point=0):
+
+    
+        data=self._given_data
+        ans=self.force_in_cable(op_point=op_point)
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        return (free_coeff)
+
+    def max_static_cable_force(self,op_point=0):
+        return abs(self.static_cable_force(op_point=op_point))
+    
 
     def max_dynamic_cable_force(self):
 
-        omg_amp = self.linearized().frequency_response_function() * self.Omega
+        cos_amp = ans.subs({cos(self.Omega*self.ivar):1, sin(self.Omega*self.ivar):0}).subs(data)
 
-        return (self.m * self.l * (omg_amp)**2 + self.max_static_cable_force())
+        return (abs(cos_amp )+ self.max_static_cable_force())
 
     def static_cable_diameter(self):
         kr = Symbol('k_r', positive=True)
