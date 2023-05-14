@@ -241,9 +241,9 @@ class ForcedNonLinearDiscSpring(NonlinearComposedSystem): ### Miałeś bład z t
 
         return default_data_dict
 
-    
-class DDoFTwoNonLinearDisksNew(ComposedSystem):
-    scheme_name = 'sdof_nonlin_disc.png'
+
+class TwoForcedNonLinearDisks(ComposedSystem):
+    scheme_name = 'MDOF_Double_Disk.png'
     real_name = 'roller_tightener.png'
     
     m1=Symbol('m_1', positive=True)
@@ -383,3 +383,35 @@ class DDoFTwoNonLinearDisksNew(ComposedSystem):
         }
         return self.sym_desc_dict
     
+    
+    def static_force(self):
+        data=self._given_data
+        ans=self.dynamic_force()
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        return (free_coeff)
+    
+    def dynamic_force(self):
+        return self.spring_force().expand().doit().n(6)
+    
+    def spring_force(self):
+
+        sol_dict=self.linearized()._fodes_system.steady_solution.as_dict()
+        
+        F_km=self.spring_m.subs(sol_dict).subs(self._given_data)
+        
+        return F_km
+    
+
+
+    def max_dynamic_force(self):
+        return self.linearized().frequency_response_function() * self.spring_m.stiffness + self.max_static_force_pin()
+
+    def static_force_pin_diameter(self):
+        kt = Symbol('k_t', positive=True)
+        Re = Symbol('R_e', positive=True)
+        return ((4 * self.max_static_force_pin()) / (pi * kt * Re))**(1 / 2)
+
+    def dynamic_force_pin_diameter(self):
+        kt = Symbol('k_t', positive=True)
+        Re = Symbol('R_e', positive=True)
+        return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
