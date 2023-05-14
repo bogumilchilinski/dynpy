@@ -721,8 +721,10 @@ class PendulumKinematicExct(ComposedSystem):
         return abs(self.static_cable_force(op_point=op_point))
     
 
-    def max_dynamic_cable_force(self):
-
+    def max_dynamic_cable_force(self,op_point=0):
+        
+        data=self._given_data
+        ans=self.force_in_cable(op_point=op_point)
         cos_amp = ans.subs({cos(self.Omega*self.ivar):1, sin(self.Omega*self.ivar):0}).subs(data)
 
         return (abs(cos_amp )+ self.max_static_cable_force())
