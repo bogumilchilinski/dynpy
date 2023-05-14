@@ -395,23 +395,34 @@ class TwoForcedNonLinearDisks(ComposedSystem):
     
     def spring_force(self):
 
-        sol_dict=self.linearized()._fodes_system.steady_solution.as_dict()
+
+        sol_dict=self.linearized().subs(self._given_data)._fodes_system.steady_solution.as_dict()
         
-        F_km=self.spring_m.subs(sol_dict).subs(self._given_data)
+
+        
+        F_km=self.spring_m.force().subs(self._given_data).subs(sol_dict).subs(self._given_data)
         
         return F_km
     
-
+    def max_static_force(self):
+        return abs(self.static_force())
 
     def max_dynamic_force(self):
-        return self.linearized().frequency_response_function() * self.spring_m.stiffness + self.max_static_force_pin()
+        
+        data=self._given_data
+        ans=self.dynamic_force()
+        amp_cos=ans.subs({cos(self.Omega*self.ivar):1, sin(self.Omega*self.ivar):0}).subs(data)
+        
+
+        
+        return (Abs(amp_cos) + self.max_static_force())#.subs(data)
 
     def static_force_pin_diameter(self):
         kt = Symbol('k_t', positive=True)
         Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_static_force_pin()) / (pi * kt * Re))**(1 / 2)
+        return ((4 * self.max_static_force()) / (pi * kt * Re))**(1 / 2)
 
     def dynamic_force_pin_diameter(self):
         kt = Symbol('k_t', positive=True)
         Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
+        return ((4 * self.max_dynamic_force()) / (pi * kt * Re))**(1 / 2)
