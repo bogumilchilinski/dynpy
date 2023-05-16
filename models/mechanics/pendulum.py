@@ -219,11 +219,11 @@ class PulledPendulum(Pendulum):
     real_name = 'pendulum_real.jpg'
 
     
-    m=Symbol('m', positive=True),
-    g=Symbol('g', positive=True),
-    l=Symbol('l', positive=True),
-    angle=dynamicsymbols('\\varphi'),
-    qs=None,
+    m=Symbol('m', positive=True)
+    g=Symbol('g', positive=True)
+    l=Symbol('l', positive=True)
+    angle=dynamicsymbols('\\varphi')
+    qs=None
     ivar=Symbol('t')
 
     
@@ -254,8 +254,7 @@ class PulledPendulum(Pendulum):
         
         self._pendulum = Pendulum(self.m,self.g,self.l,self.angle,self.ivar)(label="Pendulum")
         self._force = Force(10* sin(self.ivar), pos1=self.angle, qs=self.qs)
-        
-        
+
         components['_pendulum'] = self._pendulum
         components['_force'] = self._force
 

@@ -1664,7 +1664,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         
         return Matrix(odes).jacobian(dvars)  
     
-    @cached_property    
+    @cached_property
     def eigenvalues(self):
         '''
         Determines the system eigenvalues matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
@@ -1673,7 +1673,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
 
         return self._auxiliary_fundamental_matrix.diagonalize()[1]
   
-    @cached_property    
+    @cached_property
     def modes(self):
         '''
         Returns reversed modes matrix (computed by Sympy's .diagonalize() method) by changing order of all rows.
