@@ -252,7 +252,7 @@ class TwoForcedNonLinearDisks(ComposedSystem):
     kc=Symbol('k_c', positive=True)
     kr=Symbol('k_r', positive=True)
     R=Symbol('R', positive=True)
-    d=Symbol('d', positive=True)
+    l=Symbol('l', positive=True)
     l_0=Symbol('l_0', positive=True)
     Omega=Symbol('Omega', positive=True)
     omg=Symbol('omega', positive=True)
@@ -272,7 +272,7 @@ class TwoForcedNonLinearDisks(ComposedSystem):
                  kr=None,
                  R=None,
                  ivar=Symbol('t'),
-                 d=None,
+                 l=None,
                  l_0=None,
                  xl=None,
                  xr=None,
@@ -289,7 +289,7 @@ class TwoForcedNonLinearDisks(ComposedSystem):
         if kc is not None: self.kc = kc
         if kr is not None: self.kr = kr
         if R is not None: self.R = R
-        if d is not None: self.d = d
+        if l is not None: self.l = l
         if l_0 is not None: self.l_0 = l_0
         if xl is not None: self.xl=xl
         if xr is not None: self.xr=xr
@@ -308,8 +308,8 @@ class TwoForcedNonLinearDisks(ComposedSystem):
 
         components = {}
 
-        self.left_disk = ForcedNonLinearDisc(m1=self.m1, kl=self.kl, R=self.R, d=self.d, l_0=self.l_0, F=self.F_l, x=self.xl, ivar=self.ivar)
-        self.right_disk = ForcedNonLinearDisc(m1=self.m2, kl=self.kr, R=self.R, d=self.d, l_0=self.l_0, F=self.F_r, x=self.xr, ivar=self.ivar)
+        self.left_disk = ForcedNonLinearDisc(m1=self.m1, kl=self.kl, R=self.R, d=self.l, l_0=self.l_0, F=self.F_l, x=self.xl, ivar=self.ivar)
+        self.right_disk = ForcedNonLinearDisc(m1=self.m2, kl=self.kr, R=self.R, d=self.l, l_0=self.l_0, F=self.F_r, x=self.xr, ivar=self.ivar)
         self.spring_m = Spring(self.kc, pos1 =self.xl, pos2 = self.xr, qs=self.qs)
 #         self.disk1_lin = MaterialPoint(self.m1, self.xl, qs=self.qs) #+ MaterialPoint(self.m1/2*self.R**2, self.xl/self.R, qs=[self.xl])
 #         self.disk1_rot = MaterialPoint(self.m1/2*self.R**2, self.xl/self.R, qs=self.qs)
@@ -343,7 +343,7 @@ class TwoForcedNonLinearDisks(ComposedSystem):
         default_data_dict = {
             self.m1: [S.One *m0 * no for no in range(5, 15)],
             self.m2: [S.One *m0 * no for no in range(5, 15)],
-            self.d: [self.l_0*S.Half*no for no in range(4,16)],
+            self.l: [self.l_0*S.Half*no for no in range(4,16)],
             self.kl: [S.One *k0 * no for no in range(50, 75)],
             self.kr: [S.One *k0 * no for no in range(50, 75)],
             self.kc: [S.One *k0 * no for no in range(25, 50)],
