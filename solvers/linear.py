@@ -594,6 +594,7 @@ class ODESolution(AnalyticalSolution):
     _ivar=Symbol('t')
     _dvars_str = None
     _ivar0 = 0 
+    _sol0 = 0
 
     @property
     def _dvars(self):
@@ -677,16 +678,14 @@ class ODESolution(AnalyticalSolution):
             
         return obj
 
-    ###method owner - Franciszek, supervisior - Bogumił
-    ##------------------ TEST ------------------
-    def ics_dynamic_symbols(self):
+
+    def _ics_dynamic_symbols(self):
         symbols_list = ['v', 'a']
         ics_dynamic_symbols = [Symbol(f'{coor}_{self._dvars_str}0') for coor in symbols_list]
         ics_dynamic_symbols = Matrix([Symbol(f'{self._dvars_str}0')] + ics_dynamic_symbols)
-        # ics_dynamic_symbols = Matrix([Symbol(f'{self._dvars_str}_{index}diif') for index in range(len(self.dvars))])
         return ics_dynamic_symbols
 
-    ##------------------ TEST ------------------
+
 
     @property
     def _ics_dict(self):
@@ -719,7 +718,7 @@ class ODESolution(AnalyticalSolution):
         else:
             print(f'something went wrong - ivar0 = {ivar0} which is not proper type ')
 
-    def _get_constant_eqns(self,ics=None):
+    def _get_constant_eqns(self,ics=None, sol0=None):
         """_summary_
 
         Returns
@@ -727,12 +726,12 @@ class ODESolution(AnalyticalSolution):
         _type_
             _description_
         """
-        
-        if ics is None:
-            temp = self.ics_dynamic_symbols()
+        if isinstance(sol0, ODESolution):
+            ics_list = sol0.subs(self.ivar, self.ivar_0)  
+        elif ics is None:
+            temp = self._ics_dynamic_symbols()
             ics_list = [temp[index] for index in range(len(self.dvars))]
-        
-        if isinstance(ics,dict):
+        elif isinstance(ics,dict):
             ics_list = [ics[coord]  for coord  in self.dvars]
         elif isinstance(ics,(list,tuple)):
             ics_list = ics
@@ -741,7 +740,7 @@ class ODESolution(AnalyticalSolution):
         
         return Matrix(ics_list) - self.rhs.subs(self.ivar,self.ivar_0)
         
-    def _calculate_constant(self,ics=None):
+    def _calculate_constant(self,ics=None, sol0=None):
         """_summary_
 
         Returns
@@ -750,15 +749,15 @@ class ODESolution(AnalyticalSolution):
             _description_
         """
 
-        const_eqns=self._get_constant_eqns(ics)
+        const_eqns=self._get_constant_eqns(ics, sol0)
         const_list = self._spot_constant()
         
         return solve(const_eqns,const_list)
     
-    def with_ics(self, ics=None, ivar0=0, dvars_str=None):
+    def with_ics(self, ics=None, ivar0=0, sol0=None, dvars_str=None):
         self._dvars_str = dvars_str
         self.ivar_0 = ivar0
-        const_dict=self._calculate_constant(ics)
+        const_dict=self._calculate_constant(ics, sol0)
        
         
         return self.subs(const_dict)
