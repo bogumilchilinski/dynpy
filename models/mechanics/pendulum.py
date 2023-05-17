@@ -215,7 +215,7 @@ class PulledPendulum(Pendulum):
         -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
         -determine the instance of the pendulum by using class Pendulum()
     """
-    scheme_name = 'damped_excited_pendulum.png'
+    scheme_name = 'undamped_excited_pendulum.png'
     real_name = 'pendulum_real.jpg'
 
     
