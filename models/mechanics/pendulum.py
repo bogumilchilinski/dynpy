@@ -223,8 +223,10 @@ class PulledPendulum(Pendulum):
     g=Symbol('g', positive=True)
     l=Symbol('l', positive=True)
     angle=dynamicsymbols('\\varphi')
+    F=Symbol('F', positive=True)
     qs=None
     ivar=Symbol('t')
+    Omega=Symbol('Omega', positive=True)
 
     
     def __init__(self,
@@ -233,6 +235,8 @@ class PulledPendulum(Pendulum):
                  l=None,
                  angle=None,
                  ivar=None,
+                 F=None,
+                 Omega=None,
                  **kwargs):
 
         if m is not None: self.m = m
@@ -240,7 +244,8 @@ class PulledPendulum(Pendulum):
         if l is not None: self.l = l
         if angle is not None: self.angle = angle
         if ivar is not None: self.ivar = ivar
-        
+        if F is not None: self.F=F
+        if Omega is not None: self.Omega=Omega
 
         
         self.qs = [self.angle]
@@ -253,7 +258,7 @@ class PulledPendulum(Pendulum):
         components = {}
         
         self._pendulum = Pendulum(self.m,self.g,self.l,self.angle,self.ivar)(label="Pendulum")
-        self._force = Force(10* sin(self.ivar), pos1=self.angle, qs=self.qs)
+        self._force = Force(self.F*self.l*sin(self.Omega*self.ivar), pos1=self.angle, qs=self.qs)
 
         components['_pendulum'] = self._pendulum
         components['_force'] = self._force
@@ -316,7 +321,10 @@ class PulledPendulum(Pendulum):
         ]
         return comp_list
 
-
+    def nonlinear_steady_solution(self):
+        steady=self._fodes_system.steady_solution
+        return steady
+    
 # wymienić obrazek na taki, gdzie nie ma wymuszenia i symbole na obrazku będą zgodne z tymi w klasie
 
 #DONE
