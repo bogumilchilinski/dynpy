@@ -215,7 +215,7 @@ class PulledPendulum(Pendulum):
         -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
         -determine the instance of the pendulum by using class Pendulum()
     """
-    scheme_name = 'undamped_pendulum.png'
+    scheme_name = 'damped_excited_pendulum.png'
     real_name = 'pendulum_real.jpg'
 
     
@@ -258,7 +258,7 @@ class PulledPendulum(Pendulum):
         components = {}
         
         self._pendulum = Pendulum(self.m,self.g,self.l,self.angle,self.ivar)(label="Pendulum")
-        self._force = Force(self.F*self.l*sin(self.Omega*self.ivar), pos1=self.angle, qs=self.qs)
+        self._force = Force(-self.F*self.l*sin(self.Omega*self.ivar), pos1=self.angle, qs=self.qs)
 
         components['_pendulum'] = self._pendulum
         components['_force'] = self._force
