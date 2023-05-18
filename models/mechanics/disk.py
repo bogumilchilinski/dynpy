@@ -426,3 +426,23 @@ class TwoForcedNonLinearDisks(ComposedSystem):
         kt = Symbol('k_t', positive=True)
         Re = Symbol('R_e', positive=True)
         return ((4 * self.max_dynamic_force()) / (pi * kt * Re))**(1 / 2)
+
+    
+    def frequency_response_function(self,
+                                    frequency=Symbol('Omega', positive=True),
+                                    amplitude=Symbol('a')):
+
+        omega = (self.linearized()).natural_frequencies()[0]
+        
+        
+        eps = self.small_parameter()
+
+        exciting_force = self.external_forces()[0]
+
+        comps = exciting_force.atoms(sin, cos)
+        exciting_amp = sum([exciting_force.coeff(comp) for comp in comps])
+        inertia = self.inertia_matrix()[0]
+
+        return amplitude * (-frequency**2 + omega**2) * inertia + S(
+            3) / 4 * eps * amplitude**3 - exciting_amp
+    

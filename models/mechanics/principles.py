@@ -294,9 +294,11 @@ class NonlinearComposedSystem(ComposedSystem):
 
     def frequency_response_function(self,
                                     frequency=Symbol('Omega', positive=True),
-                                    amplitude=Symbol('a', positive=True)):
+                                    amplitude=Symbol('a')):
 
-        omega = ComposedSystem(self.linearized()).natural_frequencies()[0]
+        omega = (self.linearized()).natural_frequencies()[0]
+        
+        
         eps = self.small_parameter()
 
         exciting_force = self.external_forces()[0]
@@ -308,7 +310,7 @@ class NonlinearComposedSystem(ComposedSystem):
         return amplitude * (-frequency**2 + omega**2) * inertia + S(
             3) / 4 * eps * amplitude**3 - exciting_amp
 
-    def amplitude_from_frf(self, amplitude=Symbol('a', positive=True)):
+    def amplitude_from_frf(self, amplitude=Symbol('a')):
 
         return solveset(self.frequency_response_function(), amplitude)
 

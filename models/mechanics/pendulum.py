@@ -63,8 +63,8 @@ class Pendulum(NonlinearComposedSystem):
     angle=dynamicsymbols('\\varphi')
     qs=None
     
-    m0 = Symbol('m0', positive=True)
-    l0 = Symbol('l0', positive=True)
+    m0=Symbol('m_0',positive=True)
+    l0 = Symbol('l_0', positive=True)
     
     def __init__(self,
                  m=None,
@@ -116,6 +116,7 @@ class Pendulum(NonlinearComposedSystem):
 
             self.m: [S.One * no * m0 * 10 for no in range(5, 8)],
             self.l: [S.One * no * l0 for no in range(10, 20)],
+            self.m * self.l**2:[self.m * self.l**2],
             
         }
         return default_data_dict
@@ -215,7 +216,7 @@ class PulledPendulum(Pendulum):
         -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
         -determine the instance of the pendulum by using class Pendulum()
     """
-    scheme_name = 'undamped_pendulum.png'
+    scheme_name = 'undamped_excited_pendulum.PNG'
     real_name = 'pendulum_real.jpg'
 
     
@@ -223,8 +224,10 @@ class PulledPendulum(Pendulum):
     g=Symbol('g', positive=True)
     l=Symbol('l', positive=True)
     angle=dynamicsymbols('\\varphi')
+    F=Symbol('F', positive=True)
     qs=None
     ivar=Symbol('t')
+    Omega=Symbol('Omega', positive=True)
 
     
     def __init__(self,
@@ -233,6 +236,8 @@ class PulledPendulum(Pendulum):
                  l=None,
                  angle=None,
                  ivar=None,
+                 F=None,
+                 Omega=None,
                  **kwargs):
 
         if m is not None: self.m = m
@@ -240,7 +245,8 @@ class PulledPendulum(Pendulum):
         if l is not None: self.l = l
         if angle is not None: self.angle = angle
         if ivar is not None: self.ivar = ivar
-        
+        if F is not None: self.F=F
+        if Omega is not None: self.Omega=Omega
 
         
         self.qs = [self.angle]
@@ -253,7 +259,7 @@ class PulledPendulum(Pendulum):
         components = {}
         
         self._pendulum = Pendulum(self.m,self.g,self.l,self.angle,self.ivar)(label="Pendulum")
-        self._force = Force(10* sin(self.ivar), pos1=self.angle, qs=self.qs)
+        self._force = Force(-self.F*self.l*sin(self.Omega*self.ivar), pos1=self.angle, qs=self.qs)
 
         components['_pendulum'] = self._pendulum
         components['_force'] = self._force
@@ -316,7 +322,61 @@ class PulledPendulum(Pendulum):
         ]
         return comp_list
 
+    def nonlinear_steady_solution(self):
+        steady=self._fodes_system.steady_solution
+        return steady
 
+    
+    def static_cable_force(self,op_point=0):
+
+    
+        data=self._given_data
+        ans=self.force_in_cable(op_point=op_point)
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        return (free_coeff)
+
+    def max_static_cable_force(self,op_point=0):
+        return abs(self.static_cable_force(op_point=op_point))
+    
+
+    def max_dynamic_cable_force(self,op_point=0):
+        
+        op_point=0
+        data=self._given_data
+        ans=self.force_in_cable(op_point=op_point)
+        cos_amp = ans.subs({cos(self.Omega*self.ivar):1, sin(self.Omega*self.ivar):0}).subs(data)
+
+        return (abs(cos_amp )+ self.max_static_cable_force())
+
+    def static_cable_diameter(self):
+        kr = Symbol('k_r', positive=True)
+        Re = Symbol('R_e', positive=True)
+        return ((4 * self.max_static_cable_force()) / (pi * kr * Re))**(1 / 2)
+
+    def dynamic_cable_diameter(self):
+        kr = Symbol('k_r', positive=True)
+        Re = Symbol('R_e', positive=True)
+        return ((4 * self.max_dynamic_cable_force()) / (pi * kr * Re))**(1 / 2)
+    
+    def force_in_cable(self,op_point=0):
+
+        op_point=0
+        
+        data=self._given_data
+        dyn_sys=self.subs(data)
+        dyn_sys_lin=dyn_sys.linearized()
+        phi=dyn_sys_lin._fodes_system.steady_solution[0]
+
+#         m=data[self.m]
+#         l=data[self.l]
+
+        op_point = pi*op_point  #quick workaround - wrong implementation
+
+        force_in_cable = self.m*self.g*(1-S.One/2*(phi - op_point )**2) + self.m * self.l * (phi  - op_point).diff(self.ivar)**2
+        force_subs=force_in_cable.subs(data)#.subs({self.Omega:0.999*dyn_sys_lin.natural_frequencies()[0]})
+
+        return force_subs.doit().expand()
+    
 # wymienić obrazek na taki, gdzie nie ma wymuszenia i symbole na obrazku będą zgodne z tymi w klasie
 
 #DONE
