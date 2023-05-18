@@ -63,8 +63,8 @@ class Pendulum(NonlinearComposedSystem):
     angle=dynamicsymbols('\\varphi')
     qs=None
     
-    m0 = Symbol('m0', positive=True)
-    l0 = Symbol('l0', positive=True)
+    m0=Symbol('m_0',positive=True)
+    l0 = Symbol('l_0', positive=True)
     
     def __init__(self,
                  m=None,
@@ -116,6 +116,7 @@ class Pendulum(NonlinearComposedSystem):
 
             self.m: [S.One * no * m0 * 10 for no in range(5, 8)],
             self.l: [S.One * no * l0 for no in range(10, 20)],
+            self.m * self.l**2:[self.m * self.l**2],
             
         }
         return default_data_dict
@@ -215,7 +216,7 @@ class PulledPendulum(Pendulum):
         -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
         -determine the instance of the pendulum by using class Pendulum()
     """
-    scheme_name = 'undamped_excited_pendulum.png'
+    scheme_name = 'undamped_excited_pendulum.PNG'
     real_name = 'pendulum_real.jpg'
 
     
