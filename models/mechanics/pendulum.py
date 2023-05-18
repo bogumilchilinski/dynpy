@@ -360,9 +360,11 @@ class PulledPendulum(Pendulum):
     
     def force_in_cable(self,op_point=0):
 
+        op_point=0
+        
         data=self._given_data
         dyn_sys=self.subs(data)
-        dyn_sys_lin=dyn_sys.linearized(op_point)
+        dyn_sys_lin=dyn_sys.linearized()
         phi=dyn_sys_lin._fodes_system.steady_solution[0]
 
 #         m=data[self.m]
