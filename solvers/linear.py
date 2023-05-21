@@ -2,7 +2,7 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, re, pi, latex,
                    dsolve, solve, fraction, factorial, Add, Mul, exp, zeros, shape,
                    numbered_symbols, integrate, ImmutableMatrix,Expr,Dict,Subs,Derivative,Dummy,
-                   lambdify, Pow, Integral, init_printing, I)
+                   lambdify, Pow, Integral, init_printing, I, N,eye, zeros)
 
 from sympy.matrices.matrices import MatrixBase
 from sympy.solvers.ode.systems import matrix_exp, matrix_exp_jordan_form
@@ -594,6 +594,7 @@ class ODESolution(AnalyticalSolution):
     _ivar=Symbol('t')
     _dvars_str = None
     _ivar0 = 0 
+    _sol0 = 0
 
     @property
     def _dvars(self):
@@ -677,16 +678,14 @@ class ODESolution(AnalyticalSolution):
             
         return obj
 
-    ###method owner - Franciszek, supervisior - Bogumił
-    ##------------------ TEST ------------------
-    def ics_dynamic_symbols(self):
+
+    def _ics_dynamic_symbols(self):
         symbols_list = ['v', 'a']
         ics_dynamic_symbols = [Symbol(f'{coor}_{self._dvars_str}0') for coor in symbols_list]
         ics_dynamic_symbols = Matrix([Symbol(f'{self._dvars_str}0')] + ics_dynamic_symbols)
-        # ics_dynamic_symbols = Matrix([Symbol(f'{self._dvars_str}_{index}diif') for index in range(len(self.dvars))])
         return ics_dynamic_symbols
 
-    ##------------------ TEST ------------------
+
 
     @property
     def _ics_dict(self):
@@ -719,7 +718,7 @@ class ODESolution(AnalyticalSolution):
         else:
             print(f'something went wrong - ivar0 = {ivar0} which is not proper type ')
 
-    def _get_constant_eqns(self,ics=None):
+    def _get_constant_eqns(self,ics=None, sol0=None):
         """_summary_
 
         Returns
@@ -727,12 +726,12 @@ class ODESolution(AnalyticalSolution):
         _type_
             _description_
         """
-        
-        if ics is None:
-            temp = self.ics_dynamic_symbols()
+        if isinstance(sol0, ODESolution):
+            ics_list = sol0.subs(self.ivar, self.ivar_0)  
+        elif ics is None:
+            temp = self._ics_dynamic_symbols()
             ics_list = [temp[index] for index in range(len(self.dvars))]
-        
-        if isinstance(ics,dict):
+        elif isinstance(ics,dict):
             ics_list = [ics[coord]  for coord  in self.dvars]
         elif isinstance(ics,(list,tuple)):
             ics_list = ics
@@ -741,7 +740,7 @@ class ODESolution(AnalyticalSolution):
         
         return Matrix(ics_list) - self.rhs.subs(self.ivar,self.ivar_0)
         
-    def _calculate_constant(self,ics=None):
+    def _calculate_constant(self,ics=None, sol0=None):
         """_summary_
 
         Returns
@@ -750,15 +749,15 @@ class ODESolution(AnalyticalSolution):
             _description_
         """
 
-        const_eqns=self._get_constant_eqns(ics)
+        const_eqns=self._get_constant_eqns(ics, sol0)
         const_list = self._spot_constant()
         
         return solve(const_eqns,const_list)
     
-    def with_ics(self, ics=None, ivar0=0, dvars_str=None):
+    def with_ics(self, ics=None, ivar0=0, sol0=None, dvars_str=None):
         self._dvars_str = dvars_str
         self.ivar_0 = ivar0
-        const_dict=self._calculate_constant(ics)
+        const_dict=self._calculate_constant(ics, sol0)
        
         
         return self.subs(const_dict)
@@ -1085,7 +1084,7 @@ class ODESystem(AnalyticalSolution):
         
         #display('subs dict',self._simp_dict,type(self))
         
-        return FirstOrderLinearODESystem.from_ode_system(self)
+        return FirstOrderLinearODESystemWithHarmonics.from_ode_system(self)
     
     def as_first_ode_linear_system(self):
         
@@ -1665,6 +1664,103 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         return Matrix(odes).jacobian(dvars)  
     
     @cached_property
+    def _reduced_fundamental_matrix(self):
+
+        fund_mat=Matrix(self._auxiliary_fundamental_matrix)
+
+
+        damping = self._is_proportional_damping
+        if damping:
+            #display('the damping is',damping)
+            sl = int(fund_mat.shape[0]/2)
+            fund_mat[:sl,:sl] = 0*fund_mat[:sl,:sl]
+            
+            return fund_mat#.subs(damping,0)
+        else:
+            #display(f'there is {damping} damping here xD')
+            return fund_mat
+        
+    @cached_property
+    def _trig_fundamental_matrix(self):
+
+        fund_mat=Matrix(self._reduced_fundamental_matrix)
+        sl = int(fund_mat.shape[0]/2)
+        
+        #display(fund_mat)
+        
+        fund_mat[sl:,:] = (-1)*fund_mat[sl:,:]
+        
+        #display(fund_mat)
+        
+
+        return fund_mat
+        
+
+    @cached_property
+    def _reduced_eigenvalues(self):
+        '''
+        Determines the system eigenvalues matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
+        '''
+
+
+        return self._reduced_fundamental_matrix.diagonalize()[1]
+  
+    @cached_property
+    def _trig_eigenvalues(self):
+        '''
+        Determines the system eigenvalues matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
+        '''
+
+        return self._trig_fundamental_matrix.diagonalize()[1]
+
+
+    @cached_property
+    def _reduced_modes(self):
+        '''
+        Returns reversed modes matrix (computed by Sympy's .diagonalize() method) by changing order of all rows.
+        '''
+
+        modes=self._reduced_fundamental_matrix.diagonalize()[0]
+        rows_no = modes.shape[0]
+        
+        rows_list = [modes[row,:] for row in reversed(range(rows_no))]
+
+        return Matrix(rows_list)
+
+    
+    @cached_property
+    def _combined_modes(self):
+        '''
+        Returns reversed modes matrix (computed by Sympy's .diagonalize() method) by changing order of all rows.
+        '''
+
+        r_modes=Matrix(self._reduced_modes)
+        t_modes=Matrix(self._trig_modes)
+        
+        eig_fun=self.eigenfunctions()
+        
+        for no,efun in enumerate(eig_fun):
+            if efun.atoms(sin,cos) != set():
+                
+                r_modes[:,no] = t_modes[:,no]
+                
+        return r_modes
+    
+    
+    @cached_property
+    def _trig_modes(self):
+        '''
+        Returns reversed modes matrix (computed by Sympy's .diagonalize() method) by changing order of all rows.
+        '''
+
+        modes=self._trig_fundamental_matrix.diagonalize()[0]
+        rows_no = modes.shape[0]
+        
+        rows_list = [modes[row,:] for row in reversed(range(rows_no))]
+
+        return Matrix(rows_list)
+    
+    @cached_property
     def eigenvalues(self):
         '''
         Determines the system eigenvalues matrix (in the diagonal form). Output is obtained from inertia matrix and stiffness matrix.
@@ -1685,6 +1781,46 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         rows_list = [modes[row,:] for row in reversed(range(rows_no))]
 
         return Matrix(rows_list)
+
+    
+    @cached_property
+    def _is_proportional_damping(self):
+        
+        A_mat=self._fundamental_matrix
+        
+        
+        aux_size=N((len(self.dvars))/2)
+        
+        #display(aux_size)
+        sl = int(aux_size)
+        
+        if aux_size==round(aux_size):
+
+            
+            block_mats = A_mat[:sl,sl:],A_mat[:sl,:sl]
+            
+            is_reduced=block_mats[0]== eye(sl) and block_mats[1]== zeros(sl)
+        else:
+            is_reduced = False
+
+        if is_reduced:
+            K_mat=A_mat[sl:,:sl]
+            C_mat=A_mat[sl:,sl:]
+            
+            lam=(C_mat[0,0]/K_mat[0,0])
+            
+            #display(K_mat,C_mat)
+            
+            if C_mat == K_mat*lam:
+                return lam
+            else:
+                return False
+
+        else:
+            return False
+        
+
+    
     
     @cached_property
     def _general_solution(self):
@@ -1712,28 +1848,41 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 
                 
         
-        modal=True
+        fund_det=self._fundamental_matrix.det()
 
         
-        if modal==True:
+        if fund_det!=0:
 
 
             #         print('o tu')
             #         display(self.odes_system)
 
             #self.__class__._const_list |= set(C_list)
+            damping = self._is_proportional_damping
+            if damping is not False:
+                #print('rayleight damping')
+                modes = self._combined_modes
 
-            modes = self.modes
-            eigs = self.eigenvalues
-            
+            else:
+                #print('rayleight damping zero')
+                modes = self.modes
+
+
 
 
             Y_mat = Matrix(self.dvars)
 
             
             
+            
             #display(self.eigenfunctions())
-            solution = modes*Matrix([C_list[no]*self.eigenfunctions()[no] for   no   in range(len(self.dvars))]  )#.applyfunc(lambda elem: elem.rewrite(sin))
+            solution = self._combined_modes*Matrix([C_list[no]*self.eigenfunctions()[no] for   no   in range(len(self.dvars))]  )#.applyfunc(lambda elem: elem.rewrite(sin))
+            
+            if damping is not False:
+                sl=int(N((len(self.dvars))/2))
+                solution[sl:,:] = solution[:sl,:].diff(self.ivar)
+            
+            
             
         else:
             
@@ -1747,14 +1896,21 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         
         return ode_sol
     
-    
     def eigenfunctions(self):
         
         
-        modes = self.modes
-        eigs = self.eigenvalues
+        damping = self._is_proportional_damping
+        if damping is not False:
+            #print('rayleight damping - new code')
+            modes = self._reduced_modes
+            modes_trig = self._trig_modes
+            eigs = self._reduced_eigenvalues
+        else:
+            #print('rayleight damping zero')
+            modes = self.modes
+            eigs = self.eigenvalues
 
-
+        #display(eigs)
 
         Y_mat = Matrix(self.dvars)
 
@@ -1762,15 +1918,28 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         for   no   in range(len(self.dvars)):
 
             
-            if eigs[no,no].is_complex:
+            if eigs[no,no].n().is_imaginary:
                 
-                h = re(eigs[no,no]).doit().expand().simplify()
-                omg  = im(eigs[no,no]).doit().expand().simplify()
+                eigs_trig=self._trig_eigenvalues
                 
-#                 display(h)
-#                 display(omg)
+                if damping:
+                    h = damping/2*eigs_trig[no,no]**2
+                else:
+                    h = 0
                 
-                fun = (exp(h*self.ivar)*(cos(omg*self.ivar)+ I * sin(omg*self.ivar))/2).expand()
+
+                
+                omg  = sqrt((eigs_trig[no,no])**2 - h**2)
+                
+                #display(h)
+                #display(omg)
+                
+                if sin(no*pi/2) == 0:
+                    gen_fun = cos
+                else:
+                    gen_fun = sin
+                
+                fun = (exp(-h*self.ivar)*(gen_fun(omg*self.ivar) ))#.expand()
             else:
                 fun = exp(eigs[no,no]*self.ivar)
         
@@ -1778,7 +1947,8 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         
         return eig_fun
 
-                                 
+    ############################### NEW code
+    
     def _sin_comp(self,omega,amp): 
         '''
         It applies generic form solution for the following differential equation
@@ -1789,16 +1959,54 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         D = -(A^{-1} \Omega^2 + A)^{-1}  F 
         C =   \Omega A^{-1} * D
         '''
-           
-        A = self._fundamental_matrix
-        b = amp
-        
-                                 
-        sin_comp = -(A.inv() * omega**2 + A).inv()*b
-        cos_comp = +omega*A.inv() * sin_comp
-          
-        return cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar)                      
 
+        
+        damping = self._is_proportional_damping
+        if damping is not False:
+            
+            
+            sl=int(N((len(self.dvars))/2))
+            #print('rayleight damping - new code stedy')
+            modes = self._trig_modes[:sl,::2]
+            modes_trig = self._trig_modes
+            eigs = [self._trig_eigenvalues[no,no] for no  in range(len(self.dvars))[::2]]
+            
+            #display(eigs)
+            
+            
+            
+            b=Matrix(amp)[sl:,:]
+            
+            base_sin_list=[ (eigen**2 - omega**2)/((eigen**2 - omega**2)**2 + (damping*omega*eigen**2)**2)  for eigen in eigs]
+            base_cos_list=[ -(damping*omega*eigen**2)/((eigen**2 - omega**2)**2 + (damping*omega*eigen**2)**2)  for eigen in eigs]
+
+            
+            
+            modes_inv=modes.inv()
+            modes_x_b=modes*b
+            
+            cos_comp_base = modes_inv*diag(*base_cos_list)*modes_x_b
+            sin_comp_base = modes_inv*diag(*base_sin_list)*modes_x_b            
+            
+            cos_comp=Matrix(cos_comp_base).row_insert(sl,sin_comp_base*omega)
+            sin_comp=Matrix(sin_comp_base).row_insert(sl,-cos_comp_base*omega)
+            
+        else:
+            #print('rayleight damping zero - new code stedy')
+            modes = self.modes
+            eigs = self.eigenvalues
+        
+
+
+            A = self._fundamental_matrix
+            b = amp
+
+
+            sin_comp = -(A.inv() * omega**2 + A).inv()*b
+            cos_comp = +omega*A.inv() * sin_comp
+            
+        return (cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar) ) 
+    
     
     def _cos_comp(self,omega,amp):
         
@@ -1811,12 +2019,48 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         C = -(A^{-1} \Omega^2 + A)^{-1}  F 
         D =  -\Omega A^{-1} * C
         '''
+
         
-        A = self._fundamental_matrix
-        b = amp
+        damping = self._is_proportional_damping
+        if damping is not False:
+
+            sl=int(N((len(self.dvars))/2))
+            #print('rayleight damping - new code stedy')
+            modes = self._reduced_modes[:sl,::2]
+            modes_trig = self._trig_modes
+            eigs = [self._trig_eigenvalues[no,no] for no  in range(len(self.dvars))[::2]]
+            
+            #display(eigs)
+            
+
+            b=Matrix(amp)[sl:,:]
+
+            
+            base_sin_list=[ (damping*omega*eigen**2)/((eigen**2 - omega**2)**2 + (damping*omega*eigen**2)**2)  for eigen in eigs]
+            base_cos_list=[ (eigen**2 - omega**2)/((eigen**2 - omega**2)**2 + (damping*omega*eigen**2)**2)  for eigen in eigs]
+            
+            #display(self._reduced_modes)
+            #display(base_cos_list)
+            
+            modes_inv=modes.inv()
+            modes_x_b=modes*b
+            
+            cos_comp_base = modes_inv*diag(*base_cos_list)*modes_x_b
+            sin_comp_base = modes_inv*diag(*base_sin_list)*modes_x_b            
+            
+            cos_comp=Matrix(cos_comp_base).row_insert(sl,sin_comp_base*omega)
+            sin_comp=Matrix(sin_comp_base).row_insert(sl,-cos_comp_base*omega)
+            
+        else:
+            #print('rayleight damping zero - new code stedy')
+            modes = self.modes
+            eigs = self.eigenvalues
         
-        cos_comp = -(A.inv() * omega**2 + A).inv()*b
-        sin_comp = -omega*A.inv() * cos_comp
+            A = self._fundamental_matrix
+            b = amp
+
+            cos_comp = -(A.inv() * omega**2 + A).inv()*b
+            sin_comp = -omega*A.inv() * cos_comp
           
         return cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar)  
 
