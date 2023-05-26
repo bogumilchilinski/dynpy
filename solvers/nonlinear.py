@@ -59,10 +59,10 @@ class SimplifiedExpr:
         expanded_sum=sum([values[0]*values[1]  for  key,values  in  data.items()  ],S.Zero)
         
         expr_rest = (self._expr - expanded_sum).expand()
-        display(expr_rest)
+#         display(expr_rest)
         
-        print(len(self._expr.args))
-        print(len(simplified_sum.args))
+#         print(len(self._expr.args))
+#         print(len(simplified_sum.args))
         return simplified_sum + expr_rest
 
     
