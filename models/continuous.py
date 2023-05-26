@@ -493,7 +493,7 @@ class CSRod(ContinuousSystem):
         
         
         
-        return Abs(mode.diff(self.loc)*Symbol('E',positive=True)*Symbol('A',positive=True))*amp
+        return (mode.diff(self.loc)*Symbol('E',positive=True)*Symbol('A',positive=True))*amp
     
 
 
