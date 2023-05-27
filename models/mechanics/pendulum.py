@@ -346,7 +346,7 @@ class PulledPendulum(Pendulum):
         ans=self.force_in_cable(op_point=op_point)
         cos_amp = ans.subs({cos(self.Omega*self.ivar):1, sin(self.Omega*self.ivar):0}).subs(data)
 
-        return (abs(cos_amp )+ self.max_static_cable_force())
+        return abs(cos_amp )#+ self.max_static_cable_force()
 
     def static_cable_diameter(self):
         kr = Symbol('k_r', positive=True)
@@ -786,7 +786,7 @@ class PendulumKinematicExct(ComposedSystem):
         ans=self.force_in_cable(op_point=op_point)
         cos_amp = ans.subs({cos(self.Omega*self.ivar):1, sin(self.Omega*self.ivar):0}).subs(data)
 
-        return (abs(cos_amp )+ self.max_static_cable_force())
+        return (abs(cos_amp)) #+ self.max_static_cable_force())
 
     def static_cable_diameter(self):
         kr = Symbol('k_r', positive=True)

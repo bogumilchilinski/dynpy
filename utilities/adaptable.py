@@ -2474,7 +2474,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
         params_list = [Eq(parameter,value) for value in span]
         
-        
+         
         if isinstance(model,(list,tuple)):
             models_list = model
         else:
