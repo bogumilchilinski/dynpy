@@ -21,7 +21,7 @@ from ..utilities.timeseries import TimeSeries, TimeDataFrame
 
 from collections import ChainMap
 
-from IPython.display import display
+from IPython.display import display, Markdown
 
 import sympy.physics.mechanics as me
 
@@ -1078,7 +1078,7 @@ class ODESystem(AnalyticalSolution):
     def as_matrix(self):
         return Matrix(self._lhs_repr - self.rhs) 
     
-    ###method owner - Franciszek, supervisior - Bogumił
+    
     def _as_fode(self):
         """Creates an object of FirstOrderLinearODESystem class."""
         
@@ -1370,7 +1370,19 @@ class ODESystem(AnalyticalSolution):
         derivatives_dict = {item:item.args[1][1] for item in derivatives}
 
         return max(list(derivatives_dict.values()))
+    
+    
+    @property
+    def details(self):
+        obj = super()
+        fode = self._as_fode()
+
+        display(obj)
+        display(Markdown(f'Ivar: {self._ivar}'))
+        display(Markdown(f'ODE order: {self._ode_order}'))
+        display(Markdown(f'System reduced to first order:'), fode)
         
+
 
 class FirstOrderODESystem(ODESystem):
     
