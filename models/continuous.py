@@ -569,6 +569,20 @@ class CSString(ContinuousSystem):
             self.w: 'Space-Time function',
         }
         return self.sym_desc_dict
+    
+    def _bc_conditions(self):
+            
+        x=self.loc
+        l=self.l
+        X=Function('X')(x)
+
+        fix_ls=Subs(X.diff(x,0),x,0)
+        fix_rs=Subs(X.diff(x,0),x,l)
+        free_ls=Subs(X.diff(x,1),x,0)
+        free_rs=Subs(X.diff(x,1),x,l)
+        
+        return [free_ls, free_rs, fix_ls, fix_rs]
+
 
 
     def get_default_data(self):
