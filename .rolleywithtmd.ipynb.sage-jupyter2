@@ -1,4 +1,4 @@
 {"backend_state":"init","kernel":"python3","kernel_state":"idle","kernel_usage":{"cpu":0,"memory":0},"trust":true,"type":"settings"}
-{"cell_type":"code","exec_count":0,"id":"12ec44","input":"","pos":0,"state":"done","type":"cell"}
-{"id":0,"time":1684411739716,"type":"user"}
-{"last_load":1684411743644,"type":"file"}
+{"cell_type":"code","exec_count":0,"id":"12ec44","input":"","pos":0,"type":"cell"}
+{"id":0,"time":1685530931219,"type":"user"}
+{"last_load":1685530933854,"type":"file"}

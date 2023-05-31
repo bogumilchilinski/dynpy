@@ -257,6 +257,27 @@ class CSBeam(ContinuousSystem):
             self.rho: r'density',
         }
         return self.sym_desc_dict
+    
+    def _bc_conditions(self):
+            
+        l=self.l
+        x=self.loc
+        X=Function('X')(x)
+        
+        
+        sup_ls=Subs(X.diff(x,0),x,0)
+        sup_rs=Subs(X.diff(x,0),x,l)
+
+        fix_ls=Subs(X.diff(x,1),x,0)
+        fix_rs=Subs(X.diff(x,1),x,l)
+
+        mb_ls=Subs(X.diff(x,2),x,0)
+        mb_rs=Subs(X.diff(x,2),x,l)
+
+        v_ls=Subs(X.diff(x,3),x,0)
+        v_rs=Subs(X.diff(x,3),x,l)
+        
+        return [sup_ls, sup_rs, fix_ls, fix_rs, mb_ls, mb_rs, v_ls, v_rs]
 
     def get_default_data(self):
 
@@ -437,6 +458,19 @@ class CSRod(ContinuousSystem):
         }
         return self.sym_desc_dict
 
+    def _bc_conditions(self):
+            
+        x=self.loc
+        l=self.l
+        X=Function('X')(x)
+
+        fix_ls=Subs(X.diff(x,0),x,0)
+        fix_rs=Subs(X.diff(x,0),x,l)
+        free_ls=Subs(X.diff(x,1),x,0)
+        free_rs=Subs(X.diff(x,1),x,l)
+        
+        return [free_ls, free_rs, fix_ls, fix_rs]
+    
 
     def get_default_data(self):
 
@@ -679,7 +713,19 @@ class CSShaft(ContinuousSystem):
             self.phi: 'Space-Time function',
         }
         return self.sym_desc_dict
+    
+    def _bc_conditions(self):
+            
+        x=self.loc
+        l=self.l
+        X=Function('X')(x)
 
+        fix_ls=Subs(X.diff(x,0),x,0)
+        fix_rs=Subs(X.diff(x,0),x,l)
+        free_ls=Subs(X.diff(x,1),x,0)
+        free_rs=Subs(X.diff(x,1),x,l)
+        
+        return [free_ls, free_rs, fix_ls, fix_rs]
 
     def get_default_data(self):
 
