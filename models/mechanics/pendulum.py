@@ -1249,7 +1249,7 @@ class ForcedTriplePendulum(ComposedSystem):
     
     def get_default_data(self):
 
-        m0, l0, F0 = symbols('m_0 l_0 F0', positive=True)
+        m0, l0, F0 = symbols('m_0 l_0 F', positive=True)
 
         default_data_dict = {
             self.m1: [m0*no for no in range(1,9)],
@@ -1283,7 +1283,28 @@ class ForcedTriplePendulum(ComposedSystem):
 
 #         display(parameters_dict)
         return parameters_dict
+    @property
+    def l(self):
+        
+        if self._given_data[self.phi1]==0:
+            l1 = 0
+        else:
+            l1 = self.l1
 
+        if self._given_data[self.phi2]==0:
+            l2 = 0
+        else:
+            l2 = self.l2
+            
+        return (l1*self.m1+(l1+l2)*self.m2+(l1+l2+self.l3)*self.m3)/self.m
+
+    @property
+    def m(self):
+        
+            
+        return (self.m1+self.m2+self.m3)
+    
+    
     def nonlinear_steady_solution(self):
         steady=self._fodes_system.steady_solution
         return steady
@@ -1323,9 +1344,9 @@ class ForcedTriplePendulum(ComposedSystem):
 
         data=self._given_data
         dyn_sys=self.subs(data)
-        display(type(dyn_sys))
+#         display(type(dyn_sys))
         dyn_sys_lin=dyn_sys.linearized()
-        display(type(dyn_sys_lin))
+#         display(type(dyn_sys_lin))
         phi=dyn_sys_lin._fodes_system.steady_solution[0]
 
 #         m=data[self.m]
@@ -1342,16 +1363,17 @@ class SDoFForcedTriplePendulum(ForcedTriplePendulum):
     
     def get_default_data(self):
 
-        m0, l0, F0 = symbols('m_0 l_0 F0', positive=True)
+        m0, l0, F0 = symbols('m_0 l_0 F', positive=True)
 
         default_data_dict = {
             self.m1: [m0*no for no in range(1,9)],
             self.m2: [m0*no for no in range(1,9)],
             self.m3: [m0*no for no in range(1,9)],
-            self.l1: [l0*no for no in range(1,9)],
-            self.l2: [l0*no for no in range(1,9)],
-            self.l3: [l0*no for no in range(1,9)],
-            self.phi1: [self.phi,S.Zero],
+            self.l1: [l0*no for no in range(1,4)],
+            self.l2: [l0*no for no in range(1,4)],
+            self.l3: [l0*no for no in range(1,4)],
+            #self.phi1: [self.phi,S.Zero],
+            self.phi1: [S.Zero],
             self.phi2: [self.phi,S.Zero],
             self.phi3: [self.phi],
             self.F1: [F0*no for no in range(1,3)],
@@ -1376,5 +1398,5 @@ class SDoFForcedTriplePendulum(ForcedTriplePendulum):
             parameters_dict[self.phi1] = self.phi
             parameters_dict[self.phi2] = self.phi
 
-        display(parameters_dict)
+#         display(parameters_dict)
         return parameters_dict

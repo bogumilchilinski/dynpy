@@ -18,6 +18,7 @@ import numpy as np
 
 import inspect
 
+from .mechanics.principles import ComposedSystem, NonlinearComposedSystem,  base_frame, base_origin,cached_property, lru_cache
 
 class ComposedSystem(HarmonicOscillator):
     """Base class for all systems
@@ -65,6 +66,11 @@ class ComposedSystem(HarmonicOscillator):
 
         return parameters_dict
 
+    @lru_cache   
+    def linearized(self, x0=None, op_point=False, hint=[], label=None):
+
+        return type(self).from_system(super().linearized(x0=x0,op_point=op_point,hint=hint,label=label))
+    
 
 class ContinuousSystem(ContinuousSystem):
     """Base class for all systems
@@ -3450,13 +3456,16 @@ class MDoFForcedDisksWithParallelSprings(ComposedSystem):
 #         return parameters_dict
     
     def max_static_force_pin(self):
-        return 0
+        
+        #return 0 # int doesn't have .subs method - it wasn't able to put the data, because "int" is not object with it
+        
+        return S.Zero
     
     
     def max_dynamic_force_pin(self):
         amp=self._frf()[0].n(4)
         #amp = abs(((self.steady_solution_amp(self.external_forces().subs(self.ivar, 0), Matrix([0, 0]))[0])[1]).n(3))
-        return (self.k_cl*self.x_l).subs(self._given_data).subs(self.x_1,amp)  +self.max_static_force_pin()
+        return (self.k_l*self.x_l).subs(self._given_data).subs(self.x_1,amp)  +self.max_static_force_pin()
     
     def static_force_pin_diameter(self):
         kt=Symbol('k_t', positive=True)
