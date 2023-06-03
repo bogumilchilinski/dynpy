@@ -1068,7 +1068,11 @@ class ODESystem(AnalyticalSolution):
         #return (self.lhs).applyfunc(lambda obj: Derivative(obj,self.ivar,evaluate=False)  )
         return (self.lhs).applyfunc(lambda obj: obj.diff(self.ivar)  )
 
-    
+    @property
+    def _default_solver(self):
+        
+        return FirstOrderLinearODESystemWithHarmonics
+        #return FirstOrderLinearODESystem
     
     def _latex(self,*args):
 
@@ -1084,8 +1088,11 @@ class ODESystem(AnalyticalSolution):
         
         #display('subs dict',self._simp_dict,type(self))
         
-        return FirstOrderLinearODESystemWithHarmonics.from_ode_system(self)
-    
+        _solver = self._default_solver
+
+        return _solver.from_ode_system(self)
+        
+        
     def as_first_ode_linear_system(self):
         
         return self._as_fode()
@@ -1322,8 +1329,11 @@ class ODESystem(AnalyticalSolution):
         fode = self._as_fode()
         #solver changing due to the computational simplicity reasons
 
-        fode_sys=FirstOrderLinearODESystemWithHarmonics.from_ode_system(fode)      
 
+        _solver = self._default_solver
+
+        fode_sys=_solver.from_ode_system(fode)      
+                
         return fode_sys.steady_solution
 
 

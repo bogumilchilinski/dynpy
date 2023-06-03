@@ -115,7 +115,7 @@ class PerturbationODESolution(ODESolution):
     def eps(self):
         return self.small_parameter
     
-    def _calculate_constant(self,ics=None):
+    def _calculate_constant(self,ics=None,*args,**kwargs):
         """_summary_
 
         Returns
