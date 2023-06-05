@@ -160,7 +160,8 @@ class CoupledPendulum(ComposedSystem):
             F2=None,
             Omega=None,
             ivar=Symbol('t'),
-                 **kwargs):
+#             qs=dynamicsymbols('varphi1 varphi2'),
+            **kwargs):
 
         self.qs = [self.phi1, self.phi2]
         self.ivar = ivar

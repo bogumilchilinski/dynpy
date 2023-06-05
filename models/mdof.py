@@ -3484,12 +3484,12 @@ class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
 
     def __init__(self,
                  R=Symbol('R', positive=True),
-                 phi_1=dynamicsymbols('\\varphi_1'),
-                 phi_2=dynamicsymbols('\\varphi_2'),
-                 phi_3=dynamicsymbols('\\varphi_3'),
-                 phi_l=dynamicsymbols('\\varphi_l'),
-                 phi_c=dynamicsymbols('\\varphi_c'),
-                 phi_r=dynamicsymbols('\\varphi_r'),
+                 phi_1=dynamicsymbols('varphi_1'),
+                 phi_2=dynamicsymbols('varphi_2'),
+                 phi_3=dynamicsymbols('varphi_3'),
+                 phi_l=dynamicsymbols('varphi_l'),
+                 phi_c=dynamicsymbols('varphi_c'),
+                 phi_r=dynamicsymbols('varphi_r'),
                  m1=Symbol('m_1', positive=True),
                  m2=Symbol('m_2', positive=True),
                  m3=Symbol('m_3', positive=True),
@@ -3501,7 +3501,7 @@ class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
                  g=Symbol('g', positive=True),
                  Omega=Symbol('Omega', positive=True),
                  F=Symbol('F',positive=True),
-                 qs=dynamicsymbols('\\varphi_l, \\varphi_c, \\varphi_r'),
+                 qs=dynamicsymbols('varphi_l, varphi_c, varphi_r'),
                  ivar=Symbol('t'),
                  **kwargs):
 
@@ -3583,11 +3583,65 @@ class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
 
         return parameters_dict
 
-    def max_static_cable_force(self):
-        return (self.m1 * self.g).subs(self._given_data)
+#     def max_static_cable_force(self):
+#         return (self.m1 * self.g).subs(self._given_data)
 
-    def max_dynamic_cable_force(self):
+#     def max_dynamic_cable_force(self):
 
-        omg_amp = ComposedSystem(self.linearized())._frf()[0]*self.Omega
+#         omg_amp = ComposedSystem(self.linearized())._frf()[0]*self.Omega
 
-        return self.m1*self.l* (omg_amp)**2 + self.max_static_cable_force()
+#         return self.m1*self.l* (omg_amp)**2 + self.max_static_cable_force()
+    
+#         def nonlinear_steady_solution(self):
+#         steady=self._fodes_system.steady_solution
+#         return steady
+
+    def static_cable_force(self,op_point=0):
+
+        data=self._given_data
+        ans=self.force_in_cable(op_point=op_point)
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        return (free_coeff)
+
+    def max_static_cable_force(self,op_point=0):
+        return abs(self.static_cable_force(op_point=op_point))
+
+    def max_dynamic_cable_force(self,op_point=0):
+
+        op_point=0
+        data=self._given_data
+        ans=self.force_in_cable(op_point=op_point)
+        cos_amp = ans.subs({cos(self.Omega*self.ivar):1, sin(self.Omega*self.ivar):0}).subs(data)
+
+        return abs(cos_amp )#+ self.max_static_cable_force()
+
+    def static_cable_diameter(self):
+        kr = Symbol('k_r', positive=True)
+        Re = Symbol('R_e', positive=True)
+        return ((4 * self.max_static_cable_force()) / (pi * kr * Re))**(1 / 2)
+
+    def dynamic_cable_diameter(self):
+        kr = Symbol('k_r', positive=True)
+        Re = Symbol('R_e', positive=True)
+        return ((4 * self.max_dynamic_cable_force()) / (pi * kr * Re))**(1 / 2)
+    
+    def force_in_cable(self,op_point=0):
+
+        op_point=0
+
+        data=self._given_data
+        dyn_sys=self.subs(data)
+#         display(type(dyn_sys))
+        dyn_sys_lin=dyn_sys.linearized()
+#         display(type(dyn_sys_lin))
+        phi=dyn_sys_lin._fodes_system.steady_solution[0]
+
+#         m=data[self.m]
+#         l=data[self.l]
+
+        op_point = pi*op_point  #quick workaround - wrong implementation
+
+        force_in_cable = self.m*self.g*(1-S.One/2*(phi - op_point )**2) + self.m * self.l * (phi  - op_point).diff(self.ivar)**2
+        force_subs=force_in_cable.subs(data)#.subs({self.Omega:0.999*dyn_sys_lin.natural_frequencies()[0]})
+
+        return force_subs.doit().expand()
