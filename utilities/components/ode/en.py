@@ -395,9 +395,9 @@ class SecularTermsEquationsComponent(ReportComponent):
         
 #         display(ReportText(  self.header_text   ))
 
-        for no,eq in enumerate(system.secular_eq[eps]):
+        for no,eq in enumerate(system.secular_eq[system.eps]):
             display(Eq(system.secular_eq[system.eps].as_first_ode_linear_system().expand().linearized().lhs[no]-(system.secular_eq[system.eps].as_first_ode_linear_system().expand().linearized().rhs[no]),0))
             
-        display(ReportText(  self.footer_text   ))
+#         display(ReportText(  self.footer_text   ))
         
         
