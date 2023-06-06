@@ -1340,12 +1340,16 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
         default_data_dict = {
             self.m_1 : [100],
             self.m_2 : [200],
-            self.k : [50],
-            self.c : [100],
+            self.k_l : [50],
+            self.k_r : [50],
+            self.k_c : [50],
+            self.c_l : [100],
+            self.c_r : [100],
+            self.c_c : [100],
             self.Omega : [0.5 * 3.14, 1 * 3.14, 2 * 3.14, 4 * 3.14],
             self.F : [0.5 * 100, 1 * 100, 2 * 100, 4 * 100]
         }
-        default_data_dict.update({self.G: [4*default_data_dict[self.F][0]*cos(0.5*default_data_dict[self.Omega][0]*self.ivar) , default_data_dict[self.F][0]*cos(0.75*default_data_dict[self.Omega][0]*self.ivar)**2 , 1.5*default_data_dict[self.F][0]*2*cos(1.25*default_data_dict[self.Omega][0]*self.ivar) , 3*default_data_dict[self.F][0]*cos(2*default_data_dict[self.Omega][0]*self.ivar)**2]})
+#         default_data_dict.update({self.G: [4*default_data_dict[self.F][0]*cos(0.5*default_data_dict[self.Omega][0]*self.ivar) , default_data_dict[self.F][0]*cos(0.75*default_data_dict[self.Omega][0]*self.ivar)**2 , 1.5*default_data_dict[self.F][0]*2*cos(1.25*default_data_dict[self.Omega][0]*self.ivar) , 3*default_data_dict[self.F][0]*cos(2*default_data_dict[self.Omega][0]*self.ivar)**2]})
 
         return default_data_dict
     
