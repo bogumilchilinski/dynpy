@@ -68,7 +68,7 @@ class SpringMassSystem(ComposedSystem):
 
     m=Symbol('m', positive=True)
     k=Symbol('k', positive=True)
-    ivar=Symbol('t', positive=True)
+    ivar=Symbol('t')
     
     z=dynamicsymbols('z')
     
