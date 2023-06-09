@@ -494,7 +494,7 @@ class DampedEngineMount(EngineMount):
     
     real_path='buick_regal_3800.jpg' #buick_regal_3800.jpg
     scheme_name = 'spring.PNG'
-    scheme_name = 'damped_engine_vertical_spring_gravity.png'
+    scheme_name = 'damped_engine_vertical_spring_fy.png'
     real_name = 'paccar.jpg'
     detail_scheme_name = 'sruba_pasowana.png'
     detail_real_name = 'buick_regal_3800.jpg'

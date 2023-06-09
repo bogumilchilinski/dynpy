@@ -812,6 +812,9 @@ class ODESystem(AnalyticalSolution):
     _simp_dict = None
     _callback_dict = None
 
+    _simp_dict = {}
+    _callback_dict = {}
+    
     _default_ics = None
     
     _default_detector = CommonFactorDetector #None
@@ -1594,7 +1597,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         
         
-        A = self._auxiliary_fundamental_matrix.applyfunc(lambda elem: elem.subs(self._simp_deps,simultaneous=True))
+        A = self._auxiliary_fundamental_matrix#.applyfunc(lambda elem: elem.subs(self._simp_deps,simultaneous=True))
         
         #display('A_subs',A,'subs dict',self._simp_deps)
         
@@ -1613,7 +1616,10 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         mapper = lambda elem: elem.subs(self._simp_deps,simultaneous=True).subs(self._callback_deps,simultaneous=True) 
         
+        #ode_sol = ODESolution(self.dvars,sol).applyfunc(mapper).subs( const_dict )
+        
         ode_sol = ODESolution(self.dvars,sol).applyfunc(mapper).subs( const_dict )
+        
         ode_sol.ivar=self.ivar
         
         return ode_sol
@@ -1630,7 +1636,13 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         b = self._auxiliary_free_terms
         dvars = self._auxiliary_dvars                                 
 
+        print('steady sol')
+        display(A)
+        display(b)
+        
         sol = AnalyticalSolution(dvars,linodesolve(A,t=self.ivar,b=b)).applyfunc(self.solution_map)
+
+        display('ss',sol)
         
         dummies_set= sol.atoms(Dummy)
 

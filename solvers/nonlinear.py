@@ -19,7 +19,7 @@ import sympy.physics.mechanics as me
 
 from sympy.simplify.fu import TR8, TR10, TR7, TR3, TR0
 
-from .linear import LinearODESolution, FirstOrderODE, AnalyticalSolution, FirstOrderLinearODESystem, FirstOrderODESystem, ODESystem, ODESolution
+from .linear import LinearODESolution, FirstOrderODE, AnalyticalSolution, FirstOrderLinearODESystem, FirstOrderODESystem, ODESystem, ODESolution,FirstOrderLinearODESystemWithHarmonics
 
 from timer import timer
 from collections.abc import Iterable
@@ -127,12 +127,35 @@ class PerturbationODESolution(ODESolution):
         const_eqns=self._get_constant_eqns(ics).subs(self.eps,0).doit()
         const_list = self._spot_constant()
         
+        #display('ivar',self.ivar)
+        
         return solve(const_eqns,const_list)
     
 
+class ODESystemApproximation(ODESystem):
+
+    _simp_dict = {}
+    _callback_dict = {}
+
+    @property
+    def _default_solver(self):
+        
+        #return FirstOrderLinearODESystemWithHarmonics
+        return FirstOrderLinearODESystem
+    
+    
 class NthOrderODEsApproximation(FirstOrderLinearODESystem):
     _ode_order=1
 
+    _simp_dict = {}
+    _callback_dict = {}
+    
+    @property
+    def _default_solver(self):
+        
+        return FirstOrderLinearODESystemWithHarmonics
+        #return FirstOrderLinearODESystem
+    
     @cached_property
     def _secular_funcs(self):
 
@@ -156,7 +179,7 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
 
         ivar = self._parameters[0]
 
-
+        
         #sec_conditions =FirstOrderODESystem.from_ode_system(ODESystem([sec_conditions[1][1],sec_conditions[3][1]],dvars = self._const_list ,ivar=ivar  )).linearized().solution
 
         sec_odes=ODESystem((sec_conditions),
@@ -388,7 +411,7 @@ class MultiTimeScaleSolution(ODESystem):
         
         
         approx_list=[
-            ODESystem(
+            ODESystemApproximation(
                 eoms_approximated.applyfunc(lambda obj: order_get(obj, order)),
                 dvars=self.approximation_function(order),
                 ivar=self.t_list[0],
@@ -412,9 +435,11 @@ class MultiTimeScaleSolution(ODESystem):
         sol_list = [sol]
         sol_subs_list = [sol.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).full_expr).doit() for sol in sol_list]
         sol_subs_dict  = {  dvar:eqn     for  sol   in sol_subs_list  for dvar, eqn in sol.as_dict().items()}
+
         
-        #display(sol_list)
-        #display(sol_subs_dict)
+        print('_gen_sol')
+        display(sol_list)
+        display(sol_subs_dict)
 
         for order, approx in enumerate(approx_eoms_list[1:]):
 
@@ -452,17 +477,20 @@ class MultiTimeScaleSolution(ODESystem):
                                        1)] = (approx_subs.secular_terms)
             
             
-            #display(self.secular_eq)
+            display(self.secular_eq)
             approx_subs = approx_subs.remove_secular_terms()
             
             
 
             #display(approx_subs.lhs,approx_subs.rhs)
-            #display(approx_subs)
+            display(approx_subs)
+            display(FirstOrderLinearODESystemWithHarmonics.from_ode_system(approx_subs).steady_solution)
+            display(type(approx_subs))
 
-            sol = approx_subs.steady_solution.applyfunc(
-                lambda obj: obj.expand()).applyfunc(eqns_map).applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).sum_expr)
+            sol = FirstOrderLinearODESystemWithHarmonics.from_ode_system(approx_subs).steady_solution.applyfunc(
+                lambda obj: obj.expand()).applyfunc(eqns_map)#.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).sum_expr)
 
+            display(sol)
             #sol_subs_dict = {**sol_subs_dict, **sol.as_dict()}
             #display(*list(sol.as_matrix()))
             sol_list += [sol.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).full_expr).doit()]
@@ -497,385 +525,11 @@ class MultiTimeScaleSolution(ODESystem):
         
         new_res = PerturbationODESolution(Matrix(list(self.dvars) +  list(self.dvars.diff(self.ivar)) ) , result)#.set_small_parameter(self.eps)
         new_res.small_parameter = self.eps
-        print(new_res._lhs)
+        new_res.ivar = self.ivar
+
         return new_res
-    
-    
 
-    def nth_eoms_approximation(self, order=3):
 
-        eoms_approximated = self.eoms_approximation_list(max_order=order,
-                                                         min_order=order)
-
-        return eoms_approximated[0]
-
-    def _determine_secular_terms(self, zeroth_approx, order, ivar=None):
-
-        #         print('zeroth approx')
-        #         display(*zeroth_approx)
-
-        if not ivar:
-            ivar = self.t_list[0]
-
-#         print('===')
-        sol_zeroth = self._find_nth_solution(zeroth_approx,
-                                             order=0,
-                                             secular_comps={},
-                                             ivar=ivar)
-
-        #         print('+++ sol of zeroth')
-        #         display('+'*100,sol_zeroth,'+'*100)
-        #         print('+++ sol of zeroth')
-        #         #eig_min=sqrt(self.eigenvalues()[0])
-
-        #         #secular_comps = {sin(eig_min*self.ivar),cos(eig_min*self.ivar)}
-        secular_comps = sum(sol_zeroth).atoms(sin, cos)
-
-        self.int_const |= {
-            eq.coeff(comp)
-            for eq in sol_zeroth for comp in secular_comps
-        }
-
-        #         display('+'*100,secular_comps,'+'*100)
-
-        return secular_comps
-
-    def _nth_order_solution_with_C(self, order=1):
-
-        t_list = self.t_list
-
-        eoms_list = self.eoms_approximation_list(max_order=order)
-
-        stiffness_mat = (self.stiffness_matrix())
-
-        eps_stiffness_mat = Matrix(*stiffness_mat.shape, [
-            stiff_comp * approx for stiff_comp, approx in zip(
-                stiffness_mat, self.eigenvalue_approximation(order=order))
-        ])
-
-        secular_components = {
-            comp: 0
-            for comp in self._determine_secular_terms(
-                zeroth_approx=eoms_list[0], order=order)
-        }
-        #        display('secular comps',secular_components)
-        approx_dict = {}
-
-        solution = []
-
-        for comp_ord, eoms_nth in enumerate(eoms_list):
-
-            #            display('trutututu',eoms_nth)
-
-            nth_solution = self._find_nth_solution(
-                eoms_nth.subs(approx_dict).doit().expand(),
-                order=comp_ord,
-                secular_comps=secular_components,
-                dict=True,
-                ivar=self.t_list[0])
-            #            display(nth_solution)
-            approx_dict.update(nth_solution)
-
-        sec_eq = Matrix(list(self.secular_eq - {S.Zero}))
-        #         display(sec_eq)
-        #         display(self.int_const)
-
-        #         const_sol=FirstOrderODE((sec_eq),
-        #                         self.t_list[1],
-        #                         dvars=Matrix(list(self.int_const))
-        #                         ).general_solution()
-        #         display(const_sol)
-
-        #         print('Const const')
-        #         print(FirstOrderODE._const_list)
-
-        t_back_subs = {
-            t_i: self.ivar * self.eps**t_ord
-            for t_ord, t_i in enumerate(self.t_list)
-        }
-
-        #         display(t_back_subs)
-
-        general_form_dict = {
-            var: eqn.subs(approx_dict)
-            for var, eqn in self.predicted_solution(order=order,
-                                                    dict=True).items()
-        }
-
-        #         print('ics')
-        #         display(*list({var: eqn.subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values()))
-        #         display(*list({var: eqn.diff(self.ivar).subs({self.ivar:0}).subs(self.eps,0)  for var, eqn in general_form_dict.items()}.values()))
-
-        #         display(const_vals)
-
-        return general_form_dict
-
-    def _ic_from_sol(self, order=1, formula=True):
-
-        general_sol_obj = self.nth_order_solution(order=order)
-        general_form_dict = general_sol_obj.as_dict()
-
-        #         display(general_form_dict)
-
-        ics_eqns = list(general_sol_obj.rhs.subs({self.ivar: 0})) + list(
-            general_sol_obj.rhs.diff(self.ivar).subs({self.ivar: 0}))
-
-        eqns = Matrix([eq.expand() for eq in ics_eqns])
-
-        #         display(eqns)
-
-        const_from_eqn = [
-            var for var in list(eqns.atoms(Symbol, Function))
-            if var in FirstOrderODE._const_list
-        ]
-
-        #display(Matrix(ics_eqns).jacobian(const_from_eqn))
-
-        #         print('const from eqns')
-        #         display(const_from_eqn)
-
-        #display(ics_eqns)
-
-        #         print('ics params check')
-        #         display(self.params_values)
-
-        if formula:
-
-            const_vals_lin = Matrix([
-                eq.expand() for eq in ics_eqns
-            ]).jacobian(const_from_eqn).subs({
-                const: 0
-                for const in const_from_eqn
-            }).subs(self.eps, 0)  #.subs(self.params_values)#*Matrix(self.ics)
-            const_vals_zth = Matrix([eq.expand() for eq in ics_eqns]).subs(
-                {const: 0
-                 for const in const_from_eqn})  #.subs(self.params_values)
-
-        else:
-
-            const_vals_lin = Matrix(
-                [eq.expand()
-                 for eq in ics_eqns]).jacobian(const_from_eqn).subs({
-                     const: 0
-                     for const in const_from_eqn
-                 }).subs(self.params_values)  #*Matrix(self.ics)
-            const_vals_zth = Matrix([eq.expand() for eq in ics_eqns]).subs(
-                {const: 0
-                 for const in const_from_eqn}).subs(self.params_values)
-
-#         print('+++++++++  eqns for ics +++++++++++ ')
-#         display(const_vals_lin)
-#         display(const_vals_zth)
-
-        self.ics_symbols = symbols(f'D0:{len(self.ics)}')
-
-        self._ics_formula = {
-            const: val
-            for const, val in zip(
-                const_from_eqn,
-                const_vals_lin.inv() *
-                (-const_vals_zth + Matrix(self.ics_symbols)))
-        }
-
-        return self._ics_formula
-
-    def _nth_order_solution(self, order=1):
-
-        general_form_dict = self._nth_order_solution_with_C(order=order)
-
-        sec_eq = Matrix(list(self.secular_eq - {S.Zero}))
-
-        const_sol = FirstOrderODE(
-            (sec_eq), self.t_list[1],
-            dvars=Matrix(list(self.int_const))).solution()
-
-        steady_sol = (FirstOrderODE(
-            (sec_eq), self.t_list[1],
-            dvars=Matrix(list(self.int_const))).steady_solution())
-
-        self._const_sol = {
-            coord: const_sol[coord] + steady_sol[coord]
-            for coord in const_sol.keys()
-        }
-
-        t_back_subs = {
-            t_i: self.ivar * self.eps**t_ord
-            for t_ord, t_i in enumerate(self.t_list)
-        }
-
-        general_form_dict = {
-            key: eq.subs(const_sol).subs(t_back_subs)
-            for key, eq in general_form_dict.items()
-        }
-
-        return AnalyticalSolution.from_dict(general_form_dict)
-
-    def nth_order_solution(self, order=1):
-
-        if not (tuple(self._eoms), order) in self.__class__._saved_solution:
-
-            self.__class__._saved_solution[(tuple(
-                self._eoms), order)] = self._nth_order_solution(order=order)
-
-        return self.__class__._saved_solution[(tuple(self._eoms), order)]
-
-    def zeroth_approximation(self, dict=False, equation=False):
-
-        #eoms = Matrix(self.odes_system).subs(self.eps, 0)
-
-        eoms = (self.nth_eoms_approximation(0))
-
-        #        display(eoms, self.approximation_function(order=0))
-
-        solution = LinearODESolution(eoms,
-                                     ivar=self.ivar,
-                                     dvars=self.approximation_function(
-                                         order=len(self.t_list))).solution()
-
-        #         if equation:
-        #             solution = Matrix([
-        #                 Eq(lhs, rhs)
-        #                 for lhs, rhs in zip(self.approximation_function(
-        #                     order=0), list(solution))
-        #             ])
-
-        #         if dict:
-        #             solution = {
-        #                 lhs: rhs
-        #                 for lhs, rhs in zip(self.approximation_function(
-        #                     order=0), list(solution))
-        #             }
-
-        return self._format_solution(
-            dvars=self.approximation_function(order=0),
-            solution=solution,
-            dict=dict,
-            equation=equation)
-
-    def _find_nth_solution(self,
-                           eoms_nth,
-                           order,
-                           secular_comps,
-                           dict=False,
-                           equation=False,
-                           ivar=None):
-
-        if not ivar:
-            ivar = self.ivar
-
-        eoms = eoms_nth
-
-        # print('='*100,'eoms_nth for solve')
-        # display(eoms )
-        # print('='*100,'eoms_nth for solve')
-
-        eoms = (eoms.expand()).applyfunc(
-            lambda eqn: ((TR10(TR8(TR10(eqn).expand()).expand()).expand())))
-
-        # print('='*100,'eoms_nth for solve')
-        # display(eoms )
-        # print('='*100,'eoms_nth for solve')
-
-        self.secular_eq |= {
-            row.coeff(comp)
-            for row in eoms for comp in secular_comps
-        }  #test
-
-        #         print('='*100)
-        #         display(*self.secular_eq)
-        #         print('='*100)
-
-        eoms = eoms.subs({comp: 0 for comp in secular_comps})
-
-        #         print('='*100)
-        #         display(eoms)
-        #         display(self.approximation_function(order=order))
-        #         display(ivar)
-        #         print('='*100)
-
-        solution = LinearODESolution(
-            eoms, ivar=ivar,
-            dvars=self.approximation_function(order=order)).solution()
-
-        #         print('=eoms and its linear sol'*100)
-        #         display(eoms)
-        #         display(solution)
-
-        #         print('=eoms and its sol'*100)
-
-        return self._format_solution(
-            dvars=self.approximation_function(order=order),
-            solution=solution,
-            dict=dict,
-            equation=equation)
-
-    def nth_approximation(self, order=1, dict=False, equation=False):
-
-        #         eoms = Matrix(self.odes_system).subs(
-        #             self.predicted_solution(2, dict=True)).diff(self.eps,order).subs(
-        #                 self.eps, 0).expand()
-
-        eoms = self.nth_eoms_approximation(order)
-
-        zeroth_approximation = self.zeroth_approximation(dict=True,
-                                                         order=order)
-
-        secular_comps = sum(zeroth_approximation.values()).atoms(cos, sin)
-
-        approx = [zeroth_approximation] + [
-            self.nth_approximation(order=i, dict=True)
-            for i in range(1, order)
-        ]
-
-        approx_dict = type({})(ChainMap(*approx))
-
-        #        display('abc',approx_dict)
-
-        return self._find_nth_solution(eoms.subs(approx_dict),
-                                       order,
-                                       secular_comps,
-                                       dict=dict,
-                                       equation=equation)
-
-    def first_approximation(self, dict=False, equation=False):
-        return self.nth_approximation(order=1, dict=dict, equation=equation)
-
-
-#     def numerized(self,
-#                  params_values={},
-#                  **kwargs):
-
-#         print('params values')
-#         print(params_values)
-
-#         if params_values=={}:
-#             return copy.copy(self)
-#         else:
-
-#             if 'ics' in params_values:
-#                 ics_list = params_values['ics']
-#             else:
-#                 ics_list = self.ics
-
-#             new_system =  self.__class__(
-#                 odes_system=self.governing_equations,
-#                  ivar=self.ivar,
-#                  dvars= self.dvars,
-#                  ics=ics_list,
-#                  eps=self.eps,
-#                  omega=self.omega,
-#                  order=self._order,
-#                  t_span=[],
-#                  params=[],
-#                  params_values={**self.params_values,**params_values},
-#                  ic_point=ics_list,
-#                  equation_type=None,
-#                  label=self._label)
-
-#             new_system._stored_solution = copy.copy(self._stored_solution)
-#             new_system._saved_solution = copy.copy(self._saved_solution)
-
-#             return new_system
 
     def compute_solution(self,
                          t_span=None,
@@ -896,15 +550,7 @@ class MultiTimeScaleSolution(ODESystem):
                              order=self._order,
                              params_values=params_values)
 
-    def frequency_response_function(self,
-                                    frequency=Symbol('Omega',positive=True),
-                                    amplitude=Symbol('a',positive=True), 
-                                    exciting_force=Symbol('f_0', positive=True)):
-        
-        epsilon = self.eps
-        omega = self.omega
 
-        return -frequency**2 + omega**2 + 0.75*epsilon*amplitude**2-exciting_force/amplitude
 
 
 class WeakNonlinearProblemSolution(LinearODESolution):
