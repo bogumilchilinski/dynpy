@@ -2709,7 +2709,7 @@ class TimeDomainMethods(DataMethods):
                                   name=self.name)
         spectrum.index.name = Symbol('f')
 
-        return spectrum
+        return spectrum.sort_index()
 
 
 #     def to_frequency_domain(self):
@@ -2806,9 +2806,10 @@ class SpectrumFrame(AdaptableDataFrame, SpectralMethods):
             name: data.double_sided_rms()
             for name, data in self.items()
         }
-        f_span_shifted_ds = pd.Index(fft.fftshift(self.index),
-                                     name=self.index.name)
-
+        #f_span_shifted_ds = pd.Index(fft.fftshift(self.index),
+        #                             name=self.index.name)
+        f_span_shifted_ds=self.index
+        
         return SpectrumFrame(data=spectrum_shifted_ds, index=f_span_shifted_ds)
 
     def single_sided_rms(self):
@@ -2818,8 +2819,9 @@ class SpectrumFrame(AdaptableDataFrame, SpectralMethods):
             np.heaviside(data.double_sided_rms().index, 0.5) * 2
             for name, data in self.items()
         }
-        f_span_shifted_ss = pd.Index(fft.fftshift(self.index),
-                                     name=self.index.name)
+        #f_span_shifted_ss = pd.Index(fft.fftshift(self.index),
+        #                             name=self.index.name)
+        f_span_shifted_ss=self.index
 
         return SpectrumFrame(data=spectrum_shifted_ss, index=f_span_shifted_ss)
 
@@ -2926,7 +2928,7 @@ class TimeDataFrame(AdaptableDataFrame, TimeDomainMethods):
 
         return SpectrumFrame(data=spectral_data,
                              index=spectral_data[next(
-                                 iter(spectral_data))].index)
+                                 iter(spectral_data))].index).sort_index()
 
     def gradient(self):
 
