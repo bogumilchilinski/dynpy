@@ -2675,7 +2675,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         return Eq(self.psi, self.Omega/self.omega0)
     
     def frequency_ratio(self):
-        return Eq(self.chi, self.Omega0**2/self.omega0**2)
+        return Eq(self.chi, self.Omega0/self.omega0)
     
     def force_amplitude_ratio(self):
         return Eq(self.delta, self.F/self.k)
