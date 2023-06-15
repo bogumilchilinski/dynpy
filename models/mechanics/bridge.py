@@ -466,12 +466,11 @@ class BeamBridge(ComposedSystem):
 
     
     def dynamic_force(self):
-        k_beam=self.k_beam
-        z=self.z
-        sol_dict=self._fodes_system.steady_solution.as_dict()
-        F_kbeam=(k_beam*z).subs(sol_dict).subs(self._given_data)
+        data=self._given_data
+        amps=self._fodes_system.steady_solution.as_dict()
+        dyn_force=(self.components['_spring'].force().subs(amps)).subs(data).expand().doit()
         
-        return F_kbeam.subs(self._given_data)
+        return dyn_force
     
     def static_force(self):
         data=self._given_data
@@ -583,14 +582,22 @@ class BeamBridgeDamped(BeamBridge):
     def get_default_data(self):
 
         lam=Symbol('lambda', positive = True)
-        lam0=Symbol('lambda_0', positive = True)
+        E, I, l=symbols('E I l',positive=True)
+        F0=Symbol('F_0',positive=True)
+        m0=Symbol('m_0',positive=True)
+        k0=Symbol('k_0',positive=True)
         
         default_data_dict = {
-            self.c: [self.k_beam * lam],
-            lam: [S.One * no * lam0 /1000 for no in range(1, 5)],
+#             self.k_beam [S.One * 48 * E * I / l**3],
+            self.m: [S.One * m0 * no for no in range(100, 150)],
+            self.c: [S.One * self.k_beam * lam],
+            self.k_beam: [S.One * k0 * no for no in range(50, 100)],
+            self.F: [S.One * F0 * no for no in range(10, 25)],
+#             lam: [S.One * no * lam0 /1000 for no in range(1, 5)],
         }
         return default_data_dict
     
+
     def get_numerical_data(self):
 
         default_data_dict = {
@@ -598,7 +605,12 @@ class BeamBridgeDamped(BeamBridge):
         }
         return default_data_dict
     
-    
+    def dynamic_force(self):
+        data=self._given_data
+        amps=self._fodes_system.steady_solution.as_dict()
+        dyn_force=(self._beam_bridge.components['_spring'].force().subs(amps)).subs(data).expand().doit()
+
+        return dyn_force
 #Amadi
 class BeamBridgeTMD(BeamBridge):
 

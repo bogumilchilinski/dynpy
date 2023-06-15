@@ -483,6 +483,7 @@ class DoubleDiskShaft(ComposedSystem):
 
         return default_data_dict
 
+
     @property
     def _report_components(self):
         
@@ -501,6 +502,19 @@ class DoubleDiskShaft(ComposedSystem):
         ]
 
         return comp_list
+    
+    def static_force(self):
+        data=self._given_data
+        ans=self.dynamic_force()
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        return (free_coeff)
+    
+    def dynamic_force(self):
+        data=self._given_data
+        amps = self._fodes_system.steady_solution.as_dict()
+        dyn_force=(self.components['spring_2'].force().subs(amps)).subs(data).expand().doit()
+        
+        return dyn_force
     
     def disc_1_force(self):
         t=self.ivar
@@ -682,23 +696,43 @@ class DoubleDiskShaftHarmonicExcitation(DoubleDiskShaft):
         }
         return self.sym_desc_dict
 
+#     def get_default_data(self):
+
+#         m0, l0 , G, l,  d, T0 = self.m0, self.l0 , self.G, self.l,  self.d, self.T0
+#         theta0, Omega0 = symbols('theta_0 Omega_0', positive=True)
+
+#         default_data_dict = {
+#             self.I_m1: [S.Half*m0*(l0**2)*no for no in range(1,9)],
+#             self.I_m2: [S.Half*m0*(l0**2)*no for no in range(1,9)],
+#             self.I_1: [S.Half**(no)*(l0**4) for no in range(1,9)],
+#             self.I_2: [S.Half**no*(l0**4) for no in range(1,9)],
+#             self.l_1: [S.Half**(no-6)*l0 for no in range(1,9)],
+#             self.l_2: [S.Half**(no-6)*l0 for no in range(1,9)],
+#             self.T_1: [T0 * (no) for no in range(1,12)],
+#             self.T_2: [T0 * (no) for no in range(1,12)],
+#             self.theta:[S.One * theta0 * (no) for no in range(1,5)],
+# #             self.Omega:[S.One * Omega0],
+            
+#         }
+
+#         return default_data_dict
+
     def get_default_data(self):
 
         m0, l0 , G, l,  d, T0 = self.m0, self.l0 , self.G, self.l,  self.d, self.T0
-        theta0, Omega0 = symbols('theta_0 Omega_0', positive=True)
+        theta0, Omega = self.theta0, self.Omega
 
         default_data_dict = {
-            self.I_m1: [S.Half*m0*(l0**2)*no for no in range(1,9)],
-            self.I_m2: [S.Half*m0*(l0**2)*no for no in range(1,9)],
-            self.I_1: [S.Half**(no)*(l0**4) for no in range(1,9)],
-            self.I_2: [S.Half**no*(l0**4) for no in range(1,9)],
-            self.l_1: [S.Half**(no-6)*l0 for no in range(1,9)],
-            self.l_2: [S.Half**(no-6)*l0 for no in range(1,9)],
-            self.T_1: [T0 * (no) for no in range(1,12)],
-            self.T_2: [T0 * (no) for no in range(1,12)],
-            self.theta:[S.One * theta0 * (no) for no in range(1,5)],
-            self.Omega:[S.One * Omega0],
-            
+            self.k_1:[self.k_1],
+            self.k_2:[self.k_2],
+            self.I_m1: [S.Half*m0*(l0**2)],
+            self.I_m2: [S.Half*m0*(l0**2)],
+            self.I_1: [S.Half*(l0**4)],
+            self.I_2: [S.Half*(l0**4)],
+            self.l_1: [S.Half*l0,2*S.Half*l0,4*S.Half*l0],
+            self.l_2: [S.Half*l0,2*S.Half*l0,4*S.Half*l0],
+            self.T_1: [T0],
+            self.T_2: [T0],
         }
 
         return default_data_dict
