@@ -53,8 +53,8 @@ class Pendulum(NonlinearComposedSystem):
         -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
         -determine the instance of the pendulum by using class Pendulum()
     """
-    #scheme_name = 'undamped_pendulum.png'
-    #real_name = 'pendulum_real.jpg'
+    scheme_name = 'undamped_pendulum.png'
+    real_name = 'pendulum_real.jpg'
 
     
     m=Symbol('m', positive=True)
