@@ -1145,6 +1145,7 @@ class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
 
         return parameters_dict
 
+
     def max_static_cable_force(self):
         return (self.m1 * self.g).subs(self._given_data)
 

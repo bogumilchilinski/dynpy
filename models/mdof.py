@@ -3394,7 +3394,7 @@ class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
 
         op_point = pi*op_point  #quick workaround - wrong implementation
 
-        force_in_cable = self.m*self.g*(1-S.One/2*(phi - op_point )**2) + self.m * self.l * (phi  - op_point).diff(self.ivar)**2
+        force_in_cable = self.m1*self.g*(1-S.One/2*(phi - op_point )**2) + self.m1 * self.l * (phi  - op_point).diff(self.ivar)**2
         force_subs=force_in_cable.subs(data)#.subs({self.Omega:0.999*dyn_sys_lin.natural_frequencies()[0]})
 
         return force_subs.doit().expand()

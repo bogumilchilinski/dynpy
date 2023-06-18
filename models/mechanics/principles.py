@@ -695,6 +695,19 @@ class DampedMeasuringTool(ComposedSystem):
         }
 
         return default_data_dict
+    
+    def dynamic_force(self):
+        data=self._given_data
+        amps=self._fodes_system.steady_solution.as_dict()
+        dyn_force=(self.components['_spiral_spring'].force().subs(amps)).subs(data).expand().doit()
+        
+        return dyn_force
+    
+    def static_force(self):
+        data=self._given_data
+        ans=self.dynamic_force()
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        return (free_coeff)
 
     def steady_state(self):
         return 3 * (S.One / 2 * self.damping_coefficient())**(-1)
