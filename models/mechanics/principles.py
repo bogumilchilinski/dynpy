@@ -547,6 +547,7 @@ class KinematicClutchWithSprings(ComposedSystem):
         theta0, Omega = symbols('theta_0, Omega', positive=True)
 
         default_data_dict = {
+            self.I:[self.I],
             self.I: [S.Half * m0 * (l0**2) * no for no in range(1, 3)],
             self.I_1: [S.Half**(no) * (l0**4) for no in range(1, 8)],
             self.I_2: [S.Half**no * (l0**4) for no in range(1, 8)],
