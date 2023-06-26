@@ -3291,7 +3291,9 @@ class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
     def get_default_data(self):
 
         m0, k0, l0, F0 = symbols('m_0 k_0 l_0 F_0', positive=True)
-
+        k0 = m0/l0*self.g
+        
+        
         default_data_dict = {
 #             self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
 #             self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],

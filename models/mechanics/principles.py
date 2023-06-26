@@ -986,3 +986,83 @@ class CrankSystem(ComposedSystem):
 
         return default_data_dict
     
+    
+class Winch(ComposedSystem):
+
+    scheme_name = 'sdof_winch.PNG'
+    real_name = 'winch_mechanism_real.PNG'
+
+    r=Symbol('r', positive=True)
+    l=Symbol('l', positive=True)
+    m=Symbol('m', positive=True)
+    g=Symbol('g', positive=True)
+    ivar=Symbol('t')
+    phi=dynamicsymbols('\\varphi')
+    F=Symbol('F', positice=True)
+    Omega=Symbol('Omega', positice=True)
+
+    def __init__(self,
+                 r=None,
+                 l=None,
+                 m=None,
+                 g=None,
+                 phi=None,
+                 F=None,
+                 Omega=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m is not None: self.m = m
+        if r is not None: self.r = r
+        if l is not None: self.l = l
+        if g is not None: self.g = g
+        if phi is not None: self.phi= phi
+        if Omega is not None: self.Omega= Omega
+        if F is not None: self.F= F
+        self.ivar = ivar
+
+        self.qs = [self.phi]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self.x = self.r * cos(self.phi) + (self.l + self.r * self.phi) * sin(self.phi)
+        self.y = -(self.r) * sin(self.phi) + (self.l + self.r * self.phi) * cos(self.phi)
+
+        self.material_point_1 = MaterialPoint(self.m, self.x, qs=self.qs)
+        self.material_point_2 = MaterialPoint(self.m, self.y, qs=self.qs)
+        self.gravity = GravitationalForce(self.m, self.g, pos1=-self.y, qs=self.qs)
+        self.force= Force(self.F*self.r*sin(self.Omega*self.ivar), self.phi, self.qs)
+
+        components['_material_point_1'] = self.material_point_1
+        components['_material_point_2'] = self.material_point_2
+        components['_gravity'] = self.gravity
+        components['_force'] = self.force
+
+        return components
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.r: r'Winch radius',
+            self.l: r'Winch length',
+            self.m: r'Mass',
+            self.g: 'Gravity constant',
+            self.F: 'Force'
+        }
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        m0, l0, F0 = symbols('m_0 l_0 F_0', positive=True)
+
+        default_data_dict = {
+            self.r: [S.One * no * 2 * l0 for no in range(1,5)],
+            self.m: [S.One * no * m0 for no in range(2,10)],
+            self.l: [S.One * no * l0 for no in range(1,5)],
+            self.F: [S.One * no * F0 for no in range(5,10)],
+        }
+        return default_data_dict

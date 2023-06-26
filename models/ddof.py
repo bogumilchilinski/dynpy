@@ -19,6 +19,8 @@ import numpy as np
 
 import inspect
 
+from functools import cached_property, lru_cache
+
 class ComposedSystem(HarmonicOscillator):
     """Base class for all systems
 
@@ -88,7 +90,10 @@ class ComposedSystem(HarmonicOscillator):
 
         return parameters_dict
 
+    @lru_cache   
+    def linearized(self, x0=None, op_point=False, hint=[], label=None):
 
+        return type(self).from_system(super().linearized(x0=x0,op_point=op_point,hint=hint,label=label))
     
     
 class CoupledPendulum(ComposedSystem):
@@ -2153,7 +2158,7 @@ class TwoDisksWithThreeSprings(ComposedSystem):
 
 class TwoNonLinearTrolleys(ComposedSystem):
     scheme_name = 'ddof_nonlin_trolleys.PNG'
-    real_name = 'dwa_wozki_XD.PNG'
+    real_name = 'nonlin_trolley_real.PNG'
 
     def __init__(self,
                  g=Symbol('g', positive=True),
@@ -2168,6 +2173,8 @@ class TwoNonLinearTrolleys(ComposedSystem):
                  x1=dynamicsymbols('x1'),
                  x2=dynamicsymbols('x2'),
                  x=dynamicsymbols('x'),
+                 F=Symbol('F', positive=True),
+                 Omega=Symbol('Omega', positive=True),
                  qs=dynamicsymbols('x1, x2'),
                  **kwargs):
 
@@ -2181,29 +2188,33 @@ class TwoNonLinearTrolleys(ComposedSystem):
         self.x1 = x1
         self.x2 = x2
         self.x = x
+        self.F = F
+        self.Omega = Omega
 
-        self.Trolley1 = MaterialPoint(m1, x1, qs=[x1]) + Spring(
-            k1, pos1=(sqrt(x1**2 + d**2) - l_0), qs=[x1])
-        self.Trolley2 = MaterialPoint(m2, x2, qs=[x2]) + Spring(
-            k2, pos1=(sqrt(x2**2 + d**2) - l_0), qs=[x2])
+        self.Trolley1 = MaterialPoint(m1, x1, qs=[x1]) 
+        self.Spring_Trolley1 = Spring(k1, pos1=(sqrt(x1**2 + d**2) - l_0), qs=[x1])
+        self.Trolley2 = MaterialPoint(m2, x2, qs=[x2])
+        self.Spring_Trolley2 = Spring(k2, pos1=(sqrt(x2**2 + d**2) - l_0), qs=[x2])
         self.Spring = Spring(k3, x1, x2,qs=[x1,x2])
+        self.Force = Force(F*sin(Omega*ivar), x1, qs=[x1, x2])
 
-        system = self.Trolley1 + self.Spring + self.Trolley2
+        system = self.Trolley1 + self.Spring + self.Trolley2 + self.Spring_Trolley1 + self.Spring_Trolley2 + self.Force
         super().__init__(system(qs),**kwargs)
 
     def get_default_data(self):
 
-        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+        m0, k0, l0, F0 = symbols('m_0 k_0 l_0 F_0', positive=True)
 
         default_data_dict = {
             self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
             self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-            self.d: [1 * l0, 2 * l0, S.Half * l0, 3 * S.Half * l0, 1 * l0],
+            self.d: [1 * self.l_0, 2 * self.l_0, S.Half * self.l_0, 3 * S.Half * self.l_0, 1 * self.l_0],
             self.k1: [k0*no for no in range(5,10)],
             self.k2: [k0*no for no in range(5,10)],
             self.k3: [k0*no for no in range(5,10)],
-            self.x1: [self.x, 0],
-            self.x2: [self.x, S.Zero],
+            self.F: [F0*no for no in range(10,20)],
+#             self.x1: [self.x, 0],
+#             self.x2: [self.x, S.Zero],
         }
 
         return default_data_dict
@@ -2217,9 +2228,9 @@ class TwoNonLinearTrolleys(ComposedSystem):
             for key, items_list in default_data_dict.items()
         }
 
-        if parameters_dict[self.x1] == S.Zero:
-            parameters_dict[self.x2] = self.x
-            print('aaaaaaaaaaaaaaaa')
+#         if parameters_dict[self.x1] == S.Zero:
+#             parameters_dict[self.x2] = self.x
+#             print('aaaaaaaaaaaaaaaa')
         if parameters_dict[self.k2]+parameters_dict[self.k3] - parameters_dict[self.k2] * parameters_dict[
                 self.l_0] / parameters_dict[self.d] == 0 or parameters_dict[self.k1]+parameters_dict[self.k3] - parameters_dict[self.k1] * parameters_dict[
                 self.l_0] / parameters_dict[self.d]:
@@ -2239,6 +2250,17 @@ class TwoNonLinearTrolleys(ComposedSystem):
         }
         return self.sym_desc_dict
 
+    def static_force(self):
+        data=self._given_data
+        ans=self.dynamic_force()
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        return (free_coeff)
+    
+    def dynamic_force(self):
+        amps = self._fodes_system.steady_solution.as_dict()
+        data=self._given_data
+
+        return (self.Spring_Trolley1.force().subs(amps)).subs(data).expand().doit()
 
 class TwoNonLinearDisks(ComposedSystem):
     scheme_name = 'sdof_nonlin_disc.png'

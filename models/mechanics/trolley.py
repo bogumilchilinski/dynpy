@@ -1527,6 +1527,18 @@ class ForcedTrolleysWithNonLinearSprings(NonlinearComposedSystem):
         
         return components
     
+    def static_force(self):
+        data=self._given_data
+        ans=self.dynamic_force()
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        return (free_coeff)
+    
+    def dynamic_force(self):
+        amps = self._fodes_system.steady_solution.as_dict()
+        data=self._given_data
+
+        return (self.components['spring_1'].force().subs(amps)).subs(data).expand().doit()
+    
 class ForcedTrolleyWithSpring(ComposedSystem): ### 1 ODE
     
     scheme_name = 'nonlin_trolley.PNG'
@@ -1978,6 +1990,143 @@ class ForcedDampedDisconnectedTrolleysWithSprings(ForcedDampedThreeTrolleysWithS
         components['force'] = self._force
         
         return components
+
+class DDoFTwoNonLinearTrolleys(NonlinearComposedSystem):
+    
+    scheme_name = 'ForcedTwoNonLinearTrolleys.png'
+    real_name = 'tension_leg_platform.png'
+
+    g=Symbol('g', positive=True)
+    m1=Symbol('m_1', positive=True)
+    m2=Symbol('m_2', positive=True)
+    k1=Symbol('k_1', positive=True)
+    k2=Symbol('k_2', positive=True)
+    k3=Symbol('k_3', positive=True)
+    d=Symbol('d', positive=True)
+    l_0=Symbol('l_0', positive=True)
+    ivar=Symbol('t')
+    x1=dynamicsymbols('x1')
+    x2=dynamicsymbols('x2')
+    x=dynamicsymbols('x')
+    qs=dynamicsymbols('x1, x2')
+    F=Symbol('F', positive=True)
+    Omega=Symbol('Omega', positive=True)
+   
+    def __init__(self,
+                 g=None,
+                 m1=None,
+                 m2=None,
+                 k1=None,
+                 k2=None,
+                 k3=None,
+                 d=None,
+                 l_0=None,
+                 ivar=Symbol('t'),
+                 x1=None,
+                 x2=None,
+                 x=None,
+                 qs=None,
+                 F=None,
+                 Omega=None,
+                 **kwargs):
+
+        if m1 is not None: self.m1 = m1
+        if m2 is not None: self.m2 = m2
+        if k1 is not None: self.k1= k1
+        if k2 is not None: self.k2= k2
+        if k3 is not None: self.k3= k3
+        if d is not None: self.d = d
+        if l_0 is not None: self.l_0 = l_0
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        if x is not None: self.x = x
+        if x1 is not None: self.x1 = x1
+        if x2 is not None: self.x2 = x2
+        if qs is not None: self.qs = qs
+        if g is not None: self.g = g
+        self.ivar=ivar
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self._trolley1 = MaterialPoint(self.m1, self.x1, qs=self.qs)
+        self._spring1 = Spring(self.k1, pos1=(sqrt(self.x1**2 + self.d**2) - self.l_0), qs=self.qs)
+        self._trolley2 = MaterialPoint(self.m2, self.x2, qs=self.qs)
+        self._spring2 = Spring(self.k2, pos1=(sqrt(self.x2**2 + self.d**2) - self.l_0), qs=self.qs)
+        self._spring12 = Spring(self.k3, self.x1, self.x2,qs=self.qs)
+        self._force = Force(self.F*sin(self.Omega*self.ivar), self.x1, qs=self.qs)
+
+
+        components['_trolley1'] = self._trolley1
+        components['_trolley2'] = self._trolley2
+        components['_spring1'] = self._spring1
+        components['_spring2'] = self._spring2
+        components['_spring12'] = self._spring12
+        components['_force'] = self._force
+        
+        return components
+
+    def get_default_data(self):
+
+        m0, k0, l0, F0 = symbols('m_0 k_0 l_0 F_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.One * m0 * no for no in range(20,50)],
+            self.m2: [S.One * m0 * no for no in range(20,50)],
+            self.d: [S.One * l0 * no for no in range(2,5)],
+            self.k1: [S.One * k0 * no for no in range(10,20)],
+            self.k2: [S.One * k0 * no for no in range(10,20)],
+            self.k3: [S.One * k0 * no for no in range(10,20)],
+            self.F: [S.One * F0 * no for no in range(5,15)],
+            self.x1: [self.x, 0],
+            self.x2: [self.x, S.Zero],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.x1] == S.Zero:
+            parameters_dict[self.x2] = self.x
+
+        return parameters_dict
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m1: r'Trolley Mass',
+            self.m2: r'Trolley Mass',
+            self.k1: 'Spring Stiffness',
+            self.k2: 'Spring Stiffness',
+            self.k3: 'Spring Stiffness',
+            self.d: r'length',
+            self.l_0: r'length',
+        }
+        return self.sym_desc_dict
+
+    def static_force(self):
+        data=self._given_data
+        ans=self.linearized().dynamic_force()
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        return (free_coeff)
+
+    def dynamic_force(self):
+
+        amps = self.linearized()._fodes_system.steady_solution.as_dict()
+        #force = self.components['_spring_l'].force().doit().expand()#.doit()
+        data=self._given_data
+
+        return (self.components['_spring1'].force().subs(amps)).subs(data).expand().doit()
 
 class VariableMassTrolleyWithPendulum(ComposedSystem):
 
