@@ -2409,6 +2409,10 @@ class ParameterSummarySeries(AdaptableSeries):
 
 
 class NumericalAnalysisDataFrame(AdaptableDataFrame):
+    """
+    NumericalAnalysisDataFrame class allows you to present and format data in the form of a DataFrame.
+    """
+
     _applying_func = None
 
     _metadata = ["_applying_func"]
@@ -2465,7 +2469,69 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
                   index=None,
                   ics=None,
                                ):
+        """
+        Class method that allows you to create and customize a DataFrame object based on the ODESystem object. 
+        The prepared DataFrame gives the possibility to perform numerical simulations depending on the defined parameter.
         
+        Arguments
+        =========
+    
+            model : ODESystem object
+
+            parameter : Symbol
+                Independent constant 
+
+            span : List or array
+                Parameter values.
+
+        Default Arguments
+        =================
+
+            reference_data : Dictionary        
+                The values of the constants of the equation.
+            
+            coordinates : List or array
+                Column headers.
+
+            index : pandas.Index
+                Index values and index symbol.
+            
+            ics:
+                Initial values.
+
+        Example
+        =======
+
+            >>>from dynpy import *
+            >>>from dynpy.solvers.linear import *
+            >>>from sympy import *
+            >>>from dynpy.utilities.adaptable import *
+
+            >>>m, c, k, F = symbols('m c k F', positive = True)
+            >>>t = Symbol('t')
+            >>>x = Function('x')(t)
+
+            >>>subs_data = {
+                        m: 10,
+                        c: 5,
+                        k: 2,
+                        }
+
+            >>>tspan_1=np.linspace(0,10, 100)
+            >>>ode_sys = ODESystem(odes=Matrix([k*x + F + c*x.diff(t)]), dvars=Matrix([x]), ode_order=1)
+
+            >>>X = [x, x.diff(t)]
+            >>>num_df = NumericalAnalysisDataFrame.from_model(ode_sys.solution.with_ics([1]),
+                                              F,
+                                              [1, 2, 5],
+                                              reference_data=subs_data,
+                                              coordinates=X,
+                                              index=pd.Index(tspan_1,name=t),
+                                              ics=None
+                                              )
+
+            >>>display(num_df)
+        """
         
         if coordinates is None:
             coords = list(model.dvars)
@@ -2542,6 +2608,17 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
                             ics=None,
                             backend=None,
                             dependencies=None):
+        """
+        A method that allows you to perform numerical simulations on the created DataFrame.
+
+        Example
+        =======
+
+        >>>sym_num = num_df.perform_simulations()
+        
+        >>>display(sym_num)
+        >>>display(sym_num.plot())
+        """
 
         #display(self.columns.droplevel(coord_level_name).unique())
 
