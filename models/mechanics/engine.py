@@ -266,7 +266,7 @@ class FreeEngineDDOF(FreeEngine):
     m_e = Symbol('m_e', positive=True)  #Reduced mass of the crank system
     e = Symbol('e', positive=True)  #Length of the crank - radius of the circular motion
     phi = dynamicsymbols('\\varphi')
-    ivar = Symbol('t', positive=True)
+    ivar = Symbol('t')
     m0 = Symbol('m0', positive=True)
     m_e0 = Symbol('m_e0', positive=True)
     e0 = Symbol('e_0', positive=True)
@@ -395,7 +395,7 @@ class Engine(ComposedSystem):
     e = Symbol('e', positive=True)  #distance -motion radius of a particle
     z = dynamicsymbols('z')  #generalized coordinate
     phi = dynamicsymbols('\\varphi')
-    ivar = Symbol('t', positive=True)
+    ivar = Symbol('t')
     m0 = Symbol('m_0', positive=True)
     k_m0 = Symbol('k_m0', positive=True)
     m_e0 = Symbol('m_e0', positive=True)
