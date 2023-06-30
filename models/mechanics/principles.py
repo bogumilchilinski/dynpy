@@ -989,7 +989,7 @@ class CrankSystem(ComposedSystem):
     
 class Winch(ComposedSystem):
 
-    scheme_name = 'sdof_winch.PNG'
+    scheme_name = 'ForcedWinch.png'
     real_name = 'winch_mechanism_real.PNG'
 
     r=Symbol('r', positive=True)
@@ -998,8 +998,8 @@ class Winch(ComposedSystem):
     g=Symbol('g', positive=True)
     ivar=Symbol('t')
     phi=dynamicsymbols('\\varphi')
-    F=Symbol('F', positice=True)
-    Omega=Symbol('Omega', positice=True)
+    F=Symbol('F', positive=True)
+    Omega=Symbol('Omega', positive=True)
 
     def __init__(self,
                  r=None,
@@ -1036,7 +1036,7 @@ class Winch(ComposedSystem):
         self.material_point_1 = MaterialPoint(self.m, self.x, qs=self.qs)
         self.material_point_2 = MaterialPoint(self.m, self.y, qs=self.qs)
         self.gravity = GravitationalForce(self.m, self.g, pos1=-self.y, qs=self.qs)
-        self.force= Force(self.F*self.r*sin(self.Omega*self.ivar), self.phi, self.qs)
+        self.force= Force(self.F*self.l*sin(self.Omega*self.ivar), self.phi, self.qs)
 
         components['_material_point_1'] = self.material_point_1
         components['_material_point_2'] = self.material_point_2
@@ -1066,3 +1066,35 @@ class Winch(ComposedSystem):
             self.F: [S.One * no * F0 for no in range(5,10)],
         }
         return default_data_dict
+    
+    
+    def force_in_cable(self,op_point=0):
+
+        data=self._given_data
+        dyn_sys=self.subs(data)
+        dyn_sys_lin=dyn_sys.linearized()
+        phi=dyn_sys_lin._fodes_system.steady_solution[0]
+
+#         m=data[self.m]
+#         l=data[self.l]
+
+        op_point = pi*op_point  #quick workaround - wrong implementation
+
+        force_in_cable = self.m*self.g*(1-S.Half*(phi - op_point )**2) + self.m * self.l * (phi  - op_point).diff(self.ivar)**2
+        force_subs=force_in_cable.subs(data)#.subs({self.Omega:0.999*dyn_sys_lin.natural_frequencies()[0]})
+
+        return force_subs.doit().expand()
+    
+    def sin_coeff(self):
+        
+        phi=self.phi
+        sin_coeff=self._eoms[0].expand().coeff(sin(phi)) ## eoms[0]: m * L**2 * phi" + m * g * L * sin(phi)  == 0
+
+        return sin_coeff
+        
+    def cos_coeff(self):
+        
+        phi=self.phi
+        cos_coeff=self._eoms[0].expand().coeff(cos(phi))
+        
+        return cos_coeff

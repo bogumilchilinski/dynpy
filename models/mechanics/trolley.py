@@ -2009,7 +2009,8 @@ class DDoFTwoNonLinearTrolleys(NonlinearComposedSystem):
     x2=dynamicsymbols('x2')
     x=dynamicsymbols('x')
     qs=dynamicsymbols('x1, x2')
-    F=Symbol('F', positive=True)
+    F1=Symbol('F_1', positive=True)
+    F2=Symbol('F_2', positive=True)
     Omega=Symbol('Omega', positive=True)
    
     def __init__(self,
@@ -2026,7 +2027,8 @@ class DDoFTwoNonLinearTrolleys(NonlinearComposedSystem):
                  x2=None,
                  x=None,
                  qs=None,
-                 F=None,
+                 F1=None,
+                 F2=None,
                  Omega=None,
                  **kwargs):
 
@@ -2038,7 +2040,8 @@ class DDoFTwoNonLinearTrolleys(NonlinearComposedSystem):
         if d is not None: self.d = d
         if l_0 is not None: self.l_0 = l_0
         if Omega is not None: self.Omega = Omega
-        if F is not None: self.F = F
+        if F1 is not None: self.F1 = F1
+        if F2 is not None: self.F2 = F2
         if x is not None: self.x = x
         if x1 is not None: self.x1 = x1
         if x2 is not None: self.x2 = x2
@@ -2058,15 +2061,16 @@ class DDoFTwoNonLinearTrolleys(NonlinearComposedSystem):
         self._trolley2 = MaterialPoint(self.m2, self.x2, qs=self.qs)
         self._spring2 = Spring(self.k2, pos1=(sqrt(self.x2**2 + self.d**2) - self.l_0), qs=self.qs)
         self._spring12 = Spring(self.k3, self.x1, self.x2,qs=self.qs)
-        self._force = Force(self.F*sin(self.Omega*self.ivar), self.x1, qs=self.qs)
-
+        self._force1 = Force(self.F1*sin(self.Omega*self.ivar), self.x1, qs=self.qs)
+        self._force2 = Force(self.F2*sin(self.Omega*self.ivar), self.x2, qs=self.qs)
 
         components['_trolley1'] = self._trolley1
         components['_trolley2'] = self._trolley2
         components['_spring1'] = self._spring1
         components['_spring2'] = self._spring2
         components['_spring12'] = self._spring12
-        components['_force'] = self._force
+        components['_force1'] = self._force1
+        components['_force2'] = self._force2
         
         return components
 
@@ -2081,9 +2085,11 @@ class DDoFTwoNonLinearTrolleys(NonlinearComposedSystem):
             self.k1: [S.One * k0 * no for no in range(10,20)],
             self.k2: [S.One * k0 * no for no in range(10,20)],
             self.k3: [S.One * k0 * no for no in range(10,20)],
-            self.F: [S.One * F0 * no for no in range(5,15)],
+            self.F1: [S.One * F0 * no for no in range(5,15)],
+            self.F2: [S.One * F0 * no for no in range(5,15)],
             self.x1: [self.x, 0],
             self.x2: [self.x, S.Zero],
+
         }
 
         return default_data_dict
@@ -2116,17 +2122,24 @@ class DDoFTwoNonLinearTrolleys(NonlinearComposedSystem):
 
     def static_force(self):
         data=self._given_data
-        ans=self.linearized().dynamic_force()
+        ans=self.dynamic_force()
         free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
         return (free_coeff)
 
+#     def dynamic_force(self):
+
+#         data=self._given_data
+#         amps = self._fodes_system.steady_solution.as_dict()
+
+#         return (self.components['_spring12'].force().subs(amps)).subs(data).expand().doit()
+
     def dynamic_force(self):
 
-        amps = self.linearized()._fodes_system.steady_solution.as_dict()
-        #force = self.components['_spring_l'].force().doit().expand()#.doit()
         data=self._given_data
+        amps = self.linearized().subs(data)._fodes_system.steady_solution.as_dict()
 
-        return (self.components['_spring1'].force().subs(amps)).subs(data).expand().doit()
+
+        return (self.components['_spring12'].force().subs(data).subs(amps)).expand().doit()
 
 class VariableMassTrolleyWithPendulum(ComposedSystem):
 
