@@ -249,7 +249,7 @@ class SpringDamperMassSystem(ComposedSystem):
     k=Symbol('k', positive=True)
     F=Symbol('F', positive=True)
     c=Symbol('c',positive=True)
-    ivar=Symbol('t', positive=True)
+    ivar=Symbol('t')
     
     
     z=dynamicsymbols('z')
@@ -345,7 +345,7 @@ class SprungTrolley(ComposedSystem):
     m=Symbol('m', positive=True)
     k_l=Symbol('k_l', positive=True)
     k_r=Symbol('k_r', positive=True)
-    ivar=Symbol('t', positive=True)
+    ivar=Symbol('t')
     x=dynamicsymbols('x')
 
     def __init__(self,

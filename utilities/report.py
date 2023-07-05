@@ -55,6 +55,10 @@ class CurrentContainer:
         ReportText.set_container(self._container)
         Picture.set_container(self._container)
         SympyFormula.set_container(self._container)
+        
+        
+        
+        
         Markdown.set_container(self._container)
         
         
@@ -2759,6 +2763,7 @@ class Markdown(Environment,ReportModule):
         
         latex_code=ppd.convert_text(self.markdown,to='latex',format='md')
         
+        self.cls_container.packages |= (self.packages)
         self.cls_container.append(NoEscape(latex_code))
         
         return copy.copy(self)

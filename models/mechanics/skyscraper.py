@@ -70,7 +70,7 @@ class skyscraper(ComposedSystem):
     k=Symbol('k_b', positive=True)
     F=Symbol('F', positive=True)
     c=Symbol('c',positive=True)
-    ivar=Symbol('t', positive=True)
+    ivar=Symbol('t')
     g=Symbol('g',positive=True)
     h=Symbol('h',positive=True)
     

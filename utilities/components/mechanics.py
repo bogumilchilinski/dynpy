@@ -931,4 +931,4 @@ class MaxDynamicForce(ReportComponent):
 
         display(ReportText(f'''
                            Wartość maksymalna siły dynamicznej działającej na pojedynczy element mocujący:
-                           '''))  
+                           ''')) 

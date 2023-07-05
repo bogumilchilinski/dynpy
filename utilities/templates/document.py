@@ -19,7 +19,7 @@ class CaseTemplate(Document):
                   Package('fancyhdr'),
                   Command('pagestyle', arguments=['fancy']),
                   Command('fancyhf', arguments=['']),
-                  Command('fancyhead',  arguments=['B. Chiliński, A. Mackojć'],options=['R']),
+                  Command('fancyhead',  arguments=['DynPy Team'],options=['R']),
                   Command('fancyhead', arguments=['Mechanical Vibration, 2021'],options=['L']),
                   Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
                   #Command('newcommand{\praca}', arguments=['Praca dyplomowa']),
@@ -89,36 +89,17 @@ class ExampleTemplate(Document):
                   Package('fancyhdr'),
                   Command('pagestyle', arguments=['fancy']),
                   Command('fancyhf', arguments=['']),
-                  Command('fancyhead',  arguments=['B. Chiliński, A. Mackojć, D. Sierociński'],options=['R']),
+                  Command('fancyhead',  arguments=['DynPy Team'],options=['R']),
                   Command('fancyhead', arguments=['Mechanical vibration, 2023'],options=['L']),
                   Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
-                  
+                  ]
         
-#                   Command('newcommand{\praca}', arguments=['Praca dyplomowa']),
-#                   Command('newcommand{\dyplom}', arguments=['Inżynierska']),
-#                   Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']),
-#                   Command('newcommand{\specjalnosc}', arguments=['Wpisać specjalność']),
-#                   Command('newcommand{\\autor}', arguments=['Imię i nazwisko autora']),
-#                   Command('newcommand{\opiekun}', arguments=['Wpisać opiekuna']),
-#                   Command('newcommand{\promotor}', arguments=['Wpisać promotora']),
-#                   Command('newcommand{\konsultant}', arguments=['Wpisać konsultanta']),
-#                   Command('newcommand{\\tytul}', arguments=['Wpisać tytuł pracy dyplomowej po polsku']),
-        
-                  
-#                   Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']),
-#                   Command('newcommand{\\rok}', arguments=['Rok składania pracy']),
-#                   Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']),
-#                   Command('newcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']),
-    ]
 
-
-# \renewcommand{\headrulewidth}{1pt}
-# \renewcommand{\footrulewidth}{1pt}
     
     
     def __init__(self,
-                 title='Basic title',
                  default_filepath='default_filepath',
+                 title='Basic title',
                  *,
                  documentclass='report',
                  document_options=None,
@@ -151,11 +132,13 @@ class ExampleTemplate(Document):
 #         label=self.label
         self.title='Mechanical vibration'
         #self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
-        self.packages.append(Command('author', arguments=['Bogumił Chiliński, Anna Mackojć, Damian Sierociński']))
+        self.packages.append(Command('author', arguments=['DynPy Team']))
         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
         #self.append(Command('maketitle'))
         self.append(NewPage())
         # tu implementować co tam potrzeba
+
+        
 
         
 class BPASTSPaper(Document):
@@ -252,8 +235,8 @@ class ThesisTemplate(Document):
     
     
     def __init__(self,
-                 title='Basic title',
                  default_filepath='default_filepath',
+                 title='Basic title',
                  *,
                  documentclass='article',
                  document_options=None,
@@ -306,6 +289,46 @@ class ThesisTemplate(Document):
         self.append(NoEscape('%%% New doc'))
         # tu implementować co tam potrzeba
         
+        
+class MechanicalCase(ThesisTemplate):
+    
+    latex_name = 'document'
+    packages = [
+                  Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('microtype'),
+                  Package('authoraftertitle'),
+                  Package('polski',options=['MeX']),
+                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('listings'),
+                  Package('titlesec'),
+                  Package('fancyhdr'),
+                  Command('pagestyle', arguments=['fancy']),
+                  Command('fancyhf', arguments=['']),
+                  Command('fancyhead',  arguments=['DynPy Team'],options=['R']),
+                  Command('fancyhead', arguments=['Mechanics, 2023'],options=['L']),
+                  Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
+        ]
+        
+class DevelopmentGuide(ThesisTemplate):
+    
+    latex_name = 'document'
+    packages = [
+                  Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('microtype'),
+                  Package('authoraftertitle'),
+                  Package('polski',options=['MeX']),
+                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('listings'),
+                  Package('titlesec'),
+                  Package('fancyhdr'),
+                  Command('pagestyle', arguments=['fancy']),
+                  Command('fancyhf', arguments=['']),
+                  Command('fancyhead',  arguments=['DynPy Team'],options=['R']),
+                  Command('fancyhead', arguments=['DynPy development guide, 2023'],options=['L']),
+                  Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
+        ]
+        
+        
 class QuotationTemplate(Document):
     packages = [
                   Package('geometry',options=['left=1in','top=1in','right=1in','bottom=1in']),
@@ -321,8 +344,9 @@ class QuotationTemplate(Document):
                   Package('polski',options=['MeX']),]
 
     def __init__(self,
-                 title='Wycena zlecenia',
                  default_filepath='default_filepath',
+                 title='Wycena zlecenia',
+
                  *,
                  documentclass='report',
                  document_options=None,
@@ -377,8 +401,9 @@ class QuotationTemplate(Document):
                   Package('polski',options=['MeX']),]
 
     def __init__(self,
-                 title='Wycena zlecenia',
+
                  default_filepath='default_filepath',
+                 title='Wycena zlecenia',
                  *,
                  documentclass='report',
                  document_options=None,
@@ -423,8 +448,8 @@ class ScheduleTemplate(QuotationTemplate):
     
 class LandscapeScheduleTemplate(ScheduleTemplate):
     def __init__(self,
-                 title='Wycena zlecenia',
                  default_filepath='default_filepath',
+                 title='Wycena zlecenia',
                  *,
                  documentclass='report',
                  document_options='landscape',

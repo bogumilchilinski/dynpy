@@ -181,275 +181,275 @@ class PlaneStressProblem(PlaneStressProblem):
     
     
     
-class Pendulum(ComposedSystem):
-    """
-    Model of a sDoF mathematical Pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
+# class Pendulum(ComposedSystem):
+#     """
+#     Model of a sDoF mathematical Pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
 
-        Arguments:
-        =========
-            m = Mass
-                -Mass of system on spring
+#         Arguments:
+#         =========
+#             m = Mass
+#                 -Mass of system on spring
 
-            g = gravitional field
-                -value of gravitional's field acceleration
+#             g = gravitional field
+#                 -value of gravitional's field acceleration
 
-            l = lenght
-                -Dimension of pendulum's strong
+#             l = lenght
+#                 -Dimension of pendulum's strong
 
-            ivar = symbol object
-                -Independant time variable
+#             ivar = symbol object
+#                 -Independant time variable
 
-            qs = dynamicsymbol object
-                -Generalized coordinates
+#             qs = dynamicsymbol object
+#                 -Generalized coordinates
 
-        Example
-        =======
-        A mass oscillating up and down while being held up by a spring with a spring constant kinematicly 
+#         Example
+#         =======
+#         A mass oscillating up and down while being held up by a spring with a spring constant kinematicly 
 
-        >>> t = symbols('t')
-        >>> m, g, l = symbols('m, g, l')
-        >>> qs = dynamicsymbols('varphi') # Generalized Coordinates
-        >>> Pendulum()
+#         >>> t = symbols('t')
+#         >>> m, g, l = symbols('m, g, l')
+#         >>> qs = dynamicsymbols('varphi') # Generalized Coordinates
+#         >>> Pendulum()
 
-        -We define the symbols and dynamicsymbols
-        -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
-        -determine the instance of the pendulum by using class Pendulum()
-    """
-    scheme_name = 'undamped_pendulum.png'
-    real_name = 'pendulum_real.jpg'
+#         -We define the symbols and dynamicsymbols
+#         -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
+#         -determine the instance of the pendulum by using class Pendulum()
+#     """
+#     scheme_name = 'undamped_pendulum.png'
+#     real_name = 'pendulum_real.jpg'
 
-    def __init__(self,
-                 m=Symbol('m', positive=True),
-                 g=Symbol('g', positive=True),
-                 l=Symbol('l', positive=True),
-                 angle=dynamicsymbols('varphi'),
-                 qs=None,
-                 ivar=Symbol('t'),
-                 **kwargs):
+#     def __init__(self,
+#                  m=Symbol('m', positive=True),
+#                  g=Symbol('g', positive=True),
+#                  l=Symbol('l', positive=True),
+#                  angle=dynamicsymbols('varphi'),
+#                  qs=None,
+#                  ivar=Symbol('t'),
+#                  **kwargs):
 
-        if qs == None:
-            qs = [angle]
-        else:
-            qs = qs
+#         if qs == None:
+#             qs = [angle]
+#         else:
+#             qs = qs
 
-        self.m = m
-        self.g = g
-        self.l = l
+#         self.m = m
+#         self.g = g
+#         self.l = l
 
-        Lagrangian = S.Half * m * l**2 * diff(
-            angle, ivar)**2 - m * g * l * (1 - cos(angle))
+#         Lagrangian = S.Half * m * l**2 * diff(
+#             angle, ivar)**2 - m * g * l * (1 - cos(angle))
 
-        super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar,**kwargs)
+#         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar,**kwargs)
 
-    def get_default_data(self):
+#     def get_default_data(self):
 
-        m0, l0 = symbols('m_0 l_0', positive=True)
+#         m0, l0 = symbols('m_0 l_0', positive=True)
 
-        default_data_dict = {
-            self.m: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
-            self.l: [2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0,7*l0, 8*l0, 9*l0,10*l0],
-        }
-        return default_data_dict
+#         default_data_dict = {
+#             self.m: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
+#             self.l: [2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0,7*l0, 8*l0, 9*l0,10*l0],
+#         }
+#         return default_data_dict
 
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.m: r'Mass of pendulum',
-            self.g: r'Gravity constant',
-            self.l: r'Pendulum length',
-        }
-        return self.sym_desc_dict
+#     def symbols_description(self):
+#         self.sym_desc_dict = {
+#             self.m: r'Mass of pendulum',
+#             self.g: r'Gravity constant',
+#             self.l: r'Pendulum length',
+#         }
+#         return self.sym_desc_dict
 
 
 # wymienić obrazek na taki, gdzie nie ma wymuszenia i symbole na obrazku będą zgodne z tymi w klasie
 
-class TMD(ComposedSystem):
-    scheme_name = 'mdof_tmd.png'
-    real_name = 'mdof_tmd_real.png'
-    """
-    Model of an exemplary Tuned Mass Damper (TMD) simulated as Double Degree of Freedom of coupled trolleys.
+# class TMD(ComposedSystem):
+#     scheme_name = 'mdof_tmd.png'
+#     real_name = 'mdof_tmd_real.png'
+#     """
+#     Model of an exemplary Tuned Mass Damper (TMD) simulated as Double Degree of Freedom of coupled trolleys.
 
-        Arguments:
-        =========
-            m = Mass
-                -Mass of system on spring
+#         Arguments:
+#         =========
+#             m = Mass
+#                 -Mass of system on spring
 
-            me = Mass
-                -Mass of tuned mass damper
+#             me = Mass
+#                 -Mass of tuned mass damper
 
-            k = spring coefficient
-                -value of spring coefficient
+#             k = spring coefficient
+#                 -value of spring coefficient
 
-            ke = spring coefficient
-                -value of spring coefficient that tuned mass damper is mounted
+#             ke = spring coefficient
+#                 -value of spring coefficient that tuned mass damper is mounted
 
-            F = Force
-                -Trolley's exciting force
+#             F = Force
+#                 -Trolley's exciting force
 
-            ivar = symbol object
-                -Independant time variable
+#             ivar = symbol object
+#                 -Independant time variable
 
-            qs = dynamicsymbol object
-                -Generalized coordinates
+#             qs = dynamicsymbol object
+#                 -Generalized coordinates
 
-        Example
-        =======
-        >>> t = symbols('t')
-        >>> m, me, k, ke, F = symbols('m, m_e, k, k_e, F')
+#         Example
+#         =======
+#         >>> t = symbols('t')
+#         >>> m, me, k, ke, F = symbols('m, m_e, k, k_e, F')
 
         
         
-    """
+#     """
 
-    def __init__(self,
-                 m=Symbol('m', positive=True),
-                 me=Symbol('m_e', positive=True),
-                 k=Symbol('k', positive=True),
-                 ke=Symbol('k_e', positive=True),
-                 F=Symbol('F', positive=True),
-                 xe=dynamicsymbols('x_e'),
-                 xb=dynamicsymbols('x_b'),
-                 angle=dynamicsymbols('Omega'),
-                 ivar=Symbol('t', positive=True),
-                 **kwargs):
+#     def __init__(self,
+#                  m=Symbol('m', positive=True),
+#                  me=Symbol('m_e', positive=True),
+#                  k=Symbol('k', positive=True),
+#                  ke=Symbol('k_e', positive=True),
+#                  F=Symbol('F', positive=True),
+#                  xe=dynamicsymbols('x_e'),
+#                  xb=dynamicsymbols('x_b'),
+#                  angle=dynamicsymbols('Omega'),
+#                  ivar=Symbol('t', positive=True),
+#                  **kwargs):
 
-        self.m = m
-        self.me = me
-        self.k = k
-        self.ke = ke
-        self.F = F
+#         self.m = m
+#         self.me = me
+#         self.k = k
+#         self.ke = ke
+#         self.F = F
 
-        self.MaterialPoint_1 = MaterialPoint(m, pos1=xe, qs=[xe])
-        self.MaterialPoint_2 = MaterialPoint(me, pos1=xb, qs=[xb])
-        self.Spring_1 = Spring(k, pos1=xe, qs=[xe])
-        self.Spring_2 = Spring(ke, pos1=xe, pos2=xb, qs=[xe, xb])
-        self.Force = Force(F * sin(angle * ivar), pos1=xe, qs=[xe])
+#         self.MaterialPoint_1 = MaterialPoint(m, pos1=xe, qs=[xe])
+#         self.MaterialPoint_2 = MaterialPoint(me, pos1=xb, qs=[xb])
+#         self.Spring_1 = Spring(k, pos1=xe, qs=[xe])
+#         self.Spring_2 = Spring(ke, pos1=xe, pos2=xb, qs=[xe, xb])
+#         self.Force = Force(F * sin(angle * ivar), pos1=xe, qs=[xe])
 
-        system = self.Spring_1 + self.Spring_2 + \
-            self.MaterialPoint_1 + self.MaterialPoint_2 + self.Force
-        super().__init__(system,**kwargs)
+#         system = self.Spring_1 + self.Spring_2 + \
+#             self.MaterialPoint_1 + self.MaterialPoint_2 + self.Force
+#         super().__init__(system,**kwargs)
 
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.m: r'Mass of main object',
-            self.me: r'Mass of the TMD',
-            self.k: r'Stiffness coefficient',
-            self.ke: r'Stiffness coefficient',
-            self.F: r'Force',
-        }
-        return self.sym_desc_dict
+#     def symbols_description(self):
+#         self.sym_desc_dict = {
+#             self.m: r'Mass of main object',
+#             self.me: r'Mass of the TMD',
+#             self.k: r'Stiffness coefficient',
+#             self.ke: r'Stiffness coefficient',
+#             self.F: r'Force',
+#         }
+#         return self.sym_desc_dict
 
 
-class Winch(ComposedSystem):
-    """
-    Model of a Double Degree of Freedom Involute Pendulum (Winch)
+# class Winch(ComposedSystem):
+#     """
+#     Model of a Double Degree of Freedom Involute Pendulum (Winch)
 
-        Arguments:
-        =========
-            m = Mass
-                -Mass of the payload
+#         Arguments:
+#         =========
+#             m = Mass
+#                 -Mass of the payload
 
-            I = Moment of Inertia
-                -disc moment of inertia
+#             I = Moment of Inertia
+#                 -disc moment of inertia
 
-            g = gravitional field
-                -value of gravitional field acceleration
+#             g = gravitional field
+#                 -value of gravitional field acceleration
 
-            l = lenght
-                -initial length of the cable
+#             l = lenght
+#                 -initial length of the cable
 
-            r = lenght
-                -radius of the cylinder
+#             r = lenght
+#                 -radius of the cylinder
 
-            k = torsional stiffness coefficient
-                -value of torsional spring coefficient
+#             k = torsional stiffness coefficient
+#                 -value of torsional spring coefficient
 
-            ivar = symbol object
-                -Independant time variable
+#             ivar = symbol object
+#                 -Independant time variable
 
-            phi = dynamicsymbol object
-                -pendulation angle of the mass m
+#             phi = dynamicsymbol object
+#                 -pendulation angle of the mass m
 
-            theta = dynamicsymbol object
-                -oscillation angle of the cylinder
+#             theta = dynamicsymbol object
+#                 -oscillation angle of the cylinder
 
-            qs = dynamicsymbol object
-                -Generalized coordinates
+#             qs = dynamicsymbol object
+#                 -Generalized coordinates
 
-        Example
-        =======
-        A mass m pendulating on cable l_0 which is wounded on the cylinder with the radius R.
+#         Example
+#         =======
+#         A mass m pendulating on cable l_0 which is wounded on the cylinder with the radius R.
 
-        >>> t = symbols('t')
-        >>> R,l_0 = symbols('R, l_0',positive=True)
-        >>> MDoFWinch(r=R,l=l_0)
+#         >>> t = symbols('t')
+#         >>> R,l_0 = symbols('R, l_0',positive=True)
+#         >>> MDoFWinch(r=R,l=l_0)
 
-        -We define the symbols and dynamicsymbols
-        -determine the instance of the pendulum by using class SDoFCouplePendulum()
-    """
+#         -We define the symbols and dynamicsymbols
+#         -determine the instance of the pendulum by using class SDoFCouplePendulum()
+#     """
 
-    scheme_name = 'mdof_winch.png'
-    real_name = 'mdof_winch_real.png'
+#     scheme_name = 'mdof_winch.png'
+#     real_name = 'mdof_winch_real.png'
 
-    def __init__(self,
-                 I=Symbol('I', positive=True),
-                 k=Symbol('k', positive=True),
-                 r=Symbol('r', positive=True),
-                 l=Symbol('l', positive=True),
-                 m=Symbol('m', positive=True),
-                 g=Symbol('g', positive=True),
-                 ivar=Symbol('t'),
-                 theta=dynamicsymbols('theta'),
-                 phi=dynamicsymbols('phi'),
-                 **kwargs):
+#     def __init__(self,
+#                  I=Symbol('I', positive=True),
+#                  k=Symbol('k', positive=True),
+#                  r=Symbol('r', positive=True),
+#                  l=Symbol('l', positive=True),
+#                  m=Symbol('m', positive=True),
+#                  g=Symbol('g', positive=True),
+#                  ivar=Symbol('t'),
+#                  theta=dynamicsymbols('theta'),
+#                  phi=dynamicsymbols('phi'),
+#                  **kwargs):
 
-        self.I = I
-        self.k = k
-        self.r = r
-        self.l = l
-        self.m = m
-        self.g = g
-        self.theta = dynamicsymbols('theta')
-        self.phi = dynamicsymbols('phi')
+#         self.I = I
+#         self.k = k
+#         self.r = r
+#         self.l = l
+#         self.m = m
+#         self.g = g
+#         self.theta = dynamicsymbols('theta')
+#         self.phi = dynamicsymbols('phi')
 
-        x = r * cos(phi) + (l + r * (phi - theta)) * sin(phi)
-        y = r * sin(phi) + (l + r * (phi - theta)) * cos(phi)
-        F = m * g * r
+#         x = r * cos(phi) + (l + r * (phi - theta)) * sin(phi)
+#         y = r * sin(phi) + (l + r * (phi - theta)) * cos(phi)
+#         F = m * g * r
 
-        self.disc_1 = Disk(I, pos_c=theta, qs=[phi, theta])
-        self.spring = Spring(k, theta, qs=[phi, theta])
-        self.material_point_1 = MaterialPoint(m, x, qs=[phi, theta])
-        self.material_point_2 = MaterialPoint(m, y, qs=[phi, theta])
-        self.M_engine = Force(F, theta, qs=[phi, theta])
-        self.gravity = GravitationalForce(m, g, pos1=-y, qs=[phi])
+#         self.disc_1 = Disk(I, pos_c=theta, qs=[phi, theta])
+#         self.spring = Spring(k, theta, qs=[phi, theta])
+#         self.material_point_1 = MaterialPoint(m, x, qs=[phi, theta])
+#         self.material_point_2 = MaterialPoint(m, y, qs=[phi, theta])
+#         self.M_engine = Force(F, theta, qs=[phi, theta])
+#         self.gravity = GravitationalForce(m, g, pos1=-y, qs=[phi])
 
-        system = self.material_point_1 + self.material_point_2 + \
-            self.disc_1 + self.spring + self.M_engine + self.gravity
+#         system = self.material_point_1 + self.material_point_2 + \
+#             self.disc_1 + self.spring + self.M_engine + self.gravity
 
-        super().__init__(system,**kwargs)
+#         super().__init__(system,**kwargs)
 
-    def get_default_data(self):
+#     def get_default_data(self):
 
-        m0, l0, I0, k0, r0 = symbols('m_0 l_0 I_0 k_0 r_0', positive=True)
+#         m0, l0, I0, k0, r0 = symbols('m_0 l_0 I_0 k_0 r_0', positive=True)
 
-        default_data_dict = {
-            self.m: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
-            self.l: [2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0],
-            self.I: [2 * I0, 3 * I0, 4 * I0, 5 * I0, 6 * I0],
-            self.k: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
-            self.r: [2 * r0, 3 * r0, 4 * r0, 5 * r0, 6 * r0],
-        }
-        return default_data_dict
+#         default_data_dict = {
+#             self.m: [2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0],
+#             self.l: [2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0],
+#             self.I: [2 * I0, 3 * I0, 4 * I0, 5 * I0, 6 * I0],
+#             self.k: [2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0],
+#             self.r: [2 * r0, 3 * r0, 4 * r0, 5 * r0, 6 * r0],
+#         }
+#         return default_data_dict
 
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.I: r'Moment of Inertia of the winch',
-            self.k: r'Spring stiffness',
-            self.r: r'Winch radius',
-            self.l: r'Winch length',
-            self.m: r'Mass',
-            self.g: 'Gravity constant',
-        }
-        return self.sym_desc_dict
+#     def symbols_description(self):
+#         self.sym_desc_dict = {
+#             self.I: r'Moment of Inertia of the winch',
+#             self.k: r'Spring stiffness',
+#             self.r: r'Winch radius',
+#             self.l: r'Winch length',
+#             self.m: r'Mass',
+#             self.g: 'Gravity constant',
+#         }
+#         return self.sym_desc_dict
 
 
 class ElasticPendulum(ComposedSystem):
@@ -722,252 +722,252 @@ class Inverted_Pendulum(HarmonicOscillator):
 
 #         super().__init__(shaft_base)
 
-class MDoFTripleShaft(ComposedSystem):
-    """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
-    =========
-            I = Moment of Inertia
-                -Moment of Inertia in case of both disc
+# class MDoFTripleShaft(ComposedSystem):
+#     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
+#     =========
+#             I = Moment of Inertia
+#                 -Moment of Inertia in case of both disc
 
-            k_1 =Right spring coefficient
-                -Right spring carrying the system
+#             k_1 =Right spring coefficient
+#                 -Right spring carrying the system
 
-            k_2 =Left spring coefficient
-                -Left spring carrying the system
+#             k_2 =Left spring coefficient
+#                 -Left spring carrying the system
 
-            ivar = symbol object
-                -Independant time variable
+#             ivar = symbol object
+#                 -Independant time variable
 
-            qs = dynamicsymbol object
-                -Generalized coordinates
+#             qs = dynamicsymbol object
+#                 -Generalized coordinates
 
-    Example
-    =======
-    A mass oscillating up and down while being held up by a spring with a spring constant k
+#     Example
+#     =======
+#     A mass oscillating up and down while being held up by a spring with a spring constant k
 
-    >>> t = symbols('t')
-    >>> I, k1, k2 = symbols('I, k_1, k_2')
-    >>> qs = dynamicsymbols('phi_1, phi_2') # Generalized Coordinates
-    >>> DDoFShaft()
+#     >>> t = symbols('t')
+#     >>> I, k1, k2 = symbols('I, k_1, k_2')
+#     >>> qs = dynamicsymbols('phi_1, phi_2') # Generalized Coordinates
+#     >>> DDoFShaft()
 
-    -defines the symbols and dynamicsymbols
-    -finally determines the instance of the system using class DDoFShaft
-    """
+#     -defines the symbols and dynamicsymbols
+#     -finally determines the instance of the system using class DDoFShaft
+#     """
 
-    scheme_name = 'MDoFTripleShaft.PNG'
-    real_name = 'MDoFTripleShaft_real.jpg'
+#     scheme_name = 'MDoFTripleShaft.PNG'
+#     real_name = 'MDoFTripleShaft_real.jpg'
 
-    def __init__(self,
-                 m = symbols('m', positive=True),
-                 m_1=Symbol('m_1', positive=True),
-                 m_2=Symbol('m_2', positive=True),
-                 m_3=Symbol('m_3', positive=True),
-                 l_1=Symbol('l_1', positive=True),
-                 l_2=Symbol('l_2', positive=True),
-                 l_3=Symbol('l_3', positive=True),
-                 d=Symbol('d', positive=True),
-                 d_1=Symbol('d_1', positive=True),
-                 d_2=Symbol('d_2', positive=True),
-                 d_3=Symbol('d_3', positive=True),
-                 G=Symbol('G', positive=True),
-                 M_1=Symbol('M_1', positive=True),
-                 M_2=Symbol('M_2', positive=True),
-                 M_3=Symbol('M_3', positive=True),
-                 Omega=Symbol('\\Omega', positive=True),
-                 delta=Symbol('\\delta', positive=True),
+#     def __init__(self,
+#                  m = symbols('m', positive=True),
+#                  m_1=Symbol('m_1', positive=True),
+#                  m_2=Symbol('m_2', positive=True),
+#                  m_3=Symbol('m_3', positive=True),
+#                  l_1=Symbol('l_1', positive=True),
+#                  l_2=Symbol('l_2', positive=True),
+#                  l_3=Symbol('l_3', positive=True),
+#                  d=Symbol('d', positive=True),
+#                  d_1=Symbol('d_1', positive=True),
+#                  d_2=Symbol('d_2', positive=True),
+#                  d_3=Symbol('d_3', positive=True),
+#                  G=Symbol('G', positive=True),
+#                  M_1=Symbol('M_1', positive=True),
+#                  M_2=Symbol('M_2', positive=True),
+#                  M_3=Symbol('M_3', positive=True),
+#                  Omega=Symbol('\\Omega', positive=True),
+#                  delta=Symbol('\\delta', positive=True),
 
-                 input_displacement=dynamicsymbols('theta'),
-                 phi_1=dynamicsymbols('\\varphi_1'),
-                 phi_2=dynamicsymbols('\\varphi_2'),
-                 phi_3=dynamicsymbols('\\varphi_3'),
+#                  input_displacement=dynamicsymbols('theta'),
+#                  phi_1=dynamicsymbols('\\varphi_1'),
+#                  phi_2=dynamicsymbols('\\varphi_2'),
+#                  phi_3=dynamicsymbols('\\varphi_3'),
 
-                 phi_l=dynamicsymbols('\\varphi_L'),
-                 phi_r=dynamicsymbols('\\varphi_R'),
+#                  phi_l=dynamicsymbols('\\varphi_L'),
+#                  phi_r=dynamicsymbols('\\varphi_R'),
 
-                 ivar=Symbol('t'),
-                 qs=dynamicsymbols('\\varphi_1, \\varphi_2, \\varphi_3,'),
-                 **kwargs):
+#                  ivar=Symbol('t'),
+#                  qs=dynamicsymbols('\\varphi_1, \\varphi_2, \\varphi_3,'),
+#                  **kwargs):
 
 
-        theta = input_displacement
+#         theta = input_displacement
         
-        self.m_1=m_1
-        self.m_2=m_2
-        self.m_3=m_3
-        self.G=G
+#         self.m_1=m_1
+#         self.m_2=m_2
+#         self.m_3=m_3
+#         self.G=G
 
-        self.l_1=l_1
-        self.l_2=l_2
-        self.l_3=l_3
+#         self.l_1=l_1
+#         self.l_2=l_2
+#         self.l_3=l_3
 
-        self.d_1=d_1
-        self.d_2=d_2
-        self.d_3=d_3
-        self.d=d
+#         self.d_1=d_1
+#         self.d_2=d_2
+#         self.d_3=d_3
+#         self.d=d
 
-        self.M_1=M_1
-        self.M_2=M_2
-        self.M_3=M_3
+#         self.M_1=M_1
+#         self.M_2=M_2
+#         self.M_3=M_3
 
-        self.Omega=Omega
-        self.delta=delta
+#         self.Omega=Omega
+#         self.delta=delta
 
-        self.phi_1=phi_1
-        self.phi_2=phi_2
-        self.phi_3=phi_3
+#         self.phi_1=phi_1
+#         self.phi_2=phi_2
+#         self.phi_3=phi_3
         
-        self.phi_l=phi_l
-        self.phi_r=phi_r
+#         self.phi_l=phi_l
+#         self.phi_r=phi_r
 
-        self.input_displacement = input_displacement
-        self.qs = qs
+#         self.input_displacement = input_displacement
+#         self.qs = qs
 
-        I_0=S.Half*pi*(d/2)**4
-        I_1=S.Half*m_1*(d_1/2)**2
-        I_2=S.Half*m_2*(d_2/2)**2
-        I_3=S.Half*m_3*(d_3/2)**2
+#         I_0=S.Half*pi*(d/2)**4
+#         I_1=S.Half*m_1*(d_1/2)**2
+#         I_2=S.Half*m_2*(d_2/2)**2
+#         I_3=S.Half*m_3*(d_3/2)**2
 
-        k_1=(G*I_0)/l_1
-        k_2=(G*I_0)/l_2
-        k_3=(G*I_0)/l_3
+#         k_1=(G*I_0)/l_1
+#         k_2=(G*I_0)/l_2
+#         k_3=(G*I_0)/l_3
 
-        self.I_m0 = I_0
-        self.I_m1 = I_1
-        self.I_m2 = I_2
-        self.I_m3 = I_3
+#         self.I_m0 = I_0
+#         self.I_m1 = I_1
+#         self.I_m2 = I_2
+#         self.I_m3 = I_3
         
-        self.disk_1 = Disk(I_1, pos1=phi_1, qs=qs) + Force(-M_1 * cos(Omega * ivar + delta), pos1 = phi_1, qs = [phi_1])
-        self.spring_1 = Spring(k_1, pos1=theta, pos2=phi_1, qs=qs)  # left rod
-        self.disk_2 = Disk(I_2, pos1=phi_2, qs=qs) + Force(-M_2 * cos(Omega * ivar + delta), pos1 = phi_2, qs = [phi_2])
-        self.spring_2 = Spring(k_2, pos1=phi_1, pos2=phi_2, qs=qs)  # central rod
-        self.disk_3 = Disk(I_3, pos1=phi_3, qs=qs) + Force(-M_3 * cos(Omega * ivar + delta), pos1 = phi_3, qs = [phi_3])
-        self.spring_3 = Spring(k_3, pos1=phi_2, pos2=phi_3, qs=qs)  # right rod
+#         self.disk_1 = Disk(I_1, pos1=phi_1, qs=qs) + Force(-M_1 * cos(Omega * ivar + delta), pos1 = phi_1, qs = [phi_1])
+#         self.spring_1 = Spring(k_1, pos1=theta, pos2=phi_1, qs=qs)  # left rod
+#         self.disk_2 = Disk(I_2, pos1=phi_2, qs=qs) + Force(-M_2 * cos(Omega * ivar + delta), pos1 = phi_2, qs = [phi_2])
+#         self.spring_2 = Spring(k_2, pos1=phi_1, pos2=phi_2, qs=qs)  # central rod
+#         self.disk_3 = Disk(I_3, pos1=phi_3, qs=qs) + Force(-M_3 * cos(Omega * ivar + delta), pos1 = phi_3, qs = [phi_3])
+#         self.spring_3 = Spring(k_3, pos1=phi_2, pos2=phi_3, qs=qs)  # right rod
 
 
-        system = self.disk_1 + self.disk_2 + self.disk_3 + self.spring_1 + self.spring_2 + self.spring_3
+#         system = self.disk_1 + self.disk_2 + self.disk_3 + self.spring_1 + self.spring_2 + self.spring_3
 
-        super().__init__(system(qs),**kwargs)
+#         super().__init__(system(qs),**kwargs)
 
-#     def symbols_description(self):
-#         self.sym_desc_dict = {
-#             self.I: r'Moment of Inertia',
-#             self.k_1: r'',
-#             self.k_2: r'',
+# #     def symbols_description(self):
+# #         self.sym_desc_dict = {
+# #             self.I: r'Moment of Inertia',
+# #             self.k_1: r'',
+# #             self.k_2: r'',
+# #         }
+# #         return self.sym_desc_dict
+
+    
+#     def get_default_data(self):
+
+
+#         m0, M0, l0 , d0 ,M0, G0= symbols('m_0 M_0 l_0 d_0 M_0 G_0', positive=True)
+#         theta0, Omega = symbols('theta_0, Omega', positive=True)
+
+#         default_data_dict = {
+            
+#             Symbol('I_m'):[S.Half*Symbol('m')*Symbol('R')**2],
+#             Symbol('I_S'):[S.Half*pi*Symbol('R_S')**4],
+#             Symbol('k_S'):[Symbol('G')*Symbol('I_S')/Symbol('L_S')],
+            
+            
+#             self.m_1: [1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0],
+#             self.m_2: [1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0],
+#             self.m_3: [1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0],
+
+#             self.l_1: [1 * l0, 2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0, 9 * l0],
+#             self.l_2: [1 * l0, 2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0, 9 * l0],
+#             self.l_3: [1 * l0, 2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0, 9 * l0],
+
+#             self.d_1: [S.One * d0 * n for n in range(3,10)],
+#             self.d_2: [S.One * d0 * n for n in range(3,10)],
+#             self.d_3: [S.One * d0 * n for n in range(3,10)],
+#             self.d: [d0],
+#             self.G: [G0, 2*S.One*G0,3*S.Half*G0],
+#             self.phi_1:[self.phi_l,0],
+#             self.phi_2:[self.phi_l,self.phi_r],
+#             self.phi_3:[self.phi_r,0],
+            
+#             self.delta:[0],
+
+#             self.input_displacement:[0],
+            
+#             self.M_1:[M0],
+#             self.M_2:[M0],
+#             self.M_3:[M0],
+            
+
 #         }
-#         return self.sym_desc_dict
 
+#         return default_data_dict
+
+
+#     def get_random_parameters(self):
+
+#         default_data_dict = self.get_default_data()
+
+#         parameters_dict = {
+#             key: random.choice(items_list)
+#             for key, items_list in default_data_dict.items()
+#         }
+
+#         if parameters_dict[self.phi_1] != self.phi_l or parameters_dict[self.phi_2] != self.phi_l:
+
+#             parameters_dict[self.phi_1] = self.phi_l
+
+#         if parameters_dict[self.phi_2] != self.phi_r or parameters_dict[self.phi_3] != self.phi_r:
+
+#             parameters_dict[self.phi_3] = self.phi_r
+            
+
+#         return parameters_dict
     
-    def get_default_data(self):
-
-
-        m0, M0, l0 , d0 ,M0, G0= symbols('m_0 M_0 l_0 d_0 M_0 G_0', positive=True)
-        theta0, Omega = symbols('theta_0, Omega', positive=True)
-
-        default_data_dict = {
-            
-            Symbol('I_m'):[S.Half*Symbol('m')*Symbol('R')**2],
-            Symbol('I_S'):[S.Half*pi*Symbol('R_S')**4],
-            Symbol('k_S'):[Symbol('G')*Symbol('I_S')/Symbol('L_S')],
-            
-            
-            self.m_1: [1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0],
-            self.m_2: [1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0],
-            self.m_3: [1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0],
-
-            self.l_1: [1 * l0, 2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0, 9 * l0],
-            self.l_2: [1 * l0, 2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0, 9 * l0],
-            self.l_3: [1 * l0, 2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0, 9 * l0],
-
-            self.d_1: [S.One * d0 * n for n in range(3,10)],
-            self.d_2: [S.One * d0 * n for n in range(3,10)],
-            self.d_3: [S.One * d0 * n for n in range(3,10)],
-            self.d: [d0],
-            self.G: [G0, 2*S.One*G0,3*S.Half*G0],
-            self.phi_1:[self.phi_l,0],
-            self.phi_2:[self.phi_l,self.phi_r],
-            self.phi_3:[self.phi_r,0],
-            
-            self.delta:[0],
-
-            self.input_displacement:[0],
-            
-            self.M_1:[M0],
-            self.M_2:[M0],
-            self.M_3:[M0],
-            
-
-        }
-
-        return default_data_dict
-
-
-    def get_random_parameters(self):
-
-        default_data_dict = self.get_default_data()
-
-        parameters_dict = {
-            key: random.choice(items_list)
-            for key, items_list in default_data_dict.items()
-        }
-
-        if parameters_dict[self.phi_1] != self.phi_l or parameters_dict[self.phi_2] != self.phi_l:
-
-            parameters_dict[self.phi_1] = self.phi_l
-
-        if parameters_dict[self.phi_2] != self.phi_r or parameters_dict[self.phi_3] != self.phi_r:
-
-            parameters_dict[self.phi_3] = self.phi_r
-            
-
-        return parameters_dict
+#     def max_static_disk_1_bearing_force(self):
+#         d=Symbol('d',positive=True)
+#         return abs(2*self.static_load().doit()[0]/d)
     
-    def max_static_disk_1_bearing_force(self):
-        d=Symbol('d',positive=True)
-        return abs(2*self.static_load().doit()[0]/d)
-    
-    def max_dynamic_disk_1_bearing_force(self):
-        d=Symbol('d',positive=True)
+#     def max_dynamic_disk_1_bearing_force(self):
+#         d=Symbol('d',positive=True)
 
         
-        frf = self._frf()
-        acc_amp = (self.phi_1).subs(self._given_data).subs({self.phi_l:frf[0],self.phi_r:frf[1]})
+#         frf = self._frf()
+#         acc_amp = (self.phi_1).subs(self._given_data).subs({self.phi_l:frf[0],self.phi_r:frf[1]})
         
 
-        return  abs(2*(self.I_m1*acc_amp)/d) + self.max_static_disk_1_bearing_force()#.subs(self._given_data)
+#         return  abs(2*(self.I_m1*acc_amp)/d) + self.max_static_disk_1_bearing_force()#.subs(self._given_data)
 
-    def max_static_disk_2_bearing_force(self):
-        d=Symbol('d',positive=True)
-        return abs(2*self.static_load().doit()[1]/d)
+#     def max_static_disk_2_bearing_force(self):
+#         d=Symbol('d',positive=True)
+#         return abs(2*self.static_load().doit()[1]/d)
     
-    def max_dynamic_disk_2_bearing_force(self):
-        d=Symbol('d',positive=True)
+#     def max_dynamic_disk_2_bearing_force(self):
+#         d=Symbol('d',positive=True)
 
         
-        frf = self._frf()
-        acc_amp = (self.phi_2).subs(self._given_data).subs({self.phi_l:frf[0],self.phi_r:frf[1]})
+#         frf = self._frf()
+#         acc_amp = (self.phi_2).subs(self._given_data).subs({self.phi_l:frf[0],self.phi_r:frf[1]})
 
-        return  abs(2*(self.I_m2*acc_amp)/d) + self.max_static_disk_2_bearing_force()#.subs(self._given_data)
+#         return  abs(2*(self.I_m2*acc_amp)/d) + self.max_static_disk_2_bearing_force()#.subs(self._given_data)
     
     
-    def static_disk_1_key_length(self):
-        kd=Symbol('k_d', positive=True)
-        h=Symbol('h', positive=True)
-        return (2*self.max_static_disk_1_bearing_force())/(kd*h)
+#     def static_disk_1_key_length(self):
+#         kd=Symbol('k_d', positive=True)
+#         h=Symbol('h', positive=True)
+#         return (2*self.max_static_disk_1_bearing_force())/(kd*h)
     
-    def dynamic_disk_1_key_length(self):
-        kd=Symbol('k_d', positive=True)
-        h=Symbol('h', positive=True)
-        return (2*self.max_dynamic_disk_1_bearing_force())/(kd*h)
+#     def dynamic_disk_1_key_length(self):
+#         kd=Symbol('k_d', positive=True)
+#         h=Symbol('h', positive=True)
+#         return (2*self.max_dynamic_disk_1_bearing_force())/(kd*h)
     
     
-    def static_disk_2_key_length(self):
-        kd=Symbol('k_d', positive=True)
-        h=Symbol('h', positive=True)
-        return (2*self.max_static_disk_2_bearing_force())/(kd*h)
+#     def static_disk_2_key_length(self):
+#         kd=Symbol('k_d', positive=True)
+#         h=Symbol('h', positive=True)
+#         return (2*self.max_static_disk_2_bearing_force())/(kd*h)
     
-    def dynamic_disk_2_key_length(self):
-        kd=Symbol('k_d', positive=True)
-        h=Symbol('h', positive=True)
-        return (2*self.max_dynamic_disk_2_bearing_force())/(kd*h)
+#     def dynamic_disk_2_key_length(self):
+#         kd=Symbol('k_d', positive=True)
+#         h=Symbol('h', positive=True)
+#         return (2*self.max_dynamic_disk_2_bearing_force())/(kd*h)
     
     
     

@@ -77,7 +77,7 @@ class FreeEngine(ComposedSystem):
     m_e = Symbol('m_e', positive=True)  #Reduced mass of the crank system
     e = Symbol('e', positive=True)  #Length of the crank - radius of the circular motion
     phi = dynamicsymbols('\\varphi')
-    ivar = Symbol('t', positive=True)
+    ivar = Symbol('t')
     m0 = Symbol('m_0', positive=True)
 
     e0 = Symbol('e_0', positive=True)
@@ -187,7 +187,7 @@ class FreeEngineWithConstrains(ComposedSystem):
     m_e = Symbol('m_e', positive=True)  #Reduced mass of the crank system
     e = Symbol('e', positive=True)  #Length of the crank - radius of the circular motion
     phi = dynamicsymbols('\\varphi')
-    ivar = Symbol('t', positive=True)
+    ivar = Symbol('t')
     m0 = Symbol('m_0', positive=True)
 
     e0 = Symbol('e_0', positive=True)
@@ -1697,7 +1697,7 @@ class NonlinearEngine(Engine, NonlinearComposedSystem):
                  l_0=None,
                  z=None,
                  phi=None,
-                 ivar=Symbol('t', positive=True),
+                 ivar=Symbol('t'),
                  Omega=None,
                  g=None,
                  **kwargs):
