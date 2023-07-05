@@ -2411,6 +2411,39 @@ class ParameterSummarySeries(AdaptableSeries):
 class NumericalAnalysisDataFrame(AdaptableDataFrame):
     """
     NumericalAnalysisDataFrame class allows you to present and format data in the form of a DataFrame.
+
+    Example
+        =======
+
+            >>>from dynpy import *
+            >>>from dynpy.solvers.linear import *
+            >>>from sympy import *
+            >>>from dynpy.utilities.adaptable import *
+
+            >>>m, c, k, F = symbols('m c k F', positive = True)
+            >>>t = Symbol('t')
+            >>>x = Function('x')(t)
+
+            >>>subs_data = {
+                        m: 10,
+                        c: 5,
+                        k: 2,
+                        }
+
+            >>>tspan_1=np.linspace(0,10, 100)
+            >>>ode_sys = ODESystem(odes=Matrix([k*x + F + c*x.diff(t)]), dvars=Matrix([x]), ode_order=1)
+
+            >>>X = [x, x.diff(t)]
+            >>>num_df = NumericalAnalysisDataFrame.from_model(ode_sys.solution.with_ics([1]),
+                                              F,
+                                              [1, 2, 5],
+                                              reference_data=subs_data,
+                                              coordinates=X,
+                                              index=pd.Index(tspan_1,name=t),
+                                              ics=None
+                                              )
+
+            >>>display(num_df)
     """
 
     _applying_func = None
@@ -2572,7 +2605,58 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
                  **kwargs):
         #_try_evat='test'
         #print(f'custom init of {type(self)}')
+        """
+        Arguments
+        =========
 
+            data : List, DataFrame or DataSeries
+                The data that will be in the final DataFrame.
+            
+            index : list or array
+                Parameter values.
+            
+            columns : List
+                Column headers.
+
+        Example 1
+        =========
+
+            >>>from dynpy import *
+            >>>from dynpy.solvers.linear import *
+            >>>from sympy import *
+            >>>from dynpy.utilities.adaptable import *
+
+            >>>m = Symbol('m')
+            >>>num_df = NumericalAnalysisDataFrame(data=[0, 1, 2, 3, 4, 5, 6], index=np.linspace(0, 6, 7), columns=[m])
+            >>>display(num_df)
+
+        Example 2
+        =========
+
+            >>>from dynpy import *
+            >>>from dynpy.solvers.linear import *
+            >>>from sympy import *
+            >>>from dynpy.utilities.adaptable import *
+
+            >>>m, c, k, F = symbols('m c k F', positive = True)
+            >>>t = Symbol('t')
+            >>>x = Function('x')(t)
+
+            >>>tspan_1=np.linspace(0,10, 100)
+            >>>subs_data_2 = {
+                m: 10,
+                c: 5,
+                k: 2,
+                F: 1
+            }
+
+            >>>ode_sys = ODESystem(odes=Matrix([k*x + F + c*x.diff(t)]), dvars=Matrix([x]), ode_order=1)
+            >>>sol_num = ode_sys.subs(subs_data_2).solution.with_ics([1]).numerized().compute_solution(tspan_1)
+
+            >>>num_df = NumericalAnalysisDataFrame(data=sol_num)
+            >>>display(num_df) 
+
+        """
         super().__init__(data=data,
                          index=index,
                          columns=columns,
@@ -2618,6 +2702,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
         
         >>>display(sym_num)
         >>>display(sym_num.plot())
+
         """
 
         #display(self.columns.droplevel(coord_level_name).unique())
