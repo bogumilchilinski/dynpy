@@ -985,4 +985,4 @@ class CrankSystem(ComposedSystem):
         }
 
         return default_data_dict
-    
+

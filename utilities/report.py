@@ -3161,8 +3161,9 @@ class SympyFormula(ReportModule):
 #         return ''
 
     def _repr_markdown_(self):
-        return f'\\begin{{equation}}\n  {self.reported()._backend(self._expr)} \n \\end{{equation}}'
-
+        #return f'\\begin{{equation}}\n  {self.reported()._backend(self._expr)} \n \\end{{equation}}'
+        return f'$${self.reported()._backend(self._expr)}$$'
+    
     def reported(self):
         
         

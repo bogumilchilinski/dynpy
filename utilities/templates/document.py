@@ -156,8 +156,8 @@ class BPASTSPaper(Document):
 
 
     def __init__(self,
-                 title='Basic title',
                  default_filepath='default_filepath',
+                 title='Basic title',
                  *,
                  documentclass='article',
                  document_options=['10pt','twoside','twocolumn','a4paper'],
