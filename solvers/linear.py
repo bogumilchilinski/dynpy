@@ -1370,7 +1370,7 @@ class ODESystem(AnalyticalSolution):
 
     # Calculating a critical point
     def critical_point(self, params):
-        obj = super()
+        obj = self
         critical_point = solve(Eq(obj.lhs, obj.rhs), self.dvars[0])
         critical_point = critical_point[self.dvars[0]]
         return Eq(self.dvars[0], critical_point.subs(params))
@@ -1378,7 +1378,7 @@ class ODESystem(AnalyticalSolution):
 
     # Designate Order Method
     def spot_order(self):
-        obj = super()
+        obj = self
         derivatives = list(obj.lhs.atoms(Derivative))
         derivatives_dict = {item:item.args[1][1] for item in derivatives}
 
@@ -1387,7 +1387,7 @@ class ODESystem(AnalyticalSolution):
     
     @property
     def details(self):
-        obj = super()
+        obj = self
         fode = self._as_fode()
 
         display(obj)
