@@ -1642,13 +1642,13 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         b = self._auxiliary_free_terms
         dvars = self._auxiliary_dvars                                 
 
-        print('steady sol')
-        display(A)
-        display(b)
+        #print('steady sol')
+        #display(A)
+        #display(b)
         
         sol = AnalyticalSolution(dvars,linodesolve(A,t=self.ivar,b=b)).applyfunc(self.solution_map)
 
-        display('ss',sol)
+        #display('ss',sol)
         
         dummies_set= sol.atoms(Dummy)
 

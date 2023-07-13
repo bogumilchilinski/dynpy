@@ -1371,6 +1371,20 @@ class EntryWithUnit:
     _units = {}
     _latex_backend = lambda obj: obj if isinstance(obj, str) else vlatex(obj)
 
+    _left_par = '['
+    _right_par = ']'
+    _unit_separator = ' '
+
+    
+    @classmethod
+    def set_default_surrounding(cls, left_or_both, right=None):
+
+        cls._left_par = left_or_both[0]
+        cls._right_par = left_or_both[1]
+        
+        return cls
+    
+    
     @classmethod
     def set_default_units(cls, units={}):
 
@@ -1380,8 +1394,7 @@ class EntryWithUnit:
     def __new__(cls, obj, units=None, latex_backend=None, **kwargs):
         obj_with_unit = super().__new__(cls)
         obj_with_unit._obj = obj
-        obj_with_unit._left_par = '['
-        obj_with_unit._right_par = ']'
+
 
         if units is not None:
             obj_with_unit._units = units
@@ -1430,8 +1443,10 @@ class EntryWithUnit:
         left_par = self._left_par
         right_par = self._right_par
 
+        sep = self._unit_separator
+        
         if unit:
-            return f'{entry_str} {left_par}{unit.__str__()}{right_par}'
+            return f'{entry_str}{sep}{left_par}{unit.__str__()}{right_par}'
         else:
             return f'{entry_str}'
 
@@ -1441,8 +1456,10 @@ class EntryWithUnit:
         left_par = self._left_par
         right_par = self._right_par
 
+        sep = self._unit_separator
+        
         if unit:
-            return f'{entry_str} {left_par}{unit.__repr__()}{right_par}'
+            return f'{entry_str}{sep}{left_par}{unit.__repr__()}{right_par}'
         else:
             return f'{entry_str}'
 
@@ -1455,7 +1472,7 @@ class EntryWithUnit:
         left_par = self._left_par
         right_par = self._right_par
 
-        
+        sep = self._unit_separator
         #print('abc')
         #display(entry_str)
         #print(self._obj)
@@ -1463,14 +1480,14 @@ class EntryWithUnit:
         
         if unit:
             if isinstance(unit,str):
-                return f'{entry_str} {left_par}{unit}{right_par}'
+                return f'{entry_str}{sep}{left_par}{unit}{right_par}'
             elif str(unit) == str(ureg.dimensionless):
-                return f'{entry_str} {left_par}-{right_par}'
+                return f'{entry_str}{sep}{left_par}-{right_par}'
             elif str(unit) == str(ureg.ohm):
                 ohm_string='\\mathrm{\\Omega}'
-                return f'{entry_str} {left_par}{ohm_string}{right_par}'     
+                return f'{entry_str}{sep}{left_par}{ohm_string}{right_par}'     
             else:
-                return f'{entry_str} {left_par}{unit:~L}{right_par}'
+                return f'{entry_str}{sep}{left_par}{unit:~L}{right_par}'
         else:
             return f'{self._obj}'
 

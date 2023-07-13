@@ -20,6 +20,7 @@ import sympy.physics.mechanics as me
 from sympy.simplify.fu import TR8, TR10, TR7, TR3, TR0
 
 from .linear import LinearODESolution, FirstOrderODE, AnalyticalSolution, FirstOrderLinearODESystem, FirstOrderODESystem, ODESystem, ODESolution,FirstOrderLinearODESystemWithHarmonics
+from ..utilities.components.ode import en as ode_comp
 
 from timer import timer
 from collections.abc import Iterable
@@ -303,6 +304,29 @@ class MultiTimeScaleSolution(ODESystem):
         self._order = order
 
     @property
+    def _report_components(self):
+        
+        comp_list=[
+        ode_comp.ODESystemComponent,
+        ode_comp.VariablesComponent,
+
+        ode_comp.ODESystemComponent,
+        ode_comp.ODESystemCodeComponent,
+        ode_comp.VariablesComponent,
+        ode_comp.GoverningEquationComponent,
+#         ode_comp.ApproximatedNonlinearGoverningEquationComponent,
+#         ode_comp.FundamentalMatrixComponent,
+        ode_comp.ZerothOrderApproximatedEqComponent,
+        ode_comp.FirstOrderApproximatedEqComponent,
+        ode_comp.PredictedSolutionComponent,
+       ode_comp.GeneralSolutionComponent,
+        ode_comp.SecularTermsEquationsComponent,
+            
+        ]
+        
+        return comp_list
+        
+    @property
     def order(self):
 
         return self._order
@@ -437,9 +461,9 @@ class MultiTimeScaleSolution(ODESystem):
         sol_subs_dict  = {  dvar:eqn     for  sol   in sol_subs_list  for dvar, eqn in sol.as_dict().items()}
 
         
-        print('_gen_sol')
-        display(sol_list)
-        display(sol_subs_dict)
+        #print('_gen_sol')
+        #display(sol_list)
+        #display(sol_subs_dict)
 
         for order, approx in enumerate(approx_eoms_list[1:]):
 
@@ -477,20 +501,20 @@ class MultiTimeScaleSolution(ODESystem):
                                        1)] = (approx_subs.secular_terms)
             
             
-            display(self.secular_eq)
+            #display(self.secular_eq)
             approx_subs = approx_subs.remove_secular_terms()
             
             
 
             #display(approx_subs.lhs,approx_subs.rhs)
-            display(approx_subs)
-            display(FirstOrderLinearODESystemWithHarmonics.from_ode_system(approx_subs).steady_solution)
-            display(type(approx_subs))
+            #display(approx_subs)
+            #display(FirstOrderLinearODESystemWithHarmonics.from_ode_system(approx_subs).steady_solution)
+            #display(type(approx_subs))
 
             sol = FirstOrderLinearODESystemWithHarmonics.from_ode_system(approx_subs).steady_solution.applyfunc(
                 lambda obj: obj.expand()).applyfunc(eqns_map)#.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).sum_expr)
 
-            display(sol)
+            #display(sol)
             #sol_subs_dict = {**sol_subs_dict, **sol.as_dict()}
             #display(*list(sol.as_matrix()))
             sol_list += [sol.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).full_expr).doit()]

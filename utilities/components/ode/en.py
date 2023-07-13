@@ -97,6 +97,32 @@ class ODESystemComponent(ReportComponent):
 
         display(ReportText(  self.footer_text   ))
 
+        
+class ODESystemCodeComponent(ReportComponent):
+    
+    title="Differential equations"
+    @property
+    def header_text(self):
+
+        return "The code that enables to obtain differential equations is as follows:"
+
+        
+    @property
+    def footer_text(self):
+
+        return "Presented method can change a type of the equation represantation."
+
+    def append_elements(self):
+
+        system = self._system
+
+
+        display(ReportText(  self.header_text   ))
+
+        display(Markdown('\t from dynpy.solvers.linear import ODESystem  \n \t ode=ODESystem([]) \n \t display(ode)'))
+
+        display(ReportText(  self.footer_text   ))
+        
 
 class VariablesComponent(ReportComponent):
     
@@ -222,18 +248,20 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
     def header_text(self):
         
         system = self._system
+        system.general_solution(1)
 #         approx_sys = system.approximated(3)
-        approx_fun = system.approximation_function(0)[0]
-        zeroth_ord_eq = system.nth_eoms_approximation(0)
+
+        zeroth_ord_eq = Symbol('Omega')#system.nth_eoms_approximation(0)
         eps = Symbol('\\varepsilon')
 
-        return f"The ordering and separation of equation {AutoMarker(system.odes[0])} in terms of the power of a small parameter {eps} leads to obtaining a recursive sequence of linear equations of motion leading to the solution of the nonlinear equation. The zeroth-order approximate linear equation is given in {AutoMarker(zeroth_ord_eq)} where the dependency {approx_fun} was assumed for the zeroth-order solution of the time variable:"
+        return "The ordering and separation of equation {AutoMarker(system.odes[0])} in terms of the power of a small parameter {eps} leads to obtaining a recursive sequence of linear equations of motion leading to the solution of the nonlinear equation. The zeroth-order approximate linear equation is given in {AutoMarker(zeroth_ord_eq)} where the dependency {approx_fun} was assumed for the zeroth-order solution of the time variable:"
     
     @property
     def middle_text(self):
         
         system = self._system
-        zeroth_ord_approx_eq = Eq(system.nth_eoms_approximation(0).lhs[1]-system.nth_eoms_approximation(0).rhs[1],0)
+        system.general_solution(1)
+        zeroth_ord_approx_eq = Symbol('Omega')#Eq(system.nth_eoms_approximation(0).lhs[1]-system.nth_eoms_approximation(0).rhs[1],0)
 
         return f"Or transformed to the second order ODE {AutoMarker(zeroth_ord_approx_eq)}:"
 
@@ -249,10 +277,11 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
     def append_elements(self):
         
         system = self._system
+        system.general_solution(1)
 
         t_list = system.t_list
-        zeroth_ord_approx = system.nth_eoms_approximation(0)
-        zeroth_ord_approx_eq = Eq(system.nth_eoms_approximation(0).lhs[1]-system.nth_eoms_approximation(0).rhs[1],0)
+        zeroth_ord_approx = system.eoms_approximation_list()[0]
+        zeroth_ord_approx_eq = Eq(zeroth_ord_approx.lhs-zeroth_ord_approx.rhs,0,evaluate=False)
 
         display(ReportText(  self.header_text   ))
 
@@ -273,7 +302,7 @@ class FirstOrderApproximatedEqComponent(ReportComponent):
     def header_text(self):
         
         system = self._system
-        first_ord_eq = system.nth_eoms_approximation(1)
+        first_ord_eq = system.eoms_approximation_list()[1]
 
         return f"The next component of a recursive sequence of linear equations of motion leading to the solution of the considered nonlinear one is given in {AutoMarker(first_ord_eq)}:"
     
@@ -281,7 +310,8 @@ class FirstOrderApproximatedEqComponent(ReportComponent):
     def middle_text(self):
         
         system = self._system
-        first_ord_approx_eq = Eq(system.nth_eoms_approximation(1).lhs[1]-system.nth_eoms_approximation(1).rhs[1],0)
+        
+        first_ord_approx_eq = Eq(system.eoms_approximation_list()[0].lhs-system.eoms_approximation_list()[0].rhs,0)
 
         return f"Or transformed to the second order ODE {AutoMarker(first_ord_approx_eq)}:"
 
@@ -298,8 +328,8 @@ class FirstOrderApproximatedEqComponent(ReportComponent):
         system = self._system
 
         t_list = system.t_list
-        first_ord_approx = system.nth_eoms_approximation(1)
-        first_ord_approx_eq = Eq(system.nth_eoms_approximation(1).lhs[1]-system.nth_eoms_approximation(1).rhs[1],0)
+        first_ord_approx = system.eoms_approximation_list()[1]
+        first_ord_approx_eq = Eq(first_ord_approx.lhs-first_ord_approx.rhs,0,evaluate=False)
 
         display(ReportText(  self.header_text   ))
 
@@ -335,7 +365,7 @@ class PredictedSolutionComponent(ReportComponent):
         
         display(ReportText(  self.header_text   ))
 
-        for ord in [0,1,2]:
+        for ord in [0,1]:
             display(SympyFormula(Eq(system.dvars[0],system.predicted_solution(ord)[0])))
 
 #         display(ReportText(  self.footer_text   ))
@@ -379,26 +409,29 @@ class SecularTermsEquationsComponent(ReportComponent):
     
     @property
     def header_text(self):
-
+        t_list = self._system.t_list
+        
         return f"Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of {t_list[1]}. Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the zeroth and first order approximations are as follows:"
 
         
     @property
     def footer_text(self):
 
-        return f"In order to determine the functions \(\operatorname{C_1}\left(t_{1}\right),\operatorname{C_2}\left(t_{1}\right)\) and hence , the first-order approximate equation has to be considered:"
+        return "In order to determine the functions \(\operatorname{C_1}\left(t_{1}\right),\operatorname{C_2}\left(t_{1}\right)\) and hence , the first-order approximate equation has to be considered:"
 
     def append_elements(self):
 
 
         system = self._system
         
-#         display(ReportText(  self.header_text   ))
+        display(ReportText(  self.header_text   ))
+        sec_eqns = system.secular_eq[system.eps].as_first_ode_linear_system().lhs - system.secular_eq[system.eps].as_first_ode_linear_system().rhs
 
-        for no,eq in enumerate(system.secular_eq[system.eps]):
-            display(Eq(system.secular_eq[system.eps].as_first_ode_linear_system().expand().linearized().lhs[no]-(system.secular_eq[system.eps].as_first_ode_linear_system().expand().linearized().rhs[no]),0))
+        for no,eq in enumerate(sec_eqns):
             
-#         display(ReportText(  self.footer_text   ))
+            display(SympyFormula(Eq(eq,0)))
+            
+        display(ReportText(  self.footer_text   ))
         
         
 class HomEquationComponent(ReportComponent):
