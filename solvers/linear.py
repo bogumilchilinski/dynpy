@@ -1517,7 +1517,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
     @cached_property
     def _fundamental_matrix(self):
         
-    
+        return self.odes_rhs.jacobian(self.dvars)
     
     
     @cached_property
