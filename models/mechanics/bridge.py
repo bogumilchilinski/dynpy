@@ -367,7 +367,7 @@ class BeamBridge(ComposedSystem):
         -Next we determine the instance of the system using class LagrangeDynamicSystem
         -We call out the instance of the class
         -If necessary assign values for the default arguments
-
+     #test
 
     """
     scheme_name = 'beam_bridge.PNG'
