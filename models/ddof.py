@@ -960,7 +960,6 @@ class SimplifySuspension(ComposedSystem):
         -We define the symbols and dynamicsymbols
         -and then we determine the instance of the system using class DDoFSymplifyVehicleSuspension()
     """
-
     scheme_name = 'vehicle_suspension.PNG'
     real_name = 'vehicle_suspension_real.PNG'
 

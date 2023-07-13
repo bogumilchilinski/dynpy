@@ -305,10 +305,30 @@ class MechanicalCase(ThesisTemplate):
                   Command('pagestyle', arguments=['fancy']),
                   Command('fancyhf', arguments=['']),
                   Command('fancyhead',  arguments=['DynPy Team'],options=['R']),
-                  Command('fancyhead', arguments=['Mechanics, 2023'],options=['L']),
+                  Command('fancyhead', arguments=['EngeneeringDrawing, 2023'],options=['L']),
                   Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
         ]
-        
+
+class EngeneeringDrawingGuide(ThesisTemplate):
+    
+    latex_name = 'document'
+    packages = [
+                  Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('microtype'),
+                  Package('authoraftertitle'),
+                  Package('polski',options=['MeX']),
+                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('listings'),
+                  Package('titlesec'),
+                  Package('fancyhdr'),
+                  Command('pagestyle', arguments=['fancy']),
+                  Command('fancyhf', arguments=['']),
+                  Command('fancyhead',  arguments=['DynPy Team'],options=['R']),
+                  Command('fancyhead', arguments=['DynPy development guide, 2023'],options=['L']),
+                  Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
+    ]
+    
+    
 class DevelopmentGuide(ThesisTemplate):
     
     latex_name = 'document'

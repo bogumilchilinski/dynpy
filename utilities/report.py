@@ -20,7 +20,7 @@ from pylatex.utils import NoEscape, italic
 from sympy import Matrix, symbols, Symbol, Eq, Expr, Number, Equality, Add, Mul,Subs
 from sympy.core.relational import Relational
 
-from sympy import Symbol, Function, Derivative, latex, sin, cos, tan, exp, atan, ImmutableMatrix, sign
+from sympy import Symbol, Function, Derivative, latex, sin, cos, tan, exp, atan, ImmutableMatrix, sign, StrictGreaterThan
 
 from sympy.physics.vector.printing import vlatex, vpprint
 
@@ -3110,7 +3110,7 @@ class SympyFormula(ReportModule):
                 self._eq = Equation()
                 self._eq.append(NoEscape(self._backend(self._expr)))
 
-            elif isinstance(expr, (Eq, Relational)):
+            elif isinstance(expr, (Eq, Relational,StrictGreaterThan)):
 
                 if isinstance(expr.lhs,
                               (Matrix, ImmutableMatrix)) or isinstance(
@@ -3814,6 +3814,10 @@ class AutoBreak(Environment):
 
             elems = [expr.lhs, Symbol('='), expr.rhs]
 
+        elif isinstance(expr, StrictGreaterThan):
+
+            elems = [expr.lhs, Symbol('>'), expr.rhs]
+            
         elif isinstance(expr, Add):
 
             elems = list(expr.args)
@@ -3847,7 +3851,7 @@ class AutoBreak(Environment):
 
         for no, obj in enumerate(terms):
 
-            if terms[no - 1] == Symbol('='):
+            if terms[no - 1] == Symbol('=') or terms[no - 1] == Symbol('>'):
                 new_terms += [obj]
 
             elif isinstance(obj, Mul) and  (
@@ -3862,7 +3866,7 @@ class AutoBreak(Environment):
                 #display(obj)
                 new_terms += [Symbol('\n +'), obj]
 
-            elif obj == Symbol('='):
+            elif obj == Symbol('=') or obj == Symbol('>'):
                 new_terms += [obj]
 
             elif isinstance(obj, (Symbol, Function, Number,Derivative,Subs,Expr)):

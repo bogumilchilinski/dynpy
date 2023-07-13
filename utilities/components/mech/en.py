@@ -227,10 +227,100 @@ class KineticEnergyComponent(ReportComponent):
 
         display(SympyFormula( Eq(Symbol('T'),
                      dyn_sys_lin._kinetic_energy) , marker=None))
+        
+        
+        
                
         display(ReportText( self.footer_text  ))
     
+class KineticEnergyDynPyCodeComponent(ReportComponent):
     
+    title="Dynpy Code for Kinetic Energy"
+
+    @property
+    def header_text(self):
+        #"Energia kinetyczna układu wyrażona jest wzorem:"
+        return "Code line responsible for extracting kinetic energy from dynamic system is the following:"
+
+        
+    @property
+    def footer_text(self):
+        #"Wyznaczona wielkość określa energię układu wynikającą z jego własności inercyjnych (energię zmagazynowaną w elementach bezwładnych)."
+        return "Determined piece of code specify energy of the system related to its inertial properties."
+    
+    def append_elements(self):
+        
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+
+        display(ReportText( self.header_text  ))
+
+
+        display(Markdown(
+'''
+
+    from dynpy.models import mechanics
+    from sympy import *
+
+    display( Eq(Symbol('T'),
+                     dyn_sys_lin._kinetic_energy) )
+
+    
+'''))
+
+        display(ReportText( self.footer_text  ))
+        
+        
+class KineticEnergySymPyCodeComponent(ReportComponent):
+    
+    title="Sympy Code for Kinetic Energy"
+
+    @property
+    def header_text(self):
+        #"Energia kinetyczna układu wyrażona jest wzorem:"
+        return "Code line responsible for providing symbolic form of kinetic energy is the following:"
+
+        
+    @property
+    def footer_text(self):
+        #"Wyznaczona wielkość określa energię układu wynikającą z jego własności inercyjnych (energię zmagazynowaną w elementach bezwładnych)."
+        return "Determined piece of code specify energy of the system related to its inertial properties."
+    
+    def append_elements(self):
+        
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+        Ek=str(dyn_sys._kinetic_energy)
+        
+
+        display(ReportText( self.header_text  ))
+        
+        
+
+        display(Markdown(
+f'''
+    
+    
+
+
+    from dynpy.models.mechanics import *
+    from sympy import *
+    
+    Ek={Ek}
+    
+    display(Eq(Symbol('T'),Ek))
+
+
+
+    
+'''))
+        
+        display(ReportText( self.footer_text  ))
+
     
 class PotentialEnergyComponent(ReportComponent):#Jaś fasola
     
@@ -1243,7 +1333,7 @@ class MDoFSteadySolutionComponent(ReportComponent):
         
         
         
-# Grzes, Krzychu
+# Grzes
 class RightSpringForceComponent(ReportComponent):
 
     title="Force in top right spring of the system"
@@ -1312,4 +1402,75 @@ class CentralSpringForceComponent(ReportComponent):
 
 
         display(ReportText( self.footer_text))
+
+class SchemeDynPyCodeComponent(ExemplaryPictureComponent):
+    title="Scheme of the system"
+
+    @property
+    def header_text(self):
+        #"Ilustracja przedstawia schemat rzeczywistego obiektu mechanicznego, wyznaczony na podstawie uprzedniej analizy rzeczywistego obiektu."
+        return "Scheme of the real object is presented in the figure. It was obtained by the analysis of real mechanism."
+
+
+    @property
+    def footer_text(self):
+
+        system = self._system
+
+        #"Analizując przedstawiony układ można stwierdzić, że jego liczba stopni swobody to {len(system.q)}."
+        return f"Analysis of the scheme allows to claim its number of degrees of freedom which is {len(system.q)}"
+
+    def append_elements(self):
+
+        system = self._system
+
+        display(ReportText(  self.header_text ))
+        display(Picture(system._scheme(),width='8cm'))
+
+        display(Markdown(
+
+'''The code for calling scheme of the system is following:
+
+    display(Picture(system._scheme(),width='8cm'))
+
+'''
+            ))
+
+        display(ReportText( self.footer_text ))
         
+class SchemeSymPyCodeComponent(ExemplaryPictureComponent):
+    title="Scheme of the system"
+
+    @property
+    def header_text(self):
+        #"Ilustracja przedstawia schemat rzeczywistego obiektu mechanicznego, wyznaczony na podstawie uprzedniej analizy rzeczywistego obiektu."
+        return "Scheme of the real object is presented in the figure. It was obtained by the analysis of real mechanism."
+
+        
+    @property
+    def footer_text(self):
+        
+        system = self._system
+        
+        #"Analizując przedstawiony układ można stwierdzić, że jego liczba stopni swobody to {len(system.q)}."
+        return f"Analysis of the scheme allows to claim its number of degrees of freedom which is {len(system.q)}"
+    
+    
+    def append_elements(self):
+        
+        system = self._system
+        path=system._default_folder_path + system.scheme_name
+
+        display(ReportText(  self.header_text ))
+        display(Picture(path,width='8cm'))
+        
+        display(Markdown(
+'''The code for calling scheme of the system is following:
+
+    path=self._default_folder_path + self.scheme_name
+    
+    display(Picture(path ,width='8cm'))
+
+'''
+            ))
+        display(ReportText( self.footer_text ))

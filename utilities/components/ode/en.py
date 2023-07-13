@@ -401,3 +401,50 @@ class SecularTermsEquationsComponent(ReportComponent):
 #         display(ReportText(  self.footer_text   ))
         
         
+class HomEquationComponent(ReportComponent):
+    
+    title="Homogenous equation"
+    @property
+    def header_text(self):
+
+        return "Homogenous equation is the equation in which all the external forces and excitations are assumed to be equal to zero."
+
+        
+    @property
+    def footer_text(self):
+
+        return "Homogenous equation is used to find the general solution of differential equation which allows to analyse free vibrations of the system."
+
+    def append_elements(self):
+
+        system = self._system
+
+        display(ReportText(  self.header_text   ))
+
+        display(SympyFormula( system._hom_equation()))
+
+        display(ReportText(  self.footer_text   ))
+        
+class ODESystemTwoComponent(ReportComponent):
+    
+    title="Differential equations"
+    @property
+    def header_text(self):
+
+        return "By separating the equation we obtain the form of equation with time dependent variables on one hand side and free terms on the other:"
+
+        
+    @property
+    def footer_text(self):
+
+        return "To solve the problem serve several methods depending on the equation type."
+
+    def append_elements(self):
+
+        system = self._system
+
+        display(ReportText(  self.header_text   ))
+
+        display(SympyFormula( Eq(system._hom_equation().lhs, system._free_component())))
+
+        display(ReportText(  self.footer_text   ))

@@ -1395,7 +1395,14 @@ class ODESystem(AnalyticalSolution):
         display(Markdown(f'ODE order: {self._ode_order}'))
         display(Markdown(f'System reduced to first order:'), fode)
         
-
+        
+    def _free_component(self):
+        return (self.rhs - self.lhs).subs({var:0 for var in self.dvars}).doit()
+    
+    def _hom_equation(self):
+        free=self._free_component()
+        hom_eq=self - self._free_component()
+        return hom_eq
 
 class FirstOrderODESystem(ODESystem):
     
@@ -1510,7 +1517,6 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
     @cached_property
     def _fundamental_matrix(self):
         
-        return self.odes_rhs.jacobian(self.dvars)
     
     
     
@@ -2854,4 +2860,3 @@ class LinearODESolution:
 
 
 # class NumericalODE(ODESystem):
-#     pass
