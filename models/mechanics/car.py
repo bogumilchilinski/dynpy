@@ -722,19 +722,5 @@ class CarMovementPIDAdjust(CarMovementConstantThrottle):
         #components['_integral'] = self._integral
         components['_derivative'] = self._derivative
 
-class CarMovementPIDAdjust1(CarMovementConstantThrottle):
 
-    @property
-    def components(self):
 
-        components = super().components
-
-        self._throttle = CombustionEngine.from_data_raw(df, n = self.n ,degree=10,qs = self.qs)(label='throttle')
-        self._proportional = ProportionalElement(self.P , error=diff(self.x,self.ivar) , target = self.x , reference = v_ref*self.ivar - 0*self.x*cos(Omega*self.ivar) , qs=self.qs)(label='proportional')
-        #self._integral = IntegralElement(self.I , error=diff(self.x,self.ivar) , target = self.x , reference =  v_ref*self.ivar - self.x*cos(Omega*self.ivar) , qs=self.qs)(label='integral')
-        self._derivative = DerivativeElement(self.D , error=diff(self.x,self.ivar) , target = self.x, reference =  v_ref*self.ivar - 0*self.x*cos(Omega*self.ivar) , qs=self.qs)(label='derivative')
-
-        components['_throttle'] = self._throttle
-        components['_proportional'] = self._proportional
-        #components['_integral'] = self._integral
-        components['_derivative'] = self._derivative
