@@ -861,7 +861,7 @@ class PendulumKinematicExct(ComposedSystem):
 
         return comp_list
     
-class KinematicallyExcitedIvertedPendulum(PendulumKinematicExct):
+class KinematicallyExcitedInvertedPendulum(PendulumKinematicExct):
     
     scheme_name = 'Inverse_pendulum.png'
     real_name = 'elastic_pendulum_real.PNG'
