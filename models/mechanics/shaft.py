@@ -802,7 +802,7 @@ class DoubleDiskShaftHarmonicExcitation(DoubleDiskShaft):
         h=Symbol('h', positive=True)
         return (2*self.max_dynamic_disk_2_bearing_force())/(kd*h)
     
-    class DampedDoubleDiskShaftHarmonicExcitation(DoubleDiskShaftHarmonicExcitation):
+class DampedDoubleDiskShaftHarmonicExcitation(DoubleDiskShaftHarmonicExcitation):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
     =========
             I = Moment of Inertia
