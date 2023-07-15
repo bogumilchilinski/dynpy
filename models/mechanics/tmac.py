@@ -9,7 +9,7 @@ from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
 
 from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin, EngineMount
 from ..continuous import ContinuousSystem, PlaneStressProblem
-from dynpy.models.mechanics.tmd import TMD
+from dynpy.models.mechanics.tmd import TunedMassDamper
 
 import base64
 import random
