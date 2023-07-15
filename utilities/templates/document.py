@@ -305,7 +305,7 @@ class MechanicalCase(ThesisTemplate):
                   Command('pagestyle', arguments=['fancy']),
                   Command('fancyhf', arguments=['']),
                   Command('fancyhead',  arguments=['DynPy Team'],options=['R']),
-                  Command('fancyhead', arguments=['EngeneeringDrawing, 2023'],options=['L']),
+                  Command('fancyhead', arguments=['Mechanics, 2023'],options=['L']),
                   Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
         ]
 
@@ -324,7 +324,7 @@ class EngeneeringDrawingGuide(ThesisTemplate):
                   Command('pagestyle', arguments=['fancy']),
                   Command('fancyhf', arguments=['']),
                   Command('fancyhead',  arguments=['DynPy Team'],options=['R']),
-                  Command('fancyhead', arguments=['DynPy development guide, 2023'],options=['L']),
+                  Command('fancyhead', arguments=['Engeneering Drawing, 2023'],options=['L']),
                   Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
     ]
     

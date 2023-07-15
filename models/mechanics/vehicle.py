@@ -594,3 +594,135 @@ class DampedSymmetricalVehicleSuspension(DampedVehicleSuspension):
 #        parameters_dict[self.m_2] = parameters_dict[self.m]
 
         return parameters_dict
+
+class SimplifySuspension(ComposedSystem):
+    """
+    Ready to use sample Double Degree of Freedom System represents symmetrical kinematically excited beam with two springs.
+        Arguments:
+        =========
+            m = Mass
+                -Mass of system on spring
+
+            I = Moment of inertia
+                -Moment of inertia of a rod
+
+            l_rod = lenght of a rod
+                -Dimension of a rod imitating vehicle's floor plate
+
+            l_r = offset of right spring
+                -Dimension of a right spring's offset
+
+            l_l = offset of left spring
+                -Dimension of a left spring's offset
+
+            k_1 =Right spring coefficient
+                -Right spring carrying the system
+
+            k_2 =Left spring coefficient
+                -Left spring carrying the system
+
+            F_engine = thrust of an engine
+                -Force made by engine, which allows vehicle to move forward
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+        Example
+        =======
+        A mass oscillating up and down while being held up by a spring with a spring constant kinematicly 
+
+        >>> t = symbols('t')
+        >>> m, k_1, k_2, l_rod, l_l, l_r, F_engine = symbols('m, k_1, k_2, l_rod, l_l, l_r, F_{engine}')
+        >>> qs = dynamicsymbols('z, varphi') 
+        >>> DDoFSymplifyVehicleSuspension()
+
+        -We define the symbols and dynamicsymbols
+        -and then we determine the instance of the system using class DDoFSymplifyVehicleSuspension()
+    """
+    scheme_name = 'vehicle_suspension.PNG'
+    real_name = 'vehicle_suspension_real.PNG'
+
+    m=Symbol('m', positive=True)
+    I=Symbol('I', positive=True)
+    l_rod=Symbol('l_{rod}', positive=True)
+    l_l=Symbol('l_l', positive=True)
+    l_r=Symbol('l_r', positive=True)
+    k_1=Symbol('k_1', positive=True)
+    k_2=Symbol('k_2', positive=True)
+    F_engine=Symbol('F_{engine}', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    ivar=Symbol('t')
+    phi=dynamicsymbols('\\varphi')
+    z=dynamicsymbols('z')
+
+    def __init__(self,
+                 m=None,
+                 I=None,
+                 l_rod=None,
+                 l_r=None,
+                 k_2=None,
+                 k_1=None,
+                 l_l=None,
+                 F_engine=None,
+                 phi=None,
+                 z=None,
+                 Omega=None,
+                 ivar=Symbol('t'),
+#                  qs=None,
+                 **kwargs):
+
+        if m is not None: self.m =m # mass of a rod
+        if I is not None: self.I = I # moment of inertia of a rod
+        if l_rod is not None: self.l_rod =l_rod# length of a rod
+        if l_r is not None: self.l_r = l_r 
+        if l_l is not None: self.l_l = l_l 
+        if k_2 is not None: self.k_2 =k_2# left spring
+        if k_1 is not None: self.k_1 = k_1# right spring
+        if F_engine is not None: self.F_engine = F_engine
+        if phi is not None: self.phi = phi
+        if Omega is not None: self.Omega = Omega
+        if z is not None: self.z=z
+        self.ivar=ivar
+        self.qs = [self.z,self.phi]
+
+        self._init_from_components(**kwargs)
+
+
+    @cached_property
+    def components(self):
+
+        components = {}
+
+        self._body = RigidBody2D(self.m, (self.m / 12) * (2 * self.l_rod)**2, pos_lin=self.z, pos_rot=self.phi, qs=self.qs)(label='rod')
+        self._spring_l = Spring(self.k_1, pos1=self.z + self.phi * self.l_l, qs=self.qs)
+        self._spring_2 = Spring(self.k_2, pos1=self.z - self.phi * self.l_r, qs=self.qs)(label='right spring')
+        self._force = Force(self.F_engine*cos(self.Omega*self.ivar), pos1=self.z - self.phi * self.l_r, qs=self.qs)(label='force')
+
+        components['_body'] = self._body
+        components['_spring_l'] = self._spring_l
+        components['_spring_2'] = self._spring_2
+        components['_force'] = self._force
+
+        return components
+
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+        e,m_e,nu,t = symbols('e m_e \\nu t',positive=True)
+
+        default_data_dict = {
+            self.m: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
+            self.k_1: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, 3*S.Half * k0],
+            self.k_2: [S.Half * k0, S.Half**2 * k0, 1* k0, 2 * k0, 3 * k0],
+            self.l_l: [1 * l0, 2 * l0, S.Half * l0, 3 * l0, 4 * l0],
+            self.l_r: [3*S.Half * l0, 2 * l0, 1 * l0, 3 * l0, 5 * l0],
+            self.l_rod: [S.Half * l0, 2 * l0, 1 * l0, 4 * l0, 6 * l0],
+            self.F_engine: [e*m_e*nu**2*cos(nu*t)],
+            m_e: [S.Half**2 * m0, S.Half**3 * m0, S.Half**4 * m0, S.Half**5 * m0, S.Half**5 * m0],
+            e: [S.Half**2 * l0, S.Half**3 * l0, S.Half**4 * l0, S.Half**5 * l0, S.Half**5 * l0],
+        }
+
+        return default_data_dict
