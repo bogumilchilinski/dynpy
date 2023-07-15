@@ -802,7 +802,7 @@ class DoubleDiskShaftHarmonicExcitation(DoubleDiskShaft):
         h=Symbol('h', positive=True)
         return (2*self.max_dynamic_disk_2_bearing_force())/(kd*h)
     
-    
+#DO POPRAWY
 class TripleShaft(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
     =========
@@ -1051,7 +1051,7 @@ class TripleShaft(ComposedSystem):
         return (2*self.max_dynamic_disk_2_bearing_force())/(kd*h)
 
 #Grześ
-class SDOFDampedShaft(ComposedSystem):
+class SDoFDampedShaft(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
     =========
             I = Moment of Inertia
