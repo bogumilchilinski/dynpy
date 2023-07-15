@@ -802,6 +802,257 @@ class DoubleDiskShaftHarmonicExcitation(DoubleDiskShaft):
         h=Symbol('h', positive=True)
         return (2*self.max_dynamic_disk_2_bearing_force())/(kd*h)
     
+    class DampedDoubleDiskShaftHarmonicExcitation(DoubleDiskShaftHarmonicExcitation):
+    """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
+    =========
+            I = Moment of Inertia
+                -Moment of Inertia in case of both disc
+
+            k_1 =Right spring coefficient
+                -Right spring carrying the system
+
+            k_2 =Left spring coefficient
+                -Left spring carrying the system
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+    Example
+    =======
+    A mass oscillating up and down while being held up by a spring with a spring constant k
+
+    >>> t = symbols('t')
+    >>> I, k1, k2 = symbols('I, k_1, k_2')
+    >>> qs = dynamicsymbols('phi_1, phi_2') # Generalized Coordinates
+    >>> DDoFShaft()
+
+    -defines the symbols and dynamicsymbols
+    -finally determines the instance of the system using class DDoFShaft
+    """
+
+    scheme_name = 'ddof_undamped_shaft.png'
+    real_name = 'ddof_shaft_real.png'
+    
+    d=Symbol('d', positive=True)
+    G=Symbol('G', positive=True)
+    l=Symbol('l', positive=True)
+    l_1=Symbol('l_1', positive=True)
+    l_2=Symbol('l_2', positive=True)
+    I_1=Symbol('I_1', positive=True)
+    I_2=Symbol('I_2', positive=True)
+    I_m1=Symbol('I_m1', positive=True)
+    I_m2=Symbol('I_m2', positive=True)
+    k_2=Symbol('k_2', positive=True)
+    k_1=Symbol('k_1', positive=True)
+    T_1=Symbol('T_1',positive=True)
+    T_2=Symbol('T_2',positive=True)
+    Omega=Symbol('Omega',positive=True)
+#     theta=dynamicsymbols('theta')
+    phi_1=dynamicsymbols('\\varphi_1')                 
+    phi_2=dynamicsymbols('\\varphi_2')                 
+    phi=dynamicsymbols('\\varphi')
+    m0 = Symbol('m_0', positive=True)
+    l0 = Symbol('l_0', positive=True)
+    G = Symbol('G', positive=True)
+    T0 = Symbol('T_0', positive=True)
+    theta = Symbol('theta', positive=True)
+    Omega =Symbol('Omega', positive=True)
+    c1=Symbol('c_1',positive=True)
+    c2=Symbol('c_2',positive=True)
+
+    def __init__(self,
+                 l=None,
+                 I_m1=None,
+                 I_m2=None,
+                 k_2=None,
+                 k_1=None,
+                 T_1=None,
+                 T_2=None,
+                 l_1=None,
+                 l_2=None,
+                 I_1=None,
+                 I_2=None,
+                 phi_1=None,                 
+                 phi_2=None,                 
+                 phi=None,
+                 d=None,
+                 theta=None,
+                 Omega=None,
+                 ivar=Symbol('t'),
+                 qs=None,
+                 c1=None,
+                 c2=None,
+                 
+                 **kwargs):
+        
+        if  l_1 is not None: self.l_1 = l_1
+        if  l_2 is not None: self.l_2 = l_2
+        if  I_1 is not None: self.I_1 = I_1
+        if  I_2 is not None: self.I_2 = I_2
+        if  I_m1 is not None: self.I_m1 = I_m1
+        if  I_m2 is not None: self.I_m2 = I_m2
+        if T_1 is not None: self.T_1 = T_1
+        if T_2 is not None: self.T_2 = T_2
+        if Omega is not None: self.Omega = Omega
+        if  k_1 is not None: self.k_1 = k_1
+        if  k_2 is not None: self.k_2 = k_2
+        if  phi_1 is not None: self.phi_1 = phi_1
+        if  phi_2 is not None: self.phi_2 = phi_2 
+        if  phi is not None: self.phi = phi 
+        if  theta is not None: self.theta = theta
+        if  c2 is not None: self.c2 = c2
+        if  c1 is not None: self.c1 = c1
+        #if d is not None: self.d=d
+        self._init_from_components(**kwargs)
+            
+    @property
+    def components(self):
+        components = {}
+
+        self.qs = [self.phi_1,self.phi_2]
+        self.k_1 = (self.G*self.I_1)/self.l_1
+        self.k_2 = (self.G*self.I_2)/self.l_2
+
+        self.disc_1 = Disk(self.I_m1, pos1=self.phi_1, qs=self.qs)
+        self.spring_1 = Spring(self.k_1, self.phi_1, self.phi_2, qs=self.qs)  # left spring
+        self.disc_2 = Disk(self.I_m2, pos1=self.phi_2, qs=self.qs)
+        self.spring_2 = Spring(self.k_2, pos1=self.phi_2, pos2=self.theta*cos(self.Omega*self.ivar),qs=self.qs)  # right spring
+        self.moment_disc1=Force(self.T_1, pos1=self.phi_1)
+        self.moment_disc2=Force(self.T_2, pos1=self.phi_2)
+        self.damper_1 = Damper(self.c1, pos1=self.phi_1, pos2=self.phi_2, qs=self.qs)
+        self.damper_2 = Damper(self.c2, pos1=self.phi_2, pos2=self.theta, qs=self.qs)
+        
+
+        components['disc_1'] = self.disc_1
+        components['disc_2'] = self.disc_2
+        components['spring_1'] = self.spring_1
+        components['spring_2'] = self.spring_2
+        components['moment_disc1'] = self.moment_disc1
+        components['moment_disc2'] = self.moment_disc2
+        components['damper_1'] = self.damper_1
+        components['damper_2'] = self.damper_2
+
+        return components
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.I: r'Moment of Inertia',
+            self.k_1: r'',
+            self.k_2: r'',
+        }
+        return self.sym_desc_dict
+
+#     def get_default_data(self):
+
+#         m0, l0 , G, l,  d, T0 = self.m0, self.l0 , self.G, self.l,  self.d, self.T0
+#         theta0, Omega0 = symbols('theta_0 Omega_0', positive=True)
+
+#         default_data_dict = {
+#             self.I_m1: [S.Half*m0*(l0**2)*no for no in range(1,9)],
+#             self.I_m2: [S.Half*m0*(l0**2)*no for no in range(1,9)],
+#             self.I_1: [S.Half**(no)*(l0**4) for no in range(1,9)],
+#             self.I_2: [S.Half**no*(l0**4) for no in range(1,9)],
+#             self.l_1: [S.Half**(no-6)*l0 for no in range(1,9)],
+#             self.l_2: [S.Half**(no-6)*l0 for no in range(1,9)],
+#             self.T_1: [T0 * (no) for no in range(1,12)],
+#             self.T_2: [T0 * (no) for no in range(1,12)],
+#             self.theta:[S.One * theta0 * (no) for no in range(1,5)],
+# #             self.Omega:[S.One * Omega0],
+            
+#         }
+
+#         return default_data_dict
+
+    def get_default_data(self):
+
+        m0, l0 , G, l,  d, T0 = self.m0, self.l0 , self.G, self.l,  self.d, self.T0
+        theta0, Omega = self.theta0, self.Omega
+
+        default_data_dict = {
+            self.k_1:[self.k_1],
+            self.k_2:[self.k_2],
+            self.I_m1: [S.Half*m0*(l0**2)],
+            self.I_m2: [S.Half*m0*(l0**2)],
+            self.I_1: [S.Half*(l0**4)],
+            self.I_2: [S.Half*(l0**4)],
+            self.l_1: [S.Half*l0,2*S.Half*l0,4*S.Half*l0],
+            self.l_2: [S.Half*l0,2*S.Half*l0,4*S.Half*l0],
+            self.T_1: [T0],
+            self.T_2: [T0],
+            self.c1: [self.c1],
+            self.c2: [self.c2]
+        }
+
+        return default_data_dict
+
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        mech_comp.SchemeComponent,
+        mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.GoverningEquationComponent,
+        mech_comp.FundamentalMatrixComponent,
+        mech_comp.MDoFGeneralSolutionComponent,
+        mech_comp.MDoFSteadySolutionComponent,
+
+        ]
+
+        return comp_list
+    
+    def disc_1_force(self):
+        t=self.ivar
+        return self.I_m1 * self.steady_solution().diff(t,t)
+
+    def max_static_disk_1_bearing_force(self):
+        d=Symbol('d',positive=True)
+        return abs(2*self.static_load().doit()[0]/d)
+    
+    def max_dynamic_disk_1_bearing_force(self):
+        d=Symbol('d',positive=True)
+        acc_amp = self._frf()[0]*self.Omega**2
+
+        return  abs(2*(self.I_m1*acc_amp)/d) + self.max_static_disk_1_bearing_force()#.subs(self._given_data)
+
+    def max_static_disk_2_bearing_force(self):
+        d=Symbol('d',positive=True)
+        return abs(2*self.static_load().doit()[1]/d)
+    
+    def max_dynamic_disk_2_bearing_force(self):
+        d=Symbol('d',positive=True)
+        acc_amp = self._frf()[1]*self.Omega**2
+
+        return  abs(2*(self.I_m2*acc_amp)/d) + self.max_static_disk_2_bearing_force()#.subs(self._given_data)
+    
+    
+    def static_disk_1_key_length(self):
+        kd=Symbol('k_d', positive=True)
+        h=Symbol('h', positive=True)
+        return (2*self.max_static_disk_1_bearing_force())/(kd*h)
+    
+    def dynamic_disk_1_key_length(self):
+        kd=Symbol('k_d', positive=True)
+        h=Symbol('h', positive=True)
+        return (2*self.max_dynamic_disk_1_bearing_force())/(kd*h)
+    
+    
+    def static_disk_2_key_length(self):
+        kd=Symbol('k_d', positive=True)
+        h=Symbol('h', positive=True)
+        return (2*self.max_static_disk_2_bearing_force())/(kd*h)
+    
+    def dynamic_disk_2_key_length(self):
+        kd=Symbol('k_d', positive=True)
+        h=Symbol('h', positive=True)
+        return (2*self.max_dynamic_disk_2_bearing_force())/(kd*h)
+    
 #DO POPRAWY
 class TripleShaft(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
