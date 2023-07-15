@@ -357,7 +357,7 @@ class DampedElasticPendulum(ComposedSystem):
         }
         return self.sym_desc_dict
 
-
+#DO SPRAWDZENIA
 class ForcedTrolleysWithSprings(ComposedSystem):
     scheme_name = 'mdof_three_trolleys.PNG'
     real_name = 'three_carriages.PNG'
@@ -472,7 +472,7 @@ class ForcedTrolleysWithSprings(ComposedSystem):
 
         return parameters_dict
     
-#DO ZROBIENIA
+#DO ZROBIENIA //wydane Maja
 class MDoFForcedDisksWithSerialSprings(ComposedSystem):
     scheme_name = 'MDOF_Forced_Disks_With_Serial_Springs.PNG'
     real_name = 'three_carriages.PNG'
@@ -580,7 +580,7 @@ class MDoFForcedDisksWithSerialSprings(ComposedSystem):
 
         return parameters_dict
     
-#DO ZROBIENIA
+#DO ZROBIENIA //wydane Michał Szewczyk
 class MDoFForcedDisksWithParallelSprings(ComposedSystem):
 
     _default_subs_method='direct'
@@ -729,7 +729,7 @@ class MDoFForcedDisksWithParallelSprings(ComposedSystem):
 
         return parameters_dict
     
-    
+#DO SPRAWDZENIA
 class DoubleTrolleyDifferentWheels(ComposedSystem):
     scheme_name = 'MDOFDoubleTrolleyDifferentWheels.PNG'
     real_name = 'DoubleTrolley_real.png'
@@ -815,7 +815,7 @@ class DoubleTrolleyDifferentWheels(ComposedSystem):
 
         return default_data_dict
 
-
+#DO SPRAWDZENIA
 class DampedTrolleysWithSprings(ComposedSystem):
     scheme_name = 'MDOF_Damped_Trolleys_With_Springs.PNG'
     real_name = 'two_damped_trolleys.png'
@@ -905,6 +905,7 @@ class DampedTrolleysWithSprings(ComposedSystem):
 
         return parameters_dict
 
+#DO ZROBIENIA
 class ThreePendulumsWithSprings(ComposedSystem):
     scheme_name = 'MDOF_Three_Pendulum_Spring.png'
     real_name = 'three_carriages.PNG'
@@ -998,7 +999,7 @@ class ThreePendulumsWithSprings(ComposedSystem):
         return parameters_dict
 
     
-
+#DO SPRAWDZENIA
 class DoubleTrolleyWithNonlinearSprings(ComposedSystem):
     scheme_name = 'MDOF_Double_Trolley_With_Springs.PNG'
     real_name = 'sdof_nonlinspring_trolleys_real.PNG'
@@ -1087,7 +1088,8 @@ class DoubleTrolleyWithNonlinearSprings(ComposedSystem):
 
 
         return parameters_dict
-
+    
+#DO ZROBIENIA
 class MDoFForcedSimpleDisksWithParallelSprings(ComposedSystem):
 
     _default_subs_method='direct'
@@ -1219,6 +1221,7 @@ class MDoFForcedSimpleDisksWithParallelSprings(ComposedSystem):
 
         return parameters_dict
 
+#DO ZROBIENIA
 class MDoFForcedSimpleDisksWithSerialSprings(ComposedSystem):
     scheme_name = 'three_simple_disks_serial.png'
     real_name = 'three_carriages.PNG'
@@ -1317,6 +1320,8 @@ class MDoFForcedSimpleDisksWithSerialSprings(ComposedSystem):
             parameters_dict[self.x_r] = self.x_2
 
         return parameters_dict
+    
+#DO SPRAWDZENIA
 class ForcedDisksWithParallelSprings(ComposedSystem):
 
     _default_subs_method='direct'
@@ -1469,7 +1474,7 @@ class ForcedDisksWithParallelSprings(ComposedSystem):
 
     
     
-
+#DO ZROBIENIA?, SPRAWDZIC CZY TO NIE POWTORKA ZADAN O PODOBNEJ NAZWIE!
 class ForcedDisksWithSerialSprings(ComposedSystem):
     scheme_name = 'MDOF_Forced_Disks_With_Serial_Springs.PNG'
     real_name = 'three_carriages.PNG'
@@ -1577,6 +1582,7 @@ class ForcedDisksWithSerialSprings(ComposedSystem):
 
         return parameters_dict
     
+#DO ZROBIENIA
 class DoublePendulum(ComposedSystem):
     scheme_name = 'MDOFTriplePendulum.PNG'
     real_name = 'TriplePendulum_real.jpg'
