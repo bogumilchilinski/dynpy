@@ -394,7 +394,7 @@ class Engine(ComposedSystem):
     g = Symbol('g', positive=True)
     e = Symbol('e', positive=True)  #distance -motion radius of a particle
     z = dynamicsymbols('z')  #generalized coordinate
-    phi = dynamicsymbols('\\varphi')
+    phi = dynamicsymbols('varphi')
     ivar = Symbol('t')
     m0 = Symbol('m_0', positive=True)
     k_m0 = Symbol('k_m0', positive=True)

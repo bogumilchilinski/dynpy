@@ -102,6 +102,44 @@ class ExemplaryPictureComponent(ReportComponent):
 
         display(ReportText(self.footer_text))
 
+class ExemplaryPictureDynPyComponent(ReportComponent):
+
+    title="Dynpy Code for Exemplary Picture"
+
+    @property
+    def header_text(self):
+        return "Code line responsible for extracting exemplary picture from dynamic system is as following:"
+
+
+    @property
+    def footer_text(self):
+        return "Picture representing real object of considered dynamic system."
+
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+
+        display(ReportText( self.header_text  ))
+
+
+        display(Markdown(
+f'''
+
+    from dynpy.models.mechanics import *
+    from sympy import *
+    from dynpy.utilities.report import Picture
+
+    dyn_sys = {system.__class__.__name__}()
+
+    display(Picture(dyn_sys._real_example()))
+
+
+'''))
+
+        display(ReportText( self.footer_text  ))
+        
+        
 # Boogi        
 class SchemeComponent(ExemplaryPictureComponent):
     title="Scheme of the system"
@@ -252,7 +290,6 @@ class KineticEnergyDynPyCodeComponent(ReportComponent):
         
         system = self._system
         dyn_sys=system
-        dyn_sys_lin = dyn_sys
 
 
 
@@ -266,7 +303,7 @@ class KineticEnergyDynPyCodeComponent(ReportComponent):
     from sympy import *
 
     display( Eq(Symbol('T'),
-                     dyn_sys_lin._kinetic_energy) )
+                     dyn_sys._kinetic_energy) )
 
     
 '''))
@@ -293,7 +330,7 @@ class KineticEnergySymPyCodeComponent(ReportComponent):
         
         system = self._system
         dyn_sys=system
-        dyn_sys_lin = dyn_sys
+
         Ek=str(dyn_sys._kinetic_energy)
         
 
@@ -340,15 +377,99 @@ class PotentialEnergyComponent(ReportComponent):#Jaś fasola
 
         system = self._system
         dyn_sys=system
-        dyn_sys_lin = dyn_sys
 
 
         display(ReportText(  self.header_text   ))
 
         display(SympyFormula( Eq(Symbol('V'),
-                     dyn_sys_lin._potential_energy ), marker=None))
+                     dyn_sys._potential_energy ), marker=None))
 
         display(ReportText(  self.footer_text   ))
+
+class PotentialEnergyDynPyCodeComponent(ReportComponent):
+
+    title="Dynpy Code for Potential Energy"
+
+    @property
+    def header_text(self):
+        return "Code line responsible for extracting potential energy from dynamic system is as following:"
+
+    @property
+    def footer_text(self):
+        return "Determined piece of code specify energy of the system, which is stored in object."
+
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+
+        display(ReportText( self.header_text  ))
+
+
+        display(Markdown(
+f'''
+
+    from dynpy.models.mechanics import *
+    from sympy import *
+
+    dyn_sys = {system.__class__.__name__}()
+
+    display( Eq(Symbol('V'),
+                     dyn_sys._potential_energy) )
+
+
+'''))
+
+        display(ReportText( self.footer_text  ))
+
+class PotentialEnergySymPyCodeComponent(ReportComponent):
+    
+    title="Sympy Code for Potential Energy"
+
+    @property
+    def header_text(self):
+        return "Code line responsible for providing symbolic form of potential energy is as following:"
+
+        
+    @property
+    def footer_text(self):
+        return "Determined piece of code specify energy of the system, which is stored in object."
+    
+    def append_elements(self):
+        
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+        Ep=str(dyn_sys._potential_energy)
+        
+
+        display(ReportText( self.header_text  ))
+        
+        
+
+        display(Markdown(
+f'''
+    
+    
+
+
+    from dynpy.models.mechanics import *
+    from sympy import *
+    
+    Ep={Ep}
+    
+    display(Eq(Symbol('V'),Ep))
+
+
+
+    
+'''))
+        
+        display(ReportText( self.footer_text  ))
+
 
 # Marcel
 class DissipationComponent(ReportComponent):
