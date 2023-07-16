@@ -272,24 +272,22 @@ class KineticEnergyComponent(ReportComponent):
         display(ReportText( self.footer_text  ))
     
 class KineticEnergyDynPyCodeComponent(ReportComponent):
-    
+
     title="Dynpy Code for Kinetic Energy"
 
     @property
     def header_text(self):
-        #"Energia kinetyczna układu wyrażona jest wzorem:"
-        return "Code line responsible for extracting kinetic energy from dynamic system is the following:"
+        return "Code line responsible for extracting kinetic energy from dynamic system is as following:"
 
-        
     @property
     def footer_text(self):
-        #"Wyznaczona wielkość określa energię układu wynikającą z jego własności inercyjnych (energię zmagazynowaną w elementach bezwładnych)."
         return "Determined piece of code specify energy of the system related to its inertial properties."
-    
+
     def append_elements(self):
-        
+
         system = self._system
         dyn_sys=system
+        dyn_sys_lin = dyn_sys
 
 
 
@@ -297,18 +295,18 @@ class KineticEnergyDynPyCodeComponent(ReportComponent):
 
 
         display(Markdown(
-'''
+f'''
 
-    from dynpy.models import mechanics
+    from dynpy.models.mechanics import *
     from sympy import *
+
+    dyn_sys = {system.__class__.__name__}()
 
     display( Eq(Symbol('T'),
                      dyn_sys._kinetic_energy) )
 
-    
-'''))
 
-        display(ReportText( self.footer_text  ))
+'''))
         
         
 class KineticEnergySymPyCodeComponent(ReportComponent):
@@ -317,20 +315,18 @@ class KineticEnergySymPyCodeComponent(ReportComponent):
 
     @property
     def header_text(self):
-        #"Energia kinetyczna układu wyrażona jest wzorem:"
-        return "Code line responsible for providing symbolic form of kinetic energy is the following:"
+        return "Code line responsible for providing symbolic form of kinetic energy is as following:"
 
         
     @property
     def footer_text(self):
-        #"Wyznaczona wielkość określa energię układu wynikającą z jego własności inercyjnych (energię zmagazynowaną w elementach bezwładnych)."
         return "Determined piece of code specify energy of the system related to its inertial properties."
     
     def append_elements(self):
         
         system = self._system
         dyn_sys=system
-
+        dyn_sys_lin = dyn_sys
         Ek=str(dyn_sys._kinetic_energy)
         
 
