@@ -383,23 +383,22 @@ class PotentialEnergyComponent(ReportComponent):#Jaś fasola
         display(ReportText(  self.footer_text   ))
 
 class PotentialEnergyDynPyCodeComponent(ReportComponent):
-
+    
     title="Dynpy Code for Potential Energy"
 
     @property
     def header_text(self):
         return "Code line responsible for extracting potential energy from dynamic system is as following:"
 
+        
     @property
     def footer_text(self):
         return "Determined piece of code specify energy of the system, which is stored in object."
-
+    
     def append_elements(self):
-
+        
         system = self._system
         dyn_sys=system
-        dyn_sys_lin = dyn_sys
-
 
 
         display(ReportText( self.header_text  ))
@@ -410,60 +409,65 @@ f'''
 
     from dynpy.models.mechanics import *
     from sympy import *
-
+    
     dyn_sys = {system.__class__.__name__}()
 
-    display( Eq(Symbol('V'),
+    display( Eq(Symbol('Ep'),
                      dyn_sys._potential_energy) )
 
-
+    
 '''))
 
         display(ReportText( self.footer_text  ))
-
+        
+        
 class PotentialEnergySymPyCodeComponent(ReportComponent):
-    
+
     title="Sympy Code for Potential Energy"
 
     @property
     def header_text(self):
         return "Code line responsible for providing symbolic form of potential energy is as following:"
 
-        
+
     @property
     def footer_text(self):
         return "Determined piece of code specify energy of the system, which is stored in object."
-    
+
     def append_elements(self):
-        
+
         system = self._system
         dyn_sys=system
-        dyn_sys_lin = dyn_sys
-        Ep=str(dyn_sys._potential_energy)
-        
+
 
         display(ReportText( self.header_text  ))
-        
-        
+
+        Ep=dyn_sys._potential_energy
+
+        code_list=python(system._potential_energy).split('\n')
+
+        var_name = 'Ep'
+
+        code = '\n\n\t'.join(code_list[:-1]) + '\n\n\t' + var_name +code_list[-1][1:]
 
         display(Markdown(
 f'''
-    
-    
 
 
-    from dynpy.models.mechanics import *
+
+
     from sympy import *
-    
-    Ep={Ep}
-    
-    display(Eq(Symbol('V'),Ep))
+
+    {code}
+
+
+    display(Eq(Symbol('E_p'),Ep))
 
 
 
-    
+
 '''))
-        
+
         display(ReportText( self.footer_text  ))
 
 

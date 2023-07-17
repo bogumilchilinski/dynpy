@@ -1581,47 +1581,7 @@ class ForcedDisksWithSerialSprings(ComposedSystem):
             parameters_dict[self.x_r] = self.x_2
 
         return parameters_dict
-    
-#DO ZROBIENIA
-class DoublePendulum(ComposedSystem):
-    scheme_name = 'MDOFTriplePendulum.PNG'
-    real_name = 'TriplePendulum_real.jpg'
 
-    def __init__(self,
-                 m=Symbol('m', positive=True),
-                 m1=Symbol('m_1', positive=True),
-                 m2=Symbol('m_2', positive=True),
-                 l_1=Symbol('l_1', positive=True),
-                 l_2=Symbol('l_2', positive=True),
-                 g=Symbol('g', positive=True),
-                 phi_1=dynamicsymbols('varphi_1'),
-                 phi_2=dynamicsymbols('varphi_2'),
-                 phi_u=dynamicsymbols('varphi_u'),
-                 phi_l=dynamicsymbols('varphi_l'),
-                 qs=dynamicsymbols('varphi_1 varphi_2'),
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        self.m1 = m1
-        self.m2 = m2
-        self.l_1 = l_1
-        self.l_2 = l_2
-        self.phi_1 = phi_1
-        self.phi_2 = phi_2
-        self.phi_u = phi_u
-        self.phi_l = phi_l
-        self.g = g
-
-        x_2 = sin(phi_1)*l_1 + sin(phi_2)*l_2
-        y_2 = cos(phi_1)*l_1 + cos(phi_2)*l_2
-
-        self.Pendulum1 = Pendulum(m1, g, l_1, angle=phi_1, qs=[phi_1])
-        self.material_point_11 = MaterialPoint(m2, x_2, qs=[phi_1, phi_2])
-        self.material_point_21 = MaterialPoint(m2, y_2, qs=[phi_1, phi_2])
-        self.gravity_1 = GravitationalForce(m2, g, pos1=-y_2, qs=[phi_2])
-        
-        system = self.Pendulum1 + self.material_point_11 + self.material_point_21 + self.gravity_1 
-        super().__init__(system(qs),**kwargs)
 
     def get_default_data(self):
 
