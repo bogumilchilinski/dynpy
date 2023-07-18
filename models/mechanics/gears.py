@@ -284,12 +284,12 @@ class EquivalentSDOFGearModel(ComposedSystem):
 
         components = {}
         
-        self.gear_inercia = MaterialPoint(self.m, self.z, qs=self.qs)
+        self.gear_inertia = MaterialPoint(self.m, self.z, qs=self.qs)
         self.gear_stiffness = Spring(self.k, self.z, qs=self.qs)
         self.force = Force(self.F, self.z, qs=self.qs)
         self.gear_damping = Damper(self.c, self.z, qs=self.qs)
         
-        components['gear_inercia'] = self.gear_inercia
+        components['gear_inertia'] = self.gear_inertia
         components['gear_stiffness'] = self.gear_stiffness
         components['force'] = self.force
         components['gear_damping']=self.gear_damping
