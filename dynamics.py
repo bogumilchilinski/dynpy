@@ -285,7 +285,13 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     @classmethod
     def _real_example(cls):
+        """
+        private class method
 
+        Returns:
+            str: relative path to picture of real exaample
+                    
+        """
 
         path = cls._default_folder_path + cls.real_name
         
