@@ -2183,3 +2183,77 @@ class EngineWithTMD(Engine):
         sol_z_tmd=solve(Eq(coef_z_tmd[0], 0), k_E)
         
         return sol_z_tmd[0]
+    
+class VeeEnginePerpendicularSprings(ComposedSystem):
+    scheme_name = 'vee_engine_perpendicular_springs.png'
+    real_name = '440_magnum_v8.jpg'
+    
+    M=Symbol('M', positive=True)
+    k_m=Symbol('k_m', positive=True)
+    m_e=Symbol('m_e', positive=True)
+    e=Symbol('e', positive=True)
+    l=Symbol('l',positive=True)
+    x=dynamicsymbols('x')
+    z=dynamicsymbols('z')
+    phi=dynamicsymbols('phi')
+    ivar=Symbol('t')
+
+    def __init__(self,
+                 M=None,
+                 k_m=None,
+                 m_e=None,
+                 e=None,
+                 l=None,
+                 x=None,
+                 z=None,
+                 phi=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if M is not None: self.M = M
+        if k_m is not None: self.k_m = k_m
+        if m_e is not None: self.m_e = m_e
+        if e is not None: self.e = e
+        if l is not None: self.l = l
+        if x is not None: self.x = x
+        if z is not None: self.z = z
+        if phi is not None: self.phi = phi
+            
+        self.ivar=ivar
+        self.qs=[self.x, self.z]
+        
+        self._init_from_components(**kwargs)
+
+    @cached_property
+    def components(self):
+            
+        components = {}
+            
+        self._MaterialPoint_1x = MaterialPoint(self.M, pos1=self.x, qs=[self.x])
+        self._MaterialPoint_1z = MaterialPoint(self.M, pos1=self.z, qs=[self.z])
+        self._MaterialPoint_2x = MaterialPoint(self.m_e,
+                                             pos1=self.x + self.e * sin(self.phi),
+                                             qs=[self.x])
+        self._MaterialPoint_2z = MaterialPoint(self.m_e,
+                                             pos1=self.z + self.e * cos(self.phi),
+                                             qs=[self.z])
+        self._SpringVer = Spring(2 * self.k_m, pos1=self.z, qs=[self.z])
+        self._SpringHor = Spring(2 * self.k_m, pos1=self.x, qs=[self.x])
+        
+        components['material_point_1x'] = self._MaterialPoint_1x
+        components['material_point_1z'] = self._MaterialPoint_1z
+        components['material_point_2x'] = self._MaterialPoint_2x
+        components['material_point_2z'] = self._MaterialPoint_2z
+        components['vertical_spring'] = self._SpringVer
+        components['horizontal_spring'] = self._SpringHor
+        
+        return components
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.M: r'Mass of engine block',
+            self.k_m: r'Spring stiffness coefficient',
+            self.m_e: r'',
+            self.e: r'',
+        }
+        return self.sym_desc_dict

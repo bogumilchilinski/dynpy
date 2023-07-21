@@ -1,5 +1,5 @@
 """
-This module provides the electrical elements of dynamic systems
+This module provides the examples of mechanical models being practically used in calculations
 """
 
 import importlib

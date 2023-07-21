@@ -446,3 +446,120 @@ class TwoForcedNonLinearDisks(ComposedSystem):
         return amplitude * (-frequency**2 + omega**2) * inertia + S(
             3) / 4 * eps * amplitude**3 - exciting_amp
     
+class TwoDisksWithThreeSprings(ComposedSystem):
+    scheme_name = 'ddof_disks_3_springs_scheme.png'
+    real_name = 'nonlin_trolley_real.PNG'
+
+    d=Symbol('d', positive=True)
+    m1=Symbol('m_1', positive=True)
+    m2=Symbol('m_2', positive=True)
+    kl=Symbol('k_l', positive=True)
+    kc=Symbol('k_c', positive=True)
+    kr=Symbol('k_r', positive=True)
+    R=Symbol('R', positive=True)
+    l_0=Symbol('l_0', positive=True)
+    ivar=Symbol('t')
+    xl=dynamicsymbols('x_l')
+    xr=dynamicsymbols('x_r')
+    x=dynamicsymbols('x')
+    
+    def __init__(self,
+                 d=None,
+                 m1=None,
+                 m2=None,
+                 kl=None,
+                 kc=None,
+                 kr=None,
+                 R=None,
+                 l_0=None,
+                 ivar=Symbol('t'),
+                 xl=None,
+                 xr=None,
+                 x=None,
+                 **kwargs):
+
+        if d is not None: self.d = d
+        if m1 is not None: self.m1 = m1
+        if kl is not None: self.kl = kl
+        if R is not None: self.R = R
+        if m2 is not None: self.m2 = m2
+        if l_0 is not None: self.l_0 = l_0
+        if x is not None: self.x = x
+        if kc is not None: self.kc = kc
+        if kr is not None: self.kr = kr
+        if xl is not None: self.xl = xl
+        if xr is not None: self.xr = xr
+
+        self.ivar=ivar
+        self.qs=[self.xl, self.xr]
+
+        self._init_from_components(**kwargs)
+
+    @cached_property
+    def components(self):
+        
+        components={}
+        
+        
+
+        self.Disk1_lin = MaterialPoint(self.m1, self.xl, qs=[self.xl])
+        self.Disk1_rot = MaterialPoint(self.m1/2*self.R**2, self.xl/self.R, qs=[self.xl])
+        self.spring_l = Spring(self.kl, self.xl, qs=[self.xl])
+        self.Disk2_lin = MaterialPoint(self.m2, self.xr, qs=[self.xr])
+        self.Disk2_rot = MaterialPoint(self.m2/2*self.R**2, self.xr/self.R, qs=[self.xr])
+        self.spring_r = Spring(self.kr,self.xr, qs=[self.xr])
+        self.spring_m = Spring(self.kc, pos1 = self.xl, pos2=self.xr, qs=self.qs)
+        
+        components['_left_disk_lin'] = self.Disk1_lin
+        components['_left_disk_rot'] = self.Disk1_rot
+        components['_right_disk_lin'] = self.Disk2_lin
+        components['_right_disk_rot'] = self.Disk2_rot
+        components['_spring_m'] = self.spring_m
+        components['_spring_r'] = self.spring_r
+        components['_spring_l'] = self.spring_l
+        
+        return components
+
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+
+#             self.d: [1 * l0, 2 * l0, S.Half * l0, 4 * S.Half * l0,  S.Half**2 * l0],
+
+            self.kl: [S.Half * k0, S.Half**2 * k0, 1 * k0, 4 * S.Half * k0, 2 * k0],
+            self.kr: [S.Half * k0, S.Half**2 * k0, 1 * k0, 4 * S.Half * k0, 2 * k0],
+            self.kc: [S.Half * k0, S.Half**2 * k0, 1 * k0, 4 * S.Half * k0, 2 * k0],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+
+
+        return parameters_dict
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m1: r'Disk Mass',
+            self.m2: r'Disk Mass',
+            self.kl: 'Left Spring Stiffness',
+            self.kr: 'Right Spring Stiffness',
+            self.kc: 'Central Spring Stiffness',
+            self.l: r'Length',
+            self.l_0: r'initial Spring Length',
+        }
+        return self.sym_desc_dict
+
+    
