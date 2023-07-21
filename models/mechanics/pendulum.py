@@ -1803,7 +1803,7 @@ class DDOFLinearizedCoupledPendulum(ComposedSystem):
         }
 
         return default_data_dict
-    #Marcel_k
+    #Marcel_k(zmienione na nowy sposób, ale nie wiem czy sprawdzone dokładnie)
 class DoublePendulum(ComposedSystem):
 
     scheme_name = 'MDOFTriplePendulum.PNG'
