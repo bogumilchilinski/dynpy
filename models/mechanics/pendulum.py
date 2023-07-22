@@ -1803,7 +1803,7 @@ class DDOFLinearizedCoupledPendulum(ComposedSystem):
         }
 
         return default_data_dict
-    #Marcel_k
+    #Marcel_k(zmienione na nowy sposób, ale nie wiem czy sprawdzone dokładnie)
 class DoublePendulum(ComposedSystem):
 
     scheme_name = 'MDOFTriplePendulum.PNG'
@@ -1874,3 +1874,188 @@ class DoublePendulum(ComposedSystem):
         components['gravity_1'] = self.gravity_1
 
         return components
+    
+#Grzes
+class InvertedPendulumDDoF(ComposedSystem):
+
+    scheme_name = 'kin_exct_pendulum.PNG'
+    real_name = 'elastic_pendulum_real.PNG'
+    
+    M = Symbol('M', positive=True)
+    l = Symbol('l', positive=True)
+    m = Symbol('m', positive=True)
+    g = Symbol('g', positive=True)
+    Omega = Symbol('Omega', positive=True)
+    phi = dynamicsymbols('\\varphi')
+    x = dynamicsymbols('x')
+    x_0 = Symbol('x_0', positive=True)
+    F = Symbol('F', positive=True)
+    
+    def __init__(self,
+                 M=None,
+                 l=None,
+                 m=None,
+                 g=None,
+                 phi=None,
+                 x=None,
+                 F=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+        if M is not None: self.M = M
+        if l is not None: self.l = l
+        if m is not None: self.m = m
+        if g is not None: self.g = g
+        if phi is not None: self.phi = phi
+        if x is not None: self.x = x
+        if F is not None: self.F = F
+        self.ivar = ivar
+        self.qs = [self.phi, self.x]
+
+        self._init_from_components(**kwargs)
+
+    @cached_property
+    def components(self):
+
+        components = {}
+
+        self._trolley = MaterialPoint(self.M, self.x, qs=[self.x])
+        self._pendulum = KinematicallyExcitedInvertedPendulum(self.l, self.m, self.g, self.phi, self.x, self.ivar)
+        self._force=Force(self.F*sin(self.Omega*self.ivar), pos1=self.x, qs=[self.x, self.phi])
+
+        
+#         self._gravity = GravitationalForce(self.m, self.g, pos1=self.y, qs=self.qs)
+        
+        components['_trolley'] = self._trolley
+        components['_pendulum'] = self._pendulum
+        components['_force'] = self._force
+#         components['_gravity'] = self._gravity
+
+        return components
+
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.l: r'Pendulum length',
+            self.x: r'Kinematic lateral excitation',
+            self.m: r'Mass',
+            self.g: 'Gravity constant',
+        }
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        m0, l0, x0, Omega = symbols('m_0 l_0 x_0 Omega', positive=True)
+
+        default_data_dict = {
+            self.m: [
+                1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0,
+                9 * m0, 10 * m0, 11 * m0, 12 * m0, 13 * m0, 14 * m0, 15 * m0,
+                16 * m0, 17 * m0, 18 * m0, 19 * m0, 20 * m0, 21 * m0, 22 * m0,
+                23 * m0, 24 * m0, 25 * m0, 26 * m0, 27 * m0, 28 * m0, 29 * m0,
+                30 * m0
+            ],
+            self.l: [
+                1 * l0, 2 * l0, 3 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0,
+                9 * l0, 10 * l0, 11 * l0, 12 * l0, 13 * l0, 14 * l0, 15 * l0,
+                16 * l0, 17 * l0, 18 * l0, 19 * l0, 20 * l0, 21 * l0, 22 * l0,
+                23 * l0, 24 * l0, 25 * l0, 26 * l0, 27 * l0, 28 * l0, 29 * l0,
+                30 * l0
+            ],
+            self.x_e: [x0 * sin(self.Omega * self.ivar)],
+            x0: [l0 / (n*20) for n in range(1,11)],
+            
+        }
+        return default_data_dict
+
+    def static_cable_force(self,op_point=0):
+
+    
+        data=self._given_data
+        ans=self.force_in_cable(op_point=op_point)
+        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+        return (free_coeff)
+
+    def max_static_cable_force(self,op_point=0):
+        return abs(self.static_cable_force(op_point=op_point))
+    
+
+    def max_dynamic_cable_force(self,op_point=0):
+        
+        data=self._given_data
+        ans=self.force_in_cable(op_point=op_point)
+        cos_amp = ans.subs({cos(self.Omega*self.ivar):1, sin(self.Omega*self.ivar):0}).subs(data)
+
+        return (abs(cos_amp)) #+ self.max_static_cable_force())
+
+    def static_cable_diameter(self):
+        kr = Symbol('k_r', positive=True)
+        Re = Symbol('R_e', positive=True)
+        return ((4 * self.max_static_cable_force()) / (pi * kr * Re))**(1 / 2)
+
+    def dynamic_cable_diameter(self):
+        kr = Symbol('k_r', positive=True)
+        Re = Symbol('R_e', positive=True)
+        return ((4 * self.max_dynamic_cable_force()) / (pi * kr * Re))**(1 / 2)
+    
+    def force_in_cable(self,op_point=0):
+
+        data=self._given_data
+        dyn_sys=self.subs(data)
+        dyn_sys_lin=dyn_sys.linearized(op_point)
+        phi=dyn_sys_lin._fodes_system.steady_solution[0]
+
+#         m=data[self.m]
+#         l=data[self.l]
+
+        op_point = pi*op_point  #quick workaround - wrong implementation
+
+        force_in_cable = self.m*self.g*(1-S.One/2*(phi - op_point )**2) + self.m * self.l * (phi  - op_point).diff(self.ivar)**2
+        force_subs=force_in_cable.subs(data)#.subs({self.Omega:0.999*dyn_sys_lin.natural_frequencies()[0]})
+
+        return force_subs.doit().expand()
+    
+    def sin_coeff(self):
+        
+        phi=self.phi
+        sin_coeff=self._eoms[0].expand().coeff(sin(phi)) ## eoms[0]: m * L**2 * phi" + m * g * L * sin(phi)  == 0
+
+        return sin_coeff
+        
+    def cos_coeff(self):
+        
+        phi=self.phi
+        cos_coeff=self._eoms[0].expand().coeff(cos(phi))
+        
+        return cos_coeff
+    
+    def equilibrium_position(self):
+        
+        x_e=self.x_e
+        phi=self.phi
+        equilibrium=self.equilibrium_equation_demo(coordinates=True).doit().subs(x_e, 0).doit()[0]
+        solution=solve(equilibrium, phi)
+        solution += [i*solution[1] for i in range(2, 10)]
+        
+        return solution
+    
+    
+        
+    @property
+    def _report_components(self):
+
+        comp_list = [
+            mech_comp.TitlePageComponent,
+            mech_comp.SchemeComponent,
+            mech_comp.ExemplaryPictureComponent,
+            mech_comp.KineticEnergyComponent,
+            mech_comp.PotentialEnergyComponent,
+            mech_comp.LagrangianComponent,
+            #mech_comp.LinearizationComponent,
+            mech_comp.GoverningEquationComponent,
+            mech_comp.FundamentalMatrixComponent,
+            mech_comp.GeneralSolutionComponent,
+            mech_comp.SteadySolutionComponent,
+            mech_comp.PendulumLongitudinalForce,
+        ]
+
+        return comp_list

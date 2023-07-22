@@ -595,7 +595,7 @@ class DampedSymmetricalVehicleSuspension(DampedVehicleSuspension):
 
         return parameters_dict
 
-class SimplifySuspension(ComposedSystem):
+class SimplifySuspension(UndampedVehicleSuspension):
     """
     Ready to use sample Double Degree of Freedom System represents symmetrical kinematically excited beam with two springs.
         Arguments:
@@ -696,33 +696,119 @@ class SimplifySuspension(ComposedSystem):
 
         components = {}
 
-        self._body = RigidBody2D(self.m, (self.m / 12) * (2 * self.l_rod)**2, pos_lin=self.z, pos_rot=self.phi, qs=self.qs)(label='rod')
-        self._spring_l = Spring(self.k_1, pos1=self.z + self.phi * self.l_l, qs=self.qs)
-        self._spring_2 = Spring(self.k_2, pos1=self.z - self.phi * self.l_r, qs=self.qs)(label='right spring')
-        self._force = Force(self.F_engine*cos(self.Omega*self.ivar), pos1=self.z - self.phi * self.l_r, qs=self.qs)(label='force')
+#         self._body = RigidBody2D(self.m, self.I, pos_lin=self.z, pos_rot=self.phi, qs=self.qs)(label='rod')
+#         self._spring_l = Spring(self.k_1, pos1=self.z + self.phi * self.l_l, qs=self.qs)
+#         self._spring_2 = Spring(self.k_2, pos1=self.z - self.phi * self.l_r, qs=self.qs)(label='right spring')
+#         self._force = Force(self.F_engine*cos(self.Omega*self.ivar), pos1=self.z - self.phi * self.l_r, qs=self.qs)(label='force')
 
-        components['_body'] = self._body
-        components['_spring_l'] = self._spring_l
-        components['_spring_2'] = self._spring_2
-        components['_force'] = self._force
+#         components['_body'] = self._body
+#         components['_spring_l'] = self._spring_l
+#         components['_spring_2'] = self._spring_2
+#         components['_force'] = self._force
+
+        self._vehicle = UndampedVehicleSuspension(m=self.m, I=self.I, l_rod=self.l_rod, l_r=self.l_r, k_r=self.k_2, k_l=self.k_1, l_l=self.l_l, F_engine=self.F_engine, Omega=self.Omega, phi=self.phi, z=self.z, ivar=Symbol('t'), qs=None)
+
+        components['_vehicle'] = self._vehicle
 
         return components
 
     def get_default_data(self):
 
         m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
-        e,m_e,nu,t = symbols('e m_e \\nu t',positive=True)
+        e,m_e = symbols('e m_e',positive=True)
 
         default_data_dict = {
-            self.m: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.k_1: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, 3*S.Half * k0],
-            self.k_2: [S.Half * k0, S.Half**2 * k0, 1* k0, 2 * k0, 3 * k0],
-            self.l_l: [1 * l0, 2 * l0, S.Half * l0, 3 * l0, 4 * l0],
-            self.l_r: [3*S.Half * l0, 2 * l0, 1 * l0, 3 * l0, 5 * l0],
-            self.l_rod: [S.Half * l0, 2 * l0, 1 * l0, 4 * l0, 6 * l0],
-            self.F_engine: [e*m_e*nu**2*cos(nu*t)],
-            m_e: [S.Half**2 * m0, S.Half**3 * m0, S.Half**4 * m0, S.Half**5 * m0, S.Half**5 * m0],
-            e: [S.Half**2 * l0, S.Half**3 * l0, S.Half**4 * l0, S.Half**5 * l0, S.Half**5 * l0],
+            self.I: [(self.m / 12) * (2 * self.l_rod)**2],
+            self.m: [m0 * S.One * no for no in range(10,21)],
+            self.k_1: [k0 * S.One * no for no in range(100,201)],
+            self.k_2: [k0 * S.One * no for no in range(100,201)],
+            self.l_l: [l0 * S.One * no for no in range(1,11)],
+            self.l_r: [l0 * S.One * no for no in range(1,11)],
+            self.l_rod: [l0 * S.One * no for no in range(3,7)],
+            self.F_engine: [e*m_e*self.Omega**2],
+            m_e: [m0 * S.One * no for no in range(10,11)],
+            e: [l0 * S.One * no for no in range(1,6)],
         }
 
         return default_data_dict
+    
+class QuarterOfVehicle(ComposedSystem):
+    
+    k_d=Symbol('k_d', positive=True)
+    k_u=Symbol('k_u', positive=True)
+    m_d=Symbol('m_d', positive=True)
+    m_u=Symbol('m_u', positive=True)
+    c=Symbol('c', positive=True)
+    omega=Symbol('omega', positive=True)
+    A_0=Symbol('A_0', positive=True)
+    x_1=dynamicsymbols('x_1')
+    x_2=dynamicsymbols('x_2')
+    ivar=Symbol('t')
+    
+    def __init__(self,
+                 k_d=None,
+                 k_u=None,
+                 m_d=None,
+                 m_u=None,
+                 c=None,
+                 omega=None,
+                 A_0=None,
+                 x_1=None,
+                 x_2=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+    
+    
+        if m_d is not None: self.m_d = m_d
+        if k_d is not None: self.k_d = k_d
+        if m_u is not None: self.m_u = m_u
+        if k_u is not None:self.k_u = k_u
+        if c is not None: self.c=c
+        if omega is not None: self.omega=omega
+        if A_0 is not None: self.A_0=A_0
+        if x_1 is not None: self.x_1 = x_1
+        if x_2 is not None : self.x_2 = x_2
+
+        self.ivar = ivar
+        self.qs = [self.x_1, self.x_2]
+
+        self._init_from_components(**kwargs)
+        
+    @cached_property
+    def components(self):
+        
+        components = {}
+        
+        self._material_point_1 = MaterialPoint(self.m_d, self.x_1, qs=self.qs)
+        self._spring_1 = Spring(self.k_d,self.x_1,self.A_0*sin(self.ivar*self.omega),qs=self.qs)
+        self._material_point_2 = MaterialPoint(self.m_u, self.x_2, qs=self.qs)
+        self._spring_2 = Spring(self.k_u,self.x_1,self.x_2,qs=self.qs)
+        self._damper_1=Damper(self.c,self.x_1,self.x_2, qs=self.qs)
+
+        components['material_point_1'] = self._material_point_1
+        components['spring_1'] = self._spring_1
+        components['material_point_2'] = self._material_point_2
+        components['spring_2'] = self._spring_2
+        components['damper'] = self._damper_1
+        
+        return components
+       
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m_d: r'unsprung mass',
+            self.m_u: r'sprung mass',
+            self.k_d: r'wheel spring stiffness coefficient',
+            self.k_u: r'body spring stiffness coefficient',
+            self.c: r'współczynnik tłumienia zawieszenia',
+            self.A_0: r'amplitude',
+            self.x_1: r'wheel displacement',
+            self.x_2: r'body displacement',
+            self.x_1.diff(t): r'wheel velocity',
+            self.x_2.diff(t): r'body velocity',
+            self.omega: r'circular frequency',
+            self.ivar: r'time',
+            
+        }
+        return self.sym_desc_dict 
+
+    

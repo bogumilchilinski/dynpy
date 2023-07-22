@@ -2618,8 +2618,8 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
     g = Symbol('g', positive=True)
     Omega = Symbol('Omega', positive=True)
     F=Symbol('F', positive=True)
-    phi = dynamicsymbols('\\varphi')
-    x = dynamicsymbols('x')
+    phi = dynamicsymbols('\\Phi')
+    x = dynamicsymbols('X')
     eps = Symbol('epsilon', positive=True)
     m_s = Symbol('m_s', positive=True)
     chi = Symbol('chi', positive=True)
@@ -2785,55 +2785,114 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
 
 
     def dimensionless(self):
-        subs_dict={
-            self.phi:Function('Phi')(ivar*self.omega0),
-            self.x:Function('X')(ivar*self.omega0)}
-
-        q=self.q.subs(subs_dict)
-
-        m_s=self.m_s
-        chi=self.chi
         
-        dimensionless_eoms=(self.dimensionless_inertia_matrix/omega0**2*q.diff(ivar,2)+self.dimensionless_damping_matrix/omega0**2*q.diff(ivar)+self.dimensionless_stiffness_matrix/omega0**2*q-self.dimensionless_external_forces_mat/omega0**2)
+        q=self.q
+        m_p = self.m_p
+        m_t = self.m_t
+        ivar = self.ivar
 
-        wynik=dimensionless_eoms.subs({self.m_t:m_s-self.m_p, self.k:self.omega0**2*m_s,}).expand().doit()
+        inertia_matrix=self.dimensionless_inertia_matrix()
+        damping_matrix=self.dimensionless_damping_matrix()
+        stiffness_matrix=self.dimensionless_stiffness_matrix()
+        external_forces_matrix=self.dimensionless_external_forces_matrix()
 
-        return wynik.subs({self.g:self.l*self.omega0**2*chi}).doit()
+        eoms=inertia_matrix*q.diff(ivar,2)+damping_matrix*q.diff(ivar)+stiffness_matrix*q-external_forces_matrix
+        eoms_left=inertia_matrix*q.diff(ivar,2)+damping_matrix*q.diff(ivar)+stiffness_matrix*q
+        
+        
+        return eoms
 
-    def mass_transfer_function(self):
 
-        subs_dict={
-            self.m_t:self.m_t0 + self.m_f*(1/2-atan(self.rho*self.ivar/self.omega0 - self.rho*self.t0/self.omega0)/pi),
-            self.m_p:self.m_p0 + self.m_f*(1/2+atan(self.rho*self.ivar/self.omega0 - self.rho*self.t0/self.omega0)/pi),
-        }
-        return self.subs(subs_dict)
     
     def dimensionless_inertia_matrix(self):
+        
+        #### nie wiem co z tym, więc zostawię
         inertia_mat=self.inertia_matrix()
         first_inertia_row=inertia_mat.row(0)/inertia_mat[0]
         second_inertia_row=inertia_mat.row(1)/inertia_mat[3]
         dimensionless_inertia_mat=Matrix([[first_inertia_row],[second_inertia_row]])
-        return dimensionless_inertia_mat.doit()
+        #### nie wiem co z tym, więc zostawię
     
+        l = self.l
+        m_p = self.m_p
+        m_t = self.m_t
+        inertia_matrix=Matrix([
+        [1, l*m_p/(m_p+m_t)],
+        [1/l,1]
+        ])
+        
+        return inertia_matrix
+        
     def dimensionless_damping_matrix(self):
+        
+        #### nie wiem co z tym, więc zostawię
         inertia_mat=self.inertia_matrix()
         first_damping_row=self.damping_matrix().row(0)/inertia_mat[0]
         second_damping_row=self.damping_matrix().row(1)/inertia_mat[3]
         dimensionless_damping_mat=Matrix([[first_damping_row],[second_damping_row]])
-        return dimensionless_damping_mat.doit()
+        #### nie wiem co z tym, więc zostawię
+        
+        m_p = self.m_p
+        m_t = self.m_t
+        omega0 = self.omega0
+        lam = self.lam
+        l = self.l
+        chi = self.chi
+        
+        ivar = self.ivar
+        
+        damping_matrix=Matrix([
+                [lam*omega0, l/omega0*m_p.diff(ivar)/(m_p+m_t)],
+                [m_p.diff(ivar)/m_p/l/omega0, (lam*omega0*chi**2+m_p.diff(ivar)/omega0/m_p)]
+            ])
+        
+        return damping_matrix
     
     def dimensionless_stiffness_matrix(self):
+        
+        #### nie wiem co z tym, więc zostawię
         inertia_mat=self.inertia_matrix()
         first_stiffness_row=self.stiffness_matrix().row(0)/inertia_mat[0]
         second_stiffness_row=self.stiffness_matrix().row(1)/inertia_mat[3]
         dimensionless_stiffness_mat=Matrix([[first_stiffness_row],[second_stiffness_row]])
-        return dimensionless_stiffness_mat.doit()
+        #return dimensionless_stiffness_mat.doit()
+        #### nie wiem co z tym, więc zostawię
+
+        chi = self.chi
+        
+        stiffness_matrix=Matrix([
+        [1, 0],
+        [0, chi**2]
+        ])
+        
+        return stiffness_matrix
     
     def dimensionless_external_forces_matrix(self):
+        
+        #### nie wiem co z tym, więc zostawię
         inertia_mat=self.inertia_matrix()
         dimensionless_external_forces_mat=self.external_forces()/inertia_mat[0]
-        return dimensionless_external_forces_mat.doit()
-       
+        dimensionless_external_forces_mat.doit()
+        #### nie wiem co z tym, więc zostawię
+        
+        delta = self.delta
+        psi = self.psi
+        ivar = self.ivar
+        
+        external_forces_matrix=Matrix([
+        [delta*sin(psi*ivar)],
+        [0]
+    ])
+        return external_forces_matrix
+        
+    def mass_transfer_function(self):
+
+        subs_dict={
+            self.m_t:self.m_t0 + self.m_f*(1/2+atan(self.rho*self.ivar/self.omega0 - self.rho*self.t0/self.omega0)/pi),
+            self.m_p:self.m_p0 + self.m_f*(1/2-atan(self.rho*self.ivar/self.omega0 - self.rho*self.t0/self.omega0)/pi),
+        }
+        return subs_dict
+    
     def system_mass_ratio(self):
         return Eq(self.eps, self.m_p/self.m_s)
     

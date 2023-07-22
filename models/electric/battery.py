@@ -281,6 +281,209 @@ class BatteryModeling(ComposedSystem):
         }
         return self.sym_desc_dict
     
+    
+    
+    class CircutRl(ComposedSystem):
+    """
+help help
+
+    """
+    # scheme_name = 'engine.png'
+    # real_name = 'engine_real.PNG'
+    
+
+    resistance=Symbol('R', positive=True)
+    inductance=Symbol('L', positive=True)
+    q0=dynamicsymbols('q_c')
+    qs=dynamicsymbols('qs')
+    frame=Symbol('frame', positive=True)
+    ivar=Symbol('t')
+    
+    
+    
+    def __init__(self,
+                 resistance=None,
+                 inductance=None,
+                 ivar=None,
+                 q0=None,
+                 qs=None,
+                 frame=None,
+                 z=None,
+                 **kwargs):
+
+        
+        
+        if resistance is not None: self.resistance = resistance
+        if inductance is not None: self.inductance = inductance
+        if ivar is not None: self.ivar = ivar
+        if z is not None: self.z = z
+        if q0 is not None: self.q0 = q0
+        if qs is not None: self.qs = qs
+        if frame is not None: self.frame = frame
+
+        self.qs = [self.q0]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+        
+        self.resistor = Resistor(self.resistance, self.q0,  qs=self.qs,ivar=self.ivar , frame=base_frame)('resistor')
+        self.inductor = Inductor(self.inductance, self.q0, ivar=self.ivar, qs=self.qs, frame=base_frame)('inductor')
+        
+        components['resistor'] = self.resistor
+        components['inductor'] = self.inductor
+
+        
+        return components
+        
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.resistance: r'resistance of resistor',
+            self.inductance: r'inductance of inductor',
+        }
+
+        return self.sym_desc_dict
+    
+    
+    
+    class CircutRC(ComposedSystem):
+    """
+help help
+
+    """
+    # scheme_name = 'engine.png'
+    # real_name = 'engine_real.PNG'
+    
+
+    resistance=Symbol('R', positive=True)
+    capacity=Symbol('C', positive=True)
+    q0=dynamicsymbols('q_c')
+    qs=dynamicsymbols('qs')
+    frame=Symbol('frame', positive=True)
+    ivar=Symbol('t')
+    
+    
+    
+    def __init__(self,
+                 resistance=None,
+                 capacity=None,
+                 ivar=None,
+                 q0=None,
+                 qs=None,
+                 frame=None,
+                 z=None,
+                 **kwargs):
+
+        
+        
+        if resistance is not None: self.resistance = resistance
+        if capacity is not None: self.capacity = capacity
+        if ivar is not None: self.ivar = ivar
+        if z is not None: self.z = z
+        if q0 is not None: self.q0 = q0
+        if qs is not None: self.qs = qs
+        if frame is not None: self.frame = frame
+
+        self.qs = [self.q0]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+        
+        self.resistor = Resistor(self.resistance, self.q0,  qs=self.qs,ivar=self.ivar , frame=base_frame)('resistor')
+        self.capacitor = Capacitor(self.capacity, self.q0, ivar=self.ivar, qs=self.qs, frame=base_frame)('capacitor')
+        
+        components['resistor'] = self.resistor
+        components['capacitor'] = self.capacitor
+
+        
+        return components
+        
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.resistance: r'resistance of resistor',
+            self.capacity: r'capacity of capacitor',
+        }
+
+        return self.sym_desc_dict
+    
+    
+    
+    class CircutRLC(ComposedSystem):
+    """
+help help
+
+    """
+    # scheme_name = 'engine.png'
+    # real_name = 'engine_real.PNG'
+    
+
+    resistance=Symbol('R', positive=True)
+    inductance=Symbol('L', positive=True)
+    capacity=Symbol('C', positive=True)
+    q0=dynamicsymbols('q_c')
+    qs=dynamicsymbols('qs')
+    frame=Symbol('frame', positive=True)
+    ivar=Symbol('t')
+    
+    
+    
+    def __init__(self,
+                 resistance=None,
+                 inductance=None,
+                 capacity=None,
+                 ivar=None,
+                 q0=None,
+                 qs=None,
+                 frame=None,
+                 z=None,
+                 **kwargs):
+
+        
+        
+        if resistance is not None: self.resistance = resistance
+        if inductance is not None: self.inductance = inductance
+        if capacity is not None: self.capacity = capacity
+        if ivar is not None: self.ivar = ivar
+        if z is not None: self.z = z
+        if q0 is not None: self.q0 = q0
+        if qs is not None: self.qs = qs
+        if frame is not None: self.frame = frame
+
+        self.qs = [self.q0]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+        
+        self.resistor = Resistor(self.resistance, self.q0,  qs=self.qs,ivar=self.ivar , frame=base_frame)('resistor')
+        self.inductor = Inductor(self.inductance, self.q0, ivar=self.ivar, qs=self.qs, frame=base_frame)('inductor')
+        self.capacitor = Capacitor(self.capacity, self.q0, ivar=self.ivar, qs=self.qs, frame=base_frame)('capacitor')
+        
+        components['resistor'] = self.resistor
+        components['inductor'] = self.inductor
+        components['capacitor'] = self.capacitor
+
+        
+        return components
+        
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.resistance: r'resistance of resistor',
+            self.inductance: r'inductance of inductor',
+            self.capacity: r'capacity of capacitor',
+        }
+
+        return self.sym_desc_dict
 # class BatteryCharging(ComposedSystem):
     
 #     V_OCV = Symbol('V_OCV',positive=True)
