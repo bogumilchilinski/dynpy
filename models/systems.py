@@ -664,7 +664,7 @@ class MDoFDoubleTrolleyWithNonlinearSprings(ComposedSystem):
 
         return parameters_dict
 
-#DO ZROBIENIA
+#ZROBIONE W TMAC
 class SDOFWinchSystem(ComposedSystem):
 
 
@@ -819,7 +819,7 @@ class SDOFWinchSystem(ComposedSystem):
         return st_val
 
     
-#DO ZROBIENIA
+#DO ZROBIENIA i wloenia do modulu tmac
 class SDOFDrivetrainVehicleSystem(ComposedSystem):
 
 
