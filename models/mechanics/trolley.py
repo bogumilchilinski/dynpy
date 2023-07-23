@@ -2999,6 +2999,7 @@ class DoubleTrolleyWithNonlinearSprings(ComposedSystem):
 
         return parameters_dict
 
+#TODO
 
 #DO SPRAWDZENIA - PRZENIESIONO Z MODUŁU mdof.py
 class DampedTrolleysWithSprings(ComposedSystem):
@@ -3091,6 +3092,7 @@ class DampedTrolleysWithSprings(ComposedSystem):
         return parameters_dict
 
 
+#TODO
 #DO SPRAWDZENIA - PRZENIESIONO Z MODUŁU mdof.py
 class DoubleTrolleyDifferentWheels(ComposedSystem):
     scheme_name = 'MDOFDoubleTrolleyDifferentWheels.PNG'
@@ -3177,7 +3179,7 @@ class DoubleTrolleyDifferentWheels(ComposedSystem):
 
         return default_data_dict
 
-
+#TODO
 #DO SPRAWDZENIA - PRZENIESIONO Z MODUŁU mdof.py
 class ForcedTrolleysWithSprings(ComposedSystem):
     scheme_name = 'mdof_three_trolleys.PNG'
