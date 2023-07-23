@@ -1878,7 +1878,7 @@ class DoublePendulum(ComposedSystem):
 #Grzes
 class InvertedPendulumDDoF(ComposedSystem):
 
-    scheme_name = 'kin_exct_pendulum.PNG'
+    scheme_name = 'InvertedPendulumDDoF.PNG'
     real_name = 'elastic_pendulum_real.PNG'
     
     M = Symbol('M', positive=True)

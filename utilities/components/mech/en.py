@@ -310,48 +310,52 @@ f'''
         
         
 class KineticEnergySymPyCodeComponent(ReportComponent):
-    
-    title="Sympy Code for Kinetic Energy"
+
+    title="Sympy Code for Potential Energy"
 
     @property
     def header_text(self):
         return "Code line responsible for providing symbolic form of kinetic energy is as following:"
 
-        
+
     @property
     def footer_text(self):
         return "Determined piece of code specify energy of the system related to its inertial properties."
-    
+
     def append_elements(self):
-        
+
         system = self._system
         dyn_sys=system
-        dyn_sys_lin = dyn_sys
-        Ek=str(dyn_sys._kinetic_energy)
-        
+
 
         display(ReportText( self.header_text  ))
-        
-        
+
+        Ep=dyn_sys._kinetic_energy
+
+        code_list=python(system._kinetic_energy).split('\n')
+
+        var_name = 'Ek'
+
+        code = '\n\n\t'.join(code_list[:-1]) + '\n\n\t' + var_name +code_list[-1][1:]
 
         display(Markdown(
 f'''
-    
-    
 
 
-    from dynpy.models.mechanics import *
+
+
     from sympy import *
-    
-    Ek={Ek}
-    
+
+    {code}
+
+
     display(Eq(Symbol('T'),Ek))
 
 
 
-    
+
 '''))
-        
+
         display(ReportText( self.footer_text  ))
 
     

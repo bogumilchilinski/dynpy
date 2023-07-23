@@ -923,7 +923,7 @@ class DampedDoubleDiskShaftHarmonicExcitation(DoubleDiskShaftHarmonicExcitation)
         self.moment_disc1=Force(self.T_1, pos1=self.phi_1)
         self.moment_disc2=Force(self.T_2, pos1=self.phi_2)
         self.damper_1 = Damper(self.c1, pos1=self.phi_1, pos2=self.phi_2, qs=self.qs)
-        self.damper_2 = Damper(self.c2, pos1=self.phi_2, pos2=self.theta, qs=self.qs)
+        self.damper_2 = Damper(self.c2, pos1=self.phi_2, pos2=self.phi_2, qs=self.qs)
         
 
         components['disc_1'] = self.disc_1
@@ -945,45 +945,25 @@ class DampedDoubleDiskShaftHarmonicExcitation(DoubleDiskShaftHarmonicExcitation)
         }
         return self.sym_desc_dict
 
-#     def get_default_data(self):
-
-#         m0, l0 , G, l,  d, T0 = self.m0, self.l0 , self.G, self.l,  self.d, self.T0
-#         theta0, Omega0 = symbols('theta_0 Omega_0', positive=True)
-
-#         default_data_dict = {
-#             self.I_m1: [S.Half*m0*(l0**2)*no for no in range(1,9)],
-#             self.I_m2: [S.Half*m0*(l0**2)*no for no in range(1,9)],
-#             self.I_1: [S.Half**(no)*(l0**4) for no in range(1,9)],
-#             self.I_2: [S.Half**no*(l0**4) for no in range(1,9)],
-#             self.l_1: [S.Half**(no-6)*l0 for no in range(1,9)],
-#             self.l_2: [S.Half**(no-6)*l0 for no in range(1,9)],
-#             self.T_1: [T0 * (no) for no in range(1,12)],
-#             self.T_2: [T0 * (no) for no in range(1,12)],
-#             self.theta:[S.One * theta0 * (no) for no in range(1,5)],
-# #             self.Omega:[S.One * Omega0],
-            
-#         }
-
-#         return default_data_dict
 
     def get_default_data(self):
 
-        m0, l0 , G, l,  d, T0 = self.m0, self.l0 , self.G, self.l,  self.d, self.T0
+        m0, l0 , G, l,  d, T0, lam = self.m0, self.l0 , self.G, self.l,  self.d, self.T0 ,Symbol('lambda')
         theta0, Omega = self.theta0, self.Omega
 
         default_data_dict = {
-            self.k_1:[self.k_1],
-            self.k_2:[self.k_2],
-            self.I_m1: [S.Half*m0*(l0**2)],
-            self.I_m2: [S.Half*m0*(l0**2)],
-            self.I_1: [S.Half*(l0**4)],
-            self.I_2: [S.Half*(l0**4)],
-            self.l_1: [S.Half*l0,2*S.Half*l0,4*S.Half*l0],
-            self.l_2: [S.Half*l0,2*S.Half*l0,4*S.Half*l0],
-            self.T_1: [T0],
-            self.T_2: [T0],
-            self.c1: [self.c1],
-            self.c2: [self.c2]
+            self.I_m1: [S.Half*m0*(l0**2)*no for no in range(1,9)],
+            self.I_m2: [S.Half*m0*(l0**2)*no for no in range(1,9)],
+            self.I_1: [S.Half**(no)*(l0**4) for no in range(1,9)],
+            self.I_2: [S.Half**no*(l0**4) for no in range(1,9)],
+            self.l_1: [S.Half**(no-6)*l0 for no in range(1,9)],
+            self.l_2: [S.Half**(no-6)*l0 for no in range(1,9)],
+            self.T_1: [T0 * (no) for no in range(1,12)],
+            self.T_2: [T0 * (no) for no in range(1,12)],
+            #self.theta:[theta0* cos(self.Omega * self.ivar) ],
+            self.c1: [self.k_1 * (no) * lam for no in range (1,9)],
+            self.c2: [self.k_2 * (no) * lam for no in range (1,9)]
+            
         }
 
         return default_data_dict
@@ -1052,6 +1032,7 @@ class DampedDoubleDiskShaftHarmonicExcitation(DoubleDiskShaftHarmonicExcitation)
         kd=Symbol('k_d', positive=True)
         h=Symbol('h', positive=True)
         return (2*self.max_dynamic_disk_2_bearing_force())/(kd*h)
+    
     
 #DO POPRAWY
 class TripleShaft(ComposedSystem):
