@@ -285,8 +285,7 @@ class BatteryModeling(ComposedSystem):
     
     class CircutRl(ComposedSystem):
     """
-help help
-
+    A class that determines the equation of an electrical circuit in an RL system
     """
     # scheme_name = 'engine.png'
     # real_name = 'engine_real.PNG'
@@ -351,8 +350,7 @@ help help
     
     class CircutRC(ComposedSystem):
     """
-help help
-
+    A class that determines the equation of an electrical circuit in an RC system
     """
     # scheme_name = 'engine.png'
     # real_name = 'engine_real.PNG'
@@ -417,8 +415,7 @@ help help
     
     class CircutRLC(ComposedSystem):
     """
-help help
-
+    A class that determines the equation of an electrical circuit in an RLC system
     """
     # scheme_name = 'engine.png'
     # real_name = 'engine_real.PNG'
