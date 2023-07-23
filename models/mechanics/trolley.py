@@ -2611,14 +2611,14 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
     m_t0 = Symbol('m_t0', positive=True)
     m_p = Function('m_p')(ivar)
     m_p0 = Symbol('m_p0', positive=True)
-    lam = Symbol('\\lambda', positive=True)
-    t0 = Symbol('t_0', positive=True)
+    lam = Symbol('lambda', positive=True)
+    t0 = Symbol('tau_0', real=True)
     k = Symbol('k', positive=True)
     omega0=Symbol('omega_0', positive=True)
     g = Symbol('g', positive=True)
     Omega = Symbol('Omega', positive=True)
     F=Symbol('F', positive=True)
-    phi = dynamicsymbols('\\Phi')
+    phi = dynamicsymbols('Phi')
     x = dynamicsymbols('X')
     eps = Symbol('epsilon', positive=True)
     m_s = Symbol('m_s', positive=True)
@@ -2888,10 +2888,23 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
     def mass_transfer_function(self):
 
         subs_dict={
-            self.m_t:self.m_t0 + self.m_f*(1/2+atan(self.rho*self.ivar/self.omega0 - self.rho*self.t0/self.omega0)/pi),
-            self.m_p:self.m_p0 + self.m_f*(1/2-atan(self.rho*self.ivar/self.omega0 - self.rho*self.t0/self.omega0)/pi),
+            self.m_t:self.m_t0 + self.m_f*(1/2-atan(self.rho*self.ivar/self.omega0 - self.rho*self.t0/self.omega0)/pi),
+            self.m_p:self.m_p0 + self.m_f*(1/2+atan(self.rho*self.ivar/self.omega0 - self.rho*self.t0/self.omega0)/pi),
         }
         return subs_dict
+
+    def dimensionless_with_transfer(self):
+        return self.dimensionless().subs(self.mass_transfer_function()).doit()
+
+    def dimensionless_with_const_mass(self):
+        
+        m_p_const = Symbol('m_p', positive=True)
+        m_t_const = Symbol('m_t', positive=True)
+        
+        masses_dict = ({self.m_p:m_p_const,self.m_t:m_t_const })
+        
+        return self.dimensionless().subs(masses_dict).doit().subs({m_t_const:(-m_p_const+m_p_const/self.eps)}) # it's a bit tricky, start with checking it if something doesn't work
+    
     
     def system_mass_ratio(self):
         return Eq(self.eps, self.m_p/self.m_s)
