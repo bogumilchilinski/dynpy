@@ -61,7 +61,6 @@ class skyscraper(ComposedSystem):
         -We call out the instance of the class
         -If necessary assign values for the default arguments
 
-
     """
     scheme_name = 'engine.png'
     real_name = 'engine_real.PNG'
@@ -96,7 +95,6 @@ class skyscraper(ComposedSystem):
         if x is not None: self.x = x
         if c is not None: self.c= c
         if ivar is not None: self.ivar = ivar
-
         
    
         self.qs = [self.x]

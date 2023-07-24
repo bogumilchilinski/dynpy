@@ -25,6 +25,8 @@ def plots_no():
         yield num
         num += 1
 
+
+
 class ComposedSystem(HarmonicOscillator):
     """Base class for all systems
 
@@ -289,7 +291,6 @@ class ComposedSystem(HarmonicOscillator):
 
 
 
-
 class NonlinearComposedSystem(ComposedSystem):
 
     def frequency_response_function(self,
@@ -441,13 +442,8 @@ class SpringMassSystem(ComposedSystem):
 
         return self.sym_desc_dict
     
-    
-    
 
-    
-    
-    
-    
+
 class DampedMeasuringTool(ComposedSystem):
 
     scheme_name = 'measure_tool.PNG'
@@ -585,7 +581,72 @@ class DampedMeasuringTool(ComposedSystem):
         Re = Symbol('R_e', positive=True)
         return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
     
-    
+
+#TODO
+#DO ZROBIENIA - PRZENIESIONO Z MODUŁU systems.py
+class LagrangeIBlocksOnInclinedPlane(ComposedSystem):
+    scheme_name = 'ddof_disks_3_springs_scheme.png'
+    real_name = 'nonlin_trolley_real.PNG'
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 m3=Symbol('m_3', positive=True),
+                 m4=Symbol('m_4', positive=True),
+                 R=Symbol('R', positive=True),
+                 g=Symbol('g', positive=True),
+                 alpha=Symbol('alpha',positive=True),
+                 beta=Symbol('beta',positive=True),
+                 ivar=Symbol('t'),
+                 x1=dynamicsymbols('x_1'),
+                 x2=dynamicsymbols('x_2'),
+                 x3=dynamicsymbols('x_3'),
+                 x4=dynamicsymbols('x_4'),
+                 phi=dynamicsymbols('\\varphi'),
+                 qs=dynamicsymbols('x_1, x_2, x_3, x_4, \\varphi'),
+                 **kwargs):
+
+        self.m = m
+        self.m1 = m1
+        self.m2 = m2
+        self.m3 = m3
+        self.m4 = m4
+
+        self.Mass1 = MaterialPoint(m1, pos1=x1, qs=[x1]) + GravitationalForce(m1, g, pos1=-x1*sin(alpha), qs=[x1])
+        self.Mass2 = MaterialPoint(m2, pos1=x2, qs=[x2]) + GravitationalForce(m2, g, pos1=-x2*sin(alpha), qs=[x2])
+        self.Mass3 = MaterialPoint(m3, pos1=x3, qs=[x3]) + GravitationalForce(m3, g, pos1=-x3*sin(beta), qs=[x3])
+        self.Mass4 = MaterialPoint(m4, pos1=x4, qs=[x4]) + GravitationalForce(m4, g, pos1=-x4*sin(beta), qs=[x4])
+        self.Pulley = MaterialPoint(1/2*m*R**2, pos1=phi, qs=[phi])
+
+        system = self.Mass1 + self.Mass2 + self.Mass3 + self.Mass4 + self.Pulley
+        super().__init__(system.lagrangian(),qs=qs, hol_coneqs=[x1-x2,phi*R-x2,x2-x3,phi*R-x3],**kwargs)
+    def get_default_data(self):
+
+        m0 = symbols('m_0', positive=True)
+
+        default_data_dict = {
+            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m4: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        return parameters_dict
+
+
 class LagrangeIOnMathFunction(ComposedSystem):
 
     scheme_name = 'mat_point_parabola.PNG'
@@ -631,6 +692,8 @@ class LagrangeIOnMathFunction(ComposedSystem):
 
         return default_data_dict
     
+
+
 class CrankSystem(ComposedSystem):
 
     scheme_name = 'crank_mechanismlow.jpg'
@@ -835,6 +898,8 @@ class CrankSystem(ComposedSystem):
 
         return default_data_dict
 
+
+
 class MaterialPointMovement(ComposedSystem):
 
     m = Symbol('m', positive=True)
@@ -924,6 +989,7 @@ class MaterialPointMovement(ComposedSystem):
 
             
 #Kuba #poprawione            
+
 class KinematicClutchWithSprings(ComposedSystem):
     #scheme_name = ''
     #real_name = ''

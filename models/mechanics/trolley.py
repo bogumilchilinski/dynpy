@@ -26,6 +26,8 @@ ureg = UnitRegistry()
 
 from functools import cached_property, lru_cache
 
+
+
 #Patryk
 #dane domyślne i numeryczne
 class SpringMassSystem(ComposedSystem):
@@ -111,6 +113,8 @@ class SpringMassSystem(ComposedSystem):
         }
 
         return self.sym_desc_dict
+
+
 
 #dane domyślne i numeryczne
 class ForcedSpringMassSystem(SpringMassSystem):
@@ -204,6 +208,8 @@ class ForcedSpringMassSystem(SpringMassSystem):
         }
 
         return {**super().symbols_description(),**self.sym_desc_dict}
+
+
 
 #dziedziczenie po SpringMass
 #dane domyślne i numeryczne
@@ -303,7 +309,9 @@ class SpringDamperMassSystem(ComposedSystem):
 
         return self.sym_desc_dict
 
-    #można spróbować dziedizczyć bo SPringMass
+
+
+#można spróbować dziedizczyć bo SPringMass
 class SprungTrolley(ComposedSystem):
     """Ready to use sample Single Degree of Freedom System with mass on spring
         Arguments:
@@ -423,6 +431,7 @@ class SprungTrolley(ComposedSystem):
         return self.sym_desc_dict
 
     
+
 class NonLinearTrolley(NonlinearComposedSystem):
     
     scheme_name = 'nonlin_trolley.PNG'
@@ -521,6 +530,8 @@ class NonLinearTrolley(NonlinearComposedSystem):
         }
 
         return default_data_dict
+
+
 
 #Zrobione Amadi
 class TrolleyWithPendulum(ComposedSystem):
@@ -671,6 +682,8 @@ class TrolleyWithPendulum(ComposedSystem):
         #display(force_subs.doit().expand())
         return force_subs.doit().expand()
     
+
+
 # class DampedTrolleysWithSprings(ComposedSystem):
 #     scheme_name = 'MDOF_Damped_Trolleys_With_Springs.PNG'
 #     real_name = 'two_damped_trolleys.png'
@@ -1013,6 +1026,8 @@ class TrolleysWithSprings(NonlinearComposedSystem):
         #components['force'] = self._force
         
         return components
+
+
 
 class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
     
@@ -1462,6 +1477,8 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
 
         return comp_list
 
+
+
 ### Nieliniowe
 class ForcedTrolleysWithNonLinearSprings(NonlinearComposedSystem):
     
@@ -1539,6 +1556,8 @@ class ForcedTrolleysWithNonLinearSprings(NonlinearComposedSystem):
 
         return (self.components['spring_1'].force().subs(amps)).subs(data).expand().doit()
     
+
+
 class ForcedTrolleyWithSpring(ComposedSystem): ### 1 ODE
     
     scheme_name = 'nonlin_trolley.PNG'
@@ -1671,6 +1690,8 @@ class ForcedTrolleyWithSpring(ComposedSystem): ### 1 ODE
         
         return comp_list
     
+
+
 class ForcedDampedTrolleyWithSpring(ComposedSystem): ### 2 ODE
     
     scheme_name = 'nonlin_trolley.PNG'
@@ -1824,6 +1845,8 @@ class ForcedThreeTrolleysWithSprings(ComposedSystem): ### 7 ODE
 
         return default_data_dict
     
+
+
 class ForcedDisconnectedTrolleysWithSprings(ForcedThreeTrolleysWithSprings): ### 5 ODE
 
     @property
@@ -1853,6 +1876,8 @@ class ForcedDisconnectedTrolleysWithSprings(ForcedThreeTrolleysWithSprings): ###
         
         return components    
     
+
+
 class ForcedDampedThreeTrolleysWithSprings(ComposedSystem): ### 8 ODE
     
     scheme_name = 'nonlin_trolley.PNG'
@@ -1952,6 +1977,8 @@ class ForcedDampedThreeTrolleysWithSprings(ComposedSystem): ### 8 ODE
 
         return default_data_dict
 
+
+
 class ForcedDampedDisconnectedTrolleysWithSprings(ForcedDampedThreeTrolleysWithSprings): ### 6 ODE
 
     @property
@@ -1990,6 +2017,8 @@ class ForcedDampedDisconnectedTrolleysWithSprings(ForcedDampedThreeTrolleysWithS
         components['force'] = self._force
         
         return components
+
+
 
 class DDoFTwoNonLinearTrolleys(NonlinearComposedSystem):
     
@@ -2140,6 +2169,8 @@ class DDoFTwoNonLinearTrolleys(NonlinearComposedSystem):
 
 
         return (self.components['_spring12'].force().subs(data).subs(amps)).expand().doit()
+
+
 
 class VariableMassTrolleyWithPendulum(ComposedSystem):
 
@@ -2299,7 +2330,8 @@ class VariableMassTrolleyWithPendulum(ComposedSystem):
         }
         return self.sym_desc_dict
     
-    
+
+
 class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
 
     scheme_name = 'kin_exct_pendulum.PNG'
@@ -2509,6 +2541,7 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
         }
         return self.sym_desc_dict
 
+
 #Amadi
 class TrolleyWithTMD(ComposedSystem):
 
@@ -2597,7 +2630,8 @@ class TrolleyWithTMD(ComposedSystem):
         }
         return default_data_dict
 
-    
+
+
 class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
 
     scheme_name = 'trolley_pendulum_tmd.png'
@@ -2921,6 +2955,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
     def dimensionless_time(self):
         return Eq(self.tau, self.ivar*self.omega0)
     
+
 #TODO
 #DO SPRAWDZENIA - PRZENIESIONO Z MODUŁU mdof.py
 class DoubleTrolleyWithNonlinearSprings(ComposedSystem):
@@ -3012,8 +3047,8 @@ class DoubleTrolleyWithNonlinearSprings(ComposedSystem):
 
         return parameters_dict
 
-#TODO
 
+#TODO
 #DO SPRAWDZENIA - PRZENIESIONO Z MODUŁU mdof.py
 class DampedTrolleysWithSprings(ComposedSystem):
     scheme_name = 'MDOF_Damped_Trolleys_With_Springs.PNG'
@@ -3192,6 +3227,7 @@ class DoubleTrolleyDifferentWheels(ComposedSystem):
 
         return default_data_dict
 
+
 #TODO
 #DO SPRAWDZENIA - PRZENIESIONO Z MODUŁU mdof.py
 class ForcedTrolleysWithSprings(ComposedSystem):
@@ -3308,3 +3344,570 @@ class ForcedTrolleysWithSprings(ComposedSystem):
 
         return parameters_dict
     
+
+#TODO
+#DO SPRAWDZENIA - PRZENIESIONO Z MODUŁU systems.py
+class MDoFDoubleTrolleyWithNonlinearSprings(ComposedSystem):
+    scheme_name = 'MDOF_Double_Trolley_With_Springs.PNG'
+    real_name = 'sdof_nonlinspring_trolleys_real.PNG'
+
+    def __init__(self,
+                 R=Symbol('R', positive=True),
+                 m=Symbol('m', positive=True),
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 k_l=Symbol('k_l', positive=True),
+                 k_cl=Symbol('k_cl', positive=True),
+                 k_c=Symbol('k_c', positive=True),
+                 k_cc=Symbol('k_cc', positive=True),
+                 k_r=Symbol('k_r', positive=True),
+                 k_cr=Symbol('k_cr', positive=True),
+                 mu=Symbol('mu', positive=True),
+                 x_l=dynamicsymbols('x_l'),
+                 x_r=dynamicsymbols('x_r'),
+                 x=dynamicsymbols('x'),
+                 qs=dynamicsymbols('x_l x_r'),
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        self.m = m
+        self.m1 = m1
+        self.m2 = m2
+        self.k_l = k_l
+        self.k_cl = k_cl
+        self.k_c = k_c
+        self.k_cc = k_cc
+        self.k_r = k_r
+        self.k_cr = k_cr
+        self.x_l = x_l
+        self.x_r = x_r
+        self.x = x
+        self.R = R
+        self.mu = mu
+
+        self.Trolley_1 = (MaterialPoint(m1, x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[x_l]) 
+                          + Spring(k_cl*(1-mu*x_l**2), pos1=x_l, qs=[x_l]) 
+                          + MaterialPoint(m, x_l/2, qs = [x_l]) + MaterialPoint(m/2, x_l/2, qs = [x_l]) + MaterialPoint(m, x_l/2, qs = [x_l]) 
+                          + MaterialPoint(m/2, x_l/2, qs = [x_l]))
+        
+        
+       
+        self.Trolley_2 = (MaterialPoint(m2, x_r, qs=[x_r]) + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) 
+                          + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) + Spring(k_cc*(1-mu*(x_r - x_l)**2), pos1=x_l, pos2=x_r, qs=[x_l, x_r]) 
+                          + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_cr*(1-mu*x_r**2), pos1=x_r, qs=[x_r]) 
+                          + MaterialPoint(m, x_r/2, qs = [x_r]) + MaterialPoint(m/2, x_r/2, qs = [x_r]) + MaterialPoint(m, x_r/2, qs = [x_r]) + MaterialPoint(m/2, x_r/2, qs = [x_r]))
+
+        system = self.Trolley_1 + self.Trolley_2
+        super().__init__(system(qs),**kwargs)
+
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
+            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.m: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_cl: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_c: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_cc: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_cr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+
+            self.x_l: [self.x, 0],
+            self.x_r: [self.x, 0],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.x_l] == 0 and parameters_dict[self.x_r]==0:
+
+            parameters_dict[self.x_l] = self.x
+
+
+        return parameters_dict
+
+
+#TODO
+#DO SPRAWDZENIA - PRZENIESIONO Z MODUŁU systems.py
+class MDoFDampedTrolleysWithSprings(ComposedSystem):
+    scheme_name = 'MDOF_Damped_Trolleys_With_Springs.PNG'
+    real_name = 'two_damped_trolleys.png'
+
+    def __init__(self,
+                 R=Symbol('R', positive=True),
+                 m=Symbol('m', positive=True),
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 k_l=Symbol('k_l', positive=True),
+                 c_cl=Symbol('c_cl', positive=True),
+                 k_c=Symbol('k_c', positive=True),
+                 c_cc=Symbol('c_cc', positive=True),
+                 k_r=Symbol('k_r', positive=True),
+                 c_cr=Symbol('c_cr', positive=True),
+                 x_l=dynamicsymbols('x_l'),
+                 x_r=dynamicsymbols('x_r'),
+                 x=dynamicsymbols('x'),
+                 qs=dynamicsymbols('x_l x_r'),
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        self.m1 = m1
+        self.m2 = m2
+        self.m = m
+        self.k_l = k_l
+        self.c_cl = c_cl
+        self.k_c = k_c
+        self.c_cc = c_cc
+        self.k_r = k_r
+        self.c_cr = c_cr
+        self.x_l = x_l
+        self.x_r = x_r
+        self.x = x
+        self.R = R
+
+        self.Trolley_1 = (MaterialPoint(m1, x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[x_l]) 
+                          + Spring(k_l, pos1=x_l, qs=[x_l]) + Damper(c_cl, pos1=x_l, qs=[x_l]) 
+                          + MaterialPoint(m, x_l/2, qs = [x_l]) + MaterialPoint(m/2, x_l/2, qs = [x_l]) + MaterialPoint(m, x_l/2, qs = [x_l]) 
+                          + MaterialPoint(m/2, x_l/2, qs = [x_l]))
+
+        self.Trolley_2 = (MaterialPoint(m2, x_r, qs=[x_r]) + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) 
+                          + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) 
+                          + Damper(c_cc, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) 
+                          + Damper(c_cr, pos1=x_r, qs=[x_r]) + MaterialPoint(m, x_r/2, qs = [x_r]) + MaterialPoint(m/2, x_r/2, qs = [x_r]) + MaterialPoint(m, x_r/2, qs = [x_r]) 
+                          + MaterialPoint(m/2, x_r/2, qs = [x_r]))
+
+        system = self.Trolley_1 + self.Trolley_2
+        super().__init__(system(qs),**kwargs)
+
+    def get_default_data(self):
+
+        m0, k0, l0, lam = symbols('m k l_0 lambda', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+
+            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+            self.k_c: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+
+            self.c_cr: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
+            self.c_cc: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
+            self.c_cl: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
+
+            self.x_l: [self.x, 0],
+            self.x_r: [self.x, 0],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.x_l] == 0 and parameters_dict[self.x_r]==0:
+
+            parameters_dict[self.x_l] = self.x
+
+
+        return parameters_dict
+
+
+#TODO
+#DO SPRAWDZENIA - PRZENIESIONO Z MODUŁU systems.py
+class SDoFDoubleTrolleyDifferentWheels(ComposedSystem):
+    scheme_name = 'MDOFDoubleTrolleyDifferentWheels.PNG'
+    real_name = 'MDOFDoubleTrolleyDifferentWheels.PNG'
+
+    def __init__(self,
+                 x_l=dynamicsymbols('x_l'),
+                 x_r=dynamicsymbols('x_r'),
+                 x_1=dynamicsymbols('x_1'),
+                 x_2=dynamicsymbols('x_2'),
+                 m_w1=Symbol('m_w1', positive=True),
+                 m_w2=Symbol('m_w2', positive=True),
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 R=Symbol('R', positive=True),
+                 k_l=Symbol('k_l', positive=True),
+                 c_cl=Symbol('c_cl', positive=True),
+                 k_c=Symbol('k_c', positive=True),
+                 c_cc=Symbol('c_cc', positive=True),
+                 k_r=Symbol('k_r', positive=True),
+                 c_cr=Symbol('c_cr', positive=True),
+                 lam=Symbol('lambda', positive=True),
+
+                 qs=dynamicsymbols('x_l x_r'),
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        self.m1 = m1
+        self.m2 = m2
+        self.m_w1 = m_w1
+        self.m_w2 = m_w2
+        self.k_l = k_l
+        self.c_cl = c_cl
+        self.k_c = k_c
+        self.c_cc = c_cc
+        self.k_r = k_r
+        self.c_cr = c_cr
+        self.x_l = x_l
+        self.x_r = x_r
+        self.x_1 = x_1
+        self.x_2 = x_2
+        self.R = R
+        self.lam = lam
+
+        self.trolley_1 = (MaterialPoint(m1, x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[x_l]) 
+                          + Spring(k_l, pos1=x_l, qs=[x_l]) + Damper(c_cl, pos1=x_l, qs=[x_l]) 
+                          + MaterialPoint(m_w1, x_l/2, qs = [x_l]) + MaterialPoint(m_w1/2, x_l/2, qs = [x_l]) + MaterialPoint(m_w1, x_l/2, qs = [x_l])
+                          + MaterialPoint(m_w1/2, x_l/2, qs = [x_l]))
+
+        self.trolley_2 = (MaterialPoint(m2, x_r, qs=[x_r]) + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) 
+                          + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) 
+                          + Damper(c_cc, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) 
+                          + Damper(c_cr, pos1=x_r, qs=[x_r]) + MaterialPoint(m_w2, x_r/2, qs = [x_r]) + MaterialPoint(m_w2/2, x_r/2, qs = [x_r]) + MaterialPoint(m_w2, x_r/2, qs = [x_r])
+                          + MaterialPoint(m_w2/2, x_r/2, qs = [x_r]))
+
+        system = self.trolley_1 + self.trolley_2
+        super().__init__(system(qs),**kwargs)
+
+        
+    def get_default_data(self):
+
+        m0, k0, l0, lam = symbols('m_0 k_0 l_0 lambda', positive=True)
+
+        default_data_dict = {
+            self.m1: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
+            self.m2: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
+            self.m_w1: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
+            self.m_w2: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
+            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+            self.k_c: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+
+            self.c_cr: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
+            self.c_cc: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
+            self.c_cl: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
+
+            self.x_l: [self.x, 0],
+            self.x_r: [self.x, 0],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.x_l] == 0 and parameters_dict[self.x_r]==0:
+
+            parameters_dict[self.x_l] = self.x
+
+
+        return parameters_dict
+
+
+#TODO
+#DO SPRAWDZENIA - - PRZENIESIONO Z MODUŁU systems.py
+class MDoFDoubleTrolleyDifferentWheels(ComposedSystem):
+    scheme_name = 'MDOFDoubleTrolleyDifferentWheels.PNG'
+    real_name = 'DoubleTrolley_real.png'
+
+    def __init__(self,
+                 R=Symbol('R', positive=True),
+                 m_w1=Symbol('m_w1', positive=True),
+                 m_w2=Symbol('m_w2', positive=True),
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 k_l=Symbol('k_l', positive=True),
+                 c_cl=Symbol('c_cl', positive=True),
+                 k_c=Symbol('k_c', positive=True),
+                 c_cc=Symbol('c_cc', positive=True),
+                 k_r=Symbol('k_r', positive=True),
+                 c_cr=Symbol('c_cr', positive=True),
+                 lam=Symbol('lambda', positive=True),
+                 x_l=dynamicsymbols('x_l'),
+                 x_r=dynamicsymbols('x_r'),
+                 x_1=dynamicsymbols('x_1'),
+                 x_2=dynamicsymbols('x_2'),
+                 x=dynamicsymbols('x'),
+                 qs=dynamicsymbols('x_l x_r'),
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        self.x_l = x_l
+        self.x_r = x_r
+        self.x_1 = x_1
+        self.x_2 = x_2
+        self.x=x
+        self.m1 = m1
+        self.m2 = m2
+        self.m_w1 = m_w1
+        self.m_w2 = m_w2
+        self.k_l = k_l
+        self.c_cl = c_cl
+        self.k_c = k_c
+        self.c_cc = c_cc
+        self.k_r = k_r
+        self.c_cr = c_cr
+        self.R = R
+        self.lam = lam
+
+        self.trolley_1 = (MaterialPoint(m1, x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[x_l]) 
+                          + Spring(k_l, pos1=x_l, qs=[x_l]) + Damper(c_cl, pos1=x_l, qs=[x_l]) 
+                          + MaterialPoint(m_w1, x_l/2, qs = [x_l]) + MaterialPoint(m_w1/2, x_l/2, qs = [x_l]) + MaterialPoint(m_w1, x_l/2, qs = [x_l])
+                          + MaterialPoint(m_w1/2, x_l/2, qs = [x_l]))
+
+        self.trolley_2 = (MaterialPoint(m2, x_r, qs=[x_r]) + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) 
+                          + Spring(k_c, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) 
+                          + Damper(c_cc, pos1=x_l, pos2=x_r, qs=[x_l, x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) 
+                          + Damper(c_cr, pos1=x_r, qs=[x_r]) + MaterialPoint(m_w2, x_r/2, qs = [x_r]) + MaterialPoint(m_w2/2, x_r/2, qs = [x_r]) + MaterialPoint(m_w2, x_r/2, qs = [x_r])
+                          + MaterialPoint(m_w2/2, x_r/2, qs = [x_r]))
+
+        system = self.trolley_1 + self.trolley_2
+        super().__init__(system(qs),**kwargs)
+        
+        
+
+    def get_default_data(self):
+
+        m0, k0, l0, lam = symbols('m k l_0 lambda', positive=True)
+
+        default_data_dict = {
+            self.m1: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
+            self.m2: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
+            self.m_w1: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
+            self.m_w2: [1 * m0, 2 * m0, S.Half * m0, S.Half**2 *  m0, 2**2 * m0],
+            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+            self.k_c: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+
+            self.c_cr: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
+            self.c_cc: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
+            self.c_cl: [lam *  k0,lam * 2 * k0,lam * S.Half * k0,lam * 4 * k0,lam * S.Half**2 * k0],
+            
+            
+            self.lam:[0],
+
+
+        }
+
+        return default_data_dict
+
+
+#TODO
+#DO SPRAWDZENIA - PRZENIESIONO Z MODUŁU systems.py
+class MDoFForcedTrolleysWithSprings(ComposedSystem):
+    scheme_name = 'mdof_three_trolleys.PNG'
+    real_name = 'three_carriages.PNG'
+
+    def __init__(self,
+
+                 m1=Symbol('m_1', positive=True),
+                 m2=Symbol('m_2', positive=True),
+                 m3=Symbol('m_3', positive=True),
+                 k_l=Symbol('k_l', positive=True),
+                 k_cl=Symbol('k_cl', positive=True),
+                 k_12=Symbol('k_12', positive=True),
+                 k_c12=Symbol('k_c12', positive=True),
+                 k_23=Symbol('k_23', positive=True),
+                 k_c23=Symbol('k_c23', positive=True),
+                 k_r=Symbol('k_r', positive=True),
+                 k_cr=Symbol('k_cr', positive=True),
+                 F=Symbol('F', positive=True),
+                 Omega=Symbol('Omega', positive=True),
+                 
+                 x_l=dynamicsymbols('x_l'),
+                 x_c=dynamicsymbols('x_c'),
+                 x_r=dynamicsymbols('x_r'),
+                 x_1=dynamicsymbols('x_1'),
+                 x_2=dynamicsymbols('x_2'),
+                 x_3=dynamicsymbols('x_3'),
+                 
+                 qs=dynamicsymbols('x_l x_c x_r'),
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        self.m1 = m1
+        self.m2 = m2
+        self.m3 = m3
+        self.k_l = k_l
+        self.k_cl = k_cl
+        self.k_12 = k_12
+        self.k_c12 = k_c12
+        self.k_23 = k_23
+        self.k_c23 = k_c23
+        self.k_r = k_r
+        self.k_cr = k_cr
+        self.x_l = x_l
+        self.x_c = x_c
+        self.x_r = x_r
+        self.x_1 = x_1
+        self.x_2 = x_2
+        self.x_3 = x_3
+        self.Omega = Omega
+
+        self.Trolley_1 = MaterialPoint(m1, x_l, qs=[x_l]) + Spring(
+            k_l, pos1=x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[
+                x_l
+            ]) + Spring(k_cl, pos1=x_l, qs=[x_l]) + Force(
+                -F * cos(Omega * ivar), pos1=x_l, qs=[x_l])
+        
+        
+        
+        self.Trolley_2 = MaterialPoint(m2, x_c, qs=qs) + Spring(
+            k_12, x_l, x_c,qs=qs) + Spring(k_12, x_l, x_c,qs=qs) + Spring(
+                k_23, x_c, x_r,qs=qs) + Spring(k_23, x_c, x_r,qs=[x_c,x_l]) + Spring(
+                    k_c12, x_l, x_c,qs=qs) + Spring(k_c23, x_c, x_r,qs=qs)
+        self.Trolley_3 = MaterialPoint(m3, x_r, qs=qs) + Spring(
+            k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[
+                x_r
+            ]) + Spring(k_cr, pos1=x_r, qs=[x_r]) + Force(
+                -2 * F * cos(Omega * ivar), pos1=x_r, qs=[x_r])
+
+        system = self.Trolley_1 + self.Trolley_2 + self.Trolley_3
+        super().__init__(system,**kwargs)
+
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
+            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_cl: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_c12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_c23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_cr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+
+            self.x_l: [self.x_1, 0],
+            self.x_c: [self.x_1, self.x_2, 0],
+            self.x_r: [self.x_2, 0],
+        }
+
+        return default_data_dict
+
+    def get_random_parameters(self):
+
+        default_data_dict = self.get_default_data()
+
+        parameters_dict = {
+            key: random.choice(items_list)
+            for key, items_list in default_data_dict.items()
+        }
+
+        if parameters_dict[self.x_l] != self.x_1 or parameters_dict[self.x_c] != self.x_1:
+
+            parameters_dict[self.x_l] = self.x_1
+
+        if parameters_dict[self.x_c] != self.x_2 or parameters_dict[self.x_r] != self.x_2:
+
+            parameters_dict[self.x_r] = self.x_2
+
+        return parameters_dict
+
+
+#TODO
+#ZAPYTAC SIE BOGUSIA CO Z TYM - PRZENIESIONO Z MODUŁU systems.py
+class MDoFTMD(ComposedSystem):
+    scheme_name = 'mdof_tmd.png'
+    real_name = 'mdof_tmd_real.png'
+    """
+    Model of an exemplary Tuned Mass Damper (TMD) simulated as Double Degree of Freedom of coupled trolleys.
+
+        Arguments:
+        =========
+            m = Mass
+                -Mass of system on spring
+
+            me = Mass
+                -Mass of tuned mass damper
+
+            k = spring coefficient
+                -value of spring coefficient
+
+            ke = spring coefficient
+                -value of spring coefficient that tuned mass damper is mounted
+
+            F = Force
+                -Trolley's exciting force
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+        Example
+        =======
+        >>> t = symbols('t')
+        >>> m, me, k, ke, F = symbols('m, m_e, k, k_e, F')
+
+    """
+
+    def __init__(self,
+                 m=Symbol('m', positive=True),
+                 me=Symbol('m_e', positive=True),
+                 k=Symbol('k', positive=True),
+                 ke=Symbol('k_e', positive=True),
+                 F=Symbol('F', positive=True),
+                 xe=dynamicsymbols('x_e'),
+                 xb=dynamicsymbols('x_b'),
+                 angle=dynamicsymbols('Omega'),
+                 ivar=Symbol('t', positive=True),
+                 **kwargs):
+
+        self.m = m
+        self.me = me
+        self.k = k
+        self.ke = ke
+        self.F = F
+
+        self.MaterialPoint_1 = MaterialPoint(m, pos1=xe, qs=[xe])
+        self.MaterialPoint_2 = MaterialPoint(me, pos1=xb, qs=[xb])
+        self.Spring_1 = Spring(k, pos1=xe, qs=[xe])
+        self.Spring_2 = Spring(ke, pos1=xe, pos2=xb, qs=[xe, xb])
+        self.Force = Force(F * sin(angle * ivar), pos1=xe, qs=[xe])
+
+        system = self.Spring_1 + self.Spring_2 + \
+            self.MaterialPoint_1 + self.MaterialPoint_2 + self.Force
+        super().__init__(system,**kwargs)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass of main object',
+            self.me: r'Mass of the TMD',
+            self.k: r'Stiffness coefficient',
+            self.ke: r'Stiffness coefficient',
+            self.F: r'Force',
+        }
+        return self.sym_desc_dict
+
