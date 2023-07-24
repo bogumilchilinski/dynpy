@@ -102,7 +102,7 @@ class ExemplaryPictureComponent(ReportComponent):
 
         display(ReportText(self.footer_text))
 
-class ExemplaryPictureDynPyComponent(ReportComponent):
+class ExemplaryPictureDynPyCodeComponent(ReportComponent):
 
     title="Dynpy Code for Exemplary Picture"
 
@@ -138,6 +138,48 @@ f'''
 '''))
 
         display(ReportText( self.footer_text  ))
+        
+        
+class ExemplaryPictureSymPyCodeComponent(ExemplaryPictureComponent):
+    title="SymPy code for calling scheme of the system"
+
+    @property
+    def header_text(self):
+
+        return "Code for calling an exemplary picture is as follows:"
+
+    @property
+    def footer_text(self):
+        
+        system = self._system
+
+        return f"Analysis of the real example is needed to propose physical scheme."
+    
+    
+    def append_elements(self):
+        
+        system = self._system
+        path=system._real_example()
+        
+        display(ReportText(  self.header_text ))
+        
+        display(Markdown(
+f'''
+
+
+    from dynpy.models.mechanics import *
+    from sympy import *
+    from dynpy.utilities.report import Picture
+   
+    path="{path}"
+    
+    display(Picture(path ,width='8cm'))
+
+
+
+'''
+            ))
+        display(ReportText( self.footer_text ))
         
         
 # Boogi        
