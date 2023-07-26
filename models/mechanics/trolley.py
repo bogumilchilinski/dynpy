@@ -85,9 +85,8 @@ class SpringMassSystem(ComposedSystem):
         
         if m is not None: self.m = m
         if k is not None: self.k = k
-        if ivar is not None: self.ivar = ivar
         if z is not None: self.z = z
-        
+        self.ivar = ivar
    
         self.qs = [self.z]
 
@@ -2770,25 +2769,25 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         }
         return default_data_dict
 
-    def get_numerical_data(self):
+#     def get_numerical_data(self):
 
-        default_data_dict = {
-            self.m_p: [10],
-            self.m_f: [50],
-#             self.m_tf: [50],
-#             self.m_pf: [50],
-            self.F: [5],
-            self.flow_coeff: [5],
-            self.t0: [10],
-            self.Omega: [3.14 * 0.5],
-            self.g: [9.81],
-            #self.k: [2]
-        }
-        default_data_dict.update({self.m_t: [10.0*default_data_dict[self.m_p][0]],
-                                  #self.l: [0.99*default_data_dict[self.g][0]/(default_data_dict[self.Omega][0]*default_data_dict[self.Omega][0])],
-                                  #self.k: [2.0*default_data_dict[self.m_p][0]*default_data_dict[self.g][0]/(default_data_dict[self.g][0]/default_data_dict[self.Omega][0]**2)]
-                                 })
-        return default_data_dict
+#         default_data_dict = {
+#             self.m_p: [10],
+#             self.m_f: [50],
+# #             self.m_tf: [50],
+# #             self.m_pf: [50],
+#             self.F: [5],
+#             self.flow_coeff: [5],
+#             self.t0: [10],
+#             self.Omega: [3.14 * 0.5],
+#             self.g: [9.81],
+#             #self.k: [2]
+#         }
+#         default_data_dict.update({self.m_t: [10.0*default_data_dict[self.m_p][0]],
+#                                   #self.l: [0.99*default_data_dict[self.g][0]/(default_data_dict[self.Omega][0]*default_data_dict[self.Omega][0])],
+#                                   #self.k: [2.0*default_data_dict[self.m_p][0]*default_data_dict[self.g][0]/(default_data_dict[self.g][0]/default_data_dict[self.Omega][0]**2)]
+#                                  })
+#         return default_data_dict
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -2958,6 +2957,217 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
     def dimensionless_time(self):
         return Eq(self.tau, self.ivar*self.omega0)
     
+    
+    def get_numerical_data(self):
+        
+        params_dict = {
+                self.m_s:150000000,
+                self.chi:1,
+                self.psi:1,
+                self.lam:0.03,
+                self.l:25,
+                self.omega0:sqrt(9.81/25),
+                self.m_p0:150000,
+                #m_f:15000,
+                self.m_f:1/1000,
+                self.rho:10,
+                self.t0:60,
+                self.delta: 300000/(9.81*(150000000)/25)}
+        
+        return params_dict
+    
+    def get_analytical_data_before_transfer(self):
+
+        m_p_const = Symbol('m_p', positive=True)
+        m_t_const = Symbol('m_t', positive=True)
+
+        params_dict = {
+            self.eps:1/1000,
+            self.chi:1,
+            self.psi:1,
+            self.lam:0.03,
+            self.l:25,
+            self.omega0:sqrt(9.81/25),
+            m_p_const:150000,
+            m_t_const:150000000-1*150000,
+            self.pi:3.1415,
+            self.delta: 300000/(9.81*(150000000)/25)}
+        
+        return params_dict
+
+    def get_analytical_data_after_transfer(self):
+
+        m_p_const = Symbol('m_p', positive=True)
+        m_t_const = Symbol('m_t', positive=True)
+
+        params_dict = {
+            self.eps:4/1000,
+            self.chi:1,
+            self.psi:1,
+            self.lam:0.03,
+            m_p_const:4*150000,
+            m_t_const:150000000-4*150000,
+            self.l:25,
+            self.omega0:sqrt(9.81/25),
+            self.pi:3.1415,
+            self.delta: 300000/(9.81*(150000000)/25)}
+        
+        return params_dict
+    
+    def get_numerical_data_for_solving_options(self):
+
+        params_dict = {
+            self.chi:1,
+            self.psi:1,
+            self.lam:0.03,
+            self.l:25,
+            self.omega0:sqrt(9.81/25),
+            self.m_p0:150000,
+            self.m_t0:150000000-4*150000,
+            self.m_f:3*150000,
+            self.rho:10,
+            self.t0:90,
+            self.pi:3.1415,
+            self.delta: 300000/(9.81*(150000000)/25)}
+        
+        return params_dict
+    
+    def _mass_transfer_influence(self, t_span=None):
+        from ...solvers.linear import ODESystem
+        from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
+        
+        params_dict = {**self.get_numerical_data()}
+        params_dict.pop(self.m_f)
+
+        if t_span is None: t_span=np.linspace(0,300,3001)
+
+        masses_dict = {self.m_t0:self.m_s-self.m_p0-self.m_f}
+        eoms_num = self.dimensionless_with_transfer().subs(masses_dict).doit()
+        a_p=Symbol('a_p')
+        dependencies={a_p:self.X.diff().diff() + 25*self.Phi.diff().diff()}
+
+        q=self.q
+        
+        dyn_sys = ODESystem(odes=eoms_num, dvars=q).as_first_ode_linear_system()
+        Y=self._coords_with_acceleration_list
+        num_df = NumericalAnalysisDataFrame.from_model(dyn_sys,
+                                                      self.m_f,
+                                                      [1/10000, 5/10000, 1/1000, 3/1000, 5/1000],
+                                                      reference_data = params_dict,
+                                                      coordinates=Y,
+                                                      index=pd.Index(t_span,name=Symbol('t'))
+                                                     )
+
+        #sym_wyn = num_df.reindex(pd.Index(t_span,name=t))#.perform_simulations(model_level_name=0)
+        sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
+
+
+        result = TimeDataFrame(sym_wyn)
+        result.index.name = Symbol('tau')
+        
+        return result
+    
+    def _skycraper_stiffness_influence(self, t_span=None):
+        from ...solvers.linear import ODESystem
+        from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
+        
+        params_dict = {**self.get_numerical_data()}
+        params_dict.pop(self.chi)
+
+        if t_span is None: t_span=np.linspace(0,300,3001)
+
+        masses_dict = {self.m_t0:self.m_s-self.m_p0-self.m_f}
+        eoms_num = self.dimensionless_with_transfer().subs(masses_dict).doit()
+        a_p=Symbol('a_p')
+        dependencies={a_p:self.X.diff().diff() + 25*self.Phi.diff().diff()}
+
+        q=self.q
+        
+        dyn_sys = ODESystem(odes=eoms_num, dvars=q).as_first_ode_linear_system()
+        Y=self._coords_with_acceleration_list
+        num_df = NumericalAnalysisDataFrame.from_model(dyn_sys,
+                                                      self.chi,
+                                                      [0.8, 0.9, 1, 1.1, 1.2],
+                                                      reference_data = params_dict,
+                                                      coordinates=Y,
+                                                      index=pd.Index(t_span,name=Symbol('t'))
+                                                     )
+
+        #sym_wyn = num_df.reindex(pd.Index(t_span,name=t))#.perform_simulations(model_level_name=0)
+        sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
+
+
+        result = TimeDataFrame(sym_wyn)
+        result.index.name = Symbol('tau')
+
+        return result
+
+    def _solving_options_analysis(self, t_span=None):
+        from ...solvers.linear import ODESystem
+        from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
+
+        params_dict = {**self.get_numerical_data()}
+
+        if t_span is None: t_span=np.linspace(0,300,3001)
+
+        #ANALITYCZNIE
+        eoms1=self.dimensionless_with_const_mass.subs(self.get_analytical_data_before_transfer).doit()
+
+        ode1=ODESystem(odes=eoms1, dvars=self.q)
+
+        eoms2=self.dimensionless_with_const_mass.subs(self.get_analytical_data_after_transfer).doit()
+        ode2=ODESystem(odes=eoms2, dvars=self.q)
+
+        odes=[ode1, ode2]
+
+        symki=TwoSystemsSimulation(odes=(ode1,ode2),t_span=(np.linspace(0,89.9,900),np.linspace(90,300,2101)))
+        wyniki=symki.compute_solution(t_span=(np.linspace(0,89.9,900),np.linspace(90,300,2101))).apply(np.real)
+
+        analytical_sym_wyn=TimeDataFrame(data={('A-A ','X'): wyniki[X]})
+        analytical_sym_wyn.index.name = Symbol('tau')
+
+        #NUMERYCZNIE
+        masses_dict = {self.m_t0:self.m_s-self.m_p0-self.m_f}
+        eoms_num = self.dimensionless_with_transfer().subs(masses_dict).subs(self.get_numerical_data_for_solving_options).doit()
+
+        ode_2=ODESystem(odes=eoms_num, dvars=self.q).numerized()
+        num_sym_wyn=ode_2.compute_solution(t_span=t_span, ic_list=[0.0, 0.0, 0.0, 0.0]).apply(np.real)
+        
+        numerical_sym_wyn=TimeDataFrame(data={('N-N-N','X'): num_sym_wyn[X]})
+        numerical_sym_wyn.index.name = Symbol('tau')
+
+        #ANALITYCZNIE + NUMERYCZNIE
+        fode_1=ode1.as_first_ode_linear_system()
+        fodes_1=FirstOrderLinearODESystemWithHarmonics(fode_1,fode_1.dvars)
+        ana_sol_1=fodes_1.solution
+        ics_list=[0.0,0.0,0.0,0.0]
+        ana_sol_sym_1=ana_sol_1.with_ics(ics_list)
+        t_span_1=np.linspace(0,84.9,850)
+        ana_sym_wyn_1=ana_sol_sym_1.numerized().compute_solution(t_span=t_span_1).apply(np.real)
+        ics_list_new=list(ana_sym_wyn_1.iloc[-1,0:len(ics_list)])
+
+        ##Symulacja fazy 2.
+        t_span_2=np.linspace(85,95,101)
+        num_sym_wyn_2=ode_2.compute_solution(t_span=t_span_2, ic_list=ics_list_new).apply(np.real)
+        ics_list_the_newest=list(num_sym_wyn_2.iloc[-1,0:len(ics_list)])
+
+        ##Symulacja fazy 3.
+        fode_3=ODESystem(odes=ode2, dvars=self.q).as_first_ode_linear_system()
+        fodes_3=FirstOrderLinearODESystemWithHarmonics(fode_3,fode_3.dvars)
+        ana_sol_3=fodes_3.solution
+        ana_sol_sym_3=ana_sol_3.with_ics(ics_list_newest, ivar0=95.1)
+        t_span_3=np.linspace(95.1,300,2050)
+        ana_sym_wyn_3=ana_sol_sym_3.numerized().compute_solution(t_span=t_span_3).apply(np.real)
+        
+        results_ANA=pd.concat([ana_sym_wyn_1, num_sym_wyn_2, ana_sym_wyn_3])
+        
+        analytical_numerical_sym_wyn=TimeDataFrame(data={('A-N-A','X'): results_ANA[X]})
+        analytical_numerical_sym_wyn.index.name = Symbol('tau')
+
+        results=pd.concat([analytical_numerical_sym_wyn, numerical_sym_wyn, analytical_sym_wyn])
+        return results
+        
+
 
 #TODO
 #DO SPRAWDZENIA - PRZENIESIONO Z MODUŁU mdof.py

@@ -2246,11 +2246,11 @@ class ThreePendulumsWithSprings(ComposedSystem):
         return parameters_dict
 
     
-#DO ZROBIENIA - PRZENIESIONO Z MODUŁU mdof.py
-class DampedElasticPendulum(ComposedSystem):
+#DONE - Kuba & Madi
+class DampedElasticPendulum(MDoFElasticPendulum):
     """
     Model of a Double Degree of Freedom Involute Pendulum (Winch)
-
+    
         Arguments:
         =========
             m = Mass
@@ -2298,37 +2298,58 @@ class DampedElasticPendulum(ComposedSystem):
     scheme_name = 'damped_elastic_pendulum.PNG'
     real_name = 'elastic_pendulum_real.PNG'
 
+
+class DampedElasticPendulum(MDoFElasticPendulum):
+    c = Symbol('c', positive=True)
+    k = Symbol('k', positive=True)
+    l = Symbol('l', positive=True)
+    m = Symbol('m', positive=True)
+    g = Symbol('g', positive=True)
+    ivar=Symbol('t')
+    z=dynamicsymbols('z')
+    phi = dynamicsymbols('\\varphi')
+
     def __init__(self,
-                 undamped_system,
-                 c=Symbol('c', positive=True),
-                 k=Symbol('k', positive=True),
-                 l=Symbol('l', positive=True),
-                 m=Symbol('m', positive=True),
-                 g=Symbol('g', positive=True),
+                 c=None,
+                 k=None,
+                 l=None,
+                 m=None,
+                 g=None,
                  ivar=Symbol('t'),
-                 z=dynamicsymbols('z'),
+                 z=dynamicsymbols('z'), 
                  phi=dynamicsymbols('\\varphi'),
                  **kwargs):
 
-        self.c = c
-        self.k = k
-        self.l = l
-        self.m = m
-        self.g = g
-        self.phi = phi
-        self.z = z
-        self.undamped = undamped_system
+        if c is not None: self.c = c
+        if k is not None: self.k = k
+        if l is not None: self.l = l
+        if m is not None: self.m = m
+        if g is not None: self.g = g
+        if z is not None: self.z = z
+       
+        self.qs = [self.phi, self.z]
+        self.ivar = ivar
+        #self.undamped = undamped_system
+        self._init_from_components(**kwargs)
 
-        self.damper = Damper(c=c,
-                             pos1=self.undamped.payload,
-                             qs=[phi, z],
-                             frame=self.undamped.frame)
 
-        #         display(self.damper._eoms)
+        
+    @cached_property
+    def components(self):
 
-        system = self.undamped + self.damper
+        components = {}
+       
+        self.pendulum = MDoFElasticPendulum(k=self.k, l=self.l, m=self.m, g=self.g, z=self.z, phi=self.phi, ivar=self.ivar)
+        self.damper= Damper(c=self.c, pos1=self.z, qs=self.qs)
 
-        super().__init__(system,**kwargs)
+
+        components['pendulum'] = self.pendulum        
+        components['damper'] = self.damper
+        #components['mdofelasticpendulum'] = self.mdofelasticpendulum
+        
+        return components
+
+
 
     def symbols_description(self):
         self.sym_desc_dict = {
