@@ -85,9 +85,8 @@ class SpringMassSystem(ComposedSystem):
         
         if m is not None: self.m = m
         if k is not None: self.k = k
-        if ivar is not None: self.ivar = ivar
         if z is not None: self.z = z
-        
+        self.ivar = ivar
    
         self.qs = [self.z]
 
