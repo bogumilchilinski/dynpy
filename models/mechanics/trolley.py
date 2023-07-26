@@ -2552,6 +2552,7 @@ class TrolleyWithTMD(ComposedSystem):
     m = Symbol('m_trolley', positive=True)
     m_TMD = Symbol('m_TMD', positive=True)
     k = Symbol('k', positive=True)
+    k_TMD = Symbol('k_TMD', positive=True)
     g = Symbol('g', positive=True)
     Omega = Symbol('Omega', positive=True)
     F=Symbol('F', positive=True)
@@ -2562,6 +2563,7 @@ class TrolleyWithTMD(ComposedSystem):
                  m=None,
                  m_TMD=None,
                  k=None,
+                 k_TMD=None,
                  Omega=None,
                  x_e=None,
                  x=None,
@@ -2573,6 +2575,7 @@ class TrolleyWithTMD(ComposedSystem):
         if x_e is not None: self.x_e = x_e
         if x is not None: self.x = x
         if k is not None: self.k = k
+        if k_TMD is not None: self.k_TMD = k_TMD
         if Omega is not None: self.Omega = Omega
         if F is not None: self.F = F
         self.ivar = ivar
@@ -2584,7 +2587,7 @@ class TrolleyWithTMD(ComposedSystem):
         components = {}
 
         self._trolley = SpringMassSystem(self.m, self.k, self.x, self.ivar)(label='Trolley')
-        self._TMD = TunedMassDamperRelativeMotion(self.m_TMD, self.k, self.x_e, self.x, self.ivar)(label='Tuned Mass Damper')
+        self._TMD = TunedMassDamperRelativeMotion(self.m_TMD, self.k_TMD, self.x_e, self.x, self.ivar)(label='Tuned Mass Damper')
         self._force=Force(self.F*sin(self.Omega*self.ivar), pos1=self.x, qs=[self.x, self.x_e])(label='Force')
 
         components['_trolley'] = self._trolley
