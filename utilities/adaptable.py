@@ -455,6 +455,8 @@ class DataAxis(Axis, ReportModule):
     @classmethod
     def set_default_colours(cls, colour=None):
         cls._default_colours = colour
+        TikZPlot._default_colours = colour
+        
         return cls
 
     @classmethod
