@@ -1271,7 +1271,7 @@ class MDoFForcedDisksWithParallelSprings(ComposedSystem):
 class MDoFForcedDisksWithSerialSprings(ComposedSystem):
     scheme_name = 'MDOF_Forced_Disks_With_Serial_Springs.PNG'
     real_name = 'three_carriages.PNG'
-
+#test
     def __init__(self,
                  r=Symbol('r', positive=True), #!!! Important - it's dummy variable which is to remove when the LagrangesDynamicSystem inits will be improved
                  R=Symbol('R', positive=True),
