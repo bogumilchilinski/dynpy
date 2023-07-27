@@ -621,6 +621,7 @@ class LagrangeIBlocksOnInclinedPlane(ComposedSystem):
 
         system = self.Mass1 + self.Mass2 + self.Mass3 + self.Mass4 + self.Pulley
         super().__init__(system.lagrangian(),qs=qs, hol_coneqs=[x1-x2,phi*R-x2,x2-x3,phi*R-x3],**kwargs)
+        
     def get_default_data(self):
 
         m0 = symbols('m_0', positive=True)
