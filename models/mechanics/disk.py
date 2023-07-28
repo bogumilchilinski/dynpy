@@ -566,553 +566,552 @@ class TwoDisksWithThreeSprings(ComposedSystem):
 #TODO
 #DO ZROBIENIA - PRZENIESIONO Z MODUŁU mdof.py
 #SPRAWDZIC CZY TO NIE POWTORKA ZADAN O PODOBNEJ NAZWIE!
-class ForcedDisksWithSerialSprings(ComposedSystem):
-    scheme_name = 'MDOF_Forced_Disks_With_Serial_Springs.PNG'
-    real_name = 'three_carriages.PNG'
-
-    def __init__(self,
-                 r=Symbol('r', positive=True), #!!! Important - it's dummy variable which is to remove when the LagrangesDynamicSystem inits will be improved
-                 R=Symbol('R', positive=True),
-                 m=Symbol('m', positive=True),
-                 m1=Symbol('m_1', positive=True),
-                 m2=Symbol('m_2', positive=True),
-                 m3=Symbol('m_3', positive=True),
-                 k_ll=Symbol('k_ll', positive=True),
-                 k_lr=Symbol('k_lr', positive=True),
-                 k_12l=Symbol('k_12l', positive=True),
-                 k_12r=Symbol('k_12r', positive=True),
-                 k_23l=Symbol('k_23l', positive=True),
-                 k_23r=Symbol('k_23r', positive=True),
-                 k_rl=Symbol('k_rl', positive=True),
-                 k_rr=Symbol('k_rr', positive=True),
-                 F_0=Symbol('F_0', positive=True),
-                 Omega=Symbol('Omega', positive=True),
-                 x_l=dynamicsymbols('x_l'),
-                 x_c=dynamicsymbols('x_c'),
-                 x_r=dynamicsymbols('x_r'),
-                 x_1=dynamicsymbols('x_1'),
-                 x_2=dynamicsymbols('x_2'),
-                 x_3=dynamicsymbols('x_3'),
-                 qs=dynamicsymbols('x_l x_c x_r'),
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        self.m = m
-        self.m1 = m1
-        self.m2 = m2
-        self.m3 = m3
-        self.R = R
-        self.k_ll = k_ll
-        self.k_lr = k_lr
-        self.k_12l = k_12l
-        self.k_12r = k_12r
-        self.k_23l = k_23l
-        self.k_23r = k_23r
-        self.k_rl = k_rl
-        self.k_rr = k_rr
-        self.x_l = x_l
-        self.x_c = x_c
-        self.x_r = x_r
-        self.x_1 = x_1
-        self.x_2 = x_2
-        self.x_3 = x_3
-        self.Omega = Omega
-
-        self.Disk1 =  MaterialPoint(m, x_l, qs = [x_l]) + MaterialPoint(m/2, x_l, qs = [x_l]) + MaterialPoint(m1, x_l, qs = [x_l]) + Spring((k_ll*k_lr)/(k_ll+k_lr), pos1 = x_l, qs = [x_l]) + Force(-2*F_0 * cos(Omega * ivar), pos1 = x_l, qs = [x_l])
-        self.Disk2 =  MaterialPoint(m, x_c, qs = [x_c]) + MaterialPoint(m/2, x_c, qs = [x_c]) + MaterialPoint(m2, x_c, qs = [x_c]) + Spring((k_12l*k_12r)/(k_12l+k_12r), pos1 = x_l, pos2 = x_c, qs = [x_l, x_c]) + Spring((k_23l*k_23r)/(k_23l+k_23r), pos1 = x_c, pos2 = x_r, qs = [x_c, x_r])
-        self.Disk3 =  MaterialPoint(m, x_r, qs = [x_r]) + MaterialPoint(m/2, x_r, qs = [x_r]) + MaterialPoint(m3, x_r, qs = [x_r]) + Spring((k_rl*k_rr)/(k_rl+k_rr), pos1 = x_r, qs = [x_r]) + Force(-F_0 * cos(Omega * ivar), pos1 = x_r, qs = [x_r])
-
-
-        
-        
-        system = self.Disk1 + self.Disk2 + self.Disk3
-        super().__init__(system(qs),**kwargs)
-
-    def get_default_data(self):
-
-        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
-
-        default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
-            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
-            self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
-            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
-            
-            self.k_ll: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-            self.k_lr: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-            self.k_12l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-            self.k_12r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-            self.k_23l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-            self.k_23r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-            self.k_rl: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-            self.k_rr: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-
-            self.x_l: [self.x_1, 0],
-            self.x_c: [self.x_1, self.x_2, 0],
-            self.x_r: [self.x_2, 0],
-            }
-
-        return default_data_dict
-
-    def get_random_parameters(self):
-
-        default_data_dict = self.get_default_data()
-
-        parameters_dict = {
-            key: random.choice(items_list)
-            for key, items_list in default_data_dict.items()
-        }
-
-        if parameters_dict[self.x_l] != self.x_1 or parameters_dict[self.x_c] != self.x_1:
-
-            parameters_dict[self.x_l] = self.x_1
-
-        if parameters_dict[self.x_c] != self.x_2 or parameters_dict[self.x_r] != self.x_2:
-
-            parameters_dict[self.x_r] = self.x_2
-
-        return parameters_dict
-
-
-    def get_default_data(self):
-
-
-        m0, l0 = symbols('m_0 l_0', positive=True)
-
-        default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
-            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
-
-            self.l_1: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-            self.l_2: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-
-            self.phi_1:[self.phi_u],
-            self.phi_2:[self.phi_l],
-        }
-
-        return default_data_dict    
+#class ForcedDisksWithSerialSprings(ComposedSystem):
+#    scheme_name = 'MDOF_Forced_Disks_With_Serial_Springs.PNG'
+#    real_name = 'three_carriages.PNG'
+#
+#    def __init__(self,
+#                 r=Symbol('r', positive=True), #!!! Important - it's dummy variable which is to remove when the LagrangesDynamicSystem inits will be improved
+#                 R=Symbol('R', positive=True),
+#                 m=Symbol('m', positive=True),
+#                 m1=Symbol('m_1', positive=True),
+#                 m2=Symbol('m_2', positive=True),
+#                 m3=Symbol('m_3', positive=True),
+#                 k_ll=Symbol('k_ll', positive=True),
+#                 k_lr=Symbol('k_lr', positive=True),
+#                 k_12l=Symbol('k_12l', positive=True),
+#                 k_12r=Symbol('k_12r', positive=True),
+#                 k_23l=Symbol('k_23l', positive=True),
+#                 k_23r=Symbol('k_23r', positive=True),
+#                 k_rl=Symbol('k_rl', positive=True),
+#                 k_rr=Symbol('k_rr', positive=True),
+#                 F_0=Symbol('F_0', positive=True),
+#                 Omega=Symbol('Omega', positive=True),
+#                 x_l=dynamicsymbols('x_l'),
+#                 x_c=dynamicsymbols('x_c'),
+#                 x_r=dynamicsymbols('x_r'),
+#                 x_1=dynamicsymbols('x_1'),
+#                 x_2=dynamicsymbols('x_2'),
+#                 x_3=dynamicsymbols('x_3'),
+#                 qs=dynamicsymbols('x_l x_c x_r'),
+#                 ivar=Symbol('t'),
+#                 **kwargs):
+#
+#        self.m = m
+#        self.m1 = m1
+#        self.m2 = m2
+#        self.m3 = m3
+#        self.R = R
+#        self.k_ll = k_ll
+#        self.k_lr = k_lr
+#        self.k_12l = k_12l
+#        self.k_12r = k_12r
+#        self.k_23l = k_23l
+#        self.k_23r = k_23r
+#        self.k_rl = k_rl
+#        self.k_rr = k_rr
+#        self.x_l = x_l
+#        self.x_c = x_c
+#        self.x_r = x_r
+#        self.x_1 = x_1
+#        self.x_2 = x_2
+#        self.x_3 = x_3
+#        self.Omega = Omega
+#
+#        self.Disk1 =  MaterialPoint(m, x_l, qs = [x_l]) + MaterialPoint(m/2, x_l, qs = [x_l]) + MaterialPoint(m1, x_l, qs = [x_l]) + Spring((k_ll*k_lr)/(k_ll+k_lr), pos1 = x_l, qs = [x_l]) + Force(-2*F_0 * cos(Omega * ivar), pos1 = x_l, qs = [x_l])
+#        self.Disk2 =  MaterialPoint(m, x_c, qs = [x_c]) + MaterialPoint(m/2, x_c, qs = [x_c]) + MaterialPoint(m2, x_c, qs = [x_c]) + Spring((k_12l*k_12r)/(k_12l+k_12r), pos1 = x_l, pos2 = x_c, qs = [x_l, x_c]) + Spring((k_23l*k_23r)/(k_23l+k_23r), pos1 = x_c, pos2 = x_r, qs = [x_c, x_r])
+#        self.Disk3 =  MaterialPoint(m, x_r, qs = [x_r]) + MaterialPoint(m/2, x_r, qs = [x_r]) + MaterialPoint(m3, x_r, qs = [x_r]) + Spring((k_rl*k_rr)/(k_rl+k_rr), pos1 = x_r, qs = [x_r]) + Force(-F_0 * cos(Omega * ivar), pos1 = x_r, qs = [x_r])
+#
+#
+#        
+#        
+#        system = self.Disk1 + self.Disk2 + self.Disk3
+#        super().__init__(system(qs),**kwargs)
+#
+#    def get_default_data(self):
+#
+#        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+#
+#        default_data_dict = {
+#            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#            self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#            
+#            self.k_ll: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+#            self.k_lr: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+#            self.k_12l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+#            self.k_12r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+#            self.k_23l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+#            self.k_23r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+#            self.k_rl: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+#            self.k_rr: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+#            self.x_l: [self.x_1, 0],
+#            self.x_c: [self.x_1, self.x_2, 0],
+#            self.x_r: [self.x_2, 0],
+#            }
+#
+#        return default_data_dict
+#
+#    def get_random_parameters(self):
+#
+#        default_data_dict = self.get_default_data()
+#
+#        parameters_dict = {
+#            key: random.choice(items_list)
+#            for key, items_list in default_data_dict.items()
+#        }
+#
+#        if parameters_dict[self.x_l] != self.x_1 or parameters_dict[self.x_c] != self.x_1:
+#
+#            parameters_dict[self.x_l] = self.x_1
+#
+#        if parameters_dict[self.x_c] != self.x_2 or parameters_dict[self.x_r] != self.x_2:
+#
+#            parameters_dict[self.x_r] = self.x_2
+#
+#        return parameters_dict
+#
+#
+#    def get_default_data(self):
+#
+#
+#        m0, l0 = symbols('m_0 l_0', positive=True)
+#
+#        default_data_dict = {
+#            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 1 * m0, S.Half * m0],
+#            self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
+#
+#            self.l_1: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+#            self.l_2: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+#
+#            self.phi_1:[self.phi_u],
+##            self.phi_2:[self.phi_l],
+#        }
+#
+#        return default_data_dict    
 
  
 #DO SPRAWDZENIA - PRZENIESIONO Z MODUŁU mdof.py
-class ForcedDisksWithParallelSprings(ComposedSystem):
-
-    _default_subs_method='direct'
-    scheme_name = 'MDOF_Forced_Disks_With_Parallel_Springs.PNG'
-    real_name = 'three_rollers_real.png'
-
-    def __init__(self,
-                 R=Symbol('R', positive=True),
-                 m=Symbol('m', positive=True),
-                 m1=Symbol('m_1', positive=True),
-                 m2=Symbol('m_2', positive=True),
-                 m3=Symbol('m_3', positive=True),
-                 k_l=Symbol('k_l', positive=True),
-                 k_cl=Symbol('k_cl', positive=True),
-                 k_12=Symbol('k_12', positive=True),
-                 k_c12=Symbol('k_c12', positive=True),
-                 k_23=Symbol('k_23', positive=True),
-                 k_c23=Symbol('k_c23', positive=True),
-                 k_r=Symbol('k_r', positive=True),
-                 k_cr=Symbol('k_cr', positive=True),
-                 F_0=Symbol('F_0', positive=True),
-                 Omega=Symbol('Omega', positive=True),
-                 x_l=dynamicsymbols('x_l'),
-                 x_c=dynamicsymbols('x_c'),
-                 x_r=dynamicsymbols('x_r'),
-                 x_1=dynamicsymbols('x_1'),
-                 x_2=dynamicsymbols('x_2'),
-                 qs=dynamicsymbols('x_l x_c x_r'),
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        self.m = m
-        self.m1 = m1
-        self.m2 = m2
-        self.m3 = m3
-        self.R = R
-        self.k_l = k_l
-        self.k_cl = k_cl
-        self.k_12 = k_12
-        self.k_c12 = k_c12
-        self.k_23 = k_23
-        self.k_c23 = k_c23
-        self.k_r = k_r
-        self.k_cr = k_cr
-        self.x_l = x_l
-        self.x_c = x_c
-        self.x_r = x_r
-        self.x_1 = x_1
-        self.x_2 = x_2
-        self.Omega = Omega
-
-        self.Disk1 = MaterialPoint(m, x_l, qs=[x_l]) + MaterialPoint(
-            m / 2, x_l, qs=[x_l]) + MaterialPoint(m1, x_l, qs=[x_l]) + Spring(
-                k_l, pos1=x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[
-                    x_l
-                ]) + Spring(k_cl, pos1=x_l, qs=[x_l]) + Force(2*F_0 * cos(Omega * ivar), pos1=x_l, qs=[x_l])
-
-        self.Disk2 = MaterialPoint(m, x_c, qs=[x_c]) + MaterialPoint(
-            m / 2, x_c, qs=[x_c]) + MaterialPoint(m2, x_c, qs=[
-                x_c
-            ]) + Spring(k_12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(
-                k_c12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(
-                    k_12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(
-                        k_23, pos1=x_c, pos2=x_r, qs=[x_c, x_r]) + Spring(
-                            k_c23, pos1=x_c, pos2=x_r, qs=[x_c, x_r]) + Spring(
-                                k_23, pos1=x_c, pos2=x_r, qs=[x_c, x_r])
-
-        self.Disk3 = MaterialPoint(m, x_r, qs=[x_r]) + MaterialPoint(
-            m / 2, x_r, qs=[x_r]) + MaterialPoint(m3, x_r, qs=[x_r]) + Spring(
-                k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[
-                    x_r
-                ]) + Spring(k_cr, pos1=x_r, qs=[x_r]) + Force(F_0 * cos(Omega * ivar), pos1=x_r, qs=[x_r])
-
-
-        system = self.Disk1 + self.Disk2 + self.Disk3
-        super().__init__(system(qs),**kwargs)
-
-    def get_default_data(self):
-
-        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
-
-        default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
-            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
-            self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
-            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
-
-            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_cl: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_c12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_c23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_cr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-
-            self.x_l: [self.x_1],
-            self.x_c: [0],
-            self.x_r: [self.x_2],
-        }
-
-        return default_data_dict
+#class ForcedDisksWithParallelSprings(ComposedSystem):
+#
+#    _default_subs_method='direct'
+#    scheme_name = 'MDOF_Forced_Disks_With_Parallel_Springs.PNG'
+#    real_name = 'three_rollers_real.png'
+#
+#    def __init__(self,
+#                 R=Symbol('R', positive=True),
+#                 m=Symbol('m', positive=True),
+#                 m1=Symbol('m_1', positive=True),
+#                 m2=Symbol('m_2', positive=True),
+#                 m3=Symbol('m_3', positive=True),
+#                 k_l=Symbol('k_l', positive=True),
+#                 k_cl=Symbol('k_cl', positive=True),
+#                 k_12=Symbol('k_12', positive=True),
+#                 k_c12=Symbol('k_c12', positive=True),
+#                 k_23=Symbol('k_23', positive=True),
+#                 k_c23=Symbol('k_c23', positive=True),
+#                 k_r=Symbol('k_r', positive=True),
+#                 k_cr=Symbol('k_cr', positive=True),
+#                 F_0=Symbol('F_0', positive=True),
+#                 Omega=Symbol('Omega', positive=True),
+#                 x_l=dynamicsymbols('x_l'),
+#                 x_c=dynamicsymbols('x_c'),
+#                 x_r=dynamicsymbols('x_r'),
+#                 x_1=dynamicsymbols('x_1'),
+#                 x_2=dynamicsymbols('x_2'),
+#                 qs=dynamicsymbols('x_l x_c x_r'),
+#                 ivar=Symbol('t'),
+#                 **kwargs):
+#
+#        self.m = m
+#        self.m1 = m1
+#        self.m2 = m2
+#        self.m3 = m3
+#        self.R = R
+#        self.k_l = k_l
+#        self.k_cl = k_cl
+#        self.k_12 = k_12
+#        self.k_c12 = k_c12
+#        self.k_23 = k_23
+#        self.k_c23 = k_c23
+#        self.k_r = k_r
+#        self.k_cr = k_cr
+#        self.x_l = x_l
+#        self.x_c = x_c
+#        self.x_r = x_r
+#        self.x_1 = x_1
+#        self.x_2 = x_2
+#        self.Omega = Omega
+#
+#        self.Disk1 = MaterialPoint(m, x_l, qs=[x_l]) + MaterialPoint(
+#            m / 2, x_l, qs=[x_l]) + MaterialPoint(m1, x_l, qs=[x_l]) + Spring(
+#                k_l, pos1=x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[
+#                    x_l
+#                ]) + Spring(k_cl, pos1=x_l, qs=[x_l]) + Force(2*F_0 * cos(Omega * ivar), pos1=x_l, qs=[x_l])
+#
+#        self.Disk2 = MaterialPoint(m, x_c, qs=[x_c]) + MaterialPoint(
+#            m / 2, x_c, qs=[x_c]) + MaterialPoint(m2, x_c, qs=[
+#                x_c
+#            ]) + Spring(k_12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(
+#                k_c12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(
+#                    k_12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(
+#                        k_23, pos1=x_c, pos2=x_r, qs=[x_c, x_r]) + Spring(
+#                            k_c23, pos1=x_c, pos2=x_r, qs=[x_c, x_r]) + Spring(
+#                                k_23, pos1=x_c, pos2=x_r, qs=[x_c, x_r])
+#
+#        self.Disk3 = MaterialPoint(m, x_r, qs=[x_r]) + MaterialPoint(
+#            m / 2, x_r, qs=[x_r]) + MaterialPoint(m3, x_r, qs=[x_r]) + Spring(
+#                k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[
+#                    x_r
+#                ]) + Spring(k_cr, pos1=x_r, qs=[x_r]) + Force(F_0 * cos(Omega * ivar), pos1=x_r, qs=[x_r])
+#
+#
+#        system = self.Disk1 + self.Disk2 + self.Disk3
+#        super().__init__(system(qs),**kwargs)
+#
+#    def get_default_data(self):
+#
+#        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+#
+#        default_data_dict = {
+#            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#            self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#
+#            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_cl: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_c12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_c23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_cr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#
+#            self.x_l: [self.x_1],
+#            self.x_c: [0],
+#            self.x_r: [self.x_2],
+#        }
+#
+#        return default_data_dict
     
 
 #DO SPRAWDZENIA - PRZENIESIONO Z MODUŁU mdof.py
-class ForcedDisksWithParallelSprings(ComposedSystem):
-
-    _default_subs_method='direct'
-    scheme_name = 'MDOF_Forced_Disks_With_Parallel_Springs.PNG'
-    real_name = 'three_rollers_real.png'
-
-    def __init__(self,
-                 R=Symbol('R', positive=True),
-                 m=Symbol('m', positive=True),
-                 m1=Symbol('m_1', positive=True),
-                 m2=Symbol('m_2', positive=True),
-                 m3=Symbol('m_3', positive=True),
-                 k_l=Symbol('k_l', positive=True),
-                 k_cl=Symbol('k_cl', positive=True),
-                 k_12=Symbol('k_12', positive=True),
-                 k_c12=Symbol('k_c12', positive=True),
-                 k_23=Symbol('k_23', positive=True),
-                 k_c23=Symbol('k_c23', positive=True),
-                 k_r=Symbol('k_r', positive=True),
-                 k_cr=Symbol('k_cr', positive=True),
-                 F_0=Symbol('F_0', positive=True),
-                 Omega=Symbol('Omega', positive=True),
-                 x_l=dynamicsymbols('x_l'),
-                 x_c=dynamicsymbols('x_c'),
-                 x_r=dynamicsymbols('x_r'),
-                 x_1=dynamicsymbols('x_1'),
-                 x_2=dynamicsymbols('x_2'),
-                 qs=dynamicsymbols('x_l x_c x_r'),
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        self.m = m
-        self.m1 = m1
-        self.m2 = m2
-        self.m3 = m3
-        self.R = R
-        self.k_l = k_l
-        self.k_cl = k_cl
-        self.k_12 = k_12
-        self.k_c12 = k_c12
-        self.k_23 = k_23
-        self.k_c23 = k_c23
-        self.k_r = k_r
-        self.k_cr = k_cr
-        self.x_l = x_l
-        self.x_c = x_c
-        self.x_r = x_r
-        self.x_1 = x_1
-        self.x_2 = x_2
-        self.Omega = Omega
-
-        self.Disk1 = MaterialPoint(m, x_l, qs=[x_l]) + MaterialPoint(
-            m / 2, x_l, qs=[x_l]) + MaterialPoint(m1, x_l, qs=[x_l]) + Spring(
-                k_l, pos1=x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[
-                    x_l
-                ]) + Spring(k_cl, pos1=x_l, qs=[x_l]) + Force(2*F_0 * cos(Omega * ivar), pos1=x_l, qs=[x_l])
-
-        self.Disk2 = MaterialPoint(m, x_c, qs=[x_c]) + MaterialPoint(
-            m / 2, x_c, qs=[x_c]) + MaterialPoint(m2, x_c, qs=[
-                x_c
-            ]) + Spring(k_12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(
-                k_c12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(
-                    k_12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(
-                        k_23, pos1=x_c, pos2=x_r, qs=[x_c, x_r]) + Spring(
-                            k_c23, pos1=x_c, pos2=x_r, qs=[x_c, x_r]) + Spring(
-                                k_23, pos1=x_c, pos2=x_r, qs=[x_c, x_r])
-
-        self.Disk3 = MaterialPoint(m, x_r, qs=[x_r]) + MaterialPoint(
-            m / 2, x_r, qs=[x_r]) + MaterialPoint(m3, x_r, qs=[x_r]) + Spring(
-                k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[
-                    x_r
-                ]) + Spring(k_cr, pos1=x_r, qs=[x_r]) + Force(F_0 * cos(Omega * ivar), pos1=x_r, qs=[x_r])
-
-
-        system = self.Disk1 + self.Disk2 + self.Disk3
-        super().__init__(system(qs),**kwargs)
-
-    def get_default_data(self):
-
-        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
-
-        default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
-            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
-            self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
-            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
-
-            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_cl: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_c12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_c23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_cr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-
-            self.x_l: [self.x_1],
-            self.x_c: [0],
-            self.x_r: [self.x_2],
-        }
-
-        return default_data_dict
+#class ForcedDisksWithParallelSprings(ComposedSystem):
+#
+#    _default_subs_method='direct'
+#    scheme_name = 'MDOF_Forced_Disks_With_Parallel_Springs.PNG'
+#    real_name = 'three_rollers_real.png'
+#
+#    def __init__(self,
+#                 R=Symbol('R', positive=True),
+#                 m=Symbol('m', positive=True),
+#                 m1=Symbol('m_1', positive=True),
+#                 m2=Symbol('m_2', positive=True),
+#                 m3=Symbol('m_3', positive=True),
+#                 k_l=Symbol('k_l', positive=True),
+#                 k_cl=Symbol('k_cl', positive=True),
+#                 k_12=Symbol('k_12', positive=True),
+#                 k_c12=Symbol('k_c12', positive=True),
+#                 k_23=Symbol('k_23', positive=True),
+#                 k_c23=Symbol('k_c23', positive=True),
+#                 k_r=Symbol('k_r', positive=True),
+#                 k_cr=Symbol('k_cr', positive=True),
+#                 F_0=Symbol('F_0', positive=True),
+#                 Omega=Symbol('Omega', positive=True),
+#                 x_l=dynamicsymbols('x_l'),
+#                 x_c=dynamicsymbols('x_c'),
+#                 x_r=dynamicsymbols('x_r'),
+#                 x_1=dynamicsymbols('x_1'),
+#                 x_2=dynamicsymbols('x_2'),
+#                 qs=dynamicsymbols('x_l x_c x_r'),
+#                 ivar=Symbol('t'),
+#                 **kwargs):
+#
+#        self.m = m
+#        self.m1 = m1
+#        self.m2 = m2
+#        self.m3 = m3
+#        self.R = R
+#        self.k_l = k_l
+#        self.k_cl = k_cl
+#        self.k_12 = k_12
+#        self.k_c12 = k_c12
+#        self.k_23 = k_23
+#        self.k_c23 = k_c23
+#        self.k_r = k_r
+#        self.k_cr = k_cr
+#        self.x_l = x_l
+#        self.x_c = x_c
+#        self.x_r = x_r
+#        self.x_1 = x_1
+#        self.x_2 = x_2
+#        self.Omega = Omega
+#
+#        self.Disk1 = MaterialPoint(m, x_l, qs=#[x_l]) + MaterialPoint(
+#            m / 2, x_l, qs=[x_l]) + MaterialPoint(m1, x_l, qs=[x_l]) + Spring(
+#                k_l, pos1=x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[
+#                    x_l
+#                ]) + Spring(k_cl, pos1=x_l, qs=[x_l]) + Force(2*F_0 * cos(Omega * ivar), pos1=x_l, qs=[x_l])
+#
+#        self.Disk2 = MaterialPoint(m, x_c, qs=[x_c]) + MaterialPoint(
+#            m / 2, x_c, qs=[x_c]) + MaterialPoint(m2, x_c, qs=[
+#                x_c
+#            ]) + Spring(k_12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(
+#                k_c12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(
+#                    k_12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(
+#                        k_23, pos1=x_c, pos2=x_r, qs=[x_c, x_r]) + Spring(
+#                            k_c23, pos1=x_c, pos2=x_r, qs=[x_c, x_r]) + Spring(
+#                                k_23, pos1=x_c, pos2=x_r, qs=[x_c, x_r])
+#
+#        self.Disk3 = MaterialPoint(m, x_r, qs=[x_r]) + MaterialPoint(
+#            m / 2, x_r, qs=[x_r]) + MaterialPoint(m3, x_r, qs=[x_r]) + Spring(
+#                k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[
+#                    x_r
+#                ]) + Spring(k_cr, pos1=x_r, qs=[x_r]) + Force(F_0 * cos(Omega * ivar), pos1=x_r, qs=[x_r])
+#
+#
+#        system = self.Disk1 + self.Disk2 + self.Disk3
+#        super().__init__(system(qs),**kwargs)
+#
+#    def get_default_data(self):
+#
+#        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+#
+#        default_data_dict = {
+#            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#            self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#
+#            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_cl: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_c12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_c23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_cr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#
+#            self.x_l: [self.x_1],
+#            self.x_c: [0],
+#            self.x_r: [self.x_2],
+#        }
+#
+#        return default_data_dict
     
 
 #DO ZROBIENIA - PRZENIESIONO Z MODUŁU mdof.py
-class MDoFForcedSimpleDisksWithSerialSprings(ComposedSystem):
-    scheme_name = 'three_simple_disks_serial.png'
-    real_name = 'three_carriages.PNG'
-
-    def __init__(self,
-                 r=Symbol('r', positive=True), #!!! Important - it's dummy variable which is to remove when the LagrangesDynamicSystem inits will be improved
-                 R=Symbol('R', positive=True),
-                 m=Symbol('m', positive=True),
-                 k_ll=Symbol('k_ll', positive=True),
-                 k_lr=Symbol('k_lr', positive=True),
-                 k_12l=Symbol('k_12l', positive=True),
-                 k_12r=Symbol('k_12r', positive=True),
-                 k_23l=Symbol('k_23l', positive=True),
-                 k_23r=Symbol('k_23r', positive=True),
-                 k_rl=Symbol('k_rl', positive=True),
-                 k_rr=Symbol('k_rr', positive=True),
-                 F_0=Symbol('F_0', positive=True),
-                 Omega=Symbol('Omega', positive=True),
-                 x_l=dynamicsymbols('x_l'),
-                 x_c=dynamicsymbols('x_c'),
-                 x_r=dynamicsymbols('x_r'),
-                 x_1=dynamicsymbols('x_1'),
-                 x_2=dynamicsymbols('x_2'),
-                 x_3=dynamicsymbols('x_3'),
-                 qs=dynamicsymbols('x_l x_c x_r'),
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        self.m = m
-        self.R = R
-        self.k_ll = k_ll
-        self.k_lr = k_lr
-        self.k_12l = k_12l
-        self.k_12r = k_12r
-        self.k_23l = k_23l
-        self.k_23r = k_23r
-        self.k_rl = k_rl
-        self.k_rr = k_rr
-        self.x_l = x_l
-        self.x_c = x_c
-        self.x_r = x_r
-        self.x_1 = x_1
-        self.x_2 = x_2
-        self.x_3 = x_3
-        self.Omega = Omega
-
-        self.Disk1 =  MaterialPoint(m, x_l, qs=[x_l]) + MaterialPoint(m/2*R**2, x_l/R, qs=[x_l]) + Spring((k_ll*k_lr)/(k_ll+k_lr), pos1 = x_l, qs = [x_l]) + Force(-2*F_0 * cos(Omega * ivar), pos1 = x_l, qs = [x_l])
-        self.Disk2 =  MaterialPoint(m, x_c, qs=[x_c]) + MaterialPoint(m/2*R**2, x_c/R, qs=[x_c]) + Spring((k_12l*k_12r)/(k_12l+k_12r), pos1 = x_l, pos2 = x_c, qs = [x_l, x_c]) + Spring((k_23l*k_23r)/(k_23l+k_23r), pos1 = x_c, pos2 = x_r, qs = [x_c, x_r])
-        self.Disk3 =  MaterialPoint(m, x_r, qs=[x_r]) + MaterialPoint(m/2*R**2, x_r/R, qs=[x_r]) + Spring((k_rl*k_rr)/(k_rl+k_rr), pos1 = x_r, qs = [x_r]) + Force(-F_0 * cos(Omega * ivar), pos1 = x_r, qs = [x_r])
-
-
-        
-        
-        system = self.Disk1 + self.Disk2 + self.Disk3
-        super().__init__(system(qs),**kwargs)
-
-    def get_default_data(self):
-
-        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
-
-        default_data_dict = {
-
-            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
-            
-            self.k_ll: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-            self.k_lr: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-            self.k_12l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-            self.k_12r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-            self.k_23l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-            self.k_23r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-            self.k_rl: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-            self.k_rr: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
-
-            self.x_l: [self.x_1, 0],
-            self.x_c: [self.x_1, self.x_2, 0],
-            self.x_r: [self.x_2, 0],
-            }
-
-        return default_data_dict
-
-    def get_random_parameters(self):
-
-        default_data_dict = self.get_default_data()
-
-        parameters_dict = {
-            key: random.choice(items_list)
-            for key, items_list in default_data_dict.items()
-        }
-
-        if parameters_dict[self.x_l] != self.x_1 or parameters_dict[self.x_c] != self.x_1:
-
-            parameters_dict[self.x_l] = self.x_1
-
-        if parameters_dict[self.x_c] != self.x_2 or parameters_dict[self.x_r] != self.x_2:
-
-            parameters_dict[self.x_r] = self.x_2
-
-        return parameters_dict
-    
-
+#class MDoFForcedSimpleDisksWithSerialSprings(ComposedSystem):
+#    scheme_name = 'three_simple_disks_serial.png'
+#    real_name = 'three_carriages.PNG'
+#
+#    def __init__(self,
+#                 r=Symbol('r', positive=True), #!!! Important - it's dummy variable which is to remove when the LagrangesDynamicSystem inits will be improved
+#                 R=Symbol('R', positive=True),
+#                 m=Symbol('m', positive=True),
+#                 k_ll=Symbol('k_ll', positive=True),
+#                 k_lr=Symbol('k_lr', positive=True),
+#                 k_12l=Symbol('k_12l', positive=True),
+#                 k_12r=Symbol('k_12r', positive=True),
+#                 k_23l=Symbol('k_23l', positive=True),
+#                 k_23r=Symbol('k_23r', positive=True),
+#                 k_rl=Symbol('k_rl', positive=True),
+#                 k_rr=Symbol('k_rr', positive=True),
+#                 F_0=Symbol('F_0', positive=True),
+#                 Omega=Symbol('Omega', positive=True),
+#                 x_l=dynamicsymbols('x_l'),
+#                 x_c=dynamicsymbols('x_c'),
+#                 x_r=dynamicsymbols('x_r'),
+#                 x_1=dynamicsymbols('x_1'),
+#                 x_2=dynamicsymbols('x_2'),
+#                 x_3=dynamicsymbols('x_3'),
+#                 qs=dynamicsymbols('x_l x_c x_r'),
+#                 ivar=Symbol('t'),
+#                 **kwargs):
+#
+#        self.m = m
+#        self.R = R
+#        self.k_ll = k_ll
+#        self.k_lr = k_lr
+#        self.k_12l = k_12l
+#        self.k_12r = k_12r
+#        self.k_23l = k_23l
+#        self.k_23r = k_23r
+#        self.k_rl = k_rl
+#        self.k_rr = k_rr
+#        self.x_l = x_l
+#        self.x_c = x_c
+#        self.x_r = x_r
+#        self.x_1 = x_1
+#        self.x_2 = x_2
+#        self.x_3 = x_3
+#        self.Omega = Omega
+#
+#        self.Disk1 =  MaterialPoint(m, x_l, qs=#[x_l]) + MaterialPoint(m/2*R**2, x_l/R, qs=[x_l]) + Spring((k_ll*k_lr)/(k_ll+k_lr), pos1 = x_l, qs = [x_l]) + Force(-2*F_0 * cos(Omega * ivar), pos1 = x_l, qs = [x_l])
+#        self.Disk2 =  MaterialPoint(m, x_c, qs=[x_c]) + MaterialPoint(m/2*R**2, x_c/R, qs=[x_c]) + Spring((k_12l*k_12r)/(k_12l+k_12r), pos1 = x_l, pos2 = x_c, qs = [x_l, x_c]) + Spring((k_23l*k_23r)/(k_23l+k_23r), pos1 = x_c, pos2 = x_r, qs = [x_c, x_r])
+#        self.Disk3 =  MaterialPoint(m, x_r, qs=[x_r]) + MaterialPoint(m/2*R**2, x_r/R, qs=[x_r]) + Spring((k_rl*k_rr)/(k_rl+k_rr), pos1 = x_r, qs = [x_r]) + Force(-F_0 * cos(Omega * ivar), pos1 = x_r, qs = [x_r])
+#
+#
+#        
+#        
+#        system = self.Disk1 + self.Disk2 + self.Disk3
+#        super().__init__(system(qs),**kwargs)
+#
+#    def get_default_data(self):
+#
+#        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+#
+#        default_data_dict = {
+#
+#            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#            
+#            self.k_ll: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+#            self.k_lr: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+#            self.k_12l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+#            self.k_12r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+#            self.k_23l: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+#            self.k_23r: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+#            self.k_rl: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+#            self.k_rr: [1 * k0, 2 * k0, S.Half * k0, 4 * k0, S.Half**2 * k0],
+#
+#            self.x_l: [self.x_1, 0],
+#            self.x_c: [self.x_1, self.x_2, 0],
+#            self.x_r: [self.x_2, 0],
+#            }
+#
+#        return default_data_dict
+#
+#    def get_random_parameters(self):
+#
+#        default_data_dict = self.get_default_data()
+#
+#        parameters_dict = {
+#            key: random.choice(items_list)
+#            for key, items_list in default_data_dict.items()
+#        }
+#
+#        if parameters_dict[self.x_l] != self.x_1 or parameters_dict[self.x_c] != self.x_1:
+#
+#            parameters_dict[self.x_l] = self.x_1
+#
+#        if parameters_dict[self.x_c] != self.x_2 or parameters_dict[self.x_r] != self.x_2:
+#
+#            parameters_dict[self.x_r] = self.x_2
+#
+#        return parameters_dict
+#    
+#
 #DO ZROBIENIA - PRZENIESIONO Z MODUŁU mdof.py
-class MDoFForcedSimpleDisksWithParallelSprings(ComposedSystem):
-
-    _default_subs_method='direct'
-    scheme_name = 'three_simple_disks.png'
-    real_name = 'three_rollers_real.png'
-
-    def __init__(self,
-                 dum=Symbol('dum'),
-                 R=Symbol('R', positive=True),
-                 m=Symbol('m', positive=True),
-                 m1=Symbol('m_1', positive=True),
-                 m2=Symbol('m_2', positive=True),
-                 m3=Symbol('m_3', positive=True),
-                 k_l=Symbol('k_l', positive=True),
-                 k_cl=Symbol('k_cl', positive=True),
-                 k_12=Symbol('k_12', positive=True),
-                 k_c12=Symbol('k_c12', positive=True),
-                 k_23=Symbol('k_23', positive=True),
-                 k_c23=Symbol('k_c23', positive=True),
-                 k_r=Symbol('k_r', positive=True),
-                 k_cr=Symbol('k_cr', positive=True),
-                 F=Symbol('F', positive=True),
-                 Omega=Symbol('Omega', positive=True),
-                 x_l=dynamicsymbols('x_l'),
-                 x_c=dynamicsymbols('x_c'),
-                 x_r=dynamicsymbols('x_r'),
-                 x_1=dynamicsymbols('x_1'),
-                 x_2=dynamicsymbols('x_2'),
-                 qs=dynamicsymbols('x_l x_c x_r'),
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        self.m = m
-        self.m1 = m1
-        self.m2 = m2
-        self.m3 = m3
-        self.R = R
-        self.k_l = k_l
-        self.k_cl = k_cl
-        self.k_12 = k_12
-        self.k_c12 = k_c12
-        self.k_23 = k_23
-        self.k_c23 = k_c23
-        self.k_r = k_r
-        self.k_cr = k_cr
-        self.x_l = x_l
-        self.x_c = x_c
-        self.x_r = x_r
-        self.x_1 = x_1
-        self.x_2 = x_2
-        self.Omega = Omega
-        self.R=R
-        self.Disk1 = MaterialPoint(m, x_l, qs=[x_l]) + MaterialPoint(m/2*R**2, x_l/R, qs=[x_l])  + Spring(k_l, pos1=x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[x_l]) + Spring(k_cl, pos1=x_l, qs=[x_l]) + Force(2*F * cos(Omega * ivar), pos1=x_l, qs=[x_l])
-
-        self.Disk2 = MaterialPoint(m, x_c, qs=[x_c]) + MaterialPoint(m/2*R**2, x_c/R, qs=[x_c]) + Spring(k_12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(k_c12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(k_12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(k_23, pos1=x_c, pos2=x_r, qs=[x_c, x_r]) + Spring(k_c23, pos1=x_c, pos2=x_r, qs=[x_c, x_r]) + Spring(k_23, pos1=x_c, pos2=x_r, qs=[x_c, x_r])
-
-        self.Disk3 = MaterialPoint(m, x_r, qs=[x_r]) + MaterialPoint(m/2*R**2, x_r/R, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_cr, pos1=x_r, qs=[x_r]) + Force(F * cos(Omega * ivar), pos1=x_r, qs=[x_r])
-
-
-        system = self.Disk1 + self.Disk2 + self.Disk3
-        super().__init__(system(qs),**kwargs)
-
-    def get_default_data(self):
-
-        m0, k0, l0, = symbols('m_0 k_0 l_0', positive=True)
-
-        default_data_dict = {
-
-            self.m: [1 * m0, 2 * m0, 4 * m0, 3 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0],
-
-            self.k_l: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
-            self.k_cl: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
-            self.k_12: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
-            self.k_c12: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
-            self.k_23: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
-            self.k_c23: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
-            self.k_r: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
-            self.k_cr: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
-
-            self.x_l: [self.x_1, 0],
-            self.x_c: [self.x_1, self.x_2],
-            self.x_r: [self.x_2, 0],
-        }
-
-        return default_data_dict
-    
-
-
-    def get_random_parameters(self):
-
-        default_data_dict = self.get_default_data()
-
-        parameters_dict = {
-            key: random.choice(items_list)
-            for key, items_list in default_data_dict.items()
-        }
-
-        if parameters_dict[self.x_l] != self.x_1 or parameters_dict[
-                self.x_c] != self.x_1:
-
-            parameters_dict[self.x_l] = self.x_1
-
-        if parameters_dict[self.x_c] != self.x_2 or parameters_dict[
-                self.x_r] != self.x_2:
-
-            parameters_dict[self.x_r] = self.x_2
-
-        return parameters_dict
+#class MDoFForcedSimpleDisksWithParallelSprings(ComposedSystem):
+#
+#    _default_subs_method='direct'
+#    scheme_name = 'three_simple_disks.png'
+#    real_name = 'three_rollers_real.png'
+#
+#    def __init__(self,
+#                 dum=Symbol('dum'),
+#                 R=Symbol('R', positive=True),
+#                 m=Symbol('m', positive=True),
+#                 m1=Symbol('m_1', positive=True),
+#                 m2=Symbol('m_2', positive=True),
+#                 m3=Symbol('m_3', positive=True),
+#                 k_l=Symbol('k_l', positive=True),
+#                 k_cl=Symbol('k_cl', positive=True),
+#                 k_12=Symbol('k_12', positive=True),
+#                 k_c12=Symbol('k_c12', positive=True),
+#                 k_23=Symbol('k_23', positive=True),
+#                 k_c23=Symbol('k_c23', positive=True),
+#                 k_r=Symbol('k_r', positive=True),
+#                 k_cr=Symbol('k_cr', positive=True),
+#                 F=Symbol('F', positive=True),
+#                 Omega=Symbol('Omega', positive=True),
+#                 x_l=dynamicsymbols('x_l'),
+#                 x_c=dynamicsymbols('x_c'),
+#                 x_r=dynamicsymbols('x_r'),
+#                 x_1=dynamicsymbols('x_1'),
+#                 x_2=dynamicsymbols('x_2'),
+#                 qs=dynamicsymbols('x_l x_c x_r'),
+#                 ivar=Symbol('t'),
+#                 **kwargs):
+#
+#        self.m = m
+#        self.m1 = m1
+#        self.m2 = m2
+#        self.m3 = m3
+#        self.R = R
+#        self.k_l = k_l
+#        self.k_cl = k_cl
+#        self.k_12 = k_12
+#        self.k_c12 = k_c12
+#        self.k_23 = k_23
+#        self.k_c23 = k_c23
+#        self.k_r = k_r
+#        self.k_cr = k_cr
+#        self.x_l = x_l
+#        self.x_c = x_c
+#        self.x_r = x_r
+#        self.x_1 = x_1
+#        self.x_2 = x_2
+#        self.Omega = Omega
+#        self.R=R
+#        self.Disk1 = MaterialPoint(m, x_l, qs=[x_l]) + MaterialPoint(m/2*R**2, x_l/R, qs=[x_l])  + Spring(k_l, pos1=x_l, qs=[x_l]) + Spring(k_l, pos1=x_l, qs=[x_l]) + Spring(k_cl, pos1=x_l, qs=[x_l]) + Force(2*F * cos(Omega * ivar), pos1=x_l, qs=[x_l])
+#
+#        self.Disk2 = MaterialPoint(m, x_c, qs=[x_c]) + MaterialPoint(m/2*R**2, x_c/R, qs=[x_c]) + Spring(k_12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(k_c12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(k_12, pos1=x_l, pos2=x_c, qs=[x_l, x_c]) + Spring(k_23, pos1=x_c, pos2=x_r, qs=[x_c, x_r]) + Spring(k_c23, pos1=x_c, pos2=x_r, qs=[x_c, x_r]) + Spring(k_23, pos1=x_c, pos2=x_r, qs=[x_c, x_r])
+#
+#        self.Disk3 = MaterialPoint(m, x_r, qs=[x_r]) + MaterialPoint(m/2*R**2, x_r/R, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_r, pos1=x_r, qs=[x_r]) + Spring(k_cr, pos1=x_r, qs=[x_r]) + Force(F * cos(Omega * ivar), pos1=x_r, qs=[x_r])
+#
+#
+#        system = self.Disk1 + self.Disk2 + self.Disk3
+#        super().__init__(system(qs),**kwargs)
+#
+#    def get_default_data(self):
+#
+#        m0, k0, l0, = symbols('m_0 k_0 l_0', positive=True)
+#
+#        default_data_dict = {
+#
+#            self.m: [1 * m0, 2 * m0, 4 * m0, 3 * m0, 5 * m0, 6 * m0, 7 * m0, 8 * m0, 9 * m0],
+#
+#            self.k_l: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
+#            self.k_cl: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
+#            self.k_12: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
+#            self.k_c12: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
+#            self.k_23: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
+#            self.k_c23: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
+#            self.k_r: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
+#            self.k_cr: [1 * k0, 2 * k0, 3 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0, 9 * k0],
+#
+#            self.x_l: [self.x_1, 0],
+#            self.x_c: [self.x_1, self.x_2],
+#            self.x_r: [self.x_2, 0],
+#        }
+#
+#        return default_data_dict
+#    
+#
+#
+#    def get_random_parameters(self):
+#
+#        default_data_dict = self.get_default_data()
+#
+#        parameters_dict = {
+#            key: random.choice(items_list)
+#            for key, items_list in #default_data_dict.items()
+#        }
+#
+#        if parameters_dict[self.x_l] != self.x_1 or parameters_dict[
+#                self.x_c] != self.x_1:
+#
+#           parameters_dict[self.x_l] = self.x_1
+#
+#        if parameters_dict[self.x_c] != self.x_2 or parameters_dict[
+#                self.x_r] != self.x_2:
+#
+#            parameters_dict[self.x_r] = self.x_2
+#
+#        return parameters_dict
 
 
 #DO ZROBIENIA - PRZENIESIONO Z MODUŁU mdof.py
@@ -1243,35 +1242,35 @@ class MDoFForcedDisksWithParallelSprings(ComposedSystem):
 #         }
 
 #         return default_data_dict
-
-    def get_random_parameters(self):
-
-        default_data_dict = self.get_default_data()
-
-        parameters_dict = {
-            key: random.choice(items_list)
-            for key, items_list in default_data_dict.items()
-        }
-
-        if parameters_dict[self.x_l] != self.x_1 or parameters_dict[
-                self.x_c] != self.x_1:
-
-            parameters_dict[self.x_l] = self.x_1
-
-        if parameters_dict[self.x_c] != self.x_2 or parameters_dict[
-                self.x_r] != self.x_2:
-
-            parameters_dict[self.x_r] = self.x_2
-
-        return parameters_dict
-    
+#
+#    def get_random_parameters(self):
+#
+#        default_data_dict = self.get_default_data()
+#
+#        parameters_dict = {
+#            key: random.choice(items_list)
+#            for key, items_list in default_data_dict.items()
+#        }
+#
+#        if parameters_dict[self.x_l] != self.x_1 or parameters_dict[
+#                self.x_c] != self.x_1:
+#
+#            parameters_dict[self.x_l] = self.x_1
+#
+#        if parameters_dict[self.x_c] != self.x_2 or parameters_dict[
+#                self.x_r] != self.x_2:
+#
+#            parameters_dict[self.x_r] = self.x_2
+#
+#        return parameters_dict
+#    
 
 #DO ZROBIENIA - PRZENIESIONO Z MODUŁU mdof.py
 #  //wydane Maja
 class MDoFForcedDisksWithSerialSprings(ComposedSystem):
     scheme_name = 'MDOF_Forced_Disks_With_Serial_Springs.PNG'
     real_name = 'three_carriages.PNG'
-#test
+
     def __init__(self,
                  r=Symbol('r', positive=True), #!!! Important - it's dummy variable which is to remove when the LagrangesDynamicSystem inits will be improved
                  R=Symbol('R', positive=True),

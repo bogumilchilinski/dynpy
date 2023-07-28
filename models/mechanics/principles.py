@@ -1035,7 +1035,6 @@ class KinematicClutchWithSprings(ComposedSystem):
         if phi is not None: self.phi = phi
         if theta is not None: self.theta = theta
 
-       # theta = self.theta
         self.qs = [self.phi]
         self.ivar = ivar
         self._init_from_components(**kwargs)
@@ -1053,8 +1052,6 @@ class KinematicClutchWithSprings(ComposedSystem):
                                pos2=self.theta,
                                qs=self.qs)  #right spring
         self.moment = Force(self.Ms, pos1=self.phi, qs=self.qs)
-#        system = self.disc_1 + self.spring_2 + self.moment
-#        self.system = system
         
         components['moment'] = self.moment
         components['disc_1'] = self.disc_1
@@ -1062,7 +1059,6 @@ class KinematicClutchWithSprings(ComposedSystem):
         
         return components
 
-#        super().__init__(system, **kwargs)
 
     def symbols_description(self):
         self.sym_desc_dict = {
