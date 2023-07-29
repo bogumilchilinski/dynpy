@@ -1040,6 +1040,7 @@ class MDoFElasticPendulum(ComposedSystem):
             #mech_comp.SteadySolutionComponent,
         ]
         return comp_list
+    
 class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
     scheme_name = 'three_pendulums_forced.PNG'
     real_name = 'lifting_tandem.png'
@@ -2299,7 +2300,7 @@ class DampedElasticPendulum(MDoFElasticPendulum):
     real_name = 'elastic_pendulum_real.PNG'
 
 
-class DampedElasticPendulum(MDoFElasticPendulum):
+#class DampedElasticPendulum(MDoFElasticPendulum):
     c = Symbol('c', positive=True)
     k = Symbol('k', positive=True)
     l = Symbol('l', positive=True)
@@ -2438,7 +2439,7 @@ class DDoFWinch(ComposedSystem):
         y = r * sin(phi) + (l + r * (phi - theta)) * cos(phi)
         F = m * g * r
 
-        self.disc_1 = Disk(I, pos_c=theta, qs=[phi, theta])
+        self.disc_1 = Disk(I, pos1=theta, qs=[phi, theta])
         self.spring = Spring(k, theta, qs=[phi, theta])
         self.material_point_1 = MaterialPoint(m, x, qs=[phi, theta])
         self.material_point_2 = MaterialPoint(m, y, qs=[phi, theta])

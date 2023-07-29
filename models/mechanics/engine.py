@@ -913,77 +913,77 @@ class EngineConstantWithReactionForce(EngineConstantVelocityVerticalSpringGravit
     
 
 #TODO #DDOF #DO POPRAWY !!!
-#class BoxerEnginePerpendicularSprings(Engine):
-#    scheme_name = 'boxer_engine_perpendicular_springs.png'
-#    real_name = 'f6c_valkyrie.jpg'
-#
-#    M = Symbol('M', positive=True),
-#    k_m = Symbol('k_m', positive=True),
-#    m_e = Symbol('m_e', positive=True),
-#    e = Symbol('e', positive=True),
-#    l = Symbol('l', positive=True),
-#    x = dynamicsymbols('x'),
-#    z = dynamicsymbols('z'),
-#    phi = dynamicsymbols('phi'),
-#    ivar = Symbol('t'),
-#
-#    def __init__(self,
-#                 M=None,
-#                 k_m=None,
-#                 m_e=None,
-#                 e=None,
-#                 l=None,
-#                 x=None,
-#                 z=None,
-#                 phi=None,
-#                 ivar=Symbol('t'),
-#                 **kwargs):
-#
-#        if M is not None: self.M = M
-#        if k_m is not None: self.k_m = k_m
-#        if m_e is not None: self.m_e = m_e
-#        if e is not None: self.e = e
-#        if l is not None: self.l = l
-#        if x is not None: self.x = x
-#        if z is not None: self.z = z
-#        if phi is not None: self.phi = phi
-#
-#        self._init_from_components(**kwargs)
-#
-#        @property
-#        def components(self):
-#
-#            components = {}
-#
-#            self._engine_block = MaterialPoint(self.M,
-#                                               pos1=self.x,
-#                                               qs=[self.x
-#                                                   ])(label='Engine block')
-#            self._unbalanced_mass = MaterialPoint(
-#                self.m_e, pos1=self.x + self.e * sin(self.phi),
-#                qs=[self.x])(label='Unbalanced mass in cranksystem')
-#            self._spring_vertical = Spring(
-#                2 * self.k_m, pos1=self.x,
-#                qs=[self.x])(label='Vertical engine mount')
-#            self._spring_horizontal = Spring(
-#                2 * self.k_m, pos1=self.z,
-#                qs=[self.x])(label='Horizontal engine mount')
-#
-#            components['_engine_block'] = self._engine_block
-#            components['_unbalanced_mass'] = self._unbalanced_mass
-#            components['_spring_vertical'] = self._spring_vertical
-#            components['_spring_horizontal'] = self._spring_horizontal
-#
-#            return components
-#
-#        def symbols_description(self):
-#            self.sym_desc_dict = {
-#                self.M: r'Mass of engine block',
-#                self.k_m: r'Spring stiffness coefficient',
-#                self.m_e: r'Mass of unbalanced mass',
-#                self.e: r'radius of unbalanced mass',
-#            }
-#            return self.sym_desc_dict
+class BoxerEnginePerpendicularSprings(Engine):
+    scheme_name = 'boxer_engine_perpendicular_springs.png'
+    real_name = 'f6c_valkyrie.jpg'
+
+    M = Symbol('M', positive=True),
+    k_m = Symbol('k_m', positive=True),
+    m_e = Symbol('m_e', positive=True),
+    e = Symbol('e', positive=True),
+    l = Symbol('l', positive=True),
+    x = dynamicsymbols('x'),
+    z = dynamicsymbols('z'),
+    phi = dynamicsymbols('phi'),
+    ivar = Symbol('t'),
+
+    def __init__(self,
+                 M=None,
+                 k_m=None,
+                 m_e=None,
+                 e=None,
+                 l=None,
+                 x=None,
+                 z=None,
+                 phi=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if M is not None: self.M = M
+        if k_m is not None: self.k_m = k_m
+        if m_e is not None: self.m_e = m_e
+        if e is not None: self.e = e
+        if l is not None: self.l = l
+        if x is not None: self.x = x
+        if z is not None: self.z = z
+        if phi is not None: self.phi = phi
+
+        self._init_from_components(**kwargs)
+
+        @property
+        def components(self):
+
+            components = {}
+
+            self._engine_block = MaterialPoint(self.M,
+                                               pos1=self.x,
+                                               qs=[self.x
+                                                   ])(label='Engine block')
+            self._unbalanced_mass = MaterialPoint(
+                self.m_e, pos1=self.x + self.e * sin(self.phi),
+                qs=[self.x])(label='Unbalanced mass in cranksystem')
+            self._spring_vertical = Spring(
+                2 * self.k_m, pos1=self.x,
+                qs=[self.x])(label='Vertical engine mount')
+            self._spring_horizontal = Spring(
+                2 * self.k_m, pos1=self.z,
+                qs=[self.x])(label='Horizontal engine mount')
+
+            components['_engine_block'] = self._engine_block
+            components['_unbalanced_mass'] = self._unbalanced_mass
+            components['_spring_vertical'] = self._spring_vertical
+            components['_spring_horizontal'] = self._spring_horizontal
+
+            return components
+
+        def symbols_description(self):
+            self.sym_desc_dict = {
+                self.M: r'Mass of engine block',
+                self.k_m: r'Spring stiffness coefficient',
+                self.m_e: r'Mass of unbalanced mass',
+                self.e: r'radius of unbalanced mass',
+            }
+            return self.sym_desc_dict
 
 #DONE
 class DampedEngineVerticalSpringGravity(Engine):
@@ -1814,114 +1814,114 @@ class StraightNonlinearEngine(NonlinearEngine):
 
 
 #TODO #DDOF # DO POPRAWY !!!
-#class NonLinearVeeEnginePerpendicularSprings(Engine):
-#    scheme_name = 'nonlin_vee_engine_perpendicular_springs.png'
-#    real_name = '440_magnum_v8.jpg'
-#
-#    M = Symbol('M', positive=True)
-#    k_m = Symbol('k_m', positive=True)
-#    m_e = Symbol('m_e', positive=True)
-#    e = Symbol('e', positive=True)
-#    l = Symbol('l', positive=True)
-#    x = dynamicsymbols('x')
-#    z = dynamicsymbols('z')
-#    phi = dynamicsymbols('phi')
-#
-#    def __init__(self,
-#                 M=None,
-#                 k_m=None,
-#                 m_e=None,
-#                 e=None,
-#                 l=None,
-#                 x=None,
-#                 z=None,
-#                 phi=None,
-#                 ivar=Symbol('t'),
-#                 **kwargs):
-#
-#        if M is not None: self.M = M
-#        if k_m is not None: self.k_m = k_m
-#        if m_e is not None: self.m_e = m_e
-#        if e is not None: self.e = e
-#        if l is not None: self.l = l
-#        if x is not None: self.x = x
-#        if z is not None: self.z = z
-#        if phi is not None: self.phi = phi
-#
-#        self.qs = [self.x, self.z]  #phi nie jest wspolrzedna tego przypadku
-#        self.ivar = ivar
-#
-#        self._init_from_components(**kwargs)
-#
-#    @property
-#    def components(self):
-#
-#        components = {}
-#
-#        self._engine_block_horizontal_component = MaterialPoint(
-#            self.M, pos1=self.x,
-#            qs=[self.x])(label='Engine block (horizontal component)')
-#        self._engine_block_vertical_component = MaterialPoint(
-#            self.M, pos1=self.z,
-#            qs=[self.z])(label='Engine block (vertical component)')
-#        self._rotating_unbalanced_mass_horizontal_component = MaterialPoint(
-#            self.m_e, pos1=self.x + self.e * sin(self.phi),
-#            qs=[self.x
-#                ])(label='Rotating unbalanced mass (horizontal component)')
-#        self._rotating_unbalanced_mass_vertical_component = MaterialPoint(
-#            self.m_e, pos1=self.z + self.e * cos(self.phi),
-#            qs=[self.z])(label='Rotating unbalanced mass (vertical component)')
-#        self._engine_mount_left_vertical_component = Spring(
-#            self.k_m,
-#            pos1=(self.z**2 + self.x**2)**(1 / 2) - self.x,
-#            qs=[self.z])(label='Engine mount left (vertical component)')
-#        self._engine_mount_left_horizontal_component = Spring(
-#            self.k_m,
-#            pos1=(self.z**2 + self.x**2)**(1 / 2) - self.z,
-#            qs=[self.x])(label='Engine mount left (horizontal component)')
-#        self._engine_mount_right_vertical_component = Spring(
-#            self.k_m,
-#            pos1=(self.z**2 + self.x**2)**(1 / 2) - self.x,
-#            qs=[self.z])(label='Engine mount right (vertical component)')
-#        self._engine_mount_right_horizontal_component = Spring(
-#            self.k_m,
-#            pos1=(self.z**2 + self.x**2)**(1 / 2) - self.z,
-#            qs=[self.x])(label='Engine mount right (horizontal component)')
-#
-#        components[
-#            '_engine_block_horizontal_component'] = self._engine_block_horizontal_component
-#        components[
-#            '_engine_block_vertical_component'] = self._engine_block_vertical_component
-#        components[
-#            '_rotating_unbalanced_mass_horizontal_component'] = self._rotating_unbalanced_mass_horizontal_component
-#        components[
-#            '_rotating_unbalanced_mass_vertical_component'] = self._rotating_unbalanced_mass_vertical_component
-#        components[
-#            '_engine_mount_left_vertical_component'] = self._engine_mount_left_vertical_component
-#        components[
-#            '_engine_mount_left_horizontal_component'] = self._engine_mount_left_horizontal_component
-#        components[
-#            '_engine_mount_right_vertical_component'] = self._engine_mount_right_vertical_component
-#        components[
-#            '_engine_mount_right_horizontal_component'] = self._engine_mount_right_horizontal_component
-#
-#        return components
-#
-#        super().__init__(system, **kwargs)
-#
-#    def symbols_description(self):
-#        self.sym_desc_dict = {
-#            self.M: r'Mass of engine block',
-#            self.k_m: r'Spring stiffness coefficient',
-#            self.m_e: r'Mass in eccentric displacement',
-#            self.e: r'Eccentric displacement',
-#            #            self.l: r'?????',
-#            self.phi: r'Angle of deviation from the vertical',
-#            self.x: r'Horizontal displacement',
-#            self.z: r'Vertical displacement',
-#        }
-#
-#        return self.sym_desc_dict
+class NonLinearVeeEnginePerpendicularSprings(Engine):
+    scheme_name = 'nonlin_vee_engine_perpendicular_springs.png'
+    real_name = '440_magnum_v8.jpg'
+
+    M = Symbol('M', positive=True)
+    k_m = Symbol('k_m', positive=True)
+    m_e = Symbol('m_e', positive=True)
+    e = Symbol('e', positive=True)
+    l = Symbol('l', positive=True)
+    x = dynamicsymbols('x')
+    z = dynamicsymbols('z')
+    phi = dynamicsymbols('phi')
+
+    def __init__(self,
+                 M=None,
+                 k_m=None,
+                 m_e=None,
+                 e=None,
+                 l=None,
+                 x=None,
+                 z=None,
+                 phi=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if M is not None: self.M = M
+        if k_m is not None: self.k_m = k_m
+        if m_e is not None: self.m_e = m_e
+        if e is not None: self.e = e
+        if l is not None: self.l = l
+        if x is not None: self.x = x
+        if z is not None: self.z = z
+        if phi is not None: self.phi = phi
+
+        self.qs = [self.x, self.z]  #phi nie jest wspolrzedna tego przypadku
+        self.ivar = ivar
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self._engine_block_horizontal_component = MaterialPoint(
+            self.M, pos1=self.x,
+            qs=[self.x])(label='Engine block (horizontal component)')
+        self._engine_block_vertical_component = MaterialPoint(
+            self.M, pos1=self.z,
+            qs=[self.z])(label='Engine block (vertical component)')
+        self._rotating_unbalanced_mass_horizontal_component = MaterialPoint(
+            self.m_e, pos1=self.x + self.e * sin(self.phi),
+            qs=[self.x
+                ])(label='Rotating unbalanced mass (horizontal component)')
+        self._rotating_unbalanced_mass_vertical_component = MaterialPoint(
+            self.m_e, pos1=self.z + self.e * cos(self.phi),
+            qs=[self.z])(label='Rotating unbalanced mass (vertical component)')
+        self._engine_mount_left_vertical_component = Spring(
+            self.k_m,
+            pos1=(self.z**2 + self.x**2)**(1 / 2) - self.x,
+            qs=[self.z])(label='Engine mount left (vertical component)')
+        self._engine_mount_left_horizontal_component = Spring(
+            self.k_m,
+            pos1=(self.z**2 + self.x**2)**(1 / 2) - self.z,
+            qs=[self.x])(label='Engine mount left (horizontal component)')
+        self._engine_mount_right_vertical_component = Spring(
+            self.k_m,
+            pos1=(self.z**2 + self.x**2)**(1 / 2) - self.x,
+            qs=[self.z])(label='Engine mount right (vertical component)')
+        self._engine_mount_right_horizontal_component = Spring(
+            self.k_m,
+            pos1=(self.z**2 + self.x**2)**(1 / 2) - self.z,
+            qs=[self.x])(label='Engine mount right (horizontal component)')
+
+        components[
+            '_engine_block_horizontal_component'] = self._engine_block_horizontal_component
+        components[
+            '_engine_block_vertical_component'] = self._engine_block_vertical_component
+        components[
+            '_rotating_unbalanced_mass_horizontal_component'] = self._rotating_unbalanced_mass_horizontal_component
+        components[
+            '_rotating_unbalanced_mass_vertical_component'] = self._rotating_unbalanced_mass_vertical_component
+        components[
+            '_engine_mount_left_vertical_component'] = self._engine_mount_left_vertical_component
+        components[
+            '_engine_mount_left_horizontal_component'] = self._engine_mount_left_horizontal_component
+        components[
+            '_engine_mount_right_vertical_component'] = self._engine_mount_right_vertical_component
+        components[
+            '_engine_mount_right_horizontal_component'] = self._engine_mount_right_horizontal_component
+
+        return components
+
+        super().__init__(system, **kwargs)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.M: r'Mass of engine block',
+            self.k_m: r'Spring stiffness coefficient',
+            self.m_e: r'Mass in eccentric displacement',
+            self.e: r'Eccentric displacement',
+            #            self.l: r'?????',
+            self.phi: r'Angle of deviation from the vertical',
+            self.x: r'Horizontal displacement',
+            self.z: r'Vertical displacement',
+        }
+
+        return self.sym_desc_dict
 
 # DONE #Amadi Sprawdza
 class EngineWithTMD(Engine):

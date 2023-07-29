@@ -1083,6 +1083,101 @@ class GeneralSolutionComponent(ReportComponent):
         display(ReportText(self.footer_text))
 
         AutoBreak.latex_backend = latex_store
+        
+class GeneralSolutionDynpyCodeComponent(ReportComponent):
+    #"Rozwiązanie ogólne"
+    title="Dynpy code for general solution"
+    
+    @property
+    def header_text(self):
+        #'Rozwiązanie ogólne przedstawia wyrażenie:'
+        return "Dynpy code for general solution is presented by expression:"
+    @property
+    def footer_text(self):
+        #'Rozwiązanie ogólne opisuje ruch analizowanego układu (przedstawia przemieszczenie w funkcji czasu) i wynika z rozważań dotyczących drgań swobodnych układu.'
+        return "General solution describes motion of the analised system - presents displacement i function of time - and is given by considerations about free vibrations of the system. This code presents a solution in dynpy code."
+    
+    def append_elements(self):
+        system=self._system
+        t=system.ivar
+        dyn_sys=system
+        dyn_sys_lin=dyn_sys.linearized()
+        display(ReportText(self.header_text))
+        coord=dyn_sys.qs
+        
+        ode=system._ode_system
+
+        display(Markdown(
+f'''
+
+    from dynpy.models.mechanics import *
+    from sympy import *
+
+    dyn_sys = {system.__class__.__name__}()
+    
+    
+    dyn_sys._ode_system.general_solution
+    
+
+
+'''))
+        
+        display(ReportText(self.footer_text))
+        
+class GeneralSolutionSympyCodeComponent(ReportComponent):
+    #"Rozwiązanie ogólne"
+    title="Sympy code for General Solution"
+    
+    @property
+    def header_text(self):
+        #'Rozwiązanie ogólne przedstawia wyrażenie:'
+        return "Sympy code for General Solution is presented by expression:"
+    @property
+    def footer_text(self):
+        #'Rozwiązanie ogólne opisuje ruch analizowanego układu (przedstawia przemieszczenie w funkcji czasu) i wynika z rozważań dotyczących drgań swobodnych układu.'
+        return "General solution describes motion of the analised system - presents displacement i function of time - and is given by considerations about free vibrations of the system.  This code presents a solution in sympy code."
+    
+    def append_elements(self):
+        system=self._system
+        t=system.ivar
+        dyn_sys=system
+        dyn_sys_lin=dyn_sys.linearized()
+        ode=system._ode_system.lhs-system._ode_system.rhs
+        cord=system.qs
+
+        
+      
+        display(ReportText(self.header_text))
+
+        code_list_ode=python(ode).split('\n')
+
+        var_name = 'ode'
+        
+        code_ode = '\n\n\t'.join(code_list_ode[:-1]) + '\n\n\t' + var_name +code_list_ode[-1][1:]
+
+        display(ReportText(self.header_text))
+
+        code_list_dvars=python(system.qs).split('\n')
+
+        var_name = 'dvars'
+        
+        code_dvars = '\n\n\t'.join(code_list_dvars[:-1]) + '\n\n\t' + var_name +code_list_dvars[-1][1:]
+        
+        
+        display(Markdown(
+f'''
+    from sympy import *
+    init_printing()
+    
+
+    {code_ode}
+    
+    {code_dvars}
+    
+    dsolve(ode,dvars)
+
+
+'''))
 
         
 # Grześ
