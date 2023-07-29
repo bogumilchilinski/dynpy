@@ -124,10 +124,11 @@ class ComposedSystem(HarmonicOscillator):
 
         components = {}
 
-        self._material_point = MaterialPoint(self.m0, self.qs[0],
+        self._material_point = MaterialPoint(Symbol('ItIsWrongCode '), self.qs[0],
                                              self.qs)('Material Point')
         components['_material_point'] = self._material_point
 
+        
         return components
 
     @property
@@ -398,7 +399,7 @@ class SpringMassSystem(ComposedSystem):
 
     m=Symbol('m', positive=True)
     k=Symbol('k', positive=True)
-    ivar=Symbol('t', positive=True)
+    ivar=Symbol('t')
     
     z=dynamicsymbols('z')
     
@@ -647,7 +648,7 @@ class LagrangeIBlocksOnInclinedPlane(ComposedSystem):
 
         return parameters_dict
 
-
+#TODO
 class LagrangeIOnMathFunction(ComposedSystem):
 
     scheme_name = 'mat_point_parabola.PNG'
@@ -694,7 +695,7 @@ class LagrangeIOnMathFunction(ComposedSystem):
         return default_data_dict
     
 
-
+#TODO
 class CrankSystem(ComposedSystem):
 
     scheme_name = 'crank_mechanismlow.jpg'
@@ -900,7 +901,7 @@ class CrankSystem(ComposedSystem):
         return default_data_dict
 
 
-
+#TODO
 class MaterialPointMovement(ComposedSystem):
 
     m = Symbol('m', positive=True)

@@ -2642,7 +2642,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
     ivar=Symbol('t')
     l = Symbol('l', positive=True)
     rho = Symbol('rho', positive=True)
-    m_f = Symbol('m_f', positive=True)
+    m_f = Symbol('epsilon_f', positive=True)
     m_t = Function('m_t')(ivar)
     m_t0 = Symbol('m_t0', positive=True)
     m_p = Function('m_p')(ivar)
@@ -2943,7 +2943,13 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
     
     
     def system_mass_ratio(self):
-        return Eq(self.eps, self.m_p/self.m_s)
+        return Eq(Function('epsilon')(self.ivar), self.m_p/self.m_s)
+    
+    def total_system_mass(self):
+        return Eq(self.m_s, self.m_p+self.m_t)
+    
+    def initial_system_mass_ratio(self):
+        return Eq(Symbol('epsilon_0', positive=True), self.m_p0/self.m_s)
     
     def excitation_freq_ratio(self):
         return Eq(self.psi, self.Omega/self.omega0)
@@ -2969,9 +2975,10 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                 self.omega0:sqrt(9.81/25),
                 self.m_p0:150000,
                 #m_f:15000,
-                self.m_f:1/1000,
+                self.m_f:3/1000,
                 self.rho:10,
-                self.t0:60,
+                pi:3.1415,
+                self.t0:30,
                 self.delta: 300000/(9.81*(150000000)/25)}
         
         return params_dict
@@ -3042,7 +3049,9 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         if t_span is None: t_span=np.linspace(0,300,3001)
 
         masses_dict = {self.m_t0:self.m_s-self.m_p0-self.m_f}
-        eoms_num = self.dimensionless_with_transfer().subs(masses_dict).doit()
+        m_f_dict = {self.m_f:self.m_f*self.m_s}
+        eoms_num = self.dimensionless_with_transfer().subs(masses_dict).subs(m_f_dict).doit()
+#         display(eoms_num)
         a_p=Symbol('a_p')
         dependencies={a_p:self.x.diff().diff() + 25*self.phi.diff().diff()}
 
@@ -3077,7 +3086,8 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         if t_span is None: t_span=np.linspace(0,300,3001)
 
         masses_dict = {self.m_t0:self.m_s-self.m_p0-self.m_f}
-        eoms_num = self.dimensionless_with_transfer().subs(masses_dict).doit()
+        m_f_dict = {self.m_f:self.m_f*self.m_s}
+        eoms_num = self.dimensionless_with_transfer().subs(masses_dict).subs(m_f_dict).doit()
         a_p=Symbol('a_p')
         dependencies={a_p:self.x.diff().diff() + 25*self.phi.diff().diff()}
 
