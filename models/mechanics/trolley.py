@@ -78,7 +78,7 @@ class SpringMassSystem(ComposedSystem):
                  m=None,
                  k=None,
                  z=None,
-                 ivar=None,
+                 ivar=Symbol('t'),
                  **kwargs):
 
         
