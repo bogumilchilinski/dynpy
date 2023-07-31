@@ -1725,10 +1725,10 @@ class DDOFLinearizedCoupledPendulum(ComposedSystem):
     scheme_name = 'mdof_dpendulum.png'
     real_name = 'lifting_tandem.png'
 
-    m = Symbol('m', positive=True),
-    g = Symbol('g', positive=True),
-    l = Symbol('l', positive=True),
-    k = Symbol('k', positive=True),
+    m = Symbol('m', positive=True)
+    g = Symbol('g', positive=True)
+    l = Symbol('l', positive=True)
+    k = Symbol('k', positive=True)
     phi1=dynamicsymbols('\\varphi_1')
     phi2=dynamicsymbols('\\varphi_2')
 
@@ -1754,8 +1754,8 @@ class DDOFLinearizedCoupledPendulum(ComposedSystem):
         self.qs = [self.phi1, self.phi2]
 
         
-
         self._init_from_components(**kwargs)
+        
         
     @property
     def components(self):
