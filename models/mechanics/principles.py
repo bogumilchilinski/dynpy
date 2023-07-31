@@ -116,6 +116,7 @@ class ComposedSystem(HarmonicOscillator):
         else:
             self.qs = [self.z]
 
+
         
         self._init_from_components(system=system, **kwargs)
 
@@ -128,6 +129,7 @@ class ComposedSystem(HarmonicOscillator):
                                              self.qs)('Material Point')
         components['_material_point'] = self._material_point
 
+        self._label = 'System seems to be wrong - method components is not overload'
         
         return components
 
