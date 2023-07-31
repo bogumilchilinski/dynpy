@@ -34,12 +34,15 @@ from dynpy.models.mechanics.engine import EngineHousing, FreeEngine,  FreeEngine
 from dynpy.models.mechanics.disk import ForcedNonLinearDisc, ForcedNonLinearDiscSpring, TwoForcedNonLinearDisks, TwoDisksWithThreeSprings
 from dynpy.models.mechanics.tensioner import BlowerToothedBelt, DampedBlowerToothedBelt
 from dynpy.models.mechanics.tmd import TunedMassDamper, TunedMassDamperRelativeMotion
-from dynpy.models.mechanics.chair import *
+
 from dynpy.models.mechanics.projectile import MissileTrajectoryAirless, MissileTrajectory, MissileTrajectoryAerodynamic
 from dynpy.models.mechanics.tmac import SDOFWinchSystem, SDOFWinchSystemTest
-from dynpy.models.mechanics.motorcoach import *
+
 from dynpy.models.mechanics.principles import DampedMeasuringTool, KinematicClutchWithSprings
+
 from dynpy.models.mechanics.offshore import CompoundSystem, SDOFSemiSubmersiblePlatform, DDOFSemiSubmersiblePlatform
+from dynpy.models.mechanics.motorcoach import *
+from dynpy.models.mechanics.chair import *
 
 
 #TODO

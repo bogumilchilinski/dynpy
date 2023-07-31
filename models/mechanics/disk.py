@@ -901,7 +901,7 @@ class ForcedDisksWithParallelSprings2(ComposedSystem):
 
         return default_data_dict
     
-
+#TODO
 #DO ZROBIENIA - PRZENIESIONO Z MODUŁU mdof.py
 class MDoFForcedSimpleDisksWithSerialSprings(ComposedSystem):
     scheme_name = 'three_simple_disks_serial.png'
