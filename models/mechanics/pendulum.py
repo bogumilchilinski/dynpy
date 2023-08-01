@@ -705,6 +705,7 @@ class PendulumKinematicExct(ComposedSystem):
                  x_e=None,
                  ivar=Symbol('t'),
                  **kwargs):
+        
         if l is not None: self.l = l
         if m is not None: self.m = m
         if g is not None: self.g = g
