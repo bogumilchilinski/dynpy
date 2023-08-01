@@ -60,7 +60,7 @@ class Pendulum(NonlinearComposedSystem):
     m=Symbol('m', positive=True)
     g=Symbol('g', positive=True)
     l=Symbol('l', positive=True)
-    angle=dynamicsymbols('\\varphi')
+    angle=dynamicsymbols('varphi')
     qs=None
     
     m0=Symbol('m_0',positive=True)
@@ -223,7 +223,7 @@ class PulledPendulum(Pendulum):
     m=Symbol('m', positive=True)
     g=Symbol('g', positive=True)
     l=Symbol('l', positive=True)
-    angle=dynamicsymbols('\\varphi')
+    angle=dynamicsymbols('varphi')
     F=Symbol('F', positive=True)
     qs=None
     ivar=Symbol('t')
@@ -1726,10 +1726,10 @@ class DDOFLinearizedCoupledPendulum(ComposedSystem):
     scheme_name = 'mdof_dpendulum.png'
     real_name = 'lifting_tandem.png'
 
-    m = Symbol('m', positive=True),
-    g = Symbol('g', positive=True),
-    l = Symbol('l', positive=True),
-    k = Symbol('k', positive=True),
+    m = Symbol('m', positive=True)
+    g = Symbol('g', positive=True)
+    l = Symbol('l', positive=True)
+    k = Symbol('k', positive=True)
     phi1=dynamicsymbols('\\varphi_1')
     phi2=dynamicsymbols('\\varphi_2')
 
@@ -1755,8 +1755,8 @@ class DDOFLinearizedCoupledPendulum(ComposedSystem):
         self.qs = [self.phi1, self.phi2]
 
         
-
         self._init_from_components(**kwargs)
+        
         
     @property
     def components(self):
@@ -2154,57 +2154,93 @@ class LinearizedTriplePendulum(ComposedSystem):
         return parameters_dict
 
 
-#DO ZROBIENIA - PRZENIESIONO Z MODUŁU mdof.py
+#Done Marcelka
 class ThreePendulumsWithSprings(ComposedSystem):
     scheme_name = 'MDOF_Three_Pendulum_Spring.png'
     real_name = 'three_carriages.PNG'
 
+    phi_1=dynamicsymbols('varphi_1')
+    phi_2=dynamicsymbols('varphi_2')
+    phi_3=dynamicsymbols('varphi_3')
+    phi_l=dynamicsymbols('varphi_l')
+    phi_r=dynamicsymbols('varphi_r')
+    m1=Symbol('m_1', positive=True)
+    m2=Symbol('m_2', positive=True)
+    m3=Symbol('m_3', positive=True)
+    k_1=Symbol('k_1', positive=True)
+    k_2=Symbol('k_2', positive=True)
+    k_3=Symbol('k_3', positive=True)
+    k_4=Symbol('k_4', positive=True)
+    l=Symbol('l', positive=True)
+    g=Symbol('g', positive=True)
+    
+    qs=dynamicsymbols('varphi_1, varphi_2, varphi_3')
+
+    
     def __init__(self,
-                 phi_1=dynamicsymbols('varphi_1'),
-                 phi_2=dynamicsymbols('varphi_2'),
-                 phi_3=dynamicsymbols('varphi_3'),
-                 phi_l=dynamicsymbols('varphi_l'),
-                 phi_r=dynamicsymbols('varphi_r'),
-                 m1=Symbol('m_1', positive=True),
-                 m2=Symbol('m_2', positive=True),
-                 m3=Symbol('m_3', positive=True),
-                 k_1=Symbol('k_1', positive=True),
-                 k_2=Symbol('k_2', positive=True),
-                 k_3=Symbol('k_3', positive=True),
-                 k_4=Symbol('k_4', positive=True),
-                 l=Symbol('l', positive=True),
-                 g=Symbol('g', positive=True),
-                 qs=dynamicsymbols('varphi_1, varphi_2, varphi_3'),
+                 phi_1=None,
+                 phi_2=None,
+                 phi_3=None,
+                 phi_l=None,
+                 phi_r=None,
+                 m1=None,
+                 m2=None,
+                 m3=None,
+                 k_1=None,
+                 k_2=None,
+                 k_3=None,
+                 k_4=None,
+                 l=None,
+                 g=None,
+                 qs=None,
                  ivar=Symbol('t'),
-                 system = None,
                  **kwargs):
 
-        self.m1 = m1
-        self.m2 = m2
-        self.m3 = m3
-        self.k_1 = k_1
-        self.k_2 = k_2
-        self.k_3 = k_3
-        self.k_4 = k_4
-        self.l = l
-        self.phi_1 = phi_1
-        self.phi_2 = phi_2
-        self.phi_3 = phi_3
-        self.phi_l = phi_l
-        self.phi_r = phi_r
-        self.g = g
+        if phi_1 is not None: self.phi_1 = phi_1 
+        if phi_2 is not None: self.phi_2 = phi_2 
+        if phi_3 is not None: self.phi_3 = phi_3 
+        if phi_l is not None: self.phi_l = phi_l 
+        if phi_r is not None: self.phi_r = phi_r 
+        if m1 is not None: self.m1 = m1 
+        if m2 is not None: self.m2 = m2 
+        if m3 is not None: self.m3 = m3 
+        if k_1 is not None: self.k_1 = k_1 
+        if k_2 is not None: self.k_2 = k_2 
+        if k_3 is not None: self.k_3 = k_3 
+        if k_4 is not None: self.k_4 = k_4 
+        if l is not None: self.l = l 
+        if g is not None: self.g = g
+        self.qs = [self.phi_1,self.phi_2,self.phi_3]
+        
+        self._init_from_components(**kwargs)
 
-        if system == None:
-            self.Pendulum1 = Pendulum(m1, g, l, angle=phi_1, qs=[phi_1])
-            self.Pendulum2 = Pendulum(m2, g, l, angle=phi_2, qs=[phi_2])
-            self.Pendulum3 = Pendulum(m3, g, l, angle=phi_3, qs=[phi_3])
-            self.Spring1 = Spring(k_1, pos1=(sqrt((l/2*(sin(phi_1)-sin(phi_2)))**2+(l/2*(cos(phi_1)-cos(phi_2)))**2)), qs=[phi_1, phi_2])
-            self.Spring2 = Spring(k_2, pos1=(sqrt((l/2*(sin(phi_2)-sin(phi_3)))**2+(l/2*(cos(phi_2)-cos(phi_3)))**2)), qs=[phi_2, phi_3])
-            self.Spring3 = Spring(k_3, pos1=(sqrt((l*(sin(phi_1)-sin(phi_2)))**2+(l*(cos(phi_1)-cos(phi_2)))**2)), qs=[phi_1, phi_2])
-            self.Spring4 = Spring(k_4, pos1=(sqrt((l*(sin(phi_2)-sin(phi_3)))**2+(l*(cos(phi_2)-cos(phi_3)))**2)), qs=[phi_2, phi_3])
+    @cached_property
+    def components(self):
+        components = {}
 
-            system = self.Pendulum1 + self.Pendulum2 + self.Pendulum3 + self.Spring1 + self.Spring2 + self.Spring3 + self.Spring4
-        super().__init__(system(qs),**kwargs)
+        self.Pendulum1 = Pendulum(self.m1, self.g, self.l, angle=self.phi_1, qs=[self.phi_1])
+
+        self.Pendulum2 = Pendulum(self.m2, self.g, self.l, angle=self.phi_2, qs=[self.phi_2])
+
+        self.Pendulum3 = Pendulum(self.m3, self.g, self.l, angle=self.phi_3, qs=[self.phi_3])
+
+        self.Spring1 = Spring(self.k_1, pos1=(sqrt((self.l/2*(sin(self.phi_1)-sin(self.phi_2)))**2+(self.l/2*(cos(self.phi_1)-cos(self.phi_2)))**2)), qs=[self.phi_1, self.phi_2])
+
+        self.Spring2 = Spring(self.k_2, pos1=(sqrt((self.l/2*(sin(self.phi_2)-sin(self.phi_3)))**2+(self.l/2*(cos(self.phi_2)-cos(self.phi_3)))**2)), qs=[self.phi_2, self.phi_3])
+
+        self.Spring3 = Spring(self.k_3, pos1=(sqrt((self.l*(sin(self.phi_1)-sin(self.phi_2)))**2+(self.l*(cos(self.phi_1)-cos(self.phi_2)))**2)), qs=[self.phi_1, self.phi_2])
+
+        self.Spring4 = Spring(self.k_4, pos1=(sqrt((self.l*(sin(self.phi_2)-sin(self.phi_3)))**2+(self.l*(cos(self.phi_2)-cos(self.phi_3)))**2)), qs=[self.phi_2, self.phi_3])
+    
+        components['Pendulum1'] = self.Pendulum1
+        components['Pendulum2'] = self.Pendulum2
+        components['Pendulum3'] = self.Pendulum3
+        components['Spring1'] = self.Spring1
+        components['Spring2'] = self.Spring2
+        components['Spring3'] = self.Spring3
+        components['Spring4'] = self.Spring4
+
+        return components
 
     def get_default_data(self):
 
@@ -2246,6 +2282,7 @@ class ThreePendulumsWithSprings(ComposedSystem):
 
 
         return parameters_dict
+
 
     
 #DONE - Kuba & Madi

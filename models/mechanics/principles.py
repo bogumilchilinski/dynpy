@@ -116,6 +116,7 @@ class ComposedSystem(HarmonicOscillator):
         else:
             self.qs = [self.z]
 
+
         
         self._init_from_components(system=system, **kwargs)
 
@@ -128,6 +129,7 @@ class ComposedSystem(HarmonicOscillator):
                                              self.qs)('Material Point')
         components['_material_point'] = self._material_point
 
+        self._label = 'System seems to be wrong - method components is not overload'
         
         return components
 
@@ -230,11 +232,19 @@ class ComposedSystem(HarmonicOscillator):
             mech_comp.SchemeComponent,
             mech_comp.ExemplaryPictureComponent,
             mech_comp.KineticEnergyComponent,
+            mech_comp.KineticEnergyDynPyCodeComponent,
+            mech_comp.KineticEnergyDynPyCodeComponent,
             mech_comp.PotentialEnergyComponent,
+            mech_comp.PotentialEnergyDynPyCodeComponent,
+            mech_comp.PotentialEnergySymPyCodeComponent,
             mech_comp.LagrangianComponent,
             mech_comp.GoverningEquationComponent,
+            mech_comp.GoverningEquationDynpyCodeComponent,
+            mech_comp.GoverningEquationSympyCodeComponent,
             mech_comp.FundamentalMatrixComponent,
             mech_comp.GeneralSolutionComponent,
+            mech_comp.GeneralSolutionDynpyCodeComponent,
+            mech_comp.GeneralSolutionSympyCodeComponent,
             mech_comp.SteadySolutionComponent,
         ]
 
@@ -248,7 +258,13 @@ class ComposedSystem(HarmonicOscillator):
     @lru_cache   
     def linearized(self, x0=None, op_point=False, hint=[], label=None):
 
-        return type(self).from_system(super().linearized(x0=x0,op_point=op_point,hint=hint,label=label))
+        #temporary workaround
+        lin_sys = HarmonicOscillator(self).linearized(x0=x0,op_point=op_point,hint=hint,label=label)
+        
+        #old version
+        #lin_sys=super().linearized(x0=x0,op_point=op_point,hint=hint,label=label)
+        
+        return type(self).from_system(lin_sys)
 
     def tensioner_belt_force(self):
         return self.k_tensioner * self.steady_solution()

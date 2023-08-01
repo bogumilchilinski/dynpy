@@ -212,6 +212,93 @@ class SchemeComponent(ExemplaryPictureComponent):
 
 
         display(ReportText( self.footer_text ))
+
+
+class SchemeDynPyCodeComponent(ExemplaryPictureComponent):
+    title="DynPy code for scheme of the system"
+
+    @property
+    def header_text(self):
+
+        return "DynPy code for calling the scheme of the dynamic system is as following:"
+
+
+    @property
+    def footer_text(self):
+
+        system = self._system
+
+        return f"Analysis of the scheme allows to claim its number of degrees of freedom which is {len(system.q)}"
+
+    def append_elements(self):
+
+        system = self._system
+
+        display(ReportText(  self.header_text ))
+
+        display(Markdown(
+
+f'''
+
+
+
+    from dynpy.models.mechanics import *
+    from dynpy.utilities.report import Picture
+    from sympy import *
+
+    dyn_sys = {system.__class__.__name__}()
+
+
+    display(Picture(dyn_sys._scheme(), caption='Scheme of considered dynamic system.'))
+
+
+
+'''))
+
+        display(ReportText( self.footer_text ))
+
+
+class SchemeSymPyCodeComponent(ExemplaryPictureComponent):
+    title="SymPy code for scheme of the system"
+
+    @property
+    def header_text(self):
+        return "SymPy code for calling the scheme of the dynamic system is as following:"
+
+        
+    @property
+    def footer_text(self):
+        
+        system = self._system
+        return f"Analysis of the scheme allows to claim its number of degrees of freedom which is {len(system.q)}"
+    
+    
+    def append_elements(self):
+        
+        system = self._system
+        path=system._default_folder_path + system.scheme_name
+
+        display(ReportText(  self.header_text ))
+
+        display(Markdown(
+f'''
+
+
+    from dynpy.models.mechanics import *
+    from dynpy.utilities.report import Picture
+    from sympy import *
+
+    path="{path}"
+
+    display(Picture(path ,width='8cm', caption='Scheme of considered system.'))
+
+
+
+'''
+            ))
+        display(ReportText( self.footer_text ))
+
+
 #Pati
 class DamperPlot(ExemplaryPictureComponent):
     title="Siła tłumienia"
@@ -372,7 +459,7 @@ class KineticEnergySymPyCodeComponent(ReportComponent):
 
         display(ReportText( self.header_text  ))
 
-        Ep=dyn_sys._kinetic_energy
+#         Ek=dyn_sys._kinetic_energy
 
         code_list=python(system._kinetic_energy).split('\n')
 
@@ -649,7 +736,119 @@ class LagrangianComponent(ReportComponent):
         #frame.packages +(self.packages)
         frame+=(list(self))
         return frame
+
+
+class LagrangianDynPyCodeComponent(ReportComponent):
     
+    title="Dynpy Code for Lagrangian Component"
+
+    @property
+    def header_text(self):
+        return "Code line responsible for providing symbolic form of Lagrange's function is as following:"
+
+        
+    @property
+    def footer_text(self):
+        return "Considered piece of code can be used to determine the equations of motion of a system."
+    
+    def append_elements(self):
+        
+        system = self._system
+        dyn_sys=system
+
+
+        display(ReportText( self.header_text  ))
+
+
+        display(Markdown(
+f'''
+
+
+
+    from dynpy.models.mechanics import *
+    from sympy import *
+
+    dyn_sys = {system.__class__.__name__}()
+    t = dyn_sys.ivar
+
+    display( Eq(Symbol('L'),
+                     dyn_sys.lagrangian()) )
+
+    for q in dyn_sys.q:
+
+        display(dyn_sys.lagrangian().diff(q))
+
+        display(dyn_sys.lagrangian().diff(q.diff(t)).diff(t))
+
+
+
+'''))
+
+        display(ReportText( self.footer_text  ))
+
+
+class LagrangianSymPyCodeComponent(ReportComponent):
+
+    title="Sympy Code for Lagrangian Component"
+
+    @property
+    def header_text(self):
+        return "Code line responsible for providing symbolic form of Lagrange's function is as following:"
+
+        
+    @property
+    def footer_text(self):
+        return "Considered piece of code can be used to determine the equations of motion of a system."
+    
+    def append_elements(self):
+        
+        system = self._system
+        dyn_sys=system
+
+
+        display(ReportText( self.header_text  ))
+
+
+        L=dyn_sys.lagrangian()
+        q=dyn_sys.q
+        t=dyn_sys.ivar
+
+        code_list=python(system.lagrangian()).split('\n')
+
+        var_name = 'L'
+
+        code = '\n\n\t'.join(code_list[:-1]) + '\n\n\t' + var_name +code_list[-1][1:]
+
+
+        display(Markdown(
+f'''
+
+
+
+
+    from sympy import *
+
+    {code}
+
+
+    display(Eq(Symbol('L'),L))
+
+    qs = {q}
+
+    for q in qs:
+
+        display(L.diff(q))
+
+        display(L.diff(q.diff(t)).diff(t))
+
+
+
+'''))
+
+        display(ReportText( self.footer_text  ))
+
+        
+        
 # Amadi & Damian
 class GoverningEquationComponent(ReportComponent):
     
@@ -736,6 +935,100 @@ class LinearizedGoverningEquationComponent(ReportComponent):
 
         display(ReportText(self.footer_text))   
         
+        
+class GoverningEquationDynpyCodeComponent(ReportComponent):
+    
+    #Równania ruchu
+    title="Equation of motion"
+    
+    @property
+    def header_text(self):
+      
+      return 'Presented piece of code describes equations of motoion of the system distributed from dynamical system'
+
+       
+
+    @property
+    def footer_text(self):
+        #f''' Wyznaczone równania stanowią matematyczny opis dynamiczny właściwości układu. Dalsza analiza pozwala na skuteczną analizę działania modelowanego obiektu i określenie jego parametrów mechanicznych. '''
+        return 'Execution of this code returns equations of motion generated from dynamic system'
+    
+    def append_elements(self):
+        system = self._system
+        dyn_sys=system
+        eoms=str(dyn_sys._eoms)
+        
+        display(ReportText(self.header_text))
+
+        display(Markdown(
+f'''
+    
+    
+
+
+    from dynpy.models.mechanics import *
+    from sympy import *
+    
+    dyn_sys = {system.__class__.__name__}()
+    
+    
+    display(Eq(dyn_sys._eoms,0,evaluate=False))
+
+
+
+    
+'''))
+
+        display(ReportText(self.footer_text))        
+        
+class GoverningEquationSympyCodeComponent(ReportComponent):
+    
+    #Równania ruchu
+    title="Equation of motion"
+    
+    @property
+    def header_text(self):
+      
+      return 'Presented piece of code describes equations of motoion of the system created using Sympy library'
+
+       
+
+    @property
+    def footer_text(self):
+        #f''' Wyznaczone równania stanowią matematyczny opis dynamiczny właściwości układu. Dalsza analiza pozwala na skuteczną analizę działania modelowanego obiektu i określenie jego parametrów mechanicznych. '''
+        return 'Execution of this code returns equations of motion in a form of Sympy outputs'
+    
+    def append_elements(self):
+        system = self._system
+        dyn_sys=system
+        eoms=str(dyn_sys._eoms)
+        display(ReportText(self.header_text))
+        
+        code_list=python(system._eoms).split('\n')
+        
+        var_name = 'eoms'
+        
+        code = '\n\n\t'.join(code_list[:-1]) + '\n\n\t' + var_name +code_list[-1][1:]
+
+        
+
+        display(Markdown(
+f'''
+    
+    
+
+
+    from dynpy.models.mechanics import *
+    from sympy import *
+    
+    {code} 
+    
+    display(Eq(eoms,0,evaluate=False))
+
+    
+'''))
+
+        display(ReportText(self.footer_text))
 
 class LinearizationComponent(ReportComponent): # Szymon
 
@@ -1143,7 +1436,7 @@ class GeneralSolutionSympyCodeComponent(ReportComponent):
         dyn_sys=system
         dyn_sys_lin=dyn_sys.linearized()
         ode=system._ode_system.lhs-system._ode_system.rhs
-        cord=system.qs
+        cord=system.q
 
         
       
@@ -1157,7 +1450,7 @@ class GeneralSolutionSympyCodeComponent(ReportComponent):
 
         display(ReportText(self.header_text))
 
-        code_list_dvars=python(system.qs).split('\n')
+        code_list_dvars=python(system.q).split('\n')
 
         var_name = 'dvars'
         
@@ -1812,74 +2105,74 @@ class CentralSpringForceComponent(ReportComponent):
 
         display(ReportText( self.footer_text))
 
-class SchemeDynPyCodeComponent(ExemplaryPictureComponent):
-    title="Scheme of the system"
+# class SchemeDynPyCodeComponent(ExemplaryPictureComponent):
+#     title="Scheme of the system"
 
-    @property
-    def header_text(self):
-        #"Ilustracja przedstawia schemat rzeczywistego obiektu mechanicznego, wyznaczony na podstawie uprzedniej analizy rzeczywistego obiektu."
-        return "Scheme of the real object is presented in the figure. It was obtained by the analysis of real mechanism."
+#     @property
+#     def header_text(self):
+#         #"Ilustracja przedstawia schemat rzeczywistego obiektu mechanicznego, wyznaczony na podstawie uprzedniej analizy rzeczywistego obiektu."
+#         return "Scheme of the real object is presented in the figure. It was obtained by the analysis of real mechanism."
 
 
-    @property
-    def footer_text(self):
+#     @property
+#     def footer_text(self):
 
-        system = self._system
+#         system = self._system
 
-        #"Analizując przedstawiony układ można stwierdzić, że jego liczba stopni swobody to {len(system.q)}."
-        return f"Analysis of the scheme allows to claim its number of degrees of freedom which is {len(system.q)}"
+#         #"Analizując przedstawiony układ można stwierdzić, że jego liczba stopni swobody to {len(system.q)}."
+#         return f"Analysis of the scheme allows to claim its number of degrees of freedom which is {len(system.q)}"
 
-    def append_elements(self):
+#     def append_elements(self):
 
-        system = self._system
+#         system = self._system
 
-        display(ReportText(  self.header_text ))
-        display(Picture(system._scheme(),width='8cm'))
+#         display(ReportText(  self.header_text ))
+#         display(Picture(system._scheme(),width='8cm'))
 
-        display(Markdown(
+#         display(Markdown(
 
-'''The code for calling scheme of the system is following:
+# '''The code for calling scheme of the system is following:
 
-    display(Picture(system._scheme(),width='8cm'))
+#     display(Picture(system._scheme(),width='8cm'))
 
-'''
-            ))
+# '''
+#             ))
 
-        display(ReportText( self.footer_text ))
+#         display(ReportText( self.footer_text ))
         
-class SchemeSymPyCodeComponent(ExemplaryPictureComponent):
-    title="Scheme of the system"
+# class SchemeSymPyCodeComponent(ExemplaryPictureComponent):
+#     title="Scheme of the system"
 
-    @property
-    def header_text(self):
-        #"Ilustracja przedstawia schemat rzeczywistego obiektu mechanicznego, wyznaczony na podstawie uprzedniej analizy rzeczywistego obiektu."
-        return "Scheme of the real object is presented in the figure. It was obtained by the analysis of real mechanism."
+#     @property
+#     def header_text(self):
+#         #"Ilustracja przedstawia schemat rzeczywistego obiektu mechanicznego, wyznaczony na podstawie uprzedniej analizy rzeczywistego obiektu."
+#         return "Scheme of the real object is presented in the figure. It was obtained by the analysis of real mechanism."
 
         
-    @property
-    def footer_text(self):
+#     @property
+#     def footer_text(self):
         
-        system = self._system
+#         system = self._system
         
-        #"Analizując przedstawiony układ można stwierdzić, że jego liczba stopni swobody to {len(system.q)}."
-        return f"Analysis of the scheme allows to claim its number of degrees of freedom which is {len(system.q)}"
+#         #"Analizując przedstawiony układ można stwierdzić, że jego liczba stopni swobody to {len(system.q)}."
+#         return f"Analysis of the scheme allows to claim its number of degrees of freedom which is {len(system.q)}"
     
     
-    def append_elements(self):
+#     def append_elements(self):
         
-        system = self._system
-        path=system._default_folder_path + system.scheme_name
+#         system = self._system
+#         path=system._default_folder_path + system.scheme_name
 
-        display(ReportText(  self.header_text ))
-        display(Picture(path,width='8cm'))
+#         display(ReportText(  self.header_text ))
+#         display(Picture(path,width='8cm'))
         
-        display(Markdown(
-'''The code for calling scheme of the system is following:
+#         display(Markdown(
+# '''The code for calling scheme of the system is following:
 
-    path=self._default_folder_path + self.scheme_name
+#     path=self._default_folder_path + self.scheme_name
     
-    display(Picture(path ,width='8cm'))
+#     display(Picture(path ,width='8cm'))
 
-'''
-            ))
-        display(ReportText( self.footer_text ))
+# '''
+#             ))
+#         display(ReportText( self.footer_text ))
