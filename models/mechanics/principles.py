@@ -597,10 +597,8 @@ class DampedMeasuringTool(ComposedSystem):
         kt = Symbol('k_t', positive=True)
         Re = Symbol('R_e', positive=True)
         return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
-    
 
-#TODO
-#DO ZROBIENIA - PRZENIESIONO Z MODUŁU systems.py
+
 class LagrangeIBlocksOnInclinedPlane(ComposedSystem):
     scheme_name = 'ddof_disks_3_springs_scheme.png'
     real_name = 'nonlin_trolley_real.PNG'
@@ -628,16 +626,43 @@ class LagrangeIBlocksOnInclinedPlane(ComposedSystem):
         self.m1 = m1
         self.m2 = m2
         self.m3 = m3
-        self.m4 = m4
+        self.m4 = m
+        self.R = R
+        self.g = g
+        self.alpha = alpha
+        self.beta = beta
+        self.x1 = x1
+        self.x2 = x2
+        self.x3 = x3
+        self.x4 = x4
+        self.phi = phi
+        self.qs = qs
 
-        self.Mass1 = MaterialPoint(m1, pos1=x1, qs=[x1]) + GravitationalForce(m1, g, pos1=-x1*sin(alpha), qs=[x1])
-        self.Mass2 = MaterialPoint(m2, pos1=x2, qs=[x2]) + GravitationalForce(m2, g, pos1=-x2*sin(alpha), qs=[x2])
-        self.Mass3 = MaterialPoint(m3, pos1=x3, qs=[x3]) + GravitationalForce(m3, g, pos1=-x3*sin(beta), qs=[x3])
-        self.Mass4 = MaterialPoint(m4, pos1=x4, qs=[x4]) + GravitationalForce(m4, g, pos1=-x4*sin(beta), qs=[x4])
-        self.Pulley = MaterialPoint(1/2*m*R**2, pos1=phi, qs=[phi])
 
-        system = self.Mass1 + self.Mass2 + self.Mass3 + self.Mass4 + self.Pulley
-        super().__init__(system.lagrangian(),qs=qs, hol_coneqs=[x1-x2,phi*R-x2,x2-x3,phi*R-x3],**kwargs)
+        #IMROVE
+        self._init_from_components(**kwargs)
+        
+    @property
+    def components(self):
+
+        ######## ELEMENTS MOVED FROM __init__ METHOD
+        self.Mass1 = MaterialPoint(self.m1, pos1=self.x1, qs=[self.x1]) + GravitationalForce(self.m1, self.g, pos1=-self.x1*sin(self.alpha), qs=[self.x1])
+        self.Mass2 = MaterialPoint(self.m2, pos1=self.x2, qs=[self.x2]) + GravitationalForce(self.m2, self.g, pos1=-self.x2*sin(self.alpha), qs=[self.x2])
+        self.Mass3 = MaterialPoint(self.m3, pos1=self.x3, qs=[self.x3]) + GravitationalForce(self.m3, self.g, pos1=-self.x3*sin(self.beta), qs=[self.x3])
+        self.Mass4 = MaterialPoint(self.m4, pos1=self.x4, qs=[self.x4]) + GravitationalForce(self.m4, self.g, pos1=-self.x4*sin(self.beta), qs=[self.x4])
+        self.Pulley = MaterialPoint(1/2*self.m*self.R**2, pos1=self.phi, qs=[self.phi])
+
+        ####################
+
+        components = {}
+
+        components['Mass1'] = self.Mass1
+        components['Mass2'] = self.Mass2
+        components['Mass3'] = self.Mass3
+        components['Mass4'] = self.Mass4
+        components['Pulley'] = self.Pulley
+        
+        return components
         
     def get_default_data(self):
 
@@ -664,6 +689,7 @@ class LagrangeIBlocksOnInclinedPlane(ComposedSystem):
 
         return parameters_dict
 
+    
 #TODO
 class LagrangeIOnMathFunction(ComposedSystem):
 
