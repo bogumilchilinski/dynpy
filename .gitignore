@@ -130,3 +130,6 @@ dmypy.json
 
 # Previews folders
 /models/images/previews/*.png
+
+# iMac folders settings
+.DS_Store
