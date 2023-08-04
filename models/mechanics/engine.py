@@ -1711,6 +1711,9 @@ class NonlinearEngine(Engine, NonlinearComposedSystem):
         if z is not None: self.z = z
         if Omega is not None: self.Omega = Omega
         if g is not None: self.g = g
+        
+        
+        
         self._init_from_components(**kwargs)
 
     @cached_property
