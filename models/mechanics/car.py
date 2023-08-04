@@ -722,5 +722,3 @@ class CarMovementPIDAdjust(CarMovementConstantThrottle):
         #components['_integral'] = self._integral
         components['_derivative'] = self._derivative
 
-
-

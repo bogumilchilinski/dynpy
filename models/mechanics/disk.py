@@ -691,7 +691,7 @@ class ForcedDisksWithSerialSprings(ComposedSystem):
 
         return default_data_dict    
 
- 
+#TODO
 #DO SPRAWDZENIA - PRZENIESIONO Z MODUŁU mdof.py
 class ForcedDisksWithParallelSprings(ComposedSystem):
 
@@ -796,7 +796,7 @@ class ForcedDisksWithParallelSprings(ComposedSystem):
 
         return default_data_dict
     
-
+#TODO
 #DO SPRAWDZENIA - PRZENIESIONO Z MODUŁU mdof.py
 class ForcedDisksWithParallelSprings2(ComposedSystem):
 

@@ -563,117 +563,170 @@ class SDOFWinchSystemTest(ComposedSystem):
         st_val=obj.D/2*obj.phi_2
         return st_val
 
-
-
-#TODO
-#DO ZROBIENIA - PRZENIESIONO Z MODUŁU systems.py
+#DONE - Kuba
 class SDOFDrivetrainVehicleSystem(ComposedSystem):
 
 
     #scheme_name = 'vehicle_drivetrain.png'
     #real_name = 'vehicle_drivetrain_real.PNG'
 
+    R=Symbol('R')
+    M_m=Symbol('M_m', positive=True)
+    omega_m=Symbol('\\omega_m', positive=True)
+    I_m=Symbol('I_m', positive=True)
+    I=Symbol('I', positive=True)
+    I_k=Symbol('I_k', positive=True)
+    omega_1=Symbol('\\omega_1', positive=True)
+    I_a=Symbol('I_a', positive=True)
+    z_1=Symbol('z_1', positive=True)
+    I_1=Symbol('I_1', positive=True)
+    z_2=Symbol('z_2', positive=True)
+    I_2=Symbol('I_2', positive=True)      
+    I_b=Symbol('I_b', positive=True)
+    z_3=Symbol('z_3', positive=True)
+    I_3=Symbol('I_3', positive=True)
+    z_4=Symbol('z_4', positive=True)
+    I_4=Symbol('I_4', positive=True)
+    omega_3=Symbol('omega_3', positive=True)
+    I_c=Symbol('I_c',positive=True)
+    I_d=Symbol('I_d', positive=True)
+    I_w=Symbol('I_w', positive=True)
+    r=Symbol('r', positive=True)
+    m=Symbol('m', positive=True)
+    i_1=Symbol('i_1',positive=True)
+    i_2=Symbol('i_2',positive=True)
+    A=Symbol('A', positive=True)
+    B=Symbol('B', positive=True)
+    phi=dynamicsymbols('\\varphi')
+    phi_1=dynamicsymbols('\\varphi_1')
+    phi_2=dynamicsymbols('\\varphi_2')
+    phi_3=dynamicsymbols('\\varphi_3')
+    dphi=dynamicsymbols('\\varphi',1)
+    alpha=Symbol('alpha')
+    c=Symbol('c')
+    g=Symbol('g')    
+    
     def __init__(self,
-                 R=Symbol('R'),
-                 M_m=Symbol('M_m', positive=True),
-                 omega_m=Symbol('\\omega_m', positive=True),
-                 I_m=Symbol('I_m', positive=True),
-                 I=Symbol('I', positive=True),
-                 I_k=Symbol('I_k', positive=True),
-                 omega_1=Symbol('\\omega_1', positive=True),
-                 I_a=Symbol('I_a', positive=True),
-                 z_1=Symbol('z_1', positive=True),
-                 I_1=Symbol('I_1', positive=True),
-                 z_2=Symbol('z_2', positive=True),
-                 I_2=Symbol('I_2', positive=True),
-                 I_b=Symbol('I_b', positive=True),
-                 z_3=Symbol('z_3', positive=True),
-                 I_3=Symbol('I_3', positive=True),
-                 z_4=Symbol('z_4', positive=True),
-                 I_4=Symbol('I_4', positive=True),
-                 omega_3=Symbol('omega_3', positive=True),
-                 I_c=Symbol('I_c',positive=True),
-                 I_d=Symbol('I_d', positive=True),
-                 I_w=Symbol('I_w', positive=True),
-                 r=Symbol('r', positive=True),
-                 m=Symbol('m', positive=True),
-                 i_1=Symbol('i_1',positive=True),
-                 i_2=Symbol('i_2',positive=True),
+                 R=None,
+                 M_m=None,
+                 omega_m=None,
+                 I_m=None,
+                 I=None,
+                 I_k=None,
+                 omega_1=None,
+                 I_a=None,
+                 z_1=None,
+                 I_1=None,
+                 z_2=None,
+                 I_2=None,
+                 I_b=None,
+                 z_3=None,
+                 I_3=None,
+                 z_4=None,
+                 I_4=None,
+                 omega_3=None,
+                 I_c=None,
+                 I_d=None,
+                 I_w=None,
+                 r=None,
+                 m=None,
+                 i_1=None,
+                 i_2=None,
+                 A=None,
+                 B=None,
+                 phi=None,
+                 phi_1=None,
+                 phi_2=None,
+                 phi_3=None,
+                 dphi=None,
+                 alpha=None,
+                 c=None,
+                 g=None,
                  ivar=Symbol('t'),
-                 A=Symbol('A', positive=True),
-                 B=Symbol('B', positive=True),
-                 phi=dynamicsymbols('\\varphi'),
-                 dphi=dynamicsymbols('\\varphi',1),
-                 alpha=Symbol('alpha'),
-                 c=Symbol('c'),
-                 g=Symbol('g'),
                  **kwargs):
         
-        pos1=phi
-        qs=[phi]
-        phi_1=phi
-#         i_1=z_2/z_1
-#         i_2=z_4/z_3
-        phi_2=phi_1/i_1
-        phi_3=phi_2/i_2
 
-        self.M_s = M_m
-        self.omega_m = omega_m
-        self.I_1 = I_1
-        self.i_1 = i_1
-        self.I_2 = I_2
-        self.I_3 = I_3
-        self.i_2 = i_2
-        self.I_4 = I_4
-        self.I_a = I_a
-        self.I_b = I_b
-        self.I_c = I_c
-        self.I_d = I_d
-        self.I_k = I_k
-        self.I_m = I_m
-        self.I_w = I_w
-        self.phi_1 = phi_1
-        self.phi_2 = phi_2
-        self.phi_3 = phi_3
-        self.alpha = alpha
-        self.A = A
-        self.B = B
-        self.dphi = dphi
-        self.r = r
-        self.D = 2*self.r
-        self.m = m
-        self.c = c
-        self.g = g
+
+        if M_m is not None: self.M_m = M_m
+        if omega_m is not None: self.omega_m = omega_m
+        if I_1 is not None: self.I_1 = I_1
+        if i_1 is not None: self.i_1 = i_1
+        if I_2 is not None: self.I_2 = I_2
+        if I_3 is not None: self.I_3 = I_3
+        if i_2 is not None: self.i_2 = i_2
+        if I_4 is not None: self.I_4 = I_4
+        if I_a is not None: self.I_a = I_a
+        if I_b is not None: self.I_b = I_b
+        if I_c is not None: self.I_c = I_c
+        if I_d is not None: self.I_d = I_d
+        if I_k is not None: self.I_k = I_k
+        if I_m is not None: self.I_m = I_m
+        if I_w is not None: self.I_w = I_w
+        if phi_1 is not None: self.phi_1 = phi_1
+        if phi_2 is not None: self.phi_2 = phi_2
+        if phi_3 is not None: self.phi_3 = phi_3
+        if alpha is not None: self.alpha = alpha
+        if A is not None: self.A = A
+        if B is not None: self.B = B
+        if dphi is not None: self.dphi = dphi
+        if r is not None: self.r = r
+#        if D is not None: self.D = 2*self.r
+        if m is not None: self.m = m
+        if c is not None: self.c = c
+        if g is not None: self.g = g
+        self.ivar=ivar
+        self.qs = [self.phi] 
+
+        self._init_from_components(**kwargs)
+    #@cached_property  //not defined
+    @property
+    def components(self):
+        components = {}
         
-        self.engine_force = Force(M_m, pos1=phi_1,qs=qs)
-        self.engine_inertia = Disk(I_m, phi_1, qs=qs)
+#        pos1=phi
+        #qs=[self.phi]
+        self.phi_1=self.phi
+##         i_1=z_2/z_1
+##         i_2=z_4/z_3
+        self.phi_2=self.phi_1/self.i_1
+        self.phi_3=self.phi_2/self.i_2
+  
+        
+        self.engine_force = Force(self.M_m, pos1=self.phi_1,qs=[self.qs])
+        self.engine_inertia = Disk(self.I_m, self.phi_1, qs=[self.qs])
 #         self.flywheel = Disk(I, phi_1, qs=qs)
-        self.clutch = Disk(I_c, phi_1, qs=qs)
-        self.driveshaft_1 = Disk(I_a, phi_1, qs=qs)
-        self.transmission_i = Disk(I_1, phi_1, qs=qs)
-        self.transmission_o = Disk(I_2, phi_2, qs=qs)
-        self.driveshaft_2 = Disk(I_b, phi_2, qs=qs)
-        self.diff_i = Disk(I_3, phi_2, qs=qs)
-        self.diff_o = Disk(I_4, phi_3, qs=qs)
-        self.axleshaft = Disk(I_d, phi_3, qs=qs)
-        self.wheels = Disk(4*I_w, phi_3, qs=qs)
-        self.mass = MaterialPoint(m, pos1=phi_3*r , qs=qs)
-        self.gravity = Force(-m*g*sin(alpha), pos1=phi_3* r,qs=qs)#GravitationalForce(m, g, pos1=phi_3* r * sin(alpha) , qs=qs)
-        self.air_force = Damper(c,pos1=phi_3*r,qs=qs) #(self, c, pos1, pos2=0, qs=None, ivar=Symbol('t'), frame=base_frame)
+        self.clutch = Disk(self.I_c, self.phi_1, qs=[self.qs])
+        self.driveshaft_1 = Disk(self.I_a, self.phi_1, qs=[self.qs])
+        self.transmission_i = Disk(self.I_1, self.phi_1, qs=[self.qs])
+        self.transmission_o = Disk(self.I_2, self.phi_2, qs=[self.qs])
+        self.driveshaft_2 = Disk(self.I_b, self.phi_2, qs=[self.qs])
+        self.diff_i = Disk(self.I_3, self.phi_2, qs=[self.qs])
+        self.diff_o = Disk(self.I_4, self.phi_3, qs=[self.qs])
+        self.axleshaft = Disk(self.I_d, self.phi_3, qs=[self.qs])
+        self.wheels = Disk(4*self.I_w, self.phi_3, qs=[self.qs])
+        self.mass = MaterialPoint(self.m, pos1=self.phi_3*self.r , qs=[self.qs])
+        self.gravity = Force(-self.m*self.g*sin(self.alpha), pos1=self.phi_3*self.r,qs=[self.qs])#GravitationalForce(m, g, pos1=phi_3* r * sin(alpha) , qs=qs)
+        self.air_force = Damper(self.c,pos1=self.phi_3*self.r,qs=[self.phi_1]) #(self, c, pos1, pos2=0, qs=None, ivar=Symbol('t'), frame=base_frame)
 
-        system = self.engine_inertia + self.engine_force + self.clutch + self.driveshaft_1 + self.transmission_i + self.transmission_o + self.driveshaft_2 + self.diff_i + self.diff_o + self.axleshaft + self.wheels + self.mass + self.gravity + self.air_force
+        components['_engine_force'] = self.engine_force
+        components['_engine_inertia'] = self.engine_inertia
+        components['_clutch'] = self.clutch
+        components['_driveshaft_1'] = self.driveshaft_1
+        components['_transmission_i'] = self.transmission_i
+        components['_transmission_o'] = self.transmission_o
+        components['_driveshaft_2'] = self.driveshaft_2
+        components['_diff_i'] = self.diff_i
+        components['_diff_o'] = self.diff_o
+        components['_axleshaft'] = self.axleshaft
+        components['_wheels'] = self.wheels
+        components['_mass'] = self.mass
+        components['_gravity'] = self.gravity
+        components['_air_force'] = self.air_force
 
-        super().__init__(system,**kwargs)
+
         
-        self.__cached_solution = None
+        return components                
 
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.I_c: r'moment of inertia',
-            # self.g: r'gravitational field acceleration'
-        }
-
-        return self.sym_desc_dict
 
     def get_default_data(self):
         
@@ -788,4 +841,29 @@ class SDOFDrivetrainVehicleSystem(ComposedSystem):
             
        
         
-        return EOM_dsolve
+        return EOM_dsolve        
+    
+     
+ 
+
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        

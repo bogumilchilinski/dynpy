@@ -942,8 +942,9 @@ class CrankSystem(ComposedSystem):
         return default_data_dict
 
 
-#TODO
-class MaterialPointMovement(ComposedSystem):
+#Old MaterialPointMovement system, new system implemented.
+#This class is left just for an example.
+class ExemplaryOldImplementedSystem(ComposedSystem):
 
     m = Symbol('m', positive=True)
     g = Symbol('g', positive=True)
@@ -1030,7 +1031,108 @@ class MaterialPointMovement(ComposedSystem):
     def max_dynamic_force(self):
         return S.Zero
 
-            
+#DONE    
+class MaterialPointMovement(ComposedSystem):
+
+    m = Symbol('m', positive=True)
+    g = Symbol('g', positive=True)
+    c = Symbol('c', positive=True)
+    r = Symbol('r', positive=True)
+    phi = dynamicsymbols('phi')
+
+    c0 = Symbol('c0', positive=True)
+    r0 = Symbol('r0', positive=True)
+    phi0 = dynamicsymbols('phi0')
+
+    def __init__(self,
+                 m=None,
+                 g=None,
+                 c=None,
+                 r=None,
+                 phi=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m is not None: self.m = m
+        if g is not None: self.g = g
+        if c is not None: self.c = c
+        if r is not None: self.r = r
+        if phi is not None: self.phi = phi
+        self.ivar = ivar
+
+        self.qs = [self.phi]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+
+        self._mass_x = MaterialPoint(self.m,
+                                     pos1=self.r * sin(self.phi),
+                                     qs=self.qs)
+        self._mass_y = MaterialPoint(self.m,
+                                     pos1=self.r * cos(self.phi),
+                                     qs=self.qs)
+
+        self._gravity = GravitationalForce(self.m,
+                                            self.g,
+                                            pos1=self.r * cos(self.phi),
+                                            qs=self.qs)
+
+
+
+        components['_mass_x']=self._mass_x
+        components['_mass_y']=self._mass_y
+        components['_gravity']=self._gravity
+
+
+        return components
+        
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass',
+            self.g: r'Gravity constant',
+            self.c: r'',
+        }
+
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+
+        default_data_dict = {
+            self.m: [m0 * no for no in range(1, 8)],
+            self.c: [c0 * no for no in range(1, 8)],
+            self.r: [r0 * no for no in range(1, 8)],
+            self.phi: [phi0 * no for no in range(1, 8)],
+        }
+
+        return default_data_dict
+    
+    def get_numerical_data(self):
+
+        m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+
+        default_data_dict = {
+            self.m: [m0 * no for no in range(1, 8)],
+            self.c: [c0 * no for no in range(1, 8)],
+            self.r: [r0 * no for no in range(1, 8)],
+            self.phi: [phi0 * no for no in range(1, 8)],
+        }
+
+        return default_data_dict    
+
+    def max_static_force(self):
+        return S.Zero
+
+    def max_dynamic_force(self):
+        return S.Zero
+
+    
 #Kuba #poprawione            
 
 class KinematicClutchWithSprings(ComposedSystem):

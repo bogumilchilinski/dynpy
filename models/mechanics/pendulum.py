@@ -1041,7 +1041,7 @@ class MDoFElasticPendulum(ComposedSystem):
             #mech_comp.SteadySolutionComponent,
         ]
         return comp_list
-    
+#TO_DO    
 class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
     scheme_name = 'three_pendulums_forced.PNG'
     real_name = 'lifting_tandem.png'
@@ -1195,6 +1195,11 @@ class ForcedTriplePendulum(ComposedSystem):
                  F2=None,
                  F3=None,
                  g=None,
+                 phi1=None,
+                 phi2=None,
+                 phi3=None,
+                 phi_u=None,
+                 phi_l=None,
                  Omega=None,
                  ivar=None,
                  **kwargs):
@@ -1211,7 +1216,11 @@ class ForcedTriplePendulum(ComposedSystem):
         if l3 is not None: self.l3 = l3
         if g is not None: self.g = g
         if Omega is not None: self.Omega = Omega
-
+        if phi1 is not None: self.phi1 = phi1    
+        if phi2 is not None: self.phi2 = phi2
+        if phi3 is not None: self.phi3 = phi3
+        if phi_u is not None: self.phi_u = phi_u
+        if phi_l is not None: self.phi_l = phi_l
         self.qs = [self.phi1,self.phi2,self.phi3]
         
         self.x_2 = sin(self.phi1)*self.l1 + sin(self.phi2)*self.l2
@@ -2062,59 +2071,23 @@ class InvertedPendulumDDoF(ComposedSystem):
 
         return comp_list
 
-#TODO
-#DO ZROBIENIA lub POLACZENIA Z INNA KLASĄ - MOŻE Z ForcedTriplePendulum
-#PRZENIESIONO Z MODUŁU mdof.py
-class LinearizedTriplePendulum(ComposedSystem):
+
+#Kuba - DONE
+class LinearizedTriplePendulum(ForcedTriplePendulum):
     scheme_name = 'MDOFTriplePendulum.PNG'
     real_name = 'TriplePendulum_real.jpg'
+   
+    @cached_property
+    def components(self):
+        components = {}
 
-    def __init__(self,
-                 m=Symbol('m', positive=True),
-                 m1=Symbol('m_1', positive=True),
-                 m2=Symbol('m_2', positive=True),
-                 m3=Symbol('m_3', positive=True),
-                 l_1=Symbol('l_1', positive=True),
-                 l_2=Symbol('l_2', positive=True),
-                 l_3=Symbol('l_3', positive=True),
-                 g=Symbol('g', positive=True),
-                 phi_1=dynamicsymbols('varphi_1'),
-                 phi_2=dynamicsymbols('varphi_2'),
-                 phi_3=dynamicsymbols('varphi_3'),
-                 phi_u=dynamicsymbols('varphi_u'),
-                 phi_l=dynamicsymbols('varphi_l'),
-                 qs=dynamicsymbols('varphi_1 varphi_2 varphi_3'),
-                 ivar=Symbol('t'),
-                 **kwargs):
+                 
+        components['Pendulum1'] = ForcedTriplePendulum( m1=self.m1, m2=self.m2, m3=self.m3, l1=self.l1, l2=self.l2, l3=self.l3, F1=0, F2=0, F3=0, g=self.g, phi1=self.phi1, phi2=self.phi2, phi3=self.phi3, phi_u=self.phi_u, phi_l=self.phi_l, Omega=0, ivar=self.ivar ).linearized()
 
-        self.m1 = m1
-        self.m2 = m2
-        self.m3 = m3
-        self.l_1 = l_1
-        self.l_2 = l_2
-        self.l_3 = l_3
-        self.phi_1 = phi_1
-        self.phi_2 = phi_2
-        self.phi_3 = phi_3
-        self.phi_u = phi_u
-        self.phi_l = phi_l
-        self.g = g
+        return components                
 
-        x_2 = sin(phi_1)*l_1 + sin(phi_2)*l_2
-        y_2 = cos(phi_1)*l_1 + cos(phi_2)*l_2
-        x_3 = x_2 + sin(phi_3)*l_3
-        y_3 = y_2 + cos(phi_3)*l_3
 
-        self.Pendulum1 = Pendulum(m1, g, l_1, angle=phi_1, qs=[phi_1])
-        self.material_point_11 = MaterialPoint(m2, x_2, qs=[phi_1, phi_2])
-        self.material_point_21 = MaterialPoint(m2, y_2, qs=[phi_1, phi_2])
-        self.gravity_1 = GravitationalForce(m2, g, pos1=-y_2, qs=[phi_2])
-        self.material_point_12 = MaterialPoint(m3, x_3, qs=[phi_1, phi_2, phi_3])
-        self.material_point_22 = MaterialPoint(m3, y_3, qs=[phi_1, phi_2, phi_3])
-        self.gravity_2 = GravitationalForce(m3, g, pos1=-y_3, qs=[phi_3])
         
-        system = self.Pendulum1 + self.material_point_11 + self.material_point_12 + self.material_point_21 + self.material_point_22 + self.gravity_1 + self.gravity_2
-        super().__init__(system(qs).linearized(),**kwargs)
 
     def get_default_data(self):
 
@@ -2126,13 +2099,13 @@ class LinearizedTriplePendulum(ComposedSystem):
             self.m2: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
             self.m3: [1 * m0, 2 * m0, S.Half * m0, 1 * m0, 2 * m0],
 
-            self.l_1: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-            self.l_2: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
-            self.l_3: [2 * l0, 4 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+            self.l1: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+            self.l2: [1 * l0, 2 * l0, S.Half * l0, 2 * l0, S.Half * l0],
+            self.l3: [2 * l0, 4 * l0, S.Half * l0, 2 * l0, S.Half * l0],
 
-            self.phi_1:[self.phi_u,0],
-            self.phi_2:[self.phi_u,self.phi_l],
-            self.phi_3:[self.phi_l],
+            self.phi1:[self.phi_u,0],
+            self.phi2:[self.phi_u,self.phi_l],
+            self.phi3:[self.phi_l],
         }
 
         return default_data_dict    
@@ -2146,13 +2119,12 @@ class LinearizedTriplePendulum(ComposedSystem):
             for key, items_list in default_data_dict.items()
         }
 
-        if parameters_dict[self.phi_2] == parameters_dict[self.phi_3]:
+        if parameters_dict[self.phi2] == parameters_dict[self.phi3]:
 
-            parameters_dict[self.phi_2] = self.phi_u
+            parameters_dict[self.phi2] = self.phi_u
 
 
         return parameters_dict
-
 
 #Done Marcelka
 class ThreePendulumsWithSprings(ComposedSystem):
@@ -2400,7 +2372,7 @@ class DampedElasticPendulum(MDoFElasticPendulum):
         return self.sym_desc_dict
 
 
-#DO ZROBIENIA - PRZENIESIONO Z MODUŁU mdof.py
+#TODO - PRZENIESIONO Z MODUŁU mdof.py
 class DDoFWinch(ComposedSystem):
     """
     Model of a Double Degree of Freedom Involute Pendulum (Winch)
