@@ -1034,7 +1034,7 @@ class DampedDoubleDiskShaftHarmonicExcitation(DoubleDiskShaftHarmonicExcitation)
         return (2*self.max_dynamic_disk_2_bearing_force())/(kd*h)
     
     
-#DO POPRAWY
+#TO_DO
 class TripleShaft(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
     =========
