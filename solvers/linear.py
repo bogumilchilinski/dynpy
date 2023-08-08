@@ -1397,12 +1397,12 @@ class ODESystem(AnalyticalSolution):
         
         
     def _free_component(self):
-        return (self.rhs - self.lhs).subs({var:0 for var in self.dvars}).doit()
+        return (self.lhs - self.rhs).subs({var:0 for var in self.dvars}).doit()
     
     def _hom_equation(self):
         free=self._free_component()
-        hom_eq=self - self._free_component()
-        return hom_eq
+        hom_eq=self.lhs - free
+        return Eq(hom_eq, zeros(len(self.dvars),1))
 
 class FirstOrderODESystem(ODESystem):
     

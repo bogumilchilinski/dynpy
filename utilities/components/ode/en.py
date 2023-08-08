@@ -455,6 +455,8 @@ class HomEquationComponent(ReportComponent):
         display(ReportText(  self.header_text   ))
 
         display(SympyFormula( system._hom_equation()))
+        display(ReportText('Equations presented above correspond to each generalized coordinate:'))
+        display(SympyFormula(system.dvars))
 
         display(ReportText(  self.footer_text   ))
         
