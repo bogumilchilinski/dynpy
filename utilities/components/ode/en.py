@@ -459,6 +459,48 @@ class HomEquationComponent(ReportComponent):
         display(SympyFormula(system.dvars))
 
         display(ReportText(  self.footer_text   ))
+
+class HomEquationCodeComponent(ReportComponent):
+    
+    title="Code responsible for calculating homogenous equation"
+    @property
+    def header_text(self):
+
+        return "Code line responsible for extracting homogenous equation from ODESystsem is following."
+
+        
+    @property
+    def footer_text(self):
+
+        return "Homogenous equation is used to find the general solution of differential equation which allows to analyse free vibrations of the system."
+
+    def append_elements(self):
+
+        system = self._system
+
+        display(ReportText(  self.header_text   ))
+
+        display(Markdown
+('''
+    def _hom_equation(self):
+        free = (self.lhs - self.rhs).subs({var:0 for var in self.dvars}).doit()
+        hom_eq=self.lhs - free
+        return Eq(hom_eq, zeros(len(self.dvars),1))
+ 
+    system = self._system
+    display(SympyFormula( system._hom_equation()))
+'''))
+
+        display(SympyFormula( system._hom_equation()))
+        display(ReportText('Equations presented above correspond to each generalized coordinate:'))
+        display(ReportText('Code responsible for displaying generalized coordinates is following:'))
+        display(Markdown
+('''
+        display(SympyFormula(system.dvars))
+'''))
+        display(SympyFormula(system.dvars))
+
+        display(ReportText(  self.footer_text   ))
         
 class ODESystemTwoComponent(ReportComponent):
     
