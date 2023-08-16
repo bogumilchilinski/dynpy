@@ -2522,7 +2522,7 @@ class DampedElasticPendulum(MDoFElasticPendulum):
         }
         return self.sym_desc_dict
 
-
+#DONE - Kuba & Karolina
 class DDoFWinch(ComposedSystem):
     
     """

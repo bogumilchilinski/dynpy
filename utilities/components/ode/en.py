@@ -580,3 +580,86 @@ class ODENonHomogeneousEquationComponent(ReportComponent):
         display(SympyFormula( Eq(system._hom_equation().lhs, system._free_component())))
 
         display(ReportText(  self.footer_text   ))
+        
+class ODENonHomogeneousEquationCodeComponent(ReportComponent):
+    
+    title="Differential equations"
+    @property
+    def header_text(self):
+
+        return "Code line responsible for showing non-homogenous equation from ODESystsem is following."
+
+        
+    @property
+    def footer_text(self):
+
+        return "To solve the problem serve several methods depending on the equation type."
+
+    def append_elements(self):
+
+        system = self._system
+
+        display(ReportText(  self.header_text   ))
+        
+        display(Markdown
+('''
+        def _free_component(self):
+            return (self.lhs - self.rhs).subs({var:0 for var in self.dvars}).doit()
+    
+        def _hom_equation(self):
+            free=self._free_component()
+            hom_eq=self.lhs - free
+            return Eq(hom_eq, zeros(len(self.dvars),1))
+            
+        display(SympyFormula( Eq(system._hom_equation().lhs, system._free_component())))
+
+'''))
+
+        display(SympyFormula( Eq(system._hom_equation().lhs, system._free_component())))
+
+        display(ReportText(  self.footer_text   ))
+        
+class ODEInitCodeComponent(ReportComponent):
+
+    title="Exemplary system"
+    @property
+    def header_text(self):
+
+        return "Exemplary ODE system can be created using following code."
+
+        
+    @property
+    def footer_text(self):
+
+        return "Result of the above code presents the system of differential equations"
+
+    def append_elements(self):
+
+        system = self._system
+
+        display(ReportText(  self.header_text   ))
+        
+        code_list = python(system.lhs[0]).split('\n')
+        var_name = 'my_eq'
+        code = '\n\n\t'.join(code_list[:-1]) + '\n\n\t' + var_name +code_list[-1][1:]
+        dvars=str(system.dvars)
+        order=str(system.ode_order)
+        
+        display(Markdown(
+f'''
+
+
+
+
+    from sympy import *
+    from dynpy.solvers.linear import ODESystem
+
+    {code}
+
+    odesys = ODESystem(odes = my_eq, dvars = {dvars}, ode_order = {order})
+    display(odesys)
+
+'''))
+        display(SympyFormula( system ))
+
+        display(ReportText(  self.footer_text   ))

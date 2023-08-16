@@ -24,11 +24,13 @@ import importlib
 
 from .bridge import BeamStructure, BeamElasticity, BeamBridge, BeamBridgeDamped, BeamBridgeTMD,  BeamBridgeDampedTMD
 from .principles import *
-from .trolley import SpringMassSystem, ForcedSpringMassSystem, SpringDamperMassSystem, SprungTrolley, NonLinearTrolley, TrolleyWithPendulum, DampedTrolleyWithPendulum, ForcedNonLinearTrolley, ForcedTrolleyWithSpring, ForcedDampedTrolleyWithSpring, ForcedDampedDisconnectedTrolleysWithSprings, VariableMassTrolleyWithPendulum, VariableMassTrolleyWithPendulumRayleighDamping, TrolleyWithTMD, VariableMassTrolleyWithPendulumFunction
-from .trolleys import DDoFTwoNonLinearTrolleys, TrolleysWithSprings, ForcedTrolleysWithSprings, ForcedDampedTrolleysWithSprings, ForcedThreeTrolleysWithSprings, ForcedTrolleysWithNonLinearSprings, ForcedDisconnectedTrolleysWithSprings, ForcedDampedThreeTrolleysWithSprings
+from .trolley import SpringMassSystem, ForcedSpringMassSystem, SpringDamperMassSystem, SprungTrolley, NonLinearTrolley, TrolleyWithPendulum, DampedTrolleyWithPendulum, ForcedNonLinearTrolley, ForcedTrolleyWithSpring, ForcedDampedTrolleyWithSpring, VariableMassTrolleyWithPendulum, VariableMassTrolleyWithPendulumRayleighDamping, TrolleyWithTMD, VariableMassTrolleyWithPendulumFunction
+
+from .trolleys import DDoFTwoNonLinearTrolleys, TrolleysWithSprings, ForcedTrolleysWithSprings, ForcedDampedTrolleysWithSprings, ForcedThreeTrolleysWithSprings, ForcedTrolleysWithNonLinearSprings, ForcedDisconnectedTrolleysWithSprings, ForcedDampedThreeTrolleysWithSprings,ForcedDampedDisconnectedTrolleysWithSprings
+
 from .vehicle import UndampedVehicleSuspension, DampedVehicleSuspension, UndampedSymmetricalVehicleSuspension, QuarterOfVehicle
 from .shaft import SDoFShaft, SDoFShaftHarmonicExcitation, DoubleDiskShaft, DoubleDiskShaftHarmonicExcitation,  DampedDoubleDiskShaftHarmonicExcitation, SDoFDampedShaft
-from .pendulum import Pendulum, PulledPendulum, FreePendulum, KinematicallyExcitedInvertedPendulum, MDoFElasticPendulum, ForcedTriplePendulum, Winch, DDOFCoupledPendulum, DDOFLinearizedCoupledPendulum, InvertedPendulumDDoF, DampedElasticPendulum, LinearizedTriplePendulum
+from .pendulum import Pendulum, PulledPendulum, FreePendulum, KinematicallyExcitedInvertedPendulum, MDoFElasticPendulum, ForcedTriplePendulum, Winch, DDOFCoupledPendulum, DDOFLinearizedCoupledPendulum, InvertedPendulumDDoF, DampedElasticPendulum, LinearizedTriplePendulum, DDoFWinch
 
 from .skyscraper import skyscraper
 from .engine import EngineHousing, FreeEngine,  FreeEngineWithConstrains, FreeEngineDDOF, Engine, EngineVerticalSpringGravity,  EngineConstantVelocityVerticalSpringGravity,  EngineConstantWithReactionForce,  DampedEngineVerticalSpringGravity,  DampedEngineConstantVelocityVerticalSpringGravity,  InlineEnginePerpendicularSprings,  NonLinearInlineEnginePerpendicularSpringsGravity,  NonLinearBoxerEnginePerpendicularSprings,  DampedEngine, NonlinearEngine,  StraightNonlinearEngine, EngineWithTMD,  VeeEnginePerpendicularSprings
@@ -57,7 +59,7 @@ from .offshore import CompoundSystem, SDOFSemiSubmersiblePlatform, DDOFSemiSubme
 #from .disks import ForcedDisksWithParallelSprings2, MDoFForcedDisksWithParallelSprings
 #from .engine import BoxerEnginePerpendicularSprings, NonLinearVeeEnginePerpendicularSprings
 #from .motorcoach import FourDOFTrolleySuspension, DDOFTrolleySuspension, DDOFTrolleySuspension2
-#from .pendulum import ExcitedPendulum, DampedPendulum, ExcitedDampedPendulum, MDoFLinearizedThreePendulumsWithSprings, , ThreePendulumsWithSprings, DDoFWinch
+#from .pendulum import ExcitedPendulum, DampedPendulum, ExcitedDampedPendulum, MDoFLinearizedThreePendulumsWithSprings, , ThreePendulumsWithSprings, PendulumKinematicExct
 #from .principles import  LagrangeIOnMathFunction
 #from .shaft import TripleShaft
 

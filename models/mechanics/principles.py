@@ -374,14 +374,21 @@ class NonlinearComposedSystem(ComposedSystem):
             mech_comp.SchemeComponent,
             mech_comp.ExemplaryPictureComponent,
             mech_comp.KineticEnergyComponent,
+            mech_comp.KineticEnergyDynPyCodeComponent,
+            mech_comp.KineticEnergyDynPyCodeComponent,
             mech_comp.PotentialEnergyComponent,
+            mech_comp.PotentialEnergyDynPyCodeComponent,
+            mech_comp.PotentialEnergySymPyCodeComponent,
             mech_comp.LagrangianComponent,
-            mech_comp.LinearizationComponent,
             mech_comp.GoverningEquationComponent,
+            mech_comp.GoverningEquationDynpyCodeComponent,
+            mech_comp.GoverningEquationSympyCodeComponent,
             mech_comp.FundamentalMatrixComponent,
             mech_comp.GeneralSolutionComponent,
+            mech_comp.GeneralSolutionDynpyCodeComponent,
+            mech_comp.GeneralSolutionSympyCodeComponent,
             mech_comp.SteadySolutionComponent,
-        ]
+            ]
 
         return comp_list
 
