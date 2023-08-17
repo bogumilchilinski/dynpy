@@ -59,12 +59,11 @@ from .offshore import CompoundSystem, SDOFSemiSubmersiblePlatform, DDOFSemiSubme
 #from .disks import ForcedDisksWithParallelSprings2, MDoFForcedDisksWithParallelSprings
 #from .engine import BoxerEnginePerpendicularSprings, NonLinearVeeEnginePerpendicularSprings
 #from .motorcoach import FourDOFTrolleySuspension, DDOFTrolleySuspension, DDOFTrolleySuspension2
-#from .pendulum import ExcitedPendulum, DampedPendulum, ExcitedDampedPendulum, MDoFLinearizedThreePendulumsWithSprings, , ThreePendulumsWithSprings, PendulumKinematicExct
+#from .pendulum import ExcitedPendulum, DampedPendulum, ExcitedDampedPendulum, MDoFLinearizedThreePendulumsWithSprings, PendulumKinematicExct
 #from .principles import  LagrangeIOnMathFunction
 #from .shaft import TripleShaft
 
-#from .trolley import DoubleTrolleyWithNonlinearSprings, DoubleTrolleyDifferentWheels, MDoFDoubleTrolleyWithNonlinearSprings, SDoFDoubleTrolleyDifferentWheels, MDoFDoubleTrolleyDifferentWheels, MDoFTMD 
-#from .trolleys import DampedTrolleysWithSprings, DampedTrolleysWithSprings, ForcedTrolleysWithSprings, MDoFForcedTrolleysWithSprings, MDoFDampedTrolleysWithSprings
+#from .trolleys import DampedTrolleysWithSprings, DampedTrolleysWithSprings, ForcedTrolleysWithSprings, MDoFForcedTrolleysWithSprings, MDoFDampedTrolleysWithSprings, DoubleTrolleyWithNonlinearSprings, DoubleTrolleyDifferentWheels, MDoFDoubleTrolleyWithNonlinearSprings, SDoFDoubleTrolleyDifferentWheels, MDoFDoubleTrolleyDifferentWheels, MDoFTMD 
 #from .vehicle import DampedSymmetricalVehicleSuspension, SimplifySuspension
 
 
