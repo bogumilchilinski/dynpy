@@ -26,7 +26,7 @@ class MissileTrajectoryAirless(ComposedSystem):
     x=dynamicsymbols('x',positive=True)
     y=dynamicsymbols('y',positivie=True)
     c0=Symbol('C0',positive=True)
-    
+    ivar=Symbol('t')
     
     def __init__(self,
                  m=None,
@@ -77,7 +77,7 @@ class MissileTrajectoryAirless(ComposedSystem):
         default_data_dict = {
             self.m: [m0*no for no in range (1,8)],
 
-            self.c: [C0*no for no in range (0.3,1)],
+            self.c: [c0*no for no in range (0.3,1)],
 
         }
 
@@ -103,16 +103,16 @@ class MissileTrajectoryAirless(ComposedSystem):
         
         return comp_list
     
-
 class MissileTrajectory(MissileTrajectoryAirless):
-    
+
     m=Symbol('m',positive=True)
     g=Symbol('g',positive=True)
     c=Symbol('c',positive=True)
     x=dynamicsymbols('x',positive=True)
     y=dynamicsymbols('y',positivie=True)
     c0=Symbol('c0',positive=True)
-    
+    ivar=Symbol('t')
+
     
     def __init__(self,
                  m=None,
@@ -143,11 +143,7 @@ class MissileTrajectory(MissileTrajectoryAirless):
         v_y=(self.y).diff(self.ivar)
         components = {}
 
-        self._mass_x = MaterialPoint(self.m,pos1=self.x,qs=self.qs)(label ='mass x')
-        
-        self._mass_y = MaterialPoint(self.m,pos1=self.y,qs=self.qs)(label = 'mass y')
-
-        self._gravity = GravitationalForce(self.m,self.g,pos1=self.y,qs=self.qs)(label = 'gravity')
+        self._missile_airless = MissileTrajectoryAirless(self.m, x=self.x, y=self.y, qs=self.qs)
 
         self._drag_x = Damper(self.c*v_x,self.x,qs=self.qs)(label = 'horizontal drag')
          
@@ -156,9 +152,7 @@ class MissileTrajectory(MissileTrajectoryAirless):
         
 
         
-        components['_mass_x'] = self._mass_x
-        components['_mass_y'] = self._mass_y
-        components['_gravity'] = self._gravity
+        components['_missile_airless'] = self._missile_airless
         components['_drag_x'] = self._drag_x
         components['_drag_y'] = self._drag_y
         
@@ -188,7 +182,7 @@ class MissileTrajectory(MissileTrajectoryAirless):
         return default_data_dict
 
     
-class MissileTrajectoryAerodynamic(MissileTrajectoryAirless):
+class MissileTrajectoryAerodynamic(MissileTrajectory):
     
     m=Symbol('m',positive=True)
     g=Symbol('g',positive=True)
@@ -196,8 +190,8 @@ class MissileTrajectoryAerodynamic(MissileTrajectoryAirless):
     x=dynamicsymbols('x',positive=True)
     y=dynamicsymbols('y',positivie=True)
     c=Symbol('c',positive=True)
-    ro=Symbol('ro',positive=True)
-    area=Symbol('area',positive=True)
+    ro=Symbol('\\rho',positive=True)
+    area=Symbol('A',positive=True)
     c_x=Symbol('c_x',positive=True)
     c0=Symbol('c0',positive=True)
     
@@ -235,26 +229,13 @@ class MissileTrajectoryAerodynamic(MissileTrajectoryAirless):
         area = self.area
         v_x=(self.x).diff(self.ivar)
         v_y=(self.y).diff(self.ivar)
-        ca = 1/2*ro*area*c_x*((((self.x).diff(self.ivar))**2+((self.y).diff(self.ivar))**2))
+        ca = 1/2*self.ro*area*self.c_x*((((self.x).diff(self.ivar))**2+((self.y).diff(self.ivar))**2))
         components = {}
 
-        self._mass_x = MaterialPoint(self.m,pos1=self.x,qs=self.qs)
-        self._mass_y = MaterialPoint(self.m,pos1=self.y,qs=self.qs)
+        self.missile = MissileTrajectory(m = self.m, g = self.g, c = ca, x=self.x, y=self.y, qs=self.qs)
+ 
+        components['missile'] = self.missile
 
-        self._gravity = GravitationalForce(self.m,self.g,pos1=self.y,qs=self.qs)
-
-        self._drag_x = Damper(ca*v_x,self.x,qs=self.qs)
-         
-        self._drag_y = Damper(ca* v_y,self.y,qs=self.qs)
-        
-        
-
-        
-        components['_mass_x'] = self._mass_x
-        components['_mass_y'] = self._mass_y
-        components['_gravity'] = self._gravity
-        components['_drag_x'] = self._drag_x
-        components['_drag_y'] = self._drag_y
         return components
 
     def get_default_data(self):
@@ -264,7 +245,7 @@ class MissileTrajectoryAerodynamic(MissileTrajectoryAirless):
         default_data_dict = {
             self.m: [m0*no for no in range (1,8)],
 
-            self.c: [C0*no for no in range (1,8)],
+            self.c: [c0*no for no in range (1,8)],
 
         }
         
