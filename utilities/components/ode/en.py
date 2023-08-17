@@ -239,6 +239,61 @@ class FundamentalMatrixComponent(ReportComponent):
         display(ReportText(self.footer_text))
 
 
+class ODECharecteristicPolynomialComponent(ReportComponent):
+
+    title="Characteristic polynomial"
+    
+    @property
+    def header_text(self):
+        return "Characterisitc pylynomial for the considered system of equations of motion is the following:"
+    @property
+    def footer_text(self):
+        return "Calculation of roots of this polynomial allows to find natural frequencies of the system."
+
+    def append_elements(self):
+        system = self._system
+        delta=Symbol('Delta')
+
+        display(ReportText(  self.header_text   ))
+        polynomial=system._ode_system.char_polynomial()
+        display(SympyFormula(Eq(delta,polynomial)))
+
+        display(ReportText(  self.footer_text   ))
+
+class ODECharecteristicPolynomialCodeComponent(ReportComponent):
+
+    title="Characteristic polynomial"
+    
+    @property
+    def header_text(self):
+        return "Presented piece of code generates the characteristic pylynomial of the desired system:"
+    @property
+    def footer_text(self):
+        return "The following code is based on dynpy mechanical module."
+
+    def append_elements(self):
+        system = self._system
+        
+        display(ReportText(  self.header_text   ))
+
+        display(Markdown(
+f'''
+
+    from dynpy.models.mechanics import *
+    from sympy import *
+    from dynpy.solvers.linear import*
+
+    dyn_sys = {system.__class__.__name__}()
+
+    display( Eq(Symbol('Delta'),
+                     dyn_sys._ode_system.char_polynomial()) )
+
+
+'''))
+
+
+        display(ReportText(  self.footer_text   ))
+        
 class ZerothOrderApproximatedEqComponent(ReportComponent):
     
     title="Zeroth-order approximation"
@@ -502,7 +557,7 @@ class HomEquationCodeComponent(ReportComponent):
 
         display(ReportText(  self.footer_text   ))
         
-class ODESystemTwoComponent(ReportComponent):
+class ODENonHomogeneousEquationComponent(ReportComponent):
     
     title="Differential equations"
     @property
@@ -525,3 +580,4 @@ class ODESystemTwoComponent(ReportComponent):
         display(SympyFormula( Eq(system._hom_equation().lhs, system._free_component())))
 
         display(ReportText(  self.footer_text   ))
+        

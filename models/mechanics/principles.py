@@ -305,6 +305,41 @@ class ComposedSystem(HarmonicOscillator):
         Re = Symbol('R_e', positive=True)
         return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
 
+    def _parameter_influence_analysis(self,parameter=None,param_span=None,dependencies_dict=None):
+
+        from ...solvers.linear import ODESystem
+        from ...utilities.adaptable import NumericalAnalysisDataFrame,TimeDataFrame,pd
+
+        if parameter is None:
+            parameter = self.system_parameters()[0]
+
+        if param_span is None:
+            param_span = [0.8,1,1.2]
+
+        if dependencies_dict is None:
+            dependencies_dict = {}
+
+        reference_data = {**self.get_numerical_data()}
+        display(reference_data)
+
+        eom = self._eoms[0]
+        system = ODESystem(odes=eom,dvars=self.q).as_first_ode_linear_system()
+        Y = list(self.Y) #+ [dependencies_dict.keys()]  # tu nie działa
+
+        index = pd.Index(np.linspace(0,100,1000),name=self.ivar)
+
+        df_num = NumericalAnalysisDataFrame(index=index).from_model(system,
+                                                                    parameter=parameter,
+                                                                    span=param_span,
+                                                                    reference_data=reference_data,
+                                                                    coordinates=Y,
+                                                                    index=index)
+
+        results_num = df_num.perform_simulations(model_level_name=0,dependencies=dependencies_dict)
+        results = TimeDataFrame(results_num).droplevel(0,axis=1)
+
+        return results
+
 
 
 class NonlinearComposedSystem(ComposedSystem):
@@ -339,14 +374,21 @@ class NonlinearComposedSystem(ComposedSystem):
             mech_comp.SchemeComponent,
             mech_comp.ExemplaryPictureComponent,
             mech_comp.KineticEnergyComponent,
+            mech_comp.KineticEnergyDynPyCodeComponent,
+            mech_comp.KineticEnergyDynPyCodeComponent,
             mech_comp.PotentialEnergyComponent,
+            mech_comp.PotentialEnergyDynPyCodeComponent,
+            mech_comp.PotentialEnergySymPyCodeComponent,
             mech_comp.LagrangianComponent,
-            mech_comp.LinearizationComponent,
             mech_comp.GoverningEquationComponent,
+            mech_comp.GoverningEquationDynpyCodeComponent,
+            mech_comp.GoverningEquationSympyCodeComponent,
             mech_comp.FundamentalMatrixComponent,
             mech_comp.GeneralSolutionComponent,
+            mech_comp.GeneralSolutionDynpyCodeComponent,
+            mech_comp.GeneralSolutionSympyCodeComponent,
             mech_comp.SteadySolutionComponent,
-        ]
+            ]
 
         return comp_list
 
@@ -371,7 +413,6 @@ class NonlinearComposedSystem(ComposedSystem):
         k_m = self.k_m
 
         return amp[0] * k_m + self.max_static_force_pin()
-    
     
     
 class SpringMassSystem(ComposedSystem):

@@ -183,6 +183,12 @@ class Element(LagrangesDynamicSystem):
 
         return IP.display.Image(base64.b64decode(encoded_string))
 
+    
+    @property
+    def _components_str(self):
+
+        return None
+    
 
     def __str__(self):
         

@@ -2,7 +2,7 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, re, pi, latex,
                    dsolve, solve, fraction, factorial, Add, Mul, exp, zeros, shape,
                    numbered_symbols, integrate, ImmutableMatrix,Expr,Dict,Subs,Derivative,Dummy,
-                   lambdify, Pow, Integral, init_printing, I, N,eye, zeros)
+                   lambdify, Pow, Integral, init_printing, I, N,eye, zeros, det)
 
 from sympy.matrices.matrices import MatrixBase
 from sympy.solvers.ode.systems import matrix_exp, matrix_exp_jordan_form
@@ -1403,6 +1403,14 @@ class ODESystem(AnalyticalSolution):
         free=self._free_component()
         hom_eq=self.lhs - free
         return Eq(hom_eq, zeros(len(self.dvars),1))
+    
+    def char_polynomial(self):
+        r=Symbol('r')
+        stiffness_mat=self.lhs.jacobian(self.dvars)
+        damping_mat=self.lhs.jacobian(diff(self.dvars))
+        inertia_mat=self.lhs.jacobian(diff(self.dvars, self.ivar, 2))
+        matrix_poly = inertia_mat*r**2 + damping_mat*r + stiffness_mat
+        return matrix_poly.det()
 
 class FirstOrderODESystem(ODESystem):
     
