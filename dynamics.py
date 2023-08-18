@@ -579,17 +579,27 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         else:
             return '\t-' + ',\n \t-'.join(comps) + '.'
 
+
+
     @property
     def elements(self):
         return {**self.components}
         
-    def system_description(self):
+    def system_description(self,addtional_information=None):
         comps_str=self._components_str
+        
+        #if addtional_information is
+        
         
         if comps_str is not None:
             return str(f'{(self._label)} composed of: \n{comps_str}')
         else:
-            return str(f'{(self._label)}')
+            if self._label == type(self).__name__:
+                extra_desc = ''
+            else:    
+                extra_desc = f' (instance of {type(self).__name__ })'
+            
+            return str(f'{(self._label)}{extra_desc}')
 
     def __str__(self):
         
