@@ -1128,6 +1128,27 @@ class LinearizationComponent(ReportComponent): # Szymon
 
         AutoBreak.latex_backend = latex_store
 
+class CriticalPointsComponent(ReportComponent):
+
+    @property
+    def header_text(self):
+        return ('From the relvant kinematic dependencies the critical points of the system are calculated')
+    
+    @property
+    def footer_text(self):
+        return('Resultant values of generalized coordinates provide static equilibrium of the system')
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys = system
+
+        display(ReportText(self.header_text))
+
+        for point in dyn_sys._op_points():
+          display([Eq(key,Val) for key, Val in point.items()])
+
+        display(ReportText(self.footer_text))
 
 # Marcel & Monika
 #class FundamentalMatrixComponent(ReportComponent):
