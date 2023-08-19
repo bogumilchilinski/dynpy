@@ -189,8 +189,20 @@ class ComposedSystem(HarmonicOscillator):
     def get_numerical_data(self):
         return {}
 
-    
-    
+    def _params_summary(self):
+        
+        query = lambda obj: {key:'Param comes from '+obj.__class__.__name__  for key in obj._all_default_data().keys()}
+
+        desc_dict={key:(val if isinstance(val,str) else 'Provided directly within class')   for key,val in self._all_default_data( query ).items()}
+        #desc_dict = self._all_default_data( query )
+
+        return '\n'.join([f'{key} - {value}'  for key,value in desc_dict.items()])
+  
+    def _system_summary(self):
+        
+
+
+        return f'{self.system_description()}\n {"="*50} \n {self._params_summary()}'
     
     def get_random_parameters(self):
 
