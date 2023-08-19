@@ -584,20 +584,35 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     @property
     def elements(self):
         return {**self.components}
+   
+    def components_description(self,query=None):
+        if query is None:
+            return self._components_str
+        else:
+            comps =[((comp.system_description(query=query)).replace('\n','\n \t'))  for comp in (self.components.values())]
+
+            if len(comps) == 0:
+                return ''
+            else:
+                return '\t-' + ',\n \t-'.join(comps) + '.'        
+    
         
-    def system_description(self,addtional_information=None):
-        comps_str=self._components_str
+    def system_description(self,query=None):
+        comps_str=self.components_description(query=query)
         
-        #if addtional_information is
+        if query is not None:
+            extra_info = ' ' + query(self)
+        else:
+            extra_info = ''
         
         
         if comps_str is not None:
-            return str(f'{(self._label)} composed of: \n{comps_str}')
+            return str(f'{(self._label)} composed of: \n{comps_str}{extra_info}')
         else:
             if self._label == type(self).__name__:
-                extra_desc = ''
+                extra_desc = ''+extra_info
             else:    
-                extra_desc = f' (instance of {type(self).__name__ })'
+                extra_desc = f' (instance of {type(self).__name__ })'+extra_info
             
             return str(f'{(self._label)}{extra_desc}')
 
