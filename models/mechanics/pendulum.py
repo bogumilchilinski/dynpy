@@ -7,7 +7,7 @@ from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
 
-from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin
+from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin, RollingDisk
 
 
 import base64
@@ -1190,6 +1190,135 @@ class MDoFPendulumWithRod(ComposedSystem):
 #             mech_comp.GeneralSolutionComponent,
 #         ]
 #         return comp_list
+
+class PendulumWithRoller(NonlinearComposedSystem):
+    """
+    Model of a sDoF mathematical Pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
+
+        Arguments:
+        =========
+            m1 = Mass
+                -Mass of the gear
+                
+            m2 = Mass
+                -Mass of the carrier   
+
+            g = gravitional field
+                -value of gravitional's field acceleration
+
+            R = lenght
+                -Length of the carrier
+
+            r = length
+                - Radius of the gear    
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+    """
+    scheme_name = 'PlanetaryGearWithSpring.png'
+
+
+    
+    m1=Symbol('m_1', positive=True)
+    m2=Symbol('m_2', positive=True)
+    g=Symbol('g', positive=True)
+    R=Symbol('R', positive=True)
+    r=Symbol('r',positive=True)
+    k=Symbol('k',positive=True)
+    angle=dynamicsymbols('varphi')
+    qs=None
+    
+    m0=Symbol('m_0',positive=True)
+    l0 = Symbol('l_0', positive=True)
+    
+    def __init__(self,
+                 m1=None,
+                 m2=None,
+                 k=None,
+                 R=None,
+                 r=None,
+                 g=None,
+                 angle=None,
+                 ivar=None,
+                 **kwargs):
+
+        if m1 is not None: self.m1 = m1
+        if m2 is not None: self.m2 = m2
+        if k is not None: self.k = k 
+        if g is not None: self.g = g
+        if r is not None: self.r = r
+        if R is not None: self.R=R
+        if angle is not None: self.angle = angle
+        if ivar is not None: self.ivar = ivar
+
+        
+        self.qs = [self.angle]
+
+        self._init_from_components(**kwargs)
+        
+        
+        
+    @property
+    def components(self):
+
+        components = {}
+        
+        self.gravitationalforce_rod = GravitationalForce(self.m2, self.g, (self.R-self.r) * (1 - cos(self.angle)), qs = [self.angle])
+        self.gravitationalforce_gear = GravitationalForce(self.m1, self.g, self.r * (1 - cos(self.angle)), qs = [self.angle])
+        self.Rod= RigidBody2D(self.m2, self.m2*(self.R-self.r)**2, pos_lin=self.angle*(self.R-self.r), pos_rot=self.angle, qs=[self.angle], frame=None, ivar=self.ivar)
+        self.Gear= RollingDisk(self.m1 , self.r, F=None, x=self.angle*(self.R-self.r), qs=[self.angle], ivar=self.ivar)
+        self.Spring= Spring(self.k, self.angle, qs=[self.angle])
+        
+
+        
+        components['Gravitational_Force_Rod'] = self.gravitationalforce_rod
+        components['Gravitational_Force_Gear'] = self.gravitationalforce_gear
+        components['Rod'] = self.Rod
+        components['Gear'] = self.Gear
+        components['Spring'] = self.Spring
+        
+
+        
+        return components
+        
+    def get_default_data(self):
+
+       
+        m0, l0 = self.m0, self.l0
+        
+        
+        default_data_dict = {
+
+            self.m: [S.One * no * m0 * 10 for no in range(5, 8)],
+            self.l: [S.One * no * l0 for no in range(10, 20)],
+            self.m * self.l**2:[self.m * self.l**2],
+            
+        }
+        return default_data_dict
+
+    def get_numerical_data(self):
+        
+        
+        default_data_dict = {
+
+            self.m: [S.One * no * 10 for no in range(5, 8)],
+            self.l: [S.One * no for no in range(10, 20)],
+            
+        }
+        return default_data_dict
+    
+    
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass of pendulum',
+            self.g: r'Gravity constant',
+            self.l: r'Pendulum length',
+        }
+        return self.sym_desc_dict
     
     
 #TO_DO    

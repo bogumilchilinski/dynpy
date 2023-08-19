@@ -2096,7 +2096,99 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         results=pd.concat([analytical_numerical_sym_wyn, numerical_sym_wyn, analytical_sym_wyn])
         return results
         
+class InclinedSpringMassSystem(ComposedSystem):
+    """Ready to use sample Single Degree of Freedom System with mass on spring
+        Arguments:
+        =========
+            m = Mass
+                -Mass of system on spring
 
+            k = Spring coefficient
+                -Spring carrying the system
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+    """
+    scheme_name = 'InclinedSpringMassSystem.png'
+
+    m=Symbol('m', positive=True)
+    m1=Symbol('m_1',positive=True)
+    m2=Symbol('m_2',positive=True)
+    k=Symbol('k', positive=True)
+    ivar=Symbol('t')
+    u=dynamicsymbols('u')
+    alpha=Symbol('alpha',positive=True)
+    x=dynamicsymbols('x')
+    h0=Symbol('h_0',positive=True)
+    x_ramp=x
+    x_mass=x+u*cos(alpha)
+    y_mass=h0-u*sin(alpha)
+    p=3*cos(ivar)
+    
+    def __init__(self,
+                 m1=None,
+                 m2=None,
+                 k=None,
+                 u=None,
+                 x=None,
+                 h0=None,
+                 x_ramp=None,
+                 x_mass=None,
+                 y_mass=None,                
+                 alpha=None,
+                 ivar=None,
+                 p=None,
+                 **kwargs):
+
+        if m1 is not None: self.m1 = m1
+        if m2 is not None: self.m2 = m2
+        if h0 is not None: self.h0 = h0
+        if k is not None: self.k = k
+        if alpha is not None: self.alpha = alpha
+        if ivar is not None: self.ivar = ivar
+        if x is not None: self.x = x
+        if x_ramp is not None: self.x_ramp = x_ramp
+        if x_mass is not None: self.x_mass = x_mass
+        if y_mass is not None: self.y_mass = y_mass
+        if p is not None: self.p = p
+        
+   
+        self.qs = [self.x_ramp, self.u]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+        
+        self.mass_horizontal = MaterialPoint(self.m2, self.x_mass, qs=self.qs)
+        self.mass_vertical = MaterialPoint(self.m2, self.y_mass, qs=self.qs)
+        self.spring = Spring(self.k, self.u, qs=self.qs)
+        self.incline = MaterialPoint(self.m1, self.x_ramp, qs=[self.qs])
+        self.excitation = Force(self.p, self.x_ramp, qs=self.qs, ivar=self.ivar)
+        
+        
+        
+        components['spring'] = self.spring
+        components['incline'] = self.incline
+        components['excitation'] = self.excitation
+        components['mass_horizontal'] = self.mass_horizontal
+        components['mass_vertical'] = self.mass_vertical
+        
+        return components
+        
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'mass of system on the spring',
+            self.k: r'Spring coefficient ',
+        }
+
+        return self.sym_desc_dict
 
 
 
