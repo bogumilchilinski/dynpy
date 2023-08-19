@@ -34,7 +34,7 @@ from .pendulum import Pendulum, PulledPendulum, FreePendulum, KinematicallyExcit
 
 from .skyscraper import skyscraper
 from .engine import EngineHousing, FreeEngine,  FreeEngineWithConstrains, FreeEngineDDOF, Engine, EngineVerticalSpringGravity,  EngineConstantVelocityVerticalSpringGravity,  EngineConstantWithReactionForce,  DampedEngineVerticalSpringGravity,  DampedEngineConstantVelocityVerticalSpringGravity,  InlineEnginePerpendicularSprings,  NonLinearInlineEnginePerpendicularSpringsGravity,  NonLinearBoxerEnginePerpendicularSprings,  DampedEngine, NonlinearEngine,  StraightNonlinearEngine, EngineWithTMD,  VeeEnginePerpendicularSprings
-from .disk import ForcedNonLinearDisc, ForcedNonLinearDiscSpring
+from .disk import ForcedNonLinearDisk, ForcedNonLinearDiskSpring
 from .disks import TwoForcedNonLinearDisks, TwoDisksWithThreeSprings, ForcedDisksWithSerialSprings, ForcedDisksWithParallelSprings, MDoFForcedSimpleDisksWithSerialSprings, MDoFForcedSimpleDisksWithParallelSprings
 from .tensioner import BlowerToothedBelt, DampedBlowerToothedBelt
 from .tmd import TunedMassDamper, TunedMassDamperRelativeMotion

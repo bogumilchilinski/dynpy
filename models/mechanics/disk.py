@@ -21,9 +21,135 @@ from functools import cached_property, lru_cache
 
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
 
+class RollingDisk(ComposedSystem):
+    m1 = Symbol('m_1', positive=True)
+    R = Symbol('R', positive=True)
+    ivar = Symbol('t')
+    x = dynamicsymbols('x')
+    qs = dynamicsymbols('x')
+
+    def __init__(self,
+                 m1=None,
+                 R=None,
+                 x=None,
+                 qs=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m1 is not None: self.m1 = m1
+        if R is not None: self.R = R
+        if x is not None: self.x = x
+
+        if qs is None:
+            self.qs = [self.x]
+        else:
+            self.qs = qs
+
+        self.ivar=ivar
+
+        self._init_from_components(**kwargs)
+
+    @cached_property
+    def components(self):
+
+        components = {}
+
+        self.DiskLin = MaterialPoint(self.m1, self.x, qs=self.qs)
+        self.DiskRot = MaterialPoint(self.m1 / 2 * self.R**2, self.x / self.R, qs=self.qs)
+
+
+        components['_DiskLin'] = self.DiskLin
+        components['_DiskRot'] = self.DiskRot
+
+        return components
+
+    def get_default_data(self):
+
+        m0, l0 = symbols('m_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.One * m0 * no for no in range(1,20)],
+            self.R: [S.Half * l0 * no for no in range(1,20)],
+        }
+
+        return default_data_dict
+
+
+class DiskMountingBlock(ComposedSystem):
+
+    m = Symbol('m', positive=True)
+    m1 = Symbol('m_1', positive=True)
+    R = Symbol('R', positive=True)
+    ivar = Symbol('t')
+    x = dynamicsymbols('x')
+    qs = dynamicsymbols('x')
+
+    def __init__(self,
+                 m=None,
+                 m1=None,
+                 R=None,
+                 x=None,
+                 qs=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+
+        if m is not None: self.m = m
+        if m1 is not None: self.m1 = m1
+        if R is not None: self.R = R
+        if x is not None: self.x = x
+        if qs is None:
+            self.qs = [self.x]
+        else:
+            self.qs = qs
+
+        self.ivar=ivar
+
+        self._init_from_components(**kwargs)
+
+    @cached_property
+    def components(self):
+
+        components = {}
+
+#         self.DiskLin = MaterialPoint(self.m, self.x, qs=[self.x])
+#         self.DiskRot = MaterialPoint(self.m / 2 * self.R**2, self.x / self.R, qs=[self.x])
+        self.Disk = RollingDisk(m1=self.m, R=self.R, x=self.x, qs=[self.x], ivar=self.ivar)
+        self.DiskInner = MaterialPoint(self.m1, self.x, qs = [self.x])
+
+#         components['_DiskLin'] = self.DiskLin
+#         components['_DiskRot'] = self.DiskRot
+        components['_Disk'] = self.Disk
+        components['_DiskInner'] = self.DiskInner
+
+        return components
+
+    def get_default_data(self):
+
+        m0 = symbols('m_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.One * m0 * no for no in range(1,20)],
+        }
+
+        return default_data_dict
+
+    def get_numerical_data(self):
+
+        m0 = symbols('m_0', positive=True)
+
+
+        default_data_dict = {
+            self.m1: [
+                0.5 * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0,
+                7 * m0, 8 * m0, 9 * m0
+            ],
+        }
+
+        return default_data_dict
 
 #dane numeryczne
-class ForcedNonLinearDisc(NonlinearComposedSystem):
+class ForcedNonLinearDisk(NonlinearComposedSystem):
     scheme_name = 'nonlinear_disc.png'
     real_name = 'roller_tightener.png'
 
@@ -44,6 +170,7 @@ class ForcedNonLinearDisc(NonlinearComposedSystem):
                  d=None,
                  l_0=None,
                  F=None,
+                 Omega=None,
                  x=None,
                  ivar=Symbol('t'),
                  **kwargs):
@@ -54,6 +181,7 @@ class ForcedNonLinearDisc(NonlinearComposedSystem):
         if d is not None: self.d = d
         if l_0 is not None: self.l_0 = l_0
         if F is not None: self.F = F
+        if Omega is not None: self.Omega = Omega
         if x is not None: self.x = x
 
         self.qs = [self.x]
@@ -117,7 +245,7 @@ class ForcedNonLinearDisc(NonlinearComposedSystem):
 
         return default_data_dict
     
-class ForcedNonLinearDiscSpring(NonlinearComposedSystem): ### Miałeś bład z tabulacją - pilnuj wcięć 
+class ForcedNonLinearDiskSpring(NonlinearComposedSystem): ### Miałeś bład z tabulacją - pilnuj wcięć 
     scheme_name = 'nonlinear_disc.png'
     real_name = 'roller_tightener.png'
 
