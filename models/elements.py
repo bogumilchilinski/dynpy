@@ -125,7 +125,7 @@ class Element(LagrangesDynamicSystem):
 
         self._components = {**comps, **self.components}
 
-    def _all_default_data(self):
+    def _all_default_data(self,formatter=None):
 
         
         return self.get_default_data()

@@ -155,9 +155,12 @@ class ComposedSystem(HarmonicOscillator):
 
         return IP.display.Image(base64.b64decode(encoded_string))
 
-    def _components_default_data(self):
+    def _components_default_data(self,formatter=None):
         
-        data=[elem._all_default_data()   for elem in self.elements.values()]
+        if formatter is None:
+            formatter = lambda obj: obj._all_default_data(formatter=formatter)
+        
+        data=[formatter(elem)   for elem in self.elements.values()]
 
         
         return {key:value for elem in data for key, value in elem.items()}    
@@ -169,19 +172,18 @@ class ComposedSystem(HarmonicOscillator):
         
         return {key:value for elem in data for key, value in elem.items()}    
     
-    def _all_default_data(self):
+    def _all_default_data(self,formatter=None):
         
+     
         
-
-        
-        return {**self._components_default_data(),**self.get_default_data()}    
+        return {**self._components_default_data(formatter=formatter),**self.get_default_data()}    
     
     def _all_numerical_data(self):
         
         return {**self._components_numerical_data(),**self.get_numerical_data()}  
     
     
-    def get_default_data(self):
+    def get_default_data(self,formatter=None):
         return {}
 
     def get_numerical_data(self):
