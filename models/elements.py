@@ -784,6 +784,7 @@ class Force(Element):
                  ivar=Symbol('t'),
                  frame = base_frame):
 
+        self.force=force
         if qs is None:
             qs = [pos1]
             
@@ -809,7 +810,14 @@ class Force(Element):
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
         
-
+    def get_default_data(self):
+        t=self.ivar
+        F0=Symbol('F_0',positive=True)
+        self.default_data_dict={
+            self.force:[F0*no for no in range(1,10)],
+        }
+        return {**super().get_default_data(),**self.default_data_dict}
+        
 # class CombustionEngine(Force):
 
 #     eta= Symbol('eta', positive = True)

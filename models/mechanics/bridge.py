@@ -319,7 +319,6 @@ class BeamElasticity(Spring):
 #         Omega0=Symbol('Omega0',positive=True)
 #         default_data_dict={
 #             self.force: [S.One * no * F0 * 1000 for no in range(10, 25)],
-#             self.Omega: [S.One * Omega0]
 #         }
 #         return default_data_dict
 
@@ -820,10 +819,12 @@ class BeamBridgeDampedTMD(BeamBridge):
         
         self._beam_bridge_damped = BeamBridgeDamped(self.m, self.k_beam, self.ivar, self.g, self.Omega, self.F, self.c)(label='Beam Bridge Damped')
         self._TMD = TunedMassDamper(self.m_TMD, self.k_TMD, self.z_TMD,self.z)(label='TMD (damper)')
+        self._TMD_gravity = GravitationalForce(self.m_TMD, self.g,self.z_TMD)(label='Gravity field for TMD')
         self._damper_TMD = Damper(self.c_TMD, pos1=self.z - self.z_TMD, qs=[self.z, self.z_TMD])(label='Damper of a TMD')
         
         components['_beam_bridge_damped'] = self._beam_bridge_damped
         components['_TMD'] = self._TMD
+        components['_TMD_gravity'] = self._TMD_gravity
         components['_damper_TMD'] = self._damper_TMD
 
         return components

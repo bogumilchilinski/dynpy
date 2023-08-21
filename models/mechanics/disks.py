@@ -469,161 +469,161 @@ class ForcedDisksWithSerialSprings(ComposedSystem):
 
         return parameters_dict
 
-class ForcedDisksWithParallelSprings(ComposedSystem):
-
-    _default_subs_method='direct'
-    scheme_name = 'MDOF_Forced_Disks_With_Parallel_Springs.PNG'
-    real_name = 'three_rollers_real.png'
-
-    R=Symbol('R', positive=True)
-    m=Symbol('m', positive=True)
-    m1=Symbol('m_1', positive=True)
-    m2=Symbol('m_2', positive=True)
-    m3=Symbol('m_3', positive=True)
-    k_l=Symbol('k_l', positive=True)
-    k_cl=Symbol('k_cl', positive=True)
-    k_12=Symbol('k_12', positive=True)
-    k_c12=Symbol('k_c12', positive=True)
-    k_23=Symbol('k_23', positive=True)
-    k_c23=Symbol('k_c23', positive=True)
-    k_r=Symbol('k_r', positive=True)
-    k_cr=Symbol('k_cr', positive=True)
-    F_0=Symbol('F_0', positive=True)
-    Omega=Symbol('Omega', positive=True)
-    x_l=dynamicsymbols('x_l')
-    x_c=dynamicsymbols('x_c')
-    x_r=dynamicsymbols('x_r')
-    x_1=dynamicsymbols('x_1')
-    x_2=dynamicsymbols('x_2')
-    qs=dynamicsymbols('x_l x_c x_r')
-    ivar=Symbol('t')
-
-    def __init__(self,
-                 R=None,
-                 m=None,
-                 m1=None,
-                 m2=None,
-                 m3=None,
-                 k_l=None,
-                 k_cl=None,
-                 k_12=None,
-                 k_c12=None,
-                 k_23=None,
-                 k_c23=None,
-                 k_r=None,
-                 k_cr=None,
-                 F_0=None,
-                 Omega=None,
-                 x_l=None,
-                 x_c=None,
-                 x_r=None,
-                 x_1=None,
-                 x_2=None,
-                 qs=None,
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        if m is not None: self.m = m
-        if m1 is not None: self.m1 = m1
-        if m2 is not None: self.m2 = m2
-        if m3 is not None: self.m3 = m3
-        if R is not None: self.R = R
-        if k_l is not None: self.k_l = k_l
-        if k_cl is not None: self.k_cl = k_cl
-        if k_12 is not None: self.k_12 = k_12
-        if k_c12 is not None: self.k_c12 = k_c12
-        if k_23 is not None: self.k_23 = k_23
-        if k_c23 is not None: self.k_c23 = k_c23
-        if k_r is not None: self.k_r = k_r
-        if k_cr is not None: self.k_cr = k_cr
-        if x_l is not None: self.x_l = x_l
-        if x_c is not None: self.x_c = x_c
-        if x_r is not None: self.x_r = x_r
-        if x_1 is not None: self.x_1 = x_1
-        if x_2 is not None: self.x_2 = x_2
-        if Omega is not None: self.Omega = Omega
-
-        if qs is None:
-            self.qs = [self.x_l, self.x_c, self.x_r]
-        else:
-            self.qs = qs
-
-        self.ivar = ivar
-        self._init_from_components(**kwargs)
-
-    @property
-    def components(self):
-        components = {}
-
-        self.Disk1 = DiskMountingBlock(self.m, self.m1, R=self.R, x=self.x_l, qs=self.qs, ivar = self.ivar)(label='Left disk')
-        self.LeftSpring1 = Spring(self.k_l, pos1=self.x_l, qs=self.qs)
-        self.LeftSpring2 = Spring(self.k_l, pos1=self.x_l, qs=self.qs)
-        self.LeftSpring3 = Spring(self.k_cl, pos1=self.x_l, qs=self.qs)
-        self.LeftForce = Force(2*self.F_0 * cos(self.Omega * self.ivar), pos1=self.x_l, qs=self.qs)
-
-        self.Disk2 = DiskMountingBlock(self.m, self.m2, R=self.R, x=self.x_c, qs=self.qs, ivar = self.ivar)(label='Central disk')
-        self.CentralLeftSpring1 = Spring(self.k_12, pos1=self.x_l, pos2=self.x_c, qs=self.qs)
-        self.CentralLeftSpring2 = Spring(self.k_c12, pos1=self.x_l, pos2=self.x_c, qs=self.qs)
-        self.CentralLeftSpring3 = Spring(self.k_12, pos1=self.x_l, pos2=self.x_c, qs=self.qs)
-        self.CentralRightSpring1 = Spring(self.k_23, pos1=self.x_c, pos2=self.x_r, qs=self.qs)
-        self.CentralRightSpring2 = Spring(self.k_c23, pos1=self.x_c, pos2=self.x_r, qs=self.qs)
-        self.CentralRightSpring3 = Spring(self.k_23, pos1=self.x_c, pos2=self.x_r, qs=self.qs)
-
-        self.Disk3 = DiskMountingBlock(self.m, self.m3, R=self.R, x=self.x_r, qs=self.qs, ivar = self.ivar)(label='Right disk')
-        self.RightSpring1 = Spring(self.k_r, pos1=self.x_r, qs=self.qs)
-        self.RightSpring2 = Spring(self.k_r, pos1=self.x_r, qs=self.qs)
-        self.RightSpring3 = Spring(self.k_cr, pos1=self.x_r, qs=self.qs)
-        self.RightForce = Force(self.F_0 * cos(self.Omega * self.ivar), pos1=self.x_r, qs=self.qs)
-
-
-        components['_disk1'] = self.Disk1
-        components['_left_spring1'] = self.LeftSpring1
-        components['_left_spring2'] = self.LeftSpring2
-        components['_left_spring3'] = self.LeftSpring3
-        components['left_force'] = self.LeftForce
-
-        components['_disk2'] = self.Disk2
-        components['_central_left_spring1'] = self.CentralLeftSpring1
-        components['_central_left_spring2'] = self.CentralLeftSpring2
-        components['_central_left_spring3'] = self.CentralLeftSpring3
-        components['_central_right_spring1'] = self.CentralRightSpring1
-        components['_central_right_spring2'] = self.CentralRightSpring2
-        components['_central_right_spring3'] = self.CentralRightSpring3
-
-        components['_disk3'] = self.Disk3
-        components['_right_spring1'] = self.RightSpring1
-        components['_right_spring2'] = self.RightSpring2
-        components['_right_spring3'] = self.RightSpring3
-        components['_right_force'] = self.RightForce
-
-        return components
-
-
-    def get_default_data(self):
-
-        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
-
-        default_data_dict = {
-            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
-            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
-            self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
-            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
-
-            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_cl: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_c12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_c23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-            self.k_cr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
-
-            self.x_l: [self.x_1],
-            self.x_c: [0],
-            self.x_r: [self.x_2],
-        }
-
-        return default_data_dict
+#class ForcedDisksWithParallelSprings(ComposedSystem):
+#
+#    _default_subs_method='direct'
+#    scheme_name = 'MDOF_Forced_Disks_With_Parallel_Springs.PNG'
+#    real_name = 'three_rollers_real.png'
+#
+#    R=Symbol('R', positive=True)
+#    m=Symbol('m', positive=True)
+#    m1=Symbol('m_1', positive=True)
+#    m2=Symbol('m_2', positive=True)
+#    m3=Symbol('m_3', positive=True)
+#    k_l=Symbol('k_l', positive=True)
+#    k_cl=Symbol('k_cl', positive=True)
+#    k_12=Symbol('k_12', positive=True)
+#    k_c12=Symbol('k_c12', positive=True)
+#    k_23=Symbol('k_23', positive=True)
+#    k_c23=Symbol('k_c23', positive=True)
+#    k_r=Symbol('k_r', positive=True)
+#    k_cr=Symbol('k_cr', positive=True)
+#    F_0=Symbol('F_0', positive=True)
+#    Omega=Symbol('Omega', positive=True)
+#    x_l=dynamicsymbols('x_l')
+#    x_c=dynamicsymbols('x_c')
+#    x_r=dynamicsymbols('x_r')
+#    x_1=dynamicsymbols('x_1')
+#    x_2=dynamicsymbols('x_2')
+#    qs=dynamicsymbols('x_l x_c x_r')
+#    ivar=Symbol('t')
+#
+#    def __init__(self,
+#                 R=None,
+#                 m=None,
+#                 m1=None,
+#                 m2=None,
+#                 m3=None,
+#                 k_l=None,
+#                 k_cl=None,
+#                 k_12=None,
+#                 k_c12=None,
+#                 k_23=None,
+#                 k_c23=None,
+#                 k_r=None,
+#                 k_cr=None,
+#                 F_0=None,
+#                 Omega=None,
+#                 x_l=None,
+#                 x_c=None,
+#                 x_r=None,
+#                 x_1=None,
+#                 x_2=None,
+#                 qs=None,
+#                 ivar=Symbol('t'),
+#                 **kwargs):
+#
+#        if m is not None: self.m = m
+#        if m1 is not None: self.m1 = m1
+#        if m2 is not None: self.m2 = m2
+#        if m3 is not None: self.m3 = m3
+#        if R is not None: self.R = R
+#        if k_l is not None: self.k_l = k_l
+#        if k_cl is not None: self.k_cl = k_cl
+#        if k_12 is not None: self.k_12 = k_12
+#        if k_c12 is not None: self.k_c12 = k_c12
+#        if k_23 is not None: self.k_23 = k_23
+#        if k_c23 is not None: self.k_c23 = k_c23
+#        if k_r is not None: self.k_r = k_r
+#        if k_cr is not None: self.k_cr = k_cr
+#        if x_l is not None: self.x_l = x_l
+#        if x_c is not None: self.x_c = x_c
+#        if x_r is not None: self.x_r = x_r
+#        if x_1 is not None: self.x_1 = x_1
+#        if x_2 is not None: self.x_2 = x_2
+#        if Omega is not None: self.Omega = Omega
+#
+#        if qs is None:
+#            self.qs = [self.x_l, self.x_c, self.x_r]
+#        else:
+#            self.qs = qs
+#
+#        self.ivar = ivar
+#        self._init_from_components(**kwargs)
+#
+#    @property
+#    def components(self):
+#        components = {}
+#
+#        self.Disk1 = DiskMountingBlock(self.m, self.m1, R=self.R, x=self.x_l, qs=self.qs, ivar = self.ivar)(label='Left disk')
+#        self.LeftSpring1 = Spring(self.k_l, pos1=self.x_l, qs=self.qs)
+#        self.LeftSpring2 = Spring(self.k_l, pos1=self.x_l, qs=self.qs)
+#        self.LeftSpring3 = Spring(self.k_cl, pos1=self.x_l, qs=self.qs)
+#        self.LeftForce = Force(2*self.F_0 * cos(self.Omega * self.ivar), pos1=self.x_l, qs=self.qs)
+#
+#        self.Disk2 = DiskMountingBlock(self.m, self.m2, R=self.R, x=self.x_c, qs=self.qs, ivar = self.ivar)(label='Central disk')
+#        self.CentralLeftSpring1 = Spring(self.k_12, pos1=self.x_l, pos2=self.x_c, qs=self.qs)
+#        self.CentralLeftSpring2 = Spring(self.k_c12, pos1=self.x_l, pos2=self.x_c, qs=self.qs)
+#        self.CentralLeftSpring3 = Spring(self.k_12, pos1=self.x_l, pos2=self.x_c, qs=self.qs)
+#        self.CentralRightSpring1 = Spring(self.k_23, pos1=self.x_c, pos2=self.x_r, qs=self.qs)
+#        self.CentralRightSpring2 = Spring(self.k_c23, pos1=self.x_c, pos2=self.x_r, qs=self.qs)
+#        self.CentralRightSpring3 = Spring(self.k_23, pos1=self.x_c, pos2=self.x_r, qs=self.qs)
+#
+#        self.Disk3 = DiskMountingBlock(self.m, self.m3, R=self.R, x=self.x_r, qs=self.qs, ivar = self.ivar)(label='Right disk')
+#        self.RightSpring1 = Spring(self.k_r, pos1=self.x_r, qs=self.qs)
+#        self.RightSpring2 = Spring(self.k_r, pos1=self.x_r, qs=self.qs)
+#        self.RightSpring3 = Spring(self.k_cr, pos1=self.x_r, qs=self.qs)
+#        self.RightForce = Force(self.F_0 * cos(self.Omega * self.ivar), pos1=self.x_r, qs=self.qs)
+#
+#
+#        components['_disk1'] = self.Disk1
+#        components['_left_spring1'] = self.LeftSpring1
+#        components['_left_spring2'] = self.LeftSpring2
+#        components['_left_spring3'] = self.LeftSpring3
+#        components['left_force'] = self.LeftForce
+#
+#        components['_disk2'] = self.Disk2
+#        components['_central_left_spring1'] = self.CentralLeftSpring1
+#        components['_central_left_spring2'] = self.CentralLeftSpring2
+#        components['_central_left_spring3'] = self.CentralLeftSpring3
+#        components['_central_right_spring1'] = self.CentralRightSpring1
+#        components['_central_right_spring2'] = self.CentralRightSpring2
+#        components['_central_right_spring3'] = self.CentralRightSpring3
+#
+#        components['_disk3'] = self.Disk3
+#        components['_right_spring1'] = self.RightSpring1
+#        components['_right_spring2'] = self.RightSpring2
+#        components['_right_spring3'] = self.RightSpring3
+#        components['_right_force'] = self.RightForce
+#
+#        return components
+#
+#
+#    def get_default_data(self):
+#
+#        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+#
+#        default_data_dict = {
+#            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#            self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+#
+#            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_cl: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_c12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_c23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#            self.k_cr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+#
+#            self.x_l: [self.x_1],
+#            self.x_c: [0],
+#            self.x_r: [self.x_2],
+#        }
+#
+#        return default_data_dict
     
 
     
@@ -922,7 +922,177 @@ class MDoFForcedSimpleDisksWithParallelSprings(ComposedSystem):
             parameters_dict[self.x_r] = self.x_2
 
         return parameters_dict
+#Marcel
+class ForcedDisksWithParallelSprings(ComposedSystem):
 
+    _default_subs_method='direct'
+    scheme_name = 'MDOF_Forced_Disks_With_Parallel_Springs.PNG'
+    real_name = 'three_rollers_real.png'
+
+    R=Symbol('R', positive=True)
+    m=Symbol('m', positive=True)
+    m1=Symbol('m_1', positive=True)
+    m2=Symbol('m_2', positive=True)
+    m3=Symbol('m_3', positive=True)
+    k_l=Symbol('k_l', positive=True)
+    k_cl=Symbol('k_cl', positive=True)
+    k_12=Symbol('k_12', positive=True)
+    k_c12=Symbol('k_c12', positive=True)
+    k_23=Symbol('k_23', positive=True)
+    k_c23=Symbol('k_c23', positive=True)
+    k_r=Symbol('k_r', positive=True)
+    k_cr=Symbol('k_cr', positive=True)
+    F_0=Symbol('F_0', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    x_l=dynamicsymbols('x_l')
+    x_c=dynamicsymbols('x_c')
+    x_r=dynamicsymbols('x_r')
+    x_1=dynamicsymbols('x_1')
+    x_2=dynamicsymbols('x_2')
+    qs=dynamicsymbols('x_l x_c x_r')
+
+
+    def __init__(self,
+                 R=None,
+                 m=None,
+                 m1=None,
+                 m2=None,
+                 m3=None,
+                 k_l=None,
+                 k_cl=None,
+                 k_12=None,
+                 k_c12=None,
+                 k_23=None,
+                 k_c23=None,
+                 k_r=None,
+                 k_cr=None,
+                 F_0=None,
+                 Omega=None,
+                 x_l=None,
+                 x_c=None,
+                 x_r=None,
+                 x_1=None,
+                 x_2=None,
+                 qs=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if R is not None: self.R = R
+        if m is not None: self.m = m
+        if m1 is not None: self.m1 = m1
+        if m2 is not None: self.m2 = m2
+        if m3 is not None: self.m3 = m3
+        if k_l is not None: self.k_l = k_lR
+        if k_cl is not None: self.k_cl = k_cl
+        if k_12 is not None: self.k_12 = k_12
+        if k_c12 is not None: self.k_c12 = k_c12
+        if k_23 is not None: self.k_23 = k_23
+        if k_c23 is not None: self.k_c23 = k_c23
+        if k_r is not None: self.k_r = k_r
+        if k_cr is not None: self.k_cr = k_cr
+        if F_0 is not None: self.F_0 = F_0
+        if x_l is not None: self.x_l = x_l
+        if x_c is not None: self.x_c = x_c
+        if x_r is not None: self.x_r = x_r
+        if x_1 is not None: self.x_1 = x_1
+        if x_2 is not None: self.x_2 = x_2
+        if Omega is not None: self.Omega = Omega
+            
+        self._init_from_components(**kwargs)
+
+
+    @cached_property
+    def components(self):
+        components = {}
+        
+        #disk1
+        self.MaterialPoint1 = MaterialPoint(self.m, self.x_l, qs=[self.x_l])
+        self.MaterialPoint2 = MaterialPoint(self.m / 2, self.x_l, qs=[self.x_l])
+        self.MaterialPoint3 = MaterialPoint(self.m1, self.x_l, qs=[self.x_l])
+        self.Spring1 = Spring(self.k_l, pos1=self.x_l, qs=[self.x_l])
+        self.Spring2 =  Spring(self.k_l, pos1=self.x_l, qs=[self.x_l])
+        self.Spring3 = Spring(self.k_cl, pos1=self.x_l, qs=[self.x_l]) + Force(2*self.F_0 * cos(self.Omega * self.ivar), pos1=self.x_l, qs=[self.x_l])
+        
+        #disk2
+        self.MaterialPoint4 = MaterialPoint(self.m, self.x_c, qs=[self.x_c])
+        self.MaterialPoint5 = MaterialPoint(self.m / 2, self.x_c, qs=[self.x_c])
+        self.MaterialPoint6 = MaterialPoint(self.m2, self.x_c, qs=[self.x_c])
+        self.Spring4 = Spring(self.k_12, pos1=self.x_l, pos2=self.x_c, qs=[self.x_l, self.x_c])
+        self.Spring5 = Spring(self.k_c12, pos1=self.x_l, pos2=self.x_c, qs=[self.x_l, self.x_c])
+        self.Spring6 = Spring(self.k_12, pos1=self.x_l, pos2=self.x_c, qs=[self.x_l, self.x_c])
+        self.Spring7 = Spring(self.k_23, pos1=self.x_c, pos2=self.x_r, qs=[self.x_c, self.x_r])
+        self.Spring8 =Spring(self.k_c23, pos1=self.x_c, pos2=self.x_r, qs=[self.x_c, self.x_r])
+        self.Spring9 = Spring(self.k_23, pos1=self.x_c, pos2=self.x_r, qs=[self.x_c, self.x_r])
+                                            
+                                           
+        #disk3
+        self.MaterialPoint7 = MaterialPoint(self.m, self.x_r, qs=[self.x_r])
+        self.MaterialPoint8 = MaterialPoint(self.m / 2, self.x_r, qs=[self.x_r])
+        self.MaterialPoint9 = MaterialPoint(self.m3, self.x_r, qs=[self.x_r])
+        self.Spring10 = Spring(self.k_r, pos1=self.x_r, qs=[self.x_r])
+        self.Spring11 = Spring(self.k_r, pos1=self.x_r, qs=[self.x_r])
+        self.Spring12 =  Spring(self.k_cr, pos1=self.x_r, qs=[self.x_r])
+        self.Force1 =  Force(self.F_0 * cos(self.Omega * self.ivar), pos1=self.x_r, qs=[self.x_r])
+
+
+
+
+        components['MaterialPoint1'] = self.MaterialPoint1
+        components['MaterialPoint2'] = self.MaterialPoint2
+        components['MaterialPoint3'] = self.MaterialPoint3
+        components['MaterialPoint4'] = self.MaterialPoint4
+        components['MaterialPoint5'] = self.MaterialPoint5
+        components['MaterialPoint6'] = self.MaterialPoint6
+        components['MaterialPoint7'] = self.MaterialPoint7
+        components['MaterialPoint8'] = self.MaterialPoint8
+        components['MaterialPoint9'] = self.MaterialPoint9
+        
+        components['Spring1'] = self.Spring1
+        components['Spring2'] = self.Spring2
+        components['Spring3'] = self.Spring3
+        components['Spring4'] = self.Spring4
+        components['Spring5'] = self.Spring5
+        components['Spring6'] = self.Spring6
+        components['Spring7'] = self.Spring7
+        components['Spring8'] = self.Spring8
+        components['Spring9'] = self.Spring9
+        components['Spring10'] = self.Spring10
+        components['Spring11'] = self.Spring11
+        components['Spring12'] = self.Spring12
+        
+        components['Force1'] = self.Force1
+
+
+
+        return components
+
+
+
+    def get_default_data(self):
+
+        m0, k0, l0 = symbols('m_0 k_0 l_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m2: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m3: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+            self.m: [S.Half * m0, 1 * m0, 2 * m0, 4 * m0, S.Half**2 * m0],
+
+            self.k_l: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_cl: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_c12: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_c23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.k_cr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+
+            self.x_l: [self.x_1],
+            self.x_c: [0],
+            self.x_r: [self.x_2],
+        }
+
+        return default_data_dict
 
 class MDoFForcedDisksWithParallelSprings(ForcedDisksWithParallelSprings):
     pass

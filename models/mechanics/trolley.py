@@ -467,7 +467,6 @@ class NonLinearTrolley(NonlinearComposedSystem):
 
         self._trolley = MaterialPoint(self.m, self.x, qs=[self.x])
         #self._disk = Disk(S.One/2 * self.m1*self.R**2,pos1 = self.x / self.R, qs=[self.x]) ??? returns diffrend eoms than soultion above
-            
         self._spring = Spring(self.k, pos1 = sqrt(self.x**2 + self.d**2), pos2 = - self.l_0 , qs=[self.x])
 
 
@@ -476,30 +475,18 @@ class NonLinearTrolley(NonlinearComposedSystem):
         
         return components
 
-    def get_default_data(self):
+#     def get_default_data(self):
 
-        m0, k0, l0= symbols('m_0 k_0 l_0', positive=True)
+#         m0, k0, l0= symbols('m_0 k_0 l_0', positive=True)
 
-        default_data_dict = {
-            self.m: [
-                0.5 * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0,
-                7 * m0, 8 * m0, 9 * m0
-            ],
-            self.d: [
-                5 * l0, 2 * l0, 3 * S.Half * l0, 4 * l0, 6 * l0, 7 * l0,
-                8 * l0, 9 * l0
-            ],
-            self.k: [
-                1 * k0, 3 * k0, 2 * k0, 4 * k0, 5 * k0, 6 * k0, 7 * k0, 8 * k0,
-                9 * k0
-            ],
-            self.l_0: [
-                1 * l0, 3 * l0, 2 * l0, 4 * l0, 5 * l0, 6 * l0, 7 * l0, 8 * l0,
-                9 * l0,
-            ],
-        }
+#         default_data_dict = {
+#             self.m: [S.One * m0 * no for no in range(10,20)],
+#             self.d: [S.One * l0 * no for no in range(1,10)],
+#             self.k: [S.One * k0 * no for no in range(20,30)],
+#             self.l_0: [S.One * l0 * no for no in range(10,15)],
+#         }
 
-        return default_data_dict
+#         return default_data_dict
 
     def get_numerical_data(self): ### Brakowało numerical data. Przez to komenda get numerical parameters nie działa
 
