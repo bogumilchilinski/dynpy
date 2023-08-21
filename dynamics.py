@@ -561,6 +561,24 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         self._components = {**comps, **self.components}
 
+    def _collect_components_query(self,query=None):
+        
+
+        
+        output_list=[comp._collect_all_query(query)  for key,comp in self.componets.items() ]
+        
+        return output_list
+    
+    def _collect_all_query(self,query=None):
+        
+        if query is None:
+            query = lambda obj: obj._label
+        
+        collected_output = self._collect_components_query + [query(self)]
+        
+        return collected_output
+
+
     @property
     def components(self):
 
