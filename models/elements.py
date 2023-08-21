@@ -688,7 +688,7 @@ class Damper(Element):
     real_name = 'damper.PNG'
     
     c= Symbol('c', positive=True)
-    
+
     def __init__(self, c, pos1, pos2=0, qs=None, ivar=Symbol('t'), frame=base_frame):
         
         if c is not None: self.c=c
@@ -745,6 +745,15 @@ class Damper(Element):
         res = GeometryScene.ax_2d.plot(np.array([0,0,1,-1]) + x_shift+2,np.array([-1,2,2,2]) +  y_shift, label=class_name, color = 'k') + GeometryScene.ax_2d.plot(np.array([1.5,1.5,0,0,0,-1.5,-1.5]) + x_shift+2,np.array([1,3,3,5,3,3,1]) + y_shift, label=class_name, color = 'k')
         
         text = GeometryScene.ax_2d.text(np.array([1.5]),np.array([3]),f'{class_name}',multialignment='center')
+        
+    def get_default_data(self):
+
+        t=self.ivar
+        c0=Symbol('c_0',positive=True)
+        self.default_data_dict={
+            self.force:[c0*no for no in range(1,10)],
+        }
+        return {**super().get_default_data(),**self.default_data_dict}    
         
 class Excitation(Element):
     """

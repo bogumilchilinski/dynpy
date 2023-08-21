@@ -573,7 +573,7 @@ class DampedMeasuringTool(ComposedSystem):
     def components(self):
         components = {}
 
-        self._moment_of_inertia = MaterialPoint((S.One / 3) * self.m * self.l**2, self.phi, qs=[self.phi])
+        self.bar = Pendulum(self.m, g=0, l=self.l, angle=self.phi, ivar=self.ivar)
         self._upper_spring = Spring(self.k, pos1=self.l * self.phi, qs=[self.phi])
         self._lower_spring = Spring(self.k, pos1=self.l * self.phi, qs=[self.phi])
         self._spiral_spring = Spring(self.k_t, self.phi, qs=[self.phi])
@@ -581,8 +581,7 @@ class DampedMeasuringTool(ComposedSystem):
         self._springs_damping = Damper(2 * self.c, pos1=self.l * self.phi, qs=[self.phi])
         self._spiral_spring_damping = Damper(self.c_t, pos1=self.phi, qs=[self.phi])
 
-
-        components['_moment_of_inertia'] = self._moment_of_inertia
+        components['_bar'] = self.bar
         components['_upper_spring'] = self._upper_spring
         components['_lower_spring'] = self._lower_spring
         components['_spiral_spring'] = self._spiral_spring
@@ -599,16 +598,6 @@ class DampedMeasuringTool(ComposedSystem):
         default_data_dict = {
             self.c: [self.lam * (self.k)],
             self.c_t: [self.lam * (self.k_t)],
-            self.m: [m0 * S.One * no for no in range(1, 8)],
-            self.k: [k0 * S.One * no for no in range(1, 8)],
-            self.k_t: [k0 * l0**2 * S.One * no for no in range(1, 8)],
-            self.F: [
-                F0 * S.One * no * cos(self.Omega * self.ivar)
-                for no in range(1, 8)
-            ],
-            self.Omega: [self.Omega],
-            self.lam: [self.lam],
-            self.l: [l0 * S.One * no for no in range(1, 8)],
         }
 
         return default_data_dict
