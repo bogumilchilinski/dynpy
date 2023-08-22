@@ -1100,6 +1100,7 @@ class ODESystem(AnalyticalSolution):
         
         return self._as_fode()
 
+    
     def approximated(self, n=3, x0=None, op_point=False, hint=[], label=None):
         """
         Returns approximated N-th order function calculated with Taylor series method as an instance of the class
@@ -1411,6 +1412,16 @@ class ODESystem(AnalyticalSolution):
         inertia_mat=self.lhs.jacobian(diff(self.dvars, self.ivar, 2))
         matrix_poly = inertia_mat*r**2 + damping_mat*r + stiffness_mat
         return matrix_poly.det()
+
+        
+    def fundamental_matrix(self):
+        r=Symbol('r')
+        stiffness_mat=self.lhs.jacobian(self.dvars)
+        damping_mat=self.lhs.jacobian(diff(self.dvars))
+        inertia_mat=self.lhs.jacobian(diff(self.dvars, self.ivar, 2))
+        fundamental_mat = stiffness_mat - r**2 * inertia_mat + damping_mat * r
+        return fundamental_mat
+    
 
 class FirstOrderODESystem(ODESystem):
     
