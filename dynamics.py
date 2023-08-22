@@ -561,20 +561,29 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         self._components = {**comps, **self.components}
 
-    def _collect_components_query(self,query=None):
+    def _collect_components_query(self,query=None,aggregate=False,*args,**kwargs):
         
 
         
-        output_list=[comp._collect_all_query(query)  for key,comp in self.componets.items() ]
+        output_list=[comp._collect_all_query(query)  for key,comp in self.components.items() ]
         
         return output_list
     
-    def _collect_all_query(self,query=None):
+    def _collect_all_query(self,query=None,aggregate=False,*args,**kwargs):
         
         if query is None:
             query = lambda obj: obj._label
+         
         
-        collected_output = self._collect_components_query + [query(self)]
+        comps_collected=self._collect_components_query(query=query,aggregate=aggregate,*args,**kwargs)
+        
+        if comps_collected == []:
+            collected_output = [query(self)]
+        else:
+            if aggregate is True:    
+                collected_output = [ query(self),*sum(comps_collected,[])]
+            else:
+                collected_output = [ query(self),comps_collected]
         
         return collected_output
 
