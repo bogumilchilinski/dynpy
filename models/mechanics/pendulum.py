@@ -419,7 +419,6 @@ class FreePendulum(Pendulum):
     real_name = 'pendulum_real.jpg'
 
 
-#TO_DO
 class ExcitedPendulum(ComposedSystem):
     """
     Model of a sDoF Excited Pendulum.
@@ -460,9 +459,6 @@ class ExcitedPendulum(ComposedSystem):
     scheme_name = 'damped_excited_pendulum.PNG'
     real_name = 'pendulum2_real.jpg'
 
-    
-    
-   
     def __init__(self,
                  dummy=Symbol('dummy', positive=True),
                  m=Symbol('m', positive=True),
@@ -476,23 +472,40 @@ class ExcitedPendulum(ComposedSystem):
         phi = angle
         self.phi = phi
 
-        if qs == None:
-            qs = [angle]
-        else:
-            qs = qs
+#         if qs == None:
+#             qs = [angle]
+#         else:
+#             qs = qs
 
+        self.qs = [angle]
+
+        self.dummy = dummy
         self.m = m
         self.g = g
         self.l = l
         self.F = F
+        self.angle = angle
+        self.ivar = ivar
 
         Omega = Symbol('Omega', positive=True)
         self.Omega = Omega
-        self.pendulum = Pendulum(m, g, l, angle=phi)
-        self.force = Force(-F * l * sin(Omega * ivar), pos1=phi, qs=qs)
-        system = self.pendulum + self.force
 
-        super().__init__(system, **kwargs)
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        self.pendulum = Pendulum(self.m, self.g, self.l, angle=self.phi)
+        self.force = Force(-self.F * self.l * sin(self.Omega * self.ivar), pos1=self.phi, qs=self.qs)
+        # system = self.pendulum + self.force
+
+        components = {}
+
+        components['Pendulum'] = self.pendulum
+        components['Force'] = self.force
+
+        return components
 
     def get_default_data(self):
 
@@ -547,7 +560,6 @@ class ExcitedPendulum(ComposedSystem):
         }
         return default_data_dict
 
-#TO_DO
 class DampedPendulum(ComposedSystem):
     """
     Model of a sDoF damped Pendulum.
@@ -587,8 +599,6 @@ class DampedPendulum(ComposedSystem):
     scheme_name = 'damped_pendulum.png'
     real_name = 'pendulum2_real.jpg'
 
-    
-
     def __init__(self,
                  m=Symbol('m', positive=True),
                  g=Symbol('g', positive=True),
@@ -601,21 +611,34 @@ class DampedPendulum(ComposedSystem):
         phi = angle
         self.phi = phi
 
-        if qs == None:
-            qs = [angle]
-        else:
-            qs = qs
+#         if qs == None:
+#             qs = [angle]
+#         else:
+#             qs = qs
+
+        self.qs = [angle]
 
         self.m = m
         self.g = g
         self.l = l
         self.c = c
 
-        self.Pendulum = Pendulum(m, g, l, angle=phi)
-        self.Damper = Damper(c, l * phi, qs=qs)
-        system = self.Pendulum + self.Damper
 
-        super().__init__(system, **kwargs)
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        self.Pendulum = Pendulum(self.m, self.g, self.l, angle=self.phi)
+        self.Damper = Damper(self.c, self.l * self.phi, qs=self.qs)
+        # system = self.Pendulum + self.Damper
+
+        components = {}
+
+        components['Pendulum'] = self.Pendulum
+        components['Damper'] = self.Damper
+
+        return components
 
     def get_default_data(self):
 

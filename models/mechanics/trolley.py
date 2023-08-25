@@ -1217,22 +1217,43 @@ class VariableMassTrolleyWithPendulum(ComposedSystem):
                                  })
         return default_data_dict
 
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.m_t: r'masa początkowa wózka',
-            self.m_p: r'masa początkowa wahadła',
-            self.m_tf: r'masa transportowanej cieczy wypływającej z wózka',
-            self.m_pf: r'masa transportowanej cieczy wypływającej do wahadła',
-            self.m_f: r'masa transferowanej cieczy',
-            self.k: r'sztywność sprężyny mocującej',
-            self.l: r'długość wahadła',
-            self.Omega: r'częstotliwość wymuszenia',
-            self.F: r'wartość siły wymuszającej',
-            self.g: r'przyspieszenie ziemskie',
-            self.flow_coeff: r'współczynnik przepływu cieczy',
-            self.t0: r'czas aktywacji tłumienia',
-        }
-        return self.sym_desc_dict
+    def symbols_description(self, lang = 'en'):
+        
+        if lang == 'pl':
+        
+            self.sym_desc_dict = {
+                self.m_t: r'masa początkowa wózka',
+                self.m_p: r'masa początkowa wahadła',
+                self.m_tf: r'masa transportowanej cieczy wypływającej z wózka',
+                self.m_pf: r'masa transportowanej cieczy wypływającej do wahadła',
+                self.m_f: r'masa transferowanej cieczy',
+                self.k: r'sztywność sprężyny mocującej',
+                self.l: r'długość wahadła',
+                self.Omega: r'częstotliwość wymuszenia',
+                self.F: r'wartość siły wymuszającej',
+                self.g: r'przyspieszenie ziemskie',
+                self.flow_coeff: r'współczynnik przepływu cieczy',
+                self.t0: r'czas aktywacji tłumienia',
+            }
+            return self.sym_desc_dict
+        
+        else:
+            
+            self.sym_desc_dict = {
+                self.m_t: r'trolley initial mass',
+                self.m_p: r'pendulum initial mass',
+                self.m_tf: r'fluid mass transported from trolley',
+                self.m_pf: r'fluid mass transported to pendulum',
+                self.m_f: r'transferred fluid mass',
+                self.k: r'mounting spring stiffness',
+                self.l: r'pendulum lenght',
+                self.Omega: r'excitation frequency',
+                self.F: r'excitation force',
+                self.g: r'gravity constant',
+                self.flow_coeff: r'flow coefficient',
+                self.t0: r'damping activation time',
+            }
+            return self.sym_desc_dict
     
 
 
@@ -1414,36 +1435,70 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
         return default_data_dict
     
 
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.m_t: r'masa początkowa wózka',
-            self.m_p: r'masa początkowa wahadła',
-            self.m_tf: r'masa transportowanej cieczy wypływającej z wózka',
-            self.m_pf: r'masa transportowanej cieczy wypływającej do wahadła',
-            self.m_f: r'masa transferowanej cieczy',
-            self.k: r'sztywność sprężyny mocującej',
-            self.l: r'długość wahadła',
-            self.Omega: r'częstotliwość wymuszenia',
-            self.F: r'wartość siły wymuszającej',
-            self.g: r'przyspieszenie ziemskie',
-            self.flow_coeff: r'współczynnik przepływu cieczy',
-            self.t0: r'czas aktywacji tłumienia',
-            self.b: r'współczynnik tłumienia',
-            self.alpha: r'współczynnik tłumienia Rayleigha przy macierzy bezwładności',
-            self.beta: r'współczynnik tłumienia Rayleigha przy macierzy sztywności',
-            self.x: r'przemieszczenie wózka',
-            self.phi: r'kąt wychylenia wahadła',
-            self.omega: r'częstość własna układu',
-            self.Ek: r'energia kinetyczna układu',
-            self.Ep: r'energia potencjalna układu',
-            self.f: r'częstotliwość',
-            self.ivar: r'czas',
-            diff(self.x,self.ivar): 'prędkość wózka',
-            diff(self.x,self.ivar,self.ivar): r'przyspieszenie wózka',
-            diff(self.phi,self.ivar): r'prędkość kątowa wahadła',
-            diff(self.phi,self.ivar,self.ivar): r'przyspieszenie kątowe wahadła',
-        }
-        return self.sym_desc_dict
+    def symbols_description(self, lang = 'en'):
+        
+        if lang == 'pl':
+        
+            self.sym_desc_dict = {
+                self.m_t: r'masa początkowa wózka',
+                self.m_p: r'masa początkowa wahadła',
+                self.m_tf: r'masa transportowanej cieczy wypływającej z wózka',
+                self.m_pf: r'masa transportowanej cieczy wypływającej do wahadła',
+                self.m_f: r'masa transferowanej cieczy',
+                self.k: r'sztywność sprężyny mocującej',
+                self.l: r'długość wahadła',
+                self.Omega: r'częstotliwość wymuszenia',
+                self.F: r'wartość siły wymuszającej',
+                self.g: r'przyspieszenie ziemskie',
+                self.flow_coeff: r'współczynnik przepływu cieczy',
+                self.t0: r'czas aktywacji tłumienia',
+                self.b: r'współczynnik tłumienia',
+                self.alpha: r'współczynnik tłumienia Rayleigha przy macierzy bezwładności',
+                self.beta: r'współczynnik tłumienia Rayleigha przy macierzy sztywności',
+                self.x: r'przemieszczenie wózka',
+                self.phi: r'kąt wychylenia wahadła',
+                self.omega: r'częstość własna układu',
+                self.Ek: r'energia kinetyczna układu',
+                self.Ep: r'energia potencjalna układu',
+                self.f: r'częstotliwość',
+                self.ivar: r'czas',
+                diff(self.x,self.ivar): 'prędkość wózka',
+                diff(self.x,self.ivar,self.ivar): r'przyspieszenie wózka',
+                diff(self.phi,self.ivar): r'prędkość kątowa wahadła',
+                diff(self.phi,self.ivar,self.ivar): r'przyspieszenie kątowe wahadła',
+            }
+            return self.sym_desc_dict
+        
+        else:
+            self.sym_desc_dict = {
+                self.m_t: r'trolley initial mass',
+                self.m_p: r'pendulum initial mass',
+                self.m_tf: r'fluid mass transported from trolley',
+                self.m_pf: r'fluid mass transported to pendulum',
+                self.m_f: r'transferred fluid mass',
+                self.k: r'mounting spring stiffness',
+                self.l: r'pendulum lenght',
+                self.Omega: r'excitation frequency',
+                self.F: r'excitation force',
+                self.g: r'gravity constant',
+                self.flow_coeff: r'flow coefficient',
+                self.t0: r'damping activation time',
+                self.b: r'damping coefficient',
+                self.alpha: r'inertia matrix Rayleigh damping coefficient',
+                self.beta: r'stiffness matrix Rayleigh damping coefficient',
+                self.x: r'trolley displacement',
+                self.phi: r'pendulum angular displacement',
+                self.omega: r'system natural frequency',
+                self.Ek: r'system kinetic energy',
+                self.Ep: r'system potential energy',
+                self.f: r'frequency',
+                self.ivar: r'time',
+                diff(self.x,self.ivar): 'trolley velocity',
+                diff(self.x,self.ivar,self.ivar): r'trolley acceleration',
+                diff(self.phi,self.ivar): r'pendulum angular velocity',
+                diff(self.phi,self.ivar,self.ivar): r'pendulum angular acceleration',
+            }
+            return self.sym_desc_dict
 
 
 #Amadi

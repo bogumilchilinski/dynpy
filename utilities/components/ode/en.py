@@ -554,102 +554,126 @@ class HomEquationCodeComponent(ReportComponent):
 
         display(ReportText(  self.footer_text   ))
         
-class ODENonHomogeneousEquationComponent(ReportComponent):
+# class ODENonHomogeneousEquationComponent(ReportComponent):
     
-    title="Differential equations"
-    @property
-    def header_text(self):
+#     title="Differential equations"
+#     @property
+#     def header_text(self):
 
-        return "By separating the equation we obtain the form of equation with time dependent variables on one hand side and free terms on the other:"
+#         return "By separating the equation we obtain the form of equation with time dependent variables on one hand side and free terms on the other:"
 
         
-    @property
-    def footer_text(self):
+#     @property
+#     def footer_text(self):
 
-        return "To solve the problem serve several methods depending on the equation type."
+#         return "To solve the problem serve several methods depending on the equation type."
 
-    def append_elements(self):
+#     def append_elements(self):
 
-        system = self._system
+#         system = self._system
 
-        display(ReportText(  self.header_text   ))
+#         display(ReportText(  self.header_text   ))
 
-        display(SympyFormula( Eq(system._hom_equation().lhs, system._free_component())))
+#         display(SympyFormula( Eq(system._hom_equation().lhs, system._free_component())))
 
-        display(ReportText(  self.footer_text   ))
+#         display(ReportText(  self.footer_text   ))
 
-class ODENonHomogeneousEquationCodeComponent(ReportComponent):
+# class ODENonHomogeneousEquationCodeComponent(ReportComponent):
     
-    title="Differential equations"
-    @property
-    def header_text(self):
+#     title="Differential equations"
+#     @property
+#     def header_text(self):
 
-        return "By separating the equation we obtain the form of equation with time dependent variables on one hand side and free terms on the other:"
-
-        
-    @property
-    def footer_text(self):
-
-        return "To solve the problem serve several methods depending on the equation type."
-
-    def append_elements(self):
-
-        system = self._system
-
-        display(ReportText(  self.header_text   ))
-
-        display(Markdown
-('''
-    from sympy import *
-    from dynpy.solvers.linear import ODESystem
-
-    display(SympyFormula(Eq(system._hom_equation().lhs, system._free_component())))
-'''))
-
-        display(SympyFormula( Eq(system._hom_equation().lhs, system._free_component())))
-
-        display(ReportText(  self.footer_text   ))
-
-class ODEInitComponent(ReportComponent):
-
-    title="Exemplary system"
-    @property
-    def header_text(self):
-
-        return "Exemplary ODE system can be created using following code."
+#         return "By separating the equation we obtain the form of equation with time dependent variables on one hand side and free terms on the other:"
 
         
-    @property
-    def footer_text(self):
+# <<<<<<< HEAD
+# =======
+# class ODENonHomogeneousEquationCodeComponent(ReportComponent):
+    
+#     title="Differential equations"
+#     @property
+#     def header_text(self):
 
-        return "Code presented above shows the elements which are neccessary to build ODESystem."
+#         return "By separating the equation we obtain the form of equation with time dependent variables on one hand side and free terms on the other:"
 
-    def append_elements(self):
-
-        system = self._system
-
-        display(ReportText(  self.header_text   ))
         
-        code_list = python(system.lhs[0]).split('\n')
-        var_name = 'my_eq'
-        code = '\n\n\t'.join(code_list[:-1]) + '\n\n\t' + var_name +code_list[-1][1:]
-        dvars=str(system.dvars)
-        order=str(system.ode_order)
+# >>>>>>> f02b360 (Mechanics module maintenance and development)
+#     @property
+#     def footer_text(self):
+
+#         return "To solve the problem serve several methods depending on the equation type."
+
+#     def append_elements(self):
+
+#         system = self._system
+
+#         display(ReportText(  self.header_text   ))
+# <<<<<<< HEAD
+
+#         display(Markdown
+# ('''
+#     from sympy import *
+#     from dynpy.solvers.linear import ODESystem
+
+#     display(SympyFormula(Eq(system._hom_equation().lhs, system._free_component())))
+# =======
+# ''')
+#         display(Markdown
+# ('''
+#     system = self._system
+#     display(SympyFormula( Eq(system._hom_equation().lhs, system._free_component())))
+# >>>>>>> f02b360 (Mechanics module maintenance and development)
+# '''))
+
+#         display(SympyFormula( Eq(system._hom_equation().lhs, system._free_component())))
+
+# <<<<<<< HEAD
+#         display(ReportText(  self.footer_text   ))
+
+# class ODEInitComponent(ReportComponent):
+
+#     title="Exemplary system"
+#     @property
+#     def header_text(self):
+
+#         return "Exemplary ODE system can be created using following code."
+
         
-        display(ReportText('Code presented below describes all of the symbols needed to construct ordinary differential equation. my_eq variable stores the differential equation.'))
-        display(Markdown(
-f'''
+#     @property
+#     def footer_text(self):
 
-    from sympy import *
-    from dynpy.solvers.linear import ODESystem
+#         return "Code presented above shows the elements which are neccessary to build ODESystem."
 
-    {code}
+#     def append_elements(self):
 
-    odesys = ODESystem(odes = my_eq, dvars = {dvars}, ode_order = {order})
-    display(odesys)
-'''))
-        display(ReportText("After creating our differential equation it can be analysed using ODESystem class. Additionally one has to provide dvars and ode_order arguments. Dvars is the generalized coordinate of the system and ode_order is the order of considered differential equation."))
-        display(SympyFormula( system ))
+#         system = self._system
 
-        display(ReportText(  self.footer_text   ))
+#         display(ReportText(  self.header_text   ))
+        
+#         code_list = python(system.lhs[0]).split('\n')
+#         var_name = 'my_eq'
+#         code = '\n\n\t'.join(code_list[:-1]) + '\n\n\t' + var_name +code_list[-1][1:]
+#         dvars=str(system.dvars)
+#         order=str(system.ode_order)
+        
+#         display(ReportText('Code presented below describes all of the symbols needed to construct ordinary differential equation. my_eq variable stores the differential equation.'))
+#         display(Markdown(
+# f'''
 
+#     from sympy import *
+#     from dynpy.solvers.linear import ODESystem
+
+#     {code}
+
+#     odesys = ODESystem(odes = my_eq, dvars = {dvars}, ode_order = {order})
+#     display(odesys)
+# '''))
+#         display(ReportText("After creating our differential equation it can be analysed using ODESystem class. Additionally one has to provide dvars and ode_order arguments. Dvars is the generalized coordinate of the system and ode_order is the order of considered differential equation."))
+#         display(SympyFormula( system ))
+
+#         display(ReportText(  self.footer_text   ))
+
+# =======
+#         display(ReportText(  self.footer_text   ))
+# >>>>>>> f02b360 (Mechanics module maintenance and development)
