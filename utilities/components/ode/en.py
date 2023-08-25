@@ -538,8 +538,8 @@ class HomEquationCodeComponent(ReportComponent):
         display(Markdown
 ('''
     from sympy import *
-    from dynpy.solvers.linear import ODESystem
- 
+    from dynpy.solvers.linear import *
+    
     display(SympyFormula( system._hom_equation()))
 '''))
 
