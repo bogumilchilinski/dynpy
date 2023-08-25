@@ -1091,9 +1091,14 @@ class ODESystem(AnalyticalSolution):
         
         #display('subs dict',self._simp_dict,type(self))
         
-        _solver = self._default_solver
+        aux_mat=self.lhs.jacobian(self.dvars)
+        if det(aux_mat)!=0:
+            _solver = self._default_solver
 
-        return _solver.from_ode_system(self)
+            return _solver.from_ode_system(self)
+        else:
+            return FirstOrderLinearODESystem.from_ode_system(self)
+            
         
         
     def as_first_ode_linear_system(self):
