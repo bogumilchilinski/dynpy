@@ -1176,22 +1176,9 @@ class MDoFPendulumWithRod(ComposedSystem):
 
         return temp_sys.linearized(x0=x0, op_point=True, hint=hint, label=label)
     
-#     @property
-#     def _report_components(self):
 
-#         comp_list = [
-#             mech_comp.TitlePageComponent,
-#             mech_comp.SchemeComponent,
-#             mech_comp.ExemplaryPictureComponent,
-#             mech_comp.KineticEnergyComponent,
-#             mech_comp.PotentialEnergyComponent,
-#             mech_comp.LagrangianComponent,
-#             mech_comp.GoverningEquationComponent,
-#             mech_comp.FundamentalMatrixComponent,
-#             mech_comp.GeneralSolutionComponent,
-#         ]
-#         return comp_list
 
+#DONE KrzysiekK
 class PendulumWithRoller(NonlinearComposedSystem):
     """
     Model of a sDoF mathematical Pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.

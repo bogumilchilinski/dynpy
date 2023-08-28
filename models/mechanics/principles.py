@@ -593,7 +593,6 @@ class DampedMeasuringTool(ComposedSystem):
 
     def get_default_data(self):
 
-        m0, k0, F0, Omega0, lam0, l0 = self.m0, self.k0, self.F0, self.Omega0, self.lam0, self.l0
 
         default_data_dict = {
             self.c: [self.lam * (self.k)],

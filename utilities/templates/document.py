@@ -198,11 +198,11 @@ class BPASTSPaper(Document):
         # tu implementować co tam potrzeba
         
         
-class ThesisTemplate(Document):
+class WutThesis(Document):
     
     latex_name = 'document'
     packages = [
-                  Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('geometry',options=['lmargin=30mm', 'rmargin=30mm',  'top=25mm', 'bmargin=25mm', 'headheight=50mm']),
                   Package('microtype'),
                   Package('authoraftertitle'),
                   Package('polski',options=['MeX']),
@@ -211,6 +211,7 @@ class ThesisTemplate(Document):
                   Package('titlesec'),
                   Package('fancyhdr'),
                   Package('graphicx'),
+        
 
                   Command('newcommand{\praca}', arguments=['Praca dyplomowa']),
                   Command('newcommand{\dyplom}', arguments=['Inżynierska']),
@@ -225,7 +226,7 @@ class ThesisTemplate(Document):
                   Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']),
                   Command('newcommand{\\rok}', arguments=['Rok składania pracy']),
                   Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']),
-                  Command('newcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']),
+                  Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']),
                   Command('graphicspath{{../}}')
     ]
 
@@ -238,8 +239,8 @@ class ThesisTemplate(Document):
                  default_filepath='default_filepath',
                  title='Basic title',
                  *,
-                 documentclass='article',
-                 document_options=None,
+                 documentclass='paper',
+                 document_options=['a4paper','11pt','twoside'],
                  fontenc='T1',
                  inputenc='utf8',
                  font_size='normalsize',
@@ -248,7 +249,7 @@ class ThesisTemplate(Document):
                  microtype=True,
                  page_numbers=True,
                  indent=None,
-                 geometry_options=None,#['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
+                 geometry_options=['inner=30mm', 'outer=20mm', 'bindingoffset=10mm', 'top=25mm', 'bottom=25mm'],#,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
                  data=None):
 
         super().__init__(
@@ -283,11 +284,15 @@ class ThesisTemplate(Document):
         self.packages.append(Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']))
         self.packages.append(Command('newcommand{\\rok}', arguments=['Rok składania pracy']))
         self.packages.append(Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']))
-        self.packages.append(Command('newcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']))
+        self.packages.append(Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']))
         self.packages.append(Command('graphicspath{{../}}'))
         #self.append(Command('maketitle'))
         self.append(NoEscape('%%% New doc'))
         # tu implementować co tam potrzeba
+        
+        
+class ThesisTemplate(WutThesis):
+    pass
         
         
 class MechanicalCase(ThesisTemplate):
