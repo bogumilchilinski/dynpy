@@ -2558,7 +2558,60 @@ class FirstOrderODE:
                 initial_conditions=initial_conditions).keys()
         }
 
+class BernoullisODE(FirstOrderODESystem):
+    
 
+    
+    def solution(self,ics=None):
+        return self.linearized().solution()
+
+
+        
+
+    def linearized(self, x0=None, op_point=False, hint=[], label=None):
+        """
+        Returns approximated first order function calculated with Taylor series method as an instance of the class. It enables to obtain linearized output.
+        Arguments:
+        =========
+            System = Created system based on symbolical represent of mechanical parts of it
+            
+            op_point - boolean, which points out if the operating point will be evaluated
+            
+            x0 - setting operating point
+            
+            hint - (optional) Adds additional equation to equilibrium condition and calculate op_point as equilibrium system.
+            
+            label=None (optional): string
+                Label of the class instance. Default label: '{Class name} with {length of qs} DOF'
+
+        Example:
+        =======
+        Creating the examplary system. A mass oscillating up and down while being held up by a spring with a spring constant kinematicly 
+
+        >>> t = symbols('t')
+        >>> m, g, l = symbols('m, g, l')
+        >>> qs = dynamicsymbols('varphi') 
+        >>> Pendulum()
+
+        Creating linerized system in symbolic pattern
+        >>> System_linearized = Sytem.linearized()
+
+        """
+
+        return self.approximated(n=1, x0=x0, op_point=op_point, hint=hint, label=label)
+    
+    def _is_bernoulli(self):
+        for n in self.odes:
+            power = self.odes.atoms(self.dvars[0]**n)
+        if bool(power):
+            display(power)
+            display(self)
+            return print("This is Bernoulli equation")
+        
+        else:
+            print ('TypeError: This is not a Bernoulli equation')
+            return None
+        
 class LinearODESolution:
 
     _const_list = set()
