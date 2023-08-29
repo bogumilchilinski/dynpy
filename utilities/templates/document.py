@@ -75,7 +75,7 @@ class CaseTemplate(Document):
             data=data,
         )
 
-class ExampleTemplate(Document):
+class Guide(Document):
     
     latex_name = 'document'
     packages = [
@@ -138,7 +138,8 @@ class ExampleTemplate(Document):
         self.append(NewPage())
         # tu implementować co tam potrzeba
 
-        
+class ExampleTemplate(Guide):      
+    pass
 
         
 class BPASTSPaper(Document):
@@ -214,7 +215,7 @@ class WutThesis(Document):
         
 
                   Command('newcommand{\praca}', arguments=['Praca dyplomowa']),
-                  Command('newcommand{\dyplom}', arguments=['Inżynierska']),
+                  Command('newcommand{\dyplom}', arguments=['Magisterska']),
                   Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']),
                   Command('newcommand{\specjalnosc}', arguments=['Wpisać specjalność']),
                   Command('newcommand{\\autor}', arguments=['Imię i nazwisko autora']),
@@ -226,7 +227,7 @@ class WutThesis(Document):
                   Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']),
                   Command('newcommand{\\rok}', arguments=['Rok składania pracy']),
                   Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']),
-                  Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']),
+                  #Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']),
                   Command('graphicspath{{../}}')
     ]
 
@@ -272,7 +273,7 @@ class WutThesis(Document):
         #self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
         self.packages.append(Command('newcommand{\praca}', arguments=['Praca dyplomowa']))
-        self.packages.append(Command('newcommand{\dyplom}', arguments=['Inżynierska']))
+        self.packages.append(Command('newcommand{\dyplom}', arguments=['Magisterska']))
         self.packages.append(Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']))
         self.packages.append(Command('newcommand{\specjalnosc}', arguments=['Wpisać specjalność']))
         self.packages.append(Command('newcommand{\\autor}', arguments=['Imię i nazwisko autora']))
@@ -284,7 +285,7 @@ class WutThesis(Document):
         self.packages.append(Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']))
         self.packages.append(Command('newcommand{\\rok}', arguments=['Rok składania pracy']))
         self.packages.append(Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']))
-        self.packages.append(Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']))
+        #self.packages.append(Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']))
         self.packages.append(Command('graphicspath{{../}}'))
         #self.append(Command('maketitle'))
         self.append(NoEscape('%%% New doc'))
@@ -294,8 +295,10 @@ class WutThesis(Document):
 class ThesisTemplate(WutThesis):
     pass
         
-        
-class MechanicalCase(ThesisTemplate):
+
+
+    
+class MechanicalCase(Guide):
     
     latex_name = 'document'
     packages = [
@@ -314,7 +317,7 @@ class MechanicalCase(ThesisTemplate):
                   Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
         ]
 
-class EngeneeringDrawingGuide(ThesisTemplate):
+class EngeneeringDrawingGuide(Guide):
     
     latex_name = 'document'
     packages = [
@@ -334,7 +337,7 @@ class EngeneeringDrawingGuide(ThesisTemplate):
     ]
     
     
-class DevelopmentGuide(ThesisTemplate):
+class DevelopmentGuide(Guide):
     
     latex_name = 'document'
     packages = [

@@ -1338,12 +1338,14 @@ class ODESystem(AnalyticalSolution):
         fode = self._as_fode()
         #solver changing due to the computational simplicity reasons
 
+        aux_mat=self.lhs.jacobian(self.dvars)
+        if det(aux_mat)!=0:
+            _solver = self._default_solver
 
-        _solver = self._default_solver
+            return _solver.from_ode_system(self).steady_solution
+        else:
+            return FirstOrderLinearODESystem.from_ode_system(self).steady_solution
 
-        fode_sys=_solver.from_ode_system(fode)      
-                
-        return fode_sys.steady_solution
 
 
     
