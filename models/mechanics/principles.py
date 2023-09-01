@@ -9,6 +9,7 @@ from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
 
 from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin
 from ...continuous import ContinuousSystem, PlaneStressProblem
+from .pendulum import Pendulum
 
 import base64
 import random
@@ -559,7 +560,7 @@ class DampedMeasuringTool(ComposedSystem):
         if Omega is not None: self.Omega = Omega
         if phi is not None: self.phi = phi
         if c is not None: self.c = c
-        if c_t is not None: self.ct = ct
+        if c_t is not None: self.c_t = c_t
         if lam is not None: self.lam = lam
         if l0 is not None: self.l0 = l0
         if lam0 is not None: self.lam0 = lam0
@@ -578,7 +579,8 @@ class DampedMeasuringTool(ComposedSystem):
         self._lower_spring = Spring(self.k, pos1=self.l * self.phi, qs=[self.phi])
         self._spiral_spring = Spring(self.k_t, self.phi, qs=[self.phi])
         self._force = Force(self.F * self.l, pos1=self.phi)
-        self._springs_damping = Damper(2 * self.c, pos1=self.l * self.phi, qs=[self.phi])
+        self._spring_1_damping = Damper(self.c, pos1=self.l * self.phi, qs=[self.phi])
+        self._spring_2_damping = Damper(self.c, pos1=self.l * self.phi, qs=[self.phi])
         self._spiral_spring_damping = Damper(self.c_t, pos1=self.phi, qs=[self.phi])
 
         components['_bar'] = self.bar
@@ -586,7 +588,8 @@ class DampedMeasuringTool(ComposedSystem):
         components['_lower_spring'] = self._lower_spring
         components['_spiral_spring'] = self._spiral_spring
         components['_force'] = self._force
-        components['_springs_damping'] = self._springs_damping
+        components['_spring_1_damping'] = self._spring_1_damping
+        components['_spring_2_damping'] = self._spring_2_damping
         components['_spiral_spring_damping'] = self._spiral_spring_damping
 
         return components

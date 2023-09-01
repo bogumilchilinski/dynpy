@@ -88,7 +88,7 @@ class TrolleysWithSprings(NonlinearComposedSystem):
 
 
 
-class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
+class ForcedTrolleysWithSprings(ComposedSystem): ### 3 ODE
     
     scheme_name = 'nonlin_trolley.PNG'
     real_name = 'nonlin_trolley_real.PNG'
@@ -165,14 +165,13 @@ class ForcedTrolleysWithSprings(NonlinearComposedSystem): ### 3 ODE
 
     def get_default_data(self):
 
-        m0, k0, Omega0, F0 =  self.m0, self.k0, self.Omega0, self.F0
+        m0, k0, F0 =  self.m0, self.k0, self.F0
         
         default_data_dict = {
-            self.m_1 : [100*m0],
-            self.m_2 : [200*m0],
-            self.k : [50*k0],
-            self.Omega : [0.5 * 3.14*Omega0, 1 * 3.14*Omega0, 2 * 3.14*Omega0, 4 * 3.14*Omega0],
-            self.F : [0.5 * 100*F0, 1 * 100*F0, 2 * 100*F0, 4 * 100*F0]
+            self.m_1 : [S.One * m0 * no for no in range(10,20)],
+            self.m_2 : [S.One * m0 * no for no in range(20,30)],
+            self.k : [S.One * k0 * no for no in range(30,50)],
+            self.F : [S.One * F0 * no for no in range(1,10)]
         }
         default_data_dict.update({self.G: [4*default_data_dict[self.F][0]*cos(0.5*default_data_dict[self.Omega][0]*self.ivar) , default_data_dict[self.F][0]*cos(0.75*default_data_dict[self.Omega][0]*self.ivar)**2 , 1.5*default_data_dict[self.F][0]*2*cos(1.25*default_data_dict[self.Omega][0]*self.ivar) , 3*default_data_dict[self.F][0]*cos(2*default_data_dict[self.Omega][0]*self.ivar)**2]})
 

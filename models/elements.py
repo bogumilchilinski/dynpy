@@ -723,7 +723,7 @@ class Damper(Element):
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
         self._dissipative_potential = D
-        
+    @property
     def force(self):
         
         return self.c * diff(self.q[0],self.ivar)
@@ -751,7 +751,7 @@ class Damper(Element):
         t=self.ivar
         c0=Symbol('c_0',positive=True)
         self.default_data_dict={
-            self.force:[c0*no for no in range(1,10)],
+            self.c:[c0*no for no in range(1,10)],
         }
         return {**super().get_default_data(),**self.default_data_dict}    
         
@@ -823,7 +823,7 @@ class Force(Element):
         t=self.ivar
         F0=Symbol('F_0',positive=True)
         self.default_data_dict={
-            self.force:[F0*no for no in range(1,10)],
+#             self.force:[F0*no for no in range(1,10)],
         }
         return {**super().get_default_data(),**self.default_data_dict}
         

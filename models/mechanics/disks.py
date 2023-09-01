@@ -997,7 +997,7 @@ class ForcedDisksWithParallelSprings(ComposedSystem):
         if x_1 is not None: self.x_1 = x_1
         if x_2 is not None: self.x_2 = x_2
         if Omega is not None: self.Omega = Omega
-            
+        if qs is not None: self.qs=qs
         self._init_from_components(**kwargs)
 
 
@@ -1006,33 +1006,34 @@ class ForcedDisksWithParallelSprings(ComposedSystem):
         components = {}
         
         #disk1
-        self.MaterialPoint1 = MaterialPoint(self.m, self.x_l, qs=[self.x_l])
-        self.MaterialPoint2 = MaterialPoint(self.m / 2, self.x_l, qs=[self.x_l])
-        self.MaterialPoint3 = MaterialPoint(self.m1, self.x_l, qs=[self.x_l])
-        self.Spring1 = Spring(self.k_l, pos1=self.x_l, qs=[self.x_l])
-        self.Spring2 =  Spring(self.k_l, pos1=self.x_l, qs=[self.x_l])
-        self.Spring3 = Spring(self.k_cl, pos1=self.x_l, qs=[self.x_l]) + Force(2*self.F_0 * cos(self.Omega * self.ivar), pos1=self.x_l, qs=[self.x_l])
+        self.MaterialPoint1 = MaterialPoint(self.m, self.x_l, qs=[self.qs])
+        self.MaterialPoint2 = MaterialPoint(self.m / 2, self.x_l, qs=[self.qs])
+        self.MaterialPoint3 = MaterialPoint(self.m1, self.x_l, qs=[self.qs])
+        self.Spring1 = Spring(self.k_l, pos1=self.x_l, qs=[self.qs])
+        self.Spring2 =  Spring(self.k_l, pos1=self.x_l, qs=[self.qs])
+        self.Spring3 = Spring(self.k_cl, pos1=self.x_l, qs=[self.qs]) 
+        self.Force2 = Force(2*self.F_0 * cos(self.Omega * self.ivar), pos1=self.x_l, qs=[self.qs])
         
         #disk2
-        self.MaterialPoint4 = MaterialPoint(self.m, self.x_c, qs=[self.x_c])
-        self.MaterialPoint5 = MaterialPoint(self.m / 2, self.x_c, qs=[self.x_c])
-        self.MaterialPoint6 = MaterialPoint(self.m2, self.x_c, qs=[self.x_c])
-        self.Spring4 = Spring(self.k_12, pos1=self.x_l, pos2=self.x_c, qs=[self.x_l, self.x_c])
-        self.Spring5 = Spring(self.k_c12, pos1=self.x_l, pos2=self.x_c, qs=[self.x_l, self.x_c])
-        self.Spring6 = Spring(self.k_12, pos1=self.x_l, pos2=self.x_c, qs=[self.x_l, self.x_c])
-        self.Spring7 = Spring(self.k_23, pos1=self.x_c, pos2=self.x_r, qs=[self.x_c, self.x_r])
-        self.Spring8 =Spring(self.k_c23, pos1=self.x_c, pos2=self.x_r, qs=[self.x_c, self.x_r])
-        self.Spring9 = Spring(self.k_23, pos1=self.x_c, pos2=self.x_r, qs=[self.x_c, self.x_r])
+        self.MaterialPoint4 = MaterialPoint(self.m, self.x_c, qs=[self.qs])
+        self.MaterialPoint5 = MaterialPoint(self.m / 2, self.x_c, qs=[self.qs])
+        self.MaterialPoint6 = MaterialPoint(self.m2, self.x_c, qs=[self.qs])
+        self.Spring4 = Spring(self.k_12, pos1=self.x_l, pos2=self.x_c, qs=[self.qs])
+        self.Spring5 = Spring(self.k_c12, pos1=self.x_l, pos2=self.x_c, qs=[self.qs])
+        self.Spring6 = Spring(self.k_12, pos1=self.x_l, pos2=self.x_c, qs=[self.qs])
+        self.Spring7 = Spring(self.k_23, pos1=self.x_c, pos2=self.x_r, qs=[self.qs])
+        self.Spring8 =Spring(self.k_c23, pos1=self.x_c, pos2=self.x_r, qs=[self.qs])
+        self.Spring9 = Spring(self.k_23, pos1=self.x_c, pos2=self.x_r, qs=[self.qs])
                                             
                                            
         #disk3
-        self.MaterialPoint7 = MaterialPoint(self.m, self.x_r, qs=[self.x_r])
-        self.MaterialPoint8 = MaterialPoint(self.m / 2, self.x_r, qs=[self.x_r])
-        self.MaterialPoint9 = MaterialPoint(self.m3, self.x_r, qs=[self.x_r])
-        self.Spring10 = Spring(self.k_r, pos1=self.x_r, qs=[self.x_r])
-        self.Spring11 = Spring(self.k_r, pos1=self.x_r, qs=[self.x_r])
-        self.Spring12 =  Spring(self.k_cr, pos1=self.x_r, qs=[self.x_r])
-        self.Force1 =  Force(self.F_0 * cos(self.Omega * self.ivar), pos1=self.x_r, qs=[self.x_r])
+        self.MaterialPoint7 = MaterialPoint(self.m, self.x_r, qs=[self.qs])
+        self.MaterialPoint8 = MaterialPoint(self.m / 2, self.x_r, qs=[self.qs])
+        self.MaterialPoint9 = MaterialPoint(self.m3, self.x_r, qs=[self.qs])
+        self.Spring10 = Spring(self.k_r, pos1=self.x_r, qs=[self.qs])
+        self.Spring11 = Spring(self.k_r, pos1=self.x_r, qs=[self.qs])
+        self.Spring12 =  Spring(self.k_cr, pos1=self.x_r, qs=[self.qs])
+        self.Force1 =  Force(self.F_0 * cos(self.Omega * self.ivar), pos1=self.x_r, qs=[self.qs])
 
 
 
@@ -1061,7 +1062,7 @@ class ForcedDisksWithParallelSprings(ComposedSystem):
         components['Spring12'] = self.Spring12
         
         components['Force1'] = self.Force1
-
+        components['Force2'] = self.Force2
 
 
         return components
@@ -1086,6 +1087,7 @@ class ForcedDisksWithParallelSprings(ComposedSystem):
             self.k_c23: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
             self.k_r: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
             self.k_cr: [1 * k0, 2 * k0, S.Half * k0, 2 * k0, S.Half * k0],
+            self.F_0: [S.One * self.F_0 * no for no in range(1,10)],
 
             self.x_l: [self.x_1],
             self.x_c: [0],
