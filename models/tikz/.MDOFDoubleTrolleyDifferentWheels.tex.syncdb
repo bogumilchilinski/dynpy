@@ -1,0 +1,1 @@
+{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-interaction=nonstopmode","-output-directory=/tmp/6e1b6b6b9f0a4e1e17713e3ae4b9be9940537c97","MDOFDoubleTrolleyDifferentWheels.tex"]}

@@ -11,6 +11,7 @@ from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBod
 from ...continuous import ContinuousSystem, PlaneStressProblem
 from .pendulum import Pendulum
 
+
 import base64
 import random
 import IPython as IP
@@ -513,135 +514,6 @@ class SpringMassSystem(ComposedSystem):
         }
 
         return self.sym_desc_dict
-    
-
-
-class DampedMeasuringTool(ComposedSystem):
-
-    scheme_name = 'measure_tool.PNG'
-    real_name = 'measure_tool_real.PNG'
-    #detail_scheme_name =
-    #detail_real_name =
-
-    m = Symbol('m', positive=True)
-    l = Symbol('l', positive=True)
-    k = Symbol('k', positive=True)
-    k_t = Symbol('k_t', positive=True)
-    Omega = Symbol('Omega', positive=True)
-    F = Symbol('F', positive=True)
-    phi = dynamicsymbols('\\varphi')
-    c = Symbol('c', positive=True)
-    c_t = Symbol('c_t', positive=True)
-    lam = Symbol('lambda', positive=True)
-    l0 = Symbol('l_0', positive=True)
-    lam0 = Symbol('lambda_0', positive=True)
-
-    def __init__(self,
-                 m=None,
-                 l=None,
-                 k=None,
-                 k_t=None,
-                 ivar=Symbol('t'),
-                 Omega=None,
-                 F=None,
-                 phi=None,
-                 qs=None,
-                 c=None,
-                 c_t=None,
-                 lam=None,
-                 l0=None,
-                 lam0=None,
-                 **kwargs):
-        if l is not None: self.l = l
-        if m is not None: self.m = m
-        if k is not None: self.k = k
-        if k_t is not None: self.k_t = k_t
-        if F is not None: self.F = F
-        if Omega is not None: self.Omega = Omega
-        if phi is not None: self.phi = phi
-        if c is not None: self.c = c
-        if c_t is not None: self.c_t = c_t
-        if lam is not None: self.lam = lam
-        if l0 is not None: self.l0 = l0
-        if lam0 is not None: self.lam0 = lam0
-
-        self.qs = [self.phi]
-        self.ivar = ivar
-
-        self._init_from_components(**kwargs)
-        
-    @property
-    def components(self):
-        components = {}
-
-        self.bar = Pendulum(self.m, g=0, l=self.l, angle=self.phi, ivar=self.ivar)
-        self._upper_spring = Spring(self.k, pos1=self.l * self.phi, qs=[self.phi])
-        self._lower_spring = Spring(self.k, pos1=self.l * self.phi, qs=[self.phi])
-        self._spiral_spring = Spring(self.k_t, self.phi, qs=[self.phi])
-        self._force = Force(self.F * self.l, pos1=self.phi)
-        self._spring_1_damping = Damper(self.c, pos1=self.l * self.phi, qs=[self.phi])
-        self._spring_2_damping = Damper(self.c, pos1=self.l * self.phi, qs=[self.phi])
-        self._spiral_spring_damping = Damper(self.c_t, pos1=self.phi, qs=[self.phi])
-
-        components['_bar'] = self.bar
-        components['_upper_spring'] = self._upper_spring
-        components['_lower_spring'] = self._lower_spring
-        components['_spiral_spring'] = self._spiral_spring
-        components['_force'] = self._force
-        components['_spring_1_damping'] = self._spring_1_damping
-        components['_spring_2_damping'] = self._spring_2_damping
-        components['_spiral_spring_damping'] = self._spiral_spring_damping
-
-        return components
-
-    def get_default_data(self):
-
-
-        default_data_dict = {
-            self.c: [self.lam * (self.k)],
-            self.c_t: [self.lam * (self.k_t)],
-        }
-
-        return default_data_dict
-    
-    def dynamic_force(self):
-        data=self._given_data
-        amps=self._fodes_system.steady_solution.as_dict()
-        dyn_force=(self.components['_spiral_spring'].force().subs(amps)).subs(data).expand().doit()
-        
-        return dyn_force
-    
-    def static_force(self):
-        data=self._given_data
-        ans=self.dynamic_force()
-        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
-        return (free_coeff)
-
-    def steady_state(self):
-        return 3 * (S.One / 2 * self.damping_coefficient())**(-1)
-
-    def max_static_force_pin(self):
-        return abs(self.static_load().doit()[0])
-
-    def max_dynamic_force_pin(self):
-        lin_sys = self.linearized()
-
-        dyn_comp = (lin_sys.frequency_response_function() * self.l *
-                    self.k).subs(self._given_data)
-
-        total_force = (dyn_comp + self.max_static_force_pin())
-
-        return total_force
-
-    def static_force_pin_diameter(self):
-        kt = Symbol('k_t', positive=True)
-        Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_static_force_pin()) / (pi * kt * Re))**(1 / 2)
-
-    def dynamic_force_pin_diameter(self):
-        kt = Symbol('k_t', positive=True)
-        Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
 
 
 class LagrangeIBlocksOnInclinedPlane(ComposedSystem):
