@@ -30,7 +30,7 @@ from .trolleys import DDoFTwoNonLinearTrolleys, TrolleysWithSprings, ForcedTroll
 
 from .vehicle import UndampedVehicleSuspension, DampedVehicleSuspension, UndampedSymmetricalVehicleSuspension, QuarterOfVehicle
 from .shaft import SDoFShaft, SDoFShaftHarmonicExcitation, DoubleDiskShaft, DoubleDiskShaftHarmonicExcitation,  DampedDoubleDiskShaftHarmonicExcitation, SDoFDampedShaft
-from .pendulum import Pendulum, PulledPendulum, FreePendulum, KinematicallyExcitedInvertedPendulum, MDoFElasticPendulum, ForcedTriplePendulum, Winch, DDOFCoupledPendulum, DDOFLinearizedCoupledPendulum, InvertedPendulumDDoF, DampedElasticPendulum, LinearizedTriplePendulum, DDoFWinch, DampedMeasuringInstrument
+from .pendulum import Pendulum, PulledPendulum, FreePendulum, KinematicallyExcitedInvertedPendulum, MDoFElasticPendulum, ForcedTriplePendulum, Winch, DDOFCoupledPendulum, DDOFLinearizedCoupledPendulum, InvertedPendulumDDoF, DampedElasticPendulum, LinearizedTriplePendulum, DDoFWinch, DampedMeasuringTool
 
 from .skyscraper import skyscraper
 from .engine import EngineHousing, FreeEngine,  FreeEngineWithConstrains, FreeEngineDDOF, Engine, EngineVerticalSpringGravity,  EngineConstantVelocityVerticalSpringGravity,  EngineConstantWithReactionForce,  DampedEngineVerticalSpringGravity,  DampedEngineConstantVelocityVerticalSpringGravity,  InlineEnginePerpendicularSprings,  NonLinearInlineEnginePerpendicularSpringsGravity,  NonLinearBoxerEnginePerpendicularSprings,  DampedEngine, NonlinearEngine,  StraightNonlinearEngine, EngineWithTMD,  VeeEnginePerpendicularSprings
@@ -42,7 +42,7 @@ from .tmd import TunedMassDamper, TunedMassDamperRelativeMotion
 from .projectile import MissileTrajectoryAirless, MissileTrajectory, MissileTrajectoryAerodynamic
 from .tmac import SDOFWinchSystem, SDOFWinchSystemTest, SDOFDrivetrainVehicleSystem
 
-from .principles import DampedMeasuringTool, KinematicClutchWithSprings, LagrangeIBlocksOnInclinedPlane, MaterialPointMovement
+from .principles import KinematicClutchWithSprings, LagrangeIBlocksOnInclinedPlane, MaterialPointMovement
 
 from .offshore import CompoundSystem, SDOFSemiSubmersiblePlatform, DDOFSemiSubmersiblePlatform
 

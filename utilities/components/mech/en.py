@@ -1280,80 +1280,62 @@ class FundamentalMatrixDynPyCodeComponent(ReportComponent):
 
 class FundamentalMatrixSymPyCodeComponent(ReportComponent):
     
-    #title="Wyznaczanie macierzy fundamentalnej"
     title="Determining fundemental matrix component";
     
     @property
     def header_text(self):
-        #"Z równań ruchu wyznaczono macierz mas i sztywności układu:"
-        # google tlumacz
-        return "The matrix of masses and stiffnesses of the system was determined from the equations of motion:"
+        return "The mass and stiffness matrices of the system were determined from the equations of motion as follows:"
 
-        
     @property
     def body_text(self):
-        #"Macierz fundamentalna, na podstawie której wyznaczono równanie charakterystyczne rozważanego układu ${latex(Delta)}$, przedstawiają się następująco:"
-        # google tlumacz
-        return "The fundamental matrix, on the basis of which the characteristic equation of the considered system ${latex (Delta)}$ was determined, is as follows:"
+
+        return "The fundamental matrix, based on which the characteristic equation of the considered system ${latex(Delta)}$ was determined, is represented as follows:"
     
     @property
     def footer_text(self):
-        #" Macierz fundamentalna pozwala określić rozwiązanie ustalone. Natomiast bazując na równaniu charakterystycznym określa się częstości własne układu."
-        # google tlumacz
-        return "The fundamental matrix allows you to define a fixed solution. On the other hand, based on the characteristic equation, the eigenfrequencies of the system are determined."
-    
+        return "The fundamental matrix allows for determining the steady-state solution. Meanwhile, based on the characteristic equation, one often determines the eigenfrequencies of the system."
     
     def append_elements(self):
         
         system = self._system
-        ReportText.set_directory('./SDAresults')
-
-        latex_store=AutoBreak.latex_backend
-        AutoBreak.latex_backend = latex_store
-        
-        t=system.ivar
-        
 
         dyn_sys=system
         dyn_sys_lin=dyn_sys.linearized()
-        
-        inertia_mat=str(dyn_sys_lin.inertia_matrix())
-        stiffness_mat=str(dyn_sys_lin.stiffness_matrix())
-        fund_mat=str(dyn_sys_lin.fundamental_matrix())
-        delta=str(dyn_sys_lin.fundamental_matrix().det().expand().simplify().simplify().expand())
 
         display(ReportText(self.header_text))
         
         
-        display((SympyFormula(  Eq(Symbol('M'),dyn_sys_lin.inertia_matrix(),evaluate=False) , marker='a' )  ))
+        display((SympyFormula(  Eq(Symbol('M'),dyn_sys_lin.inertia_matrix(),evaluate=False))))
 
-        display((SympyFormula(  Eq(Symbol('K'),dyn_sys_lin.stiffness_matrix(),evaluate=False) , marker='a')  ))
+        display((SympyFormula(  Eq(Symbol('K'),dyn_sys_lin.stiffness_matrix(),evaluate=False))))
 
         Delta = Symbol('\Delta')
 
         display(ReportText(self.body_text))
 
-        display((SympyFormula(  Eq(Symbol('A'),dyn_sys_lin.fundamental_matrix(),evaluate=False) , marker='a'  )  ))
-        display((SympyFormula(  Eq(Delta,dyn_sys_lin.fundamental_matrix().det().expand().simplify().simplify().expand(),evaluate=False) , marker='a',backend=latex  )  ))
+        display((SympyFormula(  Eq(Symbol('A'),dyn_sys_lin.fundamental_matrix(),evaluate=False))))
+        display((SympyFormula(  Eq(Delta,dyn_sys_lin.fundamental_matrix().det().expand().simplify().simplify().expand(),evaluate=False))))
         
-        display(Markdown(f'''
         
-        display((SympyFormula(  Eq(Symbol('M'), {inertia_mat}))))
+        code_list=python(system.fundamental_matrix()).split('\n')
 
-        display((SympyFormula(  Eq(Symbol('K'), {stiffness_mat}))))
+        var_name = 'Fund_mat'
 
-        display((SympyFormula(  Eq(Symbol('A'), {fund_mat}))))
+        code = '\n\n\t'.join(code_list[:-1]) + '\n\n\t' + var_name +code_list[-1][1:]
 
-        Delta = Symbol('\Delta')
+        display(Markdown(
+f'''
 
-        display((SympyFormula(  Eq(Symbol('Delta'), {delta}))))
+    from sympy import *
 
+    {code}
+
+
+    display(Eq(Symbol('Delta'),Fund_mat))
+
+'''))
         
-        '''))
-
         display(ReportText(self.footer_text))
-
-        AutoBreak.latex_backend = latex_store    
     
 # Mateusz
 class GeneralSolutionComponent(ReportComponent):

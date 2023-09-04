@@ -9,7 +9,7 @@ from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
 
 from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin
 from ...continuous import ContinuousSystem, PlaneStressProblem
-from .pendulum import Pendulum
+
 
 
 import base64
@@ -20,6 +20,28 @@ import inspect
 
 import matplotlib.pyplot as plt
 from functools import cached_property, lru_cache
+
+
+REPORT_COMPONENTS_LIST = [
+            mech_comp.TitlePageComponent,
+            mech_comp.SchemeComponent,
+            mech_comp.ExemplaryPictureComponent,
+            mech_comp.KineticEnergyComponent,
+            mech_comp.KineticEnergyDynPyCodeComponent,
+            mech_comp.KineticEnergyDynPyCodeComponent,
+            mech_comp.PotentialEnergyComponent,
+            mech_comp.PotentialEnergyDynPyCodeComponent,
+            mech_comp.PotentialEnergySymPyCodeComponent,
+            mech_comp.LagrangianComponent,
+            mech_comp.GoverningEquationComponent,
+            mech_comp.GoverningEquationDynpyCodeComponent,
+            mech_comp.GoverningEquationSympyCodeComponent,
+            mech_comp.FundamentalMatrixComponent,
+            mech_comp.GeneralSolutionComponent,
+            mech_comp.GeneralSolutionDynpyCodeComponent,
+            mech_comp.GeneralSolutionSympyCodeComponent,
+            mech_comp.SteadySolutionComponent,
+        ]
 
 def plots_no():
     num = 0
@@ -243,24 +265,7 @@ class ComposedSystem(HarmonicOscillator):
     def _report_components(self):
 
         comp_list = [
-            mech_comp.TitlePageComponent,
-            mech_comp.SchemeComponent,
-            mech_comp.ExemplaryPictureComponent,
-            mech_comp.KineticEnergyComponent,
-            mech_comp.KineticEnergyDynPyCodeComponent,
-            mech_comp.KineticEnergyDynPyCodeComponent,
-            mech_comp.PotentialEnergyComponent,
-            mech_comp.PotentialEnergyDynPyCodeComponent,
-            mech_comp.PotentialEnergySymPyCodeComponent,
-            mech_comp.LagrangianComponent,
-            mech_comp.GoverningEquationComponent,
-            mech_comp.GoverningEquationDynpyCodeComponent,
-            mech_comp.GoverningEquationSympyCodeComponent,
-            mech_comp.FundamentalMatrixComponent,
-            mech_comp.GeneralSolutionComponent,
-            mech_comp.GeneralSolutionDynpyCodeComponent,
-            mech_comp.GeneralSolutionSympyCodeComponent,
-            mech_comp.SteadySolutionComponent,
+            *REPORT_COMPONENTS_LIST
         ]
 
         return comp_list
@@ -386,25 +391,8 @@ class NonlinearComposedSystem(ComposedSystem):
     def _report_components(self):
 
         comp_list = [
-            mech_comp.TitlePageComponent,
-            mech_comp.SchemeComponent,
-            mech_comp.ExemplaryPictureComponent,
-            mech_comp.KineticEnergyComponent,
-            mech_comp.KineticEnergyDynPyCodeComponent,
-            mech_comp.KineticEnergyDynPyCodeComponent,
-            mech_comp.PotentialEnergyComponent,
-            mech_comp.PotentialEnergyDynPyCodeComponent,
-            mech_comp.PotentialEnergySymPyCodeComponent,
-            mech_comp.LagrangianComponent,
-            mech_comp.GoverningEquationComponent,
-            mech_comp.GoverningEquationDynpyCodeComponent,
-            mech_comp.GoverningEquationSympyCodeComponent,
-            mech_comp.FundamentalMatrixComponent,
-            mech_comp.GeneralSolutionComponent,
-            mech_comp.GeneralSolutionDynpyCodeComponent,
-            mech_comp.GeneralSolutionSympyCodeComponent,
-            mech_comp.SteadySolutionComponent,
-            ]
+            *REPORT_COMPONENTS_LIST
+        ]
 
         return comp_list
 
