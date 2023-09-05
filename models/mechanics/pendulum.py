@@ -660,7 +660,6 @@ class DampedPendulum(ComposedSystem):
         }
         return self.sym_desc_dict
 
-#TO_DO
 class ExcitedDampedPendulum(ComposedSystem):
 
     scheme_name = 'damped_excited_pendulum.PNG'
@@ -678,11 +677,14 @@ class ExcitedDampedPendulum(ComposedSystem):
                  ivar=Symbol('t'),
                  **kwargs):
         phi = angle
+        self.phi = phi
 
-        if qs == None:
-            qs = [angle]
-        else:
-            qs = qs
+#         if qs == None:
+#             qs = [angle]
+#         else:
+#             qs = qs
+
+        self.qs = [angle]
 
         self.m = m
         self.g = g
@@ -691,12 +693,24 @@ class ExcitedDampedPendulum(ComposedSystem):
         self.F = F
         self.Omega = Omega
 
-        self.Pendulum = Pendulum(m, g, l, angle=phi)
-        self.Damper = Damper(c, l * phi, qs=qs)
-        self.Force = Force(-F * sin(Omega * ivar), pos1=phi, qs=[phi])
-        system = self.Pendulum + self.Damper + self.Force
+        #super().__init__(system, **kwargs)
+        super().__init__(**kwargs)
 
-        super().__init__(system, **kwargs)
+    @property
+    def components(self):
+
+        self.Pendulum = Pendulum(self.m, self.g, self.l, angle=self.phi)
+        self.Damper = Damper(self.c, self.l * self.phi, qs=self.qs)
+        self.Force = Force(-self.F * sin(self.Omega * self.ivar), pos1=self.phi, qs=[self.phi])
+        # system = self.Pendulum + self.Damper + self.Force
+
+        components = {}
+
+        components['Pendulum'] = self.Pendulum
+        components['Damper'] = self.Damper
+        components['Force'] = self.Force
+
+        return components
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -1332,7 +1346,6 @@ class PendulumWithRoller(NonlinearComposedSystem):
         return self.sym_desc_dict
     
     
-#TO_DO    
 class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
     scheme_name = 'three_pendulums_forced.PNG'
     real_name = 'lifting_tandem.png'
@@ -1377,18 +1390,35 @@ class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
         self.g = g
         self.Omega = Omega
         self.F = F
+        self.qs = qs
 
-        self.Pendulum1 = Pendulum(m1, g, l, angle=phi_l, qs=[phi_l]).linearized() + Force(F * l * cos(Omega * ivar), pos1=phi_l, qs=[phi_l])
-        self.Pendulum2 = Pendulum(m2, g, l, angle=phi_c, qs=[phi_c]).linearized()
-        self.Pendulum3 = Pendulum(m3, g, l, angle=phi_r, qs=[phi_r]).linearized() + Force(2* F * l* cos(Omega * ivar), pos1=phi_r, qs=[phi_r])
-        self.Spring1 = Spring(k_1, pos1=(phi_l * (l/2)), pos2=(phi_c * (l/2)), qs=[phi_l, phi_c])
-        self.Spring2 = Spring(k_2, pos1=(phi_c * (l/2)), pos2=(phi_r * (l/2)), qs=[phi_c, phi_r])
-        self.Spring3 = Spring(k_3, pos1=(phi_l * l), pos2=(phi_c * l), qs=[phi_l, phi_c])
-        self.Spring4 = Spring(k_4, pos1=(phi_c * l), pos2=(phi_r * l), qs=[phi_c, phi_r])
+        #super().__init__(system(qs),**kwargs)
+        super().__init__(**kwargs)
 
-        system = self.Pendulum1 + self.Pendulum2 + self.Pendulum3 + self.Spring1 + self.Spring2 + self.Spring3 + self.Spring4
-        super().__init__(system(qs),**kwargs)
+    @property
+    def components(self):
 
+        self.Pendulum1 = Pendulum(self.m1, self.g, self.l, angle=self.phi_l, qs=[self.phi_l]).linearized() + Force(self.F * self.l * cos(self.Omega * self.ivar), pos1=self.phi_l, qs=[self.phi_l])
+        self.Pendulum2 = Pendulum(self.m2, self.g, self.l, angle=self.phi_c, qs=[self.phi_c]).linearized()
+        self.Pendulum3 = Pendulum(self.m3, self.g, self.l, angle=self.phi_r, qs=[self.phi_r]).linearized() + Force(2* self.F * self.l* cos(self.Omega * self.ivar), pos1=self.phi_r, qs=[self.phi_r])
+        self.Spring1 = Spring(self.k_1, pos1=(self.phi_l * (self.l/2)), pos2=(self.phi_c * (self.l/2)), qs=[self.phi_l, self.phi_c])
+        self.Spring2 = Spring(self.k_2, pos1=(self.phi_c * (self.l/2)), pos2=(self.phi_r * (self.l/2)), qs=[self.phi_c, self.phi_r])
+        self.Spring3 = Spring(self.k_3, pos1=(self.phi_l * self.l), pos2=(self.phi_c * self.l), qs=[self.phi_l, self.phi_c])
+        self.Spring4 = Spring(self.k_4, pos1=(self.phi_c * self.l), pos2=(self.phi_r * self.l), qs=[self.phi_c, self.phi_r])
+
+        # system = self.Pendulum1 + self.Pendulum2 + self.Pendulum3 + self.Spring1 + self.Spring2 + self.Spring3 + self.Spring4
+
+        components = {}
+
+        components['Pendulum1'] = self.Pendulum1
+        components['Pendulum2'] = self.Pendulum2
+        components['Pendulum3'] = self.Pendulum3
+        components['Spring1'] = self.Spring1
+        components['Spring2'] = self.Spring2
+        components['Spring3'] = self.Spring3
+        components['Spring4'] = self.Spring4
+
+        return components
 
     def get_default_data(self):
 
