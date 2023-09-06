@@ -1,5 +1,5 @@
 =>PYTHONTEX:SETTINGS#
-version=0.17
+version=0.18
 outputdir=pythontex-files-ddof_damped_shaft
 workingdir=.
 workingdirset=false

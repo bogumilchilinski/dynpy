@@ -1372,9 +1372,10 @@ class GeneralSolutionComponent(ReportComponent):
 
 
         display(ReportText(self.header_text))
-        display((SympyFormula(  Eq(Symbol('X'),HarmonicOscillator(dyn_sys_lin.linearized(
-                                            )).general_solution()[0].n(3),
-                                            evaluate=False) , marker='a',backend=latex  )  ))
+#         display((SympyFormula(  Eq(Symbol('X'),HarmonicOscillator(dyn_sys_lin).general_solution()[0].n(3),
+#                                             evaluate=False) , marker='a',backend=latex  )  ))
+        
+        display((SympyFormula(  Eq(Symbol('X_g'), dyn_sys_lin._ode_system.general_solution.n(3), evaluate=False) , marker='a',backend=latex  )  ))
 
         display(ReportText(self.footer_text))
 
@@ -1399,7 +1400,7 @@ class GeneralSolutionDynpyCodeComponent(ReportComponent):
         dyn_sys=system
         dyn_sys_lin=dyn_sys.linearized()
         display(ReportText(self.header_text))
-        coord=dyn_sys.qs
+        coord=dyn_sys.q
         
         ode=system._ode_system
 
@@ -1451,7 +1452,7 @@ class GeneralSolutionSympyCodeComponent(ReportComponent):
         
         code_ode = '\n\n\t'.join(code_list_ode[:-1]) + '\n\n\t' + var_name +code_list_ode[-1][1:]
 
-        display(ReportText(self.header_text))
+        display(ReportText(self.footer_text))
 
         code_list_dvars=python(system.q).split('\n')
 
@@ -1683,10 +1684,11 @@ class SteadySolutionComponent(ReportComponent):
 
         display(ReportText(self.header_text ))
 
-        display((SympyFormula(  Eq(Symbol('X_s'),
-                            HarmonicOscillator(dyn_sys_lin.linearized(
-                            )).steady_solution()[0].n(3),
-                            evaluate=False) , marker='b',backend=latex  )  ))
+#         display((SympyFormula(  Eq(Symbol('X_s'),
+#                             HarmonicOscillator(dyn_sys_lin).steady_solution()[0].n(3),
+#                             evaluate=False) , marker='b',backend=latex  )  ))
+        
+        display((SympyFormula(  Eq(Symbol('X_s'), dyn_sys_lin._ode_system.steady_solution.n(3), evaluate=False) , marker='b',backend=latex  )  ))
 
         AutoBreak.latex_backend = latex_store
 
