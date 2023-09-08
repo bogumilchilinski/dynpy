@@ -532,7 +532,7 @@ class TrolleyWithPendulum(ComposedSystem):
     g = Symbol('g', positive=True)
     Omega = Symbol('Omega', positive=True)
     F=Symbol('F', positive=True)
-    phi = dynamicsymbols('\\varphi')
+    phi = dynamicsymbols('varphi')
     x = dynamicsymbols('x')
 
     def __init__(self,

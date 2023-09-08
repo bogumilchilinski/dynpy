@@ -19,7 +19,7 @@ import inspect
 from functools import cached_property, lru_cache
 
 
-from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
+from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
 from .disk import RollingDisk, DiskMountingBlock, ForcedNonLinearDisk
 
 
