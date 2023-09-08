@@ -2629,6 +2629,11 @@ class BernoullisODE(FirstOrderODESystem):
         else:
             print ('TypeError: This is not a Bernoulli equation')
             return None
+
+    def solution(self):
+        dvars = self.dvars
+        for n in dsolve(self.odes[0]):    
+            return AnalyticalSolution(dvars, n.rhs)
         
 class LinearODESolution:
 
