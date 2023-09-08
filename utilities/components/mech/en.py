@@ -58,7 +58,7 @@ class TitlePageComponent(Environment):
             
             self.append(Command('vspace',arguments='1cm'))
             
-            self.append(NoEscape(f'{system._label} \n \n'))
+            self.append(NoEscape(f'{system.__class__.__name__} \n \n'))
             
             self.append(Command('vspace',arguments='1cm'))
             

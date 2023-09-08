@@ -17,7 +17,7 @@ import numpy as np
 import inspect
 
 from .pendulum import Pendulum, PendulumKinematicExct
-from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
+from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
 from .tmd import TunedMassDamperRelativeMotion
 from ...utilities.components.mech import en as mech_comp
 
@@ -991,13 +991,7 @@ class ForcedTrolleyWithSpring(ComposedSystem): ### 1 ODE
     def _report_components(self):
         
         comp_list=[
-        mech_comp.TitlePageComponent,
-        mech_comp.SchemeComponent,
-        mech_comp.ExemplaryPictureComponent,
-        mech_comp.KineticEnergyComponent,
-        mech_comp.PotentialEnergyComponent,
-        mech_comp.LagrangianComponent,
-        mech_comp.GoverningEquationComponent,
+        *REPORT_COMPONENTS_LIST
         #mech_comp.FundamentalMatrixComponent,
         #mech_comp.GeneralSolutionComponent,
         #mech_comp.SteadySolutionComponent,

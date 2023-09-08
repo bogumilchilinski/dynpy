@@ -19,7 +19,7 @@ import inspect
 from functools import cached_property, lru_cache
 
 
-from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
+from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
 
 class RollingDisk(ComposedSystem):
     m1 = Symbol('m_1', positive=True)

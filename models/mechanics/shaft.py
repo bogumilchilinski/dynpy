@@ -16,7 +16,7 @@ import IPython as IP
 import numpy as np
 import inspect
 
-from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
+from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
 
     
 class SDoFShaft(ComposedSystem):
@@ -145,16 +145,7 @@ class SDoFShaft(ComposedSystem):
     def _report_components(self):
         
         comp_list=[
-        mech_comp.TitlePageComponent,
-        mech_comp.SchemeComponent,
-        mech_comp.ExemplaryPictureComponent,
-        mech_comp.KineticEnergyComponent,
-        mech_comp.PotentialEnergyComponent,
-        mech_comp.LagrangianComponent,
-        mech_comp.GoverningEquationComponent,
-        mech_comp.FundamentalMatrixComponent,
-        mech_comp.GeneralSolutionComponent,
-        mech_comp.SteadySolutionComponent,
+        *REPORT_COMPONENTS_LIST,
         mech_comp.MaxStaticForce,
         mech_comp.MaxDynamicForce,
         mech_comp.StaticKeyLength,
@@ -488,17 +479,7 @@ class DoubleDiskShaft(ComposedSystem):
     def _report_components(self):
         
         comp_list=[
-        mech_comp.TitlePageComponent,
-        mech_comp.SchemeComponent,
-        mech_comp.ExemplaryPictureComponent,
-        mech_comp.KineticEnergyComponent,
-        mech_comp.PotentialEnergyComponent,
-        mech_comp.LagrangianComponent,
-        mech_comp.GoverningEquationComponent,
-        mech_comp.FundamentalMatrixComponent,
-        #mech_comp.MDoFGeneralSolutionComponent,
-        #mech_comp.MDoFSteadySolutionComponent,
-
+        *REPORT_COMPONENTS_LIST
         ]
 
         return comp_list
@@ -741,17 +722,7 @@ class DoubleDiskShaftHarmonicExcitation(DoubleDiskShaft):
     def _report_components(self):
         
         comp_list=[
-        mech_comp.TitlePageComponent,
-        mech_comp.SchemeComponent,
-        mech_comp.ExemplaryPictureComponent,
-        mech_comp.KineticEnergyComponent,
-        mech_comp.PotentialEnergyComponent,
-        mech_comp.LagrangianComponent,
-        mech_comp.GoverningEquationComponent,
-        mech_comp.FundamentalMatrixComponent,
-        mech_comp.MDoFGeneralSolutionComponent,
-        mech_comp.MDoFSteadySolutionComponent,
-
+        *REPORT_COMPONENTS_LIST
         ]
 
         return comp_list
@@ -972,17 +943,7 @@ class DampedDoubleDiskShaftHarmonicExcitation(DoubleDiskShaftHarmonicExcitation)
     def _report_components(self):
         
         comp_list=[
-        mech_comp.TitlePageComponent,
-        mech_comp.SchemeComponent,
-        mech_comp.ExemplaryPictureComponent,
-        mech_comp.KineticEnergyComponent,
-        mech_comp.PotentialEnergyComponent,
-        mech_comp.LagrangianComponent,
-        mech_comp.GoverningEquationComponent,
-        mech_comp.FundamentalMatrixComponent,
-        mech_comp.MDoFGeneralSolutionComponent,
-        mech_comp.MDoFSteadySolutionComponent,
-
+        *REPORT_COMPONENTS_LIST
         ]
 
         return comp_list

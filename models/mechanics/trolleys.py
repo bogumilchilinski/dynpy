@@ -17,7 +17,7 @@ import numpy as np
 import inspect
 
 from .pendulum import Pendulum, PendulumKinematicExct
-from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
+from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
 from .tmd import TunedMassDamperRelativeMotion
 from ...utilities.components.mech import en as mech_comp
 
@@ -221,15 +221,16 @@ class ForcedTrolleysWithSprings(ComposedSystem): ### 3 ODE
     def _report_components(self):
         
         comp_list=[
-        mech_comp.TitlePageComponent,
-        mech_comp.SchemeComponent,
-        mech_comp.ExemplaryPictureComponent,
-        mech_comp.KineticEnergyComponent,
-        mech_comp.PotentialEnergyComponent,
-        mech_comp.LagrangianComponent,
-        mech_comp.GoverningEquationComponent,
-        mech_comp.FundamentalMatrixComponent,
-        mech_comp.GeneralSolutionComponent,
+        *REPORT_COMPONENTS_LIST,
+#         mech_comp.TitlePageComponent,
+#         mech_comp.SchemeComponent,
+#         mech_comp.ExemplaryPictureComponent,
+#         mech_comp.KineticEnergyComponent,
+#         mech_comp.PotentialEnergyComponent,
+#         mech_comp.LagrangianComponent,
+#         mech_comp.GoverningEquationComponent,
+#         mech_comp.FundamentalMatrixComponent,
+#         mech_comp.GeneralSolutionComponent,
         #mech_comp.SteadySolutionComponent,
         ]
         return comp_list
@@ -522,12 +523,13 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
     def _report_components(self):
         
         comp_list=[
-        mech_comp.TitlePageComponent,
-        mech_comp.SchemeComponent,
-        mech_comp.ExemplaryPictureComponent,
-        mech_comp.KineticEnergyComponent,
-        mech_comp.PotentialEnergyComponent,
-        mech_comp.LagrangianComponent,
+        *REPORT_COMPONENTS_LIST,
+#         mech_comp.TitlePageComponent,
+#         mech_comp.SchemeComponent,
+#         mech_comp.ExemplaryPictureComponent,
+#         mech_comp.KineticEnergyComponent,
+#         mech_comp.PotentialEnergyComponent,
+#         mech_comp.LagrangianComponent,
         mech_comp.RightSpringForceComponent,
         mech_comp.CentralSpringForceComponent
 

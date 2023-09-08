@@ -17,7 +17,7 @@ import IPython as IP
 import numpy as np
 import inspect
 
-from .principles import ComposedSystem, NonlinearComposedSystem,  base_frame, base_origin,cached_property, lru_cache
+from .principles import ComposedSystem, NonlinearComposedSystem,  base_frame, base_origin,cached_property, lru_cache, REPORT_COMPONENTS_LIST
 
 #DONE
 class Pendulum(NonlinearComposedSystem):
@@ -146,17 +146,7 @@ class Pendulum(NonlinearComposedSystem):
     def _report_components(self):
 
         comp_list = [
-            mech_comp.TitlePageComponent,
-            mech_comp.SchemeComponent,
-            mech_comp.ExemplaryPictureComponent,
-            mech_comp.KineticEnergyComponent,
-            mech_comp.PotentialEnergyComponent,
-            mech_comp.LagrangianComponent,
-            #         mech_comp.LinearizationComponent,
-            #         mech_comp.GoverningEquationComponent,
-            #         mech_comp.FundamentalMatrixComponent,
-            #         mech_comp.GeneralSolutionComponent,
-            #         mech_comp.SteadySolutionComponent,
+            *REPORT_COMPONENTS_LIST
         ]
 
         return comp_list
@@ -165,18 +155,7 @@ class Pendulum(NonlinearComposedSystem):
     def _report_components(self):
         
         comp_list=[
-        mech_comp.TitlePageComponent,
-        mech_comp.SchemeComponent,
-        mech_comp.ExemplaryPictureComponent,
-        mech_comp.KineticEnergyComponent,
-        mech_comp.PotentialEnergyComponent,
-        mech_comp.LagrangianComponent,
-        mech_comp.GoverningEquationComponent,
-        #mech_comp.FundamentalMatrixComponent,
-        #mech_comp.GeneralSolutionComponent,
-        #mech_comp.SteadySolutionComponent,
-            
-            
+        *REPORT_COMPONENTS_LIST
         ]
         
         return comp_list
@@ -309,17 +288,7 @@ class PulledPendulum(Pendulum):
     def _report_components(self):
 
         comp_list = [
-            mech_comp.TitlePageComponent,
-            mech_comp.SchemeComponent,
-            mech_comp.ExemplaryPictureComponent,
-            mech_comp.KineticEnergyComponent,
-            mech_comp.PotentialEnergyComponent,
-            mech_comp.LagrangianComponent,
-            #         mech_comp.LinearizationComponent,
-            mech_comp.GoverningEquationComponent,
-            mech_comp.FundamentalMatrixComponent,
-            mech_comp.GeneralSolutionComponent,
-            mech_comp.SteadySolutionComponent,
+            *REPORT_COMPONENTS_LIST
         ]
         return comp_list
 
@@ -884,17 +853,7 @@ class PendulumKinematicExct(ComposedSystem):
     def _report_components(self):
 
         comp_list = [
-            mech_comp.TitlePageComponent,
-            mech_comp.SchemeComponent,
-            mech_comp.ExemplaryPictureComponent,
-            mech_comp.KineticEnergyComponent,
-            mech_comp.PotentialEnergyComponent,
-            mech_comp.LagrangianComponent,
-            #mech_comp.LinearizationComponent,
-            mech_comp.GoverningEquationComponent,
-            mech_comp.FundamentalMatrixComponent,
-            mech_comp.GeneralSolutionComponent,
-            mech_comp.SteadySolutionComponent,
+            *REPORT_COMPONENTS_LIST,
             mech_comp.PendulumLongitudinalForce,
         ]
 
@@ -1066,17 +1025,7 @@ class MDoFElasticPendulum(ComposedSystem):
     def _report_components(self):
 
         comp_list = [
-            mech_comp.TitlePageComponent,
-            mech_comp.SchemeComponent,
-            mech_comp.ExemplaryPictureComponent,
-            mech_comp.KineticEnergyComponent,
-            mech_comp.PotentialEnergyComponent,
-            mech_comp.LagrangianComponent,
-            #         mech_comp.LinearizationComponent,
-            mech_comp.GoverningEquationComponent,
-            mech_comp.FundamentalMatrixComponent,
-            mech_comp.GeneralSolutionComponent,
-            #mech_comp.SteadySolutionComponent,
+            *REPORT_COMPONENTS_LIST
         ]
         return comp_list
     
@@ -2376,17 +2325,7 @@ class InvertedPendulumDDoF(ComposedSystem):
     def _report_components(self):
 
         comp_list = [
-            mech_comp.TitlePageComponent,
-            mech_comp.SchemeComponent,
-            mech_comp.ExemplaryPictureComponent,
-            mech_comp.KineticEnergyComponent,
-            mech_comp.PotentialEnergyComponent,
-            mech_comp.LagrangianComponent,
-            #mech_comp.LinearizationComponent,
-            mech_comp.GoverningEquationComponent,
-            mech_comp.FundamentalMatrixComponent,
-            mech_comp.GeneralSolutionComponent,
-            mech_comp.SteadySolutionComponent,
+            *REPORT_COMPONENTS_LIST,
             mech_comp.PendulumLongitudinalForce,
         ]
 

@@ -28,7 +28,7 @@ REPORT_COMPONENTS_LIST = [
             mech_comp.ExemplaryPictureComponent,
             mech_comp.KineticEnergyComponent,
             mech_comp.KineticEnergyDynPyCodeComponent,
-            mech_comp.KineticEnergyDynPyCodeComponent,
+            mech_comp.KineticEnergySymPyCodeComponent,
             mech_comp.PotentialEnergyComponent,
             mech_comp.PotentialEnergyDynPyCodeComponent,
             mech_comp.PotentialEnergySymPyCodeComponent,
