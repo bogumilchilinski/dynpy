@@ -2580,8 +2580,8 @@ class BernoullisODE(FirstOrderODESystem):
     
 
     
-    def solution(self,ics=None):
-        return self.linearized().solution()
+    # def solution(self,ics=None):
+    #     return self.linearized().solution()
 
 
         
