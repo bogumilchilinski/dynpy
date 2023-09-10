@@ -251,7 +251,9 @@ class EquivalentSDOFGearModel(ComposedSystem):
     F=Symbol('F', positive=True)
     c=Symbol('c',positive=True)
     ivar=Symbol('t')
-    
+    k_var=Symbol('k_var', positive=True)
+    eps=Symbol('epsilon', positive=True)
+    c_var=Symbol('c_var', positive=True)
     
     z=dynamicsymbols('z')
     
@@ -262,32 +264,36 @@ class EquivalentSDOFGearModel(ComposedSystem):
                  z=None,
                  c=None,
                  ivar=None,
+                 k_var=None,
+                 eps=None,
+                 c_var=None,
                  **kwargs):
 
-        
-        
+        if k_var is not None: self.k_var = k_var
+        if eps is not None: self.eps = eps
         if m is not None: self.m = m
         if k is not None: self.k = k
         if F is not None: self.F = F
         if z is not None: self.z = z
         if c is not None: self.c= c
+        if c_var is not None: self.c_var = c_var
         if ivar is not None: self.ivar = ivar
 
         
    
         self.qs = [self.z]
-
         self._init_from_components(**kwargs)
 
     @property
     def components(self):
 
         components = {}
-        
+        self.c_var = self.c*(1+self.eps*sin(2*pi*650*self.ivar) )
+        self.k_var = self.k*(1+self.eps*sin(2*pi*650*self.ivar) )
         self.gear_inertia = MaterialPoint(self.m, self.z, qs=self.qs)
-        self.gear_stiffness = Spring(self.k, self.z, qs=self.qs)
+        self.gear_stiffness = Spring(self.k_var, self.z, qs=self.qs)
         self.force = Force(self.F, self.z, qs=self.qs)
-        self.gear_damping = Damper(self.c, self.z, qs=self.qs)
+        self.gear_damping = Damper(self.c_var, self.z, qs=self.qs)
         
         components['gear_inertia'] = self.gear_inertia
         components['gear_stiffness'] = self.gear_stiffness
