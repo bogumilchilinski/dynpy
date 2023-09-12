@@ -1374,7 +1374,7 @@ class GeneralSolutionComponent(ReportComponent):
         display(ReportText(self.header_text))
 #         display((SympyFormula(  Eq(Symbol('X'),HarmonicOscillator(dyn_sys_lin).general_solution()[0].n(3),
 #                                             evaluate=False) , marker='a',backend=latex  )  ))
-        
+#         display(dyn_sys_lin._eoms)
         display((SympyFormula(  Eq(Symbol('X_g'), dyn_sys_lin._ode_system.general_solution.n(3), evaluate=False) , marker='a',backend=latex  )  ))
 
         display(ReportText(self.footer_text))
@@ -1571,7 +1571,7 @@ class SpringForce(ReportComponent):
 
         display(ReportText(self.middle_text))
         
-        display(SympyFormula( Eq(Symbol('F'),-1*system._left_mount.stiffness*system.steady_solution()[0],evaluate=False)))
+        display(SympyFormula( Eq(Symbol('F'),-1*system._left_mount.stiffness*system._ode_system.steady_solution[0],evaluate=False)))
         
         display(ReportText(self.footer_text))
         
@@ -1803,7 +1803,7 @@ class TensionerForce(ReportComponent):
     @property
     def footer_text(self):
            #"Siła od sprężyny, zwana również siłą naciągu, pojawia sie przy ściskaniu lub rozciaganiu. Siła, która działa jest przeciwnie skierowana do ruch i chce przywrócić do pierwotnego jej położenia. Zależy od sztywności sprężyny k oraz od tego o ile została rozciagnieta bądź skrócona x."
-        return "Spring force, also known as pull force, occurs when compressed or stretched. The force that acts is opposite to the movement and wants to return it to its original position. It depends on the spring stiffness k and how much it is stretched or shortened z."
+        return "Spring g, also known as pull force, occurs when compressed or stretched. The force that acts is opposite to the movement and wants to return it to its original position. It depends on the spring stiffness k and how much it is stretched or shortened z."
 
     def append_elements(self):
 
@@ -2109,6 +2109,154 @@ class CentralSpringForceComponent(ReportComponent):
 
 
         display(ReportText( self.footer_text))
+        
+class FreeVibrationFrequencyComponent(ReportComponent):
+    title = "Natural Frequency"
+
+
+    @property
+    def header_text(self):
+        return " natural frequency is given by the formula:"
+
+    @property
+    def footer_text(self):
+        return "The specific solution is related to the presence of quantities that force motion (vibrations) of the analyzed system."
+
+    def append_elements(self):
+        system = self._system
+        t = system.ivar
+        dyn_sys = system
+        dyn_sys_lin = dyn_sys.linearized()
+
+        display(ReportText(self.header_text))
+
+        # Calculate and display the steady solution
+        char_poly = dyn_sys_lin.fundamental_matrix().det()
+        display(SympyFormula(char_poly))
+
+        omg = Symbol('omega',positive=True)
+
+        # You may want to add more code here to display additional information or perform actions.
+#         display(char_poly.coeff(omg**2))
+#         display(char_poly.coeff(omg**1))
+#         display(char_poly.subs(omg,0))
+
+
+        display(ReportText(f"Natural Frequency in rad per sec (omage0): "))
+#         display(SympyFormula(solve(char_poly,Symbol('omega',positive=True))[0]))
+        eigs = dyn_sys_lin.natural_frequencies()
+
+        display(SympyFormula( eigs ))
+        
+        
+        display(SympyFormula( 2*pi*eigs ))
+        
+        
+        display(SympyFormula( (2*pi*eigs)**-1 ))
+        
+        display(ReportText(self.footer_text))
+        
+class StaticForceComponent(ReportComponent):
+
+    title="Force of the considered element"
+
+    @property
+    def header_text(self):
+        return "Force of the considered element is following:"
+
+    def get_force(self):
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+        
+        return dyn_sys.static_force().doit()
+
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+        force=self.get_force()
+
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('F'),
+                         force), marker=None))
+
+class DynamicForceComponent(StaticForceComponent):
+    def get_force(self):
+        system=self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+        return dyn_sys.dynamic_force().doit()
+    
+class DynamicTensionForceComponent(StaticForceComponent):
+    def get_force(self):
+        system=self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+        return dyn_sys.force_in_cable().doit()
+
+class StaticCableDiameter(ReportComponent):
+    
+    title="Minimum diameter of the cable due to static force"
+
+    @property
+    def header_text(self):
+        return "Minimum diameter of the cable due to static force formula:"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('d'),
+                     dyn_sys.static_cable_diameter().doit() ), marker=None))
+
+class DynamicCableDiameter(ReportComponent):
+    
+    title="Minimum diameter of the cable due to dynamic force"
+
+    @property
+    def header_text(self):
+        return "Minimum diameter of the cable due to dynamic force formula:"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('d'),
+                     dyn_sys.dynamic_cable_diameter().doit() ), marker=None))
+
+class DampedVibrationFrequency(ReportComponent):
+    
+    title="lalalal"
+
+    @property
+    def header_text(self):
+        return "lalalalalalaalalalalallalalalal"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+
+
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('omega_h'),
+                     ((list(dyn_sys()._ode_system.general_solution.atoms(sin))[0].args[0])/dyn_sys.ivar)**2 ), marker=None))
 
 # class SchemeDynPyCodeComponent(ExemplaryPictureComponent):
 #     title="Scheme of the system"

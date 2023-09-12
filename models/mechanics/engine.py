@@ -1195,27 +1195,14 @@ class DampedEngineConstantVelocityVerticalSpringGravity(EngineConstantVelocityVe
 
         return default_data_dict
     
-    #@property
-    #def _report_components(self):
-    #    
-    #    comp_list=[
-    #    mech_comp.TitlePageComponent,
-    #    mech_comp.SchemeComponent,
-    #    mech_comp.ExemplaryPictureComponent,
-    #    mech_comp.KineticEnergyComponent,
-    #    mech_comp.PotentialEnergyComponent,
-    #    mech_comp.LagrangianComponent,
-    #    mech_comp.GoverningEquationComponent,
-    #    mech_comp.FundamentalMatrixComponent,
-    #    mech_comp.GeneralSolutionComponent,
-    #    mech_comp.SteadySolutionComponent,
-    #    mech_comp.SpringForce,
-    #    mech_comp.MaxStaticForce,
-    #    mech_comp.MaxDynamicForce,
-    #    mech_comp.StaticPinDiameter,
-    #    mech_comp.DynamicPinDiameter,
-    #    ]
-    #    return comp_list
+    @property
+    def _report_components(self):
+       
+        comp_list=[
+        *REPORT_COMPONENTS_LIST,
+        DampedVibrationFrequency
+        ]
+        return comp_list
 
 
 ##DONE #DDOF #Mateusz

@@ -41,6 +41,7 @@ REPORT_COMPONENTS_LIST = [
             mech_comp.GeneralSolutionDynpyCodeComponent,
             mech_comp.GeneralSolutionSympyCodeComponent,
             mech_comp.SteadySolutionComponent,
+            mech_comp.FreeVibrationFrequencyComponent
         ]
 
 def plots_no():

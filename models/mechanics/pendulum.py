@@ -150,15 +150,6 @@ class Pendulum(NonlinearComposedSystem):
         ]
 
         return comp_list
-
-    @property
-    def _report_components(self):
-        
-        comp_list=[
-        *REPORT_COMPONENTS_LIST
-        ]
-        
-        return comp_list
     
     
 #DONE
@@ -854,7 +845,9 @@ class PendulumKinematicExct(ComposedSystem):
 
         comp_list = [
             *REPORT_COMPONENTS_LIST,
-            mech_comp.PendulumLongitudinalForce,
+            mech_comp.DynamicTensionForceComponent,
+            mech_comp.StaticCableDiameter,
+            mech_comp.DynamicCableDiameter
         ]
 
         return comp_list

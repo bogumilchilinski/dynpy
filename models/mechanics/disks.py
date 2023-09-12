@@ -36,12 +36,10 @@ class TwoForcedNonLinearDisks(ComposedSystem):
     l=Symbol('l', positive=True)
     l_0=Symbol('l_0', positive=True)
     Omega=Symbol('Omega', positive=True)
-    omg=Symbol('omega', positive=True)
     ivar=Symbol('t')
     xl=dynamicsymbols('x_l')
     xr=dynamicsymbols('x_r')
     x=dynamicsymbols('x')
-    qs=dynamicsymbols('x_l, x_r')
     F_l=Symbol('F_l', positive=True)
     F_r=Symbol('F_r', positive=True)
 
@@ -61,7 +59,6 @@ class TwoForcedNonLinearDisks(ComposedSystem):
                  F_l=None,
                  F_r=None,
                  Omega=None,
-                 omg=None,
                  **kwargs):
 
         if m1 is not None: self.m1=m1

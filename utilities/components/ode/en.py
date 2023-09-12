@@ -572,8 +572,11 @@ class ODEInitComponent(ReportComponent):
     def append_elements(self):
 
         system = self._system
-
-        display(ReportText('Differential equation to initialize class are as follows:'))
+        
+        if len(system.dvars)<2:
+            display(ReportText('Differential equation to initialize class is as follows:'))
+        else:
+            display(ReportText('Differential equations to initialize class are as follows:'))
         for n in system.odes:
             display(SympyFormula( n ))
 
@@ -590,8 +593,9 @@ class ODEInitComponent(ReportComponent):
         code = '\n\n\t'.join(code_list[:-1]) + '\n\n\t' + var_name +code_list[-1][1:]
         dvars=str(system.dvars)
         order=str(system.ode_order)
-
-        display(Markdown('''Code presented below describes all of the symbols needed to construct ordinary differential equation. The `my_eq`, `funcs` and `ode_order` variables store the differential equation, unknown functions and equation order.'''))
+        if len(system.dvars)<2:
+            display(Markdown('''Code presented below describes all of the symbols needed to construct ordinary differential equation. The `my_eq`, `funcs` and `ode_order` variables store the differential equation, unknown functions and equation order.'''))
+        else:display(Markdown('''Code presented below describes all of the symbols needed to construct ordinary differential equations. The `my_eq`, `funcs` and `ode_order` variables store the differential equations, unknown functions and equation order.'''))
         display(Markdown(
 f'''
 
@@ -606,7 +610,10 @@ f'''
     odesys = ODESystem(odes = my_eq, dvars = funcs, ode_order = order)
     display(odesys)
 '''))
-        display(ReportText("After creating our differential equation it can be analysed using ODESystem class. Additionally one has to provide dvars and ode_order arguments. Dvars is the generalized coordinate of the system and ode_order is the order of considered differential equation."))
+        if len(system.dvars)<2:
+            display(ReportText("After creating our differential equation it can be analysed using ODESystem class. Additionally one has to provide dvars and ode_order arguments. Dvars is the generalized coordinate of the system and ode_order is the order of considered differential equation."))
+        else:
+             display(ReportText("After creating our differential equations they can be analysed using ODESystem class. Additionally one has to provide dvars and ode_order arguments. Dvars is the generalized coordinate of the system and ode_order is the order of considered differential equations."))
         display(SympyFormula( system ))
 
         display(ReportText(  self.footer_text   ))
