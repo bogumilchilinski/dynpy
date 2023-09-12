@@ -1803,7 +1803,7 @@ class TensionerForce(ReportComponent):
     @property
     def footer_text(self):
            #"Siła od sprężyny, zwana również siłą naciągu, pojawia sie przy ściskaniu lub rozciaganiu. Siła, która działa jest przeciwnie skierowana do ruch i chce przywrócić do pierwotnego jej położenia. Zależy od sztywności sprężyny k oraz od tego o ile została rozciagnieta bądź skrócona x."
-        return "Spring g, also known as pull force, occurs when compressed or stretched. The force that acts is opposite to the movement and wants to return it to its original position. It depends on the spring stiffness k and how much it is stretched or shortened z."
+        return "Spring force, also known as pull force, occurs when compressed or stretched. The force that acts is opposite to the movement and wants to return it to its original position. It depends on the spring stiffness k and how much it is stretched or shortened z."
 
     def append_elements(self):
 
