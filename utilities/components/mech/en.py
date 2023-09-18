@@ -1150,6 +1150,75 @@ class CriticalPointsComponent(ReportComponent):
 
         display(ReportText(self.footer_text))
 
+class CriticalPointsDynPyCodeComponent(ReportComponent):
+
+    @property
+    def header_text(self):
+        return ('The following piece of code allows calculation of critical points for the given system')
+    
+    @property
+    def footer_text(self):
+        return('Outputs of this code can be used for further calculation of non-linear systems')
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys = system
+
+        display(ReportText(self.header_text))
+        display(Markdown(
+f'''
+    
+    from dynpy.models.mechanics import *
+    from sympy import *
+    
+    dyn_sys = {system.__class__.__name__}()
+    
+    display(dyn_sys._op_points())
+    
+'''))
+       
+        display(ReportText(self.footer_text))
+
+class CriticalPointsSymPyCodeComponent(ReportComponent):
+
+    @property
+    def header_text(self):
+        return ('From the relvant kinematic dependencies the critical points of the system are calculated')
+    
+    @property
+    def footer_text(self):
+        return('Resultant values of generalized coordinates provide static equilibrium of the system')
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+
+        critical_points=str(dyn_sys._op_points())
+
+        display(ReportText(self.header_text))
+
+        code_list=python(system._op_points()).split('\n')
+        
+        var_name = 'critical_points'
+        
+        code = '\n\n\t'.join(code_list[:-1]) + '\n\n\t' + var_name +code_list[-1][1:]
+
+        display(Markdown(
+f'''
+
+    from dynpy.models.mechanics import *
+    from sympy import *
+    
+    {code} 
+    
+    display(critical_points)
+
+'''))
+
+        display(ReportText(self.footer_text))
+
 # Marcel & Monika
 #class FundamentalMatrixComponent(ReportComponent):
 #    
