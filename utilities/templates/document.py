@@ -10,6 +10,7 @@ from pylatex.utils import (#italic,
 class CaseTemplate(Document):
 
     latex_name = 'document'
+    _documentclass = 'report'
     packages = [
                   Package('microtype'),
                   Package('polski',options=['MeX']),
@@ -46,7 +47,7 @@ class CaseTemplate(Document):
     def __init__(self,
                  default_filepath='default_filepath',
                  *,
-                 documentclass='report',
+                 documentclass=None,
                  document_options=None,
                  fontenc='T1',
                  inputenc='utf8',
@@ -59,9 +60,11 @@ class CaseTemplate(Document):
                  geometry_options=None,#['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
                  data=None):
 
+        if documentclass is not None: self._documentclass
+        
         super().__init__(
             default_filepath=default_filepath,
-            documentclass=documentclass,
+            documentclass=self._documentclass,
             document_options=document_options,
             fontenc=fontenc,
             inputenc=inputenc,
@@ -76,7 +79,8 @@ class CaseTemplate(Document):
         )
 
 class Guide(Document):
-    
+
+    _documentclass = 'report'
     latex_name = 'document'
     packages = [
                   Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
@@ -101,7 +105,7 @@ class Guide(Document):
                  default_filepath='default_filepath',
                  title='Basic title',
                  *,
-                 documentclass='report',
+                 documentclass=None,
                  document_options=None,
                  fontenc='T1',
                  inputenc='utf8',
@@ -114,9 +118,11 @@ class Guide(Document):
                  geometry_options=None,#['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
                  data=None):
 
+        if documentclass is not None: self._documentclass
+        
         super().__init__(
             default_filepath=default_filepath,
-            documentclass=documentclass,
+            documentclass=self._documentclass,
             document_options=document_options,
             fontenc=fontenc,
             inputenc=inputenc,
@@ -129,6 +135,7 @@ class Guide(Document):
             geometry_options=geometry_options,
             data=data,
         )
+
 #         label=self.label
         self.title='Mechanical vibration'
         #self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
@@ -317,6 +324,29 @@ class MechanicalCase(Guide):
                   Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
         ]
 
+    
+    
+class CaseStudy(Guide):
+    
+    latex_name = 'document'
+    _documentclass = 'article'
+    packages = [
+                  Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('microtype'),
+                  Package('authoraftertitle'),
+                  Package('polski',options=['MeX']),
+                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('listings'),
+                  Package('titlesec'),
+                  Package('fancyhdr'),
+                  Command('pagestyle', arguments=['fancy']),
+                  Command('fancyhf', arguments=['']),
+                  Command('fancyhead',  arguments=['B. Chiliński'],options=['R']),
+                  Command('fancyhead', arguments=['Studium przypadku, 2023'],options=['L']),
+                  Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
+        ]
+    
+    
 class EngeneeringDrawingGuide(Guide):
     
     latex_name = 'document'
