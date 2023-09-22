@@ -16,7 +16,7 @@ import IPython as IP
 import numpy as np
 import inspect
 
-from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
+from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
 
 
 class BlowerToothedBelt(ComposedSystem):
@@ -136,22 +136,12 @@ class BlowerToothedBelt(ComposedSystem):
     def _report_components(self):
         
         comp_list=[
-        mech_comp.TitlePageComponent,
-        mech_comp.SchemeComponent,
-        mech_comp.ExemplaryPictureComponent,
-        mech_comp.KineticEnergyComponent,
-        mech_comp.PotentialEnergyComponent,
-        mech_comp.LagrangianComponent,
-        mech_comp.GoverningEquationComponent,
-        mech_comp.FundamentalMatrixComponent,
-        mech_comp.GeneralSolutionComponent,
-        mech_comp.SteadySolutionComponent,
+        *REPORT_COMPONENTS_LIST,
         mech_comp.TensionerForce,
         mech_comp.MaxStaticForce,
         mech_comp.MaxDynamicForce,
         mech_comp.StaticPinDiameter,
-        mech_comp.DynamicPinDiameter,
-
+        mech_comp.DynamicPinDiameter
         ]
 
         return comp_list
@@ -329,22 +319,14 @@ class DampedBlowerToothedBelt(BlowerToothedBelt):
     def _report_components(self):
         
         comp_list=[
-        mech_comp.TitlePageComponent,
-        mech_comp.SchemeComponent,
-        mech_comp.ExemplaryPictureComponent,
-        mech_comp.KineticEnergyComponent,
-        mech_comp.PotentialEnergyComponent,
-        mech_comp.LagrangianComponent,
-        mech_comp.GoverningEquationComponent,
-        mech_comp.FundamentalMatrixComponent,
-        mech_comp.GeneralSolutionComponent,
-        mech_comp.SteadySolutionComponent,
+        *REPORT_COMPONENTS_LIST,
         mech_comp.TensionerForce,
         mech_comp.TensionerDamperForce,
         mech_comp.MaxStaticForce,
         mech_comp.MaxDynamicForce,
         mech_comp.StaticPinDiameter,
         mech_comp.DynamicPinDiameter,
+        mech_comp.DampedVibrationFrequency
 
         ]
 

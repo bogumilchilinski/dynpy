@@ -70,18 +70,18 @@ class MissileTrajectoryAirless(ComposedSystem):
         #components['_drag_y'] = self._drag_y
         return components
 
-    def get_default_data(self):
+#     def get_default_data(self):
 
-        m0, c0,= self.m0,self.c0
+#         m0, c0,= self.m0,self.c0
 
-        default_data_dict = {
-            self.m: [m0*no for no in range (1,8)],
+#         default_data_dict = {
+#             self.m: [m0*no for no in range (1,8)],
 
-            self.c: [c0*no for no in range (0.3,1)],
+#             self.c: [c0*no for no in range (0.3,1)],
 
-        }
+#         }
 
-        return default_data_dict
+#         return default_data_dict
 
     @property
     def _report_components(self):

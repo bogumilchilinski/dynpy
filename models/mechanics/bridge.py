@@ -763,6 +763,20 @@ class BeamBridgeTMD(BeamBridge):
         
         return sol_z_tmd[0].subs(self._given_data)
     
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        *REPORT_COMPONENTS_LIST,
+#         mech_comp.FundamentalMatrixComponent,
+#         mech_comp.MDoFGeneralSolutionComponent,
+#         mech_comp.MDoFSteadySolutionComponent,
+        mech_comp.TMDForceComponent
+
+        ]
+
+        return comp_list
+    
 class BeamBridgeDampedTMD(BeamBridge):
 
     scheme_name = 'bridge_tmd_dmp.png'

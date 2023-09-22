@@ -9,7 +9,7 @@ from ..elements import MaterialPoint, Damper, Spring , base_frame, base_origin
 
 
 class Capacitor(Spring):
-    
+
     """
     Model of a Capacitor
 
@@ -17,22 +17,22 @@ class Capacitor(Spring):
     """
     scheme_name = 'spring.png'
     real_name = 'spring.png'
-    
+
     def __init__(self, capacity, q0,  qs=None,ivar=Symbol('t'), frame = base_frame):
         super().__init__(stiffness=1/capacity, pos1=q0, pos2=0,l_0=0 ,  qs=qs,ivar=ivar, frame = frame)
-        
-        
-class Inductor(MaterialPoint):    
+
+
+class Inductor(MaterialPoint):
     """
     Model of a Material point with changing point of mass:
     Creates a material point of an inertial body, after inputing correct values of mass -m and general coordinates, which follows a linear motion.
     """
     scheme_name = 'material_point.png'
     real_name = 'material_point.png'
-    
+
     def __init__(self, inductance, q0 , qs=None, frame=base_frame, ivar=Symbol('t')):
         super().__init__(m=inductance, pos1=q0 , qs=qs, frame=frame, ivar=ivar)
-        
+
 class Resistor(Damper):
     """
     Model of a Material point with changing point of mass:

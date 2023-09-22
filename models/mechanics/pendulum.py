@@ -275,14 +275,6 @@ class PulledPendulum(Pendulum):
         }
         return self.sym_desc_dict
 
-    @property
-    def _report_components(self):
-
-        comp_list = [
-            *REPORT_COMPONENTS_LIST
-        ]
-        return comp_list
-
     def nonlinear_steady_solution(self):
         steady=self._fodes_system.steady_solution
         return steady
@@ -338,6 +330,34 @@ class PulledPendulum(Pendulum):
 
         return force_subs.doit().expand()
     
+    def small_parameter(self):
+        for n in self.approximated()._eoms:
+            t = self.ivar
+            coef = n.coeff((self.angle.diff(t,t)))
+            smallparameter = n.coeff(self.angle**3)/coef
+        return smallparameter
+    
+    def freq_amp_rel(self):
+        A=Symbol('A', positive=True)
+        free_vib_freq=self.natural_frequencies()
+        return free_vib_freq**2+S.Half*3/2*A**2*self.small_parameter()
+    
+    @property
+    def _report_components(self):
+
+        comp_list = [
+            *REPORT_COMPONENTS_LIST,
+            
+            mech_comp.SmallParameterComponent,
+            mech_comp.StaticAndDynamicCableForceComponent,
+            mech_comp.DynamicTensionForceComponent,
+            mech_comp.DynamicCableDiameter,
+            mech_comp.NonlinearSteadySolutionComponent,
+            mech_comp.AmplitudeAndFrequencyRelationComponent
+            
+        ]
+        return comp_list
+
 # wymienić obrazek na taki, gdzie nie ma wymuszenia i symbole na obrazku będą zgodne z tymi w klasie
 
 #DONE
@@ -871,6 +891,15 @@ class KinematicallyExcitedInvertedPendulum(PendulumKinematicExct):
         components['_gravity'] = self._gravity
 
         return components
+    
+    @property
+    def _report_components(self):
+
+        comp_list = [
+        *REPORT_COMPONENTS_LIST,
+        mech_comp.CriticalPointsComponent
+        ]
+        return comp_list
     
     
 class MDoFElasticPendulum(ComposedSystem):

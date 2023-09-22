@@ -2834,6 +2834,9 @@ class Block(Environment,ReportModule):
                 )
             
     def _repr_markdown_(self):
+        
+        self.cls_container.append(self)
+        
         return self.dumps()
 
     def reported(self):

@@ -40,7 +40,7 @@ ix = pd.IndexSlice
 t,f= symbols('t, f')
 
 
-from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
+from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
 #TODO?
 class DampedChair4DOF(ComposedSystem):
 

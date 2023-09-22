@@ -24,7 +24,7 @@ import importlib
 
 from .bridge import BeamStructure, BeamElasticity, BeamBridge, BeamBridgeDamped, BeamBridgeTMD,  BeamBridgeDampedTMD
 from .principles import *
-from .trolley import SpringMassSystem, ForcedSpringMassSystem, SpringDamperMassSystem, SprungTrolley, NonLinearTrolley, TrolleyWithPendulum, DampedTrolleyWithPendulum, ForcedNonLinearTrolley, ForcedTrolleyWithSpring, ForcedDampedTrolleyWithSpring, VariableMassTrolleyWithPendulum, VariableMassTrolleyWithPendulumRayleighDamping, TrolleyWithTMD, VariableMassTrolleyWithPendulumFunction
+from .trolley import SpringMassSystem, ForcedSpringMassSystem, SpringDamperMassSystem, SprungTrolley, NonLinearTrolley, TrolleyWithPendulum, DampedTrolleyWithPendulum, ForcedNonLinearTrolley, ForcedTrolleyWithSpring, VariableMassTrolleyWithPendulum, VariableMassTrolleyWithPendulumRayleighDamping, TrolleyWithTMD, VariableMassTrolleyWithPendulumFunction#, ForcedDampedTrolleyWithSpring
 
 from .trolleys import DDoFTwoNonLinearTrolleys, TrolleysWithSprings, ForcedTrolleysWithSprings, ForcedDampedTrolleysWithSprings, ForcedThreeTrolleysWithSprings, ForcedTrolleysWithNonLinearSprings, ForcedDisconnectedTrolleysWithSprings, ForcedDampedThreeTrolleysWithSprings,ForcedDampedDisconnectedTrolleysWithSprings
 

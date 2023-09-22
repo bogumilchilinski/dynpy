@@ -530,7 +530,13 @@ class DampedVehicleSuspension(UndampedVehicleSuspension):
     def _report_components(self):
         
         comp_list=[
-        *REPORT_COMPONENTS_LIST
+        *REPORT_COMPONENTS_LIST,
+        mech_comp.DampedVibrationFrequency,
+        mech_comp.MaxDynamicForce,
+        mech_comp.DynamicForceComponent,
+        mech_comp.MaxStaticForce,
+        mech_comp.DynamicPinDiameter,
+        mech_comp.DampingMatrixComponent
         ]
         
         return comp_list

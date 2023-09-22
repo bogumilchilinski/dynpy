@@ -150,6 +150,7 @@ class SDoFShaft(ComposedSystem):
         mech_comp.MaxDynamicForce,
         mech_comp.StaticKeyLength,
         mech_comp.DynamicKeyLength,
+        mech_comp.DynamicTorqueComponent
 
         ]
 
@@ -191,6 +192,12 @@ class SDoFShaft(ComposedSystem):
         h = Symbol('h', positive=True)
         return (2 * self.max_dynamic_force()) / (kd * h)
     
+    def dynamic_torque(self):
+        t=self.ivar
+        steady=self._fodes_system.steady_solution[0]
+        torque=steady.diff(t,t)*self.I+self.Ms
+        return torque
+        
 class SDoFShaftHarmonicExcitation(SDoFShaft):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
     =========

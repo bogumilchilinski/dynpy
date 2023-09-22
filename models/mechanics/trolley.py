@@ -668,7 +668,18 @@ class TrolleyWithPendulum(ComposedSystem):
         #display(force_subs.doit().expand())
         return force_subs.doit().expand()
     
-
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        *REPORT_COMPONENTS_LIST,
+        mech_comp.StaticAndDynamicCableForceComponent,
+        mech_comp.StaticCableDiameter,
+        mech_comp.DynamicCableDiameter,
+        mech_comp.DynamicTensionForceComponent
+        ]
+        
+        return comp_list
 
 
 
@@ -1003,7 +1014,7 @@ class ForcedTrolleyWithSpring(ComposedSystem): ### 1 ODE
     
 
 
-class ForcedDampedTrolleyWithSpring(ComposedSystem): ### 2 ODE
+class ForcedFTrolleyWithSpring(ComposedSystem): ### 2 ODE
     
     scheme_name = 'nonlin_trolley.PNG'
     real_name = 'nonlin_trolley_real.PNG'
@@ -1768,8 +1779,12 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
             self.tau: 'dimensionless time',
             self.x: '''trolley's horizontal displacement''',
             self.x.diff(self.ivar): '''trolley's horizontal velocity''',
+            self.x.diff(self.ivar,2): '''trolley's horizontal acceleration''',
             self.phi.diff(self.ivar): '''pendulum's angular velocity''',
+            self.phi.diff(self.ivar,2): '''pendulum's angular acceleration''',
             self.phi: '''pendulum's angular displacement''',
+            self.ivar:'time',
+            self.m_p.diff(self.ivar): 'differentiated mass of the pendulum',
         }
         return self.sym_desc_dict
 

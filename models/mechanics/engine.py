@@ -1200,7 +1200,8 @@ class DampedEngineConstantVelocityVerticalSpringGravity(EngineConstantVelocityVe
        
         comp_list=[
         *REPORT_COMPONENTS_LIST,
-        DampedVibrationFrequency
+        mech_comp.DampedVibrationFrequency,
+        mech_comp.DampedEngineDynamicShearRatioComponent
         ]
         return comp_list
 
@@ -2069,25 +2070,6 @@ class EngineWithTMD(Engine):
 
         return parameters_dict
 
-
-    @property
-    def _report_components(self):
-        
-        comp_list=[
-        *REPORT_COMPONENTS_LIST,
-        mech_comp.FundamentalMatrixComponent,
-        mech_comp.MDoFGeneralSolutionComponent,
-        mech_comp.MDoFSteadySolutionComponent,
-#         mech_comp.SpringForce,
-#         mech_comp.MaxStaticForce,
-#         mech_comp.MaxDynamicForce,
-#         mech_comp.StaticPinDiameter,
-#         mech_comp.DynamicPinDiameter,
-
-        ]
-
-        return comp_list
-
 #     def max_static_force_pin(self):
 
 #         force = self._engine._left_mount.force().subs(self._op_points()[0])
@@ -2112,7 +2094,7 @@ class EngineWithTMD(Engine):
         
         return F_km
     
-    def spring_force_tmd(self):
+    def dynamic_force_TMD(self):
         
         '''This method evaluates dynamic force in spring between tuned mass damper and engine. It works by substituting coordinates in spring force with steady solutions.'''
         
@@ -2136,6 +2118,26 @@ class EngineWithTMD(Engine):
         sol_z_tmd=solve(Eq(coef_z_tmd[0], 0), k_E)
         
         return sol_z_tmd[0]
+    
+
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        *REPORT_COMPONENTS_LIST,
+        mech_comp.FundamentalMatrixComponent,
+        mech_comp.MDoFGeneralSolutionComponent,
+        mech_comp.MDoFSteadySolutionComponent,
+        mech_comp.TMDForceComponent
+#         mech_comp.SpringForce,
+#         mech_comp.MaxStaticForce,
+#         mech_comp.MaxDynamicForce,
+#         mech_comp.StaticPinDiameter,
+#         mech_comp.DynamicPinDiameter,
+
+        ]
+
+        return comp_list
     
 class VeeEnginePerpendicularSprings(ComposedSystem):
     scheme_name = 'vee_engine_perpendicular_springs.png'

@@ -74,11 +74,11 @@ class TitlePageComponent(Environment):
 
             
 ######################### Initial point
+
     
     
 # Damian
 class ExemplaryPictureComponent(ReportComponent):
-    
     title="Example of an real object"
     packages=[Package('float')] 
     @property
@@ -1975,9 +1975,8 @@ class DynamicKeyLength(ReportComponent):
 
         display(SympyFormula( Eq(Symbol('l'),
                      dyn_sys.dynamic_key_length().doit() ), marker=None))
-        
-        
-class PendulumLongitudinalForce(ReportComponent):
+
+class StaticAndDynamicCableForceComponent(ReportComponent):
     
     title="Pendulum's cable longitudinal force value"
 
@@ -1986,12 +1985,8 @@ class PendulumLongitudinalForce(ReportComponent):
         return "Pendulum's cable static force is represented by formula:"
     
     @property
-    def middle_text(self):
-        return "Pendulum's maximum angular velocity has following form:"
-    
-    @property
     def footer_text(self):
-        return "Sum of static force and maximum angular velocity represents pendulum's cable longitudinal force:"
+        return "Pendulum's cable dynamic force is represented by formula:"
     
     def append_elements(self):
 
@@ -2004,17 +1999,30 @@ class PendulumLongitudinalForce(ReportComponent):
         display(SympyFormula( Eq(Symbol('F_s'),
                      dyn_sys.max_static_cable_force().doit() ), marker=None))
         
+        display(ReportText(self.footer_text))
+
+        display(SympyFormula( Eq(Symbol('T'),
+                     dyn_sys.max_dynamic_cable_force().doit() ), marker=None))
+
+        
+class PendulumLongitudinalForce(StaticAndDynamicCableForceComponent):
+    
+    @property
+    def middle_text(self):
+        return "Pendulum's maximum angular velocity has following form:"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+        
         display(ReportText(self.middle_text))
 
         display(SympyFormula( Eq(Eq(dynamicsymbols('varphi_max').diff(dyn_sys.ivar) , Symbol('A_omega'), evaluate=False),
                      dyn_sys.linearized().frequency_response_function() * dyn_sys.Omega, evaluate=False ), marker=None))
         
-        display(ReportText(self.footer_text))
 
-        display(SympyFormula( Eq(Symbol('T'),
-                     dyn_sys.max_dynamic_cable_force().doit() ), marker=None))
-        
-        
 class MDoFGeneralSolutionComponent(ReportComponent):
     #"Rozwiązanie ogólne"
     title="General solution"
@@ -2309,11 +2317,10 @@ class DynamicCableDiameter(ReportComponent):
 
 class DampedVibrationFrequency(ReportComponent):
     
-    title="lalalal"
-
+    title="damped vibration frequency"
     @property
     def header_text(self):
-        return "lalalalalalaalalalalallalalalal"
+        return "damped vibration frequency(omega'h):"
     
     def append_elements(self):
 
@@ -2326,6 +2333,137 @@ class DampedVibrationFrequency(ReportComponent):
 
         display(SympyFormula( Eq(Symbol('omega_h'),
                      ((list(dyn_sys()._ode_system.general_solution.atoms(sin))[0].args[0])/dyn_sys.ivar)**2 ), marker=None))
+
+class DampedEngineDynamicShearRatioComponent(ReportComponent):
+    
+    title="Ratio of undamped and damped dynamic shear force"
+
+    @property
+    def header_text(self):
+        return "Ratio of undamped and damped dynamic shear force is following:"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+        
+        from dynpy.models.mechanics.engine import EngineConstantVelocityVerticalSpringGravity
+        
+        undamped=EngineConstantVelocityVerticalSpringGravity()
+        
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('phi'),
+                     undamped.max_static_force()/dyn_sys.max_static_force()), marker=None))
+
+        
+class DampingMatrixComponent(ReportComponent):
+    title="Damping matrix of the system"
+    
+    @property
+    def header_text(self):
+         return "Damping matrix of the system is following:"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+        
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('C'),
+                     dyn_sys.damping_matrix(), evaluate=False, marker=None)))
+
+class TMDForceComponent(ReportComponent):
+    title="Dynamic force in the system with TMD and without"
+    
+    @property
+    def header_text(self):
+         return "Dynamic force in the system with TMD and without is following:"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+        
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('F_tmd'),
+                     dyn_sys.dynamic_force_TMD(), marker=None)))
+        display(SympyFormula(Eq(Symbol('F'), dyn_sys.dynamic_force(), marker=None)))
+        
+class SmallParameterComponent(ReportComponent):
+    title="Small parameter"
+    
+    @property
+    def header_text(self):
+         return "Small parameter of the system is following:"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+        
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('epsilon'),
+                     dyn_sys.small_parameter(), marker=None)))
+        
+class NonlinearSteadySolutionComponent(ReportComponent):
+    title="Nonlinear Steady Solution"
+    
+    @property
+    def header_text(self):
+         return "Nonlinear steady solution of the system is following:"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+        
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(dyn_sys.qs[0], solve(dyn_sys.frequency_response_function(),a)[2]*sin(dyn_sys.Omega*dyn_sys.ivar), marker=None)))
+        
+class AmplitudeAndFrequencyRelationComponent(ReportComponent):
+    title="Nonlinear Steady Solution"
+    
+    @property
+    def header_text(self):
+         return "Nonlinear steady solution of the system is following:"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+        
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('omega')**2, dyn_sys.freq_amp_rel(), marker=None)))
+        
+class DynamicTorqueComponent(ReportComponent):
+    title="Dynamic Torque"
+    
+    @property
+    def header_text(self):
+         return "Dynamic torque of the system is following:"
+    
+    def append_elements(self):
+
+        system = self._system
+        dyn_sys=system
+        dyn_sys_lin = dyn_sys
+        
+        display(ReportText(self.header_text))
+
+        display(SympyFormula( Eq(Symbol('T_d'), dyn_sys.dynamic_torque(), marker=None)))
+    
 
 # class SchemeDynPyCodeComponent(ExemplaryPictureComponent):
 #     title="Scheme of the system"

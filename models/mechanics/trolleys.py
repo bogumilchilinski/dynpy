@@ -524,14 +524,14 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
         
         comp_list=[
         *REPORT_COMPONENTS_LIST,
-#         mech_comp.TitlePageComponent,
-#         mech_comp.SchemeComponent,
-#         mech_comp.ExemplaryPictureComponent,
-#         mech_comp.KineticEnergyComponent,
-#         mech_comp.PotentialEnergyComponent,
-#         mech_comp.LagrangianComponent,
         mech_comp.RightSpringForceComponent,
-        mech_comp.CentralSpringForceComponent
+        mech_comp.CentralSpringForceComponent,
+        mech_comp.DampedVibrationFrequency,
+        mech_comp.MaxDynamicForce,
+        mech_comp.DynamicForceComponent,
+        mech_comp.MaxStaticForce,
+        mech_comp.DynamicPinDiameter,
+        mech_comp.DampingMatrixComponent
 
         ]
 
