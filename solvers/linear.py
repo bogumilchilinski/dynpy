@@ -754,12 +754,14 @@ class ODESolution(AnalyticalSolution):
         
         return solve(const_eqns,const_list)
     
-    def with_ics(self, ics=None, ivar0=0, sol0=None, dvars_str=None):
-        self._dvars_str = dvars_str
+    def _get_dvars_str(self):
+        return str(type(self.dvars[0]))
+
+    def with_ics(self, ics=None, ivar0=0, sol0=None):
+        self._dvars_str = self._get_dvars_str()
         self.ivar_0 = ivar0
         const_dict=self._calculate_constant(ics, sol0)
        
-        
         return self.subs(const_dict)
     
     def __call__(self,ivar=None,ics=None,params={}):
