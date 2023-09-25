@@ -346,7 +346,7 @@ class ComposedSystem(HarmonicOscillator):
 
         eom = self._eoms[0]
         system = ODESystem(odes=eom,dvars=self.q).as_first_ode_linear_system()
-        Y = list(self.Y) #+ [dependencies_dict.keys()]  # tu nie działa
+        Y = list(self.Y) + list(dependencies_dict.keys())
 
         index = pd.Index(np.linspace(0,100,1000),name=self.ivar)
 

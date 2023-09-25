@@ -1,6 +1,7 @@
-from .systems import ComposedSystem
+from .mechanics.principles import ComposedSystem
 from sympy.physics.mechanics import dynamicsymbols
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, Eq, pi)
+from ..dynamics import HarmonicOscillator
 
 import pint
 ureg = pint.UnitRegistry()
@@ -178,6 +179,7 @@ class TDoFCompensatedPayload(ComposedSystem):
         self.h_eq = h_eq
         self.h_ceq = h_ceq
         self.ivar = ivar
+        self.qs = qs
 
         phi, h, h_c = qs
 
@@ -205,7 +207,7 @@ class TDoFCompensatedPayload(ComposedSystem):
                                  S.Half* k_c * (h + h_eq - (h_c + h_ceq))**2 -
                                  m_p * g * z - m_c * g * z_c)
 
-        super().__init__((self.kinetic_energy - self.potential_energy).subs(positions_dict).doit(),
+        super(HarmonicOscillator,self).__init__((self.kinetic_energy - self.potential_energy).subs(positions_dict).doit(),
                          qs=qs,
                          ivar=ivar,**kwargs)
 
