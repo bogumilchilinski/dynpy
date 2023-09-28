@@ -1,3 +1,5 @@
+#96 DONE
+
 from sympy import (Symbol, symbols, Matrix, sin, cos, asin, diff, sqrt, S,
                    diag, Eq, hessian, Function, flatten, Tuple, im, pi, latex,
                    dsolve, solve, fraction, factorial, Subs, Number, oo, Abs,
@@ -147,28 +149,28 @@ class MissileTrajectory(MissileTrajectoryAirless):
         
         return components
 
-    def get_default_data(self):
+#     def get_default_data(self):
 
-        m0, c0,= self.m0,self.c0
+#         m0, c0,= self.m0,self.c0
 
-        default_data_dict = {
-            self.m: [m0*no for no in range (1,8)],
+#         default_data_dict = {
+#             self.m: [m0*no for no in range (1,8)],
 
-            self.c: [c0*no for no in range (1,8)],
+#             self.c: [c0*no for no in range (1,8)],
 
-        }
+#         }
         
-        return default_data_dict
+#         return default_data_dict
         
-    def get_numerical_data(self):
+#     def get_numerical_data(self):
 
-        default_data_dict = {
-            self.m: [140],
-            self.g: [10],
-            self.c: [0.95],
-        }
+#         default_data_dict = {
+#             self.m: [140],
+#             self.g: [10],
+#             self.c: [0.95],
+#         }
 
-        return default_data_dict
+#         return default_data_dict
 
     
 class MissileTrajectoryAerodynamic(MissileTrajectory):
@@ -227,18 +229,18 @@ class MissileTrajectoryAerodynamic(MissileTrajectory):
 
         return components
 
-    def get_default_data(self):
+#     def get_default_data(self):
 
-        m0, c0,= self.m0,self.c0
+#         m0, c0,= self.m0,self.c0
 
-        default_data_dict = {
-            self.m: [m0*no for no in range (1,8)],
+#         default_data_dict = {
+#             self.m: [m0*no for no in range (1,8)],
 
-            self.c: [c0*no for no in range (1,8)],
+#             self.c: [c0*no for no in range (1,8)],
 
-        }
+#         }
         
-        return default_data_dict
+#         return default_data_dict
         
 #     def get_numerical_data(self):
 
@@ -252,4 +254,4 @@ class MissileTrajectoryAerodynamic(MissileTrajectory):
 #             }
         
 
-        return default_data_dict
+#         return default_data_dict

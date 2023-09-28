@@ -341,11 +341,16 @@ class ComposedSystem(HarmonicOscillator):
         if dependencies_dict is None:
             dependencies_dict = {}
 
-        reference_data = {**self.get_numerical_data()}
+        reference_data = {**self.get_numerical_parameters()}
         display(reference_data)
 
-        eom = self._eoms[0]
-        system = ODESystem(odes=eom,dvars=self.q).as_first_ode_linear_system()
+#        eom = self._eoms[0]
+        #system = ODESystem(odes=eom,dvars=self.q).as_first_ode_linear_system()
+        #system = ODESystem(odes=eom,dvars=self.q,ode_order=2)#.numerized()
+        system = self._ode_system
+        
+        
+        
         Y = list(self.Y) + list(dependencies_dict.keys())
 
         index = pd.Index(np.linspace(0,100,1000),name=self.ivar)
@@ -357,9 +362,10 @@ class ComposedSystem(HarmonicOscillator):
                                                                     coordinates=Y,
                                                                     index=index)
 
-        results_num = df_num.perform_simulations(model_level_name=0,dependencies=dependencies_dict)
-        results = TimeDataFrame(results_num).droplevel(0,axis=1)
-
+        results_num = df_num#.perform_simulations(model_level_name=0,dependencies=dependencies_dict)
+        #results = TimeDataFrame(results_num).droplevel(0,axis=1)
+        results= results_num
+        
         return results
 
 
@@ -596,7 +602,7 @@ class LagrangeIBlocksOnInclinedPlane(ComposedSystem):
         return parameters_dict
 
     
-#TODO
+#TODO  159
 class LagrangeIOnMathFunction(ComposedSystem):
 
     scheme_name = 'mat_point_parabola.PNG'

@@ -398,7 +398,7 @@ class FreePendulum(Pendulum):
     scheme_name = 'free_sdof_pendulum.png'
     real_name = 'pendulum_real.jpg'
 
-
+#152
 class ExcitedPendulum(ComposedSystem):
     """
     Model of a sDoF Excited Pendulum.
@@ -539,7 +539,7 @@ class ExcitedPendulum(ComposedSystem):
             ],
         }
         return default_data_dict
-
+#151
 class DampedPendulum(ComposedSystem):
     """
     Model of a sDoF damped Pendulum.
@@ -639,7 +639,7 @@ class DampedPendulum(ComposedSystem):
             self.c: r'Damping coefficient',
         }
         return self.sym_desc_dict
-
+#150
 class ExcitedDampedPendulum(ComposedSystem):
 
     scheme_name = 'damped_excited_pendulum.PNG'
@@ -701,7 +701,7 @@ class ExcitedDampedPendulum(ComposedSystem):
         }
         return self.sym_desc_dict
 
-#TO_DO
+#DONE 160
 class PendulumKinematicExct(ComposedSystem):
 
     scheme_name = 'kin_exct_pendulum.PNG'
@@ -1316,7 +1316,8 @@ class PendulumWithRoller(NonlinearComposedSystem):
         }
         return self.sym_desc_dict
     
-    
+
+#DONE #128
 class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
     scheme_name = 'three_pendulums_forced.PNG'
     real_name = 'lifting_tandem.png'
@@ -1364,7 +1365,7 @@ class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
         self.qs = qs
 
         #super().__init__(system(qs),**kwargs)
-        super().__init__(**kwargs)
+        self._init_from_components(**kwargs)
 
     @property
     def components(self):
@@ -2106,7 +2107,8 @@ class DDOFLinearizedCoupledPendulum(ComposedSystem):
         }
 
         return default_data_dict
-    #Marcel_k(zmienione na nowy sposób, ale nie wiem czy sprawdzone dokładnie)
+    
+#Marcel_k(zmienione na nowy sposób, ale nie wiem czy sprawdzone dokładnie)
 class DoublePendulum(ComposedSystem):
 
     scheme_name = 'MDOFTriplePendulum.PNG'

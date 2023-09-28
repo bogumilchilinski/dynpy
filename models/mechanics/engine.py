@@ -882,8 +882,7 @@ class EngineConstantWithReactionForce(EngineConstantVelocityVerticalSpringGravit
     
     
     
-
-#TODO #DDOF #DO POPRAWY !!!
+#164 DONE
 class BoxerEnginePerpendicularSprings(Engine):
     scheme_name = 'boxer_engine_perpendicular_springs.png'
     real_name = 'f6c_valkyrie.jpg'
@@ -1704,7 +1703,7 @@ class NonlinearEngine(Engine, NonlinearComposedSystem):
 
     
     
-# DONE
+#DONE
 class StraightNonlinearEngine(NonlinearEngine):
     """
     Model of an exemplary Engine with nonlinear suspension aligned horizontally.
@@ -1773,7 +1772,7 @@ class StraightNonlinearEngine(NonlinearEngine):
         return default_data_dict
 
 
-#TODO #DDOF # DO POPRAWY !!!
+#162 DONE
 class NonLinearVeeEnginePerpendicularSprings(Engine):
     scheme_name = 'nonlin_vee_engine_perpendicular_springs.png'
     real_name = '440_magnum_v8.jpg'

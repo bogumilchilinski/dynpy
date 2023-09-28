@@ -54,25 +54,25 @@ class RollingDisk(ComposedSystem):
 
         components = {}
 
-        self.DiskLin = MaterialPoint(self.m1, self.x, qs=self.qs)
-        self.DiskRot = MaterialPoint(self.m1 / 2 * self.R**2, self.x / self.R, qs=self.qs)
+        self._disk_lin = MaterialPoint(self.m1, self.x, qs=self.qs)
+        self._disk_rot = MaterialPoint(self.m1 / 2 * self.R**2, self.x / self.R, qs=self.qs)
 
 
-        components['_DiskLin'] = self.DiskLin
-        components['_DiskRot'] = self.DiskRot
+        components['_disk_lin'] = self._disk_lin
+        components['_disk_rot'] = self._disk_rot
 
         return components
 
-    def get_default_data(self):
+#     def get_default_data(self):
 
-        m0, l0 = symbols('m_0 l_0', positive=True)
+#         m0, l0 = symbols('m_0 l_0', positive=True)
 
-        default_data_dict = {
-            self.m1: [S.One * m0 * no for no in range(1,20)],
-            self.R: [S.Half * l0 * no for no in range(1,20)],
-        }
+#         default_data_dict = {
+#             self.m1: [S.One * m0 * no for no in range(1,20)],
+#             self.R: [S.Half * l0 * no for no in range(1,20)],
+#         }
 
-        return default_data_dict
+#         return default_data_dict
 
 
 class DiskMountingBlock(ComposedSystem):
@@ -112,41 +112,38 @@ class DiskMountingBlock(ComposedSystem):
 
         components = {}
 
-#         self.DiskLin = MaterialPoint(self.m, self.x, qs=[self.x])
-#         self.DiskRot = MaterialPoint(self.m / 2 * self.R**2, self.x / self.R, qs=[self.x])
-        self.Disk = RollingDisk(m1=self.m, R=self.R, x=self.x, qs=[self.x], ivar=self.ivar)
-        self.DiskInner = MaterialPoint(self.m1, self.x, qs = [self.x])
+        self._disk = RollingDisk(m1=self.m, R=self.R, x=self.x, qs=[self.x], ivar=self.ivar)
+        self._disk_inner = MaterialPoint(self.m1, self.x, qs = [self.x])
 
-#         components['_DiskLin'] = self.DiskLin
-#         components['_DiskRot'] = self.DiskRot
-        components['_Disk'] = self.Disk
-        components['_DiskInner'] = self.DiskInner
+
+        components['_disk'] = self._disk
+        components['_disk_inner'] = self._disk_inner
 
         return components
 
-    def get_default_data(self):
+#     def get_default_data(self):
 
-        m0 = symbols('m_0', positive=True)
+#         m0 = symbols('m_0', positive=True)
 
-        default_data_dict = {
-            self.m1: [S.One * m0 * no for no in range(1,20)],
-        }
+#         default_data_dict = {
+#             self.m1: [S.One * m0 * no for no in range(1,20)],
+#         }
 
-        return default_data_dict
+#         return default_data_dict
 
-    def get_numerical_data(self):
+#     def get_numerical_data(self):
 
-        m0 = symbols('m_0', positive=True)
+#         m0 = symbols('m_0', positive=True)
 
 
-        default_data_dict = {
-            self.m1: [
-                0.5 * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0,
-                7 * m0, 8 * m0, 9 * m0
-            ],
-        }
+#         default_data_dict = {
+#             self.m1: [
+#                 0.5 * m0, 1 * m0, 2 * m0, 3 * m0, 4 * m0, 5 * m0, 6 * m0,
+#                 7 * m0, 8 * m0, 9 * m0
+#             ],
+#         }
 
-        return default_data_dict
+#         return default_data_dict
 
 
 
@@ -188,11 +185,11 @@ class DiskWithNonlinearSpring(NonlinearComposedSystem):
         components = {}
 
         self._disk = RollingDisk(self.m1, self.R, self.x, self.qs, self.ivar)
-        self.spring = Spring(self.kl, pos1=(sqrt(self.x**2 + self.d**2) - self.l_0), qs=self.qs)
+        self._spring = Spring(self.kl, pos1=(sqrt(self.x**2 + self.d**2) - self.l_0), qs=self.qs)
 
 
         components['_disk'] = self._disk
-        components['_spring'] = self.spring
+        components['_spring'] = self._spring
         return components
 
 
@@ -241,11 +238,11 @@ class ForcedDiskWithNonlinearSpring(NonlinearComposedSystem):
         components = {}
 
         self._disk = DiskWithNonlinearSpring(self.m1, self.kl, self.R, self.d, self.l_0, self.x, self.ivar)
-        self.force = Force(self.F * cos(self.Omega * self.ivar), pos1=self.x, qs=self.qs)
+        self._force = Force(self.F * cos(self.Omega * self.ivar), pos1=self.x, qs=self.qs)
 
 
         components['_disk'] = self._disk
-        components['_force'] = self.force
+        components['_force'] = self._force
 
         return components
 

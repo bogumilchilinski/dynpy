@@ -961,12 +961,16 @@ class ODESystem(AnalyticalSolution):
     
     def default_ics(self,critical_point=False):
         
+        
+        
+        ics_init_dict = {coord:0 for coord in self._fode_dvars}
+        
         if isinstance(self._default_ics,dict):
             ics_instance={coord:self._default_ics[coord] for coord in self.dvars if coord in self._default_ics}
             
-            return {**{coord:0 for coord in self.dvars},**ics_instance}
+            return {**ics_init_dict,**ics_instance}
         else:
-            return {coord:0 for coord in self.dvars}
+            return ics_init_dict
     
     def set_simp_deps(self,dependencies,callback=None,inplace=False):
         
