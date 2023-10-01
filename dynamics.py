@@ -53,6 +53,10 @@ base_origin=me.Point('O')
 
 from functools import cached_property, lru_cache
 
+
+import os
+
+
 class GeometryScene:
     """_summary_
     """
@@ -270,16 +274,32 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     real_name = 'engine_real.PNG'
     _default_folder_path = "./dynpy/models/images/"
     
+    _dynpy_path = os.getcwd()
+    _module_path=__file__
+    
     reportclass= ExampleTemplate
     _components = None
     
     ivar = Symbol('t')
 
+    
+    @classmethod
+    def _module_abs_path(cls):
+        abs_path = __file__
+        
+        return abs_path.replace('dynpy/dynamics.py','')
+
+    @classmethod
+    def _images_abs_path(cls):
+        image_path = cls._default_folder_path[2:]
+        
+        return cls._module_abs_path() + image_path
+    
     @classmethod
     def _scheme(cls):
 
-        
-        path = cls._default_folder_path  + cls.scheme_name
+
+        path = cls._images_abs_path()  + cls.scheme_name
 
         return path
 
@@ -290,11 +310,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         Returns:
             str: relative path to picture of real exaample
-                    
+
         """
 
-        path = cls._default_folder_path + cls.real_name
-        
+        path = cls._images_abs_path() + cls.real_name
+
         return path
 
     @classmethod

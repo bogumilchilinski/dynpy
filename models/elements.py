@@ -78,22 +78,22 @@ class Element(LagrangesDynamicSystem):
 
     scheme_name = 'damper.PNG'
     real_name = 'damper.PNG'
-    _default_folder_path = "./dynpy/models/images/"
+    #_default_folder_path = "./dynpy/models/images/"
     
 
     
-    @classmethod
-    def _scheme(cls):
+    # @classmethod
+    # def _scheme(cls):
 
-        path = cls._default_folder_path + cls.scheme_name
-        
-        return path
+    #     path = cls._default_folder_path + cls.scheme_name
 
-    @classmethod
-    def _real_example(cls):
-        path = cls._default_folder_path + cls.real_name
+    #     return path
 
-        return path
+    # @classmethod
+    # def _real_example(cls):
+    #     path = cls._default_folder_path + cls.real_name
+
+    #     return path
     
     @classmethod
     def _detail_real(cls):
@@ -437,166 +437,7 @@ class Spring(Element):
 
         return cls(stiffness=stiffness, pos1=pos1, qs=qs,ivar=ivar, frame = frame)
 
-class EngineMount(Spring):
 
-    """
-    Model of a Engine Mount: Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s),
-    which analytically display the dynamics of displacing spring after cummulating PE.
-    """
-    real_path='buick_regal_3800.jpg'#buick_regal_3800.jpg
-    scheme_name = 'spring.PNG'
-    def pin_diameter(self):
-        #średnica sworznia ze wzoru na ścinanie
-        kt=Symbol('k_t', positive=True)
-        Re=Symbol('R_e', positive=True)
-
-        return sqrt((4*S.One*self.force())/(pi*kt*Re)).doit()
-
-    def pin_force(self):
-
-        return self.force()
-
-    def get_numerical_data(self):
-        self.default_data_dict={
-            self.stiffness: [1e5 * no for no in range(1,8)]
-        }
-        return self.default_data_dict
-    
-    def _plot_2d(self, language='en',*args,**kwargs):
-
-        class_name = self.__class__.__name__
-
-        coords=[(0,0),(0,3),(3,6),(-3,12),(0,15),(0,18)]
-
-        sch_opt=self.scheme_options
-        x_shift,y_shift = 0,0
-        
-        if sch_opt is not None:
-            if 'at' in sch_opt:
-                x_shift,y_shift = sch_opt['at']
-
-        x_span = np.arange(0,21,1)
-
-
-        x_coords = np.sin(x_span*np.pi/2)+x_shift
-        y_coords = (x_span*0.4)+y_shift
-        
-        x_end=x_coords[0]+2
-        y_end=y_coords[0]/2
-
-        #print(y_coords)
-        
-        res = GeometryScene.ax_2d.plot(x_coords,y_coords,label=class_name)
-        res = GeometryScene.ax_2d.plot(x_end,y_end,'*r')
-        res =GeometryScene.ax_2d.text(x_end,y_end,"pin")
-        res =GeometryScene.ax_2d.text(x_end,y_end,'$' + latex(self.stiffness) + '$')
-    
-class DampedEngineMount(EngineMount):
-
-    """
-    Model of a Damped Engine Mount: Creates a singular model, after inputing correct values of stiffeness - k, damping coefficient - c and general coordinate(s),
-    which analytically display the dynamics of displacing spring after cummulating PE and damper after commulating KE.
-    """
-    
-    real_path='buick_regal_3800.jpg' #buick_regal_3800.jpg
-    scheme_name = 'spring.PNG'
-    scheme_name = 'damped_engine_vertical_spring_fy.png'
-    real_name = 'paccar.jpg'
-    detail_scheme_name = 'sruba_pasowana.png'
-    detail_real_name = 'buick_regal_3800.jpg'
-    
-    stiffness = Symbol('k', positive=True)
-    damping_coeff = Symbol('c', positive=True)
-    _pos1 = dynamicsymbols('z')
-    #_pos2 = Symbol('pos_2', positive=True)
-    _pos2 = 0
-    l_s = Symbol('l_s', positive= True)
-    ivar = Symbol('t')
-    
-    def __init__(
-            self,
-            stiffness,
-            damping_coeff,
-            pos1,
-            pos2=0,
-            l_s=None,
-            qs=None,
-            ivar=Symbol('t'),
-            **kwargs):
-
-        if stiffness is not None: self.stiffness = stiffness
-        if damping_coeff is not None:  self.damping_coeff = damping_coeff
-        if pos1 is not None: self._pos1=pos1
-        if pos2 == 0: self._pos2 = 0
-        else: self._pos2 = pos2
-        if qs is not None: self.qs=qs
-        else: self.qs=[self._pos1]
-        if l_s is not None: self.l_s=l_s
-        else:
-            l_s=0
-            self.l_s=l_s
-        self.ivar = ivar
-
-        self._init_from_components(**kwargs)
-
-    @property
-    def components(self):
-
-        components = {}
-        
-        self._engine_mount = EngineMount(self.stiffness, pos1=self.pos1, pos2=self.pos2, l_s=self.l_s, qs=self.qs)(label='Elasticity',scheme_options={'at':(2,4)})
-        self._damper = Damper(self.damping_coeff, pos1=self.pos1, pos2=self.pos2, qs=self.qs)(label='Damping',scheme_options={'at':(-2,4)})
-
-        components['_engine_mount'] = self._engine_mount
-        components['_damper'] = self._damper
-
-        return components
-
-    def force(self):
-        return self._engine_mount.force() + self._damper.force()         #WorkInProgress
-
-    @classmethod 
-    def from_default(cls,
-                stiffness=None,
-                damping_coeff=None,
-                pos1=None,
-                pos2=0,
-                l_s=None,
-                qs=None,
-                ivar=Symbol('t'),
-                 **kwargs):
-
-        return cls(stiffness=stiffness, damping_coeff=damping_coeff, pos1=pos1, pos2=pos2, l_s=l_s, qs=qs,ivar=ivar)
-
-    def _plot_2d(self, language='en',*args,**kwargs):
-
-        class_name = self.__class__.__name__
-
-        coords=[(0,0),(0,3),(3,6),(-3,12),(0,15),(0,18)]
-
-        sch_opt=self.scheme_options
-
-        x_shift,y_shift = 0,0
-
-        if sch_opt is not None:
-            if 'at' in sch_opt:
-                x_shift,y_shift = sch_opt['at']
-
-        x_span = np.arange(0,21,1)
-
-        x_coords = np.sin(x_span*np.pi/2)+x_shift
-        y_coords = (x_span*0.4)+y_shift
-        
-        x_end=x_coords[0]+2
-        y_end=y_coords[0]/2
-
-        #print(y_coords)
-#         for comp in self.components.values():
-#             comp._plot_2d(language=language, *args, **kwargs)
-        res = GeometryScene.ax_2d.plot(x_coords,y_coords,label=class_name)
-        res = GeometryScene.ax_2d.plot(x_end,y_end,'*r')
-        res =GeometryScene.ax_2d.text(x_end,y_end,"pin")
-        res =GeometryScene.ax_2d.text(x_end,y_end,'$' + latex(self.stiffness) + '$')
     
     
 class GravitationalForce(Element):
@@ -754,7 +595,172 @@ class Damper(Element):
             self.c:[c0*no for no in range(1,10)],
         }
         return {**super().get_default_data(),**self.default_data_dict}    
+
+    
+    
+class EngineMount(Spring):
+
+    """
+    Model of a Engine Mount: Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s),
+    which analytically display the dynamics of displacing spring after cummulating PE.
+    """
+    real_path='buick_regal_3800.jpg'#buick_regal_3800.jpg
+    scheme_name = 'spring.PNG'
+    def pin_diameter(self):
+        #średnica sworznia ze wzoru na ścinanie
+        kt=Symbol('k_t', positive=True)
+        Re=Symbol('R_e', positive=True)
+
+        return sqrt((4*S.One*self.force())/(pi*kt*Re)).doit()
+
+    def pin_force(self):
+
+        return self.force()
+
+    def get_numerical_data(self):
+        self.default_data_dict={
+            self.stiffness: [1e5 * no for no in range(1,8)]
+        }
+        return self.default_data_dict
+    
+    def _plot_2d(self, language='en',*args,**kwargs):
+
+        class_name = self.__class__.__name__
+
+        coords=[(0,0),(0,3),(3,6),(-3,12),(0,15),(0,18)]
+
+        sch_opt=self.scheme_options
+        x_shift,y_shift = 0,0
         
+        if sch_opt is not None:
+            if 'at' in sch_opt:
+                x_shift,y_shift = sch_opt['at']
+
+        x_span = np.arange(0,21,1)
+
+
+        x_coords = np.sin(x_span*np.pi/2)+x_shift
+        y_coords = (x_span*0.4)+y_shift
+        
+        x_end=x_coords[0]+2
+        y_end=y_coords[0]/2
+
+        #print(y_coords)
+        
+        res = GeometryScene.ax_2d.plot(x_coords,y_coords,label=class_name)
+        res = GeometryScene.ax_2d.plot(x_end,y_end,'*r')
+        res =GeometryScene.ax_2d.text(x_end,y_end,"pin")
+        res =GeometryScene.ax_2d.text(x_end,y_end,'$' + latex(self.stiffness) + '$')
+    
+class DampedEngineMount(EngineMount):
+
+    """
+    Model of a Damped Engine Mount: Creates a singular model, after inputing correct values of stiffeness - k, damping coefficient - c and general coordinate(s),
+    which analytically display the dynamics of displacing spring after cummulating PE and damper after commulating KE.
+    """
+    
+    real_path='buick_regal_3800.jpg' #buick_regal_3800.jpg
+    scheme_name = 'spring.PNG'
+    scheme_name = 'damped_engine_vertical_spring_fy.png'
+    real_name = 'paccar.jpg'
+    detail_scheme_name = 'sruba_pasowana.png'
+    detail_real_name = 'buick_regal_3800.jpg'
+    
+    stiffness = Symbol('k', positive=True)
+    damping_coeff = Symbol('c', positive=True)
+    _pos1 = dynamicsymbols('z')
+    #_pos2 = Symbol('pos_2', positive=True)
+    _pos2 = 0
+    l_s = Symbol('l_s', positive= True)
+    ivar = Symbol('t')
+    
+    def __init__(
+            self,
+            stiffness,
+            damping_coeff,
+            pos1,
+            pos2=0,
+            l_s=None,
+            qs=None,
+            ivar=Symbol('t'),
+            **kwargs):
+
+        if stiffness is not None: self.stiffness = stiffness
+        if damping_coeff is not None:  self.damping_coeff = damping_coeff
+        if pos1 is not None: self._pos1=pos1
+        if pos2 == 0: self._pos2 = 0
+        else: self._pos2 = pos2
+        if qs is not None: self.qs=qs
+        else: self.qs=[self._pos1]
+        if l_s is not None: self.l_s=l_s
+        else:
+            l_s=0
+            self.l_s=l_s
+        self.ivar = ivar
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+        
+        self._elasticity = EngineMount(self.stiffness, pos1=self.pos1, pos2=self.pos2, l_s=self.l_s, qs=self.qs)(label='Elasticity',scheme_options={'at':(2,4)})
+        self._damping = Damper(self.damping_coeff, pos1=self.pos1, pos2=self.pos2, qs=self.qs)(label='Damping',scheme_options={'at':(-2,4)})
+
+        components['_elasticity'] = self._elasticity
+        components['_damping'] = self._damping
+
+        return components
+
+    def force(self):
+        return self._engine_mount.force() + self._damper.force()         #WorkInProgress
+
+    @classmethod 
+    def from_default(cls,
+                stiffness=None,
+                damping_coeff=None,
+                pos1=None,
+                pos2=0,
+                l_s=None,
+                qs=None,
+                ivar=Symbol('t'),
+                 **kwargs):
+
+        return cls(stiffness=stiffness, damping_coeff=damping_coeff, pos1=pos1, pos2=pos2, l_s=l_s, qs=qs,ivar=ivar)
+
+    def _plot_2d(self, language='en',*args,**kwargs):
+
+        class_name = self.__class__.__name__
+
+        coords=[(0,0),(0,3),(3,6),(-3,12),(0,15),(0,18)]
+
+        sch_opt=self.scheme_options
+
+        x_shift,y_shift = 0,0
+
+        if sch_opt is not None:
+            if 'at' in sch_opt:
+                x_shift,y_shift = sch_opt['at']
+
+        x_span = np.arange(0,21,1)
+
+        x_coords = np.sin(x_span*np.pi/2)+x_shift
+        y_coords = (x_span*0.4)+y_shift
+        
+        x_end=x_coords[0]+2
+        y_end=y_coords[0]/2
+
+        #print(y_coords)
+#         for comp in self.components.values():
+#             comp._plot_2d(language=language, *args, **kwargs)
+        res = GeometryScene.ax_2d.plot(x_coords,y_coords,label=class_name)
+        res = GeometryScene.ax_2d.plot(x_end,y_end,'*r')
+        res =GeometryScene.ax_2d.text(x_end,y_end,"pin")
+        res =GeometryScene.ax_2d.text(x_end,y_end,'$' + latex(self.stiffness) + '$')
+    
+    
+    
 class Excitation(Element):
     """
     Model of a harmonic extorsion applied onto the elemnt:
