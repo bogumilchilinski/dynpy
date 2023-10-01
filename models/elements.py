@@ -437,6 +437,38 @@ class Spring(Element):
 
         return cls(stiffness=stiffness, pos1=pos1, qs=qs,ivar=ivar, frame = frame)
 
+class TorsionalSpring(Spring):
+    """
+    Model of a Spring: Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s),
+    which analytically display the dynamics of displacing spring after cummulating PE.
+    """
+    scheme_name = 'spring.PNG'
+    real_name = 'spring_real.png'
+    
+    stiffness=Symbol('k',positive=True)
+    l_s=Symbol('l_s', positive=True)
+    k0 =Symbol('k_0',positive=True)
+    l0 = Symbol('l_0', positive=True)        
+        
+    def get_default_data(self):
+
+        k0,l0= self.k0,self.l0
+        self.default_data_dict={
+            self.stiffness: [S.One *  k0*l0**2 * no for no in range(2,5)],
+        }
+        #return {**super().get_default_data(),**self.default_data_dict}
+        return {**self.default_data_dict}
+        
+    def get_numerical_data(self):
+
+        self.default_numerical_dict={
+            self.stiffness: [S.One / 100 *  50e3 * no for no in range(80, 135)],
+        }
+        
+        return {**super().get_numerical_data(),**self.default_numerical_dict}    
+
+    
+
 
     
     
@@ -598,6 +630,7 @@ class Damper(Element):
 
     
     
+
 class EngineMount(Spring):
 
     """

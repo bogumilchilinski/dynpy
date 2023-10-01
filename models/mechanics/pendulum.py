@@ -7,7 +7,7 @@ from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
 
-from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin
+from ..elements import MaterialPoint, Spring,TorsionalSpring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin
 from ..mechanics.disk import RollingDisk
 
 
@@ -2788,7 +2788,7 @@ class DDoFWinch(ComposedSystem):
         }
         return self.sym_desc_dict
     
-    
+
     
 class DampedMeasuringTool(ComposedSystem):
 
@@ -2851,7 +2851,7 @@ class DampedMeasuringTool(ComposedSystem):
         self.bar = Pendulum(self.m, g=0, l=self.l, angle=self.phi, ivar=self.ivar)
         self._upper_spring = Spring(self.k, pos1=self.l * self.phi, qs=[self.phi])
         self._lower_spring = Spring(self.k, pos1=self.l * self.phi, qs=[self.phi])
-        self._spiral_spring = Spring(self.k_t, self.phi, qs=[self.phi])
+        self._spiral_spring = TorsionalSpring(self.k_t, self.phi, qs=[self.phi])
         self._force = Force(self.F * self.l, pos1=self.phi)
         self._spring_1_damping = Damper(self.c, pos1=self.l * self.phi, qs=[self.phi])
         self._spring_2_damping = Damper(self.c, pos1=self.l * self.phi, qs=[self.phi])
