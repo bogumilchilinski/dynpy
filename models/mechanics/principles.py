@@ -63,7 +63,7 @@ class ComposedSystem(HarmonicOscillator):
     detail_scheme_name = 'sruba_pasowana.png'
     detail_real_name = 'buick_regal_3800.jpg'
     _default_args = ()
-    _default_folder_path = "./dynpy/models/images/"
+    #_default_folder_path = "./dynpy/models/images/"
     _path = None
 
     z = dynamicsymbols('z')
@@ -75,18 +75,18 @@ class ComposedSystem(HarmonicOscillator):
     ivar=Symbol('t')
 
     
-    @classmethod
-    def _scheme(cls):
+    # @classmethod
+    # def _scheme(cls):
 
-        path = cls._default_folder_path + cls.scheme_name
+    #     path = cls._default_folder_path + cls.scheme_name
 
-        return path
+    #     return path
 
-    @classmethod
-    def _real_example(cls):
-        path = cls._default_folder_path + cls.real_name
+    # @classmethod
+    # def _real_example(cls):
+    #     path = cls._default_folder_path + cls.real_name
 
-        return path
+    #     return path
 
     @classmethod
     def _detail_real(cls):
