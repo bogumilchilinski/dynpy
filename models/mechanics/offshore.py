@@ -22,7 +22,8 @@ from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, bas
 import pint
 ureg = pint.UnitRegistry()
 
-
+#TODO
+#ISSUE #149
 class DDoFVessel(ComposedSystem):
 
     scheme_name = 'vessel.jpg'
@@ -161,6 +162,8 @@ class DDoFVessel(ComposedSystem):
         
         return units_dict    
     
+#TODO
+#ISSUE #150
 class TDoFCompensatedPayload(ComposedSystem):
 
     scheme_name = '3dofs_new.PNG'
