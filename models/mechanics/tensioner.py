@@ -32,7 +32,6 @@ class BlowerToothedBelt(ComposedSystem):
     ivar=Symbol('t')
     Omega=Symbol('Omega', positive=True)
     F=Symbol('F', positive=True)
-    Q=Symbol('Q', positive=True)
     z0 = Symbol('z_0', positive=True)
     z=dynamicsymbols('z')
 
@@ -44,7 +43,6 @@ class BlowerToothedBelt(ComposedSystem):
                  ivar=Symbol('t'),
                  Omega=None,
                  F=None,
-                 Q=None,
                  z0=None,
                  z=None,
                  **kwargs):
@@ -54,12 +52,10 @@ class BlowerToothedBelt(ComposedSystem):
         if k_tensioner is not None: self.k_tensioner = k_tensioner
         if F is not None: self.F = F
         if Omega is not None: self.Omega = Omega
-        if Q is not None: self.Q = Q
         if z is not None: self.z = z
         if ivar is not None: self.ivar = ivar
         if z0 is not None: self.z0 = z0
 
-        self.qs = [self.z]
         self.ivar = ivar
 
         self._init_from_components(**kwargs)
@@ -73,7 +69,7 @@ class BlowerToothedBelt(ComposedSystem):
         self._upper_belt = Spring(self.k_belt, self.z, pos2=0, qs=[self.z])(label = 'Upper belt stiffness')
         self._lower_belt = Spring(self.k_belt, self.z, pos2=0, qs=[self.z])(label = 'Lower belt stiffness')
         self._tensioner = Spring(self.k_tensioner, self.z, pos2=self.z0, qs=[self.z])(label = 'Tensioner stiffness')
-        self._force = Force(self.F * sin(self.Omega * self.ivar), pos1=self.z)(label = 'Force')  # + Force(-self.Q, pos1=self.z)
+        self._force = Force(self.F * sin(self.Omega * self.ivar), pos1=self.z, qs=[self.z])(label = 'Force')
 
 
 
@@ -87,7 +83,7 @@ class BlowerToothedBelt(ComposedSystem):
     def get_default_data(self):
 
 
-        k0, F0 = self.k0, self.F0
+        k0, F0 = symbols('k0 F0', positive=True)
 
         default_data_dict = {
             self.F: [F0, 2 * F0, 3 * F0, 4 * F0, 5 * F0, 6 * F0],
@@ -97,8 +93,6 @@ class BlowerToothedBelt(ComposedSystem):
         return default_data_dict
     
     def get_numerical_data(self):
-
-        m0, k0, F0, Omega0 = self.m0, self.F0, self.k0, self.Omega0
 
         default_data_dict = {
             self.m: [2 * no for no in range(1, 8)],
@@ -202,35 +196,42 @@ class DampedBlowerToothedBelt(BlowerToothedBelt):
     detail_scheme_name = 'blower_roller_bolt.png'
     detail_real_name = 'tensioner_pulley.jpg'
 
+
     c_belt = Symbol('c_b', positive=True)
     c_tensioner = Symbol('c_t', positive=True)
     lam = Symbol('lambda', positive=True)
     z0 = Symbol('z0', positive=True)
-    lam0 = Symbol('lambda_0', positive=True)
 
     def __init__(
             self,
+            m=None,
+            k_belt=None,
+            k_tensioner=None,
+            ivar=Symbol('t'),
+            Omega=None,
+            F=None,
+            z0=None,
+            z=None,
             c_belt=None,
             c_tensioner=None,
             lam=None,
             qs=None,
-            z0=None,
             **kwargs):
         if lam is not None: self.lam = lam
         if c_belt is not None: self.c_belt = c_belt
         if c_tensioner is not None: self.c_tensioner = c_tensioner
         if z0 is not None: self.z0 = z0
+        if qs is not None: self.qs = qs
+        else: self.qs = [self.z]
 
-        self.qs = [self.z]
-
-        self._init_from_components(**kwargs)
+        super().__init__(m=m, k_belt=k_belt, k_tensioner=k_tensioner, ivar=ivar, Omega=Omega, F=F, z0=z0, z=z)
 
     @property
     def components(self):
 
         components = {}
 
-        self._blower_toothed_belt = BlowerToothedBelt(m=self.m, k_belt=self.k_belt, k_tensioner=self.k_tensioner, ivar=self.ivar, Omega=self.Omega, F=self.F, Q=self.Q, z0=self.z0, z=self.z)(label = 'Blower Toothed Belt')
+        self._blower_toothed_belt = BlowerToothedBelt(m=self.m, k_belt=self.k_belt, k_tensioner=self.k_tensioner, ivar=self.ivar, Omega=self.Omega, F=self.F, z0=self.z0, z=self.z)(label = 'Blower Toothed Belt')
         self._upper_belt_damping = Damper(self.c_belt, pos1=self.z, pos2=0, qs=[self.z])(label = 'Upper belt damping')
         self._lower_belt_damping = Damper(self.c_belt, pos1=self.z, pos2=0, qs=[self.z])(label = 'Lower belt damping')
         self._tensioner_damping = Damper(self.c_tensioner, pos1=self.z, pos2=self.z0, qs=[self.z])(label = 'Tensioner damping')
@@ -244,8 +245,6 @@ class DampedBlowerToothedBelt(BlowerToothedBelt):
 
     def get_default_data(self):
 
-        m0, k0, F0, Omega0, lam0, z0 = self.m0, self.k0, self.F0, self.Omega0, self.lam0, self.z0
-
         default_data_dict = {
 
             self.c_belt: [self.lam * (self.k_belt)],
@@ -255,8 +254,6 @@ class DampedBlowerToothedBelt(BlowerToothedBelt):
         return default_data_dict
 
     def get_numerical_data(self):
-
-        m0, k0, F0, Omega0, lam0, z0 = self.m0, self.k0, self.F0, self.Omega0, self.lam0, self.z0
 
         default_data_dict = {
             self.c_belt: [(self.k_belt)*self.lam],
