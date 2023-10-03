@@ -299,7 +299,7 @@ f'''
         display(ReportText( self.footer_text ))
 
 
-#Pati
+#TODO
 class DamperPlot(ExemplaryPictureComponent):
     title="Siła tłumienia"
   

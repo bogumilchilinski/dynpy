@@ -26,158 +26,158 @@ from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, bas
 #TODO
 #ZROBIONA ?? - PRZENIESIONO Z MODUŁU systems.py
 # class SDOFWinchSystem after code refactoring is below this one
-class SDOFWinchSystem(ComposedSystem):
+# class SDOFWinchSystem(ComposedSystem):
 
 
-    scheme_name = 'Winch_System.png'
-    real_name = 'winch_mechanism_real.PNG'
+#     scheme_name = 'Winch_System.png'
+#     real_name = 'winch_mechanism_real.PNG'
 
-    def __init__(self,
-                 I_s=Symbol('I_s', positive=True),
-                 I_k=Symbol('I_k', positive=True),
-                 I_1=Symbol('I_1', positive=True),
-                 i_1=Symbol('i_1', positive=True),
-                 I_2=Symbol('I_2', positive=True),
-                 i_2=Symbol('i_2', positive=True),
-                 I_3=Symbol('I_3', positive=True),
-                 I_4=Symbol('I_4', positive=True),
-                 I_b=Symbol('I_b', positive=True),
-                 A=Symbol('A', positive=True),
-                 B=Symbol('B', positive=True),
-                 ivar=Symbol('t'),
-                 phi=dynamicsymbols('\\varphi'),
-                 dphi=dynamicsymbols('\\varphi',1),
-                 D=Symbol('D', positive=True),
-                 mu=Symbol('\\mu', positive=True),
-                 M_s=Symbol('M_s', positive=True),
-                 M_T=Symbol('M_T', positive=True),
-                 G=Symbol('G', positive=True),
-                 g=Symbol('g',positive=True),
-                 alpha=Symbol('\\alpha'),
-                 **kwargs):
+#     def __init__(self,
+#                  I_s=Symbol('I_s', positive=True),
+#                  I_k=Symbol('I_k', positive=True),
+#                  I_1=Symbol('I_1', positive=True),
+#                  i_1=Symbol('i_1', positive=True),
+#                  I_2=Symbol('I_2', positive=True),
+#                  i_2=Symbol('i_2', positive=True),
+#                  I_3=Symbol('I_3', positive=True),
+#                  I_4=Symbol('I_4', positive=True),
+#                  I_b=Symbol('I_b', positive=True),
+#                  A=Symbol('A', positive=True),
+#                  B=Symbol('B', positive=True),
+#                  ivar=Symbol('t'),
+#                  phi=dynamicsymbols('\\varphi'),
+#                  dphi=dynamicsymbols('\\varphi',1),
+#                  D=Symbol('D', positive=True),
+#                  mu=Symbol('\\mu', positive=True),
+#                  M_s=Symbol('M_s', positive=True),
+#                  M_T=Symbol('M_T', positive=True),
+#                  G=Symbol('G', positive=True),
+#                  g=Symbol('g',positive=True),
+#                  alpha=Symbol('\\alpha'),
+#                  **kwargs):
         
-        pos1=phi
-        qs=[phi]
-        phi_1=phi
-        phi_2=phi_1*i_1
-        phi_3=phi_2*i_2
+#         pos1=phi
+#         qs=[phi]
+#         phi_1=phi
+#         phi_2=phi_1*i_1
+#         phi_3=phi_2*i_2
 
-        self.I_s = I_s
-        self.I_k = I_k
-        self.I_1 = I_1
-        self.i_1 = i_1
-        self.I_2 = I_2
-        self.I_3 = I_3
-        self.i_2 = i_2
-        self.I_4 = I_4
-        self.I_b = I_b
-        self.D = D
-        self.G = G
-        self.g = g
-        self.mu = mu
-        self.M_T = M_T
-        self.M_s = M_s
-        self.phi_1 = phi_1
-        self.phi_2 = phi_2
-        self.phi_3 = phi_3
-        self.alpha = alpha
-        self.A=A
-        self.B=B
-        self.dphi = dphi
+#         self.I_s = I_s
+#         self.I_k = I_k
+#         self.I_1 = I_1
+#         self.i_1 = i_1
+#         self.I_2 = I_2
+#         self.I_3 = I_3
+#         self.i_2 = i_2
+#         self.I_4 = I_4
+#         self.I_b = I_b
+#         self.D = D
+#         self.G = G
+#         self.g = g
+#         self.mu = mu
+#         self.M_T = M_T
+#         self.M_s = M_s
+#         self.phi_1 = phi_1
+#         self.phi_2 = phi_2
+#         self.phi_3 = phi_3
+#         self.alpha = alpha
+#         self.A=A
+#         self.B=B
+#         self.dphi = dphi
 
         
-        self.engine = Disk(I_s, phi_1, qs=qs)
-#         self.disk_k = Disk(I_k, phi_1, qs=qs)
-        self.disk_1 = Disk(I_1, phi_1, qs=qs)
-        self.disk_2 = Disk(I_2, phi_2, qs=qs)
-        self.disk_3 = Disk(I_3, phi_2, qs=qs)
-        self.disk_4 = Disk(I_4, phi_3, qs=qs)
-        self.disk_B = Disk(I_b, phi_3, qs=qs)
-        self.load = MaterialPoint(G/g, pos1=phi_3* D/2, qs=qs)
-        self.friction_comp = GravitationalForce(G/g, g, pos1=phi_3* D/2 * cos(alpha)*mu , qs=qs)
-        self.force = Force(-M_T,pos1=phi_3,qs=qs)
-        self.drive = Force(M_s,pos1=phi_1,qs=qs)
-        self.gravity_comp = GravitationalForce(G/g, g, pos1=phi_3* D/2 * sin(alpha) , qs=qs)
+#         self.engine = Disk(I_s, phi_1, qs=qs)
+# #         self.disk_k = Disk(I_k, phi_1, qs=qs)
+#         self.disk_1 = Disk(I_1, phi_1, qs=qs)
+#         self.disk_2 = Disk(I_2, phi_2, qs=qs)
+#         self.disk_3 = Disk(I_3, phi_2, qs=qs)
+#         self.disk_4 = Disk(I_4, phi_3, qs=qs)
+#         self.disk_B = Disk(I_b, phi_3, qs=qs)
+#         self.load = MaterialPoint(G/g, pos1=phi_3* D/2, qs=qs)
+#         self.friction_comp = GravitationalForce(G/g, g, pos1=phi_3* D/2 * cos(alpha)*mu , qs=qs)
+#         self.force = Force(-M_T,pos1=phi_3,qs=qs)
+#         self.drive = Force(M_s,pos1=phi_1,qs=qs)
+#         self.gravity_comp = GravitationalForce(G/g, g, pos1=phi_3* D/2 * sin(alpha) , qs=qs)
 
-        system = self.engine + self.disk_1 + self.disk_2 + self.disk_3 + self.disk_4 + self.disk_B + self.load + self.friction_comp + self.gravity_comp + self.force + self.drive
+#         system = self.engine + self.disk_1 + self.disk_2 + self.disk_3 + self.disk_4 + self.disk_B + self.load + self.friction_comp + self.gravity_comp + self.force + self.drive
 
-        super().__init__(system,**kwargs)
+#         super().__init__(system,**kwargs)
 
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.I: r'crank moment of inertia',
-            # self.k_beam: r'Beam stiffness',
-            # self.g: r'gravitational field acceleration'
-        }
+#     def symbols_description(self):
+#         self.sym_desc_dict = {
+#             self.I: r'crank moment of inertia',
+#             # self.k_beam: r'Beam stiffness',
+#             # self.g: r'gravitational field acceleration'
+#         }
 
-        return self.sym_desc_dict
+#         return self.sym_desc_dict
 
-    def get_default_data(self):
-        E, I_s,I_k,I_b,I_1,I_2,I_3,I_4,i_1, i_2,D,G,g,mu,M_T,M_s= symbols('E I_s I_k I_b I_1 I_2 I_3 I_4 i_1 i_2 D G g \mu M_T M_s', positive=True)
+#     def get_default_data(self):
+#         E, I_s,I_k,I_b,I_1,I_2,I_3,I_4,i_1, i_2,D,G,g,mu,M_T,M_s= symbols('E I_s I_k I_b I_1 I_2 I_3 I_4 i_1 i_2 D G g \mu M_T M_s', positive=True)
         
-        default_data_dict = {
-            self.I_s: [20,30,40],
-            self.I_k: [20,30,40],
-            self.I_1: [20,30,40],
-            self.I_2: [20,30,40],
-            self.I_3: [20,30,40],
-            self.I_4: [20,30,40],
-            self.I_b: [20,30,40],
-            self.i_1: [20,30,40],
-            self.i_2: [20,30,40],
-            self.D: [10,20,30],
-            self.G: [10,20,30],
-            self.g: [10,20,30],
-            self.mu : [10,20,30],
-            self.M_T : [10,20,30],
-            self.M_s : [10,20,30],
-            self.phi_1: [10,20,30],
-            self.phi_2: [10,20,30],
-            self.phi_3  : [10,20,30],
-            self.alpha  : [10,20,30],
-        }
+#         default_data_dict = {
+#             self.I_s: [20,30,40],
+#             self.I_k: [20,30,40],
+#             self.I_1: [20,30,40],
+#             self.I_2: [20,30,40],
+#             self.I_3: [20,30,40],
+#             self.I_4: [20,30,40],
+#             self.I_b: [20,30,40],
+#             self.i_1: [20,30,40],
+#             self.i_2: [20,30,40],
+#             self.D: [10,20,30],
+#             self.G: [10,20,30],
+#             self.g: [10,20,30],
+#             self.mu : [10,20,30],
+#             self.M_T : [10,20,30],
+#             self.M_s : [10,20,30],
+# #             self.phi_1: [10,20,30],
+# #             self.phi_2: [10,20,30],
+# #             self.phi_3  : [10,20,30],
+#             self.alpha  : [10,20,30],
+#         }
 
-        return default_data_dict
+#         return default_data_dict
         
-    def steady_angular_velocity(self):
-        obj=self
-        eoms_num = N(obj._eoms[0].subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data),3)
-        eom_sol = dsolve(eoms_num, obj.q[0], ics={obj.q[0].subs(obj.ivar, 0): 0, obj.q[0].diff(obj.ivar).subs(obj.ivar, 0): 0})
-        omega_steady_state =  N(eom_sol.rhs.diff(obj.ivar).subs(obj.ivar,oo),3)
-        return omega_steady_state
+#     def steady_angular_velocity(self):
+#         obj=self
+#         eoms_num = N(obj._eoms[0].subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data),3)
+#         eom_sol = dsolve(eoms_num, obj.q[0], ics={obj.q[0].subs(obj.ivar, 0): 0, obj.q[0].diff(obj.ivar).subs(obj.ivar, 0): 0})
+#         omega_steady_state =  N(eom_sol.rhs.diff(obj.ivar).subs(obj.ivar,oo),3)
+#         return omega_steady_state
     
-    def reduced_torque(self):
-        obj=self
+#     def reduced_torque(self):
+#         obj=self
         
-        red_tor = -(obj._eoms[0].doit().subs(obj.M_s,obj.A-obj.B*obj.dphi).subs([(obj.q[0].diff(obj.ivar,obj.ivar),0),(obj.q[0].diff(obj.ivar),0)]))
-        return red_tor
+#         red_tor = -(obj._eoms[0].doit().subs(obj.M_s,obj.A-obj.B*obj.dphi).subs([(obj.q[0].diff(obj.ivar,obj.ivar),0),(obj.q[0].diff(obj.ivar),0)]))
+#         return red_tor
     
-    def delta_1(self):
+#     def delta_1(self):
         
-        obj=self
-        M_Z = obj._eoms[0].doit().subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data).subs([(obj.q[0].diff(obj.ivar,obj.ivar),0),(obj.q[0].diff(obj.ivar),0)])
-        delta_1 = 0.4*(obj.A-Abs(M_Z))/(self.steady_angular_velocity()**2*self.reduced_inertia())
+#         obj=self
+#         M_Z = obj._eoms[0].doit().subs(obj.M_s,obj.A-obj.B*obj.dphi).subs(obj._given_data).subs([(obj.q[0].diff(obj.ivar,obj.ivar),0),(obj.q[0].diff(obj.ivar),0)])
+#         delta_1 = 0.4*(obj.A-Abs(M_Z))/(self.steady_angular_velocity()**2*self.reduced_inertia())
 
-        return delta_1
+#         return delta_1
 
-    def reduced_inertia(self):
-        obj = self
+#     def reduced_inertia(self):
+#         obj = self
         
-        ans = obj.inertia_matrix()[0]
+#         ans = obj.inertia_matrix()[0]
 
-        return ans
+#         return ans
 
-    def flywheel_moment_of_inertia(self):
-        obj=self
-        delta_1=self.delta_1()
-        I_r=self.reduced_inertia()
+#     def flywheel_moment_of_inertia(self):
+#         obj=self
+#         delta_1=self.delta_1()
+#         I_r=self.reduced_inertia()
 
-        ik=((((delta_1/0.02)-1)*I_r).n(5))
-        return ik
-    def startup_mass_velocity(self):
-        obj=self
-        st_val=obj.D/2*obj.phi_3
-        return st_val
+#         ik=((((delta_1/0.02)-1)*I_r).n(5))
+#         return ik
+#     def startup_mass_velocity(self):
+#         obj=self
+#         st_val=obj.D/2*obj.phi_3
+#         return st_val
 
 
 
@@ -332,9 +332,9 @@ class SDOFWinchSystem(ComposedSystem):
             self.mu : [10,20,30],
             self.M_T : [10,20,30],
             self.M_s : [10,20,30],
-            self.phi_1: [10,20,30],
-            self.phi_2: [10,20,30],
-            self.phi_3  : [10,20,30],
+#             self.phi_1: [10,20,30],
+#             self.phi_2: [10,20,30],
+#             self.phi_3  : [10,20,30],
             self.alpha  : [10,20,30],
         }
 

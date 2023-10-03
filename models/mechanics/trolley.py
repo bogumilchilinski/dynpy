@@ -2241,7 +2241,58 @@ class InclinedSpringMassSystem(ComposedSystem):
 
         return self.sym_desc_dict
 
+class DDoFSliderPendulum(TrolleyWithPendulum):
 
+    m_1 = Symbol('m_1',positive=True)    
+    m_2 = Symbol('m_2',positive=True)
+    u_0 = Symbol('u_0',positive=True)
+    omega=Symbol('omega',positive=True)
+    
+
+    
+    m_p = m_2
+    m_t = m_1
+    F = TrolleyWithPendulum.k * u_0
+    
+    Omega = omega
+    
+    
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.g: r'Przyśpieszenie ziemskie',
+            self.omega: r'Częstość wymuszenia',
+            self.k: r'Sztywność',
+            self.u_0: r'Wymuszenie początkowe',
+            self.l: r'Długość belki',
+            self.m_2: r'Masa obciążenia',
+            self.m_1: r'Masa wózka',
+            self.phi: r'Współrzędna uogólniona, kąt obrotu wahadła',
+            self.x: r'Współrzędna uogólniona, przemieszczenie wózka',
+            self.a: r'przyśpieszenie',
+            self.ivar: r'Czas',
+        }
+        return self.sym_desc_dict
+    
+    def unit_dict(self):
+        dyn_sys = self
+        
+        unit_dict = {dyn_sys.phi:ureg.radian,
+              dyn_sys.x:ureg.meter,
+              dyn_sys.g:(ureg.meter / ureg.second**2),
+              dyn_sys.u_0:ureg.meter,
+              dyn_sys.phi:ureg.radian,
+              dyn_sys.k:ureg.newton/ureg.meter,
+              dyn_sys.omega:(ureg.rad / ureg.second**2),
+              dyn_sys.m_1:ureg.kilogram,
+              dyn_sys.m_2:ureg.kilogram,
+              dyn_sys.l_1:ureg.meter,
+              dyn_sys.l_2:ureg.meter,
+              dyn_sys.l:ureg.meter,
+              Symbol('a'):(ureg.meter / ureg.second**2),
+               t:ureg.second,
+               f:ureg.hertz
+             }
+        return unit_dict
 
 
 

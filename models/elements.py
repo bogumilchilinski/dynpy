@@ -260,7 +260,7 @@ class MaterialPoint(Element):
         t=self.ivar
         m0=Symbol('m_0',positive=True)
         self.default_data_dict={
-            self.m:[m0*no for no in range(1,3)],
+            self.m:[m0*no for no in range(1,30)],
         }
         return {**super().get_default_data(),**self.default_data_dict}
     
