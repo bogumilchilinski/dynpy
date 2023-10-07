@@ -1301,7 +1301,7 @@ class ODESystem(AnalyticalSolution):
             return print('False')
 
 
-    def numerized(self,parameters={},ic_list=[],**kwrags):
+    def numerized(self,parameters={},ic_list=[],backend='fortran',**kwrags):
         '''
         Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
         '''
@@ -1309,7 +1309,7 @@ class ODESystem(AnalyticalSolution):
         
         ode=self.as_first_ode_linear_system()
         
-        return OdeComputationalCase(odes_system=ode.rhs,ivar=ode.ivar,dvars=ode.dvars,params= parameters)
+        return OdeComputationalCase(odes_system=ode.rhs,ivar=ode.ivar,dvars=ode.dvars,params= parameters,backend=backend)
     
     # def numerized(self,parameters={},ic_list=[]):
     #     '''

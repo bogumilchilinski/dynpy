@@ -1,7 +1,7 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, asin, diff, sqrt, S,
                    diag, Eq, hessian, Function, flatten, Tuple, im, pi, latex,
                    dsolve, solve, fraction, factorial, Subs, Number, oo, Abs,
-                   N, solveset, atan)
+                   N, solveset, atan,Heaviside)
 
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
@@ -250,6 +250,7 @@ class EquivalentSDOFGearModel(ComposedSystem):
     k=Symbol('k', positive=True)
     F=Symbol('F', positive=True)
     c=Symbol('c',positive=True)
+    T=Symbol('T',positive=True)
     ivar=Symbol('t')
     k_var=Symbol('k_var', positive=True)
     eps=Symbol('epsilon', positive=True)
@@ -263,6 +264,7 @@ class EquivalentSDOFGearModel(ComposedSystem):
                  F=None,
                  z=None,
                  c=None,
+                 T=None,
                  ivar=None,
                  k_var=None,
                  eps=None,
@@ -276,6 +278,7 @@ class EquivalentSDOFGearModel(ComposedSystem):
         if F is not None: self.F = F
         if z is not None: self.z = z
         if c is not None: self.c= c
+        if T is not None: self.T= T
         if c_var is not None: self.c_var = c_var
         if ivar is not None: self.ivar = ivar
 
@@ -288,8 +291,8 @@ class EquivalentSDOFGearModel(ComposedSystem):
     def components(self):
 
         components = {}
-        self.c_var = self.c*(1+self.eps*sin(2*pi*650*self.ivar) )
-        self.k_var = self.k*(1+self.eps*sin(2*pi*650*self.ivar) )
+        self.c_var = self.c*(1+0*self.eps*Heaviside(sin(2*pi/self.T*self.ivar)) )
+        self.k_var = self.k*(1+self.eps*Heaviside(sin(2*pi/self.T*self.ivar)) )
         self.gear_inertia = MaterialPoint(self.m, self.z, qs=self.qs)
         self.gear_stiffness = Spring(self.k_var, self.z, qs=self.qs)
         self.force = Force(self.F, self.z, qs=self.qs)
