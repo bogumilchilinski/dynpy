@@ -395,7 +395,7 @@ class DampedVehicleSuspension(UndampedVehicleSuspension):
 
         self.qs = [self.phi,self.z]
 
-        super().__init__(m=m,I=I, l_rod= l_rod,l_r=l_r,k_r=k_r,k_l=k_l, F_engine= F_engine,z=z,l_l=l_l,ivar=ivar,**kwargs)
+        self._init_from_components(**kwargs)
 
 
     @cached_property

@@ -399,6 +399,7 @@ class FreePendulum(Pendulum):
     real_name = 'pendulum_real.jpg'
 
 #152
+#ISSUE #152
 class ExcitedPendulum(ComposedSystem):
     """
     Model of a sDoF Excited Pendulum.
@@ -639,7 +640,7 @@ class DampedPendulum(ComposedSystem):
             self.c: r'Damping coefficient',
         }
         return self.sym_desc_dict
-#150
+
 class ExcitedDampedPendulum(ComposedSystem):
 
     scheme_name = 'damped_excited_pendulum.PNG'
@@ -674,7 +675,7 @@ class ExcitedDampedPendulum(ComposedSystem):
         self.Omega = Omega
 
         #super().__init__(system, **kwargs)
-        super().__init__(**kwargs)
+        self._init_from_components(**kwargs)
 
     @property
     def components(self):
@@ -702,6 +703,7 @@ class ExcitedDampedPendulum(ComposedSystem):
         return self.sym_desc_dict
 
 #DONE 160
+#ISSUE #160
 class PendulumKinematicExct(ComposedSystem):
 
     scheme_name = 'kin_exct_pendulum.PNG'
@@ -1318,6 +1320,7 @@ class PendulumWithRoller(NonlinearComposedSystem):
     
 
 #DONE #128
+#ISSUE #128
 class MDoFLinearizedThreePendulumsWithSprings(ComposedSystem):
     scheme_name = 'three_pendulums_forced.PNG'
     real_name = 'lifting_tandem.png'

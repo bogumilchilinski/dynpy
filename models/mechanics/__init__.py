@@ -30,12 +30,12 @@ from .trolleys import DDoFTwoNonLinearTrolleys, TrolleysWithSprings, ForcedTroll
 
 from .vehicle import UndampedVehicleSuspension, DampedVehicleSuspension, UndampedSymmetricalVehicleSuspension, QuarterOfVehicle
 from .shaft import SDoFShaft, SDoFShaftHarmonicExcitation, DoubleDiskShaft, DoubleDiskShaftHarmonicExcitation,  DampedDoubleDiskShaftHarmonicExcitation, SDoFDampedShaft
-from .pendulum import Pendulum, PulledPendulum, FreePendulum, KinematicallyExcitedInvertedPendulum, MDoFElasticPendulum, ForcedTriplePendulum, Winch, DDOFCoupledPendulum, DDOFLinearizedCoupledPendulum, InvertedPendulumDDoF, DampedElasticPendulum, LinearizedTriplePendulum, DDoFWinch, DampedMeasuringTool
+from .pendulum import Pendulum, PulledPendulum, FreePendulum, KinematicallyExcitedInvertedPendulum, MDoFElasticPendulum, ForcedTriplePendulum, Winch, DDOFCoupledPendulum, DDOFLinearizedCoupledPendulum, InvertedPendulumDDoF, DampedElasticPendulum, LinearizedTriplePendulum, DDoFWinch, DampedMeasuringTool, ExcitedDampedPendulum, DampedPendulum, ExcitedPendulum, MDoFLinearizedThreePendulumsWithSprings, PendulumKinematicExct
 
 from .skyscraper import skyscraper
 from .engine import EngineHousing, FreeEngine,  FreeEngineWithConstrains, FreeEngineDDOF, Engine, EngineVerticalSpringGravity,  EngineConstantVelocityVerticalSpringGravity,  EngineConstantWithReactionForce,  DampedEngineVerticalSpringGravity,  DampedEngineConstantVelocityVerticalSpringGravity,  InlineEnginePerpendicularSprings,  NonLinearInlineEnginePerpendicularSpringsGravity,  NonLinearBoxerEnginePerpendicularSprings,  DampedEngine, NonlinearEngine,  StraightNonlinearEngine, EngineWithTMD,  VeeEnginePerpendicularSprings, BoxerEnginePerpendicularSprings, NonLinearVeeEnginePerpendicularSprings
 from .disk import ForcedNonLinearDisk, ForcedNonLinearDiskSpring
-from .disks import TwoForcedNonLinearDisks, TwoDisksWithThreeSprings, ForcedDisksWithSerialSprings, ForcedDisksWithParallelSprings, MDoFForcedSimpleDisksWithSerialSprings, MDoFForcedSimpleDisksWithParallelSprings
+from .disks import TwoForcedNonLinearDisks, TwoDisksWithThreeSprings, ForcedDisksWithSerialSprings, ForcedDisksWithParallelSprings, MDoFForcedSimpleDisksWithSerialSprings, MDoFForcedSimpleDisksWithParallelSprings, MDoFForcedDisksWithParallelSprings
 from .tensioner import BlowerToothedBelt, DampedBlowerToothedBelt
 from .tmd import TunedMassDamper, TunedMassDamperRelativeMotion
 
@@ -46,7 +46,7 @@ from .principles import KinematicClutchWithSprings, LagrangeIBlocksOnInclinedPla
 
 from .offshore import CompoundSystem, SDOFSemiSubmersiblePlatform, DDOFSemiSubmersiblePlatform
 
-#from .car import CarMovementPIDAdjust, GearboxEngine, CarMovementRegulatedThrottleACC, CarMovementRegulatedThrottle, CarMovementAdjustableThrottle, OwnCombustionEngine, SecondGearCarMovement, ThirdGearCarMovement, FourthGearCarMovement, FifthGearCarMovement, CarMovementConstantThrottle
+from .car import CarMovementPIDAdjust, GearboxEngine, CarMovementRegulatedThrottleACC, CarMovementRegulatedThrottle, CarMovementAdjustableThrottle, OwnCombustionEngine, SecondGearCarMovement, ThirdGearCarMovement, FourthGearCarMovement, FifthGearCarMovement, CarMovementConstantThrottle
 
 #from .motorcoach import FourDOFTrolleySuspension, DDOFTrolleySuspension2
 #TODO
@@ -56,10 +56,8 @@ from .offshore import CompoundSystem, SDOFSemiSubmersiblePlatform, DDOFSemiSubme
 
 
 #TODO
-#from .disks import ForcedDisksWithParallelSprings2, MDoFForcedDisksWithParallelSprings
 #from .engine import #163,#162 (TODO)
 #from .motorcoach import FourDOFTrolleySuspension, DDOFTrolleySuspension, DDOFTrolleySuspension2
-#from .pendulum import ExcitedPendulum, DampedPendulum, ExcitedDampedPendulum, MDoFLinearizedThreePendulumsWithSprings, PendulumKinematicExct
 #from .principles import  LagrangeIOnMathFunction
 #from .shaft import TripleShaft
 #prosta zmiana
