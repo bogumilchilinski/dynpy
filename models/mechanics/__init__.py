@@ -62,7 +62,7 @@ from .offshore import CompoundSystem, SDOFSemiSubmersiblePlatform, DDOFSemiSubme
 #from .pendulum import ExcitedPendulum, DampedPendulum, ExcitedDampedPendulum, MDoFLinearizedThreePendulumsWithSprings, PendulumKinematicExct
 #from .principles import  LagrangeIOnMathFunction
 #from .shaft import TripleShaft
-
+#prosta zmiana
 #from .trolleys import DampedTrolleysWithSprings, DampedTrolleysWithSprings, ForcedTrolleysWithSprings, MDoFForcedTrolleysWithSprings, MDoFDampedTrolleysWithSprings, DoubleTrolleyWithNonlinearSprings, DoubleTrolleyDifferentWheels, MDoFDoubleTrolleyWithNonlinearSprings, SDoFDoubleTrolleyDifferentWheels, MDoFDoubleTrolleyDifferentWheels, MDoFTMD 
 #from .vehicle import DampedSymmetricalVehicleSuspension, SimplifySuspension
 
