@@ -313,14 +313,14 @@ class UndampedSymmetricalVehicleSuspension(UndampedVehicleSuspension):
         components = {}
 
         self._body = RigidBody2D(self.m, self.I, pos_lin=self.z, pos_rot=self.phi, qs=self.qs)(label='rod')
-        self._spring_l = Spring(self.k_l, pos1=self.z + self.phi * self.l_l, qs=self.qs)(label='left spring')
-        self._spring_r = Spring(self.k_r, pos1=self.z - self.phi * self.l_r, qs=self.qs)(label='right spring')
+        self._left_mount = Spring(self.k_l, pos1=self.z + self.phi * self.l_l, qs=self.qs)(label='left spring')
+        self._right_mount = Spring(self.k_r, pos1=self.z - self.phi * self.l_r, qs=self.qs)(label='right spring')
         self._force = Force(self.F_engine*cos(self.Omega*self.ivar), pos1=self.z - self.l_r * self.phi, qs=self.qs)(label='force')
         self._static_force = Force(self.F_engine, pos1=self.z - self.l_r * self.phi, qs=self.qs)(label='force')
 
         components['_body'] = self._body
-        components['_spring_l'] = self._spring_l
-        components['_spring_r'] = self._spring_r
+        components['_left_mount'] = self._left_mount
+        components['_right_monut'] = self._right_mount
         components['_force'] = self._force
         components['_static_force'] = self._static_force
 
