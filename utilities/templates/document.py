@@ -618,7 +618,7 @@ class DGBeamer(Document):
     latex_name = 'document'
     packages = [
                   Package('microtype'),
-                  Package('english',options=['MeX']),
+                  #Package('english',options=['MeX']),
                   #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
                   Package('listings'),
                   #Package('titlesec'),
