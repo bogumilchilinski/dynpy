@@ -60,7 +60,6 @@ from .car import CarMovementPIDAdjust, GearboxEngine, CarMovementRegulatedThrott
 #from .motorcoach import FourDOFTrolleySuspension, DDOFTrolleySuspension, DDOFTrolleySuspension2
 #from .principles import  LagrangeIOnMathFunction
 #from .shaft import TripleShaft
-#prosta zmiana
 #from .trolleys import DampedTrolleysWithSprings, DampedTrolleysWithSprings, ForcedTrolleysWithSprings, MDoFForcedTrolleysWithSprings, MDoFDampedTrolleysWithSprings, DoubleTrolleyWithNonlinearSprings, DoubleTrolleyDifferentWheels, MDoFDoubleTrolleyWithNonlinearSprings, SDoFDoubleTrolleyDifferentWheels, MDoFDoubleTrolleyDifferentWheels, MDoFTMD 
 #from .vehicle import DampedSymmetricalVehicleSuspension, SimplifySuspension
 
