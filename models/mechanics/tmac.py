@@ -20,9 +20,218 @@ import inspect
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
 
 
+class CrankSystem(ComposedSystem):
+
+    scheme_name = 'crank_mechanismlow.jpg'
+    real_name = 'crank_slider_real.jpg'
+
+    
+    _default_folder_path = "./dynpy/models/images/"
+
+
+
+    def _detail_scheme(self):
+
+        self.preview()
+
+        return self._path
+    
+    
+    def preview(self, example=False):
+        
+
+        if self._path:
+            path = self._path
+            
+        else:
+
+            plt.figure(figsize=(10,10))
+
+
+            plt.xlim(-0.5,1)
+            plt.ylim(-0.25,1.25)
+            plt.grid(True)
+            
+            if (self._given_data)=={}:
+            
+                path = self.__class__._default_folder_path + self.__class__.scheme_name
+            else:
+                
+
+                
+                h_num=float(self.h.subs(self._given_data))
+                r_num=float(self.r.subs(self._given_data))
+                phi_num=float(self.phi.subs(self._given_data))
+                a_num=float(self.a.subs(self._given_data))
+                b_num=float(self.b.subs(self._given_data))                
+                
+                pOx = 0
+                pOy = 0
+                plt.text(-0.05+(pOx),(-0.05+pOy),'O')
+                
+                pAx=0
+                pAy=h_num
+                plt.text(-0.05+(pAx),(+0.05+pAy),'A')
+                
+                plt.plot([pOx,pAx],[pOy,pAy],'b',linewidth=2)
+                plt.text(-0.05+(pOx+pAx)/2,(pOy+pAy)/2,'h')
+                
+                pBx = pAx + r_num*np.sin(phi_num)
+                pBy = pAy + r_num*np.cos(phi_num)
+                plt.text(+0.05+(pBx),(+0.00+pBy),'B')
+                
+                plt.plot([pBx,pAx],[pBy,pAy],'r',linewidth=2)
+                plt.text((pBx+pAx)/2,0.05+(pBy+pAy)/2,'r')
+                
+                lBO = ((pBx-pOx)**2 + (pBy-pOy)**2)**0.5
+                
+                p1x = 1.1*(h_num+r_num)*pBx/lBO
+                p1y = 1.1*(h_num+r_num)*pBy/lBO
+                
+                plt.plot([p1x,pOx],[p1y,pOy],'g',linewidth=2)
+
+                pCx = a_num*pBx/lBO
+                pCy = a_num*pBy/lBO
+                plt.text(+0.05+(pCx),(+0.05+pCy),'C')
+                
+                plt.plot([pOx,pCx],[pOy,pCy],'m',linewidth=2)
+                plt.text(0.05+(pOx+pCx)/2,(pOy+pCy)/2,'a')
+                
+#                 pDx = pCx+(b_num**2 - pCy**2)**0.5        # poprawna wartość położenia D
+                pDx = (pCx+(b_num**2 - pCy**2)**0.5)*1.15   # celowo wprowadzony błąd
+                pDy = 0
+                plt.text(+0.05+(pDx),(+0.00+pDy),'D')
+                
+                plt.plot([pCx,pDx],[pCy,pDy],'k',linewidth=2)
+                plt.text((pCx+pDx)/2,0.05+(pCy+pDy)/2,'b')
+            
+                path = self.__class__._default_folder_path + 'previews/' + self.__class__.__name__ + str(
+                                            next(self.__class__._case_no)) + '.png'
+
+                plt.savefig(path)
+                self._path=path
+
+                plt.close()
+
+        
+
+#        print('check' * 100)
+        print(self._path)
+#        print('check' * 100)
+        plt.close()
+
+        with open(f"{path}", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+        image_file.close()
+
+        return IP.display.Image(base64.b64decode(encoded_string))
+    
+    
+    
+    def __init__(self,
+                 I=Symbol('I', positive=True),
+                 r=Symbol('r', positive=True),
+                 h=Symbol('h', positive=True),
+                 a=Symbol('a', positive=True),
+                 b=Symbol('b', positive=True),
+                 phi=dynamicsymbols('\\varphi'),
+                 beta=dynamicsymbols('beta'),
+#                  alpha=dynamicsymbols('alpha'),
+                 **kwargs):
+
+        self.I = I
+        self.h=h
+        self.r=r
+        self.phi = phi
+        self.beta = beta
+#         self.alpha = alp
+        self.a = a
+        self.b = b
+
+        self.crank = MaterialPoint(I, phi, qs=[phi])
+        composed_system = (self.crank)
+
+        super().__init__(composed_system,**kwargs)
+
+        
+    def _crank_horizontal_pos(self):
+        return None
+        
+    @property
+    def _dbeta(self):
+        beta=atan(self.r/self.l*self.phi) #it's probably wrong - has to be checked
+        return beta.diff(self.ivar)
+    
+    @property
+    def _displacement_d(self):
+
+        return -(-self.b*sqrt((self.h**2 - self.h**2*self.a**2/self.b**2 + 2*self.h*self.r*cos(self.phi) - 2*self.h*self.r*self.a**2*cos(self.phi)/self.b**2 + self.r**2 - self.r**2*self.a**2*cos(self.phi)**2/self.b**2)/(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)) - self.r*self.a*sin(self.phi)/sqrt(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2))
+    
+    @property
+    def _velocity_b2(self):
+        return (self.phi.diff(self.ivar)*self.r)
+    @property
+    def _velocity_b2b3(self):
+        return (sqrt(self.h**2 + 2*self.h*self.r*cos(self.phi) + self.r**2)).diff(self.ivar)
+    @property
+    def _velocity_b3(self):
+        gamma=asin(self._velocity_b2b3/self._velocity_b2)
+        return self._velocity_b2*cos(gamma)
+    @property
+    def _velocity_d(self):
+        return self._displacement_d.diff(self.ivar)
+    @property
+    def _velocity_c(self):
+        omega3=self._velocity_b3/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi))
+        return omega3*self.a
+    @property
+    def _acceleration_b2(self):
+        return self.phi.diff(self.ivar)**2*self.r
+    @property
+    def _acceleration_b3n(self):
+        return (self._velocity_b3**2/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi)))
+    @property
+    def _acceleration_cn(self):
+        return (self._velocity_b3**2*(self.a/(sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi)))**2))
+    @property
+    def _acceleration_d(self):
+        return self._velocity_d.diff(self.ivar)
+
+    
+    @property
+    def _omega_3(self):
+        return (self._velocity_b3/sqrt(self.r**2 + self.h**2 - 2*self.r*self.h*cos(pi-self.phi)))
+    @property
+    def linkage_ang_velocity(self):
+        return self._dbeta
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.I: r'crank moment of inertia',
+            # self.k_beam: r'Beam stiffness',
+            # self.g: r'gravitational field acceleration'
+        }
+
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+        E, I, l, m0, k0 = symbols('E I0 l_beam m_0 k_0', positive=True)
+        
+        default_data_dict = {
+            self.I: [20 * I, 30 * I,60 * I,50 * I,40 * I,],
+            self.h:[1,2,3],
+            self.r:[0.1,0.2,0.3],
+            self.a:[10],
+            self.b:[20],
+            self.phi : [10,20,30],
+        }
+
+        return default_data_dict
+
+
 class SDOFWinchSystem(ComposedSystem):
 
-    scheme_name = 'winch.png'
+    scheme_name = 'winch_complete.png'
     real_name = 'winch_cross_sec.png'
 
     I_s=Symbol('I_s', positive=True)
@@ -222,7 +431,7 @@ class SDOFWinchSystem(ComposedSystem):
 class SDOFWinchSystemTest(ComposedSystem):
 
 
-    scheme_name = 'winch_scheme_test.png'
+    scheme_name = 'winch_complete.png'
     real_name = 'winch_cross_sec.png'
     
     I_s=Symbol('I_s', positive=True)
