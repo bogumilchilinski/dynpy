@@ -13,7 +13,7 @@ class Capacitor(Spring):
     """
     Model of a Capacitor
 
-    Creates a singular model, after inputing correct values of capacity - c and general coordinate(s), which analytically display the dynamics of displacing spring after            cummulating PE.
+    Creates a singular model, after inputing correct values of capacity - c and general coordinate(s), which analytically display the dynamics of displacing spring after cummulating PE.
     """
     scheme_name = 'spring.png'
     real_name = 'spring.png'
@@ -35,7 +35,8 @@ class Inductor(MaterialPoint):
 
 class Resistor(Damper):
     """
-    Model of a Material point with changing point of mass:
+    Model of Resistor
+    
     Creates a material point of an inertial body, after inputing correct values of mass -m and general coordinates, which follows a linear motion.
     """
     scheme_name = 'material_point.png'
