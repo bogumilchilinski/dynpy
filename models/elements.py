@@ -417,6 +417,7 @@ class Spring(Element):
 
         self.default_numerical_dict={
             self.stiffness: [S.One / 100 *  50e3 * no for no in range(80, 135)],
+            
         }
         
         return {**super().get_numerical_data(),**self.default_numerical_dict}
@@ -627,9 +628,13 @@ class Damper(Element):
             self.c:[c0*no for no in range(1,10)],
         }
         return {**super().get_default_data(),**self.default_data_dict}    
+    def get_numerical_data(self):
 
-    
-    
+        self.default_numerical_dict={
+            #self.stiffness: [S.One / 100 *  50e3 * no for no in range(80, 135)],
+            self.c: [S.One   * no for no in range(50, 60)]
+        }
+        return self.default_numerical_dict
 
 class EngineMount(Spring):
 

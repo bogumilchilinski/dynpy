@@ -367,7 +367,10 @@ class ComposedSystem(HarmonicOscillator):
         results= results_num
         
         return results
-
+    
+    def get_reference_data(self):
+    
+        return self.get_numerical_parameters()
 
 
 class NonlinearComposedSystem(ComposedSystem):

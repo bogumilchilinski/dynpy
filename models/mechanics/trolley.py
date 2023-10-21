@@ -113,6 +113,108 @@ class SpringMassSystem(ComposedSystem):
 
         return self.sym_desc_dict
 
+class ThreeSprings(ComposedSystem):
+
+    scheme_name = 'engine.png'
+    real_name = 'engine_real.PNG'
+
+    k_l=Symbol('k_l', positive=True)
+    k_cl=Symbol('k_cl', positive=True)
+    ivar=Symbol('t')
+    
+    pos1=dynamicsymbols('pos1')
+    pos2=dynamicsymbols('pos2')
+    qs=dynamicsymbols('pos1 pos2')
+    
+    def __init__(self,
+                 k_l=None,
+                 k_cl=None,
+                 pos1=None,
+                 pos2=None,
+                 qs=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        
+        
+        if k_l is not None: self.k_l = k_l
+        if k_cl is not None: self.k_cl = k_cl
+        if pos1 is not None: self.pos1 = pos1
+        if pos2 is not None: self.pos2 = pos2
+
+        self.ivar = ivar
+   
+        if qs is None: self.qs = [self.pos1,self.pos2] 
+        else: self.qs = qs
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+        
+        self._spring1 = Spring(self.k_l, pos1=self.pos1,pos2=self.pos2, qs=self.qs)
+        self._spring2 = Spring(self.k_l, pos1=self.pos1,pos2=self.pos2, qs=self.qs)
+        self._spring3 = Spring(self.k_cl, pos1=self.pos1,pos2=self.pos2, qs=self.qs)
+        
+        components['spring1'] = self._spring1
+        components['spring2'] = self._spring2
+        components['spring3'] = self._spring3
+        
+        return components
+
+class ForcedTrolleyWithThreeSprings(ComposedSystem):
+
+    scheme_name = 'engine.png'
+    real_name = 'engine_real.PNG'
+
+    m=Symbol('m', positive=True)
+    k_l=Symbol('k_l', positive=True)
+    k_cl=Symbol('k_cl', positive=True)
+    F=Symbol('F', positive=True)
+    ivar=Symbol('t')
+    
+    z=dynamicsymbols('z')
+    
+    def __init__(self,
+                 m=None,
+                 k_l=None,
+                 k_cl=None,
+                 F=None,
+                 z=None,
+                 qs=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        
+        
+        if m is not None: self.m = m
+        if k_l is not None: self.k_l = k_l
+        if k_cl is not None: self.k_cl = k_cl
+        if F is not None: self.F = F
+        if z is not None: self.z = z
+        self.ivar = ivar
+   
+        self.qs = [self.z]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+        
+        self.material_point = MaterialPoint(self.m, self.z, qs=self.qs)
+        self._three_springs=ThreeSprings(self.k_l, self.k_cl,pos1=self.z,pos2=0, qs=self.qs)
+        self._force = Force(self.F, pos1=self.z, qs=self.qs)
+        
+        components['material_point'] = self.material_point
+        components['_three_springs'] = self._three_springs
+        components['_force'] = self._force
+        
+        return components
+
 
 
 #dane domyślne i numeryczne

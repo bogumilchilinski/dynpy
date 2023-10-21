@@ -20,6 +20,61 @@ import inspect
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
 
 
+class YokeSystem(ComposedSystem):
+
+    scheme_name = 'crank_mechanismlow.jpg'
+    real_name = 'crank_slider_real.jpg'
+
+    
+    _default_folder_path = "./dynpy/models/images/"
+
+    
+    def __init__(self,
+                 I=Symbol('I', positive=True),
+                 r=Symbol('r', positive=True),
+                 h=Symbol('h', positive=True),
+                 a=Symbol('a', positive=True),
+                 phi=dynamicsymbols('\\varphi'),
+                 **kwargs):
+
+        self.I = I
+        self.h=h
+        self.r=r
+        self.phi = phi
+        self.a = a
+
+        self.crank = MaterialPoint(I, phi, qs=[phi])
+        composed_system = (self.crank)
+
+        super().__init__(composed_system,**kwargs)
+
+        
+    def _crank_horizontal_comp(self):
+        
+        r_num = float(self.r.subs(self._given_data))
+        phi_num=float(self.phi.subs(self._given_data))
+        
+        pAx = 0
+        pBx = pAx + r_num*np.sin(phi_num)
+        
+        return pBx
+    
+    def _crank_vertical_comp(self):
+        
+        h_num = float(self.h.subs(self._given_data))
+        r_num = float(self.r.subs(self._given_data))
+        phi_num=float(self.phi.subs(self._given_data))
+        
+        pAy = h_num
+        pBy = pAy + r_num*np.cos(phi_num)
+        
+        return pBy
+    
+    
+
+
+
+
 class CrankSystem(ComposedSystem):
 
     scheme_name = 'crank_mechanismlow.jpg'

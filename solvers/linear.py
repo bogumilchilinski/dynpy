@@ -42,7 +42,7 @@ from ..utilities.components.ode import en as ode
 
 import copy
 
-from .tools import CommonFactorDetector
+from .tools import CommonFactorDetector, ODE_COMPONENTS_LIST
 
 class MultivariableTaylorSeries(Expr):
     """_summary_
@@ -1321,9 +1321,7 @@ class ODESystem(AnalyticalSolution):
     def _report_components(self):
         
         comp_list=[
-        ode.ODESystemComponent,
-        ode.VariablesComponent,
-            
+        *ODE_COMPONENTS_LIST
         ]
         
         return comp_list

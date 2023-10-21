@@ -14,6 +14,20 @@ from sympy.physics.vector.printing import vpprint, vlatex
 import pandas as pd
 from ..utilities.adaptable import *
 
+ODE_COMPONENTS_LIST = [
+            ode.ODESystemComponent,
+            ode.ODEInitComponent,
+            ode.ODESystemCodeComponent,
+            ode.VariablesComponent,
+            ode.HomEquationComponent,
+            ode.HomEquationCodeComponent,
+            ode.GoverningEquationComponent,
+            ode.FundamentalMatrixComponent,
+            ode.ODECharecteristicPolynomialComponent,
+            ode.ODECharecteristicPolynomialCodeComponent,
+            ode.PredictedSolutionComponent,
+            ode.GeneralSolutionComponent
+        ]
 
 class CommonFactorDetector:
     
