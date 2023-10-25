@@ -212,10 +212,10 @@ class FundamentalMatrixComponent(ReportComponent):
     def body_text(self):
         
         system = self._system
-        system_lin=system.linearized()
+
         Delta = Symbol('Delta')
 
-        return f"The characteristic polynomial ${latex(Delta)}$ of the considered system derived based on its fundamental matrix is presented in {AutoMarker(Eq(Delta,system_lin.fundamental_matrix().det().expand().simplify().expand(),evaluate=False))}:"
+        return f"The characteristic polynomial ${latex(Delta)}$ of the considered system derived based on its fundamental matrix is presented in {AutoMarker(Eq(Delta,system.fundamental_matrix().det().expand().simplify().expand(),evaluate=False))}:"
     
     @property
     def footer_text(self):
@@ -225,16 +225,16 @@ class FundamentalMatrixComponent(ReportComponent):
     def append_elements(self):
 
         system = self._system
-        system_lin=system.linearized()
 
-
+        Delta = Symbol('Delta')
+        
         display(ReportText(self.header_text))
 
-        display((SympyFormula(Eq(Symbol('A'),system_lin.fundamental_matrix(),evaluate=False))))
+        display((SympyFormula(Eq(Symbol('A'),system.fundamental_matrix(),evaluate=False))))
 
         display(ReportText(self.body_text))
 
-        display((SympyFormula(Eq(Delta,system_lin.fundamental_matrix().det().expand().simplify().expand(),evaluate=False))))
+        display((SympyFormula(Eq(Delta,system.fundamental_matrix().det().expand().simplify().expand(),evaluate=False))))
 
         display(ReportText(self.footer_text))
 
@@ -255,7 +255,7 @@ class ODECharecteristicPolynomialComponent(ReportComponent):
         delta=Symbol('Delta')
 
         display(ReportText(  self.header_text   ))
-        polynomial=system._ode_system.char_polynomial()
+        polynomial=system.char_polynomial()
         display(SympyFormula(Eq(delta,polynomial)))
 
         display(ReportText(  self.footer_text   ))
@@ -416,7 +416,7 @@ class PredictedSolutionComponent(ReportComponent):
 
         system = self._system
 
-        t_list = system.t_list
+#         t_list = system.t_list
         
         display(ReportText(  self.header_text   ))
 
@@ -436,9 +436,7 @@ class GeneralSolutionComponent(ReportComponent):
         
         system = self._system
 
-        t_list = system.t_list
-
-        return f"Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of {t_list[1]}. Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the zeroth and first order approximations are as follows:"
+        return f"Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of t. Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the zeroth and first order approximations are as follows:"
 
         
     @property
@@ -451,9 +449,11 @@ class GeneralSolutionComponent(ReportComponent):
         system = self._system
         
         display(ReportText(  self.header_text   ))
+        
+        display(SympyFormula(system.general_solution))
 
-        for no,eq in enumerate(system._general_sol(1)):
-            display(SympyFormula(Eq(system._general_sol(1)[no].lhs[0],system._general_sol(1)[no].rhs[0])))
+#         for no,eq in enumerate(system._general_sol(1)):
+#             display(SympyFormula(Eq(system._general_sol(1)[no].lhs[0],system._general_sol(1)[no].rhs[0])))
 
 #         display(ReportText(  self.footer_text   ))
         

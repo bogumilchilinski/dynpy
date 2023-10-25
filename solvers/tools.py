@@ -10,6 +10,7 @@ from numbers import Number
 ###  exemplary comment
 from sympy.physics.mechanics import dynamicsymbols, init_vprinting
 from sympy.physics.vector.printing import vpprint, vlatex
+from ..utilities.components.ode import en as ode
 
 import pandas as pd
 from ..utilities.adaptable import *
@@ -23,11 +24,10 @@ ODE_COMPONENTS_LIST = [
             ode.HomEquationCodeComponent,
             ode.GoverningEquationComponent,
             ode.FundamentalMatrixComponent,
-            ode.ODECharecteristicPolynomialComponent,
+#             ode.ODECharecteristicPolynomialComponent,
             ode.ODECharecteristicPolynomialCodeComponent,
-            ode.PredictedSolutionComponent,
             ode.GeneralSolutionComponent
-        ]
+]
 
 class CommonFactorDetector:
     

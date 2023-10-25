@@ -19,8 +19,9 @@ import inspect
 
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
 
+import matplotlib.pyplot as plt
 
-class YokeSystem(ComposedSystem):
+class YokeMechanism(ComposedSystem):
 
     scheme_name = 'crank_mechanismlow.jpg'
     real_name = 'crank_slider_real.jpg'
@@ -48,32 +49,159 @@ class YokeSystem(ComposedSystem):
 
         super().__init__(composed_system,**kwargs)
 
-        
-    def _crank_horizontal_comp(self):
-        
-        r_num = float(self.r.subs(self._given_data))
-        phi_num=float(self.phi.subs(self._given_data))
-        
+
+    def _crank_horizontal_comp(self,subs=False):
+
+        phi = self.phi
+        r = self.r
+
         pAx = 0
-        pBx = pAx + r_num*np.sin(phi_num)
-        
-        return pBx
-    
-    def _crank_vertical_comp(self):
-        
-        h_num = float(self.h.subs(self._given_data))
-        r_num = float(self.r.subs(self._given_data))
-        phi_num=float(self.phi.subs(self._given_data))
-        
-        pAy = h_num
-        pBy = pAy + r_num*np.cos(phi_num)
-        
-        return pBy
-    
-    
+        pBx = pAx + r*sin(phi)
+
+        if subs is False:
+            return pBx
+        else:
+            return float(pBx.subs(self._given_data))
+
+    def _crank_vertical_comp(self,subs=False):
+
+        phi = self.phi
+        r = self.r
+        h = self.h
+
+        pAy = h
+        pBy = pAy + r*cos(phi)
+
+        if subs is False:
+            return pBy
+        else:
+            return float(pBy.subs(self._given_data))
+
+    def preview(self, example=False):
 
 
+        if self._path:
+            path = self._path
 
+        else:
+
+            plt.figure(figsize=(10,10))
+
+
+            plt.xlim(-0.5,1)
+            plt.ylim(-0.25,1.25)
+            plt.grid(True)
+            
+            if (self._given_data)=={}:
+            
+                path = self.__class__._default_folder_path + self.__class__.scheme_name
+            else:
+
+                h_num=float(self.h.subs(self._given_data))
+
+                pOx = 0
+                pOy = 0
+                plt.text(-0.05+(pOx),(-0.05+pOy),'O')
+
+                pAx=0
+                pAy=h_num
+                plt.text(-0.05+(pAx),(+0.05+pAy),'A')
+
+                plt.plot([pOx,pAx],[pOy,pAy],'b',linewidth=2)
+                plt.text(-0.05+(pOx+pAx)/2,(pOy+pAy)/2,'h')
+
+                pBx = self._crank_horizontal_comp(True)
+                pBy = self._crank_vertical_comp(True)
+                plt.text(+0.05+(pBx),(+0.00+pBy),'B')
+
+                plt.plot([pBx,pAx],[pBy,pAy],'r',linewidth=2)
+                plt.text((pBx+pAx)/2,0.05+(pBy+pAy)/2,'r')
+
+                path = self.__class__._default_folder_path + 'previews/' + self.__class__.__name__ + str(
+                                            next(self.__class__._case_no)) + '.png'
+
+                plt.savefig(path)
+                self._path=path
+
+                plt.close()
+
+
+#        print('check' * 100)
+        print(self._path)
+#        print('check' * 100)
+        plt.close()
+
+        with open(f"{path}", "rb") as image_file:
+            encoded_string = base64.b64encode(image_file.read())
+        image_file.close()
+
+        return IP.display.Image(base64.b64decode(encoded_string))
+    
+    
+    
+    
+    
+class CrankMechanism(ComposedSystem):
+
+    scheme_name = 'crank_mechanismlow.jpg'
+    real_name = 'crank_slider_real.jpg'
+
+    
+    _default_folder_path = "./dynpy/models/images/"
+
+    
+    def __init__(self,
+                 I=Symbol('I', positive=True),
+                 a=Symbol('a', positive=True),
+                 b=Symbol('b', positive=True),
+                 alpha=dynamicsymbols('alpha'),
+                 beta=dynamicsymbols('beta'),
+                 **kwargs):
+
+        self.I = I
+        self.a = a
+        self.b = b
+        self.alpha = alpha
+        self.beta = beta
+
+        self.crank = MaterialPoint(I, alpha, qs=[alpha])
+        composed_system = (self.crank)
+
+        super().__init__(composed_system,**kwargs)
+
+
+    def _crank_horizontal_comp(self,subs=False):
+
+        pCx = a*cos(alpha)
+
+        if subs is False:
+            return pCx
+        else:
+            return float(pCx.subs(self._given_data))
+
+    def _crank_vertical_comp(self,subs=False):
+
+        pCy = a*sin(alpha)
+
+        if subs is False:
+            return pCy
+        else:
+            return float(pCy.subs(self._given_data))
+
+    def _piston_horizontal_comp(self,subs=False):
+
+        pDx = self._crank_horizontal_comp() + (b**2 - self._crank_vertical_comp())**0.5
+        
+        if subs is False:
+            return pDx
+        else:
+            return float(pDx.subs(self._given_data))
+
+    def _pistion_vertical_comp(self):
+
+        pDy = 0
+        return pDy
+    
 
 class CrankSystem(ComposedSystem):
 
