@@ -169,6 +169,9 @@ class TDoFCompensatedPayload(ComposedSystem):
     scheme_name = '3dofs_new.PNG'
 
     def __init__(self,
+                 phi=dynamicsymbols('varphi'),
+                 h=dynamicsymbols('h'),
+                 h_c=dynamicsymbols('h_c'),
                  m_p=Symbol('m_p', positive=True),
                  k_w=Symbol('k_w', positive=True),
                  l_0=Symbol('l_0', positive=True),
@@ -198,6 +201,9 @@ class TDoFCompensatedPayload(ComposedSystem):
         self.h_eq = h_eq
         self.h_ceq = h_ceq
         self.ivar = ivar
+        self.phi = phi
+        self.h = h
+        self.h_c = h_c
         self.qs = qs
 
         phi, h, h_c = qs
@@ -229,6 +235,38 @@ class TDoFCompensatedPayload(ComposedSystem):
         super(HarmonicOscillator,self).__init__((self.kinetic_energy - self.potential_energy).subs(positions_dict).doit(),
                          qs=qs,
                          ivar=ivar,**kwargs)
+
+
+    def single_dof_transformation(self,p=None):
+        
+        if p is None:
+            p = S.One
+        
+        
+        omega, delta, eps = symbols('omega, delta, varepsilon',positive=True)
+        A_y, A_z, Phi_y, Phi_z = symbols('A_y, A_z, Phi_y, Phi_z,',positive=True)
+        
+        sdof_payload = self(self.phi)
+        
+        nonlin_mathieu_model = sdof_payload.subs({self.h:0,self.h_c:0,self.m_c:0}).subs({self.h_eq:self.l_c,self.h_ceq:self.l_c,self.l_0:self.l_w-self.l_c})
+
+        mathieu_nonlin_approx = nonlin_mathieu_model.approximated(n=3)
+
+        mathieu_acc_form = mathieu_nonlin_approx._to_acc()
+
+        mathieu_basis = mathieu_acc_form.subs({self.l_c:0,
+                                               self.g:omega**2*self.l_w})
+
+        mathieu_instability_eq = mathieu_basis.subs(S.Half*omega**2*self.phi**2,(S.Half)**3*omega**2*self.phi**2*(1+eps*delta),simultenouos=True)
+
+        mathieu_transformed_eq = mathieu_instability_eq.subs({self.l_w:1/eps,
+                                                              self.phi.diff(self.ivar)*self.phi**2*self.y_e.diff(self.ivar):0,
+                                                              self.z_e:A_z*cos(omega/p*self.ivar+Phi_z),
+                                                              self.y_e:A_y*cos(omega/p*self.ivar+Phi_y),
+                                                              A_y*self.phi**2*eps:0
+                                                             })
+
+        return mathieu_transformed_eq._eoms
 
 #     def symbols_description(self):
 #         self.sym_desc_dict = {
