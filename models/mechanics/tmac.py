@@ -28,27 +28,45 @@ class YokeMechanism(ComposedSystem):
 
     
     _default_folder_path = "./dynpy/models/images/"
-
+    
+    I=Symbol('I', positive=True)
+    r=Symbol('r', positive=True)
+    h=Symbol('h', positive=True)
+    a=Symbol('a', positive=True)
+    phi=dynamicsymbols('\\varphi')
+    omega=Symbol('omega',positive=True)
     
     def __init__(self,
-                 I=Symbol('I', positive=True),
-                 r=Symbol('r', positive=True),
-                 h=Symbol('h', positive=True),
-                 a=Symbol('a', positive=True),
-                 phi=dynamicsymbols('\\varphi'),
+                 I=None,
+                 r=None,
+                 h=None,
+                 a=None,
+                 phi=None,
+                 omega=None,
+                 ivar=None,
                  **kwargs):
 
-        self.I = I
-        self.h=h
-        self.r=r
-        self.phi = phi
-        self.a = a
+        if I is not None: self.I = I
+        if h is not None: self.h = h
+        if r is not None: self.r = r
+        if a is not None: self.a = a
+        if phi is not None: self.phi = phi
+        if omega is not None: self.omega = omega
+        if ivar is not None: self.ivar = ivar
+        self.qs = [self.phi]
 
-        self.crank = MaterialPoint(I, phi, qs=[phi])
-        composed_system = (self.crank)
+        self._init_from_components(**kwargs)
 
-        super().__init__(composed_system,**kwargs)
+    @property
+    def components(self):
+        components = {}
+        I,h,r,a,phi,omega = self.I,self.h,self.r,self.a,self.phi,self.omega
 
+        self._crank = MaterialPoint(I, pos1=phi, qs=[phi])
+
+        components['crank'] = self._crank
+
+        return components
 
     def _crank_horizontal_comp(self,subs=False):
 
@@ -61,6 +79,7 @@ class YokeMechanism(ComposedSystem):
         if subs is False:
             return pBx
         else:
+            print(self._given_data)
             return float(pBx.subs(self._given_data))
 
     def _crank_vertical_comp(self,subs=False):
@@ -77,6 +96,30 @@ class YokeMechanism(ComposedSystem):
         else:
             return float(pBy.subs(self._given_data))
 
+    def _guide_sin_comp(self,subs=False):
+
+        pOx = 0
+        pOy = 0
+        pBx = self._crank_horizontal_comp(subs)
+        pBy = self._crank_vertical_comp(subs)
+
+        lBO = ((pBx-pOx)**2 + (pBy-pOy)**2)**0.5
+        guide_angle = pBy/lBO
+
+        return guide_angle
+
+    def _guide_cos_comp(self,subs=False):
+
+        pOx = 0
+        pOy = 0
+        pBx = self._crank_horizontal_comp(subs)
+        pBy = self._crank_vertical_comp(subs)
+
+        lBO = ((pBx-pOx)**2 + (pBy-pOy)**2)**0.5
+        guide_angle = pBx/lBO
+
+        return guide_angle
+
     def preview(self, example=False):
 
 
@@ -86,10 +129,12 @@ class YokeMechanism(ComposedSystem):
         else:
 
             plt.figure(figsize=(10,10))
+#             plt.figure()
 
 
-            plt.xlim(-0.5,1)
-            plt.ylim(-0.25,1.25)
+            #plt.xlim(-0.5,1)
+            #plt.ylim(-0.25,1.25)
+            plt.axis('equal')
             plt.grid(True)
             
             if (self._given_data)=={}:
@@ -117,12 +162,21 @@ class YokeMechanism(ComposedSystem):
                 plt.plot([pBx,pAx],[pBy,pAy],'r',linewidth=2)
                 plt.text((pBx+pAx)/2,0.05+(pBy+pAy)/2,'r')
 
+                plt.plot([pOx,pBx],[pOy,pBy],'g',linewidth=2)
+                plt.text((pOx+pBx)/2,0.05+(pOy+pBy)/2,'a')
+
+                lBO = ((pBx-pOx)**2 + (pBy-pOy)**2)**0.5
+                pDx = lBO*self._guide_cos_comp(True)*1.2
+                pDy = lBO*self._guide_sin_comp(True)*1.2
+                plt.plot([pOx,pDx],[pOy,pDy],'g',linewidth=2)
+                plt.text(+0.05+(pDx),(+0.00+pDy),'D')
+
                 path = self.__class__._default_folder_path + 'previews/' + self.__class__.__name__ + str(
                                             next(self.__class__._case_no)) + '.png'
 
                 plt.savefig(path)
                 self._path=path
-
+                plt.show()
                 plt.close()
 
 
@@ -136,8 +190,15 @@ class YokeMechanism(ComposedSystem):
         image_file.close()
 
         return IP.display.Image(base64.b64decode(encoded_string))
-    
-    
+
+    def get_default_data(self):
+
+        default_data_dict = {
+            self.h: [0.6,0.6,0.55,0.5,0.45,0.4,0.5,0.55,0.6],
+            self.r: [0.35,0.3,0.4,0.45,0.5,0.35,0.4,0.3,0.2],
+            self.phi: [30*pi/180,35*pi/180,40*pi/180,45*pi/180,50*pi/180,55*pi/180,180*pi/180,275*pi/180,300*pi/180,35*pi/180]
+        }
+        return default_data_dict
     
     
     
