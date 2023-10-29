@@ -6,6 +6,7 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
 
 from sympy.matrices.matrices import MatrixBase
 from sympy.solvers.ode.systems import matrix_exp, matrix_exp_jordan_form
+from sympy.solvers.deutils import ode_order
 
 from numbers import Number
 
@@ -1034,11 +1035,21 @@ class ODESystem(AnalyticalSolution):
     
     @cached_property
     def _fode_dvars(self):
-        return Matrix([self._dvars.diff(self.ivar,order) for order  in range(self.ode_order)])
+
+        orders_dict = self.spot_order()
+        sys_order=max(orders_dict.values())
+
+        dvars_span = ([dvar.diff(self.ivar,order) for order  in range(sys_order) for dvar in self._dvars if order < orders_dict[dvar]])
+
+        return Matrix(dvars_span)
     
     @cached_property
     def _highest_diff(self):
-        return self.dvars.diff(self.ivar,self.ode_order)
+        
+        orders = self.spot_order()
+        dvars = self.dvars
+        
+        return Matrix([dvar.diff(self.ivar,orders[dvar])  for dvar in dvars])
     
     @cached_property
     def odes_rhs(self):
@@ -1049,10 +1060,10 @@ class ODESystem(AnalyticalSolution):
             return self.rhs
         else:
             diff_coeffs_mat=self.lhs.jacobian(diffs)
-            
+
             return diff_coeffs_mat.inv()*(self.rhs  - self.lhs.subs({elem:0 for elem in diffs }))
 
-                                          
+
     @cached_property
     def parameters(self):
         
@@ -1060,6 +1071,8 @@ class ODESystem(AnalyticalSolution):
 
     @cached_property    
     def ode_order(self):
+        
+        #if self._ode_order is None:
         
         return self._ode_order
     
@@ -1373,15 +1386,17 @@ class ODESystem(AnalyticalSolution):
 
     # Derivative reset Method
     def static_equation(self):
-        obj = super()
+        obj = self
         derivatives = list(obj.lhs.atoms(Derivative))
         derivatives_values = {item: 0 for item in derivatives}
         static_eqs = obj.subs(derivatives_values)
         return static_eqs
 
 
-    # Calculating a critical point
     def critical_point(self, params):
+        """
+        Calculating a critical point
+        """
         obj = self
         critical_point = solve(Eq(obj.lhs, obj.rhs), self.dvars[0])
         critical_point = critical_point[self.dvars[0]]
@@ -1390,11 +1405,15 @@ class ODESystem(AnalyticalSolution):
 
     # Designate Order Method
     def spot_order(self):
-        obj = self
-        derivatives = list(obj.lhs.atoms(Derivative))
-        derivatives_dict = {item:item.args[1][1] for item in derivatives}
+        
+        
+        odes = self.odes
+        dvars = self.dvars
+        
+        
+        orders={coord:max(odes.applyfunc(lambda elem: ode_order(elem,coord)))  for coord in dvars }
 
-        return max(list(derivatives_dict.values()))
+        return orders
     
     
     @property
