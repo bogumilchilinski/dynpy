@@ -3,7 +3,7 @@ from numbers import Number
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 
-from ..elements import MaterialPoint, Damper, Spring , base_frame, base_origin
+from ..elements import MaterialPoint, Damper, Spring , base_frame, base_origin, Force
 
 
 
@@ -43,3 +43,16 @@ class Resistor(Damper):
     real_name = 'material_point.png'
     def __init__(self, resistance, q0,  qs=None, ivar=Symbol('t'), frame=base_frame):
         super().__init__(c=resistance, pos1=q0, pos2=0, qs=qs, ivar=Symbol('t'), frame=base_frame)
+        
+class VoltageSource(Force):
+
+    """
+    Model of a voltage source
+
+    Creates a singular model, after inputing correct values of capacity - c and general coordinate(s), which analytically display the dynamics of displacing spring after cummulating PE.
+    """
+    scheme_name = 'voltgesrc.png'
+    real_name = 'spring.png'
+
+    def __init__(self, voltage, q0,  qs=None,ivar=Symbol('t'), frame = base_frame):
+        super().__init__(force=voltage, pos1=q0, qs=qs,ivar=ivar, frame = frame)

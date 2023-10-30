@@ -1864,7 +1864,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
             self.m_p: r'mass of the pendulum',
             self.m_f: r'mass of the transferred liquid to the mass of the system ratio',
             self.k: r'''trolley's equivalent stiffness''',
-            self.lam: r'''Rayleigh's proportional damping coefficient''',
+            self.lam: r'''Rayleigh's proportional to stiffness damping coefficient''',
             self.l: r'length of the pendulum',
             self.Omega: r'excitation frequency',
             self.omega0: r'natural frequency of the trolley',
@@ -1910,6 +1910,14 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         return eoms
 
 
+    def const_mass(self):
+        
+        subs_dict={
+            self.m_p:Symbol('m_p',positive=True),
+            self.m_t:Symbol('m_t',positive=True)
+        }
+        
+        return self.subs(subs_dict)
     
     def dimensionless_inertia_matrix(self):
         
@@ -2049,20 +2057,30 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                 self.m_f:3/1000,
                 self.rho:10,
                 pi:3.1415,
-                self.t0:30,
+                self.t0:10*3.1415,
                 self.delta: 300000/(9.81*(150000000)/25)}
         
         return params_dict
     
-    def get_analytical_data_before_transfer(self):
+    def get_analytical_data_before_transfer(self, psi=False, chi=None):
 
         m_p_const = Symbol('m_p', positive=True)
         m_t_const = Symbol('m_t', positive=True)
+        
+        if psi == False:
+            var = 1
+        else:
+            var = self.psi
+            
+        if chi == None:
+            var_chi = 1
+        else:
+            var_chi = chi
 
         params_dict = {
             self.eps:1/1000,
-            self.chi:1,
-            self.psi:1,
+            self.chi:var_chi,
+            self.psi:var,
             self.lam:0.03,
             self.l:25,
             self.omega0:sqrt(9.81/25),
@@ -2073,19 +2091,54 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         
         return params_dict
 
-    def get_analytical_data_after_transfer(self):
+    def get_analytical_data_after_transfer(self, psi=False, chi=None):
 
         m_p_const = Symbol('m_p', positive=True)
         m_t_const = Symbol('m_t', positive=True)
 
+        if psi == False:
+            var = 1
+        else:
+            var = self.psi
+
+
+        if chi == None:
+            var_chi = 1
+        else:
+            var_chi = chi
+
         params_dict = {
             self.eps:4/1000,
-            self.chi:1,
-            self.psi:1,
+            self.chi:var_chi,
+            self.psi:var,
             self.lam:0.03,
             m_p_const:4*150000,
             m_t_const:150000000-4*150000,
             self.l:25,
+            self.omega0:sqrt(9.81/25),
+            pi:3.1415,
+            self.delta: 300000/(9.81*(150000000)/25)}
+        
+        return params_dict
+    
+    def get_analytical_data_without_pendulum(self, psi=False):
+
+        m_p_const = Symbol('m_p', positive=True)
+        m_t_const = Symbol('m_t', positive=True)
+
+        if psi == False:
+            var = 1
+        else:
+            var = self.psi
+            
+        params_dict = {
+            self.eps:0,
+            self.chi:0,
+            self.psi:var,
+            self.lam:0.03,
+            m_p_const:4*150000,
+            m_t_const:150000000-4*150000,
+            self.l:0,
             self.omega0:sqrt(9.81/25),
             pi:3.1415,
             self.delta: 300000/(9.81*(150000000)/25)}
@@ -2109,7 +2162,118 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
             self.delta: 300000/(9.81*(150000000)/25)}
         
         return params_dict
+
+
+    def _FRF_chart(self, chi=None):
+        from sympy import lambdify
+        from ...solvers.linear import ODESystem, FirstOrderLinearODESystemWithHarmonics
+        import pandas as pd
+        tau=Symbol('tau')
+        ode_eoms=self.dimensionless_with_const_mass()
+        
+        if chi is not None:
+            var_chi = chi
+        else:
+            var_chi = 1
+
+        odes_przed=ode_eoms.subs(self.get_analytical_data_before_transfer(psi=True, chi=var_chi)).n()
+        odes_po=ode_eoms.subs(self.get_analytical_data_after_transfer(psi=True, chi=var_chi)).n()
+        odes_bez=Matrix([ode_eoms[0].subs(self.get_analytical_data_without_pendulum(psi=True)).n()])
+
+
+        fode_system_przed=ODESystem(odes=odes_przed, dvars=self.q, ode_order=2)._as_fode()
+        fode_system_po=ODESystem(odes=odes_po, dvars=self.q, ode_order=2)._as_fode()
+        fode_system_bez=ODESystem(odes=odes_bez, dvars=Matrix([self.q[0]]), ode_order=2)._as_fode()
+
+        ana_sol_przed=fode_system_przed.steady_solution.subs(self.ivar, tau)[0]
+        ana_sol_po=fode_system_po.steady_solution.subs(self.ivar, tau)[0]
+        ana_sol_bez=fode_system_bez.steady_solution.subs(self.ivar, tau)[0]
+
+        Amp_przed=sqrt((ana_sol_przed.coeff(sin(self.psi*tau)))**2+(ana_sol_przed.coeff(cos(self.psi*tau)))**2)
+
+        Amp_po=sqrt((ana_sol_po.coeff(sin(self.psi*tau)))**2+(ana_sol_po.coeff(cos(self.psi*tau)))**2)
+
+        Amp_bez=sqrt((ana_sol_bez.coeff(sin(self.psi*tau)))**2+(ana_sol_bez.coeff(cos(self.psi*tau)))**2)
+
+        psi_span = np.linspace(0.1,1.9,181)
+
+
+        data4plot_przed= lambdify(self.psi,Amp_przed,'numpy')(psi_span)
+        data4plot_po= lambdify(self.psi,Amp_po,'numpy')(psi_span)
+        data4plot_bez= lambdify(self.psi,Amp_bez,'numpy')(psi_span)
+
+        df = pd.DataFrame(data={'Before transfer':data4plot_przed, 'After transfer':data4plot_po, 'Without TMD':data4plot_bez}, index=psi_span)
+        
+        df = df.set_axis(pd.Index([(val,Symbol('A',positive=True))  for val  in df.columns]),axis=1)
+        df.index.name = self.psi
+
+        return df
     
+    
+    def _activation_time_chart(self, transfer_func=None, data_dict=None, upper_func=True):
+
+        import pandas as pd
+        from sympy import lambdify
+        from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
+        
+        if upper_func==True:
+            var=self.m_t
+        else:
+            var=self.m_p
+        
+        atan_expr=transfer_func.subs(data_dict)
+
+        lambda_atan_expr= lambdify((self.tau, self.t0, self.rho),atan_expr.n())
+
+        t_span=np.linspace(0,100,1001)
+
+        t0_list=[-10,25,75,110]
+
+        fluid_flow_t0=pd.DataFrame(data={})
+        fluid_flow_t0.index.name=Symbol('tau')
+
+        for t0num, t0val in enumerate(t0_list):
+            fluid_flow_t0[t0val]=pd.DataFrame((lambda_atan_expr(t_span,t0val,10)),index=t_span)
+
+        fluid_flow_t0 = TimeDataFrame(fluid_flow_t0.set_axis(pd.Index([(Eq(self.t0,val,evaluate=False),var)  for val  in fluid_flow_t0.columns]),axis=1))
+        fluid_flow_t0.index.name=Symbol('tau')
+        fluid_flow_t0_tikz_data = TimeDataFrame(fluid_flow_t0[list((fluid_flow_t0.columns))])
+
+        return fluid_flow_t0_tikz_data
+
+
+    def _flow_rate_chart(self, transfer_func=None, data_dict=None, upper_func=True):
+
+        import pandas as pd
+        from sympy import lambdify
+        from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
+        
+        if upper_func==True:
+            var=self.m_t
+        else:
+            var=self.m_p
+
+        atan_expr=transfer_func.subs(data_dict)
+
+        lambda_atan_expr= lambdify((self.tau, self.t0, self.rho),atan_expr.n())
+
+        t_span=np.linspace(0,100,1001)
+
+        flow_coeff_list=[1,5,10]
+
+        fluid_flow_fc=pd.DataFrame(data={})
+        fluid_flow_fc.index.name=Symbol('tau')
+
+
+        for fcnum, fcval in enumerate(flow_coeff_list):
+            fluid_flow_fc[fcval]=pd.DataFrame((lambda_atan_expr(t_span,50,fcval)),index=t_span)
+
+        fluid_flow_fc = fluid_flow_fc.set_axis(pd.Index([(Eq(self.rho,val,evaluate=False),var)  for val  in fluid_flow_fc.columns]),axis=1)
+        fluid_flow_fc.index.name=Symbol('tau')
+        fluid_flow_tikz_data = TimeDataFrame(fluid_flow_fc[list((fluid_flow_fc.columns))])
+
+        return fluid_flow_tikz_data
+   
     def _mass_transfer_influence(self, t_span=None):
         from ...solvers.linear import ODESystem
         from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
@@ -2397,5 +2561,108 @@ class DDoFSliderPendulum(TrolleyWithPendulum):
         return unit_dict
 
 
+class VariableMassTrolleyWithPendulumFunctionWithoutRayleigh(VariableMassTrolleyWithPendulumFunction):
 
+    scheme_name = 'trolley_pendulum_tmd.png'
+    real_name = 'taipei101.png'
+
+    ivar=Symbol('t')
+    l = Symbol('l', positive=True)
+    rho = Symbol('rho', positive=True)
+    m_f = Symbol('epsilon_f', positive=True)
+    m_t = Function('m_t')(ivar)
+    m_t0 = Symbol('m_t0', positive=True)
+    m_p = Function('m_p')(ivar)
+    m_p0 = Symbol('m_p0', positive=True)
+    c = Symbol('c', positive=True)
+    t0 = Symbol('tau_0', real=True)
+    k = Symbol('k', positive=True)
+    omega0=Symbol('omega_0', positive=True)
+    g = Symbol('g', positive=True)
+    Omega = Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    phi = dynamicsymbols('Phi')
+    x = dynamicsymbols('X')
+    eps = Symbol('epsilon', positive=True)
+    m_s = Symbol('m_s', positive=True)
+    chi = Symbol('chi', positive=True)
+    psi = Symbol('psi', positive=True)
+    delta = Symbol('delta', positive=True)
+    Omega0=Symbol('Omega_0', positive=True)
+    tau=Symbol('tau', positive=True)
+
+    def __init__(self,
+                 l=None,
+                 rho=None,
+                 m_f=None,
+                 m_t=None,
+                 m_t0=None,
+                 m_p=None,
+                 m_p0=None,
+                 c=None,
+                 t0=None,
+                 k=None,
+                 g=None,
+                 Omega=None,
+                 omega0=None,
+                 phi=None,
+                 x=None,
+                 F=None,
+                 eps=None,
+                 m_s=None,
+                 chi=None,
+                 psi=None,
+                 delta=None,
+                 Omega0=None,
+                 tau=None,
+                 ivar=ivar,
+                 **kwargs):
+        
+        if l is not None: self.l = l
+        if rho is not None: self.rho = rho
+        if m_f is not None: self.m_f = m_f
+        if m_t is not None: self.m_t = m_t
+        if m_t0 is not None: self.m_t0 = m_t0
+        if m_p is not None: self.m_p = m_p
+        if m_p0 is not None: self.m_p0 = m_p0
+        if c is not None: self.c = c
+        if t0 is not None: self.t0 = t0
+        if g is not None: self.g = g
+        if phi is not None: self.phi = phi
+        if x is not None: self.x = x
+        if k is not None: self.k = k
+        if Omega is not None: self.Omega = Omega
+        if omega0 is not None: self.omega0 = omega0
+        if F is not None: self.F = F
+        if eps is not None: self.eps = eps
+        if m_s is not None: self.m_s = m_s
+        if chi is not None: self.chi = chi
+        if psi is not None: self.psi = psi
+        if delta is not None: self.delta = delta
+        if Omega0 is not None: self.Omega0 = Omega0
+        if tau is not None: self.tau = tau
+        self.ivar = ivar
+        self._init_from_components(**kwargs)
+
+        #self.trans_expr = ((S.One/2-atan(self.flow_coeff*(self.ivar-self.t0))/pi))
+        #self.m_tf = self.m_f#((S.One/2-atan(self.flow_coeff*(self.ivar-self.t0))/pi))
+        #self.m_pf = self.m_f#((S.One/2+atan(self.flow_coeff*(self.ivar-self.t0))/pi))
+
+    @cached_property
+    def components(self):
+        components = {}
+
+        self._trolley = SpringMassSystem(self.m_t, self.k, self.x, self.ivar)(label='Trolley')
+        self._trolley_damper = Damper(c=self.c, pos1=self.x, pos2=0, qs=[self.x, self.phi])(label='Trolley damper')
+        self._pendulum = PendulumKinematicExct(self.l, self.m_p, self.g, self.phi, self.x, self.ivar)(label='Pendulum')
+        self._pendulum_damper = Damper(c=self.c, pos1=self.phi, pos2=0, qs=[self.x, self.phi])(label='Pendulum damper')
+        self._force=Force(self.F*sin(self.Omega*self.ivar), pos1=self.x, qs=[self.x, self.phi])(label='Force')
+
+        components['_trolley'] = self._trolley
+        components['_trolley_damper'] = self._trolley_damper
+        components['_pendulum'] = self._pendulum
+        components['_pendulum_damper'] = self._pendulum_damper
+        components['_force'] = self._force
+
+        return components
 

@@ -1,268 +1,280 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, asin, diff, sqrt, S,
                    diag, Eq, hessian, Function, flatten, Tuple, im, pi, latex,
                    dsolve, solve, fraction, factorial, Subs, Number, oo, Abs,
-                   N, solveset)
+                   N, solveset, lambdify)
 
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
 
-from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin, CombustionEngine
+from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin, CombustionEngine, ProportionalElement, DerivativeElement, IntegralElement
 from  ..continuous import ContinuousSystem, PlaneStressProblem
 
 import base64
 import random
 import IPython as IP
 import numpy as np
+import pandas as pd
 import inspect
 
 
-from .trolley import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
+from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
+
+T_engine = np.array([140, 160, 177, 188, 200, 210, 220, 227, 234, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 238, 236, 234, 232, 229, 227, 225, 221, 219, 217, 211, 201, 189, 179, 177,]);
+n_span = np.linspace(1000,6500,56)
+omega_span = 2*3.14/60*n_span
+z = np.polyfit(n_span, T_engine, 10) # Przybliżenie wielomianem 10 stopnia
+n = Symbol('n',positive=True)
+T = z[0]*n**10 + z[1]*n**9 + z[2]*n**8 + z[3]*n**7 + z[4]*n**6 + z[5]*n**5 + z[6]*n**4 + z[7]*n**3 + z[8]*n**2 + z[9]*n + z[10]
+T_lambda = lambdify(n,T)
+data = T_lambda(n_span)
+df = pd.DataFrame(data,index=n_span,columns=["Torque [Nm]"])
 
 
-class ComposedSystem(HarmonicOscillator):
-    """Base class for all systems
+# class ComposedSystem(HarmonicOscillator):
+#     """Base class for all systems
 
-    """
-    scheme_name = 'damped_car_new.PNG'
-    real_name = 'car_real.jpg'
-    detail_scheme_name = 'sruba_pasowana.png'
-    detail_real_name = 'buick_regal_3800.jpg'
-    _default_args = ()
-    _default_folder_path = "./dynpy/models/images/"
+#     """
+#     scheme_name = 'damped_car_new.PNG'
+#     real_name = 'car_real.jpg'
+#     detail_scheme_name = 'sruba_pasowana.png'
+#     detail_real_name = 'buick_regal_3800.jpg'
+#     _default_args = ()
+#     _default_folder_path = "./dynpy/models/images/"
 
-    z = dynamicsymbols('z')
+#     z = dynamicsymbols('z')
 
-    m0 = Symbol('m_0', positive=True)
-    k0 = Symbol('k_0', positive=True)
-    F0 = Symbol('F_0', positive=True)
-    Omega0 = Symbol('Omega_0', positive=True)
-    ivar=Symbol('t')
+#     m0 = Symbol('m_0', positive=True)
+#     k0 = Symbol('k_0', positive=True)
+#     F0 = Symbol('F_0', positive=True)
+#     Omega0 = Symbol('Omega_0', positive=True)
+#     ivar=Symbol('t')
 
     
-    @classmethod
-    def _scheme(cls):
+#     @classmethod
+#     def _scheme(cls):
 
-        path = cls._default_folder_path + cls.scheme_name
+#         path = cls._default_folder_path + cls.scheme_name
 
-        return path
+#         return path
 
-    @classmethod
-    def _real_example(cls):
-        path = cls._default_folder_path + cls.real_name
+#     @classmethod
+#     def _real_example(cls):
+#         path = cls._default_folder_path + cls.real_name
 
-        return path
+#         return path
 
-    @classmethod
-    def _detail_real(cls):
-        path = cls._default_folder_path + cls.detail_real_name
+#     @classmethod
+#     def _detail_real(cls):
+#         path = cls._default_folder_path + cls.detail_real_name
 
-        return path
+#         return path
 
-    @classmethod
-    def _detail_scheme(cls):
-        path = cls._default_folder_path + cls.detail_scheme_name
+#     @classmethod
+#     def _detail_scheme(cls):
+#         path = cls._default_folder_path + cls.detail_scheme_name
 
-        return path
+#         return path
 
-    def _init_from_components(self, *args, system=None, **kwargs):
+#     def _init_from_components(self, *args, system=None, **kwargs):
 
-        if system is None:
-            composed_system = self._elements_sum
-        else:
-            composed_system = system
+#         if system is None:
+#             composed_system = self._elements_sum
+#         else:
+#             composed_system = system
 
-        #print('CS',composed_system._components)
-        super(HarmonicOscillator,self).__init__(None, system=composed_system)
+#         #print('CS',composed_system._components)
+#         super(HarmonicOscillator,self).__init__(None, system=composed_system)
 
-        #print('self',self._components)
-        if self._components is None:
-            comps = {}
-        else:
-            comps = self._components
+#         #print('self',self._components)
+#         if self._components is None:
+#             comps = {}
+#         else:
+#             comps = self._components
 
-        self._components = {**comps, **self.components}
+#         self._components = {**comps, **self.components}
 
-    def __init__(self,
-                 Lagrangian=None,
-                 m0=None,
-                 qs=None,
-                 forcelist=None,
-                 bodies=None,
-                 frame=None,
-                 hol_coneqs=None,
-                 nonhol_coneqs=None,
-                 label=None,
-                 ivar=None,
-                 evaluate=True,
-                 system=None,
-                 **kwargs):
+#     def __init__(self,
+#                  Lagrangian=None,
+#                  m0=None,
+#                  qs=None,
+#                  forcelist=None,
+#                  bodies=None,
+#                  frame=None,
+#                  hol_coneqs=None,
+#                  nonhol_coneqs=None,
+#                  label=None,
+#                  ivar=None,
+#                  evaluate=True,
+#                  system=None,
+#                  **kwargs):
 
-        if ivar is not None: self.ivar = ivar
-        if m0 is not None: self.m0 = m0
+#         if ivar is not None: self.ivar = ivar
+#         if m0 is not None: self.m0 = m0
 
-        if qs is not None:
-            self.qs = qs
-        else:
-            self.qs = [self.z]
-
-        
-        self._init_from_components(system=system, **kwargs)
-
-    @property
-    def components(self):
-
-        components = {}
-
-        self._material_point = MaterialPoint(self.m0, self.qs[0],
-                                             self.qs)('Material Point')
-        components['_material_point'] = self._material_point
-
-        return components
-
-    @property
-    def elements(self):
-
-        return {**super().components, **self.components}
-
-    @classmethod
-    def preview(cls, example=False):
-        if example:
-            path = cls._real_example()
-
-        elif example == 'detail_scheme_name':
-            path = cls._detail_scheme()
-        elif example == 'detail_real_name':
-            path = cls._detail_real()
-        else:
-            path = cls._scheme()
-        print(path)
-        with open(f"{path}", "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read())
-        image_file.close()
-
-        return IP.display.Image(base64.b64decode(encoded_string))
-
-    def _components_default_data(self):
-        
-        data=[elem._all_default_data()   for elem in self.elements.values()]
+#         if qs is not None:
+#             self.qs = qs
+#         else:
+#             self.qs = [self.z]
 
         
-        return {key:value for elem in data for key, value in elem.items()}    
+#         self._init_from_components(system=system, **kwargs)
+
+#     @property
+#     def components(self):
+
+#         components = {}
+
+#         self._material_point = MaterialPoint(self.m0, self.qs[0],
+#                                              self.qs)('Material Point')
+#         components['_material_point'] = self._material_point
+
+#         return components
+
+#     @property
+#     def elements(self):
+
+#         return {**super().components, **self.components}
+
+#     @classmethod
+#     def preview(cls, example=False):
+#         if example:
+#             path = cls._real_example()
+
+#         elif example == 'detail_scheme_name':
+#             path = cls._detail_scheme()
+#         elif example == 'detail_real_name':
+#             path = cls._detail_real()
+#         else:
+#             path = cls._scheme()
+#         print(path)
+#         with open(f"{path}", "rb") as image_file:
+#             encoded_string = base64.b64encode(image_file.read())
+#         image_file.close()
+
+#         return IP.display.Image(base64.b64decode(encoded_string))
+
+#     def _components_default_data(self):
+        
+#         data=[elem._all_default_data()   for elem in self.elements.values()]
+
+        
+#         return {key:value for elem in data for key, value in elem.items()}    
     
-    def _components_numerical_data(self):
+#     def _components_numerical_data(self):
         
-        data=[elem._all_numerical_data()   for elem in self.elements.values()]
+#         data=[elem._all_numerical_data()   for elem in self.elements.values()]
         
         
-        return {key:value for elem in data for key, value in elem.items()}    
+#         return {key:value for elem in data for key, value in elem.items()}    
     
-    def _all_default_data(self):
+#     def _all_default_data(self):
         
         
 
         
-        return {**self._components_default_data(),**self.get_default_data()}    
+#         return {**self._components_default_data(),**self.get_default_data()}    
     
-    def _all_numerical_data(self):
+#     def _all_numerical_data(self):
         
-        return {**self._components_numerical_data(),**self.get_numerical_data()}  
+#         return {**self._components_numerical_data(),**self.get_numerical_data()}  
     
     
-    def get_default_data(self):
-        return {}
+#     def get_default_data(self):
+#         return {}
 
-    def get_numerical_data(self):
-        return {}
+#     def get_numerical_data(self):
+#         return {}
 
-    def linearized(self, x0=None, op_point=False, hint=[], label=None):
+#     def linearized(self, x0=None, op_point=False, hint=[], label=None):
 
-        return type(self).from_system(super().linearized(x0=x0,op_point=op_point,hint=hint,label=label))
+#         return type(self).from_system(super().linearized(x0=x0,op_point=op_point,hint=hint,label=label))
 
-    def get_random_parameters(self):
+#     def get_random_parameters(self):
 
         
-        #print('preview for',self)
-        #display(self._all_default_data())
-        #display(self.get_default_data())
+#         #print('preview for',self)
+#         #display(self._all_default_data())
+#         #display(self.get_default_data())
         
-        default_data_dict = {**self._components_default_data(),**self.get_default_data()}
+#         default_data_dict = {**self._components_default_data(),**self.get_default_data()}
 
-        if default_data_dict:
-            parameters_dict = {
-                key: random.choice(items_list)
-                for key, items_list in default_data_dict.items()
-            }
-        else:
-            parameters_dict = None
+#         if default_data_dict:
+#             parameters_dict = {
+#                 key: random.choice(items_list)
+#                 for key, items_list in default_data_dict.items()
+#             }
+#         else:
+#             parameters_dict = None
 
-        return parameters_dict
+#         return parameters_dict
 
-    def get_numerical_parameters(self):
+#     def get_numerical_parameters(self):
 
-        default_data_dict = {**self._components_numerical_data(),**self.get_numerical_data()}
+#         default_data_dict = {**self._components_numerical_data(),**self.get_numerical_data()}
 
-        if default_data_dict:
-            parameters_dict = {
-                key: random.choice(items_list)
-                for key, items_list in default_data_dict.items()
-            }
-        else:
-            parameters_dict = None
+#         if default_data_dict:
+#             parameters_dict = {
+#                 key: random.choice(items_list)
+#                 for key, items_list in default_data_dict.items()
+#             }
+#         else:
+#             parameters_dict = None
 
-        return parameters_dict
+#         return parameters_dict
 
-    @property
-    def _report_components(self):
+#     @property
+#     def _report_components(self):
 
-        comp_list = [
-        *REPORT_COMPONENTS_LIST
-        ]
+#         comp_list = [
+#         *REPORT_COMPONENTS_LIST
+#         ]
 
-        return comp_list
+#         return comp_list
 
 
 
-    def tensioner_belt_force(self):
-        return self.k_tensioner * self.steady_solution()
+#     def tensioner_belt_force(self):
+#         return self.k_tensioner * self.steady_solution()
 
-    def left_belt_force(self):
-        return self.k_belt * self.steady_solution()
+#     def left_belt_force(self):
+#         return self.k_belt * self.steady_solution()
 
-    def right_belt_force(self):
-        return self.k_belt * self.steady_solution()
+#     def right_belt_force(self):
+#         return self.k_belt * self.steady_solution()
 
+
+# #     def max_static_force_pin(self):
+# #         return abs(self.static_load().doit()[0])
+
+# #     def max_dynamic_force_pin(self):
+# #         return self.frequency_response_function() * self.stiffness_matrix(
+# #         )[0] + self.max_static_force_pin()
 
 #     def max_static_force_pin(self):
-#         return abs(self.static_load().doit()[0])
+#         return abs(self.static_load().doit()[0]) / 2
 
 #     def max_dynamic_force_pin(self):
-#         return self.frequency_response_function() * self.stiffness_matrix(
-#         )[0] + self.max_static_force_pin()
+#         return self._frf()[0] * self.k_m + self.max_static_force_pin()
 
-    def max_static_force_pin(self):
-        return abs(self.static_load().doit()[0]) / 2
+#     def static_force_pin_diameter(self):
+#         kt = Symbol('k_t', positive=True)
+#         Re = Symbol('R_e', positive=True)
+#         return ((4 * self.max_static_force_pin()) / (pi * kt * Re))**(1 / 2)
 
-    def max_dynamic_force_pin(self):
-        return self._frf()[0] * self.k_m + self.max_static_force_pin()
+#     def dynamic_force_pin_diameter(self):
+#         kt = Symbol('k_t', positive=True)
+#         Re = Symbol('R_e', positive=True)
+#         return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
+#         Re = Symbol('R_e', positive=True)
+#         return ((4 * self.max_static_force_pin()) / (pi * kt * Re))**(1 / 2)
 
-    def static_force_pin_diameter(self):
-        kt = Symbol('k_t', positive=True)
-        Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_static_force_pin()) / (pi * kt * Re))**(1 / 2)
+#     def dynamic_force_pin_diameter(self):
+#         kt = Symbol('k_t', positive=True)
+#         Re = Symbol('R_e', positive=True)
+#         return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
 
-    def dynamic_force_pin_diameter(self):
-        kt = Symbol('k_t', positive=True)
-        Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
-        Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_static_force_pin()) / (pi * kt * Re))**(1 / 2)
-
-    def dynamic_force_pin_diameter(self):
-        kt = Symbol('k_t', positive=True)
-        Re = Symbol('R_e', positive=True)
-        return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
-
+#FINISHED 
 class CarMovementConstantThrottle(ComposedSystem):
 
     x = dynamicsymbols('x')
@@ -306,6 +318,9 @@ class CarMovementConstantThrottle(ComposedSystem):
     n_min = Symbol('n_min', positive=True)
     n_max = Symbol('n_max', positive=True)
     
+    v_ref = Symbol('v_ref', positive=True)
+    Omega = Symbol('Omega', positive=True)
+    
     def __init__(self,
                 x = None,
                 T = None,
@@ -333,6 +348,8 @@ class CarMovementConstantThrottle(ComposedSystem):
                 e = None,
                 n_min = None,
                 n_max = None,
+                v_ref = None,
+                Omega = None,
                 ivar=None,
                 **kwargs):
 
@@ -362,6 +379,8 @@ class CarMovementConstantThrottle(ComposedSystem):
         if e is not None: self.e = e
         if n_min is not None: self.n_min = n_min
         if n_max is not None: self.n_max = n_max
+        if v_ref is not None: self.v_ref = v_ref
+        if Omega is not None: self.Omega = Omega
         if ivar is not None: self.ivar = ivar
             
         self.qs = [self.x]
@@ -439,6 +458,7 @@ class CarMovementConstantThrottle(ComposedSystem):
             self.a_h: r'Podstawowe opóźnienie siły hamowania',
             self.u: r'Siła hamowania',
             self.x: r'Przemieszczenie w osi x',
+            self.v_ref: r'Prędkość referencyjna',
             self.ivar: r'Czas',
         }
 
@@ -499,27 +519,31 @@ class CarMovementConstantThrottle(ComposedSystem):
 
         return default_data_dict
     
-    
+#FINISHED 
 class SecondGearCarMovement(CarMovementConstantThrottle):
     @property
     def current_gear(self):
         return 2.08
-    
+
+#FINISHED 
 class ThirdGearCarMovement(CarMovementConstantThrottle):
     @property
     def current_gear(self):
         return 1.361
+    
+#FINISHED 
 class FourthGearCarMovement(CarMovementConstantThrottle):
     @property
     def current_gear(self):
         return 0.84
 
+#FINISHED     
 class FifthGearCarMovement(CarMovementConstantThrottle):
     @property
     def current_gear(self):
         return 0.686
 
-    
+#FINISHED 
 class OwnCombustionEngine(CombustionEngine):
 
     eta= Symbol('eta', positive = True)
@@ -533,6 +557,7 @@ class OwnCombustionEngine(CombustionEngine):
     def characteristic(self):
         return 1.27125002e-32*self.n_engine**10 -4.80476337e-28*self.n_engine**9  +7.97606590e-24*self.n_engine**8 -7.64635574e-20*self.n_engine**7 +4.67842235e-16*self.n_engine**6 -1.90327141e-12*self.n_engine**5 + 5.18793861e-09*self.n_engine**4 -9.27156707e-06*self.n_engine**3 +1.02140928e-02*self.n_engine**2 -6.02709068e+00*self.n_engine + 1.54285805e+03
 
+#FINISHED 
 class CarMovementAdjustableThrottle(CarMovementConstantThrottle):
     @property
     def current_gear(self):
@@ -549,7 +574,8 @@ class CarMovementAdjustableThrottle(CarMovementConstantThrottle):
 
         components['_throttle'] = self._throttle
         return components
-    
+
+#FINISHED 
 class CarMovementRegulatedThrottle(CarMovementConstantThrottle):
 
     @property
@@ -567,7 +593,8 @@ class CarMovementRegulatedThrottle(CarMovementConstantThrottle):
         components['_integral'] = self._integral
         components['_derivative'] = self._derivative
         return components
-    
+
+#FINISHED 
 class CarMovementRegulatedThrottleACC(CarMovementConstantThrottle):
 
     @property
@@ -612,7 +639,8 @@ class CarMovementRegulatedThrottleACC(CarMovementConstantThrottle):
         }
 
         return default_data_dict
-    
+
+#FINISHED 
 class GearboxEngine(ComposedSystem):
 
     x = dynamicsymbols('x')
@@ -677,12 +705,19 @@ class GearboxEngine(ComposedSystem):
 
         return components
 
-    
+#FINISHED 
 class CarMovementGearBoxThrottle(CarMovementConstantThrottle):
 
     @property
     def components(self):
-
+        i1 = 3.643
+        i2 = 2.08
+        i3 = 1.361
+        i4 = 1.024 # Szymon
+        i5 = 0.83
+        i6 = 0.686
+        i_gearbox = [i1,i2,i3,i4,i5,i6]
+        
         components = super().components
 
         self._throttle = GearboxEngine(df, i_gearbox)(label='throttle')
@@ -695,7 +730,8 @@ class CarMovementGearBoxThrottle(CarMovementConstantThrottle):
         components['_integral'] = self._integral
         components['_derivative'] = self._derivative
         return components
-    
+
+#TODO 
 class CarMovementPIDAdjust(CarMovementConstantThrottle):
 
     @property
@@ -704,9 +740,9 @@ class CarMovementPIDAdjust(CarMovementConstantThrottle):
         components = super().components
 
         self._throttle = CombustionEngine.from_data_raw(df, n = self.n ,degree=10,qs = self.qs)(label='throttle')
-        self._proportional = ProportionalElement(self.P , error=diff(self.x,self.ivar) , target = self.x , reference = v_ref*self.ivar - 0*self.x*cos(Omega*self.ivar) , qs=self.qs)(label='proportional')
-        #self._integral = IntegralElement(self.I , error=diff(self.x,self.ivar) , target = self.x , reference =  v_ref*self.ivar - self.x*cos(Omega*self.ivar) , qs=self.qs)(label='integral')
-        self._derivative = DerivativeElement(self.D , error=diff(self.x,self.ivar) , target = self.x, reference =  v_ref*self.ivar - 0*self.x*cos(Omega*self.ivar) , qs=self.qs)(label='derivative')
+        self._proportional = ProportionalElement(self.P , error=diff(self.x,self.ivar) , target = self.x , reference = self.v_ref*self.ivar , qs=self.qs)(label='proportional')
+        #self._integral = IntegralElement(self.I , error=diff(self.x,self.ivar) , target = self.x , reference =  self.v_ref*self.ivar - self.x*cos(self.Omega*self.ivar) , qs=self.qs)(label='integral')
+        self._derivative = DerivativeElement(self.D , error=diff(self.x,self.ivar) , target = self.x, reference =  self.v_ref*self.ivar , qs=self.qs)(label='derivative')
 
         components['_throttle'] = self._throttle
         components['_proportional'] = self._proportional

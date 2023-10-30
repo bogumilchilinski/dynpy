@@ -34,6 +34,12 @@ def const_no_gen():
 
 class SimplifiedExpr:
     
+    """
+
+    This class provides methods which allow to obtain a differencial equation in simplified form, or extract desired simplification parameters. 
+
+    """
+
     _const_no=const_no_gen()
     
     _subs_container={}
@@ -44,14 +50,34 @@ class SimplifiedExpr:
         self._parameters = parameters
     @property
     def _fun_list(self):
+        
+        """
+        
+        Method extracts functions from expression and returns them in a list.
+        
+        """
+        
         funlist=[expr  for  expr in  (self._expr).atoms(sin,cos) if expr.has(self._ivar)]
         return funlist
     @property
     def simplified_expr(self):
+        
+        """
+        
+        This method returns a simplified expression, prepared in sum_expr method.
+        
+        """
+        
         return self.sum_expr
     @property
     def sum_expr(self):
         
+        """
+        
+        This method provides simplified expression that consist of main part of an equation and functions with additional coefficents.
+        
+        """
+
         data = self._expr_collector
         expr_dict={key:values[0]  for  key,values  in  data.items() }
         self.__class__._subs_container={**self.__class__._subs_container, **expr_dict}
@@ -69,10 +95,23 @@ class SimplifiedExpr:
     
     @property
     def _expr_dict(self):
+        
+        """
+
+        Method returns a dictionary that contains additional coefficients with their values.
+
+        """
+        
         expr_dict={key:values[0]  for  key,values  in  self._expr_collector.items() }
         return expr_dict
     @property
     def _expr_collector(self):
+        
+        """
+
+        This method combines functions and coefficients and then returns a dictionary with segregated values.
+
+        """
         
         parameters = self._parameters
         
@@ -85,6 +124,13 @@ class SimplifiedExpr:
         return bucket
     @property
     def full_expr(self):
+        
+        """
+
+        Main method that returns a full expression with functions and proper coefficients.
+
+        """
+        
         #display(self.__class__._subs_container)
     
         return self._expr.doit().expand().subs(self.__class__._subs_container)
