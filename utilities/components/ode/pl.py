@@ -808,3 +808,156 @@ class MaxDynamicForce(ReportComponent):
 
         display(SympyFormula( Eq(Symbol('F_d'),
                      dyn_sys.max_dynamic_force().doit() ), marker=None))
+
+##### Karolina + Kamil + Bogi rr
+
+class EquationDefinitionComponent(ReportComponent):
+    #title="We consider the following differential equation:"
+    title="Rozpatrujemy następujące równanie różniczkowe: "
+
+    def append_elements(self):
+
+        system = self._system
+        ode_sys =system
+
+        y_sym = system._variable_name()[2]
+        display(SympyFormula(Eq(ode_sys.lhs[0],ode_sys.rhs[0])))
+        #display(ReportText('Where:')
+        display(ReportText('Gdzie:'))
+        display(SympyFormula(y_sym))
+        #display(ReportText('Is our encountered function.'))
+        display(ReportText('Jest naszą szukaną funkcją.'))
+
+class VariablesSeparationComponent(ReportComponent):
+    
+    #title="Separation of variables"
+    title="Rodzielanie zmiennych"
+
+    def append_elements(self):
+
+        system = self._system
+        ode_sys =system
+        ############################ must have
+
+#         display(ReportText(  self.header_text   ))
+
+        fun = system.dvars[0]
+        ivar = system.ivar
+
+        fun_str = system._variable_name()[3]
+
+        d_ivar = system._variable_name()[0]
+        d_var = system._variable_name()[1]
+
+        y_sym = system._variable_name()[2]
+        gx=Symbol('g(x)')
+        hx=Symbol('h(x)')
+
+        
+        
+        #ode_rhs = solve(ode_sys.lhs[0],ode_sys.dvars[0].diff())[0]
+        
+        #sep_vars_dict = (separatevars(ode_rhs.subs(fun,y_sym),(ivar,y_sym),dict=True))
+        
+        g_fun_ivar = system._function_separation()[0]
+        h_fun_dvar = system._function_separation()[1]
+        #display(ReportText('If it is possible variables $x$ and $y$ should be separated like shown below:'))
+        display(ReportText('Jeżeli to możliwe,  zmienne $x$ i $y$ powinny zostać rozdzielone jak pokazano poniżej:'))
+        display(SympyFormula(Eq(gx,g_fun_ivar)))
+        display(SympyFormula(Eq(hx,h_fun_dvar)))
+        display(ReportText('Gdy da się rozdzielić zmienne, możemy oddzielić $dx$ i $dy$, co umożliwi nam rozwiązanie równania poprzez jedynie scałkowaniu go obustronnie :'))
+
+class SeparatedVariablesIntegrationComponent(ReportComponent):
+    
+    #title="Integration of separated variables"
+    title="Całkowanie zmiennych rozdzielonych"
+    def append_elements(self):
+
+        system = self._system
+        ode_sys =system
+        ############################ must have
+
+#         display(ReportText(  self.header_text   ))
+
+        fun = system.dvars[0]
+        ivar = system.ivar
+        gx=Symbol('g(x)')
+        hx=Symbol('h(x)')
+        
+
+        d_ivar = system._variable_name()[0]
+        d_var = system._variable_name()[1]
+        y_sym = system._variable_name()[2]
+        fun_str = system._variable_name()[3]
+
+        
+
+
+        
+
+        
+        g_fun_ivar = system._function_separation()[0]
+        h_fun_dvar = system._function_separation()[1]
+        #display(ReportText(f'We treat our ${latex(hx)}$ function as a ${latex(y_sym)}$'))
+        display(ReportText(f'Traktujemy funkcję ${latex(hx)}$ jako ${latex(y_sym)}$'))
+        
+        display(SympyFormula( Eq(Symbol(fun_str),g_fun_ivar*h_fun_dvar)))
+
+        #display(ReportText('Two functions of seprarate variables are to define. These are as follows'  ))
+        display(ReportText('Należy zdefiniować dwie następujące funkcje rozdzielonych zmiennych jak pokazano poniżej. '  ))
+        
+        display(SympyFormula( Symbol(latex(d_var/h_fun_dvar)+ '=' + latex(g_fun_ivar) + latex(d_ivar) )   ) )
+        #display(ReportText('Integration on both sides'))## uzupełnić opis
+        display(ReportText('''Następnie, aby "wrócić" do funkcji pierwotnej oraz otrzymać wynik w postaci funkcji $y$ całkujemy obustronnie: '''))
+        
+        #display(SympyFormula(  Symbol('\\int ' + latex(d_var/y_sym) + '=  \\int ' + latex(g_fun_ivar) + latex(d_ivar) )   ) )
+        display(ReportText('''Przy całkowaniu należy pamiętać o dodaniu stałej w dowolnej postaci. '''))
+        display(SympyFormula(  Symbol(latex( Integral(1/h_fun_dvar,y_sym) )+ '= ' + latex(Integral(g_fun_ivar,ivar))  )   ) )
+
+#         const = (system.solution._spot_constant())[0]
+        const=Symbol('D')
+        display(ReportText(' Po scałkowaniu otrzymujemy następujący wynik:'))
+        display(SympyFormula(  Symbol(latex( Integral(1/h_fun_dvar,y_sym).doit() )+ '=' + latex(Integral(g_fun_ivar,ivar).doit()) + '+' + latex(const)   )   ) )
+#         display(ReportText('Equations presented above correspond to each generalized coordinate:'))
+#         display(SympyFormula(system.dvars))
+
+#         display(ReportText(  self.footer_text   ))
+
+class SolutionComponent(ReportComponent):
+    
+    title="Uproszczenie rozwiązania otrzymanego po scałkowaniu równań"
+
+    def append_elements(self):
+
+        system = self._system
+        ode_sys =system
+        ############################ must have
+
+#         display(ReportText(  self.header_text   ))
+
+        fun = system.dvars[0]
+        ivar = system.ivar
+
+        fun_str = system._variable_name()[3]
+
+        d_ivar = system._variable_name()[0]
+        d_var = system._variable_name()[1]
+
+        y_sym = system._variable_name()[2]
+
+
+        
+        ode_rhs = solve(ode_sys.lhs[0],ode_sys.dvars[0].diff())[0]
+        
+        sep_vars_dict = (separatevars(ode_rhs.subs(fun,y_sym),(ivar,y_sym),dict=True))
+        
+        g_fun_ivar = system._function_separation()[0]
+        h_fun_dvar = system._function_separation()[1]
+        
+        #display(ReportText('After rearrangment a solution has the following form:'  ))
+        display(ReportText('Po uporządkowaniu oraz przeobrażeniu stałej wyrażenie ma następującą postać:'  ))
+        display(SympyFormula( system.general_solution.as_eq_list()[0] ))
+
+        #display(ReportText('Obtained expresions enable to rewrite equation under consideration.'  ))
+        display(ReportText('Otrzymane wyrażenie umożliwia ponowne zapisanie równań uwzględniając wczeniejsze obliczenia.'  ))
+

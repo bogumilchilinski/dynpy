@@ -172,7 +172,7 @@ class ReportComponent(Subsection):
     
     title='Report generic component'
 
-    def __init__(self, system,title=None, numbering=False, *, label=True, **kwargs):
+    def __init__(self, reported_object, title=None, numbering=False, *, label=True, **kwargs):
         """
         Args
         ----
@@ -185,26 +185,18 @@ class ReportComponent(Subsection):
             preference between automatic or no label
         """
 
-        self._system=system
+
+
+        self.reported_object = reported_object #it's forced by pylatex library
+        
         
         if title is None:
             title = self.title
         
         super().__init__(title=title, numbering=numbering, label=label, **kwargs)
-
-
-                
-
-        ReportText.set_container(self)
-        #ReportText.set_directory('./SDAresults')
-        SympyFormula.set_container(self)
-        LatexDataFrame.set_default_container(self)
-        Markdown.set_container(self)
-        LatexDataFrame.set_picture_mode(True)
-        Picture.set_container(self)
-        #LatexDataFrame.set_directory('./SDAresults')
+        CurrentContainer(self)
         
-        
+
         self.append_elements()
         
     def append_elements(self):
@@ -216,6 +208,26 @@ class ReportComponent(Subsection):
         frame+=(list(self))
         return frame
 
+    @property
+    def reported_object(self):
+
+        from ...solvers.linear import ODESystem
+        return self._reported_object       
+#         if isinstance(self._reported_object, ODESystem):
+#             return self._reported_object
+#         else:
+#             return self._reported_object._ode_system
+            
+    @reported_object.setter
+    def reported_object(self, obj):
+        self._reported_object=obj
+
+    @property
+    def _system(self):
+        print('Kod do poprawienia #################### bo stosujesz starą zmienną self._system')
+        print('zamień se self._system na self.reported_object')
+        
+        return self.reported_object
 
 
 class TitlePageComponent(Environment):
