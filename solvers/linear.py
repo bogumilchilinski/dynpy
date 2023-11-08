@@ -1052,6 +1052,12 @@ class ODESystem(AnalyticalSolution):
         return Matrix([dvar.diff(self.ivar,orders[dvar])  for dvar in dvars])
     
     @cached_property
+    def _reduction_eqns(self):
+        
+        return [eqn for eqn  in list(self._fode_dvars) if eqn not in self.dvars]
+    
+    
+    @cached_property
     def odes_rhs(self):
         
         diffs = self._highest_diff
@@ -1549,7 +1555,9 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         
         f_ord_dvars=sys._fode_dvars
-        ode_rhs = Matrix(list(f_ord_dvars[len(dvars):]) + list(sys.odes_rhs))
+        aux_odes = sys._reduction_eqns
+        
+        ode_rhs = Matrix(aux_odes + list(sys.odes_rhs))
 
     
         new_sys = cls._constructor(f_ord_dvars.diff(ivar) , f_ord_dvars,ode_rhs, ivar = ivar,ode_order=ode_order ,parameters=parameters)

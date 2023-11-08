@@ -630,3 +630,211 @@ class DDOFSemiSubmersiblePlatform(ComposedSystem):
         }
 
         return default_data_dict
+    
+class ROVImpactDamped(ComposedSystem):
+
+    scheme_name = 'engine.png'
+    real_name = 'engine_real.PNG'
+
+    m=Symbol('m', positive=True)
+    m_n=Symbol('m_n', positive=True)
+    c=Symbol('c',positive=True)
+    k=Symbol('k', positive=True)
+    ivar=Symbol('t')
+    
+    z, z_s=dynamicsymbols('z z_s')
+    
+    def __init__(self,
+                 m=None,
+                 c=None,
+                 z=None,
+                 z_s=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m is not None: self.m = m
+        if c is not None: self.c = c
+        if z is not None: self.z = z
+        if z_s is not None: self.z_s = z_s
+
+        self.ivar = ivar
+        self.qs = [self.z,self.z_s]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self.material_point = MaterialPoint(self.m, self.z, qs=self.qs)
+        self.damper = Damper(self.c, pos1=self.z_s, qs=self.qs)
+
+        components['material_point'] = self.material_point
+        components['damper'] = self.damper
+
+        return components
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'mass of system on the spring',
+            self.k: r'Spring coefficient ',
+        }
+
+        return self.sym_desc_dict
+
+class ROVImpactElasticDamped(ROVImpactDamped):
+
+    scheme_name = 'engine.png'
+    real_name = 'engine_real.PNG'
+
+    m=Symbol('m', positive=True)
+    m_n=Symbol('m_n', positive=True)
+    c=Symbol('c',positive=True)
+    k=Symbol('k', positive=True)
+    ivar=Symbol('t')
+    
+    z, z_s=dynamicsymbols('z z_s')
+    
+    def __init__(self,
+                 m=None,
+                 c=None,
+                 k=None,
+                 z=None,
+                 z_s=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m is not None: self.m = m
+        if k is not None: self.k = k
+        if c is not None: self.c = c
+        if z is not None: self.z = z
+        if z_s is not None: self.z_s = z_s
+
+        self.ivar = ivar
+        self.qs = [self.z,self.z_s]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self.material_point = MaterialPoint(self.m, self.z, qs=self.qs)
+        self.damper = Damper(self.c, pos1=self.z_s, qs=self.qs)
+        self.spring = Spring(self.k, pos1=self.z, pos2=self.z_s, qs=self.qs)
+
+        components['material_point'] = self.material_point
+        components['damper'] = self.damper
+        components['spring'] = self.spring
+
+        return components
+    
+class ROVandStructureImpact(ROVImpactDamped):
+
+    scheme_name = 'engine.png'
+    real_name = 'engine_real.PNG'
+
+    m=Symbol('m', positive=True)
+    m_n=Symbol('m_n', positive=True)
+    c=Symbol('c',positive=True)
+    k=Symbol('k', positive=True)
+    ivar=Symbol('t')
+    
+    z, z_s=dynamicsymbols('z z_s')
+    
+    def __init__(self,
+                 m=None,
+                 c=None,
+                 k=None,
+                 z=None,
+                 z_s=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m is not None: self.m = m
+        if k is not None: self.k = k
+        if c is not None: self.c = c
+        if z is not None: self.z = z
+        if z_s is not None: self.z_s = z_s
+
+        self.ivar = ivar
+        self.qs = [self.z,self.z_s]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self.material_point = MaterialPoint(self.m, self.z, qs=self.qs)
+        self.spring = Spring(self.k, pos1=self.z, pos2=self.z_s, qs=self.qs)
+        self.damper = Damper(self.c, pos1=self.z_s, qs=self.qs)
+        self.material_point_aux = MaterialPoint(self.m_n, self.z_s, qs=self.qs)
+
+        components['material_point'] = self.material_point
+        components['spring'] = self.spring
+        components['damper'] = self.damper
+        components['material_point1'] = self.material_point_aux
+
+        return components
+
+class ROVandStructureImpactMassModel(ROVandStructureImpact):
+
+    scheme_name = 'engine.png'
+    real_name = 'engine_real.PNG'
+
+    m=Symbol('m', positive=True)
+    m_n=Symbol('m_n', positive=True)
+    k_n=Symbol('k_n', positive=True)
+    c=Symbol('c', positive=True)
+    k=Symbol('k', positive=True)
+    ivar=Symbol('t')
+    
+    z, z_s=dynamicsymbols('z z_s')
+    
+    def __init__(self,
+                 m=None,
+                 m_n=None,
+                 c=None,
+                 k=None,
+                 k_n=None,
+                 z=None,
+                 z_s=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m is not None: self.m = m
+        if m_n is not None: self.m_n = m_n
+        if k is not None: self.k = k
+        if k_n is not None: self.k_n = k_n
+        if c is not None: self.c = c
+        if z is not None: self.z = z
+        if z_s is not None: self.z_s = z_s
+
+        self.ivar = ivar
+        self.qs = [self.z,self.z_s]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self.material_point = MaterialPoint(self.m, self.z, qs=self.qs)
+        self.spring_rov = Spring(self.k, pos1=self.z, pos2=self.z_s, qs=self.qs)
+        self.damper = Damper(self.c, pos1=self.z_s, qs=self.qs)
+        self.material_point_aux = MaterialPoint(self.m_n, self.z_s, qs=self.qs)
+        self.spring_str = Spring(self.k_n, pos1=self.z_s, pos2=0, qs=self.qs)
+
+        components['material_point'] = self.material_point
+        components['spring_rov'] = self.spring_rov
+        components['damper'] = self.damper
+        components['material_point1'] = self.material_point_aux
+        components['spring_str'] = self.spring_str
+
+        return components
+    
