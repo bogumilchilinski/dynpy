@@ -2370,7 +2370,8 @@ class ReportText(ReportModule):
             self._text = self._text.format(**DataStorage._dict)
 
         except:
-            print('.w')
+            pass
+            #print('.w')
         finally:
             self._text = self._text
 

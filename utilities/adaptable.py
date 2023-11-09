@@ -401,6 +401,7 @@ class DataAxis(Axis, ReportModule):
     _height = NoEscape(r'5cm')
     _width = '0.9\\textwidth'
     _x_axis_empty = False
+    _y_limit = None
     _legend_pos = 'north east'
     _default_transformer = BaseIndexTransformer
 
@@ -410,6 +411,7 @@ class DataAxis(Axis, ReportModule):
                  width=None,
                  options=None,
                  *,
+                 y_limit = None,
                  x_axis_empty = None,
                  colour =None,
                  at=None,
@@ -440,7 +442,9 @@ class DataAxis(Axis, ReportModule):
         if x_axis_empty is not None:
             self._x_axis_empty = x_axis_empty
 
-
+        if y_limit is not None:
+            self._y_limit = y_limit
+            
         if options is None:
             options = self._axis_options
 
@@ -736,8 +740,12 @@ class TikZPlot(TikZ, ReportModule):
     _subplots = False
     _height = 5
     _width = 0.9
+    _ylim = None
 
     _subplots_gap = 0.0
+    _subplots_horizontal_gap = 0.5
+    _default_grid = None
+    _grid = (2,6)
 
     _in_figure = False
     _figure_gen = lambda: Figure(position='H')
@@ -802,12 +810,15 @@ class TikZPlot(TikZ, ReportModule):
                     #data.columns.name = labels[no]
                     
                     
-                    ax_data = self.axis_type(data,height=self.subplot_height,width=self.width,x_axis_empty=empty_axis,colour=colours_list[no],at = pos,handle=f'subplot{no}')
+                    ax_data = self.axis_type(data,height=self.subplot_height,width=self.subplot_width,x_axis_empty=empty_axis,colour=colours_list[no],at = pos,handle=f'subplot{no}')
 
                     self.append(ax_data)
             else:
                 
                 self.append(self.axis_type(plotdata,height=self.height,width=self.width))
+
+                
+
 
     @property
     def axis_type(self):
@@ -841,32 +852,80 @@ class TikZPlot(TikZ, ReportModule):
     def _axis_options(self):
 
         return None
-        return Options('grid style=dashed',
-                       NoEscape('legend style={font=\small}'),
-                       NoEscape(f'width={self._width}'),
-                       NoEscape(f'xmin={min(self._plotdata.index)}'),
-                       NoEscape(f'xmax={max(self._plotdata.index)}'),
-                       height=NoEscape(self._height),
-                       anchor='north west',
-                       ymajorgrids='true',
-                       xmajorgrids='true',
-                       xlabel=self._x_axis_name,
-                       ylabel=self._y_axis_name)
+        if isinstance(self._ylim, list):
+            return Options('grid style=dashed',
+                           NoEscape('legend style={font=\small}'),
+                           NoEscape(f'width={self._width}'),
+                           NoEscape(f'xmin={min(self._plotdata.index)}'),
+                           NoEscape(f'xmax={max(self._plotdata.index)}'),
+                           NoEscape(f'ymin={min(self._ylim)}'),
+                           NoEscape(f'ymax={max(self._ylim)}'),
+                           height=NoEscape(self._height),
+                           anchor='north west',
+                           ymajorgrids='true',
+                           xmajorgrids='true',
+                           xlabel=self._x_axis_name,
+                           ylabel=self._y_axis_name)
+        elif self._ylim is None:
+            return Options('grid style=dashed',
+                           NoEscape('legend style={font=\small}'),
+                           NoEscape(f'width={self._width}'),
+                           NoEscape(f'xmin={min(self._plotdata.index)}'),
+                           NoEscape(f'xmax={max(self._plotdata.index)}'),
+                           height=NoEscape(self._height),
+                           anchor='north west',
+                           ymajorgrids='true',
+                           xmajorgrids='true',
+                           xlabel=self._x_axis_name,
+                           ylabel=self._y_axis_name)
+
+                
+    @property
+    def grid(self):
+        
+        if self._grid is None:
+            grid = (1,len(self._plotdata.columns)  )
+        else:
+            grid = self._grid
+        
+        return grid
+    
     
     @property
     def grid_nodes(self):
+        
+        cols_no, rows_no=self.grid
+        
         coordinates = []
-        i = 0
-        for column in self._plotdata.columns:
-            y_coordinate = i * (self._height/len(self._plotdata.columns))
-            position = "{"+f"(0cm , -{round(y_coordinate,2)}cm)"+"}"
-            coordinates.append(position)
-            i += 1
+        
+        for row_id in range(rows_no):
+            y_coordinate = row_id * (self._height/rows_no)
+            y_coord_round = round(y_coordinate,2)
+            
+            for col_id in range(cols_no):
+                x_coordinate = col_id * (self._width/rows_no)
+                x_coord_round = round(x_coordinate,2)
+                
+                position = "{"+f"({x_coord_round}cm , -{y_coord_round}cm)"+"}"
+                coordinates.append(position)
+            
         return coordinates
 
     @property
     def subplot_height(self):
-        return NoEscape(f'{self._height/len(self._plotdata.columns)+1.5-self._subplots_gap}cm')
+        
+        rows_no=self.grid[1]
+        
+        return NoEscape(f'{self._height/rows_no+1.5-self._subplots_gap}cm')
+
+    @property
+    def subplot_width(self):
+        
+        cols_no=self.grid[0]
+        
+#         return NoEscape(f'{self._width/cols_no+1.5-self._subplots_gap}cm')
+        return NoEscape(f'{self._width/cols_no-2-self._subplots_horizontal_gap-self._subplots_gap}cm')
+    
     
     @property
     def height(self):
@@ -1300,8 +1359,8 @@ class DataMethods:
 
         return fig
 
-    def to_pylatex_tikz(self,height=None,width=None,subplots=None):
-        return TikZPlot(LatexDataFrame.formatted(self),height=height,width=width,subplots=subplots)
+    def to_pylatex_tikz(self,height=None,width=None,subplots=None,options=None):
+        return TikZPlot(LatexDataFrame.formatted(self),height=height,width=width,subplots=subplots,options=options)
 
     
     def to_latex_dataframe(self):

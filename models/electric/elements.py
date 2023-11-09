@@ -18,8 +18,8 @@ class Capacitor(Spring):
     scheme_name = 'spring.png'
     real_name = 'spring.png'
 
-    def __init__(self, capacity, q0,  qs=None,ivar=Symbol('t'), frame = base_frame):
-        super().__init__(stiffness=1/capacity, pos1=q0, pos2=0,l_0=0 ,  qs=qs,ivar=ivar, frame = frame)
+    def __init__(self, capacity, q0, q1=0,  qs=None,ivar=Symbol('t'), frame = base_frame):
+        super().__init__(stiffness=1/capacity, pos1=q0, pos2=q1,l_0=0 ,  qs=qs,ivar=ivar, frame = frame)
 
 
 class Inductor(MaterialPoint):
