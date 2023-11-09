@@ -1052,6 +1052,11 @@ class ODESystem(AnalyticalSolution):
         return Matrix([dvar.diff(self.ivar,orders[dvar])  for dvar in dvars])
     
     @cached_property
+    def _reduction_eqns(self):
+        
+        return [eqn for eqn  in list(self._fode_dvars) if eqn not in self.dvars]
+    
+    @cached_property
     def odes_rhs(self):
         
         diffs = self._highest_diff
