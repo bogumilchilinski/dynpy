@@ -51,7 +51,7 @@ class ReportComponent(Subsection):
     @property
     def reported_object(self):
 
-        from ...solvers.linear import ODESystem
+        from ....solvers.linear import ODESystem
         
         if isinstance(self._reported_object, ODESystem):
             return self._reported_object

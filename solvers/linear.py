@@ -1438,8 +1438,9 @@ class ODESystem(AnalyticalSolution):
     
     def _hom_equation(self):
         free=self._free_component()
-        hom_eq=self.lhs - free
-        return Eq(hom_eq, zeros(len(self.dvars),1))
+        hom_eq=(self.lhs - free)
+        
+        return ODESystem(odes=hom_eq, odes_rhs=zeros(len(self.dvars),1), dvars=self.dvars, ode_order=1, ivar=self._ivar)#dzieki Madi<3
     
     def char_polynomial(self):
         r=Symbol('r')
