@@ -2203,7 +2203,8 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         odes_przed=ode_eoms.subs(self.get_analytical_data_before_transfer(psi=True, chi=self.chi)).n()
         odes_po=ode_eoms.subs(self.get_analytical_data_after_transfer(psi=True, chi=self.chi)).n()
         odes_bez=Matrix([ode_eoms[0].subs(self.get_analytical_data_without_pendulum(psi=True)).n()])
-        odes_bez_mniejsza_masa=Matrix([ode_eoms[0].subs(self.psi, self.psi*0.99856528).subs(self.get_analytical_data_without_pendulum(psi=True, omega0=0.6273)).n()])
+        odes_bez_mniejsza_masa=Matrix([(ode_eoms[0].subs({self.delta:self.delta*1.00300903, self.omega0:self.omega0**2/0.6264})-0.003*self.x).subs(self.get_analytical_data_without_pendulum(psi=True, omega0=0.6273)).n()])
+#         odes_bez_mniejsza_masa=Matrix([ode_eoms[0].subs(self.psi, self.psi*0.99856528).subs(self.get_analytical_data_without_pendulum(psi=True, omega0=0.6273)).n()])
 
 
         fode_system_przed=ODESystem(odes=odes_przed, dvars=self.q, ode_order=2)._as_fode()
@@ -2241,7 +2242,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         data4plot_bez= lambdify(self.psi,Amp_bez,'numpy')(psi_span)
         data4plot_bez_mniejsza_masa= lambdify(self.psi,Amp_bez_mniejsza_masa,'numpy')(psi_span)
 
-        df = pd.DataFrame(data={f'w/o TMD BT, {latex(Eq(self.chi,0,evaluate=False))}':data4plot_bez, f'w/o TMD AT':data4plot_bez_mniejsza_masa, f'BT, {latex(Eq(self.chi,var_chi,evaluate=False))}':data4plot_przed, f'AT, {latex(Eq(self.chi,var_chi,evaluate=False))}':data4plot_po}, index=psi_span)
+        df = pd.DataFrame(data={f'w/o TMD BT':data4plot_bez, f'w/o TMD AT':data4plot_bez_mniejsza_masa, f'BT, {latex(Eq(self.chi,var_chi,evaluate=False))}':data4plot_przed, f'AT, {latex(Eq(self.chi,var_chi,evaluate=False))}':data4plot_po}, index=psi_span)
         
         df = df.set_axis(pd.Index([(val,Symbol('A',positive=True))  for val  in df.columns]),axis=1)
         df.index.name = self.psi

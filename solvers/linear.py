@@ -1039,7 +1039,11 @@ class ODESystem(AnalyticalSolution):
         orders_dict = self.spot_order()
         sys_order=max(orders_dict.values())
 
-        dvars_span = ([dvar.diff(self.ivar,order) for order  in range(sys_order) for dvar in self._dvars if order < orders_dict[dvar]])
+        # a quick workaround - error to be solved
+        if sys_order == 1:
+            dvars_span = self._dvars
+        else:
+            dvars_span = ([dvar.diff(self.ivar,order) for order  in range(sys_order) for dvar in self._dvars if order < orders_dict[dvar]])
 
         return Matrix(dvars_span)
     
@@ -1564,7 +1568,8 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         aux_odes = sys._reduction_eqns
         
         ode_rhs = Matrix(aux_odes + list(sys.odes_rhs))
-
+        display(f_ord_dvars)
+        display(ode_rhs)
     
         new_sys = cls._constructor(f_ord_dvars.diff(ivar) , f_ord_dvars,ode_rhs, ivar = ivar,ode_order=ode_order ,parameters=parameters)
         

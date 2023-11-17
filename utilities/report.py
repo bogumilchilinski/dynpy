@@ -3140,9 +3140,18 @@ class SympyFormula(ReportModule):
                 auto_mrk = AutoMarker(self._expr).marker
                 marker = auto_mrk
 
-            
             self._eq.append(Label(marker))
             self._marker = marker
+
+        elif self._break_mode == 'eq':
+            self._eq = Equation()
+            self._eq.append(NoEscape(self._backend(self._expr)))
+
+            if self._marker:
+                marker = self._marker
+            else:
+                auto_mrk = AutoMarker(self._expr).marker
+                marker = auto_mrk
 
 
 

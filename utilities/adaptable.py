@@ -512,6 +512,12 @@ class DataAxis(Axis, ReportModule):
             ax_options = [NoEscape(f'xlabel= {self.x_axis_name}'),
                          ]
 
+        if self.__class__._y_limit is not None:
+            ay_options = [NoEscape(f'ymin={(self.__class__._y_limit)[0]}'),
+                       NoEscape(f'ymax={(self.__class__._y_limit)[1]}')]
+        else:
+            ay_options = []
+
         base_options = ['grid style=dashed',
                         f'legend pos={self._legend_pos}',
                        NoEscape('legend style={font=\small}'),
@@ -522,7 +528,7 @@ class DataAxis(Axis, ReportModule):
                        NoEscape(f'xmin={min(self.plotdata.index)}'),
                        NoEscape(f'xmax={max(self.plotdata.index)}'),
                        NoEscape(f'ylabel= {self.y_axis_name}'),
-                       ] + at_option + ax_options
+                       ] + at_option + ax_options + ay_options
         
         return Options(*base_options, **kwargs)
 
@@ -555,6 +561,10 @@ class DataAxis(Axis, ReportModule):
         """
         return self._plotdata.index.to_numpy()
 
+    
+    
+    
+    
     @property
     def _index_limits(self):
         """
@@ -568,6 +578,20 @@ class DataAxis(Axis, ReportModule):
             xmax = None
 
         return xmin, xmax
+    
+    @property
+    def _values_limits(self):
+        """
+        Returns minimum and maximum values limits
+        """
+        if isinstance(self.plotdata, (pd.DataFrame, pd.Series)):
+            ymin = -0.25#min(self.plotdata.index)
+            ymax = 0.25#max(self.plotdata.index)
+        else:
+            ymin = None
+            ymax = None
+
+        return ymin, ymax
 
     @property
     def x_axis_name(self):
@@ -798,7 +822,8 @@ class TikZPlot(TikZ, ReportModule):
 
                 
                 plots_no=len(plotdata.columns)
-                empty_axis_list = [True]*(plots_no-1)+[False]
+                cols,rows=self.grid
+                empty_axis_list = self.grid_nodes[:-cols]+[False]*cols
                 colours_list = self._default_colours*plots_no
                 
                 self._selected_colours = colours_list
@@ -903,7 +928,7 @@ class TikZPlot(TikZ, ReportModule):
             y_coord_round = round(y_coordinate,2)
             
             for col_id in range(cols_no):
-                x_coordinate = col_id * (self._width/rows_no)
+                x_coordinate = col_id * (self._width/cols_no)
                 x_coord_round = round(x_coordinate,2)
                 
                 position = "{"+f"({x_coord_round}cm , -{y_coord_round}cm)"+"}"
