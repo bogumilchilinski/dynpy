@@ -1568,8 +1568,8 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         aux_odes = sys._reduction_eqns
         
         ode_rhs = Matrix(aux_odes + list(sys.odes_rhs))
-        display(f_ord_dvars)
-        display(ode_rhs)
+        print(f_ord_dvars)
+        print(ode_rhs)
     
         new_sys = cls._constructor(f_ord_dvars.diff(ivar) , f_ord_dvars,ode_rhs, ivar = ivar,ode_order=ode_order ,parameters=parameters)
         

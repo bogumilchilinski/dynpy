@@ -501,6 +501,9 @@ class MultiTimeScaleSolution(ODESystem):
         approx_eoms_list = self.eoms_approximation_list(order)
 
         approx_eoms_list[0]._parameters = self._t_list[1:]
+        
+        display(approx_eoms_list[0])
+        
         sol = approx_eoms_list[0].solution
         sol_list = [sol]
         sol_subs_list = [sol.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).full_expr).doit() for sol in sol_list]
