@@ -22,7 +22,7 @@ from functools import cached_property, lru_cache
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
 from .disk import RollingDisk, DiskMountingBlock, ForcedNonLinearDisk
 
-
+#FINISHED 
 class TwoForcedNonLinearDisks(ComposedSystem):
     scheme_name = 'MDOF_Double_Disk.png'
     real_name = 'roller_tightener.png'
@@ -199,6 +199,7 @@ class TwoForcedNonLinearDisks(ComposedSystem):
         return amplitude * (-frequency**2 + omega**2) * inertia + S(
             3) / 4 * eps * amplitude**3 - exciting_amp
 
+#FINISHED 
 class TwoDisksWithThreeSprings(ComposedSystem):
     scheme_name = 'ddof_disks_3_springs_scheme.png'
     real_name = 'nonlin_trolley_real.PNG'
@@ -309,7 +310,7 @@ class TwoDisksWithThreeSprings(ComposedSystem):
         }
         return self.sym_desc_dict
 
-
+#FINISHED 
 class ForcedDisksWithSerialSprings(ComposedSystem):
     scheme_name = 'MDOF_Forced_Disks_With_Serial_Springs.PNG'
     real_name = 'three_carriages.PNG'
@@ -623,7 +624,7 @@ class ForcedDisksWithSerialSprings(ComposedSystem):
 #        return default_data_dict
     
 
-    
+#FINISHED 
 #DONE Kuba & Michal
 class MDoFForcedSimpleDisksWithSerialSprings(ComposedSystem):
     scheme_name = 'three_simple_disks_serial.png'
@@ -766,7 +767,7 @@ class MDoFForcedSimpleDisksWithSerialSprings(ComposedSystem):
 
         
 
-
+#FINISHED 
 #DONE - Kuba & Sabina
 class MDoFForcedSimpleDisksWithParallelSprings(ComposedSystem):
 
@@ -919,6 +920,7 @@ class MDoFForcedSimpleDisksWithParallelSprings(ComposedSystem):
             parameters_dict[self.x_r] = self.x_2
 
         return parameters_dict
+#FINISHED 
 #Marcel
 class ForcedDisksWithParallelSprings(ComposedSystem):
 

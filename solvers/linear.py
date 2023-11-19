@@ -1040,10 +1040,13 @@ class ODESystem(AnalyticalSolution):
         sys_order=max(orders_dict.values())
 
         # a quick workaround - error to be solved
+        #print(sys_order)
         if sys_order == 1:
-            dvars_span = self._dvars
+            dvars_span = list(self.dvars)
         else:
-            dvars_span = ([dvar.diff(self.ivar,order) for order  in range(sys_order) for dvar in self._dvars if order < orders_dict[dvar]])
+            dvars_span = ([dvar.diff(self.ivar,order) for order  in range(sys_order) for dvar in self.dvars if order < orders_dict[dvar]])
+            dvars_span = list(({dvar:1 for dvar in dvars_span}).keys())
+            #dvars_span = list(np.unique(dvars_span))
 
         return Matrix(dvars_span)
     
