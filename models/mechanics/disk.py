@@ -193,6 +193,18 @@ class DiskWithNonlinearSpring(NonlinearComposedSystem):
         return components
 
 
+    def get_default_data(self):
+
+        m0, k0, l0, F0 = symbols('m_0 k_0 l_0 F_0', positive=True)
+
+        default_data_dict = {
+            self.m1: [m0 * no for no in range(5, 15)],
+            self.d: [self.l_0*S.Half*no for no in range(4,16)]
+        }
+
+        return default_data_dict
+
+
 
 class ForcedDiskWithNonlinearSpring(NonlinearComposedSystem):
     scheme_name = 'nonlinear_disc.png'
