@@ -2660,17 +2660,7 @@ class BernoullisODE(FirstOrderODESystem):
 
         return self.approximated(n=1, x0=x0, op_point=op_point, hint=hint, label=label)
     
-    def _is_bernoulli(self):
-        for n in self.odes:
-            power = self.odes.atoms(self.dvars[0]**n)
-        if bool(power):
-            display(power)
-            display(self)
-            return print("This is Bernoulli equation")
-        
-        else:
-            print ('TypeError: This is not a Bernoulli equation')
-            return None
+    
 
     def solution(self):
         dvars = self.dvars

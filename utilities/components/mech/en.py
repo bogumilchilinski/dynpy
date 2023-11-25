@@ -158,7 +158,7 @@ class ExemplaryPictureSymPyCodeComponent(ExemplaryPictureComponent):
     
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
         path=system._real_example()
         
         display(ReportText(  self.header_text ))

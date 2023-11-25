@@ -1793,3 +1793,112 @@ class MDoFTMD(ComposedSystem):
             self.F: r'Force',
         }
         return self.sym_desc_dict
+#poprawione MDofTMD1- ready to check
+#TODO(#212 - check)
+class MDoFTMD1(ComposedSystem):
+    
+    scheme_name = 'MDoF_new.png'
+    real_name = 'mdof_tmd_real.png'
+    """
+    Model of an exemplary Tuned Mass Damper (TMD) simulated as Double Degree of Freedom of coupled trolleys.
+
+        Arguments:
+        =========
+            m = Mass
+                -Mass of system on spring
+
+            me = Mass
+                -Mass of tuned mass damper
+
+            k = spring coefficient
+                -value of spring coefficient
+
+            ke = spring coefficient
+                -value of spring coefficient that tuned mass damper is mounted
+
+            F = Force
+                -Trolley's exciting force
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+        Example
+        =======
+        >>> t = symbols('t')
+        >>> m, me, k, ke, F = symbols('m, m_e, k, k_e, F')
+
+    """
+    
+    m=Symbol('m', positive=True)
+    me=Symbol('m_e', positive=True)
+    k=Symbol('k', positive=True)
+    ke=Symbol('k_e', positive=True)
+    
+    F=Symbol('F', positive=True)
+    angle = Symbol('Omega', positive=True)
+    
+    xe=dynamicsymbols('x_e')
+    xb=dynamicsymbols('x_b')
+
+    m0=Symbol('m_0', positive=True)
+    k0=Symbol('k_0', positive=True)
+    Omega0=Symbol('Omega_0', positive=True)
+    F0=Symbol('F_0', positive=True)
+
+    def __init__(self,
+                 m=None,
+                 me=None,
+                 k=None,
+                 ke=None,
+                 F=None,
+                 xe=None,
+                 xb=None,
+                 angle=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m is not None: self.m = m
+        if me is not None: self.me = me
+        if k is not None: self.k= k
+        if ke is not None: self.ke= ke
+        if F is not None: self.F = F
+
+        if xe is not None: self.xe = xe
+        if xb is not None: self.xb = xb
+        
+        if angle is not None: self.angle = angle
+
+        self.ivar = ivar
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+            components = {}
+
+            self._trolley_1 = MaterialPoint(self.m, pos1=self.xe, qs=[self.xe])
+            self._trolley_2 = MaterialPoint(self.me, pos1=self.xb, qs=[self.xb])
+            
+            self._springs1 = Spring(self.k, pos1=self.xe, qs=[self.xe])
+            self._springs2 = Spring(self.ke, pos1=self.xe, pos2=self.xb, qs=[self.xe, self.xb])
+            
+            components['_trolley_1'] = self._trolley_1
+            components['_trolley_2'] = self._trolley_2
+            components['_springs1'] = self._springs1
+            components['_springs2'] = self._springs2
+
+
+            return components
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass of main object',
+            self.me: r'Mass of the TMD',
+            self.k: r'Stiffness coefficient',
+            self.ke: r'Stiffness coefficient',
+            self.F: r'Force',
+        }
+        return self.sym_desc_dict

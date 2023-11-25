@@ -266,10 +266,10 @@ class DissipationComponent(ReportComponent):
         display(ReportText( self.footer_text  ))
 
 # Boogi          
-class LagrangianComponent(ReportComponent):
+class LagrangianComponent(en.LagrangianComponent):
     
     #title="Lagrangian (funkcja Lagrange'a)  układu"
-    title="Lagrangian of the system (Lagranges function)"
+    title="Lagrangian układu (Funkcja Lagrange'a)"
         
     @property
     def header_text(self):
@@ -278,22 +278,22 @@ class LagrangianComponent(ReportComponent):
         system = self._system
         dyn_sys=system
         
-        return f"System Lagrangian is described by the formula ({AutoMarker(Eq(Symbol('L'),dyn_sys.L.expand()[0]))}):"
+        return f"Lagrangian układu dany jest następującym wyrażeniem ({AutoMarker(Eq(Symbol('L'),dyn_sys.L.expand()[0]))}):"
         
     @property
     def body_text_1(self):
         #"Równania Eulera-Lagrange'a dla rozważanego przypadku są nastęujące: "   
-        return "The Euler-Lagrange equations for the case under consideration are as follows: "
+        return "Równania Eulera Lagrange'a dla rozważanego przypadku są następujące: "
         
     @property
     def body_text_2(self):
         #"Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące: "
-        return "Subsequent derivatives obtained with the Euler-Lagrange equations are as follows: "
+        return "Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące:"
     
     @property
     def footer_text(self):
         #"Wyniki przedstawionych operacji wykorzystuje się wyznaczenia równań ruchu układu."
-        return "The results of the presented operations are used to determine the equations of motion of the system."
+        return "Wyniki przedstawionych operacji wykorzystuje się wyznaczenia równań ruchu układu."
         
     def append_elements(self):
         
@@ -367,7 +367,7 @@ class LagrangianComponent(ReportComponent):
 class GoverningEquationComponent(ReportComponent):
     
     #Równania ruchu
-    title="Equation of motion"
+    title="Równanie ruchu"
     
     @property
     def entry_text_one(self):
@@ -405,7 +405,7 @@ class GoverningEquationComponent(ReportComponent):
 
 class LinearizedGoverningEquationComponent(ReportComponent):
     #Równania ruchu
-    title="Equation of motion"
+    title="Równanie ruchu"
 
     @property
     def entry_text_one(self):
@@ -702,21 +702,21 @@ class FrequencyResponseFunctionComponentToSecond(ReportComponent):
 class SteadySolutionComponent(ReportComponent):
     
         #"Rozwiązanie szczególne"
-    title="Steady solution"
+    title="Rozwiązanie szczególne"
     _phi=False
     
     @property
     def header_text(self):
         #"Rozwiązanie szczególne przedstawia wyrażenie:"
         # google tlumacz
-        return "The steady solution is given by the formula:"
+        return "Rozwiązanie szczególne dane jest następującym wyrażeniem:"
 
         
     @property
     def footer_text(self):
         #" Rozwiązanie szczególne związane jest obecnością wielkości wymuszających ruch (drgania) analizowanego układu."
         # google tlumacz
-        return "The specific solution is related to the presence of quantities that force motion (vibrations) of the analyzed system."
+        return "Rozwiązanie szczególne układu przedstawia zależność położenia od czas odpowiednią dla drgań wymuszonych"
     
     def append_elements(self,phi=_phi):
 

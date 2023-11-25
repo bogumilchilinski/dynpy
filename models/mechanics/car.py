@@ -39,7 +39,7 @@ df = pd.DataFrame(data,index=n_span,columns=["Torque [Nm]"])
 #     real_name = 'car_real.jpg'
 #     detail_scheme_name = 'sruba_pasowana.png'
 #     detail_real_name = 'buick_regal_3800.jpg'
-#     _default_args = ()
+#     _default_args = ()Undamped Vehicle Suspension
 #     _default_folder_path = "./dynpy/models/images/"
 
 #     z = dynamicsymbols('z')

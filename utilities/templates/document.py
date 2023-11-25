@@ -139,7 +139,7 @@ class Guide(Document):
 #         label=self.label
         self.title='Mechanical vibration'
         #self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
-        self.packages.append(Command('author', arguments=['DynPy Team']))
+        #self.packages.append(Command('author', arguments=['DynPy Team']))
         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
         #self.append(Command('maketitle'))
         self.append(NewPage())
@@ -346,6 +346,30 @@ class CaseStudy(Guide):
                   Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
         ]
     
+    
+class TechThriveMechanicalCase(Guide):
+    
+    latex_name = 'document'
+    _documentclass = 'article'
+    packages = [
+                  Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('microtype'),
+                  Package('authoraftertitle'),
+                  Package('polski',options=['MeX']),
+                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('listings'),
+                  Package('titlesec'),
+                  Package('fancyhdr'),
+                  Package('svg'),        
+                  Command('pagestyle', arguments=['fancy']),
+                  Command('fancyhf', arguments=['']),
+                  Command('fancyhead',  arguments=[NoEscape(r'\includegraphics[height=0.5cm]{TT.png}')],options=['C']),
+                  Command('fancyhead', arguments=['Mechanika Ogólna'],options=['L']),
+                  Command('fancyhead', arguments=[NoEscape('\\today')],options=['R']),
+                  Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
+                  Command('fancyfoot',  arguments=['Copyright TechThrive 2023'],options=['L']),
+                  Command('fancyfoot',  arguments=['Powered by DynPy'],options=['R']),
+        ]
     
 class EngeneeringDrawingGuide(Guide):
     
