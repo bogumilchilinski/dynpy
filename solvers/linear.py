@@ -1545,8 +1545,8 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
             
         f_ord_dvars=Matrix(sum([list(dvars.diff(ivar,no))   for no in  range(ode_order)],[]))
         
-        display(odes)
-        display(f_ord_dvars)
+        #display(odes)
+        #display(f_ord_dvars)
             
         return cls._constructor( odes=f_ord_dvars.diff(ivar) , dvars=f_ord_dvars  , odes_rhs = Matrix([f_ord_dvars[len(dvars):],odes] )  ,ivar=ivar,ode_order=ode_order,parameters=parameters)
 
@@ -1571,8 +1571,8 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         aux_odes = sys._reduction_eqns
         
         ode_rhs = Matrix(aux_odes + list(sys.odes_rhs))
-        print(f_ord_dvars)
-        print(ode_rhs)
+        #print(f_ord_dvars)
+        #print(ode_rhs)
     
         new_sys = cls._constructor(f_ord_dvars.diff(ivar) , f_ord_dvars,ode_rhs, ivar = ivar,ode_order=ode_order ,parameters=parameters)
         
