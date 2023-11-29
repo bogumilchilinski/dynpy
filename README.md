@@ -6,7 +6,7 @@ There are four main parts of the entire project:
 
 - dynamics module
 
-- mechanical models - lead of development and maintenance: Amadeusz Radomski (@amdvk);;
+- mechanical models - lead of development and maintenance: Amadeusz Radomski (@amvdek); Grzegorz Długopolski (@grzegorzdl);
 
 - symbolic and numeric solvers for ODE systems;
 
