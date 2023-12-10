@@ -2868,7 +2868,7 @@ class Picture(Figure,ReportModule):
              Command('graphicspath{{../}}'),]
     
     _position = 'H'
-
+    _preview_default_size = "20cm"
     
     
     _latex_name = 'figure'
@@ -2969,8 +2969,9 @@ class Picture(Figure,ReportModule):
                 display(f'Fig. X: {caption}')
                 return ''
             else:
-            
-                return f'![image preview]({path}) \n \n Fig. X: {caption}'
+                size = self.__class__._preview_default_size
+                return f'<img src="{path}" alt="{caption}" width="{size}"/>'
+                #return f'![image preview]({path}) \n \n Fig. X: {caption}'
         else:
             return f'Nothing to plot \n \n Fig. X: {caption}'
         
@@ -3100,6 +3101,7 @@ class SympyFormula(ReportModule):
 
         self._text = 'Figures {first_marker}-{last_marker}'
         self._backend = backend
+        self.latex_backend = backend
 
         self._marker = marker
 
@@ -3126,13 +3128,17 @@ class SympyFormula(ReportModule):
                 else:
                     self._eq = Align()
                     with self._eq.create(AutoBreak()) as eq:
+                        eq.latex_backend = self.latex_backend
                         eq.append_formula(expr)
+
 
             else:
 
                 self._eq = Align()
                 with self._eq.create(AutoBreak()) as eq:
+                    eq.latex_backend = self.latex_backend
                     eq.append_formula(expr)
+                    
 
             if self._marker:
                 marker = self._marker
@@ -3153,7 +3159,13 @@ class SympyFormula(ReportModule):
                 auto_mrk = AutoMarker(self._expr).marker
                 marker = auto_mrk
 
+    @property
+    def latex_backend(self):
+        return self._latex_backend
 
+    @latex_backend.setter
+    def latex_backend(self, backend):
+        self._latex_backend=backend
 
     def __call__(self, analysis):
 
@@ -3819,7 +3831,17 @@ class AutoBreak(Environment):
     packages = [Package('mathtools'), Package('autobreak')]
     escape = False
     content_separator = " "
-    latex_backend = vlatex
+    _latex_backend = vlatex
+
+
+    @property
+    def latex_backend(self):
+        return self._latex_backend
+
+    @latex_backend.setter
+    def latex_backend(self, backend):
+        self._latex_backend=backend
+
 
     def _split_expr(self, expr):
 
@@ -3893,7 +3915,8 @@ class AutoBreak(Environment):
         for term in new_terms[1:]:
 #             print('+++',self.__class__.latex_backend(term))
 #             print('++ prev +++',prev_term)
-            self.append(self.__class__.latex_backend(term))
+#             self.append(self.__class__.latex_backend(term)) ######### TA LINIA ZAKOMENTOWANA /AMADI
+            self.append(self.latex_backend(term))
             #prev_term=self.__class__.latex_backend(term)
         self.append('\n')
 

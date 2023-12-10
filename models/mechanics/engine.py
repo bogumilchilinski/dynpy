@@ -1041,6 +1041,9 @@ class DampedEngineVerticalSpringGravity(Engine):
             self.e: r'',
         }
         return self.sym_desc_dict
+    
+    def get_constant_velocity(self):
+        return self.subs({self.phi:self.Omega*self.ivar})
 
     def get_default_data(self):
 

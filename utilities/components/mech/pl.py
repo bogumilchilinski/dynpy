@@ -1,5 +1,6 @@
 from ..mechanics import *
 from . import en
+import dynpy.solvers.linear as comps
 
 
 class TitlePageComponent(Environment):
@@ -461,7 +462,8 @@ class LinearizationComponent(ReportComponent): # Szymon
     @property
     def eom_text(self):
         dyn_sys= self._system
-        return '''Równanie ruchu dla współrzędnej ${latex(dyn_sys.q[no])}$ można przestawić jako:'''
+#         return '''Równanie ruchu dla współrzędnej ${latex(dyn_sys.q[no])}$ można przestawić jako:'''
+        return '''Równanie ruchu dla współrzędnej ${coord}$ można przestawić jako:'''
     @property
     def lagrange_text(self):
         dyn_sys= self._system
@@ -517,7 +519,7 @@ class LinearizationComponent(ReportComponent): # Szymon
 
             eq_sym=Symbol(f'RR_{latex(dyn_sys.q[no])}')
 
-
+################################ NOT SURE ######################################################
             display(ReportText( self.eom_text.format(coord = latex(dyn_sys.q[no])) ))
 
             #display((SympyFormula(  Eq(eq_sym,eom,evaluate=False) , marker=mrk_lagrangian_lin,backend=latex  )  ))
@@ -558,7 +560,7 @@ class FundamentalMatrixComponent(ReportComponent):
     @property
     def body_text(self):
 
-        return "Macierz fundamentalna, na podstawie której wyznaczono równanie charakterystyczne rozważanego układu ${latex(Delta)}$, przedstawiają się następująco::"
+        return "Macierz fundamentalna, na podstawie której wyznaczono równanie charakterystyczne rozważanego układu ${delta}$, przedstawiają się następująco::"
     
     @property
     def footer_text(self):
@@ -589,7 +591,7 @@ class FundamentalMatrixComponent(ReportComponent):
 
         Delta = Symbol('\Delta')
 
-        display(ReportText(self.body_text))
+        display(ReportText(self.body_text.format(delta = latex(Delta) )))
 
         display((SympyFormula(  Eq(Symbol('A'),dyn_sys_lin.fundamental_matrix(),evaluate=False) , marker='a'  )  ))
         display((SympyFormula(  Eq(Delta,dyn_sys_lin.fundamental_matrix().det().expand().simplify().simplify().expand(),evaluate=False) , marker='a',backend=latex  )  ))
@@ -632,9 +634,23 @@ class GeneralSolutionComponent(ReportComponent):
 
 
         display(ReportText(self.header_text))
-        display((SympyFormula(  Eq(Symbol('X'),HarmonicOscillator(dyn_sys_lin.linearized(
-                                            )).general_solution().n(3),
+        
+        
+        for i,qs in enumerate(system.q):
+        
+            display((SympyFormula(  Eq(Symbol(f'X_g_-{qs}'),HarmonicOscillator(dyn_sys_lin.linearized(
+                                            )).general_solution().n(3)[i],
                                             evaluate=False) , marker='a',backend=latex  )  ))
+        
+#         if len(system.q) == 1:
+        
+#             display((SympyFormula(  Eq(Symbol('X'),HarmonicOscillator(dyn_sys_lin.linearized(
+#                                             )).general_solution().n(3)[0],
+#                                             evaluate=False) , marker='a',backend=latex  )  ))
+#         else:
+#             display((SympyFormula(  Eq(Symbol('X'),HarmonicOscillator(dyn_sys_lin.linearized(
+#                                             )).general_solution().n(3),
+#                                             evaluate=False) , marker='a',backend=latex  )  ))
 
         display(ReportText(self.footer_text))
 
@@ -737,11 +753,24 @@ class SteadySolutionComponent(ReportComponent):
 
 
         display(ReportText(self.header_text ))
-
-        display((SympyFormula(  Eq(Symbol('X_s'),
-                            HarmonicOscillator(dyn_sys_lin.linearized(
-                            )).steady_solution().n(3),
-                            evaluate=False) , marker='b',backend=latex  )  ))
+        
+        
+        for i,qs in enumerate(system.q):
+        
+            display((SympyFormula(  Eq(Symbol(f'X_s_-{qs}'),HarmonicOscillator(dyn_sys_lin.linearized(
+                                            )).steady_solution().n(3)[i],
+                                            evaluate=False) , marker='b',backend=latex  )  ))
+        
+#         if len(system.q) == 1:
+#             display((SympyFormula(  Eq(Symbol('X_s'),
+#                             HarmonicOscillator(dyn_sys_lin.linearized(
+#                             )).steady_solution().n(3)[0],
+#                             evaluate=False) , marker='b',backend=latex  )  ))
+#         else:
+#             display((SympyFormula(  Eq(Symbol('X_s'),
+#                             HarmonicOscillator(dyn_sys_lin.linearized(
+#                             )).steady_solution().n(3),
+#                             evaluate=False) , marker='b',backend=latex  )  ))
 
         AutoBreak.latex_backend = latex_store
 

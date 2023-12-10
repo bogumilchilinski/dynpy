@@ -80,7 +80,7 @@ class CaseTemplate(Document):
 
 class Guide(Document):
 
-    _documentclass = 'report'
+    _documentclass = 'article'
     latex_name = 'document'
     packages = [
                   Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
@@ -219,7 +219,8 @@ class WutThesis(Document):
                   Package('titlesec'),
                   Package('fancyhdr'),
                   Package('graphicx'),
-        
+                  Package('indentfirst'),
+                  Package('pdfpages'),
 
                   Command('newcommand{\praca}', arguments=['Praca dyplomowa']),
                   Command('newcommand{\dyplom}', arguments=['Magisterska']),
@@ -230,24 +231,27 @@ class WutThesis(Document):
                   Command('newcommand{\promotor}', arguments=['Wpisać promotora']),
                   Command('newcommand{\konsultant}', arguments=['Wpisać konsultanta']),
                   Command('newcommand{\\tytul}', arguments=['Wpisać tytuł pracy dyplomowej po polsku']),
-                  Command('newcommand{\\album}', arguments=['303596']),
+                  Command('newcommand{\\album}', arguments=['297537']),
                   Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']),
                   Command('newcommand{\\rok}', arguments=['Rok składania pracy']),
                   Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']),
                   #Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']),
-                  Command('graphicspath{{../}}')
+                  Command('graphicspath{{../}}'),
+                  Command('frenchspacing'),
+                  Command('counterwithin{figure}{section}'),
+                  Command('counterwithin{table}{section}'),
+                  Command('fancypagestyle{headings}{\\fancyhead{} \\renewcommand{\headrulewidth}{1pt} \\fancyheadoffset{0cm} \\fancyhead[RO]{\\nouppercase{\\leftmark}} \\fancyhead[LE]{\\nouppercase{\\leftmark}} \\fancyfoot{} \\fancyfoot[LE,RO]{\\thepage}}'),
+                  Command('fancypagestyle{plain}{\\fancyhf{} \\renewcommand{\\headrulewidth}{0pt} \\fancyfoot[LE,RO]{\\thepage}}'),
+        
     ]
-
-
-# \renewcommand{\headrulewidth}{1pt}
-# \renewcommand{\footrulewidth}{1pt}
+    
     
     
     def __init__(self,
                  default_filepath='default_filepath',
                  title='Basic title',
                  *,
-                 documentclass='paper',
+                 documentclass='article',
                  document_options=['a4paper','11pt','twoside'],
                  fontenc='T1',
                  inputenc='utf8',
@@ -278,25 +282,27 @@ class WutThesis(Document):
 #         label=self.label
         self.title=title
         #self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
-        self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
-        self.packages.append(Command('newcommand{\praca}', arguments=['Praca dyplomowa']))
-        self.packages.append(Command('newcommand{\dyplom}', arguments=['Magisterska']))
-        self.packages.append(Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']))
-        self.packages.append(Command('newcommand{\specjalnosc}', arguments=['Wpisać specjalność']))
-        self.packages.append(Command('newcommand{\\autor}', arguments=['Imię i nazwisko autora']))
-        self.packages.append(Command('newcommand{\opiekun}', arguments=['Wpisać opiekuna']))
-        self.packages.append(Command('newcommand{\promotor}', arguments=['Wpisać promotora']))
-        self.packages.append(Command('newcommand{\konsultant}', arguments=['Wpisać konsultanta']))
-        self.packages.append(Command('newcommand{\\tytul}', arguments=['Wpisać tytuł pracy dyplomowej po polsku']))
-        self.packages.append(Command('newcommand{\\album}', arguments=['303596']))
-        self.packages.append(Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']))
-        self.packages.append(Command('newcommand{\\rok}', arguments=['Rok składania pracy']))
-        self.packages.append(Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']))
-        #self.packages.append(Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']))
+#         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
+#         self.packages.append(Command('newcommand{\praca}', arguments=['Praca dyplomowa']))
+#         self.packages.append(Command('newcommand{\dyplom}', arguments=['Magisterska']))
+#         self.packages.append(Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']))
+#         self.packages.append(Command('newcommand{\specjalnosc}', arguments=['Wpisać specjalność']))
+#         self.packages.append(Command('newcommand{\\autor}', arguments=['Imię i nazwisko autora']))
+#         self.packages.append(Command('newcommand{\opiekun}', arguments=['Wpisać opiekuna']))
+#         self.packages.append(Command('newcommand{\promotor}', arguments=['Wpisać promotora']))
+#         self.packages.append(Command('newcommand{\konsultant}', arguments=['Wpisać konsultanta']))
+#         self.packages.append(Command('newcommand{\\tytul}', arguments=['Wpisać tytuł pracy dyplomowej po polsku']))
+#         self.packages.append(Command('newcommand{\\album}', arguments=['303596']))
+#         self.packages.append(Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']))
+#         self.packages.append(Command('newcommand{\\rok}', arguments=['Rok składania pracy']))
+#         self.packages.append(Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']))
+#         #self.packages.append(Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']))
         self.packages.append(Command('graphicspath{{../}}'))
-        #self.append(Command('maketitle'))
+#         self.append(Command('maketitle'))
         self.append(NoEscape('%%% New doc'))
         # tu implementować co tam potrzeba
+        
+
         
         
 class ThesisTemplate(WutThesis):
@@ -363,7 +369,7 @@ class TechThriveMechanicalCase(Guide):
                   Package('svg'),        
                   Command('pagestyle', arguments=['fancy']),
                   Command('fancyhf', arguments=['']),
-                  Command('fancyhead',  arguments=[NoEscape(r'\includegraphics[height=0.5cm]{TT.png}')],options=['C']),
+                  Command('fancyhead',  arguments=[NoEscape(r'\includegraphics[height=0.8cm]{TT.png}')],options=['C']), #
                   Command('fancyhead', arguments=['Mechanika Ogólna'],options=['L']),
                   Command('fancyhead', arguments=[NoEscape('\\today')],options=['R']),
                   Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),

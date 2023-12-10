@@ -810,6 +810,14 @@ class MaxDynamicForce(ReportComponent):
                      dyn_sys.max_dynamic_force().doit() ), marker=None))
 
 ##### Karolina + Kamil + Bogi rr
+class SeparableODEIntroComponent(ReportComponent):
+    title="Podstawowa wiedza niezbędna do rozwiązania równania o zmiennych rozdzielonych"
+
+    def append_elements(self):
+        system = self.reported_object
+        ode_sys =system
+
+        display(ReportText('Jednym z najbardziej podstawowych typów równań różniczkowych jest równanie o zmiennych rozdzielonych, które  polega na przerzuceniu wyrazów z $y$ i $x$ na dwie różne strony i scałkowaniu ich. Po scałkowaniu można zapisać przerzucić jedną ze stałych całkowania na drugą stronę równania i zsumować stałe C. Rozwiązanie takeigo równania możemy zrozumieć na podstawie zadania poniżej:'))
 
 class EquationDefinitionComponent(ReportComponent):
     #title="We consider the following differential equation:"
@@ -817,7 +825,7 @@ class EquationDefinitionComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         ode_sys =system
 
         y_sym = system._variable_name()[2]
@@ -835,7 +843,7 @@ class VariablesSeparationComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         ode_sys =system
         ############################ must have
 
@@ -873,7 +881,7 @@ class SeparatedVariablesIntegrationComponent(ReportComponent):
     title="Całkowanie zmiennych rozdzielonych"
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         ode_sys =system
         ############################ must have
 
@@ -929,7 +937,7 @@ class SolutionComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         ode_sys =system
         ############################ must have
 
@@ -960,4 +968,100 @@ class SolutionComponent(ReportComponent):
 
         #display(ReportText('Obtained expresions enable to rewrite equation under consideration.'  ))
         display(ReportText('Otrzymane wyrażenie umożliwia ponowne zapisanie równań uwzględniając wczeniejsze obliczenia.'  ))
+class BernoulliODEIntroComponent(ReportComponent):
+    title="Podstawowa wiedza niezbędna do rozwiązania równania rózniczkowego"
+    
+    def append_elements(self):
+
+        system = self.reported_object
+        y_sym = system.dvars[0]
+        dane=system._get_dvars_symbols()
+        Px=Symbol('P(x)')
+        Qx=Symbol('Q(x)')
+        n=Symbol('n')
+        ynpow=Symbol('y')**Symbol('n')
+        display(ReportText('Równanie różniczkowe typu Bernoulliego to szczególny rodzaj równania różniczkowego zwyczajnego pierwszego rzędu. Ma postać ogólną:'))
+        bernoulli_form=Eq(y_sym.diff()+Px*y_sym,Qx*y_sym**n)
+        display(SympyFormula(bernoulli_form.subs(dane)))
+        
+        display(ReportText(f'Gdzie $y$ to nieznana funkcja zależna od zmiennej $x$, $P(x)$ i $Q(x)$ o dane funkcje zależne od $x$, a $n$ to stała liczba rzeczywista, różna od 0 i 1. Charakterystyczne dla równań Bernoulliego jest to, że są one nieliniowe z powodu obecności wyrazu ${latex(ynpow)}$ po jednej stronie równania. Rozwiązania tego typu równań mogą być trudne do uzyskania w ogólności, ale dla pewnych wartości $n$ można zastosować pewne techniki upraszczające rozwiązanie. W przypadku $n=0$ równanie Bernoulliego staje się liniowe, a dla $n=1$ można je przekształcić do postaci liniowego równania różniczkowego zwyczajnego pierwszego rzędu. W innych przypadkach konieczne może być zastosowanie specjalnych technik, takich jak zamiana zmiennych czy redukcja rzędu, aby uzyskać ogólne rozwiązanie.'))
+
+class EquationDefinitionComponent(ReportComponent):
+    #title="We consider the following differential equation:"
+    title="Rozpatrujemy następujące równanie różniczkowe: "
+
+    def append_elements(self):
+
+        system = self.reported_object
+        ode_sys =system
+        y_sym = system.dvars[0]
+
+        dane=system._get_dvars_symbols()
+        ode_sub=ode_sys.subs(dane)
+        display(SympyFormula(Eq(ode_sub.lhs[0],ode_sub.rhs[0])))
+        #display(ReportText('Where:')
+        display(ReportText('Gdzie:'))
+        #display(ReportText('Is our encountered function.'))
+        display(SympyFormula(y_sym))
+        display(ReportText('Jest naszą szukaną funkcją.'))
+        
+
+class BernoulliTransformation(ReportComponent):
+    title=" Wyznaczenie nowej funkcji $z$ zależnej od $x$ w celu przejscia na równanie liniowe"
+    
+    def append_elements(self):
+        system = self.reported_object
+        ode_sys =system
+        fun = system.dvars[0]
+        ivar = system.ivar
+###########################DO ZMIANYYYYYYYY########################
+        fun_str = system._variable_name()[2] #y'
+
+        d_ivar = system._variable_name()[0] #dx
+        d_var = system._variable_name()[1] #dy
+        dane=system._get_dvars_symbols()
+        bernoulli_sub=system._bernoulli_substitution()
+        #bern_power = system
+
+
+
+        
+        n=Symbol('n')
+        z=Function('z')(ivar)
+
+        display(ReportText('Aby dokonać podstawienia, konieczne jest zdefiniowanie $n$ poprzez znalezienie najwyższej potęgi $y$, gdzie $n$ to wykładnik tej funkcji. '))
+        display(SympyFormula(Eq(Symbol('n'),n.subs(bernoulli_sub))))
+        display(ReportText('Następnie należy dokonać podstawienia i przejsć na nową funkcję $z$, używając poniższego wzoru:'))
+        display(SympyFormula(Eq(Symbol('z'),Symbol('y')**(S.One-Symbol('n')))))
+        display(ReportText('W naszym przypadku:'))
+        display(SympyFormula(Eq(Symbol('z'),Symbol('y')**(S.One-n.subs(bernoulli_sub)))))
+        #display(SympyFormula(Eq(Symbol('z'),z.subs(bernoulli_sub))))
+        display(ReportText('Następnym krokiem jest wyznaczenie pierwszej pochodnej funkcji $z$:'))
+        display(SympyFormula(Eq(Symbol("z'"), bernoulli_sub['z_diff'])))
+        display(ReportText('Po podstawieniu wartosci n :'))
+        display(SympyFormula(Eq(Symbol("z'"), bernoulli_sub['z_diff'].subs(n,bernoulli_sub[n]))))
+        
+        display(ReportText("Następnie należy wyznaczyć z powyższych równań $y$ oraz $y'$"))
+        display(SympyFormula(Eq(Symbol("y"),fun.subs(bernoulli_sub))))
+        display(SympyFormula(Eq(Symbol("y'"),fun.diff().subs(bernoulli_sub))))
+class BernoulliLinearTransformation(ReportComponent):
+    title=" Przejscie na równanie liniowe"
+    
+    def append_elements(self):
+        system = self.reported_object
+        ode_sys =system
+        fun = system.dvars[0]
+        ivar = system.ivar
+###########################DO ZMIANYYYYYYYY########################
+        fun_str = system._variable_name()[2] #y'
+
+        d_ivar = system._variable_name()[0] #dx
+        d_var = system._variable_name()[1] #dy
+        dane=system._get_dvars_symbols()
+
+        rownanie=system._as_reduced_ode()
+
+        display(ReportText("Ostatnim krokiem do przejscia na równanie liniowe jest podstawienie wyliczonych wyżej $y$ i $y'$ do pierwotnego równania:"))
+        display(SympyFormula(Eq(rownanie.lhs[0],rownanie.rhs[0])))
+        display(ReportText('Orzymane równanie to równanie liniowe, które liczymy w znany już sposób: LINEARWITHCONSTCOEFF'))
 

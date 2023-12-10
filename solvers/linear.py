@@ -2,7 +2,7 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, re, pi, latex,
                    dsolve, solve, fraction, factorial, Add, Mul, exp, zeros, shape,
                    numbered_symbols, integrate, ImmutableMatrix,Expr,Dict,Subs,Derivative,Dummy,
-                   lambdify, Pow, Integral, init_printing, I, N,eye, zeros, det)
+                   lambdify, Pow, Integral, init_printing, I, N,eye, zeros, det, Integer,separatevars)
 
 from sympy.matrices.matrices import MatrixBase
 from sympy.solvers.ode.systems import matrix_exp, matrix_exp_jordan_form
@@ -40,6 +40,7 @@ from ..utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFor
 from ..utilities.templates.document import *
 from ..utilities.templates import tikz
 from ..utilities.components.ode import en as ode
+from ..utilities.components.ode import pl as ode_comp_pl
 
 import copy
 
@@ -2954,6 +2955,8 @@ class LinearODESolution:
                 #                      ext_forces).expand().doit())
                 eqns_res = (self.governing_equations - self.external_forces() +
                             ext_forces).expand().doit()
+                
+#                 display(eqns_res)
 
                 if len(self.dvars) == 1:
                     steady_sol += Matrix([
@@ -2985,7 +2988,7 @@ class LinearODESolution:
 class SeparableODE(ODESystem):
 
 
-#     from ..utilities.components.ode import pl
+#    from ..utilities.components.ode import pl
 #     system = self
 #     fun = system.dvars[0]
 #     ivar = system.ivar
@@ -2994,10 +2997,11 @@ class SeparableODE(ODESystem):
     def _report_components(self):
         
         comp_list=[
-        EquationDefinitionComponent,
-        VariablesSeparationComponent,
-        SeparatedVariablesIntegrationComponent,
-        SolutionComponent,
+        ode_comp_pl.SeparableODEIntroComponent,
+        ode_comp_pl.EquationDefinitionComponent,
+        ode_comp_pl.VariablesSeparationComponent,
+        ode_comp_pl.SeparatedVariablesIntegrationComponent,
+        ode_comp_pl.SolutionComponent,
         ]
         
         return comp_list
@@ -3013,7 +3017,7 @@ class SeparableODE(ODESystem):
         d_ivar = Symbol(f'd{latex(system.ivar)}')
         d_var = Symbol(f'd{latex(fun)[:-17]}')
 
-        y_sym=Symbol(str(y))
+        y_sym=Symbol('y')
         
         return d_ivar, d_var, y_sym, fun_str
     
@@ -3027,7 +3031,7 @@ class SeparableODE(ODESystem):
 
         fun = system.dvars[0]
         ivar = system.ivar
-        y_sym=Symbol(str(y))
+        y_sym=Symbol('y')
         
         
         ode_rhs = solve(ode_sys.lhs[0],ode_sys.dvars[0].diff())[0]
@@ -3045,6 +3049,7 @@ class SeparableODE(ODESystem):
 
     def _function_integration(self,form='expr'):
         system = self
+        #y=Function('y')(x)
         
         ode_sys = system
         
@@ -3054,7 +3059,7 @@ class SeparableODE(ODESystem):
         ode_rhs = solve(ode_sys.lhs[0],ode_sys.dvars[0].diff())[0]
         d_ivar = Symbol(f'd{latex(system.ivar)}')
         d_var = Symbol(f'd{latex(fun)[:-17]}')
-        y_sym=Symbol(str(y))
+        y_sym=Symbol('y')
         sep_vars_dict = (separatevars(ode_rhs.subs(fun,y_sym),(ivar,y_sym),dict=True))
         g_fun_ivar = sep_vars_dict[ivar]*sep_vars_dict['coeff']
         h_fun_dvar = sep_vars_dict[y_sym]
@@ -3079,11 +3084,180 @@ class SeparableODE(ODESystem):
             'symbol_4':symbol_4
             
         }
+    
     def _ode_solution(self):
         dvars=self.dvars
         return AnalyticalSolution(dvars,dsolve(self.odes[0],self.dvars[0]).rhs)
+    def _get_dvars_symbols(self):
+        system=self
+        dvars = system.dvars[0]
+        ivar = system.ivar
+        
+        dvars_str=f"{str(dvars)}".replace(f'({str(ivar)})','')
+#         dvars_str=f"{latex(dvars)[:-17]}"
+    
+        return {dvars:Symbol(dvars_str),
+                ivar:ivar,
+                dvars.diff(ivar):Symbol(f"{dvars_str}'")}
     
     @cached_property
     def _general_solution(self):
 
         return self._ode_solution()
+
+class BernoulliODE(ODESystem):    
+#     system = self
+#     fun = system.dvars[0]
+#     ivar = system.ivar
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+        ode_comp_pl.BernoulliODEIntroComponent,
+        ode_comp_pl.EquationDefinitionComponent,
+        ode_comp_pl.BernoulliTransformation,
+        ode_comp_pl.BernoulliLinearTransformation,
+        ]
+        
+        return comp_list
+
+
+    def get_nonlinear_power(self):
+        
+            
+        
+            
+        power_fun = list(self.odes[0].atoms(Pow))[0]
+        power_value = power_fun.atoms(Integer)
+        
+        
+        return power_fun,list(power_value)[0]
+    
+    @property
+    def power_Bernoulli(self):
+        return self.get_nonlinear_power()[1]
+        
+        
+    def _bernooullicos(self):
+        alpha=Symbol('alpha',positive=True)
+        system = self
+        ivar = self.ivar
+        dvar = system.dvars[0]
+        
+        
+        coeffs_dict = {dvar.diff(ivar): system.lhs[0].coeff(dvar.diff(ivar)), # coefficient of highest derivative
+                       dvar : system.lhs[0].coeff(dvar),
+                       'free': system.lhs[0].subs({dvar:0})
+                        }
+        
+        return coeffs_dict
+
+    def _bernoulli_substitution(self,subs_fun=None):
+        dvars=self.dvars
+        ivar=self.ivar
+        n_sub=self.power_Bernoulli
+
+        y_pow=self.get_nonlinear_power()[0]
+        n=Symbol('n')
+        if subs_fun is None:
+            z_fun=Function('z')(ivar)
+        else:
+            z_fun = subs_fun
+
+        z_eq=Eq(z_fun,(dvars**(1-n).subs(n,n_sub))[0])
+        z_eq_pow=Eq(z_eq.lhs**n_sub,z_eq.rhs**n_sub)
+        z=z_eq.rhs
+        y_sol_z=solve(z_eq,dvars[0])[0]
+
+        z_prim=(z.diff(ivar))
+        y_prim=y_sol_z.diff(ivar)
+        y_pow=y_sol_z**n
+        #z_sol=solve(z_eq_pow,y_pow)[
+
+        
+        return {
+                'z_fun':Matrix([z_fun]),
+                'z_diff':((dvars[0])**(S.One-n)).diff(ivar),
+                dvars[0] : z_fun**(S.One/1-n)*z_fun**(n*0),
+                dvars[0].diff(ivar):y_pow*z_fun.diff(ivar)*z_fun**(n*0),
+                n:n_sub,
+               }
+
+    def _function_separation(self,form='expr'):
+        
+        system = self
+        ode_sys =system
+
+        fun = system.dvars[0]
+        ivar = system.ivar
+#        y_sym=Symbol(str(y))
+
+        ode_sys_hom = system._hom_equation()
+
+        ode_rhs = solve(ode_sys_hom.lhs[0],ode_sys.dvars[0].diff())[0]
+
+        sep_vars_dict = (separatevars(ode_rhs.subs(fun,y_sym),(ivar,y_sym),dict=True))
+
+        g_fun_ivar = sep_vars_dict[ivar]*sep_vars_dict['coeff']
+        h_fun_dvar = sep_vars_dict[y_sym]
+
+
+        return g_fun_ivar,h_fun_dvar
+
+    def _variable_name(self, form='expr'):
+        system = self
+
+        fun = system.dvars[0]
+        ivar = system.ivar
+
+        fun_str = f"{latex(fun)[:-17]}'"
+
+        d_ivar = Symbol(f'd{latex(system.ivar)}')
+        d_var = Symbol(f'd{latex(fun)[:-17]}')
+
+#        y_sym=Symbol(str(y))
+
+        return d_ivar, d_var, fun_str #y_sym
+
+    def _ode_solution(self):
+        dvars=self.dvars
+        return ODESolution(dvars,dsolve(self.odes[0],self.dvars[0]).rhs)
+
+    @cached_property
+    def _general_solution(self):
+
+        return self._ode_solution()
+
+    def _get_dvars_symbols(self):
+        system=self
+        dvars = system.dvars[0]
+        ivar = system.ivar
+        
+        dvars_str=f"{str(dvars)}".replace(f'({str(ivar)})','')
+#         dvars_str=f"{latex(dvars)[:-17]}"
+    
+        return {dvars:Symbol(dvars_str),
+                ivar:ivar,
+                dvars.diff(ivar):Symbol(f"{dvars_str}'")}
+    
+    def _bernoulli_subs(self):
+        
+        #ode = self.subs(self._bernoulli_substitution())
+        
+        return self._as_reduced_ode()
+    
+    def _as_reduced_ode(self):
+        reduction_dict=self._bernoulli_substitution()
+
+        red_dvar=reduction_dict['z_fun']
+        n_sub=self.power_Bernoulli
+        
+        red_expr=red_dvar[0]**n_sub
+        
+        ode_rhs=(((self.subs(reduction_dict).lhs*red_expr-self.subs(reduction_dict).rhs*red_expr  )))
+
+        sep_ode = SeparableODE(ode_rhs,dvars=red_dvar,ivar=self.ivar,ode_order=1)
+
+        return sep_ode    
+    
