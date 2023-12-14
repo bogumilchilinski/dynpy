@@ -2921,6 +2921,26 @@ class Picture(Figure,ReportModule):
             
             self.append(Label(marker))
             
+
+    @property
+    def preview_size(self):
+        return self._preview_size
+
+    @preview_size.setter
+    def preview_size(self, size):
+        if isinstance(size,float) or isinstance(size,int):
+            size = NoEscape(f'{size}cm')
+        if isinstance(size,str):
+            size = NoEscape(size)
+
+        self._preview_size=size
+
+    @classmethod
+    def set_default_preview_size(cls, size):
+        cls._preview_default_size = size
+        return cls
+
+
     def _get_str_key(self):
         return self.image + '_caption:'+str(self.caption    )     
             
@@ -2969,7 +2989,7 @@ class Picture(Figure,ReportModule):
                 display(f'Fig. X: {caption}')
                 return ''
             else:
-                size = self.__class__._preview_default_size
+                size = self.__class__.preview_size
                 return f'<img src="{path}" alt="{caption}" width="{size}"/>'
                 #return f'![image preview]({path}) \n \n Fig. X: {caption}'
         else:
