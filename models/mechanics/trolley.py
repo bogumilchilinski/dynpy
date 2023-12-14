@@ -2272,6 +2272,216 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         df.index.name = self.psi
 
         return df
+    
+    def excitation_frequency_sim(self, t_span=None, params_list=None):
+        from ...solvers.linear import ODESystem
+        from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
+        
+        params_dict = {**self.get_numerical_data()}
+        params_dict.pop(self.psi)
+        params_dict[self.t0] = 150
+
+        if t_span is None: t_span=np.linspace(0,100,1001)
+
+        if params_list is not None: param_list=params_list
+        else: param_list=[0.8, 0.9, 1, 1.1, 1.2]
+
+        masses_dict = {self.m_t0:self.m_s-self.m_p0-self.m_f}
+        m_f_dict = {self.m_f:self.m_f*self.m_s}
+        eoms_num = self.dimensionless_with_transfer().subs(masses_dict).subs(m_f_dict).doit()
+        a_p=Symbol('a_p')
+        dependencies={a_p:self.x.diff().diff() + 25*self.phi.diff().diff()}
+
+        q=self.q
+
+        dyn_sys = ODESystem(odes=eoms_num, dvars=q)#.as_first_ode_linear_system()
+        Y=self._coords_with_acceleration_list + [a_p]
+        num_df = NumericalAnalysisDataFrame.from_model(dyn_sys,
+                                                      self.psi,
+                                                      param_list,
+                                                      reference_data = params_dict,
+                                                      coordinates=Y,
+                                                      index=pd.Index(t_span,name=Symbol('t'))
+                                                     )
+
+        #sym_wyn = num_df.reindex(pd.Index(t_span,name=t))#.perform_simulations(model_level_name=0)
+        sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
+
+
+        result = TimeDataFrame(sym_wyn)
+        result.index.name = Symbol('tau')
+
+        return result.droplevel(0, axis=1)
+
+    def rayleigh_damping_coefficient_sim(self, t_span=None, params_list=None, t0=None):
+        from ...solvers.linear import ODESystem
+        from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
+
+        params_dict = {**self.get_numerical_data()}
+        params_dict.pop(self.lam)
+
+        if t0 is None: t0 = 150
+        params_dict[self.t0] = t0
+
+        if t_span is None: t_span=np.linspace(0,100,1001)
+
+        if params_list is not None: param_list=params_list
+        else: param_list=[0.01, 0.02, 0.03, 0.04, 0.05]
+
+        masses_dict = {self.m_t0:self.m_s-self.m_p0-self.m_f}
+        m_f_dict = {self.m_f:self.m_f*self.m_s}
+        eoms_num = self.dimensionless_with_transfer().subs(masses_dict).subs(m_f_dict).doit()
+        a_p=Symbol('a_p')
+        dependencies={a_p:self.x.diff().diff() + 25*self.phi.diff().diff()}
+
+        q=self.q
+
+        dyn_sys = ODESystem(odes=eoms_num, dvars=q)#.as_first_ode_linear_system()
+        Y=self._coords_with_acceleration_list + [a_p]
+        num_df = NumericalAnalysisDataFrame.from_model(dyn_sys,
+                                                      self.lam,
+                                                      param_list,
+                                                      reference_data = params_dict,
+                                                      coordinates=Y,
+                                                      index=pd.Index(t_span,name=Symbol('t'))
+                                                     )
+
+        #sym_wyn = num_df.reindex(pd.Index(t_span,name=t))#.perform_simulations(model_level_name=0)
+        sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
+
+
+        result = TimeDataFrame(sym_wyn)
+        result.index.name = Symbol('tau')
+
+        return result.droplevel(0, axis=1)
+    
+    
+    def flow_rate_coefficient_sim(self, t_span=None, params_list=None, t0=None):
+        from ...solvers.linear import ODESystem
+        from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
+
+        params_dict = {**self.get_numerical_data()}
+        params_dict.pop(self.rho)
+
+        if t0 is None: t0 = 50
+        params_dict[self.t0] = t0
+
+        if t_span is None: t_span=np.linspace(0,300,3001)
+
+        if params_list is not None: param_list=params_list
+        else: param_list=[1, 5, 10, 15, 20]
+
+        masses_dict = {self.m_t0:self.m_s-self.m_p0-self.m_f}
+        m_f_dict = {self.m_f:self.m_f*self.m_s}
+        eoms_num = self.dimensionless_with_transfer().subs(masses_dict).subs(m_f_dict).doit()
+        a_p=Symbol('a_p')
+        dependencies={a_p:self.x.diff().diff() + 25*self.phi.diff().diff()}
+
+        q=self.q
+
+        dyn_sys = ODESystem(odes=eoms_num, dvars=q)#.as_first_ode_linear_system()
+        Y=self._coords_with_acceleration_list + [a_p]
+        num_df = NumericalAnalysisDataFrame.from_model(dyn_sys,
+                                                      self.rho,
+                                                      param_list,
+                                                      reference_data = params_dict,
+                                                      coordinates=Y,
+                                                      index=pd.Index(t_span,name=Symbol('t'))
+                                                     )
+
+        #sym_wyn = num_df.reindex(pd.Index(t_span,name=t))#.perform_simulations(model_level_name=0)
+        sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
+
+
+        result = TimeDataFrame(sym_wyn)
+        result.index.name = Symbol('tau')
+
+        return result.droplevel(0, axis=1)
+    
+    def activation_time_sim(self, t_span=None, params_list=None):
+        from ...solvers.linear import ODESystem
+        from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
+
+        params_dict = {**self.get_numerical_data()}
+        params_dict.pop(self.t0)
+
+
+        if t_span is None: t_span=np.linspace(0,300,3001)
+
+        if params_list is not None: param_list=params_list
+        else: param_list=[-30, 0, 30, 90, 330]
+
+        masses_dict = {self.m_t0:self.m_s-self.m_p0-self.m_f}
+        m_f_dict = {self.m_f:self.m_f*self.m_s}
+        eoms_num = self.dimensionless_with_transfer().subs(masses_dict).subs(m_f_dict).doit()
+        a_p=Symbol('a_p')
+        dependencies={a_p:self.x.diff().diff() + 25*self.phi.diff().diff()}
+
+        q=self.q
+
+        dyn_sys = ODESystem(odes=eoms_num, dvars=q)#.as_first_ode_linear_system()
+        Y=self._coords_with_acceleration_list + [a_p]
+        num_df = NumericalAnalysisDataFrame.from_model(dyn_sys,
+                                                      self.t0,
+                                                      param_list,
+                                                      reference_data = params_dict,
+                                                      coordinates=Y,
+                                                      index=pd.Index(t_span,name=Symbol('t'))
+                                                     )
+
+        #sym_wyn = num_df.reindex(pd.Index(t_span,name=t))#.perform_simulations(model_level_name=0)
+        sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
+
+
+        result = TimeDataFrame(sym_wyn)
+        result.index.name = Symbol('tau')
+
+        return result.droplevel(0, axis=1)
+    
+    def initial_mass_ratio_sim(self, t_span=None, params_list=None, t0=None):
+        from ...solvers.linear import ODESystem
+        from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
+
+        params_dict = {**self.get_numerical_data()}
+
+        if t0 is None: t0 = 150
+        params_dict[self.t0] = t0
+
+        eps0 = Symbol('epsilon_0', positive=True)
+
+
+        if t_span is None: t_span=np.linspace(0,300,3001)
+
+        if params_list is not None: param_list=params_list
+        else: param_list=[0.0001, 0.0005, 0.001, 0.003, 0.005]
+
+        masses_dict = {self.m_t0:self.m_s-self.m_p0-self.m_f}
+        m_p_dict = {self.m_p0: eps0*self.m_s}
+        m_f_dict = {self.m_f:self.m_f*self.m_s}
+        eoms_num = self.dimensionless_with_transfer().subs(masses_dict).subs(m_f_dict).subs(m_p_dict).doit()
+        a_p=Symbol('a_p')
+        dependencies={a_p:self.x.diff().diff() + 25*self.phi.diff().diff()}
+
+        q=self.q
+
+        dyn_sys = ODESystem(odes=eoms_num, dvars=q)#.as_first_ode_linear_system()
+        Y=self._coords_with_acceleration_list + [a_p]
+        num_df = NumericalAnalysisDataFrame.from_model(dyn_sys,
+                                                      eps0,
+                                                      param_list,
+                                                      reference_data = params_dict,
+                                                      coordinates=Y,
+                                                      index=pd.Index(t_span,name=Symbol('t'))
+                                                     )
+
+        #sym_wyn = num_df.reindex(pd.Index(t_span,name=t))#.perform_simulations(model_level_name=0)
+        sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
+
+
+        result = TimeDataFrame(sym_wyn)
+        result.index.name = Symbol('tau')
+
+        return result.droplevel(0, axis=1)
 
     def _activation_time_chart(self, transfer_func=None, data_dict=None, upper_func=True):
 
