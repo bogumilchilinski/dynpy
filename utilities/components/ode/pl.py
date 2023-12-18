@@ -968,6 +968,147 @@ class SolutionComponent(ReportComponent):
 
         #display(ReportText('Obtained expresions enable to rewrite equation under consideration.'  ))
         display(ReportText('Otrzymane wyrażenie umożliwia ponowne zapisanie równań uwzględniając wczeniejsze obliczenia.'  ))
+        
+class LinearODEIntroComponent(ReportComponent):
+    title="Podstawowa wiedza niezbędna do rozwiązania równania rózniczkowego"
+    
+    def append_elements(self):
+
+        system = self.reported_object
+        ode_sys =system
+        fun = system.dvars[0]
+        ivar = system.ivar
+
+        fun_str = system._variable_name()[3]
+
+        d_ivar = system._variable_name()[0]
+        d_var = system._variable_name()[1]
+
+        y_sym = system._variable_name()[2]
+        Px=Symbol('P(x)')
+        Qx=Symbol('Q(x)')
+        n=Symbol('n')
+        display(ReportText('Jednym z najbardziej podstawowych typów równań różniczkowych jest równanie liniowe o stałych współczynnikach. Równanie liniowe składa się jedynie z liniowych wyrazów, które mogą zawierać stałe współczynniki. Wymagane jest przejście na rówanie jednorodne- przenosimy wszystkie wyrazy z funkcją $y$ i jej pochodnymi, po czym przyrównujemy do zera otrzymując równanie jednorodne. Następnie wymagane jest uzmiennienie stałej i traktowanie jej jako funkcji zależnej od $x$. Liczymy pochodne obu stron i wykorzystujemy wyniki w początkowym równaniu. Wynikiem jest suma rozwiązań z obu części'))
+
+class LinearTransformation(ReportComponent):
+    title=" Przejscie na równanie jednorodne"
+    
+    def append_elements(self):
+        system = self.reported_object
+        ode_sys =system
+        fun = system.dvars[0]
+        y = fun
+        ivar = system.ivar
+
+        fun_str = system._variable_name()[3] #y'
+
+        d_ivar = system._variable_name()[0] #dx
+        d_var = system._variable_name()[1] #dy
+
+        y_sym = system._variable_name()[2] #y(x)
+        const=Symbol('D')
+        g_fun_ivar = system._function_separation()[0] #x.coef
+        h_fun_dvar = system._function_separation()[1] #y.coef
+
+#         ## to jest do obgadania odtad
+#         separation=VariablesSeparationComponent(system._hom_equation())
+#         self.append(separation) ## dotąd
+        display(ReportText('Przenosimy wszystkie elementy z funkcją $y$ i jej pochodnymi na jedną stronę i przyrównujemy do zera, otrzymując równanie jednorodne:'))
+        display(SympyFormula(Eq(system._hom_equation().lhs[0],0)))
+        display(ReportText('Następnie rozwiązujemy powyższe równanie jak typowe równanie o zmiennych rozdzielonych'))
+        display(SympyFormula(Eq(system.general_solution.lhs[0],system.general_solution.rhs[0])))
+
+        
+#         display(SympyFormula( Symbol(latex(h_fun_dvar)+ '=' + latex(g_fun_ivar)  )   ) )
+
+class VariationOfConstant(ReportComponent):
+    title="Uzmiennienie stałej"
+    
+    def append_elements(self):
+
+        system = self.reported_object
+        ode_sys =system
+        fun = system.dvars[0]
+        y = fun
+        ivar = system.ivar
+        
+        #         sys_0=Eq(ode_sys.lhs[0],ode_sys.rhs[0])
+        #         sol=ode_sys.general_solution()
+        #         Cx=Function(sol._spot_constant()[0])(x)
+        #         c_prim=Function("C'")(x)
+        #         fun_str = system._variable_name()[3] #y'
+
+        #         d_ivar = system._variable_name()[0] #dx
+        #         d_var = system._variable_name()[1] #dy
+
+        #         #y_sym = system._variable_name()[2] #y(x)
+        # #         const=Symbol('D')
+        # #         const=solve(sol,c1)
+        #         display(ReportText('Kolejnym krokiem jest potraktowanie stałej jako funkcji zależnej od $x$:'))
+        #         sol_const=sol.subs(sol._spot_constant()[0], Cx)
+        #         sol_cx=display(SympyFormula(Eq(Symbol(y_sym),sol_const.rhs[0])))
+        #         display(sol_cx)
+        #         display(ReportText('Następnie należy policzyć pochodne obu stron równania'))
+        #         sol_diff=Eq(Symbol(fun_str), sol.rhs.diff(x)[0])
+        #         display(sol_diff)
+        #         display(ReportText("Dzięki tej operacji możemy teraz podstawić $y$ i $y'$ do oryginalnego równania"))
+        #         sys_sub=sys_0.subs(y,sol_cx.rhs).subs(y.diff(),sol_diff.rhs)
+        #         display(SympyFormula(sys_sub))
+        #         display(ReportText("Jeżeli nie popełnilismy blędu, stałe powinny się wyzerować i zostajemy z $C'(x)$ :"))
+        #         cp_sol=solve(sys_sub,Cx.diff())
+        #         cp_eq=Eq(c_prim,cp_sol[0])
+        #         display(SympyFormula(cp_eq))
+        #         display(ReportText("Następnie, aby uzyskać rozwiązanie szczególne należy policzyć całki obustronnie :"))
+        #         display(SympyFormula(Eq(Cx,cp_eq.rhs.diff())))
+        #         display(ReportText("Aby uzyskać rozwiązanie naszego równania musimy połączyć dwa wyżej uzyskane rozwiązania, czyli do rozwiązania ogólnego podstawić wyliczoną stałą:"))
+        ode_sys2 = ode_sys
+        x=ivar
+        szur=ode_sys2.general_solution
+#         display(szur)
+        ode_syso=Eq(ode_sys2.lhs[0],ode_sys2.rhs[0])
+        Cx = Function(szur._spot_constant()[0])(x)
+        Cx
+        c_prim=Function("C'")(x)
+        szur2=szur.subs(szur._spot_constant()[0], Cx)
+        #display(szur2)
+        szur3=Eq(szur2.lhs.diff(x), szur2.rhs.diff(x))
+        #display(szur3)
+        szur3_=szur3.subs(Cx.diff(x),c_prim)
+        szur3_
+        #To implement, change left hand side to y_prim variable and subsitute variables with object variables
+
+        ##### Tu sie teoretycznie zaczyna variation of constant ########################################
+        sol_cx=(Eq(Symbol('y'),szur2.rhs[0]))
+        display(ReportText('Kolejnym krokiem jest potraktowanie stałej jako funkcji zależnej od $x$:'))
+        display(SympyFormula(sol_cx))
+        sol_diff3=Eq(Symbol("y'"), szur3_.rhs[0])
+        display(ReportText('Następnie należy policzyć pochodne obu stron równania'))
+        
+        
+        
+        display(SympyFormula(sol_diff3))#gdzie?
+        display(ReportText("Dzięki tej operacji możemy teraz podstawić $y$ i $y'$ do oryginalnego równania"))
+        display(SympyFormula(ode_syso))
+        lolo=ode_syso.subs(y.diff(ivar),sol_diff3.rhs).subs(y,sol_cx.rhs)
+        display(ReportText('I otrzymamy:'))
+        display(SympyFormula(lolo))
+        c_p_sol=solve(lolo,c_prim)
+        cp_eq=Eq(c_prim,c_p_sol[0])
+        display(ReportText("Następnie, jeżeli wszystko zostało policzne poprawnie to wartosci $C(x)$ powinny się skrócić i uzyskamy wartosc $C'(x)$"))
+        display(SympyFormula(cp_eq))
+        cx_wyn=Eq(Cx,cp_eq.rhs.diff(ivar))
+        display(ReportText("Po obustronnym scałkowaniu otrzymamy wartosć stałej:"))
+        display(SympyFormula(cx_wyn))
+        FINALOWY_WYNIK=sol_cx.subs(Cx,cx_wyn.rhs)
+        display(ReportText("Aby otrzymać ostateczny wynik musimy podstawić otrzymaną stałą do pierwszego równania w którym uzmiennilismy stałą:"))
+        display(SympyFormula(FINALOWY_WYNIK))
+# class LinearODESolution(ReportComponent):
+#     title="Uzyskanie pełnego rozwiązania"
+    
+#     def append_elements(self):
+#         system = self._system
+#         ode_sys =system
+
 class BernoulliODEIntroComponent(ReportComponent):
     title="Podstawowa wiedza niezbędna do rozwiązania równania rózniczkowego"
     
@@ -1044,6 +1185,7 @@ class BernoulliTransformation(ReportComponent):
         display(ReportText("Następnie należy wyznaczyć z powyższych równań $y$ oraz $y'$"))
         display(SympyFormula(Eq(Symbol("y"),fun.subs(bernoulli_sub))))
         display(SympyFormula(Eq(Symbol("y'"),fun.diff().subs(bernoulli_sub))))
+        
 class BernoulliLinearTransformation(ReportComponent):
     title=" Przejscie na równanie liniowe"
     
@@ -1064,4 +1206,5 @@ class BernoulliLinearTransformation(ReportComponent):
         display(ReportText("Ostatnim krokiem do przejscia na równanie liniowe jest podstawienie wyliczonych wyżej $y$ i $y'$ do pierwotnego równania:"))
         display(SympyFormula(Eq(rownanie.lhs[0],rownanie.rhs[0])))
         display(ReportText('Orzymane równanie to równanie liniowe, które liczymy w znany już sposób: LINEARWITHCONSTCOEFF'))
+        rownanie.report
 

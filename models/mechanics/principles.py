@@ -365,13 +365,25 @@ class ComposedSystem(HarmonicOscillator):
         results_num = df_num#.perform_simulations(model_level_name=0,dependencies=dependencies_dict)
         #results = TimeDataFrame(results_num).droplevel(0,axis=1)
         results= results_num
-        
-        return results
-    
-    def get_reference_data(self):
-    
-        return self.get_numerical_parameters()
 
+        return results
+
+    def reference_data_dict(self):
+        return {}
+
+    def get_reference_data(self):
+
+        reference_data_dict = self.reference_data_dict()
+
+        if reference_data_dict:
+            parameters_dict = {
+                key: random.choice(items_list)
+                for key, items_list in reference_data_dict.items()
+            }
+        else:
+            parameters_dict = None
+
+        return parameters_dict
 
 class NonlinearComposedSystem(ComposedSystem):
 

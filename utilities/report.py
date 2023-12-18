@@ -3004,6 +3004,7 @@ class Picture(Figure,ReportModule):
     
 class ObjectCode(PyVerbatim,ReportModule):
     _latex_name='pyverbatim'
+    default_title = "Listing"
     
     r"""A base class for LaTeX environments.
     This class implements the basics of a LaTeX environment. A LaTeX
@@ -3070,7 +3071,7 @@ class ObjectCode(PyVerbatim,ReportModule):
     
     def reported(self):
         
-        lst_env = Aspect('Code of script')
+        lst_env = Aspect(self.default_title)
         
         lst_env.append(self)
         #lst_env=self

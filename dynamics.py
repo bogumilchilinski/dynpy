@@ -716,7 +716,16 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         subs_dict=system.get_random_parameters()
         
         return system.subs(subs_dict)
+    
+    @classmethod
+    def from_reference_data(cls):
 
+        system=cls.from_default_data()
+        subs_dict=system.get_reference_data()
+        
+        if subs_dict is not None:
+            return system.subs(subs_dict)
+        else: return system
     
     def all_symbols_description(self):
         
@@ -3315,6 +3324,15 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         subs_dict=system.get_random_parameters()
         
         return system.subs(subs_dict)
+    
+    @classmethod
+    def from_reference_data(cls):
+
+        system=cls.from_default_data()
+        subs_dict=system.get_reference_data()
+        if subs_dict is not None:
+            return system.subs(subs_dict)
+        else: return system
 
     
     def all_symbols_description(self):

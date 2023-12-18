@@ -634,23 +634,12 @@ class GeneralSolutionComponent(ReportComponent):
 
 
         display(ReportText(self.header_text))
-        
-        
+
+
         for i,qs in enumerate(system.q):
-        
-            display((SympyFormula(  Eq(Symbol(f'X_g_-{qs}'),HarmonicOscillator(dyn_sys_lin.linearized(
-                                            )).general_solution().n(3)[i],
-                                            evaluate=False) , marker='a',backend=latex  )  ))
-        
-#         if len(system.q) == 1:
-        
-#             display((SympyFormula(  Eq(Symbol('X'),HarmonicOscillator(dyn_sys_lin.linearized(
-#                                             )).general_solution().n(3)[0],
-#                                             evaluate=False) , marker='a',backend=latex  )  ))
-#         else:
-#             display((SympyFormula(  Eq(Symbol('X'),HarmonicOscillator(dyn_sys_lin.linearized(
-#                                             )).general_solution().n(3),
-#                                             evaluate=False) , marker='a',backend=latex  )  ))
+
+            display((SympyFormula(  Eq(Symbol(f'X_g_-{qs}'),dyn_sys_lin._ode_system.general_solution.n(3)[i], evaluate=False) , marker='a',backend=latex  )  ))
+
 
         display(ReportText(self.footer_text))
 
@@ -733,7 +722,8 @@ class SteadySolutionComponent(ReportComponent):
         #" Rozwiązanie szczególne związane jest obecnością wielkości wymuszających ruch (drgania) analizowanego układu."
         # google tlumacz
         return "Rozwiązanie szczególne układu przedstawia zależność położenia od czas odpowiednią dla drgań wymuszonych"
-    
+
+
     def append_elements(self,phi=_phi):
 
         from ....dynamics import LagrangesDynamicSystem, HarmonicOscillator
@@ -753,24 +743,12 @@ class SteadySolutionComponent(ReportComponent):
 
 
         display(ReportText(self.header_text ))
-        
-        
+
+
         for i,qs in enumerate(system.q):
-        
-            display((SympyFormula(  Eq(Symbol(f'X_s_-{qs}'),HarmonicOscillator(dyn_sys_lin.linearized(
-                                            )).steady_solution().n(3)[i],
-                                            evaluate=False) , marker='b',backend=latex  )  ))
-        
-#         if len(system.q) == 1:
-#             display((SympyFormula(  Eq(Symbol('X_s'),
-#                             HarmonicOscillator(dyn_sys_lin.linearized(
-#                             )).steady_solution().n(3)[0],
-#                             evaluate=False) , marker='b',backend=latex  )  ))
-#         else:
-#             display((SympyFormula(  Eq(Symbol('X_s'),
-#                             HarmonicOscillator(dyn_sys_lin.linearized(
-#                             )).steady_solution().n(3),
-#                             evaluate=False) , marker='b',backend=latex  )  ))
+
+            display((SympyFormula(  Eq(Symbol(f'X_s_-{qs}'),dyn_sys_lin._ode_system.steady_solution.n(3)[i], evaluate=False) , marker='b',backend=latex  )  ))
+
 
         AutoBreak.latex_backend = latex_store
 
@@ -822,3 +800,43 @@ class MaxDynamicForce(ReportComponent):
 
         display(SympyFormula( Eq(Symbol('F_d'),
                      dyn_sys.max_dynamic_force().doit() ), marker=None))
+        
+class GivenDataComponent(ReportComponent):
+
+    title="Tabelka z wartościami parametrów do obliczeń"
+
+    @property
+    def entry_text(self):
+
+        return "Przyjęte do obliczeń wartości poszczególnych parametrów przedstawia tabelka {tabelkamarker}"
+    
+    @property
+    def table_caption(self):
+        return "Podstawowe wartości parametrów"
+
+
+    def append_elements(self):
+
+        dyn_sys = self.reported_object
+        
+        given_data=dyn_sys._given_data
+
+        if given_data == {}:
+            params_dict = dyn_sys.get_reference_data()
+
+        else: params_dict = given_data
+
+        preview_mapper = lambda x: f'${latex(x)}$' if isinstance(x,(Symbol,Eq,Function,Mul)) else str(x)
+
+        mapped_dict = {k: f'${latex(v)}$' if isinstance(v,(Symbol,Eq,Function,Mul)) else str(v) for k, v in params_dict.items()}
+
+        params_dict_for_ldf={'Parametr':list(params_dict.keys()),'Wartość':list(mapped_dict.values())}
+        params_ldf = pd.DataFrame(data=params_dict_for_ldf)
+        params_ldf['Parametr'].apply(preview_mapper)
+        params_ldf=params_ldf.set_index('Parametr')
+
+        table_params=LatexDataFrame.formatted(params_ldf)
+
+        display(ReportText(self.entry_text.format(tabelkamarker = AutoMarker(table_params))))
+
+        display(table_params.reported(index=True, caption=self.table_caption))

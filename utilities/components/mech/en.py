@@ -2464,6 +2464,45 @@ class DynamicTorqueComponent(ReportComponent):
 
         display(SympyFormula( Eq(Symbol('T_d'), dyn_sys.dynamic_torque(), marker=None)))
     
+class GivenDataComponent(ReportComponent):
+
+    title="Table with parameter values for calculations"
+
+    @property
+    def entry_text(self):
+
+        return "The values of individual parameters adopted for the calculations are presented in the table {tabelkamarker}"
+    
+    @property
+    def table_caption(self):
+        return "Default parameter values"
+
+
+    def append_elements(self):
+
+        dyn_sys = self.reported_object
+        
+        given_data=dyn_sys._given_data
+
+        if given_data == {}:
+            params_dict = dyn_sys.get_reference_data()
+
+        else: params_dict = given_data
+
+        preview_mapper = lambda x: f'${latex(x)}$' if isinstance(x,(Symbol,Eq,Function,Mul)) else str(x)
+
+        mapped_dict = {k: f'${latex(v)}$' if isinstance(v,(Symbol,Eq,Function,Mul)) else str(v) for k, v in params_dict.items()}
+
+        params_dict_for_ldf={'Parameter':list(params_dict.keys()),'Value':list(mapped_dict.values())}
+        params_ldf = pd.DataFrame(data=params_dict_for_ldf)
+        params_ldf['Parameter'].apply(preview_mapper)
+        params_ldf=params_ldf.set_index('Parameter')
+
+        table_params=LatexDataFrame.formatted(params_ldf)
+
+        display(ReportText(self.entry_text.format(tabelkamarker = AutoMarker(table_params))))
+
+        display(table_params.reported(index=True, caption=self.table_caption))
 
 # class SchemeDynPyCodeComponent(ExemplaryPictureComponent):
 #     title="Scheme of the system"

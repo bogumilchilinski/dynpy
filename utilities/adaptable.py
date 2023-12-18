@@ -914,7 +914,18 @@ class TikZPlot(TikZ, ReportModule):
             grid = self._grid
         
         return grid
-    
+
+#     @property
+#     def grid(self):
+#         if self._default_grid is None:
+#             return self.grid
+#         else:
+#             return self._default_grid
+
+#     @grid.setter
+#     def grid(self, size):
+#         self._grid_size=size
+
     
     @property
     def grid_nodes(self):
@@ -1582,7 +1593,11 @@ class DataTable(Table,ReportModule):
 
     _position = 'H'
     _latex_name = 'table'
-    packages=[Package('booktabs'),Package('longtable')]
+    packages=[Package('booktabs'),
+              Package('longtable'),
+              Package('caption'),
+              Command('captionsetup[table]{skip=5pt}'),
+             ]
 
     def __init__(self, numerical_data, position=None):
         
@@ -1601,18 +1616,31 @@ class DataTable(Table,ReportModule):
         #             self._numerical_data=numerical_data
 
         tab = self._numerical_data
-        self.append(
-            NoEscape(
-                tab.style.to_latex(#index=index, 
+        
+        
+#         latex_code=tab.style.to_latex(#index=index, 
+#                                    #escape=False,
+#                              #longtable=longtable,
+# #                    multirow=multirow,
+#                     hrules=True,
+#                     column_format=column_format).replace(
+#                                  '\\toprule',
+#                                  '\\toprule \n \\midrule').replace(
+#                                      '\\bottomrule',
+#                                      '\\midrule \n \\bottomrule')
+        latex_code=tab.to_latex(index=index, 
                                    #escape=False,
                              #longtable=longtable,
 #                    multirow=multirow,
-                    hrules=True,
+                    #hrules=True,
                     column_format=column_format).replace(
                                  '\\toprule',
                                  '\\toprule \n \\midrule').replace(
                                      '\\bottomrule',
-                                     '\\midrule \n \\bottomrule')))
+                                     '\\midrule \n \\bottomrule')
+        
+        self.append(
+            NoEscape(latex_code))
 
 
 class MarkerRegistry(dict):

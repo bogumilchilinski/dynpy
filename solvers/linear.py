@@ -3005,6 +3005,18 @@ class SeparableODE(ODESystem):
         ]
         
         return comp_list
+    
+    def _get_dvars_symbols(self):
+        system=self
+        dvars = system.dvars[0]
+        ivar = system.ivar
+        
+        dvars_str=f"{str(dvars)}".replace(f'({str(ivar)})','')
+#         dvars_str=f"{latex(dvars)[:-17]}"
+    
+        return {dvars:Symbol(dvars_str),
+                ivar:ivar,
+                dvars.diff(ivar):Symbol(f"{dvars_str}'")}
 
     def _variable_name(self, form='expr'):
         system = self
@@ -3029,21 +3041,28 @@ class SeparableODE(ODESystem):
 
 #         display(ReportText(  self.header_text   ))
 
-        fun = system.dvars[0]
+        dvars = system.dvars[0]
         ivar = system.ivar
-        y_sym=Symbol('y')
+        dvar_sym= dvars.subs(system._get_dvars_symbols())
         
         
         ode_rhs = solve(ode_sys.lhs[0],ode_sys.dvars[0].diff())[0]
         
-        sep_vars_dict = (separatevars(ode_rhs.subs(fun,y_sym),(ivar,y_sym),dict=True))
+        display(f'ode_rhs = {ode_rhs}')
+        display(f'dvars = {dvars}')
+        display(f'dvar_sym = {dvar_sym}')
+        display(f'ivar = {ivar}')
+        display(f'ode_rhs.subs = {ode_rhs.subs(dvars,dvar_sym)}')
+        
+        
+        sep_vars_dict = (separatevars(ode_rhs.subs(dvars,dvar_sym),(ivar,dvar_sym),dict=True))
+        
+        display(f'słownik = {sep_vars_dict}')
+        display(f'ivar = {sep_vars_dict[ivar]}')
+        display(f'''coeff = {sep_vars_dict['coeff']}''')
         
         g_fun_ivar = sep_vars_dict[ivar]*sep_vars_dict['coeff']
-        h_fun_dvar = sep_vars_dict[y_sym]
-
-        
-        
-
+        h_fun_dvar = sep_vars_dict[dvar_sym]
         
         return g_fun_ivar,h_fun_dvar
 
@@ -3104,6 +3123,149 @@ class SeparableODE(ODESystem):
     def _general_solution(self):
 
         return self._ode_solution()
+    
+class LinearWithConstCoeffODE(ODESystem):
+#     system = self
+#     fun = system.dvars[0]
+#     ivar = system.ivar
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+        ode_comp_pl.EquationDefinitionComponent,
+        ode_comp_pl.LinearTransformation,
+        ode_comp_pl.VariationOfConstant
+        ]
+        
+        return comp_list
+
+    def _eqn_coeffs(self):
+        
+        system = self
+        ivar = self.ivar
+        dvar = system.dvars[0]
+        
+        coeffs_dict = {dvar.diff(ivar): system.lhs[0].coeff(dvar.diff(ivar)), # coefficient of highest derivative
+                       dvar : system.lhs[0].coeff(dvar),
+                       'free': system.lhs[0].subs({dvar:0})
+                        }
+        
+        return coeffs_dict
+    
+    def _variable_name(self, form='expr'):
+        system = self
+        
+        fun = system.dvars[0]
+        ivar = system.ivar
+        
+        fun_str = str(fun).replace(f'({str(ivar)})','' )
+        y_prim = f"{fun_str}'"
+
+        d_ivar = Symbol(f'd{latex(system.ivar)}')
+        d_var = Symbol(f'd{fun_str}')
+
+        y_sym=Symbol(str(y))
+        
+        return d_ivar, d_var, y_sym, fun_str ##slownik zrobic z tego
+    
+    def _function_separation(self,form='expr'):
+        
+        system = self
+        ode_sys =system
+        ############################ must have
+
+#         display(ReportText(  self.header_text   ))
+
+        dvars = system.dvars[0]
+        ivar = system.ivar
+        dvar_sym= dvars.subs(system._get_dvars_symbols())
+        
+        
+        ode_rhs = solve(ode_sys.lhs[0],ode_sys.dvars[0].diff())[0]
+        
+        sep_vars_dict = (separatevars(ode_rhs.subs(dvars,dvar_sym),(ivar,dvar_sym),dict=True))
+        
+        g_fun_ivar = sep_vars_dict[ivar]*sep_vars_dict['coeff']
+        h_fun_dvar = sep_vars_dict[dvar_sym]
+        
+        return g_fun_ivar,h_fun_dvar        
+
+    def _function_integration(self,form='expr'):
+        system = self
+        
+        ode_sys = system
+        
+        fun = system.dvars[0]
+        ivar = system.ivar
+        fun_str=self._variable_name()[3]
+        
+        ode_rhs = solve(ode_sys.lhs[0],ode_sys.dvars[0].diff())[0]
+        
+        display(ode_rhs)
+        
+        d_ivar = Symbol(f'd{latex(system.ivar)}')
+        d_var = Symbol(f'd{latex(fun)[:-17]}')
+        y_sym=Symbol(str(y))
+        sep_vars_dict = (separatevars(ode_rhs.subs(fun,y_sym),(ivar,y_sym),dict=True))
+        g_fun_ivar = sep_vars_dict[ivar]*sep_vars_dict['coeff']
+        h_fun_dvar = sep_vars_dict[y_sym]
+
+        first_eq=Eq(Symbol(fun_str),g_fun_ivar*h_fun_dvar * y_sym)
+
+        symbol_1=Symbol(latex(d_var/y_sym)+ '=' + latex(g_fun_ivar) + latex(d_ivar) )
+        
+        symbol_2=Symbol('\\int ' + latex(d_var/y_sym)+ '=  \\int ' + latex(g_fun_ivar) + latex(d_ivar) )
+
+        symbol_3=Symbol(latex( Integral(1/h_fun_dvar,y_sym) )+ '= ' + latex(Integral(g_fun_ivar,ivar))  )
+
+#         const = (system.solution._spot_constant())[0]
+        const = Symbol('D')
+        
+        symbol_4=Symbol(latex( Integral(1/h_fun_dvar,y_sym).doit() )+ '= ' + latex(Integral(g_fun_ivar,ivar).doit()  )  + '+' + latex(const)   )
+        return{
+            'first_eq':first_eq,
+            'symbol_1':symbol_1,
+            'symbol_2':symbol_2,
+            'symbol_3':symbol_1,
+            'symbol_4':symbol_4
+            
+        }
+    def _ode_solution(self):
+        dvars=self.dvars
+        return ODESolution(dvars,dsolve(self.odes[0],self.dvars[0]).rhs)
+    
+    @cached_property
+    def _general_solution(self):
+
+        return self._ode_solution()
+
+    def _variable_name(self, form='expr'):
+        system = self
+        
+        fun = system.dvars[0]
+        ivar = system.ivar
+
+        fun_str = f"{latex(fun)[:-17]}'"
+
+        d_ivar = Symbol(f'd{latex(system.ivar)}')
+        d_var = Symbol(f'd{latex(fun)[:-17]}')
+
+        y_sym=Symbol('y')
+        
+        return d_ivar, d_var, y_sym, fun_str
+
+    def _get_dvars_symbols(self):
+        system=self
+        dvars = system.dvars[0]
+        ivar = system.ivar
+        
+        dvars_str=f"{str(dvars)}".replace(f'({str(ivar)})','')
+#         dvars_str=f"{latex(dvars)[:-17]}"
+    
+        return {dvars:Symbol(dvars_str),
+                ivar:ivar,
+                dvars.diff(ivar):Symbol(f"{dvars_str}'")}
 
 class BernoulliODE(ODESystem):    
 #     system = self
@@ -3188,23 +3350,24 @@ class BernoulliODE(ODESystem):
         
         system = self
         ode_sys =system
+        ############################ must have
 
-        fun = system.dvars[0]
+#         display(ReportText(  self.header_text   ))
+
+        dvars = system.dvars[0]
         ivar = system.ivar
-#        y_sym=Symbol(str(y))
-
-        ode_sys_hom = system._hom_equation()
-
-        ode_rhs = solve(ode_sys_hom.lhs[0],ode_sys.dvars[0].diff())[0]
-
-        sep_vars_dict = (separatevars(ode_rhs.subs(fun,y_sym),(ivar,y_sym),dict=True))
-
+        dvar_sym= dvars.subs(system._get_dvars_symbols())
+        
+        
+        ode_rhs = solve(ode_sys.lhs[0],ode_sys.dvars[0].diff())[0]
+        
+        sep_vars_dict = (separatevars(ode_rhs.subs(dvars,dvar_sym),(ivar,dvar_sym),dict=True))
+        
         g_fun_ivar = sep_vars_dict[ivar]*sep_vars_dict['coeff']
-        h_fun_dvar = sep_vars_dict[y_sym]
-
-
-        return g_fun_ivar,h_fun_dvar
-
+        h_fun_dvar = sep_vars_dict[dvar_sym]
+        
+        return g_fun_ivar,h_fun_dvar        
+        
     def _variable_name(self, form='expr'):
         system = self
 
@@ -3257,7 +3420,8 @@ class BernoulliODE(ODESystem):
         
         ode_rhs=(((self.subs(reduction_dict).lhs*red_expr-self.subs(reduction_dict).rhs*red_expr  )))
 
-        sep_ode = SeparableODE(ode_rhs,dvars=red_dvar,ivar=self.ivar,ode_order=1)
+        sep_ode = LinearWithConstCoeffODE(ode_rhs,dvars=red_dvar,ivar=self.ivar,ode_order=1)
 
-        return sep_ode    
+        return sep_ode
+    
     

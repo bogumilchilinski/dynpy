@@ -93,6 +93,7 @@ class TikzStandalone(Document):
     latex_name = 'document'
     packages = [
                  Package('siunitx'),
+                 Package('polski',options=['MeX']),
         #         Package('amsmath'),
         #         Package('float'),
         #         Package('tikz'),
