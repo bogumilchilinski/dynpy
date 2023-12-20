@@ -1641,8 +1641,12 @@ class DataTable(Table,ReportModule):
         
         self.append(
             NoEscape(latex_code))
-
-
+    
+    @classmethod
+    def set_caption_space(cls, space):
+        cls.packages.remove(Command('captionsetup[table]{skip=5pt}'))
+        cls.packages.append(Command('captionsetup[table]{skip='+str(space)+'pt}'))
+        
 class MarkerRegistry(dict):
 
     _prefix = 'automrk'
