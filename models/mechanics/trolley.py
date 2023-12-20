@@ -1784,9 +1784,6 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         self.ivar = ivar
         self._init_from_components(**kwargs)
 
-        #self.trans_expr = ((S.One/2-atan(self.flow_coeff*(self.ivar-self.t0))/pi))
-        #self.m_tf = self.m_f#((S.One/2-atan(self.flow_coeff*(self.ivar-self.t0))/pi))
-        #self.m_pf = self.m_f#((S.One/2+atan(self.flow_coeff*(self.ivar-self.t0))/pi))
 
     @cached_property
     def components(self):
@@ -1836,25 +1833,6 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         }
         return default_data_dict
 
-#     def get_numerical_data(self):
-
-#         default_data_dict = {
-#             self.m_p: [10],
-#             self.m_f: [50],
-# #             self.m_tf: [50],
-# #             self.m_pf: [50],
-#             self.F: [5],
-#             self.flow_coeff: [5],
-#             self.t0: [10],
-#             self.Omega: [3.14 * 0.5],
-#             self.g: [9.81],
-#             #self.k: [2]
-#         }
-#         default_data_dict.update({self.m_t: [10.0*default_data_dict[self.m_p][0]],
-#                                   #self.l: [0.99*default_data_dict[self.g][0]/(default_data_dict[self.Omega][0]*default_data_dict[self.Omega][0])],
-#                                   #self.k: [2.0*default_data_dict[self.m_p][0]*default_data_dict[self.g][0]/(default_data_dict[self.g][0]/default_data_dict[self.Omega][0]**2)]
-#                                  })
-#         return default_data_dict
 
     def symbols_description(self):
         self.sym_desc_dict = {
@@ -1890,9 +1868,44 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         }
         return self.sym_desc_dict
 
+    def symbols_description_polish(self):
+        self.sym_desc_dict = {
+            self.m_t0: r'początkowa masa wózka',
+            self.m_t: r'masa wózka',
+            self.m_p0: r'początkowa masa wahadła',
+            self.m_p: r'masa wahadła',
+            self.m_f: r'stosunek masy transferowanej cieczy do masy systemu',
+            self.k: r'''współczynnik równoważny sztywność konstrukcji''',
+            self.lam: r'''współczynnik proporcjonalny do macierzy sztywności w tłumieniu Rayleigh'a''',
+            self.l: r'długość wahadła',
+            self.Omega: r'częstość wymuszenia',
+            self.omega0: r'częstość własna wózka',
+            self.F: r'amplituda siły wymuszającej',
+            self.g: r'stała grawitacyjna',
+            self.rho: r'współczynnik natężenia przepływu',
+            self.t0: r'bezwymiarowy czas aktywacji transferu masy',
+            self.eps: r'stosunek masy wahadła do masy systemu',
+            self.m_s: r'całkowita masa systemu',
+            self.chi: r'stosunek częstotliwości własnych elementów',
+            self.psi: r'stosunek częstośći wymuszenia do częstści własnej wózka',
+            self.delta: r'''stosunek amplitudy siły wymuszenia do współczynnika równoważnego sztywności konstrukcji''',
+            self.Omega0: r'częstość własna wahadła',
+            self.tau: 'bezwymiarowy czas',
+            self.x: '''poziome przemieszczenie wózka''',
+            self.x.diff(self.ivar): '''prędkość pozioma wózka''',
+            self.x.diff(self.ivar,2): '''przyspieszenie poziome wózka''',
+            self.phi.diff(self.ivar): '''prędkość kątowa wahadła''',
+            self.phi.diff(self.ivar,2): '''przyspieszenie kątowe wahadła''',
+            self.phi: '''przemieszczenie kątowe wahadła''',
+            self.ivar:'czas',
+            self.m_p.diff(self.ivar): 'pochodna masy wahadła',
+
+        }
+        return self.sym_desc_dict
+
 
     def dimensionless(self):
-        
+
         q=self.q
         m_p = self.m_p
         m_t = self.m_t
@@ -1905,29 +1918,26 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
 
         eoms=inertia_matrix*q.diff(ivar,2)+damping_matrix*q.diff(ivar)+stiffness_matrix*q-external_forces_matrix
         eoms_left=inertia_matrix*q.diff(ivar,2)+damping_matrix*q.diff(ivar)+stiffness_matrix*q
-        
-        
+
         return eoms
 
 
     def const_mass(self):
-        
+
         subs_dict={
             self.m_p:Symbol('m_p',positive=True),
             self.m_t:Symbol('m_t',positive=True)
         }
-        
+
         return self.subs(subs_dict)
-    
+
     def dimensionless_inertia_matrix(self):
-        
-        #### nie wiem co z tym, więc zostawię
+
         inertia_mat=self.inertia_matrix()
         first_inertia_row=inertia_mat.row(0)/inertia_mat[0]
         second_inertia_row=inertia_mat.row(1)/inertia_mat[3]
         dimensionless_inertia_mat=Matrix([[first_inertia_row],[second_inertia_row]])
-        #### nie wiem co z tym, więc zostawię
-    
+
         l = self.l
         m_p = self.m_p
         m_t = self.m_t
@@ -1935,72 +1945,65 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         [1, l*m_p/(m_p+m_t)],
         [1/l,1]
         ])
-        
+
         return inertia_matrix
-        
+
     def dimensionless_damping_matrix(self):
-        
-        #### nie wiem co z tym, więc zostawię
+
         inertia_mat=self.inertia_matrix()
         first_damping_row=self.damping_matrix().row(0)/inertia_mat[0]
         second_damping_row=self.damping_matrix().row(1)/inertia_mat[3]
         dimensionless_damping_mat=Matrix([[first_damping_row],[second_damping_row]])
-        #### nie wiem co z tym, więc zostawię
-        
+
         m_p = self.m_p
         m_t = self.m_t
         omega0 = self.omega0
         lam = self.lam
         l = self.l
         chi = self.chi
-        
+
         ivar = self.ivar
-        
+
         damping_matrix=Matrix([
                 [lam*omega0, l/omega0*m_p.diff(ivar)/(m_p+m_t)],
                 [m_p.diff(ivar)/m_p/l/omega0, (lam*omega0*chi**2+m_p.diff(ivar)/omega0/m_p)]
             ])
-        
+
         return damping_matrix
-    
+
     def dimensionless_stiffness_matrix(self):
-        
-        #### nie wiem co z tym, więc zostawię
+
+
         inertia_mat=self.inertia_matrix()
         first_stiffness_row=self.stiffness_matrix().row(0)/inertia_mat[0]
         second_stiffness_row=self.stiffness_matrix().row(1)/inertia_mat[3]
         dimensionless_stiffness_mat=Matrix([[first_stiffness_row],[second_stiffness_row]])
-        #return dimensionless_stiffness_mat.doit()
-        #### nie wiem co z tym, więc zostawię
 
         chi = self.chi
-        
+
         stiffness_matrix=Matrix([
         [1, 0],
         [0, chi**2]
         ])
-        
+
         return stiffness_matrix
-    
+
     def dimensionless_external_forces_matrix(self):
-        
-        #### nie wiem co z tym, więc zostawię
+
         inertia_mat=self.inertia_matrix()
         dimensionless_external_forces_mat=self.external_forces()/inertia_mat[0]
         dimensionless_external_forces_mat.doit()
-        #### nie wiem co z tym, więc zostawię
-        
+
         delta = self.delta
         psi = self.psi
         ivar = self.ivar
-#         chi = self.chi
-        
+
         external_forces_matrix=Matrix([
         [delta*sin(psi*ivar)],
         [0]
     ])
         return external_forces_matrix
-        
+
     def mass_transfer_function(self):
 
         subs_dict={
@@ -2013,39 +2016,39 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         return self.dimensionless().subs(self.mass_transfer_function()).doit()
 
     def dimensionless_with_const_mass(self):
-        
+
         m_p_const = Symbol('m_p', positive=True)
         m_t_const = Symbol('m_t', positive=True)
-        
+
         masses_dict = ({self.m_p:m_p_const,self.m_t:m_t_const })
-        
+
         return self.dimensionless().subs(masses_dict).doit().subs({m_t_const:(-m_p_const+m_p_const/self.eps)}) # it's a bit tricky, start with checking it if something doesn't work
-    
-    
+
+
     def system_mass_ratio(self):
         return Eq(Function('epsilon')(self.ivar), self.m_p/self.m_s)
-    
+
     def total_system_mass(self):
         return Eq(self.m_s, self.m_p+self.m_t)
-    
+
     def initial_system_mass_ratio(self):
         return Eq(Symbol('epsilon_0', positive=True), self.m_p0/self.m_s)
-    
+
     def excitation_freq_ratio(self):
         return Eq(self.psi, self.Omega/self.omega0)
-    
+
     def frequency_ratio(self):
         return Eq(self.chi, self.Omega0/self.omega0)
-    
+
     def force_amplitude_ratio(self):
         return Eq(self.delta, self.F/self.k)
-    
+
     def dimensionless_time(self):
         return Eq(self.tau, self.ivar*self.omega0)
-    
-    
+
+
     def get_numerical_data(self):
-        
+
         params_dict = {
                 self.m_s:150000000,
                 self.chi:1,
@@ -2054,33 +2057,31 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                 self.l:25,
                 self.omega0:sqrt(9.81/25),
                 self.m_p0:150000,
-                #m_f:15000,
                 self.m_f:3/1000,
                 self.rho:10,
                 pi:3.1415,
                 self.t0:10*3.1415,
-#                 self.t0:100*3.1415,
                 self.delta: 300000/(9.81*(150000000)/25)}
-        
+
         return params_dict
-    
+
     def get_analytical_data_before_transfer(self, psi=False, chi=None, eps=None):
 
         m_p_const = Symbol('m_p', positive=True)
         m_t_const = Symbol('m_t', positive=True)
-        
+
         if psi == False:
             var = 1
         elif psi==True:
             var = self.psi
         elif isinstance(psi,float):
             var = psi
-            
+
         if chi == None:
             var_chi = 1
         else:
             var_chi = chi
-            
+
         if eps == None:
             var_eps = 1/1000
         else:
@@ -2097,7 +2098,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
             m_t_const:150000000-1*150000,
             pi:3.1415,
             self.delta: 300000/(9.81*(150000000)/25)}
-        
+
         return params_dict
 
     def get_analytical_data_after_transfer(self, psi=False, chi=None, eps=None):
@@ -2133,9 +2134,9 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
             self.omega0:sqrt(9.81/25),
             pi:3.1415,
             self.delta: 300000/(9.81*(150000000)/25)}
-        
+
         return params_dict
-    
+
     def get_analytical_data_without_pendulum(self, psi=False, omega0=None):
 
         m_p_const = Symbol('m_p', positive=True)
@@ -2145,13 +2146,13 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
             var = 1
         else:
             var = self.psi
-            
+
         if omega0 is not None:
             omega0_var=omega0
         else:
             omega0_var=sqrt(9.81/25)
-        
-            
+
+
         params_dict = {
             self.eps:0,
             self.chi:0,
@@ -2163,9 +2164,9 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
             self.omega0: omega0_var,
             pi:3.1415,
             self.delta: 300000/(9.81*(150000000)/25)}
-        
+
         return params_dict
-    
+
     def get_numerical_data_for_solving_options(self):
 
         params_dict = {
@@ -2181,7 +2182,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
             self.t0:90,
             pi:3.1415,
             self.delta: 300000/(9.81*(150000000)/25)}
-        
+
         return params_dict
 
 
@@ -2191,47 +2192,36 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         import pandas as pd
         tau=Symbol('tau')
         ode_eoms=self.dimensionless_with_const_mass()
-#         display(ode_eoms[0])
-        
+
         if chi is not None:
             var_chi = chi
         else:
             var_chi = 1
-            
-#         display(ode_eoms)
 
         odes_przed=ode_eoms.subs(self.get_analytical_data_before_transfer(psi=True, chi=self.chi)).n()
         odes_po=ode_eoms.subs(self.get_analytical_data_after_transfer(psi=True, chi=self.chi)).n()
         odes_bez=Matrix([ode_eoms[0].subs(self.get_analytical_data_without_pendulum(psi=True)).n()])
         odes_bez_mniejsza_masa=Matrix([(ode_eoms[0].subs({self.delta:self.delta*1.00300903, self.omega0:self.omega0**2/0.6264})-0.003*self.x).subs(self.get_analytical_data_without_pendulum(psi=True, omega0=0.6273)).n()])
-#         odes_bez_mniejsza_masa=Matrix([ode_eoms[0].subs(self.psi, self.psi*0.99856528).subs(self.get_analytical_data_without_pendulum(psi=True, omega0=0.6273)).n()])
-
 
         fode_system_przed=ODESystem(odes=odes_przed, dvars=self.q, ode_order=2)._as_fode()
         fode_system_po=ODESystem(odes=odes_po, dvars=self.q, ode_order=2)._as_fode()
         fode_system_bez=ODESystem(odes=odes_bez, dvars=Matrix([self.q[0]]), ode_order=2)._as_fode()
         fode_system_bez_mniejsza_masa=ODESystem(odes=odes_bez_mniejsza_masa, dvars=Matrix([self.q[0]]), ode_order=2)._as_fode()
-        
-#         display(fode_system_bez_mniejsza_masa)
-        
-#         display(fode_system_przed.eigenvalues())
 
         ana_sol_przed=fode_system_przed.steady_solution.subs(self.ivar, tau)[0].subs(self.chi, var_chi)
-#         display(ana_sol_przed)
+
         ana_sol_po=fode_system_po.steady_solution.subs(self.ivar, tau)[0].subs(self.chi, var_chi)
-#         display(ana_sol_po)
+
         ana_sol_bez=fode_system_bez.steady_solution.subs(self.ivar, tau)[0]
-#         display(ana_sol_bez)
+
         ana_sol_bez_mniejsza_masa=fode_system_bez_mniejsza_masa.steady_solution.subs(self.ivar, tau)[0]
-    
-#         display(ana_sol_bez_mniejsza_masa)
 
         Amp_przed=sqrt((ana_sol_przed.coeff(sin(self.psi*tau)))**2+(ana_sol_przed.coeff(cos(self.psi*tau)))**2)
 
         Amp_po=sqrt((ana_sol_po.coeff(sin(self.psi*tau)))**2+(ana_sol_po.coeff(cos(self.psi*tau)))**2)
 
         Amp_bez=sqrt((ana_sol_bez.coeff(sin(self.psi*tau)))**2+(ana_sol_bez.coeff(cos(self.psi*tau)))**2)
-        
+
         Amp_bez_mniejsza_masa=sqrt((ana_sol_bez_mniejsza_masa.coeff(sin(self.psi*tau)))**2+(ana_sol_bez.coeff(cos(self.psi*tau)))**2)
 
         psi_span = np.linspace(0.1,1.9,1801)
@@ -2243,7 +2233,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         data4plot_bez_mniejsza_masa= lambdify(self.psi,Amp_bez_mniejsza_masa,'numpy')(psi_span)
 
         df = pd.DataFrame(data={f'w/o TMD BT':data4plot_bez, f'w/o TMD AT':data4plot_bez_mniejsza_masa, f'BT, {latex(Eq(self.chi,var_chi,evaluate=False))}':data4plot_przed, f'AT, {latex(Eq(self.chi,var_chi,evaluate=False))}':data4plot_po}, index=psi_span)
-        
+
         df = df.set_axis(pd.Index([(val,Symbol('A',positive=True))  for val  in df.columns]),axis=1)
         df.index.name = self.psi
 
@@ -2265,7 +2255,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
 
         for param in param_list:
             df_param=self._FRF_chart(chi=param)#.reset_index(drop=True, inplace=True)
-#             display(df_param)
+
             df=pd.concat([df, df_param], axis=1)
 
         df= df.loc[:,~df.T.duplicated(keep='first')]
@@ -2276,7 +2266,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
     def excitation_frequency_sim(self, t_span=None, params_list=None):
         from ...solvers.linear import ODESystem
         from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
-        
+
         params_dict = {**self.get_numerical_data()}
         params_dict.pop(self.psi)
         params_dict[self.t0] = 150
@@ -2304,7 +2294,47 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                                                       index=pd.Index(t_span,name=Symbol('t'))
                                                      )
 
-        #sym_wyn = num_df.reindex(pd.Index(t_span,name=t))#.perform_simulations(model_level_name=0)
+        sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
+
+
+        result = TimeDataFrame(sym_wyn)
+        result.index.name = Symbol('tau')
+
+        return result.droplevel(0, axis=1)
+    
+    def force_to_stiffness_ratio_sim(self, t_span=None, params_list=None, t0=None):
+        from ...solvers.linear import ODESystem
+        from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
+
+        params_dict = {**self.get_numerical_data()}
+        params_dict.pop(self.delta)
+
+        if t0 is None: t0 = 10*3.1415
+        params_dict[self.t0] = t0
+
+        if t_span is None: t_span=np.linspace(0,100,1001)
+
+        if params_list is not None: param_list=params_list
+        else: param_list=[0.0011, 0.0031, 0.0051, 0.0071, 0.0091]
+
+        masses_dict = {self.m_t0:self.m_s-self.m_p0-self.m_f}
+        m_f_dict = {self.m_f:self.m_f*self.m_s}
+        eoms_num = self.dimensionless_with_transfer().subs(masses_dict).subs(m_f_dict).doit()
+        a_p=Symbol('a_p')
+        dependencies={a_p:self.x.diff().diff() + 25*self.phi.diff().diff()}
+
+        q=self.q
+
+        dyn_sys = ODESystem(odes=eoms_num, dvars=q)#.as_first_ode_linear_system()
+        Y=self._coords_with_acceleration_list + [a_p]
+        num_df = NumericalAnalysisDataFrame.from_model(dyn_sys,
+                                                      self.delta,
+                                                      param_list,
+                                                      reference_data = params_dict,
+                                                      coordinates=Y,
+                                                      index=pd.Index(t_span,name=Symbol('t'))
+                                                     )
+
         sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
 
 
@@ -2320,7 +2350,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         params_dict = {**self.get_numerical_data()}
         params_dict.pop(self.lam)
 
-        if t0 is None: t0 = 150
+        if t0 is None: t0 = 31.415
         params_dict[self.t0] = t0
 
         if t_span is None: t_span=np.linspace(0,100,1001)
@@ -2346,7 +2376,6 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                                                       index=pd.Index(t_span,name=Symbol('t'))
                                                      )
 
-        #sym_wyn = num_df.reindex(pd.Index(t_span,name=t))#.perform_simulations(model_level_name=0)
         sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
 
 
@@ -2354,8 +2383,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         result.index.name = Symbol('tau')
 
         return result.droplevel(0, axis=1)
-    
-    
+
     def flow_rate_coefficient_sim(self, t_span=None, params_list=None, t0=None):
         from ...solvers.linear import ODESystem
         from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
@@ -2363,7 +2391,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         params_dict = {**self.get_numerical_data()}
         params_dict.pop(self.rho)
 
-        if t0 is None: t0 = 50
+        if t0 is None: t0 = 10*3.1415
         params_dict[self.t0] = t0
 
         if t_span is None: t_span=np.linspace(0,300,3001)
@@ -2389,7 +2417,6 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                                                       index=pd.Index(t_span,name=Symbol('t'))
                                                      )
 
-        #sym_wyn = num_df.reindex(pd.Index(t_span,name=t))#.perform_simulations(model_level_name=0)
         sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
 
 
@@ -2397,7 +2424,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         result.index.name = Symbol('tau')
 
         return result.droplevel(0, axis=1)
-    
+
     def activation_time_sim(self, t_span=None, params_list=None):
         from ...solvers.linear import ODESystem
         from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
@@ -2409,7 +2436,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         if t_span is None: t_span=np.linspace(0,300,3001)
 
         if params_list is not None: param_list=params_list
-        else: param_list=[-30, 0, 30, 90, 330]
+        else: param_list=[0, 28.2735, 31.415, 91.1035, 330]
 
         masses_dict = {self.m_t0:self.m_s-self.m_p0-self.m_f}
         m_f_dict = {self.m_f:self.m_f*self.m_s}
@@ -2429,7 +2456,6 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                                                       index=pd.Index(t_span,name=Symbol('t'))
                                                      )
 
-        #sym_wyn = num_df.reindex(pd.Index(t_span,name=t))#.perform_simulations(model_level_name=0)
         sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
 
 
@@ -2437,7 +2463,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         result.index.name = Symbol('tau')
 
         return result.droplevel(0, axis=1)
-    
+
     def initial_mass_ratio_sim(self, t_span=None, params_list=None, t0=None):
         from ...solvers.linear import ODESystem
         from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
@@ -2450,7 +2476,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         eps0 = Symbol('epsilon_0', positive=True)
 
 
-        if t_span is None: t_span=np.linspace(0,300,3001)
+        if t_span is None: t_span=np.linspace(0,100,1001)
 
         if params_list is not None: param_list=params_list
         else: param_list=[0.0001, 0.0005, 0.001, 0.003, 0.005]
@@ -2474,7 +2500,6 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                                                       index=pd.Index(t_span,name=Symbol('t'))
                                                      )
 
-        #sym_wyn = num_df.reindex(pd.Index(t_span,name=t))#.perform_simulations(model_level_name=0)
         sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
 
 
@@ -2488,12 +2513,12 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         import pandas as pd
         from sympy import lambdify
         from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
-        
+
         if upper_func==True:
             var=self.m_t
         else:
             var=self.m_p
-        
+
         atan_expr=transfer_func.subs(data_dict)
 
         lambda_atan_expr= lambdify((self.tau, self.t0, self.rho),atan_expr.n())
@@ -2520,7 +2545,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         import pandas as pd
         from sympy import lambdify
         from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
-        
+
         if upper_func==True:
             var=self.m_t
         else:
@@ -2546,11 +2571,11 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         fluid_flow_tikz_data = TimeDataFrame(fluid_flow_fc[list((fluid_flow_fc.columns))])
 
         return fluid_flow_tikz_data
-   
+
     def _mass_transfer_influence(self, t_span=None):
         from ...solvers.linear import ODESystem
         from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
-        
+
         params_dict = {**self.get_numerical_data()}
         params_dict.pop(self.m_f)
 
@@ -2559,16 +2584,14 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         masses_dict = {self.m_t0:self.m_s-self.m_p0-self.m_f}
         m_f_dict = {self.m_f:self.m_f*self.m_s}
         eoms_num = self.dimensionless_with_transfer().subs(masses_dict).subs(m_f_dict).doit()
-#         display(eoms_num)
+
         a_p=Symbol('a_p')
         dependencies={a_p:self.x.diff().diff() + 25*self.phi.diff().diff()}
 
         q=self.q
-        
+
         dyn_sys = ODESystem(odes=eoms_num, dvars=q)#.as_first_ode_linear_system()
-        
-#         display(dyn_sys)
-        
+
         Y=self._coords_with_acceleration_list + [a_p]
         num_df = NumericalAnalysisDataFrame.from_model(dyn_sys,
                                                       self.m_f,
@@ -2578,19 +2601,18 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                                                       index=pd.Index(t_span,name=Symbol('t'))
                                                      )
 
-        #sym_wyn = num_df.reindex(pd.Index(t_span,name=t))#.perform_simulations(model_level_name=0)
         sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
 
 
         result = TimeDataFrame(sym_wyn)
         result.index.name = Symbol('tau')
-        
+
         return result.droplevel(0, axis=1)
-    
+
     def _skyscraper_stiffness_influence(self, t_span=None, params_list=None):
         from ...solvers.linear import ODESystem
         from ...utilities.adaptable import NumericalAnalysisDataFrame,pd,TimeDataFrame
-        
+
         params_dict = {**self.get_numerical_data()}
         params_dict.pop(self.chi)
 
@@ -2606,7 +2628,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         dependencies={a_p:self.x.diff().diff() + 25*self.phi.diff().diff()}
 
         q=self.q
-        
+
         dyn_sys = ODESystem(odes=eoms_num, dvars=q)#.as_first_ode_linear_system()
         Y=self._coords_with_acceleration_list + [a_p]
         num_df = NumericalAnalysisDataFrame.from_model(dyn_sys,
@@ -2617,7 +2639,6 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                                                       index=pd.Index(t_span,name=Symbol('t'))
                                                      )
 
-        #sym_wyn = num_df.reindex(pd.Index(t_span,name=t))#.perform_simulations(model_level_name=0)
         sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
 
 
@@ -2654,10 +2675,10 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         #NUMERYCZNIE
         masses_dict = {self.m_t0:self.m_s-self.m_p0-self.m_f}
         eoms_num = self.dimensionless_with_transfer().subs(self.get_numerical_data_for_solving_options()).doit()
-#         display(eoms_num)
+
         ode_2=ODESystem(odes=eoms_num, dvars=self.q).numerized()
         num_sym_wyn=ode_2.compute_solution(t_span=t_span, ic_list=[0.0, 0.0, 0.0, 0.0]).apply(np.real)
-        
+
         numerical_sym_wyn=TimeDataFrame(data={('N-N-N','X'): num_sym_wyn[self.x]})
         numerical_sym_wyn.index.name = Symbol('tau')
 
@@ -2683,9 +2704,9 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         ana_sol_sym_3=ana_sol_3.with_ics(ics_list_the_newest, ivar0=95.1)
         t_span_3=np.linspace(95.1,300,2050)
         ana_sym_wyn_3=ana_sol_sym_3.numerized().compute_solution(t_span=t_span_3).apply(np.real)
-        
+
         results_ANA=pd.concat([ana_sym_wyn_1, num_sym_wyn_2, ana_sym_wyn_3])
-        
+
         analytical_numerical_sym_wyn=TimeDataFrame(data={('A-N-A','X'): results_ANA[self.x]})
         analytical_numerical_sym_wyn.index.name = Symbol('tau')
 
@@ -2923,9 +2944,6 @@ class VariableMassTrolleyWithPendulumFunctionWithoutRayleigh(VariableMassTrolley
         self.ivar = ivar
         self._init_from_components(**kwargs)
 
-        #self.trans_expr = ((S.One/2-atan(self.flow_coeff*(self.ivar-self.t0))/pi))
-        #self.m_tf = self.m_f#((S.One/2-atan(self.flow_coeff*(self.ivar-self.t0))/pi))
-        #self.m_pf = self.m_f#((S.One/2+atan(self.flow_coeff*(self.ivar-self.t0))/pi))
 
     @cached_property
     def components(self):
