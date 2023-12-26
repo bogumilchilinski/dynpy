@@ -2353,7 +2353,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         if t0 is None: t0 = 31.415
         params_dict[self.t0] = t0
 
-        if t_span is None: t_span=np.linspace(0,100,1001)
+        if t_span is None: t_span=np.linspace(0,300,3001)
 
         if params_list is not None: param_list=params_list
         else: param_list=[0.01, 0.02, 0.03, 0.04, 0.05]
@@ -2470,13 +2470,13 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
 
         params_dict = {**self.get_numerical_data()}
 
-        if t0 is None: t0 = 150
+        if t0 is None: t0 = 31.415
         params_dict[self.t0] = t0
 
         eps0 = Symbol('epsilon_0', positive=True)
 
 
-        if t_span is None: t_span=np.linspace(0,100,1001)
+        if t_span is None: t_span=np.linspace(0,200,2001)
 
         if params_list is not None: param_list=params_list
         else: param_list=[0.0001, 0.0005, 0.001, 0.003, 0.005]
