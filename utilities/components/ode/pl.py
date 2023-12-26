@@ -817,7 +817,7 @@ class SeparableODEIntroComponent(ReportComponent):
         system = self.reported_object
         ode_sys =system
 
-        display(ReportText('Jednym z najbardziej podstawowych typów równań różniczkowych jest równanie o zmiennych rozdzielonych, które  polega na przerzuceniu wyrazów z $y$ i $x$ na dwie różne strony i scałkowaniu ich. Po scałkowaniu można zapisać przerzucić jedną ze stałych całkowania na drugą stronę równania i zsumować stałe C. Rozwiązanie takeigo równania możemy zrozumieć na podstawie zadania poniżej:'))
+        display(ReportText('Jednym z fundamentalnych typów równań różniczkowych jest równanie o zmiennych rozdzielonych. Proces rozwiązania tego typu równania polega na separacji wyrazów zawierających $y$ i $x$, przeniesieniu ich na różne strony równania, a następnie zastosowaniu operacji całkowania. Po przeprowadzeniu całkowania nie można zapomnieć o dodaniu do jednej ze stron stałej całkowania. Poniżej znajduje się przykład zadania ilustrującego proces rozwiązania tego rodzaju równania.:'))
 
 class EquationDefinitionComponent(ReportComponent):
     #title="We consider the following differential equation:"
@@ -843,7 +843,7 @@ class VariablesSeparationComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self.reported_object
+        system = self.reported_object._hom_equation()
         ode_sys =system
         ############################ must have
 
@@ -852,12 +852,12 @@ class VariablesSeparationComponent(ReportComponent):
         fun = system.dvars[0]
         ivar = system.ivar
 
-        fun_str = system._variable_name()[3]
+        fun_str = system._get_dvars_symbols()[fun.diff(ivar)]
 
         d_ivar = system._variable_name()[0]
         d_var = system._variable_name()[1]
 
-        y_sym = system._variable_name()[2]
+        y_sym = system._get_dvars_symbols()[fun]
         gx=Symbol('g(x)')
         hx=Symbol('h(x)')
 
@@ -870,10 +870,12 @@ class VariablesSeparationComponent(ReportComponent):
         g_fun_ivar = system._function_separation()[0]
         h_fun_dvar = system._function_separation()[1]
         #display(ReportText('If it is possible variables $x$ and $y$ should be separated like shown below:'))
-        display(ReportText('Jeżeli to możliwe,  zmienne $x$ i $y$ powinny zostać rozdzielone jak pokazano poniżej:'))
+        display(ReportText('Jeżeli jest to możliwe, dokonujemy powszechnie znanego rozdzielenia zmiennych $x$ i $y$. Poprzez rozdzielenie zmiennych rozumie się oddzielenie wyrazów zawierających zmienną $x$ od tych, które zawierają zmienną $y$. W celu dokonania tego podziału, możemy przyporządkować te wyrazy do funkcji $h(x)$ i $g(x)$, co pokazano poniżej:'))
         display(SympyFormula(Eq(gx,g_fun_ivar)))
         display(SympyFormula(Eq(hx,h_fun_dvar)))
-        display(ReportText('Gdy da się rozdzielić zmienne, możemy oddzielić $dx$ i $dy$, co umożliwi nam rozwiązanie równania poprzez jedynie scałkowaniu go obustronnie :'))
+        display(ReportText(f'Poza tymi elementami nasze równanie zawiera również wyraz ${latex(fun_str)}$, który można również zapisać jako:'))
+        display(SympyFormula(Eq(fun_str,d_var/d_ivar)))
+        display(ReportText(f'Po wstawieniu tego wyrażenia można zauważyć, że w pózniejszych krokach pomnożenie równania obustronnie przez ${latex(d_ivar)}$ umożliwia scałkowanie obu stron względem innych zmiennych.'))
 
 class SeparatedVariablesIntegrationComponent(ReportComponent):
     
@@ -881,7 +883,7 @@ class SeparatedVariablesIntegrationComponent(ReportComponent):
     title="Całkowanie zmiennych rozdzielonych"
     def append_elements(self):
 
-        system = self.reported_object
+        system = self.reported_object._hom_equation()
         ode_sys =system
         ############################ must have
 
@@ -907,19 +909,19 @@ class SeparatedVariablesIntegrationComponent(ReportComponent):
         g_fun_ivar = system._function_separation()[0]
         h_fun_dvar = system._function_separation()[1]
         #display(ReportText(f'We treat our ${latex(hx)}$ function as a ${latex(y_sym)}$'))
-        display(ReportText(f'Traktujemy funkcję ${latex(hx)}$ jako ${latex(y_sym)}$'))
+        display(ReportText('Poniższe równanie należy zmodyfikować:'))###nie jestem pewien co tutaj wsyawic jako ten opis
         
-        display(SympyFormula( Eq(Symbol(fun_str),g_fun_ivar*h_fun_dvar)))
+        display(SympyFormula( Eq(Symbol(latex(d_var/d_ivar)),g_fun_ivar*h_fun_dvar)))
 
         #display(ReportText('Two functions of seprarate variables are to define. These are as follows'  ))
-        display(ReportText('Należy zdefiniować dwie następujące funkcje rozdzielonych zmiennych jak pokazano poniżej. '  ))
+        display(ReportText(f'W tym celu mnożymy obustronnie przez ${latex(d_ivar)}$ oraz przenosimy ${latex(fun)}$ na przeciwną stronę równania:'  ))
         
         display(SympyFormula( Symbol(latex(d_var/h_fun_dvar)+ '=' + latex(g_fun_ivar) + latex(d_ivar) )   ) )
         #display(ReportText('Integration on both sides'))## uzupełnić opis
-        display(ReportText('''Następnie, aby "wrócić" do funkcji pierwotnej oraz otrzymać wynik w postaci funkcji $y$ całkujemy obustronnie: '''))
+        display(ReportText('''Następnie, aby "wrócić" do funkcji pierwotnej oraz otrzymać wynik w postaci funkcji $y$ całkujemy otrzymane równanie obustronnie: '''))
         
         #display(SympyFormula(  Symbol('\\int ' + latex(d_var/y_sym) + '=  \\int ' + latex(g_fun_ivar) + latex(d_ivar) )   ) )
-        display(ReportText('''Przy całkowaniu należy pamiętać o dodaniu stałej w dowolnej postaci. '''))
+        display(ReportText('''Co ważne, przy całkowaniu należy pamiętać o dodaniu stałej całkowania w dowolnej postaci naogół zapisywanej jako $C$ bądź $D$. '''))
         display(SympyFormula(  Symbol(latex( Integral(1/h_fun_dvar,y_sym) )+ '= ' + latex(Integral(g_fun_ivar,ivar))  )   ) )
 
 #         const = (system.solution._spot_constant())[0]
@@ -963,14 +965,14 @@ class SolutionComponent(ReportComponent):
         h_fun_dvar = system._function_separation()[1]
         
         #display(ReportText('After rearrangment a solution has the following form:'  ))
-        display(ReportText('Po uporządkowaniu oraz przeobrażeniu stałej wyrażenie ma następującą postać:'  ))
+        display(ReportText('Po uporządkowaniu oraz przeobrażeniu stałej wyrażenie ma następującą postać:'  ))## trzeba rozwinąć hasło przeobrażenie
         display(SympyFormula( system.general_solution.as_eq_list()[0] ))
 
         #display(ReportText('Obtained expresions enable to rewrite equation under consideration.'  ))
-        display(ReportText('Otrzymane wyrażenie umożliwia ponowne zapisanie równań uwzględniając wczeniejsze obliczenia.'  ))
+        display(ReportText('Otrzymane wyrażenie stanowi rozwiązania równania różniczkowego o zmiennych rozdzielonych. Stała całkowania jest możliwa do policzenia w momencie w którym w zadaniu zostały podane warunki początkowe, czyli wartość funkcji dla konkretnego $x$.'  ))
         
 class LinearODEIntroComponent(ReportComponent):
-    title="Podstawowa wiedza niezbędna do rozwiązania równania rózniczkowego"
+    title="Podstawowa wiedza niezbędna do rozwiązania równania różniczkowego"
     
     def append_elements(self):
 
@@ -988,7 +990,7 @@ class LinearODEIntroComponent(ReportComponent):
         Px=Symbol('P(x)')
         Qx=Symbol('Q(x)')
         n=Symbol('n')
-        display(ReportText('Jednym z najbardziej podstawowych typów równań różniczkowych jest równanie liniowe o stałych współczynnikach. Równanie liniowe składa się jedynie z liniowych wyrazów, które mogą zawierać stałe współczynniki. Wymagane jest przejście na rówanie jednorodne- przenosimy wszystkie wyrazy z funkcją $y$ i jej pochodnymi, po czym przyrównujemy do zera otrzymując równanie jednorodne. Następnie wymagane jest uzmiennienie stałej i traktowanie jej jako funkcji zależnej od $x$. Liczymy pochodne obu stron i wykorzystujemy wyniki w początkowym równaniu. Wynikiem jest suma rozwiązań z obu części'))
+        display(ReportText('Jednym z najbardziej podstawowych typów równań różniczkowych jest równanie liniowe o stałych współczynnikach. Równanie liniowe składa się jedynie z liniowych wyrazów, które mogą zawierać stałe współczynniki. Wymagane jest przejście na rówanie jednorodne- przenosimy wszystkie wyrazy z funkcją $y$ i jej pochodnymi, po czym przyrównujemy do zera otrzymując równanie jednorodne. Następnie wymagane jest uzmiennienie stałej i traktowanie jej jako funkcji zależnej od $x$. Liczymy pochodne obu stron i wykorzystujemy wyniki w początkowym równaniu. Wynikiem jest suma rozwiązań z obu części')) ###dodać: mające postać a*y'+b*y+R(x),gdzie r(x) to funckja x opisana jawnie gdzie a=... b=... r(x)=... i tutaj wpisać dla naszego przykładu z tego spot consant)
 
 class LinearTransformation(ReportComponent):
     title=" Przejscie na równanie jednorodne"
@@ -1007,19 +1009,40 @@ class LinearTransformation(ReportComponent):
 
         y_sym = system._variable_name()[2] #y(x)
         const=Symbol('D')
-        g_fun_ivar = system._function_separation()[0] #x.coef
-        h_fun_dvar = system._function_separation()[1] #y.coef
 
-#         ## to jest do obgadania odtad
-#         separation=VariablesSeparationComponent(system._hom_equation())
-#         self.append(separation) ## dotąd
         display(ReportText('Przenosimy wszystkie elementy z funkcją $y$ i jej pochodnymi na jedną stronę i przyrównujemy do zera, otrzymując równanie jednorodne:'))
         display(SympyFormula(Eq(system._hom_equation().lhs[0],0)))
-        display(ReportText('Następnie rozwiązujemy powyższe równanie jak typowe równanie o zmiennych rozdzielonych'))
-        display(SympyFormula(Eq(system.general_solution.lhs[0],system.general_solution.rhs[0])))
-
         
-#         display(SympyFormula( Symbol(latex(h_fun_dvar)+ '=' + latex(g_fun_ivar)  )   ) )
+        
+        
+
+
+class LinearToSeparable(ReportComponent):
+    
+    title="Rozwiązanie powstałego równania o zmiennych rozdzielonych"
+    def append_elements(self):
+
+        system = self.reported_object
+        fun = system.dvars[0]
+        
+        ode_sys=system._hom_equation()
+        #sep_ode_report=ode_sys.report #mniej więcej coś takiego tylko coś pomyliłem na 100%
+        
+        display(ReportText('Rozwiązanie równania jednorodnego jest następujęce (TO TEN KOMP CO POBIERA RAPORT) '))
+        display(SympyFormula(Eq(ode_sys.lhs[0],0)))
+        
+        #print("#"*200)
+        sep_ode_report=ode_sys.report
+        
+        
+        #print(list(sep_ode_report))
+        #print('#'*3)
+        #print(list(sep_ode_report)[3:])
+        
+        for elem in list(sep_ode_report)[3:]:
+            self.append(elem)
+
+
 
 class VariationOfConstant(ReportComponent):
     title="Uzmiennienie stałej"
@@ -1032,35 +1055,7 @@ class VariationOfConstant(ReportComponent):
         y = fun
         ivar = system.ivar
         
-        #         sys_0=Eq(ode_sys.lhs[0],ode_sys.rhs[0])
-        #         sol=ode_sys.general_solution()
-        #         Cx=Function(sol._spot_constant()[0])(x)
-        #         c_prim=Function("C'")(x)
-        #         fun_str = system._variable_name()[3] #y'
 
-        #         d_ivar = system._variable_name()[0] #dx
-        #         d_var = system._variable_name()[1] #dy
-
-        #         #y_sym = system._variable_name()[2] #y(x)
-        # #         const=Symbol('D')
-        # #         const=solve(sol,c1)
-        #         display(ReportText('Kolejnym krokiem jest potraktowanie stałej jako funkcji zależnej od $x$:'))
-        #         sol_const=sol.subs(sol._spot_constant()[0], Cx)
-        #         sol_cx=display(SympyFormula(Eq(Symbol(y_sym),sol_const.rhs[0])))
-        #         display(sol_cx)
-        #         display(ReportText('Następnie należy policzyć pochodne obu stron równania'))
-        #         sol_diff=Eq(Symbol(fun_str), sol.rhs.diff(x)[0])
-        #         display(sol_diff)
-        #         display(ReportText("Dzięki tej operacji możemy teraz podstawić $y$ i $y'$ do oryginalnego równania"))
-        #         sys_sub=sys_0.subs(y,sol_cx.rhs).subs(y.diff(),sol_diff.rhs)
-        #         display(SympyFormula(sys_sub))
-        #         display(ReportText("Jeżeli nie popełnilismy blędu, stałe powinny się wyzerować i zostajemy z $C'(x)$ :"))
-        #         cp_sol=solve(sys_sub,Cx.diff())
-        #         cp_eq=Eq(c_prim,cp_sol[0])
-        #         display(SympyFormula(cp_eq))
-        #         display(ReportText("Następnie, aby uzyskać rozwiązanie szczególne należy policzyć całki obustronnie :"))
-        #         display(SympyFormula(Eq(Cx,cp_eq.rhs.diff())))
-        #         display(ReportText("Aby uzyskać rozwiązanie naszego równania musimy połączyć dwa wyżej uzyskane rozwiązania, czyli do rozwiązania ogólnego podstawić wyliczoną stałą:"))
         ode_sys2 = ode_sys
         x=ivar
         szur=ode_sys2.general_solution
@@ -1083,10 +1078,12 @@ class VariationOfConstant(ReportComponent):
         display(SympyFormula(sol_cx))
         sol_diff3=Eq(Symbol("y'"), szur3_.rhs[0])
         display(ReportText('Następnie należy policzyć pochodne obu stron równania'))
+        ## dodać równanie 
+        display(ReportText('Otrzymując równanie następującej postaci'))
+                ##dodać spochodnione równanie chyba soldiff3 bedzie git
         
         
-        
-        display(SympyFormula(sol_diff3))#gdzie?
+        display(SympyFormula(sol_diff3))#gdzie? gdzie co?
         display(ReportText("Dzięki tej operacji możemy teraz podstawić $y$ i $y'$ do oryginalnego równania"))
         display(SympyFormula(ode_syso))
         lolo=ode_syso.subs(y.diff(ivar),sol_diff3.rhs).subs(y,sol_cx.rhs)
@@ -1094,7 +1091,7 @@ class VariationOfConstant(ReportComponent):
         display(SympyFormula(lolo))
         c_p_sol=solve(lolo,c_prim)
         cp_eq=Eq(c_prim,c_p_sol[0])
-        display(ReportText("Następnie, jeżeli wszystko zostało policzne poprawnie to wartosci $C(x)$ powinny się skrócić i uzyskamy wartosc $C'(x)$"))
+        display(ReportText("Następnie, jeżeli wszystko zostało policzne poprawnie to wartosci $C(x)$ powinny się skrócić i uprościć do postaci z której w łatwy sposób możemy wyznaczyć $C'(x)$ otrzymując:"))
         display(SympyFormula(cp_eq))
         cx_wyn=Eq(Cx,cp_eq.rhs.diff(ivar))
         display(ReportText("Po obustronnym scałkowaniu otrzymamy wartosć stałej:"))
@@ -1102,12 +1099,15 @@ class VariationOfConstant(ReportComponent):
         FINALOWY_WYNIK=sol_cx.subs(Cx,cx_wyn.rhs)
         display(ReportText("Aby otrzymać ostateczny wynik musimy podstawić otrzymaną stałą do pierwszego równania w którym uzmiennilismy stałą:"))
         display(SympyFormula(FINALOWY_WYNIK))
+        
 # class LinearODESolution(ReportComponent):
 #     title="Uzyskanie pełnego rozwiązania"
     
 #     def append_elements(self):
 #         system = self._system
 #         ode_sys =system
+## no i tutaj to brakuje całego komeponentu w którym finalowy wynik jest rozwiązywany jako separable taka moja propozycja mniej więcej
+
 
 class BernoulliODEIntroComponent(ReportComponent):
     title="Podstawowa wiedza niezbędna do rozwiązania równania rózniczkowego"
@@ -1205,6 +1205,6 @@ class BernoulliLinearTransformation(ReportComponent):
 
         display(ReportText("Ostatnim krokiem do przejscia na równanie liniowe jest podstawienie wyliczonych wyżej $y$ i $y'$ do pierwotnego równania:"))
         display(SympyFormula(Eq(rownanie.lhs[0],rownanie.rhs[0])))
-        display(ReportText('Orzymane równanie to równanie liniowe, które liczymy w znany już sposób: LINEARWITHCONSTCOEFF'))
+        display(ReportText('Orzymane równanie to równanie liniowe, które liczymy jak zwykłe równanie liniowe'))
         rownanie.report
 

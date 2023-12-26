@@ -1449,7 +1449,7 @@ class ODESystem(AnalyticalSolution):
         free=self._free_component()
         hom_eq=(self.lhs - free)
         
-        return ODESystem(odes=hom_eq, odes_rhs=zeros(len(self.dvars),1), dvars=self.dvars, ode_order=1, ivar=self._ivar)#dzieki Madi<3
+        return type(self)(odes=hom_eq, odes_rhs=zeros(len(self.dvars),1), dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar)#dzieki Madi<3
     
     def char_polynomial(self):
         r=Symbol('r')
@@ -2987,11 +2987,11 @@ class LinearODESolution:
 
 class SeparableODE(ODESystem):
 
+    def _hom_equation(self):
+        ode = super()._hom_equation()
+        
+        return HomogeneousSeparableODE.from_ode_system(ode)
 
-#    from ..utilities.components.ode import pl
-#     system = self
-#     fun = system.dvars[0]
-#     ivar = system.ivar
 
     @property
     def _report_components(self):
@@ -2999,9 +2999,11 @@ class SeparableODE(ODESystem):
         comp_list=[
         ode_comp_pl.SeparableODEIntroComponent,
         ode_comp_pl.EquationDefinitionComponent,
+        ode_comp_pl.LinearTransformation,
         ode_comp_pl.VariablesSeparationComponent,
         ode_comp_pl.SeparatedVariablesIntegrationComponent,
         ode_comp_pl.SolutionComponent,
+        ode_comp_pl.VariationOfConstant,
         ]
         
         return comp_list
@@ -3047,19 +3049,10 @@ class SeparableODE(ODESystem):
         
         
         ode_rhs = solve(ode_sys.lhs[0],ode_sys.dvars[0].diff())[0]
-        
-        display(f'ode_rhs = {ode_rhs}')
-        display(f'dvars = {dvars}')
-        display(f'dvar_sym = {dvar_sym}')
-        display(f'ivar = {ivar}')
-        display(f'ode_rhs.subs = {ode_rhs.subs(dvars,dvar_sym)}')
-        
+
         
         sep_vars_dict = (separatevars(ode_rhs.subs(dvars,dvar_sym),(ivar,dvar_sym),dict=True))
-        
-        display(f'słownik = {sep_vars_dict}')
-        display(f'ivar = {sep_vars_dict[ivar]}')
-        display(f'''coeff = {sep_vars_dict['coeff']}''')
+
         
         g_fun_ivar = sep_vars_dict[ivar]*sep_vars_dict['coeff']
         h_fun_dvar = sep_vars_dict[dvar_sym]
@@ -3106,7 +3099,7 @@ class SeparableODE(ODESystem):
     
     def _ode_solution(self):
         dvars=self.dvars
-        return AnalyticalSolution(dvars,dsolve(self.odes[0],self.dvars[0]).rhs)
+        return ODESolution(dvars,dsolve(self.odes[0],self.dvars[0]).rhs)
     def _get_dvars_symbols(self):
         system=self
         dvars = system.dvars[0]
@@ -3124,6 +3117,21 @@ class SeparableODE(ODESystem):
 
         return self._ode_solution()
     
+class HomogeneousSeparableODE(SeparableODE):
+
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        ode_comp_pl.SeparableODEIntroComponent,
+        ode_comp_pl.EquationDefinitionComponent,
+        ode_comp_pl.VariablesSeparationComponent,
+        ode_comp_pl.SeparatedVariablesIntegrationComponent,
+        ode_comp_pl.SolutionComponent,
+        ]
+        
+        return comp_list
+    
 class LinearWithConstCoeffODE(ODESystem):
 #     system = self
 #     fun = system.dvars[0]
@@ -3135,11 +3143,17 @@ class LinearWithConstCoeffODE(ODESystem):
         comp_list=[
         ode_comp_pl.EquationDefinitionComponent,
         ode_comp_pl.LinearTransformation,
+        ode_comp_pl.LinearToSeparable,
         ode_comp_pl.VariationOfConstant
         ]
         
         return comp_list
 
+    def _hom_equation(self):
+        ode = super()._hom_equation()
+        
+        return HomogeneousSeparableODE.from_ode_system(ode)
+    
     def _eqn_coeffs(self):
         
         system = self
@@ -3189,7 +3203,7 @@ class LinearWithConstCoeffODE(ODESystem):
         g_fun_ivar = sep_vars_dict[ivar]*sep_vars_dict['coeff']
         h_fun_dvar = sep_vars_dict[dvar_sym]
         
-        return g_fun_ivar,h_fun_dvar        
+        return g_fun_ivar,h_fun_dvar
 
     def _function_integration(self,form='expr'):
         system = self
@@ -3418,7 +3432,7 @@ class BernoulliODE(ODESystem):
         
         red_expr=red_dvar[0]**n_sub
         
-        ode_rhs=(((self.subs(reduction_dict).lhs*red_expr-self.subs(reduction_dict).rhs*red_expr  )))
+        ode_rhs=(((self.subs(reduction_dict).lhs*red_expr-self.subs(reduction_dict).rhs*red_expr  ))).expand()
 
         sep_ode = LinearWithConstCoeffODE(ode_rhs,dvars=red_dvar,ivar=self.ivar,ode_order=1)
 

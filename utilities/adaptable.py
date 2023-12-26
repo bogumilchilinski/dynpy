@@ -1644,8 +1644,10 @@ class DataTable(Table,ReportModule):
     
     @classmethod
     def set_caption_space(cls, space):
-        cls.packages.remove(Command('captionsetup[table]{skip=5pt}'))
+        cls.packages.remove(Command('captionsetup[table]{skip=5pt}')) 
         cls.packages.append(Command('captionsetup[table]{skip='+str(space)+'pt}'))
+        
+        return cls
         
 class MarkerRegistry(dict):
 
