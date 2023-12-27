@@ -278,6 +278,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     _module_path=__file__
     
     reportclass= ExampleTemplate
+    _defeutl_documentclass = ExampleTemplate
     _components = None
     
     ivar = Symbol('t')
@@ -1156,12 +1157,25 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         return comp_list
     
+    
+    @property
+    def default_document_form(self):
+
+        template=self._default_documentclass
+        
+        return template
+
+    @default_documentclass.setter
+    def default_documentclass(self,value):
+
+        self._default_documentclass=value
+
+
     @property
     def report(self):
 
-      
         sys=self
-        doc = ExampleTemplate()
+        doc = self._default_documentclass
 
         for comp in self._report_components:
             doc.append(comp(sys))
