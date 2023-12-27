@@ -3096,6 +3096,17 @@ class SeparableODE(ODESystem):
             'symbol_4':symbol_4
             
         }
+
+    def _rename_variables(self):
+        system=self
+        dvars = system.dvars[0]
+        ivar = system.ivar
+        
+        dvars_str=f"{str(dvars)}".replace(f'({str(ivar)})','')
+        dvars_g=Symbol(f"{dvars_str}_o")
+    
+        return {dvars:dvars_g,
+                dvars.diff(ivar):Symbol(f"{dvars_g}'")}
     
     def _ode_solution(self):
         dvars=self.dvars

@@ -1185,7 +1185,7 @@ class BernoulliTransformation(ReportComponent):
         display(ReportText("Następnie należy wyznaczyć z powyższych równań $y$ oraz $y'$"))
         display(SympyFormula(Eq(Symbol("y"),fun.subs(bernoulli_sub))))
         display(SympyFormula(Eq(Symbol("y'"),fun.diff().subs(bernoulli_sub))))
-        
+
 class BernoulliLinearTransformation(ReportComponent):
     title=" Przejscie na równanie liniowe"
     
@@ -1205,6 +1205,10 @@ class BernoulliLinearTransformation(ReportComponent):
 
         display(ReportText("Ostatnim krokiem do przejscia na równanie liniowe jest podstawienie wyliczonych wyżej $y$ i $y'$ do pierwotnego równania:"))
         display(SympyFormula(Eq(rownanie.lhs[0],rownanie.rhs[0])))
-        display(ReportText('Orzymane równanie to równanie liniowe, które liczymy jak zwykłe równanie liniowe'))
-        rownanie.report
+        display(ReportText('Orzymane równanie liczymy w następujący sposób:'))
 
+        sep_ode_report=rownanie.report
+
+
+        for elem in list(sep_ode_report)[3:]:
+            self.append(elem)
