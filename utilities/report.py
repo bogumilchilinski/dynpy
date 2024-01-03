@@ -3045,7 +3045,7 @@ class ObjectCode(LstListing,ReportModule):
     #: string if it has no content.
     omit_if_empty = False
 
-    def __init__(self, inspected_obj=None, options=None, arguments=None, start_arguments=None,
+    def __init__(self, source=None, options=None, arguments=None, start_arguments=None,
                  **kwargs):
         r"""
         Args
@@ -3058,7 +3058,7 @@ class ObjectCode(LstListing,ReportModule):
             Arguments to be added before the options
         """
 
-        self.inspected_obj = inspected_obj
+        self.source = source
         self.options = options
         self.arguments = arguments
         self.start_arguments = start_arguments
@@ -3067,19 +3067,15 @@ class ObjectCode(LstListing,ReportModule):
         
         super().__init__(options=None, arguments=None, start_arguments=None,**kwargs)
         
-        if self.inspected_obj is not None:
-            self.append(NoEscape(
-                inspect.getsource(self.inspected_obj)
-                ))
+        self.code_type
+
+
     
     def __repr__(self):
 
         self.reported()
         
-        if self.inspected_obj is not None:
-            code = (inspect.getsource(self.inspected_obj))
-        else:
-            code = 'nothing to print :('
+        code=self.code_type
         
         repr_string=f'''
         \n++++++++++ CODE +++++++
@@ -3090,6 +3086,23 @@ class ObjectCode(LstListing,ReportModule):
         
         return repr_string
     
+    
+    @property
+    def code_type(self):
+        
+        if self.source is None:
+            code = 'nothing to print :('
+        
+        elif type(self.source)==str:
+            code=self.source
+            self.append(NoEscape(code))
+            
+        else:
+            
+            code=(inspect.getsource(self.source))
+            self.append(NoEscape(code))
+        return code
+    
     def reported(self):
         
         lst_env = Aspect(self.default_title)
@@ -3099,6 +3112,14 @@ class ObjectCode(LstListing,ReportModule):
         self.cls_container.append(lst_env)
         
         return copy.deepcopy(self)
+    
+    def _repr_markdown_(self):
+
+
+        #print(self.code_type)
+        
+        return '\t'+self.code_type.replace('\n','\n \t')
+    
     
 
 class SympyFormula(ReportModule):
