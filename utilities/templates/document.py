@@ -221,6 +221,7 @@ class WutThesis(Document):
                   Package('graphicx'),
                   Package('indentfirst'),
                   Package('pdfpages'),
+                  Package('amsmath'),
 
                   Command('newcommand{\praca}', arguments=['Praca dyplomowa']),
                   Command('newcommand{\dyplom}', arguments=['Magisterska']),
@@ -242,6 +243,7 @@ class WutThesis(Document):
                   Command('counterwithin{table}{section}'),
                   Command('fancypagestyle{headings}{\\fancyhead{} \\renewcommand{\headrulewidth}{1pt} \\fancyheadoffset{0cm} \\fancyhead[RO]{\\nouppercase{\\leftmark}} \\fancyhead[LE]{\\nouppercase{\\leftmark}} \\fancyfoot{} \\fancyfoot[LE,RO]{\\thepage}}'),
                   Command('fancypagestyle{plain}{\\fancyhf{} \\renewcommand{\\headrulewidth}{0pt} \\fancyfoot[LE,RO]{\\thepage}}'),
+                  Command('numberwithin{equation}{section}'),
         
     ]
     

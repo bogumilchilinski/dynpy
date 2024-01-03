@@ -2774,11 +2774,19 @@ class Markdown(Environment,ReportModule):
         return self.reported().markdown
 
     def reported(self):
-        
-        
+
         latex_code=ppd.convert_text(self.markdown,to='latex',format='md')
+
+        if '\\begin{verbatim}' in latex_code:
+            
+            env_name = ObjectCode._latex_name
+            
+            latex_code=latex_code.replace('\\begin{verbatim}',f'\\begin{{{env_name}}} \n').replace('\\end{verbatim}',f'\n \\end{{{env_name}}}')
+            self.cls_container.packages |= (ObjectCode.packages)
         
         self.cls_container.packages |= (self.packages)
+        
+        
         self.cls_container.append(NoEscape(latex_code))
         
         return copy.copy(self)
@@ -3095,15 +3103,24 @@ class ObjectCode(LstListing,ReportModule):
         
         elif type(self.source)==str:
             code=self.source
-            self.append(NoEscape(code))
+            #self.append(NoEscape('   \n   '+code+'   \n   '))
             
         else:
             
             code=(inspect.getsource(self.source))
-            self.append(NoEscape(code))
+            #self.append(NoEscape('   \n   '+code+'   \n   '))
+
+        pol_lang_dict = {'ą':'a', 'Ą':'A','ć':'c', 'Ć':'C', 'ę':'e', 'Ę':'E', 'ł':'l', 'Ł':'L', 'ó':'o', 'Ó':'O', 'ń':'n', 'Ń':'N', 'ś':'s', 'Ś':'S', 'ż':'z', 'Ż':'Z', 'ź':'z', 'Ź':'Z'}
+
+        for pol_lang_dict_key in pol_lang_dict.keys():
+            code = code.replace(pol_lang_dict_key, pol_lang_dict[pol_lang_dict_key])
+        
         return code
     
     def reported(self):
+        
+        code = self.code_type
+        self.append(NoEscape('   \n   '+code+'   \n   '))
         
         lst_env = Aspect(self.default_title)
         
