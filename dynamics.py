@@ -1193,8 +1193,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     def report(self):
 
         sys=self
+<<<<<<< HEAD
         doc = self.default_doctype()
         
+=======
+        doc = self._default_doctype
+>>>>>>> 8b9a054 (Dynamics and electric modules development)
 
         for comp in self._report_components:
             doc.append(comp(sys))
