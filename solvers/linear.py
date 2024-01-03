@@ -224,6 +224,9 @@ class MultivariableTaylorSeries(Expr):
 
 
 class AnalyticalSolution(ImmutableMatrix):
+
+    _default_doctype = ExampleTemplate
+
     def __new__(cls, data, rhs=None, evaluate=True, **options):
 
         
@@ -554,30 +557,42 @@ class AnalyticalSolution(ImmutableMatrix):
         solution_tdf._set_comp_time(comp_time)
         solution_tdf.index.name = ivar
         return solution_tdf
-    
-    
+
     @property
     def _report_components(self):
-        
+
         comp_list=[
         ode.ODESystemComponent,
-            
+
         ]
-        
+
         return comp_list
-    
+
+    @property
+    def default_doctype(self):
+
+        doctype=self._default_doctype
+
+        return doctype
+
+    @default_doctype.setter
+    def default_doctype(self,value):
+
+        self._default_doctype=value
+
+
     @property
     def report(self):
 
-      
         sys=self
-        doc = ExampleTemplate()
+        doc = self.default_doctype()
+
 
         for comp in self._report_components:
             doc.append(comp(sys))
-    
-    
+
         return doc
+
     
     def __str__(self):
         return "Analytical Solution of ODE"
@@ -587,7 +602,9 @@ class AnalyticalSolution(ImmutableMatrix):
     def _format_str(self, printer=None):
 
         return self.__str__()
+
     
+
 class ODESolution(AnalyticalSolution):
 
     _ics = None    
@@ -3102,11 +3119,11 @@ class SeparableODE(ODESystem):
         dvars = system.dvars[0]
         ivar = system.ivar
         
-        dvars_str=f"{str(dvars)}".replace(f'({str(ivar)})','')
-        dvars_g=Symbol(f"{dvars_str}_o")
+        dvars_str=Symbol(f"{str(dvars)}".replace(f'({str(ivar)})',''))
+        dvars_g=Function(f"{dvars_str}_o")(ivar)
     
         return {dvars:dvars_g,
-                dvars.diff(ivar):Symbol(f"{dvars_g}'")}
+                dvars.diff(ivar):Function(f"{dvars_g}'")(ivar)}
     
     def _ode_solution(self):
         dvars=self.dvars
@@ -3152,6 +3169,7 @@ class LinearWithConstCoeffODE(ODESystem):
     def _report_components(self):
 
         comp_list=[
+        ode_comp_pl.LinearODEIntroComponent,
         ode_comp_pl.EquationDefinitionComponent,
         ode_comp_pl.LinearTransformation,
         ode_comp_pl.LinearToSeparable,

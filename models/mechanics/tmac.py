@@ -504,6 +504,7 @@ class SDOFWinchSystem(ComposedSystem):
     phi_1=phi
     phi_2=phi_1*i_1
     phi_3=phi_2*i_2
+    
     def __init__(self,
                  I_s=None,
                  I_k=None,
@@ -559,6 +560,7 @@ class SDOFWinchSystem(ComposedSystem):
         if phi_1 is not None: self.phi_1 = phi_1
         if phi_2 is not None: self.phi_2 = phi_2
         if phi_3 is not None: self.phi_3 = phi_3
+        
         self._init_from_components(**kwargs)
 
     @property

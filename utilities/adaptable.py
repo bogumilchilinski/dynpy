@@ -69,9 +69,9 @@ class ReportModule:
         >>>RM.set_units_dict(unit_dict)
     '''
 
-    _cls_container = []
-    cls_container = []
-    _container = []
+    _cls_container = Section('Dummy')
+    cls_container = Section('Dummy')
+    _container = Section('Dummy')
     cls_path = '.'
     _caption = 'Figure describes the numerical data'
     _label = 'fig:markerIsMissing'

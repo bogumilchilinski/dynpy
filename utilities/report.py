@@ -2463,7 +2463,21 @@ class Minted(Environment):
     content_separator = "\n"
 
 class LstListing(Environment):
-    packages=[Package('lstlisting')]
+    packages=[Package('listings'),
+              Package('float'),
+              Package('fvextra'),
+              Package('xcolor'),
+              Command('floatname',arguments=['listing'],extra_arguments=['Listing']),
+              
+              
+              Command('definecolor{codegreen}', arguments=['rgb'], extra_arguments = ['0,0.6,0']),
+              Command('definecolor{codegray}', arguments=['rgb'], extra_arguments = ['0.5,0.5,0.5']),
+              Command('definecolor{codepurple}', arguments=['rgb'], extra_arguments = ['0.58,0,0.82']),
+              Command('definecolor{backcolour}', arguments=['rgb'], extra_arguments = ['0.95,0.95,0.92']),
+              Command('lstdefinestyle{dynPyStyle}', arguments = [NoEscape(r'backgroundcolor=\color{backcolour},commentstyle=\color{codegreen},keywordstyle=\color{magenta},numberstyle=\tiny\color{codegray},stringstyle=\color{codepurple}, basicstyle=\ttfamily\footnotesize,breakatwhitespace=false,breaklines=true,captionpos=b,keepspaces=true,numbers=left,numbersep=5pt,showspaces=false,showstringspaces=false,showtabs=false,tabsize=2')]),
+              Command('lstset', arguments = [NoEscape('style=dynPyStyle,language=Python')])
+             ]
+
     
     
 class PyVerbatim(Environment):
@@ -2868,8 +2882,12 @@ class Picture(Figure,ReportModule):
              Command('graphicspath{{../}}'),]
     
     _position = 'H'
-    _preview_default_size = "20cm"
+    _preview_default_size = "10cm"
     
+    @classmethod
+    def set_preview_default_size(cls, size):
+        cls._preview_default_size = size
+        return cls
     
     _latex_name = 'figure'
     def __init__(self, image=None, position=None, caption=None,width=None,height=None,marker=None, **kwargs):
@@ -2889,6 +2907,7 @@ class Picture(Figure,ReportModule):
     
         self.image = image
         self.caption = caption
+        self.preview_size = None
         
         if width is not None:
             self.width = width
@@ -2924,7 +2943,11 @@ class Picture(Figure,ReportModule):
 
     @property
     def preview_size(self):
-        return self._preview_size
+        if self._preview_size is not None:
+            
+            return self._preview_size
+        else:
+            return self.__class__._preview_default_size
 
     @preview_size.setter
     def preview_size(self, size):
@@ -2935,10 +2958,7 @@ class Picture(Figure,ReportModule):
 
         self._preview_size=size
 
-    @classmethod
-    def set_default_preview_size(cls, size):
-        cls._preview_default_size = size
-        return cls
+
 
 
     def _get_str_key(self):
@@ -2989,8 +3009,8 @@ class Picture(Figure,ReportModule):
                 display(f'Fig. X: {caption}')
                 return ''
             else:
-                size = self.__class__.preview_size
-                return f'<img src="{path}" alt="{caption}" width="{size}"/>'
+                size = self.preview_size
+                return f'<img src="{path}" alt="{caption}" width="{size}"/> \n \n Fig. X: {caption}'
                 #return f'![image preview]({path}) \n \n Fig. X: {caption}'
         else:
             return f'Nothing to plot \n \n Fig. X: {caption}'
@@ -3001,10 +3021,11 @@ class Picture(Figure,ReportModule):
         self.cls_container.append(self)
         
         return copy.deepcopy(self)
-    
-class ObjectCode(PyVerbatim,ReportModule):
-    _latex_name='pyverbatim'
+
+class ObjectCode(LstListing,ReportModule):
+    _latex_name='lstlisting'
     default_title = "Listing"
+    
     
     r"""A base class for LaTeX environments.
     This class implements the basics of a LaTeX environment. A LaTeX
@@ -3079,7 +3100,7 @@ class ObjectCode(PyVerbatim,ReportModule):
         
         return copy.deepcopy(self)
     
-    
+
 class SympyFormula(ReportModule):
     r'''
     This class appends a sympy expression to the existing document container. 

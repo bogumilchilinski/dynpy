@@ -811,13 +811,13 @@ class MaxDynamicForce(ReportComponent):
 
 ##### Karolina + Kamil + Bogi rr
 class SeparableODEIntroComponent(ReportComponent):
-    title="Podstawowa wiedza niezbędna do rozwiązania równania o zmiennych rozdzielonych"
-
+    #title="Podstawowa wiedza niezbędna do rozwiązania równania o zmiennych rozdzielonych"
+    title="Rozwiązanie równania jednorodnego"
     def append_elements(self):
         system = self.reported_object
         ode_sys =system
 
-        display(ReportText('Jednym z fundamentalnych typów równań różniczkowych jest równanie o zmiennych rozdzielonych. Proces rozwiązania tego typu równania polega na separacji wyrazów zawierających $y$ i $x$, przeniesieniu ich na różne strony równania, a następnie zastosowaniu operacji całkowania. Po przeprowadzeniu całkowania nie można zapomnieć o dodaniu do jednej ze stron stałej całkowania. Poniżej znajduje się przykład zadania ilustrującego proces rozwiązania tego rodzaju równania.:'))
+#         display(ReportText('Jednym z fundamentalnych typów równań różniczkowych jest równanie o zmiennych rozdzielonych. Proces rozwiązania tego typu równania polega na separacji wyrazów zawierających $y$ i $x$, przeniesieniu ich na różne strony równania, a następnie zastosowaniu operacji całkowania. Po przeprowadzeniu całkowania nie można zapomnieć o dodaniu do jednej ze stron stałej całkowania. Poniżej znajduje się przykład zadania ilustrującego proces rozwiązania tego rodzaju równania.:'))
 
 class EquationDefinitionComponent(ReportComponent):
     #title="We consider the following differential equation:"
@@ -1010,8 +1010,8 @@ class LinearTransformation(ReportComponent):
         y_sym = system._variable_name()[2] #y(x)
         const=Symbol('D')
 
-        display(ReportText('Przenosimy wszystkie elementy z funkcją $y$ i jej pochodnymi na jedną stronę i przyrównujemy do zera, otrzymując równanie jednorodne:'))
-        display(SympyFormula(Eq(system._hom_equation().lhs[0],0)))
+        display(ReportText('Przenosimy wszystkie elementy z funkcją $y$ i jej pochodnymi na jedną stronę i przyrównujemy do zera, otrzymując równanie jednorodne.'))
+        #display(SympyFormula(Eq(system._hom_equation().lhs[0],0)))
         
         
         
@@ -1028,7 +1028,7 @@ class LinearToSeparable(ReportComponent):
         ode_sys=system._hom_equation()
         #sep_ode_report=ode_sys.report #mniej więcej coś takiego tylko coś pomyliłem na 100%
         
-        display(ReportText('Rozwiązanie równania jednorodnego jest następujęce (TO TEN KOMP CO POBIERA RAPORT) '))
+        display(ReportText('Uzyskane równanie jednorodne jest równaniem o zmiennych rozdzielonych i przyjmuje postać:'))
         display(SympyFormula(Eq(ode_sys.lhs[0],0)))
         
         #print("#"*200)
@@ -1148,7 +1148,7 @@ class EquationDefinitionComponent(ReportComponent):
         
 
 class BernoulliTransformation(ReportComponent):
-    title=" Wyznaczenie nowej funkcji $z$ zależnej od $x$ w celu przejscia na równanie liniowe"
+    title=" Wyznaczenie nowej funkcji z zależnej od x w celu przejscia na równanie liniowe"
     
     def append_elements(self):
         system = self.reported_object

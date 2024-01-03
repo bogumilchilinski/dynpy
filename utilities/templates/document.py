@@ -358,6 +358,9 @@ class TechThriveMechanicalCase(Guide):
     latex_name = 'document'
     _documentclass = 'article'
     packages = [
+                  Package('float'),
+                  Package('graphicx'),
+                  Command('graphicspath{{../}}'),
                   Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
                   Package('microtype'),
                   Package('authoraftertitle'),
@@ -369,14 +372,25 @@ class TechThriveMechanicalCase(Guide):
                   Package('svg'),        
                   Command('pagestyle', arguments=['fancy']),
                   Command('fancyhf', arguments=['']),
-                  Command('fancyhead',  arguments=[NoEscape(r'\includegraphics[height=0.8cm]{TT.png}')],options=['C']), #
+                  Command('fancyhead',  arguments=[NoEscape(r'\includegraphics[height=0.8cm]{./dynpy/models/images/TT.png}')],options=['C']), #
                   Command('fancyhead', arguments=['Mechanika Ogólna'],options=['L']),
                   Command('fancyhead', arguments=[NoEscape('\\today')],options=['R']),
                   Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
                   Command('fancyfoot',  arguments=['Copyright TechThrive 2023'],options=['L']),
                   Command('fancyfoot',  arguments=['Powered by DynPy'],options=['R']),
+                  Command('graphicspath{{../}}'),
         ]
     
+class TechThriveODECase(TechThriveMechanicalCase):
+    packages = [
+                  Command('fancyhead', arguments=['Równania różniczkowe'],options=['L']),
+        ]
+    
+class TechThriveMVCase(TechThriveMechanicalCase):
+    packages = [
+                  Command('fancyhead', arguments=['Drgania mechaniczne'],options=['L']),
+        ]
+
 class EngeneeringDrawingGuide(Guide):
     
     latex_name = 'document'
