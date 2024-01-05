@@ -21,6 +21,9 @@ from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, bas
 
 import matplotlib.pyplot as plt
 
+import pint
+ureg = pint.UnitRegistry()
+
 class YokeMechanism(ComposedSystem):
 
     scheme_name = 'crank_mechanismlow.jpg'
@@ -671,8 +674,42 @@ class SDOFWinchSystem(ComposedSystem):
         obj=self
         st_val=obj.D/2*obj.phi_3
         return st_val
-    
 
+# metody do zatwierdzenia - karolina
+
+
+    def startup_time(self):
+        obj=self
+        I_r=obj.reduced_inertia()
+        ts_val=3*I_r/obj.B
+        return ts_val
+
+    def passive_torque(self):
+        obj=self
+        tp_val=(obj.M_T+obj.G*obj.D/2*(sin(obj.alpha)+obj.mu*cos(obj.alpha)))*obj.i_1*obj.i_2
+        return tp_val
+
+    def units(self):
+        units_dict={
+            self.I_s:ureg.kilogram*ureg.meter**2,
+            self.I_k:ureg.kilogram*ureg.meter**2,
+            self.I_1:ureg.kilogram*ureg.meter**2,
+            self.I_2:ureg.kilogram*ureg.meter**2,
+            self.I_3:ureg.kilogram*ureg.meter**2,
+            self.I_4:ureg.kilogram*ureg.meter**2,
+            self.I_b:ureg.kilogram*ureg.meter**2,
+            self.q[0]:ureg.radian,
+            self.D:ureg.meter,
+            self.ivar:ureg.second,
+            self.M_s:ureg.newton/ureg.meter,
+            self.M_T:ureg.newton/ureg.meter,
+            self.G:ureg.newton,
+            self.g:ureg.meter/ureg.second**2,
+            self.alpha:ureg.radian,
+            self.A:ureg.newton*ureg.meter,
+            self.B:(ureg.newton*ureg.meter*ureg.second)/ureg.radian,
+           }
+        return units_dict
     
 class SDOFWinchSystemTest(ComposedSystem):
 

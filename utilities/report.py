@@ -38,6 +38,27 @@ import inspect
 from collections.abc import Iterable
 
 
+
+pol_lang_dict = {'ą':'a', 'Ą':'A','ć':'c', 'Ć':'C', 'ę':'e', 'Ę':'E', 'ł':'l', 'Ł':'L', 'ó':'o', 'Ó':'O', 'ń':'n', 'Ń':'N', 'ś':'s', 'Ś':'S', 'ż':'z', 'Ż':'Z', 'ź':'z', 'Ź':'Z'}
+
+
+def fix_code(str_to_fix):
+
+
+    for old_char,new_char in pol_lang_dict.items():
+        if old_char in str_to_fix:
+            #print(f'old code for {old_char}')
+            #print(str_to_fix)
+
+            str_to_fix = str_to_fix.replace(old_char, new_char)
+
+            #print('new code')
+            #print(str_to_fix.replace(old_char, new_char))
+    return str_to_fix
+
+
+
+
 def plots_no():
     num = 0
     while True:
@@ -2324,7 +2345,7 @@ class ReportText(ReportModule):
     Example
     =======
     '''
-
+    _conjuction_dict = None
     _color = None
     _alignment = None
 
@@ -2433,7 +2454,16 @@ class ReportText(ReportModule):
 
     def reported(self):
 
-        text_to_add =NoEscape(self._text_formatted)
+        formatted_text = self._text_formatted
+
+        if self._conjuction_dict is not None and isinstance(self._conjuction_dict, dict):
+            for dict_key in self._conjuction_dict.keys():
+                formatted_text = formatted_text.replace(dict_key, self._conjuction_dict[dict_key])
+
+
+        text_to_add =NoEscape(formatted_text)
+
+#         text_to_add =NoEscape(self._text_formatted)
         
         if self._alignment_env:
             align_env=self._alignment_env()
@@ -2782,12 +2812,15 @@ class Markdown(Environment,ReportModule):
             env_name = ObjectCode._latex_name
             
             latex_code=latex_code.replace('\\begin{verbatim}',f'\\begin{{{env_name}}} \n').replace('\\end{verbatim}',f'\n \\end{{{env_name}}}')
+
+            latex_code = fix_code(latex_code)
+
             self.cls_container.packages |= (ObjectCode.packages)
         
         self.cls_container.packages |= (self.packages)
         
         
-        self.cls_container.append(NoEscape(latex_code))
+        self.cls_container.append(NoEscape(  latex_code  ))
         
         return copy.copy(self)
         
@@ -2831,10 +2864,6 @@ class Block(Environment,ReportModule):
         """
 
 
-
-
-
-        
         self.data = data
         self.options = options
         self.arguments = arguments
@@ -2970,12 +2999,12 @@ class Picture(Figure,ReportModule):
 
 
     def _get_str_key(self):
-        return self.image + '_caption:'+str(self.caption    )     
-            
+        return self.image + '_caption:'+str(self.caption    )
+
     def __repr__(self):
 
-        #self.reported()
-        
+        self.cls_container.append(self)
+
         if self.image is not None:
             path = (self.image)
         else:
@@ -2995,8 +3024,7 @@ class Picture(Figure,ReportModule):
     def _repr_markdown_(self):
         from wand.image import Image as WImage
 
-        self.cls_container.append(self)
-        
+
         if self.caption is None:
             caption = ''
         else:
@@ -3110,12 +3138,7 @@ class ObjectCode(LstListing,ReportModule):
             code=(inspect.getsource(self.source))
             #self.append(NoEscape('   \n   '+code+'   \n   '))
 
-        pol_lang_dict = {'ą':'a', 'Ą':'A','ć':'c', 'Ć':'C', 'ę':'e', 'Ę':'E', 'ł':'l', 'Ł':'L', 'ó':'o', 'Ó':'O', 'ń':'n', 'Ń':'N', 'ś':'s', 'Ś':'S', 'ż':'z', 'Ż':'Z', 'ź':'z', 'Ź':'Z'}
-
-        for pol_lang_dict_key in pol_lang_dict.keys():
-            code = code.replace(pol_lang_dict_key, pol_lang_dict[pol_lang_dict_key])
-        
-        return code
+        return fix_code(code)
     
     def reported(self):
         
