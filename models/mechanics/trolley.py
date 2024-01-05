@@ -1881,6 +1881,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
             self.Omega: r'częstość wymuszenia',
             self.omega0: r'częstość własna wózka',
             self.F: r'amplituda siły wymuszającej',
+            self.m_f: r'masa transferowanej cieczy',
             self.g: r'stała grawitacyjna',
             self.rho: r'współczynnik natężenia przepływu',
             self.t0: r'bezwymiarowy czas aktywacji transferu masy',

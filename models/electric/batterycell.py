@@ -111,6 +111,8 @@ class BatteryCell(ComposedSystem):
     
     def voltage_ode(self):
         
+        t=self.ivar
+        
         exprI=0.084*Heaviside(t-100)+0*Heaviside(t-400)-0*Heaviside(t-600)-0*Heaviside(t-800)
         #plot(exprI,(t,0,1001))
         funcI = lambdify(t, exprI)
@@ -136,81 +138,81 @@ class BatteryCell(ComposedSystem):
         
         #pojemnosc w amperogodzinach
 
-    data_dict1 = {
-        U_oc:4.25,
-        R_0:0.02423,
-        R_th:0.1,
-        C_th:100,
-        SOC_init:0.99,
-        C_rated:100,
-        t_0:0,
-    }
+        data_dict1 = {
+            U_oc:4.25,
+            R_0:0.02423,
+            R_th:0.1,
+            C_th:100,
+            SOC_init:0.99,
+            C_rated:100,
+            t_0:0,
+        }
 
-    U_oc_dict = {
-        '100':4.25,
-        '90':4.25,
-        '80':4.25,
-        '70':4.25,
-        '60':3.80,
-        '50':3.70,
-        '40':3.60,
-        '30':3.50,
-        '20':3.40,
-        '10':3.3,
-        '0':3.2
-    }
+        U_oc_dict = {
+            '100':4.25,
+            '90':4.25,
+            '80':4.25,
+            '70':4.25,
+            '60':3.80,
+            '50':3.70,
+            '40':3.60,
+            '30':3.50,
+            '20':3.40,
+            '10':3.3,
+            '0':3.2
+        }
 
-    n_points=2000 #rozdzielczosc symulacji
-    t_array=np.linspace(0,1001,n_points)#czas symulacji i prad symulacji
-    
-    
-    prad_list=[]
-    u0_list=[]
-    for i in t_array:
-        prad_list.append(funcI(i))
-    display(prad_list)
-
-    u0_list = [i * data_dict1[R_0] for i in prad_list]
-    
-    
-    #obliczanie rownania rozniczkowego
-    ode_th.subs(I_li,exprI).subs(data_dict1).numerized(backend='numpy').compute_solution(t_array,[0])
-    
-    
-    #tworzenie dataframe z wynikami
-    tabelka=ode_th.subs(I_li,exprI).subs(data_dict1).numerized(backend='numpy').compute_solution(t_array,[0])
-    
-    
-    wynsym = list(tabelka.iloc[:,1])
-    U_th_list=wynsym
-    
-    
-    u_array=[]
-    soc_array=[]
-
-    for i in range(n_points):
-        soc_array.append(float((SOC_eq_bezcalki.rhs.subs(data_dict1)*(-1)*(np.trapz(prad_list[0:i], x=t_array[0:i]))/3600+SOC_init.subs(data_dict1))))
-    #tutaj jest dopasowanie ocv w zaleznosci od soc, zamiast ifow
-        soc_calk = int(soc_array[i]*10)
-        soc_calk = soc_calk*10
-        data_dict1["U_oc"]=U_oc_dict[str(soc_calk)]
+        n_points=2000 #rozdzielczosc symulacji
+        t_array=np.linspace(0,1001,n_points)#czas symulacji i prad symulacji
 
 
-        u_array.append(data_dict1["U_oc"]-U_th_list[i]-u0_list[i])
+        prad_list=[]
+        u0_list=[]
+        for i in t_array:
+            prad_list.append(funcI(i))
+        display(prad_list)
+
+        u0_list = [i * data_dict1[R_0] for i in prad_list]
+
+
+        #obliczanie rownania rozniczkowego
+        ode_th.subs(I_li,exprI).subs(data_dict1).numerized(backend='numpy').compute_solution(t_array,[0])
+
+
+        #tworzenie dataframe z wynikami
+        tabelka=ode_th.subs(I_li,exprI).subs(data_dict1).numerized(backend='numpy').compute_solution(t_array,[0])
+
+
+        wynsym = list(tabelka.iloc[:,1])
+        U_th_list=wynsym
+
+
+        u_array=[]
+        soc_array=[]
+
+        for i in range(n_points):
+            soc_array.append(float((SOC_eq_bezcalki.rhs.subs(data_dict1)*(-1)*(np.trapz(prad_list[0:i], x=t_array[0:i]))/3600+SOC_init.subs(data_dict1))))
+        #tutaj jest dopasowanie ocv w zaleznosci od soc, zamiast ifow
+            soc_calk = int(soc_array[i]*10)
+            soc_calk = soc_calk*10
+            data_dict1["U_oc"]=U_oc_dict[str(soc_calk)]
+
+
+            u_array.append(data_dict1["U_oc"]-U_th_list[i]-u0_list[i])
 
 
 
-    df_u = pd.DataFrame({t : t_array})
-    df_u[U_li] = u_array
+        df_u = pd.DataFrame({t : t_array})
+        df_u[U_li] = u_array
 
 
-    df_I = pd.DataFrame({t : t_array})
-    df_I[I_li] = prad_list
+        df_I = pd.DataFrame({t : t_array})
+        df_I[I_li] = prad_list
 
-    df_SOC = pd.DataFrame({t : t_array})
-    df_SOC[SOC] = soc_array
+        df_SOC = pd.DataFrame({t : t_array})
+        df_SOC[SOC] = soc_array
 
 
-    tdf_u=TimeDataFrame(df_u).set_index(t)
-    tdf_I=TimeDataFrame(df_I).set_index(t)
-    tdf_SOC=TimeDataFrame(df_SOC).set_index(t)
+        tdf_u=TimeDataFrame(df_u).set_index(t)
+        tdf_I=TimeDataFrame(df_I).set_index(t)
+        tdf_SOC=TimeDataFrame(df_SOC).set_index(t)
