@@ -34,7 +34,7 @@ from pylatex.base_classes import Environment
 from pylatex.section import Paragraph, Chapter
 from pylatex.utils import italic, NoEscape
 
-from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim)
+from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim,Picture)
 from .utilities.templates.document import *
 from .utilities.templates import tikz
 from .utilities.components.mech import en as mech_comp
@@ -311,7 +311,13 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         else:
             return False
         
+    @classmethod
+    def _as_picture(cls):
         
+        
+        pic_path = cls._default_folder_path + cls.scheme_name
+        cls._settle_dynpy()
+        return Picture(pic_path)
         
     
     @classmethod

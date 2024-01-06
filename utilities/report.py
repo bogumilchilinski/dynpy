@@ -3003,8 +3003,6 @@ class Picture(Figure,ReportModule):
 
     def __repr__(self):
 
-        self.cls_container.append(self)
-
         if self.image is not None:
             path = (self.image)
         else:
@@ -3022,6 +3020,8 @@ class Picture(Figure,ReportModule):
         return repr_string
 
     def _repr_markdown_(self):
+        
+        self.cls_container.append(self)
         from wand.image import Image as WImage
 
 
@@ -3046,7 +3046,7 @@ class Picture(Figure,ReportModule):
                 return ''
             else:
                 size = self.preview_size
-                return f'<img src="{path}" alt="{caption}" width="{size}"/> \n \n Fig. X: {caption}'
+                return f'<img src="{path}" alt="{caption}" width="{size}"/>    \n \n Fig. X: {caption}'
                 #return f'![image preview]({path}) \n \n Fig. X: {caption}'
         else:
             return f'Nothing to plot \n \n Fig. X: {caption}'
