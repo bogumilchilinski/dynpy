@@ -1904,6 +1904,39 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         }
         return self.sym_desc_dict
 
+    def unit_dict(self):
+        from pint import UnitRegistry
+        ureg=UnitRegistry()
+
+        unit_dict = {
+            self.m_t0: ureg.kilogram,
+            self.m_t: ureg.kilogram,
+            self.m_p0: ureg.kilogram,
+            self.m_p: ureg.kilogram,
+            self.k: ureg.newton/ureg.meter,
+            self.l: ureg.meter,
+            self.Omega: ureg.rad,
+            self.omega0: ureg.rad,
+            self.F: ureg.newton,
+            self.g: ureg.meter/ureg.second/ureg.second,
+            self.rho: 1/ureg.sec,
+            self.m_s: ureg.kilogram,
+            self.delta: ureg.meter,
+            self.Omega0: ureg.rad,
+            self.x: ureg.meter,
+            self.x.diff(self.ivar): ureg.meter/ureg.second,
+            self.x.diff(self.ivar,2): ureg.meter/ureg.second/ureg.second,
+            self.phi.diff(self.ivar): ureg.rad/ureg.second,
+            self.phi.diff(self.ivar,2): ureg.rad/ureg.second/ureg.second,
+            self.phi: ureg.rad,
+            self.ivar: ureg.second,
+            self.m_p.diff(self.ivar): ureg.kilogram,
+
+        }
+
+        return unit_dict
+
+
 
     def dimensionless(self):
 
