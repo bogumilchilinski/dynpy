@@ -3103,7 +3103,7 @@ class ObjectCode(LstListing,ReportModule):
         
         if self._caption is not None:
             caption_str = f'{{{ self._caption }}}'
-            options = [f'caption={caption_str}' ]
+            options = [NoEscape(f'caption={caption_str}') ]
 
         
         
