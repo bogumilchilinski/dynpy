@@ -317,7 +317,6 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         
         pic_path = "./._dynpy_env" + cls._default_folder_path[1:] + cls.scheme_name
-        print(pic_path)
         cls._settle_dynpy()
         return Picture(pic_path, position=position, caption=caption, width=width, height=height, marker=marker, **kwargs)
         

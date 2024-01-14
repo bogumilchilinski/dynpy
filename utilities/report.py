@@ -2921,7 +2921,7 @@ class Picture(Figure,ReportModule):
              Command('graphicspath{{../}}'),]
     
     _position = 'H'
-    _preview_default_size = "10cm"
+    _preview_default_size = "20cm"
     
     @classmethod
     def set_preview_default_size(cls, size):

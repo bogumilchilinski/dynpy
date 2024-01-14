@@ -492,6 +492,9 @@ class SDOFWinchSystem(ComposedSystem):
     I_b=Symbol('I_b', positive=True)
     A=Symbol('A', positive=True)
     B=Symbol('B', positive=True)
+    M_r=Symbol('M_r')
+    M_b=Symbol('M_b')
+    I_r=Symbol('I_r')
     ivar=Symbol('t')
     phi=dynamicsymbols('\\varphi')
     dphi=dynamicsymbols('\\varphi',1)
@@ -520,6 +523,9 @@ class SDOFWinchSystem(ComposedSystem):
                  I_b=None,
                  A=None,
                  B=None,
+                 M_r=None,
+                 I_r=None,
+                 M_b=None,
                  ivar=Symbol('t'),
                  phi=None,
                  dphi=None,
@@ -559,6 +565,9 @@ class SDOFWinchSystem(ComposedSystem):
         if alpha is not None: self.alpha = alpha
         if A is not None: self.A=A
         if B is not None: self.B=B
+        if M_r is not None: self.M_r = M_r
+        if M_b is not None: self.M_b = M_b
+        if I_r is not None: self.I_r = I_r
         if dphi is not None: self.dphi = dphi
         if phi_1 is not None: self.phi_1 = phi_1
         if phi_2 is not None: self.phi_2 = phi_2
@@ -677,6 +686,17 @@ class SDOFWinchSystem(ComposedSystem):
 
 # metody do zatwierdzenia - karolina
 
+    def reduced_system(self):
+        obj=self
+        new_sys=obj.subs(obj.M_s,obj.A-obj.B*obj.dphi)
+        Ir=self.I_r
+        Mr=self.M_r
+        Mb=self.M_b
+        ir=Eq(Ir,obj.reduced_inertia())
+        mr=Eq(Mr,obj.reduced_torque()-obj.B*obj.dphi)
+        mb=Eq(Mb,mr.rhs-(obj.A-obj.B*obj.dphi))
+        reduced_ode=new_sys.subs(obj.I_s,solve(ir,obj.I_s)[0]).subs(obj.M_T,solve(mr,obj.M_T)[0])._ode_system.expand()
+        return reduced_ode
 
     def startup_time(self):
         obj=self
@@ -701,8 +721,8 @@ class SDOFWinchSystem(ComposedSystem):
             self.q[0]:ureg.radian,
             self.D:ureg.meter,
             self.ivar:ureg.second,
-            self.M_s:ureg.newton/ureg.meter,
-            self.M_T:ureg.newton/ureg.meter,
+            self.M_s:ureg.newton*ureg.meter,
+            self.M_T:ureg.newton*ureg.meter,
             self.G:ureg.newton,
             self.g:ureg.meter/ureg.second**2,
             self.alpha:ureg.radian,
