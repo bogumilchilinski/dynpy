@@ -244,6 +244,8 @@ class WutThesis(Document):
                   Command('fancypagestyle{headings}{\\fancyhead{} \\renewcommand{\headrulewidth}{1pt} \\fancyheadoffset{0cm} \\fancyhead[RO]{\\nouppercase{\\leftmark}} \\fancyhead[LE]{\\nouppercase{\\leftmark}} \\fancyfoot{} \\fancyfoot[LE,RO]{\\thepage}}'),
                   Command('fancypagestyle{plain}{\\fancyhf{} \\renewcommand{\\headrulewidth}{0pt} \\fancyfoot[LE,RO]{\\thepage}}'),
                   Command('numberwithin{equation}{section}'),
+                  Command('renewcommand{\\familydefault}{\\sfdefault}'),
+        #\renewcommand{\familydefault}{\sfdefault}
         
     ]
     

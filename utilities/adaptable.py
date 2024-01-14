@@ -402,6 +402,7 @@ class DataAxis(Axis, ReportModule):
     _width = '0.9\\textwidth'
     _x_axis_empty = False
     _y_limit = None
+    _line_style = None
     _legend_pos = 'north east'
     _default_transformer = BaseIndexTransformer
 
@@ -716,13 +717,18 @@ class DataAxis(Axis, ReportModule):
             self._label_colour(no) for no, elem in enumerate(coords_pack)
         ]
 
+        if self._line_style is None:
+            line_style='solid'
+        else:
+            line_style = self._line_style
+
         #return list(zip(coords_pack,labels,colours))
         if self.at is not None:
             plot_list = [
             Plot(name=NoEscape(
                 NoEscape(self.legend_fontsize) + NoEscape(str(label))),
                  coordinates=list(coords),
-                 options=Options('solid', color=colour))
+                 options=Options(f'{line_style}', color=colour))
             for coords, label, colour in (zip(coords_pack, labels, colours))
             ]
         else:
@@ -730,7 +736,7 @@ class DataAxis(Axis, ReportModule):
             Plot(name=NoEscape(
                 NoEscape(self.legend_fontsize) + NoEscape(str(label))),
                  coordinates=list(coords),
-                 options=Options('solid', color=colour))
+                 options=Options(f'{line_style}', color=colour))
             for coords, label, colour in (zip(coords_pack, labels, colours))
             ]
         

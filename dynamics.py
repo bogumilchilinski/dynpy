@@ -302,22 +302,24 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         abspath = cls._module_abs_path()
         cwd = cls._dynpy_path
         
-        cmd_str = f'ln -s "{abspath}dynpy" "./"'
+        cmd_str = f'ln -s "{abspath}dynpy" "./._dynpy_env/"'
         #print(cmd_str)
         
-        if not os.path.exists("./dynpy"):
+        if not os.path.exists("./._dynpy_env/dynpy"):
+            os.popen("mkdir ./._dynpy_env")
             os.popen(cmd_str)
             return True
         else:
             return False
         
     @classmethod
-    def _as_picture(cls):
+    def _as_picture(cls, position=None, caption=None,width=None,height=None,marker=None, **kwargs):
         
         
-        pic_path = cls._default_folder_path + cls.scheme_name
+        pic_path = "./._dynpy_env" + cls._default_folder_path[1:] + cls.scheme_name
+        print(pic_path)
         cls._settle_dynpy()
-        return Picture(pic_path)
+        return Picture(pic_path, position=position, caption=caption, width=width, height=height, marker=marker, **kwargs)
         
     
     @classmethod

@@ -1931,7 +1931,13 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
             self.phi: ureg.rad,
             self.ivar: ureg.second,
             self.m_p.diff(self.ivar): ureg.kilogram,
-
+#             self.m_f: ureg.dimensionless,
+#             self.lam: ureg.dimensionless,
+#             self.t0: ureg.dimensionless,
+#             self.eps: ureg.dimensionless,
+#             self.chi: ureg.dimensionless,
+#             self.psi: ureg.dimensionless,
+            self.tau: ureg.dimensionless,
         }
 
         return unit_dict
@@ -2223,8 +2229,13 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
     def _FRF_chart(self, chi=None):
         from sympy import lambdify
         from ...solvers.linear import ODESystem, FirstOrderLinearODESystemWithHarmonics
+        from pint import UnitRegistry
+        ureg = UnitRegistry()
         import pandas as pd
         tau=Symbol('tau')
+        sym = Symbol('A')
+        sym_psi = Symbol('psi')
+        sym_A = f'${latex(sym)}$[m]'
         ode_eoms=self.dimensionless_with_const_mass()
 
         if chi is not None:
@@ -2266,9 +2277,10 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         data4plot_bez= lambdify(self.psi,Amp_bez,'numpy')(psi_span)
         data4plot_bez_mniejsza_masa= lambdify(self.psi,Amp_bez_mniejsza_masa,'numpy')(psi_span)
 
-        df = pd.DataFrame(data={f'w/o TMD BT':data4plot_bez, f'w/o TMD AT':data4plot_bez_mniejsza_masa, f'BT, {latex(Eq(self.chi,var_chi,evaluate=False))}':data4plot_przed, f'AT, {latex(Eq(self.chi,var_chi,evaluate=False))}':data4plot_po}, index=psi_span)
+        df = pd.DataFrame(data={f'bez TMD BT':data4plot_bez, f'bez TMD AT':data4plot_bez_mniejsza_masa, f'BT, ${latex(Eq(self.chi,var_chi,evaluate=False))}$':data4plot_przed, f'AT, ${latex(Eq(self.chi,var_chi,evaluate=False))}$':data4plot_po}, index=psi_span)
 
-        df = df.set_axis(pd.Index([(val,Symbol('A',positive=True))  for val  in df.columns]),axis=1)
+#         df = df.set_axis(pd.Index([ (val,sym_A)  for val  in df.columns]),axis=1)
+        df = df.set_axis(pd.Index([ val  for val  in df.columns]),axis=1)
         df.index.name = self.psi
 
         return df
@@ -2276,7 +2288,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
     def _simulate_FRFs(self, params_list=None):
 
         import pandas as pd
-
+        sym_psi = Symbol('psi')
         if params_list is not None:
             param_list=params_list
         else:
@@ -2293,7 +2305,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
             df=pd.concat([df, df_param], axis=1)
 
         df= df.loc[:,~df.T.duplicated(keep='first')]
-        df.index.name = self.psi
+        df.index.name = f'${latex(sym_psi)}$[$-$]'
 
         return df
     
@@ -2325,14 +2337,14 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                                                       param_list,
                                                       reference_data = params_dict,
                                                       coordinates=Y,
-                                                      index=pd.Index(t_span,name=Symbol('t'))
+                                                      index=pd.Index(t_span,name=Symbol('tau'))
                                                      )
 
         sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
 
 
         result = TimeDataFrame(sym_wyn)
-        result.index.name = Symbol('tau')
+#         result.index.name = Symbol('tau')
 
         return result.droplevel(0, axis=1)
     
@@ -2366,14 +2378,14 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                                                       param_list,
                                                       reference_data = params_dict,
                                                       coordinates=Y,
-                                                      index=pd.Index(t_span,name=Symbol('t'))
+                                                      index=pd.Index(t_span,name=Symbol('tau'))
                                                      )
 
         sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
 
 
         result = TimeDataFrame(sym_wyn)
-        result.index.name = Symbol('tau')
+#         result.index.name = Symbol('tau')
 
         return result.droplevel(0, axis=1)
 
@@ -2407,14 +2419,14 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                                                       param_list,
                                                       reference_data = params_dict,
                                                       coordinates=Y,
-                                                      index=pd.Index(t_span,name=Symbol('t'))
+                                                      index=pd.Index(t_span,name=Symbol('tau'))
                                                      )
 
         sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
 
 
         result = TimeDataFrame(sym_wyn)
-        result.index.name = Symbol('tau')
+#         result.index.name = Symbol('tau')
 
         return result.droplevel(0, axis=1)
 
@@ -2448,14 +2460,14 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                                                       param_list,
                                                       reference_data = params_dict,
                                                       coordinates=Y,
-                                                      index=pd.Index(t_span,name=Symbol('t'))
+                                                      index=pd.Index(t_span,name=Symbol('tau'))
                                                      )
 
         sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
 
 
         result = TimeDataFrame(sym_wyn)
-        result.index.name = Symbol('tau')
+#         result.index.name = Symbol('tau')
 
         return result.droplevel(0, axis=1)
 
@@ -2487,14 +2499,14 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                                                       param_list,
                                                       reference_data = params_dict,
                                                       coordinates=Y,
-                                                      index=pd.Index(t_span,name=Symbol('t'))
+                                                      index=pd.Index(t_span,name=Symbol('tau'))
                                                      )
 
         sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
 
 
         result = TimeDataFrame(sym_wyn)
-        result.index.name = Symbol('tau')
+#         result.index.name = Symbol('tau')
 
         return result.droplevel(0, axis=1)
 
@@ -2531,14 +2543,14 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                                                       param_list,
                                                       reference_data = params_dict,
                                                       coordinates=Y,
-                                                      index=pd.Index(t_span,name=Symbol('t'))
+                                                      index=pd.Index(t_span,name=Symbol('tau'))
                                                      )
 
         sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
 
 
         result = TimeDataFrame(sym_wyn)
-        result.index.name = Symbol('tau')
+#         result.index.name = Symbol('tau')
 
         return result.droplevel(0, axis=1)
 
@@ -2632,14 +2644,14 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                                                       [1/10000, 5/10000, 1/1000, 3/1000, 5/1000],
                                                       reference_data = params_dict,
                                                       coordinates=Y,
-                                                      index=pd.Index(t_span,name=Symbol('t'))
+                                                      index=pd.Index(t_span,name=Symbol('tau'))
                                                      )
 
         sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
 
 
         result = TimeDataFrame(sym_wyn)
-        result.index.name = Symbol('tau')
+#         result.index.name = Symbol('tau')
 
         return result.droplevel(0, axis=1)
 
@@ -2670,14 +2682,14 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
                                                       param_list,
                                                       reference_data = params_dict,
                                                       coordinates=Y,
-                                                      index=pd.Index(t_span,name=Symbol('t'))
+                                                      index=pd.Index(t_span,name=Symbol('tau'))
                                                      )
 
         sym_wyn = num_df.perform_simulations(model_level_name=0, dependencies=dependencies)
 
 
         result = TimeDataFrame(sym_wyn)
-        result.index.name = Symbol('tau')
+#         result.index.name = Symbol('tau')
 
         return result.droplevel(0, axis=1)
 

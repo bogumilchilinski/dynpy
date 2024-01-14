@@ -67,6 +67,7 @@ class BatteryCell(ComposedSystem):
     t_0 = Symbol('t_0')
     U_th = Function('U_th')(t)
     funcI= Function('funcI')(t)
+    U_th = Symbol('U_th')
 
     def __init__(self,
                  R_1=None,
@@ -76,6 +77,7 @@ class BatteryCell(ComposedSystem):
                  q_1=None,
                  q_2=None,
                  t=None,
+                 U_th=None,
                  ivar=Symbol('t'),
                  **kwargs):
 
@@ -86,6 +88,7 @@ class BatteryCell(ComposedSystem):
         if U is not None: self.U = U
         if q_1 is not None: self.q_1 = q_1
         if q_2 is not None: self.q_2 = q_2
+        if U_th is not None: self.U_th = U_th
         self.qs = [self.q_1, self.q_2]
         self._init_from_components(**kwargs)
 
@@ -123,7 +126,7 @@ class BatteryCell(ComposedSystem):
         display(uth_eq)
         ode_th = ODESystem(odes=uth_eq.rhs+uth_eq.lhs, dvars=U_th, ode_order=1)
         analytical_sol1=ode_th.solution
-        display(analytical_sol1)
+        #display(analytical_sol1)
         
         
         napiecie_eq=Eq(U_li,U_oc-R_0*I_li-U_th)

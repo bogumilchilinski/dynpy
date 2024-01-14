@@ -87,6 +87,8 @@ class CurrentContainer:
         LatexDataFrame.set_picture_mode(True)
 
         ObjectCode.set_container(self._container)
+        TikZPicture.set_container(self._container)
+        
         Block.set_container(self._container)
         AlertBlock.set_container(self._container)
         ExampleBlock.set_container(self._container)
@@ -2503,8 +2505,8 @@ class LstListing(Environment):
               Command('definecolor{codegreen}', arguments=['rgb'], extra_arguments = ['0,0.6,0']),
               Command('definecolor{codegray}', arguments=['rgb'], extra_arguments = ['0.5,0.5,0.5']),
               Command('definecolor{codepurple}', arguments=['rgb'], extra_arguments = ['0.58,0,0.82']),
-              Command('definecolor{backcolour}', arguments=['rgb'], extra_arguments = ['0.95,0.95,0.92']),
-              Command('lstdefinestyle{dynPyStyle}', arguments = [NoEscape(r'backgroundcolor=\color{backcolour},commentstyle=\color{codegreen},keywordstyle=\color{magenta},numberstyle=\tiny\color{codegray},stringstyle=\color{codepurple}, basicstyle=\ttfamily\footnotesize,breakatwhitespace=false,breaklines=true,captionpos=b,keepspaces=true,numbers=left,numbersep=5pt,showspaces=false,showstringspaces=false,showtabs=false,tabsize=2')]),
+#               Command('definecolor{backcolour}', arguments=['rgb'], extra_arguments = ['0.95,0.95,0.92']),
+              Command('lstdefinestyle{dynPyStyle}', arguments = [NoEscape(r'commentstyle=\color{codegreen},keywordstyle=\color{magenta},numberstyle=\tiny\color{codegray},stringstyle=\color{codepurple}, basicstyle=\ttfamily\footnotesize,breakatwhitespace=false,breaklines=true,captionpos=b,keepspaces=true,numbers=left,numbersep=5pt,showspaces=false,showstringspaces=false,showtabs=false,tabsize=2')]),
               Command('lstset', arguments = [NoEscape('style=dynPyStyle,language=Python')])
              ]
 
@@ -3081,8 +3083,7 @@ class ObjectCode(LstListing,ReportModule):
     #: string if it has no content.
     omit_if_empty = False
 
-    def __init__(self, source=None, options=None, arguments=None, start_arguments=None,
-                 **kwargs):
+    def __init__(self, source=None, caption=None, options=None, arguments=None, start_arguments=None,**kwargs):
         r"""
         Args
         ----
@@ -3098,10 +3099,15 @@ class ObjectCode(LstListing,ReportModule):
         self.options = options
         self.arguments = arguments
         self.start_arguments = start_arguments
+        self._caption = caption
+        
+        if self._caption is not None:
+            caption_str = f'{{{ self._caption }}}'
+            options = [f'caption={caption_str}' ]
 
         
         
-        super().__init__(options=None, arguments=None, start_arguments=None,**kwargs)
+        super().__init__(options=options, arguments=None, start_arguments=None,**kwargs)
         
         self.code_type
 
@@ -3160,7 +3166,86 @@ class ObjectCode(LstListing,ReportModule):
         
         return '\t'+self.code_type.replace('\n','\n \t')
     
+class TikZPicture(Environment,ReportModule):
     
+    _latex_name = 'tikzpicture'
+    
+    packages = [
+        Package('tikz'),
+        #Package('hyperref'),
+        ]
+    
+    r"""A base class for LaTeX environments.
+    This class implements the basics of a LaTeX environment. A LaTeX
+    environment looks like this:
+    .. code-block:: latex
+        \begin{environment_name}
+            Some content that is in the environment
+        \end{environment_name}
+    The text that is used in the place of environment_name is by default the
+    name of the class in lowercase.
+    However, this default can be overridden in 2 ways:
+    1. setting the _latex_name class variable when declaring the class
+    2. setting the _latex_name attribute when initialising object
+    """
+
+    #: Set to true if this full container should be equivalent to an empty
+    #: string if it has no content.
+    omit_if_empty = False
+
+    def __init__(self, tikzcode=None, options=None, arguments=None, start_arguments=None,
+                 **kwargs):
+        r"""
+        Args
+        ----
+        options: str or list or  `~.Options`
+            Options to be added to the ``\begin`` command
+        arguments: str or list or `~.Arguments`
+            Arguments to be added to the ``\begin`` command
+        start_arguments: str or list or `~.Arguments`
+            Arguments to be added before the options
+        """
+
+        self._tikzcode = tikzcode
+        self.options = options
+        self.arguments = arguments
+        self.start_arguments = start_arguments
+
+        
+        
+        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
+        
+        self.append(self.tikzcode)
+        
+    @property
+    def tikzcode(self):
+        
+        if self._tikzcode is None:
+            code = self._scheme_desc()
+        else:
+            code=self._tikzcode
+        
+        return NoEscape(code)
+
+    def _scheme_desc(self):
+        
+        code="""
+        Lack of code xD
+        """
+        
+        return code
+    
+    def _repr_markdown_(self):
+        
+
+        return '\t'+self.reported().tikzcode.replace('\n','\n \t')
+
+    def reported(self):
+
+        
+        TikZPicture.cls_container.append(self)
+        
+        return copy.copy(self)
 
 class SympyFormula(ReportModule):
     r'''
