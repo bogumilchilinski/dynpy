@@ -3153,8 +3153,8 @@ class ObjectCode(LstListing,ReportModule):
         
         lst_env = Aspect(self.default_title)
         
-        lst_env.append(self)
-        #lst_env=self
+        #lst_env.append(self)
+        lst_env=self
         self.cls_container.append(lst_env)
         
         return copy.deepcopy(self)
