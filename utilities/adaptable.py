@@ -24,7 +24,13 @@ from dynpy.utilities.templates import tikz
 from pint import UnitRegistry
 ureg = UnitRegistry()
 
-
+class ReportCache:
+    
+    _file_names = {}
+    
+    def __init__(self,file_names):
+        self._file_names = file_names
+        
 
 class ReportModule:
     r'''
@@ -1013,15 +1019,23 @@ class TikZPlot(TikZ, ReportModule):
         fig.packages.append(Package('float'))
 
         img_params = self.__class__._image_parameters
+        width = self.__class__._image_parameters['width']
 
         if self._picture:
             from .report import Picture
+            
+            key=standalone_plot.dumps()
+            
+            if key in ReportCache._file_names:
+                filename = ReportCache._file_names[key]
+            
+            else:
 
-            standalone_plot.generate_pdf(filename, clean_tex=False,compiler_args=['--lualatex'])
+                standalone_plot.generate_pdf(filename, clean_tex=False,compiler_args=['--lualatex'])
+                ReportCache._file_names[key] = filename
 
 
-
-            width = self.__class__._image_parameters['width']
+                
 
 
             fig = Picture(filename+'.pdf', width=width, caption = caption)
