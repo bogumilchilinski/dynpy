@@ -1138,8 +1138,8 @@ class IntegralElement(Force):
         
 class DerivativeElement(Force):
     """
-    Model of an Derivative Element :
-        Creates a additional force which allows to control output value.
+    Model of a Derivative Element :
+        Creates an additional force which allows to control output value.
 
      Examples
         =======
@@ -1216,8 +1216,8 @@ class DerivativeElement(Force):
 
 class ProportionalElement(Force):
     """
-    Model of an Proportional Element :
-        Creates a additional force which allows to control output value.
+    Model of a Proportional Element :
+        Creates an additional force which allows to control output value.
 
      Examples
         =======
@@ -1292,6 +1292,53 @@ class ProportionalElement(Force):
         return schm
 
         
+class PIController(Force):
+    
+    k_P = Symbol('k_P', positive=True)
+    k_I = Symbol('k_I', positive=True)
+    error = Symbol('e', positive=True)
+    target = Symbol('target', positive=True)
+    reference = S.Zero
+
+    def __init__(self,
+                 k_P,
+                 k_I,
+                 error = None,
+                 target=None,
+                 reference = None,
+                 qs=None,
+                 ivar=Symbol('t'),
+                 frame = base_frame,
+                 **kwargs):
+
+        if k_P is not None: self.k_P = k_P
+        if k_I is not None: self.k_I = k_I
+        
+        if reference is not None: self.reference = reference
+
+        if error is not None: self.error = error
+
+        if target is None and isinstance(self.error,Function):
+               target=self.error
+
+        self.ivar = ivar
+        self.qs = qs
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+        
+        components = {}
+        k_P, k_I = self.k_P, self.k_I
+        
+        self._proporional_elem = ProportionalElement(k_P, self.error, self.reference, qs = self.qs, ivar = self.ivar)
+        self._integral_elem = IntegralElement(k_I, self.error, self.reference, qs = self.qs, ivar = self.ivar)
+        
+        components['proportional_elem'] = self._proporional_elem
+        components['integral_elem'] = self._integral_elem
+        
+        return components
         
 class PID(Element):
     """
