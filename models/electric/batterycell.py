@@ -42,7 +42,7 @@ from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBod
 from .elements import Resistor, Inductor, Capacitor, VoltageSource
 from ..mechanics.principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
 
-
+from sympy import symbols, Eq, diff
 
 class BatteryCell(ComposedSystem):
     scheme_name = 'thevenincircuit.PNG'
@@ -68,6 +68,9 @@ class BatteryCell(ComposedSystem):
     U_th = Function('U_th')(t)
     funcI= Function('funcI')(t)
     U_th = Symbol('U_th')
+    R_th = Symbol('R_th')
+    C_th = Symbol('C_th')
+    I_li = Symbol('I_li')
 
     def __init__(self,
                  R_1=None,
@@ -78,6 +81,9 @@ class BatteryCell(ComposedSystem):
                  q_2=None,
                  t=None,
                  U_th=None,
+                 R_th=None,
+                 C_th=None,
+                 I_li=None,
                  ivar=Symbol('t'),
                  **kwargs):
 
@@ -89,6 +95,9 @@ class BatteryCell(ComposedSystem):
         if q_1 is not None: self.q_1 = q_1
         if q_2 is not None: self.q_2 = q_2
         if U_th is not None: self.U_th = U_th
+        if R_th is not None: self.R_th = R_th
+        if C_th is not None: self.C_th = C_th
+        if I_li is not None: self.I_li = I_li
         self.qs = [self.q_1, self.q_2]
         self._init_from_components(**kwargs)
 
@@ -113,16 +122,30 @@ class BatteryCell(ComposedSystem):
     
     
     def voltage_ode(self):
+        '''
+        t = self.ivar
+        U_th = self.U_th
+        R_th = self.R_th
+        C_th = self.C_th
+        I_li = self.I_li
+        '''
         
-        t=self.ivar
+        t =Symbol('t')
+        U_th=Symbol('U_th')
+        R_th=Symbol('R_th')
+        C_th=Symbol('C_th')
+        I_li=Symbol('I_li')
+        
         
         exprI=0.084*Heaviside(t-100)+0*Heaviside(t-400)-0*Heaviside(t-600)-0*Heaviside(t-800)
         #plot(exprI,(t,0,1001))
         funcI = lambdify(t, exprI)
         
-        
+        #Derivative(Function('U')(t),t, evaluate=False))
         #tworzenie odesystemu z drugiego wzoru z publikacji
-        uth_eq=Eq(diff(U_th,t),((U_th)/(R_th*C_th))+I_li/C_th)
+        #uth_eq=Eq(Derivative(U_th,t, evaluate=False),((U_th)/(R_th*C_th))+I_li/C_th) to nie działa
+        
+        uth_eq=Eq(diff(U_th,t, evaluate=False),((U_th)/(R_th*C_th))+I_li/C_th)
         display(uth_eq)
         ode_th = ODESystem(odes=uth_eq.rhs+uth_eq.lhs, dvars=U_th, ode_order=1)
         analytical_sol1=ode_th.solution
