@@ -21,6 +21,15 @@ from ...models.elements import Force,IntegralElement,ProportionalElement,Derivat
 
 class PIController(Force):
     
+    '''
+    A proportional–integral controller (PI controller) is a control loop mechanism
+    employing feedback used in industrial control systems requiring continuously
+    modulated control. A PI controller calculates an error value (e(t)) as the
+    difference between a desired setpoint (SP) and a measured process variable (PV)
+    and applies a correction based on proportional and integral terms. It consists of
+    two independent elements - P and I that being combined return two-term controller.
+    '''
+    
     k_P = Symbol('k_P', positive=True)
     k_I = Symbol('k_I', positive=True)
     error = Symbol('e', positive=True)

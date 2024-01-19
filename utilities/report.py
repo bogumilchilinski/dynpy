@@ -3175,6 +3175,29 @@ class TikZPicture(Environment,ReportModule):
         #Package('hyperref'),
         ]
     
+    
+    _height = 5
+    _width = 0.9
+    _ylim = None
+
+    _subplots_gap = 0.0
+    _subplots_horizontal_gap = 0.5
+    _default_grid = None
+    _grid = (2,6)
+
+    _in_figure = False
+    _figure_gen = lambda: Figure(position='H')
+    _image_parameters = {'width': None}
+    
+    _floats_no_gen = plots_no()    
+    _default_path = './tikzplots'
+    _filename = None
+    _prefix = None
+    
+    _picture = True
+    _caption = 'Default caption'
+    
+    
     r"""A base class for LaTeX environments.
     This class implements the basics of a LaTeX environment. A LaTeX
     environment looks like this:
@@ -3247,6 +3270,65 @@ class TikZPicture(Environment,ReportModule):
         
         return copy.copy(self)
 
+    def in_figure(self,filename=None,caption=None):
+
+        obj = copy.copy(self)
+        obj._in_figure = True
+
+        if caption is not None:
+            obj._caption = caption
+
+        standalone_plot = tikz.TikzStandalone()
+        standalone_plot.append(self)
+
+        filename = self.filename
+
+
+        fig = self.__class__._figure_gen()
+        fig.packages.append(Package('float'))
+
+        img_params = self.__class__._image_parameters
+        width = self.__class__._image_parameters['width']
+
+        if self._picture:
+            from .report import Picture
+            
+            key=standalone_plot.dumps()
+            
+            if key in ReportCache._file_names:
+                filename = ReportCache._file_names[key]
+            
+            else:
+
+                standalone_plot.generate_pdf(filename, clean_tex=False,compiler_args=['--lualatex'])
+                ReportCache._file_names[key] = filename
+
+
+            fig = Picture(filename+'.pdf', width=width, caption = caption)
+        else:
+            standalone_plot.generate_tex(filename)
+
+            fig.append(Command(command='input', arguments=filename))
+
+
+        return fig
+
+    @property    
+    def filename(self):
+
+        if self._filename is None and self._prefix is None:
+            filename = f'{self.__class__._default_path}/plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
+
+        elif self._filename is None and self._prefix is not None:
+            filename = f'{self.__class__._default_path}/{self._prefix}_plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
+
+        else:
+            filename = self._filename
+
+        return  filename
+    
+    
+    
 class SympyFormula(ReportModule):
     r'''
     This class appends a sympy expression to the existing document container. 
