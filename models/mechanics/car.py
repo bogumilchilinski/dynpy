@@ -461,7 +461,6 @@ class CarMovementConstantThrottle(ComposedSystem):
             self.v_ref: r'Prędkość referencyjna',
             self.ivar: r'Czas',
         }
-
         return self.sym_desc_dict
 
     def get_numerical_data(self):
@@ -584,9 +583,9 @@ class CarMovementRegulatedThrottle(CarMovementConstantThrottle):
         components = super().components
 
         self._throttle = CombustionEngine.from_data(df, n = self.n ,degree=10, qs = self.qs)(label='throttle')
-        self._proportional = ProportionalElement(self.P , error=diff(self.x,self.ivar) , target = self.x , reference =30, qs=self.qs)(label='proportional')
-        self._integral = IntegralElement(self.I , error=diff(self.x,self.ivar) , target = self.x , reference =30, qs=self.qs)(label='integral')
-        self._derivative = DerivativeElement(self.D , error=diff(self.x,self.ivar) , target = self.x, reference =30, qs=self.qs)(label='derivative')
+        self._proportional = ProportionalElement(self.P , error=diff(self.x,self.ivar) , target = self.x , reference =150, qs=self.qs)(label='proportional')
+        self._integral = IntegralElement(self.I , error=diff(self.x,self.ivar) , target = self.x , reference =150, qs=self.qs)(label='integral')
+        self._derivative = DerivativeElement(self.D , error=diff(self.x,self.ivar) , target = self.x, reference =150, qs=self.qs)(label='derivative')
 
         components['_throttle'] = self._throttle
         components['_proportional'] = self._proportional
@@ -721,9 +720,9 @@ class CarMovementGearBoxThrottle(CarMovementConstantThrottle):
         components = super().components
 
         self._throttle = GearboxEngine(df, i_gearbox)(label='throttle')
-        self._proportional = ProportionalElement(self.P , error=diff(self.x,self.ivar) , target = self.x , reference = 30, qs=self.qs)(label='proportional')
-        self._integral = IntegralElement(self.I , error=diff(self.x,self.ivar) , target = self.x , reference = 30, qs=self.qs)(label='integral')
-        self._derivative = DerivativeElement(self.D , error=diff(self.x,self.ivar) , target = self.x, reference = 30, qs=self.qs)(label='derivative')
+        self._proportional = ProportionalElement(self.P , error=diff(self.x,self.ivar) , target = self.x , reference = 150, qs=self.qs)(label='proportional')
+        self._integral = IntegralElement(self.I , error=diff(self.x,self.ivar) , target = self.x , reference = 150, qs=self.qs)(label='integral')
+        self._derivative = DerivativeElement(self.D , error=diff(self.x,self.ivar) , target = self.x, reference = 150, qs=self.qs)(label='derivative')
 
         components['_throttle'] = self._throttle
         components['_proportional'] = self._proportional
