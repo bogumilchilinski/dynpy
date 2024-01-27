@@ -23,6 +23,7 @@ from dynpy.utilities.templates import tikz
 
 from pint import UnitRegistry
 ureg = UnitRegistry()
+import os
 
 class ReportCache:
     
@@ -31,7 +32,20 @@ class ReportCache:
     def __init__(self,file_names):
         self._file_names = file_names
         
-
+    @classmethod
+    def update_existing_files(cls,directory):
+        file_list = []
+        for file_name in os.listdir(directory):
+            file_path = os.path.join(directory, file_name)
+            
+            if os.path.isfile(file_path) and '.tex' in file_path:
+                with open(file_path, 'r') as file:
+                    data = file.read()
+                    cls._file_names[data] = file_path.replace('.tex','')
+        
+        
+        return list(cls._file_names.values())
+        
 class ReportModule:
     r'''
     Basic class for maintaining global options of a report module. It provides methods for setting options common with every class inheriting from ReportModule instance. 
@@ -781,7 +795,7 @@ class TikZPlot(TikZ, ReportModule):
     _subplots_gap = 0.0
     _subplots_horizontal_gap = 0.5
     _default_grid = None
-    _grid = (2,6)
+    _grid = None
 
     _in_figure = False
     _figure_gen = lambda: Figure(position='H')
@@ -951,9 +965,14 @@ class TikZPlot(TikZ, ReportModule):
             y_coord_round = round(y_coordinate,2)
             
             for col_id in range(cols_no):
-                x_coordinate = col_id * (self._width/cols_no)
-                x_coord_round = round(x_coordinate,2)
+                if cols_no > 1:
                 
+                    x_coordinate = col_id * (self._width/cols_no)
+                    
+                else:
+                    x_coordinate = 0
+                    
+                x_coord_round = round(x_coordinate,2)
                 position = "{"+f"({x_coord_round}cm , -{y_coord_round}cm)"+"}"
                 coordinates.append(position)
             
@@ -971,8 +990,13 @@ class TikZPlot(TikZ, ReportModule):
         
         cols_no=self.grid[0]
         
-#         return NoEscape(f'{self._width/cols_no+1.5-self._subplots_gap}cm')
-        return NoEscape(f'{self._width/cols_no-2-self._subplots_horizontal_gap-self._subplots_gap}cm')
+        if cols_no > 1:
+
+            return NoEscape(f'{self._width/cols_no-2-self._subplots_horizontal_gap-self._subplots_gap}cm')
+
+        else:
+            return self.width
+        
     
     
     @property
@@ -1003,6 +1027,10 @@ class TikZPlot(TikZ, ReportModule):
 
     def in_figure(self,filename=None,caption=None):
 
+
+        ReportCache.update_existing_files(self.__class__._default_path)
+
+        
         obj = copy.copy(self)
         obj._in_figure = True
 
@@ -1052,12 +1080,16 @@ class TikZPlot(TikZ, ReportModule):
     
         if self._filename is None and self._prefix is None:
             filename = f'{self.__class__._default_path}/plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
-            
+
         elif self._filename is None and self._prefix is not None:
             filename = f'{self.__class__._default_path}/{self._prefix}_plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
-            
+
         else:
             filename = self._filename
+            
+        if filename in list(ReportCache._file_names.values()):
+            filename = self.filename
+
 
         return  filename
 

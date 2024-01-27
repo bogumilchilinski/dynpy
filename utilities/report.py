@@ -3172,6 +3172,16 @@ class TikZPicture(Environment,ReportModule):
     
     packages = [
         Package('tikz'),
+        Package('polski',options=['MeX']),
+        Package('fontenc',options=['T1']),
+#         Package('babel',options=['polish']),
+        Package('amssymb'),
+        Package('rotating'),
+        NoEscape(r'\usetikzlibrary{snakes,calc,positioning,patterns,angles,quotes,decorations.pathmorphing,decorations.markings,through}'),
+        NoEscape(r'\usetikzlibrary{arrows,decorations,decorations.text}'),
+        NoEscape(r'\usetikzlibrary{patterns.meta,math}'),
+        NoEscape(r'\usetikzlibrary{shapes.geometric}'),
+#         Package('fontenc')
         #Package('hyperref'),
         ]
     
@@ -3272,6 +3282,8 @@ class TikZPicture(Environment,ReportModule):
 
     def in_figure(self,filename=None,caption=None):
 
+        ReportCache.update_existing_files(self.__class__._default_path)
+        
         obj = copy.copy(self)
         obj._in_figure = True
 
@@ -3315,7 +3327,7 @@ class TikZPicture(Environment,ReportModule):
 
     @property    
     def filename(self):
-
+    
         if self._filename is None and self._prefix is None:
             filename = f'{self.__class__._default_path}/plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
 
@@ -3324,6 +3336,10 @@ class TikZPicture(Environment,ReportModule):
 
         else:
             filename = self._filename
+            
+        if filename in list(ReportCache._file_names.values()):
+            filename = self.filename
+
 
         return  filename
     

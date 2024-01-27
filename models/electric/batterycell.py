@@ -1,13 +1,10 @@
 import sympy
+import sympy as sym
 import pandas
 from sympy import *
-from scipy import integrate
-import numpy as np
-from sympy import lambdify
 #sprawdzenie poprawności importów
 init_printing()
-
-
+sympy.Symbol, sym.Symbol, Symbol
 from pylatex import Document,Section
 from dynpy.utilities import *
 from dynpy.solvers.linear import ODESystem
@@ -23,28 +20,15 @@ from dynpy.utilities.report import ReportText, Markdown, Picture, Frame, ObjectC
 from dynpy.utilities.report import SymbolsDescription, DescriptionsRegistry
 from dynpy.utilities.adaptable import *
 from dynpy.models.electric.elements import *
+#from dynpy.models.electric import batterycell 
 #mechanics_printing(pretty_print=True)
 
 
-from sympy import (Symbol, symbols, Matrix, sin, cos, asin, diff, sqrt, S,
-                   diag, Eq, hessian, Function, flatten, Tuple, im, pi, latex,
-                   dsolve, solve, fraction, factorial, Subs, Number, oo, Abs,
-                   N, solveset)
-import numpy as np
-from numpy import *
 
-from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
-from sympy.physics.vector import vpprint, vlatex
-from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
-
-from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin, CombustionEngine
-
-from .elements import Resistor, Inductor, Capacitor, VoltageSource
-from ..mechanics.principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
-
-from sympy import symbols, Eq, diff
 
 class BatteryCell(ComposedSystem):
+    
+    
     scheme_name = 'thevenincircuit.PNG'
     real_name = 'liioncell.PNG'
 
@@ -67,7 +51,7 @@ class BatteryCell(ComposedSystem):
     t_0 = Symbol('t_0')
     U_th = Function('U_th')(t)
     funcI= Function('funcI')(t)
-    U_th = Symbol('U_th')
+    #U_th = Symbol('U_th')
     R_th = Symbol('R_th')
     C_th = Symbol('C_th')
     I_li = Symbol('I_li')
@@ -100,25 +84,6 @@ class BatteryCell(ComposedSystem):
         if I_li is not None: self.I_li = I_li
         self.qs = [self.q_1, self.q_2]
         self._init_from_components(**kwargs)
-
-    @property
-    def components(self):
-
-        components = {}
-
-        self._resistor_1 = Resistor(self.R_1, self.q_1, qs=[self.q_1])
-        self._resistor_2 = Resistor(self.R_2, q0=self.q_2, qs=[self.q_2])
-        self._voltagesource = VoltageSource(self.U, q0 = self.q_1, qs=[self.q_1])
-        self._capacitor = Capacitor(self.C, q0 = self.q_1-self.q_2, qs=[self.q_1, self.q_2])
-
-
-
-        components['resistor_1'] = self._resistor_1
-        components['resistor_2'] = self._resistor_2
-        components['voltagesource'] = self._voltagesource
-        components['capacitor'] = self._capacitor
-
-        return components
     
     
     def voltage_ode(self):
@@ -128,24 +93,132 @@ class BatteryCell(ComposedSystem):
         R_th = self.R_th
         C_th = self.C_th
         I_li = self.I_li
-
         
-#         t =Symbol('t')
-#         U_th=Symbol('U_th')
-#         R_th=Symbol('R_th')
-#         C_th=Symbol('C_th')
-#         I_li=Symbol('I_li')
-        
-        
-        exprI=0.084*Heaviside(t-100)+0*Heaviside(t-400)-0*Heaviside(t-600)-0*Heaviside(t-800)
-        #plot(exprI,(t,0,1001))
-        funcI = lambdify(t, exprI)
-        
-        #Derivative(Function('U')(t),t, evaluate=False))
-        #tworzenie odesystemu z drugiego wzoru z publikacji
-        #uth_eq=Eq(Derivative(U_th,t, evaluate=False),((U_th)/(R_th*C_th))+I_li/C_th) to nie działa
         
         uth_eq=Eq(diff(U_th,t, evaluate=False),((U_th)/(R_th*C_th))+I_li/C_th)
-        #display(uth_eq)
+        ode_th = ODESystem(odes=uth_eq.rhs+uth_eq.lhs, dvars=U_th, ode_order=1)
         
-        return uth_eq
+        return ode_th
+    
+    
+    def _uth_simulation(self,data_dict1,U_oc_dict,R_0_dict,step_time,step_current):
+        
+        t = self.ivar
+        U_th = self.U_th
+        R_th = self.R_th
+        C_th = self.C_th
+        I_li = self.I_li
+        U_li = self.U_li
+        U_oc = self.U_oc
+        R_0 = self.R_0
+        t_0 = self.t_0
+        SOC = self.SOC
+        C_rated = self.C_rated
+        SOC_init = self.SOC_init
+        ode_th = self.voltage_ode()
+        
+        
+
+     
+        #wzor na napiecie
+        napiecie_eq=Eq(U_li,U_oc-R_0*I_li-U_th)
+
+        
+        #wzor na soc
+        calka=integrate(I_li, (t, t_0, t))
+        SOC_eq_bezcalki = Eq(SOC,((1)/(C_rated)))
+        SOC_eq = Eq(SOC,SOC_init+((1)/(C_rated))*calka)
+        
+        
+        #dane symulacji
+        n_points=step_time[-1]*4 #rozdzielczosc symulacji probki na sekunde
+        t_array=np.linspace(0,step_time[-1]*1.1,n_points)#czas symulacji i prad symulacji
+
+        #tworzenie pustych list
+        prad_list=[]
+        u0_list=[]
+        u_array=[]
+        soc_array=[]
+        
+        #tworzenie wymuszenia
+        exprI=step_current[0]*Heaviside(t-step_time[0])+step_current[1]*Heaviside(t-step_time[1])+step_current[2]*Heaviside(t-step_time[2])+step_current[3]*Heaviside(t-step_time[3])
+        funcI = lambdify(t, exprI)
+        
+
+        #tworzenie dataframe z wynikami rownania rozniczkowego+tworzenie z tego listy
+        tabelka=ode_th.subs(I_li,exprI).subs(data_dict1).numerized(backend='numpy').compute_solution(t_array,[0])
+        U_th_list = list(tabelka.iloc[:,1])
+
+
+
+
+        for i in range(n_points):
+            prad_list.append(funcI(t_array[i]))
+            soc_array.append(float((SOC_eq_bezcalki.rhs.subs(data_dict1)*(-1)*(np.trapz(prad_list[0:i], x=t_array[0:i]))/3600+SOC_init.subs(data_dict1))))
+
+            #tutaj jest dopasowanie ocv w zaleznosci od soc, zamiast ifow
+            soc_calk = int(soc_array[i]*10)
+            soc_calk = soc_calk*10
+            data_dict1["U_oc"]=U_oc_dict[str(soc_calk)]
+            data_dict1["R_0"]=R_0_dict[str(soc_calk)]
+
+            u0_list.append( prad_list[-1] * data_dict1[R_0])
+            u_array.append(data_dict1["U_oc"]-U_th_list[i]-u0_list[i])
+
+
+        wartosci = [u_array,prad_list,soc_array,t_array]
+#komentuje zeby sprawdzic czy dobrze licze
+        return wartosci
+    
+        #return prad_list
+
+
+
+    def VoltageResponse(self,data_dict1,U_oc_dict,R_0_dict,step_time,step_current):
+
+        t=self.t
+        U_li= self.U_li
+        wyn = self._uth_simulation(data_dict1,U_oc_dict,R_0_dict,step_time,step_current)
+        t_array = wyn[3]
+        u_array = wyn[0]
+
+        df_u = pd.DataFrame({t : t_array})
+        df_u[U_li] = u_array
+        df_u = df_u.set_index(t)
+
+        return df_u
+    
+    def SocLevelResponse(self,data_dict1,U_oc_dict,R_0_dict,step_time,step_current):
+        
+        t=self.t
+        SOC= self.SOC
+        wyn = self._uth_simulation(data_dict1,U_oc_dict,R_0_dict,step_time,step_current)
+        t_array = wyn[3]
+        soc_array = wyn[2]
+
+        df_SOC = pd.DataFrame({t : t_array})
+        df_SOC[SOC] = soc_array
+        df_SOC = df_SOC.set_index(t)
+
+        return df_SOC
+    
+    
+    def CurrentForcing(self,data_dict1,U_oc_dict,R_0_dict,step_time,step_current):
+        
+        t=self.t
+        I_li= self.I_li
+        wyn = self._uth_simulation(data_dict1,U_oc_dict,R_0_dict,step_time,step_current)
+        t_array = wyn[3]
+        prad_list = wyn[1]
+
+        df_I = pd.DataFrame({t : t_array})
+        df_I[I_li] = prad_list
+        df_I = df_I.set_index(t)
+
+        return df_I
+        
+        
+
+#         tdf_u=TimeDataFrame(df_u).set_index(t)
+#         tdf_I=TimeDataFrame(df_I).set_index(t)
+#         tdf_SOC=TimeDataFrame(df_SOC).set_index(t)

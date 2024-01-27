@@ -1703,7 +1703,7 @@ class TrolleyWithTMD(ComposedSystem):
 
 class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
 
-    scheme_name = 'trolley_pendulum_tmd.png'
+    scheme_name = 'DampedTrolleyWithPendulumGravityOtherCoordinates.png'
     real_name = 'taipei101.png'
 
     ivar=Symbol('t')
@@ -1919,7 +1919,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
             self.omega0: ureg.rad,
             self.F: ureg.newton,
             self.g: ureg.meter/ureg.second/ureg.second,
-            self.rho: 1/ureg.sec,
+            self.rho: (ureg.dimensionless/ureg.second),
             self.m_s: ureg.kilogram,
             self.delta: ureg.meter,
             self.Omega0: ureg.rad,
@@ -2280,7 +2280,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         df = pd.DataFrame(data={f'bez TMD BT':data4plot_bez, f'bez TMD AT':data4plot_bez_mniejsza_masa, f'BT, ${latex(Eq(self.chi,var_chi,evaluate=False))}$':data4plot_przed, f'AT, ${latex(Eq(self.chi,var_chi,evaluate=False))}$':data4plot_po}, index=psi_span)
 
 #         df = df.set_axis(pd.Index([ (val,sym_A)  for val  in df.columns]),axis=1)
-        df = df.set_axis(pd.Index([ val  for val  in df.columns]),axis=1)
+        df = df.set_axis(pd.Index([ (val,sym_A)  for val  in df.columns]),axis=1)
         df.index.name = self.psi
 
         return df
