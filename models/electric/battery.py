@@ -283,7 +283,7 @@ class BatteryModeling(ComposedSystem):
     
     
     
-    class CircutRl(ComposedSystem):
+class CircutRl(ComposedSystem):
     """
     A class that determines the equation of an electrical circuit in an RL system
     """
@@ -348,7 +348,7 @@ class BatteryModeling(ComposedSystem):
     
     
     
-    class CircutRC(ComposedSystem):
+class CircutRC(ComposedSystem):
     """
     A class that determines the equation of an electrical circuit in an RC system
     """
@@ -413,7 +413,7 @@ class BatteryModeling(ComposedSystem):
     
     
     
-    class CircutRLC(ComposedSystem):
+class CircutRLC(ComposedSystem):
     """
     A class that determines the equation of an electrical circuit in an RLC system
     """

@@ -3009,3 +3009,4 @@ class VariableMassTrolleyWithPendulumFunctionWithoutRayleigh(VariableMassTrolley
 
         return components
 
+

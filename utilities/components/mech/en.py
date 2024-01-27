@@ -440,7 +440,7 @@ f'''
         
 class KineticEnergySymPyCodeComponent(ReportComponent):
 
-    title="Sympy Code for Potential Energy"
+    title="Sympy Code for Kinetic Energy"
 
     @property
     def header_text(self):
