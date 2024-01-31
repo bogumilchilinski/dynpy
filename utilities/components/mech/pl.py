@@ -59,8 +59,15 @@ class TitlePageComponent(Environment):
             
             self.append(Command('vspace',arguments='1cm'))
             
-            self.append(NoEscape(f'{system._label} \n \n'))
-            
+#             self.append(NoEscape(f'{system._label} \n \n'))
+
+            if len(system._given_data) == 0:
+                self.append(NoEscape(f'{system.readable_name} z {len(system.q)} St.S. \n \n'))
+            else:
+                data_eqns= [f'${latex(key)} = {latex(value)}$' for key, value in system._given_data.items()]
+
+                self.append(NoEscape(f'''{system.readable_name} z {len(system.q)} St.S. dla {f', '.join(data_eqns)} \n \n'''))
+
             self.append(Command('vspace',arguments='1cm'))
             
             self.append(Command('MyAuthor'))

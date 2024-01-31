@@ -65,8 +65,8 @@ class SpringMassSystem(ComposedSystem):
 
 
     """
-    scheme_name = 'engine.png'
-    real_name = 'engine_real.PNG'
+    scheme_name = 'harmonic_oscillator.png'
+    real_name = 'leaf_spring.png'
 
     m=Symbol('m', positive=True)
     k=Symbol('k', positive=True)
@@ -253,8 +253,8 @@ class ForcedSpringMassSystem(SpringMassSystem):
 
 
     """
-    scheme_name = 'engine.png'
-    real_name = 'engine_real.PNG'
+    scheme_name = 'forced_harmonic_oscillator_gravity.png'
+    real_name = 'leaf_spring.png'
 
 
     F=Symbol('F', positive=True)
@@ -349,8 +349,8 @@ class SpringDamperMassSystem(ComposedSystem):
 
 
     """
-    scheme_name = 'engine.png'
-    real_name = 'engine_real.PNG'
+    scheme_name = 'forced_damped_harmonic_oscillator.png'
+    real_name = 'leaf_spring.png'
 
     m=Symbol('m', positive=True)
     k=Symbol('k', positive=True)

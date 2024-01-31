@@ -17,6 +17,7 @@ import random
 import IPython as IP
 import numpy as np
 import inspect
+import re
 
 import matplotlib.pyplot as plt
 from functools import cached_property, lru_cache
@@ -385,6 +386,15 @@ class ComposedSystem(HarmonicOscillator):
 
         return parameters_dict
 
+    @property
+    def readable_name(self):
+
+        name = self.__class__.__name__
+
+        words = re.sub(r'([a-z](?=[A-Z])|[A-Z](?=[A-Z][a-z]))', r'\1 ', name)
+
+        return words
+
 class NonlinearComposedSystem(ComposedSystem):
 
     def frequency_response_function(self,
@@ -476,8 +486,8 @@ class SpringMassSystem(ComposedSystem):
 
 
     """
-    scheme_name = 'engine.png'
-    real_name = 'engine_real.PNG'
+    scheme_name = 'harmonic_oscillator.png'
+    real_name = 'leaf_spring.png'
 
     m=Symbol('m', positive=True)
     k=Symbol('k', positive=True)
