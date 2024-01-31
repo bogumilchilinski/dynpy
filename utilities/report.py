@@ -3193,7 +3193,7 @@ class TikZPicture(Environment,ReportModule):
     _subplots_gap = 0.0
     _subplots_horizontal_gap = 0.5
     _default_grid = None
-    _grid = (2,6)
+    _grid = None
 
     _in_figure = False
     _figure_gen = lambda: Figure(position='H')
@@ -3298,6 +3298,17 @@ class TikZPicture(Environment,ReportModule):
 
         fig = self.__class__._figure_gen()
         fig.packages.append(Package('float'))
+#         display(fig.packages)
+#         fig.packages.remove(Package('fontenc',options=['T1']))
+#         fig.packages.remove(Package('inputenc',options=['utf8']))
+#         fig.packages.remove(Package('lmodern'))
+#         fig.packages.append(Command(NoEscape(r'''\if\ifxetex T\else\ifluatex T\else F\fi\fi T%
+#                                                   \usepackage{fontspec}
+#                                                 \else
+#                                                   \usepackage[T1]{fontenc}
+#                                                   \usepackage[utf8]{inputenc}
+#                                                   \usepackage{lmodern}
+#                                                 \fi''')))
 
         img_params = self.__class__._image_parameters
         width = self.__class__._image_parameters['width']
@@ -3312,7 +3323,7 @@ class TikZPicture(Environment,ReportModule):
             
             else:
 
-                standalone_plot.generate_pdf(filename, clean_tex=False,compiler_args=['--lualatex'])
+                standalone_plot.generate_pdf(filename, clean_tex=False)#,compiler_args=['--lualatex']) #ZMIANA
                 ReportCache._file_names[key] = filename
 
 
