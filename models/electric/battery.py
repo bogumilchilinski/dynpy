@@ -56,9 +56,6 @@ class BatteryCell(ComposedSystem):
     U_th = Function('U_th')(t)
     funcI= Function('funcI')(t)
     #U_th = Symbol('U_th')
-    R_th = Symbol('R_th')
-    C_th = Symbol('C_th')
-    I_li = Symbol('I_li')
 
     def __init__(self,
                  R_1=None,
@@ -138,7 +135,7 @@ class BatteryCell(ComposedSystem):
         
         #dane symulacji
         n_points=step_time[-1]*4 #rozdzielczosc symulacji probki na sekunde
-        t_array=np.linspace(0,step_time[-1]*1.1,n_points)#czas symulacji i prad symulacji
+        t_array=np.linspace(0,step_time[-1]*1,n_points)#czas symulacji i prad symulacji
 
         #tworzenie pustych list
         prad_list=[]
