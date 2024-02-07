@@ -101,7 +101,7 @@ class ExemplaryPictureComponent(ReportComponent):
     
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
 
         display(ReportText(self.header_text))
 
@@ -130,7 +130,7 @@ class SchemeComponent(ExemplaryPictureComponent):
     
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
 
         display(ReportText(  self.header_text ))
           
@@ -175,7 +175,7 @@ class NumericalAnalysisComponent(ExemplaryPictureComponent):
 
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
 
         display(ReportText(f'''Dla Damiana :P
                             '''))
@@ -228,7 +228,7 @@ class PotentialEnergyComponent(ReportComponent):#Jaś fasola
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -260,7 +260,7 @@ class DissipationComponent(ReportComponent):
     
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -282,11 +282,9 @@ class LagrangianComponent(en.LagrangianComponent):
     @property
     def header_text(self):
         #"Lagrangian systemu wyrażony jest wzorem ({AutoMarker(Eq(Symbol('L'),dyn_sys.L.expand()[0]))}):"
+
         
-        system = self._system
-        dyn_sys=system
-        
-        return f"Lagrangian układu dany jest następującym wyrażeniem ({AutoMarker(Eq(Symbol('L'),dyn_sys.L.expand()[0]))}):"
+        return f"Lagrangian układu dany jest następującym wyrażeniem (marker):"
         
     @property
     def body_text_1(self):
@@ -305,7 +303,7 @@ class LagrangianComponent(en.LagrangianComponent):
         
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys.linearized()
 
@@ -316,9 +314,11 @@ class LagrangianComponent(en.LagrangianComponent):
 
         #display(ReportText(f'''The following model is considered. The system's Lagrangian is described by the formula ({Ref(mrk_lagrangian_nonlin).dumps()}):
         #                    '''))
-        display(ReportText(self.header_text ))
+        eq_lagr = Eq(Symbol('L'),dyn_sys.L.expand()[0])
+        
+        display(ReportText(self.header_text.replace('marker', f'{AutoMarker(eq_lagr)}') ))
 
-        display((SympyFormula(  Eq(Symbol('L'),dyn_sys.L.expand()[0])  , marker=mrk_lagrangian_nonlin )  ))
+        display((SympyFormula(  eq_lagr)  ))
         
         q_sym =[ Symbol(f'{coord}'[0:-3]) for coord in dyn_sys.q]
         
@@ -379,13 +379,13 @@ class GoverningEquationComponent(ReportComponent):
     
     @property
     def entry_text_one(self):
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         return f"Wykorzystując obliczone pochodne, wyznacza się równanie ruchu na podstawie odpowiedniego wzoru. Równanie ruchu układu przedstawia zależność: ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})"
     
     @property
     def entry_text_two(self):
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         
         return f"Wykorzystując obliczone pochodne, wyznacza się równania ruchu na podstawie odpowiedniego wzoru. Równania ruchu układu przedstawiają zależności: ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})-     ({AutoMarker(Eq(dyn_sys._eoms[-1].simplify().expand(),0))})"
@@ -397,8 +397,8 @@ class GoverningEquationComponent(ReportComponent):
     
     def append_elements(self):
         
-        system = self._system
-        dyn_sys=system
+        system = self.reported_object
+        dyn_sys=system#.subs(system._given_data)
 
         if len(system.q)==1:
             display(ReportText(self.entry_text_one))   
@@ -417,7 +417,7 @@ class LinearizedGoverningEquationComponent(ReportComponent):
 
     @property
     def entry_text_one(self):
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys.linearized()
         
@@ -425,7 +425,7 @@ class LinearizedGoverningEquationComponent(ReportComponent):
     
     @property
     def entry_text_two(self):
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys.linearized()
         
@@ -438,7 +438,7 @@ class LinearizedGoverningEquationComponent(ReportComponent):
     
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys.linearized()
 
@@ -486,7 +486,7 @@ class LinearizationComponent(ReportComponent): # Szymon
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         ReportText.set_directory('./SDAresults')
         latex_store=AutoBreak.latex_backend
         AutoBreak.latex_backend = latex_store
@@ -577,7 +577,7 @@ class FundamentalMatrixComponent(ReportComponent):
     
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
         ReportText.set_directory('./SDAresults')
 
         latex_store=AutoBreak.latex_backend
@@ -587,7 +587,7 @@ class FundamentalMatrixComponent(ReportComponent):
         
 
         dyn_sys=system
-        dyn_sys_lin=dyn_sys.linearized()
+        dyn_sys_lin=dyn_sys.linearized()#.subs(system._given_data)
 
 
         display(ReportText(self.header_text))
@@ -625,7 +625,7 @@ class GeneralSolutionComponent(ReportComponent):
         from ....dynamics import LagrangesDynamicSystem, HarmonicOscillator
         #from dynpy import LagrangesDynamicSystem, HarmonicOscillator
 
-        system = self._system
+        system = self.reported_object
         ReportText.set_directory('./SDAresults')
 
         latex_store=AutoBreak.latex_backend
@@ -637,7 +637,7 @@ class GeneralSolutionComponent(ReportComponent):
         
 
         dyn_sys=system
-        dyn_sys_lin=dyn_sys.linearized()
+        dyn_sys_lin=dyn_sys.linearized()#.subs(system._given_data)
 
 
         display(ReportText(self.header_text))
@@ -669,7 +669,7 @@ class FrequencyResponseFunctionComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -691,7 +691,7 @@ class FrequencyResponseFunctionComponentToSecond(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -728,14 +728,14 @@ class SteadySolutionComponent(ReportComponent):
     def footer_text(self):
         #" Rozwiązanie szczególne związane jest obecnością wielkości wymuszających ruch (drgania) analizowanego układu."
         # google tlumacz
-        return "Rozwiązanie szczególne układu przedstawia zależność położenia od czas odpowiednią dla drgań wymuszonych"
+        return "Rozwiązanie szczególne układu przedstawia zależność położenia od czasu odpowiednią dla drgań wymuszonych"
 
 
     def append_elements(self,phi=_phi):
 
         from ....dynamics import LagrangesDynamicSystem, HarmonicOscillator
         
-        system = self._system
+        system = self.reported_object
         ReportText.set_directory('./SDAresults')
 
         latex_store=AutoBreak.latex_backend
@@ -745,7 +745,7 @@ class SteadySolutionComponent(ReportComponent):
         
 
         dyn_sys=system
-        dyn_sys_lin=dyn_sys.linearized()
+        dyn_sys_lin=dyn_sys.linearized()#.subs(system._given_data)
 
 
 
@@ -775,7 +775,7 @@ class MaxStaticForce(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -798,7 +798,7 @@ class MaxDynamicForce(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 

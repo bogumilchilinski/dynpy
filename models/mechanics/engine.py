@@ -548,6 +548,9 @@ class EngineVerticalSpringGravity(Engine):
         components['_left_mount'] = self._left_mount
         components['_right_mount'] = self._right_mount
         return components
+    
+    def get_constant_velocity(self):
+        return self.subs({self.phi:self.Omega*self.ivar})
 
 class EngineConstantVelocityVerticalSpringGravity(Engine):
 
@@ -2140,6 +2143,20 @@ class EngineWithTMD(Engine):
         ]
 
         return comp_list
+    
+    def reference_data_dict(self):
+
+        m0, k0, l0, Omega  = symbols(' m_0 k_0 l_0 Omega', positive=True)
+
+        default_data_dict = {
+  
+            self.phi: [self.Omega*self.ivar],
+            self.M: [self.m_E],
+            self.m_e: [self.m_E],
+            self.k_m: [self.k_E],
+        }
+
+        return default_data_dict
     
 class VeeEnginePerpendicularSprings(ComposedSystem):
     scheme_name = 'vee_engine_perpendicular_springs.png'

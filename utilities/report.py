@@ -3157,7 +3157,7 @@ class ObjectCode(LstListing,ReportModule):
         lst_env=self
         self.cls_container.append(lst_env)
         
-        return copy.deepcopy(self)
+        return copy.copy(self)
     
     def _repr_markdown_(self):
 

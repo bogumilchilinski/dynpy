@@ -658,7 +658,7 @@ class LagrangianComponent(ReportComponent):
         system = self._system
         dyn_sys=system
         
-        return f"System Lagrangian is described by the formula ({AutoMarker(Eq(Symbol('L'),dyn_sys.L.expand()[0]))}):"
+        return f"System Lagrangian is described by the formula (marker):"
         
     @property
     def body_text_1(self):
@@ -688,9 +688,13 @@ class LagrangianComponent(ReportComponent):
 
         #display(ReportText(f'''The following model is considered. The system's Lagrangian is described by the formula ({Ref(mrk_lagrangian_nonlin).dumps()}):
         #                    '''))
-        display(ReportText(self.header_text ))
+        
+        eq_lagr = Eq(Symbol('L'),dyn_sys.L.expand()[0])
+        
+        display(ReportText(self.header_text.replace('marker', f'{AutoMarker(eq_lagr)}')))
 
-        display((SympyFormula(  Eq(Symbol('L'),dyn_sys.L.expand()[0])  , marker=mrk_lagrangian_nonlin )  ))
+
+        display((SympyFormula(eq_lagr)))
         
         q_sym =[ Symbol(f'{coord}'[0:-3]) for coord in dyn_sys.q]
         

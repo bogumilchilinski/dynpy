@@ -1755,10 +1755,49 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         return type(self)(0,system=new_sys)
     
+#     @lru_cache
+#     def numerized(self, parameter_values=None, FFT = None,label=None,backend='fortran',**kwargs):
+#         '''
+#         Takes values of parameters, substitute it into the list of parameters and changes list it into a Tuple. Returns instance of class OdeComputationalCase.
+#         Arguments:
+#         =========
+#             System = Created system based on symbolical represent of mechanical parts of it
 
-    def numerized(self, parameter_values={}, FFT = None,label=None,backend='fortran',**kwargs):
+#         Example:
+#         =======
+#         Creating the examplary system. A mass oscillating up and down while being held up by a spring with a spring constant k
+
+#         >>> t = symbols('t')
+#         >>> m, k = symbols('m, k')
+#         >>> qs = dynamicsymbols('z') 
+#         >>> System = SDoFHarmonicOscillator(m,k, qs=[z]) 
+
+#         Defining the list of values to substitute
+#         >>> val ={
+#                 M: 1000,
+#                 k1: 1000
+#             }
+#         >>> System numeric = Sytem.numerized(parameters_values = val)
+
+#         - In default returned numerized system is in the time domain but can be represented in the frequency domain if it is desired
+#         >>> System numeric = Sytem.numerized(parameters_values = val, FFT = True)
+
+#         - if necessary the created numerized system can be solved in order to represent displacement, velocity, or acceleration 
+#         '''
+
+#         if not FFT:
+# #             data_Tuple = Tuple(*self.system_parameters()).subs(parameter_values)
+# #             computed_case = self.computational_case(parameter_values=data_Tuple)
+#             if label:
+#                 print('dynpy label',label)
+#                 computed_case['label']=label
+#                 print('computed case',computed_case)
+
+# #             return OdeComputationalCase(**computed_case,backend=backend, evaluate=True)
+#             return self._ode_system.numerized(parameters=parameter_values, backend=backend, **kwargs)
+    def numerized(self, parameter_values=None, ic_list=None, backend='fortran',**kwargs):
         '''
-        Takes values of parameters, substitute it into the list of parameters and changes list it into a Tuple. Returns instance of class OdeComputationalCase.
+        Takes values of parameters. Redirects the numerizing to ODESystem method numerized which does the variables types conversion and then proceeds to execution method _numerized wchih has lru_cache.
         Arguments:
         =========
             System = Created system based on symbolical represent of mechanical parts of it
@@ -1779,21 +1818,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             }
         >>> System numeric = Sytem.numerized(parameters_values = val)
 
-        - In default returned numerized system is in the time domain but can be represented in the frequency domain if it is desired
-        >>> System numeric = Sytem.numerized(parameters_values = val, FFT = True)
-
         - if necessary the created numerized system can be solved in order to represent displacement, velocity, or acceleration 
         '''
-        if not FFT:
-            data_Tuple = Tuple(*self.system_parameters()).subs(parameter_values)
-            computed_case = self.computational_case(parameter_values=data_Tuple)
-            if label:
-                print('dynpy label',label)
-                computed_case['label']=label
-                print('computed case',computed_case)
 
-            return OdeComputationalCase(**computed_case,backend=backend, evaluate=True)
-
+        return self._ode_system.numerized(parameter_values=parameter_values, ic_list=ic_list, backend=backend, **kwargs)
 
 
 

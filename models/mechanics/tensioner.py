@@ -252,6 +252,17 @@ class DampedBlowerToothedBelt(BlowerToothedBelt):
         }
 
         return default_data_dict
+    
+    def reference_data_dict(self):
+
+        lam, m0, k0, l0, F0 = symbols('lambda m_0 k_0 l_0 F_0', positive=True)
+
+        default_data_dict = {
+            self.c_belt: [self.lam*(self.k_belt)],
+            self.c_tensioner: [self.lam*(self.k_tensioner)],
+        }
+
+        return default_data_dict
 
     def get_numerical_data(self):
 

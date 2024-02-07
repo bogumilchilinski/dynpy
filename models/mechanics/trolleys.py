@@ -539,6 +539,19 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
 
         return comp_list
 
+    def reference_data_dict(self):
+        lam=Symbol('lambda',postive=True)
+        default_data_dict = {
+            self.m_1: [self.m],
+            self.m_2: [self.m],
+            self.c_r: [self.k_c*lam],
+            self.c_l: [self.k_c*lam],
+            self.c_c: [self.k_c*lam],
+            self.k_l: [self.k_c],
+            self.k_r: [self.k_c]
+        }
+
+        return default_data_dict
 
 
 ### Nieliniowe

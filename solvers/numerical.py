@@ -1,4 +1,4 @@
-from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq#, Tuple
+from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Dict#, Tuple
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 #from sympy import *
@@ -74,7 +74,7 @@ class OdeComputationalCase:
         self.ic_point = ic_point
         if type(ic_point) == type(None):
             self.ic_point = [0]*len(self.dvars)
-        if isinstance(params, dict):
+        if isinstance(params, (dict, Dict)):
             self.params_values = params
             self.params = list(self.params_values.keys())
 

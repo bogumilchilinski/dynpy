@@ -350,6 +350,16 @@ class UndampedSymmetricalVehicleSuspension(UndampedVehicleSuspension):
         }
 
         return default_data_dict
+    
+    def reference_data_dict(self):
+
+        default_data_dict = {
+            self.l_l: [self.l_r],
+#             self.I: [S.One/12*self.m *self.l_rod**2],
+            self.k_l: [self.k_r],
+        }
+
+        return default_data_dict
 
     
 class DampedVehicleSuspension(UndampedVehicleSuspension):
@@ -590,6 +600,19 @@ class DampedSymmetricalVehicleSuspension(DampedVehicleSuspension):
 #        parameters_dict[self.m_2] = parameters_dict[self.m]
 
         return parameters_dict
+
+    def reference_data_dict(self):
+
+        lam, m0, k0, l0, F0 = symbols('lambda m_0 k_0 l_0 F_0', positive=True)
+
+        default_data_dict = {
+            self.c_r: [self.lam*(self.k_r)],
+            self.c_l: [self.lam*(self.k_l)],
+            self.l_l: [self.l_r],
+            self.k_l: [self.k_r],
+        }
+
+        return default_data_dict
 
 class SimplifySuspension(UndampedVehicleSuspension):
     """

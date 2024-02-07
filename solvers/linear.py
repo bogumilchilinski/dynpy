@@ -29,7 +29,7 @@ import sympy.physics.mechanics as me
 from sympy.simplify.fu import TR8, TR10, TR7,TR6, TR5, TR3
 from collections.abc import Iterable
 from sympy.solvers.ode.systems import linodesolve
-from functools import cached_property
+from functools import cached_property, lru_cache
 
 from .numerical import OdeComputationalCase
 
@@ -1345,22 +1345,52 @@ class ODESystem(AnalyticalSolution):
         else:
             return print('False')
 
-
-    def numerized(self,parameters={},ic_list=[],backend='fortran',**kwrags):
-        '''
-        Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
-        '''
+# #     @lru_cache
+#     def numerized(self,parameters=None,ic_list=[],backend='fortran',**kwrags):
+#         '''
+#         Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
+#         '''
 
         
-        ode=self.as_first_ode_linear_system()
+#         ode=self.as_first_ode_linear_system()
+#         if parameters is None:
+#             parameters={}
         
-        return OdeComputationalCase(odes_system=ode.rhs,ivar=ode.ivar,dvars=ode.dvars,params= parameters,backend=backend)
+#         return OdeComputationalCase(odes_system=ode.rhs,ivar=ode.ivar,dvars=ode.dvars,params= parameters,backend=backend)
     
     # def numerized(self,parameters={},ic_list=[]):
     #     '''
     #     Takes values of parameters, substitutes it into the list of parameters and changes it into a Tuple. Returns instance of class OdeComputationalCase.
     #     '''
     #     return OdeComputationalCase(odes_system=self.odes_rhs,dvars=self.dvars,ivar=self.ivar)
+
+    def numerized(self,parameter_values=None,ic_list=None,backend='fortran',**kwrags):
+        '''
+        Takes values of parameters, substitute it into the sympy Dict. Redirects the numerizing to exectution method _numerized which has lru cache.
+        '''
+
+        if parameter_values is None: parameters_sympy_dict = Dict({})
+        elif isinstance(parameter_values, dict): parameters_sympy_dict = Dict(parameter_values)
+        elif isinstance(parameter_values, Dict): parameters_sympy_dict = parameter_values
+        else: print("Podano zły typ danych - podaj słownik na parameter_values")
+
+        if ic_list is None: ic_tuple=()
+        elif isinstance(ic_list, list): ic_tuple = tuple(ic_list)
+        elif isinstance(ic_list, tuple): ic_tuple = ic_list
+        else: print("Podano zły typ danych - podaj list lub tuple na ic_list")
+
+        return self._numerized(parameters=parameters_sympy_dict, ic_tuple=ic_tuple, backend=backend)
+
+    @lru_cache
+    def _numerized(self,parameters=Dict(),ic_tuple=(),backend='fortran',**kwrags):
+        '''
+        Execution method that assumes all Args are hashable due to application of lru cache. Takes values of parameters and returns instance of class OdeComputationalCase.
+        '''
+
+        ode=self.as_first_ode_linear_system()
+
+        return OdeComputationalCase(odes_system=ode.rhs,ivar=ode.ivar,dvars=ode.dvars,params= parameters,backend=backend)
+    
     
     @property
     def _report_components(self):
