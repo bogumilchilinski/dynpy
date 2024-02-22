@@ -169,7 +169,6 @@ class MissileTrajectory(MissileTrajectoryAirless):
 #             self.g: [10],
 #             self.c: [0.95],
 #         }
-
 #         return default_data_dict
 
     

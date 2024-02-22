@@ -87,7 +87,8 @@ class CurrentContainer:
         LatexDataFrame.set_picture_mode(True)
 
         ObjectCode.set_container(self._container)
-        TikZPicture.set_container(self._container)
+        
+        Picture.set_container(self._container)
         
         Block.set_container(self._container)
         AlertBlock.set_container(self._container)

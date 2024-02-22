@@ -98,7 +98,7 @@ class ExemplaryPictureComponent(ReportComponent):
         return "A real example is shown for better understanding of the schematic view and purpose of the system."
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
 
         display(ReportText(self.header_text))
         
@@ -123,7 +123,7 @@ class ExemplaryPictureDynPyCodeComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
 
         display(ReportText( self.header_text  ))
@@ -157,7 +157,7 @@ class ExemplaryPictureSymPyCodeComponent(ExemplaryPictureComponent):
     @property
     def footer_text(self):
         
-        system = self._system
+        system = self.reported_object
 
         return f"Analysis of the real example is needed to propose physical scheme."
     
@@ -201,7 +201,7 @@ class SchemeComponent(ExemplaryPictureComponent):
     @property
     def footer_text(self):
         
-        system = self._system
+        system = self.reported_object
         
         #"Analizując przedstawiony układ można stwierdzić, że jego liczba stopni swobody to {len(system.q)}."
         return f"Analysis of the scheme allows to claim its number of degrees of freedom which is {len(system.q)}"
@@ -209,7 +209,7 @@ class SchemeComponent(ExemplaryPictureComponent):
     
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
 
         display(ReportText(  self.header_text ))
 
@@ -232,13 +232,13 @@ class SchemeDynPyCodeComponent(ExemplaryPictureComponent):
     @property
     def footer_text(self):
 
-        system = self._system
+        system = self.reported_object
 
         return f"Analysis of the scheme allows to claim its number of degrees of freedom which is {len(system.q)}"
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
 
         display(ReportText(  self.header_text ))
 
@@ -275,13 +275,13 @@ class SchemeSymPyCodeComponent(ExemplaryPictureComponent):
     @property
     def footer_text(self):
         
-        system = self._system
+        system = self.reported_object
         return f"Analysis of the scheme allows to claim its number of degrees of freedom which is {len(system.q)}"
     
     
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
         path=system._default_folder_path + system.scheme_name
 
         display(ReportText(  self.header_text ))
@@ -312,7 +312,7 @@ class DamperPlot(ExemplaryPictureComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -353,7 +353,7 @@ class NumericalAnalysisComponent(ExemplaryPictureComponent):
 
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
 
         display(ReportText(f'''Dla Damiana :P
                             '''))
@@ -388,7 +388,7 @@ class KineticEnergyComponent(ReportComponent):
     
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -420,7 +420,7 @@ class KineticEnergyDynPyCodeComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -459,7 +459,7 @@ class KineticEnergySymPyCodeComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
 
 
@@ -510,7 +510,7 @@ class PotentialEnergyComponent(ReportComponent):#Jaś fasola
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
 
 
@@ -536,7 +536,7 @@ class PotentialEnergyDynPyCodeComponent(ReportComponent):
     
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
 
 
@@ -575,7 +575,7 @@ class PotentialEnergySymPyCodeComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
 
 
@@ -630,7 +630,7 @@ class DissipationComponent(ReportComponent):
     
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -655,7 +655,7 @@ class LagrangianComponent(ReportComponent):
     def header_text(self):
         #"Lagrangian systemu wyrażony jest wzorem ({AutoMarker(Eq(Symbol('L'),dyn_sys.L.expand()[0]))}):"
         
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         
         return f"System Lagrangian is described by the formula (marker):"
@@ -677,7 +677,7 @@ class LagrangianComponent(ReportComponent):
         
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys.linearized()
 
@@ -763,7 +763,7 @@ class LagrangianDynPyCodeComponent(ReportComponent):
     
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
 
 
@@ -812,7 +812,7 @@ class LagrangianSymPyCodeComponent(ReportComponent):
     
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
 
 
@@ -867,13 +867,13 @@ class GoverningEquationComponent(ReportComponent):
     
     @property
     def entry_text_one(self):
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         return f"Using the calculated derivatives, the equation of motion is based on the appropriate formula. System equation of motion is described by the formula ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})"
     
     @property
     def entry_text_two(self):
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         #f"przedstawiają zależności ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})-({AutoMarker(Eq(dyn_sys._eoms[-1].simplify().expand(),0))})"
         return f"Using the calculated derivatives, the equations of motions are based on the appropriate formulas. System equations of motions are described by the formulas ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})-     ({AutoMarker(Eq(dyn_sys._eoms[-1].simplify().expand(),0))})"
@@ -886,7 +886,7 @@ class GoverningEquationComponent(ReportComponent):
     
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
 
         if len(system.q)==1:
@@ -907,7 +907,7 @@ class LinearizedGoverningEquationComponent(ReportComponent):
     
     @property
     def entry_text_one(self):
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys.linearized()
         #f"przedstawia zależność ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})"
@@ -915,7 +915,7 @@ class LinearizedGoverningEquationComponent(ReportComponent):
     
     @property
     def entry_text_two(self):
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys.linearized()
         #f"przedstawiają zależności ({AutoMarker(Eq(dyn_sys._eoms[0].simplify().expand(),0))})-({AutoMarker(Eq(dyn_sys._eoms[-1].simplify().expand(),0))})"
@@ -929,7 +929,7 @@ class LinearizedGoverningEquationComponent(ReportComponent):
     
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys.linearized()
 
@@ -964,7 +964,7 @@ class GoverningEquationDynpyCodeComponent(ReportComponent):
         return 'Execution of this code returns equations of motion generated from dynamic system'
     
     def append_elements(self):
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         eoms=str(dyn_sys._eoms)
         
@@ -1009,7 +1009,7 @@ class GoverningEquationSympyCodeComponent(ReportComponent):
         return 'Execution of this code returns equations of motion in a form of Sympy outputs'
     
     def append_elements(self):
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         eoms=str(dyn_sys._eoms)
         display(ReportText(self.header_text))
@@ -1054,12 +1054,12 @@ class LinearizationComponent(ReportComponent): # Szymon
 
     @property
     def eom_text(self):
-        dyn_sys= self._system
+        dyn_sys= self.reported_object
         return '''Equation of motion for coordinate ${coord}$ can be presented as:'''
 
     @property
     def lagrange_text(self):
-        dyn_sys= self._system
+        dyn_sys= self.reported_object
         return "Proper computings requires finding derivatives of generalized coordinates, which are components of Lagrange's equations"
 
     @property
@@ -1072,7 +1072,7 @@ class LinearizationComponent(ReportComponent): # Szymon
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         ReportText.set_directory('./SDAresults')
         latex_store=AutoBreak.latex_backend
         AutoBreak.latex_backend = latex_store
@@ -1150,7 +1150,7 @@ class CriticalPointsComponent(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys = system
 
         display(ReportText(self.header_text))
@@ -1172,7 +1172,7 @@ class CriticalPointsDynPyCodeComponent(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys = system
 
         display(ReportText(self.header_text))
@@ -1202,7 +1202,7 @@ class CriticalPointsSymPyCodeComponent(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
 
         critical_points=str(dyn_sys._op_points())
@@ -1314,7 +1314,7 @@ class FundamentalMatrixDynPyCodeComponent(ReportComponent):
     
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
         ReportText.set_directory('./SDAresults')
 
         latex_store=AutoBreak.latex_backend
@@ -1376,7 +1376,7 @@ class FundamentalMatrixSymPyCodeComponent(ReportComponent):
     
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
 
         dyn_sys=system
         dyn_sys_lin=dyn_sys.linearized()
@@ -1435,7 +1435,7 @@ class GeneralSolutionComponent(ReportComponent):
         from ....dynamics import LagrangesDynamicSystem, HarmonicOscillator
         #from dynpy import LagrangesDynamicSystem, HarmonicOscillator
 
-        system = self._system
+        system = self.reported_object
         ReportText.set_directory('./SDAresults')
 
         latex_store=AutoBreak.latex_backend
@@ -1474,7 +1474,7 @@ class GeneralSolutionDynpyCodeComponent(ReportComponent):
         return "General solution describes motion of the analised system - presents displacement i function of time - and is given by considerations about free vibrations of the system. This code presents a solution in dynpy code."
     
     def append_elements(self):
-        system=self._system
+        system=self.reported_object
         t=system.ivar
         dyn_sys=system
         dyn_sys_lin=dyn_sys.linearized()
@@ -1514,7 +1514,7 @@ class GeneralSolutionSympyCodeComponent(ReportComponent):
         return "General solution describes motion of the analised system - presents displacement i function of time - and is given by considerations about free vibrations of the system.  This code presents a solution in sympy code."
     
     def append_elements(self):
-        system=self._system
+        system=self.reported_object
         t=system.ivar
         dyn_sys=system
         dyn_sys_lin=dyn_sys.linearized()
@@ -1572,7 +1572,7 @@ class FrequencyResponseFunctionComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -1594,7 +1594,7 @@ class FrequencyResponseFunctionComponentToSecond(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -1616,7 +1616,7 @@ class SpringForce(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -1639,7 +1639,7 @@ class SpringForce(ReportComponent):
     def append_elements(self):
 
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -1662,7 +1662,7 @@ class DamperForce(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -1692,7 +1692,7 @@ class LogarithmicDecrement(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -1747,7 +1747,7 @@ class SteadySolutionComponent(ReportComponent):
 
         from ....dynamics import LagrangesDynamicSystem, HarmonicOscillator
         
-        system = self._system
+        system = self.reported_object
         ReportText.set_directory('./SDAresults')
 
         latex_store=AutoBreak.latex_backend
@@ -1787,7 +1787,7 @@ class MaxStaticForce(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -1810,7 +1810,7 @@ class MaxDynamicForce(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -1832,7 +1832,7 @@ class DynamicPinDiameter(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -1853,7 +1853,7 @@ class StaticPinDiameter(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -1887,7 +1887,7 @@ class TensionerForce(ReportComponent):
     def append_elements(self):
 
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -1928,7 +1928,7 @@ class TensionerDamperForce(ReportComponent):
     def append_elements(self):
 
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -1955,7 +1955,7 @@ class StaticKeyLength(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -1976,7 +1976,7 @@ class DynamicKeyLength(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -2000,7 +2000,7 @@ class StaticAndDynamicCableForceComponent(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -2023,7 +2023,7 @@ class PendulumLongitudinalForce(StaticAndDynamicCableForceComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
         
@@ -2051,7 +2051,7 @@ class MDoFGeneralSolutionComponent(ReportComponent):
         from ....dynamics import LagrangesDynamicSystem, HarmonicOscillator
         #from dynpy import LagrangesDynamicSystem, HarmonicOscillator
 
-        system = self._system
+        system = self.reported_object
         ReportText.set_directory('./SDAresults')
 
         latex_store=AutoBreak.latex_backend
@@ -2098,7 +2098,7 @@ class MDoFSteadySolutionComponent(ReportComponent):
 
         from ....dynamics import LagrangesDynamicSystem, HarmonicOscillator
         
-        system = self._system
+        system = self.reported_object
         ReportText.set_directory('./SDAresults')
 
         latex_store=AutoBreak.latex_backend
@@ -2145,7 +2145,7 @@ class RightSpringForceComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         kr=system.k_r
         x_2=system.x_2
         Fr=-kr*x_2
@@ -2178,7 +2178,7 @@ class CentralSpringForceComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
         kc=system.k_c
@@ -2210,7 +2210,7 @@ class FreeVibrationFrequencyComponent(ReportComponent):
         return "The specific solution is related to the presence of quantities that force motion (vibrations) of the analyzed system."
 
     def append_elements(self):
-        system = self._system
+        system = self.reported_object
         t = system.ivar
         dyn_sys = system
         dyn_sys_lin = dyn_sys.linearized()
@@ -2252,7 +2252,7 @@ class StaticForceComponent(ReportComponent):
         return "Force of the considered element is following:"
 
     def get_force(self):
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
         
@@ -2260,7 +2260,7 @@ class StaticForceComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -2273,14 +2273,14 @@ class StaticForceComponent(ReportComponent):
 
 class DynamicForceComponent(StaticForceComponent):
     def get_force(self):
-        system=self._system
+        system=self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
         return dyn_sys.dynamic_force().doit()
     
 class DynamicTensionForceComponent(StaticForceComponent):
     def get_force(self):
-        system=self._system
+        system=self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
         return dyn_sys.force_in_cable().doit()
@@ -2295,7 +2295,7 @@ class StaticCableDiameter(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -2315,7 +2315,7 @@ class DynamicCableDiameter(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -2334,7 +2334,7 @@ class DampedVibrationFrequency(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
 
@@ -2354,7 +2354,7 @@ class DampedEngineDynamicShearRatioComponent(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
         
@@ -2377,7 +2377,7 @@ class DampingMatrixComponent(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
         
@@ -2395,7 +2395,7 @@ class TMDForceComponent(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
         
@@ -2414,7 +2414,7 @@ class SmallParameterComponent(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
         
@@ -2432,7 +2432,7 @@ class NonlinearSteadySolutionComponent(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
         
@@ -2449,7 +2449,7 @@ class AmplitudeAndFrequencyRelationComponent(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
         
@@ -2466,7 +2466,7 @@ class DynamicTorqueComponent(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         dyn_sys=system
         dyn_sys_lin = dyn_sys
         

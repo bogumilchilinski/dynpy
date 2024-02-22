@@ -123,7 +123,7 @@ class SchemeComponent(ExemplaryPictureComponent):
     @property
     def footer_text(self):
         
-        system = self._system
+        system = self.reported_object
 
         return f"Analizując przedstawiony układ można stwierdzić, że jego liczba stopni swobody to {len(system.q)}."
     
@@ -468,12 +468,12 @@ class LinearizationComponent(ReportComponent): # Szymon
         return "Punkty równowagi rozważanego układu są następujące:"
     @property
     def eom_text(self):
-        dyn_sys= self._system
+        dyn_sys= self.reported_object
 #         return '''Równanie ruchu dla współrzędnej ${latex(dyn_sys.q[no])}$ można przestawić jako:'''
         return '''Równanie ruchu dla współrzędnej ${coord}$ można przestawić jako:'''
     @property
     def lagrange_text(self):
-        dyn_sys= self._system
+        dyn_sys= self.reported_object
         return "Formalnie należy obliczyć pochodne cząstkowe wielkości uogólnionych ze składników równań Lagrange'a"
 
     @property
