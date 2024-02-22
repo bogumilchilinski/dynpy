@@ -224,19 +224,50 @@ class DampedBlowerToothedBelt(BlowerToothedBelt):
         if qs is not None: self.qs = qs
         else: self.qs = [self.z]
 
-        super().__init__(m=m, k_belt=k_belt, k_tensioner=k_tensioner, ivar=ivar, Omega=Omega, F=F, z0=z0, z=z)
+        if m is not None: self.m = m
+        if k_belt is not None: self.k_belt = k_belt
+        if k_tensioner is not None: self.k_tensioner = k_tensioner
+        if F is not None: self.F = F
+        if Omega is not None: self.Omega = Omega
+        if z is not None: self.z = z
+        if ivar is not None: self.ivar = ivar
+        if z0 is not None: self.z0 = z0
+
+        self.ivar = ivar
+
+        self._init_from_components(**kwargs)
+        
+        
+        #super().__init__(m=m, k_belt=k_belt, k_tensioner=k_tensioner, ivar=ivar, Omega=Omega, F=F, z0=z0, z=z)
 
     @property
     def components(self):
 
         components = {}
 
-        self._blower_toothed_belt = BlowerToothedBelt(m=self.m, k_belt=self.k_belt, k_tensioner=self.k_tensioner, ivar=self.ivar, Omega=self.Omega, F=self.F, z0=self.z0, z=self.z)(label = 'Blower Toothed Belt')
+        #self._blower_toothed_belt = BlowerToothedBelt(m=self.m, k_belt=self.k_belt, k_tensioner=self.k_tensioner, ivar=self.ivar, Omega=self.Omega, F=self.F, z0=self.z0, z=self.z)(label = 'Blower Toothed Belt')
+        #components['_blower_toothed_belt'] = self._blower_toothed_belt
+        
+        self._mass = MaterialPoint(self.m, self.z, qs=[self.z])(label = 'Material point')
+        self._upper_belt = Spring(self.k_belt, self.z, pos2=0, qs=[self.z])(label = 'Upper belt stiffness')
+        self._lower_belt = Spring(self.k_belt, self.z, pos2=0, qs=[self.z])(label = 'Lower belt stiffness')
+        self._tensioner = Spring(self.k_tensioner, self.z, pos2=self.z0, qs=[self.z])(label = 'Tensioner stiffness')
+        self._force = Force(self.F * sin(self.Omega * self.ivar), pos1=self.z, qs=[self.z])(label = 'Force')
+
+
+
+        components['_mass'] = self._mass
+        components['_upper_belt'] = self._upper_belt
+        components['_lower_belt'] = self._lower_belt
+        components['_tensioner'] = self._tensioner
+        components['_force'] = self._force
+        
+        
         self._upper_belt_damping = Damper(self.c_belt, pos1=self.z, pos2=0, qs=[self.z])(label = 'Upper belt damping')
         self._lower_belt_damping = Damper(self.c_belt, pos1=self.z, pos2=0, qs=[self.z])(label = 'Lower belt damping')
         self._tensioner_damping = Damper(self.c_tensioner, pos1=self.z, pos2=self.z0, qs=[self.z])(label = 'Tensioner damping')
 
-        components['_blower_toothed_belt'] = self._blower_toothed_belt
+
         components['_upper_belt_damping'] = self._upper_belt_damping
         components['_lower_belt_damping'] = self._lower_belt_damping
         components['_tensioner_damping'] = self._tensioner_damping

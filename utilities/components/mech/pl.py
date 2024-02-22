@@ -305,7 +305,7 @@ class LagrangianComponent(en.LagrangianComponent):
         
         system = self.reported_object
         dyn_sys=system
-        dyn_sys_lin = dyn_sys.linearized()
+        dyn_sys_lin = dyn_sys#.linearized()
 
         
         print(system._scheme())

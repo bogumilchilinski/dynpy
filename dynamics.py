@@ -55,7 +55,7 @@ from functools import cached_property, lru_cache
 
 
 import os
-
+import re
 
 class GeometryScene:
     """_summary_
@@ -585,6 +585,16 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self._nonlinear_base_system=None
 
         
+    @property
+    def readable_name(self):
+
+        name = self.__class__.__name__
+
+        words = re.sub(r'([a-z](?=[A-Z])|[A-Z](?=[A-Z][a-z]))', r'\1 ', name)
+
+        return words
+        
+        
     @property    
     def scheme_options(self):
         return self._scheme_options
@@ -748,10 +758,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         system=cls.from_default_data()
         subs_dict=system.get_reference_data()
+
+        new_sys = system.subs(subs_dict)
+        new_sys._given_data = subs_dict
         
-        if subs_dict is not None:
-            return system.subs(subs_dict)
-        else: return system
+        
+        return new_sys
     
     def all_symbols_description(self):
         
@@ -2372,7 +2384,7 @@ class HarmonicOscillator(LinearDynamicSystem):
 
     def frequency_response_function(self,
                                     excitation_freq=Symbol('Omega',
-                                                           positive=True)):
+                                                           positive=True),mode=0):
         '''
         Returns the Frequency Response Function of the system for the given excitation amplitude working correctly for systems with defined stiffenes matrix.
         '''
@@ -2383,31 +2395,52 @@ class HarmonicOscillator(LinearDynamicSystem):
 
         #solution = self.steady_solution()[0].expand()
         sin_fun=list(self.external_forces().atoms(sin))
+        display('sin_fun',sin_fun)
         cos_fun=list(self.external_forces().atoms(cos))
-
-        if len(sin_fun) == 1: 
+        display('cos_fun',cos_fun)
         
+        if len(sin_fun)!=1 and len(cos_fun)!=1:
+            display("inside")
+            
+
             omg_sin=list(set((sin_fun[0]).args)-{self.ivar})[0]
 
             comp_sin = self.external_forces().applyfunc(lambda comp: comp.coeff(sin_fun[0]))
-        else:
-            comp_sin=(self.external_forces()*S.Zero).doit()
-            omg_sin=S.Zero
             
+            if len(cos_fun) !=0:
             
-        if len(cos_fun) == 1: 
-            omg_cos=list(set(cos_fun[0].args)-{self.ivar})[0]
+                omg_cos=list(set(cos_fun[0].args)-{self.ivar})[0]
 
-            comp_cos = self.external_forces().applyfunc(lambda comp: comp.coeff(cos_fun[0]))
-        else:
-            comp_cos=(self.external_forces()*S.Zero).doit()
-            omg_cos=S.Zero
-
-        if omg_sin == 0:
-            omg = omg_cos
-        else:
-            omg = omg_sin
+                comp_cos = self.external_forces().applyfunc(lambda comp: comp.coeff(cos_fun[0]))
+            else:
+                comp_cos=(self.external_forces()*S.Zero).doit()
+                omg_cos=S.Zero
             
+        else:
+            
+            if len(sin_fun) == 1: 
+
+                omg_sin=list(set((sin_fun[0]).args)-{self.ivar})[0]
+
+                comp_sin = self.external_forces().applyfunc(lambda comp: comp.coeff(sin_fun[0]))
+            else:
+                comp_sin=(self.external_forces()*S.Zero).doit()
+                omg_sin=S.Zero
+
+
+            if len(cos_fun) == 1: 
+                omg_cos=list(set(cos_fun[0].args)-{self.ivar})[0]
+
+                comp_cos = self.external_forces().applyfunc(lambda comp: comp.coeff(cos_fun[0]))
+            else:
+                comp_cos=(self.external_forces()*S.Zero).doit()
+                omg_cos=S.Zero
+
+            if omg_sin == 0:
+                omg = omg_cos
+            else:
+                omg = omg_sin
+
         if excitation_freq is not None:
             omg = excitation_freq
         else:
@@ -2432,8 +2465,12 @@ class HarmonicOscillator(LinearDynamicSystem):
             ) + self.stiffness_matrix()
 
             amp=((fund_mat.inv()*comp_cos).applyfunc(lambda elem: elem**2) + (fund_mat.inv()*comp_sin).applyfunc(lambda elem: elem**2)   )
+            
 
-        return sqrt(amp[0])
+        if mode==0:
+            return sqrt(amp[0])
+        elif mode==1:
+            return sqrt(amp[1])
 
     def _frf(self,excitation_freq=Symbol('Omega',positive=True)):
         '''

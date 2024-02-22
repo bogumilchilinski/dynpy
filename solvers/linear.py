@@ -3304,6 +3304,24 @@ class LinearWithConstCoeffODE(ODESystem):
             'symbol_4':symbol_4
             
         }
+    def _variation_of_constant(self):
+        
+        system = self
+        ode_sys =system
+        fun = system.dvars[0]
+        y = fun
+        ivar = system.ivar
+
+        ode_sys2 = ode_sys
+        x=ivar
+        szur=ode_sys2.general_solution
+        ode_syso=Eq(ode_sys2.lhs[0],ode_sys2.rhs[0])
+        Cx = Function(szur._spot_constant()[0])(x)
+        c_prim=Function("C'")(x)
+        szur2=szur.subs(szur._spot_constant()[0], Cx)
+
+        return szur2
+    
     def _ode_solution(self):
         dvars=self.dvars
         return ODESolution(dvars,dsolve(self.odes[0],self.dvars[0]).rhs)

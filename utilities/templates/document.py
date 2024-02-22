@@ -5,7 +5,7 @@ from pylatex import (Document, Package, Command, NewPage, Tabularx
 #from pylatex.section import Paragraph, Chapter
 from pylatex.utils import (#italic, 
                            NoEscape)
-
+from ..report import Markdown, CurrentContainer, ReportText
 
 class CaseTemplate(Document):
 
@@ -99,7 +99,48 @@ class Guide(Document):
                   ]
         
 
+    @classmethod
+    def base_setup(cls):
+        
+        preliminary_str=(
+"""
+Examplary setup is as follows:
+
+## Imports
+
+    from dynpy.utilities.report import *
+    from dynpy.utilities.templates.document import Guide
+
+    doc = Guide('./output/report_name')
     
+
+    
+## Text reporting
+    
+    sec_text = Section('Section that presents text reporting')
+    CurrentContainer(sec_text)
+    
+    ReportText('Exemplary text'*100)
+    
+    Markdown('Formatted text'*100)
+    
+    
+## Math
+
+    from sympy import Eq, Symbol, symbols
+    
+    sec_formula = Section('Section that presents formulas reporting')
+    CurrentContainer(sec_formula)
+    
+    ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.')
+    
+    a,b = symbols('a b')
+    display(SympyFormula(Eq(a,b)))
+
+"""
+)
+        
+        return Markdown(preliminary_str)
     
     def __init__(self,
                  default_filepath='default_filepath',

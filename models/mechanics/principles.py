@@ -17,7 +17,7 @@ import random
 import IPython as IP
 import numpy as np
 import inspect
-import re
+
 
 import matplotlib.pyplot as plt
 from functools import cached_property, lru_cache
@@ -277,11 +277,11 @@ class ComposedSystem(HarmonicOscillator):
 
     #     return type(self).from_system(super().linearized())
  
-    @lru_cache   
+    #@lru_cache   
     def linearized(self, x0=None, op_point=False, hint=[], label=None):
 
         #temporary workaround
-        lin_sys = HarmonicOscillator(self).linearized(x0=x0,op_point=op_point,hint=hint,label=label)
+        lin_sys = HarmonicOscillator(self).linearized(x0=x0,op_point=op_point,hint=hint,label=label).subs(self._given_data)
         
         #old version
         #lin_sys=super().linearized(x0=x0,op_point=op_point,hint=hint,label=label)
@@ -386,14 +386,7 @@ class ComposedSystem(HarmonicOscillator):
 
         return parameters_dict
 
-    @property
-    def readable_name(self):
 
-        name = self.__class__.__name__
-
-        words = re.sub(r'([a-z](?=[A-Z])|[A-Z](?=[A-Z][a-z]))', r'\1 ', name)
-
-        return words
 
 class NonlinearComposedSystem(ComposedSystem):
 
