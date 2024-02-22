@@ -156,7 +156,7 @@ class ODESystemComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
 
 
         display(ReportText(  self.header_text   ))
@@ -182,7 +182,7 @@ class ODESystemCodeComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
 
 
         display(ReportText(  self.header_text   ))
@@ -208,7 +208,7 @@ class VariablesComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
 
         display(ReportText(  self.header_text   ))
 
@@ -225,7 +225,7 @@ class GoverningEquationComponent(ReportComponent):
     
     @property
     def header_text(self):
-        system = self._system
+        system = self.reported_object
 
         return f"The equation of motion was derived based on physical principles and governing laws regarding the considered system. The equation is described by the following expression ({AutoMarker(Eq(system.odes[0],0))})"
 
@@ -235,11 +235,12 @@ class GoverningEquationComponent(ReportComponent):
     
     def append_elements(self):
         
-        system = self._system
+        system = self.reported_object
 
         display(ReportText(self.header_text))
-
-        display(SympyFormula(Eq(system.odes[0],0)))
+        
+        for ode_expr in system.odes:
+            display(SympyFormula(Eq(ode_expr,0)))
 
         display(ReportText(self.footer_text))
 
@@ -259,7 +260,7 @@ class ApproximatedNonlinearGoverningEquationComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
 
         display(ReportText(  self.header_text   ))
 
@@ -279,7 +280,7 @@ class FundamentalMatrixComponent(ReportComponent):
     @property
     def body_text(self):
         
-        system = self._system
+        system = self.reported_object
 
         Delta = Symbol('Delta')
 
@@ -292,7 +293,7 @@ class FundamentalMatrixComponent(ReportComponent):
     
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
 
         Delta = Symbol('Delta')
         
@@ -319,7 +320,7 @@ class ODECharecteristicPolynomialComponent(ReportComponent):
         return "Calculation of roots of this polynomial allows to find natural frequencies of the system."
 
     def append_elements(self):
-        system = self._system
+        system = self.reported_object
         delta=Symbol('Delta')
 
         display(ReportText(  self.header_text   ))
@@ -340,7 +341,7 @@ class ODECharecteristicPolynomialCodeComponent(ReportComponent):
         return "The following code is based on dynpy mechanical module."
 
     def append_elements(self):
-        system = self._system
+        system = self.reported_object
         
         display(ReportText(  self.header_text   ))
 
@@ -370,8 +371,8 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
     @property
     def header_text(self):
         
-        system = self._system
-        system.general_solution(1)
+        
+        system = self.reported_object.set_order(1)
 #         approx_sys = system.approximated(3)
 
         zeroth_ord_eq = Symbol('Omega')#system.nth_eoms_approximation(0)
@@ -382,8 +383,8 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
     @property
     def middle_text(self):
         
-        system = self._system
-        system.general_solution(1)
+        system = self.reported_object.set_order(1)
+
         zeroth_ord_approx_eq = Symbol('Omega')#Eq(system.nth_eoms_approximation(0).lhs[1]-system.nth_eoms_approximation(0).rhs[1],0)
 
         return f"Or transformed to the second order ODE {AutoMarker(zeroth_ord_approx_eq)}:"
@@ -392,15 +393,15 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
     @property
     def footer_text(self):
         
-        system = self._system
+        system = self.reported_object
         t_list = system.t_list
 
         return f"Since {t_list[0]} and {t_list[1]} are treated as independent, the differential equation becomes a partial differential equation for a function of two variables {t_list[0]} and {t_list[1]}. Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of {t_list[1]}."
 
     def append_elements(self):
         
-        system = self._system
-        system.general_solution(1)
+        system = self.reported_object.set_order(1)
+        
 
         t_list = system.t_list
         zeroth_ord_approx = system.eoms_approximation_list()[0]
@@ -424,7 +425,7 @@ class FirstOrderApproximatedEqComponent(ReportComponent):
     @property
     def header_text(self):
         
-        system = self._system
+        system = self.reported_object.set_order(1)
         first_ord_eq = system.eoms_approximation_list()[1]
 
         return f"The next component of a recursive sequence of linear equations of motion leading to the solution of the considered nonlinear one is given in {AutoMarker(first_ord_eq)}:"
@@ -432,7 +433,7 @@ class FirstOrderApproximatedEqComponent(ReportComponent):
     @property
     def middle_text(self):
         
-        system = self._system
+        system = self.reported_object.set_order(1)
         
         first_ord_approx_eq = Eq(system.eoms_approximation_list()[0].lhs-system.eoms_approximation_list()[0].rhs,0)
 
@@ -441,14 +442,14 @@ class FirstOrderApproximatedEqComponent(ReportComponent):
     @property
     def footer_text(self):
         
-        system = self._system
+        system = self.reported_object.set_order(1)
         t_list = system.t_list
 
         return f"Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of {t_list[1]}."
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object.set_order(1)
 
         t_list = system.t_list
         first_ord_approx = system.eoms_approximation_list()[1]
@@ -482,7 +483,7 @@ class PredictedSolutionComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
 
 #         t_list = system.t_list
         
@@ -502,7 +503,7 @@ class GeneralSolutionComponent(ReportComponent):
     @property
     def header_text(self):
         
-        system = self._system
+        system = self.reported_object
 
         return f"Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of t. Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the zeroth and first order approximations are as follows:"
 
@@ -514,7 +515,7 @@ class GeneralSolutionComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         
         display(ReportText(  self.header_text   ))
         
@@ -532,7 +533,7 @@ class SecularTermsEquationsComponent(ReportComponent):
     
     @property
     def header_text(self):
-        t_list = self._system.t_list
+        t_list = self.reported_object.t_list
         
         return f"Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of {t_list[1]}. Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the zeroth and first order approximations are as follows:"
 
@@ -545,7 +546,7 @@ class SecularTermsEquationsComponent(ReportComponent):
     def append_elements(self):
 
 
-        system = self._system
+        system = self.reported_object
         
         display(ReportText(  self.header_text   ))
         sec_eqns = system.secular_eq[system.eps].as_first_ode_linear_system().lhs - system.secular_eq[system.eps].as_first_ode_linear_system().rhs
@@ -573,7 +574,7 @@ class HomEquationComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
 
         display(ReportText(  self.header_text   ))
 
@@ -599,7 +600,7 @@ class HomEquationCodeComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
 
         display(ReportText(  self.header_text   ))
 
@@ -639,7 +640,7 @@ class ODEInitComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self._system
+        system = self.reported_object
         
         if len(system.dvars)<2:
             display(ReportText('Differential equation to initialize class is as follows:'))

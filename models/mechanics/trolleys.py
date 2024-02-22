@@ -289,6 +289,7 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
         if F is not None: self.F = F
         if x_1 is not None: self.x_1 = x_1
         if x_2 is not None: self.x_2 = x_2
+        self.ivar=ivar
 
         self.qs = [self.x_1, self.x_2]
         self._init_from_components(**kwargs)

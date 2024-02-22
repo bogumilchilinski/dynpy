@@ -196,7 +196,13 @@ class DampedBlowerToothedBelt(BlowerToothedBelt):
     detail_scheme_name = 'blower_roller_bolt.png'
     detail_real_name = 'tensioner_pulley.jpg'
 
-
+    m=Symbol('m', positive=True)
+    k_belt=Symbol('k_b', positive=True)
+    k_tensioner=Symbol('k_t', positive=True)
+    ivar=Symbol('t')
+    Omega=Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    z=dynamicsymbols('z')
     c_belt = Symbol('c_b', positive=True)
     c_tensioner = Symbol('c_t', positive=True)
     lam = Symbol('lambda', positive=True)
@@ -217,12 +223,6 @@ class DampedBlowerToothedBelt(BlowerToothedBelt):
             lam=None,
             qs=None,
             **kwargs):
-        if lam is not None: self.lam = lam
-        if c_belt is not None: self.c_belt = c_belt
-        if c_tensioner is not None: self.c_tensioner = c_tensioner
-        if z0 is not None: self.z0 = z0
-        if qs is not None: self.qs = qs
-        else: self.qs = [self.z]
 
         if m is not None: self.m = m
         if k_belt is not None: self.k_belt = k_belt
@@ -232,13 +232,15 @@ class DampedBlowerToothedBelt(BlowerToothedBelt):
         if z is not None: self.z = z
         if ivar is not None: self.ivar = ivar
         if z0 is not None: self.z0 = z0
+        if qs is not None: self.qs = qs
+        else: self.qs = [self.z]
+        if lam is not None: self.lam = lam
+        if c_belt is not None: self.c_belt = c_belt
+        if c_tensioner is not None: self.c_tensioner = c_tensioner
 
         self.ivar = ivar
 
         self._init_from_components(**kwargs)
-        
-        
-        #super().__init__(m=m, k_belt=k_belt, k_tensioner=k_tensioner, ivar=ivar, Omega=Omega, F=F, z0=z0, z=z)
 
     @property
     def components(self):

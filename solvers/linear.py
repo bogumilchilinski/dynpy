@@ -1316,7 +1316,7 @@ class ODESystem(AnalyticalSolution):
     
     def copy(self):
         
-        obj=copy.deepcopy(self)
+        obj=self.from_ode_system(self)
         #obj = super().copy()
         obj._lhs = copy.copy(self.lhs)
         obj._dvars=self._dvars
@@ -1381,7 +1381,7 @@ class ODESystem(AnalyticalSolution):
 
         return self._numerized(parameters=parameters_sympy_dict, ic_tuple=ic_tuple, backend=backend)
 
-    @lru_cache
+    #@lru_cache
     def _numerized(self,parameters=Dict(),ic_tuple=(),backend='fortran',**kwrags):
         '''
         Execution method that assumes all Args are hashable due to application of lru cache. Takes values of parameters and returns instance of class OdeComputationalCase.

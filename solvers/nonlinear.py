@@ -371,12 +371,27 @@ class MultiTimeScaleSolution(ODESystem):
         ]
         
         return comp_list
-        
+
+    
+
+    
     @property
     def order(self):
 
         return self._order
 
+    @order.setter
+    def order(self,order):
+        self._order = order
+
+    def set_order(self,order):
+        
+        new_ode = self#.copy()
+        new_ode.order = order
+        
+        return new_ode
+    
+    
     @property
     def ics_dvars(self):
 
@@ -560,7 +575,10 @@ class MultiTimeScaleSolution(ODESystem):
             #display(FirstOrderLinearODESystemWithHarmonics.from_ode_system(approx_subs).steady_solution)
             #display(type(approx_subs))
 
-            sol = FirstOrderLinearODESystemWithHarmonics.from_ode_system(approx_subs).steady_solution.applyfunc(
+            #SolverClass = FirstOrderLinearODESystemWithHarmonics
+            SolverClass = FirstOrderLinearODESystem
+            
+            sol = SolverClass.from_ode_system(approx_subs).steady_solution.applyfunc(
                 lambda obj: obj.expand()).applyfunc(eqns_map)#.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).sum_expr)
 
             #display(sol)
@@ -571,8 +589,11 @@ class MultiTimeScaleSolution(ODESystem):
 
         return sol_list
 
-    def general_solution(self, order=1):
+    @cached_property
+    def general_solution(self):
 
+        
+        order = self.order
         sol_list = []
         gen_sol = self._general_sol(order)
         
@@ -602,6 +623,20 @@ class MultiTimeScaleSolution(ODESystem):
 
         return new_res
 
+    @cached_property
+    def steady_solution(self):
+
+        result = Matrix(2*len(self.dvars)*[0])
+
+        new_res = PerturbationODESolution(Matrix(list(self.dvars) +  list(self.dvars.diff(self.ivar)) ) , result)#.set_small_parameter(self.eps)
+        new_res.small_parameter = self.eps
+        new_res.ivar = self.ivar
+        return new_res
+
+    @cached_property
+    def solution(self):
+
+        return self.general_solution
 
 
     def compute_solution(self,

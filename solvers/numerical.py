@@ -1,4 +1,4 @@
-from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Dict#, Tuple
+from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Dict, ImmutableMatrix#, Tuple
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 #from sympy import *
@@ -51,6 +51,10 @@ class OdeComputationalCase:
     label=None (optional): string
         Labels the instance. The default label is: '{Class name} with {length of dvars} equations'
     '''
+    
+    _cached_odes = {}
+    
+    
     def __init__(self,
                  odes_system=[],
                  ivar=None,
@@ -192,13 +196,19 @@ class OdeComputationalCase:
         '''
         Generates and returns the bininary code related to symbolical expresions declered in the __init__ method. Ready-to-use function object in the compact form f(t,y,params).
         '''
-        if self._backend == 'numpy':
-            odes_rhs = self.__numpy_odes_rhs()        
+        
+        odes_key = (ImmutableMatrix(self.odes_system),tuple(self.dvars))
+        if odes_key in self.__class__._cached_odes:
+            odes_rhs = self.__class__._cached_odes[odes_key]
         else:
-            odes_rhs = self.__fortran_odes_rhs()
+            if self._backend == 'numpy':
+                odes_rhs = self.__numpy_odes_rhs()        
+            else:
+                odes_rhs = self.__fortran_odes_rhs()
 
         self.__numerical_odes = lambda t, y, *args, **kwargs: np.asarray(
             (odes_rhs(t, *y, *args, **kwargs))).reshape(y.shape)
+        
         return self.__numerical_odes
 
     def solve_ivp_input(self,
