@@ -3391,7 +3391,7 @@ class SympyFormula(ReportModule):
         return cls
 
     def __init__(self,
-                 expr=None,
+                 expr,
                  key_dict=DataStorage._dict,
                  marker=None,
                  backend=vlatex,

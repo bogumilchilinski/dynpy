@@ -1230,62 +1230,59 @@ f'''
         display(ReportText(self.footer_text))
 
 # Marcel & Monika
-#class FundamentalMatrixComponent(ReportComponent):
-#    
-#    #title="Wyznaczanie macierzy fundamentalnej"
-#    title="Determining fundemental matrix component";
-#    
-#    @property
-#    def header_text(self):
-#        #"Z równań ruchu wyznaczono macierz mas i sztywności układu:"
-#        # google tlumacz
-#        return "The matrix of masses and stiffnesses of the system was determined from the equations of motion:"
-#
-#        
-#    @property
-#    def body_text(self):
-#        #"Macierz fundamentalna, na podstawie której wyznaczono równanie charakterystyczne rozważanego układu #${latex(Delta)}$, przedstawiają się następująco:"
-#        # google tlumacz
-#        return "The fundamental matrix, on the basis of which the characteristic equation of the considered #system ${latex (Delta)}$ was determined, is as follows:"
-#    
-#    @property
-#    def footer_text(self):
-#        #" Macierz fundamentalna pozwala określić rozwiązanie ustalone. Natomiast bazując na równaniu #charakterystycznym określa się częstości własne układu."
-#        # google tlumacz
-#        return "The fundamental matrix allows you to define a fixed solution. On the other hand, based on the #characteristic equation, the eigenfrequencies of the system are determined."
-#    
-#    
-#    def append_elements(self):
-#        
-#        system = self._system
-#        ReportText.set_directory('./SDAresults')
-#
-#        latex_store=AutoBreak.latex_backend
-#        AutoBreak.latex_backend = latex_store
-#        
-#        t=system.ivar
-#        
-#
-#        dyn_sys=system
-#        dyn_sys_lin=dyn_sys.linearized()
-#
-#
-#        display(ReportText(self.header_text))
-#        
-#        display((SympyFormula(  Eq(Symbol('M'),dyn_sys_lin.inertia_matrix(),evaluate=False) , marker='a' )  ))
-#
-#        display((SympyFormula(  Eq(Symbol('K'),dyn_sys_lin.stiffness_matrix(),evaluate=False) , marker='a')  ))
-#
-#        Delta = Symbol('\Delta')
-#
-#        display(ReportText(self.body_text))
-#
-#        display((SympyFormula(  Eq(Symbol('A'),dyn_sys_lin.fundamental_matrix(),evaluate=False) , marker='a'  )  ))
- #       display((SympyFormula(  Eq(Delta,dyn_sys_lin.fundamental_matrix().det().expand().simplify().simplify().expand(),evaluate=False) , marker='a',backend=latex  )  ))
-#
-#        display(ReportText(self.footer_text))
-#
- #       AutoBreak.latex_backend = latex_store
+class FundamentalMatrixComponent(ReportComponent):
+
+    #title="Wyznaczanie macierzy fundamentalnej"
+    title="Determining fundemental matrix";
+
+    @property
+    def header_text(self):
+        #"Z równań ruchu wyznaczono macierz mas i sztywności układu:"
+        # google tlumacz
+        return "The matrix of masses and stiffnesses of the system was determined from the equations of motion:"
+
+    @property
+    def body_text(self):
+        #"Macierz fundamentalna, na podstawie której wyznaczono równanie charakterystyczne rozważanego układu #${latex(Delta)}$, przedstawiają się następująco:"
+        # google tlumacz
+        return "The fundamental matrix, on the basis of which the characteristic equation of the considered system ${delta}$ was determined, is as follows:"
+
+    @property
+    def footer_text(self):
+        #" Macierz fundamentalna pozwala określić rozwiązanie ustalone. Natomiast bazując na równaniu #charakterystycznym określa się częstości własne układu."
+        # google tlumacz
+        return "The fundamental matrix allows you to define a fixed solution. On the other hand, based on the characteristic equation, the eigenfrequencies of the system are determined."
+
+    def append_elements(self):
+
+        system = self.reported_object
+        ReportText.set_directory('./SDAresults')
+
+        latex_store=AutoBreak.latex_backend
+        AutoBreak.latex_backend = latex_store
+
+        t=system.ivar
+
+        dyn_sys=system
+        dyn_sys_lin=dyn_sys.linearized()#.subs(system._given_data)
+
+
+        display(ReportText(self.header_text))
+
+        display((SympyFormula(  Eq(Symbol('M'),dyn_sys_lin.inertia_matrix(),evaluate=False) , marker='a' )  ))
+
+        display((SympyFormula(  Eq(Symbol('K'),dyn_sys_lin.stiffness_matrix(),evaluate=False) , marker='a')  ))
+
+        Delta = Symbol('\Delta')
+
+        display(ReportText(self.body_text.format(delta = latex(Delta) )))
+
+        display((SympyFormula(  Eq(Symbol('A'),dyn_sys_lin.fundamental_matrix(),evaluate=False) , marker='a'  )  ))
+        display((SympyFormula(  Eq(Delta,dyn_sys_lin.fundamental_matrix().det().expand().simplify().simplify().expand(),evaluate=False) , marker='a',backend=latex  )  ))
+
+        display(ReportText(self.footer_text))
+
+        AutoBreak.latex_backend = latex_store
 
 class FundamentalMatrixDynPyCodeComponent(ReportComponent):
     
@@ -1454,7 +1451,11 @@ class GeneralSolutionComponent(ReportComponent):
 #         display((SympyFormula(  Eq(Symbol('X'),HarmonicOscillator(dyn_sys_lin).general_solution()[0].n(3),
 #                                             evaluate=False) , marker='a',backend=latex  )  ))
 #         display(dyn_sys_lin._eoms)
-        display((SympyFormula(  Eq(Symbol('X_g'), dyn_sys_lin._ode_system.general_solution.n(3), evaluate=False) , marker='a',backend=latex  )  ))
+#         display((SympyFormula(  Eq(Symbol('X_g'), dyn_sys_lin._ode_system.general_solution.n(3), evaluate=False) , marker='a',backend=latex  )  ))
+
+        for i,qs in enumerate(system.q):
+
+            display((SympyFormula(  Eq(Symbol(f'X_g_-{qs}'),dyn_sys_lin._ode_system.general_solution.n(3)[i], evaluate=False) , marker='a',backend=latex  )  ))
 
         display(ReportText(self.footer_text))
 
@@ -1767,7 +1768,10 @@ class SteadySolutionComponent(ReportComponent):
 #                             HarmonicOscillator(dyn_sys_lin).steady_solution()[0].n(3),
 #                             evaluate=False) , marker='b',backend=latex  )  ))
         
-        display((SympyFormula(  Eq(Symbol('X_s'), dyn_sys_lin._ode_system.steady_solution.n(3), evaluate=False) , marker='b',backend=latex  )  ))
+#         display((SympyFormula(  Eq(Symbol('X_s'), dyn_sys_lin._ode_system.steady_solution.n(3), evaluate=False) , marker='b',backend=latex  )  ))
+        for i,qs in enumerate(system.q):
+
+            display((SympyFormula(  Eq(Symbol(f'X_s_-{qs}'),dyn_sys_lin._ode_system.steady_solution.n(3)[i], evaluate=False) , marker='b',backend=latex  )  ))
 
         AutoBreak.latex_backend = latex_store
 

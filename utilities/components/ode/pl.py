@@ -811,13 +811,12 @@ class MaxDynamicForce(ReportComponent):
 
 ##### Karolina + Kamil + Bogi rr
 class SeparableODEIntroComponent(ReportComponent):
-    #title="Podstawowa wiedza niezbędna do rozwiązania równania o zmiennych rozdzielonych"
-    title="Rozwiązanie równania jednorodnego"
+    title="Podstawowa wiedza niezbędna do rozwiązania równania o zmiennych rozdzielonych"
     def append_elements(self):
         system = self.reported_object
         ode_sys =system
 
-#         display(ReportText('Jednym z fundamentalnych typów równań różniczkowych jest równanie o zmiennych rozdzielonych. Proces rozwiązania tego typu równania polega na separacji wyrazów zawierających $y$ i $x$, przeniesieniu ich na różne strony równania, a następnie zastosowaniu operacji całkowania. Po przeprowadzeniu całkowania nie można zapomnieć o dodaniu do jednej ze stron stałej całkowania. Poniżej znajduje się przykład zadania ilustrującego proces rozwiązania tego rodzaju równania.:'))
+        display(ReportText('Jednym z fundamentalnych typów równań różniczkowych jest równanie o zmiennych rozdzielonych. Proces rozwiązania tego typu równania polega na separacji wyrazów zawierających $y$ i $x$, przeniesieniu ich na różne strony równania, a następnie zastosowaniu operacji całkowania. Po przeprowadzeniu całkowania nie można zapomnieć o dodaniu do jednej ze stron stałej całkowania. Poniżej znajduje się przykład zadania ilustrującego proces rozwiązania tego rodzaju równania.:'))
 
 class EquationDefinitionComponent(ReportComponent):
     #title="We consider the following differential equation:"
@@ -1099,18 +1098,11 @@ class VariationOfConstant(ReportComponent):
         FINALOWY_WYNIK=sol_cx.subs(Cx,cx_wyn.rhs)
         display(ReportText("Aby otrzymać ostateczny wynik musimy podstawić otrzymaną stałą do pierwszego równania w którym uzmiennilismy stałą:"))
         display(SympyFormula(FINALOWY_WYNIK))
-        
-# class LinearODESolution(ReportComponent):
-#     title="Uzyskanie pełnego rozwiązania"
-    
-#     def append_elements(self):
-#         system = self._system
-#         ode_sys =system
-## no i tutaj to brakuje całego komeponentu w którym finalowy wynik jest rozwiązywany jako separable taka moja propozycja mniej więcej
+
 
 
 class BernoulliODEIntroComponent(ReportComponent):
-    title="Podstawowa wiedza niezbędna do rozwiązania równania rózniczkowego"
+    title="Podstawowa wiedza niezbędna do rozwiązania równania różniczkowego"
     
     def append_elements(self):
 
@@ -1148,7 +1140,7 @@ class EquationDefinitionComponent(ReportComponent):
         
 
 class BernoulliTransformation(ReportComponent):
-    title=" Wyznaczenie nowej funkcji z zależnej od x w celu przejscia na równanie liniowe"
+    title=" Wyznaczenie nowej funkcji z zależnej od x w celu przejścia na równanie liniowe"
     
     def append_elements(self):
         system = self.reported_object
@@ -1172,7 +1164,7 @@ class BernoulliTransformation(ReportComponent):
 
         display(ReportText('Aby dokonać podstawienia, konieczne jest zdefiniowanie $n$ poprzez znalezienie najwyższej potęgi $y$, gdzie $n$ to wykładnik tej funkcji. '))
         display(SympyFormula(Eq(Symbol('n'),n.subs(bernoulli_sub))))
-        display(ReportText('Następnie należy dokonać podstawienia i przejsć na nową funkcję $z$, używając poniższego wzoru:'))
+        display(ReportText('Następnie należy dokonać podstawienia i przejść na nową funkcję $z$, używając poniższego wzoru:'))
         display(SympyFormula(Eq(Symbol('z'),Symbol('y')**(S.One-Symbol('n')))))
         display(ReportText('W naszym przypadku:'))
         display(SympyFormula(Eq(Symbol('z'),Symbol('y')**(S.One-n.subs(bernoulli_sub)))))
@@ -1187,7 +1179,7 @@ class BernoulliTransformation(ReportComponent):
         display(SympyFormula(Eq(Symbol("y'"),fun.diff().subs(bernoulli_sub))))
 
 class BernoulliLinearTransformation(ReportComponent):
-    title=" Przejscie na równanie liniowe"
+    title=" Przejście na równanie liniowe"
     
     def append_elements(self):
         system = self.reported_object
@@ -1205,7 +1197,7 @@ class BernoulliLinearTransformation(ReportComponent):
 
         display(ReportText("Ostatnim krokiem do przejscia na równanie liniowe jest podstawienie wyliczonych wyżej $y$ i $y'$ do pierwotnego równania:"))
         display(SympyFormula(Eq(rownanie.lhs[0],rownanie.rhs[0])))
-        display(ReportText('Orzymane równanie liczymy w następujący sposób:'))
+        display(ReportText('Otrzymane równanie liczymy w następujący sposób:'))
 
         sep_ode_report=rownanie.report
 

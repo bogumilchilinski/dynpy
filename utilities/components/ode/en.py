@@ -763,3 +763,373 @@ f'''
 
 # <<<<<<< HEAD
 #         display(ReportText(  self.footer_text   ))
+
+class SeparableODEIntroComponent(ReportComponent):
+    title="The basic knowledge necessary to solve an equation with separated variables."
+    def append_elements(self):
+        system = self.reported_object
+        ode_sys =system
+
+        display(ReportText(f'One of the fundamental types of differential equations is an equation with separated variables. The process of solving this type of equation involves separating the terms containing $y$ and $x$, moving them to different sides of the equation, and then applying integration. After integrating, its important not to forget to add the constant of integration to one side. Below is an example problem illustrating the process of solving this type of equation.'))
+
+
+class EquationDefinitionComponent(ReportComponent):
+    title="We consider the following differential equation:"
+
+    def append_elements(self):
+
+        system = self.reported_object
+        ode_sys =system
+
+        y_sym = system._variable_name()[2]
+        display(SympyFormula(Eq(ode_sys.lhs[0],ode_sys.rhs[0])))
+        display(ReportText('Where:'))
+        display(SympyFormula(y_sym))
+        display(ReportText('Is our encountered function.'))
+
+class VariablesSeparationComponent(ReportComponent):
+    
+    title="Separation of variables"
+
+    def append_elements(self):
+
+        system = self.reported_object._hom_equation()
+        ode_sys =system
+        ############################ must have
+
+#         display(ReportText(  self.header_text   ))
+
+        fun = system.dvars[0]
+        ivar = system.ivar
+
+        fun_str = system._get_dvars_symbols()[fun.diff(ivar)]
+
+        d_ivar = system._variable_name()[0]
+        d_var = system._variable_name()[1]
+
+        y_sym = system._get_dvars_symbols()[fun]
+        gx=Symbol('g(x)')
+        hx=Symbol('h(x)')
+
+        
+        
+        #ode_rhs = solve(ode_sys.lhs[0],ode_sys.dvars[0].diff())[0]
+        
+        #sep_vars_dict = (separatevars(ode_rhs.subs(fun,y_sym),(ivar,y_sym),dict=True))
+        
+        g_fun_ivar = system._function_separation()[0]
+        h_fun_dvar = system._function_separation()[1]
+        display(ReportText(f'If possible, we perform the commonly known separation of variables $x$ and $y$. By separating variables, we mean separating terms containing the variable $x$ from those containing the variable $y$. To accomplish this separation, we can assign these terms to functions $h(x)$ and $g(x)$, as shown below:'))
+        display(SympyFormula(Eq(gx,g_fun_ivar)))
+        display(SympyFormula(Eq(hx,h_fun_dvar)))
+        display(ReportText(f'Apart from these elements, our equation also contains the term ${latex(fun_str)}$, which can also be written as:'))
+        display(SympyFormula(Eq(fun_str,d_var/d_ivar)))
+        display(ReportText(f'After substituting this expression, it can be observed that in subsequent steps, multiplying the equation on both sides by ${latex(d_ivar)}$ enables integrating both sides with respect to different variables.'))
+
+class SeparatedVariablesIntegrationComponent(ReportComponent):
+    
+    #title="Integration of separated variables"
+    title="Integration of separated variables"
+    def append_elements(self):
+
+        system = self.reported_object._hom_equation()
+        ode_sys =system
+        ############################ must have
+
+#         display(ReportText(  self.header_text   ))
+
+        fun = system.dvars[0]
+        ivar = system.ivar
+        gx=Symbol('g(x)')
+        hx=Symbol('h(x)')
+        
+
+        d_ivar = system._variable_name()[0]
+        d_var = system._variable_name()[1]
+        y_sym = system._variable_name()[2]
+        fun_str = system._variable_name()[3]
+
+        g_fun_ivar = system._function_separation()[0]
+        h_fun_dvar = system._function_separation()[1]
+#         display(ReportText(''))
+        
+        display(SympyFormula( Eq(Symbol(latex(d_var/d_ivar)),g_fun_ivar*h_fun_dvar)))
+        display(ReportText(f'''To do this, we multiply both sides by ${latex(d_ivar)}$ and move ${latex(fun)}$ to the opposite side of the equation:''' ))
+        
+        display(SympyFormula( Symbol(latex(d_var/h_fun_dvar)+ '=' + latex(g_fun_ivar) + latex(d_ivar) )   ) )
+        display(ReportText('''Then, to "go back" to the original function and obtain the result in the form of the f $y$, we integrate both sides of the obtained equation. '''))
+        
+        display(ReportText('''Importantly, when integrating, it's essential to remember to add the constant of integration in any form, typically denoted as $C$ or $D$. '''))
+        display(SympyFormula(  Symbol(latex( Integral(1/h_fun_dvar,y_sym) )+ '= ' + latex(Integral(g_fun_ivar,ivar))  )   ) )
+
+#         const = (system.solution._spot_constant())[0]
+        const=Symbol('D')
+        display(ReportText('After integration, we obtain the following result:'))
+        display(SympyFormula(  Symbol(latex( Integral(1/h_fun_dvar,y_sym).doit() )+ '=' + latex(Integral(g_fun_ivar,ivar).doit()) + '+' + latex(const)   )   ) )
+
+#         display(ReportText(  self.footer_text   ))
+
+class SolutionComponent(ReportComponent):
+    
+    title="Simplification of the solution obtained after integrating the equations"
+
+    def append_elements(self):
+
+        system = self.reported_object
+        ode_sys =system
+        ############################ must have
+
+#         display(ReportText(  self.header_text   ))
+
+        fun = system.dvars[0]
+        ivar = system.ivar
+
+        fun_str = system._variable_name()[3]
+
+        d_ivar = system._variable_name()[0]
+        d_var = system._variable_name()[1]
+
+        y_sym = system._variable_name()[2]
+
+
+        
+        ode_rhs = solve(ode_sys.lhs[0],ode_sys.dvars[0].diff())[0]
+        
+        sep_vars_dict = (separatevars(ode_rhs.subs(fun,y_sym),(ivar,y_sym),dict=True))
+        
+        g_fun_ivar = system._function_separation()[0]
+        h_fun_dvar = system._function_separation()[1]
+        
+        display(ReportText('After rearrangment a solution has the following form:'  ))
+        display(SympyFormula( system.general_solution.as_eq_list()[0] ))
+
+        display(ReportText('The obtained expression represents the solution to a differential equation with separated variables. The constant of integration can be determined when initial conditions are provided in the problem, i.e., the value of the function for a specific $x$.'))
+        
+class LinearODEIntroComponent(ReportComponent):
+    title="The basic knowledge necessary to solve a differential equation"
+    
+    def append_elements(self):
+
+        system = self.reported_object
+        ode_sys =system
+        fun = system.dvars[0]
+        ivar = system.ivar
+
+        fun_str = system._variable_name()[3]
+
+        d_ivar = system._variable_name()[0]
+        d_var = system._variable_name()[1]
+
+        y_sym = system._variable_name()[2]
+        Px=Symbol('P(x)')
+        Qx=Symbol('Q(x)')
+        n=Symbol('n')
+        display(ReportText('One of the most fundamental types of differential equations is a linear equation with constant coefficients. A linear equation consists only of linear terms, which may include constant coefficients. Transitioning to a homogeneous equation is required - we move all terms involving the function $y$ and its derivatives, then equate them to zero, obtaining a homogeneous equation. Next, it is necessary to treat the constant as a function dependent on $x$. We calculate the derivatives of both sides and utilize the results in the initial equation. The result is the sum of solutions from both parts.'))
+
+class LinearTransformation(ReportComponent):
+    title="Transition to a homogeneous equation"
+    
+    def append_elements(self):
+        system = self.reported_object
+        ode_sys =system
+        fun = system.dvars[0]
+        y = fun
+        ivar = system.ivar
+
+        fun_str = system._variable_name()[3] #y'
+
+        d_ivar = system._variable_name()[0] #dx
+        d_var = system._variable_name()[1] #dy
+
+        y_sym = system._variable_name()[2] #y(x)
+        const=Symbol('D')
+
+        display(ReportText('We move all terms involving the function $y$ and its derivatives to one side and equate it to zero, obtaining a homogeneous equation.'))
+        #display(SympyFormula(Eq(system._hom_equation().lhs[0],0)))
+        
+        
+        
+
+
+class LinearToSeparable(ReportComponent):
+    
+    title="The solution to the resulting separated variable equation"
+    def append_elements(self):
+
+        system = self.reported_object
+        fun = system.dvars[0]
+        
+        ode_sys=system._hom_equation()
+        #sep_ode_report=ode_sys.report #mniej więcej coś takiego tylko coś pomyliłem na 100%
+        
+        display(ReportText('The obtained homogeneous equation is a separated variable equation and takes the form:'))
+        display(SympyFormula(Eq(ode_sys.lhs[0],0)))
+        
+        #print("#"*200)
+        sep_ode_report=ode_sys.report
+        
+        
+        #print(list(sep_ode_report))
+        #print('#'*3)
+        #print(list(sep_ode_report)[3:])
+        
+        for elem in list(sep_ode_report)[3:]:
+            self.append(elem)
+
+
+
+class VariationOfConstant(ReportComponent):
+    title="Variation of constant"
+    
+    def append_elements(self):
+
+        system = self.reported_object
+        ode_sys =system
+        fun = system.dvars[0]
+        y = fun
+        ivar = system.ivar
+        
+
+        ode_sys2 = ode_sys
+        x=ivar
+        szur=ode_sys2.general_solution
+#         display(szur)
+        ode_syso=Eq(ode_sys2.lhs[0],ode_sys2.rhs[0])
+        Cx = Function(szur._spot_constant()[0])(x)
+        Cx
+        c_prim=Function("C'")(x)
+        szur2=szur.subs(szur._spot_constant()[0], Cx)
+        #display(szur2)
+        szur3=Eq(szur2.lhs.diff(x), szur2.rhs.diff(x))
+        #display(szur3)
+        szur3_=szur3.subs(Cx.diff(x),c_prim)
+        szur3_
+        #To implement, change left hand side to y_prim variable and subsitute variables with object variables
+
+        ##### Tu sie teoretycznie zaczyna variation of constant ########################################
+        sol_cx=(Eq(Symbol('y'),szur2.rhs[0]))
+        display(ReportText('The next step is to treat the constant as a function dependent on $x$:'))
+        display(SympyFormula(sol_cx))
+        sol_diff3=Eq(Symbol("y'"), szur3_.rhs[0])
+        display(ReportText('Next, you need to calculate the derivatives of both sides of the equation.'))
+        ## dodać równanie 
+        display(ReportText('Upon obtaining the equation in the following form:'))
+        display(SympyFormula(sol_diff3))#gdzie? gdzie co?
+        display(ReportText("Thanks to this operation, we can now substitute $y$ and $y'$ into the original equation."))
+        display(SympyFormula(ode_syso))
+        lolo=ode_syso.subs(y.diff(ivar),sol_diff3.rhs).subs(y,sol_cx.rhs)
+        display(ReportText('And obtain:'))
+        display(SympyFormula(lolo))
+        c_p_sol=solve(lolo,c_prim)
+        cp_eq=Eq(c_prim,c_p_sol[0])
+        display(ReportText("Then, if everything has been calculated correctly, the values of $C(x)$ should simplify to a form from which we can easily determine $C'(x)$, obtaining:"))
+        display(SympyFormula(cp_eq))
+        cx_wyn=Eq(Cx,cp_eq.rhs.diff(ivar))
+        display(ReportText("After integrating both sides, we obtain the value of the constant:"))
+        display(SympyFormula(cx_wyn))
+        FINALOWY_WYNIK=sol_cx.subs(Cx,cx_wyn.rhs)
+        display(ReportText("To obtain the final result, we need to substitute the obtained constant into the first equation where we introduced the constant as a variable:"))
+        display(SympyFormula(FINALOWY_WYNIK))
+
+
+
+class BernoulliODEIntroComponent(ReportComponent):
+    title="The basic knowledge necessary to solve a differential equation:"
+    
+    def append_elements(self):
+
+        system = self.reported_object
+        y_sym = system.dvars[0]
+        dane=system._get_dvars_symbols()
+        Px=Symbol('P(x)')
+        Qx=Symbol('Q(x)')
+        n=Symbol('n')
+        ynpow=Symbol('y')**Symbol('n')
+        display(ReportText('The Bernoulli differential equation is a special type of first-order ordinary differential equation. Its general form is:'))
+        bernoulli_form=Eq(y_sym.diff()+Px*y_sym,Qx*y_sym**n)
+        display(SympyFormula(bernoulli_form.subs(dane)))
+        
+        display(ReportText(f'Where $y$ is the unknown function dependent on the variable $x$, $P(x)$ and $Q(x)$ are given functions dependent on $x$, and $n$ is a constant real number, different from 0 and 1. Characteristic of Bernoulli equations is that they are nonlinear due to the presence of the term ${latex(ynpow)}$ on one side of the equation. Solutions to such equations can be challenging to obtain in general, but for certain values of $n$, certain techniques can be applied to simplify the solution. In the case of $n=0$, the Bernoulli equation becomes linear, and for $n=1$, it can be transformed into the form of a linear ordinary differential equation of the first order. In other cases, special techniques such as variable substitution or order reduction may be necessary to obtain the general solution.'))
+
+class EquationDefinitionComponent(ReportComponent):
+    title="We consider the following differential equation:"
+
+    def append_elements(self):
+
+        system = self.reported_object
+        ode_sys =system
+        y_sym = system.dvars[0]
+
+        dane=system._get_dvars_symbols()
+        ode_sub=ode_sys.subs(dane)
+        display(SympyFormula(Eq(ode_sub.lhs[0],ode_sub.rhs[0])))
+        display(ReportText('Where:'))
+        display(SympyFormula(y_sym))
+        display(ReportText('Is our encountered function.'))
+        
+
+class BernoulliTransformation(ReportComponent):
+    title="Determining the new function $z$ dependent on $x$ in order to transition to a linear equation."
+    
+    def append_elements(self):
+        system = self.reported_object
+        ode_sys =system
+        fun = system.dvars[0]
+        ivar = system.ivar
+###########################DO ZMIANYYYYYYYY########################
+        fun_str = system._variable_name()[2] #y'
+
+        d_ivar = system._variable_name()[0] #dx
+        d_var = system._variable_name()[1] #dy
+        dane=system._get_dvars_symbols()
+        bernoulli_sub=system._bernoulli_substitution()
+        #bern_power = system
+
+
+
+        
+        n=Symbol('n')
+        z=Function('z')(ivar)
+
+        display(ReportText('To make the substitution, it is necessary to define $n$ by finding the highest power of $y$, where $n$ is the exponent of this function.'))
+        display(SympyFormula(Eq(Symbol('n'),n.subs(bernoulli_sub))))
+        display(ReportText('Next, you need to make the substitution and transition to the new function $z$, using the following formula:'))
+        display(SympyFormula(Eq(Symbol('z'),Symbol('y')**(S.One-Symbol('n')))))
+        display(ReportText('In our case:'))
+        display(SympyFormula(Eq(Symbol('z'),Symbol('y')**(S.One-n.subs(bernoulli_sub)))))
+        #display(SympyFormula(Eq(Symbol('z'),z.subs(bernoulli_sub))))
+        display(ReportText('The next step is to determine the first derivative of the function $z$:'))
+        display(SympyFormula(Eq(Symbol("z'"), bernoulli_sub['z_diff'])))
+        display(ReportText('After substituting the $n$ value :'))
+        display(SympyFormula(Eq(Symbol("z'"), bernoulli_sub['z_diff'].subs(n,bernoulli_sub[n]))))
+        
+        display(ReportText("Next, we need to determine $y$ and $y'$ from the above equations."))
+        display(SympyFormula(Eq(Symbol("y"),fun.subs(bernoulli_sub))))
+        display(SympyFormula(Eq(Symbol("y'"),fun.diff().subs(bernoulli_sub))))
+
+class BernoulliLinearTransformation(ReportComponent):
+    title=" Transition to a linear equation"
+    
+    def append_elements(self):
+        system = self.reported_object
+        ode_sys =system
+        fun = system.dvars[0]
+        ivar = system.ivar
+###########################DO ZMIANYYYYYYYY########################
+        fun_str = system._variable_name()[2] #y'
+
+        d_ivar = system._variable_name()[0] #dx
+        d_var = system._variable_name()[1] #dy
+        dane=system._get_dvars_symbols()
+
+        rownanie=system._as_reduced_ode()
+
+        display(ReportText("The last step in transitioning to a linear equation is substituting the previously calculated $y$ and $y'$ into the original equation:"))
+        display(SympyFormula(Eq(rownanie.lhs[0],rownanie.rhs[0])))
+        display(ReportText('We compute the obtained equation in the following manner:'))
+
+        sep_ode_report=rownanie.report
+
+
+        for elem in list(sep_ode_report)[3:]:
+            self.append(elem)

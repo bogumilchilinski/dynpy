@@ -3040,17 +3040,32 @@ class SeparableODE(ODESystem):
         return HomogeneousSeparableODE.from_ode_system(ode)
 
 
+#     @property
+#     def _report_components(self):
+        
+#         comp_list=[
+#         ode_comp_pl.SeparableODEIntroComponent,
+#         ode_comp_pl.EquationDefinitionComponent,
+#         ode_comp_pl.LinearTransformation,
+#         ode_comp_pl.VariablesSeparationComponent,
+#         ode_comp_pl.SeparatedVariablesIntegrationComponent,
+#         ode_comp_pl.SolutionComponent,
+#         ode_comp_pl.VariationOfConstant,
+#         ]
+        
+#         return comp_list
+
     @property
     def _report_components(self):
         
         comp_list=[
-        ode_comp_pl.SeparableODEIntroComponent,
-        ode_comp_pl.EquationDefinitionComponent,
-        ode_comp_pl.LinearTransformation,
-        ode_comp_pl.VariablesSeparationComponent,
-        ode_comp_pl.SeparatedVariablesIntegrationComponent,
-        ode_comp_pl.SolutionComponent,
-        ode_comp_pl.VariationOfConstant,
+        ode.SeparableODEIntroComponent,
+        ode.EquationDefinitionComponent,
+        ode.LinearTransformation,
+        ode.VariablesSeparationComponent,
+        ode.SeparatedVariablesIntegrationComponent,
+        ode.SolutionComponent,
+        ode.VariationOfConstant,
         ]
         
         return comp_list
@@ -3177,15 +3192,28 @@ class SeparableODE(ODESystem):
     
 class HomogeneousSeparableODE(SeparableODE):
 
+#     @property
+#     def _report_components(self):
+        
+#         comp_list=[
+#         ode_comp_pl.SeparableODEIntroComponent,
+#         ode_comp_pl.EquationDefinitionComponent,
+#         ode_comp_pl.VariablesSeparationComponent,
+#         ode_comp_pl.SeparatedVariablesIntegrationComponent,
+#         ode_comp_pl.SolutionComponent,
+#         ]
+        
+#         return comp_list
+
     @property
     def _report_components(self):
         
         comp_list=[
-        ode_comp_pl.SeparableODEIntroComponent,
-        ode_comp_pl.EquationDefinitionComponent,
-        ode_comp_pl.VariablesSeparationComponent,
-        ode_comp_pl.SeparatedVariablesIntegrationComponent,
-        ode_comp_pl.SolutionComponent,
+        ode.SeparableODEIntroComponent,
+        ode.EquationDefinitionComponent,
+        ode.VariablesSeparationComponent,
+        ode.SeparatedVariablesIntegrationComponent,
+        ode.SolutionComponent,
         ]
         
         return comp_list
@@ -3195,15 +3223,27 @@ class LinearWithConstCoeffODE(ODESystem):
 #     fun = system.dvars[0]
 #     ivar = system.ivar
 
+#     @property
+#     def _report_components(self):
+
+#         comp_list=[
+#         ode_comp_pl.LinearODEIntroComponent,
+#         ode_comp_pl.EquationDefinitionComponent,
+#         ode_comp_pl.LinearTransformation,
+#         ode_comp_pl.LinearToSeparable,
+#         ode_comp_pl.VariationOfConstant
+#         ]
+        
+#         return comp_list
     @property
     def _report_components(self):
 
         comp_list=[
-        ode_comp_pl.LinearODEIntroComponent,
-        ode_comp_pl.EquationDefinitionComponent,
-        ode_comp_pl.LinearTransformation,
-        ode_comp_pl.LinearToSeparable,
-        ode_comp_pl.VariationOfConstant
+        ode.LinearODEIntroComponent,
+        ode.EquationDefinitionComponent,
+        ode.LinearTransformation,
+        ode.LinearToSeparable,
+        ode.VariationOfConstant
         ]
         
         return comp_list
@@ -3363,14 +3403,26 @@ class BernoulliODE(ODESystem):
 #     fun = system.dvars[0]
 #     ivar = system.ivar
 
+#     @property
+#     def _report_components(self):
+
+#         comp_list=[
+#         ode_comp_pl.BernoulliODEIntroComponent,
+#         ode_comp_pl.EquationDefinitionComponent,
+#         ode_comp_pl.BernoulliTransformation,
+#         ode_comp_pl.BernoulliLinearTransformation,
+#         ]
+        
+#         return comp_list
+
     @property
     def _report_components(self):
 
         comp_list=[
-        ode_comp_pl.BernoulliODEIntroComponent,
-        ode_comp_pl.EquationDefinitionComponent,
-        ode_comp_pl.BernoulliTransformation,
-        ode_comp_pl.BernoulliLinearTransformation,
+        ode.BernoulliODEIntroComponent,
+        ode.EquationDefinitionComponent,
+        ode.BernoulliTransformation,
+        ode.BernoulliLinearTransformation,
         ]
         
         return comp_list

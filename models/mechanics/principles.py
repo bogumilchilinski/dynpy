@@ -96,40 +96,7 @@ class ComposedSystem(HarmonicOscillator):
         return path
 
     
-    @classmethod
-    def interactive_preview(cls):
-        import ipywidgets as widgets
-        from dynpy.models.mechanics import Pendulum, Engine
 
-        classes_list = [Pendulum(),Engine(),cls()]
-        methods_list = [lambda obj: obj._eoms,lambda obj: obj._ode_system,lambda obj: obj._ode_system.general_solution ]
-
-        systems = widgets.Dropdown(
-            options=[(Pendulum(),1),(Engine(),2),(cls(),3)],
-            value=3,
-            description='>',
-            disabled=False,
-        )
-
-
-        methods = widgets.Dropdown(
-            options=[('_eoms',1),('_ode_system',2),('_ode_system.general_solution',3)],
-            value=2,
-            description='>',
-            disabled=False,
-        )
-
-        def recalculate(var1,var2):
-            display(  methods_list[var2-1](classes_list[var1-1]))
-            return var1+var2
-
-        out = widgets.interactive_output(recalculate, {'var1': systems, 'var2': methods})
-
-        accordion = widgets.VBox(children=[widgets.HTML('Systemy dynamiczne'),widgets.HTML('Wybierz system:'),systems,widgets.HTML('Wybierz metodę:'),methods,widgets.HTML('Wynik:'),out], titles=('Slider', 'Text'))
-        accordion.titles = ('a','b')
-        accordion
-
-        return accordion
     
     @classmethod
     def _detail_scheme(cls):

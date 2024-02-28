@@ -61,7 +61,7 @@ class Pendulum(NonlinearComposedSystem):
     m=Symbol('m', positive=True)
     g=Symbol('g', positive=True)
     l=Symbol('l', positive=True)
-    angle=dynamicsymbols('varphi')
+    angle=dynamicsymbols('\phi')
     qs=None
     
     m0=Symbol('m_0',positive=True)
