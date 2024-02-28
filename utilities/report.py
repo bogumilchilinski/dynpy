@@ -3182,6 +3182,7 @@ class TikZPicture(Environment,ReportModule):
         NoEscape(r'\usetikzlibrary{arrows,decorations,decorations.text}'),
         NoEscape(r'\usetikzlibrary{patterns.meta,math}'),
         NoEscape(r'\usetikzlibrary{shapes.geometric}'),
+        NoEscape(r'\usepackage{circuitikz}'),
 #         Package('fontenc')
         #Package('hyperref'),
         ]

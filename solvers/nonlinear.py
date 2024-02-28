@@ -1,6 +1,6 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    Function, lambdify, factorial, solve, Dict, Number, N, Add,
-                   Mul, expand,zoo,exp,Dummy)
+                   Mul, expand,zoo,exp,Dummy, det)
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 import sympy as sym
@@ -365,7 +365,7 @@ class MultiTimeScaleSolution(ODESystem):
         ode_comp.ZerothOrderApproximatedEqComponent,
         ode_comp.FirstOrderApproximatedEqComponent,
         ode_comp.PredictedSolutionComponent,
-       ode_comp.GeneralSolutionComponent,
+        ode_comp.GeneralSolutionComponent,
         ode_comp.SecularTermsEquationsComponent,
             
         ]
@@ -574,9 +574,16 @@ class MultiTimeScaleSolution(ODESystem):
             #display(approx_subs)
             #display(FirstOrderLinearODESystemWithHarmonics.from_ode_system(approx_subs).steady_solution)
             #display(type(approx_subs))
+            
+            aux_mat=self.odes_system.jacobian(self.dvars)
+            if det(aux_mat)!=0:
+
+                SolverClass = FirstOrderLinearODESystem
+            else:
+                SolverClass = FirstOrderLinearODESystemWithHarmonics
 
             #SolverClass = FirstOrderLinearODESystemWithHarmonics
-            SolverClass = FirstOrderLinearODESystem
+            #SolverClass = FirstOrderLinearODESystem
             
             sol = SolverClass.from_ode_system(approx_subs).steady_solution.applyfunc(
                 lambda obj: obj.expand()).applyfunc(eqns_map)#.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).sum_expr)

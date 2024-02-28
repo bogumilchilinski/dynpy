@@ -405,7 +405,7 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
 
         t_list = system.t_list
         zeroth_ord_approx = system.eoms_approximation_list()[0]
-        zeroth_ord_approx_eq = Eq(zeroth_ord_approx.lhs-zeroth_ord_approx.rhs,0,evaluate=False)
+        zeroth_ord_approx_eq = Eq((zeroth_ord_approx.lhs-zeroth_ord_approx.rhs)[1],0,evaluate=False)
 
         display(ReportText(  self.header_text   ))
 
@@ -453,7 +453,7 @@ class FirstOrderApproximatedEqComponent(ReportComponent):
 
         t_list = system.t_list
         first_ord_approx = system.eoms_approximation_list()[1]
-        first_ord_approx_eq = Eq(first_ord_approx.lhs-first_ord_approx.rhs,0,evaluate=False)
+        first_ord_approx_eq = Eq((first_ord_approx.lhs-first_ord_approx.rhs),0,evaluate=False)
 
         display(ReportText(  self.header_text   ))
 
@@ -507,7 +507,7 @@ class GeneralSolutionComponent(ReportComponent):
 
         return f"Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of t. Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the zeroth and first order approximations are as follows:"
 
-        
+
     @property
     def footer_text(self):
 
@@ -519,10 +519,10 @@ class GeneralSolutionComponent(ReportComponent):
         
         display(ReportText(  self.header_text   ))
         
-        display(SympyFormula(system.general_solution))
+#         display(SympyFormula(system.general_solution))
 
-#         for no,eq in enumerate(system._general_sol(1)):
-#             display(SympyFormula(Eq(system._general_sol(1)[no].lhs[0],system._general_sol(1)[no].rhs[0])))
+        for no,eq in enumerate(system._general_solution):
+            display(SympyFormula(Eq(system._general_solution.lhs[no],system._general_solution.rhs[no])))
 
 #         display(ReportText(  self.footer_text   ))
         
