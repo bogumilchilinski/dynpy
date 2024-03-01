@@ -161,7 +161,8 @@ class ODESystemComponent(ReportComponent):
 
         display(ReportText(  self.header_text   ))
 
-        display(SympyFormula( system ))
+        for no,eq in enumerate(system):
+            display(SympyFormula(Eq(system.lhs[no],system.rhs[no])))
 
         display(ReportText(  self.footer_text   ))
 
@@ -213,7 +214,7 @@ class VariablesComponent(ReportComponent):
         display(ReportText(  self.header_text   ))
 
         display(SympyFormula(  system.ivar))
-        display(SympyFormula(  system.dvars))
+        display(SympyFormula(  system.dvars[0]))
 
         display(ReportText(  self.footer_text   ))
 
@@ -409,7 +410,12 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
 
         display(ReportText(  self.header_text   ))
 
-        display(SympyFormula(zeroth_ord_approx))
+        for no,eq in enumerate(zeroth_ord_approx):
+            
+            eq_to_check=Eq(zeroth_ord_approx.lhs[no],zeroth_ord_approx.rhs[no])
+            
+            if isinstance(eq_to_check,Eq):
+                display(SympyFormula(eq_to_check))
 
         display(ReportText(  self.middle_text   ))
 
@@ -453,11 +459,16 @@ class FirstOrderApproximatedEqComponent(ReportComponent):
 
         t_list = system.t_list
         first_ord_approx = system.eoms_approximation_list()[1]
-        first_ord_approx_eq = Eq((first_ord_approx.lhs-first_ord_approx.rhs),0,evaluate=False)
+        first_ord_approx_eq = Eq((first_ord_approx.lhs[1]-first_ord_approx.rhs[1]),0,evaluate=False)
 
         display(ReportText(  self.header_text   ))
 
-        display(SympyFormula(first_ord_approx))
+        for no,eq in enumerate(first_ord_approx):
+            
+            eq_to_check=Eq(first_ord_approx.lhs[no],first_ord_approx.rhs[no])
+            
+            if isinstance(eq_to_check,Eq):
+                display(SympyFormula(eq_to_check))
 
         display(ReportText(  self.middle_text   ))
 
@@ -547,12 +558,17 @@ class SecularTermsEquationsComponent(ReportComponent):
 
 
         system = self.reported_object
+        system.order = 1
         
         display(ReportText(  self.header_text   ))
+        
+        
+        system.general_solution
+        #display(system.secular_eq)
         sec_eqns = system.secular_eq[system.eps].as_first_ode_linear_system().lhs - system.secular_eq[system.eps].as_first_ode_linear_system().rhs
 
         for no,eq in enumerate(sec_eqns):
-            
+
             display(SympyFormula(Eq(eq,0)))
             
         display(ReportText(  self.footer_text   ))

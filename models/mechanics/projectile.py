@@ -136,9 +136,9 @@ class MissileTrajectory(MissileTrajectoryAirless):
 
         self._missile_airless = MissileTrajectoryAirless(self.m, x=self.x, y=self.y, qs=self.qs)
 
-        self._drag_x = Damper(self.c*v_x,self.x,qs=self.qs)(label = 'horizontal drag')
+        self._drag_x = Damper(self.c,self.x,qs=self.qs)(label = 'horizontal drag')
          
-        self._drag_y = Damper(self.c* v_y,self.y,qs=self.qs)(label = 'drag')
+        self._drag_y = Damper(self.c,self.y,qs=self.qs)(label = 'drag')
         
         
 
