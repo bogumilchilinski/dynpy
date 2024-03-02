@@ -200,8 +200,8 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
     @property
     def _default_solver(self):
         
-        return FirstOrderLinearODESystemWithHarmonics
-        #return FirstOrderLinearODESystem
+        #return FirstOrderLinearODESystemWithHarmonics
+        return FirstOrderLinearODESystem
     
     @cached_property
     def _secular_funcs(self):
@@ -517,7 +517,7 @@ class MultiTimeScaleSolution(ODESystem):
 
         approx_eoms_list[0]._parameters = self._t_list[1:]
         
-        display(approx_eoms_list[0])
+        #display(approx_eoms_list[0])
         
         sol = approx_eoms_list[0].solution
         sol_list = [sol]
@@ -583,7 +583,7 @@ class MultiTimeScaleSolution(ODESystem):
                 SolverClass = FirstOrderLinearODESystemWithHarmonics
 
             #SolverClass = FirstOrderLinearODESystemWithHarmonics
-            #SolverClass = FirstOrderLinearODESystem
+            SolverClass = FirstOrderLinearODESystem
             
             sol = SolverClass.from_ode_system(approx_subs).steady_solution.applyfunc(
                 lambda obj: obj.expand()).applyfunc(eqns_map)#.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).sum_expr)
@@ -596,11 +596,13 @@ class MultiTimeScaleSolution(ODESystem):
 
         return sol_list
 
-    @cached_property
+    @property
     def general_solution(self):
 
         
         order = self.order
+        
+        print('my order',order)
         sol_list = []
         gen_sol = self._general_sol(order)
         
