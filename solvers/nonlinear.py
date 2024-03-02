@@ -377,7 +377,6 @@ class MultiTimeScaleSolution(ODESystem):
     
     @property
     def order(self):
-
         return self._order
 
     @order.setter
@@ -400,9 +399,9 @@ class MultiTimeScaleSolution(ODESystem):
 
         return Matrix(q + dq)
 
-    @order.setter
-    def order(self, order):
-        self._order = order
+#     @order.setter
+#     def order(self, order):
+#         self._order = order
 
     @cached_property
     def t_list(self):

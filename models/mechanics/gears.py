@@ -307,11 +307,23 @@ class EquivalentSDOFGearModel(ComposedSystem):
         
     def symbols_description(self):
         self.sym_desc_dict = {
-            self.m: r'mass of system on the spring',
-            self.k: r'Spring coefficient ',
+            self.m: r'mass of the system on spring',
+            self.F: r'excitation force',
+            self.c: r'damping constant',
+            self.k: r'stiffness',
+            self.T: r'torque [not sure]',
         }
 
         return self.sym_desc_dict
+
+    def units(self):
+        units_dict={
+            self.m:ureg.kilogram,
+            self.F:ureg.newton,
+            self.ivar:ureg.second,
+            self.T:ureg.newton*ureg.meter,
+           }
+        return units_dict
     
     def get_numerical_data(self):
 
@@ -326,7 +338,109 @@ class EquivalentSDOFGearModel(ComposedSystem):
         }
         return default_data_dict
     
+class DDOFGearMechanism(ComposedSystem):
+    scheme_name = 'MDOF_Forced_Disks_With_Serial_Springs.PNG'
+    real_name = 'three_carriages.PNG'
 
+    r1 = Symbol('r_1', positive=True)
+    r2 = Symbol('r_2', positive=True)
+    J1 = Symbol('J_1', positive=True)
+    J2 = Symbol('J_2', positive=True)
+    k = Symbol('k', positive=True)
+    c = Symbol('c', positive=True)
+    T1 = Symbol('T_1', positive=True)
+    T2 = Symbol('T_2', positive=True)
+    Omega = Symbol('Omega', positive=True)
+    phi1 = dynamicsymbols('phi_1')
+    phi2 = dynamicsymbols('phi_2')
+    qs = dynamicsymbols('phi_1 phi_2')
+    ivar = Symbol('t')
+
+    def __init__(self,
+                 r1=None,
+                 r2=None,
+                 J1=None,
+                 J2=None,
+                 k=None,
+                 c=None,
+                 T1=None,
+                 T2=None,
+                 Omega=None,
+                 phi1=None,
+                 phi2=None,
+                 qs=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if r1 is not None: self.r1 = r1
+        if r2 is not None: self.r2 = r2
+        if J1 is not None: self.J1 = J1
+        if J2 is not None: self.J2 = J2
+        if k is not None: self.k = k
+        if c is not None: self.c = c
+        if T1 is not None: self.T1 = T1
+        if T2 is not None: self.T2 = T2
+        if Omega is not None: self.Omega = Omega
+        if phi1 is not None: self.phi1 = phi1
+        if phi2 is not None: self.phi2 = phi2
+        if qs is not None: self.qs = qs
+
+        self.ivar = ivar
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+        components = {}
+
+        self.gear1 = Disk(self.J1, pos1=self.phi1, qs=self.qs, ivar = self.ivar)(label='Drive gear')
+        self.gear2 = Disk(self.J2, pos1=self.phi2, qs=self.qs, ivar = self.ivar)(label='Driven gear')
+
+
+        self.gears_equivalent_stiffness = Spring(self.k, pos1=self.phi1*self.r1, pos2=self.phi2*self.r2, qs=self.qs)(label='Gears equivalent stiffness of teeth')
+        self.gears_equivalent_damping = Damper(self.c, pos1=self.phi1*self.r1, pos2=self.phi2*self.r2, qs=self.qs)(label='Gears equivalent damping coefficient of teeth')
+
+
+        self.torque1 = Force(self.T1 * cos(self.Omega * self.ivar), pos1 = self.phi1, qs = self.qs)(label='Torque of the driving gear')
+        self.torque2 = Force(self.T2 * cos(self.Omega * self.ivar), pos1 = self.phi2, qs = self.qs)(label='Torque of the driven gear')
+
+
+        components['_gear1'] = self.gear1
+        components['_gear2'] = self.gear2
+        components['_gears_equivalent_stiffness'] = self.gears_equivalent_stiffness
+        components['_gears_equivalent_damping'] = self.gears_equivalent_damping
+        components['_torque1'] = self.torque1
+        components['_torque2'] = self.torque2
+
+        return components
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.J1: r'moment of inertia of the driving gear',
+            self.J2: r'moment of inertia of the driven gear',
+            self.r1: r'rolling radius of the driving gear',
+            self.r2: r'rolling radius of the driven gear',
+            self.T1: r'torque of the driving gear',
+            self.T2: r'torque of the driven gear',
+            self.k: r'meshing stiffness',
+            self.c: r'meshing damping',
+            self.Omega: r'rotation frequency',
+        }
+
+        return self.sym_desc_dict
+
+    def units(self):
+        units_dict={
+            self.J1:ureg.kilogram*ureg.meter**2,
+            self.J2:ureg.kilogram*ureg.meter**2,
+            self.Omega:ureg.radian/ureg.second,
+            self.r1:ureg.meter,
+            self.r2:ureg.meter,
+            self.ivar:ureg.second,
+            self.T1:ureg.newton*ureg.meter,
+            self.T2:ureg.newton*ureg.meter,
+           }
+        return units_dict
     #można spróbować dziedizczyć bo SPringMass
 # class SprungTrolley(ComposedSystem):
 #     """Ready to use sample Single Degree of Freedom System with mass on spring
