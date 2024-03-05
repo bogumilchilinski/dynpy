@@ -291,10 +291,12 @@ class EquivalentSDOFGearModel(ComposedSystem):
     def components(self):
 
         components = {}
-        self.c_var = self.c*(1+0*self.eps*Heaviside(sin(2*pi/self.T*self.ivar)) )
-        self.k_var = self.k*(1+self.eps*Heaviside(sin(2*pi/self.T*self.ivar)) )
+        self.c_var = self.c*(1+0*self.eps*self.k_var )
+        stiffness = self.k*(1+self.eps*self.k_var  ) 
+        
+        
         self.gear_inertia = MaterialPoint(self.m, self.z, qs=self.qs)
-        self.gear_stiffness = Spring(self.k_var, self.z, qs=self.qs)
+        self.gear_stiffness = Spring(stiffness, self.z, qs=self.qs)
         self.force = Force(self.F, self.z, qs=self.qs)
         self.gear_damping = Damper(self.c_var, self.z, qs=self.qs)
         
@@ -337,6 +339,31 @@ class EquivalentSDOFGearModel(ComposedSystem):
             self.eps : [0.1],
         }
         return default_data_dict
+    def trig_stiff(self):
+        trig = sin(2*pi*self.ivar)/self.T
+        new_eq = self.subs(self.k_var,trig)
+        
+        return new_eq
+    
+    def wave_stiff(self):
+        wave1=(100*(sin(self.ivar/self.T))+1000)*Heaviside(sin(self.ivar/self.T))
+        wave2=(100*(-sin(self.ivar/self.T)))*Heaviside(-sin(self.ivar/self.T))
+        waves=wave1+wave2
+        new_eq = self.subs(self.k_var,waves)
+
+        return new_eq
+        
+    def rect_stiff(self):
+        trig=550*sin(self.ivar/self.T)+550
+        new_eq=self.subs(self.k_var,trig)
+        
+        return new_eq
+    def approx_rect(self):
+        amps_list = [2.27348466531425, 0.757408805199249, 0.453942816897038, 0.323708002807428, 0.25121830779797, 0.204977919963796, 0.172873394602606, 0.149252079729775, 0.131121653619234, 0.116749954968057]
+        rectangular_approx = sum([amp*2/sqrt(2)*sin((2*(no)+1)*2*pi*self.ivar/self.T) for no,amp in enumerate(amps_list[0:3])])
+        new_eq=self.subs({self.k_var:(rectangular_approx)})
+        
+        return new_eq
     
 class DDOFGearMechanism(ComposedSystem):
     scheme_name = 'MDOF_Forced_Disks_With_Serial_Springs.PNG'
