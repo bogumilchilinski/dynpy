@@ -275,6 +275,7 @@ class MultiTimeScaleSolution(ODESystem):
     _saved_solution = {}
 
     _saved_numerized = {}
+    _order = 2
 
     def __new__(cls,
                 odes_system,
@@ -1171,6 +1172,7 @@ class MultiTimeScaleMethod(LinearODESolution):
                                    2)] = solution[dvar.diff(self.ivar,
                                                             1)].gradient()
             t_e = time.time()
+            
             t_d = t_e-t_0
             
             solution.index.name = self.ivar
