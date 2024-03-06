@@ -22,7 +22,27 @@ from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, bas
 class SDoFShaft(ComposedSystem):
     """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
     =========
-            I = Moment of Inertia
+            I = Moment of Inertiafrom sympy import *
+from sympy.plotting import plot
+from pylatex import Document, Section, Subsection, Subsubsection, Command, Itemize, Package, HorizontalSpace, Description, Marker
+from pylatex.section import Paragraph, Chapter
+from pylatex.utils import italic, NoEscape
+
+from dynpy.utilities.report import * #to do tworzenia raportu pozniej
+
+from dynpy.utilities.adaptable import *
+import pypandoc as ppd
+import importlib
+
+
+from pylatex import Package, Document, NoEscape, Command, Section
+from sympy.physics.mechanics import *
+from dynpy.solvers.linear import * #ODESystem here
+from dynpy.models.mechanics.pendulum import *
+
+from dynpy.models.mechanics.pendulum import *  #skad zaciagasz modele
+ 
+mechanics_printing() #mechaniczny zapis pochodnej to kropki, ta linijka zmienia z d/dt na kropkis
                 -Moment of Inertia in case of both disc
 
             k_1 =Right spring coefficient

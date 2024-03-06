@@ -22,7 +22,8 @@ from sympy.simplify.fu import TR8, TR10, TR7, TR3, TR0
 from .linear import LinearODESolution, FirstOrderODE, AnalyticalSolution, FirstOrderLinearODESystem, FirstOrderODESystem, ODESystem, ODESolution,FirstOrderLinearODESystemWithHarmonics
 from ..utilities.components.ode import en as ode_comp
 
-from timer import timer
+#from timer import timer
+from time import time
 from collections.abc import Iterable
 from functools import cached_property
 
@@ -1139,47 +1140,48 @@ class MultiTimeScaleMethod(LinearODESolution):
                         list(ics_symbols_dict.keys()),
                         nth_order_solution_expr.n())
 
-            with timer() as t:
+            t_0 = time.time()
 
-                nth_order_solution_fun = self.__class__._saved_numerized[tuple(
-                    nth_order_solution_expr)]
+            nth_order_solution_fun = self.__class__._saved_numerized[tuple(nth_order_solution_expr)]
 
-                #return nth_order_solution_fun(ivar)
-                solution = TimeDataFrame(
-                    data={
-                        dvar: data[0]
-                        for dvar, data in zip(
-                            self.dvars,
-                            nth_order_solution_fun(
-                                ivar, **{
-                                    str(key): val
-                                    for key, val in numbers_dict.items()
-                                }, **{
-                                    str(key): val
-                                    for key, val in ics_symbols_dict.items()
-                                }))
-                        #for dvar, data in zip(self.dvars, nth_order_solution_fun(ivar))
-                    },
-                    index=ivar)
+            #return nth_order_solution_fun(ivar)
+            solution = TimeDataFrame(
+                data={
+                    dvar: data[0]
+                    for dvar, data in zip(
+                        self.dvars,
+                        nth_order_solution_fun(
+                            ivar, **{
+                                str(key): val
+                                for key, val in numbers_dict.items()
+                            }, **{
+                                str(key): val
+                                for key, val in ics_symbols_dict.items()
+                            }))
+                    #for dvar, data in zip(self.dvars, nth_order_solution_fun(ivar))
+                },
+                index=ivar)
 
-                for dvar in self.dvars:
-                    solution[dvar.diff(self.ivar,
-                                       1)] = solution[dvar].gradient()
+            for dvar in self.dvars:
+                solution[dvar.diff(self.ivar,
+                                   1)] = solution[dvar].gradient()
 
-                for dvar in self.dvars:
-                    solution[dvar.diff(self.ivar,
-                                       2)] = solution[dvar.diff(self.ivar,
-                                                                1)].gradient()
+            for dvar in self.dvars:
+                solution[dvar.diff(self.ivar,
+                                   2)] = solution[dvar.diff(self.ivar,
+                                                            1)].gradient()
+            t_e = time.time()
+            t_d = t_e-t_0
+            
+            solution.index.name = self.ivar
 
-                solution.index.name = self.ivar
+            print('A_time' * 20, t_d)
 
-                print('A_time' * 20, t.elapse)
+            solution = solution.apply(np.real)
 
-                solution = solution.apply(np.real)
+            solution._set_comp_time(t_d)
 
-            solution._set_comp_time(t.elapse)
-
-            print('B_time' * 20, solution._get_comp_time())
+            print('B_time' * 20, solution._get_comp_time(t_d))
 
             return solution
 

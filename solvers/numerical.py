@@ -17,7 +17,7 @@ from IPython.display import display
 import sympy.physics.mechanics as me
 
 from sympy.simplify.fu import TR8, TR10, TR7, TR3
-from timer import timer
+import time
 
 
 
@@ -301,34 +301,33 @@ class OdeComputationalCase:
         if not self._evaluated:
             self.form_numerical_rhs()
             self._evaluated=True
-        
-        
-        with timer() as t:
-            solution = solver.solve_ivp(
-                **self.solve_ivp_input(t_span=t_span,
-                                       ic_list=ic_list,
-                                       t_eval=t_eval,
-                                       params_values=params_values,
-                                       method=method))
-
-            solution_tdf = TimeDataFrame(
-                data={key: solution.y[no, :]
-                      for no, key in enumerate(self.dvars)}, index=t_span)
 
 
+        t_0 = time.time()
 
-            velocities = self.dvars[int(len(self.dvars)/2) :]
-            for vel in velocities:
-                solution_tdf[vel].to_numpy()
-                gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
-                solution_tdf[vel.diff(self.ivar)] = gradient
-            print('_'*100,t.elapse)
-            comp_time=t.elapse
+        solution = solver.solve_ivp(
+            **self.solve_ivp_input(t_span=t_span,
+                                   ic_list=ic_list,
+                                   t_eval=t_eval,
+                                   params_values=params_values,
+                                   method=method))
+
+        solution_tdf = TimeDataFrame(
+            data={key: solution.y[no, :]
+                  for no, key in enumerate(self.dvars)}, index=t_span)
+
+
+
+        velocities = self.dvars[int(len(self.dvars)/2) :]
+        for vel in velocities:
+            solution_tdf[vel].to_numpy()
+            gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
+            solution_tdf[vel.diff(self.ivar)] = gradient
             
-            #if derivatives:
-            
-
-
+        t_e = time.time()
+        t_d = t_e-t_0
+        print('_'*100,t_d)
+        comp_time=t_d
 
         solution_tdf._set_comp_time(comp_time)
         solution_tdf.index.name = self.ivar

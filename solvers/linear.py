@@ -33,7 +33,7 @@ from functools import cached_property, lru_cache
 
 from .numerical import OdeComputationalCase
 
-from timer import timer
+import time
 
 
 from ..utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim)
@@ -513,49 +513,48 @@ class AnalyticalSolution(ImmutableMatrix):
 #             self.form_numerical_rhs()
 #             self._evaluated=True
         
+        t_0=time.time()
+
+        solution = self
+
+        ivar = list(self.dvars[0].args)[0]
+        solution_fixed=solution+Matrix([exp(-ivar)*exp(-(1e6+t_span[0])) if isinstance(expr,Number) else 0  for expr in solution])
+
+
+
+        #             print('num'*3)
+        #             display(solution)
+
+        sol_func = lambdify(ivar, solution_fixed, 'numpy')
+
+        numerized_data = (sol_func(t_span))
+
+        dvars = self.lhs
+
+        numerized_sol  = TimeDataFrame(data={dvar:data[0] for dvar,data in zip(dvars,numerized_data)},index=t_span)
+        numerized_sol.index.name = ivar 
+
+        solution_tdf = numerized_sol
+
+
+
+        velocities = self.dvars[int(len(self.dvars)/2) :]
+        for vel in velocities:
+            solution_tdf[vel].to_numpy()
+            gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
+            solution_tdf[vel.diff(ivar)] = gradient
+            
+        t_e=time.time()
         
-        with timer() as t:
-            
-            solution = self
-            
-            ivar = list(self.dvars[0].args)[0]
-            solution_fixed=solution+Matrix([exp(-ivar)*exp(-(1e6+t_span[0])) if isinstance(expr,Number) else 0  for expr in solution])
-            
-            
-            
-#             print('num'*3)
-#             display(solution)
-
-            sol_func = lambdify(ivar, solution_fixed, 'numpy')
-
-            numerized_data = (sol_func(t_span))
-
-            dvars = self.lhs
-
-            numerized_sol  = TimeDataFrame(data={dvar:data[0] for dvar,data in zip(dvars,numerized_data)},index=t_span)
-            numerized_sol.index.name = ivar 
-            
-
-
-            solution_tdf = numerized_sol
-
-
-
-            velocities = self.dvars[int(len(self.dvars)/2) :]
-            for vel in velocities:
-                solution_tdf[vel].to_numpy()
-                gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
-                solution_tdf[vel.diff(ivar)] = gradient
-            print('_'*100,t.elapse)
-            comp_time=t.elapse
-            
-            #if derivatives:
-            
-
-
+        t_d = t_e - t_0
+        print('_'*100,t_d)
+        
+        comp_time=t_d
+        #if derivatives:
 
         solution_tdf._set_comp_time(comp_time)
         solution_tdf.index.name = ivar
+
         return solution_tdf
 
     @property

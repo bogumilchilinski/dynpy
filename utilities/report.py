@@ -30,8 +30,6 @@ from IPython.display import Markdown as IPMarkdown
 from .adaptable import *
 from .timeseries import TimeDataFrame, TimeSeries
 
-import pypandoc as ppd
-
 import copy
 import inspect
 
@@ -2801,13 +2799,16 @@ class Markdown(Environment,ReportModule):
                 )
 
     def dumps(self):
+
+        import pypandoc as ppd
         return NoEscape(ppd.convert_text(self.markdown,to='latex',format='md'))
-            
+
     def _repr_markdown_(self):
         return self.reported().markdown
 
     def reported(self):
 
+        import pypandoc as ppd
         latex_code=ppd.convert_text(self.markdown,to='latex',format='md')
 
         if '\\begin{verbatim}' in latex_code:
