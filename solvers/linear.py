@@ -892,6 +892,13 @@ class ODESystem(AnalyticalSolution):
 
 
     
+    @classmethod
+    def from_random_data(cls):
+
+        system=cls.from_default_data()
+        subs_dict=system.get_random_parameters()
+        
+        return system.subs(subs_dict)
     
     def __new__(cls, odes, dvars, odes_rhs=None , ivar=None, ode_order=None, evaluate=True, parameters = None, **options):
         """
@@ -976,6 +983,12 @@ class ODESystem(AnalyticalSolution):
             
         return obj
 
+
+    def _as_msm(self):
+        ode=self
+        from dynpy.solvers.nonlinear import MultiTimeScaleSolution
+        msm_eq=MultiTimeScaleSolution.from_ode_system(ode)
+        return msm_eq
     
     def default_ics(self,critical_point=False):
         
