@@ -129,7 +129,7 @@ class ForcedSpringMassSystem(SpringMassSystem):
             qs = dynamicsymbol object
                 -Generalized coordinates
 
-        Example
+        Exampled
         =======
         A mass oscillating up and down while being held up by a spring with a spring constant k
 
@@ -251,9 +251,10 @@ class EquivalentSDOFGearModel(ComposedSystem):
     F=Symbol('F', positive=True)
     c=Symbol('c',positive=True)
     T=Symbol('T',positive=True)
+    omega=Symbol('omega',positive=True)
     ivar=Symbol('t')
     k_var=Symbol('k_var', positive=True)
-    eps=Symbol('epsilon', positive=True)
+    eps=Symbol('varepsilon', positive=True)
     c_var=Symbol('c_var', positive=True)
     
     z=dynamicsymbols('z')
@@ -341,7 +342,7 @@ class EquivalentSDOFGearModel(ComposedSystem):
         return default_data_dict
     
     def trig_stiff(self, angle=2*pi):
-        trig = sin((angle*self.ivar)/self.T)
+        trig = sin(self.omega * self.ivar)
         new_eq = self.subs(self.k_var,trig)
         
         return new_eq
@@ -359,9 +360,12 @@ class EquivalentSDOFGearModel(ComposedSystem):
         new_eq=self.subs(self.k_var,trig)
         
         return new_eq
+    
     def approx_rect(self,no=2):
-        amps_list = [2.27348466531425, 0.757408805199249, 0.453942816897038, 0.323708002807428, 0.25121830779797, 0.204977919963796, 0.172873394602606, 0.149252079729775, 0.131121653619234, 0.116749954968057]
-        rectangular_approx = sum([amp*2/sqrt(2)*sin((2*(no)+1)*2*pi*self.ivar/self.T) for no,amp in enumerate(amps_list[0:no])])
+        #amps_list = [2.27348466531425, 0.757408805199249, 0.453942816897038, 0.323708002807428, 0.25121830779797, 0.204977919963796, 0.172873394602606, 0.149252079729775, 0.131121653619234, 0.116749954968057]
+        amps_list = symbols(f'a_0:{no}')
+        
+        rectangular_approx = sum([N(amp,3)*sin(((no)+1)*self.omega*self.ivar) for no,amp in enumerate(amps_list[0:no])])
         new_eq=self.subs({self.k_var:(rectangular_approx)})
         
         return new_eq
