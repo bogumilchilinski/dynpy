@@ -73,6 +73,7 @@ class OdeComputationalCase:
         self._backend = backend
 
         self.odes_system = odes_system
+        self._default_ics = None
         self.ivar = ivar
         self.dvars = dvars
         self.ic_point = ic_point
@@ -134,7 +135,10 @@ class OdeComputationalCase:
         #             self._label = self.__class__.__name__ + ' with ' + str(len(self.dvars)) + ' equations'
         #self._label = self.__class__.__name__ + ' with ' + str(len(self.dvars)) + ' equations'
 
-        return self._label
+        if self._default_ics is not None:
+            return self._label + f' with ics {self._default_ics}'
+        else:
+            return self._label + ' without ics'
 
     def __repr__(self):
 
@@ -224,13 +228,14 @@ class OdeComputationalCase:
 #         display(params_values)
 
         #Zmiana Franek
-        if type(ic_list) == type(None):
+        if ic_list is None:
         #if ic_list is None:
             #Zmiana Franek
             ic_list = list(Matrix(self.dvars).subs(self.ic_point))
             #ic_list = self.ic_point
         if len(ic_list) != len(self.dvars):
             raise IndexError('Number of initial conditions is not correct.')
+        
         if type(t_span) == type(None):
             t_span = self.t_span
 
@@ -287,6 +292,12 @@ class OdeComputationalCase:
             'args': params_values
             }
 
+        
+    def with_ics(self, ics=None, ivar0=0, sol0=None):
+        self._default_ics = ics
+       
+        return self
+        
     def compute_solution(self,
                          t_span=None,
                          ic_list=None,
@@ -297,7 +308,9 @@ class OdeComputationalCase:
         '''
         Returns the result of the computations of solve_ivp integrator from scipy.integrate module.
         '''
-        
+        if ic_list is None:
+            ic_list=self._default_ics
+
         if not self._evaluated:
             self.form_numerical_rhs()
             self._evaluated=True
@@ -305,6 +318,8 @@ class OdeComputationalCase:
 
         t_0 = time.time()
 
+        
+        
         solution = solver.solve_ivp(
             **self.solve_ivp_input(t_span=t_span,
                                    ic_list=ic_list,
