@@ -371,7 +371,7 @@ class EquivalentSDOFGearModel(ComposedSystem):
         eps =Symbol('varepsilon', positive=True)
         
         with_delta = self._eoms[0]+self.k*eps*delta*self.z
-        delta_sys = ODESystem(with_delta, Matrix([self.z]), ivar=self.ivar, ode_order=2)
+        delta_sys = type(self._ode_system)(with_delta, Matrix([self.z]), ivar=self.ivar, ode_order=2)
 
         return delta_sys
     
