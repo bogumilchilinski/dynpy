@@ -374,7 +374,6 @@ class MultiTimeScaleSolution(ODESystem):
         
         return comp_list
 
-    
 
     
     @property
