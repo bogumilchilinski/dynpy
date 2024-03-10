@@ -8,6 +8,7 @@ from sympy.matrices.matrices import MatrixBase
 from sympy.solvers.ode.systems import matrix_exp, matrix_exp_jordan_form
 from sympy.solvers.deutils import ode_order
 
+
 from numbers import Number
 
 ###  exemplary comment
