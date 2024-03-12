@@ -1633,6 +1633,16 @@ class ODESystem(AnalyticalSolution):
 
         return type(self)(odes=hom_ode.odes, odes_rhs=exct_mat, dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar)#.numerized(backend='numpy')
     
+    def to_canonical_form(self):
+        if self._ode_order == 2 and len(self) == 1:
+            new_eq = (self.odes[0]/self.odes[0].coeff(diff(self.dvars[0],self.ivar,2))).expand()
+            omega_coeff = new_eq.coeff(self.dvars[0])
+            h_coeff = new_eq.coeff(diff(self.dvars[0], self.ivar))
+            subs_eq = new_eq.subs({omega_coeff:Symbol('omega')**2, h_coeff:2*Symbol('h')})
+            new_odesys = ODESystem(odes = Matrix([subs_eq]), dvars = Matrix([self.dvars[0]]), ode_order = 2)
+            return new_odesys
+        else:
+            return self
 
 class FirstOrderODESystem(ODESystem):
     
@@ -1926,7 +1936,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
 
     def _latex(self,*args):
 
-        
+#         f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}'
         return latex(Eq(self.lhs,self.rhs ,evaluate=False   ))    
     
 class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
