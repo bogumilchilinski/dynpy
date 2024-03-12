@@ -1142,9 +1142,10 @@ class ODESystem(AnalyticalSolution):
         #return FirstOrderLinearODESystem
     
     def _latex(self,*args):
-
-        
-        return f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}' 
+        if self._default_ics is None:
+            return f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}'
+        else:
+            return f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}~~with~~{latex(self._default_ics)}' 
 
     def as_matrix(self):
         return Matrix(self._lhs_repr - self.rhs) 
@@ -1527,6 +1528,52 @@ class ODESystem(AnalyticalSolution):
         inertia_mat=self.lhs.jacobian(diff(self.dvars, self.ivar, 2))
         fundamental_mat = stiffness_mat - r**2 * inertia_mat + damping_mat * r
         return fundamental_mat
+    
+    def swept_analysis(self, dvar, amplitude=None, ramp=None):
+
+        '''
+        Performs swept analysis on numerical ODESystem.
+
+        dvar - Symbol or Integer, coordinate which will be taken into consideration for performing swept analysis. This coordinate indicates which equation will be under excitation.
+
+        amplitude - Integer or Float, amplitude of excitation
+
+        ramp - Integer or Float, sets the steep coefficient of the ramp
+        '''
+
+        if ramp is None:
+            Omega = 0.005*self._ivar
+        elif isinstance(ramp, (float, int)):
+            Omega = ramp*self._ivar
+        else:
+            return "Error"
+
+        if amplitude is None:
+            force = 1*sin(Omega*self._ivar)
+        elif isinstance(amplitude, (float, int)):
+            force = amplitude*sin(Omega*self._ivar)
+        else:
+            return "Error"
+
+        hom_ode = self._hom_equation()
+
+        if isinstance(dvar, Function):
+            for no, sym in enumerate(self.dvars):
+                if sym == dvar:
+                    number = no
+
+        elif isinstance(dvar, int):
+            number = dvar
+
+        else:
+            return "Error"
+
+
+        exct_mat = zeros(len(self.dvars),1)
+        exct_mat[number,0] = force
+
+
+        return type(self)(odes=hom_ode.odes, odes_rhs=exct_mat, dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar)#.numerized(backend='numpy')
     
 
 class FirstOrderODESystem(ODESystem):
