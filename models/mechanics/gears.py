@@ -361,9 +361,12 @@ class EquivalentSDOFGearModel(ComposedSystem):
         
         return new_eq
     
-    def approx_rect(self,no=2):
-        #amps_list = [2.27348466531425, 0.757408805199249, 0.453942816897038, 0.323708002807428, 0.25121830779797, 0.204977919963796, 0.172873394602606, 0.149252079729775, 0.131121653619234, 0.116749954968057]
-        amps_list = symbols(f'a_0:{no}')
+    def approx_rect(self,no=6,numerical=False):
+        
+        if numerical is True:
+            amps_list = [2.27348466531425,0, 0.757408805199249,0, 0.453942816897038,0, 0.323708002807428,0, 0.25121830779797,0, 0.204977919963796,0, 0.172873394602606,0, 0.149252079729775,0, 0.131121653619234,0, 0.116749954968057,0]
+        else:
+            amps_list = symbols(f'a_0:{no}')
         
         rectangular_approx = sum([N(amp,3)*sin(((no)+1)*self.omega*self.ivar) for no,amp in enumerate(amps_list[0:no])])
         new_eq=self.subs({self.k_var:(rectangular_approx)})
