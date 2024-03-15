@@ -2966,7 +2966,37 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
         return (computed_data)
 
+    def compute_solution(self,
+                         t_span=None,
+                         ic_list=None,
+                         t_eval=None,
+                         params_values=None,
+                         method='RK45',
+                         derivatives=False,
+                         model_level_name=0,
+                         coord_level_name=-1,
+                         backend=None,
+                         dependencies=None,
+                         output=None
+                         ):
 
+
+        computed_data = self.copy()
+        
+        if t_span is not None:
+            computed_data = computed_data.set_axis(t_span,computed_data.index.name)
+        
+        result = computed_data.perform_simulations(
+                            model_level_name=model_level_name,
+                            coord_level_name=coord_level_name,
+                            ics=ic_list,
+                            backend=backend,
+                            dependencies=dependencies)
+        
+        if output == 'NA':
+            return TimeDataFrame(computed_data.droplevel(0))
+        else:
+            return TimeDataFrame(computed_data)
 
 class NumericalAnalisysSeries(AdaptableSeries):
 

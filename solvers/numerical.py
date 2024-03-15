@@ -8,7 +8,7 @@ import numpy as np
 import itertools as itools
 import scipy.integrate as solver
 from sympy.utilities.lambdify import lambdify
-from ..utilities.timeseries import TimeSeries, TimeDataFrame
+from ..utilities.adaptable import TimeSeries, TimeDataFrame,NumericalAnalysisDataFrame
 from scipy.misc import derivative
 from collections import ChainMap
 
@@ -18,7 +18,7 @@ import sympy.physics.mechanics as me
 
 from sympy.simplify.fu import TR8, TR10, TR7, TR3
 import time
-
+import pandas as pd
 
 
 class OdeComputationalCase:
@@ -117,6 +117,14 @@ class OdeComputationalCase:
     def parameters(self):
         return self.odes_system.free_symbols-{self.ivar}
         
+    def default_ics(self,critical_point=False):
+        
+        if isinstance(self._default_ics,dict):
+            ics_instance={coord:self._default_ics[coord] for coord in self.dvars if coord in self._default_ics}
+            
+            return {**{coord:0 for coord in self.dvars},**ics_instance}
+        else:
+            return {coord:0 for coord in self.dvars}
         
     def __call__(self, label=None):
 
@@ -151,6 +159,7 @@ class OdeComputationalCase:
 
         return self.dvars
     
+
 
     def __fortran_odes_rhs(self):
         '''
@@ -348,5 +357,23 @@ class OdeComputationalCase:
         solution_tdf.index.name = self.ivar
         return solution_tdf
 
+    def numerized(self,*args,**kwargs):
+
+        return self
+        
+    def _as_na_df(self):
+        
+        coords = list(self.dvars)
+        num_cases = pd.MultiIndex.from_product([[self],[Eq(Symbol('a'),10)], coords])
+
+        if len(self._default_ics)==len(coords):
+            ics = self._default_ics
+        else:
+            ics = None
+
+        return NumericalAnalysisDataFrame(data=None,
+                    index=pd.Index([0.0],name=self.ivar),
+                    columns=num_cases,
+                    )
 
     
