@@ -19,7 +19,7 @@ from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
 import itertools as itools
 import scipy.integrate as solver
-from ..utilities.timeseries import TimeSeries, TimeDataFrame
+from ..utilities.adaptable import TimeSeries, TimeDataFrame, NumericalAnalysisDataFrame
 
 from collections import ChainMap
 
@@ -35,7 +35,7 @@ from functools import cached_property, lru_cache
 from .numerical import OdeComputationalCase
 
 import time
-
+import pandas as pd
 
 from ..utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim)
 from ..utilities.templates.document import *
@@ -474,6 +474,22 @@ class AnalyticalSolution(ImmutableMatrix):
     def as_eq_list(self):
 
         return [ Eq(lhs,comp,evaluate=False) for lhs,comp  in zip(self._lhs,self)]
+    
+    def system_parameters(self, parameter_values=None):
+        '''
+        Recognises system parameters as symbols which are not independent variable or its relations and returns the Tuple (Sympy object) containing these elements. It does not take into account undefined functions (instances of Function class) of independent variable.
+        '''
+
+        
+        params = (self.lhs-self.rhs).free_symbols
+        params.remove(self.ivar)
+        if parameter_values == None:
+            return list(params)
+        else:
+            return {
+                param: parameter_values[no]
+                for no, param in enumerate(params)
+            }
     
     @property
     def _lhs_repr(self):
@@ -988,6 +1004,7 @@ class ODESystem(AnalyticalSolution):
     def _as_msm(self):
         ode=self
         from dynpy.solvers.nonlinear import MultiTimeScaleSolution
+        
         msm_eq=MultiTimeScaleSolution.from_ode_system(ode)
         return msm_eq
     
@@ -995,7 +1012,7 @@ class ODESystem(AnalyticalSolution):
         
         
         
-        ics_init_dict = {coord:0 for coord in self._fode_dvars}
+        ics_init_dict = {coord:0.0 for coord in self._fode_dvars}
         
         if isinstance(self._default_ics,dict):
             ics_instance={coord:self._default_ics[coord] for coord in self.dvars if coord in self._default_ics}
@@ -1003,6 +1020,47 @@ class ODESystem(AnalyticalSolution):
             return {**ics_init_dict,**ics_instance}
         else:
             return ics_init_dict
+
+
+    
+    
+    def _as_na_df(self,parameter=None,param_span=None,dependencies_dict=None):
+
+        parameters = self.system_parameters()
+        if len(parameters)<1:
+            parameters = [Symbol('a')]
+
+        if parameter is None:
+            parameter = parameters[0]
+
+        if param_span is None:
+            param_span = [0.8,1,1.2]
+
+        if dependencies_dict is None:
+            dependencies_dict = {}
+
+        reference_data = {ref_val: 1 for ref_val in  self.system_parameters()[1:] }
+        #display(reference_data)
+
+        system = self
+        
+        Y = list(system._fode_dvars) + list(dependencies_dict.keys())
+
+        index = pd.Index(np.linspace(0,1,2),name=self.ivar)
+
+        df_num = NumericalAnalysisDataFrame.from_model(system,
+                                                        parameter=parameter,
+                                                        span=param_span,
+                                                        reference_data=reference_data,
+                                                        coordinates=Y,
+                                                        index=index)
+
+        results_num = df_num#.perform_simulations(model_level_name=0,dependencies=dependencies_dict)
+        #results = TimeDataFrame(results_num).droplevel(0,axis=1)
+        results= results_num
+
+        return results
+    
     
     def set_simp_deps(self,dependencies,callback=None,inplace=False):
         
