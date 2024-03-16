@@ -328,25 +328,33 @@ class OdeComputationalCase:
         t_0 = time.time()
 
         
-        
-        solution = solver.solve_ivp(
-            **self.solve_ivp_input(t_span=t_span,
-                                   ic_list=ic_list,
-                                   t_eval=t_eval,
-                                   params_values=params_values,
-                                   method=method))
-
-        solution_tdf = TimeDataFrame(
-            data={key: solution.y[no, :]
-                  for no, key in enumerate(self.dvars)}, index=t_span)
-
-
-
         velocities = self.dvars[int(len(self.dvars)/2) :]
-        for vel in velocities:
-            solution_tdf[vel].to_numpy()
-            gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
-            solution_tdf[vel.diff(self.ivar)] = gradient
+        if len(t_span)>1:
+            solution = solver.solve_ivp(
+                **self.solve_ivp_input(t_span=t_span,
+                                    ic_list=ic_list,
+                                    t_eval=t_eval,
+                                    params_values=params_values,
+                                    method=method))
+
+            solution_tdf = TimeDataFrame(
+                data={key: solution.y[no, :]
+                    for no, key in enumerate(self.dvars)}, index=t_span)
+
+
+
+            
+            for vel in velocities:
+                solution_tdf[vel].to_numpy()
+                gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
+                solution_tdf[vel.diff(self.ivar)] = gradient
+        else:
+            solution_tdf = TimeDataFrame(
+                data={key: ic_list[no]
+                    for no, key in enumerate(self.dvars)}, index=t_span)
+            for vel in velocities:
+
+                solution_tdf[vel.diff(self.ivar)] = 0.0
             
         t_e = time.time()
         t_d = t_e-t_0
