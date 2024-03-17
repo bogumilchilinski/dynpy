@@ -1,4 +1,4 @@
-from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Dict, ImmutableMatrix#, Tuple
+from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Dict, ImmutableMatrix, latex#, Tuple
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 #from sympy import *
@@ -151,7 +151,13 @@ class OdeComputationalCase:
     def __repr__(self):
 
         return self.__str__()
-    
+
+    def _repr_latex_(self):
+        if self._default_ics is None:
+            return f'${latex(self.odes_system)}$ for ${latex(self.dvars)}$'
+        else:
+            return f'${latex(self.odes_system)}$ for ${latex(self.dvars)}$ with ${latex(self._default_ics)}$'
+
     @property
     def ics_dvars(self):
 
@@ -384,4 +390,4 @@ class OdeComputationalCase:
                     columns=num_cases,
                     )
 
-    
+   
