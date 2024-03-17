@@ -3021,6 +3021,38 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
             return TimeDataFrame(computed_data.droplevel(0))
         else:
             return TimeDataFrame(computed_data)
+        
+    
+    def with_ics(self, ics=None, ivar0=0, sol0=None):
+        computed_data = self.copy()
+        
+        if isinstance(ics,(list,tuple)):
+            computed_data = self.insert_ics(ics=ics)
+        elif isinstance(ics, dict):
+            ics = list(ics.values())
+            computed_data = self.insert_ics(ics=ics)
+        else:
+            raise TypeError(f"Expected list, tuple or dictionary, received: {type(ics)}")
+
+        return computed_data
+
+
+    def insert_ics(self, ics):
+        computed_data = self.copy()
+        
+        if len(ics) < len(computed_data.columns):
+            param_span = len(computed_data.columns) // len(ics)
+            ics = self.multiply_list(ics, param_span)
+        computed_data.values[0] = ics
+        return computed_data
+
+
+    def multiply_list(self, ics, param_span):
+        duplicated_list = []
+        for _ in range(param_span):
+            duplicated_list.extend(ics)
+        return duplicated_list
+
 
 class NumericalAnalisysSeries(AdaptableSeries):
 
