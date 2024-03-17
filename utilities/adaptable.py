@@ -2759,8 +2759,13 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
             coords = list(model.dvars)
         else:
             coords = coordinates
+            
+        if isinstance(parameter,list):
+            params_dict = {param:span for param in parameter}
+        else:
+            params_dict = {parameter:span}
 
-        params_list = [Eq(parameter,value) for value in span]
+        params_list = [[Eq(dict_param,value) for value in dict_span] for dict_param,dict_span in params_dict.items()]
         
          
         if isinstance(model,(list,tuple)):
@@ -2768,13 +2773,13 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
         else:
             models_list = [model]
         
+        aux_subs_dict = {param:param for param in params_dict.keys()}
         if reference_data is None:
             prepared_models = models_list
         else:
-            prepared_models = [sim_model.subs({**reference_data,parameter:parameter}) for sim_model in models_list]
+            prepared_models = [sim_model.subs({**reference_data,**aux_subs_dict}) for sim_model in models_list]
         
-        num_cases = pd.MultiIndex.from_product([prepared_models,params_list, coords])
-
+        num_cases = pd.MultiIndex.from_product([prepared_models,*params_list, coords])
 
         
         return cls(data=ics,

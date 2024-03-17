@@ -593,12 +593,25 @@ class AnalyticalSolution(ImmutableMatrix):
     def _as_na_df(self,parameter=None,param_span=None,dependencies_dict=None):
 
         parameters = self.system_parameters()
+        
         if len(parameters)<1:
             parameters = [Symbol('a')]
 
-        if parameter is None:
-            parameter = parameters[0]
+        
 
+        if parameter is None:
+
+            params_included = 1
+            params_list = parameters[0:params_included]
+        elif isinstance(parameter,Number):
+
+            params_included = parameter     
+            params_list = parameters[0:params_included]  
+        else:
+            
+            params_included = 1
+            params_list = parameters[0:params_included]
+            
         if param_span is None:
             #param_span = [0.8,1,1.2]
             param_span = [0.9,1.0]
@@ -606,7 +619,8 @@ class AnalyticalSolution(ImmutableMatrix):
         if dependencies_dict is None:
             dependencies_dict = {}
 
-        reference_data = {ref_val: 1 for ref_val in  self.system_parameters()[1:] }
+        reference_data = {ref_val: 1 for ref_val in  self.system_parameters()[params_included:] }
+        #reference_data = {}
         #display(reference_data)
 
         system = self
@@ -616,7 +630,7 @@ class AnalyticalSolution(ImmutableMatrix):
         index = pd.Index([0.0],name=self.ivar)
 
         df_num = NumericalAnalysisDataFrame.from_model(system,
-                                                        parameter=parameter,
+                                                        parameter=params_list,
                                                         span=param_span,
                                                         reference_data=reference_data,
                                                         coordinates=Y,
