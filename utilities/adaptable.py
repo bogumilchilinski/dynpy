@@ -2942,9 +2942,17 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
 
             # print('ics list \n',ics_list)
+
+            # if len(t_span)>1:
+            #     result = numerized_model.compute_solution(t_span, ics_list,params_values=params_dict)
+            #     result_array = result.T.to_numpy()
+            # else:
+            #     lvls_to_drop=list(range(len(computed_data.columns.levels)-1))
+            #     result_array = computed_data.T.to_numpy()
+            #     result = computed_data.droplevel(lvls_to_drop,axis=1)
+ 
             result = numerized_model.compute_solution(t_span, ics_list,params_values=params_dict)
-            result_array = result.T.to_numpy()
-            
+            result_array = result.T.to_numpy()            
             
             ######### extra dependencies handling - it should be reimplemented with new method #####
             if isinstance(dependencies,dict):
@@ -2957,10 +2965,21 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
                     result[key] = single_data
             #### END ##### extra dependencies handling 
 
+
+            
             computed_data[case_data] = result[computed_data[case_data].columns]
 
             sim_time = pd.Series([result._get_comp_time()],
-                                 index=['Computing time [s]'])
+                                index=['Computing time [s]'])
+
+            # print(len(t_span))
+            # if len(t_span)>1:
+            #     sim_time = pd.Series([result._get_comp_time()],
+            #                         index=['Computing time [s]'])
+            # else:
+            #     sim_time = pd.Series([0],
+            #         index=['Computing time [s]'])
+                
 
             computed_data._comp_time[case_data] = sim_time
 

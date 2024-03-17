@@ -498,7 +498,22 @@ class AnalyticalSolution(ImmutableMatrix):
     def __repr__(self):
 
         return f'{self._lhs_repr} = {self.rhs}'
+ 
+    # @property
+    # def _dvars(self):
+    #     return self.lhs
+ 
+    # @_dvars.setter
+    # def _dvars(self,dvars):
+    #     self._lhs = dvars
+ 
+    @cached_property
+    def dvars(self):
+        return self.lhs    
     
+    @property
+    def _fode_dvars(self):
+        return self.dvars
     
     def _latex(self,*args):
 
@@ -574,6 +589,45 @@ class AnalyticalSolution(ImmutableMatrix):
 
         return solution_tdf
 
+
+    def _as_na_df(self,parameter=None,param_span=None,dependencies_dict=None):
+
+        parameters = self.system_parameters()
+        if len(parameters)<1:
+            parameters = [Symbol('a')]
+
+        if parameter is None:
+            parameter = parameters[0]
+
+        if param_span is None:
+            #param_span = [0.8,1,1.2]
+            param_span = [0.9,1.0]
+
+        if dependencies_dict is None:
+            dependencies_dict = {}
+
+        reference_data = {ref_val: 1 for ref_val in  self.system_parameters()[1:] }
+        #display(reference_data)
+
+        system = self
+        
+        Y = list(system._fode_dvars) + list(dependencies_dict.keys())
+
+        index = pd.Index([0.0],name=self.ivar)
+
+        df_num = NumericalAnalysisDataFrame.from_model(system,
+                                                        parameter=parameter,
+                                                        span=param_span,
+                                                        reference_data=reference_data,
+                                                        coordinates=Y,
+                                                        index=index)
+
+        results_num = df_num#.perform_simulations(model_level_name=0,dependencies=dependencies_dict)
+        #results = TimeDataFrame(results_num).droplevel(0,axis=1)
+        results= results_num
+
+        return results
+
     @property
     def _report_components(self):
 
@@ -631,10 +685,7 @@ class ODESolution(AnalyticalSolution):
     _ivar0 = 0 
     _sol0 = 0
 
-    @property
-    def _dvars(self):
-        return self.lhs
- 
+
 
     def _assign_properties(self,obj):
         
@@ -698,9 +749,7 @@ class ODESolution(AnalyticalSolution):
         else:
             return {coord:0 for coord in self.dvars}
     
-    @cached_property
-    def dvars(self):
-        return self.lhs
+
 
 
 
@@ -1024,42 +1073,7 @@ class ODESystem(AnalyticalSolution):
 
     
     
-    def _as_na_df(self,parameter=None,param_span=None,dependencies_dict=None):
 
-        parameters = self.system_parameters()
-        if len(parameters)<1:
-            parameters = [Symbol('a')]
-
-        if parameter is None:
-            parameter = parameters[0]
-
-        if param_span is None:
-            param_span = [0.8,1,1.2]
-
-        if dependencies_dict is None:
-            dependencies_dict = {}
-
-        reference_data = {ref_val: 1 for ref_val in  self.system_parameters()[1:] }
-        #display(reference_data)
-
-        system = self
-        
-        Y = list(system._fode_dvars) + list(dependencies_dict.keys())
-
-        index = pd.Index(np.linspace(0,1,2),name=self.ivar)
-
-        df_num = NumericalAnalysisDataFrame.from_model(system,
-                                                        parameter=parameter,
-                                                        span=param_span,
-                                                        reference_data=reference_data,
-                                                        coordinates=Y,
-                                                        index=index)
-
-        results_num = df_num#.perform_simulations(model_level_name=0,dependencies=dependencies_dict)
-        #results = TimeDataFrame(results_num).droplevel(0,axis=1)
-        results= results_num
-
-        return results
     
     
     def set_simp_deps(self,dependencies,callback=None,inplace=False):
@@ -1633,6 +1647,16 @@ class ODESystem(AnalyticalSolution):
 
         return type(self)(odes=hom_ode.odes, odes_rhs=exct_mat, dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar)#.numerized(backend='numpy')
     
+    def to_canonical_form(self):
+        if self._ode_order == 2 and len(self) == 1:
+            new_eq = (self.odes[0]/self.odes[0].coeff(diff(self.dvars[0],self.ivar,2))).expand()
+            omega_coeff = new_eq.coeff(self.dvars[0])
+            h_coeff = new_eq.coeff(diff(self.dvars[0], self.ivar))
+            subs_eq = new_eq.subs({omega_coeff:Symbol('omega')**2, h_coeff:2*Symbol('h')})
+            new_odesys = ODESystem(odes = Matrix([subs_eq]), dvars = Matrix([self.dvars[0]]), ode_order = 2)
+            return new_odesys
+        else:
+            return self
 
 class FirstOrderODESystem(ODESystem):
     
@@ -1926,7 +1950,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
 
     def _latex(self,*args):
 
-        
+#         f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}'
         return latex(Eq(self.lhs,self.rhs ,evaluate=False   ))    
     
 class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
