@@ -1229,9 +1229,14 @@ class ODESystem(AnalyticalSolution):
     
     def _latex(self,*args):
         if self._default_ics is None:
-            return f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}'
+            latex_str =  f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}'
         else:
-            return f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}~~with~~{latex(self._default_ics)}' 
+            latex_str = f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}~~with~~{latex(self._default_ics)}' 
+        
+        if len(self._callback_dict) == 0:
+            return f'{latex_str}'
+        else:
+            return f'{latex_str}~~with~~{latex(self._callback_dict)}'
 
     def as_matrix(self):
         return Matrix(self._lhs_repr - self.rhs) 
@@ -1663,14 +1668,26 @@ class ODESystem(AnalyticalSolution):
     
     def to_canonical_form(self):
         if self._ode_order == 2 and len(self) == 1:
-            new_eq = (self.odes[0]/self.odes[0].coeff(diff(self.dvars[0],self.ivar,2))).expand()
+            
+            coord = self.dvars[0]
+            
+            new_eq = (self.odes[0]/self.odes[0].coeff(diff(coord,self.ivar,2))).expand()
             omega_coeff = new_eq.coeff(self.dvars[0])
             h_coeff = new_eq.coeff(diff(self.dvars[0], self.ivar))
-            subs_eq = new_eq.subs({omega_coeff:Symbol('omega')**2, h_coeff:2*Symbol('h')})
-            new_odesys = ODESystem(odes = Matrix([subs_eq]), dvars = Matrix([self.dvars[0]]), ode_order = 2)
+            
+            omega_sym = Symbol('omega',positive=True)
+            h_sym  = Symbol('h',positive=True)
+            
+            subs_eq = new_eq.subs({omega_sym**2:omega_coeff, h_sym:S.Half * h_coeff})
+            canonical_ode = Matrix([coord.diff(ivar,2) + 2*h_sym * coord.diff(ivar) + omega_sym**2 * coord ])
+            
+            new_odesys = ODESystem(odes = canonical_ode, dvars = Matrix([coord]), ode_order = 2)
+            
+            new_odesys._callback_dict = subs_eq
+            
             return new_odesys
         else:
-            return self
+            return self.copy()
 
 class FirstOrderODESystem(ODESystem):
     
