@@ -58,8 +58,8 @@ class LinearEzSystem(ODESystem):
         return odes
     
 
-#klasa rozwijana 
 
+#gotowe!!!
 class SpringMassSystem(ODESystem):
 
     
