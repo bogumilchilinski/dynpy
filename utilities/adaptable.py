@@ -3030,7 +3030,6 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
             ics_list = ics
             computed_data = self.insert_ics(ics_list=ics_list)
         elif isinstance(ics, dict):
-            # ics = list(ics.values())
             dvars_list = self.get_dvars_in_order(computed_data.columns)
             ics_list = [ics[coord]  for coord  in dvars_list]
             computed_data = self.insert_ics(ics_list=ics_list)
@@ -3058,7 +3057,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
     
 
     def get_dvars_in_order(self, columns):
-        '''This method is used to get dvars list in specific order'''
+        '''This method is used to get dvars list in correct order'''
         seen = set()
         return [col[2] for col in columns if not (col[2] in seen or seen.add(col[2]))]
 
