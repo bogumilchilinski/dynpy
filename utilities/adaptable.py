@@ -3027,31 +3027,39 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
         computed_data = self.copy()
         
         if isinstance(ics,(list,tuple)):
-            computed_data = self.insert_ics(ics=ics)
+            ics_list = ics
+            computed_data = self.insert_ics(ics_list=ics_list)
         elif isinstance(ics, dict):
-            ics = list(ics.values())
-            computed_data = self.insert_ics(ics=ics)
+            dvars_list = self.get_dvars_in_order(computed_data.columns)
+            ics_list = [ics[coord]  for coord  in dvars_list]
+            computed_data = self.insert_ics(ics_list=ics_list)
         else:
             raise TypeError(f"Expected list, tuple or dictionary, received: {type(ics)}")
 
         return computed_data
 
 
-    def insert_ics(self, ics):
+    def insert_ics(self, ics_list):
         computed_data = self.copy()
         
-        if len(ics) < len(computed_data.columns):
-            param_span = len(computed_data.columns) // len(ics)
-            ics = self.multiply_list(ics, param_span)
-        computed_data.values[0] = ics
+        if len(ics_list) < len(computed_data.columns):
+            param_span = len(computed_data.columns) // len(ics_list)
+            ics_list = self.multiply_list(ics_list, param_span)
+        computed_data.values[0] = ics_list
         return computed_data
 
 
-    def multiply_list(self, ics, param_span):
+    def multiply_list(self, ics_list, param_span):
         duplicated_list = []
         for _ in range(param_span):
-            duplicated_list.extend(ics)
+            duplicated_list.extend(ics_list)
         return duplicated_list
+    
+
+    def get_dvars_in_order(self, columns):
+        '''This method is used to get dvars list in correct order'''
+        seen = set()
+        return [col[2] for col in columns if not (col[2] in seen or seen.add(col[2]))]
 
 
 class NumericalAnalisysSeries(AdaptableSeries):
