@@ -154,9 +154,9 @@ class OdeComputationalCase:
 
     def _repr_latex_(self):
         if self._default_ics is None:
-            return f'${latex(self.odes_system)}$ for ${latex(self.dvars)}$'
+            return f'${latex(self.odes_system)} for {latex(self.dvars)}$'
         else:
-            return f'${latex(self.odes_system)}$ for ${latex(self.dvars)}$ with ${latex(self._default_ics)}$'
+            return f'${latex(self.odes_system)} for {latex(self.dvars)} with {latex(self.default_ics())}$'
 
     @property
     def ics_dvars(self):
@@ -205,7 +205,7 @@ class OdeComputationalCase:
         #args_list = list(self.ivar) + list(subs_dict.values()) + list(self.params)
 
         return lambdify( args_list ,
-                         ((self.odes_system).subs(subs_dict, simultaneous=True)).n(),
+                         ((self.odes_system).subs(subs_dict, simultaneous=True)).doit().n(),
                          [{'sin':np.sin,'cos':np.cos},'numpy']
                         )
     

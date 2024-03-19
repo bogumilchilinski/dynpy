@@ -1835,7 +1835,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
 #         if not FFT:
 # #             data_Tuple = Tuple(*self.system_parameters()).subs(parameter_values)
-# #             computed_case = self.computational_case(parameter_values=data_Tuple)
+# #             ad_case = self.computational_case(parameter_values=data_Tuple)
 #             if label:
 #                 print('dynpy label',label)
 #                 computed_case['label']=label
@@ -1872,6 +1872,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return self._ode_system.numerized(parameter_values=parameter_values, ic_list=ic_list, backend=backend, **kwargs)
 
 
+    def _as_na_df(self,parameter=None,param_span=None,dependencies_dict=None):
+
+        return self._ode_system._as_na_df(parameter=parameter,param_span=param_span,dependencies_dict=dependencies_dict)
 
 
 

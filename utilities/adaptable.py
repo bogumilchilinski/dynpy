@@ -2454,6 +2454,27 @@ class AdaptableSeries(pd.Series, BasicFormattingTools):
         self._reported = False
 
 
+def find_peaks_values(self, signal, height=None, threshold=None, distance=None, prominence=None, width=None, wlen=None, rel_height=0.5, plateau_size=None):
+
+    '''
+    Method based on scipy signal.find_peaks method.
+    '''
+
+    import scipy
+    from scipy import signal as scipy_signal
+
+    sig = np.array(signal.values.tolist())
+
+    sig = sig.reshape((len(sig), 1))[:,0]
+
+    peaks_no, _ = scipy_signal.find_peaks(x=sig, height=height, threshold=threshold, distance=distance, prominence=prominence, width=width, wlen=wlen, rel_height=rel_height, plateau_size=plateau_size)
+
+    peaks_list = sig[peaks_no]
+
+    peaks_idx = signal.index[peaks_no]
+
+    return self._constructor(data=peaks_list, index=peaks_idx)
+
 class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
 
     @property

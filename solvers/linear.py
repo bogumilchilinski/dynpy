@@ -1664,7 +1664,7 @@ class ODESystem(AnalyticalSolution):
         exct_mat[number,0] = force
 
 
-        return type(self)(odes=hom_ode.odes, odes_rhs=exct_mat, dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar)#.numerized(backend='numpy')
+        return type(self)(odes=hom_ode.odes, odes_rhs=exct_mat, dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar).numerized(backend='numpy')
     
     def to_canonical_form(self):
         if self._ode_order == 2 and len(self) == 1:
