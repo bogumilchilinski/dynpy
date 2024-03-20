@@ -3029,7 +3029,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
         computed_data = self.copy()
         
         if t_span is not None:
-            computed_data = computed_data.set_axis(t_span,computed_data.index.name)
+            computed_data = computed_data.reindex(t_span)
         
         result = computed_data.perform_simulations(
                             model_level_name=model_level_name,
@@ -3039,9 +3039,9 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
                             dependencies=dependencies)
         
         if output == 'NA':
-            return TimeDataFrame(computed_data.droplevel(0))
+            return TimeDataFrame(result.droplevel(0))
         else:
-            return TimeDataFrame(computed_data)
+            return TimeDataFrame(result)
         
     
     def with_ics(self, ics=None, ivar0=0, sol0=None):
