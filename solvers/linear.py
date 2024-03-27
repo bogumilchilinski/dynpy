@@ -1556,7 +1556,7 @@ class ODESystem(AnalyticalSolution):
     @property
     def solution(self):
         '''
-        
+        Provides the final solution of a differential equation
         '''
         return self.general_solution + self.steady_solution    
     
