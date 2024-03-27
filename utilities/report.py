@@ -20,7 +20,7 @@ from pylatex.utils import NoEscape, italic
 from sympy import Matrix, symbols, Symbol, Eq, Expr, Number, Equality, Add, Mul,Subs
 from sympy.core.relational import Relational
 
-from sympy import Symbol, Function, Derivative, latex, sin, cos, tan, exp, atan, ImmutableMatrix, sign, StrictGreaterThan,LessThan
+from sympy import Symbol, Function, Derivative, latex, sin, cos, tan, exp, atan, ImmutableMatrix, sign, StrictGreaterThan,LessThan, GreaterThan,StrictLessThan
 
 from sympy.physics.vector.printing import vlatex, vpprint
 
@@ -3099,7 +3099,7 @@ class Picture(Figure,ReportModule):
                 return ''
             else:
                 size = self.preview_size
-                return f'<img src="{path}" alt="{caption}" width="{size}"/>    \n \n Fig. X: {caption}'
+                return f'<img src="{path}" alt="{caption}" style="width: 700px;" width="{size}"/>    \n \n Fig. X: {caption}'
                 #return f'![image preview]({path}) \n \n Fig. X: {caption}'
         else:
             return f'Nothing to plot \n \n Fig. X: {caption}'
@@ -3465,7 +3465,7 @@ class SympyFormula(ReportModule):
                 self._eq = Equation()
                 self._eq.append(NoEscape(self._backend(self._expr)))
 
-            elif isinstance(expr, (Eq, Relational,StrictGreaterThan,LessThan)):
+            elif isinstance(expr, (Eq, Relational,StrictGreaterThan,LessThan,StrictLessThan,GreaterThan)):
 
                 if isinstance(expr.lhs,
                               (Matrix, ImmutableMatrix)) or isinstance(
@@ -4205,6 +4205,13 @@ class AutoBreak(Environment):
         elif isinstance(expr, LessThan):
 
             elems = [expr.lhs, Symbol('\leq'), expr.rhs]
+        elif isinstance(expr, GreaterThan):
+
+            elems = [expr.lhs, Symbol('\geq'), expr.rhs]
+            
+        elif isinstance(expr, StrictLessThan):
+
+            elems = [expr.lhs, Symbol('<'), expr.rhs]
 
             
         elif isinstance(expr, Add):
@@ -4240,7 +4247,7 @@ class AutoBreak(Environment):
 
         for no, obj in enumerate(terms):
 
-            if terms[no - 1] == Symbol('=') or terms[no - 1] == Symbol('>') or terms[no - 1] == Symbol('\leq'):
+            if terms[no - 1] == Symbol('=') or terms[no - 1] == Symbol('>') or terms[no - 1] == Symbol('\leq') or terms[no - 1] == Symbol('\geq') or terms[no - 1] == Symbol('<'):
                 new_terms += [obj]
 
             elif isinstance(obj, Mul) and  (
@@ -4255,7 +4262,7 @@ class AutoBreak(Environment):
                 #display(obj)
                 new_terms += [Symbol('\n +'), obj]
 
-            elif obj == Symbol('=') or obj == Symbol('>') or obj == Symbol('\leq'):
+            elif obj == Symbol('=') or obj == Symbol('>') or obj == Symbol('\leq') or obj == Symbol('<') or obj == Symbol('\geq'):
                 new_terms += [obj]
 
             elif isinstance(obj, (Symbol, Function, Number,Derivative,Subs,Expr)):

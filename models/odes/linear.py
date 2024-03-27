@@ -34,7 +34,7 @@ class LinearSecondOrder(ODESystem):
 
 
 
-class LinearEzSystem(ODESystem):
+class LinearHorizontalSystem(ODESystem):
 
     
     @classmethod

@@ -85,8 +85,24 @@ class BatteryCell(ComposedSystem):
         if I_li is not None: self.I_li = I_li
         self.qs = [self.q_1, self.q_2]
         self._init_from_components(**kwargs)
-    
-    
+
+
+    @property
+    def components(self):
+        components = {}
+        self._resistor_1 = Resistor(self.R_1, self.q_1, qs=[self.q_1])
+        self._resistor_2 = Resistor(self.R_2, q0=self.q_2, qs=[self.q_2])
+        self._voltagesource = VoltageSource(self.U, q0 = self.q_1, qs=[self.q_1])
+        self._capacitor = Capacitor(self.C, q0 = self.q_1-self.q_2, qs=[self.q_1, self.q_2])
+
+        components['resistor_1'] = self._resistor_1
+        components['resistor_2'] = self._resistor_2
+        components['voltagesource'] = self._voltagesource
+        components['capacitor'] = self._capacitor
+
+        return components
+
+
     def voltage_ode(self):
 
         t = self.ivar

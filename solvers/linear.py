@@ -1629,53 +1629,80 @@ class ODESystem(AnalyticalSolution):
         inertia_mat=self.lhs.jacobian(diff(self.dvars, self.ivar, 2))
         fundamental_mat = stiffness_mat - r**2 * inertia_mat + damping_mat * r
         return fundamental_mat
-    
-    def swept_analysis(self, dvar, amplitude=None, ramp=None):
+
+    def _swept_analysis(self, subs_method=True, dvar=None, freq_symbol=None, amp_symbol=None, amplitude=None, ramp=None):
 
         '''
         Performs swept analysis on numerical ODESystem.
 
+        subs_method - Boolean, switches methods for swept analysis, if True it substitutes values, if False it uses _hom_equation method.
+        
         dvar - Symbol or Integer, coordinate which will be taken into consideration for performing swept analysis. This coordinate indicates which equation will be under excitation.
 
-        amplitude - Integer or Float, amplitude of excitation
+        freq_symbol - Symbol for substituting the excitation frequency value in equation.
 
-        ramp - Integer or Float, sets the steep coefficient of the ramp
+        amp_symbol - Symbol for substituting the excitation amplitude value in equation.
+
+        amplitude - Integer or Float, amplitude of excitation.
+
+        ramp - Integer or Float, sets the steep coefficient of the ramp.
         '''
-
         if ramp is None:
-            Omega = 0.005*self._ivar
+            frequency = 0.005*self._ivar
         elif isinstance(ramp, (float, int)):
-            Omega = ramp*self._ivar
+            frequency = ramp*self._ivar
+            display(frequency)
         else:
-            return "Error"
+            return "Error, ramp should be a float or int type"
 
         if amplitude is None:
-            force = 1*sin(Omega*self._ivar)
+            amplitude=1
         elif isinstance(amplitude, (float, int)):
-            force = amplitude*sin(Omega*self._ivar)
+            pass
         else:
-            return "Error"
+            return "Error, Amplitude should be a float or int type"
 
-        hom_ode = self._hom_equation()
+        if subs_method is True:
 
-        if isinstance(dvar, Function):
-            for no, sym in enumerate(self.dvars):
-                if sym == dvar:
-                    number = no
-
-        elif isinstance(dvar, int):
-            number = dvar
+            if freq_symbol is None:
+                freq_symbol = Symbol('Omega', positive=True)
+            if amp_symbol is None:
+                amp_symbol = Symbol('F', positive=True)
+#             display(freq_symbol,amp_symbol)
+            return type(self)(odes=self.odes.subs({freq_symbol: frequency, amp_symbol:amplitude}), dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar).numerized(backend='numpy')
 
         else:
-            return "Error"
+
+            hom_ode = self._hom_equation()
+
+            if dvar is None:
+                dvar = self.dvars[0]
+
+            if isinstance(dvar, Symbol):
+                for no, sym in enumerate(self.dvars):
+                    if sym == Symbol:
+                        number = no
+
+            elif isinstance(dvar, int):
+                number = dvar
+
+            else:
+                return "Error"
 
 
-        exct_mat = zeros(len(self.dvars),1)
-        exct_mat[number,0] = force
+            exct_mat = zeros(len(self.dvars),1)
+            exct_mat[number,0] = amplitude*sin(Omega*self._ivar)
 
 
-        return type(self)(odes=hom_ode.odes, odes_rhs=exct_mat, dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar).numerized(backend='numpy')
-    
+            return type(self)(odes=hom_ode.odes, odes_rhs=exct_mat, dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar).numerized(backend='numpy')
+
+
+#         type(self)(odes=hom_eq, odes_rhs=zeros(len(self.dvars),1), dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar)
+
+    def swept_analysis(self, subs_method=True, dvar=None, freq_symbol=None, amp_symbol=None, amplitude=None, ramp=None):
+
+        return self._swept_analysis(subs_method=subs_method, dvar=dvar, freq_symbol=freq_symbol, amp_symbol=amp_symbol, amplitude=amplitude, ramp=ramp)
+
     def to_canonical_form(self):
         if self._ode_order == 2 and len(self) == 1:
             

@@ -107,7 +107,7 @@ class GeometryScene:
 
         self.__class__.ax_2d=ax_2d
         self.__class__.ax_3d=ax_3d
-    
+
 
 def multivariable_taylor_series(expr, args, n=2, x0=None):
     '''
@@ -186,7 +186,7 @@ class DynamicSymbol(Function):
     def _repr_latex_(self):
         print(self.args)
         return super()._repr_latex_()[0:-2]
-    
+
 
 
 
@@ -196,7 +196,7 @@ class DynamicDerivative(Derivative):
         
         print(self.args)
         return super()._repr_latex_()[0:-2]
-    
+
     
 
 class LagrangesDynamicSystem(me.LagrangesMethod):
@@ -483,17 +483,17 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         if system:
             # print(system._kinetic_energy)
-            
+
 #             if system._components is not None:
 #                 comps=list(system._components.values())
 #                 self._components = {**system._components}
 #                 print('abc',comps)
 #                 system = sum(comps[1:],comps[0])
-            
+
             Lagrangian=system
             system=None
-            
-            
+
+
 #             self._kinetic_energy = Lagrangian._kinetic_energy
 #             self._potential_energy = Lagrangian._potential_energy
 
@@ -1015,12 +1015,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         ########### new wersion
         new_sys = type(self).from_system(new_system)
         ########### new wersion        
-        
-        
+
+
 #         ########## old wersion
 #         new_sys = type(self)(0,system=new_system)#(f'{self._label} for {args} and {kwargs}')
 #         ########## old wersion        
-        
+
         new_sys._label=f'{self._label} for {args} and {kwargs}'
 
 
@@ -1617,10 +1617,10 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         '''
 #         print('system parameters @')
 #         print(self)
-        
+
 #         print(self.lagrangian())
 #         print(self.q)
-        
+
         params = self.rhs().free_symbols
         params.remove(self.ivar)
         if parameter_values == None:
@@ -1694,8 +1694,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
                                                         self.Y,
                                                         n=n + 1,
                                                         x0=x0_dict)
-        
-        
+
+
 #         coords_list = list(self.Y) + [diff(self.q,self.ivar,self.ivar)]
 #         coords_mat = Matrix(coords_list)
 
@@ -1809,7 +1809,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         
         return type(self)(0,system=new_sys)
-    
+
 #     @lru_cache
 #     def numerized(self, parameter_values=None, FFT = None,label=None,backend='fortran',**kwargs):
 #         '''
@@ -1972,7 +1972,7 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
 #             display(ReportText(f'''Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące: 
 #                                    ({Ref(mrk_lagrangian_nonlin).dumps()}):
 #                                 '''))
-            
+
             #op_point = {coord  for coord in self.Y + list(self.q.diff(self.ivar))}
 
 
@@ -2107,7 +2107,7 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
 #             display(ReportText(f'''Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące: 
 #                                    ({Ref(mrk_lagrangian_nonlin).dumps()}):
 #                                 '''))
-            
+
             #op_point = {coord  for coord in self.Y + list(self.q.diff(self.ivar))}
 
 
