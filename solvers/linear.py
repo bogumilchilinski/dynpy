@@ -7,7 +7,7 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
 from sympy.matrices.matrices import MatrixBase
 from sympy.solvers.ode.systems import matrix_exp, matrix_exp_jordan_form
 from sympy.solvers.deutils import ode_order
-
+from sympy import classify_ode
 
 from numbers import Number
 
@@ -641,6 +641,10 @@ class AnalyticalSolution(ImmutableMatrix):
         results= results_num
 
         return results
+    
+    def numerical_analysis(self,parameter=None,param_span=None,dependencies_dict=None):
+                       
+        return self._as_na_df(parameter=parameter, param_span=param_span, dependencies_dict=dependencies_dict)
 
     @property
     def _report_components(self):
@@ -1536,18 +1540,24 @@ class ODESystem(AnalyticalSolution):
     
     @cached_property
     def general_solution(self):
-
+        '''
+        Solves the problem in the symbolic way and returns matrix of solution (in the form of equations (objects of Eq class)).
+        '''
         return self._general_solution
 
 
     @cached_property
     def steady_solution(self):
-
+        '''
+        Provides the particular solution of a differential equation.
+        '''
         return self._steady_solution
     
     @property
     def solution(self):
-
+        '''
+        
+        '''
         return self.general_solution + self.steady_solution    
     
 
@@ -1688,6 +1698,11 @@ class ODESystem(AnalyticalSolution):
             return new_odesys
         else:
             return self.copy()
+
+    def _classify_ode(self):
+        odes=Eq(self.lhs[0]-self.rhs[0],0)
+        return classify_ode(odes,self.dvars[0])
+
 
 class FirstOrderODESystem(ODESystem):
     

@@ -1771,8 +1771,15 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         Returns Equations of Motion of the system
         """
         return self.governing_equations
-    
-    
+
+    @property
+    def eoms(self):
+        """
+        Returns Equations of Motion of the system using ODESystem
+        """
+        return self._ode_system
+
+
     @cached_property
     def _ode_system(self):
         return ODESystem.from_dynamic_system(self)

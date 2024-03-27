@@ -129,7 +129,7 @@ class ExemplaryPictureDynPyCodeComponent(ReportComponent):
         display(ReportText( self.header_text  ))
 
 
-        display(Markdown(
+        display(ObjectCode(#tu
 f'''
 
     from dynpy.models.mechanics import *
@@ -169,7 +169,7 @@ class ExemplaryPictureSymPyCodeComponent(ExemplaryPictureComponent):
         
         display(ReportText(  self.header_text ))
         
-        display(Markdown(
+        display(ObjectCode(#tu
 f'''
 
 
@@ -217,7 +217,7 @@ class SchemeComponent(ExemplaryPictureComponent):
         
 
 
-        display(ReportText( self.footer_text ))
+        display(ObjectCode( self.footer_text ))
 
 
 class SchemeDynPyCodeComponent(ExemplaryPictureComponent):
@@ -226,7 +226,7 @@ class SchemeDynPyCodeComponent(ExemplaryPictureComponent):
     @property
     def header_text(self):
 
-        return "DynPy code for calling the scheme of the dynamic system is as following:"
+        return "DynPy code for calling the scheme of the dynamic system is as follows:"
 
 
     @property
@@ -242,7 +242,7 @@ class SchemeDynPyCodeComponent(ExemplaryPictureComponent):
 
         display(ReportText(  self.header_text ))
 
-        display(Markdown(
+        display(ObjectCode(#tu
 
 f'''
 
@@ -286,7 +286,7 @@ class SchemeSymPyCodeComponent(ExemplaryPictureComponent):
 
         display(ReportText(  self.header_text ))
 
-        display(Markdown(
+        display(ObjectCode(#tu
 f'''
 
 
@@ -428,8 +428,7 @@ class KineticEnergyDynPyCodeComponent(ReportComponent):
 
         display(ReportText( self.header_text  ))
 
-
-        display(Markdown(
+        display(ObjectCode(#tu
 f'''
 
     from dynpy.models.mechanics import *
@@ -442,7 +441,10 @@ f'''
 
 
 '''))
-        
+
+
+
+###
         
 class KineticEnergySymPyCodeComponent(ReportComponent):
 
@@ -450,7 +452,7 @@ class KineticEnergySymPyCodeComponent(ReportComponent):
 
     @property
     def header_text(self):
-        return "Code line responsible for providing symbolic form of kinetic energy is as following:"
+        return "Code line responsible for providing symbolic form of kinetic energy is as follows:"
 
 
     @property
@@ -473,7 +475,7 @@ class KineticEnergySymPyCodeComponent(ReportComponent):
 
         code = '\n\n\t'.join(code_list[:-1]) + '\n\n\t' + var_name +code_list[-1][1:]
 
-        display(Markdown(
+        display(ObjectCode(#tu
 f'''
 
 
@@ -527,7 +529,7 @@ class PotentialEnergyDynPyCodeComponent(ReportComponent):
 
     @property
     def header_text(self):
-        return "Code line responsible for extracting potential energy from dynamic system is as following:"
+        return "Code line responsible for extracting potential energy from dynamic system is as follows:"
 
         
     @property
@@ -543,7 +545,7 @@ class PotentialEnergyDynPyCodeComponent(ReportComponent):
         display(ReportText( self.header_text  ))
 
 
-        display(Markdown(
+        display(ObjectCode(# tu 
 f'''
 
     from dynpy.models.mechanics import *
@@ -589,7 +591,7 @@ class PotentialEnergySymPyCodeComponent(ReportComponent):
 
         code = '\n\n\t'.join(code_list[:-1]) + '\n\n\t' + var_name +code_list[-1][1:]
 
-        display(Markdown(
+        display(ObjectCode(#tu
 f'''
 
 
@@ -770,7 +772,7 @@ class LagrangianDynPyCodeComponent(ReportComponent):
         display(ReportText( self.header_text  ))
 
 
-        display(Markdown(
+        display(ObjectCode(#tu
 f'''
 
 
@@ -830,7 +832,7 @@ class LagrangianSymPyCodeComponent(ReportComponent):
         code = '\n\n\t'.join(code_list[:-1]) + '\n\n\t' + var_name +code_list[-1][1:]
 
 
-        display(Markdown(
+        display(ObjectCode(#tu
 f'''
 
 
@@ -970,7 +972,7 @@ class GoverningEquationDynpyCodeComponent(ReportComponent):
         
         display(ReportText(self.header_text))
 
-        display(Markdown(
+        display(ObjectCode(#tu
 f'''
     
     
@@ -1022,7 +1024,7 @@ class GoverningEquationSympyCodeComponent(ReportComponent):
 
         
 
-        display(Markdown(
+        display(ObjectCode(#tu
 f'''
     
     
@@ -1176,7 +1178,7 @@ class CriticalPointsDynPyCodeComponent(ReportComponent):
         dyn_sys = system
 
         display(ReportText(self.header_text))
-        display(Markdown(
+        display(ReportText(
 f'''
     
     from dynpy.models.mechanics import *
@@ -1215,7 +1217,7 @@ class CriticalPointsSymPyCodeComponent(ReportComponent):
         
         code = '\n\n\t'.join(code_list[:-1]) + '\n\n\t' + var_name +code_list[-1][1:]
 
-        display(Markdown(
+        display(ReportText(
 f'''
 
     from dynpy.models.mechanics import *
@@ -1337,7 +1339,7 @@ class FundamentalMatrixDynPyCodeComponent(ReportComponent):
         display((SympyFormula(  Eq(Symbol('A'),dyn_sys_lin.fundamental_matrix(),evaluate=False) , marker='a'  )  ))
         display((SympyFormula(  Eq(Delta,dyn_sys_lin.fundamental_matrix().det().expand().simplify().simplify().expand(),evaluate=False) , marker='a',backend=latex  )  ))
         
-        display(Markdown('''
+        display(ReportText('''
         display((SympyFormula(  Eq(Symbol('M'),dyn_sys_lin.inertia_matrix(),evaluate=False) , marker='a' )  ))
 
         display((SympyFormula(  Eq(Symbol('K'),dyn_sys_lin.stiffness_matrix(),evaluate=False) , marker='a')  ))
@@ -1399,7 +1401,7 @@ class FundamentalMatrixSymPyCodeComponent(ReportComponent):
 
         code = '\n\n\t'.join(code_list[:-1]) + '\n\n\t' + var_name +code_list[-1][1:]
 
-        display(Markdown(
+        display(ObjectCode(#tu
 f'''
 
     from sympy import *
@@ -1484,7 +1486,7 @@ class GeneralSolutionDynpyCodeComponent(ReportComponent):
         
         ode=system._ode_system
 
-        display(Markdown(
+        display(ReportText(
 f'''
 
     from dynpy.models.mechanics import *
@@ -1541,7 +1543,7 @@ class GeneralSolutionSympyCodeComponent(ReportComponent):
         code_dvars = '\n\n\t'.join(code_list_dvars[:-1]) + '\n\n\t' + var_name +code_list_dvars[-1][1:]
         
         
-        display(Markdown(
+        display(ReportText(
 f'''
     from sympy import *
     init_printing()
@@ -2542,7 +2544,7 @@ class GivenDataComponent(ReportComponent):
 #         display(ReportText(  self.header_text ))
 #         display(Picture(system._scheme(),width='8cm'))
 
-#         display(Markdown(
+#         display(ReportText(
 
 # '''The code for calling scheme of the system is following:
 
@@ -2579,7 +2581,7 @@ class GivenDataComponent(ReportComponent):
 #         display(ReportText(  self.header_text ))
 #         display(Picture(path,width='8cm'))
         
-#         display(Markdown(
+#         display(ReportText(
 # '''The code for calling scheme of the system is following:
 
 #     path=self._default_folder_path + self.scheme_name

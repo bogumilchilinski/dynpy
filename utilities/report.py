@@ -2745,6 +2745,55 @@ class Frame(Environment,ReportModule):
                 Command('frametitle', arguments=[self.title])
                 )
 
+class CodeFrame(Environment,ReportModule):
+
+    
+    r"""A base class for LaTeX environments.
+    This class implements the basics of a LaTeX environment. A LaTeX
+    environment looks like this:
+    .. code-block:: latex
+        \begin{environment_name}
+            Some content that is in the environment
+        \end{environment_name}
+    The text that is used in the place of environment_name is by default the
+    name of the class in lowercase.
+    However, this default can be overridden in 2 ways:
+    1. setting the _latex_name class variable when declaring the class
+    2. setting the _latex_name attribute when initialising object
+    """
+
+    #: Set to true if this full container should be equivalent to an empty
+    #: string if it has no content.
+    omit_if_empty = False
+
+    def __init__(self, title=None, options=None, arguments=None, start_arguments=None, **kwargs):
+        r"""
+        Args
+        ----
+        options: str or list or  `~.Options`
+            Options to be added to the ``\begin`` command
+        arguments: str or list or `~.Arguments`
+            Arguments to be added to the ``\begin`` command
+        start_arguments: str or list or `~.Arguments`
+            Arguments to be added before the options
+        """
+
+        _latex_name = 'frame'
+
+        self.title = title
+        self.options = options
+        self.arguments = arguments
+        self.start_arguments = start_arguments
+        self._latex_name = _latex_name
+        
+        super()._latex_name
+        super().__init__(options=['containsverbatim'], arguments=arguments, start_arguments=start_arguments,**kwargs)
+
+    
+        if self.title is not None:
+            self.append(
+                Command('frametitle', arguments=[self.title])
+                )
 
 class Markdown(Environment,ReportModule):
     packages = [

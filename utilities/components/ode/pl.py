@@ -969,7 +969,19 @@ class SolutionComponent(ReportComponent):
 
         #display(ReportText('Obtained expresions enable to rewrite equation under consideration.'  ))
         display(ReportText('Otrzymane wyrażenie stanowi rozwiązania równania różniczkowego o zmiennych rozdzielonych. Stała całkowania jest możliwa do policzenia w momencie w którym w zadaniu zostały podane warunki początkowe, czyli wartość funkcji dla konkretnego $x$.'  ))
+
+class ClassifyODEComponent(ReportComponent):
+    title="Klasyfikacja równania różniczkowego"
+
+    def append_elements(self):
+
+        system = self.reported_object
+        types=system._classify_ode()
+        display(ReportText("To równanie różniczkowe możemy określić jako równanie typu:"))
+        for feature in types:
+            display(ReportText(f'\n\n - { feature } '.replace('_',' ')))
         
+
 class LinearODEIntroComponent(ReportComponent):
     title="Podstawowa wiedza niezbędna do rozwiązania równania różniczkowego"
     

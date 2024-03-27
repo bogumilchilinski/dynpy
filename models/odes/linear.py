@@ -7,11 +7,11 @@ class LinearFirstOrder(ODESystem):
     @classmethod
     def from_reference_data(cls):
         t = Symbol('t')
-        z= Function('z')(t)
+        z = Function('z')(t)
         a=Symbol('a',positive=True)
         ode_eq=z.diff(t)+a*z-sin(10*t)
 
-        odes = cls(ode_eq,z,t,ode_order=1)
+        odes = cls(ode_eq,dvars=z,ivar=t,ode_order=1)
 
         return odes
 
@@ -28,7 +28,7 @@ class LinearSecondOrder(ODESystem):
         omg=Symbol('Omega',positive=True)
         ode_eq=z.diff(t,2)+2*h*z.diff(t)+omg0**2*z+fd*cos(omg*t)+fs
 
-        odes = cls(ode_eq,z,t,ode_order=2)
+        odes = cls(ode_eq,dvars=z,ivar=t,ode_order=2)
 
         return odes
 
@@ -48,7 +48,7 @@ class LinearEzSystem(ODESystem):
         odes = cls(ode_eq,dvars=z,ivar=t,ode_order=2)
 
         return odes
-    
+
 
 
 #gotowe!!!
