@@ -120,9 +120,9 @@ Examplary setup is as follows:
     sec_text = Section('Section that presents text reporting')
     CurrentContainer(sec_text)
     
-    ReportText('Exemplary text'*100)
+    display(ReportText('Exemplary text'*100))
     
-    Markdown('Formatted text'*100)
+    display(Markdown('Formatted text'*100))
     
     
 ## Math
@@ -132,7 +132,7 @@ Examplary setup is as follows:
     sec_formula = Section('Section that presents formulas reporting')
     CurrentContainer(sec_formula)
     
-    ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.')
+    display(ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.'))
     
     a,b = symbols('a b')
     display(SympyFormula(Eq(a,b)))

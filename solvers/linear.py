@@ -1541,7 +1541,7 @@ class ODESystem(AnalyticalSolution):
     @cached_property
     def general_solution(self):
         '''
-        Solves the problem in the symbolic way and returns matrix of solution (in the form of equations (objects of Eq class)).
+        Solves the problem in the symbolic way and returns matrix of solution (in the form of equations (objects of ODESolution class)).
         '''
         return self._general_solution
 
@@ -1549,14 +1549,14 @@ class ODESystem(AnalyticalSolution):
     @cached_property
     def steady_solution(self):
         '''
-        Provides the particular solution of a differential equation.
+        Provides the particular solution of a differential equation and returns matrix of solution (in the form of equations (objects of ODESolution class)).
         '''
         return self._steady_solution
     
     @property
     def solution(self):
         '''
-        Provides the final solution of a differential equation
+        Provides the final solution of a differential equation and returns matrix of solution (in the form of equations (objects of ODESolution class)).
         '''
         return self.general_solution + self.steady_solution    
     

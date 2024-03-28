@@ -140,18 +140,30 @@ class CodePrinter:
     
     def __init__(self, expr, *args, **kwargs):
         self._expr=expr
-    def _print_code(self):
+        
+        
+        
+    def _generate_code(self):
+
         expr=self._expr
-        for pis in expr.atoms():
-            if isinstance(pis, (sym.Float, sym.Integer)):
+        raw_code = python(expr).replace("e = ","eq = ")
+
+        for elem in expr.atoms():
+            if isinstance(elem, (sym.Float, sym.Integer)):
                 pass
-            elif isinstance(pis, (sym.Symbol, sym.Function)):
-                my_arg = str(pis)
-                print(python(srepr(pis)).replace("e = ",f"{my_arg} = "))
+            elif isinstance(elem, (sym.Symbol)):
+                my_arg = str(elem)
+                raw_code = raw_code.replace(f"Symbol('{my_arg}')",srepr(elem))
             else:
                 pass
+            
+         
+        return raw_code
+        
+    def _print_code(self):
 
-        return print(python(repr(expr)).replace("e = ","eq = "))
+        return print(self._generate_code())
+
 class LatexSize:
 
     _units= pint.UnitRegistry()
