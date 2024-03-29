@@ -5,7 +5,7 @@ from pylatex import (Document, Package, Command, NewPage, Tabularx
 #from pylatex.section import Paragraph, Chapter
 from pylatex.utils import (#italic, 
                            NoEscape)
-from ..report import Markdown, CurrentContainer, ReportText
+from ..report import Markdown, CurrentContainer, ReportText, IPMarkdown
 
 class CaseTemplate(Document):
 
@@ -140,7 +140,7 @@ Examplary setup is as follows:
 """
 )
         
-        return Markdown(preliminary_str)
+        return IPMarkdown(preliminary_str)
     
     def __init__(self,
                  default_filepath='default_filepath',

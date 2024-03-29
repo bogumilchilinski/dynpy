@@ -1932,19 +1932,19 @@ class BasicFormattingTools(DataMethods):
 
         new_obj = self.copy()
         new_obj_idx = new_obj.axes[axis]
-        idx_frame = new_obj_idx.to_frame().applymap(func)
+        #idx_frame = new_obj_idx.to_frame().map(func)
 
         #print('idx',new_obj_idx)
         #display('map',idx_frame)
 
-        if isinstance(new_obj_idx, pd.MultiIndex):
-            new_obj_idx = pd.MultiIndex.from_frame(idx_frame)
-            #new_obj_idx.names=map(func,new_obj_idx.names)
-        else:
-            #new_obj_idx = pd.Index((idx_frame),name=new_obj_idx.name)
-            new_obj_idx = new_obj_idx.map(func)
+        #if isinstance(new_obj_idx, pd.MultiIndex):
+        #    new_obj_idx = pd.MultiIndex.from_frame(idx_frame)
+        #    #new_obj_idx.names=map(func,new_obj_idx.names)
+        #else:
+        #    #new_obj_idx = pd.Index((idx_frame),name=new_obj_idx.name)
+        #    new_obj_idx = new_obj_idx.map(func)
 
-        return new_obj.set_axis(new_obj_idx, axis=axis)
+        return new_obj.rename(func,axis=axis)
 
     def _modify_axis_name(self, func, axis=0):
         new_obj = self.copy()
