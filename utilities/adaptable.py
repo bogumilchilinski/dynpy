@@ -376,7 +376,7 @@ class BaseIndexTransformer:
             
         else:
 
-            labels = [(\,)  for entry in cols]
+            labels = [(entry,)  for entry in cols]
 
 
         #print('len',len(labels),labels,type(labels))
