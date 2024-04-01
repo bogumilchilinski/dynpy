@@ -8,6 +8,8 @@ from pylatex.utils import (#italic,
 from ..report import Markdown, CurrentContainer, ReportText, IPMarkdown
 from ..components.mech import en as mech_comp
 
+
+
 class ReportMethods:
 
     _reported_object = None
@@ -75,14 +77,20 @@ Examplary setup is as follows:
         
         return comp_list
     
-    
+    @property
+    def default_reported_object(self):
+        
+        return None
 
     @property
     def reported_object(self):
 
         reported_obj=self._reported_object
         
-        return reported_obj
+        if reported_obj is None:
+            return self.default_reported_object
+        else:
+            return reported_obj
 
     @reported_object.setter
     def reported_object(self,value):
@@ -494,9 +502,40 @@ class TechThriveODECase(TechThriveMechanicalCase):
         ]
     
 class TechThriveMVCase(TechThriveMechanicalCase):
+    
+
+    
     packages = [
                   Command('fancyhead', arguments=['Drgania mechaniczne'],options=['L']),
         ]
+
+
+    @property
+    def default_reported_object(self):
+
+        from ...models.mechanics import ForcedDampedTrolleysWithSprings,ForcedSpringMassSystem
+        
+        return ForcedSpringMassSystem()   
+
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+        mech_comp.TitlePageComponent,
+        #mech_comp.SchemeComponent,
+        #mech_comp.ExemplaryPictureComponent,
+        mech_comp.KineticEnergyComponent,
+        mech_comp.PotentialEnergyComponent,
+        mech_comp.LagrangianComponent,
+        mech_comp.GoverningEquationComponent,
+        #mech_comp.FundamentalMatrixComponent,
+        mech_comp.GeneralSolutionComponent,
+        #mech_comp.SteadySolutionComponent,
+   
+        ]
+        
+        return comp_list
+
 
 class EngeneeringDrawingGuide(Guide):
     
