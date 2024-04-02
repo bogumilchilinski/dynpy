@@ -1239,7 +1239,7 @@ class ODESystem(AnalyticalSolution):
 
     # Michał Sz.
     def _latex(self,*args):
-        if self._default is None:
+        if self._default_ics is None:
             latex_str =  f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}'
         else:
             latex_str = f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}~~with~~{latex(self._default_ics)}' 
