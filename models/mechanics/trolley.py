@@ -1466,7 +1466,7 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
         if F is not None: self.F = F
         if f is not None: self.f = f
         self.ivar = ivar
-        self.trans_expr = ((S.One/2-atan(self.flow_coeff*(self.ivar-self.t0))/pi))
+        self.trans_expr = ((S.One/2-atan(self.flow_coeff*(self.ivar-self.t_init))/pi))
         self.alpha = self.b
         self.beta = self.b/2
         #self.rayleigh_damping_matrix = self.alpha*VariableMassTrolleyWithPendulum().inertia_matrix() + self.beta*VariableMassTrolleyWithPendulum().stiffness_matrix()
