@@ -1236,13 +1236,14 @@ class ODESystem(AnalyticalSolution):
         
         return FirstOrderLinearODESystemWithHarmonics
         #return FirstOrderLinearODESystem
-    
+
+    # Michał Sz.
     def _latex(self,*args):
-        if self._default_ics is None:
+        if self._default is None:
             latex_str =  f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}'
         else:
             latex_str = f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}~~with~~{latex(self._default_ics)}' 
-        
+    #
         if len(self._callback_dict) == 0:
             return f'{latex_str}'
         else:
