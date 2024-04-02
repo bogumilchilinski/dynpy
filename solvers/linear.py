@@ -457,9 +457,14 @@ class AnalyticalSolution(ImmutableMatrix):
     
 
     def as_matrix(self):
+        ''' Returns the right-hand side of the equation as a matrix.
+        It returns Numpy Matrix object'''
         return Matrix( self.rhs )
     
     def as_eq(self):
+        ''' Creates an equation using the Eq method from the Sympy library.
+        It returns Sympy Equation class.
+        '''
         return Eq(self.lhs,self.rhs)
     
     def as_iterable(self):
@@ -472,7 +477,8 @@ class AnalyticalSolution(ImmutableMatrix):
         return Dict({lhs:rhs  for  lhs,rhs in self.as_iterable()})
     
     def as_eq_list(self):
-
+        ''' Creates a zip object consisting of the left side of the self instance and self itself.
+        It returns zip object.'''
         return [ Eq(lhs,comp,evaluate=False) for lhs,comp  in zip(self._lhs,self)]
     
     def system_parameters(self, parameter_values=None):
