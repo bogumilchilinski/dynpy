@@ -229,13 +229,18 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
 
         
         #sec_conditions =FirstOrderODESystem.from_ode_system(ODESystem([sec_conditions[1][1],sec_conditions[3][1]],dvars = self._const_list ,ivar=ivar  )).linearized().solution
-
+        
+        print('some check')
+        
+        display(sec_conditions)
+        display(self._const_list)
+        
         sec_odes=ODESystem((sec_conditions),
                          dvars=Matrix(self._const_list),
                          ivar=ivar,
                          ode_order=1)
         
-        
+
         
         return sec_odes
 
@@ -341,6 +346,7 @@ class MultiTimeScaleSolution(ODESystem):
         #obj._odes = odes_system
 
         return obj
+    
     @property
     def eps(self):
         return self._eps
@@ -609,7 +615,8 @@ class MultiTimeScaleSolution(ODESystem):
             #display(FirstOrderLinearODESystemWithHarmonics.from_ode_system(approx_subs).steady_solution)
             #display(type(approx_subs))
             
-            aux_mat=self.odes_system.jacobian(self.dvars)
+            #aux_mat=self.odes_system.jacobian(self.dvars)
+            aux_mat=approx_subs.jacobian(approx_subs.dvars)
             if det(aux_mat)!=0:
 
                 SolverClass = FirstOrderLinearODESystem
@@ -617,7 +624,7 @@ class MultiTimeScaleSolution(ODESystem):
                 SolverClass = FirstOrderLinearODESystemWithHarmonics
 
             #SolverClass = FirstOrderLinearODESystemWithHarmonics
-            SolverClass = FirstOrderLinearODESystem
+            #SolverClass = FirstOrderLinearODESystem
             
             sol = SolverClass.from_ode_system(approx_subs).steady_solution.applyfunc(
                 lambda obj: obj.expand()).applyfunc(eqns_map)#.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).sum_expr)

@@ -1893,10 +1893,10 @@ class MDoFTMD1(ComposedSystem):
 
             components = {}
 
-            self._trolley_1 = MaterialPoint(self.m, pos1=self.xe, qs=[self.xe])
-            self._trolley_2 = MaterialPoint(self.me, pos1=self.xb, qs=[self.xb])
+            self._trolley_1 = MaterialPoint(self.m, pos1=self.xb, qs=[self.xb])
+            self._trolley_2 = MaterialPoint(self.me, pos1=self.xe, qs=[self.xe])
             
-            self._springs1 = Spring(self.k, pos1=self.xe, qs=[self.xe])
+            self._springs1 = Spring(self.k, pos1=self.xb, qs=[self.xb])
             self._springs2 = Spring(self.ke, pos1=self.xe, pos2=self.xb, qs=[self.xe, self.xb])
             
             components['_trolley_1'] = self._trolley_1
