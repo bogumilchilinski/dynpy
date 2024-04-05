@@ -3166,16 +3166,11 @@ class ObjectCode(LstListing,ReportModule):
     
     def __repr__(self):
 
-        self.reported()
+        #self.reported()
         
         code=self.code_type
         
-        repr_string=f'''
-        \n++++++++++ CODE +++++++
-        \n{code}
-        \n++++++++++ CODE +++++++
-        
-        '''
+        repr_string= f'\n CODE\n {code} \n CODE'
         
         return repr_string
     
@@ -3212,7 +3207,7 @@ class ObjectCode(LstListing,ReportModule):
     
     def _repr_markdown_(self):
 
-
+        self.reported()
         #print(self.code_type)
         
         return '\t'+self.code_type.replace('\n','\n \t')
@@ -3548,6 +3543,7 @@ class SympyFormula(ReportModule):
             self._container.append(self._eq)
         
         return copy.copy(self)
+        #return self
     
     def _latex(self):
 

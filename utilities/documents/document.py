@@ -7,6 +7,7 @@ from pylatex.utils import (#italic,
                            NoEscape)
 from ..report import Markdown, CurrentContainer, ReportText, IPMarkdown
 from ..components.mech import en as mech_comp
+from ..components.guides import en as guide_comp
 
 
 
@@ -926,3 +927,27 @@ class PosterTemplate(Document):
 
         #self.append(Command('frame', arguments=[NoEscape(r'\titlepage')]))
         self.append(Command('maketitle'))
+        
+        
+class IntroToCocalcGuide(Guide):
+
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+
+            guide_comp.CocalcLoginComponent,
+            guide_comp.JupyterSetUpComponent,
+            guide_comp.CocalcFolderComponent,
+
+            guide_comp.CocalcDynSysListComponent,
+            guide_comp.ReportingBasicsComponent,
+            
+
+        ]
+
+        return comp_list
+
+
+
+        

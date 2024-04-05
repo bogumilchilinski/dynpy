@@ -1149,3 +1149,10 @@ class BernoulliLinearTransformation(ReportComponent):
 
         for elem in list(sep_ode_report)[3:]:
             self.append(elem)
+
+class MultiScaleProcedureComponent(ReportComponent):
+    title="Algorithm needed to use MSM solver"
+    
+    def append_elements(self):
+        system = self.reported_object
+        display(ReportText("Step by step instruction: \n\n Step 1: \n\n Step 2: \n\n Step 3: \n\n Step 4: \n\n Step 5:"))
