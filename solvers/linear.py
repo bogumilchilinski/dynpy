@@ -1658,7 +1658,7 @@ class ODESystem(AnalyticalSolution):
             frequency = 0.005*self._ivar
         elif isinstance(ramp, (float, int)):
             frequency = ramp*self._ivar
-            display(frequency)
+#             display(frequency)
         else:
             return "Error, ramp should be a float or int type"
 

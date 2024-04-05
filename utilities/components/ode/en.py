@@ -1156,3 +1156,11 @@ class MultiScaleProcedureComponent(ReportComponent):
     def append_elements(self):
         system = self.reported_object
         display(ReportText("Step by step instruction: \n\n Step 1: \n\n Step 2: \n\n Step 3: \n\n Step 4: \n\n Step 5:"))
+# class MSMComparison(ReportComponent):
+#     title="Plot Comparison: Numerically Simulated Results vs. Analytical Solutions"
+
+#     def append_elements(self):
+#         system=self.reported_object
+#         msm=system.as_msm()
+#         msm_sol=msm.general_solution
+#         num_plot=msm.numerized().with_ics([0.1,0]).compute_solution(t_span,[0.1,0]).plot()
