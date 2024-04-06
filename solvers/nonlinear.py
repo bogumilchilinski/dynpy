@@ -643,7 +643,7 @@ class MultiTimeScaleSolution(ODESystem):
         
         order = self.order
         
-        print('my order',order)
+        #print('my order',order)
         sol_list = []
         gen_sol = self._general_sol(order)
         
