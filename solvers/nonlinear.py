@@ -596,7 +596,7 @@ class MultiTimeScaleSolution(ODESystem):
             approx_subs = approx.applyfunc(eqns_map).subs(
                 sol_subs_dict).applyfunc(eqns_map)
             
-            #display(approx_subs)
+            display(approx_subs)
 
             
             approx_subs._parameters = self._t_list[1:]
@@ -617,14 +617,14 @@ class MultiTimeScaleSolution(ODESystem):
             
             #aux_mat=self.odes_system.jacobian(self.dvars)
             aux_mat=approx_subs.jacobian(approx_subs.dvars)
-            if det(aux_mat)!=0:
+            if det(aux_mat)==0:
 
                 SolverClass = FirstOrderLinearODESystem
             else:
                 SolverClass = FirstOrderLinearODESystemWithHarmonics
 
             #SolverClass = FirstOrderLinearODESystemWithHarmonics
-            #SolverClass = FirstOrderLinearODESystem
+            SolverClass = FirstOrderLinearODESystem
             
             sol = SolverClass.from_ode_system(approx_subs).steady_solution.applyfunc(
                 lambda obj: obj.expand()).applyfunc(eqns_map)#.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).sum_expr)
