@@ -230,10 +230,10 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
         
         #sec_conditions =FirstOrderODESystem.from_ode_system(ODESystem([sec_conditions[1][1],sec_conditions[3][1]],dvars = self._const_list ,ivar=ivar  )).linearized().solution
         
-        print('some check')
+        #print('some check')
         
-        display(sec_conditions)
-        display(self._const_list)
+        #display(sec_conditions)
+        #display(self._const_list)
         
         sec_odes=ODESystem((sec_conditions),
                          dvars=Matrix(self._const_list),
@@ -596,7 +596,7 @@ class MultiTimeScaleSolution(ODESystem):
             approx_subs = approx.applyfunc(eqns_map).subs(
                 sol_subs_dict).applyfunc(eqns_map)
             
-            display(approx_subs)
+            #display(approx_subs)
 
             
             approx_subs._parameters = self._t_list[1:]
@@ -643,7 +643,7 @@ class MultiTimeScaleSolution(ODESystem):
         
         order = self.order
         
-        print('my order',order)
+        #print('my order',order)
         sol_list = []
         gen_sol = self._general_sol(order)
         
