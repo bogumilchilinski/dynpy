@@ -2906,7 +2906,8 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
                             coord_level_name=-1,
                             ics=None,
                             backend=None,
-                            dependencies=None):
+                            dependencies=None,
+                            ):
         """
         A method that allows you to perform numerical simulations on the created DataFrame.
 
