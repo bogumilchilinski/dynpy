@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from sympy import lambdify
 
+
 miesiace_list = ['styczeń', 'luty', 'marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']
 
 srednie_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]
@@ -120,6 +121,7 @@ class CocalcLoginComponent(ReportComponent):
         display(pic3)
 
         display(ReportText('''Poprzez tego linka można dołączyć do projektu Ongoing: [ONGOING](https://cocalc.com/app?project-invite=dS62jsbRJvcfj2Mu) '''))
+        
 
 #Zakladanie Jupytera        
 
@@ -412,11 +414,11 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
 
     def append_elements(self):
         
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
         
-        from dynpy.models.mechanics import ForcedSpringMassSystem as SDOFWinchSystem
+        #from dynpy.models.mechanics import ForcedSpringMassSystem as SDOFWinchSystem
 
-        eoms=SDOFWinchSystem()._eoms[0]
+        eoms=system._eoms[0]
         eoms
 
         display(ReportText('Proces wywołowania równania ruchu za pomoca metody eoms:'))
@@ -442,7 +444,7 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
 
         #display(Picture('./Image/eomseq_w.jpg'))
 
-        slownik=SDOFWinchSystem().get_random_parameters()
+        slownik=system.get_random_parameters()
 
         
 
@@ -461,7 +463,7 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
         display(ReportText('Rozwiązanie ogólne równania:'))
         #display(Picture('./Image/ogolne_w.jpg'))
 
-        solution=SDOFWinchSystem()._ode_system.solution[0]
+        solution=system._ode_system.solution[0]
 #         display(ObjectCode('''solution=SDOFWinchSystem()._ode_system.solution[0]
 #         solution'''
 #         ))
@@ -471,7 +473,7 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
 
 
 
-        steady_solution=SDOFWinchSystem()._ode_system.steady_solution[0]
+        steady_solution=system._ode_system.steady_solution[0]
 #         display(ObjectCode('''steady_solution=SDOFWinchSystem()._ode_system.steady_solution[0]
 #         steady_solution'''))
         display(SympyFormula(steady_solution))
@@ -517,7 +519,7 @@ class SimulationsComponent(ReportComponent):
 
     def append_elements(self):
         
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
 
 
         display(ReportText('Definicja wektoru czasu:'))
@@ -532,16 +534,16 @@ class SimulationsComponent(ReportComponent):
         #display(Picture('./Image/stedisub_w.jpg'))
 
         display(Markdown(steady_sol_str))
-        slownik=SDOFWinchSystem().get_random_parameters()
-        steady_solution=SDOFWinchSystem()._ode_system.steady_solution[0]
+        slownik=system.get_random_parameters()
+        steady_solution=system._ode_system.steady_solution[0]
         steady_solution_subs=steady_solution.subs(slownik)
         display(steady_solution_subs)
         display(ReportText('Zastosowanie metody lambdify umożliwiającej konwersje funkcji do postaci anonimowej'))
         #display(Picture('./Image/lambdify_w.jpg'))
 
 
-        eq_lambdify=lambdify(SDOFWinchSystem().ivar,steady_solution_subs.simplify())
-        display(ObjectCode('''eq_lambdify=lambdify(SDOFWinchSystem().ivar,steady_solution_subs.simplify())'''))
+        eq_lambdify=lambdify(system.ivar,steady_solution_subs.simplify())
+        display(ObjectCode('''eq_lambdify=lambdify(system.ivar,steady_solution_subs.simplify())'''))
         display(SympyFormula(eq_lambdify))
 
 
@@ -555,16 +557,16 @@ class SimulationsComponent(ReportComponent):
         display(ReportText('Podstawienie słownika:'))
         #display(Picture('./Image/tableq_w.jpg'))
 
-        table_eq=SDOFWinchSystem()._ode_system.steady_solution.subs(slownik)
+        table_eq=system._ode_system.steady_solution.subs(slownik)
 
 
-        display(Markdown('''table_eq=SDOFWinchSystem()._ode_system.steady_solution.subs(slownik)'''))
+        display(Markdown('''table_eq=system._ode_system.steady_solution.subs(slownik)'''))
         display(SympyFormula(table_eq))
 
         #jak tabele zrobic + ew jej output
         display(ReportText('Sposób tworzenia tabeli:'))
         #display(Picture('./Image/tabela_w.jpg'))
-        phi = SDOFWinchSystem.phi
+        phi = system.phi
         table=table_eq.numerized().compute_solution(t_span)
         table_new=table[phi]
 
@@ -629,7 +631,7 @@ class SimulationReportComponent(ReportComponent):
 
     def append_elements(self):
         
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
 
         display(ReportText('Sposób tworzenia sekcji przy użyciu metody CurrentContainer:'))
 
@@ -643,11 +645,11 @@ class SimulationReportComponent(ReportComponent):
 
 
         display(ReportText('poniżej przedstawiony jest sposób tworzenia wykresu dla podanych danych: '))
-        eoms=SDOFWinchSystem()._eoms[0]
-        slownik=SDOFWinchSystem().get_random_parameters()
+        eoms=system._eoms[0]
+        slownik=system.get_random_parameters()
         eoms_eq=Eq(eoms,0)
-        solution_subs = SDOFWinchSystem()._ode_system.steady_solution.subs(slownik)
-        steady_solution=SDOFWinchSystem()._ode_system.steady_solution[0]
+        solution_subs = system._ode_system.steady_solution.subs(slownik)
+        steady_solution=system._ode_system.steady_solution[0]
         steady_solution_subs=steady_solution.subs(slownik)
         steady_solution_subs
 #         eq_sol=Eq(solution_subs,0)
@@ -760,12 +762,12 @@ class BasicSymComponent(ReportComponent):
 
     def append_elements(self):
         
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
 
 
         #przekopiowac tu fragment kodu z guide pamietajac o indentach
-
-        from dynpy.models.mechanics.tmac import SDOFWinchSystem
+        SDOFWinchSystem = type(system)
+#         from dynpy.models.mechanics.tmac import SDOFWinchSystem
         eoms= SDOFWinchSystem()._eoms[0]
         eoms_eq_raw=Eq(eoms,0)
         data=SDOFWinchSystem().get_random_parameters()
@@ -958,8 +960,8 @@ class DifferentSimulationsComponent(ReportComponent):
     
     def append_elements(self):
         
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
-
+        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        SDOFWinchSystem = type(system)
 
         display(ReportText('Wygenerowanie rozwiazania szczegolnego klasy:'))
         display(ObjectCode(steady_state_code))

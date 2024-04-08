@@ -900,7 +900,7 @@ class ODESystem(AnalyticalSolution):
         >>>from dynpy.solvers.linear import *
         >>>import sympy
 
-        >>>t = Symbols('t')
+        >>>t = Symbol('t')
         >>>Omega, omega = symbols('Omega omega',positive)
         >>>x = Function('x')(t)
 
@@ -1242,7 +1242,7 @@ class ODESystem(AnalyticalSolution):
         if self._default_ics is None:
             latex_str =  f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}'
         else:
-            latex_str = f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}~~with~~{latex(self._default_ics)}' 
+            latex_str = f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}~~with~~{latex(self.default_ics)}' 
     #
         if len(self._callback_dict) == 0:
             return f'{latex_str}'

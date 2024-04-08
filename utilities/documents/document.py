@@ -7,7 +7,7 @@ from pylatex.utils import (#italic,
                            NoEscape)
 from ..report import Markdown, CurrentContainer, ReportText, IPMarkdown
 from ..components.mech import en as mech_comp
-from ..components.guides import en as guide_comp
+from ..components.guides import pl as guide_comp
 
 
 
@@ -947,6 +947,29 @@ class IntroToCocalcGuide(Guide):
         ]
 
         return comp_list
+
+class UsageOfDynamicSystemsGuide(Guide):
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+
+            guide_comp.DynamicSystemCallComponent,
+            guide_comp.DynamicSystemMethodsUsageComponent,
+            guide_comp.SimulationsComponent,
+            guide_comp.SimulationReportComponent
+
+        ]
+
+        return comp_list
+    
+    @property
+    def default_reported_object(self):
+        
+        from ...models.mechanics.tmac import SDOFWinchSystem
+        
+        return SDOFWinchSystem()
 
 
 
