@@ -2454,26 +2454,28 @@ class AdaptableSeries(pd.Series, BasicFormattingTools):
         self._reported = False
 
 
-def find_peaks_values(self, signal, height=None, threshold=None, distance=None, prominence=None, width=None, wlen=None, rel_height=0.5, plateau_size=None):
+    def find_peaks_values(self, height=None, threshold=None, distance=None, prominence=None, width=None, wlen=None, rel_height=0.5, plateau_size=None):
 
-    '''
-    Method based on scipy signal.find_peaks method.
-    '''
+        '''
+        Method based on scipy signal.find_peaks method.
+        '''
 
-    import scipy
-    from scipy import signal as scipy_signal
+        import scipy
+        from scipy import signal as scipy_signal
 
-    sig = np.array(signal.values.tolist())
+        signal=self
 
-    sig = sig.reshape((len(sig), 1))[:,0]
+        sig = np.array(signal.values.tolist())
 
-    peaks_no, _ = scipy_signal.find_peaks(x=sig, height=height, threshold=threshold, distance=distance, prominence=prominence, width=width, wlen=wlen, rel_height=rel_height, plateau_size=plateau_size)
+        sig = sig.reshape((len(sig), 1))[:,0]
 
-    peaks_list = sig[peaks_no]
+        peaks_no, _ = scipy_signal.find_peaks(x=sig, height=height, threshold=threshold, distance=distance, prominence=prominence, width=width, wlen=wlen, rel_height=rel_height, plateau_size=plateau_size)
 
-    peaks_idx = signal.index[peaks_no]
+        peaks_list = sig[peaks_no]
 
-    return self._constructor(data=peaks_list, index=peaks_idx)
+        peaks_idx = signal.index[peaks_no]
+
+        return self._constructor(data=peaks_list, index=peaks_idx)
 
 class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
 
@@ -2542,6 +2544,32 @@ class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
     def _get_str_key(self):
         #return self.to_latex()+f'subplot={self._subplot}, self._caption{self._caption} '
         return self.style.to_latex() + f'subplot={self._subplot}'
+    
+    
+    def find_peaks_values(self, height=None, threshold=None, distance=None, prominence=None, width=None, wlen=None, rel_height=0.5, plateau_size=None):
+
+        '''
+        Method based on scipy signal.find_peaks method.
+        '''
+
+        series_list=[]
+
+        for signal in self.items():
+
+            sig = AdaptableSeries(signal[1])
+
+            series = sig.find_peaks_values(height=height, threshold=threshold, distance=distance, prominence=prominence, width=width, wlen=wlen, rel_height=rel_height, plateau_size=plateau_size)
+
+            series_list.append(series)
+
+        df = pd.concat(series_list, axis=1)
+
+        result = self._constructor(df)
+
+        result.columns = self.columns
+
+        return result
+
 
 
 class LatexDataFrame(AdaptableDataFrame):
