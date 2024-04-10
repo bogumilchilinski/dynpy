@@ -423,13 +423,14 @@ class Spring(Element):
         return {**super().get_numerical_data(),**self.default_numerical_dict}
     
     @classmethod 
-    def from_default(cls,
-                 stiffness=None,
-                 pos1=None,
-                 frame=base_frame,
-                 qs=None,
-                 ivar=Symbol('t'),
-                 **kwargs):
+    def from_default(
+            cls,
+            stiffness=None,
+            pos1=None,
+            frame=base_frame,
+            qs=None,
+            ivar=Symbol('t'),
+            **kwargs):
         if stiffness is not None: cls.stiffness=stiffness
         if pos1 is None: pos1= dynamicsymbols('z') 
         if not qs: 
@@ -476,7 +477,7 @@ class TorsionalSpring(Spring):
 class GravitationalForce(Element):
     """
     Model of a changing centroid for potential energy. Creates a singular model, after inputing correct values of gravity field - g,
-     mass of - m as well as additionaly the general coordiante
+    mass of - m as well as additionaly the general coordiante
     """
     scheme_name = ''
     real_name = ''
@@ -597,6 +598,7 @@ class Damper(Element):
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
         self._dissipative_potential = D
+
     @property
     def force(self):
         
