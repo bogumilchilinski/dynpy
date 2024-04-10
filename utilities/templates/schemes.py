@@ -159,3 +159,31 @@ class TheveninTikZDiagram(TikZPicture):
 """
 
         return code
+    
+class TikZDiagram(TikZPicture):
+
+    def _scheme_desc(self):
+
+        code=r"""
+\coordinate (origo) at (0,0);
+\node (B1) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center, rounded corners=0.5cm] at (origo) {Podaj funkcję limitu stanu, \\wartości parametrów, cenę, \\oczekiwany indeks niezawodności, \\funkcję kosztów zmiany parametrów};
+\node (B2) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([xshift=0cm,yshift=-1.5cm]B1.south) {Wykonaj obliczenia przy użyciu \\metody odwrotnej niezawodności};
+\draw [thick, ->] ([yshift=0cm]B1.south) -- ([xshift=0cm,yshift=0cm]B2.north) node[midway,above] {};
+\node (B3) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([xshift=0cm,yshift=-1.5cm]B2.south) {Zbadaj wrażliwość parametrów};
+\draw [thick, ->] ([yshift=0cm]B2.south) -- ([xshift=0cm,yshift=0cm]B3.north) node[midway,above] {};
+\node (B4) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([xshift=0cm,yshift=-1.5cm]B3.south) {Na podstawie funkcji kosztów określ \\cenę dla aktualnej tolerancji wykonania};
+\draw [thick, ->] ([yshift=0cm]B3.south) -- ([xshift=0cm,yshift=0cm]B4.north) node[midway,above] {};
+\node (B5) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center, diamond, aspect=1.5] at ([xshift=0cm,yshift=-3cm]B4.south) {Porównaj aktualną cenę \\z ceną poprzednią};
+\draw [thick, ->] ([yshift=0cm]B4.south) -- ([xshift=0cm,yshift=0cm]B5.north) node[midway,above] {};
+\node (B6) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([xshift=4.5cm,yshift=0cm]B5.east) {ALGORYTM \\OPTYMALIZACYJNY \\dobór nowych parametrów};
+\node (B7) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([xshift=0cm,yshift=-1.5cm]B5.south) {Zapisz wartości};
+\node (B8) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center,, rounded corners=0.5cm] at ([xshift=-4.2cm,yshift=0cm]B5.west) {Podaj wartości \\parametrów i zakończ};
+\draw [thick, ->] ([xshift=0cm]B5.west) -- ([xshift=0cm,yshift=0cm]B8.east) node[midway,above] {Równa};
+\draw [thick, ->] ([xshift=0cm]B5.south) -- ([xshift=0cm,yshift=0cm]B7.north) node[midway,right] {Niższa cena};
+\draw [thick, ->] ([xshift=0cm]B5.east) -- ([xshift=0cm,yshift=0cm]B6.west) node[midway,above] {Wyższa cena};
+\draw [thick, ->] ([xshift=0cm]B6.north) |- ([xshift=0cm,yshift=0cm]B2.east) node[midway,above] {};
+\draw [thick, ->] ([xshift=0cm]B7.east) -| ([xshift=0cm,yshift=0cm]B6.south) node[midway,above] {};
+"""
+
+        return code
+    
