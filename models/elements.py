@@ -875,6 +875,10 @@ class Force(Element):
     def _get_virtual_work(self):
         return Eq(Symbol('\delta W'), Symbol(latex(self.force)) * Symbol(f'\delta({latex(self._pos1)})')  )    
         
+        
+        
+
+        
 # class CombustionEngine(Force):
 
 #     eta= Symbol('eta', positive = True)
@@ -1380,3 +1384,62 @@ Creates a model of a PID controller (proportional , integral , derivative) which
         forcelist = [ (point_dmp,-diff(G,coord_vel)*frame.x)  for coord_vel,point_dmp in points_dict.items() ]
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
+        
+class ConstrainsReaction(Element):
+    """
+    Creates enforcement.
+    """
+
+    scheme_name = ''
+    real_name = ''
+    def __init__(self,
+                 constrain = None,
+                 pos1 = None,
+                 qs = None,
+                 ivar=Symbol('t'),
+                 frame = base_frame):
+
+        self.constrain = constrain
+        self._pos1 = pos1
+        self.force=force
+        if qs is None:
+            qs = [pos1]
+
+        else:
+            qs = qs
+
+
+        if isinstance(pos1, Point):
+            P = pos1
+            if qs is None:
+                diffs=P.vel(frame).magnitude().atoms(Derivative)
+
+                qs= [deriv.args[0] for deriv in diffs]
+                print(qs)
+        else:
+
+            P = Point('P')
+            P.set_vel(frame,pos1.diff(ivar)*frame.x)
+
+            force = 0
+            for coord  in qs:
+
+                force=+self.constrain.diff(coord)*frame.x
+
+
+        forcelist=[(P,force)]
+
+        #display(forcelist)
+
+        super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
+
+    def get_default_data(self):
+        t=self.ivar
+        F0=Symbol('F_0',positive=True)
+        self.default_data_dict={
+            # self.force:[F0*no for no in range(1,10)],
+        }
+        return {**super().get_default_data(),**self.default_data_dict}
+
+    def _get_virtual_work(self):
+        return Eq(Symbol('\delta W'), Symbol(latex(self.force)) * Symbol(f'\delta({latex(self._pos1)})')  )    

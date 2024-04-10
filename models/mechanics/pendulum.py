@@ -2919,3 +2919,86 @@ class DampedMeasuringTool(ComposedSystem):
         kt = Symbol('k_t', positive=True)
         Re = Symbol('R_e', positive=True)
         return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
+    
+    
+    
+#issue 589 karolina ziabrowska piotr loch
+class PendulumWithVaryingMassDamper(ComposedSystem):
+
+    
+    # do zmiany rysunek juz sie wczytuje
+    scheme_name = 'MDOFDoublePendulum.png'
+    real_name = 'TriplePendulum_real.jpg'
+    detali_scheme_name = 'MDOFDoublePendulum.png'
+    detali_real_name = 'TriplePendulum_real.jpg'
+    #do zmiany
+    
+    #m=Symbol('m', positive=True)
+    ivar=Symbol('t')
+    
+    m1=Function('m_1')(ivar)
+    m2=Function('m_2')(ivar)
+    l_1=Symbol('l_1', positive=True)
+    l_2=Symbol('l_2', positive=True)
+    g=Symbol('g', positive=True)
+    omega=Symbol('Omega', positive=True)
+    phi_1=dynamicsymbols('varphi_1')
+    phi_2=dynamicsymbols('varphi_2')
+    phi_u=dynamicsymbols('varphi_u')
+    phi_l=dynamicsymbols('varphi_l')
+    qs=dynamicsymbols('varphi_1 varphi_2')
+    
+ 
+
+    def __init__(self,
+                 #m=None,
+                 m1=None,
+                 m2=None,
+                 l_1=None,
+                 l_2=None,
+                 g=None,
+                 omega=None,
+                 phi_1=None,
+                 phi_2=None,
+                 phi_u=None,
+                 phi_l=None,
+                 qs=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+ 
+        if m1 is not None: self.m1 = m1
+        #if m is not None: self.m=m
+        if m2 is not None: self.m2 = m2
+        if l_1 is not None: self.l_1 = l_1
+        if l_2 is not None: self.l_2 = l_2
+        if g is not None: self.g = g
+        if omega is not None: self.omega = omega
+        if phi_1 is not None: self.phi_1 = phi_1
+        if phi_2 is not None: self.phi_2 = phi_2
+        if phi_u is not None: self.phi_u = phi_u
+        if phi_l is not None: self.phi_l = phi_l
+
+        
+        self.qs = [self.phi_1,self.phi_2]
+        self._init_from_components(**kwargs)
+
+    @cached_property
+    def components(self):
+        components = {}
+
+        self.x_2 = sin(self.phi_1)*self.l_1 + sin(self.phi_2)*self.l_2
+        self.y_2 = cos(self.phi_1)*self.l_1 + cos(self.phi_2)*self.l_2
+
+        self.Pendulum1 = Pendulum(self.m1, self.g, self.l_1, angle=self.phi_1, qs=[self.phi_1])
+        self.material_point_11 = MaterialPoint(self.m2, self.x_2, qs=[self.phi_1, self.phi_2])
+        self.material_point_21 = MaterialPoint(self.m2, self.y_2, qs=[self.phi_1, self.phi_2])
+        self.gravity_1 = GravitationalForce(self.m2, self.g, pos1=-self.y_2, qs=[self.phi_2])
+
+        components['Pendulum 1'] = self.Pendulum1
+        components['material_point_11'] = self.material_point_11
+        components['material_point_21'] = self.material_point_21
+        components['gravity_1'] = self.gravity_1
+
+        return components
+    

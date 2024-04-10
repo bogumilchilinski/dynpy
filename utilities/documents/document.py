@@ -7,7 +7,7 @@ from pylatex.utils import (#italic,
                            NoEscape)
 from ..report import Markdown, CurrentContainer, ReportText, IPMarkdown
 from ..components.mech import en as mech_comp
-from ..components.guides import en as guide_comp
+from ..components.guides import pl as guide_comp
 
 
 
@@ -38,7 +38,9 @@ Examplary setup is as follows:
     
     display(ReportText('Exemplary text'*100))
     
-    display(Markdown('Formatted text'*100))
+    #will not work in some projects, restrict usage 
+    display(Markdown('Formatted text'*100)) 
+    
     
     
 ## Math
@@ -256,8 +258,39 @@ class Guide(Document,ReportMethods):
         self.append(NewPage())
         # tu implementować co tam potrzeba
         self.append_components()
+        
+    @classmethod
+    def base_setup(cls):
+        """
+        Perform basic setup for document creation.
 
-class ExampleTemplate(Guide):      
+        This method initializes the document and prepares it for content addition.
+
+        Example:
+            
+            To prepare a simple document with text and images:
+
+            >>> section = Section('name_of_section')
+            >>> CurrentContainer(section)
+
+        # Adding text in containers
+        >>> display(ReportText('''text''')) 
+
+        # Adding images
+        >>> display(Picture('path_of_image', position = 'H', height= NoEscape(' x cm '), width = NoEscape(' x cm ')
+        # Creating file
+        >>> guide_name = 'path File_name'
+        doc=DevelopmentGuide(guide_name,documentclass=NoEscape('article'),document_options=['a4paper','fleqn'],lmodern=False)
+        doc.append(section_name) # adding certain sections
+        # Generating file
+        >>> doc.generate_pdf(clean_tex=True)
+
+        Returns:
+            None
+        """
+
+
+class ExampleTemplate(Guide):
     pass
 
         
@@ -947,6 +980,29 @@ class IntroToCocalcGuide(Guide):
         ]
 
         return comp_list
+
+class UsageOfDynamicSystemsGuide(Guide):
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+
+            guide_comp.DynamicSystemCallComponent,
+            guide_comp.DynamicSystemMethodsUsageComponent,
+            guide_comp.SimulationsComponent,
+            guide_comp.SimulationReportComponent
+
+        ]
+
+        return comp_list
+    
+    @property
+    def default_reported_object(self):
+        
+        from ...models.mechanics.tmac import SDOFWinchSystem
+        
+        return SDOFWinchSystem()
 
 
 

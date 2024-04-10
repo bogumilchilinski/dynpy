@@ -900,7 +900,7 @@ class ODESystem(AnalyticalSolution):
         >>>from dynpy.solvers.linear import *
         >>>import sympy
 
-        >>>t = Symbols('t')
+        >>>t = Symbol('t')
         >>>Omega, omega = symbols('Omega omega',positive)
         >>>x = Function('x')(t)
 
@@ -1242,7 +1242,7 @@ class ODESystem(AnalyticalSolution):
         if self._default_ics is None:
             latex_str =  f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}'
         else:
-            latex_str = f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}~~with~~{latex(self._default_ics)}' 
+            latex_str = f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}~~with~~{latex(self.default_ics)}' 
     #
         if len(self._callback_dict) == 0:
             return f'{latex_str}'
@@ -1676,7 +1676,7 @@ class ODESystem(AnalyticalSolution):
             if amp_symbol is None:
                 amp_symbol = Symbol('F', positive=True)
 #             display(freq_symbol,amp_symbol)
-            return type(self)(odes=self.odes.subs({freq_symbol: frequency, amp_symbol:amplitude}), dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar).numerized(backend='numpy')
+            return type(self)(odes=self.odes.subs({freq_symbol: frequency, amp_symbol:amplitude}), dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar)#.numerized(backend='numpy')
 
         else:
 
@@ -1701,7 +1701,7 @@ class ODESystem(AnalyticalSolution):
             exct_mat[number,0] = amplitude*sin(Omega*self._ivar)
 
 
-            return type(self)(odes=hom_ode.odes, odes_rhs=exct_mat, dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar).numerized(backend='numpy')
+            return type(self)(odes=hom_ode.odes, odes_rhs=exct_mat, dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar)#.numerized(backend='numpy')
 
 
 #         type(self)(odes=hom_eq, odes_rhs=zeros(len(self.dvars),1), dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar)
