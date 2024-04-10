@@ -1714,20 +1714,27 @@ class ODESystem(AnalyticalSolution):
         if self._ode_order == 2 and len(self) == 1:
             
             coord = self.dvars[0]
+            ivar = self.ivar
             
-            new_eq = (self.odes[0]/self.odes[0].coeff(diff(coord,self.ivar,2))).expand()
+            inertia = self.odes[0].coeff(diff(coord,self.ivar,2))
+            
+            new_eq = (self.odes[0]/inertia).expand()
+            rhs_comp=self._free_component()/inertia
+            
             omega_coeff = new_eq.coeff(self.dvars[0])
             h_coeff = new_eq.coeff(diff(self.dvars[0], self.ivar))
             
             omega_sym = Symbol('omega',positive=True)
             h_sym  = Symbol('h',positive=True)
             
-            subs_eq = new_eq.subs({omega_sym**2:omega_coeff, h_sym:S.Half * h_coeff})
-            canonical_ode = Matrix([coord.diff(ivar,2) + 2*h_sym * coord.diff(ivar) + omega_sym**2 * coord ])
+            subs_dict = {omega_sym**2:omega_coeff, h_sym:S.Half * h_coeff}
+            
+            #subs_eq = new_eq.subs(subs_dict)
+            canonical_ode = Matrix([coord.diff(ivar,2) + 2*h_sym * coord.diff(ivar) + omega_sym**2 * coord  ] )  +rhs_comp
             
             new_odesys = ODESystem(odes = canonical_ode, dvars = Matrix([coord]), ode_order = 2)
             
-            new_odesys._callback_dict = subs_eq
+            new_odesys._callback_dict = subs_dict
             
             return new_odesys
         else:
