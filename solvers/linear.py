@@ -1237,8 +1237,8 @@ class ODESystem(AnalyticalSolution):
         return FirstOrderLinearODESystemWithHarmonics
         #return FirstOrderLinearODESystem
 
-    # Michał Sz.
     def _latex(self,*args):
+
         if self._default_ics is None:
             latex_str =  f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}'
         else:
@@ -1247,7 +1247,9 @@ class ODESystem(AnalyticalSolution):
         if len(self._callback_dict) == 0:
             return f'{latex_str}'
         else:
-            return f'{latex_str}~~with~~{latex(self._callback_dict)}'
+            cannonical_coeffs_list=[Eq(thing,self._callback_dict[thing],evaluate=False) for thing in self._callback_dict]
+            
+            return f'{latex_str}~~where~~{latex(cannonical_coeffs_list[0])}, {latex(cannonical_coeffs_list[1])}'
 
     def as_matrix(self):
         return Matrix(self._lhs_repr - self.rhs) 

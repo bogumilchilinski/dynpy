@@ -1260,7 +1260,7 @@ odesys1 = ODESystem(odes = Matrix([eq1.lhs-eq1.rhs]),dvars = Matrix([x], ode_ord
 
 odesys1.solution
 ''')
-class OdeBasics(ReportComponent):
+class BasicUsageOfODESystemComponent(ReportComponent):
     
     title="Podstawy używania klasy ODESystem"
 

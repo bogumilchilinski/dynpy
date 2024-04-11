@@ -205,6 +205,8 @@ class Element(LagrangesDynamicSystem):
         #print(f'{class_name} element check', self.scheme_options )
         return [TikZNode('Material Point',options=['draw'],text=f'{class_name}')]
 
+    def _get_virtual_work(self):
+        return Eq(Symbol('\delta W'), Symbol(latex(self.force)) * Symbol(f'\delta({latex(self._pos1)})')  )
     
 #Pati
 class MaterialPoint(Element):
@@ -230,6 +232,9 @@ class MaterialPoint(Element):
                  **kwargs):
         if m is not None: self.m=m
         if pos1 is not None: self.pos1=pos1
+        self.ivar = ivar
+        
+        
         if not qs:
             self.qs = [pos1]
 
@@ -249,6 +254,11 @@ class MaterialPoint(Element):
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar,frame=frame,**kwargs)
         
         self._kinetic_energy = Lagrangian
+        
+        
+    def _get_virtual_work(self):
+        return Eq(Symbol('\delta W'), Symbol(latex(self.m * self.pos1.diff(self.ivar))) * Symbol(f'\delta({latex(self.pos1)})')  )
+        
     def symbols_description(self):
         self.sym_desc_dict={
             self.m :r'Mass of body',
@@ -323,7 +333,7 @@ class MaterialPoint(Element):
         
         
 
-#Mateusz
+#Mateusz karol
 class Spring(Element):
     """
     Model of a Spring: Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s),
@@ -439,6 +449,10 @@ class Spring(Element):
 
         return cls(stiffness=stiffness, pos1=pos1, qs=qs,ivar=ivar, frame = frame)
 
+    def _get_virtual_work(self):
+        return Eq(Symbol('\delta W'), Symbol(latex(self.m * self.pos1.diff(self.ivar))) * Symbol(f'\delta({latex(self.pos1)})')  )
+    
+   #piotrek 
 class TorsionalSpring(Spring):
     """
     Model of a Spring: Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s),
@@ -473,7 +487,7 @@ class TorsionalSpring(Spring):
 
 
     
-    
+    #piotrek
 class GravitationalForce(Element):
     """
     Model of a changing centroid for potential energy. Creates a singular model, after inputing correct values of gravity field - g,
@@ -501,7 +515,10 @@ class GravitationalForce(Element):
         }
         return self.default_data_dict
 
-
+    def _get_virtual_work(self):
+        return Eq(Symbol('\delta W'), Symbol(latex(self.m * self.pos1.diff(self.ivar))) * Symbol(f'\delta({latex(self.pos1)})')  )
+    
+#karol
 class Disk(Element):
     """
     Model of a Disk:
@@ -1403,7 +1420,7 @@ class ConstrainsReaction(Element):
 
         self.constrain = constrain
         self._pos1 = pos1
-        self.force=force
+#         self.force=force
         if qs is None:
             qs = [pos1]
 
@@ -1444,4 +1461,4 @@ class ConstrainsReaction(Element):
         return {**super().get_default_data(),**self.default_data_dict}
 
     def _get_virtual_work(self):
-        return Eq(Symbol('\delta W'), Symbol(latex(self.force)) * Symbol(f'\delta({latex(self._pos1)})')  )    
+        return Eq(Symbol('\delta W'), Symbol(latex(self.force)) * Symbol(f'\delta({latex(self._pos1)})')  )

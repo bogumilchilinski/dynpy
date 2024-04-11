@@ -261,34 +261,71 @@ class Guide(Document,ReportMethods):
         
     @classmethod
     def base_setup(cls):
+        
+        preliminary_str=(
         """
-        Perform basic setup for document creation.
+        #Perform basic setup for document creation.
 
-        This method initializes the document and prepares it for content addition.
+        #This method initializes the document and prepares it for content addition.
 
-        Example:
+        #Example:
             
-            To prepare a simple document with text and images:
+        #To prepare a simple document with text and images:
+        
+        #Good practice here is to allocate 1 section per 1 cell
+        
+        # Creating section 1 
+    section1 = Section('name_of_section')
+    CurrentContainer(section1)
+        
+        # Adding text in containers 1
+    display(ReportText('''text'''))
+    display(Markdown('''text'''))
 
-            >>> section = Section('name_of_section')
-            >>> CurrentContainer(section)
+        # Adding images 1
+    display(Picture('path_of_image', position = 'H', height= NoEscape(' x cm '), width = NoEscape(' x cm ')))
+    
+        # Adding math formulas
+    from sympy import Eq, Symbol, symbols
+    display(ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.'))
+    a,b = symbols('a b')
+    display(SympyFormula(Eq(a,b)))
+    
+        # Creating section 2 
+    section2 = Section('name_of_section')
+    CurrentContainer(section2)
+        
+        # Adding text in containers 2
+    display(ReportText('''text''')) 
+    display(Markdown('''text'''))
+        
+        # Adding images 2
+    display(Picture('path_of_image', position = 'H', height= NoEscape(' x cm '), width = NoEscape(' x cm ')))
+        
+        # Creating sections 3
+    section3 = Section('name_of_section')
+    CurrentContainer(section3)
+        
+        # Adding text in containers 3
+    display(ReportText('''text''')) 
 
-        # Adding text in containers
-        >>> display(ReportText('''text''')) 
-
-        # Adding images
-        >>> display(Picture('path_of_image', position = 'H', height= NoEscape(' x cm '), width = NoEscape(' x cm ')
+        # Adding images 3
+    display(Picture('path_of_image', position = 'H', height= NoEscape(' x cm '), width = NoEscape(' x cm ')))
+        
+        
+        
         # Creating file
-        >>> guide_name = 'path File_name'
-        doc=DevelopmentGuide(guide_name,documentclass=NoEscape('article'),document_options=['a4paper','fleqn'],lmodern=False)
-        doc.append(section_name) # adding certain sections
+    guide_name = 'path File_name'
+    doc=DevelopmentGuide(guide_name,documentclass=NoEscape('article'),document_options=['a4paper','fleqn'],lmodern=False)
+    doc.append(section1) # adding certain sections
+    doc.append(section2)
+    doc.append(section3)
         # Generating file
-        >>> doc.generate_pdf(clean_tex=True)
+    doc.generate_pdf(clean_tex=True)
 
-        Returns:
-            None
         """
-
+        )    
+        return IPMarkdown(preliminary_str) 
 
 class ExampleTemplate(Guide):
     pass

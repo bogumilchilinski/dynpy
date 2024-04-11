@@ -1696,6 +1696,7 @@ class DataTable(Table, ReportModule):
         Package("booktabs"),
         Package("longtable"),
         Package("caption"),
+        Package("float"),
         Command("captionsetup[table]{skip=5pt}"),
     ]
 
