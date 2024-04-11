@@ -2922,7 +2922,7 @@ class DampedMeasuringTool(ComposedSystem):
     
     
     
-#issue 589 karolina ziabrowska piotr loch
+#issue 589 karolina ziabrowska piotr loch AM
 class PendulumWithVaryingMassDamper(ComposedSystem):
 
     
@@ -2942,11 +2942,14 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
     l_2=Symbol('l_2', positive=True)
     g=Symbol('g', positive=True)
     omega=Symbol('Omega', positive=True)
-    phi_1=dynamicsymbols('varphi_1')
-    phi_2=dynamicsymbols('varphi_2')
+    phi_1=dynamicsymbols('alpha')
+    phi_2=dynamicsymbols('beta')
     phi_u=dynamicsymbols('varphi_u')
     phi_l=dynamicsymbols('varphi_l')
-    qs=dynamicsymbols('varphi_1 varphi_2')
+    u0 = Symbol('u_0',positive=True)
+    k = Symbol('k',positive=True)
+    b = Symbol('b',positive=True)
+    qs=dynamicsymbols('alpha beta')
     
  
 
@@ -2962,6 +2965,9 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
                  phi_2=None,
                  phi_u=None,
                  phi_l=None,
+                 u0=None,
+                 k=None,
+                 b=None,
                  qs=None,
                  ivar=Symbol('t'),
                  **kwargs):
@@ -2978,6 +2984,9 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
         if phi_2 is not None: self.phi_2 = phi_2
         if phi_u is not None: self.phi_u = phi_u
         if phi_l is not None: self.phi_l = phi_l
+        if u0 is not None: self.u0 = u0
+        if k is not None: self.k = k
+        if b is not None: self.b = b
 
         
         self.qs = [self.phi_1,self.phi_2]
@@ -2994,11 +3003,17 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
         self.material_point_11 = MaterialPoint(self.m2, self.x_2, qs=[self.phi_1, self.phi_2])
         self.material_point_21 = MaterialPoint(self.m2, self.y_2, qs=[self.phi_1, self.phi_2])
         self.gravity_1 = GravitationalForce(self.m2, self.g, pos1=-self.y_2, qs=[self.phi_2])
+        self.damper_1 = Damper(self.b,self.phi_1,qs=[self.phi_1])
+        self.damper_2 = Damper(self.b,self.phi_2,qs=[self.phi_2])
+        self.force = Force(self.u0*sin(self.omega*self.ivar)*self.k*self.l_1,self.phi_1,qs=[self.phi_1])
 
         components['Pendulum 1'] = self.Pendulum1
         components['material_point_11'] = self.material_point_11
         components['material_point_21'] = self.material_point_21
         components['gravity_1'] = self.gravity_1
+        components['damper_1'] = self.damper_1
+        components['damper_2'] = self.damper_2
+        components['force'] = self.force
 
         return components
     
