@@ -325,7 +325,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     def _scheme(cls):
 
 
-        path = cls._images_abs_path()  + cls.scheme_name
+        path = cls._default_folder_path  + cls.scheme_name
 
         return path
 
@@ -339,7 +339,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         """
 
-        path = cls._images_abs_path() + cls.real_name
+        path = cls._default_folder_path + cls.real_name
 
         return path
 

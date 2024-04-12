@@ -2974,6 +2974,26 @@ class Picture(Figure,ReportModule):
     _position = 'H'
     _preview_default_size = "20cm"
     
+    
+    @classmethod
+    def _settle_dynpy(cls):
+        from ..dynamics import LagrangesDynamicSystem
+        
+        if not os.path.exists("./._dynpy_env/dynpy"):
+            LagrangesDynamicSystem._settle_dynpy()
+            return True
+        else:
+            return False
+        
+#     @classmethod
+#     def _as_picture(cls, position=None, caption=None,width=None,height=None,marker=None, **kwargs):
+        
+        
+#         pic_path = "./._dynpy_env" + cls._default_folder_path[1:] + cls.scheme_name
+#         cls._settle_dynpy()
+#         return Picture(pic_path, position=position, caption=caption, width=width, height=height, marker=marker, **kwargs)
+    
+    
     @classmethod
     def set_preview_default_size(cls, size):
         cls._preview_default_size = size
@@ -3015,6 +3035,11 @@ class Picture(Figure,ReportModule):
         super().__init__(position=self._position,**kwargs)
         
         if self.image is not None:
+            type(self)._settle_dynpy()
+
+            if "./dynpy/" in self.image:
+                self.image = self.image.replace("./dynpy","./._dynpy_env/dynpy")
+                
             self.add_image(NoEscape(self.image),width=self.width)
             
         if self.caption is not None:
@@ -3085,6 +3110,9 @@ class Picture(Figure,ReportModule):
         
         if self.image is not None:
             path = (self.image)
+
+                
+            
             if 'pdf' in path:
                 from wand.image import Image as WImage            
 

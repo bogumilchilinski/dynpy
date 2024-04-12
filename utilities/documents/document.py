@@ -5,11 +5,9 @@ from pylatex import (Document, Package, Command, NewPage, Tabularx
 #from pylatex.section import Paragraph, Chapter
 from pylatex.utils import (#italic, 
                            NoEscape)
-from ..report import Markdown, CurrentContainer, ReportText, IPMarkdown
+from ..report import Markdown, CurrentContainer, ReportText, IPMarkdown, ObjectCode,display
 from ..components.mech import en as mech_comp
-from ..components.guides import pl as guide_comp
-
-
+from ..components.guides import en as guide_comp
 
 class ReportMethods:
 
@@ -20,9 +18,13 @@ class ReportMethods:
         
         preliminary_str=(
 """
+
 Examplary setup is as follows:
 
+## CELL 1
 ## Imports
+
+
 
     from dynpy.utilities.report import *
     from dynpy.utilities.templates.document import Guide
@@ -30,8 +32,11 @@ Examplary setup is as follows:
     doc = Guide('./output/report_name')
     
 
-    
+## CELL 2
 ## Text reporting
+    
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
     
     sec_text = Section('Section that presents text reporting')
     CurrentContainer(sec_text)
@@ -42,8 +47,11 @@ Examplary setup is as follows:
     display(Markdown('Formatted text'*100)) 
     
     
-    
-## Math
+## CELL 3
+## Math 
+
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
     from sympy import Eq, Symbol, symbols
     
@@ -55,12 +63,121 @@ Examplary setup is as follows:
     a,b = symbols('a b')
     display(SympyFormula(Eq(a,b)))
 
+
+## CELL 4
+## Picture
+    
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_picture = Section('Section that presents pictures reporting')
+    CurrentContainer(sec_picture)
+
+    display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))
+
+
+
+## CELL 5
+## Document
+
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+    # Creating file
+    # Be sure *output* folder is in the current directory
+
+    guide_name = './output/report_name' #path for report file 
+
+    oc = Guide(guide_name)
+    doc.append(sec_text) # adding certain sections
+    doc.append(sec_formula)
+    doc.append(sec_picture)
+    # Generating file
+    doc.generate_pdf(clean_tex=True)
+
 """
+
 )
         
-        return IPMarkdown(preliminary_str)    
+        display(IPMarkdown(preliminary_str))    
+
+        
+        preliminary_str=(
+"""
+#Perform basic setup for document creation.
+
+#This method initializes the document and prepares it for content addition.
+
+#Example:
+
+#To prepare a simple document with text and images:
+
+#Good practice here is to allocate 1 section per 1 cell
+
+## ############### CELL 1 ###########################
+## Imports
+
+from dynpy.utilities.report import *
+from dynpy.utilities.templates.document import Guide
+
+doc = Guide('./output/report_name')
+    
+
+## ############### CELL 2 ###########################
+## Text reporting
+    
+sec_text = Section('Section that presents text reporting')
+CurrentContainer(sec_text)
+
+display(ReportText('Exemplary text'*100))
+
+#will not work in some projects, restrict usage 
+display(Markdown('Formatted text'*100)) 
+    
+    
+## ############### CELL 3 ###########################
+## Math 
+
+from sympy import Eq, Symbol, symbols
+
+sec_formula = Section('Section that presents formulas reporting')
+CurrentContainer(sec_formula)
+
+display(ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.'))
+
+a,b = symbols('a b')
+display(SympyFormula(Eq(a,b)))
+
+## ############### CELL 4 ###########################
+## Picture
+
+sec_picture = Section('Section that presents pictures reporting')
+CurrentContainer(sec_picture)
+
+display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))
 
 
+
+## ############### CELL 5 ###########################
+## Document
+
+# Creating file
+# Be sure *output* folder is in the current directory
+
+guide_name = './output/report_name' #path for report file 
+
+oc = Guide(guide_name)
+doc.append(sec_text) # adding certain sections
+doc.append(sec_formula)
+doc.append(sec_picture)
+# Generating file
+doc.generate_pdf(clean_tex=True)
+
+""")    
+        return ObjectCode(preliminary_str) 
+    
+    
+    
     @property
     def _report_components(self):
         
@@ -258,74 +375,7 @@ class Guide(Document,ReportMethods):
         self.append(NewPage())
         # tu implementować co tam potrzeba
         self.append_components()
-        
-    @classmethod
-    def base_setup(cls):
-        
-        preliminary_str=(
-        """
-        #Perform basic setup for document creation.
 
-        #This method initializes the document and prepares it for content addition.
-
-        #Example:
-            
-        #To prepare a simple document with text and images:
-        
-        #Good practice here is to allocate 1 section per 1 cell
-        
-        # Creating section 1 
-    section1 = Section('name_of_section')
-    CurrentContainer(section1)
-        
-        # Adding text in containers 1
-    display(ReportText('''text'''))
-    display(Markdown('''text'''))
-
-        # Adding images 1
-    display(Picture('path_of_image', position = 'H', height= NoEscape(' x cm '), width = NoEscape(' x cm ')))
-    
-        # Adding math formulas
-    from sympy import Eq, Symbol, symbols
-    display(ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.'))
-    a,b = symbols('a b')
-    display(SympyFormula(Eq(a,b)))
-    
-        # Creating section 2 
-    section2 = Section('name_of_section')
-    CurrentContainer(section2)
-        
-        # Adding text in containers 2
-    display(ReportText('''text''')) 
-    display(Markdown('''text'''))
-        
-        # Adding images 2
-    display(Picture('path_of_image', position = 'H', height= NoEscape(' x cm '), width = NoEscape(' x cm ')))
-        
-        # Creating sections 3
-    section3 = Section('name_of_section')
-    CurrentContainer(section3)
-        
-        # Adding text in containers 3
-    display(ReportText('''text''')) 
-
-        # Adding images 3
-    display(Picture('path_of_image', position = 'H', height= NoEscape(' x cm '), width = NoEscape(' x cm ')))
-        
-        
-        
-        # Creating file
-    guide_name = 'path File_name'
-    doc=DevelopmentGuide(guide_name,documentclass=NoEscape('article'),document_options=['a4paper','fleqn'],lmodern=False)
-    doc.append(section1) # adding certain sections
-    doc.append(section2)
-    doc.append(section3)
-        # Generating file
-    doc.generate_pdf(clean_tex=True)
-
-        """
-        )    
-        return IPMarkdown(preliminary_str) 
 
 class ExampleTemplate(Guide):
     pass
