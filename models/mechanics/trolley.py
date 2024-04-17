@@ -1385,7 +1385,7 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
     
     flow_coeff = Symbol('\\lambda', positive=True)
     
-    t_0 = Symbol('t_0', positive=True)
+    t_0 = Symbol('t_0')
     
     m_0 = Symbol('m_0', positive=True)
 

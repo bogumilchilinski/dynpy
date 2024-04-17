@@ -596,7 +596,7 @@ class AnalyticalSolution(ImmutableMatrix):
         return solution_tdf
 
 
-    def _as_na_df(self,parameter=None,param_span=None,dependencies_dict=None):
+    def _as_na_df(self,parameter=None,param_span=None,dependencies_dict=None, t_span=None):
 
         parameters = self.system_parameters()
         
@@ -624,6 +624,9 @@ class AnalyticalSolution(ImmutableMatrix):
 
         if dependencies_dict is None:
             dependencies_dict = {}
+            
+        if t_span is None:
+            t_span = [0.0]
 
         reference_data = {ref_val: 1 for ref_val in  self.system_parameters()[params_included:] }
         #reference_data = {}
@@ -633,7 +636,7 @@ class AnalyticalSolution(ImmutableMatrix):
         
         Y = list(system._fode_dvars) + list(dependencies_dict.keys())
 
-        index = pd.Index([0.0],name=self.ivar)
+        index = pd.Index(t_span,name=self.ivar)
 
         df_num = NumericalAnalysisDataFrame.from_model(system,
                                                         parameter=params_list,
@@ -648,9 +651,9 @@ class AnalyticalSolution(ImmutableMatrix):
 
         return results
     
-    def numerical_analysis(self,parameter=None,param_span=None,dependencies_dict=None):
+    def numerical_analysis(self,parameter=None,param_span=None,dependencies_dict=None, t_span=None):
                        
-        return self._as_na_df(parameter=parameter, param_span=param_span, dependencies_dict=dependencies_dict)
+        return self._as_na_df(parameter=parameter, param_span=param_span, dependencies_dict=dependencies_dict, t_span=t_span)
 
     @property
     def _report_components(self):
