@@ -1242,10 +1242,11 @@ class ODESystem(AnalyticalSolution):
 
     def _latex(self,*args):
 
-        if self._default_ics is None:
+        if self.default_ics is None:
             latex_str =  f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}'
         else:
-            latex_str = f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}~~with~~{latex(self.default_ics)}' 
+            ics = self.default_ics()
+            latex_str = f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}~~with~~{latex(ics)}'
     #
         if len(self._callback_dict) == 0:
             return f'{latex_str}'

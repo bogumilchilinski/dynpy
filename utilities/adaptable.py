@@ -444,6 +444,8 @@ class DataAxis(Axis, ReportModule):
     _legend_pos = "north east"
     _default_transformer = BaseIndexTransformer
 
+    _xtick=None
+    
     def __init__(
         self,
         plotdata=None,
@@ -457,6 +459,7 @@ class DataAxis(Axis, ReportModule):
         at=None,
         handle=None,
         data=None,
+        xtick=None,
     ):
         """
         Args
@@ -488,6 +491,8 @@ class DataAxis(Axis, ReportModule):
 
         if options is None:
             options = self._axis_options
+        
+            
 
         super().__init__(options=options, data=data)
 
@@ -558,6 +563,11 @@ class DataAxis(Axis, ReportModule):
             ]
         else:
             ay_options = []
+            
+        if self.__class__._xtick is not None:
+            xtick_options=[NoEscape(f"xtick={{{self.__class__._xtick}}}")]
+        else:
+            xtick_options=[]
 
         base_options = (
             [
@@ -573,7 +583,9 @@ class DataAxis(Axis, ReportModule):
             + at_option
             + ax_options
             + ay_options
+            + xtick_options
         )
+
 
         return Options(*base_options, **kwargs)
 
@@ -1771,6 +1783,7 @@ class MarkerRegistry(dict):
 class AutoMarker:
     _markers_dict = {}
     _prefix = "eq"
+    _sufix=""
     _name = None
     _floats_no_gen = plots_no()
 
@@ -1848,7 +1861,7 @@ class AutoMarker:
         else:
 
             marker = Marker(
-                f"Mrk{self._marker_name}{next(self._floats_no_gen)}",
+                f"Mrk{self._marker_name}{next(self._floats_no_gen)}{self.__class__._sufix}",
                 prefix=self._prefix,
             )
             self._markers_dict[elem] = marker
@@ -1865,6 +1878,10 @@ class AutoMarker:
 
     def __str__(self):
         return Ref(self.marker).dumps()
+    
+    @classmethod
+    def set_default_sufix(cls, sufix=""):
+        cls._sufix = sufix
 
 
 class BasicFormattingTools(DataMethods):

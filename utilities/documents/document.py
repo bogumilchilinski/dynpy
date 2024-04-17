@@ -211,6 +211,7 @@ doc.generate_pdf(clean_tex=True)
             return self.default_reported_object
         else:
             return reported_obj
+        
 
     @reported_object.setter
     def reported_object(self,value):
@@ -1087,9 +1088,10 @@ class UsageOfDynamicSystemsGuide(Guide):
     @property
     def default_reported_object(self):
         
-        from ...models.mechanics.tmac import SDOFWinchSystem
+        #from ...models.mechanics.tmac import SDOFWinchSystem
+        from ...models.mechanics import ForcedSpringMassSystem as DynamicSystem
         
-        return SDOFWinchSystem()
+        return DynamicSystem()
 
 
 

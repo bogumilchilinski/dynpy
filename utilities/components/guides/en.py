@@ -74,7 +74,7 @@ class ReportComponent(Subsection):
             return self._reported_object
 
         else:
-            return None
+            return self._reported_object
             
     @reported_object.setter
     def reported_object(self, obj):
@@ -394,7 +394,7 @@ class CocalcDynSysListComponent(ReportComponent):
             classes_str=',\n - '.join(mods_tmp)
             if mods_tmp != []:
                 display(ReportText( '\\par' + f'-{nazwa}'+ '\\par'))
-                display(ReportText(f'- {classes_str}'))  
+                display(ReportText(f'- {classes_str}'))
 
 
 class ReportingBasicsComponent(ReportComponent):
@@ -437,7 +437,7 @@ from pylatex.utils import italic, NoEscape
 from dynpy.utilities.adaptable import *
 from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase 
 from dynpy.utilities.templates.tikz import TikzCaSCStandalone
-from dynpy.utilities.report import (SystemDynamicsAnalyzer, DataPlot, AccelerationComparison, FFTComparison, ReportEntry, SimulationalBlock, ReportText, SimulationFFT, DataStorage, Markdown, SummaryTable, Picture, SympyFormula, SymbolsDescription, DescriptionsRegistry, ObjectCode, CurrentContainer)
+from dynpy.utilities.report import (Markdown, Picture, SympyFormula, SymbolsDescription, DescriptionsRegistry, ObjectCode, CurrentContainer)
 from dynpy.solvers.linear import ODESystem
 init_vprinting()
 from dynpy.models.mechanics.tmac import SDOFWinchSystem
@@ -453,7 +453,9 @@ class DynamicSystemCallComponent(ReportComponent):
 
     def append_elements(self):
 
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        system_name = system.__class__.__name__
+        
         display(ReportText('Wymagane importy bibliotek/poszczególnych klas do stworzenia raportu:'))
 
 
@@ -462,19 +464,15 @@ class DynamicSystemCallComponent(ReportComponent):
 
         display(ReportText('Klasa umożliwiająca rozwiązanie konkretnej problematyki (w tym przypadku problematyki związanej z opisem dźwigu):'))
 
-        display(ObjectCode(
-        """
-        from dynpy.models.mechanics.tmac import SDOFWinchSystem 
-        """))
+        display(ObjectCode("""from dynpy.models.mechanics import SDOFWinchSystem""".replace('SDOFWinchSystem',system_name)      ))
+        display(ObjectCode('system=SDOFWinchSystem()'.replace('SDOFWinchSystem',system_name)     ))
 
         display(ReportText('Ścieżka do poszukiwanej klasy na platformie CoCalc:'))
         display(Picture('./dynpy/utilities/components/guides/images/sciezka_w.jpg'))
 
         display(ReportText('Sposób wywowałania preview klasy - tzw. podglądu:'))
 
-        display(ObjectCode('''
-        SDOFWinchSystem().preview()
-        '''))
+        display(ObjectCode('''SDOFWinchSystem()._as_picture()'''.replace('SDOFWinchSystem',system_name)    ))
         
         
 class DynamicSystemMethodsUsageComponent(ReportComponent):
@@ -482,19 +480,17 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
     title="Wywolywanie rownan ruchu oraz innych metod"
 
 
+
     def append_elements(self):
         
         system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
         
         #from dynpy.models.mechanics import ForcedSpringMassSystem as SDOFWinchSystem
-
+        
         eoms=system._eoms[0]
-        eoms
 
         display(ReportText('Proces wywołowania równania ruchu za pomoca metody eoms:'))
-#         display(ObjectCode('''eoms=SDOFWinchSystem()._eoms[0]
-#         eoms'''
-#         ))
+        display(ObjectCode('''eoms=SDOFWinchSystem()._eoms[0]'''))
 
 
 
@@ -506,9 +502,7 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
         eoms_eq
 
         display(ReportText('Proces tworzenia równania z wcześniej wywołanego równania ruchu (równanie początkowo jest wywoływane jako ciąg znaków reprezentujący opis danego problemu, jednak nie jest on wówczas równaniem, które możemy zastosować do obliczeń):'))
-#         display(ObjectCode('''eoms_eq=Eq(eoms,0)
-#         eoms_eq'''
-#         ))
+        display(ObjectCode('eoms_eq=Eq(eoms,0)'))
         display(ReportText('Wynik jest następujący:'))
         display(SympyFormula(eoms))
 
@@ -520,23 +514,15 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
 
         display(ReportText('Tworzenie słownika (w tym przypadku z losowymi wartościami) umożliwiający nadanie wartości zmiennym:'))
 
-        display(Markdown(
-"""
-
-    slownik=SDOFWinchSystem().get_random_parameters()
-    slownik
-
-"""
-        ))
+        display(ObjectCode('slownik=SDOFWinchSystem().get_random_parameters()'))
         #display(Picture('./Image/slownik_w.jpg'))
 
         display(ReportText('Rozwiązanie ogólne równania:'))
         #display(Picture('./Image/ogolne_w.jpg'))
 
         solution=system._ode_system.solution[0]
-#         display(ObjectCode('''solution=SDOFWinchSystem()._ode_system.solution[0]
-#         solution'''
-#         ))
+        display(ObjectCode('''solution=SDOFWinchSystem()._ode_system.solution[0]'''))
+        display(ObjectCode('solution_sym=SDOFWinchSystem()._ode_system.solution'))
         display(SympyFormula(solution))
 
         display(ReportText('Rozwiązanie szczególne równania:'))
@@ -544,8 +530,7 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
 
 
         steady_solution=system._ode_system.steady_solution[0]
-#         display(ObjectCode('''steady_solution=SDOFWinchSystem()._ode_system.steady_solution[0]
-#         steady_solution'''))
+        display(ObjectCode('''steady_solution=SDOFWinchSystem()._ode_system.steady_solution[0]'''))
         display(SympyFormula(steady_solution))
     
     
@@ -554,7 +539,6 @@ steady_sol_str=(
 '''
 
 steady_solution_subs=steady_solution.subs(slownik)
-steady_solution_subsS
 
 ''')
 
@@ -571,13 +555,14 @@ report_table_define_str=(
 
 tabela = Section('Tabela')
 CurrentContainer(tabela)
-
+phi = system.phi
+general_sol_matrix=solution_sym.subs(slownik).with_ics([0,0])
 table_eq=general_sol_matrix.n().numerized().compute_solution(t_span)
 table=table_eq[[phi]]
 
 table_for_report = table[0::15].to_latex_dataframe()
 
-#Wyniki symulacji zostały zestawione w tabeli
+#Wyniki symulacji zostaly zestawione w tabeli
 
 table_for_report.reported(caption=('Tabela'))
 
@@ -589,8 +574,9 @@ class SimulationsComponent(ReportComponent):
 
     def append_elements(self):
         
-        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
-
+        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        from dynpy.models.mechanics.tmac import SDOFWinchSystem
+        system=SDOFWinchSystem()
 
         display(ReportText('Definicja wektoru czasu:'))
         #display(Picture('./Image/tspan_w.jpg'))
@@ -603,7 +589,7 @@ class SimulationsComponent(ReportComponent):
         display(ReportText('Podstawienie danych z wcześniej stworzonego słownika:'))
         #display(Picture('./Image/stedisub_w.jpg'))
 
-        display(Markdown(steady_sol_str))
+        display(ObjectCode(steady_sol_str))
         slownik=system.get_random_parameters()
         steady_solution=system._ode_system.steady_solution[0]
         steady_solution_subs=steady_solution.subs(slownik)
@@ -630,7 +616,7 @@ class SimulationsComponent(ReportComponent):
         table_eq=system._ode_system.steady_solution.subs(slownik)
 
 
-        display(Markdown('''table_eq=system._ode_system.steady_solution.subs(slownik)'''))
+        display(ObjectCode('''table_eq=system._ode_system.steady_solution.subs(slownik)'''))
         display(SympyFormula(table_eq))
 
         #jak tabele zrobic + ew jej output
@@ -647,12 +633,11 @@ class SimulationsComponent(ReportComponent):
         display(ReportText('Sposób tworzenia wizualizacji zdefiniowanej tabeli:'))
         #display(Picture('./Image/tabelka_w.jpg'))
 
-        display(ObjectCode('''table_new'''))
 
         display(ReportText('sposób tworzenia tabeli wyświetlanej w gotowym raporcie:'))
         #display(Picture('./Image/tworzenie_tabeli_w.png'))
 
-        display(Markdown(report_table_define_str))
+        display(ObjectCode(report_table_define_str))
 
         display(ReportText('Wizualizacja wykresu::'))
         #display(Picture('./Image/tikzplot_w.jpg'))
@@ -685,7 +670,7 @@ display(SympyFormula(eq_steady_sol))
 
 report_generation_libraries=(
 '''
-doc_final = MechanicalCase('./Out/Document',documentclass=NoEscape('article'),document_options=['a4paper','fleqn'],lmodern=False)
+doc_final = MechanicalCase('./output/Document',documentclass=NoEscape('article'),document_options=['a4paper','fleqn'],lmodern=False)
 
 doc_final.append(intro)
 doc_final.append(rownania_ruchu)
@@ -698,11 +683,11 @@ class SimulationReportComponent(ReportComponent):
     
     title="Raportowanie wykresów"
 
-
     def append_elements(self):
         
-        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
-
+        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        from dynpy.models.mechanics.tmac import SDOFWinchSystem
+        system=SDOFWinchSystem()
         display(ReportText('Sposób tworzenia sekcji przy użyciu metody CurrentContainer:'))
 
         #sekcja 1|
@@ -882,10 +867,10 @@ class BasicSymComponent(ReportComponent):
         table_eq=general_sol_matrix.n().numerized().compute_solution(t_span)
         table=table_eq[[phi.diff(t)]]
         table_for_report = table.iloc[0::15].to_latex_dataframe()
-        display(Markdown(f'Wyniki symulacji zostały zestawione w tabeli {AutoMarker(table_for_report)}'))
+        display(ObjectCode(f'Wyniki symulacji zostały zestawione w tabeli {AutoMarker(table_for_report)}'))
         display(table_for_report.reported(caption='Tabela'))
         sim_plot = table.to_pylatex_tikz().in_figure(caption='Wykres')
-        display(Markdown(f'Wyniki symulacji zostały przedstawione graficznie na wykresie {AutoMarker(sim_plot)}'))
+        display(ObjectCode(f'Wyniki symulacji zostały przedstawione graficznie na wykresie {AutoMarker(sim_plot)}'))
         display(sim_plot)
         
         
@@ -1061,7 +1046,7 @@ class DifferentSimulationsComponent(ReportComponent):
 
 
         display(ReportText('Utworzenie wektora - zestaw wartosci czasu dla naszej symulacji '))
-        display(Markdown('''
+        display(ObjectCode('''
             function = lambdify(SDOFWinchSystem.ivar, steady_state)
             t_span = np.linspace(0,100,200)'''))
 
@@ -1181,7 +1166,7 @@ class BasicOperationsComponent(ReportComponent):
         display(ReportText(' **Funkcja describe() - podstawowe statystyki** s.describe() '))
         display(x4.reported())
 
-        display(Markdown(
+        display(ObjectCode(
         '''
         **Zmiana nazw indeskow domyslnie zaczynajacych sie od 0**
         s.index =['pierwszy','drugi','trzeci','czwarty','piąty','szósty']

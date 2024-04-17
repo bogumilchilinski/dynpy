@@ -894,7 +894,7 @@ class PandasMethodsComponent(ReportComponent):
         
 steady_state_code=(
 '''
-steady_state = SDOFWinchSystem()._ode_system_solution()[0]
+steady_state = SDOFWinchSystem().eoms.solution[0]
 steady_state
 ''')
     
@@ -961,10 +961,13 @@ class DifferentSimulationsComponent(ReportComponent):
     def append_elements(self):
         
         system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        
         SDOFWinchSystem = type(system)
 
         display(ReportText('Wygenerowanie rozwiazania szczegolnego klasy:'))
-        display(ObjectCode(steady_state_code))
+        
+        display(ObjectCode(   steady_state_code.replace('SDOFWinchSystem',system.__class__.__name__)   ))
+        
         steady_state = SDOFWinchSystem.from_random_data()._ode_system.solution.with_ics([0,0])[0].subs(SDOFWinchSystem.m0,10)
         display(steady_state)
 
@@ -1573,7 +1576,7 @@ class ODENumericalSimulationsComponent(ReportComponent):
 
 
         
-class ProjectileExamplComponent(ReportComponent):
+class ProjectileExampleComponent(ReportComponent):
     
     title="Przykład użycia ODESystem na podstawie rzutu ukośnego"
 
@@ -1733,3 +1736,12 @@ class ReportCompUseComponent(ReportComponent):
         display(ReportText('To solve the problem serve several methods depending on the equation type. As dynamic systems s behaviour is described by an ordinary differential equation, the variables of the equation are as follows: t [x]'))
         display(ReportText('The variables allow to study and analyse the system s dynamics varying with time.'))
         
+'''
+class DynSysIntroComponent(ReportComponent):
+
+    title="Wstęp do używania modułu DynSys"
+    
+    def append_element(self):
+    
+    
+'''
