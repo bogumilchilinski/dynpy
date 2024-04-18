@@ -3017,3 +3017,47 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
 
         return components
     
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'mass of the system',
+            self.m1: r'initial mass of the upper pendulum member',
+            self.m2: r'initial mass of the lower pendulum member',
+            self.m_f1: r'mass of the upper pendulum',
+            self.m_f2: r'mass of the lower pendulum',
+            self.m_f1.diff(t): r'mass fluid flow of the upper pendulum',
+            self.m_f2.diff(t): r'mass fluid flow of the lower pendulum',
+            self.m_t: r'total mass of the system',
+            self.m_t2: r'total mass of the lower pendulum',
+            self.m_0: r'transferred damping mass',
+            self.l_1: r'length of the upper pendulum',
+            self.l_2: r'length of the lower pendulum',
+            self.l_3: r'length of the damper pendulum',
+            self.w: r'angular velocity',
+            self.k: r'spring stiffness',
+            self.ls: r'length of the spring',
+            #self.u: r'difference of spring length and initial spring length',
+            self.x0: r'initial position of the system',
+            self.l0: r'initial spring length',
+            self.u0: r'initial difference of spring length and starting spring length',
+            self.x_k: r'forcing force',
+            self.b: r'damping coefficient value',
+            self.omega: r'excitation frequency',
+            #self.f: r'????',
+            self.g: r'acceleration of gravity',
+            self.rho_f: r'fluid density',
+            self.phi_1: r'angle of the upper pendulum swing',
+            self.phi_2: r'angle of the lower pendulum swing',
+            self.phi_1.diff(t): r'generalized velocity of the upper pendulum member',
+            self.phi_2.diff(t): r'generalized velocity of the lower pendulum member',
+            self.phi_1.diff(t,t): r'generalized acceleration of the upper pendulum member',
+            self.phi_2.diff(t,t): r'generalized acceleration of the lower pendulum member',
+            self.t0: r'activation time',
+            self.flow_coeff: r'fluid flow rate',
+            self.ivar: r'time',
+            self.h_fa:r'centre of gravity of the higher member',
+            self.h_fb:r'centre of gravity of the lower member',
+            self.A_pipe1:r'cross-section area of the upper member',
+            self.A_pipe2:r'cross-section area of the lower member',
+        }
+        return self.sym_desc_dict
+    
