@@ -289,7 +289,7 @@ class JupyterSetUpComponent(ReportComponent):
 
         # display(pic18)
 
-        display(ObjectCode(dynpy_imports_code))
+        display(GuideCode(dynpy_imports_code))
 
 
 class CocalcFolderComponent(ReportComponent):
@@ -377,11 +377,10 @@ class CocalcDynSysListComponent(ReportComponent):
 
         display(ReportText('''Kod wywołania pomocy jest następujący:'''))
         
-        display(ObjectCode(   code_dynsys_list_str   ))
+        display(GuideCode(   code_dynsys_list_str   ))
 
 
         display(ReportText('Poniżej znajduje się lista systemów mechanicznych których można użyć:  '))
-
         from dynpy.models import mechanics
 
 
@@ -409,7 +408,7 @@ class ReportingBasicsComponent(ReportComponent):
         
         display(ReportText('Pierwszy krokiem jest import "szablonu" dokumentu np. klasy `Guide` oraz wywołanie metody `base_setup`. Wynik wywołania jest następujący:'))
 
-        display(ObjectCode(
+        display(GuideCode(
 '''
 from dynpy.utilities.templates.document import *
 Guide.base_setup()
@@ -459,20 +458,22 @@ class DynamicSystemCallComponent(ReportComponent):
         display(ReportText('Wymagane importy bibliotek/poszczególnych klas do stworzenia raportu:'))
 
 
-        display(ObjectCode(imports_code_str))
+        display(GuideCode(imports_code_str.replace('SDOFWinchSystem',system_name)))
 
 
         display(ReportText('Klasa umożliwiająca rozwiązanie konkretnej problematyki (w tym przypadku problematyki związanej z opisem dźwigu):'))
 
-        display(ObjectCode("""from dynpy.models.mechanics import SDOFWinchSystem""".replace('SDOFWinchSystem',system_name)      ))
-        display(ObjectCode('system=SDOFWinchSystem()'.replace('SDOFWinchSystem',system_name)     ))
+        display(GuideCode("""from dynpy.models.mechanics import SDOFWinchSystem""".replace('SDOFWinchSystem',system_name)      ))
+        
+        
+        display(GuideCode('system=SDOFWinchSystem()'.replace('SDOFWinchSystem',system_name)     ))
 
         display(ReportText('Ścieżka do poszukiwanej klasy na platformie CoCalc:'))
         display(Picture('./dynpy/utilities/components/guides/images/sciezka_w.jpg'))
 
         display(ReportText('Sposób wywowałania preview klasy - tzw. podglądu:'))
 
-        display(ObjectCode('''SDOFWinchSystem()._as_picture()'''.replace('SDOFWinchSystem',system_name)    ))
+        display(GuideCode('''SDOFWinchSystem()._as_picture()'''.replace('SDOFWinchSystem',system_name)    ))
         
         
 class DynamicSystemMethodsUsageComponent(ReportComponent):
@@ -484,13 +485,14 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
     def append_elements(self):
         
         system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        system_name = system.__class__.__name__
         
         #from dynpy.models.mechanics import ForcedSpringMassSystem as SDOFWinchSystem
         
         eoms=system._eoms[0]
 
         display(ReportText('Proces wywołowania równania ruchu za pomoca metody eoms:'))
-        display(ObjectCode('''eoms=SDOFWinchSystem()._eoms[0]'''))
+        display(GuideCode('''eoms=SDOFWinchSystem()._eoms[0]'''.replace('SDOFWinchSystem',system_name)))
 
 
 
@@ -502,7 +504,7 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
         eoms_eq
 
         display(ReportText('Proces tworzenia równania z wcześniej wywołanego równania ruchu (równanie początkowo jest wywoływane jako ciąg znaków reprezentujący opis danego problemu, jednak nie jest on wówczas równaniem, które możemy zastosować do obliczeń):'))
-        display(ObjectCode('eoms_eq=Eq(eoms,0)'))
+        display(GuideCode('eoms_eq=Eq(eoms,0)'.replace('SDOFWinchSystem',system_name)))
         display(ReportText('Wynik jest następujący:'))
         display(SympyFormula(eoms))
 
@@ -514,15 +516,15 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
 
         display(ReportText('Tworzenie słownika (w tym przypadku z losowymi wartościami) umożliwiający nadanie wartości zmiennym:'))
 
-        display(ObjectCode('slownik=SDOFWinchSystem().get_random_parameters()'))
+        display(GuideCode('slownik=SDOFWinchSystem().get_random_parameters()'.replace('SDOFWinchSystem',system_name)))
         #display(Picture('./Image/slownik_w.jpg'))
 
         display(ReportText('Rozwiązanie ogólne równania:'))
         #display(Picture('./Image/ogolne_w.jpg'))
 
         solution=system._ode_system.solution[0]
-        display(ObjectCode('''solution=SDOFWinchSystem()._ode_system.solution[0]'''))
-        display(ObjectCode('solution_sym=SDOFWinchSystem()._ode_system.solution'))
+        display(GuideCode('''solution=SDOFWinchSystem()._ode_system.solution[0]'''.replace('SDOFWinchSystem',system_name)))
+        display(GuideCode('solution_sym=SDOFWinchSystem()._ode_system.solution'.replace('SDOFWinchSystem',system_name)))
         display(SympyFormula(solution))
 
         display(ReportText('Rozwiązanie szczególne równania:'))
@@ -530,7 +532,7 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
 
 
         steady_solution=system._ode_system.steady_solution[0]
-        display(ObjectCode('''steady_solution=SDOFWinchSystem()._ode_system.steady_solution[0]'''))
+        display(GuideCode('''steady_solution=SDOFWinchSystem()._ode_system.steady_solution[0]'''.replace('SDOFWinchSystem',system_name)))
         display(SympyFormula(steady_solution))
     
     
@@ -544,9 +546,9 @@ steady_solution_subs=steady_solution.subs(slownik)
 
 solution_table_str=(
 '''
-
+coord = system.q[0]
 table=table_eq.numerized().compute_solution(t_span)
-table_new=table[[phi]]
+table_new=table[[coord]]
 
 ''')
 
@@ -555,10 +557,11 @@ report_table_define_str=(
 
 tabela = Section('Tabela')
 CurrentContainer(tabela)
-phi = system.phi
+coord = system.q[0]
+
 general_sol_matrix=solution_sym.subs(slownik).with_ics([0,0])
 table_eq=general_sol_matrix.n().numerized().compute_solution(t_span)
-table=table_eq[[phi]]
+table=table_eq[[coord]]
 
 table_for_report = table[0::15].to_latex_dataframe()
 
@@ -574,14 +577,14 @@ class SimulationsComponent(ReportComponent):
 
     def append_elements(self):
         
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
-        from dynpy.models.mechanics.tmac import SDOFWinchSystem
-        system=SDOFWinchSystem()
+        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        system_name = system.__class__.__name__
+
 
         display(ReportText('Definicja wektoru czasu:'))
         #display(Picture('./Image/tspan_w.jpg'))
 
-        display(ObjectCode('''t_span = np.linspace(0,100,200)'''))
+        display(GuideCode('''t_span = np.linspace(0,100,200)'''.replace('SDOFWinchSystem',system_name)))
         t_span = np.linspace(0,100,200)
 
 
@@ -589,7 +592,10 @@ class SimulationsComponent(ReportComponent):
         display(ReportText('Podstawienie danych z wcześniej stworzonego słownika:'))
         #display(Picture('./Image/stedisub_w.jpg'))
 
-        display(ObjectCode(steady_sol_str))
+        
+        
+        display(GuideCode(steady_sol_str.replace('SDOFWinchSystem',system_name)))
+        
         slownik=system.get_random_parameters()
         steady_solution=system._ode_system.steady_solution[0]
         steady_solution_subs=steady_solution.subs(slownik)
@@ -599,14 +605,17 @@ class SimulationsComponent(ReportComponent):
 
 
         eq_lambdify=lambdify(system.ivar,steady_solution_subs.simplify())
-        display(ObjectCode('''eq_lambdify=lambdify(system.ivar,steady_solution_subs.simplify())'''))
+        display(GuideCode('''eq_lambdify=lambdify(system.ivar,steady_solution_subs.simplify())'''.replace('SDOFWinchSystem',system_name)))
         display(SympyFormula(eq_lambdify))
 
 
         display(ReportText('Stworzenie wykresu:'))
         #display(Picture('./Image/plot2_w.jpg'))
-        pd.DataFrame(index=t_span, data=eq_lambdify(t_span)).plot()
-        display(ObjectCode('''pd.DataFrame(index=t_span, data=eq_lamdify(t_span)).plot()'''))
+        
+        #pd.DataFrame(data=eq_lambdify(t_span),index=t_span).plot()
+        #plt.show
+        
+        display(GuideCode('''pd.DataFrame(index=t_span, data=eq_lamdify(t_span)).plot()'''.replace('SDOFWinchSystem',system_name)))
 
 
         display(ReportText('Sposób tworzenia wykresów bezpośrednio z wcześniej wywołanej klasy:'))
@@ -616,17 +625,17 @@ class SimulationsComponent(ReportComponent):
         table_eq=system._ode_system.steady_solution.subs(slownik)
 
 
-        display(ObjectCode('''table_eq=system._ode_system.steady_solution.subs(slownik)'''))
+        display(GuideCode('''table_eq=system._ode_system.steady_solution.subs(slownik)'''.replace('SDOFWinchSystem',system_name)))
         display(SympyFormula(table_eq))
 
         #jak tabele zrobic + ew jej output
         display(ReportText('Sposób tworzenia tabeli:'))
         #display(Picture('./Image/tabela_w.jpg'))
-        phi = system.phi
+        coord = system.q[0]
         table=table_eq.numerized().compute_solution(t_span)
-        table_new=table[phi]
+        table_new=table[coord]
 
-        display(ObjectCode(solution_table_str))
+        display(GuideCode(solution_table_str.replace('SDOFWinchSystem',system_name)))
         display(table)
         display(table_new)
 
@@ -637,12 +646,12 @@ class SimulationsComponent(ReportComponent):
         display(ReportText('sposób tworzenia tabeli wyświetlanej w gotowym raporcie:'))
         #display(Picture('./Image/tworzenie_tabeli_w.png'))
 
-        display(ObjectCode(report_table_define_str))
+        display(GuideCode(report_table_define_str.replace('SDOFWinchSystem',system_name)))
 
         display(ReportText('Wizualizacja wykresu::'))
         #display(Picture('./Image/tikzplot_w.jpg'))
 
-        display(ObjectCode('''table_new.to_pylatex_tikz().in_figure()'''))    
+        display(GuideCode('''table_new.to_pylatex_tikz().in_figure()'''.replace('SDOFWinchSystem',system_name)))    
 
 section_development_str=(
 '''
@@ -685,17 +694,17 @@ class SimulationReportComponent(ReportComponent):
 
     def append_elements(self):
         
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
-        from dynpy.models.mechanics.tmac import SDOFWinchSystem
-        system=SDOFWinchSystem()
+        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        system_name = system.__class__.__name__
+        
         display(ReportText('Sposób tworzenia sekcji przy użyciu metody CurrentContainer:'))
 
         #sekcja 1|
-        display(ObjectCode(section_development_str))
+        display(GuideCode(section_development_str))
 
 
         display(ReportText('Poniżej przedstawiony jest sposób tworzenia równań. W tym przypadku przyrównamy wyrazy (przed przecinkiem) do 0 (po przecinku).'))
-        display(ObjectCode(forming_equation_str))
+        display(GuideCode(forming_equation_str.replace('SDOFWinchSystem',system_name)))
 
 
 
@@ -722,7 +731,7 @@ class SimulationReportComponent(ReportComponent):
 
 
 
-        display(ObjectCode(report_generation_libraries))
+        display(GuideCode(report_generation_libraries))
 
 
 
@@ -762,16 +771,16 @@ class PandasTableGenerationComponent(ReportComponent):
 
         display(ReportText('Stworzenie listy danych:'))
 
-        display(ObjectCode(data_code))
+        display(GuideCode(data_code))
 
 
         display(ReportText('Stworzenie słownika:'))
 
-        display(ObjectCode(dict_code))
+        display(GuideCode(dict_code))
 
 
         display(ReportText('Wywolanie tabelki:'))
-        display(ObjectCode(output_code))
+        display(GuideCode(output_code))
         display(df)
         
 
@@ -852,7 +861,7 @@ class BasicSymComponent(ReportComponent):
 
         units_dict = {phi : ureg.radian,phi.diff(t):ureg.radian,t:ureg.second }
         LatexDataFrame.set_default_units(units_dict)
-        display(ObjectCode(winch_pandas_code))
+        display(GuideCode(winch_pandas_code))
 
 
         display(ReportText('Analiza i symulacje klasy SDOFWinchSystem, tzw. wciągarki. Równania ruchu: '))
@@ -867,10 +876,10 @@ class BasicSymComponent(ReportComponent):
         table_eq=general_sol_matrix.n().numerized().compute_solution(t_span)
         table=table_eq[[phi.diff(t)]]
         table_for_report = table.iloc[0::15].to_latex_dataframe()
-        display(ObjectCode(f'Wyniki symulacji zostały zestawione w tabeli {AutoMarker(table_for_report)}'))
+        display(GuideCode(f'Wyniki symulacji zostały zestawione w tabeli {AutoMarker(table_for_report)}'))
         display(table_for_report.reported(caption='Tabela'))
         sim_plot = table.to_pylatex_tikz().in_figure(caption='Wykres')
-        display(ObjectCode(f'Wyniki symulacji zostały przedstawione graficznie na wykresie {AutoMarker(sim_plot)}'))
+        display(GuideCode(f'Wyniki symulacji zostały przedstawione graficznie na wykresie {AutoMarker(sim_plot)}'))
         display(sim_plot)
         
         
@@ -899,34 +908,34 @@ class PandasMethodsComponent(ReportComponent):
         df = pd.DataFrame(index = miesiace_list,data = data_warunki_atmosferyczne)
 
         display(ReportText('***Metoda iloc:***'))
-        display(ObjectCode('df.iloc[0:3]'))
+        display(GuideCode('df.iloc[0:3]'))
         display(df.iloc[0:3])
 
         # display(Picture('./Image/iloc.jpg', caption = ""))
 
         display(ReportText('***Metoda loc:***'))
-        display(ObjectCode('df.loc["styczeń"]'))
+        display(GuideCode('df.loc["styczeń"]'))
         display(df.loc["styczeń"])
         # display(Picture('./Image/loc.jpg', caption = ""))
 
         display(ReportText('***Metoda set axis dziala za rowno dla kolumn jak i rzędów. Dla rzędów:***'))
-        display(ObjectCode("def.set_axis(['a','b','c','d','e','f','g','h','i','j','k','l'],axis = 'index')"))
+        display(GuideCode("def.set_axis(['a','b','c','d','e','f','g','h','i','j','k','l'],axis = 'index')"))
         display(df.set_axis(['a','b','c','d','e','f','g','h','i','j','k','l'], axis = 'index'))
 
         # display(Picture('./Image/set_axis.jpg', caption = ""))
 
         display(ReportText('***Dla kolumn:***'))
-        display(ObjectCode("df.set_axis(['a','b','c'],axis = 'columns')"))
+        display(GuideCode("df.set_axis(['a','b','c'],axis = 'columns')"))
         display(df.set_axis(['a','b','c'],axis = 'columns'))
         # display(Picture('./Image/set_axis2.jpg', caption = ""))
 
         display(ReportText('***Metoda rename - Zmienienie pojedynczej kolumny:***'))
-        display(ObjectCode('''df.rename(columns = {"Długość dnia w miesiącu":'AAA'}, index = {"styczeń":'A'} )'''))
+        display(GuideCode('''df.rename(columns = {"Długość dnia w miesiącu":'AAA'}, index = {"styczeń":'A'} )'''))
         display(df.rename(columns = {"Długość dnia w miesiącu":'AAA'}, index = {"styczeń":'A'} ))
         # display(Picture('./Image/rename.jpg', caption = ""))
 
         display(ReportText('***Metoda applymap:***'))
-        display(ObjectCode('     df.applymap(lambda x:x+2)'))
+        display(GuideCode('     df.applymap(lambda x:x+2)'))
         display(df.applymap(lambda x:x+2))
 
         # display(ReportText('***Metoda applymap dla kolumny/wiersza:***'))
@@ -942,7 +951,7 @@ class PandasMethodsComponent(ReportComponent):
         # display(Picture('./Image/applymap.jpg', caption = ""))
 
         display(ReportText('***Slicowanie:***'))
-        display(ObjectCode('''df['Długość dnia w miesiącu']'''))
+        display(GuideCode('''df['Długość dnia w miesiącu']'''))
         display(df['Długość dnia w miesiącu'])
         # display(Picture('./Image/slice2.jpg', caption = ""))
         
@@ -966,7 +975,7 @@ system_parameters = {'Inertia':inertia_list, 'Stiffness':stiffness_list,'Damping
 
 df_code=(
 '''
-df = pd.DataFrame(index = Model_numbber, data = system_parameters)
+df = pd.DataFrame(index = Model_number, data = system_parameters)
 df
 ''')
 
@@ -982,7 +991,11 @@ eq3 = steady_state.subs(data_dict_3).subs(SDOFWinchSystem().F,100)
 eq4 = steady_state.subs(data_dict_4).subs(SDOFWinchSystem().F,100)
 ''')
 
-
+lambdify_code_str=(
+'''
+function = lambdify(SDOFWinchSystem.ivar, steady_state)
+t_span = np.linspace(0,100,200)
+''')
 
 sym_gen_sol=(
 '''
@@ -1019,7 +1032,7 @@ class DifferentSimulationsComponent(ReportComponent):
         SDOFWinchSystem = type(system)
 
         display(ReportText('Wygenerowanie rozwiazania szczegolnego klasy:'))
-        display(ObjectCode(steady_state_code))
+        display(GuideCode(steady_state_code.replace('SDOFWinchSystem',system_name)))
         steady_state = SDOFWinchSystem.from_random_data()._ode_system.solution.with_ics([0,0])[0].subs(SDOFWinchSystem.m0,10)
         display(steady_state)
 
@@ -1027,7 +1040,7 @@ class DifferentSimulationsComponent(ReportComponent):
 
 
         display(ReportText('Stworzenie listy i tabelki'))
-        display(ObjectCode(list_code))
+        display(GuideCode(list_code))
         Model_number = [1,2,3,4] 
         inertia_list= [1,2,3,4] 
         stiffness_list = [1,2,3,4] 
@@ -1037,7 +1050,7 @@ class DifferentSimulationsComponent(ReportComponent):
         system_parameters = {'Inertia':inertia_list, 'Stiffness':stiffness_list,'Damping':damping_list,'Excitation':Excitation_list}
 
 
-        display(ObjectCode(df_code))
+        display(GuideCode(df_code))
 
         df1 =  pd.DataFrame(index = Model_number, data = system_parameters)
         display(df1)
@@ -1046,9 +1059,7 @@ class DifferentSimulationsComponent(ReportComponent):
 
 
         display(ReportText('Utworzenie wektora - zestaw wartosci czasu dla naszej symulacji '))
-        display(ObjectCode('''
-            function = lambdify(SDOFWinchSystem.ivar, steady_state)
-            t_span = np.linspace(0,100,200)'''))
+        display(GuideCode(lambdify_code_str.replace('SDOFWinchSystem',system_name)))
 
         function = lambdify(SDOFWinchSystem.ivar, steady_state)
         t_span = np.linspace(0,100,200)
@@ -1058,22 +1069,22 @@ class DifferentSimulationsComponent(ReportComponent):
 
         display(ReportText('Utworzenie słowników z danymi i podstawienie danych w nim zawartych do naszego rownania, tak aby bylo zalezne jedynie od czasu '))
 
-        display(ObjectCode(dict_code))
+        display(GuideCode(dict_code.replace('SDOFWinchSystem',system_name)))
         # display(Picture('./Image/slowniki_sym.jpg', caption = ""))
 
 
         display(ReportText('Utworzenie listy elementów podstawiajac po kolei wartosci czasu '))
-        display(ObjectCode(list_elem))
+        display(GuideCode(list_elem.replace('SDOFWinchSystem',system_name)))
         display(Picture('./dynpy/utilities/components/guides/images/eq2_fun.jpg', caption = ""))
 
 
         display(ReportText('Generowanie wykresu rownania szczegolnego '))
-        display(ObjectCode(solution_code))
+        display(GuideCode(solution_code.replace('SDOFWinchSystem',system_name)))
         display(Picture('./dynpy/utilities/components/guides/images/wykres_niefun.jpg', caption = ""))
 
 
         display(ReportText('Generowanie wykresu rownania ogolnego '))
-        display(ObjectCode(sym_gen_sol))
+        display(GuideCode(sym_gen_sol.replace('SDOFWinchSystem',system_name)))
         display(Picture('./dynpy/utilities/components/guides/images/ogolne_tab.jpg', caption = ""))
         display(Picture('./dynpy/utilities/components/guides/images/ogolne_plot.jpg', caption = ""))
 
@@ -1144,7 +1155,7 @@ class BasicOperationsComponent(ReportComponent):
         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
         
         display(ReportText('**Importowanie biblioteki Pandas**'))
-        display(ObjectCode(
+        display(GuideCode(
             '''
             import pandas as pd
             '''))
@@ -1152,7 +1163,7 @@ class BasicOperationsComponent(ReportComponent):
         display(ReportText('**Tworzenie serii (analogicznie do kolumn w Excelu)**'))
         display(x1.reported())
 
-        display(ObjectCode(
+        display(GuideCode(
             '''
             s = pd.Series([2,34,5,-2,8,12]) 
             '''))
@@ -1166,7 +1177,7 @@ class BasicOperationsComponent(ReportComponent):
         display(ReportText(' **Funkcja describe() - podstawowe statystyki** s.describe() '))
         display(x4.reported())
 
-        display(ObjectCode(
+        display(GuideCode(
         '''
         **Zmiana nazw indeskow domyslnie zaczynajacych sie od 0**
         s.index =['pierwszy','drugi','trzeci','czwarty','piąty','szósty']
@@ -1174,7 +1185,7 @@ class BasicOperationsComponent(ReportComponent):
         display(x5.reported())
         
         display(ReportText('**DataFrame (tabele) - tworzenie DataFrame na bazie słownika** *tworzenie listy wojewodztw*'))
-        display(ObjectCode(
+        display(GuideCode(
             '''
             wojewodztwa_list = ['mazowieckie','wielkopolskie','lubelskie'
             'warmińsko-mazurskie','zachodniopomorskie','podlaskie'
@@ -1184,37 +1195,37 @@ class BasicOperationsComponent(ReportComponent):
             '''))
         
         display(ReportText('*tworzenie listy powierzchni wojewodztw w km^2*'))
-        display(ObjectCode(
+        display(GuideCode(
             '''
             powierzchnia_lista=[35558,29826,25122,24173,22892,20187,19947,18310,18219,17972,17846,15183,13988,12333,11711,9412]
             '''))
 
         display(ReportText('*tworzenie listy liczby ludności*'))
-        display(ObjectCode(
+        display(GuideCode(
             '''
             ludnosc_lista=[5349114,3475323,2139726,1439675,1710482,1188800,2904207,2307710,2493603,2086210,2127657,3372618,1018075,4570849,1257179,996011]
             '''))
         
         display(ReportText('*tworzenie listy dochodow na osobe*'))
-        display(ObjectCode(
+        display(GuideCode(
             '''
             dochody_lista=[4464,3371,3338,3447,3649,3552,3788,4104,3438,3508,3212,3395,3187,3586,3268,3112]
             '''))
 
         display(ReportText('*tworzenie listy wydatków majątkowych/inwestycyjnych na osobe*'))
-        display(ObjectCode(
+        display(GuideCode(
             '''
             wydatki_lista=[787,596,623,597,767,697,742,1023,590,778,574,598,365,631,647,431]
             '''))
 
         display(ReportText('*Tworzenie słownika*'))
-        display(ObjectCode(
+        display(GuideCode(
             '''
            wojwodztwa_dane={'powierzchnia':powierzchnia,'l.osob':ludnosc_lista,'doch.':dochody_lista,'wyd.':wydatki_lista}
             '''))
 
         display(ReportText('*Wywołanie tabeli*'))
-        display(ObjectCode(
+        display(GuideCode(
             '''
             df = pd.DataFrame(index=wojewodztwa_list,data=wojwodztwa_dane)
             df
@@ -1222,7 +1233,7 @@ class BasicOperationsComponent(ReportComponent):
         display(x6.reported())
 
         display(ReportText('**Operacje na kolumnach - dodanie kolumny z obliczoną gęstością zaludnienia**'))
-        display(ObjectCode(
+        display(GuideCode(
             '''
             df['zalud.']=df['l.os.']/df['pow.']
             df
@@ -1231,35 +1242,35 @@ class BasicOperationsComponent(ReportComponent):
         
         
         display(ReportText('**Metoda iloc - za pomoca indeksów wykonujemy operacje na wierszach i kolumnach**'))
-        display(ObjectCode(
+        display(GuideCode(
             '''
             df.iloc[1:3,0:3]
             '''))
         display(x8.reported())
         
         display(ReportText('**Metoda loc**'))
-        display(ObjectCode(
+        display(GuideCode(
             '''
             df.loc['mazowieckie']
             '''))
         display(x9.reported())
         
         display(ReportText('**Dodanie wiersza za pomocą metody loc**'))
-        display(ObjectCode(
+        display(GuideCode(
             '''
             df.loc['Warszawa',:]=[4000,600000,2500,300,120]
             '''))
         display(x10.reported())
 
         display(ReportText('**Metoda set_axis dla wierszy - operacje na indeksach**'))
-        display(ObjectCode(
+        display(GuideCode(
             '''
             df.set_axis([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],axis='index')
             '''))
         display(x11.reported())
 
         display(ReportText('**Metoda set_axis dla kolumn**'))
-        display(ObjectCode(
+        display(GuideCode(
             '''
             a,b,c,d,e = symbols('a b c d e',positive = True)
             
@@ -1271,21 +1282,21 @@ class BasicOperationsComponent(ReportComponent):
         display(LatexDataFrame.formatted(x12).reported())
         
         display(ReportText('**Metoda rename - zmienia nazwy kolumni wierszy** '))
-        display(ObjectCode(
+        display(GuideCode(
             '''
             df.rename(columns={'l.osob':'LUDNOŚĆ'},index={'lubuskie':'LUBU...'})
             '''))
         display(x21.reported())
 
         display(ReportText('**Metoda apply - implemetacja funkcji na wybranej kolumnie tabeli**'))
-        display(ObjectCode(
+        display(GuideCode(
             '''
             df.dochody.apply(lambda x: x*2)
             '''))
         display(x13.reported())
 
         display(ReportText('**Metoda applymap - implemetacja funkcji na calej tabeli**'))
-        display(ObjectCode(
+        display(GuideCode(
             '''
             df.applymap(lambda x: x*2)
             '''))

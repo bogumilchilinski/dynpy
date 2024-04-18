@@ -3143,6 +3143,7 @@ class ObjectCode(LstListing,ReportModule):
     _latex_name='lstlisting'
     default_title = "Listing"
     
+    _default_header = None
     
     r"""A base class for LaTeX environments.
     This class implements the basics of a LaTeX environment. A LaTeX
@@ -3218,11 +3219,19 @@ class ObjectCode(LstListing,ReportModule):
             code=(inspect.getsource(self.source))
             #self.append(NoEscape('   \n   '+code+'   \n   '))
 
-        return fix_code(code)
+            
+            
+        if self._default_header is not None:
+            
+            return   fix_code(self._default_header + '\n' + code)
+        else:
+            return fix_code(code)
     
     def reported(self):
         
         code = self.code_type
+        
+        
         self.append(NoEscape('   \n   '+code+'   \n   '))
         
         lst_env = Aspect(self.default_title)
@@ -3239,6 +3248,17 @@ class ObjectCode(LstListing,ReportModule):
         #print(self.code_type)
         
         return '\t'+self.code_type.replace('\n','\n \t')
+
+    
+guide_code_header = """
+#!!! REMEMBER TO PASTE AND RUN ALL PREVIOUS CELL
+#!!! REMEMBER TO PASTE AND RUN ALL PREVIOUS CELL
+"""
+    
+    
+class GuideCode(ObjectCode):
+    
+    _default_header = guide_code_header
     
 class TikZPicture(Environment,ReportModule):
     
