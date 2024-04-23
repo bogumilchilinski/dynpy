@@ -9,7 +9,7 @@ from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp, G
 
 from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin
 from ...continuous import ContinuousSystem, PlaneStressProblem
-
+from ...solvers.linear import ODESystem
 
 
 import base64
@@ -389,7 +389,8 @@ class ComposedSystem(HarmonicOscillator):
 
         return parameters_dict
 
-
+    def numerical_analysis(self, parameter=None, param_span=None, dependencies_dict=None, t_span = None):
+        return ODESystem.from_dynamic_system(self)._as_na_df(parameter=parameter, param_span=param_span, dependencies_dict=dependencies_dict, t_span = t_span)
 
 class NonlinearComposedSystem(ComposedSystem):
 

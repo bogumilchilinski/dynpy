@@ -20,7 +20,7 @@ from pylatex.utils import NoEscape, italic
 from sympy import Matrix, symbols, Symbol, Eq, Expr, Number, Equality, Add, Mul,Subs
 from sympy.core.relational import Relational
 
-from sympy import Symbol, Function, Derivative, latex, sin, cos, tan, exp, atan, ImmutableMatrix, sign, StrictGreaterThan
+from sympy import Symbol, Function, Derivative, latex, sin, cos, tan, exp, atan, ImmutableMatrix, sign, StrictGreaterThan,LessThan, GreaterThan,StrictLessThan
 
 from sympy.physics.vector.printing import vlatex, vpprint
 
@@ -2745,6 +2745,55 @@ class Frame(Environment,ReportModule):
                 Command('frametitle', arguments=[self.title])
                 )
 
+class CodeFrame(Environment,ReportModule):
+
+    
+    r"""A base class for LaTeX environments.
+    This class implements the basics of a LaTeX environment. A LaTeX
+    environment looks like this:
+    .. code-block:: latex
+        \begin{environment_name}
+            Some content that is in the environment
+        \end{environment_name}
+    The text that is used in the place of environment_name is by default the
+    name of the class in lowercase.
+    However, this default can be overridden in 2 ways:
+    1. setting the _latex_name class variable when declaring the class
+    2. setting the _latex_name attribute when initialising object
+    """
+
+    #: Set to true if this full container should be equivalent to an empty
+    #: string if it has no content.
+    omit_if_empty = False
+
+    def __init__(self, title=None, options=None, arguments=None, start_arguments=None, **kwargs):
+        r"""
+        Args
+        ----
+        options: str or list or  `~.Options`
+            Options to be added to the ``\begin`` command
+        arguments: str or list or `~.Arguments`
+            Arguments to be added to the ``\begin`` command
+        start_arguments: str or list or `~.Arguments`
+            Arguments to be added before the options
+        """
+
+        _latex_name = 'frame'
+
+        self.title = title
+        self.options = options
+        self.arguments = arguments
+        self.start_arguments = start_arguments
+        self._latex_name = _latex_name
+        
+        super()._latex_name
+        super().__init__(options=['containsverbatim'], arguments=arguments, start_arguments=start_arguments,**kwargs)
+
+    
+        if self.title is not None:
+            self.append(
+                Command('frametitle', arguments=[self.title])
+                )
 
 class Markdown(Environment,ReportModule):
     packages = [
@@ -2925,6 +2974,26 @@ class Picture(Figure,ReportModule):
     _position = 'H'
     _preview_default_size = "20cm"
     
+    
+    @classmethod
+    def _settle_dynpy(cls):
+        from ..dynamics import LagrangesDynamicSystem
+        
+        if not os.path.exists("./._dynpy_env/dynpy"):
+            LagrangesDynamicSystem._settle_dynpy()
+            return True
+        else:
+            return False
+        
+#     @classmethod
+#     def _as_picture(cls, position=None, caption=None,width=None,height=None,marker=None, **kwargs):
+        
+        
+#         pic_path = "./._dynpy_env" + cls._default_folder_path[1:] + cls.scheme_name
+#         cls._settle_dynpy()
+#         return Picture(pic_path, position=position, caption=caption, width=width, height=height, marker=marker, **kwargs)
+    
+    
     @classmethod
     def set_preview_default_size(cls, size):
         cls._preview_default_size = size
@@ -2966,6 +3035,11 @@ class Picture(Figure,ReportModule):
         super().__init__(position=self._position,**kwargs)
         
         if self.image is not None:
+            type(self)._settle_dynpy()
+
+            if "./dynpy/" in self.image:
+                self.image = self.image.replace("./dynpy","./._dynpy_env/dynpy")
+                
             self.add_image(NoEscape(self.image),width=self.width)
             
         if self.caption is not None:
@@ -3036,6 +3110,9 @@ class Picture(Figure,ReportModule):
         
         if self.image is not None:
             path = (self.image)
+
+                
+            
             if 'pdf' in path:
                 from wand.image import Image as WImage            
 
@@ -3050,7 +3127,7 @@ class Picture(Figure,ReportModule):
                 return ''
             else:
                 size = self.preview_size
-                return f'<img src="{path}" alt="{caption}" width="{size}"/>    \n \n Fig. X: {caption}'
+                return f'<img src="{path}" alt="{caption}" style="width: 700px;" width="{size}"/>    \n \n Fig. X: {caption}'
                 #return f'![image preview]({path}) \n \n Fig. X: {caption}'
         else:
             return f'Nothing to plot \n \n Fig. X: {caption}'
@@ -3066,6 +3143,7 @@ class ObjectCode(LstListing,ReportModule):
     _latex_name='lstlisting'
     default_title = "Listing"
     
+    _default_header = None
     
     r"""A base class for LaTeX environments.
     This class implements the basics of a LaTeX environment. A LaTeX
@@ -3117,16 +3195,11 @@ class ObjectCode(LstListing,ReportModule):
     
     def __repr__(self):
 
-        self.reported()
+        #self.reported()
         
         code=self.code_type
         
-        repr_string=f'''
-        \n++++++++++ CODE +++++++
-        \n{code}
-        \n++++++++++ CODE +++++++
-        
-        '''
+        repr_string= f'\n CODE\n {code} \n CODE'
         
         return repr_string
     
@@ -3146,11 +3219,19 @@ class ObjectCode(LstListing,ReportModule):
             code=(inspect.getsource(self.source))
             #self.append(NoEscape('   \n   '+code+'   \n   '))
 
-        return fix_code(code)
+            
+            
+        if self._default_header is not None:
+            
+            return   fix_code(self._default_header + '\n' + code)
+        else:
+            return fix_code(code)
     
     def reported(self):
         
         code = self.code_type
+        
+        
         self.append(NoEscape('   \n   '+code+'   \n   '))
         
         lst_env = Aspect(self.default_title)
@@ -3163,10 +3244,21 @@ class ObjectCode(LstListing,ReportModule):
     
     def _repr_markdown_(self):
 
-
+        self.reported()
         #print(self.code_type)
         
         return '\t'+self.code_type.replace('\n','\n \t')
+
+    
+guide_code_header = """
+#!!! REMEMBER TO PASTE AND RUN ALL PREVIOUS CELL
+#!!! REMEMBER TO PASTE AND RUN ALL PREVIOUS CELL
+"""
+    
+    
+class GuideCode(ObjectCode):
+    
+    _default_header = guide_code_header
     
 class TikZPicture(Environment,ReportModule):
     
@@ -3416,7 +3508,7 @@ class SympyFormula(ReportModule):
                 self._eq = Equation()
                 self._eq.append(NoEscape(self._backend(self._expr)))
 
-            elif isinstance(expr, (Eq, Relational,StrictGreaterThan)):
+            elif isinstance(expr, (Eq, Relational,StrictGreaterThan,LessThan,StrictLessThan,GreaterThan)):
 
                 if isinstance(expr.lhs,
                               (Matrix, ImmutableMatrix)) or isinstance(
@@ -3499,6 +3591,7 @@ class SympyFormula(ReportModule):
             self._container.append(self._eq)
         
         return copy.copy(self)
+        #return self
     
     def _latex(self):
 
@@ -4153,6 +4246,18 @@ class AutoBreak(Environment):
 
             elems = [expr.lhs, Symbol('>'), expr.rhs]
             
+        elif isinstance(expr, LessThan):
+
+            elems = [expr.lhs, Symbol('\leq'), expr.rhs]
+        elif isinstance(expr, GreaterThan):
+
+            elems = [expr.lhs, Symbol('\geq'), expr.rhs]
+            
+        elif isinstance(expr, StrictLessThan):
+
+            elems = [expr.lhs, Symbol('<'), expr.rhs]
+
+            
         elif isinstance(expr, Add):
 
             elems = list(expr.args)
@@ -4186,7 +4291,7 @@ class AutoBreak(Environment):
 
         for no, obj in enumerate(terms):
 
-            if terms[no - 1] == Symbol('=') or terms[no - 1] == Symbol('>'):
+            if terms[no - 1] == Symbol('=') or terms[no - 1] == Symbol('>') or terms[no - 1] == Symbol('\leq') or terms[no - 1] == Symbol('\geq') or terms[no - 1] == Symbol('<'):
                 new_terms += [obj]
 
             elif isinstance(obj, Mul) and  (
@@ -4201,7 +4306,7 @@ class AutoBreak(Environment):
                 #display(obj)
                 new_terms += [Symbol('\n +'), obj]
 
-            elif obj == Symbol('=') or obj == Symbol('>'):
+            elif obj == Symbol('=') or obj == Symbol('>') or obj == Symbol('\leq') or obj == Symbol('<') or obj == Symbol('\geq'):
                 new_terms += [obj]
 
             elif isinstance(obj, (Symbol, Function, Number,Derivative,Subs,Expr)):

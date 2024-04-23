@@ -1202,7 +1202,7 @@ class VariableMassTrolleyWithPendulum(ComposedSystem):
     
     flow_coeff = Symbol('\\lambda', positive=True)
     
-    t0 = Symbol('t_0', positive=True)
+    t_0 = Symbol('t_0', positive=True)
     
     m_0 = Symbol('m_0', positive=True)
 
@@ -1225,7 +1225,7 @@ class VariableMassTrolleyWithPendulum(ComposedSystem):
                  m_pf=None,
                  m_0=None,
                  flow_coeff=None,
-                 t0=None,
+                 t_0=None,
                  k=None,
                  g=None,
                  Omega=None,
@@ -1245,7 +1245,7 @@ class VariableMassTrolleyWithPendulum(ComposedSystem):
         if m_pf is not None: self.m_pf = m_pf
         if m_0 is not None: self.m_0 = m_0
         if flow_coeff is not None: self.flow_coeff = flow_coeff
-        if t0 is not None: self.t0 = t0
+        if t_0 is not None: self.t_0 = t_0
         if g is not None: self.g = g
         if phi is not None: self.phi = phi
         if x is not None: self.x = x
@@ -1255,7 +1255,7 @@ class VariableMassTrolleyWithPendulum(ComposedSystem):
         self.ivar = ivar
         self._init_from_components(**kwargs)
 
-        self.trans_expr = ((S.One/2-atan(self.flow_coeff*(self.ivar-self.t0))/pi))
+        self.trans_expr = ((S.One/2-atan(self.flow_coeff*(self.ivar-self.t_0))/pi))
         
         #self.m_tf = self.m_f#((S.One/2-atan(self.flow_coeff*(self.ivar-self.t0))/pi))
         #self.m_pf = self.m_f#((S.One/2+atan(self.flow_coeff*(self.ivar-self.t0))/pi))
@@ -1313,7 +1313,7 @@ class VariableMassTrolleyWithPendulum(ComposedSystem):
 #             self.m_pf: [50],
             self.F: [5],
             self.flow_coeff: [5],
-            self.t0: [10],
+            self.t_0: [10],
             self.Omega: [3.14 * 0.5],
             self.g: [9.81],
             #self.k: [2]
@@ -1340,7 +1340,7 @@ class VariableMassTrolleyWithPendulum(ComposedSystem):
                 self.F: r'wartość siły wymuszającej',
                 self.g: r'przyspieszenie ziemskie',
                 self.flow_coeff: r'współczynnik przepływu cieczy',
-                self.t0: r'czas aktywacji tłumienia',
+                self.t_init: r'czas aktywacji tłumienia',
             }
             return self.sym_desc_dict
         
@@ -1358,7 +1358,7 @@ class VariableMassTrolleyWithPendulum(ComposedSystem):
                 self.F: r'excitation force',
                 self.g: r'gravity constant',
                 self.flow_coeff: r'flow coefficient',
-                self.t0: r'damping activation time',
+                self.t_init: r'damping activation time',
             }
             return self.sym_desc_dict
     
@@ -1385,7 +1385,7 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
     
     flow_coeff = Symbol('\\lambda', positive=True)
     
-    t0 = Symbol('t_0', positive=True)
+    t_0 = Symbol('t_0')
     
     m_0 = Symbol('m_0', positive=True)
 
@@ -1422,7 +1422,7 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
                  m_pf_eq=None,
                  m_0=None,
                  flow_coeff=None,
-                 t0=None,
+                 t_0=None,
                  k=None,
                  g=None,
                  alpha=None,
@@ -1453,7 +1453,7 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
         if m_0 is not None: self.m_0 = m_0
         if flow_coeff is not None: self.flow_coeff = flow_coeff
         if rayleigh_damping_matrix is not None: self.rayleigh_damping_matrix = rayleigh_damping_matrix
-        if t0 is not None: self.t0 = t0
+        if t_0 is not None: self.t_0 = t_0
         if g is not None: self.g = g
         if b is not None: self.b = b
         if phi is not None: self.phi = phi
@@ -1466,7 +1466,7 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
         if F is not None: self.F = F
         if f is not None: self.f = f
         self.ivar = ivar
-        self.trans_expr = ((S.One/2-atan(self.flow_coeff*(self.ivar-self.t0))/pi))
+        self.trans_expr = ((S.One/2-atan(self.flow_coeff*(self.ivar-self.t_0))/pi))
         self.alpha = self.b
         self.beta = self.b/2
         #self.rayleigh_damping_matrix = self.alpha*VariableMassTrolleyWithPendulum().inertia_matrix() + self.beta*VariableMassTrolleyWithPendulum().stiffness_matrix()
@@ -1478,8 +1478,8 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
     def components(self):
         components = {}
         
-        self.m_tf_eq = self.m_f*((S.One/2-atan(self.flow_coeff*(self.ivar-self.t0))/pi))
-        self.m_pf_eq = self.m_f*((S.One/2+atan(self.flow_coeff*(self.ivar-self.t0))/pi))
+        self.m_tf_eq = self.m_f*((S.One/2-atan(self.flow_coeff*(self.ivar-self.t_0))/pi))
+        self.m_pf_eq = self.m_f*((S.One/2+atan(self.flow_coeff*(self.ivar-self.t_0))/pi))
 
         self._trolley = VariableMassTrolleyWithPendulum(m_tf = self.m_tf, m_pf = self.m_pf)(label='Trolley')
         
@@ -1523,7 +1523,7 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
             self.b: [2.5],
             self.F: [250],
             self.flow_coeff: [10],
-            self.t0: [30],
+            self.t_0: [30],
             self.Omega: [3.14 * 0.65],
             self.g: [9.81],
             #self.k: [2]
@@ -1531,8 +1531,8 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
         default_data_dict.update({self.m_t: [10.0*default_data_dict[self.m_p][0]],
                                   self.l: [0.99*default_data_dict[self.g][0]/(default_data_dict[self.Omega][0]*default_data_dict[self.Omega][0])],
                                   self.k: [2.0*default_data_dict[self.m_p][0]*default_data_dict[self.g][0]/(default_data_dict[self.g][0]/default_data_dict[self.Omega][0]**2)],
-                                  self.m_tf: [default_data_dict[self.m_f][0]*((S.One/2-atan(default_data_dict[self.flow_coeff][0]*(self.ivar-default_data_dict[self.t0][0]))/pi))],
-                                  self.m_pf: [default_data_dict[self.m_f][0]*((S.One/2+atan(default_data_dict[self.flow_coeff][0]*(self.ivar-default_data_dict[self.t0][0]))/pi))],
+                                  self.m_tf: [default_data_dict[self.m_f][0]*((S.One/2-atan(default_data_dict[self.flow_coeff][0]*(self.ivar-default_data_dict[self.t_0][0]))/pi))],
+                                  self.m_pf: [default_data_dict[self.m_f][0]*((S.One/2+atan(default_data_dict[self.flow_coeff][0]*(self.ivar-default_data_dict[self.t_0][0]))/pi))],
                                           })
         
         default_data_dict.update({self.m_t+self.m_tf: [default_data_dict[self.m_t][0]+default_data_dict[self.m_tf][0]],
@@ -1558,7 +1558,7 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
                 self.F: r'wartość siły wymuszającej',
                 self.g: r'przyspieszenie ziemskie',
                 self.flow_coeff: r'współczynnik przepływu cieczy',
-                self.t0: r'czas aktywacji tłumienia',
+                self.t_0: r'czas aktywacji tłumienia',
                 self.b: r'współczynnik tłumienia',
                 self.alpha: r'współczynnik tłumienia Rayleigha przy macierzy bezwładności',
                 self.beta: r'współczynnik tłumienia Rayleigha przy macierzy sztywności',
@@ -1589,7 +1589,7 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
                 self.F: r'excitation force',
                 self.g: r'gravity constant',
                 self.flow_coeff: r'flow coefficient',
-                self.t0: r'damping activation time',
+                self.t_0: r'damping activation time',
                 self.b: r'damping coefficient',
                 self.alpha: r'inertia matrix Rayleigh damping coefficient',
                 self.beta: r'stiffness matrix Rayleigh damping coefficient',

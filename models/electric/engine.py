@@ -74,7 +74,8 @@ class DCMotor(ComposedSystem):
         components = {}
         
         self.resistor = CurrentDependentResistor(-self.R_w, self.i_w,  qs=self.qs, ivar=self.ivar , frame=base_frame)
-        self.inductor = Inductor(-self.L_w, self.i_w, qs=self.qs, ivar=self.ivar, frame=base_frame)
+        self.inductor = Resistor(-self.L_w, self.i_w, qs=self.qs, ivar=self.ivar, frame=base_frame)
+#         self.inductor = Inductor(-self.L_w, self.i_w, qs=self.qs, ivar=self.ivar, frame=base_frame)
         self.voltage_source = VoltageSource(-self.U_z, self.i_w, qs=self.qs, ivar=self.ivar , frame=base_frame)
         self.electromotive_force = ElectromotiveForce(self.k_e*self.omega_s, self.i_w, qs=self.qs, ivar=self.ivar , frame=base_frame)
         self.engine_load_torque = EngineLoadTorque(self.M_obc, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)

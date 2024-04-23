@@ -2919,3 +2919,145 @@ class DampedMeasuringTool(ComposedSystem):
         kt = Symbol('k_t', positive=True)
         Re = Symbol('R_e', positive=True)
         return ((4 * self.max_dynamic_force_pin()) / (pi * kt * Re))**(1 / 2)
+    
+    
+    
+#issue 589 karolina ziabrowska piotr loch AM
+class PendulumWithVaryingMassDamper(ComposedSystem):
+
+    
+    # do zmiany rysunek juz sie wczytuje
+    scheme_name = 'MDOFDoublePendulum.png'
+    real_name = 'TriplePendulum_real.jpg'
+    detali_scheme_name = 'MDOFDoublePendulum.png'
+    detali_real_name = 'TriplePendulum_real.jpg'
+    #do zmiany
+    
+    #m=Symbol('m', positive=True)
+    ivar=Symbol('t')
+    
+    m1=Function('m_1')(ivar)
+    m2=Function('m_2')(ivar)
+    l_1=Symbol('l_1', positive=True)
+    l_2=Symbol('l_2', positive=True)
+    g=Symbol('g', positive=True)
+    omega=Symbol('Omega', positive=True)
+    phi_1=dynamicsymbols('alpha')
+    phi_2=dynamicsymbols('beta')
+    phi_u=dynamicsymbols('varphi_u')
+    phi_l=dynamicsymbols('varphi_l')
+    u0 = Symbol('u_0',positive=True)
+    k = Symbol('k',positive=True)
+    b = Symbol('b',positive=True)
+    qs=dynamicsymbols('alpha beta')
+    
+ 
+
+    def __init__(self,
+                 #m=None,
+                 m1=None,
+                 m2=None,
+                 l_1=None,
+                 l_2=None,
+                 g=None,
+                 omega=None,
+                 phi_1=None,
+                 phi_2=None,
+                 phi_u=None,
+                 phi_l=None,
+                 u0=None,
+                 k=None,
+                 b=None,
+                 qs=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+ 
+        if m1 is not None: self.m1 = m1
+        #if m is not None: self.m=m
+        if m2 is not None: self.m2 = m2
+        if l_1 is not None: self.l_1 = l_1
+        if l_2 is not None: self.l_2 = l_2
+        if g is not None: self.g = g
+        if omega is not None: self.omega = omega
+        if phi_1 is not None: self.phi_1 = phi_1
+        if phi_2 is not None: self.phi_2 = phi_2
+        if phi_u is not None: self.phi_u = phi_u
+        if phi_l is not None: self.phi_l = phi_l
+        if u0 is not None: self.u0 = u0
+        if k is not None: self.k = k
+        if b is not None: self.b = b
+
+        
+        self.qs = [self.phi_1,self.phi_2]
+        self._init_from_components(**kwargs)
+
+    @cached_property
+    def components(self):
+        components = {}
+
+        self.x_2 = sin(self.phi_1)*self.l_1 + sin(self.phi_2)*self.l_2
+        self.y_2 = cos(self.phi_1)*self.l_1 + cos(self.phi_2)*self.l_2
+
+        self.Pendulum1 = Pendulum(self.m1, self.g, self.l_1, angle=self.phi_1, qs=[self.phi_1])
+        self.material_point_11 = MaterialPoint(self.m2, self.x_2, qs=[self.phi_1, self.phi_2])
+        self.material_point_21 = MaterialPoint(self.m2, self.y_2, qs=[self.phi_1, self.phi_2])
+        self.gravity_1 = GravitationalForce(self.m2, self.g, pos1=-self.y_2, qs=[self.phi_2])
+        self.damper_1 = Damper(self.b,self.phi_1,qs=[self.phi_1])
+        self.damper_2 = Damper(self.b,self.phi_2,qs=[self.phi_2])
+        self.force = Force(self.u0*sin(self.omega*self.ivar)*self.k*self.l_1,self.phi_1,qs=[self.phi_1])
+
+        components['Pendulum 1'] = self.Pendulum1
+        components['material_point_11'] = self.material_point_11
+        components['material_point_21'] = self.material_point_21
+        components['gravity_1'] = self.gravity_1
+        components['damper_1'] = self.damper_1
+        components['damper_2'] = self.damper_2
+        components['force'] = self.force
+
+        return components
+    
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'mass of the system',
+            self.m1: r'initial mass of the upper pendulum member',
+            self.m2: r'initial mass of the lower pendulum member',
+            self.m_f1: r'mass of the upper pendulum',
+            self.m_f2: r'mass of the lower pendulum',
+            self.m_f1.diff(t): r'mass fluid flow of the upper pendulum',
+            self.m_f2.diff(t): r'mass fluid flow of the lower pendulum',
+            self.m_t: r'total mass of the system',
+            self.m_t2: r'total mass of the lower pendulum',
+            self.m_0: r'transferred damping mass',
+            self.l_1: r'length of the upper pendulum',
+            self.l_2: r'length of the lower pendulum',
+            self.l_3: r'length of the damper pendulum',
+            self.w: r'angular velocity',
+            self.k: r'spring stiffness',
+            self.ls: r'length of the spring',
+            #self.u: r'difference of spring length and initial spring length',
+            self.x0: r'initial position of the system',
+            self.l0: r'initial spring length',
+            self.u0: r'initial difference of spring length and starting spring length',
+            self.x_k: r'forcing force',
+            self.b: r'damping coefficient value',
+            self.omega: r'excitation frequency',
+            #self.f: r'????',
+            self.g: r'acceleration of gravity',
+            self.rho_f: r'fluid density',
+            self.phi_1: r'angle of the upper pendulum swing',
+            self.phi_2: r'angle of the lower pendulum swing',
+            self.phi_1.diff(t): r'generalized velocity of the upper pendulum member',
+            self.phi_2.diff(t): r'generalized velocity of the lower pendulum member',
+            self.phi_1.diff(t,t): r'generalized acceleration of the upper pendulum member',
+            self.phi_2.diff(t,t): r'generalized acceleration of the lower pendulum member',
+            self.t0: r'activation time',
+            self.flow_coeff: r'fluid flow rate',
+            self.ivar: r'time',
+            self.h_fa:r'centre of gravity of the higher member',
+            self.h_fb:r'centre of gravity of the lower member',
+            self.A_pipe1:r'cross-section area of the upper member',
+            self.A_pipe2:r'cross-section area of the lower member',
+        }
+        return self.sym_desc_dict
+    

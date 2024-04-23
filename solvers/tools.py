@@ -14,6 +14,9 @@ from ..utilities.components.ode import en as ode
 
 import pandas as pd
 from ..utilities.adaptable import *
+import sympy as sym
+from sympy.printing import *
+import pint
 
 ODE_COMPONENTS_LIST = [
             ode.ODESystemComponent,
@@ -133,3 +136,57 @@ class TwoSystemsSimulation:
         return TimeDataFrame(pd.concat([ana_sym_wyn_1,ana_sym_wyn_2]))
         
         
+class CodePrinter:
+    
+    def __init__(self, expr, *args, **kwargs):
+        self._expr=expr
+        
+        
+        
+    def _generate_code(self):
+
+        expr=self._expr
+        raw_code = python(expr).replace("e = ","eq = ")
+
+        for elem in expr.atoms():
+            if isinstance(elem, (sym.Float, sym.Integer)):
+                pass
+            elif isinstance(elem, (sym.Symbol)):
+                my_arg = str(elem)
+                raw_code = raw_code.replace(f"Symbol('{my_arg}')",srepr(elem))
+            else:
+                pass
+            
+         
+        return raw_code
+        
+    def _print_code(self):
+
+        return print(self._generate_code())
+
+class LatexSize:
+
+    _units= pint.UnitRegistry()
+    _units.default_format = "~"
+
+    def __init__(self, size, unit=None,):
+        self._size=size
+        self._unit=unit
+    @classmethod
+    def units(cls):
+        return cls._units
+
+    def _size_with_unit(self):
+        ureg = self.units()
+        return ureg(self._size)
+    @property
+    def size(self):
+        return self._size_with_unit().to(ureg.cm)
+
+    @property
+    def unit(self):
+        ureg = self.units()
+        if self._unit is None:
+            return ureg('dm')
+        else:
+            return ureg(self._unit)

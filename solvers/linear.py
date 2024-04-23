@@ -7,7 +7,7 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
 from sympy.matrices.matrices import MatrixBase
 from sympy.solvers.ode.systems import matrix_exp, matrix_exp_jordan_form
 from sympy.solvers.deutils import ode_order
-
+from sympy import classify_ode
 
 from numbers import Number
 
@@ -19,7 +19,7 @@ from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
 import itertools as itools
 import scipy.integrate as solver
-from ..utilities.timeseries import TimeSeries, TimeDataFrame
+from ..utilities.adaptable import TimeSeries, TimeDataFrame, NumericalAnalysisDataFrame
 
 from collections import ChainMap
 
@@ -35,7 +35,7 @@ from functools import cached_property, lru_cache
 from .numerical import OdeComputationalCase
 
 import time
-
+import pandas as pd
 
 from ..utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim)
 from ..utilities.templates.document import *
@@ -457,9 +457,14 @@ class AnalyticalSolution(ImmutableMatrix):
     
 
     def as_matrix(self):
+        ''' Returns the right-hand side of the equation as a matrix.
+        It returns Numpy Matrix object'''
         return Matrix( self.rhs )
     
     def as_eq(self):
+        ''' Creates an equation using the Eq method from the Sympy library.
+        It returns Sympy Equation class.
+        '''
         return Eq(self.lhs,self.rhs)
     
     def as_iterable(self):
@@ -472,8 +477,25 @@ class AnalyticalSolution(ImmutableMatrix):
         return Dict({lhs:rhs  for  lhs,rhs in self.as_iterable()})
     
     def as_eq_list(self):
-
+        ''' Creates a zip object consisting of the left side of the self instance and self itself.
+        It returns zip object.'''
         return [ Eq(lhs,comp,evaluate=False) for lhs,comp  in zip(self._lhs,self)]
+    
+    def system_parameters(self, parameter_values=None):
+        '''
+        Recognises system parameters as symbols which are not independent variable or its relations and returns the Tuple (Sympy object) containing these elements. It does not take into account undefined functions (instances of Function class) of independent variable.
+        '''
+
+        
+        params = (self.lhs-self.rhs).free_symbols
+        params.remove(self.ivar)
+        if parameter_values == None:
+            return list(params)
+        else:
+            return {
+                param: parameter_values[no]
+                for no, param in enumerate(params)
+            }
     
     @property
     def _lhs_repr(self):
@@ -482,7 +504,22 @@ class AnalyticalSolution(ImmutableMatrix):
     def __repr__(self):
 
         return f'{self._lhs_repr} = {self.rhs}'
+ 
+    # @property
+    # def _dvars(self):
+    #     return self.lhs
+ 
+    # @_dvars.setter
+    # def _dvars(self,dvars):
+    #     self._lhs = dvars
+ 
+    @cached_property
+    def dvars(self):
+        return self.lhs    
     
+    @property
+    def _fode_dvars(self):
+        return self.dvars
     
     def _latex(self,*args):
 
@@ -558,6 +595,66 @@ class AnalyticalSolution(ImmutableMatrix):
 
         return solution_tdf
 
+
+    def _as_na_df(self,parameter=None,param_span=None,dependencies_dict=None, t_span=None):
+
+        parameters = self.system_parameters()
+        
+        if len(parameters)<1:
+            parameters = [Symbol('a')]
+
+        
+
+        if parameter is None:
+
+            params_included = 1
+            params_list = parameters[0:params_included]
+        elif isinstance(parameter,Number):
+
+            params_included = parameter     
+            params_list = parameters[0:params_included]  
+        else:
+            
+            params_included = 1
+            params_list = parameters[0:params_included]
+            
+        if param_span is None:
+            #param_span = [0.8,1,1.2]
+            param_span = [0.9,1.0]
+
+        if dependencies_dict is None:
+            dependencies_dict = {}
+            
+        if t_span is None:
+            t_span = [0.0]
+
+        reference_data = {ref_val: 1 for ref_val in  self.system_parameters()[params_included:] }
+        #reference_data = {}
+        #display(reference_data)
+
+        system = self
+        
+        Y = list(system._fode_dvars) + list(dependencies_dict.keys())
+
+        index = pd.Index(t_span,name=self.ivar)
+
+        df_num = NumericalAnalysisDataFrame.from_model(system,
+                                                        parameter=params_list,
+                                                        span=param_span,
+                                                        reference_data=reference_data,
+                                                        coordinates=Y,
+                                                        index=index)
+
+        results_num = df_num#.perform_simulations(model_level_name=0,dependencies=dependencies_dict)
+        #results = TimeDataFrame(results_num).droplevel(0,axis=1)
+        results= results_num
+
+        return results
+    
+    def numerical_analysis(self,parameter=None,param_span=None,dependencies_dict=None, t_span=None):
+                       
+        return self._as_na_df(parameter=parameter, param_span=param_span, dependencies_dict=dependencies_dict, t_span=t_span)
+
     @property
     def _report_components(self):
 
@@ -615,10 +712,7 @@ class ODESolution(AnalyticalSolution):
     _ivar0 = 0 
     _sol0 = 0
 
-    @property
-    def _dvars(self):
-        return self.lhs
- 
+
 
     def _assign_properties(self,obj):
         
@@ -682,9 +776,7 @@ class ODESolution(AnalyticalSolution):
         else:
             return {coord:0 for coord in self.dvars}
     
-    @cached_property
-    def dvars(self):
-        return self.lhs
+
 
 
 
@@ -811,7 +903,7 @@ class ODESystem(AnalyticalSolution):
         >>>from dynpy.solvers.linear import *
         >>>import sympy
 
-        >>>t = Symbols('t')
+        >>>t = Symbol('t')
         >>>Omega, omega = symbols('Omega omega',positive)
         >>>x = Function('x')(t)
 
@@ -988,6 +1080,7 @@ class ODESystem(AnalyticalSolution):
     def _as_msm(self):
         ode=self
         from dynpy.solvers.nonlinear import MultiTimeScaleSolution
+        
         msm_eq=MultiTimeScaleSolution.from_ode_system(ode)
         return msm_eq
     
@@ -995,7 +1088,7 @@ class ODESystem(AnalyticalSolution):
         
         
         
-        ics_init_dict = {coord:0 for coord in self._fode_dvars}
+        ics_init_dict = {coord:0.0 for coord in self._fode_dvars}
         
         if isinstance(self._default_ics,dict):
             ics_instance={coord:self._default_ics[coord] for coord in self.dvars if coord in self._default_ics}
@@ -1003,6 +1096,12 @@ class ODESystem(AnalyticalSolution):
             return {**ics_init_dict,**ics_instance}
         else:
             return ics_init_dict
+
+
+    
+    
+
+    
     
     def set_simp_deps(self,dependencies,callback=None,inplace=False):
         
@@ -1140,11 +1239,21 @@ class ODESystem(AnalyticalSolution):
         
         return FirstOrderLinearODESystemWithHarmonics
         #return FirstOrderLinearODESystem
-    
+
     def _latex(self,*args):
 
-        
-        return f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}' 
+        if self.default_ics is None:
+            latex_str =  f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}'
+        else:
+            ics = self.default_ics()
+            latex_str = f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}~~with~~{latex(ics)}'
+    #
+        if len(self._callback_dict) == 0:
+            return f'{latex_str}'
+        else:
+            cannonical_coeffs_list=[Eq(thing,self._callback_dict[thing],evaluate=False) for thing in self._callback_dict]
+            
+            return f'{latex_str}~~where~~{latex(cannonical_coeffs_list[0])}, {latex(cannonical_coeffs_list[1])}'
 
     def as_matrix(self):
         return Matrix(self._lhs_repr - self.rhs) 
@@ -1444,18 +1553,24 @@ class ODESystem(AnalyticalSolution):
     
     @cached_property
     def general_solution(self):
-
+        '''
+        Solves the problem in the symbolic way and returns matrix of solution (in the form of equations (objects of ODESolution class)).
+        '''
         return self._general_solution
 
 
     @cached_property
     def steady_solution(self):
-
+        '''
+        Provides the particular solution of a differential equation and returns matrix of solution (in the form of equations (objects of ODESolution class)).
+        '''
         return self._steady_solution
     
     @property
     def solution(self):
-
+        '''
+        Provides the final solution of a differential equation and returns matrix of solution (in the form of equations (objects of ODESolution class)).
+        '''
         return self.general_solution + self.steady_solution    
     
 
@@ -1527,7 +1642,114 @@ class ODESystem(AnalyticalSolution):
         inertia_mat=self.lhs.jacobian(diff(self.dvars, self.ivar, 2))
         fundamental_mat = stiffness_mat - r**2 * inertia_mat + damping_mat * r
         return fundamental_mat
-    
+
+    def _swept_analysis(self, subs_method=True, dvar=None, freq_symbol=None, amp_symbol=None, amplitude=None, ramp=None):
+
+        '''
+        Performs swept analysis on numerical ODESystem.
+
+        subs_method - Boolean, switches methods for swept analysis, if True it substitutes values, if False it uses _hom_equation method.
+        
+        dvar - Symbol or Integer, coordinate which will be taken into consideration for performing swept analysis. This coordinate indicates which equation will be under excitation.
+
+        freq_symbol - Symbol for substituting the excitation frequency value in equation.
+
+        amp_symbol - Symbol for substituting the excitation amplitude value in equation.
+
+        amplitude - Integer or Float, amplitude of excitation.
+
+        ramp - Integer or Float, sets the steep coefficient of the ramp.
+        '''
+        if ramp is None:
+            frequency = 0.005*self._ivar
+        elif isinstance(ramp, (float, int)):
+            frequency = ramp*self._ivar
+#             display(frequency)
+        else:
+            return "Error, ramp should be a float or int type"
+
+        if amplitude is None:
+            amplitude=1
+        elif isinstance(amplitude, (float, int)):
+            pass
+        else:
+            return "Error, Amplitude should be a float or int type"
+
+        if subs_method is True:
+
+            if freq_symbol is None:
+                freq_symbol = Symbol('Omega', positive=True)
+            if amp_symbol is None:
+                amp_symbol = Symbol('F', positive=True)
+#             display(freq_symbol,amp_symbol)
+            return type(self)(odes=self.odes.subs({freq_symbol: frequency, amp_symbol:amplitude}), dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar)#.numerized(backend='numpy')
+
+        else:
+
+            hom_ode = self._hom_equation()
+
+            if dvar is None:
+                dvar = self.dvars[0]
+
+            if isinstance(dvar, Symbol):
+                for no, sym in enumerate(self.dvars):
+                    if sym == Symbol:
+                        number = no
+
+            elif isinstance(dvar, int):
+                number = dvar
+
+            else:
+                return "Error"
+
+
+            exct_mat = zeros(len(self.dvars),1)
+            exct_mat[number,0] = amplitude*sin(Omega*self._ivar)
+
+
+            return type(self)(odes=hom_ode.odes, odes_rhs=exct_mat, dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar)#.numerized(backend='numpy')
+
+
+#         type(self)(odes=hom_eq, odes_rhs=zeros(len(self.dvars),1), dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar)
+
+    def swept_analysis(self, subs_method=True, dvar=None, freq_symbol=None, amp_symbol=None, amplitude=None, ramp=None):
+
+        return self._swept_analysis(subs_method=subs_method, dvar=dvar, freq_symbol=freq_symbol, amp_symbol=amp_symbol, amplitude=amplitude, ramp=ramp)
+
+    def to_canonical_form(self):
+        if self._ode_order == 2 and len(self) == 1:
+            
+            coord = self.dvars[0]
+            ivar = self.ivar
+            
+            inertia = self.odes[0].coeff(diff(coord,self.ivar,2))
+            
+            new_eq = (self.odes[0]/inertia).expand()
+            rhs_comp=self._free_component()/inertia
+            
+            omega_coeff = new_eq.coeff(self.dvars[0])
+            h_coeff = new_eq.coeff(diff(self.dvars[0], self.ivar))
+            
+            omega_sym = Symbol('omega',positive=True)
+            h_sym  = Symbol('h',positive=True)
+            
+            subs_dict = {omega_sym**2:omega_coeff, h_sym:S.Half * h_coeff}
+            
+            #subs_eq = new_eq.subs(subs_dict)
+            canonical_ode = Matrix([coord.diff(ivar,2) + 2*h_sym * coord.diff(ivar) + omega_sym**2 * coord  ] )  +rhs_comp
+            
+            new_odesys = ODESystem(odes = canonical_ode, dvars = Matrix([coord]), ode_order = 2)
+            
+            new_odesys._callback_dict = subs_dict
+            
+            return new_odesys
+        else:
+            return self.copy()
+
+    def _classify_ode(self):
+        odes=Eq(self.lhs[0]-self.rhs[0],0)
+        return classify_ode(odes,self.dvars[0])
+
 
 class FirstOrderODESystem(ODESystem):
     
@@ -1821,7 +2043,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
 
     def _latex(self,*args):
 
-        
+#         f'{latex(self.as_eq())}~~for~~{latex(self.dvars)}'
         return latex(Eq(self.lhs,self.rhs ,evaluate=False   ))    
     
 class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):

@@ -205,6 +205,8 @@ class Element(LagrangesDynamicSystem):
         #print(f'{class_name} element check', self.scheme_options )
         return [TikZNode('Material Point',options=['draw'],text=f'{class_name}')]
 
+    def _get_virtual_work(self):
+        return Eq(Symbol('\delta W'), Symbol(latex(self.force)) * Symbol(f'\delta({latex(self._pos1)})')  )
     
 #Pati
 class MaterialPoint(Element):
@@ -230,6 +232,9 @@ class MaterialPoint(Element):
                  **kwargs):
         if m is not None: self.m=m
         if pos1 is not None: self.pos1=pos1
+        self.ivar = ivar
+        
+        
         if not qs:
             self.qs = [pos1]
 
@@ -249,6 +254,11 @@ class MaterialPoint(Element):
         super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar,frame=frame,**kwargs)
         
         self._kinetic_energy = Lagrangian
+        
+        
+    def _get_virtual_work(self):
+        return Eq(Symbol('\delta W'), Symbol(latex(self.m * self.pos1.diff(self.ivar))) * Symbol(f'\delta({latex(self.pos1)})')  )
+        
     def symbols_description(self):
         self.sym_desc_dict={
             self.m :r'Mass of body',
@@ -323,7 +333,7 @@ class MaterialPoint(Element):
         
         
 
-#Mateusz
+#Mateusz karol
 class Spring(Element):
     """
     Model of a Spring: Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s),
@@ -423,13 +433,14 @@ class Spring(Element):
         return {**super().get_numerical_data(),**self.default_numerical_dict}
     
     @classmethod 
-    def from_default(cls,
-                 stiffness=None,
-                 pos1=None,
-                 frame=base_frame,
-                 qs=None,
-                 ivar=Symbol('t'),
-                 **kwargs):
+    def from_default(
+            cls,
+            stiffness=None,
+            pos1=None,
+            frame=base_frame,
+            qs=None,
+            ivar=Symbol('t'),
+            **kwargs):
         if stiffness is not None: cls.stiffness=stiffness
         if pos1 is None: pos1= dynamicsymbols('z') 
         if not qs: 
@@ -438,6 +449,10 @@ class Spring(Element):
 
         return cls(stiffness=stiffness, pos1=pos1, qs=qs,ivar=ivar, frame = frame)
 
+    def _get_virtual_work(self):
+        return Eq(Symbol('\delta W'), Symbol(latex(self.m * self.pos1.diff(self.ivar))) * Symbol(f'\delta({latex(self.pos1)})')  )
+    
+   #piotrek 
 class TorsionalSpring(Spring):
     """
     Model of a Spring: Creates a singular model, after inputing correct values of stiffeness - k and general coordinate(s),
@@ -472,11 +487,11 @@ class TorsionalSpring(Spring):
 
 
     
-    
+    #piotrek
 class GravitationalForce(Element):
     """
     Model of a changing centroid for potential energy. Creates a singular model, after inputing correct values of gravity field - g,
-     mass of - m as well as additionaly the general coordiante
+    mass of - m as well as additionaly the general coordiante
     """
     scheme_name = ''
     real_name = ''
@@ -500,7 +515,10 @@ class GravitationalForce(Element):
         }
         return self.default_data_dict
 
-
+    def _get_virtual_work(self):
+        return Eq(Symbol('\delta W'), Symbol(latex(self.m * self.pos1.diff(self.ivar))) * Symbol(f'\delta({latex(self.pos1)})')  )
+    
+#karol
 class Disk(Element):
     """
     Model of a Disk:
@@ -597,6 +615,7 @@ class Damper(Element):
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
         self._dissipative_potential = D
+
     @property
     def force(self):
         
@@ -874,6 +893,10 @@ class Force(Element):
         
     def _get_virtual_work(self):
         return Eq(Symbol('\delta W'), Symbol(latex(self.force)) * Symbol(f'\delta({latex(self._pos1)})')  )    
+        
+        
+        
+
         
 # class CombustionEngine(Force):
 
@@ -1380,3 +1403,62 @@ Creates a model of a PID controller (proportional , integral , derivative) which
         forcelist = [ (point_dmp,-diff(G,coord_vel)*frame.x)  for coord_vel,point_dmp in points_dict.items() ]
         
         super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
+        
+class ConstrainsReaction(Element):
+    """
+    Creates enforcement.
+    """
+
+    scheme_name = ''
+    real_name = ''
+    def __init__(self,
+                 constrain = None,
+                 pos1 = None,
+                 qs = None,
+                 ivar=Symbol('t'),
+                 frame = base_frame):
+
+        self.constrain = constrain
+        self._pos1 = pos1
+#         self.force=force
+        if qs is None:
+            qs = [pos1]
+
+        else:
+            qs = qs
+
+
+        if isinstance(pos1, Point):
+            P = pos1
+            if qs is None:
+                diffs=P.vel(frame).magnitude().atoms(Derivative)
+
+                qs= [deriv.args[0] for deriv in diffs]
+                print(qs)
+        else:
+
+            P = Point('P')
+            P.set_vel(frame,pos1.diff(ivar)*frame.x)
+
+            force = 0
+            for coord  in qs:
+
+                force=+self.constrain.diff(coord)*frame.x
+
+
+        forcelist=[(P,force)]
+
+        #display(forcelist)
+
+        super().__init__(0, qs=qs, forcelist=forcelist, frame=frame, ivar=ivar)
+
+    def get_default_data(self):
+        t=self.ivar
+        F0=Symbol('F_0',positive=True)
+        self.default_data_dict={
+            # self.force:[F0*no for no in range(1,10)],
+        }
+        return {**super().get_default_data(),**self.default_data_dict}
+
+    def _get_virtual_work(self):
+        return Eq(Symbol('\delta W'), Symbol(latex(self.force)) * Symbol(f'\delta({latex(self._pos1)})')  )

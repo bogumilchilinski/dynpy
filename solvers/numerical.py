@@ -1,4 +1,4 @@
-from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Dict, ImmutableMatrix#, Tuple
+from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Dict, ImmutableMatrix, latex#, Tuple
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 #from sympy import *
@@ -8,7 +8,7 @@ import numpy as np
 import itertools as itools
 import scipy.integrate as solver
 from sympy.utilities.lambdify import lambdify
-from ..utilities.timeseries import TimeSeries, TimeDataFrame
+from ..utilities.adaptable import TimeSeries, TimeDataFrame,NumericalAnalysisDataFrame
 from scipy.misc import derivative
 from collections import ChainMap
 
@@ -18,7 +18,7 @@ import sympy.physics.mechanics as me
 
 from sympy.simplify.fu import TR8, TR10, TR7, TR3
 import time
-
+import pandas as pd
 
 
 class OdeComputationalCase:
@@ -117,6 +117,14 @@ class OdeComputationalCase:
     def parameters(self):
         return self.odes_system.free_symbols-{self.ivar}
         
+    def default_ics(self,critical_point=False):
+        
+        if isinstance(self._default_ics,dict):
+            ics_instance={coord:self._default_ics[coord] for coord in self.dvars if coord in self._default_ics}
+            
+            return {**{coord:0 for coord in self.dvars},**ics_instance}
+        else:
+            return {coord:0 for coord in self.dvars}
         
     def __call__(self, label=None):
 
@@ -143,7 +151,13 @@ class OdeComputationalCase:
     def __repr__(self):
 
         return self.__str__()
-    
+
+    def _repr_latex_(self):
+        if self._default_ics is None:
+            return f'${latex(self.odes_system)} for {latex(self.dvars)}$'
+        else:
+            return f'${latex(self.odes_system)} for {latex(self.dvars)} with {latex(self.default_ics())}$'
+
     @property
     def ics_dvars(self):
 
@@ -151,6 +165,7 @@ class OdeComputationalCase:
 
         return self.dvars
     
+
 
     def __fortran_odes_rhs(self):
         '''
@@ -319,25 +334,33 @@ class OdeComputationalCase:
         t_0 = time.time()
 
         
-        
-        solution = solver.solve_ivp(
-            **self.solve_ivp_input(t_span=t_span,
-                                   ic_list=ic_list,
-                                   t_eval=t_eval,
-                                   params_values=params_values,
-                                   method=method))
-
-        solution_tdf = TimeDataFrame(
-            data={key: solution.y[no, :]
-                  for no, key in enumerate(self.dvars)}, index=t_span)
-
-
-
         velocities = self.dvars[int(len(self.dvars)/2) :]
-        for vel in velocities:
-            solution_tdf[vel].to_numpy()
-            gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
-            solution_tdf[vel.diff(self.ivar)] = gradient
+        if len(t_span)>1:
+            solution = solver.solve_ivp(
+                **self.solve_ivp_input(t_span=t_span,
+                                    ic_list=ic_list,
+                                    t_eval=t_eval,
+                                    params_values=params_values,
+                                    method=method))
+
+            solution_tdf = TimeDataFrame(
+                data={key: solution.y[no, :]
+                    for no, key in enumerate(self.dvars)}, index=t_span)
+
+
+
+            
+            for vel in velocities:
+                solution_tdf[vel].to_numpy()
+                gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
+                solution_tdf[vel.diff(self.ivar)] = gradient
+        else:
+            solution_tdf = TimeDataFrame(
+                data={key: ic_list[no]
+                    for no, key in enumerate(self.dvars)}, index=t_span)
+            for vel in velocities:
+
+                solution_tdf[vel.diff(self.ivar)] = 0.0
             
         t_e = time.time()
         t_d = t_e-t_0
@@ -348,5 +371,25 @@ class OdeComputationalCase:
         solution_tdf.index.name = self.ivar
         return solution_tdf
 
+    def numerized(self,*args,**kwargs):
 
-    
+        return self
+        
+    def _as_na_df(self, t_span=None):
+        
+        coords = list(self.dvars)
+        num_cases = pd.MultiIndex.from_product([[self],[Eq(Symbol('a'),10)], coords])
+
+        if len(self._default_ics)==len(coords):
+            ics = self._default_ics
+        else:
+            ics = None
+            
+        if t_span is None:
+            t_span = [0.0]
+
+        return NumericalAnalysisDataFrame(data=None,
+                    index=pd.Index(t_span,name=self.ivar),
+                    columns=num_cases,
+                    )
+

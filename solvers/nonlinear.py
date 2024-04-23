@@ -229,13 +229,18 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
 
         
         #sec_conditions =FirstOrderODESystem.from_ode_system(ODESystem([sec_conditions[1][1],sec_conditions[3][1]],dvars = self._const_list ,ivar=ivar  )).linearized().solution
-
+        
+        #print('some check')
+        
+        #display(sec_conditions)
+        #display(self._const_list)
+        
         sec_odes=ODESystem((sec_conditions),
                          dvars=Matrix(self._const_list),
                          ivar=ivar,
                          ode_order=1)
         
-        
+
         
         return sec_odes
 
@@ -316,7 +321,7 @@ class MultiTimeScaleSolution(ODESystem):
             label = obj._label = obj.__class__.__name__ + ' with ' + str(
                 len(obj.dvars)) + ' equations'
         obj._label = 123
-
+                
         obj.eps = eps
         obj._order = order
 
@@ -330,17 +335,52 @@ class MultiTimeScaleSolution(ODESystem):
         obj.omega = 1
         if omega:
             obj.omega = omega
-
+        
         obj.ics = ics
 
         obj._const_sol = {}
 
+        
         obj._eoms = odes_system
         obj.odes_system = odes_system
         #obj._odes = odes_system
 
         return obj
+    
+    @property
+    def eps(self):
+        return self._eps
+    @eps.setter
+    def eps(self,eps):
+        self._eps=eps
+    @property
+    def order(self):
+        return self._order
+    @order.setter
+    def order(self,order):
+        self._order = order
+    @property
+    def omega(self):
+        return self._omega
 
+    @omega.setter
+    def omega(self, omega):
+        self._omega = omega
+    @property
+    def ics(self):
+        return self._ics
+
+    @ics.setter
+    def ics(self, ics):
+        self._ics = ics
+    @property
+    def extra_params(self):
+        return self._extra_params
+
+    @ics.setter
+    def extra_params(self, extra_params):
+        self._ics = extra_params
+        
     def __str__(self):
         return '123'
 
@@ -575,8 +615,9 @@ class MultiTimeScaleSolution(ODESystem):
             #display(FirstOrderLinearODESystemWithHarmonics.from_ode_system(approx_subs).steady_solution)
             #display(type(approx_subs))
             
-            aux_mat=self.odes_system.jacobian(self.dvars)
-            if det(aux_mat)!=0:
+            #aux_mat=self.odes_system.jacobian(self.dvars)
+            aux_mat=approx_subs.jacobian(approx_subs.dvars)
+            if det(aux_mat)==0:
 
                 SolverClass = FirstOrderLinearODESystem
             else:
@@ -602,7 +643,7 @@ class MultiTimeScaleSolution(ODESystem):
         
         order = self.order
         
-        print('my order',order)
+        #print('my order',order)
         sol_list = []
         gen_sol = self._general_sol(order)
         
