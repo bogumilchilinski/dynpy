@@ -23,7 +23,6 @@ from dynpy.utilities.templates import tikz
 
 from pint import UnitRegistry
 ureg = UnitRegistry()
-import os
 
 class ReportCache:
     
@@ -32,20 +31,7 @@ class ReportCache:
     def __init__(self,file_names):
         self._file_names = file_names
         
-    @classmethod
-    def update_existing_files(cls,directory):
-        file_list = []
-        for file_name in os.listdir(directory):
-            file_path = os.path.join(directory, file_name)
-            
-            if os.path.isfile(file_path) and '.tex' in file_path:
-                with open(file_path, 'r') as file:
-                    data = file.read()
-                    cls._file_names[data] = file_path.replace('.tex','')
-        
-        
-        return list(cls._file_names.values())
-        
+
 class ReportModule:
     r'''
     Basic class for maintaining global options of a report module. It provides methods for setting options common with every class inheriting from ReportModule instance. 
@@ -795,7 +781,7 @@ class TikZPlot(TikZ, ReportModule):
     _subplots_gap = 0.0
     _subplots_horizontal_gap = 0.5
     _default_grid = None
-    _grid = None
+    _grid = (2,6)
 
     _in_figure = False
     _figure_gen = lambda: Figure(position='H')
@@ -965,14 +951,9 @@ class TikZPlot(TikZ, ReportModule):
             y_coord_round = round(y_coordinate,2)
             
             for col_id in range(cols_no):
-                if cols_no > 1:
-                
-                    x_coordinate = col_id * (self._width/cols_no)
-                    
-                else:
-                    x_coordinate = 0
-                    
+                x_coordinate = col_id * (self._width/cols_no)
                 x_coord_round = round(x_coordinate,2)
+                
                 position = "{"+f"({x_coord_round}cm , -{y_coord_round}cm)"+"}"
                 coordinates.append(position)
             
@@ -990,13 +971,8 @@ class TikZPlot(TikZ, ReportModule):
         
         cols_no=self.grid[0]
         
-        if cols_no > 1:
-
-            return NoEscape(f'{self._width/cols_no-2-self._subplots_horizontal_gap-self._subplots_gap}cm')
-
-        else:
-            return self.width
-        
+#         return NoEscape(f'{self._width/cols_no+1.5-self._subplots_gap}cm')
+        return NoEscape(f'{self._width/cols_no-2-self._subplots_horizontal_gap-self._subplots_gap}cm')
     
     
     @property
@@ -1027,10 +1003,6 @@ class TikZPlot(TikZ, ReportModule):
 
     def in_figure(self,filename=None,caption=None):
 
-
-        ReportCache.update_existing_files(self.__class__._default_path)
-
-        
         obj = copy.copy(self)
         obj._in_figure = True
 
@@ -1080,16 +1052,12 @@ class TikZPlot(TikZ, ReportModule):
     
         if self._filename is None and self._prefix is None:
             filename = f'{self.__class__._default_path}/plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
-
+            
         elif self._filename is None and self._prefix is not None:
             filename = f'{self.__class__._default_path}/{self._prefix}_plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
-
+            
         else:
             filename = self._filename
-            
-        if filename in list(ReportCache._file_names.values()):
-            filename = self.filename
-
 
         return  filename
 
@@ -1480,12 +1448,13 @@ class SpectralMethods(DataMethods):
 
     def to_time_domain(self):
 
-        sampling_rate = self.index[1] - self.index[0]
+        sampling_rate = (self.index[1] - self.index[0])
         t_span = fft.fftshift(fft.fftfreq(len(self.index), d=sampling_rate))
         t_span = t_span[-1] + t_span
 
         timeseries = {
-            name: fft.ifftshift(fft.ifft(data))
+            #name: data._sort_for_ifft()
+            name:fft.ifft(data._sort_for_ifft())
             for name, data in self.items()
         }
 
@@ -3049,6 +3018,19 @@ class TimeDomainMethods(DataMethods):
         else:
             return False
 
+        
+    def _pure_fft(self):
+
+        spectrum = (fft.fft(self.to_numpy()))
+
+        #f_span = fft.fftfreq(len(self.index), d=self.index[1] - self.index[0])
+
+        spectrum = SpectrumSeries(data=spectrum)
+        #spectrum.index.name = Symbol('f')
+
+        return spectrum
+        
+        
     def to_frequency_domain(self):
 
         spectrum = (fft.fft(self.to_numpy()))
@@ -3080,6 +3062,10 @@ class SpectrumSeries(AdaptableSeries, SpectralMethods):
     @property
     def _constructor_expanddim(self):
         return SpectrumFrame
+
+    def _sort_for_ifft(self):
+        
+        return SpectrumSeries(fft.fftshift(self.to_numpy()))
 
 
 #     def time_series(self):
@@ -3150,6 +3136,11 @@ class SpectrumFrame(AdaptableDataFrame, SpectralMethods):
             extra_commands=extra_commands,
             options=options,
             smooth=smooth)
+
+
+    def _sort_for_ifft(self):
+
+        return SpectrumFrame(fft.fftshift(self),columns=self.columns,index=None)
 
     def double_sided_rms(self):
 
@@ -3269,6 +3260,26 @@ class TimeDataFrame(AdaptableDataFrame, TimeDomainMethods):
     def _constructor_sliced(self):
         return TimeSeries
 
+    
+    def _pure_fft(self):
+
+        spectral_data = {
+            name: data._pure_fft()
+            for name, data in self.items()
+        }
+
+        return SpectrumFrame(data=spectral_data)
+    
+    def _resampled(self,sample_length,num_samples):
+        
+        from scipy import signal
+        
+        new_idx = np.linspace(0, sample_length, num_samples, endpoint=False)
+        resampled_sig = {name:signal.resample(data.to_numpy(),num_samples) for name,data in self.items()}
+        
+        return TimeDataFrame(data=resampled_sig,index=new_idx)
+    
+    
     def to_frequency_domain(self):
 
         spectral_data = {

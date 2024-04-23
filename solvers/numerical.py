@@ -190,8 +190,8 @@ class OdeComputationalCase:
         #args_list = list(self.ivar) + list(subs_dict.values()) + list(self.params)
 
         return lambdify( args_list ,
-                         ((self.odes_system).subs(subs_dict, simultaneous=True)).n(),
-                         [{'sin':np.sin,'cos':np.cos},'numpy']
+                         ((self.odes_system).subs(subs_dict, simultaneous=True)).doit().n(),
+                         [{'sin':np.sin,'cos':np.cos,'atan':np.arctan},'numpy']
                         )
     
         # return autowrap(  (msubs(self.odes_system,subs_dict)),args=args_list)
