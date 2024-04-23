@@ -1,44 +1,12 @@
-from numpy import fft
+from numpy import (fft)
 import numpy as np
-from pylatex import (
-    Document,
-    Section,
-    Subsection,
-    Tabular,
-    Math,
-    TikZ,
-    Axis,
-    Plot,
-    Figure,
-    Alignat,
-    Package,
-    Quantity,
-    Command,
-    Label,
-    Table,
-    Marker,
-    Ref,
-    TikZCoordinate,
-)
-
+from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, Plot, Figure, Alignat, Package, Quantity, Command, Label, Table, Marker, Ref,TikZCoordinate
 from pylatex.base_classes import Environment, Options
 
 
 from pylatex.utils import italic, NoEscape
 
-from sympy import (
-    Matrix,
-    ImmutableMatrix,
-    symbols,
-    Symbol,
-    Eq,
-    Expr,
-    latex,
-    Float,
-    Function,
-    Number,
-    lambdify,
-)
+from sympy import Matrix, ImmutableMatrix, symbols, Symbol, Eq, Expr, latex, Float, Function, Number, lambdify
 from sympy.core.relational import Relational
 
 from sympy.physics.mechanics import vlatex
@@ -54,36 +22,35 @@ from dynpy.utilities.templates import tikz
 
 
 from pint import UnitRegistry
-
 ureg = UnitRegistry()
 import os
 
 
 class ReportCache:
-
+    
     _file_names = {}
-
-    def __init__(self, file_names):
+    
+    def __init__(self,file_names):
         self._file_names = file_names
-
+        
     @classmethod
-    def update_existing_files(cls, directory):
+    def update_existing_files(cls,directory):
         file_list = []
         for file_name in os.listdir(directory):
             file_path = os.path.join(directory, file_name)
-
-            if os.path.isfile(file_path) and ".tex" in file_path:
-                with open(file_path, "r") as file:
+            
+            if os.path.isfile(file_path) and '.tex' in file_path:
+                with open(file_path, 'r') as file:
                     data = file.read()
-                    cls._file_names[data] = file_path.replace(".tex", "")
-
+                    cls._file_names[data] = file_path.replace('.tex','')
+        
+        
         return list(cls._file_names.values())
-
-
+        
 class ReportModule:
-    r"""
-    Basic class for maintaining global options of a report module. It provides methods for setting options common with every class inheriting from ReportModule instance.
-
+    r'''
+    Basic class for maintaining global options of a report module. It provides methods for setting options common with every class inheriting from ReportModule instance. 
+    
     Arguments
     =========
         container: obj
@@ -106,42 +73,42 @@ class ReportModule:
         >>>from pylatex import Document
         >>>from sympy import Symbol
         >>>import pint
-
+        
         >>>ureg = pint.UnitRegistry()
         >>>m=Symbol('m')
         >>>doc=Document
         >>>unit_dict={m:ureg.kilogram}
-
+        
         >>>RM=ReportModule()
-
+        
         >>>RM.set_container(doc)
-
+        
         >>>RM.set_caption('This is caption.')
-
+        
         >>>RM.set_directory('./my_directory')
-
+        
         >>>RM.set_units_dict(unit_dict)
-    """
+    '''
 
-    _cls_container = Section("Dummy")
-    cls_container = Section("Dummy")
-    _container = Section("Dummy")
-    cls_path = "."
-    _caption = "Figure describes the numerical data"
-    _label = "fig:markerIsMissing"
+    _cls_container = Section('Dummy')
+    cls_container = Section('Dummy')
+    _container = Section('Dummy')
+    cls_path = '.'
+    _caption = 'Figure describes the numerical data'
+    _label = 'fig:markerIsMissing'
     _units = {}
     _autoreport = False
-    # _frame = TimeDataFrame()
+    #_frame = TimeDataFrame()
     _frame = pd.DataFrame()
     _list = []
     _subplot = False
     _hold = False
-    _out_formatter = None  # BaseFrameFormatter  # lambda data: data
-    _height = NoEscape(r"6cm")
+    _out_formatter = None #BaseFrameFormatter  # lambda data: data
+    _height = NoEscape(r'6cm')
 
     @classmethod
     def set_output_formatter(cls, formatter=None):
-        # def set_output_formatter(cls, formatter=BaseFrameFormatter):
+    #def set_output_formatter(cls, formatter=BaseFrameFormatter):
         cls._out_formatter = formatter
         return cls
 
@@ -151,7 +118,7 @@ class ReportModule:
         return cls
 
     @classmethod
-    def set_caption(cls, caption=""):
+    def set_caption(cls, caption=''):
         cls._caption = caption
         return cls
 
@@ -188,7 +155,7 @@ class ReportModule:
         return cls
 
     @classmethod
-    def set_directory(cls, path="./SDA_results"):
+    def set_directory(cls, path='./SDA_results'):
 
         cls.cls_path = path
         return cls
@@ -199,17 +166,20 @@ class ReportModule:
         cls._units = units
         return cls
 
-    #     @property
-    #     def _cls_container(self):
-    #         return self.__class__._cls_container
-
-    #     @property
-    #     def _container(self):
-    #         return self.__class__._cls_container
-
-    def __init__(
-        self, container=None, path=None, autoreporting=False, output_formatter=None
-    ):
+#     @property
+#     def _cls_container(self):
+#         return self.__class__._cls_container
+    
+#     @property
+#     def _container(self):
+#         return self.__class__._cls_container
+    
+    
+    def __init__(self,
+                 container=None,
+                 path=None,
+                 autoreporting=False,
+                 output_formatter=None):
         if container:
             self._container = container
         else:
@@ -235,21 +205,17 @@ class ReportModule:
         else:
             self._out_format = self.__class__._out_formatter
 
-        # print(f'Report module init - formatter is {self._out_format}')
+        #print(f'Report module init - formatter is {self._out_format}')
 
     def _apply_formatter(self, data):
 
-        # print(type(self._out_format))
-        if (
-            self._out_format is BaseFrameFormatter,
-            PivotFrameSummary,
-            FFTFrameFormatter,
-            PivotPlotFrameSummary,
-        ):
-            # print('Base frmatter is working')
+        #print(type(self._out_format))
+        if (self._out_format is BaseFrameFormatter, PivotFrameSummary,
+                FFTFrameFormatter, PivotPlotFrameSummary):
+            #print('Base frmatter is working')
 
-            # print('data.index', data.index)
-            # print('data.index.name', data.index.name)
+            #print('data.index', data.index)
+            #print('data.index.name', data.index.name)
 
             result = self._out_format(data)()
 
@@ -257,11 +223,11 @@ class ReportModule:
             #             display(result)
             #             #print(result.index.name)
             if not result.index.name:
-                result.index.name = ""
+                result.index.name = ''
 
             return result
         else:
-            # print('callable is working')
+            #print('callable is working')
             return self._out_format(data)
 
     @property
@@ -278,20 +244,22 @@ class ReportModule:
         if time_frame.columns != [] and time_frame.columns != pd.Index([]):
 
             time_frame.columns = pd.MultiIndex.from_tuples(time_frame.columns)
-            time_frame.columns.set_names(
-                ["model", "parameter", "coordinate"], inplace=True
-            )
+            time_frame.columns.set_names(['model', 'parameter', 'coordinate'],
+                                         inplace=True)
 
         return time_frame
 
+
+
+
     def set_frame(self, key, frame):
-        # print('self frame is modified')
+        #print('self frame is modified')
         self._frame[key] = frame
 
         return frame
 
     def set_class_frame(self, key, frame):
-        # print('class frame is modified')
+        #print('class frame is modified')
 
         self.__class__._frame[key] = frame
 
@@ -302,13 +270,13 @@ class ReportModule:
         if not self.__class__._hold:
 
             if obj and (self._frame is not None):
-                # print('self cleaner')
+                #print('self cleaner')
                 self._frame = type(self._frame)()
-                # self._frame = None
+                #self._frame = None
             if (not obj) and (self.__class__._frame is not None):
-                # print('class cleaner')
+                #print('class cleaner')
                 self.__class__._frame = type(self.__class__._frame)()
-            # self.__class__._frame =  None
+            #self.__class__._frame =  None
 
         return None
 
@@ -320,12 +288,13 @@ class ReportModule:
 
     def reported(self):
         self.cls_container.append(self)
-
+        
         return copy.deepcopy(self)
 
+    
     def _report(self):
         self.cls_container.append(self)
-
+    
 
 def plots_no():
     num = 0
@@ -334,41 +303,46 @@ def plots_no():
         num += 1
 
 
-default_colors = ["red", "blue", "orange", "teal", "black", "green"]
+default_colors = ['red', 'blue', 'orange', 'teal', 'black', 'green']
+
+
 
 
 class BaseIndexTransformer:
+
     """_summary_
 
     Returns
     -------
     _type_
         _description_
-
+    
     maintenance by BCh
     """
 
-    _coord_level = -1
-    _name_level = "auto"
+    _coord_level=-1
+    _name_level='auto'
 
-    def __init__(self, data):
+    def __init__(self,data):
 
         self._data = data
 
     @property
     def index(self):
         return self._data.index
+    
 
     @property
     def columns(self):
         return self._data.columns
 
+    
     def _spot_axis_label(self):
 
         cols = self.columns
         lvl_to_drop = self._coord_level
-
-        if isinstance(cols, pd.MultiIndex):
+        
+        if isinstance(cols,pd.MultiIndex):
             ylabel = list(cols.get_level_values(lvl_to_drop).unique())
 
         else:
@@ -376,46 +350,56 @@ class BaseIndexTransformer:
 
         return ylabel
 
-    def _spot_labels(self):
 
+    def _spot_labels(self):
+        
         cols = self.columns
         lvl_to_drop = self._coord_level
+        
 
-        # print('raw input',cols)
+        #print('raw input',cols)
 
-        if isinstance(cols, pd.MultiIndex):
+        if isinstance(cols,pd.MultiIndex):
 
-            if len(self._spot_axis_label()) == 1:
+            if len(self._spot_axis_label() )==1:
                 cols = cols.droplevel(lvl_to_drop)
 
-        if isinstance(cols, pd.MultiIndex):
+        if isinstance(cols,pd.MultiIndex):
             labels = list(cols.to_flat_index())
-
-        #             #print('len',len(labels),labels,type(labels))
-
-        #             if not isinstance(labels[0],tuple):
-        #                 labels =[(label,)  for label in labels]
-
+            
+            
+            
+#             #print('len',len(labels),labels,type(labels))
+            
+#             if not isinstance(labels[0],tuple):
+#                 labels =[(label,)  for label in labels]
+            
+            
         else:
 
-            labels = [(entry,) for entry in cols]
+            labels = [(entry,)  for entry in cols]
 
-        # print('len',len(labels),labels,type(labels))
+
+        #print('len',len(labels),labels,type(labels))
         return labels
-
+    
+    
     def get_columns_str(self):
+        
 
+        
         cols = self.columns
         lvl_to_drop = self._coord_level
-
+        
         labels = self._spot_labels()
-
-        return [", ".join([str(entry) for entry in label]) for label in labels]
+        
+        return [', '.join([str(entry) for entry in label])   for label in labels]
 
     def get_axis_str(self):
-
-        return ", ".join([str(entry) for entry in self._spot_axis_label()])
-
+        
+        return ', '.join([str(entry) for entry in self._spot_axis_label()])
+    
+    
 
 class DataAxis(Axis, ReportModule):
     """
@@ -426,38 +410,35 @@ class DataAxis(Axis, ReportModule):
 
     maintenance by BCh
     """
-
-    _latex_name = "axis"
-    _handle = "plotEntry"
+    _latex_name = 'axis'
+    _handle = 'plotEntry'
     _at = None
 
-    _x_axis_name = "x"
-    _y_axis_name = "y"
-    _legend_fontsize = r"\small "
+    _x_axis_name = 'x'
+    _y_axis_name = 'y'
+    _legend_fontsize = r'\small '
     _default_colours = default_colors
 
-    _height = NoEscape(r"5cm")
-    _width = "0.9\\textwidth"
+    _height = NoEscape(r'5cm')
+    _width = '0.9\\textwidth'
     _x_axis_empty = False
     _y_limit = None
     _line_style = None
-    _legend_pos = "north east"
+    _legend_pos = 'north east'
     _default_transformer = BaseIndexTransformer
 
-    def __init__(
-        self,
-        plotdata=None,
-        height=None,
-        width=None,
-        options=None,
-        *,
-        y_limit=None,
-        x_axis_empty=None,
-        colour=None,
-        at=None,
-        handle=None,
-        data=None,
-    ):
+    def __init__(self,
+                 plotdata=None,
+                 height=None,
+                 width=None,
+                 options=None,
+                 *,
+                 y_limit = None,
+                 x_axis_empty = None,
+                 colour =None,
+                 at=None,
+                 handle=None,
+                 data=None):
         """
         Args
         ----
@@ -485,9 +466,10 @@ class DataAxis(Axis, ReportModule):
 
         if y_limit is not None:
             self._y_limit = y_limit
-
+            
         if options is None:
             options = self._axis_options
+
 
         super().__init__(options=options, data=data)
 
@@ -495,22 +477,23 @@ class DataAxis(Axis, ReportModule):
             for data in self._plots:
                 self.append(data)
 
+    
     @classmethod
     def set_default_colours(cls, colour=None):
         cls._default_colours = colour
         TikZPlot._default_colours = colour
-
+        
         return cls
 
     @classmethod
     def set_width(cls, width=None):
         cls._width = width
         return cls
-
+    
     @classmethod
     def set_height(cls, height=None):
         cls._height = height
-        return cls
+        return cls 
 
     @property
     def handle(self):
@@ -518,63 +501,57 @@ class DataAxis(Axis, ReportModule):
 
     @property
     def at(self):
-
+        
         if self._at is not None:
             return self._at
         else:
-            return None  # return '(0,0)'
+            return None #return '(0,0)'
 
     @property
     def _axis_options(self):
 
         kwargs = {
-            "height": NoEscape(self._height),
-            "anchor": "north west",
-            "ymajorgrids": "true",
-            "xmajorgrids": "true",
+            'height': NoEscape(self._height),
+            'anchor': 'north west',
+            'ymajorgrids': 'true',
+            'xmajorgrids': 'true',
             #'ylabel': self.y_axis_name,
+
         }
 
         if self.handle:
-            kwargs["name"] = self.handle
+            kwargs['name'] = self.handle
 
         at_option = []
         if self.at is not None:
-            at_option = [NoEscape(f"at={self.at}")]
+            at_option = [NoEscape(f'at={self.at}')]
+
 
         if self._x_axis_empty:
-            ax_options = [
-                NoEscape("xticklabels=\empty"),
-            ]
+            ax_options = [NoEscape('xticklabels=\empty'),
+                         ]
         else:
-            ax_options = [
-                NoEscape(f"xlabel= {self.x_axis_name}"),
-            ]
+            ax_options = [NoEscape(f'xlabel= {self.x_axis_name}'),
+                         ]
 
         if self.__class__._y_limit is not None:
-            ay_options = [
-                NoEscape(f"ymin={(self.__class__._y_limit)[0]}"),
-                NoEscape(f"ymax={(self.__class__._y_limit)[1]}"),
-            ]
+            ay_options = [NoEscape(f'ymin={(self.__class__._y_limit)[0]}'),
+                       NoEscape(f'ymax={(self.__class__._y_limit)[1]}')]
         else:
             ay_options = []
 
-        base_options = (
-            [
-                "grid style=dashed",
-                f"legend pos={self._legend_pos}",
-                NoEscape("legend style={font=\small}"),
-                # NoEscape('at={(0,0)}'),
-                NoEscape(f"width={self._width}"),
-                NoEscape(f"xmin={min(self.plotdata.index)}"),
-                NoEscape(f"xmax={max(self.plotdata.index)}"),
-                NoEscape(f"ylabel= {self.y_axis_name}"),
-            ]
-            + at_option
-            + ax_options
-            + ay_options
-        )
+        base_options = ['grid style=dashed',
+                        f'legend pos={self._legend_pos}',
+                       NoEscape('legend style={font=\small}'),
 
+                       #NoEscape('at={(0,0)}'),
+
+                       NoEscape(f'width={self._width}'),
+                       NoEscape(f'xmin={min(self.plotdata.index)}'),
+                       NoEscape(f'xmax={max(self.plotdata.index)}'),
+                       NoEscape(f'ylabel= {self.y_axis_name}'),
+                       ] + at_option + ax_options + ay_options
+        
         return Options(*base_options, **kwargs)
 
     @property
@@ -606,6 +583,10 @@ class DataAxis(Axis, ReportModule):
         """
         return self._plotdata.index.to_numpy()
 
+    
+    
+    
+    
     @property
     def _index_limits(self):
         """
@@ -619,15 +600,15 @@ class DataAxis(Axis, ReportModule):
             xmax = None
 
         return xmin, xmax
-
+    
     @property
     def _values_limits(self):
         """
         Returns minimum and maximum values limits
         """
         if isinstance(self.plotdata, (pd.DataFrame, pd.Series)):
-            ymin = -0.25  # min(self.plotdata.index)
-            ymax = 0.25  # max(self.plotdata.index)
+            ymin = -0.25#min(self.plotdata.index)
+            ymax = 0.25#max(self.plotdata.index)
         else:
             ymin = None
             ymax = None
@@ -644,12 +625,13 @@ class DataAxis(Axis, ReportModule):
         else:
             name = None
 
-        return "{" + name + "}" if name is not None else "{" + self._x_axis_name + "}"
+        return '{'+name+'}' if name is not None else '{'+self._x_axis_name +'}'
 
     @property
     def _data_description(self):
         return self._default_transformer(self.plotdata)
-
+    
+    
     @property
     def y_axis_name(self):
         """
@@ -659,14 +641,15 @@ class DataAxis(Axis, ReportModule):
         if isinstance(self.plotdata, (pd.DataFrame)):
             cols_name = self.plotdata.columns.name
 
-            if isinstance(self.plotdata.columns, pd.MultiIndex):
 
+
+            if isinstance(self.plotdata.columns,pd.MultiIndex):
+
+                
                 name = self._data_description.get_axis_str()
 
-            elif isinstance(
-                self.plotdata.columns, pd.Index
-            ):  # temporary solution for further improvement - must be rewritten
-                name = ", ".join(self.plotdata.columns.unique())
+            elif isinstance(self.plotdata.columns,pd.Index): #temporary solution for further improvement - must be rewritten
+                name = ', '.join(self.plotdata.columns.unique())
             else:
                 name = cols_name
 
@@ -675,7 +658,7 @@ class DataAxis(Axis, ReportModule):
         else:
             name = None
 
-        return "{" + name + "}" if name is not None else "{" + self._y_axis_name + "}"
+        return '{'+name+'}' if name is not None else '{'+self._y_axis_name +'}'
 
     def _preview(self):
         """
@@ -693,21 +676,22 @@ class DataAxis(Axis, ReportModule):
         """
         Returns plot dataframe columns' labels.
         """
-
+        
         trans_class = self._transformer
-
+        
         if isinstance(self.plotdata, (pd.DataFrame)):
 
             labels = self._data_description.get_columns_str()
 
+            
         elif isinstance(self.plotdata, (pd.Series)):
             labels = [self.plotdata.name]
         else:
-            labels = ["Data"]
+            labels = ['Data']
 
         return labels
 
-    # Zaprogramować zabezpieczenie metody na data integrity!!!
+    #Zaprogramować zabezpieczenie metody na data integrity!!!
     @property
     def _coordinates(self):
         """
@@ -716,7 +700,8 @@ class DataAxis(Axis, ReportModule):
         data = self.plotdata
         if isinstance(data, pd.DataFrame):
             data_for_plot_list = [
-                zip(self._index, plot_data) for label, plot_data in list(data.items())
+                zip(self._index, plot_data)
+                for label, plot_data in list(data.items())
             ]
         else:
             data_for_plot_list = [zip(self._index, data.to_numpy())]
@@ -746,43 +731,45 @@ class DataAxis(Axis, ReportModule):
 
         coords_pack = self._coordinates
         labels = self.labels
+        
 
-        colours = [self._label_colour(no) for no, elem in enumerate(coords_pack)]
+        
+        colours = [
+            self._label_colour(no) for no, elem in enumerate(coords_pack)
+        ]
 
         if self._line_style is None:
-            line_style = "solid"
+            line_style='solid'
         else:
             line_style = self._line_style
 
-        # return list(zip(coords_pack,labels,colours))
+        #return list(zip(coords_pack,labels,colours))
         if self.at is not None:
             plot_list = [
-                Plot(
-                    name=NoEscape(
-                        NoEscape(self.legend_fontsize) + NoEscape(str(label))
-                    ),
-                    coordinates=list(coords),
-                    options=Options(f"{line_style}", color=colour),
-                )
-                for coords, label, colour in (zip(coords_pack, labels, colours))
+            Plot(name=NoEscape(
+                NoEscape(self.legend_fontsize) + NoEscape(str(label))),
+                 coordinates=list(coords),
+                 options=Options(f'{line_style}', color=colour))
+            for coords, label, colour in (zip(coords_pack, labels, colours))
             ]
         else:
             plot_list = [
-                Plot(
-                    name=NoEscape(
-                        NoEscape(self.legend_fontsize) + NoEscape(str(label))
-                    ),
-                    coordinates=list(coords),
-                    options=Options(f"{line_style}", color=colour),
-                )
-                for coords, label, colour in (zip(coords_pack, labels, colours))
+            Plot(name=NoEscape(
+                NoEscape(self.legend_fontsize) + NoEscape(str(label))),
+                 coordinates=list(coords),
+                 options=Options(f'{line_style}', color=colour))
+            for coords, label, colour in (zip(coords_pack, labels, colours))
             ]
-
+        
         return plot_list
+    
 
+    
+    
     def _repr_markdown_(self):
         self._preview()
-        return " "
+        return ' '
+    
 
 
 class TikZPlot(TikZ, ReportModule):
@@ -794,12 +781,11 @@ class TikZPlot(TikZ, ReportModule):
 
     maintenance by BCh
     """
+    _latex_name = 'tikzpicture'
 
-    _latex_name = "tikzpicture"
-
-    _x_axis_name = "x"
-    _y_axis_name = "y"
-    _legend_fontsize = r"\small "
+    _x_axis_name = 'x'
+    _y_axis_name = 'y'
+    _legend_fontsize = r'\small '
     _default_colours = default_colors
 
     _subplots = False
@@ -813,29 +799,26 @@ class TikZPlot(TikZ, ReportModule):
     _grid = None
 
     _in_figure = False
-    _figure_gen = lambda: Figure(position="H")
-    _image_parameters = {"width": None}
-
-    _floats_no_gen = plots_no()
-    _default_path = "./tikzplots"
+    _figure_gen = lambda: Figure(position='H')
+    _image_parameters = {'width': None}
+    
+    _floats_no_gen = plots_no()    
+    _default_path = './tikzplots'
     _filename = None
     _prefix = None
-
+    
     _picture = True
-    _caption = "Default caption"
-
-    def __init__(
-        self,
-        plotdata=None,
-        subplots=None,
-        height=None,
-        width=None,
-        options=None,
-        *,
-        arguments=None,
-        start_arguments=None,
-        **kwargs,
-    ):
+    _caption = 'Default caption'
+    
+    def __init__(self,
+                 plotdata=None,
+                 subplots=None,
+                 height=None,
+                 width=None,
+                 options=None,
+                 *,
+                 arguments=None, start_arguments=None,
+                 **kwargs):
         """
         Args
         ----
@@ -853,50 +836,41 @@ class TikZPlot(TikZ, ReportModule):
 
         if width is not None:
             self._width = width
-
+            
         self._selected_colours = None
 
-        super().__init__(
-            options=options,
-            arguments=arguments,
-            start_arguments=start_arguments,
-            **kwargs,
-        )
 
+        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
+
+
+        
         if plotdata is not None:
             if self.subplots:
 
-                plots_no = len(plotdata.columns)
-                cols, rows = self.grid
-                empty_axis_list = self.grid_nodes[:-cols] + [False] * cols
-                colours_list = self._default_colours * plots_no
-
+                
+                plots_no=len(plotdata.columns)
+                cols,rows=self.grid
+                empty_axis_list = self.grid_nodes[:-cols]+[False]*cols
+                colours_list = self._default_colours*plots_no
+                
                 self._selected_colours = colours_list
-                labels = self.ylabel_list
-
-                for no, (column, pos, empty_axis) in enumerate(
-                    zip(plotdata.columns, self.grid_nodes, empty_axis_list)
-                ):
-
-                    data = plotdata[[column]]
-                    # data.columns.name = labels[no]
-
-                    ax_data = self.axis_type(
-                        data,
-                        height=self.subplot_height,
-                        width=self.subplot_width,
-                        x_axis_empty=empty_axis,
-                        colour=colours_list[no],
-                        at=pos,
-                        handle=f"subplot{no}",
-                    )
+                labels=self.ylabel_list
+                
+                for no,(column,pos,empty_axis) in enumerate(zip(plotdata.columns,self.grid_nodes,empty_axis_list)):
+                    
+                    data=plotdata[[column]]
+                    #data.columns.name = labels[no]
+                    
+                    
+                    ax_data = self.axis_type(data,height=self.subplot_height,width=self.subplot_width,x_axis_empty=empty_axis,colour=colours_list[no],at = pos,handle=f'subplot{no}')
 
                     self.append(ax_data)
             else:
+                
+                self.append(self.axis_type(plotdata,height=self.height,width=self.width))
 
-                self.append(
-                    self.axis_type(plotdata, height=self.height, width=self.width)
-                )
+                
+
 
     @property
     def axis_type(self):
@@ -909,7 +883,7 @@ class TikZPlot(TikZ, ReportModule):
 
         if plotdata is not None:
 
-            if isinstance(plotdata.columns, pd.MultiIndex):
+            if isinstance(plotdata.columns,pd.MultiIndex):
                 return plotdata.columns.levels
             else:
 
@@ -931,115 +905,113 @@ class TikZPlot(TikZ, ReportModule):
 
         return None
         if isinstance(self._ylim, list):
-            return Options(
-                "grid style=dashed",
-                NoEscape("legend style={font=\small}"),
-                NoEscape(f"width={self._width}"),
-                NoEscape(f"xmin={min(self._plotdata.index)}"),
-                NoEscape(f"xmax={max(self._plotdata.index)}"),
-                NoEscape(f"ymin={min(self._ylim)}"),
-                NoEscape(f"ymax={max(self._ylim)}"),
-                height=NoEscape(self._height),
-                anchor="north west",
-                ymajorgrids="true",
-                xmajorgrids="true",
-                xlabel=self._x_axis_name,
-                ylabel=self._y_axis_name,
-            )
+            return Options('grid style=dashed',
+                           NoEscape('legend style={font=\small}'),
+                           NoEscape(f'width={self._width}'),
+                           NoEscape(f'xmin={min(self._plotdata.index)}'),
+                           NoEscape(f'xmax={max(self._plotdata.index)}'),
+                           NoEscape(f'ymin={min(self._ylim)}'),
+                           NoEscape(f'ymax={max(self._ylim)}'),
+                           height=NoEscape(self._height),
+                           anchor='north west',
+                           ymajorgrids='true',
+                           xmajorgrids='true',
+                           xlabel=self._x_axis_name,
+                           ylabel=self._y_axis_name)
         elif self._ylim is None:
-            return Options(
-                "grid style=dashed",
-                NoEscape("legend style={font=\small}"),
-                NoEscape(f"width={self._width}"),
-                NoEscape(f"xmin={min(self._plotdata.index)}"),
-                NoEscape(f"xmax={max(self._plotdata.index)}"),
-                height=NoEscape(self._height),
-                anchor="north west",
-                ymajorgrids="true",
-                xmajorgrids="true",
-                xlabel=self._x_axis_name,
-                ylabel=self._y_axis_name,
-            )
+            return Options('grid style=dashed',
+                           NoEscape('legend style={font=\small}'),
+                           NoEscape(f'width={self._width}'),
+                           NoEscape(f'xmin={min(self._plotdata.index)}'),
+                           NoEscape(f'xmax={max(self._plotdata.index)}'),
+                           height=NoEscape(self._height),
+                           anchor='north west',
+                           ymajorgrids='true',
+                           xmajorgrids='true',
+                           xlabel=self._x_axis_name,
+                           ylabel=self._y_axis_name)
 
+                
     @property
     def grid(self):
-
+        
         if self._grid is None:
-            grid = (1, len(self._plotdata.columns))
+            grid = (1,len(self._plotdata.columns)  )
         else:
             grid = self._grid
-
+        
         return grid
 
-    #     @property
-    #     def grid(self):
-    #         if self._default_grid is None:
-    #             return self.grid
-    #         else:
-    #             return self._default_grid
+#     @property
+#     def grid(self):
+#         if self._default_grid is None:
+#             return self.grid
+#         else:
+#             return self._default_grid
 
-    #     @grid.setter
-    #     def grid(self, size):
-    #         self._grid_size=size
+#     @grid.setter
+#     def grid(self, size):
+#         self._grid_size=size
 
+    
     @property
     def grid_nodes(self):
-
-        cols_no, rows_no = self.grid
-
+        
+        cols_no, rows_no=self.grid
+        
         coordinates = []
-
+        
         for row_id in range(rows_no):
-            y_coordinate = row_id * (self._height / rows_no)
-            y_coord_round = round(y_coordinate, 2)
-
+            y_coordinate = row_id * (self._height/rows_no)
+            y_coord_round = round(y_coordinate,2)
+            
             for col_id in range(cols_no):
                 if cols_no > 1:
-
-                    x_coordinate = col_id * (self._width / cols_no)
-
+                
+                    x_coordinate = col_id * (self._width/cols_no)
+                    
                 else:
                     x_coordinate = 0
-
-                x_coord_round = round(x_coordinate, 2)
-                position = "{" + f"({x_coord_round}cm , -{y_coord_round}cm)" + "}"
+                    
+                x_coord_round = round(x_coordinate,2)
+                position = "{"+f"({x_coord_round}cm , -{y_coord_round}cm)"+"}"
                 coordinates.append(position)
-
+            
         return coordinates
 
     @property
     def subplot_height(self):
-
-        rows_no = self.grid[1]
-
-        return NoEscape(f"{self._height/rows_no+1.5-self._subplots_gap}cm")
+        
+        rows_no=self.grid[1]
+        
+        return NoEscape(f'{self._height/rows_no+1.5-self._subplots_gap}cm')
 
     @property
     def subplot_width(self):
-
-        cols_no = self.grid[0]
-
+        
+        cols_no=self.grid[0]
+        
         if cols_no > 1:
 
-            return NoEscape(
-                f"{self._width/cols_no-2-self._subplots_horizontal_gap-self._subplots_gap}cm"
-            )
+            return NoEscape(f'{self._width/cols_no-2-self._subplots_horizontal_gap-self._subplots_gap}cm')
 
         else:
             return self.width
-
+        
+    
+    
     @property
     def height(self):
         """
         Returns dataframe index as numpy array related to data for plot
         """
-        if isinstance(self._height, float) or isinstance(self._height, int):
-            return NoEscape(f"{self._height}cm")
-        if isinstance(self._height, tuple):
-            return NoEscape(f"{self._height[0]}" + self._height[1])
-        if isinstance(self._height, str):
+        if isinstance(self._height,float) or isinstance(self._height,int):
+            return NoEscape(f'{self._height}cm')
+        if isinstance(self._height,tuple):
+            return NoEscape(f'{self._height[0]}'+self._height[1])
+        if isinstance(self._height,str):
             return NoEscape(self._height)
-        if isinstance(self._height, NoEscape):
+        if isinstance(self._height,NoEscape):
             return self._height
 
     @property
@@ -1047,17 +1019,19 @@ class TikZPlot(TikZ, ReportModule):
         """
         Returns dataframe index as numpy array related to data for plot
         """
-        if isinstance(self._width, float) or isinstance(self._width, int):
-            return f"{self._width}\\textwidth"
-        if isinstance(self._width, tuple):
-            return f"{self._width[0]}" + self._width[1]
-        if isinstance(self._width, str):
+        if isinstance(self._width,float) or isinstance(self._width,int):
+            return f'{self._width}\\textwidth'
+        if isinstance(self._width,tuple):
+            return f'{self._width[0]}'+self._width[1]
+        if isinstance(self._width,str):
             return self._width
 
-    def in_figure(self, filename=None, caption=None):
+    def in_figure(self,filename=None,caption=None):
+
 
         ReportCache.update_existing_files(self.__class__._default_path)
 
+        
         obj = copy.copy(self)
         obj._in_figure = True
 
@@ -1069,109 +1043,120 @@ class TikZPlot(TikZ, ReportModule):
 
         filename = self.filename
 
+
         fig = self.__class__._figure_gen()
-        fig.packages.append(Package("float"))
+        fig.packages.append(Package('float'))
 
         img_params = self.__class__._image_parameters
-        width = self.__class__._image_parameters["width"]
+        width = self.__class__._image_parameters['width']
 
         if self._picture:
             from .report import Picture
-
-            key = standalone_plot.dumps()
-
+            
+            key=standalone_plot.dumps()
+            
             if key in ReportCache._file_names:
                 filename = ReportCache._file_names[key]
-
+            
             else:
 
-                standalone_plot.generate_pdf(
-                    filename, clean_tex=False, compiler_args=["--lualatex"]
-                )
+                standalone_plot.generate_pdf(filename, clean_tex=False,compiler_args=['--lualatex'])
                 ReportCache._file_names[key] = filename
 
-            fig = Picture(filename + ".pdf", width=width, caption=caption)
+
+                
+
+
+            fig = Picture(filename+'.pdf', width=width, caption = caption)
         else:
             standalone_plot.generate_tex(filename)
 
-            fig.append(Command(command="input", arguments=filename))
+            fig.append(Command(command='input', arguments=filename))
+
 
         return fig
 
-    @property
+    @property    
     def filename(self):
-
+    
         if self._filename is None and self._prefix is None:
-            filename = f"{self.__class__._default_path}/plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}"
+            filename = f'{self.__class__._default_path}/plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
 
         elif self._filename is None and self._prefix is not None:
-            filename = f"{self.__class__._default_path}/{self._prefix}_plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}"
+            filename = f'{self.__class__._default_path}/{self._prefix}_plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
 
         else:
             filename = self._filename
-
+            
         if filename in list(ReportCache._file_names.values()):
             filename = self.filename
 
-        return filename
 
+        return  filename
+
+    
     def _report(self):
         if self._in_figure is True:
             standalone_plot = tikz.TikzStandalone()
             standalone_plot.append(self)
-
+            
             filename = self.filename
 
-            fig = self.__class__._figure_gen()
-            fig.packages.append(Package("float"))
 
+            fig = self.__class__._figure_gen()
+            fig.packages.append(Package('float'))
+            
             img_params = self.__class__._image_parameters
 
             if self._picture:
                 from .report import Picture
 
-                standalone_plot.generate_pdf(
-                    filename, clean_tex=False, compiler_args=["--lualatex"]
-                )
+                standalone_plot.generate_pdf(filename, clean_tex=False,compiler_args=['--lualatex'])
 
-                width = self.__class__._image_parameters["width"]
 
-                fig = Picture(filename + ".pdf", width=width)
+
+                width = self.__class__._image_parameters['width']
+
+                
+                fig = Picture(filename+'.pdf', width=width)
             else:
                 standalone_plot.generate_tex(filename)
+                
+                fig.append(Command(command='input', arguments=filename))
 
-                fig.append(Command(command="input", arguments=filename))
 
+            
             fig.add_caption(self._caption)
-
+            
             self.cls_container.append(fig)
             display(fig)
-
+            
         else:
             self.cls_container.append(self)
-            self._plotdata.plot(
-                subplots=self.subplots,
-                # color=self._selected_colours
-            )
-
+            self._plotdata.plot(subplots=self.subplots,
+                                #color=self._selected_colours
+                               )
+            
+        
+    
     def _repr_markdown_(self):
-
-        # self._plotdata.plot(subplots=self.subplots,color=self._selected_colours)
+        
+        #self._plotdata.plot(subplots=self.subplots,color=self._selected_colours)
         self._report()
-
-        return " "
+        
+        return ' '
 
 
 class DataMethods:
 
-    _figure_gen = lambda: Figure(position="H")
-    _image_parameters = {"width": NoEscape(r"0.9\textwidth")}
-    _legend_fontsize = r" "
-    _label_fontsize = r"\small "
-    _template = Document(
-        documentclass="standalone", geometry_options=None, document_options=["tikz"]
-    )
-    # _extra
+    _figure_gen = lambda: Figure(position='H')
+    _image_parameters = {'width': NoEscape(r'0.9\textwidth')}
+    _legend_fontsize = r' '
+    _label_fontsize = r'\small '
+    _template = Document(documentclass='standalone',
+                         geometry_options=None,
+                         document_options=["tikz"])
+    #_extra
 
     @classmethod
     def set_document_template(cls, template=None):
@@ -1203,58 +1188,51 @@ class DataMethods:
             cls._image_parameters = image_parameters
         return cls
 
-    def _pylatex_tikz(
-        self,
-        filename,
-        labels_list=None,
-        colors_list=default_colors,
-        height=NoEscape(r"7cm"),
-        width=NoEscape("0.9\\textwidth"),
-        x_axis_description=",xlabel={$t$},x unit=\\si{\\second},",
-        y_axis_description=" ",
-        subplots=False,
-        extra_commands=None,
-        options=None,
-        smooth=False,
-    ):
+    def _pylatex_tikz(self,
+                      filename,
+                      labels_list=None,
+                      colors_list=default_colors,
+                      height=NoEscape(r'7cm'),
+                      width=NoEscape('0.9\\textwidth'),
+                      x_axis_description=',xlabel={$t$},x unit=\\si{\\second},',
+                      y_axis_description=' ',
+                      subplots=False,
+                      extra_commands=None,
+                      options=None,
+                      smooth=False):
 
         if smooth:
-            radius_str = NoEscape(f",rounded corners=1mm,")
+            radius_str = NoEscape(f',rounded corners=1mm,')
         else:
-            radius_str = ""
+            radius_str = ''
 
         labels_list = [label for label in self.columns]
-        # labels_list=[(vlatex(label)) for label in self.columns]
+        #labels_list=[(vlatex(label)) for label in self.columns]
 
         data_for_plot_list = [
-            zip(self.index, plot_data) for label, plot_data in list(self.items())
+            zip(self.index, plot_data)
+            for label, plot_data in list(self.items())
         ]
 
         plots_no = len(data_for_plot_list)
 
         colors_multiplicator = np.ceil(plots_no / len(colors_list))
 
-        # print(y_axis_description)
-        # y_axis_description= ' '
-        plot_options = (
-            NoEscape(
-                "anchor=north west,ymajorgrids=true,xmajorgrids=true,grid style=dashed,legend style={font=\\small},"
-                + NoEscape(y_axis_description)
-            )
-            + NoEscape(", height=")
-            + height
-            + NoEscape(",width=")
-            + width
-            + NoEscape(f",xmin={min(self.index)},xmax={max(self.index)}")
-        )
-
+        #print(y_axis_description)
+        #y_axis_description= ' '
+        plot_options = NoEscape(
+            'anchor=north west,ymajorgrids=true,xmajorgrids=true,grid style=dashed,legend style={font=\\small},'
+            + NoEscape(y_axis_description)
+        ) + NoEscape(', height=') + height + NoEscape(
+            ',width='
+        ) + width  + NoEscape(f',xmin={min(self.index)},xmax={max(self.index)}')
+        
         print(plot_options)
 
-        # with doc.create(Figure(position='!htb')) as fig:
+        #with doc.create(Figure(position='!htb')) as fig:
 
-        plot_options_list = [plot_options + NoEscape(",xticklabels=\empty,")] * (
-            plots_no - 1
-        )
+        plot_options_list = [plot_options + NoEscape(',xticklabels=\empty,')
+                             ] * (plots_no - 1)
         plot_options_list.append(plot_options + NoEscape(x_axis_description))
 
         tikzpicture = TikZ(options=options)
@@ -1263,51 +1241,39 @@ class DataMethods:
 
         if subplots == False:
 
-            with tikzpicture.create(Axis(options=plot_options_list[-1])) as plot:
+            with tikzpicture.create(
+                    Axis(options=plot_options_list[-1])) as plot:
 
                 for data_for_plot, label, color in zip(
-                    data_for_plot_list,
-                    labels_list,
-                    colors_list * int(colors_multiplicator),
-                ):
+                        data_for_plot_list, labels_list,
+                        colors_list * int(colors_multiplicator)):
                     coordinates = data_for_plot
 
                     plot.append(
-                        Plot(
-                            name=NoEscape(NoEscape(legend_font_size + str(label))),
-                            coordinates=coordinates,
-                            options="color=" + color + ",solid" + radius_str,
-                        )
-                    )
+                        Plot(name=NoEscape(
+                            NoEscape(legend_font_size + str(label))),
+                             coordinates=coordinates,
+                             options='color=' + color + ',solid' + radius_str))
 
         else:
-            at_option = NoEscape("")
+            at_option = NoEscape('')
             for no, combined_plot_data in enumerate(
-                zip(
-                    data_for_plot_list,
-                    labels_list,
-                    colors_list * int(colors_multiplicator),
-                )
-            ):
+                    zip(data_for_plot_list, labels_list,
+                        colors_list * int(colors_multiplicator))):
                 data_for_plot, label, color = combined_plot_data
-                plot_name = NoEscape(",name=plot" + str(no) + ",")
+                plot_name = NoEscape(',name=plot' + str(no) + ',')
                 with tikzpicture.create(
-                    Axis(options=plot_options_list[no] + plot_name + at_option)
-                ) as plot:
+                        Axis(options=plot_options_list[no] + plot_name +
+                             at_option)) as plot:
                     coordinates = data_for_plot
                     plot.append(
-                        Plot(
-                            name=NoEscape(
-                                NoEscape(legend_font_size) + NoEscape(str(label))
-                            ),
-                            coordinates=coordinates,
-                            options="color=" + color + ",solid" + radius_str,
-                        )
-                    )
-                    # at_option=NoEscape('at=(plot'+str(no)+'.below south west),')
-                    at_option = NoEscape(
-                        "at={(plot" + str(no) + ".south west)},yshift=-0.1cm,"
-                    )
+                        Plot(name=NoEscape(
+                            NoEscape(legend_font_size) + NoEscape(str(label))),
+                             coordinates=coordinates,
+                             options='color=' + color + ',solid' + radius_str))
+                    #at_option=NoEscape('at=(plot'+str(no)+'.below south west),')
+                    at_option = NoEscape('at={(plot' + str(no) +
+                                         '.south west)},yshift=-0.1cm,')
 
         if extra_commands is not None:
             tikzpicture.append(extra_commands)
@@ -1315,51 +1281,47 @@ class DataMethods:
         return tikzpicture
 
     def to_pylatex_plot(
-        self,
-        filename,
-        labels_list=None,
-        colors_list=default_colors,
-        height=NoEscape(r"6cm"),
-        width=NoEscape(r"0.49\textwidth"),
-        x_axis_description=",xlabel={$t$},x unit=\si{\second},",
-        y_axis_description="",
-        subplots=False,
-        extra_commands=None,
-    ):
-
-        tikz_pic = self._pylatex_tikz(
+            self,
             filename,
-            labels_list,
-            colors_list,
-            height,
-            width,
-            x_axis_description,
-            y_axis_description,
-            subplots,
-            extra_commands=extra_commands,
-        )
+            labels_list=None,
+            colors_list=default_colors,
+            height=NoEscape(r'6cm'),
+            width=NoEscape(r'0.49\textwidth'),
+            x_axis_description=',xlabel={$t$},x unit=\si{\second},',
+            y_axis_description='',
+            subplots=False,
+            extra_commands=None):
+
+        tikz_pic = self._pylatex_tikz(filename,
+                                      labels_list,
+                                      colors_list,
+                                      height,
+                                      width,
+                                      x_axis_description,
+                                      y_axis_description,
+                                      subplots,
+                                      extra_commands=extra_commands)
 
         return tikz_pic
 
     def to_standalone_plot(
-        self,
-        filename,
-        labels_list=None,
-        colors_list=default_colors,
-        height=NoEscape(r"6cm"),
-        width=NoEscape(r"0.49\textwidth"),
-        x_axis_description=",xlabel={$t$},x unit=\si{\second},",
-        y_axis_description="",
-        subplots=False,
-        legend_pos="north east",
-        extra_commands=None,
-        options=None,
-        smooth=False,
-        picture=True,
-        template=None,
-        *arg,
-        **kwargs,
-    ):
+            self,
+            filename,
+            labels_list=None,
+            colors_list=default_colors,
+            height=NoEscape(r'6cm'),
+            width=NoEscape(r'0.49\textwidth'),
+            x_axis_description=',xlabel={$t$},x unit=\si{\second},',
+            y_axis_description='',
+            subplots=False,
+            legend_pos='north east',
+            extra_commands=None,
+            options=None,
+            smooth=False,
+            picture=True,
+            template=None,
+            *arg,
+            **kwargs):
 
         geometry_options = {
             "margin": "0cm",
@@ -1370,46 +1332,41 @@ class DataMethods:
             doc = self.__class__._template
 
         doc = copy.deepcopy(self.__class__._template)
-        # doc=Document(documentclass='subfiles',document_options=NoEscape('bch_r4.tex'))
+        #doc=Document(documentclass='subfiles',document_options=NoEscape('bch_r4.tex'))
 
-        doc.packages.append(Package("siunitx"))
-        doc.packages.append(Package("mathtools"))
-        doc.packages.append(Package("float"))
-        doc.packages.append(Package("tikz"))
-        doc.packages.append(Package("pgfplots"))
-        doc.append(Command("usepgfplotslibrary", arguments="units"))
-        doc.append(Command("usetikzlibrary", arguments="spy"))
+        doc.packages.append(Package('siunitx'))
+        doc.packages.append(Package('mathtools'))
+        doc.packages.append(Package('float'))
+        doc.packages.append(Package('tikz'))
+        doc.packages.append(Package('pgfplots'))
+        doc.append(Command('usepgfplotslibrary', arguments='units'))
+        doc.append(Command('usetikzlibrary', arguments='spy'))
 
         doc.append(
             Command(
-                "pgfplotsset",
+                'pgfplotsset',
                 arguments=NoEscape(
-                    r"compat=newest,label style={fontsize},legend pos=".format(
-                        fontsize="{" + f"font={self.__class__._label_fontsize}" + "}"
-                    )
-                    + str(legend_pos)
-                ),
-            )
-        )
+                    r'compat=newest,label style={fontsize},legend pos='.format(
+                        fontsize='{' +
+                        f'font={self.__class__._label_fontsize}' + '}') +
+                    str(legend_pos))))
 
-        tikz_pic = self._pylatex_tikz(
-            filename,
-            labels_list,
-            colors_list,
-            height,
-            width,
-            x_axis_description,
-            y_axis_description,
-            subplots,
-            extra_commands=extra_commands,
-            options=options,
-            smooth=smooth,
-        )
+        tikz_pic = self._pylatex_tikz(filename,
+                                      labels_list,
+                                      colors_list,
+                                      height,
+                                      width,
+                                      x_axis_description,
+                                      y_axis_description,
+                                      subplots,
+                                      extra_commands=extra_commands,
+                                      options=options,
+                                      smooth=smooth)
 
         doc.append(tikz_pic)
 
         if picture:
-            doc.generate_pdf(filename, clean_tex=False, compiler_args=["--lualatex"])
+            doc.generate_pdf(filename, clean_tex=False,compiler_args=['--lualatex'])
         else:
             doc.generate_tex(filename)
 
@@ -1420,135 +1377,129 @@ class DataMethods:
         filename,
         labels_list=None,
         colors_list=default_colors,
-        height=NoEscape(r"6cm"),
-        width=NoEscape(r"0.49\textwidth"),
-        x_axis_description=",xlabel={$t$},x unit=\si{\second},",
-        y_axis_description="",
+        height=NoEscape(r'6cm'),
+        width=NoEscape(r'0.49\textwidth'),
+        x_axis_description=',xlabel={$t$},x unit=\si{\second},',
+        y_axis_description='',
         subplots=False,
-        legend_pos="north east",
+        legend_pos='north east',
         extra_commands=None,
         options=None,
         smooth=False,
         picture=True,
     ):
 
-        return self.to_standalone_plot(
-            filename,
-            labels_list,
-            colors_list,
-            height,
-            width,
-            x_axis_description,
-            y_axis_description,
-            subplots,
-            legend_pos,
-            extra_commands=extra_commands,
-            options=options,
-            smooth=smooth,
-            picture=picture,
-        )
+        return self.to_standalone_plot(filename,
+                                       labels_list,
+                                       colors_list,
+                                       height,
+                                       width,
+                                       x_axis_description,
+                                       y_axis_description,
+                                       subplots,
+                                       legend_pos,
+                                       extra_commands=extra_commands,
+                                       options=options,
+                                       smooth=smooth,
+                                       picture=picture)
 
     def to_standalone_figure(
         self,
         filename,
         labels_list=None,
         colors_list=default_colors,
-        height=NoEscape(r"6cm"),
-        width=NoEscape(r"0.49\textwidth"),
-        x_axis_description=",xlabel={$t$},x unit=\si{\second},",
-        y_axis_description="",
+        height=NoEscape(r'6cm'),
+        width=NoEscape(r'0.49\textwidth'),
+        x_axis_description=',xlabel={$t$},x unit=\si{\second},',
+        y_axis_description='',
         subplots=False,
-        legend_pos="north east",
+        legend_pos='north east',
         extra_commands=None,
         options=None,
         smooth=False,
         picture=True,
     ):
 
-        self.to_standalone_plot(
-            filename,
-            labels_list,
-            colors_list,
-            height,
-            width,
-            x_axis_description,
-            y_axis_description,
-            subplots,
-            legend_pos,
-            extra_commands=extra_commands,
-            options=options,
-            smooth=smooth,
-            picture=picture,
-        )
+        self.to_standalone_plot(filename,
+                                labels_list,
+                                colors_list,
+                                height,
+                                width,
+                                x_axis_description,
+                                y_axis_description,
+                                subplots,
+                                legend_pos,
+                                extra_commands=extra_commands,
+                                options=options,
+                                smooth=smooth,
+                                picture=picture)
 
         fig = self.__class__._figure_gen()
         img_params = self.__class__._image_parameters
 
         if picture:
 
-            width = self.__class__._image_parameters["width"]
-            # width=NoEscape(r'0.8\textwidth')
+            width = self.__class__._image_parameters['width']
+            #width=NoEscape(r'0.8\textwidth')
 
             fig.add_image(filename, width=width)
         else:
-            fig.append(Command(command="input", arguments=filename))
+            fig.append(Command(command='input', arguments=filename))
 
         return fig
 
-    def to_pylatex_tikz(self, height=None, width=None, subplots=None, options=None):
-        return TikZPlot(
-            LatexDataFrame.formatted(self),
-            height=height,
-            width=width,
-            subplots=subplots,
-            options=options,
-        )
+    def to_pylatex_tikz(self,height=None,width=None,subplots=None,options=None):
+        return TikZPlot(LatexDataFrame.formatted(self),height=height,width=width,subplots=subplots,options=options)
 
+    
     def to_latex_dataframe(self):
         return LatexDataFrame.formatted(self)
-
-
+    
 class SpectralMethods(DataMethods):
 
     def is_uniformly_distributed(self):
 
         sample_length = max(self.index) - min(self.index) / len(self.index) - 1
         step_list = [
-            self.index[i + 1] - self.index[i] for i in range(len(self.index) - 1)
+            self.index[i + 1] - self.index[i]
+            for i in range(len(self.index) - 1)
         ]
 
-        if all(np.round(element - step_list[0], 10) == 0 for element in step_list):
+        if all(
+                np.round(element - step_list[0], 10) == 0
+                for element in step_list):
             return True
         else:
             return False
 
-    #     def spectrum(self):
+#     def spectrum(self):
 
-    #     spectrum={name:fft.fftshift(fft.fft(data)) for name,data in self.items()}
-    #     f_span=fft.fftfreq(len(self.index),d=self.index[1]-self.index[0])
+#     spectrum={name:fft.fftshift(fft.fft(data)) for name,data in self.items()}
+#     f_span=fft.fftfreq(len(self.index),d=self.index[1]-self.index[0])
 
-    #     return SpectrumFrame(data=spectrum,index=fft.fftshift(f_span))
+#     return SpectrumFrame(data=spectrum,index=fft.fftshift(f_span))
+
 
     def to_time_domain(self):
 
-        sampling_rate = self.index[1] - self.index[0]
+        sampling_rate = (self.index[1] - self.index[0])
         t_span = fft.fftshift(fft.fftfreq(len(self.index), d=sampling_rate))
         t_span = t_span[-1] + t_span
 
         timeseries = {
-            name: fft.ifftshift(fft.ifft(data)) for name, data in self.items()
+            #name: data._sort_for_ifft()
+            name:fft.ifft(data._sort_for_ifft())
+            for name, data in self.items()
         }
-
-        return TimeDataFrame(data=(timeseries), index=t_span)
 
     def double_sided_rms(self):
 
-        f_span_shifted_ds = fft.fftshift(self.index)
+        f_span_shifted_ds = (fft.fftshift(self.index))
         spectrum_shifted_ds = fft.fftshift(abs(self) / len(self))
 
-        return SpectrumSeries(
-            data=spectrum_shifted_ds, index=f_span_shifted_ds, name=self.name
-        )
+        return SpectrumSeries(data=spectrum_shifted_ds,
+                              index=f_span_shifted_ds,
+                              name=self.name)
 
 
 #     def double_sided_spec(self):
@@ -1570,18 +1521,20 @@ class EntryWithUnit:
     _units = {}
     _latex_backend = lambda obj: obj if isinstance(obj, str) else vlatex(obj)
 
-    _left_par = "["
-    _right_par = "]"
-    _unit_separator = " "
+    _left_par = '['
+    _right_par = ']'
+    _unit_separator = ' '
 
+    
     @classmethod
     def set_default_surrounding(cls, left_or_both, right=None):
 
         cls._left_par = left_or_both[0]
         cls._right_par = left_or_both[1]
-
+        
         return cls
-
+    
+    
     @classmethod
     def set_default_units(cls, units={}):
 
@@ -1592,14 +1545,15 @@ class EntryWithUnit:
         obj_with_unit = super().__new__(cls)
         obj_with_unit._obj = obj
 
+
         if units is not None:
             obj_with_unit._units = units
         else:
             obj_with_unit._units = cls._units
 
         if isinstance(obj, Relational):
-            obj_with_unit._left_par = ""
-            obj_with_unit._right_par = ""
+            obj_with_unit._left_par = ''
+            obj_with_unit._right_par = ''
             obj_with_unit._quantity = obj_with_unit._obj.lhs
         else:
             obj_with_unit._quantity = obj_with_unit._obj
@@ -1640,11 +1594,11 @@ class EntryWithUnit:
         right_par = self._right_par
 
         sep = self._unit_separator
-
+        
         if unit:
-            return f"{entry_str}{sep}{left_par}{unit.__str__()}{right_par}"
+            return f'{entry_str}{sep}{left_par}{unit.__str__()}{right_par}'
         else:
-            return f"{entry_str}"
+            return f'{entry_str}'
 
     def __repr__(self):
         entry_str = self._obj.__repr__()
@@ -1653,124 +1607,118 @@ class EntryWithUnit:
         right_par = self._right_par
 
         sep = self._unit_separator
-
+        
         if unit:
-            return f"{entry_str}{sep}{left_par}{unit.__repr__()}{right_par}"
+            return f'{entry_str}{sep}{left_par}{unit.__repr__()}{right_par}'
         else:
-            return f"{entry_str}"
+            return f'{entry_str}'
 
     def _latex(self, *args):
 
-        # print('abc')
-
+        #print('abc')
+        
         entry_str = self._latex_backend(self._obj)
         unit = self._unit
         left_par = self._left_par
         right_par = self._right_par
 
         sep = self._unit_separator
-        # print('abc')
-        # display(entry_str)
-        # print(self._obj)
-        # display(unit)
-
+        #print('abc')
+        #display(entry_str)
+        #print(self._obj)
+        #display(unit)
+        
         if unit:
-            if isinstance(unit, str):
-                return f"{entry_str}{sep}{left_par}{unit}{right_par}"
+            if isinstance(unit,str):
+                return f'{entry_str}{sep}{left_par}{unit}{right_par}'
             elif str(unit) == str(ureg.dimensionless):
-                return f"{entry_str}{sep}{left_par}-{right_par}"
+                return f'{entry_str}{sep}{left_par}-{right_par}'
             elif str(unit) == str(ureg.ohm):
-                ohm_string = "\\mathrm{\\Omega}"
-                return f"{entry_str}{sep}{left_par}{ohm_string}{right_par}"
+                ohm_string='\\mathrm{\\Omega}'
+                return f'{entry_str}{sep}{left_par}{ohm_string}{right_par}'     
             else:
-                return f"{entry_str}{sep}{left_par}{unit:~L}{right_par}"
+                return f'{entry_str}{sep}{left_par}{unit:~L}{right_par}'
         else:
-            return f"{self._obj}"
+            return f'{self._obj}'
 
 
-class DataTable(Table, ReportModule):
+class DataTable(Table,ReportModule):
 
-    _position = "H"
-    _latex_name = "table"
-    packages = [
-        Package("booktabs"),
-        Package("longtable"),
-        Package("caption"),
-        Package("float"),
-        Command("captionsetup[table]{skip=5pt}"),
-    ]
+    _position = 'H'
+    _latex_name = 'table'
+    packages=[Package('booktabs'),
+              Package('longtable'),
+              Package('caption'),
+              Command('captionsetup[table]{skip=5pt}'),
+             ]
 
     def __init__(self, numerical_data, position=None):
-
-        if position is not None:
-            self._position = position
-
+        
+        if position is not None: self._position = position
+        
         super().__init__(position=self._position)
         ##print(numerical_data)
         self._numerical_data = numerical_data
         self.position = position
 
-    def add_table(
-        self,
-        numerical_data=None,
-        index=False,
-        longtable=False,
-        multirow=True,
-        column_format=None,
-    ):
-        self.append(NoEscape("\\centering"))
-        self.append(NoEscape("%%%%%%%%%%%%%% Table %%%%%%%%%%%%%%%"))
+
+    def add_table(self, numerical_data=None, index=False, longtable=False,multirow=True, column_format=None):
+        self.append(NoEscape('\\centering'))
+        self.append(NoEscape('%%%%%%%%%%%%%% Table %%%%%%%%%%%%%%%'))
         #         if numerical_data!=None:
         #             self._numerical_data=numerical_data
 
         tab = self._numerical_data
-
-        #         latex_code=tab.style.to_latex(#index=index,
-        #                                    #escape=False,
-        #                              #longtable=longtable,
-        # #                    multirow=multirow,
-        #                     hrules=True,
-        #                     column_format=column_format).replace(
-        #                                  '\\toprule',
-        #                                  '\\toprule \n \\midrule').replace(
-        #                                      '\\bottomrule',
-        #                                      '\\midrule \n \\bottomrule')
-        latex_code = (
-            tab.to_latex(
-                index=index,
-                # escape=False,
-                # longtable=longtable,
-                #                    multirow=multirow,
-                # hrules=True,
-                column_format=column_format,
-            )
-            .replace("\\toprule", "\\toprule \n \\midrule")
-            .replace("\\bottomrule", "\\midrule \n \\bottomrule")
-        )
-
-        self.append(NoEscape(latex_code))
-
+        
+        
+#         latex_code=tab.style.to_latex(#index=index, 
+#                                    #escape=False,
+#                              #longtable=longtable,
+# #                    multirow=multirow,
+#                     hrules=True,
+#                     column_format=column_format).replace(
+#                                  '\\toprule',
+#                                  '\\toprule \n \\midrule').replace(
+#                                      '\\bottomrule',
+#                                      '\\midrule \n \\bottomrule')
+        latex_code=tab.to_latex(index=index, 
+                                   #escape=False,
+                             #longtable=longtable,
+#                    multirow=multirow,
+                    #hrules=True,
+                    column_format=column_format).replace(
+                                 '\\toprule',
+                                 '\\toprule \n \\midrule').replace(
+                                     '\\bottomrule',
+                                     '\\midrule \n \\bottomrule')
+        
+        self.append(
+            NoEscape(latex_code))
+    
+    @classmethod
+    def set_default_position(cls, position=""):
+        cls._position = position
+        
     @classmethod
     def set_caption_space(cls, space):
-        cls.packages.remove(Command("captionsetup[table]{skip=5pt}"))
-        cls.packages.append(Command("captionsetup[table]{skip=" + str(space) + "pt}"))
-
+        cls.packages.remove(Command('captionsetup[table]{skip=5pt}')) 
+        cls.packages.append(Command('captionsetup[table]{skip='+str(space)+'pt}'))
+        
         return cls
-
-
+        
 class MarkerRegistry(dict):
 
-    _prefix = "automrk"
+    _prefix = 'automrk'
     _markers_dict = {}
 
-    def __init__(self, prefix="automrk", sufix=None):
+    def __init__(self, prefix='automrk', sufix=None):
         super().__init__()
         self._prefix = prefix
 
 
 class AutoMarker:
     _markers_dict = {}
-    _prefix = "eq"
+    _prefix = 'eq'
     _name = None
     _floats_no_gen = plots_no()
 
@@ -1778,54 +1726,54 @@ class AutoMarker:
     def add_marker(cls, elem, marker):
 
         from .report import Picture
-
+        
         if isinstance(elem, (AdaptableDataFrame)):
             elem_id = elem._get_str_key()
             if elem._subplot is None:
-                prefix = "tab"
+                prefix = 'tab'
             else:
-                prefix = "fig"
+                prefix = 'fig'
 
         elif isinstance(elem, Picture):
             elem_id = elem._get_str_key()
-            prefix = "fig"
-
+            prefix = 'fig'
+                
         elif isinstance(elem, (pd.DataFrame, pd.Series)):
             elem_id = elem.style.to_latex()
-            prefix = "fig"
+            prefix = 'fig'
 
         elif isinstance(elem, Matrix):
             elem_id = ImmutableMatrix(elem)
-            prefix = "eq"
+            prefix = 'eq'
         else:
             elem_id = elem
 
         cls._markers_dict[elem_id] = marker
 
-    #         return elem_id, prefix
+#         return elem_id, prefix
 
-    def __init__(self, elem, prefix="eq", name=None, sufix=None):
+    def __init__(self, elem, prefix='eq', name=None, sufix=None):
 
         from .report import Picture
 
         if isinstance(elem, (AdaptableDataFrame)):
             elem_id = elem._get_str_key()
             if elem._subplot is None:
-                prefix = "tab"
+                prefix = 'tab'
             else:
-                prefix = "fig"
+                prefix = 'fig'
 
         elif isinstance(elem, Picture):
             elem_id = elem._get_str_key()
-            prefix = "fig"
+            prefix = 'fig'
 
         elif isinstance(elem, (pd.DataFrame, pd.Series)):
             elem_id = elem.style.to_latex()
-            prefix = "fig"
+            prefix = 'fig'
 
         elif isinstance(elem, Matrix):
             elem_id = ImmutableMatrix(elem)
-            prefix = "eq"
+            prefix = 'eq'
         else:
             elem_id = elem
 
@@ -1838,6 +1786,8 @@ class AutoMarker:
 
     def _get_marker(self, elem=None):
 
+        
+        
         if elem is None:
             elem = self._elem_id
 
@@ -1848,9 +1798,8 @@ class AutoMarker:
         else:
 
             marker = Marker(
-                f"Mrk{self._marker_name}{next(self._floats_no_gen)}",
-                prefix=self._prefix,
-            )
+                f'Mrk{self._marker_name}{next(self._floats_no_gen)}',
+                prefix=self._prefix)
             self._markers_dict[elem] = marker
 
         self._marker = marker
@@ -1861,7 +1810,7 @@ class AutoMarker:
         return self._marker
 
     def __repr__(self):
-        return f"AutoMarker for {self.marker}"
+        return f'AutoMarker for {self.marker}'
 
     def __str__(self):
         return Ref(self.marker).dumps()
@@ -1872,31 +1821,30 @@ class BasicFormattingTools(DataMethods):
     _floats_no_gen = plots_no()
 
     _latex_backend = lambda obj: obj if isinstance(obj, str) else vlatex(obj)
-    _label_formatter = lambda obj: (
-        f"${_latex_backend(obj)}$"
-        if isinstance(obj, (Expr, Eq, EntryWithUnit))
-        else obj
-    )
+    _label_formatter = lambda obj: f'${_latex_backend(obj)}$' if isinstance(
+        obj, (Expr, Eq, EntryWithUnit)) else obj
     _unit_selector = EntryWithUnit
     _domain = None
     _units = {}
     _applying_func = lambda x: x
     _init_ops = True
 
-    _default_sep = ", "
+    _default_sep = ', '
     _container = []
-    _default_path = "./tikzplots"
+    _default_path = './tikzplots'
     _picture = True
 
-    _subplot = False
-    _caption = "Default caption"
 
-    _default_width = NoEscape(r"0.9\textwidth")
-    _default_height = NoEscape(r"6cm")
+
+    _subplot = False
+    _caption = 'Default caption'
+
+    _default_width = NoEscape(r'0.9\textwidth')
+    _default_height = NoEscape(r'6cm')
     _preview_mode = False
 
     @classmethod
-    def set_default_width(cls, width=NoEscape(r"0.9\textwidth")):
+    def set_default_width(cls, width=NoEscape(r'0.9\textwidth')):
         cls._default_width = width
         return cls
 
@@ -1906,13 +1854,13 @@ class BasicFormattingTools(DataMethods):
         return cls
 
     @classmethod
-    def set_default_height(cls, height=NoEscape(r"6cm")):
+    def set_default_height(cls, height=NoEscape(r'6cm')):
         cls._default_height = height
 
         return cls
 
     @classmethod
-    def set_default_column_separator(cls, sep=", "):
+    def set_default_column_separator(cls, sep=', '):
         cls._default_sep = sep
 
         return cls
@@ -1924,7 +1872,7 @@ class BasicFormattingTools(DataMethods):
         return cls
 
     @classmethod
-    def set_directory(cls, path="./"):
+    def set_directory(cls, path='./'):
 
         cls._default_path = path
         return cls
@@ -1956,31 +1904,31 @@ class BasicFormattingTools(DataMethods):
     @staticmethod
     def _label_formatter(obj):
 
-        # print('type',type(obj))
+        #print('type',type(obj))
 
-        # print(isinstance(obj, (Expr, Eq, EntryWithUnit)))
+        #print(isinstance(obj, (Expr, Eq, EntryWithUnit)))
 
         latex_backend = BasicFormattingTools._latex_backend
 
         if isinstance(obj, (Symbol, Function, Expr, Eq, EntryWithUnit)):
-            formatted_obj = f"${latex_backend(obj)}$"
+            formatted_obj = f'${latex_backend(obj)}$'
         else:
             formatted_obj = obj
-        # print('effect',formatted_str)
+        #print('effect',formatted_str)
 
         return formatted_obj
 
     def applying_method(self, data, func=None, **kwargs):
         if func:
-            # print('func is used')
+            #print('func is used')
             ops_func = func
 
         elif self.__class__._applying_func is not None:
-            # print('class func is used')
+            #print('class func is used')
 
             ops_func = self.__class__._applying_func
         else:
-            # print('identity is used')
+            #print('identity is used')
             ops_func = lambda data: data
 
         return ops_func(data)
@@ -1989,19 +1937,19 @@ class BasicFormattingTools(DataMethods):
 
         new_obj = self.copy()
         new_obj_idx = new_obj.axes[axis]
-        # idx_frame = new_obj_idx.to_frame().map(func)
+        idx_frame = new_obj_idx.to_frame().applymap(func)
 
-        # print('idx',new_obj_idx)
-        # display('map',idx_frame)
+        #print('idx',new_obj_idx)
+        #display('map',idx_frame)
 
-        # if isinstance(new_obj_idx, pd.MultiIndex):
-        #    new_obj_idx = pd.MultiIndex.from_frame(idx_frame)
-        #    #new_obj_idx.names=map(func,new_obj_idx.names)
-        # else:
-        #    #new_obj_idx = pd.Index((idx_frame),name=new_obj_idx.name)
-        #    new_obj_idx = new_obj_idx.map(func)
+        if isinstance(new_obj_idx, pd.MultiIndex):
+            new_obj_idx = pd.MultiIndex.from_frame(idx_frame)
+            #new_obj_idx.names=map(func,new_obj_idx.names)
+        else:
+            #new_obj_idx = pd.Index((idx_frame),name=new_obj_idx.name)
+            new_obj_idx = new_obj_idx.map(func)
 
-        return new_obj.rename(func, axis=axis)
+        return new_obj.set_axis(new_obj_idx, axis=axis)
 
     def _modify_axis_name(self, func, axis=0):
         new_obj = self.copy()
@@ -2013,7 +1961,7 @@ class BasicFormattingTools(DataMethods):
 
         else:
 
-            # new_obj_idx = pd.Index((idx_frame),name=new_obj_idx.name)
+            #new_obj_idx = pd.Index((idx_frame),name=new_obj_idx.name)
             new_obj_idx = new_obj_idx.map(func)
             new_obj_idx.name = func(new_obj_idx.name)
 
@@ -2021,9 +1969,9 @@ class BasicFormattingTools(DataMethods):
 
     def set_multiindex_axis(self, axis=0):
 
-        if axis == "index":
+        if axis == 'index':
             axis = 0
-        elif axis == "colums":
+        elif axis == 'colums':
             axis = 1
 
         idx = self.axes[axis]
@@ -2044,9 +1992,9 @@ class BasicFormattingTools(DataMethods):
 
     def set_flat_index_axis(self, axis=0):
 
-        if axis == "index":
+        if axis == 'index':
             axis = 0
-        elif axis == "colums":
+        elif axis == 'colums':
             axis = 1
 
         idx = self.axes[axis]
@@ -2067,9 +2015,9 @@ class BasicFormattingTools(DataMethods):
 
     def switch_axis_type(self, axis=0):
 
-        if axis == "index":
+        if axis == 'index':
             axis = 0
-        elif axis == "colums":
+        elif axis == 'colums':
             axis = 1
 
         idx = self.axes[axis]
@@ -2090,12 +2038,12 @@ class BasicFormattingTools(DataMethods):
     def format_axis_names(self, formatter=None, axis=0):
         if formatter is None:
 
-            # formatter = self.__class__._label_formatter
+            #formatter = self.__class__._label_formatter
             formatter = self._label_formatter
 
-        new_frame = self._modify_axis(formatter, axis=axis)._modify_axis_name(
-            formatter, axis=axis
-        )
+        new_frame = self._modify_axis(formatter,
+                                      axis=axis)._modify_axis_name(formatter,
+                                                                   axis=axis)
 
         return new_frame
 
@@ -2109,11 +2057,11 @@ class BasicFormattingTools(DataMethods):
 
     def format_axes_names(self, formatter=None):
 
-        return self.format_axis_names(formatter=formatter, axis=1).format_axis_names(
-            formatter=formatter, axis=0
-        )
+        return self.format_axis_names(
+            formatter=formatter, axis=1).format_axis_names(formatter=formatter,
+                                                           axis=0)
 
-    def set_str_index_axis(self, axis=0, separator=", "):
+    def set_str_index_axis(self, axis=0, separator=', '):
 
         new_obj = self.copy()
         new_idx = new_obj.axes[axis]
@@ -2122,12 +2070,12 @@ class BasicFormattingTools(DataMethods):
             new_obj = self.copy().set_flat_index_axis(axis=axis)
 
             new_obj = new_obj.set_axis(
-                [separator.join(map(str, entry)) for entry in new_idx], axis=axis
-            )
+                [separator.join(map(str, entry)) for entry in new_idx],
+                axis=axis)
 
         return new_obj
 
-    def set_str_index_columns(self, separator=", "):
+    def set_str_index_columns(self, separator=', '):
 
         return self.set_str_index_axis(axis=1, separator=separator)
 
@@ -2142,18 +2090,17 @@ class BasicFormattingTools(DataMethods):
         idx = new_obj.axes[axis]
 
         if isinstance(idx, pd.MultiIndex):
-            # print('MultiIndex modification has been not supported yet')
+            #print('MultiIndex modification has been not supported yet')
             numbered_obj = new_obj.format_axis_names(
                 lambda name: float(name.rhs) if isinstance(name, Eq) else name,
-                axis=axis,
-            )
-            # sym_wyn.loc[:,ix[:,:,dyn_sys.phi_1]].plot()
+                axis=axis)
+            #sym_wyn.loc[:,ix[:,:,dyn_sys.phi_1]].plot()
 
             new_obj_with_name = numbered_obj.format_columns_names(
-                lambda name: float(name.rhs) if isinstance(name, Eq) else name
-            )
+                lambda name: float(name.rhs) if isinstance(name, Eq) else name)
             new_obj_with_name.axes[axis].names = [
-                level_idx[0].lhs if isinstance(level_idx[0], Eq) else level_idx.name
+                level_idx[0].lhs
+                if isinstance(level_idx[0], Eq) else level_idx.name
                 for level_idx in idx.levels
             ]
 
@@ -2161,18 +2108,16 @@ class BasicFormattingTools(DataMethods):
             name = idx.name
 
             if all([isinstance(entry, Relational) for entry in idx]):
-                # TODO: add numerical types recognizing
+                #TODO: add numerical types recognizing
                 new_obj_with_name = new_obj._modify_axis(
-                    lambda elem: (
-                        float(elem.rhs) if isinstance(elem.rhs, Number) else elem.rhs
-                    ),
-                    axis=axis,
-                )
+                    lambda elem: float(elem.rhs)
+                    if isinstance(elem.rhs, Number) else elem.rhs,
+                    axis=axis)
 
-                # print(new_obj_with_name.axes[axis].name)
+                #print(new_obj_with_name.axes[axis].name)
                 new_obj_with_name.axes[axis].name = idx[0].lhs
 
-        return new_obj_with_name  # .rename(Symbol('l_w'),axis=axis)
+        return new_obj_with_name  #.rename(Symbol('l_w'),axis=axis)
 
     def to_named_index_form(self):
         return self.to_named_axis_form(axis=0)
@@ -2189,22 +2134,28 @@ class BasicFormattingTools(DataMethods):
 
         units_fitter = unit_selector.set_default_units(units)
 
-        new_frame = self._modify_axis(units_fitter, axis=axis)._modify_axis_name(
-            units_fitter, axis=axis
-        )
+        new_frame = self._modify_axis(
+            units_fitter, axis=axis)._modify_axis_name(units_fitter, axis=axis)
 
         return new_frame
 
     def fit_units_to_index(self, unit_selector=None, units=None):
-        return self.fit_units_to_axis(unit_selector=unit_selector, units=units, axis=0)
+        return self.fit_units_to_axis(unit_selector=unit_selector,
+                                      units=units,
+                                      axis=0)
 
     def fit_units_to_columns(self, unit_selector=None, units=None):
-        return self.fit_units_to_axis(unit_selector=unit_selector, units=units, axis=1)
+        return self.fit_units_to_axis(unit_selector=unit_selector,
+                                      units=units,
+                                      axis=1)
 
     def fit_units_to_axes(self, unit_selector=None, units=None):
-        return self.fit_units_to_axis(
-            unit_selector=unit_selector, units=units, axis=1
-        ).fit_units_to_axis(unit_selector=unit_selector, units=units, axis=0)
+        return self.fit_units_to_axis(unit_selector=unit_selector,
+                                      units=units,
+                                      axis=1).fit_units_to_axis(
+                                          unit_selector=unit_selector,
+                                          units=units,
+                                          axis=0)
 
     def switch_columns_type(self):
 
@@ -2216,29 +2167,27 @@ class BasicFormattingTools(DataMethods):
         else:
             return self.__class__._label_formatter(obj)
 
-    def plotted(
-        self,
-        filename=None,
-        labels_list=None,
-        colors_list=default_colors,
-        height=None,
-        width=None,
-        x_axis_description=None,
-        y_axis_description=None,
-        subplots=False,
-        legend_pos="north east",
-        extra_commands=None,
-        options=None,
-        container=None,
-        label=None,
-        caption=None,
-        smooth=False,
-        picture=None,
-        preview=None,
-        *args,
-        **kwargs,
-    ):
-        ",xlabel={$t$},x unit=\si{\second},"
+    def plotted(self,
+                filename=None,
+                labels_list=None,
+                colors_list=default_colors,
+                height=None,
+                width=None,
+                x_axis_description=None,
+                y_axis_description=None,
+                subplots=False,
+                legend_pos='north east',
+                extra_commands=None,
+                options=None,
+                container=None,
+                label=None,
+                caption=None,
+                smooth=False,
+                picture=None,
+                preview=None,
+                *args,
+                **kwargs):
+        ',xlabel={$t$},x unit=\si{\second},'
 
         if height is None:
             height = self._default_height
@@ -2246,101 +2195,104 @@ class BasicFormattingTools(DataMethods):
         if width is None:
             width = self._default_width
 
-        print("self++++++++++++++")
+        print('self++++++++++++++')
         print(self._ylabel)
-        print("self++++++++++++++")
-        self._raw_title = " "
+        print('self++++++++++++++')
+        self._raw_title=' '
 
         plotted_frame = self.copy()
         plotted_frame._ylabel = self._ylabel
         plotted_frame._raw_title = self._raw_title
-        print("copy", plotted_frame._ylabel)
+        print('copy',plotted_frame._ylabel)
 
         col_idx = plotted_frame.columns
 
         latex_backend = self.__class__._latex_backend
 
         # title recognition
-        # +++++++++++++++++++
+        #+++++++++++++++++++
         if isinstance(col_idx, pd.MultiIndex):
             if len(col_idx.get_level_values(0).unique()) == 1:
-
+                
                 plotted_frame._raw_title = col_idx.get_level_values(0).unique()[0]
                 plotted_frame = plotted_frame.droplevel(0, axis=1)
+
+
+                
 
         col_idx = plotted_frame.columns
 
         if y_axis_description is None and isinstance(col_idx, pd.MultiIndex):
 
-            print("index2transform", col_idx.get_level_values(-1).unique())
+            print('index2transform',col_idx.get_level_values(-1).unique())
             if len(col_idx.get_level_values(-1).unique()) == 1:
 
-                print("tu jestem")
-                label_raw = EntryWithUnit(col_idx.get_level_values(-1).unique()[0])
+                print('tu jestem')
+                label_raw = (EntryWithUnit(
+                    col_idx.get_level_values(-1).unique()[0]))
                 if isinstance(label_raw, str):
                     ylabel = label_raw
                 else:
                     ylabel = latex_backend(
                         NoEscape(
                             EntryWithUnit(
-                                NoEscape(col_idx.get_level_values(-1).unique()[0])
-                            )
-                        )
-                    )
-                # print('detect')
-                # print(ylabel)
+                                NoEscape(
+                                    col_idx.get_level_values(-1).unique()
+                                    [0]))))
+                #print('detect')
+                #print(ylabel)
 
-                y_axis_description = "ylabel={$" + ylabel + "$},"
-                y_axis_description = y_axis_description.replace("$$", "$")
+                y_axis_description = 'ylabel={$' + ylabel + '$},'
+                y_axis_description = y_axis_description.replace('$$', '$')
 
                 plotted_frame = plotted_frame.droplevel(-1, axis=1)
                 plotted_frame._ylabel = ylabel
             else:
-                print(" a tu jestem w else")
+                print(' a tu jestem w else')
                 ylabel_list = [
                     latex_backend(EntryWithUnit(label))
                     for label in col_idx.get_level_values(-1).unique()
                 ]
 
-                # print('ylabels',ylabel_list)
+                #print('ylabels',ylabel_list)
 
-                ylabel = ", ".join(set(ylabel_list))
+                ylabel = ', '.join(set(ylabel_list))
 
-                # y_axis_description = 'ylabel={$' + ylabel + '$},'
+                #y_axis_description = 'ylabel={$' + ylabel + '$},'
 
-                y_axis_description = "ylabel={$" + NoEscape(ylabel) + "$},"
+                y_axis_description = 'ylabel={$' + NoEscape(ylabel) + '$},'
 
                 plotted_frame._ylabel = ylabel
 
         elif plotted_frame._ylabel is not None:
             ylabel = plotted_frame._ylabel
 
-            # y_axis_description = 'ylabel={$' + ylabel + '$},'
+            #y_axis_description = 'ylabel={$' + ylabel + '$},'
 
-            y_axis_description = "ylabel={$" + NoEscape(ylabel) + "$},"
+            y_axis_description = 'ylabel={$' + NoEscape(ylabel) + '$},'
             plotted_frame._ylabel = ylabel
 
         else:
-            print("pure else")
+            print('pure else')
 
             ylabel = plotted_frame._ylabel
-            y_axis_description = ""
+            y_axis_description = ''
 
         if x_axis_description is None:
-
+            
             _xlabel = plotted_frame.index.name
-            if isinstance(_xlabel, str):
+            if isinstance(_xlabel,str):
                 xlabel_desc = _xlabel
             else:
                 xlabel_desc = latex(_xlabel)
-
-            x_axis_description = ",xlabel={$" + xlabel_desc + "$},"
+            
+            x_axis_description = ',xlabel={$' + xlabel_desc + '$},'
 
         plotted_frame = plotted_frame.set_str_index_columns()
         plotted_frame = plotted_frame.rename_axis(None, axis=1)
 
         if filename is None:
-            filename = f"{self.__class__._default_path}/plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}"
+            filename = f'{self.__class__._default_path}/plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
 
         if container is None:
             container = self.__class__._container
@@ -2348,24 +2300,23 @@ class BasicFormattingTools(DataMethods):
         if picture is None:
             picture = self.__class__._picture
 
-        # print(ylabel)
-        # print(type(ylabel))
-        # print(y_axis_description)
+        #print(ylabel)
+        #print(type(ylabel))
+        #print(y_axis_description)
         fig = plotted_frame.to_standalone_figure(
             filename,
             labels_list=labels_list,
             colors_list=colors_list,
             height=height,
             width=width,
-            x_axis_description=x_axis_description.replace("$$", "$"),
-            y_axis_description=y_axis_description.replace("$$", "$"),
+            x_axis_description=x_axis_description.replace('$$', '$'),
+            y_axis_description=y_axis_description.replace('$$', '$'),
             subplots=subplots,
             legend_pos=legend_pos,
             extra_commands=extra_commands,
             options=options,
             smooth=smooth,
-            picture=picture,
-        )
+            picture=picture)
 
         ############################ to pack as method
         if caption is not None:
@@ -2397,7 +2348,7 @@ class BasicFormattingTools(DataMethods):
 
         #################################33 to as method
 
-        # ylabel = plotted_frame._ylabel
+        #ylabel = plotted_frame._ylabel
 
         if label is not None:
             AutoMarker.add_marker(plotted_frame._get_str_key(), label)
@@ -2411,34 +2362,33 @@ class BasicFormattingTools(DataMethods):
 
         if preview:
             plotted_frame.plot(ylabel=ylabel, subplots=subplots)
-            print("==============")
-            print(y_axis_description.replace("$$", "$"))
-            print("==============")
-            plt.ylabel((f"${ylabel}$").replace("$$", "$"))
+            print('==============')
+            print(y_axis_description.replace('$$', '$'))
+            print('==============')
+            plt.ylabel((  f'${ylabel}$'  ).replace('$$', '$'))
             plt.title(plotted_frame._raw_title)
             plt.show()
             display(IPMarkdown(caption))
             container.append(fig)
-
-        print("==============")
+            
+            
+        print('==============')
         print(ylabel)
-        print("==============")
-
+        print('==============')    
+    
         plotted_frame._ylabel = ylabel
-        return plotted_frame  # .plot(ylabel=ylabel,subplots=subplots)
+        return plotted_frame  #.plot(ylabel=ylabel,subplots=subplots)
 
-    def reported(
-        self,
-        container=None,
-        index=True,
-        label=None,
-        caption=None,
-        multirow=True,
-        column_format=None,
-        longtable=None,
-        *args,
-        **kwargs,
-    ):
+    def reported(self,
+                 container=None,
+                 index=True,
+                 label=None,
+                 caption=None,
+                 multirow=True,
+                 column_format=None,
+                 longtable=None,
+                 *args,
+                 **kwargs):
 
         if container is None:
             container = self.__class__._container
@@ -2448,13 +2398,7 @@ class BasicFormattingTools(DataMethods):
         if caption is not None:
             tab.add_caption(NoEscape(caption))
 
-        tab.add_table(
-            index=index,
-            multirow=multirow,
-            column_format=column_format,
-            longtable=longtable,
-            **kwargs,
-        )
+        tab.add_table(index=index,multirow=multirow,column_format=column_format,longtable=longtable,**kwargs)
 
         if label is not None:
             tab.append(Label(label))
@@ -2463,9 +2407,9 @@ class BasicFormattingTools(DataMethods):
             AutoMarker.add_marker(self.style.to_latex(), label)
             tab.append(Label(label))
         else:
-            # old version
-            # auto_mrk = AutoMarker(self.style.to_latex()).marker
-            # new option
+            #old version
+            #auto_mrk = AutoMarker(self.style.to_latex()).marker
+            #new option
             auto_mrk = AutoMarker(self).marker
             tab.append(Label(auto_mrk))
 
@@ -2474,10 +2418,11 @@ class BasicFormattingTools(DataMethods):
         return self.copy()
 
 
-class AdaptableSeries(pd.Series, BasicFormattingTools):
-    r"""
-    Basic class for formatting data plots. It provides methods for setting options
 
+class AdaptableSeries(pd.Series, BasicFormattingTools):
+    r'''
+    Basic class for formatting data plots. It provides methods for setting options 
+    
     Arguments
     =========
 
@@ -2487,7 +2432,7 @@ class AdaptableSeries(pd.Series, BasicFormattingTools):
     Example
     =======
 
-    """
+    '''
 
     @property
     def _constructor(self):
@@ -2497,53 +2442,22 @@ class AdaptableSeries(pd.Series, BasicFormattingTools):
     def _constructor_expanddim(self):
         return AdaptableDataFrame
 
-    def __init__(
-        self, data=None, index=None, dtype=None, name=None, copy=False, fastpath=False
-    ):
+    def __init__(self,
+                 data=None,
+                 index=None,
+                 dtype=None,
+                 name=None,
+                 copy=False,
+                 fastpath=False):
 
-        super().__init__(
-            data=data, index=index, dtype=dtype, name=name, copy=copy, fastpath=fastpath
-        )
+        super().__init__(data=data,
+                         index=index,
+                         dtype=dtype,
+                         name=name,
+                         copy=copy,
+                         fastpath=fastpath)
         self._reported = False
 
-    def find_peaks_values(
-        self,
-        signal,
-        height=None,
-        threshold=None,
-        distance=None,
-        prominence=None,
-        width=None,
-        wlen=None,
-        rel_height=0.5,
-        plateau_size=None,
-    ):
-        """
-        Method based on scipy signal.find_peaks method.
-        """
-
-    def find_peaks_values(self, height=None, threshold=None, distance=None, prominence=None, width=None, wlen=None, rel_height=0.5, plateau_size=None):
-
-        '''
-        Method based on scipy signal.find_peaks method.
-        '''
-
-        import scipy
-        from scipy import signal as scipy_signal
-
-        signal=self
-
-        sig = np.array(signal.values.tolist())
-
-        sig = sig.reshape((len(sig), 1))[:,0]
-
-        peaks_no, _ = scipy_signal.find_peaks(x=sig, height=height, threshold=threshold, distance=distance, prominence=prominence, width=width, wlen=wlen, rel_height=rel_height, plateau_size=plateau_size)
-
-        peaks_list = sig[peaks_no]
-
-        peaks_idx = signal.index[peaks_no]
-
-        return self._constructor(data=peaks_list, index=peaks_idx)
 
 class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
 
@@ -2556,25 +2470,51 @@ class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
         return AdaptableSeries
 
     @classmethod
-    def _init_with_ops(
-        cls, data=None, index=None, columns=None, dtype=None, copy=None, **kwargs
-    ):
+    def _init_with_ops(cls,
+                       data=None,
+                       index=None,
+                       columns=None,
+                       dtype=None,
+                       copy=None,
+                       **kwargs):
 
-        raw_frame = cls(data=data, index=index, columns=columns, dtype=dtype, copy=copy)
+        raw_frame = cls(data=data,
+                        index=index,
+                        columns=columns,
+                        dtype=dtype,
+                        copy=copy)
         new_frame = raw_frame.applying_method(raw_frame, **kwargs)
 
-        return cls(data=new_frame, index=index, columns=columns, dtype=dtype, copy=copy)
+        return cls(data=new_frame,
+                   index=index,
+                   columns=columns,
+                   dtype=dtype,
+                   copy=copy)
 
     @classmethod
-    def formatted(cls, data=None, index=None, columns=None, dtype=None, copy=None):
-        return cls._init_with_ops(
-            data=data, index=index, columns=columns, dtype=dtype, copy=copy
-        )
+    def formatted(cls,
+                  data=None,
+                  index=None,
+                  columns=None,
+                  dtype=None,
+                  copy=None):
+        return cls._init_with_ops(data=data,
+                                  index=index,
+                                  columns=columns,
+                                  dtype=dtype,
+                                  copy=copy)
 
-    def __init__(self, data=None, index=None, columns=None, dtype=None, copy=None):
-        super().__init__(
-            data=data, index=index, columns=columns, dtype=dtype, copy=copy
-        )
+    def __init__(self,
+                 data=None,
+                 index=None,
+                 columns=None,
+                 dtype=None,
+                 copy=None):
+        super().__init__(data=data,
+                         index=index,
+                         columns=columns,
+                         dtype=dtype,
+                         copy=copy)
         self._reported = False
 
         self._subplot = None
@@ -2586,32 +2526,6 @@ class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
     def _get_str_key(self):
         #return self.to_latex()+f'subplot={self._subplot}, self._caption{self._caption} '
         return self.style.to_latex() + f'subplot={self._subplot}'
-    
-    
-    def find_peaks_values(self, height=None, threshold=None, distance=None, prominence=None, width=None, wlen=None, rel_height=0.5, plateau_size=None):
-
-        '''
-        Method based on scipy signal.find_peaks method.
-        '''
-
-        series_list=[]
-
-        for signal in self.items():
-
-            sig = AdaptableSeries(signal[1])
-
-            series = sig.find_peaks_values(height=height, threshold=threshold, distance=distance, prominence=prominence, width=width, wlen=wlen, rel_height=rel_height, plateau_size=plateau_size)
-
-            series_list.append(series)
-
-        df = pd.concat(series_list, axis=1)
-
-        result = self._constructor(df)
-
-        result.columns = self.columns
-
-        return result
-
 
 
 class LatexDataFrame(AdaptableDataFrame):
@@ -2638,12 +2552,9 @@ class LatexSeries(AdaptableSeries):
 
 
 class ComputationalErrorFrame(AdaptableDataFrame):
-    # _applying_func = lambda obj: obj.join(((obj[obj.columns[1]]-obj[obj.columns[0]]).div(obj[obj.columns[0]],axis=0))).set_axis(list(obj.columns)+[Symbol('\\delta')],axis=1)
-    _applying_func = lambda obj: obj.join(
-        (obj[(obj.columns[1])] - obj[(obj.columns[0])])
-        .div(obj[obj.columns[0]])
-        .rename("Difference")
-    )
+    #_applying_func = lambda obj: obj.join(((obj[obj.columns[1]]-obj[obj.columns[0]]).div(obj[obj.columns[0]],axis=0))).set_axis(list(obj.columns)+[Symbol('\\delta')],axis=1)
+    _applying_func = lambda obj: obj.join((obj[(obj.columns[1])] - obj[
+        (obj.columns[0])]).div(obj[obj.columns[0]]).rename('Difference'))
 
     @property
     def _constructor(self):
@@ -2666,12 +2577,8 @@ class ComputationalErrorSeries(AdaptableSeries):
 
 
 class ParametersSummaryFrame(AdaptableDataFrame):
-    _applying_func = (
-        lambda frame: frame.abs()
-        .max()
-        .reset_index()
-        .pivot(columns=["level_0", "level_2"], index=["level_1"])[0]
-    )
+    _applying_func = lambda frame: frame.abs().max().reset_index().pivot(
+        columns=['level_0', 'level_2'], index=['level_1'])[0]
 
     @property
     def _common_constructor_series(self):
@@ -2738,60 +2645,68 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
     _metadata = ["_applying_func"]
 
     @classmethod
-    def _init_with_ops(
-        cls, data=None, index=None, columns=None, dtype=None, copy=None, **kwargs
-    ):
+    def _init_with_ops(cls,
+                       data=None,
+                       index=None,
+                       columns=None,
+                       dtype=None,
+                       copy=None,
+                       **kwargs):
 
-        raw_frame = cls(
-            data=data,
-            index=index,
-            columns=columns,
-            dtype=dtype,
-            copy=copy,
-            func=lambda obj: obj,
-        )
+        raw_frame = cls(data=data,
+                        index=index,
+                        columns=columns,
+                        dtype=dtype,
+                        copy=copy,
+                        func=lambda obj: obj)
 
         new_frame = raw_frame.applying_method(raw_frame, **kwargs)
 
-        return cls(
-            data=new_frame,
-            index=index,
-            columns=columns,
-            dtype=dtype,
-            copy=copy,
-            func=lambda obj: obj,
-        )
+        return cls(data=new_frame,
+                   index=index,
+                   columns=columns,
+                   dtype=dtype,
+                   copy=copy,
+                   func=lambda obj: obj)
+
+    
+    
+    @classmethod
+    def formatted(cls,
+                  data=None,
+                  index=None,
+                  columns=None,
+                  dtype=None,
+                  copy=None,
+                  **kwargs):
+        return cls._init_with_ops(data=data,
+                                  index=index,
+                                  columns=columns,
+                                  dtype=dtype,
+                                  copy=copy,
+                                  **kwargs)
 
     @classmethod
-    def formatted(
-        cls, data=None, index=None, columns=None, dtype=None, copy=None, **kwargs
-    ):
-        return cls._init_with_ops(
-            data=data, index=index, columns=columns, dtype=dtype, copy=copy, **kwargs
-        )
-
-    @classmethod
-    def from_model(
-        cls,
-        model,
-        parameter,
-        span,
-        reference_data=None,
-        coordinates=None,
-        index=None,
-        ics=None,
-    ):
+    def from_model(cls,
+                  model,
+                  parameter,
+                  span,
+                  reference_data=None,
+                  coordinates=None,                                
+                  index=None,
+                  ics=None,
+                               ):
         """
-        Class method that allows you to create and customize a DataFrame object based on the ODESystem object.
+        Class method that allows you to create and customize a DataFrame object based on the ODESystem object. 
         The prepared DataFrame gives the possibility to perform numerical simulations depending on the defined parameter.
-
+        
         Arguments
         =========
-
+    
             model : ODESystem object
 
             parameter : Symbol
-                Independent constant
+                Independent constant 
 
             span : List or array
                 Parameter values.
@@ -2799,15 +2714,15 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
         Default Arguments
         =================
 
-            reference_data : Dictionary
+            reference_data : Dictionary        
                 The values of the constants of the equation.
-
+            
             coordinates : List or array
                 Column headers.
 
             index : pandas.Index
                 Index values and index symbol.
-
+            
             ics:
                 Initial values.
 
@@ -2844,67 +2759,56 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
             >>>display(num_df)
         """
-
+        
         if coordinates is None:
             coords = list(model.dvars)
         else:
             coords = coordinates
 
-        if isinstance(parameter, list):
-            params_dict = {param: span for param in parameter}
-        else:
-            params_dict = {parameter: span}
-
-        params_list = [
-            [Eq(dict_param, value) for value in dict_span]
-            for dict_param, dict_span in params_dict.items()
-        ]
-
-        if isinstance(model, (list, tuple)):
+        params_list = [Eq(parameter,value) for value in span]
+        
+         
+        if isinstance(model,(list,tuple)):
             models_list = model
         else:
             models_list = [model]
-
-        aux_subs_dict = {param: param for param in params_dict.keys()}
+        
         if reference_data is None:
             prepared_models = models_list
         else:
-            prepared_models = [
-                sim_model.subs({**reference_data, **aux_subs_dict})
-                for sim_model in models_list
-            ]
+            prepared_models = [sim_model.subs({**reference_data,parameter:parameter}).doit() for sim_model in models_list]
+        
+        num_cases = pd.MultiIndex.from_product([prepared_models,params_list, coords])
 
-        num_cases = pd.MultiIndex.from_product([prepared_models, *params_list, coords])
 
-        return cls(
-            data=ics,
-            index=index,
-            columns=num_cases,
-        )
-
-    def __init__(
-        self,
-        data=None,
-        index=None,
-        columns=None,
-        model=None,
-        ics=None,
-        dtype=None,
-        copy=None,
-        **kwargs,
-    ):
-        # _try_evat='test'
-        # print(f'custom init of {type(self)}')
+        
+        return cls(data=ics,
+                   index=index,
+                   columns=num_cases,
+                   )
+    
+    
+    def __init__(self,
+                 data=None,
+                 index=None,
+                 columns=None,
+                 model=None,
+                 ics=None,
+                 dtype=None,
+                 copy=None,
+                 **kwargs):
+        #_try_evat='test'
+        #print(f'custom init of {type(self)}')
         """
         Arguments
         =========
 
             data : List, DataFrame or DataSeries
                 The data that will be in the final DataFrame.
-
+            
             index : list or array
                 Parameter values.
-
+            
             columns : List
                 Column headers.
 
@@ -2944,16 +2848,21 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
             >>>sol_num = ode_sys.subs(subs_data_2).solution.with_ics([1]).numerized().compute_solution(tspan_1)
 
             >>>num_df = NumericalAnalysisDataFrame(data=sol_num)
-            >>>display(num_df)
+            >>>display(num_df) 
 
         """
-        super().__init__(
-            data=data, index=index, columns=columns, dtype=dtype, copy=copy
-        )
+        super().__init__(data=data,
+                         index=index,
+                         columns=columns,
+                         dtype=dtype,
+                         copy=copy)
         #         self._numerical_model = model
         #         self._ics_list=ics
         self._comp_time = None
 
+        
+
+        
     @property
     def _constructor(self):
         return NumericalAnalysisDataFrame
@@ -2966,19 +2875,17 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
         columns_index = self.columns
 
-        if "model" in columns_index.names:
+        if 'model' in columns_index.names:
             current_models = columns_index.to_frame()[model][current_case]
         else:
             current_model = self._numerical_model
 
-    def perform_simulations(
-        self,
-        model_level_name=0,
-        coord_level_name=-1,
-        ics=None,
-        backend=None,
-        dependencies=None,
-    ):
+    def perform_simulations(self,
+                            model_level_name=0,
+                            coord_level_name=-1,
+                            ics=None,
+                            backend=None,
+                            dependencies=None):
         """
         A method that allows you to perform numerical simulations on the created DataFrame.
 
@@ -2986,19 +2893,18 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
         =======
 
         >>>sym_num = num_df.perform_simulations()
-
+        
         >>>display(sym_num)
         >>>display(sym_num.plot())
 
         """
 
-        # display(self.columns.droplevel(coord_level_name).unique())
+        #display(self.columns.droplevel(coord_level_name).unique())
 
         computed_data = self.copy()
 
         computed_data._comp_time = AdaptableDataFrame(
-            columns=self.columns.droplevel(coord_level_name).unique()
-        )
+            columns=self.columns.droplevel(coord_level_name).unique())
 
         for case_data in self.columns.droplevel(coord_level_name).unique():
 
@@ -3016,145 +2922,56 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
             t0 = t_span[0]
 
-            ics_series = self[case_data].T[t0]
+            ics_series = (self[case_data].T[t0])
 
-            # print('xxxxxxxxxxxxxxxxxxx',ics_series)
+            #print('xxxxxxxxxxxxxxxxxxx',ics_series)
+            
+#             default_ics=model.default_ics()
 
-            #             default_ics=model.default_ics()
 
             ics_list = []
             for coord in numerized_model.ics_dvars:
-                given_value = ics_series[coord]
-
+                given_value = (ics_series[coord])
+                
                 # print('given',given_value,type(given_value))
-                # print('cond: ',given_value is None,np.isnan( given_value))
+                # print('cond: ',given_value is None,np.isnan( given_value)) 
                 if given_value is None:
                     ics_val = model.default_ics()[coord]
-                elif np.isnan(given_value):
+                elif np.isnan( given_value):
                     ics_val = model.default_ics()[coord]
                 else:
                     ics_val = given_value
-
+                    
                 # print('selected value \n',ics_val)
                 ics_list.append(ics_val)
 
+
             # print('ics list \n',ics_list)
 
-            # if len(t_span)>1:
-            #     result = numerized_model.compute_solution(t_span, ics_list,params_values=params_dict)
-            #     result_array = result.T.to_numpy()
-            # else:
-            #     lvls_to_drop=list(range(len(computed_data.columns.levels)-1))
-            #     result_array = computed_data.T.to_numpy()
-            #     result = computed_data.droplevel(lvls_to_drop,axis=1)
-
-            result = numerized_model.compute_solution(
-                t_span, ics_list, params_values=params_dict
-            )
+            result = numerized_model.compute_solution(t_span, ics_list,params_values=params_dict)
             result_array = result.T.to_numpy()
-
+            
+            
             ######### extra dependencies handling - it should be reimplemented with new method #####
-            if isinstance(dependencies, dict):
-
+            if isinstance(dependencies,dict):
+                
                 for key, expr in dependencies.items():
-                    lambdified_expr = lambdify(
-                        (result.index.name, list(result.columns)),
-                        expr.subs(params_dict).expand().doit(),
-                        "numpy",
-                    )
+                    lambdified_expr = lambdify((result.index.name,list(result.columns)),expr.subs(params_dict).expand().doit(),'numpy')
 
-                    single_data = lambdified_expr(t_span, result_array)
-
+                    single_data = lambdified_expr(t_span,result_array)
+                    
                     result[key] = single_data
-            #### END ##### extra dependencies handling
+            #### END ##### extra dependencies handling 
 
             computed_data[case_data] = result[computed_data[case_data].columns]
 
-            sim_time = pd.Series(
-                [result._get_comp_time()], index=["Computing time [s]"]
-            )
-
-            # print(len(t_span))
-            # if len(t_span)>1:
-            #     sim_time = pd.Series([result._get_comp_time()],
-            #                         index=['Computing time [s]'])
-            # else:
-            #     sim_time = pd.Series([0],
-            #         index=['Computing time [s]'])
+            sim_time = pd.Series([result._get_comp_time()],
+                                 index=['Computing time [s]'])
 
             computed_data._comp_time[case_data] = sim_time
 
-        return computed_data
+        return (computed_data)
 
-    def compute_solution(
-        self,
-        t_span=None,
-        ic_list=None,
-        t_eval=None,
-        params_values=None,
-        method="RK45",
-        derivatives=False,
-        model_level_name=0,
-        coord_level_name=-1,
-        backend=None,
-        dependencies=None,
-        output=None,
-    ):
-
-        computed_data = self.copy()
-
-        if t_span is not None:
-            computed_data = computed_data.reindex(t_span)
-
-        result = computed_data.perform_simulations(
-            model_level_name=model_level_name,
-            coord_level_name=coord_level_name,
-            ics=ic_list,
-            backend=backend,
-            dependencies=dependencies,
-        )
-
-        if output == "NA":
-            return TimeDataFrame(result.droplevel(0))
-        else:
-            return TimeDataFrame(result)
-
-    def with_ics(self, ics=None, ivar0=0, sol0=None):
-        computed_data = self.copy()
-
-        if isinstance(ics, (list, tuple)):
-            ics_list = ics
-            computed_data = self.insert_ics(ics_list=ics_list)
-        elif isinstance(ics, dict):
-            dvars_list = self.get_dvars_in_order(computed_data.columns)
-            ics_list = [ics[coord] for coord in dvars_list]
-            computed_data = self.insert_ics(ics_list=ics_list)
-        else:
-            raise TypeError(
-                f"Expected list, tuple or dictionary, received: {type(ics)}"
-            )
-
-        return computed_data
-
-    def insert_ics(self, ics_list):
-        computed_data = self.copy()
-
-        if len(ics_list) < len(computed_data.columns):
-            param_span = len(computed_data.columns) // len(ics_list)
-            ics_list = self.multiply_list(ics_list, param_span)
-        computed_data.values[0] = ics_list
-        return computed_data
-
-    def multiply_list(self, ics_list, param_span):
-        duplicated_list = []
-        for _ in range(param_span):
-            duplicated_list.extend(ics_list)
-        return duplicated_list
-
-    def get_dvars_in_order(self, columns):
-        """This method is used to get dvars list in correct order"""
-        seen = set()
-        return [col[2] for col in columns if not (col[2] in seen or seen.add(col[2]))]
 
 
 class NumericalAnalisysSeries(AdaptableSeries):
@@ -3223,26 +3040,43 @@ class TimeDomainMethods(DataMethods):
 
         return TimeSeries(data=data_gradient, index=self.index, name=self.name)
 
+    def _pure_fft(self):
+
+        spectrum = (fft.fft(self.to_numpy()))
+
+        #f_span = fft.fftfreq(len(self.index), d=self.index[1] - self.index[0])
+
+        spectrum = SpectrumSeries(data=spectrum)
+        #spectrum.index.name = Symbol('f')
+
+        return spectrum
+
+
     def is_uniformly_distributed(self):
 
         sample_length = max(self.index) - min(self.index) / len(self.index) - 1
         step_list = [
-            self.index[i + 1] - self.index[i] for i in range(len(self.index) - 1)
+            self.index[i + 1] - self.index[i]
+            for i in range(len(self.index) - 1)
         ]
 
-        if all(np.round(element - step_list[0], 10) == 0 for element in step_list):
+        if all(
+                np.round(element - step_list[0], 10) == 0
+                for element in step_list):
             return True
         else:
             return False
 
     def to_frequency_domain(self):
 
-        spectrum = fft.fft(self.to_numpy())
+        spectrum = (fft.fft(self.to_numpy()))
 
         f_span = fft.fftfreq(len(self.index), d=self.index[1] - self.index[0])
 
-        spectrum = SpectrumSeries(data=spectrum, index=(f_span), name=self.name)
-        spectrum.index.name = Symbol("f")
+        spectrum = SpectrumSeries(data=spectrum,
+                                  index=(f_span),
+                                  name=self.name)
+        spectrum.index.name = Symbol('f')
 
         return spectrum.sort_index()
 
@@ -3287,47 +3121,42 @@ class SpectrumFrame(AdaptableDataFrame, SpectralMethods):
     def _constructor_sliced(self):
         return SpectrumSeries
 
-    def to_tikz_plot(
-        self,
-        filename,
-        labels_list=None,
-        colors_list=["red", "blue", "orange"],
-        x_axis_description=",xlabel={$f$},x unit=\si{\hertz},",
-        y_axis_description=None,
-        legend_pos="north east",
-        extra_commands=None,
-        smooth=False,
-    ):
+    def to_tikz_plot(self,
+                     filename,
+                     labels_list=None,
+                     colors_list=['red', 'blue', 'orange'],
+                     x_axis_description=',xlabel={$f$},x unit=\si{\hertz},',
+                     y_axis_description=None,
+                     legend_pos='north east',
+                     extra_commands=None,
+                     smooth=False):
 
         if y_axis_description == None:
-            y_axis_description = "ylabel={$" + self.name + "$},"
+            y_axis_description = 'ylabel={$' + self.name + '$},'
 
-        return super().to_tikz_plot(
-            filename=filename,
-            labels_list=labels_list,
-            colors_list=colors_list,
-            x_axis_description=x_axis_description,
-            y_axis_description=y_axis_description,
-            legend_pos=legend_pos,
-            extra_commands=extra_commands,
-            smooth=smooth,
-        )
+        return super().to_tikz_plot(filename=filename,
+                                    labels_list=labels_list,
+                                    colors_list=colors_list,
+                                    x_axis_description=x_axis_description,
+                                    y_axis_description=y_axis_description,
+                                    legend_pos=legend_pos,
+                                    extra_commands=extra_commands,
+                                    smooth=smooth)
 
     def to_standalone_figure(
-        self,
-        filename,
-        labels_list=None,
-        colors_list=default_colors,
-        height=NoEscape(r"7cm"),
-        width=NoEscape(r"0.9\textwidth"),
-        x_axis_description=",xlabel={$f$},x unit=\si{\hertz},",
-        y_axis_description="",
-        subplots=False,
-        legend_pos="north east",
-        extra_commands=None,
-        options=None,
-        smooth=False,
-    ):
+            self,
+            filename,
+            labels_list=None,
+            colors_list=default_colors,
+            height=NoEscape(r'7cm'),
+            width=NoEscape(r'0.9\textwidth'),
+            x_axis_description=',xlabel={$f$},x unit=\si{\hertz},',
+            y_axis_description='',
+            subplots=False,
+            legend_pos='north east',
+            extra_commands=None,
+            options=None,
+            smooth=False):
 
         return super().to_standalone_figure(
             filename=filename,
@@ -3338,31 +3167,34 @@ class SpectrumFrame(AdaptableDataFrame, SpectralMethods):
             legend_pos=legend_pos,
             extra_commands=extra_commands,
             options=options,
-            smooth=smooth,
-        )
+            smooth=smooth)
+
+    def _sort_for_ifft(self):
+
+        return SpectrumFrame(fft.fftshift(self),columns=self.columns,index=None)
 
     def double_sided_rms(self):
 
         spectrum_shifted_ds = {
-            name: data.double_sided_rms() for name, data in self.items()
+            name: data.double_sided_rms()
+            for name, data in self.items()
         }
-        # f_span_shifted_ds = pd.Index(fft.fftshift(self.index),
+        #f_span_shifted_ds = pd.Index(fft.fftshift(self.index),
         #                             name=self.index.name)
-        f_span_shifted_ds = self.index
-
+        f_span_shifted_ds=self.index
+        
         return SpectrumFrame(data=spectrum_shifted_ds, index=f_span_shifted_ds)
 
     def single_sided_rms(self):
 
         spectrum_shifted_ss = {
-            name: data.double_sided_rms()
-            * np.heaviside(data.double_sided_rms().index, 0.5)
-            * 2
+            name: data.double_sided_rms() *
+            np.heaviside(data.double_sided_rms().index, 0.5) * 2
             for name, data in self.items()
         }
-        # f_span_shifted_ss = pd.Index(fft.fftshift(self.index),
+        #f_span_shifted_ss = pd.Index(fft.fftshift(self.index),
         #                             name=self.index.name)
-        f_span_shifted_ss = self.index
+        f_span_shifted_ss=self.index
 
         return SpectrumFrame(data=spectrum_shifted_ss, index=f_span_shifted_ss)
 
@@ -3416,26 +3248,25 @@ class TimeSeries(AdaptableSeries, TimeDomainMethods):
     def _constructor_expanddim(self):
         return TimeDataFrame
 
-    #     def spectrum(self):
 
-    #         spectrum={name:(fft.fft(data)) for name,data in self.items()}
-    #         f_span=fft.fftfreq(len(self.index),d=self.index[1]-self.index[0])
-    #         return SpectrumSeries(data=spectrum,index=(f_span))
+#     def spectrum(self):
 
-    def to_tikz_plot(
-        self,
-        filename,
-        labels_list=None,
-        colors_list=["red", "blue", "orange"],
-        x_axis_description="xlabel={$t$},x unit=\si{\second},",
-        y_axis_description=None,
-        extra_commands=None,
-        options=None,
-        smooth=False,
-    ):
+#         spectrum={name:(fft.fft(data)) for name,data in self.items()}
+#         f_span=fft.fftfreq(len(self.index),d=self.index[1]-self.index[0])
+#         return SpectrumSeries(data=spectrum,index=(f_span))
+
+    def to_tikz_plot(self,
+                     filename,
+                     labels_list=None,
+                     colors_list=['red', 'blue', 'orange'],
+                     x_axis_description='xlabel={$t$},x unit=\si{\second},',
+                     y_axis_description=None,
+                     extra_commands=None,
+                     options=None,
+                     smooth=False):
 
         if y_axis_description == None:
-            y_axis_description = "ylabel={$" + self.name + "$},"
+            y_axis_description = 'ylabel={$' + self.name + '$},'
 
         aux_DataFrame = TimeDataFrame(data=self, index=self.index)
         dumped_tex = aux_DataFrame.to_tikz_plot(
@@ -3446,9 +3277,10 @@ class TimeSeries(AdaptableSeries, TimeDomainMethods):
             y_axis_description=y_axis_description,
             extra_commands=extra_commands,
             options=options,
-            smooth=smooth,
-        )
+            smooth=smooth)
         return dumped_tex
+    
+
 
 
 class TimeDataFrame(AdaptableDataFrame, TimeDomainMethods):
@@ -3461,20 +3293,39 @@ class TimeDataFrame(AdaptableDataFrame, TimeDomainMethods):
     def _constructor_sliced(self):
         return TimeSeries
 
+    def _pure_fft(self):
+
+        spectral_data = {
+            name: data._pure_fft()
+            for name, data in self.items()
+        }
+
+        return SpectrumFrame(data=spectral_data)
+    
+    def _resampled(self,sample_length,num_samples):
+        
+        from scipy import signal
+        
+        new_idx = np.linspace(0, sample_length, num_samples, endpoint=False)
+        resampled_sig = {name:signal.resample(data.to_numpy(),num_samples) for name,data in self.items()}
+        
+        return TimeDataFrame(data=resampled_sig,index=new_idx)
+
     def to_frequency_domain(self):
 
         spectral_data = {
-            name: data.to_frequency_domain() for name, data in self.items()
+            name: data.to_frequency_domain()
+            for name, data in self.items()
         }
         f_span = fft.fftfreq(len(self.index), d=self.index[1] - self.index[0])
 
-        return SpectrumFrame(
-            data=spectral_data, index=spectral_data[next(iter(spectral_data))].index
-        ).sort_index()
+        return SpectrumFrame(data=spectral_data,
+                             index=spectral_data[next(
+                                 iter(spectral_data))].index).sort_index()
 
     def gradient(self):
 
         data_gradient = {name: data.gradient() for name, data in self.items()}
-        return TimeDataFrame(
-            data=data_gradient, index=data_gradient[next(iter(data_gradient))].index
-        )
+        return TimeDataFrame(data=data_gradient,
+                             index=data_gradient[next(
+                                 iter(data_gradient))].index)

@@ -206,7 +206,7 @@ class OdeComputationalCase:
 
         return lambdify( args_list ,
                          ((self.odes_system).subs(subs_dict, simultaneous=True)).doit().n(),
-                         [{'sin':np.sin,'cos':np.cos},'numpy']
+                         [{'sin':np.sin,'cos':np.cos,'atan':np.arctan},'numpy']
                         )
     
         # return autowrap(  (msubs(self.odes_system,subs_dict)),args=args_list)
@@ -375,7 +375,7 @@ class OdeComputationalCase:
 
         return self
         
-    def _as_na_df(self):
+    def _as_na_df(self, t_span=None):
         
         coords = list(self.dvars)
         num_cases = pd.MultiIndex.from_product([[self],[Eq(Symbol('a'),10)], coords])
@@ -384,9 +384,12 @@ class OdeComputationalCase:
             ics = self._default_ics
         else:
             ics = None
+            
+        if t_span is None:
+            t_span = [0.0]
 
         return NumericalAnalysisDataFrame(data=None,
-                    index=pd.Index([0.0],name=self.ivar),
+                    index=pd.Index(t_span,name=self.ivar),
                     columns=num_cases,
                     )
 

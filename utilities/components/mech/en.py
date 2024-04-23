@@ -132,13 +132,13 @@ class ExemplaryPictureDynPyCodeComponent(ReportComponent):
         display(ObjectCode(#tu
 f'''
 
-    from dynpy.models.mechanics import *
-    from sympy import *
-    from dynpy.utilities.report import Picture
+from dynpy.models.mechanics import *
+from sympy import *
+from dynpy.utilities.report import Picture
 
-    dyn_sys = {system.__class__.__name__}()
+dyn_sys = {system.__class__.__name__}()
 
-    display(Picture(dyn_sys._real_example()))
+display(Picture(dyn_sys._real_example()))
 
 
 '''))
