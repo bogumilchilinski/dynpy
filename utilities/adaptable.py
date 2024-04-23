@@ -1696,6 +1696,10 @@ class DataTable(Table,ReportModule):
             NoEscape(latex_code))
     
     @classmethod
+    def set_default_position(cls, position=""):
+        cls._position = position
+        
+    @classmethod
     def set_caption_space(cls, space):
         cls.packages.remove(Command('captionsetup[table]{skip=5pt}')) 
         cls.packages.append(Command('captionsetup[table]{skip='+str(space)+'pt}'))

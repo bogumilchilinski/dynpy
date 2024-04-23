@@ -221,7 +221,7 @@ doc.generate_pdf(clean_tex=True)
 
     def append_components(self,reported_object=None):
 
-        self.reported_object = reported_object
+        #self.reported_object = reported_object
         
         doc=self
 
@@ -272,6 +272,7 @@ class CaseTemplate(Document,ReportMethods):
     
     def __init__(self,
                  default_filepath='default_filepath',
+                 reported_object=None,
                  *,
                  documentclass=None,
                  document_options=None,
@@ -287,6 +288,8 @@ class CaseTemplate(Document,ReportMethods):
                  data=None):
 
         if documentclass is not None: self._documentclass
+        
+        self._reported_object = reported_object
         
         super().__init__(
             default_filepath=default_filepath,
@@ -335,6 +338,7 @@ class Guide(Document,ReportMethods):
     def __init__(self,
                  default_filepath='default_filepath',
                  title='Basic title',
+                 reported_object=None,
                  *,
                  documentclass=None,
                  document_options=None,
@@ -350,6 +354,8 @@ class Guide(Document,ReportMethods):
                  data=None):
 
         if documentclass is not None: self._documentclass
+
+        self._reported_object = reported_object
         
         super().__init__(
             default_filepath=default_filepath,
@@ -1092,6 +1098,68 @@ class UsageOfDynamicSystemsGuide(Guide):
         from ...models.mechanics import ForcedSpringMassSystem as DynamicSystem
         
         return DynamicSystem()
+
+class IntroToPandasGuide(Guide):
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+
+            guide_comp.PandasTableGenerationComponent,
+            
+            guide_comp.PandasMethodsComponent,
+            guide_comp.SimulationsComponent, #Common with *UsageOfDynamicSystemsGuide* class
+            guide_comp.DifferentSimulationsComponent,
+            guide_comp.BasicOperationsComponent
+
+        ]
+
+        return comp_list
+
+    @property
+    def default_reported_object(self):
+
+        #from ...models.mechanics.tmac import SDOFWinchSystem
+        from ...models.mechanics import ForcedSpringMassSystem as DynamicSystem
+
+        return DynamicSystem()    
+
+class BasicsOfODESystemGuide(Guide):
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+
+            guide_comp.BasicUsageOfODESystemComponent,
+            guide_comp.ODEReportComponent,
+            guide_comp.ReportCompUseComponent,
+            guide_comp.ProjectileExampleComponent,
+            guide_comp.ODESimulationComponent,
+            guide_comp.ODENumericalSimulationsComponent
+
+        ]
+
+        return comp_list    
+    
+class DynSysOverviewReport(UsageOfDynamicSystemsGuide):
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+
+            guide_comp.DynamicSystemCallComponent,
+            guide_comp.DynamicSystemMethodsUsageComponent,
+            guide_comp.SimulationsComponent,
+            guide_comp.SimulationReportComponent,
+            guide_comp.DynSysCodeComponent
+
+
+        ]
+
+        return comp_list
 
 
 

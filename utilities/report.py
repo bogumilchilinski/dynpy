@@ -14,6 +14,7 @@ from pylatex import (Alignat, Axis, Command, Document, Eqref, Figure, Label,
                      Quantity, Ref, Section, Subsection, Table, Tabular, TikZ,
                      Description, LongTable,FlushRight,FlushLeft, Center)
 from pylatex.base_classes import Environment, Options
+from pylatex.base_classes.command import CommandBase
 from pylatex.package import Package
 from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
@@ -2993,6 +2994,9 @@ class Picture(Figure,ReportModule):
 #         cls._settle_dynpy()
 #         return Picture(pic_path, position=position, caption=caption, width=width, height=height, marker=marker, **kwargs)
     
+    @classmethod
+    def set_default_position(cls, position=""):
+        cls._position = position
     
     @classmethod
     def set_preview_default_size(cls, size):
@@ -5568,3 +5572,13 @@ class ReportSection(Section):
                         })))
 
             subsec.append(NewPage())
+            
+class DateCommand(CommandBase):
+    """
+    A class representing a custom date LaTeX command.
+
+    This class represents a custom LaTeX command named
+    ``DateCommand``.
+    """
+
+    _latex_name = 'date'

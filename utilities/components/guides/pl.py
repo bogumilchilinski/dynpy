@@ -1263,6 +1263,7 @@ odesys1 = ODESystem(odes = Matrix([eq1.lhs-eq1.rhs]),dvars = Matrix([x], ode_ord
 
 odesys1.solution
 ''')
+
 class BasicUsageOfODESystemComponent(ReportComponent):
     
     title="Podstawy używania klasy ODESystem"
@@ -1582,7 +1583,7 @@ class ProjectileExampleComponent(ReportComponent):
 
 
     def append_elements(self):
-        
+        from dynpy.solvers.linear import ODESystem
         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
 
         m, g, v, alpha = symbols('m g v \\alpha')
@@ -1712,11 +1713,14 @@ class ODESimulationComponent(ReportComponent):
         display(Picture('./dynpy/utilities/components/guides/images/wykresoo.jpg'))
 
 ####     
-        omega, omega2 = symbols('omega Omega')
-        t=Symbol('t')
-        x=Function('x')(t)
-        y=Function('y')(t)
-        ode=ODESystem(odes=Matrix([omega**2*x-sin(omega2*t)+x.diff(t,t)]),dvars=Matrix([x]),ode_order=1)
+omega, omega2 = symbols('omega Omega')
+t=Symbol('t')
+x=Function('x')(t)
+y=Function('y')(t)
+ode=(
+'''
+ODESystem(odes=Matrix([omega**2*x-sin(omega2*t)+x.diff(t,t)]),dvars=Matrix([x]),ode_order=1)
+''')   
         
         
 class ReportCompUseComponent(ReportComponent):
@@ -1735,13 +1739,107 @@ class ReportCompUseComponent(ReportComponent):
         display(ObjectCode(ode))
         display(ReportText('To solve the problem serve several methods depending on the equation type. As dynamic systems s behaviour is described by an ordinary differential equation, the variables of the equation are as follows: t [x]'))
         display(ReportText('The variables allow to study and analyse the system s dynamics varying with time.'))
-        
-'''
+
+
 class DynSysIntroComponent(ReportComponent):
 
     title="Wstęp do używania modułu DynSys"
     
-    def append_element(self):
     
-    
-'''
+    def append_elements(self):
+        from dynpy.models.mechanics.tmac import SDOFWinchSystem
+        
+        display(ReportText('Wymagane importy bibliotek/poszczególnych klas do stworzenia raportu:'))
+        display(ObjectCode(
+        '''
+                from sympy import *
+                import numpy as np
+                from pandas import *
+                from sympy.physics.mechanics import init_vprinting, dynamicsymbols
+                from pylatex import Document, Section, Subsection, Itemize, Package, HorizontalSpace, Description, Marker, Command 
+                from pylatex.section import Paragraph, Chapter 
+                from pylatex.utils import italic, NoEscape 
+                from dynpy.utilities.adaptable import *
+                from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase 
+                from dynpy.utilities.templates.tikz import TikzCaSCStandalone
+                from dynpy.utilities.report import (SystemDynamicsAnalyzer, DataPlot, AccelerationComparison, FFTComparison, ReportEntry, SimulationalBlock,               ReportText, SimulationFFT, DataStorage, Markdown, SummaryTable, Picture, SympyFormula, SymbolsDescription, DescriptionsRegistry,
+                ObjectCode, CurrentContainer)
+                from dynpy.solvers.linear import ODESystem
+                init_vprinting()
+                from dynpy.models.mechanics.tmac import SDOFWinchSystem
+
+        '''))
+        display(ReportText('Klasa umożliwiająca rozwiązanie konkretnej problematyki (w tym przypadku problematyki związanej z opisem dźwigu):'))
+        display(Markdown('''
+            from dynpy.models.mechanics.tmac import SDOFWinchSystem
+            '''))
+        display(ReportText('Ścieżka do poszukiwanej klasy na platformie CoCalc:'))
+        display(Picture('./Image/sciezka_w.jpg'))
+
+        display(ReportText('Sposób wywowałania preview klasy - tzw. podglądu:'))
+
+        display(ObjectCode('''
+            SDOFWinchSystem().preview()
+            '''))
+
+        eoms=SDOFWinchSystem()._eoms[0]
+        eoms
+
+        display(ReportText('Proces wywołowania równania ruchu za pomoca metody eoms:'))
+        display(ObjectCode(
+            '''
+            eoms=SDOFWinchSystem()._eoms[0]
+            eoms
+            '''))
+
+        display(ReportText('Wynik jest następujący:'))
+        display(SympyFormula(eoms))
+
+
+        eoms_eq=Eq(eoms,0)
+        eoms_eq
+        display(ReportText('Proces tworzenia równania z wcześniej wywołanego równania ruchu (równanie początkowo jest wywoływane jako ciąg znaków reprezentujący opis danego problemu, jednak nie jest on wówczas równaniem, które możemy zastosować do obliczeń):'))
+        display(ObjectCode('''
+            eoms_eq=Eq(eoms,0)
+            eoms_eq
+            '''))
+        display(ReportText('Wynik jest następujący:'))
+        display(SympyFormula(eoms))
+
+        #display(Picture('./Image/eomseq_w.jpg'))
+
+        slownik=SDOFWinchSystem().get_random_parameters()
+
+
+        display(ReportText('Tworzenie słownika (w tym przypadku z losowymi wartościami) umożliwiający nadanie wartości zmiennym:'))
+        display(ObjectCode('''
+            slownik=SDOFWinchSystem().get_random_parameters()
+            slownik
+            '''))
+        display(slownik)
+        #display(Picture('./Image/slownik_w.jpg'))
+
+        display(ReportText('Rozwiązanie ogólne równania:'))
+        #display(Picture('./Image/ogolne_w.jpg'))
+
+        solution=SDOFWinchSystem()._ode_system.solution[0]
+        display(ObjectCode(
+            '''
+                solution=SDOFWinchSystem()._ode_system.solution[0]
+                solution
+
+            '''))
+        display(SympyFormula(solution))
+
+        display(ReportText('Rozwiązanie szczególne równania:'))
+
+
+
+        steady_solution=SDOFWinchSystem()._ode_system.steady_solution[0]
+        display(ObjectCode(
+            '''
+                steady_solution=SDOFWinchSystem()._ode_system.steady_solution[0]
+                steady_solution
+
+            '''))
+        display(SympyFormula(steady_solution))
