@@ -1479,18 +1479,18 @@ class SpectralMethods(DataMethods):
 
 #     return SpectrumFrame(data=spectrum,index=fft.fftshift(f_span))
 
+
     def to_time_domain(self):
 
-        sampling_rate = self.index[1] - self.index[0]
+        sampling_rate = (self.index[1] - self.index[0])
         t_span = fft.fftshift(fft.fftfreq(len(self.index), d=sampling_rate))
         t_span = t_span[-1] + t_span
 
         timeseries = {
-            name: fft.ifftshift(fft.ifft(data))
+            #name: data._sort_for_ifft()
+            name:fft.ifft(data._sort_for_ifft())
             for name, data in self.items()
         }
-
-        return TimeDataFrame(data=(timeseries), index=t_span)
 
     def double_sided_rms(self):
 
@@ -3036,6 +3036,18 @@ class TimeDomainMethods(DataMethods):
 
         return TimeSeries(data=data_gradient, index=self.index, name=self.name)
 
+    def _pure_fft(self):
+
+        spectrum = (fft.fft(self.to_numpy()))
+
+        #f_span = fft.fftfreq(len(self.index), d=self.index[1] - self.index[0])
+
+        spectrum = SpectrumSeries(data=spectrum)
+        #spectrum.index.name = Symbol('f')
+
+        return spectrum
+
+
     def is_uniformly_distributed(self):
 
         sample_length = max(self.index) - min(self.index) / len(self.index) - 1
@@ -3153,6 +3165,10 @@ class SpectrumFrame(AdaptableDataFrame, SpectralMethods):
             options=options,
             smooth=smooth)
 
+    def _sort_for_ifft(self):
+
+        return SpectrumFrame(fft.fftshift(self),columns=self.columns,index=None)
+
     def double_sided_rms(self):
 
         spectrum_shifted_ds = {
@@ -3259,6 +3275,8 @@ class TimeSeries(AdaptableSeries, TimeDomainMethods):
             options=options,
             smooth=smooth)
         return dumped_tex
+    
+
 
 
 class TimeDataFrame(AdaptableDataFrame, TimeDomainMethods):
@@ -3270,6 +3288,24 @@ class TimeDataFrame(AdaptableDataFrame, TimeDomainMethods):
     @property
     def _constructor_sliced(self):
         return TimeSeries
+
+    def _pure_fft(self):
+
+        spectral_data = {
+            name: data._pure_fft()
+            for name, data in self.items()
+        }
+
+        return SpectrumFrame(data=spectral_data)
+    
+    def _resampled(self,sample_length,num_samples):
+        
+        from scipy import signal
+        
+        new_idx = np.linspace(0, sample_length, num_samples, endpoint=False)
+        resampled_sig = {name:signal.resample(data.to_numpy(),num_samples) for name,data in self.items()}
+        
+        return TimeDataFrame(data=resampled_sig,index=new_idx)
 
     def to_frequency_domain(self):
 
