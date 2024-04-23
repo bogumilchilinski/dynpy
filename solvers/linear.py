@@ -1634,13 +1634,19 @@ class ODESystem(AnalyticalSolution):
         matrix_poly = inertia_mat*r**2 + damping_mat*r + stiffness_mat
         return matrix_poly.det()
 
+    def _stiffness_matrix(self):
+        return self.lhs.jacobian(self.dvars)
+    
+    def _inertia_matrix(self):
+        return self.lhs.jacobian(diff(self.dvars,self.ivar,2))
+
         
     def fundamental_matrix(self):
         r=Symbol('r')
         stiffness_mat=self.lhs.jacobian(self.dvars)
         damping_mat=self.lhs.jacobian(diff(self.dvars))
         inertia_mat=self.lhs.jacobian(diff(self.dvars, self.ivar, 2))
-        fundamental_mat = stiffness_mat - r**2 * inertia_mat + damping_mat * r
+        fundamental_mat = stiffness_mat + r**2 * inertia_mat + damping_mat * r
         return fundamental_mat
 
     def _swept_analysis(self, subs_method=True, dvar=None, freq_symbol=None, amp_symbol=None, amplitude=None, ramp=None):

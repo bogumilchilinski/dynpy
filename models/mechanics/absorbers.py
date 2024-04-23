@@ -48,7 +48,7 @@ class AdaptableTunedFluidDamper(VariableMassTrolleyWithPendulumRayleighDamping):
     mainplot_phi_tikz_graph = Symbol('mp_vg')
     spectrum_phi_tikz_data_graph = Symbol('sp_dg')
     spectrum_phi_tikz_graph = Symbol('sp_vg')
-    
+
     def simulation_performance(self, params_dict, parameter, param_span, t_span, ic_list):
         
         na_df = self._ode_system.subs(params_dict).numerical_analysis(parameter=parameter, param_span=param_span)
@@ -58,6 +58,21 @@ class AdaptableTunedFluidDamper(VariableMassTrolleyWithPendulumRayleighDamping):
         return simulation_result.droplevel(0, axis=1)
     
     def simulation_results_presentation(self, simulation_result, dynamic_variable, caption = None):
+        
+        trolley_max_value = Symbol('tv_max')
+        trolley_min_value = Symbol('tv_min')
+        trolley_max_spec_value = Symbol('tsv_max')
+        pendulum_max_value = Symbol('pv_max')
+        pendulum_min_value = Symbol('pv_min')
+        pendulum_max_spec_value = Symbol('psv_max')
+        mainplot_tikz_data_graph = Symbol('mx_dg')
+        mainplot_tikz_value_graph = Symbol('mx_vg')
+        spectrum_tikz_data_graph = Symbol('sx_dg')
+        spectrum_tikz_graph = Symbol('sx_vg')
+        mainplot_phi_tikz_data_graph = Symbol('mp_dg')
+        mainplot_phi_tikz_graph = Symbol('mp_vg')
+        spectrum_phi_tikz_data_graph = Symbol('sp_dg')
+        spectrum_phi_tikz_graph = Symbol('sp_vg')
 
         display(dynamic_variable[0])
         

@@ -1156,11 +1156,105 @@ class MultiScaleProcedureComponent(ReportComponent):
     def append_elements(self):
         system = self.reported_object
         display(ReportText("Step by step instruction: \n\n Step 1: \n\n Step 2: \n\n Step 3: \n\n Step 4: \n\n Step 5:"))
-# class MSMComparison(ReportComponent):
-#     title="Plot Comparison: Numerically Simulated Results vs. Analytical Solutions"
 
-#     def append_elements(self):
-#         system=self.reported_object
-#         msm=system.as_msm()
-#         msm_sol=msm.general_solution
-#         num_plot=msm.numerized().with_ics([0.1,0]).compute_solution(t_span,[0.1,0]).plot()
+
+class MSMComparison(ReportComponent):
+    title="Plot Comparison: Numerically Simulated Results vs. Analytical Solutions"
+
+    def append_elements(self):
+        from dynpy.solvers.nonlinear import MultiTimeScaleSolution
+        system=self.reported_object
+        t_span=np.linspace(0.0,10,1000)
+        eps=Symbol('\\varepsilon')
+        delta = Symbol('delta',positive=True)
+        omg = Symbol('omega',positive=True)
+        sys_msm=MultiTimeScaleSolution(system.odes[0], system.dvars[0], ivar=system.ivar, omega=S.One, order=2,eps=eps)
+        sys_sol=sys_msm.general_solution
+        sys_an=sys_sol.subs({eps:0.1,delta:0.1,omg:0.1}).with_ics([0.1,0]).numerized().compute_solution(t_span,[0.1,0])
+        sys_num=sys_msm.subs({eps:0.1,delta:0.1,omg:0.1}).numerized().compute_solution(t_span,[0.1,0])
+        sys_diff=sys_num-sys_an
+        display(ReportText("Analytical solution"))
+        display(sys_an.plot())
+        display(ReportText("Numerical solution"))
+        display(sys_num.plot())
+        display(ReportText("Difference between numerical and analytical solutions"))
+        display(sys_diff.plot())
+
+
+class NaturalFrequenciesAnalysisComponent(ReportComponent):
+
+    title="Determination of fundamental matrix"
+
+    @property
+    def header_text(self):
+
+        return "The system physical properties of mass and stiffness are the basis to formulate the fundamental matrix of the system:"
+
+    @property
+    def body_text(self):
+
+        system = self.reported_object
+
+        Delta = Symbol('Delta')
+
+        return f"The characteristic polynomial ${latex(Delta)}$ of the considered system derived based on its fundamental matrix is presented in {AutoMarker(Eq(Delta,system.fundamental_matrix().det().expand().simplify().expand(),evaluate=False))}:"
+
+    @property
+    def footer_text(self):
+
+        return "The system fundamental matrix and its characteristic equation allows for a determination of the system unsteady state and its eigenfrequencies related to free vibration."
+
+    def append_elements(self):
+
+        system = self.reported_object
+        t = system.ivar
+
+        display(ReportText(self.header_text))
+
+        base_matrix = system._inertia_matrix().inv()*system._stiffness_matrix()
+#         display(base_matrix)
+
+        nom = fraction(((base_matrix.trace()/2)**2 - base_matrix.det()).simplify().radsimp())[0]
+        denom = fraction(((base_matrix.trace()/2)**2 - base_matrix.det()).simplify().radsimp())[1]
+        delta_omg = sqrt(nom)/sqrt(denom)
+
+        omg_mean = (base_matrix.trace()/2).simplify()
+
+
+        # display(SympyFormula(ode_sys.natural_frequencies()[0]**2))
+        # display(SympyFormula(ode_sys.natural_frequencies()[3]**2))
+
+
+        display(ReportText(self.body_text))
+        
+        display(SympyFormula(Eq(Symbol('M'),system._inertia_matrix(),evaluate=False)))
+        display(SympyFormula(Eq(Symbol('K'),system._stiffness_matrix(),evaluate=False)))
+        
+        r = Symbol('r')
+        omg = Symbol('omega')
+        
+        fund_mat = system.fundamental_matrix().subs({r:-omg})
+        
+        display(SympyFormula(Eq(Symbol('A'),fund_mat,evaluate=False)))
+        
+        display(SympyFormula(Eq(fund_mat.det().collect(omg**2),0,evaluate=False)))
+        
+
+        display(SympyFormula(Eq(Symbol('\omega_{\\alpha}'),sqrt(omg_mean-delta_omg))))
+        display(SympyFormula(Eq(Symbol('\omega_{\\beta}'),sqrt(omg_mean+delta_omg))))
+
+        display(SympyFormula(Eq(Symbol('A'),simplify(base_matrix),evaluate=False)))
+
+        omega_dict = {base_matrix[0]:Symbol('omega_m')**2,
+                      base_matrix[1]:Symbol('\omega_{c}')**2,
+                      base_matrix[2]:-Symbol('\omega_{TMD}')**2,
+                      base_matrix[3]:Symbol('\omega_{TMD}')**2}
+
+        display(SympyFormula(Eq(Symbol('A_{\omega^2}'),simplify(base_matrix.subs(omega_dict)),evaluate=False)))
+
+        display(SympyFormula(Eq(Symbol('\=\omega^2'),omg_mean)))
+
+        display(SympyFormula(Eq(Symbol('\Delta \omega^2'),delta_omg)))
+
+
+        display(ReportText(self.footer_text))
