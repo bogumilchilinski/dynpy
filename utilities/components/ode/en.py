@@ -1220,6 +1220,17 @@ class NaturalFrequenciesAnalysisComponent(ReportComponent):
 
         omg_mean = (base_matrix.trace()/2).simplify()
 
+        l1 = Symbol('l_alpha',positive=True)
+        l2 = Symbol('l_beta',positive=True)
+        g = Symbol('g',positive=True)
+        m_a = Symbol('m_{\\alpha}',positive=True)
+        omg_m = Symbol('\=\omega')
+
+#         simp_expr = 4*l1**2*l2**2*m_a**2
+#         delta_omg_simp = ((nom/denom)/g**2).subs(omg_mean**2/g**2*simp_expr,omg_m**2*simp_expr).ratsimp().subs(1/l1,1/l1*g**2)
+        
+        delta_omg_simp = omg_m**2 + (g/l1)*simplify(base_matrix)[2]
+
 
         # display(SympyFormula(ode_sys.natural_frequencies()[0]**2))
         # display(SympyFormula(ode_sys.natural_frequencies()[3]**2))
@@ -1235,26 +1246,41 @@ class NaturalFrequenciesAnalysisComponent(ReportComponent):
         
         fund_mat = system.fundamental_matrix().subs({r:-omg})
         
+        display(ReportText(self.header_text))
+        
         display(SympyFormula(Eq(Symbol('A'),fund_mat,evaluate=False)))
         
         display(SympyFormula(Eq(fund_mat.det().collect(omg**2),0,evaluate=False)))
         
+        display(ReportText(self.header_text))
 
-        display(SympyFormula(Eq(Symbol('\omega_{\\alpha}'),sqrt(omg_mean-delta_omg))))
-        display(SympyFormula(Eq(Symbol('\omega_{\\beta}'),sqrt(omg_mean+delta_omg))))
+        display(SympyFormula(Eq(Symbol('\omega_1'),sqrt(omg_mean-delta_omg))))
+        display(SympyFormula(Eq(Symbol('\omega_2'),sqrt(omg_mean+delta_omg))))
 
         display(SympyFormula(Eq(Symbol('A'),simplify(base_matrix),evaluate=False)))
 
-        omega_dict = {base_matrix[0]:Symbol('omega_m')**2,
-                      base_matrix[1]:Symbol('\omega_{c}')**2,
-                      base_matrix[2]:-Symbol('\omega_{TMD}')**2,
-                      base_matrix[3]:Symbol('\omega_{TMD}')**2}
+        display(ReportText(self.header_text))
+        
+        display(SympyFormula(Eq(Symbol('A_{\omega^2}'),Matrix([[Symbol('\omega_{MS}')**2,-Symbol('\omega_{C}')**2],
+                                                              [-Symbol('\omega_{TMD}')**2,Symbol('\omega_{TMD}')**2]]),evaluate=False)))
+        
+        display(SympyFormula(Eq(Symbol('\omega_1^2'),omg_m**2 - Symbol('\Delta \omega^2'))))
+        display(SympyFormula(Eq(Symbol('\omega_2^2'),omg_m**2 + Symbol('\Delta \omega^2'))))
 
-        display(SympyFormula(Eq(Symbol('A_{\omega^2}'),simplify(base_matrix.subs(omega_dict)),evaluate=False)))
-
-        display(SympyFormula(Eq(Symbol('\=\omega^2'),omg_mean)))
+        display(SympyFormula(Eq(omg_m**2,omg_mean)))
 
         display(SympyFormula(Eq(Symbol('\Delta \omega^2'),delta_omg)))
+        
+        display(SympyFormula(Eq(Symbol('\Delta \omega^2'),sqrt(delta_omg_simp))))
+
 
 
         display(ReportText(self.footer_text))
+        
+        display(SympyFormula(Eq(Symbol('\omega_1^2'),omg_m**2 - sqrt(delta_omg_simp))))
+        display(SympyFormula(Eq(Symbol('\omega_2^2'),omg_m**2 + sqrt(delta_omg_simp))))
+        
+#         display(SympyFormula(Eq(Symbol('\omega_{\\alpha}'),sqrt(delta_omg_simp.subs(omg_m**2,0)).doit())))
+
+        display(ReportText(self.footer_text))
+
