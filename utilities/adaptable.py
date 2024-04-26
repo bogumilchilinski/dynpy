@@ -799,7 +799,7 @@ class TikZPlot(TikZ, ReportModule):
     _grid = None
 
     _in_figure = False
-    _figure_gen = lambda: Figure(position='H')
+    _figure_gen = lambda: Figure(position='htbp')
     _image_parameters = {'width': None}
     
     _floats_no_gen = plots_no()    
@@ -1149,7 +1149,7 @@ class TikZPlot(TikZ, ReportModule):
 
 class DataMethods:
 
-    _figure_gen = lambda: Figure(position='H')
+    _figure_gen = lambda: Figure(position='htbp')
     _image_parameters = {'width': NoEscape(r'0.9\textwidth')}
     _legend_fontsize = r' '
     _label_fontsize = r'\small '
@@ -1492,6 +1492,8 @@ class SpectralMethods(DataMethods):
             for name, data in self.items()
         }
 
+        return TimeDataFrame(data=(timeseries), index=t_span)
+
     def double_sided_rms(self):
 
         f_span_shifted_ds = (fft.fftshift(self.index))
@@ -1721,6 +1723,11 @@ class AutoMarker:
     _prefix = 'eq'
     _name = None
     _floats_no_gen = plots_no()
+    _sufix=''
+    
+    @classmethod
+    def set_default_sufix(cls,sufix=""):
+        cls._sufix=sufix
 
     @classmethod
     def add_marker(cls, elem, marker):
@@ -1798,7 +1805,7 @@ class AutoMarker:
         else:
 
             marker = Marker(
-                f'Mrk{self._marker_name}{next(self._floats_no_gen)}',
+                f'Mrk{self._marker_name}{next(self._floats_no_gen)}{self.__class__._sufix}',
                 prefix=self._prefix)
             self._markers_dict[elem] = marker
 
@@ -1937,7 +1944,7 @@ class BasicFormattingTools(DataMethods):
 
         new_obj = self.copy()
         new_obj_idx = new_obj.axes[axis]
-        idx_frame = new_obj_idx.to_frame().applymap(func)
+        idx_frame = new_obj_idx.to_frame().map(func)
 
         #print('idx',new_obj_idx)
         #display('map',idx_frame)
@@ -3109,6 +3116,10 @@ class SpectrumSeries(AdaptableSeries, SpectralMethods):
 #         timeseries={name:fft.ifftshift(fft.ifft( data ) )for name,data in self.items()}
 
 #         return TimeDataSeries(data=(timeseries),index=t_span)
+
+    def _sort_for_ifft(self):
+        
+        return SpectrumSeries(fft.fftshift(self.to_numpy()))
 
 
 class SpectrumFrame(AdaptableDataFrame, SpectralMethods):

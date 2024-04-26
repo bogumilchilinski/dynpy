@@ -1034,8 +1034,8 @@ t_span = np.linspace(0,100,200)
 
 sym_gen_sol=(
 '''
-    table = SDOFWinchSystem().subs(data_dict_2).subs(SDOFWinchSystem.F,100).numerized().compute_solution(t_span,[0,0]).iloc[:,0] 
-    table.plot() 
+table = SDOFWinchSystem().subs(data_dict_2).subs(SDOFWinchSystem.F,100).numerized().compute_solution(t_span,[0,0]).iloc[:,0] 
+table.plot() 
 ''')
 
 list_elem = (
@@ -1124,6 +1124,24 @@ class DifferentSimulationsComponent(ReportComponent):
         display(GuideCode(sym_gen_sol.replace('SDOFWinchSystem',system_name)))
         display(Picture('./dynpy/utilities/components/guides/images/ogolne_tab.jpg', caption = ""))
         display(Picture('./dynpy/utilities/components/guides/images/ogolne_plot.jpg', caption = ""))
+
+        
+        
+pandas_latax_df_code = '''
+
+from dynpy.utilities.adaptable import LatexDataFrame
+from sympy import symbols
+from pint import UnitRegistry 
+ureg = UnitRegistry()
+
+a,b,c,d,e = symbols('a b c d e',positive = True)
+
+units_dict = {a:ureg.meter,b:ureg.second, 'lubuskie':ureg.meter}
+LatexDataFrame.set_default_units(units_dict)
+
+LatexDataFrame.formatted(df.set_axis([a,b,c,d,e],axis='columns'))
+'''
+
 
 class BasicOperationsComponent(ReportComponent):
 
@@ -1217,11 +1235,11 @@ class BasicOperationsComponent(ReportComponent):
         
         display(ReportText('**DataFrame (tabele) - tworzenie DataFrame na bazie słownika** *tworzenie listy województw*'))
         display(GuideCode('''
-            wojewodztwa_list = ['mazowieckie','wielkopolskie','lubelskie'
-            'warmińsko-mazurskie','zachodniopomorskie','podlaskie'
-            'dolnośląskie','pomorskie','łódzkie'
-            'kujawsko-pomorskie','podkarpackie','małopolskie'
-            'lubuskie','śląskie','świętokrzyskie','opolskie']
+wojewodztwa_list = ['mazowieckie','wielkopolskie','lubelskie',
+'warmińsko-mazurskie','zachodniopomorskie','podlaskie',
+'dolnośląskie','pomorskie','łódzkie',
+'kujawsko-pomorskie','podkarpackie','małopolskie',
+'lubuskie','śląskie','świętokrzyskie','opolskie']
             '''))
         
         display(ReportText('*Tworzenie listy zawierającej pola powierzchni poszczególnych województw w ${km^2}$*'))
@@ -1237,19 +1255,19 @@ class BasicOperationsComponent(ReportComponent):
         display(GuideCode('wydatki_lista=[787,596,623,597,767,697,742,1023,590,778,574,598,365,631,647,431]'))
 
         display(ReportText('*Tworzenie słownika*'))
-        display(GuideCode('''wojwodztwa_dane={'powierzchnia':powierzchnia,'l.osob':ludnosc_lista,'doch.':dochody_lista,'wyd.':wydatki_lista}'''))
+        display(GuideCode('''wojwodztwa_dane={'pow.':powierzchnia_lista,'l.os.':ludnosc_lista,'dochody':dochody_lista,'wyd.':wydatki_lista}'''))
 
         display(ReportText('*Wywołanie tabeli*'))
         display(GuideCode('''
-        df = pd.DataFrame(index=wojewodztwa_list,data=wojwodztwa_dane)
-        df
+df = pd.DataFrame(index=wojewodztwa_list,data=wojwodztwa_dane)
+df
         '''))
         display(x6.reported())
 
         display(ReportText('**Operacje na kolumnach - dodanie kolumny z obliczoną gęstością zaludnienia**'))
         display(GuideCode('''
-        df['zalud.']=df['l.os.']/df['pow.']
-        df
+df['zalud.']=df['l.os.']/df['pow.']
+df
         '''))
         display(x7.reported())
 
@@ -1270,19 +1288,13 @@ class BasicOperationsComponent(ReportComponent):
         display(x11.reported())
 
         display(ReportText('**Metoda set_axis dla kolumn**'))
-        display(GuideCode('''
-        a,b,c,d,e = symbols('a b c d e',positive = True)
-
-        units_dict = {a:ureg.meter,b:ureg.second, 'lubuskie':ureg.meter}
-        LatexDataFrame.set_default_units(units_dict)
-
-        LatexDataFrame.formatted(df.set_axis([a,b,c,d,e],axis='columns'))
-        '''))
+        display(GuideCode(    pandas_latax_df_code    ))
+        
         display(LatexDataFrame.formatted(x12).reported())
 
         display(ReportText('**Metoda rename - zmienia nazwy kolumn i wierszy**'))
         display(GuideCode('''
-        df.rename(columns={'l.osob':'LUDNOŚĆ'},index={'lubuskie':'LUBU...'})
+df.rename(columns={'l.os.':'LUDNOŚĆ'},index={'lubuskie':'LUBU...'})
         '''))
         display(x21.reported())
 
@@ -1290,8 +1302,8 @@ class BasicOperationsComponent(ReportComponent):
         display(GuideCode('df.dochody.apply(lambda x: x*2)'))
         display(x13.reported())
 
-        display(ReportText('**Metoda applymap - implementacja funkcji w całej tabeli**'))
-        display(GuideCode('df.applymap(lambda x: x*2)'))
+        display(ReportText('**Metoda map - implementacja funkcji w całej tabeli**'))
+        display(GuideCode('df.map(lambda x: x*2)'))
         display(x14.reported())
         
 class DynSysIntroComponent(ReportComponent):

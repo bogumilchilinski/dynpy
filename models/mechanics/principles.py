@@ -392,6 +392,35 @@ class ComposedSystem(HarmonicOscillator):
     def numerical_analysis(self, parameter=None, param_span=None, dependencies_dict=None, t_span = None):
         return ODESystem.from_dynamic_system(self)._as_na_df(parameter=parameter, param_span=param_span, dependencies_dict=dependencies_dict, t_span = t_span)
 
+
+    def to_normal_coordinates(self):
+
+        u = Function('u')(self.ivar)
+        p = Function('p')(self.ivar)
+        s = Function('s')(self.ivar)
+        h = Function('h')(self.ivar)
+
+        symbols = [u, s, p, h]
+
+        dvars = []
+
+        for i in range(len(self.q)):
+
+            dvars.append(symbols[i])
+
+        inertia_matrix=self.inertia_matrix()
+        inertia_matrix_inv=inertia_matrix.inv()
+        stiffness_matrix = self.stiffness_matrix()
+        ex_forces_matrix = self.external_forces()
+
+
+        result_stiffness = (inertia_matrix_inv*stiffness_matrix).diagonalize()[1]
+        result_forces = (inertia_matrix_inv*ex_forces_matrix)
+
+        diagonalized_form_eoms = result_stiffness* Matrix(dvars) + Matrix(dvars).diff(self.ivar,2) - result_forces
+
+        return ODESystem(odes = diagonalized_form_eoms, ode_order=2, dvars=Matrix([dvars]))
+
 class NonlinearComposedSystem(ComposedSystem):
 
     def frequency_response_function(self,

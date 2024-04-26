@@ -331,150 +331,150 @@ class BeamElasticity(Spring):
 #         return self.default_data_dict
 
 #Amadi
-    """Ready to use model of bridge represented by the mass supported by elastic beam.
-        Arguments:
-        =========
-            m = Symbol object
-                -Mass embedded on beam.
+#     """Ready to use model of bridge represented by the mass supported by elastic beam.
+#         Arguments:
+#         =========
+#             m = Symbol object
+#                 -Mass embedded on beam.
 
-            k = Symbol object
-                -Bending stiffness of the beam
+#             k = Symbol object
+#                 -Bending stiffness of the beam
 
-            g = Symbol object
-                -Gravitational field acceleration
+#             g = Symbol object
+#                 -Gravitational field acceleration
 
-            ivar = symbol object
-                -Independant time variable
+#             ivar = symbol object
+#                 -Independant time variable
 
-            qs = dynamicsymbol object
-                -Generalized coordinates
+#             qs = dynamicsymbol object
+#                 -Generalized coordinates
 
-        Example
-        =======
-        A mass hanged on the elastic beam with the stiffness k in the gravitational field
+#         Example
+#         =======
+#         A mass hanged on the elastic beam with the stiffness k in the gravitational field
 
-        >>> t = symbols('t')
-        >>> m, k = symbols('m, k')
-        >>> qs = dynamicsymbols('z') # Generalized Coordinates
-        >>> mass = SDoFHarmonicOscillator(m,k, qs=[z],) # Initialization of LagrangesDynamicSystem instance
+#         >>> t = symbols('t')
+#         >>> m, k = symbols('m, k')
+#         >>> qs = dynamicsymbols('z') # Generalized Coordinates
+#         >>> mass = SDoFHarmonicOscillator(m,k, qs=[z],) # Initialization of LagrangesDynamicSystem instance
 
-        -We define the symbols and dynamicsymbols
-        -Kinetic energy T and potential energy v are evaluated to calculate the lagrangian L
-        -Reference frame was created with point P defining the position and the velocity determined on the z axis
-        -external forces assigned
-        -Next we determine the instance of the system using class LagrangeDynamicSystem
-        -We call out the instance of the class
-        -If necessary assign values for the default arguments
-     #test
+#         -We define the symbols and dynamicsymbols
+#         -Kinetic energy T and potential energy v are evaluated to calculate the lagrangian L
+#         -Reference frame was created with point P defining the position and the velocity determined on the z axis
+#         -external forces assigned
+#         -Next we determine the instance of the system using class LagrangeDynamicSystem
+#         -We call out the instance of the class
+#         -If necessary assign values for the default arguments
+#      #test
 
-    """
-    scheme_name = 'beam_bridge.PNG'
-    real_name = 'beam_bridge_real.PNG'
+#     """
+#     scheme_name = 'beam_bridge.PNG'
+#     real_name = 'beam_bridge_real.PNG'
 
-    m = Symbol('m', positive=True)
-    k_beam = Symbol('k_beam', positive=True)
-    g = Symbol('g', positive=True)
-    Omega = Symbol('Omega', positive=True)
-    F = Symbol('F', positive=True)
-    z = dynamicsymbols('z')
+#     m = Symbol('m', positive=True)
+#     k_beam = Symbol('k_beam', positive=True)
+#     g = Symbol('g', positive=True)
+#     Omega = Symbol('Omega', positive=True)
+#     F = Symbol('F', positive=True)
+#     z = dynamicsymbols('z')
 
 
-    def __init__(self,
-                 m=None,
-                 k_beam=None,
-                 ivar=Symbol('t'),
-                 g=None,
-                 Omega=None,
-                 F=None,
-                 z=None,
-                 **kwargs):
+#     def __init__(self,
+#                  m=None,
+#                  k_beam=None,
+#                  ivar=Symbol('t'),
+#                  g=None,
+#                  Omega=None,
+#                  F=None,
+#                  z=None,
+#                  **kwargs):
 
-        if m is not None: self.m = m
-        if k_beam is not None: self.k_beam = k_beam
-        if g is not None: self.g = g
-        if Omega is not None: self.Omega = Omega
-        if F is not None: self.F = F
-        if z is not None: self.z = z
-        self.ivar = ivar
+#         if m is not None: self.m = m
+#         if k_beam is not None: self.k_beam = k_beam
+#         if g is not None: self.g = g
+#         if Omega is not None: self.Omega = Omega
+#         if F is not None: self.F = F
+#         if z is not None: self.z = z
+#         self.ivar = ivar
 
-        self._init_from_components(**kwargs)
+#         self._init_from_components(**kwargs)
 
-    @cached_property
-    def components(self):
+#     @cached_property
+#     def components(self):
 
-        components = {}
+#         components = {}
 
-        self._mass = BeamStructure(self.m, self.z, qs=[self.z])(label='Mass of a beam')
-        self._spring = BeamElasticity(self.k_beam, self.z, qs=[self.z])(label='Beam stiffness')
-        self._gravity_force = GravitationalForce(self.m, self.g,self.z)(label='Gravity field')
-        self._force = Force(-self.F * sin(self.Omega * self.ivar),pos1=self.z)(label='External force')
+#         self._mass = BeamStructure(self.m, self.z, qs=[self.z])(label='Mass of a beam')
+#         self._spring = BeamElasticity(self.k_beam, self.z, qs=[self.z])(label='Beam stiffness')
+#         self._gravity_force = GravitationalForce(self.m, self.g,self.z)(label='Gravity field')
+#         self._force = Force(-self.F * sin(self.Omega * self.ivar),pos1=self.z)(label='External force')
 
-        components['_mass'] = self._mass
-        components['_spring'] = self._spring
-        components['_gravity_force'] = self._gravity_force
-        components['_force'] = self._force
+#         components['_mass'] = self._mass
+#         components['_spring'] = self._spring
+#         components['_gravity_force'] = self._gravity_force
+#         components['_force'] = self._force
 
-        return components
+#         return components
 
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.m: r'Mass of system on the spring',
-            self.k_beam: r'Beam stiffness',
-            self.g: r'Gravitational field acceleration',
-            self.Omega: r'Excitation frequency',
-            self.F: r'Force acting on a bridge',
-            self.l: r'Lenght of a beam',
-            self.module: r'Youngs modulus',
-            self.inertia: r'Interia of a beam'
-        }
+#     def symbols_description(self):
+#         self.sym_desc_dict = {
+#             self.m: r'Mass of system on the spring',
+#             self.k_beam: r'Beam stiffness',
+#             self.g: r'Gravitational field acceleration',
+#             self.Omega: r'Excitation frequency',
+#             self.F: r'Force acting on a bridge',
+#             self.l: r'Lenght of a beam',
+#             self.module: r'Youngs modulus',
+#             self.inertia: r'Interia of a beam'
+#         }
 
-        return self.sym_desc_dict
+#         return self.sym_desc_dict
 
-    def get_default_data(self):
+#     def get_default_data(self):
         
-        m0, k0, E, I, l, E0, I0= symbols('m_0 k_0 E I l E_0 I_0', positive=True)
+#         m0, k0, E, I, l, E0, I0= symbols('m_0 k_0 E I l E_0 I_0', positive=True)
         
-        F0=Symbol('F_0',positive=True)
-        Omega0=Symbol('Omega_0',positive=True)
-        E0=Symbol('E_0',positive=True)
-        I0=Symbol('I_0',positive=True)
-        l0=Symbol('l_0',positive=True)
-        module=Symbol('E',positive=True)
-        inertia=Symbol('I',positive=True)
-        l=Symbol('l',positive=True)
+#         F0=Symbol('F_0',positive=True)
+#         Omega0=Symbol('Omega_0',positive=True)
+#         E0=Symbol('E_0',positive=True)
+#         I0=Symbol('I_0',positive=True)
+#         l0=Symbol('l_0',positive=True)
+#         module=Symbol('E',positive=True)
+#         inertia=Symbol('I',positive=True)
+#         l=Symbol('l',positive=True)
         
-        default_data_dict={
-            l: [S.One * no * l0 for no in range(1, 4)],
-            #module: [S.One * E0 * no for no in range(10, 20)],
-            #inertia: [S.One * no * I0 for no in range(10, 20)],
-            self.F: [S.One * no * F0  for no in range(10, 25)],
-            #self.m :[S.One * no * m0 for no in range(10, 20)]
-#            self.Omega: [S.One * Omega0]
-        }
-        return default_data_dict
+#         default_data_dict={
+#             l: [S.One * no * l0 for no in range(1, 4)],
+#             #module: [S.One * E0 * no for no in range(10, 20)],
+#             #inertia: [S.One * no * I0 for no in range(10, 20)],
+#             self.F: [S.One * no * F0  for no in range(10, 25)],
+#             #self.m :[S.One * no * m0 for no in range(10, 20)]
+# #            self.Omega: [S.One * Omega0]
+#         }
+#         return default_data_dict
 
-    def get_numerical_data(self):
+#     def get_numerical_data(self):
 
-        default_data_dict={
-            self.F:[no * 1000 for no in range(10, 25)],
-            self.Omega: [3.14 * no for no in range(1,10)],
+#         default_data_dict={
+#             self.F:[no * 1000 for no in range(10, 25)],
+#             self.Omega: [3.14 * no for no in range(1,10)],
             
-        }
-        return default_data_dict
+#         }
+#         return default_data_dict
 
     
-    def dynamic_force(self):
-        data=self._given_data
-        amps=self._fodes_system.steady_solution.as_dict()
-        dyn_force=(self.components['_spring'].force().subs(amps)).subs(data).expand().doit()
+#     def dynamic_force(self):
+#         data=self._given_data
+#         amps=self._fodes_system.steady_solution.as_dict()
+#         dyn_force=(self.components['_spring'].force().subs(amps)).subs(data).expand().doit()
         
-        return dyn_force
+#         return dyn_force
     
-    def static_force(self):
-        data=self._given_data
-        ans=self.dynamic_force()
-        free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
-        return (free_coeff)
+#     def static_force(self):
+#         data=self._given_data
+#         ans=self.dynamic_force()
+#         free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
+#         return (free_coeff)
     
 class BeamBridge(ComposedSystem):
     """Ready to use model of bridge represented by the mass supported by elastic beam.
