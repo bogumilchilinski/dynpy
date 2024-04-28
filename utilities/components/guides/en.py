@@ -993,7 +993,7 @@ class PandasMethodsComponent(ReportComponent):
         
 steady_state_code=(
 '''
-steady_state = SDOFWinchSystem()._ode_system_solution()[0]
+steady_state = SDOFWinchSystem()._ode_system.solution[0]
 steady_state
 ''')
     
