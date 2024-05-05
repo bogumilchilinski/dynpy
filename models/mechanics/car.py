@@ -529,8 +529,8 @@ class CarMovementPIDAdjust(CarMovementConstantThrottle):
         components = super().components
 
         self._throttle = CombustionEngine.from_data(self.engine_dataframe, n = self.n ,degree=10,qs = self.qs)(label='throttle')
-        self._proportional = ProportionalElement(self.P , error=diff(self.x,self.ivar) , target = self.x , reference = self.v_ref , qs=self.qs)(label='proportional')
-        self._derivative = DerivativeElement(self.D , error=diff(self.x,self.ivar) , target = self.x, reference =  self.v_ref , qs=self.qs)(label='derivative')
+        self._proportional = ProportionalElement(self.P , error=diff(self.x,self.ivar), target = diff(self.x,self.ivar) , reference = self.v_ref , qs=self.qs)(label='proportional')
+        self._derivative = DerivativeElement(self.D , error=diff(self.x,self.ivar) , target = diff(self.x,self.ivar), reference =  self.v_ref , qs=self.qs)(label='derivative')
         #self._throttle = CombustionEngine.from_data(df, n = self.n ,degree=10, n_min=1000, n_max=6500,qs = self.qs)(label='throttle')
         #self._throttle = OwnCombustionEngine(omega=self.n,qs=self.qs)(label='throttle')
 
