@@ -52,7 +52,6 @@ class TitlePageComponent(Environment):
         
             system = self.system
 
-
             
             self.append(NoEscape('\centering'))
 

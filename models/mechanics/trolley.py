@@ -300,6 +300,18 @@ class ForcedSpringMassSystem(SpringMassSystem):
         
         return components
 
+    def get_numerical_parameters(self):
+
+        m, k, g, F = self.m, self.k, self.g, self.F
+        
+        get_numerical_parameters = {
+
+            self.m: 0.5, 
+            self.k: 20, 
+            self.F: 2,
+            self.g: 9.81, 
+        }
+        return get_numerical_parameters
 
     def symbols_description(self):
 
@@ -307,7 +319,6 @@ class ForcedSpringMassSystem(SpringMassSystem):
             self.m: r'mass of system on the spring',
             self.k: r'Spring coefficient ',
         }
-
         return {**super().symbols_description(),**self.sym_desc_dict}
 
 

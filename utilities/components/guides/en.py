@@ -511,7 +511,7 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
         display(SympyFormula(eoms))
 
         #display(Picture('./Image/eomseq_w.jpg'))
-
+        
         slownik=system.get_random_parameters()
         
         slownik_numerical=system.get_numerical_parameters()
@@ -526,7 +526,7 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
 
         display(ReportText('Tworzenie słownika (w tym przypadku z losowymi wartościami) umożliwiający nadanie wartości zmiennym:'))
         
-
+        
 
         display(GuideCode('slownik=SDOFWinchSystem().get_random_parameters()'.replace('SDOFWinchSystem',system_name)))
         display(GuideCode('slownik_numerical=SDOFWinchSystem().get_numerical_parameters()'.replace('SDOFWinchSystem',system_name)))
@@ -553,6 +553,7 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
 steady_sol_str=(
 '''
 
+slownik_numerical=system.get_numerical_parameters()
 steady_solution_subs=steady_solution.subs(slownik_numerical)
 
 ''')
@@ -636,7 +637,9 @@ class SimulationsComponent(ReportComponent):
         display(ReportText('Podstawienie słownika:'))
         #display(Picture('./Image/tableq_w.jpg'))
 
-        table_eq=system._ode_system.steady_solution.subs(slownik)
+        
+        #zmiana slownik na slownik_numerical
+        table_eq=system._ode_system.steady_solution.subs(slownik_numerical)
 
 
         display(GuideCode('''table_eq=system._ode_system.steady_solution.subs(slownik_numerical)'''.replace('SDOFWinchSystem',system_name)))
@@ -731,7 +734,9 @@ class SimulationReportComponent(ReportComponent):
         eoms_eq=Eq(eoms,0)
         solution_subs = system._ode_system.steady_solution.subs(slownik_numerical)
         steady_solution=system._ode_system.steady_solution[0]
-        steady_solution_subs=steady_solution.subs(slownik)
+        steady_solution_subs=steady_solution.subs(slownik_numerical)
+        #zmiana slownik na slownik numerical
+        
         steady_solution_subs
 #         eq_sol=Eq(solution_subs,0)
 #         eq_steady_sol=Eq(steady_solution_subs,0)
@@ -1204,7 +1209,7 @@ class BasicOperationsComponent(ReportComponent):
         df50=df.dochody.apply(lambda x: x*2)
         x13 = LatexDataFrame(df50)
         
-        df60=df.applymap(lambda x: x*2)
+        df60=df.map(lambda x: x*2)
         x14 = LatexDataFrame(df60)
         
         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
@@ -1213,9 +1218,8 @@ class BasicOperationsComponent(ReportComponent):
         display(GuideCode('import pandas as pd'))
 
         display(ReportText('**Tworzenie serii (analogicznie do kolumn w Excelu)**'))
-        display(x1.reported())
-
         display(GuideCode('s = pd.Series([2,34,5,-2,8,12])'))
+        display(x1.reported())
 
         display(ReportText('**Operacje na seriach**'))
         display(GuideCode('s*10'))
@@ -1890,7 +1894,7 @@ class ReportCompUseComponent(ReportComponent):
     title="Podstawy używania komponentu raportującego"
 
 
-    def append_elements(self):
+    def append_elements(self): 
         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
 
         komponent = Chapter('Podstawy używania komponentu raportującego')

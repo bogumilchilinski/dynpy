@@ -1109,7 +1109,7 @@ class IntroToPandasGuide(Guide):
             guide_comp.PandasTableGenerationComponent,
             guide_comp.BasicOperationsComponent,
             guide_comp.PandasMethodsComponent,
-
+            guide_comp.DynamicSystemCallComponent,
             guide_comp.SimulationsComponent, #Common with *UsageOfDynamicSystemsGuide* class
             guide_comp.DifferentSimulationsComponent,
 
