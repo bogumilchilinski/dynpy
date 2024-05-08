@@ -10,10 +10,7 @@ from sympy.physics.mechanics import dynamicsymbols
 
 from ....solvers.linear import *
 from ....dynamics import *
-<<<<<<< HEAD
 
-=======
->>>>>>> 0bf8d9e (Mechanical systems development)
 
 miesiace_list = ['styczeń', 'luty', 'marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']
 
