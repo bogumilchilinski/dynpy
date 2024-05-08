@@ -4,6 +4,13 @@ import pandas as pd
 import numpy as np
 from sympy import lambdify
 
+from sympy import *
+from pandas import *
+from sympy.physics.mechanics import dynamicsymbols
+
+from ....solvers.linear import *
+from ....dynamics import *
+
 
 miesiace_list = ['styczeń', 'luty', 'marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']
 
@@ -1842,3 +1849,276 @@ class DynSysIntroComponent(ReportComponent):
 
             '''))
         display(SympyFormula(steady_solution))
+
+        
+class NumericalAnalysisSimulationComponent(ReportComponent):
+
+    title="Wykonanie symulacji z wykorzystaniem metody numerical_analysis"
+
+
+    def append_elements(self):
+        
+        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        
+        eoms=system._eoms[0]
+        eoms
+
+        display(ReportText('Proces wywołowania równania ruchu za pomoca metody eoms:'))
+
+        display(ReportText('Wynik jest następujący:'))
+        
+        display(Markdown(
+            '''
+        eoms_eq=Eq(eoms,0)
+        eoms_eq
+            '''))
+        
+        eoms_eq=Eq(eoms,0)
+        eoms_eq
+        
+        display(SympyFormula(eoms_eq))
+        
+        display(ReportText('Zaprezentowane równanie pozwala sprawdzić, czy rozważany układ jest poprawnie zaimportowany do przestrzeni roboczej.'))
+        
+        display(ReportText('Kolejnym kluczowym elementem jest zdefiniowanie parametrów układu, wektora czasu i warunków początkowych.'))
+        
+        param_dict = system.get_numerical_parameters()
+        t_span = np.linspace(1,100,101)
+        ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
+        
+        display(Markdown(
+        '''
+        param_dict = system.get_numerical_parameters()
+        t_span = np.linspace(1,100,101)
+        ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
+        '''))
+        
+        display(ReportText('Następnie należy określić, który parametr ma zostać poddany analizie. Parametr ten należy wówczas zmienić w słowniku parametrów z wartości liczbowej na symbol.'))
+        
+        numerical_param_dict.update({dyn_sys.m_e: dyn_sys.m_e})
+        
+        display(Markdown(
+        '''
+        parametr = system.k
+        param_dict.update({parametr: parametr})
+        '''))
+        
+        display(ReportText('Ostatnim etapem jest wywołanie metody numerical_analysis dla rozważanego systemu:'))
+
+        display(Markdown(
+        '''
+        na_df = dyn_sys.subs(param_dict).numerical_analysis(parameter=dyn_sys.m_e, param_span=[6, 9, 12], t_span = t_span)
+        na_df
+        '''))
+        
+        na_df = dyn_sys.subs(param_dict).numerical_analysis(parameter=dyn_sys.m_e, param_span=[6, 9, 12], t_span = t_span)
+        na_df
+        
+        display(ReportText('Symulacje numeryczną wykonuje się w analogiczny sposób do pozostałych symulacji w następujący sposób:'))
+
+        display(Markdown(
+        '''
+        na_df_sol = na_df.compute_solution(t_span = t_span, ic_list = [0.0,0.0])
+        na_df_sol.plot()
+        '''))
+        
+        na_df_sol = na_df.compute_solution(t_span = t_span, ic_list = [0.0,0.0])
+        na_df_sol.plot()
+        
+class AnalyticalSimulationComponent(ReportComponent):
+
+    title="Wykonanie symulacji z wykorzystaniem rozwiązania analitycznego"
+
+    
+    
+    def append_elements(self):
+
+        from ....solvers.linear import ODESystem
+        
+        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        
+        eoms=system._eoms[0]
+        eoms
+
+        display(ReportText('Proces wywołowania równania ruchu za pomoca metody eoms:'))
+
+        display(ReportText('Wynik jest następujący:'))
+        
+        display(Markdown(
+            '''
+        eoms_eq=Eq(eoms,0)
+        eoms_eq
+            '''))
+        
+        eoms_eq=Eq(eoms,0)
+        eoms_eq
+        
+        display(SympyFormula(eoms_eq))
+        
+        ode_system = ODESystem.from_dynamic_system(system)
+
+        display(ReportText('Podane równanie w tym przypadku nie będzie odpowiednim wyborem. Do wykonania symulacji analitycznej należy zastosować system dynamiczny w postaci równań różniczkowych zwyczajnych, który można uzyskać za pomocą klasy ODESystem:'))
+        
+        display(ReportText('Wynik jest następujący:'))
+
+        display(SympyFormula(ode_system))
+        
+        display(ReportText('Aby przeprowadzić symulację analityczną w pierwszej kolejności konieczne jest uzyskanie rozwiązania równań ruchu, co można wykonać za pomocą metod solution i steady_solution w zależności od skomplikowania systemu.'))
+        
+        ode_solution = ode_system.steady_solution
+        
+        display(ReportText('Wynik jest następujący:'))
+        
+        display(SympyFormula(ode_solution))
+        
+        display(ReportText('Do przeprowadzenia symulacji konieczne jest zdefiniowanie parametrów układu, wektora czasu oraz warunków początkowych. Można je uzyskać w następujący sposób:'))
+        
+        param_dict = system.get_numerical_parameters()
+        t_span = np.linspace(1,100,101)
+        ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
+        
+        display(Markdown(
+        '''
+        param_dict = system.get_numerical_parameters()
+        t_span = np.linspace(1,100,101)
+        ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
+        '''))
+        
+        display(Markdown(
+        '''
+        ode_simulation = ode_solution.subs(param_dict).compute_solution(t_span, ic_list = ic_list)
+        ode_simulation.plot()
+        '''))
+        
+        display(ReportText('Dla zdefiniowanych parametrów symulacja analityczna wygląda w następujący sposób:'))
+        
+        ode_simulation = ode_solution.subs(param_dict).compute_solution(t_span, ic_list = ic_list)
+
+        ode_simulation.plot()
+
+
+class DynamicSystemCompletenessCheckComponent(ReportComponent):
+
+    title="Wywoływanie i sprawdzanie wszystkich kluczowych elementów systemu dynamicznego"
+
+
+    def append_elements(self):
+        
+        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        
+        eoms=system._eoms[0]
+        eoms
+
+        display(ReportText('Wywołanie systemu w pierwszej kolejności można sprawdzić przez sprawdzenie równania ruchu metodą _eoms.'))
+
+        display(ReportText('Wynik jest następujący:'))
+        
+        display(Markdown(
+            '''
+        eoms_eq=Eq(eoms,0)
+        eoms_eq
+            '''))
+        
+        eoms_eq=Eq(eoms,0)
+        eoms_eq
+        
+        display(SympyFormula(eoms_eq))
+        
+        display(ReportText('Następnie wykonuje się analizę metody __init__ klasy:'))
+        
+        display(ObjectCode(system.__init__()))
+        
+        display(ReportText('Kolejnym etapem jest sprawdzenie, czy schemat oraz zdjęcie reczywiste systemu są zdefiniowane:'))
+        
+        display(Markdown(
+            '''
+        system._as_picture()
+        system.preview(example = 'detail_real_name')
+            '''))
+        
+        system._as_picture()
+        system.preview(example = 'detail_real_name')
+        
+        display(ReportText('Kolejnym etapem jest sprawdzenie, czy zdefiniowane są słowniki z parametrami:'))
+        
+        display(Markdown(
+            '''
+        system.get_random_parameters()
+        system.get_numerical_parameters()
+            '''))
+        
+        display(ReportText('Jeśli podczas wywołania pojawia się błąd o braku tej metody lub parametry są inne niż w metodzie __init__ należy zmodyfikować klasę analogicznie do pokazanego rozwiązania:'))
+        
+        display(Markdown(
+            '''
+        
+        def get_default_data(self):
+
+            m0, k0 = self.m0, self.k0
+
+            default_data_dict = {
+
+                self.m: [S.One * no * m0 /100 for no in range(80, 120)], # percentage
+                self.k_r: [S.One * no * k0/100 for no in range(80, 120)], # percentage
+                self.k_l: [S.One * no * k0/100 for no in range(70, 110)], # percentage
+            }
+            return default_data_dict
+
+        def get_numerical_data(self):
+
+
+            m0, k0 = 100, 1000
+
+
+            default_data_dict = {
+                self.m: [S.One * no * m0 /100 for no in range(80, 120)], # percentage
+                self.k_r: [S.One * no * k0/100 for no in range(80, 120)], # percentage
+                self.k_l: [S.One * no * k0/100 for no in range(70, 110)], # percentage
+
+            }
+            return default_data_dict
+            '''))
+        
+        system.get_random_parameters()
+        system.get_numerical_parameters()
+        
+        display(ReportText('Następnie konieczne jest sprawdzenie opisów symboli oraz jednostek:'))
+        
+        display(Markdown(
+            '''
+        system.symbols_description()
+        system.unit_dict()
+            '''))
+        
+        display(ReportText('Jeśli podczas wywołania tej metody pojawia się błąd, należy wykonać modyfikację w analogizny sposób do:'))
+        
+                
+        display(Markdown(
+            '''
+        def symbols_description(self):
+            self.sym_desc_dict = {
+                self.m: r'system's mass',
+                self.k_l: r'left spring stiffness',
+                self.k_r: r'left spring stiffness',
+            }
+            return self.sym_desc_dict
+
+        def unit_dict(self):
+        
+            from pint import UnitRegistry
+            ureg=UnitRegistry()
+
+            unit_dict = {
+                self.m: ureg.kilogram,
+                self.k_l: ureg.Newton/ureg.meter,
+                self.k_r: ureg.Newton/ureg.meter,
+            }
+            return unit_dict
+
+            '''))
+        
+        from pint import UnitRegistry
+        ureg=UnitRegistry()
+        
+        system.symbols_description()
+        system.unit_dict()

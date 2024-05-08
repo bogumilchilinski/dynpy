@@ -1183,33 +1183,30 @@ class MSMComparison(ReportComponent):
 
 class NaturalFrequenciesAnalysisComponent(ReportComponent):
 
-    title="Determination of fundamental matrix"
+    title="Determination of natural frequencies"
 
     @property
     def header_text(self):
 
-        return "The system physical properties of mass and stiffness are the basis to formulate the fundamental matrix of the system:"
+        return '''In order to describe the basic properties of the system, its inertia and stiffness matrices will serve to determine an influence of the system parameters on its natural vibration frequencies. The system inertia matrix provides a complete description of the system components' behaviour under the action of accelerations on individual degrees of freedom. It describes an influence of inertia of the system's elements while the stiffness matrix describes the global response of the system to external forces. The individual components of the matrix result from elastic and geometrical properties of the whole structure.
+        '''
 
     @property
     def body_text(self):
 
         system = self.reported_object
 
-        Delta = Symbol('Delta')
-
         return f"The characteristic polynomial ${latex(Delta)}$ of the considered system derived based on its fundamental matrix is presented in {AutoMarker(Eq(Delta,system.fundamental_matrix().det().expand().simplify().expand(),evaluate=False))}:"
 
     @property
     def footer_text(self):
 
-        return "The system fundamental matrix and its characteristic equation allows for a determination of the system unsteady state and its eigenfrequencies related to free vibration."
+        return '''This allows for a more transparent notation of the vibration frequency and therefore easier physical analysis and tuning its TMD parameters.'''
 
     def append_elements(self):
 
         system = self.reported_object
         t = system.ivar
-
-        display(ReportText(self.header_text))
 
         base_matrix = system._inertia_matrix().inv()*system._stiffness_matrix()
 #         display(base_matrix)
@@ -1223,20 +1220,20 @@ class NaturalFrequenciesAnalysisComponent(ReportComponent):
         l1 = Symbol('l_alpha',positive=True)
         l2 = Symbol('l_beta',positive=True)
         g = Symbol('g',positive=True)
-        m_a = Symbol('m_{\\alpha}',positive=True)
         omg_m = Symbol('\=\omega')
+        delta = Symbol('\Delta')
+        omg = Symbol('omega')
+        omg_1 = Symbol('omega_1')
+        omg_2 = Symbol('omega_2')
 
-#         simp_expr = 4*l1**2*l2**2*m_a**2
-#         delta_omg_simp = ((nom/denom)/g**2).subs(omg_mean**2/g**2*simp_expr,omg_m**2*simp_expr).ratsimp().subs(1/l1,1/l1*g**2)
-        
         delta_omg_simp = omg_m**2 + (g/l1)*simplify(base_matrix)[2]
+#         display(simplify(base_matrix)[1])
 
 
-        # display(SympyFormula(ode_sys.natural_frequencies()[0]**2))
-        # display(SympyFormula(ode_sys.natural_frequencies()[3]**2))
-
-
-        display(ReportText(self.body_text))
+        display(ReportText(self.header_text))
+    
+        display(ReportText(f'''\n The inertia and stifness matrices are given in {AutoMarker(Eq(Symbol('M'),system._inertia_matrix(),evaluate=False))} and {AutoMarker(Eq(Symbol('M'),system._stiffness_matrix(),evaluate=False))}:
+        '''))
         
         display(SympyFormula(Eq(Symbol('M'),system._inertia_matrix(),evaluate=False)))
         display(SympyFormula(Eq(Symbol('K'),system._stiffness_matrix(),evaluate=False)))
@@ -1244,43 +1241,198 @@ class NaturalFrequenciesAnalysisComponent(ReportComponent):
         r = Symbol('r')
         omg = Symbol('omega')
         
-        fund_mat = system.fundamental_matrix().subs({r:-omg})
+        display(ReportText('''The stiffness matrix makes possible to determine equilibrium positions of the system and together with the inertia matrix, to determine its natural frequencies creating its the fundamental matrix:
+        '''))
         
-        display(ReportText(self.header_text))
+        fund_mat = system.fundamental_matrix().subs({r:-omg})
         
         display(SympyFormula(Eq(Symbol('A'),fund_mat,evaluate=False)))
         
+        display(ReportText(f'''By calculating a determinant of the fundamental matrix, the system natural frequencies can be determined.
+        '''))
+        
         display(SympyFormula(Eq(fund_mat.det().collect(omg**2),0,evaluate=False)))
         
-        display(ReportText(self.header_text))
+        display(ReportText(f'''Assuming certain dependencies, the formula {AutoMarker(Eq(Symbol('A'),fund_mat,evaluate=False))} can be rearranged and simplified to the following:
+        '''))
+        
+        display(SympyFormula(Eq(Symbol('a'),fund_mat.det().collect(omg**2).coeff(omg**4))))
+        display(SympyFormula(Eq(Symbol('b'),fund_mat.det().collect(omg**2).coeff(omg**2))))
+        display(SympyFormula(Eq(Symbol('c'),fund_mat.det().collect(omg**2).subs({omg**4:0,omg**2:0}))))
+        
+        display(SympyFormula(Eq(Symbol('a')*omg**4 + Symbol('b')*omg**2 + Symbol('c'),0)))
+        
+        display(ReportText(f'''The purpose of the presented approach is to provide an opportunity to influence the eigenvalues and thus control the system resonant behaviour. The linear form of the equations of motion allows to obtain the system's natural frequencies ({AutoMarker(Eq(Symbol('omega_1'),sqrt(omg_mean-delta_omg)))},{AutoMarker(Eq(Symbol('omega_1'),sqrt(omg_mean+delta_omg)))}) utilising the fundamental matrix {AutoMarker(Eq(Symbol('A'),fund_mat,evaluate=False))}:
+        '''))
 
-        display(SympyFormula(Eq(Symbol('\omega_1'),sqrt(omg_mean-delta_omg))))
-        display(SympyFormula(Eq(Symbol('\omega_2'),sqrt(omg_mean+delta_omg))))
+        display(SympyFormula(Eq(omg_1,sqrt(omg_mean-delta_omg))))
+        display(SympyFormula(Eq(omg_2,sqrt(omg_mean+delta_omg))))
+        
+        display(ReportText('''By creating an inverse matrix of matrix $M$ and multiplying it by matrix $K$, it is possible to identify and assign certain frequency relationships in the cosidered system:
+        '''))
 
-        display(SympyFormula(Eq(Symbol('A'),simplify(base_matrix),evaluate=False)))
+        display(SympyFormula(Eq(Symbol('A_{\omega^2}'),simplify(base_matrix),evaluate=False)))
 
-        display(ReportText(self.header_text))
         
         display(SympyFormula(Eq(Symbol('A_{\omega^2}'),Matrix([[Symbol('\omega_{MS}')**2,-Symbol('\omega_{C}')**2],
                                                               [-Symbol('\omega_{TMD}')**2,Symbol('\omega_{TMD}')**2]]),evaluate=False)))
         
-        display(SympyFormula(Eq(Symbol('\omega_1^2'),omg_m**2 - Symbol('\Delta \omega^2'))))
-        display(SympyFormula(Eq(Symbol('\omega_2^2'),omg_m**2 + Symbol('\Delta \omega^2'))))
+        display(ReportText('''where: $\omega_{MS}^2$ corresponds a frequency of a main system, $\omega_{C}^2$ corresponds a composed frequency and $\omega_{TMD}^2$ corresponds a frequency of a tuned mass damper.
+        '''))
+        
+        display(ReportText('''Analyzing the natural frequency components, some dependencies can be noticed. An expression of "a base frequency" can be separated, which is changed by "a $\Delta$ frequency" value. It can be presented as follows:
+        '''))
+        
+        display(SympyFormula(Eq(omg_1**2, omg_m**2 - delta * omg**2)))
+        display(SympyFormula(Eq(omg_2**2, omg_m**2 + delta * omg**2)))
+        
+        display(ReportText('''And the individual components, where a base frequency is defined as:
+        '''))
 
         display(SympyFormula(Eq(omg_m**2,omg_mean)))
-
-        display(SympyFormula(Eq(Symbol('\Delta \omega^2'),delta_omg)))
         
-        display(SympyFormula(Eq(Symbol('\Delta \omega^2'),sqrt(delta_omg_simp))))
+        display(ReportText('''And the separated $\Delta \omega$ component containing also a base frequency term, after some rearangement can be simplified to the following expressions:
+        '''))
 
+
+        display(SympyFormula(Eq( Eq(delta*omg**2, delta_omg),sqrt(delta_omg_simp),evaluate=False)))
+
+#         display(SympyFormula(Eq(delta*omg**2, sqrt(delta_omg_simp))))
+
+
+
+        display(ReportText(f'''Finally, the natural frequencies can be simplified to the expressions presented in {AutoMarker(Eq(omg_1, omg_m**2 - sqrt(delta_omg_simp)))}, {AutoMarker(Eq(omg_2, omg_m**2 + sqrt(delta_omg_simp)))}
+        '''))
+
+        display(SympyFormula(Eq(omg_1, sqrt(omg_m**2 - sqrt(delta_omg_simp)))))
+        display(SympyFormula(Eq(omg_2, sqrt(omg_m**2 + sqrt(delta_omg_simp)))))
 
 
         display(ReportText(self.footer_text))
         
-        display(SympyFormula(Eq(Symbol('\omega_1^2'),omg_m**2 - sqrt(delta_omg_simp))))
-        display(SympyFormula(Eq(Symbol('\omega_2^2'),omg_m**2 + sqrt(delta_omg_simp))))
+class NormalisedNaturalFrequenciesAnalysisComponent(ReportComponent):
+
+    title="Determination of natural frequencies"
+
+    @property
+    def header_text(self):
+
+        return '''In order to describe the basic properties of the system, its inertia and stiffness matrices will serve to determine an influence of the system parameters on its natural vibration frequencies. The system inertia matrix provides a complete description of the system components' behaviour under the action of accelerations on individual degrees of freedom. It describes an influence of inertia of the system's elements while the stiffness matrix describes the global response of the system to external forces. The individual components of the matrix result from elastic and geometrical properties of the whole structure.
+        '''
+
+    @property
+    def footer_text(self):
+
+        return '''This allows for a more transparent notation of the vibration frequency and therefore easier physical analysis and tuning its TMD parameters.'''
+
+    def append_elements(self):
+
+        system = self.reported_object
+        t = system.ivar
+
+        base_matrix = system._inertia_matrix().inv()*system._stiffness_matrix()
+        base = simplify(base_matrix)
+        base_matrix = base/base[0]
+#         display(base_matrix)
+
+        nom = fraction(((base_matrix.trace()/2)**2 - base_matrix.det()).simplify().radsimp())[0]
+        denom = fraction(((base_matrix.trace()/2)**2 - base_matrix.det()).simplify().radsimp())[1]
+        delta_omg = sqrt(nom)/sqrt(denom)
+
+        omg_mean = (base_matrix.trace()/2).simplify()
+
+        l1 = Symbol('l_alpha',positive=True)
+        l2 = Symbol('l_beta',positive=True)
+        g = Symbol('g',positive=True)
+        delta = Symbol('\Delta')
+        omg = Symbol('omega_n')
+        omg_1 = Symbol('\omega_{n_{1}}')
+        omg_2 = Symbol('\omega_{n_{2}}')
+        omg_n = Symbol('\=\omega_n')
+
+        delta_omg_simp = omg_n**2 + simplify(base_matrix)[1]*simplify(base_matrix)[2]
+#         display(simplify(base_matrix)[1])
+
+
+        display(ReportText(self.header_text))
+    
+        display(ReportText(f'''\n The inertia and stifness matrices are given in {AutoMarker(Eq(Symbol('M'),system._inertia_matrix(),evaluate=False))} and {AutoMarker(Eq(Symbol('M'),system._stiffness_matrix(),evaluate=False))}:
+        '''))
         
-#         display(SympyFormula(Eq(Symbol('\omega_{\\alpha}'),sqrt(delta_omg_simp.subs(omg_m**2,0)).doit())))
+        display(SympyFormula(Eq(Symbol('M'),system._inertia_matrix(),evaluate=False)))
+        display(SympyFormula(Eq(Symbol('K'),system._stiffness_matrix(),evaluate=False)))
+        
+        r = Symbol('r')
+        omg = Symbol('omega')
+        
+        display(ReportText('''The stiffness matrix makes possible to determine equilibrium positions of the system and together with the inertia matrix, to determine its natural frequencies creating its the fundamental matrix:
+        '''))
+        
+        fund_mat = system.fundamental_matrix().subs({r:-omg})
+        
+        display(SympyFormula(Eq(Symbol('A'),fund_mat,evaluate=False)))
+        
+        display(ReportText(f'''By calculating a determinant of the fundamental matrix, the system natural frequencies can be determined.
+        '''))
+        
+        display(SympyFormula(Eq(fund_mat.det().collect(omg**2),0,evaluate=False)))
+        
+        display(ReportText(f'''Assuming certain dependencies, the formula {AutoMarker(Eq(Symbol('A'),fund_mat,evaluate=False))} can be rearranged and simplified to the following:
+        '''))
+        
+        display(SympyFormula(Eq(Symbol('a'),fund_mat.det().collect(omg**2).coeff(omg**4))))
+        display(SympyFormula(Eq(Symbol('b'),fund_mat.det().collect(omg**2).coeff(omg**2))))
+        display(SympyFormula(Eq(Symbol('c'),fund_mat.det().collect(omg**2).subs({omg**4:0,omg**2:0}))))
+        
+        display(SympyFormula(Eq(Symbol('a')*omg**4 + Symbol('b')*omg**2 + Symbol('c'),0)))
+        
+        display(ReportText(f'''The purpose of the presented approach is to provide an opportunity to influence the eigenvalues and thus control the system resonant behaviour. The linear form of the equations of motion allows to obtain the system's natural frequencies ({AutoMarker(Eq(Symbol('omega_1'),sqrt(omg_mean-delta_omg)))},{AutoMarker(Eq(Symbol('omega_1'),sqrt(omg_mean+delta_omg)))}) utilising the fundamental matrix {AutoMarker(Eq(Symbol('A'),fund_mat,evaluate=False))}:
+        '''))
+        
+        display(SympyFormula(Eq(Symbol('\omega^2_{n_{1}}'),Symbol('\\frac{\omega^2_1}{\omega^2_m}'))))
+        display(SympyFormula(Eq(Symbol('\omega^2_{n_{2}}'),Symbol('\\frac{\omega^2_2}{\omega^2_m}'))))
+
+
+
+        display(SympyFormula(Eq(omg_1,sqrt(omg_mean-delta_omg))))
+        display(SympyFormula(Eq(omg_2,sqrt(omg_mean+delta_omg))))
+        
+        omg11_str=r'$\omega_{11}$'
+        
+        display(ReportText(f'''By creating an inverse matrix of matrix $M$ and multiplying it by matrix $K$, it is possible to identify and assign certain frequency relationships in the cosidered system. The matrix elements were normalised to the value of element {omg11_str} ({AutoMarker(Eq(Symbol('omega_11'),simplify(base_matrix)[0],evaluate=False))}) corresponding to a frequency of the main system. This results in a normalised matrix presented in {AutoMarker(Eq(Symbol('A_{omega_n^2}'),simplify(base_matrix),evaluate=False))}:
+        '''))
+        
+        display(SympyFormula(Eq(Symbol('\omega_11'),simplify(system._inertia_matrix().inv()*system._stiffness_matrix())[0],evaluate=False)))
+
+        display(SympyFormula(Eq(Symbol('A_{\omega_n^2}'),simplify(base_matrix),evaluate=False)))
+        
+        display(ReportText('''Analyzing the natural frequency components, some dependencies can be noticed. An expression of "a base frequency" can be separated, which is changed by "a $\Delta$ frequency" value. It can be presented as follows:
+        '''))
+        
+        display(SympyFormula(Eq(omg_1**2, omg_n**2 - delta * omg**2)))
+        display(SympyFormula(Eq(omg_2**2, omg_n**2 + delta * omg**2)))
+        
+        display(ReportText('''And the individual components, where a base frequency is defined as:
+        '''))
+
+        display(SympyFormula(Eq(omg_n**2,omg_mean)))
+        
+        display(ReportText('''And the separated $\Delta \omega$ component containing also a base frequency term, after some rearangement can be simplified to the following expressions:
+        '''))
+
+
+        display(SympyFormula(Eq( Eq(delta*omg**2, delta_omg),sqrt(delta_omg_simp),evaluate=False)))
+
+#         display(SympyFormula(Eq(delta*omg**2, sqrt(omg_mean**2-simplify(base_matrix)[1]*simplify(base_matrix)[2]))))
+
+
+
+        display(ReportText(f'''Finally, the natural frequencies can be simplified to the expressions presented in {AutoMarker(Eq(omg_1, omg_n**2 - sqrt(delta_omg_simp)))}, {AutoMarker(Eq(omg_2, omg_n**2 + sqrt(delta_omg_simp)))}
+        '''))
+
+        display(SympyFormula(Eq(omg_1, sqrt(omg_n**2 - sqrt(delta_omg_simp)))))
+        display(SympyFormula(Eq(omg_2, sqrt(omg_n**2 + sqrt(delta_omg_simp)))))
+
 
         display(ReportText(self.footer_text))
 

@@ -8,40 +8,1023 @@ from sympy.physics.vector import vpprint, vlatex
 from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
 
 from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin
-from dynpy import * # enables mechanical models for mathematical modelling
+from ..mechanics.disk import RollingDisk
 
 
-from sympy import * # provides mathematical interface for symbolic calculations
-
-
-from sympy.physics.mechanics import *
-
-import sympy as sym
+import base64
+import random
+import IPython as IP
 import numpy as np
-import numpy.fft as fft
+import inspect
 
-import matplotlib.pyplot as plt
-import math
-
-from dynpy.utilities.report import SystemDynamicsAnalyzer
-
-import pandas as pd
-
-from dynpy.utilities.adaptable import *
-
-
-from pint import UnitRegistry
-ureg = UnitRegistry()
-
-ix = pd.IndexSlice
-
-
+from .principles import ComposedSystem, NonlinearComposedSystem,  base_frame, base_origin,cached_property, lru_cache, REPORT_COMPONENTS_LIST
 
 t,f= symbols('t, f')
 
 
-from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
-#TODO? 156
+from sympy import * # provides mathematical interface for symbolic calculations
+
+from pint import UnitRegistry
+ureg = UnitRegistry()
+
+# from sympy.physics.mechanics import *
+
+# import sympy as sym
+# import numpy as np
+# import numpy.fft as fft
+
+# import matplotlib.pyplot as plt
+# import math
+
+# from dynpy.utilities.report import SystemDynamicsAnalyzer
+
+# import pandas as pd
+
+# from dynpy.utilities.adaptable import *
+
+
+
+
+# ix = pd.IndexSlice
+
+
+
+#TODO - road profiles
+
+#u0=Symbol('u_0',positive=True)
+#l_ramp=Symbol('l_ramp',positive=True)
+#t_0=Symbol('t_0',positive=True)
+#delta_t=Symbol('Delta_t',positive=True)
+
+# # u_rr=u0/2*(1+(Heaviside(x-t0-2*R,0.5) - Heaviside(x-t0-delta_t-2*R,0.5) ))#road profile given in time domain
+# # u_rf=u0/2*(1+(Heaviside(x-t0,0.5) - Heaviside(x-t0-delta_t,0.5) ))#road profile given in time domain
+
+# u_rf_bump_on=u0/2*(1+2/pi*atan(5*(t-t0)))-u0/2*(1+2/pi*atan(5*(t-t0-t_l)))
+# u_rr_bump_on=u_rf_bump.subs(t,t-1) 
+#  #road profile given in time domain
+    
+# u_rf_mul_bumps_on=sum(u_rf_bump_on.subs(x,x-ii*l_bumps) for ii in range(5))
+# u_rr_mul_bumps_on=u_rf_mul_bumps_on.subs(x,x-2*R)
+#  #road profile given in time domain
+    
+# # u_rf_ramp=u0/l_ramp*x
+# # u_rr_ramp=u_rf_ramp.subs(x,x-2*R)
+
+# u_road=Function('u_r')
+# # u_rf=u_road(x)
+# # u_rr=u_road(x-2*R)
+
+# # u_rr=u0*(sin(x-2*R))  #road profile given in time domain
+# # u_rf=u_rr.subs(x,x+2*R) #road profile given in time domain
+
+
+
+
+###################+++++++++++++++++++++++++++++++++++++++++++ NEWEST SYSTEMS
+
+class UndampedChair5DOF(ComposedSystem):
+
+    scheme_name = 'chair5dof.jpg'
+    real_name = 'gtm.png'
+
+    x=dynamicsymbols('x')
+    z=dynamicsymbols('z')
+    phi=dynamicsymbols('varphi')
+    z_rear=dynamicsymbols('z_r')
+    z_front=dynamicsymbols('z_f')
+
+    M=Symbol('M', positive=True)
+    I_ch=Symbol('I_chair',positive=True)
+    m_rear=Symbol('m_rw',positive=True)
+    I_w=Symbol('I_rw', positive=True)
+    R=Symbol('R',positive=True)
+    m_fr=Symbol('m_fw',positive=True)
+    g=Symbol('g',positive=True)
+    z_c=Symbol('z_c',positive=True)
+    k_rt=Symbol('k_rt',positive=True)
+    u_rrp=Symbol('u_rrp',positive=True)
+    k_r=Symbol('k_r',positive=True)
+    u_rsd=Symbol('u_rsd',positive=True)
+    k_ft=Symbol('k_ft',positive=True)
+    u_frp=Symbol('u_frp',positive=True)
+    k_f=Symbol('k_f',positive=True)
+    u_fsd=Symbol('u_fsd',positive=True)
+    F=Symbol('F',positive=True)
+    Omega=Symbol('Omega',positive=True)
+    pm=Symbol('PM',positive=True)
+    
+    ivar=Symbol('t')
+
+    def __init__(self,
+                x=None,
+                z=None,
+                phi=None,
+                z_rear=None,
+                z_front=None,
+                M=None,
+                I_ch=None,
+                m_rear=None,
+                I_w=None,
+                R=None,
+                m_fr=None,
+                g=None,
+                z_c=None,
+                k_rt=None,
+                u_rrp=None,
+                k_r=None,
+                u_rsd=None,
+                k_ft=None,
+                u_frp=None,
+                k_f=None,
+                ivar=None,
+                u_fsd=None,
+                F=None,
+                Omega=None,
+                pm=None,
+                **kwargs):
+
+        if x is not None: self.x=x
+        if z is not None: self.z=z
+        if phi is not None: self.phi=phi
+        if z_rear is not None: self.z_rear=z_rear
+        if z_front is not None: self.z_front=z_front
+
+        if M is not None: self.M=M
+        if I_ch is not None: self.I_ch=I_ch
+        if m_rear is not None: self.m_rear=m_rear
+        if I_w is not None: self.I_w=I_w
+        if R is not None: self.R=R
+        if m_fr is not None: self.m_fr=m_fr
+        if g is not None: self.g=g
+        if z_c is not None: self.z_c=z_c
+        if k_rt is not None: self.k_rt=k_rt
+        if u_rrp is not None: self.u_rrp=u_rrp
+        if k_r is not None: self.k_r=k_r
+        if u_rsd is not None: self.u_rsd=u_rsd
+        if k_ft is not None: self.k_ft=k_ft
+        if u_frp is not None: self.u_frp=u_frp
+        if k_f is not None: self.k_f=k_f
+        if u_fsd is not None: self.u_fsd=u_fsd
+        if F is not None: self.F=F
+        if Omega is not None: self.Omega=Omega
+        if pm is not None: self.pm=pm
+        
+        if ivar is not None: self.ivar=ivar
+
+        self.qs = [self.x,self.z,self.phi,self.z_rear,self.z_front]
+
+        self._init_from_components(**kwargs)
+
+
+    @cached_property
+    def components(self):
+
+        components={}
+
+        self._body_horizontal = MaterialPoint(self.M, self.x+self.z_c*self.phi, qs=self.qs)(label='body_horizontal')
+        self._body_vertical_rotational = RigidBody2D(self.M, self.I_ch, pos_lin=self.z, pos_rot=self.phi, qs=self.qs)(label='body_vertical_rotational')
+        self._rear_wheel_vertical_rotational = RigidBody2D(self.m_rear, self.I_w, pos_lin=self.z_rear, pos_rot=self.x/self.R, qs=self.qs)(label='rear_wheel_vertical_rotational')
+        self._rear_wheel_horizontal = MaterialPoint(self.m_rear, self.x, qs=self.qs)(label='rear_wheel_horizontal')
+        self._front_wheel_vertical = MaterialPoint(self.m_fr, self.z_front, qs=self.qs)(label='front_wheel_vertical')
+        self._front_wheel_horizontal = MaterialPoint(self.m_fr, self.x, qs=self.qs)(label='front_wheel_horizontal')
+        self._front_wheel_gravity = GravitationalForce(self.m_fr, self.g, self.z_front)(label='front_wheel_gravity')
+        self._rear_wheel_gravity = GravitationalForce(self.m_rear, self.g, self.z_rear)(label='rear_wheel_gravity')
+        self._body_gravity = GravitationalForce(self.M, self.g, self.z+self.z_c*cos(self.phi), qs=self.qs)(label='body_gravity')
+        self._rear_tire_spring = Spring(self.k_rt, self.z_rear-self.u_rrp, qs=self.qs)('rear_tire_spring')
+        self._rear_wheel_spring = Spring(self.k_r, self.u_rsd, qs=self.qs)('rear_wheel_spring')
+        self._front_tire_spring = Spring(self.k_ft, self.z_front-self.u_frp, qs=self.qs)('front_tire_spring')
+        self._front_wheel_spring = Spring(self.k_f, self.u_fsd, qs=self.qs)('front_wheel_spring')
+        self._hand_drive_force = Force(self.F*(sign(cos(self.Omega*self.ivar)-self.pm)+1), pos1=self.x , qs=self.qs)('hand_drive_force')
+        self._hand_drive_force_phi = Force(self.F*self.Omega*self.R*((sign(cos(self.Omega*self.ivar)-self.pm)+1)*cos(self.Omega*self.ivar)), pos1=self.phi , qs=self.qs)('hand_drive_force_phi')
+
+        components['_body_horizontal'] = self._body_horizontal
+        components['_body_vertical_rotational'] = self._body_vertical_rotational
+        components['_rear_wheel_vertical_rotational'] = self._rear_wheel_vertical_rotational
+        components['_rear_wheel_horizontal'] = self._rear_wheel_horizontal
+        components['_front_wheel_vertical'] = self._front_wheel_vertical
+        components['_front_wheel_horizontal'] = self._front_wheel_horizontal
+        components['_front_wheel_gravity'] = self._front_wheel_gravity
+        components['_rear_wheel_gravity'] = self._rear_wheel_gravity
+        components['_body_gravity'] = self._body_gravity
+        components['_rear_tire_spring'] = self._rear_tire_spring
+        components['_rear_wheel_spring'] = self._rear_wheel_spring
+        components['_front_tire_spring'] = self._front_tire_spring
+        components['_front_wheel_spring'] = self._front_wheel_spring
+        components['_hand_drive_force'] = self._hand_drive_force
+        components['_hand_drive_force_phi'] = self._hand_drive_force_phi
+        
+        return components
+
+    def get_param_values(self):
+
+        default_data_dict={
+                            self.M:75,
+                            self.I_ch:9.479342+self.M*0.39*0.39,
+                            self.m_rear:1.5,
+                            self.R:0.3,
+                            self.I_w:self.m_rear*self.R**2,
+                            self.m_fr:0.6,
+                            self.g:9.81,
+                            self.z_c:0.4,
+                            self.k_rt:109000,
+                            self.k_r:750000,
+                            self.k_ft:300000,
+                            self.k_f:750000,
+                            self.F:150,
+                            self.Omega:0.3*np.pi*2,
+                            self.pm:0.1,
+                          }
+
+        return default_data_dict
+    def symbols_description(self):
+        self.sym_desc_dict = {
+                                self.x:'main body center of mass horizontal displacement',
+                                self.z:'main body center of mass vertical displacement',
+                                self.phi:'angular displacement of the main mass',
+                                self.z_rear:'rear wheel vertical displacement',
+                                self.M:'''mass of the main body including user''',
+                                self.I_ch:'''wheelchair's moment of inertia''',
+                                self.m_rear:'rear wheel mass',
+                                self.R:'rear wheel radius',
+                                self.I_w:'''rear wheel moment of inertia''',
+                                self.m_fr:'front wheel mass',
+                                self.g:'gravitational acceleration',
+                                self.z_c:'''vertical distance between wheelchair's center of gravity and center of rotation''',
+                                self.k_rt:'rear wheel tire stiffness',
+                                self.u_rrp:'rear road profile',
+                                self.k_r:'rear wheel stiffness',
+                                self.k_ft:'front wheel tire stiffness',
+                                self.u_frp:'front road profile',
+                                self.k_r:'front wheel stiffness',
+                                self.F:'disabled driver arm force',
+                                self.Omega:'driving force frequency',
+                                self.pm:'force duty cycle',
+        }
+
+        return self.sym_desc_dict
+
+    
+class DampedChair5DOF(UndampedChair5DOF):
+
+    c_mu=Symbol('c_mu',positive=True)
+
+    def __init__(self,
+                x=None,
+                z=None,
+                phi=None,
+                z_rear=None,
+                z_front=None,
+                M=None,
+                I_ch=None,
+                m_rear=None,
+                I_w=None,
+                R=None,
+                m_fr=None,
+                g=None,
+                z_c=None,
+                k_rt=None,
+                u_rrp=None,
+                k_r=None,
+                u_rsd=None,
+                k_ft=None,
+                u_frp=None,
+                k_f=None,
+                ivar=None,
+                u_fsd=None,
+                F=None,
+                Omega=None,
+                pm=None,
+                c_mu=None,
+                **kwargs):
+
+        if x is not None: self.x=x
+        if z is not None: self.z=z
+        if phi is not None: self.phi=phi
+        if z_rear is not None: self.z_rear=z-rear
+        if z_front is not None: self.z_front=_front
+
+        if M is not None: self.M=M
+        if I_ch is not None: self.I_ch=I_ch
+        if m_rear is not None: self.m_rear=m_rear
+        if I_w is not None: self.I_w=I_w
+        if R is not None: self.R=R
+        if m_fr is not None: self.m_fr=m_fr
+        if g is not None: self.g=g
+        if z_c is not None: self.z_c=z_c
+        if k_rt is not None: self.k_rt=k_rt
+        if u_rrp is not None: self.u_rrp=u_rrp
+        if k_r is not None: self.k_r=k_r
+        if u_rsd is not None: self.u_rsd=u_rsd
+        if k_ft is not None: self.k_ft=k_ft
+        if u_frp is not None: self.u_frp=u_frp
+        if k_f is not None: self.k_f=k_f
+        if u_fsd is not None: self.u_fsd=u_fsd
+        if F is not None: self.F=F
+        if Omega is not None: self.Omega=Omega
+        if pm is not None: self.pm=pm
+        if c_mu is not None: self.c_mu=c_mu
+        
+        if ivar is not None: self.ivar=ivar
+
+        self.qs = [self.x,self.z,self.phi,self.z_rear,self.z_front]
+
+        self._init_from_components(**kwargs)
+
+
+    @cached_property
+    def components(self):
+
+        components={}
+
+#         self._undamped_chair_5DOF = UndampedChair5DOF(self.x,self.z,self.phi,self.z_rear,self.z_front,self.M,self.I_ch,self.m_rear,self.I_w,self.R,self.m_fr,self.g,self.z_c,self.k_rt,self.u_rrp,self.k_r,self.u_rsd,self.k_ft,self.u_frp,self.k_f,self.ivar,self.u_fsd,self.F,self.Omega,self.pm)('undamped_chair_5DOF')
+        
+        self._undamped_chair_5DOF = UndampedChair5DOF(self.x,self.z,self.phi,self.z_rear,self.z_front,self.M,self.I_ch,self.m_rear,self.I_w,self.R,self.m_fr,self.g,self.z_c,self.k_rt,0,self.k_r,((self.z+self.R*self.phi+Symbol('l_r',positive=True) -self.z_rear)**2 )-Symbol('l_r',positive=True),self.k_ft,0,self.k_f,self.ivar,((self.z-self.R*self.phi+Symbol('l_fr',positive=True)   -self.z_front)**2  )-Symbol('l_fr',positive=True),self.F,self.Omega,self.pm)('undamped_chair_5DOF')
+        self._rear_wheel_damping = Damper(self.I_w*self.c_mu,self.x/self.R,qs=self.qs)('rear_wheel_damping')
+#         self._rayleigh_damping_inertia_x = Damper(self.rayleigh_damping_inertia_x()*self.c_mu,self.x,qs=self.qs)
+        self._damping_body_horizontal = Damper(self.M*self.c_mu, self.x+self.z_c*self.phi, qs=self.qs)(label='_damping_body_horizontal')
+        self._damping_body_vertical = Damper(self.M*self.c_mu, self.z, qs=self.qs)(label='damping_body_vertical')
+        self._damping_body_rotational = Damper(self.I_ch*self.c_mu, self.phi, qs=self.qs)(label='damping_body_rotational')
+        self._damping_rear_wheel_vertical = Damper(self.m_rear*self.c_mu, self.z_rear, qs=self.qs)(label='damping_rear_wheel_vertical')
+        self._damping_rear_wheel_rotational = Damper(self.I_w*self.c_mu, self.x/self.R, qs=self.qs)(label='damping_rear_wheel_rotational')
+        self._damping_rear_wheel_horizontal = Damper(self.m_rear*self.c_mu, self.x, qs=self.qs)(label='damping_rear_wheel_horizontal')
+        self._damping_front_wheel_vertical = Damper(self.m_fr*self.c_mu, self.z_front, qs=self.qs)(label='damping_front_wheel_vertical')
+        self._damping_front_wheel_horizontal = Damper(self.m_fr*self.c_mu, self.x, qs=self.qs)(label='damping_front_wheel_horizontal')
+            
+        components['_undamped_chair_5DOF'] = self._undamped_chair_5DOF
+        components['_damping_body_horizontal'] = self._damping_body_horizontal
+        components['_damping_body_vertical'] = self._damping_body_vertical
+        components['_damping_body_rotational'] = self._damping_body_rotational
+        components['_damping_rear_wheel_vertical'] = self._damping_rear_wheel_vertical
+        components['_damping_rear_wheel_rotational'] = self._damping_rear_wheel_rotational
+        components['_damping_rear_wheel_horizontal'] = self._damping_rear_wheel_horizontal
+        components['_damping_front_wheel_vertical'] = self._damping_front_wheel_vertical
+        components['_damping_front_wheel_horizontal'] = self._damping_front_wheel_horizontal
+
+
+        return components
+    
+    def rayleigh_damping_inertia_x(self):
+        
+        return (UndampedChair5DOF().mass_matrix*Matrix(self.qs))#[0]#*self.c_mu#[0].coeff(self.c_mu)
+
+
+    def get_param_values(self):
+
+        default_data_dict={
+                            c_mu:0.0001,
+                          }
+
+        return {**super().get_param_values(),**self.default_data_dict}
+    
+    def symbols_description(self):
+        self.sym_desc_dict = {
+                                self.c_mu:"Rayileigh's damping mass matrix coefficient"
+        }
+
+        return {**super().symbols_description(),**self.sym_desc_dict}
+
+
+class BasicUndampedChair5DOF(ComposedSystem):
+
+    scheme_name = 'chair5dof.jpg'
+    real_name = 'gtm.png'
+
+    x=dynamicsymbols('x')
+    z=dynamicsymbols('z')
+    phi=dynamicsymbols('varphi')
+    z_rear=dynamicsymbols('z_r')
+    z_front=dynamicsymbols('z_f')
+
+    M=Symbol('M', positive=True)
+    I_ch=Symbol('I_chair',positive=True)
+    m_rear=Symbol('m_rw',positive=True)
+    I_w=Symbol('I_rw', positive=True)
+    R=Symbol('R',positive=True)
+    m_fr=Symbol('m_fw',positive=True)
+    g=Symbol('g',positive=True)
+    z_c=Symbol('z_c',positive=True)
+    k_rt=Symbol('k_rt',positive=True)
+    u_rrp=Symbol('u_rrp',positive=True)
+    k_r=Symbol('k_r',positive=True)
+    u_rsd=Symbol('u_rsd',positive=True)
+    k_ft=Symbol('k_ft',positive=True)
+    u_frp=Symbol('u_frp',positive=True)
+    k_f=Symbol('k_f',positive=True)
+    u_fsd=Symbol('u_fsd',positive=True)
+    F=Symbol('F',positive=True)
+    Omega=Symbol('Omega',positive=True)
+    pm=Symbol('PM',positive=True)
+    
+    ivar=Symbol('t')
+
+    def __init__(self,
+                x=None,
+                z=None,
+                phi=None,
+                z_rear=None,
+                z_front=None,
+                M=None,
+                I_ch=None,
+                m_rear=None,
+                I_w=None,
+                R=None,
+                m_fr=None,
+                g=None,
+                z_c=None,
+                k_rt=None,
+                u_rrp=None,
+                k_r=None,
+                u_rsd=None,
+                k_ft=None,
+                u_frp=None,
+                k_f=None,
+                ivar=None,
+                u_fsd=None,
+                F=None,
+                Omega=None,
+                pm=None,
+                **kwargs):
+
+        if x is not None: self.x=x
+        if z is not None: self.z=z
+        if phi is not None: self.phi=phi
+        if z_rear is not None: self.z_rear=z_rear
+        if z_front is not None: self.z_front=z_front
+
+        if M is not None: self.M=M
+        if I_ch is not None: self.I_ch=I_ch
+        if m_rear is not None: self.m_rear=m_rear
+        if I_w is not None: self.I_w=I_w
+        if R is not None: self.R=R
+        if m_fr is not None: self.m_fr=m_fr
+        if g is not None: self.g=g
+        if z_c is not None: self.z_c=z_c
+        if k_rt is not None: self.k_rt=k_rt
+        if u_rrp is not None: self.u_rrp=u_rrp
+        if k_r is not None: self.k_r=k_r
+        if u_rsd is not None: self.u_rsd=u_rsd
+        if k_ft is not None: self.k_ft=k_ft
+        if u_frp is not None: self.u_frp=u_frp
+        if k_f is not None: self.k_f=k_f
+        if u_fsd is not None: self.u_fsd=u_fsd
+        if F is not None: self.F=F
+        if Omega is not None: self.Omega=Omega
+        if pm is not None: self.pm=pm
+        
+        if ivar is not None: self.ivar=ivar
+
+        self.qs = [self.x,self.z,self.phi,self.z_rear,self.z_front]
+
+        self._init_from_components(**kwargs)
+
+
+    @cached_property
+    def components(self):
+
+        components={}
+
+        self._body_horizontal = MaterialPoint(self.M, self.x+self.z_c*self.phi, qs=self.qs)(label='body_horizontal')
+        self._body_vertical_rotational = RigidBody2D(self.M, self.I_ch, pos_lin=self.z, pos_rot=self.phi, qs=self.qs)(label='body_vertical_rotational')
+        self._rear_wheel_vertical_rotational = RigidBody2D(self.m_rear, self.I_w, pos_lin=self.z_rear, pos_rot=self.x/self.R, qs=self.qs)(label='rear_wheel_vertical_rotational')
+        self._rear_wheel_horizontal = MaterialPoint(self.m_rear, self.x, qs=self.qs)(label='rear_wheel_horizontal')
+        self._front_wheel_vertical = MaterialPoint(self.m_fr, self.z_front, qs=self.qs)(label='front_wheel_vertical')
+        self._front_wheel_horizontal = MaterialPoint(self.m_fr, self.x, qs=self.qs)(label='front_wheel_horizontal')
+        self._front_wheel_gravity = GravitationalForce(self.m_fr, self.g, self.z_front)(label='front_wheel_gravity')
+        self._rear_wheel_gravity = GravitationalForce(self.m_rear, self.g, self.z_rear)(label='rear_wheel_gravity')
+        self._body_gravity = GravitationalForce(self.M, self.g, self.z+self.z_c*cos(self.phi), qs=self.qs)(label='body_gravity')
+        self._rear_tire_spring = Spring(self.k_rt, self.z_rear-self.u_rrp, qs=self.qs)('rear_tire_spring')
+        self._rear_wheel_spring = Spring(self.k_r, self.u_rsd, qs=self.qs)('rear_wheel_spring')
+        self._front_tire_spring = Spring(self.k_ft, self.z_front-self.u_frp, qs=self.qs)('front_tire_spring')
+        self._front_wheel_spring = Spring(self.k_f, self.u_fsd, qs=self.qs)('front_wheel_spring')
+        self._hand_drive_force = Force(self.F*(sign(cos(self.Omega*self.ivar)-self.pm)+1), pos1=self.x , qs=self.qs)('hand_drive_force')
+        self._hand_drive_force_phi = Force(self.F*self.Omega*self.R*((sign(cos(self.Omega*self.ivar)-self.pm)+1)*cos(self.Omega*self.ivar)), pos1=self.phi , qs=self.qs)('hand_drive_force_phi')
+
+        components['_body_horizontal'] = self._body_horizontal
+        components['_body_vertical_rotational'] = self._body_vertical_rotational
+        components['_rear_wheel_vertical_rotational'] = self._rear_wheel_vertical_rotational
+        components['_rear_wheel_horizontal'] = self._rear_wheel_horizontal
+        components['_front_wheel_vertical'] = self._front_wheel_vertical
+        components['_front_wheel_horizontal'] = self._front_wheel_horizontal
+        components['_front_wheel_gravity'] = self._front_wheel_gravity
+        components['_rear_wheel_gravity'] = self._rear_wheel_gravity
+        components['_body_gravity'] = self._body_gravity
+        components['_rear_tire_spring'] = self._rear_tire_spring
+        components['_rear_wheel_spring'] = self._rear_wheel_spring
+        components['_front_tire_spring'] = self._front_tire_spring
+        components['_front_wheel_spring'] = self._front_wheel_spring
+        components['_hand_drive_force'] = self._hand_drive_force
+        components['_hand_drive_force_phi'] = self._hand_drive_force_phi
+        
+        return components
+
+    def get_param_values(self):
+
+        default_data_dict={
+                            self.M:75,
+                            self.I_ch:9.479342+self.M*0.39*0.39,
+                            self.m_rear:1.5,
+                            self.R:0.3,
+                            self.I_w:self.m_rear*self.R**2,
+                            self.m_fr:0.6,
+                            self.g:9.81,
+                            self.z_c:0.4,
+                            self.k_rt:109000,
+                            self.k_r:750000,
+                            self.k_ft:300000,
+                            self.k_f:750000,
+                            self.F:150,
+                            self.Omega:0.3*np.pi*2,
+                            self.pm:0.1,
+                          }
+
+        return default_data_dict
+    def symbols_description(self):
+        self.sym_desc_dict = {
+                                self.x:'main body center of mass horizontal displacement',
+                                self.z:'main body center of mass vertical displacement',
+                                self.phi:'angular displacement of the main mass',
+                                self.z_rear:'rear wheel vertical displacement',
+                                self.M:'''mass of the main body including user''',
+                                self.I_ch:'''wheelchair's moment of inertia''',
+                                self.m_rear:'rear wheel mass',
+                                self.R:'rear wheel radius',
+                                self.I_w:'''rear wheel moment of inertia''',
+                                self.m_fr:'front wheel mass',
+                                self.g:'gravitational acceleration',
+                                self.z_c:'''vertical distance between wheelchair's center of gravity and center of rotation''',
+                                self.k_rt:'rear wheel tire stiffness',
+                                self.u_rrp:'rear road profile',
+                                self.k_r:'rear wheel stiffness',
+                                self.k_ft:'front wheel tire stiffness',
+                                self.u_frp:'front road profile',
+                                self.k_r:'front wheel stiffness',
+                                self.F:'disabled driver arm force',
+                                self.Omega:'driving force frequency',
+                                self.pm:'force duty cycle',
+        }
+
+        return self.sym_desc_dict
+    
+class BasicDampedChair5DOF(BasicUndampedChair5DOF):
+
+    c_mu=Symbol('c_mu',positive=True)
+
+    def __init__(self,
+                x=None,
+                z=None,
+                phi=None,
+                z_rear=None,
+                z_front=None,
+                M=None,
+                I_ch=None,
+                m_rear=None,
+                I_w=None,
+                R=None,
+                m_fr=None,
+                g=None,
+                z_c=None,
+                k_rt=None,
+                u_rrp=None,
+                k_r=None,
+                u_rsd=None,
+                k_ft=None,
+                u_frp=None,
+                k_f=None,
+                ivar=None,
+                u_fsd=None,
+                F=None,
+                Omega=None,
+                pm=None,
+                c_mu=None,
+                **kwargs):
+
+        if x is not None: self.x=x
+        if z is not None: self.z=z
+        if phi is not None: self.phi=phi
+        if z_rear is not None: self.z_rear=z_rear
+        if z_front is not None: self.z_front=z_front
+
+        if M is not None: self.M=M
+        if I_ch is not None: self.I_ch=I_ch
+        if m_rear is not None: self.m_rear=m_rear
+        if I_w is not None: self.I_w=I_w
+        if R is not None: self.R=R
+        if m_fr is not None: self.m_fr=m_fr
+        if g is not None: self.g=g
+        if z_c is not None: self.z_c=z_c
+        if k_rt is not None: self.k_rt=k_rt
+        if u_rrp is not None: self.u_rrp=u_rrp
+        if k_r is not None: self.k_r=k_r
+        if u_rsd is not None: self.u_rsd=u_rsd
+        if k_ft is not None: self.k_ft=k_ft
+        if u_frp is not None: self.u_frp=u_frp
+        if k_f is not None: self.k_f=k_f
+        if u_fsd is not None: self.u_fsd=u_fsd
+        if F is not None: self.F=F
+        if Omega is not None: self.Omega=Omega
+        if pm is not None: self.pm=pm
+        if c_mu is not None: self.c_mu=c_mu
+        
+        if ivar is not None: self.ivar=ivar
+
+        self.qs = [self.x,self.z,self.phi,self.z_rear,self.z_front]
+
+        self._init_from_components(**kwargs)
+
+
+    @cached_property
+    def components(self):
+
+        components={}
+
+        self._undamped_chair_5DOF = BasicUndampedChair5DOF(self.x,self.z,self.phi,self.z_rear,self.z_front,self.M,self.I_ch,self.m_rear,self.I_w,self.R,self.m_fr,self.g,self.z_c,self.k_rt,self.u_rrp,self.k_r,self.u_rsd,self.k_ft,self.u_frp,self.k_f,self.ivar,self.u_fsd,self.F,self.Omega,self.pm)('undamped_chair_5DOF')
+
+        self._damping_body_horizontal = Damper(self.M*self.c_mu, self.x+self.z_c*self.phi, qs=self.qs)(label='_damping_body_horizontal')
+        self._damping_body_vertical = Damper(self.M*self.c_mu, self.z, qs=self.qs)(label='damping_body_vertical')
+        self._damping_body_rotational = Damper(self.I_ch*self.c_mu, self.phi, qs=self.qs)(label='damping_body_rotational')
+        self._damping_rear_wheel_vertical = Damper(self.m_rear*self.c_mu, self.z_rear, qs=self.qs)(label='damping_rear_wheel_vertical')
+        self._damping_rear_wheel_rotational = Damper(self.I_w*self.c_mu, self.x/self.R, qs=self.qs)(label='damping_rear_wheel_rotational')
+        self._damping_rear_wheel_horizontal = Damper(self.m_rear*self.c_mu, self.x, qs=self.qs)(label='damping_rear_wheel_horizontal')
+        self._damping_front_wheel_vertical = Damper(self.m_fr*self.c_mu, self.z_front, qs=self.qs)(label='damping_front_wheel_vertical')
+        self._damping_front_wheel_horizontal = Damper(self.m_fr*self.c_mu, self.x, qs=self.qs)(label='damping_front_wheel_horizontal')
+
+        components['_undamped_chair_5DOF'] = self._undamped_chair_5DOF
+        components['_damping_body_horizontal'] = self._damping_body_horizontal
+        components['_damping_body_vertical'] = self._damping_body_vertical
+        components['_damping_body_rotational'] = self._damping_body_rotational
+        components['_damping_rear_wheel_vertical'] = self._damping_rear_wheel_vertical
+        components['_damping_rear_wheel_rotational'] = self._damping_rear_wheel_rotational
+        components['_damping_rear_wheel_horizontal'] = self._damping_rear_wheel_horizontal
+        components['_damping_front_wheel_vertical'] = self._damping_front_wheel_vertical
+        components['_damping_front_wheel_horizontal'] = self._damping_front_wheel_horizontal
+
+
+        return components
+
+    def get_param_values(self):
+
+        self.default_data_dict={
+                            self.c_mu:0.0001,
+                          }
+
+        return {**self.default_data_dict,**super().get_param_values()}
+    
+    def symbols_description(self):
+        self.sym_desc_dict = {
+                                self.c_mu:"Rayileigh's damping mass matrix coefficient"
+        }
+
+        return {**self.sym_desc_dict,**super().symbols_description(),}
+    
+class LinearSpringDeflectionUndampedChair5DOF(BasicUndampedChair5DOF):
+    
+    l_rear=Symbol('l_r',positive=True)
+    l_front=Symbol('l_f',positive=True)
+
+    def __init__(self,
+                x=None,
+                z=None,
+                phi=None,
+                z_rear=None,
+                z_front=None,
+                M=None,
+                I_ch=None,
+                m_rear=None,
+                I_w=None,
+                R=None,
+                m_fr=None,
+                g=None,
+                z_c=None,
+                k_rt=None,
+                u_rrp=None,
+                k_r=None,
+                u_rsd=None,
+                k_ft=None,
+                u_frp=None,
+                k_f=None,
+                ivar=None,
+                u_fsd=None,
+                F=None,
+                Omega=None,
+                pm=None,
+                l_rear=None,
+                l_front=None,
+                **kwargs):
+
+        if x is not None: self.x=x
+        if z is not None: self.z=z
+        if phi is not None: self.phi=phi
+        if z_rear is not None: self.z_rear=z_rear
+        if z_front is not None: self.z_front=z_front
+
+        if M is not None: self.M=M
+        if I_ch is not None: self.I_ch=I_ch
+        if m_rear is not None: self.m_rear=m_rear
+        if I_w is not None: self.I_w=I_w
+        if R is not None: self.R=R
+        if m_fr is not None: self.m_fr=m_fr
+        if g is not None: self.g=g
+        if z_c is not None: self.z_c=z_c
+        if k_rt is not None: self.k_rt=k_rt
+        if u_rrp is not None: self.u_rrp=u_rrp
+        if k_r is not None: self.k_r=k_r
+        if u_rsd is not None: self.u_rsd=u_rsd
+        if k_ft is not None: self.k_ft=k_ft
+        if u_frp is not None: self.u_frp=u_frp
+        if k_f is not None: self.k_f=k_f
+        if u_fsd is not None: self.u_fsd=u_fsd
+        if F is not None: self.F=F
+        if Omega is not None: self.Omega=Omega
+        if pm is not None: self.pm=pm
+        if l_rear is not None: self.l_rear=l_rear
+        if l_front is not None: self.l_front=l_front
+        
+        if ivar is not None: self.ivar=ivar
+
+        self.qs = [self.x,self.z,self.phi,self.z_rear,self.z_front]
+
+        self._init_from_components(**kwargs)
+
+
+    @cached_property
+    def components(self):
+        rear_spring_deflection=((self.z+self.R*self.phi+self.l_rear-self.z_rear)**2 )-self.l_rear
+        front_spring_deflection=((self.z-self.R*self.phi+self.l_front-self.z_front)**2  )-self.l_front
+        rear_road_profile=0
+        front_road_profile=0
+        components={}
+
+        self._basic_undamped_chair_5DOF = BasicUndampedChair5DOF(self.x,self.z,self.phi,self.z_rear,self.z_front,self.M,self.I_ch,self.m_rear,self.I_w,self.R,self.m_fr,self.g,self.z_c,self.k_rt,rear_road_profile,self.k_r,rear_spring_deflection,self.k_ft,front_road_profile,self.k_f,self.ivar,front_spring_deflection,self.F,self.Omega,self.pm)('basic_undamped_chair_5DOF')
+        
+        components['_basic_undamped_chair_5DOF'] = self._basic_undamped_chair_5DOF
+        
+        return components
+
+    def get_param_values(self):
+
+        self.default_data_dict={
+                            self.l_rear:0.1,
+                            self.l_front:0.1,
+                          }
+
+        return {**self.default_data_dict,**super().get_param_values()}
+    
+    def symbols_description(self):
+        self.sym_desc_dict = {
+                                self.l_rear:'???',
+                                self.l_front:'???'
+        }
+
+        return {**self.sym_desc_dict,**super().symbols_description()}
+    
+class LinearSpringDeflectionDampedChair5DOF(LinearSpringDeflectionUndampedChair5DOF,BasicDampedChair5DOF):
+
+    def __init__(self,
+                x=None,
+                z=None,
+                phi=None,
+                z_rear=None,
+                z_front=None,
+                M=None,
+                I_ch=None,
+                m_rear=None,
+                I_w=None,
+                R=None,
+                m_fr=None,
+                g=None,
+                z_c=None,
+                k_rt=None,
+                u_rrp=None,
+                k_r=None,
+                u_rsd=None,
+                k_ft=None,
+                u_frp=None,
+                k_f=None,
+                ivar=None,
+                u_fsd=None,
+                F=None,
+                Omega=None,
+                pm=None,
+                l_rear=None,
+                l_front=None,
+                c_mu=None,
+                **kwargs):
+
+        if x is not None: self.x=x
+        if z is not None: self.z=z
+        if phi is not None: self.phi=phi
+        if z_rear is not None: self.z_rear=z_rear
+        if z_front is not None: self.z_front=z_front
+
+        if M is not None: self.M=M
+        if I_ch is not None: self.I_ch=I_ch
+        if m_rear is not None: self.m_rear=m_rear
+        if I_w is not None: self.I_w=I_w
+        if R is not None: self.R=R
+        if m_fr is not None: self.m_fr=m_fr
+        if g is not None: self.g=g
+        if z_c is not None: self.z_c=z_c
+        if k_rt is not None: self.k_rt=k_rt
+        if u_rrp is not None: self.u_rrp=u_rrp
+        if k_r is not None: self.k_r=k_r
+        if u_rsd is not None: self.u_rsd=u_rsd
+        if k_ft is not None: self.k_ft=k_ft
+        if u_frp is not None: self.u_frp=u_frp
+        if k_f is not None: self.k_f=k_f
+        if u_fsd is not None: self.u_fsd=u_fsd
+        if F is not None: self.F=F
+        if Omega is not None: self.Omega=Omega
+        if pm is not None: self.pm=pm
+        if l_rear is not None: self.l_rear=l_rear
+        if l_front is not None: self.l_front=l_front
+        if c_mu is not None: self.c_mu=c_mu
+        
+        if ivar is not None: self.ivar=ivar
+
+        self.qs = [self.x,self.z,self.phi,self.z_rear,self.z_front]
+
+        self._init_from_components(**kwargs)
+
+
+    @cached_property
+    def components(self):
+        rear_spring_deflection=((self.z+self.R*self.phi+self.l_rear-self.z_rear)**2 )-self.l_rear
+        front_spring_deflection=((self.z-self.R*self.phi+self.l_front-self.z_front)**2  )-self.l_front
+        rear_road_profile=0
+        front_road_profile=0
+        components={}
+
+        self._basic_damped_chair_5DOF = BasicDampedChair5DOF(self.x,self.z,self.phi,self.z_rear,self.z_front,self.M,self.I_ch,self.m_rear,self.I_w,self.R,self.m_fr,self.g,self.z_c,self.k_rt,rear_road_profile,self.k_r,rear_spring_deflection,self.k_ft,front_road_profile,self.k_f,self.ivar,front_spring_deflection,self.F,self.Omega,self.pm,self.c_mu)('basic_damped_chair_5DOF')
+        
+        components['_basic_damped_chair_5DOF'] = self._basic_damped_chair_5DOF
+        
+        return components
+
+class NonLinearSpringDeflectionUndampedChair5DOF(LinearSpringDeflectionUndampedChair5DOF):
+
+    def __init__(self,
+                x=None,
+                z=None,
+                phi=None,
+                z_rear=None,
+                z_front=None,
+                M=None,
+                I_ch=None,
+                m_rear=None,
+                I_w=None,
+                R=None,
+                m_fr=None,
+                g=None,
+                z_c=None,
+                k_rt=None,
+                u_rrp=None,
+                k_r=None,
+                u_rsd=None,
+                k_ft=None,
+                u_frp=None,
+                k_f=None,
+                ivar=None,
+                u_fsd=None,
+                F=None,
+                Omega=None,
+                pm=None,
+                l_rear=None,
+                l_front=None,
+                **kwargs):
+
+        if x is not None: self.x=x
+        if z is not None: self.z=z
+        if phi is not None: self.phi=phi
+        if z_rear is not None: self.z_rear=z_rear
+        if z_front is not None: self.z_front=z_front
+
+        if M is not None: self.M=M
+        if I_ch is not None: self.I_ch=I_ch
+        if m_rear is not None: self.m_rear=m_rear
+        if I_w is not None: self.I_w=I_w
+        if R is not None: self.R=R
+        if m_fr is not None: self.m_fr=m_fr
+        if g is not None: self.g=g
+        if z_c is not None: self.z_c=z_c
+        if k_rt is not None: self.k_rt=k_rt
+        if u_rrp is not None: self.u_rrp=u_rrp
+        if k_r is not None: self.k_r=k_r
+        if u_rsd is not None: self.u_rsd=u_rsd
+        if k_ft is not None: self.k_ft=k_ft
+        if u_frp is not None: self.u_frp=u_frp
+        if k_f is not None: self.k_f=k_f
+        if u_fsd is not None: self.u_fsd=u_fsd
+        if F is not None: self.F=F
+        if Omega is not None: self.Omega=Omega
+        if pm is not None: self.pm=pm
+        if l_rear is not None: self.l_rear=l_rear
+        if l_front is not None: self.l_front=l_front
+        
+        if ivar is not None: self.ivar=ivar
+
+        self.qs = [self.x,self.z,self.phi,self.z_rear,self.z_front]
+
+        self._init_from_components(**kwargs)
+
+
+    @cached_property
+    def components(self):
+        rear_spring_deflection=sqrt((self.z+self.R*sin(self.phi)+self.l_rear-self.z_rear)**2+(self.R-self.R*cos(self.phi))**2)-self.l_rear
+        front_spring_deflection=sqrt((self.z-self.R*sin(self.phi)+self.l_front-self.z_front)**2+(self.R-self.R*cos(self.phi))**2)-self.l_front
+        rear_road_profile=0
+        front_road_profile=0
+        components={}
+
+        self._basic_undamped_chair_5DOF = BasicUndampedChair5DOF(self.x,self.z,self.phi,self.z_rear,self.z_front,self.M,self.I_ch,self.m_rear,self.I_w,self.R,self.m_fr,self.g,self.z_c,self.k_rt,rear_road_profile,self.k_r,rear_spring_deflection,self.k_ft,front_road_profile,self.k_f,self.ivar,front_spring_deflection,self.F,self.Omega,self.pm)('basic_undamped_chair_5DOF')
+        
+        components['_basic_undamped_chair_5DOF'] = self._basic_undamped_chair_5DOF
+        
+        return components
+    
+class NonLinearSpringDeflectionDampedChair5DOF(LinearSpringDeflectionDampedChair5DOF):
+
+    def __init__(self,
+                x=None,
+                z=None,
+                phi=None,
+                z_rear=None,
+                z_front=None,
+                M=None,
+                I_ch=None,
+                m_rear=None,
+                I_w=None,
+                R=None,
+                m_fr=None,
+                g=None,
+                z_c=None,
+                k_rt=None,
+                u_rrp=None,
+                k_r=None,
+                u_rsd=None,
+                k_ft=None,
+                u_frp=None,
+                k_f=None,
+                ivar=None,
+                u_fsd=None,
+                F=None,
+                Omega=None,
+                pm=None,
+                l_rear=None,
+                l_front=None,
+                c_mu=None,
+                **kwargs):
+
+        if x is not None: self.x=x
+        if z is not None: self.z=z
+        if phi is not None: self.phi=phi
+        if z_rear is not None: self.z_rear=z_rear
+        if z_front is not None: self.z_front=z_front
+
+        if M is not None: self.M=M
+        if I_ch is not None: self.I_ch=I_ch
+        if m_rear is not None: self.m_rear=m_rear
+        if I_w is not None: self.I_w=I_w
+        if R is not None: self.R=R
+        if m_fr is not None: self.m_fr=m_fr
+        if g is not None: self.g=g
+        if z_c is not None: self.z_c=z_c
+        if k_rt is not None: self.k_rt=k_rt
+        if u_rrp is not None: self.u_rrp=u_rrp
+        if k_r is not None: self.k_r=k_r
+        if u_rsd is not None: self.u_rsd=u_rsd
+        if k_ft is not None: self.k_ft=k_ft
+        if u_frp is not None: self.u_frp=u_frp
+        if k_f is not None: self.k_f=k_f
+        if u_fsd is not None: self.u_fsd=u_fsd
+        if F is not None: self.F=F
+        if Omega is not None: self.Omega=Omega
+        if pm is not None: self.pm=pm
+        if l_rear is not None: self.l_rear=l_rear
+        if l_front is not None: self.l_front=l_front
+        if c_mu is not None: self.c_mu=c_mu
+        
+        if ivar is not None: self.ivar=ivar
+
+        self.qs = [self.x,self.z,self.phi,self.z_rear,self.z_front]
+
+        self._init_from_components(**kwargs)
+
+
+    @cached_property
+    def components(self):
+        rear_spring_deflection=sqrt((self.z+self.R*sin(self.phi)+self.l_rear-self.z_rear)**2+(self.R-self.R*cos(self.phi))**2)-self.l_rear
+        front_spring_deflection=sqrt((self.z-self.R*sin(self.phi)+self.l_front-self.z_front)**2+(self.R-self.R*cos(self.phi))**2)-self.l_front
+        rear_road_profile=0
+        front_road_profile=0
+        components={}
+
+        self._basic_damped_chair_5DOF = BasicDampedChair5DOF(self.x,self.z,self.phi,self.z_rear,self.z_front,self.M,self.I_ch,self.m_rear,self.I_w,self.R,self.m_fr,self.g,self.z_c,self.k_rt,rear_road_profile,self.k_r,rear_spring_deflection,self.k_ft,front_road_profile,self.k_f,self.ivar,front_spring_deflection,self.F,self.Omega,self.pm,self.c_mu)('basic_damped_chair_5DOF')
+        
+        components['_basic_damped_chair_5DOF'] = self._basic_damped_chair_5DOF
+        
+        return components
+
+###################+++++++++++++++++++++++++++++++++++++++++++ OLDER SYSTEMS
 class DampedChair4DOF(ComposedSystem):
 
     scheme_name = 'chair5dof.jpg'

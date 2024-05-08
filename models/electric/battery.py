@@ -33,7 +33,7 @@ from ..mechanics.trolley import ComposedSystem, NonlinearComposedSystem, base_fr
 class BatteryCell(ComposedSystem):
     
     
-    scheme_name = 'thevenincircuit.PNG'
+    scheme_name = 'thevenincircuit.png'
     real_name = 'liioncell.PNG'
 
     R_1=Symbol('R_1', positive=True)

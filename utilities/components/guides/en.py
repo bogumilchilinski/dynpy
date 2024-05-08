@@ -1,4 +1,5 @@
 from  ..mechanics import *
+from . import pl
 
 import pandas as pd
 import numpy as np
@@ -1905,3 +1906,15 @@ class ReportCompUseComponent(ReportComponent):
         display(ObjectCode(ode))
         display(ReportText('To solve the problem serve several methods depending on the equation type. As dynamic systems s behaviour is described by an ordinary differential equation, the variables of the equation are as follows: t [x]'))
         display(ReportText('The variables allow to study and analyse the system s dynamics varying with time.'))
+        
+class NumericalAnalysisSimulationComponent(pl.NumericalAnalysisSimulationComponent):
+    
+    title="Numerical analysis simulation Component"
+
+class AnalyticalSimulationComponent(pl.AnalyticalSimulationComponent):
+    
+    title="Analytical simulation Component"
+    
+class DynamicSystemCompletenessCheckComponent(pl.DynamicSystemCompletenessCheckComponent):
+    
+    title="Dynamic system completeness check component"
