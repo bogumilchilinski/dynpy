@@ -100,7 +100,7 @@ class BlowerToothedBelt(ComposedSystem):
             self.k_tensioner: [10e5 * no for no in range(4, 8)],
             self.F: [500 * no for no in range(1, 8)],
             self.Omega: [0.02*no for no in range(1,4)],
-            self.Q: [200* no for no in range(1,8)],
+           # self.Q: [200* no for no in range(1,8)],
             self.z0: [0.2 * no for no in range(1, 2)],
         }
 
@@ -113,7 +113,7 @@ class BlowerToothedBelt(ComposedSystem):
             self.k_tensioner: r'Tensioner spring stiffnessfactor',
             self.Omega: r'Angle of exciting function',
             self.F: r'Exciting force',
-            self.Q: r'Load of the system',
+           # self.Q: r'Load of the system',
             self.z: r'Displacement of the system'
         }
 

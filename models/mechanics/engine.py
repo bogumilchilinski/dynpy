@@ -20,6 +20,9 @@ import inspect
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
 from functools import cached_property
 
+from pint import UnitRegistry
+ureg = UnitRegistry()
+
 #####
 
 class EngineHousing(MaterialPoint):
@@ -139,7 +142,9 @@ class FreeEngine(ComposedSystem):
 #             self.M: [10 * self.m0 * no / 100 for no in range(10, 150)],
 #             self.m_e: [self.m0 * no / 100 for no in range(80, 120)],
             self.e: [S.One *self.e0 * no  for no in range(8, 12)],
-            self.phi: [self.omega * self.ivar]
+            self.phi: [self.omega * self.ivar],
+            self.phi.diff(self.ivar):[self.omega],
+            self.phi.diff(self.ivar,self.ivar):0,
         }
         return default_data_dict
 
@@ -150,9 +155,11 @@ class FreeEngine(ComposedSystem):
 #             self.m_e: [0.5 * no for no in range(80, 120)],
             self.e: [2/100 * no for no in range(5, 15)],
             self.phi: [2 * 3.14 * 10 * self.ivar],
-#             self.g: [9.81]
+            self.phi.diff(self.ivar):62.8,
+            self.phi.diff(self.ivar,self.ivar):0,
         }
         return default_data_dict
+
     
     
 #DONE #Mateusz
@@ -450,6 +457,22 @@ class Engine(ComposedSystem):
         ]
         
         return comp_list
+
+    def unit_dict(self):
+        
+        units_dict = {self.M: ureg.kilogram,
+                 self.k_m: ureg.newton/ureg.meter,
+                 self.m_e: ureg.kilogram,
+                 self.g: ureg.meter/ureg.second,
+                 self.e: ureg.meter,
+                 self.z: ureg.meter,
+                 self.phi: ureg.radian,
+                 self.ivar: ureg.second,
+                }
+        
+        return units_dict
+
+
     
 #DONE 
 class EngineVerticalSpringGravity(Engine):

@@ -10,7 +10,10 @@ from sympy.physics.mechanics import dynamicsymbols
 
 from ....solvers.linear import *
 from ....dynamics import *
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0bf8d9e (Mechanical systems development)
 
 miesiace_list = ['styczeń', 'luty', 'marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']
 
@@ -1857,6 +1860,8 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
 
 
     def append_elements(self):
+
+        from ....solvers.linear import ODESystem
         
         system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
         
@@ -1895,7 +1900,7 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
         
         display(ReportText('Następnie należy określić, który parametr ma zostać poddany analizie. Parametr ten należy wówczas zmienić w słowniku parametrów z wartości liczbowej na symbol.'))
         
-        numerical_param_dict.update({dyn_sys.m_e: dyn_sys.m_e})
+#         param_dict.update({system.m: system.m})
         
         display(Markdown(
         '''
@@ -1911,7 +1916,7 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
         na_df
         '''))
         
-        na_df = dyn_sys.subs(param_dict).numerical_analysis(parameter=dyn_sys.m_e, param_span=[6, 9, 12], t_span = t_span)
+        na_df = system.subs(param_dict).numerized()
         na_df
         
         display(ReportText('Symulacje numeryczną wykonuje się w analogiczny sposób do pozostałych symulacji w następujący sposób:'))
@@ -2026,7 +2031,7 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
         
         display(ReportText('Następnie wykonuje się analizę metody __init__ klasy:'))
         
-        display(ObjectCode(system.__init__()))
+        display(ObjectCode(system.__init__))
         
         display(ReportText('Kolejnym etapem jest sprawdzenie, czy schemat oraz zdjęcie reczywiste systemu są zdefiniowane:'))
         
@@ -2122,3 +2127,36 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
         
         system.symbols_description()
         system.unit_dict()
+        
+class IssuePreparationComponent(ReportComponent):
+    
+    title="Wzór na tworzenie issue w systemie GitHub"
+
+    def append_elements(self):
+        
+        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        
+        display(ReportText("Przykładowy tekst, który pozwoli na sprawne przygotowywanie issue ma następującą formę:"))
+        
+        display(ObjectCode('''
+            from dynpy.utilities.report import Markdown
+
+            issue_no = 567
+            system_name = 'ForcedSpringMassSystem'
+
+            issue_str = f"""
+            # Issue no. #{issue_no}
+            ## Maintenance of `{system_name}` class which is dynamic system representation
+
+            The following problems have to be checked or fixed , in order to ensure the correctness of implemented system:
+
+            - [ ] validation of reference parameters,
+
+            - [ ] validation of random parameters,
+
+            - [ ] validation of units.
+            """
+
+            Markdown(issue_str)
+         '''
+                          ))

@@ -5,6 +5,12 @@ import pandas as pd
 import numpy as np
 from sympy import lambdify
 
+from sympy import *
+from pandas import *
+from sympy.physics.mechanics import dynamicsymbols
+
+from ....solvers.linear import *
+from ....dynamics import *
 
 miesiace_list = ['styczeń', 'luty', 'marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']
 
@@ -16,7 +22,7 @@ Eg_dzienne_kilowatogodziny_na_metr2 = [0.6,1,3,3.8,4.8,5.3,4.9,3.3,1.7,0.7,0.5]
 
 długosc_dnia_w_miesiacach_godziny = [8.3,10.0,11.8,13.9,15.7,16.7,16.3,14.7,12.7,10.7,8.8,7.8]
 
-data_warunki_atmosferyczne = {'Długość dnia w miesiącu':długosc_dnia_w_miesiacach_godziny,'Dzienne natezenie energii [kWh/m^2]':Eg_dzienne_list_watogodziny_na_metr2,'Średnia temperatura':srednie_temp_list}
+data_warunki_atmosferyczne = {'Długość dnia w miesiącu [h]':długosc_dnia_w_miesiacach_godziny,'Dzienne natężenie energii [${kWh/m^2}$]':Eg_dzienne_list_watogodziny_na_metr2,'Średnia temperatura [$^{\circ}$C]':srednie_temp_list}
 
 df = pd.DataFrame(index = miesiace_list,data = data_warunki_atmosferyczne)
 
@@ -477,6 +483,7 @@ class DynamicSystemCallComponent(ReportComponent):
         display(ReportText('Sposób wywowałania preview klasy - tzw. podglądu:'))
 
         display(GuideCode(f'''{system_name}()._as_picture()'''  ))
+        display(system._as_picture())
         
         
 class DynamicSystemMethodsUsageComponent(ReportComponent):
@@ -775,22 +782,22 @@ class DynSysCodeComponent(ReportComponent):
         
         display(ReportText('''Kod analizowanej klasy jest nastepujacy'''))
         display(ObjectCode(system.__class__))
-        display(ReportText(f'''Przedstawiony kod klasy {system_name} został pobrany przy pomoc klasy ObjectCode.  '''))        
+        display(ReportText(f'''Przedstawiony kod klasy {system_name} został pobrany przy pomoc klasy ObjectCode.  '''))
         
         
 #pandas guide
 data_code=(
 '''
-miesiace_list = ['styczeń','luty','marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']  
+miesiace_list = ['styczeń','luty','marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']
 srednie_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]
 długosc_dnia_w_miesiacach_godziny = [8.3,10.0,11.8,13.9,15.7,16.7,16.3,14.7,12.7,10.7,8.8,7.8]
-Eg_dzienne_list_watogodziny_na_metr2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]  
+Eg_dzienne_list_watogodziny_na_metr2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]
 Eg_dzienne_kilowatogodziny_na_metr2 = [0.6,1,3,3.8,4.8,5.3,4.9,3.3,1.7,0.7,0.5]
 ''')
 
 data_dict_code=(
 '''
-data_warunki_atmosferyczne = {'Długość dnia w miesiącu':długosc_dnia_w_miesiacach_godziny,'Dzienne natezenie energii         [kWh/m^2]':Eg_dzienne_list_watogodziny_na_metr2,'Średnia             temperatura':srednie_temp_list}
+data_warunki_atmosferyczne = {'Długość dnia w miesiącu [h]':długosc_dnia_w_miesiacach_godziny,'Dzienne natężenie energii [${kWh/m^2}$]':Eg_dzienne_list_watogodziny_na_metr2,'Średnia temperatura [$^{\circ}$C]':srednie_temp_list}
 ''')
 output_code=(
 '''
@@ -820,7 +827,7 @@ class PandasTableGenerationComponent(ReportComponent):
         display(GuideCode(data_dict_code))
 
 
-        display(ReportText('Wywolanie tabelki:'))
+        display(ReportText('Wywołanie tabelki:'))
         display(GuideCode(output_code))
         display(df)
         
@@ -944,39 +951,40 @@ class PandasMethodsComponent(ReportComponent):
 
         długosc_dnia_w_miesiacach_godziny = [8.3,10.0,11.8,13.9,15.7,16.7,16.3,14.7,12.7,10.7,8.8,7.8]
 
-        data_warunki_atmosferyczne = {'Długość dnia w miesiącu':długosc_dnia_w_miesiacach_godziny,'Dzienne natezenie energii [kWh/m^2]':Eg_dzienne_list_watogodziny_na_metr2,'Średnia temperatura':srednie_temp_list}
+        data_warunki_atmosferyczne = {'Długość dnia w miesiącu [h]':długosc_dnia_w_miesiacach_godziny,'Dzienne natężenie energii [${kWh/m^2}$]':Eg_dzienne_list_watogodziny_na_metr2,'Średnia temperatura [$^{\circ}$C]':srednie_temp_list}
 
         df = pd.DataFrame(index = miesiace_list,data = data_warunki_atmosferyczne)
 
-        display(ReportText('***Metoda iloc:***'))
+        display(ReportText('Metoda iloc:'))
         display(GuideCode('df.iloc[0:3]'))
         display(df.iloc[0:3])
 
         # display(Picture('./Image/iloc.jpg', caption = ""))
 
-        display(ReportText('***Metoda loc:***'))
+        display(ReportText('Metoda loc:'))
         display(GuideCode('df.loc["styczeń"]'))
         display(df.loc["styczeń"])
         # display(Picture('./Image/loc.jpg', caption = ""))
 
-        display(ReportText('***Metoda set axis działa zarówno dla kolumn jak i rzędów. Dla rzędów:***'))
+        display(ReportText('Metoda set axis działa zarówno dla kolumn jak i rzędów. Dla rzędów:'))
         display(GuideCode("df.set_axis(['a','b','c','d','e','f','g','h','i','j','k','l'],axis = 'index')"))
         display(df.set_axis(['a','b','c','d','e','f','g','h','i','j','k','l'], axis = 'index'))
 
         # display(Picture('./Image/set_axis.jpg', caption = ""))
 
-        display(ReportText('***Dla kolumn:***'))
+        display(ReportText('Dla kolumn:'))
         display(GuideCode("df.set_axis(['a','b','c'],axis = 'columns')"))
         display(df.set_axis(['a','b','c'],axis = 'columns'))
         # display(Picture('./Image/set_axis2.jpg', caption = ""))
 
-        display(ReportText('***Metoda rename - Zmienienie pojedynczej kolumny:***'))
+        display(ReportText('Metoda rename - Zmienienie pojedynczej kolumny:'))
         display(GuideCode('''df.rename(columns = {"Długość dnia w miesiącu":'AAA'}, index = {"styczeń":'A'} )'''))
         display(df.rename(columns = {"Długość dnia w miesiącu":'AAA'}, index = {"styczeń":'A'} ))
         # display(Picture('./Image/rename.jpg', caption = ""))
 
-        display(ReportText('***Metoda map:***'))
+        display(ReportText('Metoda map:'))
         display(GuideCode('df.map(lambda x:x+2)'))
+#         display(df.map(lambda x:x+2)) - nowa wersja pandasa zmieniła nazwę "map" na "applymap" - Michał SZ
         display(df.map(lambda x:x+2))
 
         # display(ReportText('***Metoda applymap dla kolumny/wiersza:***'))
@@ -991,9 +999,9 @@ class PandasMethodsComponent(ReportComponent):
 
         # display(Picture('./Image/applymap.jpg', caption = ""))
 
-        display(ReportText('***Slicowanie:***'))
-        display(GuideCode('''df['Długość dnia w miesiącu']'''))
-        display(df['Długość dnia w miesiącu'])
+        display(ReportText('Slicowanie:'))
+        display(GuideCode('''df['Długość dnia w miesiącu [h]']'''))
+        display(df['Długość dnia w miesiącu [h]'])
         # display(Picture('./Image/slice2.jpg', caption = ""))
         
         
@@ -1151,7 +1159,7 @@ LatexDataFrame.formatted(df.set_axis([a,b,c,d,e],axis='columns'))
 
 class BasicOperationsComponent(ReportComponent):
 
-    title="Podstawowe obekty i operacje"
+    title="Podstawowe obiekty i operacje"
 
     def append_elements(self):
 
@@ -1175,13 +1183,13 @@ class BasicOperationsComponent(ReportComponent):
         ludnosc_lista=[5349114,3475323,2139726,1439675,1710482,1188800,2904207,2307710,2493603,2086210, 2127657,3372618,1018075,4570849,1257179,996011]
         dochody_lista=[4464,3371,3338,3447,3649,3552,3788,4104,3438,3508,3212, 3395,3187,3586,3268,3112]
         wydatki_lista=[787,596,623,597,767,697,742,1023,590,778,574,598,365,631,647,431]
-        wojwodztwa_dane={'powierzchnia':powierzchnia_lista,'l.osob':ludnosc_lista,'dochody':dochody_lista,'wydatki':wydatki_lista}
+        wojwodztwa_dane={'powierzchnia':powierzchnia_lista,'l.osób':ludnosc_lista,'dochody':dochody_lista,'wydatki':wydatki_lista}
         
         df = pd.DataFrame(index=wojewodztwa_list,data=wojwodztwa_dane)
         x6 = LatexDataFrame(df)
 
         area = Symbol('A',positive=True)
-        df['zaludnienie']=df['l.osob']/df['powierzchnia']
+        df['zaludnienie']=df['l.osób']/df['powierzchnia']
         x7 = LatexDataFrame(df)
         
         df21=df.iloc[1:3,0:3]
@@ -1209,36 +1217,36 @@ class BasicOperationsComponent(ReportComponent):
         
         df50=df.dochody.apply(lambda x: x*2)
         x13 = LatexDataFrame(df50)
-        
         df60=df.map(lambda x: x*2)
         x14 = LatexDataFrame(df60)
         
         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
         
-        display(ReportText('**Importowanie biblioteki Pandas**'))
+        display(ReportText('Importowanie biblioteki Pandas'))
         display(GuideCode('import pandas as pd'))
 
-        display(ReportText('**Tworzenie serii (analogicznie do kolumn w Excelu)**'))
+        display(ReportText('Tworzenie serii (analogicznie do kolumn w Excelu)'))
         display(GuideCode('s = pd.Series([2,34,5,-2,8,12])'))
         display(x1.reported())
 
-        display(ReportText('**Operacje na seriach**'))
+        display(ReportText('Operacje na seriach'))
         display(GuideCode('s*10'))
         display(x2.reported())
 
-        display(ReportText('**Funkcja abs() zmiana wartrosci na dodtanie**'))
+        display(ReportText('Funkcja abs() - wartość bezwględna'))
         display(GuideCode('s.abs()'))
         display(x3.reported())
 
-        display(ReportText('**Funkcja describe() - podstawowe statystyki**'))
+        display(ReportText('Funkcja describe() - podstawowe statystyki'))
         display(GuideCode('s.describe()'))
         display(x4.reported())
 
-        display(ReportText('**Zmiana nazw indeskow domyslnie zaczynajacych sie od 0**'))
+        display(ReportText('Zmiana nazw indesków domyślnie zaczynających sie od 0'))
         display(GuideCode('''s.index =['pierwszy','drugi','trzeci','czwarty','piąty','szósty']'''))
         display(x5.reported())
         
-        display(ReportText('**DataFrame (tabele) - tworzenie DataFrame na bazie słownika** *tworzenie listy województw*'))
+        display(ReportText('DataFrame - tabela DataFrame, która powstaje na bazie słownika.'))
+        display(ReportText('Tworzenie listy województw:'))
         display(GuideCode('''
 wojewodztwa_list = ['mazowieckie','wielkopolskie','lubelskie',
 'warmińsko-mazurskie','zachodniopomorskie','podlaskie',
@@ -1247,67 +1255,69 @@ wojewodztwa_list = ['mazowieckie','wielkopolskie','lubelskie',
 'lubuskie','śląskie','świętokrzyskie','opolskie']
             '''))
         
-        display(ReportText('*Tworzenie listy zawierającej pola powierzchni poszczególnych województw w ${km^2}$*'))
+        display(ReportText('Tworzenie listy zawierającej pola powierzchni poszczególnych województw w ${km^2}$:'))
         display(GuideCode('powierzchnia_lista=[35558,29826,25122,24173,22892,20187,19947,18310,18219,17972,17846,15183,13988,12333,11711,9412]'))
 
-        display(ReportText('*Tworzenie listy liczby ludności dla poszczególnych województw*'))
+        display(ReportText('Tworzenie listy liczby ludności dla poszczególnych województw:'))
         display(GuideCode('ludnosc_lista=[5349114,3475323,2139726,1439675,1710482,1188800,2904207,2307710,2493603,2086210,2127657,3372618,1018075,4570849,1257179,996011]'))
         
-        display(ReportText('*Tworzenie listy dochodów przypadających na osobę*'))
+        display(ReportText('Tworzenie listy dochodów przypadających na osobę w danym województwie:'))
         display(GuideCode('dochody_lista=[4464,3371,3338,3447,3649,3552,3788,4104,3438,3508,3212,3395,3187,3586,3268,3112]'))
 
-        display(ReportText('*Tworzenie listy wydatków majątkowych/inwestycyjnych przypadających na osobę*'))
+        display(ReportText('Tworzenie listy wydatków majątkowych/inwestycyjnych przypadających na osobę w danym województwie:'))
         display(GuideCode('wydatki_lista=[787,596,623,597,767,697,742,1023,590,778,574,598,365,631,647,431]'))
 
-        display(ReportText('*Tworzenie słownika*'))
+        display(ReportText('Tworzenie słownika'))
         display(GuideCode('''wojwodztwa_dane={'pow.':powierzchnia_lista,'l.os.':ludnosc_lista,'dochody':dochody_lista,'wyd.':wydatki_lista}'''))
 
-        display(ReportText('*Wywołanie tabeli*'))
+        display(ReportText('Wywołanie tabeli'))
         display(GuideCode('''
 df = pd.DataFrame(index=wojewodztwa_list,data=wojwodztwa_dane)
 df
         '''))
         display(x6.reported())
 
-        display(ReportText('**Operacje na kolumnach - dodanie kolumny z obliczoną gęstością zaludnienia**'))
+        display(ReportText('Operacje na kolumnach - dodanie kolumny z obliczoną gęstością zaludnienia'))
         display(GuideCode('''
 df['zalud.']=df['l.os.']/df['pow.']
 df
         '''))
         display(x7.reported())
 
-        display(ReportText('**Metoda iloc - za pomocą indeksów wykonujemy operacje na wierszach i kolumnach**'))
+        display(ReportText('Metoda iloc - za pomocą indeksów wykonujemy operacje na wierszach i kolumnach'))
         display(GuideCode('df.iloc[1:3,0:3]'))
         display(x8.reported())
 
-        display(ReportText('**Metoda loc**'))
+        display(ReportText('Metoda loc - za pomocą etykiet wykonujemy operacje na wierszach i kolumnach'))
         display(GuideCode('''df.loc['mazowieckie']'''))
         display(x9.reported())
 
-        display(ReportText('**Dodanie wiersza za pomocą metody loc**'))
-        display(GuideCode('''df.loc['Warszawa',:]=[4000,600000,2500,300,120]'''))
+        display(ReportText('Dodanie wiersza za pomocą metody loc'))
+        display(GuideCode('''
+df.loc['Warszawa',:]=[4000,600000,2500,300,120]
+df
+        '''))
         display(x10.reported())
 
-        display(ReportText('**Metoda set_axis dla wierszy - operacje na indeksach**'))
+        display(ReportText('Metoda set_axis dla wierszy'))
         display(GuideCode('''df.set_axis([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],axis='index')'''))
         display(x11.reported())
 
-        display(ReportText('**Metoda set_axis dla kolumn**'))
-        display(GuideCode(    pandas_latax_df_code    ))
-        
-        display(LatexDataFrame.formatted(x12).reported())
+        display(ReportText('Metoda set_axis dla kolumn'))
+        display(GuideCode('''df.set_axis([a,b,c,d,e],axis='columns')'''))
+        display(x12.reported())
 
-        display(ReportText('**Metoda rename - zmienia nazwy kolumn i wierszy**'))
+        display(ReportText('Metoda rename - zmienia nazwy kolumn i wierszy'))
         display(GuideCode('''
 df.rename(columns={'l.os.':'LUDNOŚĆ'},index={'lubuskie':'LUBU...'})
         '''))
         display(x21.reported())
 
-        display(ReportText('**Metoda apply - implementacja funkcji na wybranej kolumnie tabeli**'))
+        display(ReportText('Metoda apply - implementacja funkcji na wybranej kolumnie tabeli'))
         display(GuideCode('df.dochody.apply(lambda x: x*2)'))
         display(x13.reported())
 
-        display(ReportText('**Metoda map - implementacja funkcji w całej tabeli**'))
+        display(ReportText('Metoda map - implementacja funkcji w całej tabeli'))
         display(GuideCode('df.map(lambda x: x*2)'))
         display(x14.reported())
         
@@ -1918,3 +1928,7 @@ class AnalyticalSimulationComponent(pl.AnalyticalSimulationComponent):
 class DynamicSystemCompletenessCheckComponent(pl.DynamicSystemCompletenessCheckComponent):
     
     title="Dynamic system completeness check component"
+    
+class IssuePreparationComponent(pl.IssuePreparationComponent):
+    
+    title="Issue preparation component"

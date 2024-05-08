@@ -257,12 +257,9 @@ class DDoFTrain(ComposedSystem):
 
             self._spring_left = Spring(self.k,
                                  pos1=self.z + self.phi*self.l_l ,
-                                       pos2=self.S*sin(2*pi*self.v/self.d*(self.ivar-self.s/self.v)), #i tak samo 
+                                       pos2=self.S*sin(2*pi*self.v/self.d*(self.ivar-self.s/self.v)), 
                                   qs=self.qs)(label='left spring')
-#             self._spring_left = Spring(self.k,
-#                                  pos1=self.z + self.phi*self.l_l ,
-#                                        pos2=self.S*sin(2*pi*self.v/self.d*(self.ivar)), #i tak samo 
-#                                   qs=self.qs)(label='left spring')
+
 
             self._spring_right = Spring(self.k,
                                  pos1=self.z - self.phi*self.l_r,
@@ -273,16 +270,13 @@ class DDoFTrain(ComposedSystem):
                                        pos1= self.z + self.phi*self.l_l,
                                        pos2=self.S*sin(2*pi*self.v/self.d*(self.ivar-self.s/self.v)),
                                        qs=self.qs) (label = 'left damper')
-                                       
-#             self._damper_left = Damper(self.c,
-#                                        pos1= self.z + self.phi*self.l_l,
-#                                        pos2=self.S*sin(2*pi*self.v/self.d*(self.ivar)),
-#                                        qs=self.qs) (label = 'left damper')
+
 
             self._damper_right = Damper(self.c,
                                        pos1= self.z - self.phi*self.l_r,
                                        pos2=self.S*sin(2*pi*self.v/self.d*(self.ivar)),
                                        qs=self.qs) (label = 'right damper')
+            
 #######################################################TORSIONAL I HORIZONTAL########################################################
             
 #             self._torsional_spring = Spring(self.k_t,

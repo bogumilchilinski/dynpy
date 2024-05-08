@@ -19,6 +19,9 @@ import inspect
 
 from .principles import ComposedSystem, NonlinearComposedSystem,  base_frame, base_origin,cached_property, lru_cache, REPORT_COMPONENTS_LIST
 
+from pint import UnitRegistry
+ureg = UnitRegistry()
+
 #DONE
 class Pendulum(NonlinearComposedSystem):
     """
@@ -136,9 +139,14 @@ class Pendulum(NonlinearComposedSystem):
     
     def symbols_description(self):
         self.sym_desc_dict = {
+
             self.m: r'Mass of pendulum',
             self.g: r'Gravity constant',
             self.l: r'Pendulum length',
+            self.angle: r'angle of the pendulum',
+            self.angle.diff(self.ivar): r'velocity of the pendulum',
+            self.angle.diff(self.ivar,2): r'acceleration of the pendulum',
+            self.ivar: r'time',
         }
         return self.sym_desc_dict
 
@@ -150,6 +158,19 @@ class Pendulum(NonlinearComposedSystem):
         ]
 
         return comp_list
+
+    def unit_dict(self):
+        units_dict = {
+                self.m: ureg.kilogram,
+                self.g: ureg.meter/ureg.second/ureg.second,
+                self.l: ureg.meter,
+                self.angle: ureg.radian,
+                self.angle.diff(self.ivar): ureg.radian/ureg.second,
+                self.angle.diff(self.ivar,2): ureg.radian/ureg.second/ureg.second,
+                self.ivar: ureg.second,
+                }
+
+        return units_dict
     
     
 #DONE

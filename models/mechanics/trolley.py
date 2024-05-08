@@ -634,6 +634,20 @@ class NonLinearTrolley(NonlinearComposedSystem):
 
 #Zrobione Amadi
 class TrolleyWithPendulum(ComposedSystem):
+    
+    def unit_dict(self):
+        
+        units_dict = {self.M: ureg.kilogram,
+                 self.k_m: ureg.newton/ureg.meter,
+                 self.m_e: ureg.kilogram,
+                 self.g: ureg.meter/ureg.second,
+                 self.e: ureg.meter,
+                 self.z: ureg.meter,
+                 self.phi: ureg.radian,
+                 self.ivar: ureg.second,
+                }
+        
+        return units_dict
 
     scheme_name = 'trolley_pendulum_tmd.png'
     real_name = 'taipei101.png'
@@ -794,7 +808,28 @@ class TrolleyWithPendulum(ComposedSystem):
         
         return comp_list
 
+    def unit_dict(self):
 
+        from pint import UnitRegistry
+        ureg=UnitRegistry()
+
+        unit_dict = {
+            self.m_t: ureg.kilogram,
+            self.m_p: ureg.kilogram,
+            self.l: ureg.meter,
+            self.F: ureg.newton,
+            self.Omega: ureg.radian,
+            self.g: ureg.meter/ureg.second/ureg.second,
+            self.k: ureg.newton/ureg.meter,
+            self.x: ureg.meter,
+            self.x.diff(self.ivar): ureg.meter/ureg.second,
+            self.x.diff(self.ivar,2): ureg.meter/ureg.second/ureg.second,
+            self.phi: ureg.radian,
+            self.phi.diff(self.ivar): ureg.radian/ureg.second,
+            self.phi.diff(self.ivar,2): ureg.radian/ureg.second/ureg.second,
+            self.ivar: ureg.second,
+        }
+        return unit_dict
 
     
 #Zrobione Amadi
@@ -903,7 +938,25 @@ class DampedTrolleyWithPendulum(TrolleyWithPendulum):
             self.c: [0.1*m_taipei*(omg_nat)**2 for no in range(50, 100)],
         }        
         return default_data_dict
+ 
+    def unit_dict(self):
     
+        from pint import UnitRegistry
+        ureg=UnitRegistry()
+
+        unit_dict = {
+            self.l: ureg.meter,
+            self.k: ((ureg.kilogram*ureg.meter)/ureg.second/ureg.second)/ureg.meter,
+            self.x: ureg.meter,
+            self.phi: ureg.radian,
+            self.m_p: ureg.kilogram,
+            self.m_t: ureg.kilogram,
+            self.g: ureg.meter/ureg.second/ureg.second,
+            self.F: (ureg.kilogram*ureg.meter)/ureg.second/ureg.second,
+            self.Omega: ureg.radian,
+            self.c: ureg.kilogram/ureg.second
+        }
+        return unit_dict
     
 ### Nieliniowe
 class ForcedNonLinearTrolley(NonlinearComposedSystem):
