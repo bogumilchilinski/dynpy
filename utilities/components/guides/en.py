@@ -1124,7 +1124,7 @@ class DifferentSimulationsComponent(ReportComponent):
         # display(Picture('./Image/slowniki_sym.jpg', caption = ""))
 
 
-        display(ReportText('Utworzenie listy elementów podstawiajac po kolei wartosci czasu: '))
+        display(ReportText('Utworzenie listy elementów podstawiając po kolei wartości czasu: '))
         display(GuideCode(list_elem.replace('SDOFWinchSystem',system_name)))
         display(Picture('./dynpy/utilities/components/guides/images/eq2_fun.jpg', caption = ""))
 
@@ -1423,10 +1423,14 @@ class DynSysIntroComponent(ReportComponent):
 
 obiekt_1=(
 '''
-x = dynamicsymbols('x')
-omega = Symbol('\\omega',positive = True)
-Omega = Symbol('\\Omega',positive = True)
+from sympy import *
+
+
+omega = Symbol('\omega',positive = True)
+Omega = Symbol('\Omega',positive = True)
+
 t = Symbol('t')
+x = Function('x')(t)
 '''
 )
 obiekt_2=(
@@ -1454,10 +1458,7 @@ class BasicUsageOfODESystemComponent(ReportComponent):
         display(ReportText('Klasa ODESystem służy do rozwiązywania i analizowania równań różniczkowych. Tworzy ona obiekt w postaci równania różniczkowego zwyczajnego (ODE) w formie ogólnej i zapewnia metody podstawowych operacji, takich jak rozwiązanie ogólne czy szczególne.'))
 
         display(ReportText(
-        '''\n Do prawidłowego wykonania zadania należy przyjąć następujące kroki:
-
-        - Definiowanie potrzebnych symboli, które wykorzystamy do budowy ODESystem: 
-        '''))
+        '\n Do prawidłowego wykonania zadania należy przyjąć następujące kroki:  \n- Definiowanie potrzebnych symboli, które wykorzystamy do budowy ODESystem: '))
 
         display(ObjectCode(obiekt_1))
         display(ReportText('- Definiowanie równania, które wykorzystamy do budowy ODESystem: '))
@@ -1502,13 +1503,14 @@ harmonic_oscylator_ode
 ''')
 
 harmonic_oscylator_sym = (
-    '''
+'''
 harmonic_oscylator_sym = harmonic_oscylator_sol.subs(subs_dict).compute_solution(t_span)
 harmonic_oscylator_sym
 ''')
 
 ode_sys_P = (
-'''ode_sys_P = ODESystem.from_dynamic_system(dyn_sys_P.linearized())
+'''
+ode_sys_P = ODESystem.from_dynamic_system(dyn_sys_P.linearized())
 ode_sys_P
 '''
 )
@@ -1613,6 +1615,49 @@ class ODEReportComponent(ReportComponent):
         display(ObjectCode(property_report_formula)) 
 #        display(Picture('./dynpy/utilities/components/guides/images/appeend.jpg'))
 
+num_system_code_str = '''
+
+m,F,c,k,x=symbols('m,F,c,k,x', positive=True)
+t=Symbol('t')
+x=Function(x)(t)
+
+ subs_dict={m:100 ,
+          F:200 ,
+          c:50 ,
+          k:500 
+          }
+
+ics_list = [0.0,0.0]
+
+'''
+
+
+dys_sys_code_str =(
+'''
+
+dyn_sys_P = PulledPendulum()
+dyn_sys_P._eoms
+
+subs_dict_P = dyn_sys_P.get_numerical_parameters()
+subs_dict_P = {dyn_sys_P.F: 10, dyn_sys_P.Omega: 3.14/5, **subs_dict_P}
+
+
+subs_dict_P
+ics_list_P = [0.0,0.0] # 1 stopień swobody
+
+''')
+sym_wyn_code=(
+'''
+sym_wyn_P = ode_sol_P.subs(subs_dict_P).compute_solution(t_span)
+sym_wyn_P.plot()
+''')
+wywolanie_helpa=(
+'''
+help(NumericalAnalysisDataFrame)
+type(coords)
+''')
+
+
 class ODENumericalSimulationsComponent(ReportComponent):
     
     title="Symulacje numeryczne- różne techniki symulacji"
@@ -1625,19 +1670,7 @@ class ODENumericalSimulationsComponent(ReportComponent):
         display(ReportText('Przeprowadzenei symulacji przy pomocy ODE'))
         display(ReportText('W pierwszej kolejności zdefiniowano parametry potrzebne do przeprowadzenia do obliczeń'))
 
-        display(ObjectCode(''' 
-        m,F,c,k,x=symbols('m,F,c,k,x', positive=True)
-        t=Symbol('t')
-        x=Function(x)(t)
-
-         subs_dict={m:100 ,
-                  F:200 ,
-                  c:50 ,
-                  k:500 
-                  }
-
-        ics_list = [0.0,0.0]
-        '''))
+        display(ObjectCode( num_system_code_str ))
 
         display(ReportText('Wyprowadzenie wzoru na oscylator harmoniczny'))
 
@@ -1656,22 +1689,9 @@ class ODENumericalSimulationsComponent(ReportComponent):
         display(ObjectCode(harmonic_oscylator_sym))
 
         display(ReportText('Wprowadzenie systemu dynamicznego, zdefiniowano również pojawiającą się Omegę '))
-        display(ObjectCode('''
-        dyn_sys_P = PulledPendulum()
-        dyn_sys_P._eoms
+        display(ObjectCode(  dys_sys_code_str ))
 
-        subs_dict_P = dyn_sys_P.get_numerical_parameters()
-        subs_dict_P = {dyn_sys_P.F: 10, dyn_sys_P.Omega: 3.14/5, **subs_dict_P}
-
-
-        subs_dict_P
-        ics_list_P = [0.0,0.0] # 1 stopień swobody
-        '''))
-
-        display(ObjectCode('''
-        sym_wyn_P = ode_sol_P.subs(subs_dict_P).compute_solution(t_span)
-        sym_wyn_P.plot()
-        '''))
+        display(ObjectCode(sym_wyn_code))
         display(ObjectCode(ode_sys_P))
         display(ObjectCode(ode_sol_P))
         display(ObjectCode(num_mod_P))
@@ -1685,10 +1705,7 @@ class ODENumericalSimulationsComponent(ReportComponent):
 
 
         display(ReportText('Sprawdzenie za pomocą helpa czy tak na prawdę jest NumericalAnalysisDataFrame'))
-        display(ObjectCode('''
-        help(NumericalAnalysisDataFrame)
-        type(coords)
-        '''))
+        display(ObjectCode(wywolanie_helpa))
 
         display(ReportText('Wyświetlenie poszczególnych wykresów, wyników oraz tablicy'))
         display(ObjectCode('''
@@ -1707,9 +1724,7 @@ class ODENumericalSimulationsComponent(ReportComponent):
         nadf_sol
         '''))
 
-        display(ObjectCode('''
-        nadf_sol.plot()
-        '''))
+        display(ObjectCode('''nadf_sol.plot()'''))
 
         display(ReportText('Analiza porównawcza symulacji rozwiązania analitycznego i numerycznego'))
 
@@ -1755,7 +1770,34 @@ class ODENumericalSimulationsComponent(ReportComponent):
         sym_comparison.to_frequency_domain().single_sided_rms().truncate(0,0.2).plot()
         '''))
 
+definicja_danych=(
+'''
+m=Symbol('m',positive=True)
+g=Symbol('g')
+alfa=Symbol('\\alpha')
+v_0=Symbol('v_0')
+t=Symbol("t")
+x=Function("x")(t)
+y=Function("y")(t)
 
+dane={m:10,g:10,v_0:20,alfa:pi/4}
+''')
+
+rownania_predkosci=(
+'''
+v_x=Eq(x.diff(t),v_0*cos(alfa))
+v_y=Eq(y.diff(t),v_0*sin(alfa)-g*t)
+''')
+definicja_ode=(
+'''
+ODE_x=ODESystem(odes=Matrix([v_x.lhs-v_x.rhs]),dvars=Matrix([x]),ode_order=1)
+ODE_y=ODESystem(odes=Matrix([v_y.lhs-v_y.rhs]),dvars=Matrix([y]),ode_order=1)
+''')
+ode_solution_code=(
+'''
+ODE_x_sol=ODE_x.subs(dane).solution.with_ics([20])
+ODE_x_sol
+''')
 class ProjectileExampleComponent(ReportComponent):
     
     title="Przykład użycia ODESystem na podstawie rzutu ukośnego"
@@ -1782,77 +1824,33 @@ class ProjectileExampleComponent(ReportComponent):
         ODE_x_sol
         
         display(ReportText('Implementacja biblioteki ODESystem'))
-        display(ObjectCode(
-            '''
-            from dynpy.solvers.linear import ODESystem
-            '''))
+        display(ObjectCode('''from dynpy.solvers.linear import ODESystem'''))
   
         display(ReportText('Definiowanie zmiennych i utworzenie słownika'))
-        display(ObjectCode(
-            '''
-            m=Symbol('m',positive=True)
-            g=Symbol('g')
-            alfa=Symbol('\\alpha')
-            v_0=Symbol('v_0')
-            t=Symbol("t")
-            x=Function("x")(t)
-            y=Function("y")(t)
-
-            dane={m:10,g:10,v_0:20,alfa:pi/4}
-            '''))
+        display(ObjectCode(definicja_danych))
         
         display(ReportText('Równania ruchu dla osi x oraz y'))
-        display(ObjectCode(
-            '''
-            v_x=Eq(x.diff(t),v_0*cos(alfa))
-            v_y=Eq(y.diff(t),v_0*sin(alfa)-g*t)
-            '''))
+        display(ObjectCode(rownania_predkosci))
         display(ReportText('Zapisanie równań za pomocą ODESystem'))
-        display(ObjectCode(
-            '''
-            ODE_x=ODESystem(odes=Matrix([v_x.lhs-v_x.rhs]),dvars=Matrix([x]),ode_order=1)
-            ODE_y=ODESystem(odes=Matrix([v_y.lhs-v_y.rhs]),dvars=Matrix([y]),ode_order=1)
-            '''))
+        display(ObjectCode(definicja_ode))
 
         display(ReportText('Wywołanie odpowiednio zmiennych i funkcji daje następujące rezultaty'))
-        display(ObjectCode(
-            '''
-            ODE_x
-            '''))
+        display(ObjectCode('''ODE_x'''))
         display(SympyFormula(ode_x_x))
-        display(ObjectCode(
-            '''
-            ODE_x.general_solution[0]
-            '''))
+        display(ObjectCode('''ODE_x.general_solution[0]'''))
         display(SympyFormula(ode_x_x.general_solution[0]))
-        display(ObjectCode(
-            '''
-            ODE_x.steady_solution[0]
-            '''))
+        display(ObjectCode('''ODE_x.steady_solution[0]'''))
         display(SympyFormula(ode_x_x.steady_solution[0]))
-        display(ObjectCode(
-            '''
-            ODE_x.solution
-            '''))
+        display(ObjectCode('''ODE_x.solution'''))
         display(SympyFormula(ode_x_x.solution[0]))
-        display(ObjectCode(
-            '''
-            ODE_x.solution.subs(dane)
-            '''))
+        display(ObjectCode('''ODE_x.solution.subs(dane)'''))
 
         display(SympyFormula(ode_x_x.solution.subs(dane)))
-        display(ObjectCode(
-            '''
-            ODE_x_sol=ODE_x.subs(dane).solution.with_ics([20])
-            ODE_x_sol
-            '''))
+        display(ObjectCode(ode_solution_code))
 
         display(SympyFormula(ODE_x_sol))
         display(ReportText('Ten sam wynik można osiągnąć stosując metoodę " dsolve ", jednak nie jest ona zalecana do równań różniczkowych'))
-        display(ObjectCode(
-            '''
-            dsolve(v_y.subs(dane))
-            '''))
+        display(ObjectCode('''dsolve(v_y.subs(dane))'''))
         display(SympyFormula(dsolve(predkosc_y.subs(dane))))
 
 class ODESimulationComponent(ReportComponent):
