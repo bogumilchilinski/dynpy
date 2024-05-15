@@ -3379,7 +3379,7 @@ class TikZPicture(Environment,ReportModule):
         
         return copy.copy(self)
 
-    def in_figure(self,filename=None,caption=None):
+    def in_figure(self,filename=None,position=None, caption=None,width=None,height=None,marker=None, **kwargs):
 
         ReportCache.update_existing_files(self.__class__._default_path)
         
@@ -3410,7 +3410,9 @@ class TikZPicture(Environment,ReportModule):
 #                                                 \fi''')))
 
         img_params = self.__class__._image_parameters
-        width = self.__class__._image_parameters['width']
+    
+        if width is None:
+            width = self.__class__._image_parameters['width']
 
         if self._picture:
             from .report import Picture
@@ -3426,7 +3428,7 @@ class TikZPicture(Environment,ReportModule):
                 ReportCache._file_names[key] = filename
 
 
-            fig = Picture(filename+'.pdf', width=width, caption = caption)
+            fig = Picture(filename+'.pdf',  caption = caption,width=width,height=height ,marker=marker,**kwargs)
         else:
             standalone_plot.generate_tex(filename)
 
@@ -4087,7 +4089,7 @@ class SymbolsDescription(Description,ReportModule):
         if len(entries) != 0:
 
             self._container.append(NoEscape(self._description_head + '\n'))
-            self._container.append(copy.deepcopy(self))
+            self._container.append(copy.copy(self))
 
 
         return text
@@ -4296,7 +4298,7 @@ class AutoBreak(Environment):
         for no, obj in enumerate(terms):
 
             if terms[no - 1] == Symbol('=') or terms[no - 1] == Symbol('>') or terms[no - 1] == Symbol('\leq') or terms[no - 1] == Symbol('\geq') or terms[no - 1] == Symbol('<'):
-                new_terms += [obj]
+                new_terms += [Symbol('\n'),obj,Symbol('\n')]
 
             elif isinstance(obj, Mul) and  (
                 (any([elem.is_negative for elem in obj.args]))):

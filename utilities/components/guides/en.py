@@ -1930,3 +1930,298 @@ class DynamicSystemCompletenessCheckComponent(pl.DynamicSystemCompletenessCheckC
 class IssuePreparationComponent(pl.IssuePreparationComponent):
     
     title="Issue preparation component"
+
+    
+    
+class_call_str=(
+'''
+from dynpy.models.mechanics.principles import ComposedSystem
+from sympy import *
+
+class MyMaterialPointMovement(ComposedSystem):
+    pass
+''')
+
+atributes_str=(
+'''
+m = Symbol('m', positive=True)
+g = Symbol('g', positive=True)
+c = Symbol('c', positive=True)
+r = Symbol('r', positive=True)
+phi = dynamicsymbols('phi')
+
+c0 = Symbol('c0', positive=True)
+r0 = Symbol('r0', positive=True)
+phi0 = dynamicsymbols('phi0')
+''')
+
+innit_str=(
+'''
+def __init__(self,
+             m=None,
+             g=None,
+             c=None,
+             r=None,
+             phi=None,
+             ivar=Symbol('t'),
+             **kwargs):
+
+    if m is not None: self.m = m
+    if g is not None: self.g = g
+    if c is not None: self.c = c
+    if r is not None: self.r = r
+    if phi is not None: self.phi = phi
+    self.ivar = ivar
+
+    self.qs = [self.phi]
+
+    self._init_from_components(**kwargs)
+''')
+
+component_str=(
+'''
+@property
+def components(self):
+
+    components = {}
+
+
+    self._mass_x = MaterialPoint(self.m,
+                                 pos1=self.r * sin(self.phi),
+                                 qs=self.qs)
+    self._mass_y = MaterialPoint(self.m,
+                                 pos1=self.r * cos(self.phi),
+                                 qs=self.qs)
+
+    self._gravity_ = GravitationalForce(self.m,
+                                        self.g,
+                                        pos1=self.r * cos(self.phi),
+                                        qs=self.qs)
+
+
+
+    components['_mass_x']=self._mass_x
+    components['_mass_y']=self._mass_y
+    components['_gravity_']=self._gravity_
+
+
+    return components
+''')
+
+
+symb_desc_str=(
+'''
+def symbols_description(self):
+    self.sym_desc_dict = {
+        self.m: r'Mass',
+        self.g: r'Gravity constant',
+        self.c: r'',
+    }
+
+    return self.sym_desc_dict
+''')
+
+def_data_str=(
+'''
+def get_default_data(self):
+
+    m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+
+    default_data_dict = {
+        self.m: [m0 * no for no in range(1, 8)],
+        self.c: [c0 * no for no in range(1, 8)],
+        self.r: [r0 * no for no in range(1, 8)],
+        self.phi: [phi0 * no for no in range(1, 8)],
+    }
+
+    return default_data_dict
+''')
+
+num_data_str=(
+'''
+def get_numerical_data(self):
+
+    m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+
+    default_data_dict = {
+        self.m: [m0 * no for no in range(1, 8)],
+        self.c: [c0 * no for no in range(1, 8)],
+        self.r: [r0 * no for no in range(1, 8)],
+        self.phi: [phi0 * no for no in range(1, 8)],
+    }
+
+    return default_data_dict
+''')
+
+dict_str=(
+'''
+def unit_dict(self):
+
+    from pint import UnitRegistry
+    ureg=UnitRegistry()
+
+    unit_dict = {
+        self.m: ureg.kilogram,
+        self.g: ureg.meter/ureg.second/ureg.second,
+        self.c: ureg.kilogram/ureg.second,
+        self.r: ureg.meter,
+        self.phi: ureg.radian,
+        self.c0: ureg.kilogram/ureg.second,
+        self.r0: ureg.meter,
+        self.phi0:  ureg.radian
+    }
+    return unit_dict
+''')
+
+full_class_str=(
+'''
+from dynpy.models.mechanics.principles import ComposedSystem
+from sympy import *
+
+class MyMaterialPointMovement(ComposedSystem):
+
+    m = Symbol('m', positive=True)
+    g = Symbol('g', positive=True)
+    c = Symbol('c', positive=True)
+    r = Symbol('r', positive=True)
+    phi = dynamicsymbols('phi')
+
+    c0 = Symbol('c0', positive=True)
+    r0 = Symbol('r0', positive=True)
+    phi0 = dynamicsymbols('phi0')
+
+    def __init__(self,
+                 m=None,
+                 g=None,
+                 c=None,
+                 r=None,
+                 phi=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m is not None: self.m = m
+        if g is not None: self.g = g
+        if c is not None: self.c = c
+        if r is not None: self.r = r
+        if phi is not None: self.phi = phi
+        self.ivar = ivar
+
+        self.qs = [self.phi]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+
+        self._mass_x = MaterialPoint(self.m,
+                                     pos1=self.r * sin(self.phi),
+                                     qs=self.qs)
+        self._mass_y = MaterialPoint(self.m,
+                                     pos1=self.r * cos(self.phi),
+                                     qs=self.qs)
+
+        self._gravity_ = GravitationalForce(self.m,
+                                            self.g,
+                                            pos1=self.r * cos(self.phi),
+                                            qs=self.qs)
+
+
+      
+        components['_mass_x']=self._mass_x
+        components['_mass_y']=self._mass_y
+        components['_gravity_']=self._gravity_
+     
+
+        return components
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass',
+            self.g: r'Gravity constant',
+            self.c: r'',
+        }
+
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+
+        default_data_dict = {
+            self.m: [m0 * no for no in range(1, 8)],
+            self.c: [c0 * no for no in range(1, 8)],
+            self.r: [r0 * no for no in range(1, 8)],
+            self.phi: [phi0 * no for no in range(1, 8)],
+        }
+
+        return default_data_dict
+
+    def get_numerical_data(self):
+
+        m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+
+        default_data_dict = {
+            self.m: [m0 * no for no in range(1, 8)],
+            self.c: [c0 * no for no in range(1, 8)],
+            self.r: [r0 * no for no in range(1, 8)],
+            self.phi: [phi0 * no for no in range(1, 8)],
+        }
+
+        return default_data_dict
+        
+    def unit_dict(self):
+
+        from pint import UnitRegistry
+        ureg=UnitRegistry()
+
+        unit_dict = {
+            self.m: ureg.kilogram,
+            self.g: ureg.meter/ureg.second/ureg.second,
+            self.c: ureg.kilogram/ureg.second,
+            self.r: ureg.meter,
+            self.phi: ureg.radian,
+            self.c0: ureg.kilogram/ureg.second,
+            self.r0: ureg.meter,
+            self.phi0:  ureg.radian
+        }
+        return unit_dict        
+''')
+
+class DynSysImplementationComponent(ReportComponent):
+    
+    title="Implementacja systemow dynamicznych"
+
+
+    def append_elements(self):
+        
+        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+
+
+        #przekopiowac tu fragment kodu z guide pamietajac o indentach
+        display(ReportText("Tworzenie klasy należy zacząć od wybrania nazwy opisującej nasz system oraz zadeklarowania jej w odpowiedni sposób, który został przedstawiony poniżej:")) #itp
+        display(GuideCode(class_call_str))
+        display(ReportText('Następnie deklarujemy atrybuty/symbole, które są niezbędne do opisania danego obiektu'))
+        display(GuideCode(atributes_str))
+        display(ReportText('Do zdefiniowania inicjalizacji obiektu klasy z określonymi atrybutami służy poniższa struktura.'))
+        display(GuideCode(innit_str))
+        display(ReportText('W tym kroku korzystamy z predefiniowanych elementów takich jak punkty materialne, dyski, itp.'))
+        display(GuideCode(component_str))
+        display(ReportText('W tej części opisujemy parametry klasy, np. masę'))
+        display(GuideCode(symb_desc_str))
+        display(ReportText('Sekcja ta przedstawia inicjalizację słownika zawierającego dane symboliczne do równań analitycznych systemu:'))
+        display(GuideCode(def_data_str))
+        display(ReportText('Kolejnym krokiem jest przypisanie słowników zawierających dane do symulacji numerycznych:'))
+        display(GuideCode(num_data_str))
+        display(ReportText('Ta sekcja opisuje definiowanie jednostek używanych przez system dynamiczny:'))
+        display(GuideCode(dict_str))
+        
+        display(ReportText('Ostatecznie kod implementacji całego systemu ma następującą postać:'))
+        display(GuideCode(full_class_str))
+        
+        
+        
+    
+    

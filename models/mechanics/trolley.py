@@ -316,11 +316,25 @@ class ForcedSpringMassSystem(SpringMassSystem):
     def symbols_description(self):
 
         self.sym_desc_dict = {
-            self.m: r'mass of system on the spring',
+            self.m: r'Mass of system on the spring',
             self.k: r'Spring coefficient ',
+            self.F: r'Force',
+            self.g: r'Gravitational acceleration'
         }
         return {**super().symbols_description(),**self.sym_desc_dict}
+    
+    def unit_dict(self):
+    
+        from pint import UnitRegistry
+        ureg=UnitRegistry()
 
+        unit_dict = {
+            self.k: ((ureg.kilogram*ureg.meter)/ureg.second/ureg.second)/ureg.meter,
+            self.m: ureg.kilogram,
+            self.g: ureg.meter/ureg.second/ureg.second,
+            self.F: (ureg.kilogram*ureg.meter)/ureg.second/ureg.second
+        }
+        return unit_dict
 
 
 #dziedziczenie po SpringMass
