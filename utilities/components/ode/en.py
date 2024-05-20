@@ -1280,7 +1280,7 @@ class NaturalFrequenciesAnalysisComponent(ReportComponent):
         display(ReportText('''where: $\omega_{MS}^2$ corresponds a frequency of a main system, $\omega_{C}^2$ corresponds a composed frequency and $\omega_{TMD}^2$ corresponds a frequency of a tuned mass damper.
         '''))
         
-        display(ReportText('''Analyzing the natural frequency components, some dependencies can be noticed. An expression of "a base frequency" can be separated, which is changed by "a $\Delta$ frequency" value. It can be presented as follows:
+        display(ReportText('''Analyzing the natural frequency components, some dependencies can be noticed. An expression of "a base frequency" can be separated, which is changed by a $\Delta \omega$ value. It can be presented as follows:
         '''))
         
         display(SympyFormula(Eq(omg_1**2, omg_m**2 - delta * omg**2)))
@@ -1406,7 +1406,7 @@ class NormalisedNaturalFrequenciesAnalysisComponent(ReportComponent):
 
         display(SympyFormula(Eq(Symbol('A_{\omega_n^2}'),simplify(base_matrix),evaluate=False)))
         
-        display(ReportText('''Analyzing the natural frequency components, some dependencies can be noticed. An expression of "a base frequency" can be separated, which is changed by "a $\Delta$ frequency" value. It can be presented as follows:
+        display(ReportText('''Analyzing the natural frequency components, some dependencies can be noticed. An expression of "a base frequency" can be separated, which is changed by a $\Delta \omega$ value. It can be presented as follows:
         '''))
         
         display(SympyFormula(Eq(omg_1**2, omg_n**2 - delta * omg**2)))
