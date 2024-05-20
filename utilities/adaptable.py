@@ -2979,7 +2979,75 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
         return (computed_data)
 
+    def compute_solution(
+        self,
+        t_span=None,
+        ic_list=None,
+        t_eval=None,
+        params_values=None,
+        method="RK45",
+        derivatives=False,
+        model_level_name=0,
+        coord_level_name=-1,
+        backend=None,
+        dependencies=None,
+        output=None,
+    ):
 
+        computed_data = self.copy()
+
+        if t_span is not None:
+            computed_data = computed_data.reindex(t_span)
+
+        result = computed_data.perform_simulations(
+            model_level_name=model_level_name,
+            coord_level_name=coord_level_name,
+            ics=ic_list,
+            backend=backend,
+            dependencies=dependencies,
+        )
+
+        if output == "NA":
+            return TimeDataFrame(result.droplevel(0))
+        else:
+            return TimeDataFrame(result)
+
+    def with_ics(self, ics=None, ivar0=0, sol0=None):
+        computed_data = self.copy()
+
+        if isinstance(ics, (list, tuple)):
+            ics_list = ics
+            computed_data = self.insert_ics(ics_list=ics_list)
+        elif isinstance(ics, dict):
+            dvars_list = self.get_dvars_in_order(computed_data.columns)
+            ics_list = [ics[coord] for coord in dvars_list]
+            computed_data = self.insert_ics(ics_list=ics_list)
+        else:
+            raise TypeError(
+                f"Expected list, tuple or dictionary, received: {type(ics)}"
+            )
+
+        return computed_data
+
+    def insert_ics(self, ics_list):
+        computed_data = self.copy()
+
+        if len(ics_list) < len(computed_data.columns):
+            param_span = len(computed_data.columns) // len(ics_list)
+            ics_list = self.multiply_list(ics_list, param_span)
+        computed_data.values[0] = ics_list
+        return computed_data
+
+    def multiply_list(self, ics_list, param_span):
+        duplicated_list = []
+        for _ in range(param_span):
+            duplicated_list.extend(ics_list)
+        return duplicated_list
+
+    def get_dvars_in_order(self, columns):
+        """This method is used to get dvars list in correct order"""
+        seen = set()
+        return [col[2] for col in columns if not (col[2] in seen or seen.add(col[2]))]
 
 class NumericalAnalisysSeries(AdaptableSeries):
 

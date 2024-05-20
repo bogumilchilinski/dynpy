@@ -2,7 +2,7 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, re, pi, latex,
                    dsolve, solve, fraction, factorial, Add, Mul, exp, zeros, shape,
                    numbered_symbols, integrate, ImmutableMatrix,Expr,Dict,Subs,Derivative,Dummy,
-                   lambdify, Pow, Integral, init_printing, I, N,eye, zeros, det, Integer,separatevars)
+                   lambdify, Pow, Integral, init_printing, I, N,eye, zeros, det, Integer,separatevars,Heaviside)
 
 from sympy.matrices.matrices import MatrixBase
 from sympy.solvers.ode.systems import matrix_exp, matrix_exp_jordan_form
@@ -2519,6 +2519,8 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         
         sol = 0*b
         
+        #print([elem for elem,coeff in self._get_excitation_comps]) 
+        
         for elem,coeff in self._get_excitation_comps:
             if type(elem) == cos:
                 omg = (elem.args[0].diff(self.ivar)).doit()
@@ -2526,6 +2528,9 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
             elif type(elem) == sin:
                 omg = (elem.args[0].diff(self.ivar)).doit()
                 sol += self._cos_comp(omg,0*b) + self._sin_comp(omg,coeff)
+
+            elif type(elem) == Heaviside:
+                sol += self._hom_equation().general_solution.rhs*elem
 
             elif elem == S.One:
                 sol += self._cos_comp(0,coeff) + self._sin_comp(0,coeff)
