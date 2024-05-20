@@ -3617,7 +3617,7 @@ class LinearWithConstCoeffODE(ODESystem):
 
         y_sym=Symbol(str(y))
         
-        return {'ivar':d_ivar, 'dvar':d_var, 'y':y_sym, 'y_fun':fun_str} ##slownik zrobic z tego
+        return {'ivar':d_ivar, 'dvar':d_var, 'y_fun':y_sym, 'y':fun_str} ##slownik zrobic z tego
     
     def _function_separation(self,form='expr'):
         
