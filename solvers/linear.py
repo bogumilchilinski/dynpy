@@ -2468,6 +2468,93 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
           
         return cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar)  
 
+    def _exp_sin_comp(self,omega,amp):
+
+        damping = self._is_proportional_damping
+        if damping is not False:
+    
+            sl=int(N((len(self.dvars))/2))
+            #print('rayleight damping - new code stedy')
+            modes = self._reduced_modes[:sl,::2]
+            modes_trig = self._trig_modes
+            eigs = [self._trig_eigenvalues[no,no] for no  in range(len(self.dvars))[::2]]
+            
+            #display(eigs)
+    
+            b=Matrix(amp)[sl:,:]
+    
+            
+            base_exp_sin_list=[ (damping*omega*eigen**2)/((eigen**2 - omega**2)**2 + (damping*omega*eigen**2)**2)  for eigen in eigs]
+            base_exp_cos_list=[ (eigen**2 - omega**2)/((eigen**2 - omega**2)**2 + (damping*omega*eigen**2)**2)  for eigen in eigs]
+            
+            
+            modes_inv=modes.inv()
+            modes_x_b=modes*b
+            
+            exp_cos_comp_base = modes_inv*diag(*base_exp_cos_list)*modes_x_b
+            exp_sin_comp_base = modes_inv*diag(*base_exp_sin_list)*modes_x_b
+            
+            exp_cos_comp=Matrix(exp_cos_comp_base).row_insert(sl,exp_sin_comp_base*omega)
+            exp_sin_comp=Matrix(exp_sin_comp_base).row_insert(sl,-exp_cos_comp_base*omega)
+            
+        else:
+            #print('rayleight damping zero - new code stedy')
+            modes = self.modes
+            eigs = self.eigenvalues
+        
+            A = self._fundamental_matrix
+            b = amp
+    
+            exp_cos_comp = -(A.inv() * omega**2 + A).inv()*b
+            exp_sin_comp = -omega*A.inv() * exp_cos_comp
+          
+        return exp_cos_comp*exp(self.ivar)*cos(omega*self.ivar) +  exp_sin_comp*exp(self.ivar)*sin(omega*self.ivar)
+    
+    
+    def _exp_cos_comp(self,omega,amp):
+
+        damping = self._is_proportional_damping
+        if damping is not False:
+    
+            sl=int(N((len(self.dvars))/2))
+            #print('rayleight damping - new code stedy')
+            modes = self._reduced_modes[:sl,::2]
+            modes_trig = self._trig_modes
+            eigs = [self._trig_eigenvalues[no,no] for no  in range(len(self.dvars))[::2]]
+            
+            #display(eigs)
+    
+            b=Matrix(amp)[sl:,:]
+    
+            
+            base_exp_sin_list=[ (damping*omega*eigen**2)/((eigen**2 - omega**2)**2 + (damping*omega*eigen**2)**2)  for eigen in eigs]
+            base_exp_cos_list=[ (eigen**2 - omega**2)/((eigen**2 - omega**2)**2 + (damping*omega*eigen**2)**2)  for eigen in eigs]
+            
+            
+            modes_inv=modes.inv()
+            modes_x_b=modes*b
+            
+            exp_cos_comp_base = modes_inv*diag(*base_exp_cos_list)*modes_x_b
+            exp_sin_comp_base = modes_inv*diag(*base_exp_sin_list)*modes_x_b
+            
+            exp_cos_comp=Matrix(exp_cos_comp_base).row_insert(sl,exp_sin_comp_base*omega)
+            exp_sin_comp=Matrix(exp_sin_comp_base).row_insert(sl,-exp_cos_comp_base*omega)
+            
+        else:
+            #print('rayleight damping zero - new code stedy')
+            modes = self.modes
+            eigs = self.eigenvalues
+        
+            A = self._fundamental_matrix
+            b = amp
+    
+            exp_cos_comp = -(A.inv() * omega**2 + A).inv()*b
+            exp_sin_comp = -omega*A.inv() * exp_cos_comp
+          
+        return exp_cos_comp*exp(self.ivar)*cos(omega*self.ivar) +  exp_sin_comp*exp(self.ivar)*sin(omega*self.ivar)
+    
+
+    
     @cached_property
     def _get_excitation_comps(self):
         '''
@@ -3811,5 +3898,4 @@ class BernoulliODE(ODESystem):
         sep_ode = LinearWithConstCoeffODE(ode_rhs,dvars=red_dvar,ivar=self.ivar,ode_order=1)
 
         return sep_ode
-    
     

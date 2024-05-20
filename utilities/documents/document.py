@@ -1178,3 +1178,21 @@ class BasicsOfDynSysImplementationGuide(UsageOfDynamicSystemsGuide):
 
         return comp_list
 
+
+class BasicsOfReportingGuide(UsageOfDynamicSystemsGuide):
+
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+
+            guide_comp.CocalcDynSysListComponent,
+            guide_comp.ReportingBasicsComponent,
+            guide_comp.DynamicSystemCallComponent,
+            guide_comp.SimulationsComponent,
+            guide_comp.SimulationReportComponent,            
+
+        ]
+
+        return comp_list
+    
