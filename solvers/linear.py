@@ -2211,7 +2211,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
             
             #display(K_mat,C_mat)
             
-            if C_mat == K_mat*lam:
+            if C_mat == K_mat*lam and lam != 0:
                 return lam
             else:
                 return False
@@ -2362,6 +2362,8 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
 
         
         damping = self._is_proportional_damping
+        #print('damping = ',damping)
+        
         if damping is not False:
             
             
@@ -2422,6 +2424,8 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
 
         
         damping = self._is_proportional_damping
+        #print('damping = ',damping)
+        
         if damping is not False:
 
             sl=int(N((len(self.dvars))/2))

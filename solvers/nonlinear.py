@@ -624,9 +624,17 @@ class MultiTimeScaleSolution(ODESystem):
                 SolverClass = FirstOrderLinearODESystemWithHarmonics
 
             #SolverClass = FirstOrderLinearODESystemWithHarmonics
-            SolverClass = FirstOrderLinearODESystem
+            #SolverClass = FirstOrderLinearODESystem
             
-            sol = SolverClass.from_ode_system(approx_subs).steady_solution.applyfunc(
+            
+            ode_2_solve = SolverClass.from_ode_system(approx_subs)
+            
+            
+            fm_mat = ode_2_solve._as_fode()._fundamental_matrix
+            #display(fm_mat)
+            #display(fm_mat.diagonalize())
+            
+            sol = ode_2_solve.steady_solution.applyfunc(
                 lambda obj: obj.expand()).applyfunc(eqns_map)#.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).sum_expr)
 
             #display(sol)
