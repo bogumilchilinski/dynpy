@@ -2125,6 +2125,28 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
         system.symbols_description()
         system.unit_dict()
         
+        
+issue_title_str = """
+Maintenance of `{system_name}` class which is dynamic system representation        
+"""
+        
+issue_desc_str = """
+
+The following problems have to be checked or fixed, in order to ensure the correctness of implemented system:
+
+- [ ] checking if a class is executable,
+
+- [ ] validation of figures for schemes and real examples,
+
+- [ ] validation of reference parameters,
+
+- [ ] validation of random parameters,
+
+- [ ] validation of  description of parameters,
+
+- [ ] validation of units.
+"""
+        
 class IssuePreparationComponent(ReportComponent):
     
     title="Wzór na tworzenie issue w systemie GitHub"
@@ -2132,31 +2154,15 @@ class IssuePreparationComponent(ReportComponent):
     def append_elements(self):
         
         system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        system_name = system.__class__.__name__
         
         display(ReportText("Przykładowy tekst, który pozwoli na sprawne przygotowywanie issue ma następującą formę:"))
-        
-        display(ObjectCode('''
-            from dynpy.utilities.report import Markdown
 
-            issue_no = 567
-            system_name = 'ForcedSpringMassSystem'
+        display(ReportText("# Title: "))
+        display(ObjectCode(issue_title_str.format(system_name=system_name)))
 
-            issue_str = f"""
-            # Issue no. #{issue_no}
-            ## Maintenance of `{system_name}` class which is dynamic system representation
-
-            The following problems have to be checked or fixed , in order to ensure the correctness of implemented system:
-
-            - [ ] validation of reference parameters,
-
-            - [ ] validation of random parameters,
-
-            - [ ] validation of units.
-            """
-
-            Markdown(issue_str)
-         '''
-                          ))
+        display(ReportText("# Description: "))
+        display(ObjectCode(issue_desc_str))
         
         
         

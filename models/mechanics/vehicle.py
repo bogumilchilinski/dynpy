@@ -106,7 +106,62 @@ class UndampedVehicleSuspension(ComposedSystem):
 
         return components
 
+    def get_numerical_parameters(self):
+
+        m, I, l_rod, l_r, l_l, k_r, k_l, F_engine, Omega, phi, z = self.m, self.I, self.l_rod, self.l_r, self.l_l, self.k_r, self.k_l, self.F_engine, self.Omega, self.phi, self.z
+        
+        get_numerical_parameters = {
+
+            self.m: 0.5, 
+            self.I: 20, 
+            self.l_rod: 2,
+            self.l_r: 9.81,
+            self.l_l: 0.5, 
+            self.k_r: 20, 
+            self.k_l: 2,
+            self.F_engine: 9.81,
+            self.Omega: 2,
+            self.phi: 3,
+            self.z: 1,
+        }
+        return get_numerical_parameters
+
+    def symbols_description(self):
+
+        self.sym_desc_dict = {
+            self.m: r'Mass of system',
+            self.I: r'Moment of inertia',
+            self.l_rod: r'Length of the rod',
+            self.l_l: r'Length of the left side of the suspension',
+            self.l_r: r'Length of the right side of the suspension',
+            self.k_r: r'Right spring coefficient',
+            self.k_l: r'Left spring coefficient ',
+            self.F_engine: r'Force of engine',
+            self.Omega: r'Excitation frequency ',
+            self.phi: r'Angular position of suspension',
+            self.z: r'Linear position of suspension',}
+        return {**super().symbols_description(),**self.sym_desc_dict}
     
+    
+    
+    
+    
+    def unit_dict(self):
+
+        from pint import UnitRegistry
+        ureg=UnitRegistry()
+
+        unit_dict = {
+            self.k_r: ureg.newton/ureg.meter,
+            self.k_l: ureg.newton/ureg.meter,
+            self.m: ureg.kilogram,
+            self.I: ureg.kilogram*ureg.meter**2,
+            self.F_engine: ureg.newton,
+            self.l_l: ureg.meter,
+            self.l_r: ureg.meter,
+            self.l_rod: ureg.meter,
+        }
+        return unit_dict
 #    def max_dynamic_force_pin(self):
 #        return self.frequency_response_function()*self.stiffness_matrix()[0]
     

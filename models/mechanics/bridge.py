@@ -21,6 +21,9 @@ from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, bas
 
 from functools import cached_property
 
+from pint import UnitRegistry
+ureg = UnitRegistry()
+
 # class ComposedSystem(HarmonicOscillator):
 #     """Base class for all systems
 
@@ -622,6 +625,22 @@ class BeamBridge(ComposedSystem):
         free_coeff=ans.subs({cos(self.Omega*self.ivar):0, sin(self.Omega*self.ivar):0}).subs(data)
         return (free_coeff)
     
+    def unit_dict(self):
+
+        unit_dict = {
+
+            self.k_beam: ureg.newton/ureg.meter,
+            self.m: ureg.kilogram,
+            self.g: ureg.meter/ureg.second/ureg.second,
+            self.Omega: ureg.radian/ureg.second,
+            self.F: ureg.newton,
+            self.ivar: ureg.second,
+            self.z: ureg.meter,
+            self.z.diff(self.ivar): ureg.meter/ureg.second,
+            self.z.diff(self.ivar,2): ureg.meter/ureg.second/ureg.second,
+        }
+        return unit_dict
+    
 #Amadi
 class BeamBridgeDamped(BeamBridge):
     """Ready to use model of damped bridge represented by the mass supported by elastic beam.
@@ -754,6 +773,26 @@ class BeamBridgeDamped(BeamBridge):
         dyn_force=(self._beam_bridge.components['_spring'].force().subs(amps)).subs(data).expand().doit()
 
         return dyn_force
+    def unit_dict(self):
+
+        from pint import UnitRegistry
+        ureg=UnitRegistry()
+
+        unit_dict = {
+            self.m: ureg.kilogram,
+            self.k_beam: ureg.newton/ureg.meter,
+            self.g: ureg.meter/ureg.second/ureg.second,
+            self.Omega: ureg.radian/ureg.second,
+            self.F: ureg.newton,
+            self.l: ureg.meter,
+            self.module: ureg.newton/ureg.meter/ureg.meter,
+            self.inertia: ureg.kilogram*ureg.meter*ureg.meter,
+            self.c: ureg.newton*ureg.second/ureg.meter,
+            self.z: ureg.meter,
+            self.z.diff(self.ivar): ureg.meter/ureg.second,
+            self.z.diff(self.ivar,2): ureg.meter/ureg.second/ureg.second,
+        }
+        return unit_dict
 #Amadi
 class BeamBridgeTMD(BeamBridge):
 
