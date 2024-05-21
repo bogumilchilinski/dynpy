@@ -1618,13 +1618,13 @@ class ODESystem(AnalyticalSolution):
         
         
     def _free_component(self):
-        return (self.lhs - self.rhs).subs({var:0 for var in self.dvars}).doit()
+        type(self.odes)
+        return self.odes.subs({var:0 for var in self.dvars}).doit()
+#         return (self.lhs - self.rhs).subs({var:0 for var in self.dvars}).doit()
     
     def _hom_equation(self):
-        free=self._free_component()
-        hom_eq=(self.lhs - free)
         
-        return type(self)(odes=hom_eq, odes_rhs=zeros(len(self.dvars),1), dvars=self.dvars, ode_order=self._ode_order, ivar=self._ivar)#dzieki Madi<3
+        return ODESystem(odes = (self.odes - self._free_component()), dvars = self.dvars, ode_order = self._ode_order, ivar = self._ivar)#dzieki Madi<3
     
     def char_polynomial(self):
         r=Symbol('r')
