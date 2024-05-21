@@ -2627,10 +2627,10 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 odes =self._hom_equation()+coeff
                 #display(self._hom_equation())
                 #display(odes)
-                sol = odes.solution.with_ics(ics_list,ivar0)
+                sol = odes.general_solution.with_ics(ics_list,ivar0)
                 
                 
-                sol += gen_sol.rhs*elem
+                sol += sol.rhs*elem
 
             elif elem == S.One:
                 sol += self._cos_comp(0,coeff) + self._sin_comp(0,coeff)
