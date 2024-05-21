@@ -2617,7 +2617,20 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 sol += self._cos_comp(omg,0*b) + self._sin_comp(omg,coeff)
 
             elif type(elem) == Heaviside:
-                sol += self._hom_equation().general_solution.rhs*elem
+                #display(coeff)
+                #display(elem)
+                ivar0 = -elem.args[0].subs(self.ivar,0)
+                #   display(ivar0)
+                
+                ics_list = list(0*b)
+                
+                odes =self._hom_equation()+coeff
+                #display(self._hom_equation())
+                #display(odes)
+                sol = odes.solution.with_ics(ics_list,ivar0)
+                
+                
+                sol += gen_sol.rhs*elem
 
             elif elem == S.One:
                 sol += self._cos_comp(0,coeff) + self._sin_comp(0,coeff)
