@@ -37,7 +37,7 @@ class SimplifiedExpr:
     
     """
 
-    This class provides methods which allow to obtain a differencial equation in simplified form, or extract desired simplification parameters. 
+    This class provides methods which allow to obtain a differential equation in simplified form, or extract desired simplification parameters. 
 
     """
 
@@ -49,6 +49,7 @@ class SimplifiedExpr:
         self._expr = expr
         self._ivar = ivar
         self._parameters = parameters
+
     @property
     def _fun_list(self):
         
@@ -59,7 +60,9 @@ class SimplifiedExpr:
         """
         
         funlist=[expr  for  expr in  (self._expr).atoms(sin,cos) if expr.has(self._ivar)]
+        
         return funlist
+    
     @property
     def simplified_expr(self):
         
@@ -87,10 +90,10 @@ class SimplifiedExpr:
         expanded_sum=sum([values[0]*values[1]  for  key,values  in  data.items()  ],S.Zero)
         
         expr_rest = (self._expr - expanded_sum).expand()
-#         display(expr_rest)
+        # display(expr_rest)
         
-#         print(len(self._expr.args))
-#         print(len(simplified_sum.args))
+        # print(len(self._expr.args))
+        # print(len(simplified_sum.args))
         return simplified_sum + expr_rest
 
     
@@ -123,6 +126,7 @@ class SimplifiedExpr:
         
         bucket = {aux_symbol(no):(self._expr.coeff(fun),fun) for no,fun in enumerate(self._fun_list)}
         return bucket
+    
     @property
     def full_expr(self):
         

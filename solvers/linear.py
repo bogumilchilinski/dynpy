@@ -937,6 +937,8 @@ class ODESystem(AnalyticalSolution):
     
     _parameters = None
     _ode_order = 2
+    
+    _profcheck = False
 
     @classmethod
     def from_ode_system(cls,ode_system):
@@ -2562,16 +2564,70 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         '''
         It expands the free terms vector to sequnece of harmonic (sin and cos) components.
         '''
-        terms = self._free_terms.expand().applyfunc(lambda row: (TR8(row).expand()))
+        base_terms = self._free_terms.expand().applyfunc(lambda row: (TR8(row).expand()))
+        terms = base_terms
 
         #base = sin,cos,exp,
         base = Function,
 
-        components = [
-            (comp,terms.applyfunc(lambda row: row.coeff(comp))) for comp in terms.atoms(*base) if comp.has(self.ivar)
-        ]
+        # components = [
+        #     (comp,terms.applyfunc(lambda row: row.coeff(comp))) for comp in terms.atoms(*base) if comp.has(self.ivar)
+        # ]
+        components = []
+        #display(terms)
         
-        rest = (terms - sum([coeff*comp  for comp,coeff in components],Matrix([0]*len(self.dvars)))).doit()
+        base_comps_H = terms.atoms(Heaviside)
+        
+        for comp in base_comps_H:
+            # print('_get_excitation_comps -> Heaviside only')
+            # display(comp,type(comp))
+            # print('its called by:')
+            # display(self)
+            
+            if comp.has(self.ivar): #and not type(comp)==Mul:
+                #display(terms)
+                coeff_of_comp = terms.applyfunc(lambda row: row.coeff(comp))
+                components += [(comp,coeff_of_comp)]
+                terms  = terms -  coeff_of_comp*comp
+
+        base_comps_sc = terms.atoms(sin,cos)
+
+        #display(terms)
+        for comp in base_comps_sc:
+            # print('_get_excitation_comps - sin/cos')
+            # display(comp,type(comp))
+            # print('its called by:')
+            # display(self)
+            
+            if comp.has(self.ivar): #and not type(comp)==Mul:
+                #display(terms)
+                coeff_of_comp = terms.applyfunc(lambda row: row.coeff(comp))
+                components += [(comp,coeff_of_comp)]
+                terms  = terms -  coeff_of_comp*comp
+  
+        base_comps_fun = terms.atoms(Function)
+
+        #display(terms)
+        for comp in base_comps_fun:
+            # print('_get_excitation_comps - sin/cos')
+            # display(comp,type(comp))
+            # print('its called by:')
+            # display(self)
+            
+            if comp.has(self.ivar): #and not type(comp)==Mul:
+                #display(terms)
+                coeff_of_comp = terms.applyfunc(lambda row: row.coeff(comp))
+                components += [(comp,coeff_of_comp)]
+                terms  = terms -  coeff_of_comp*comp
+        
+        
+        rest = (base_terms - sum([coeff*comp  for comp,coeff in components],Matrix([0]*len(self.dvars)))).doit()
+        
+        #self._profcheck = True
+        if self._profcheck:
+            print('Terms collected')
+            display(rest)
+        
 
         # #        display('ext_forces',ext_forces)
 
@@ -2629,9 +2685,9 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 odes =self._hom_equation()+coeff
                 #display(self._hom_equation().odes)
                 #display(odes)
-                sol = odes.solution.with_ics(ics_list,ivar0)
+                sol_H = odes.solution.with_ics(ics_list,ivar0)
                 
-                sol += sol.rhs*elem
+                sol += sol_H.rhs*elem
 
             elif elem == S.One:
                 sol += self._cos_comp(0,coeff) + self._sin_comp(0,coeff)
