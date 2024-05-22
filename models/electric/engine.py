@@ -31,10 +31,14 @@ class DCMotor(ComposedSystem):
     M_s = Symbol('M_s', positive=True)
     B = Symbol('B', positive=True)
     J = Symbol('J', positive=True)
-    M_obc = Symbol('M_obc', positive=True)
+    M_obc = Symbol('M_l', positive=True)
     k_m = Symbol('k_m', positive=True)
+    M_a = Symbol('M_a', positive=True)
+    M_r = Symbol('M_r', positive=True)
     i_w=dynamicsymbols('i_w')
     omega_s=dynamicsymbols('omega_s')
+    
+
     
     def __init__(self,
                  U_z=None, 
@@ -49,6 +53,8 @@ class DCMotor(ComposedSystem):
                  J=None, 
                  M_obc=None, 
                  k_m=None,
+                 M_a=None,
+                 M_r=None,
                  ivar=Symbol('t'),
                  **kwargs):
         
@@ -64,6 +70,8 @@ class DCMotor(ComposedSystem):
         if J is not None: self.J = J
         if M_obc is not None: self.M_obc = M_obc
         if k_m is not None: self.k_m = k_m
+        if M_a is not None: self.M_a = M_a
+        if M_r is not None: self.M_r = M_r
         
         self.ivar = ivar
         self.qs = [self.i_w, self.omega_s]
@@ -95,19 +103,26 @@ class DCMotor(ComposedSystem):
         return components
         
     def symbols_description(self):
+        i_roc=self.i_w.diff(self.ivar)
         self.sym_desc_dict = {
             self.U_z: r'voltage supplying the rotor',
             self.R_w: r'equivalent resistance of the rotor windings',
             self.L_w: r'equivalent inductance of the rotor windings',
             self.E: r'electromotive force of induction',
-            self.U_Rw: r'Voltage across the rotor winding resistance',
-            self.U_Lw: r'Voltage related to the rotor inductance',
+            self.U_Rw: r'voltage across the rotor winding resistance',
+            self.U_Lw: r'voltage related to the rotor inductance',
             self.k_e: r'electric constant',
             self.M_s: r'rotor torque',
             self.B: r'coefficient of viscous friction reduced to the rotor shaft',
             self.J: r'moment of inertia reduced to the rotor shaft',
             self.M_obc: r'engine load torque',
             self.k_m: r'mechanical constant',
+            self.i_w: r'rotor winding current',
+            i_roc:r'rotor winding current rate of change',
+            self.omega_s:r'angular velocity of the rotor',
+            self.M_a:r'rotor angular acceleration torque',
+            self.M_r:r'rotor motion resistance torque',
+            self.omega_s.diff(self.ivar):r'angular acceleration of the rotor',
         }
         return self.sym_desc_dict
     

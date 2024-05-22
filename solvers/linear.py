@@ -577,6 +577,7 @@ class AnalyticalSolution(ImmutableMatrix):
 
 
         velocities = self.dvars[int(len(self.dvars)/2) :]
+        velocities=self.dvars
         for vel in velocities:
             solution_tdf[vel].to_numpy()
             gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
@@ -872,6 +873,7 @@ class ODESolution(AnalyticalSolution):
         self._dvars_str = self._get_dvars_str()
         self.ivar_0 = ivar0
         const_dict=self._calculate_constant(ics, sol0)
+        display(const_dict)
        
         return self.subs(const_dict)
     
