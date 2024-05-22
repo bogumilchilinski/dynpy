@@ -873,7 +873,7 @@ class ODESolution(AnalyticalSolution):
         self._dvars_str = self._get_dvars_str()
         self.ivar_0 = ivar0
         const_dict=self._calculate_constant(ics, sol0)
-        display(const_dict)
+        #display(const_dict)
        
         return self.subs(const_dict)
     
@@ -1620,9 +1620,9 @@ class ODESystem(AnalyticalSolution):
         
         
     def _free_component(self):
-        type(self.odes)
+        #type(self.odes)
         return self.odes.subs({var:0 for var in self.dvars}).doit()
-#         return (self.lhs - self.rhs).subs({var:0 for var in self.dvars}).doit()
+        #return (self.lhs - self.rhs).subs({var:0 for var in self.dvars}).doit()
     
     def _hom_equation(self):
         
@@ -2627,10 +2627,9 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 ics_list = list(0*b)
                 
                 odes =self._hom_equation()+coeff
-                #display(self._hom_equation())
+                #display(self._hom_equation().odes)
                 #display(odes)
-                sol = odes.general_solution.with_ics(ics_list,ivar0)
-                
+                sol = odes.solution.with_ics(ics_list,ivar0)
                 
                 sol += sol.rhs*elem
 
