@@ -1349,8 +1349,10 @@ class NormalisedNaturalFrequenciesAnalysisComponent(ReportComponent):
         omg_1 = Symbol('\omega_{n_{1}}')
         omg_2 = Symbol('\omega_{n_{2}}')
         omg_n = Symbol('\=\omega_n')
+        omg12_omg21 = Symbol('\omega_{12}')*Symbol('\omega_{21}')
 
-        delta_omg_simp = omg_n**2 + simplify(base_matrix)[1]*simplify(base_matrix)[2]
+
+        delta_omg_simp = omg_n**4 - simplify(base_matrix)[1]*simplify(base_matrix)[2]
 #         display(simplify(base_matrix)[1])
 
 
@@ -1430,8 +1432,8 @@ class NormalisedNaturalFrequenciesAnalysisComponent(ReportComponent):
         display(ReportText(f'''Finally, the natural frequencies can be simplified to the expressions presented in {AutoMarker(Eq(omg_1, omg_n**2 - sqrt(delta_omg_simp)))}, {AutoMarker(Eq(omg_2, omg_n**2 + sqrt(delta_omg_simp)))}
         '''))
 
-        display(SympyFormula(Eq(omg_1, sqrt(omg_n**2 - sqrt(delta_omg_simp)))))
-        display(SympyFormula(Eq(omg_2, sqrt(omg_n**2 + sqrt(delta_omg_simp)))))
+        display(SympyFormula(Eq(Eq(omg_1, sqrt(omg_n**2 - sqrt(delta_omg_simp)), omg*sqrt(1 - sqrt(1-(omg12_omg21)/omg**2))), evaluate=False)))
+        display(SympyFormula(Eq(Eq(omg_2, sqrt(omg_n**2 + sqrt(delta_omg_simp)), omg*sqrt(1 + sqrt(1-(omg12_omg21)/omg**2))), evaluate=False)))
 
 
         display(ReportText(self.footer_text))
