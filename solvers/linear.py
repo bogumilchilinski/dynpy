@@ -2566,7 +2566,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
           
         return cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar)  
 
-    def _exp_sin_comp(self,omega,amp):
+    def _exp_sin_comp(self,omega,amp,a):
 
         damping = self._is_proportional_damping
         if damping is not False:
@@ -2606,10 +2606,10 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
             exp_cos_comp = -(A.inv() * omega**2 + A).inv()*b
             exp_sin_comp = -omega*A.inv() * exp_cos_comp
           
-        return exp_cos_comp*exp(self.ivar)*cos(omega*self.ivar) +  exp_sin_comp*exp(self.ivar)*sin(omega*self.ivar)
+        return exp_cos_comp*exp(a*self.ivar)*cos(omega*self.ivar) +  exp_sin_comp*exp(a*self.ivar)*sin(omega*self.ivar)
     
     
-    def _exp_cos_comp(self,omega,amp):
+    def _exp_cos_comp(self,omega,amp,a):
 
         damping = self._is_proportional_damping
         if damping is not False:
@@ -2649,7 +2649,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
             exp_cos_comp = -(A.inv() * omega**2 + A).inv()*b
             exp_sin_comp = -omega*A.inv() * exp_cos_comp
           
-        return exp_cos_comp*exp(self.ivar)*cos(omega*self.ivar) +  exp_sin_comp*exp(self.ivar)*sin(omega*self.ivar)
+        return exp_cos_comp*exp(a*self.ivar)*cos(omega*self.ivar) +  exp_sin_comp*exp(a*self.ivar)*sin(omega*self.ivar)
     
 
     
@@ -2767,6 +2767,19 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
             elif type(elem) == sin:
                 omg = (elem.args[0].diff(self.ivar)).doit()
                 sol += self._cos_comp(omg,0*b) + self._sin_comp(omg,coeff)
+
+            elif type(elem) == exp:
+                a = (elem.args[0].diff(self.ivar)).doit()
+                if coeff[1,0].has(sin) == True:
+                    for arg in coeff[1,0].args:
+                        if type(arg) == sin:
+                            omg = arg.args[0].diff(self.ivar).doit()
+                    sol += self._exp_cos_comp(omg,0*b,a) + self._exp_sin_comp(omg,coeff,a)
+                elif coeff[1,0].has(cos) == True:
+                    for arg in coeff[1,0].args:
+                        if type(arg) == cos:
+                            omg = arg.args[0].diff(self.ivar).doit()
+                    sol += self._exp_cos_comp(omg,coeff,a) + self._exp_sin_comp(omg,0*b,a)
 
             elif type(elem) == Heaviside:
                 
