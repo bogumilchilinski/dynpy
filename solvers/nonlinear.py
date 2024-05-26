@@ -192,9 +192,19 @@ class ODESystemApproximation(ODESystem):
     @property
     def _default_solver(self):
         
-        #return FirstOrderLinearODESystemWithHarmonics
-        return FirstOrderLinearODESystem
-    
+        return FirstOrderLinearODESystemWithHarmonics
+        #return FirstOrderLinearODESystem
+   
+class ODESystemDsolve(ODESystem):
+    _ode_order=2
+    _simp_dict = {}
+    _callback_dict = {}
+
+    @property
+    def _default_solver(self):
+        
+        return FirstOrderLinearODESystemWithHarmonics
+        #return FirstOrderLinearODESystem 
     
 class NthOrderODEsApproximation(FirstOrderLinearODESystem):
     _ode_order=1
@@ -202,27 +212,34 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
     _simp_dict = {}
     _callback_dict = {}
     
+    # _const_list = []
+    
     @property
     def _default_solver(self):
         
-        #return FirstOrderLinearODESystemWithHarmonics
-        return FirstOrderLinearODESystem
+        return FirstOrderLinearODESystemWithHarmonics
+        #return FirstOrderLinearODESystem
     
     @cached_property
     def _secular_funcs(self):
 
         # weird error occurs, when .remove_secular_terms is called. if secular terms are missing, method returns None,
         # if statement should be considered
+        
+        #const_to_add=[eqn for eqn in self._const_list ]
+        
         secular_funcs = set() | (self.general_solution.atoms(Function) - set(
             self._const_list) - set(self._parameters) - {self.ivar})
+        #display(secular_funcs)
+        
         return secular_funcs
 
     @cached_property
     def secular_terms(self):
 
-        #         print('secsec')
+        #print('secsec')
         sec_funcs = self._secular_funcs
-        self._const_list
+        #self._const_list
 
 
         
@@ -234,24 +251,24 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
         
         #sec_conditions =FirstOrderODESystem.from_ode_system(ODESystem([sec_conditions[1][1],sec_conditions[3][1]],dvars = self._const_list ,ivar=ivar  )).linearized().solution
         
-        #print('some check')
+        # print('some check fof sec eq')
         
-        #display(sec_conditions)
-        #display(self._const_list)
+        # display(sec_conditions)
+        # display(self._const_list)
         
         sec_odes=ODESystem((sec_conditions),
-                         dvars=Matrix(self._const_list),
-                         ivar=ivar,
-                         ode_order=1)
+                            dvars=Matrix(self._const_list),
+                            ivar=ivar,
+                            ode_order=1)
         
-
+        
         
         return sec_odes
 
     def remove_secular_terms(self):
 
 
-        obj = FirstOrderLinearODESystem.from_ode_system(self)
+        obj = FirstOrderLinearODESystemWithHarmonics.from_ode_system(self)
 
         # subs_dict = {comp: 0 for comp in self._secular_funcs}
         
@@ -561,17 +578,21 @@ class MultiTimeScaleSolution(ODESystem):
 
         approx_eoms_list[0]._parameters = self._t_list[1:]
         
-        #display(approx_eoms_list[0])
+        # display(approx_eoms_list)
+        # display(approx_eoms_list[0])
         
         sol = approx_eoms_list[0].solution
+        
         sol_list = [sol]
         sol_subs_list = [sol.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).full_expr).doit() for sol in sol_list]
         sol_subs_dict  = {  dvar:eqn     for  sol   in sol_subs_list  for dvar, eqn in sol.as_dict().items()}
 
         
-        #print('_gen_sol')
-        #display(sol_list)
-        #display(sol_subs_dict)
+        # print('_gen_sol')
+        # display(sol_list)
+        # display(sol_subs_dict)
+        
+        # display(approx_eoms_list[0]._const_list)
 
         for order, approx in enumerate(approx_eoms_list[1:]):
 
@@ -583,8 +604,9 @@ class MultiTimeScaleSolution(ODESystem):
             def eqns_map(obj):
 
                 oper_expr = lambda obj: (TR10(
-                    TR8(TR10(TR0(obj.expand())).expand())).expand().doit().
-                                         expand())
+                    TR8(TR10(TR0(obj.expand())).expand())).expand().doit().expand())
+
+                oper_expr = lambda obj: obj.doit().expand()
 
                 if isinstance(obj, Add):
                     elems = obj.args
@@ -592,7 +614,8 @@ class MultiTimeScaleSolution(ODESystem):
                 else:
                     return oper_expr(obj)
             
-            #display(approx)
+            # print('approx eqn')
+            # display(approx)
             
             sol_subs_list = [sol.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).full_expr).doit() for sol in sol_list]
             sol_subs_dict  = {  dvar:eqn     for  sol   in sol_subs_list  for dvar, eqn in sol.as_dict().items()}
@@ -600,16 +623,19 @@ class MultiTimeScaleSolution(ODESystem):
             approx_subs = approx.applyfunc(eqns_map).subs(
                 sol_subs_dict).applyfunc(eqns_map)
             
-            #display(approx_subs)
+            # display(approx_subs)
 
             
             approx_subs._parameters = self._t_list[1:]
+            
+
 
             self.secular_eq[self.eps**(order +
                                        1)] = (approx_subs.secular_terms)
             
             
-            #display(self.secular_eq)
+            # print('secular eq check')
+            # display(self.secular_eq)
             approx_subs = approx_subs.remove_secular_terms()
             
             
@@ -632,7 +658,8 @@ class MultiTimeScaleSolution(ODESystem):
             
             
             ode_2_solve = SolverClass.from_ode_system(approx_subs)
-            
+            # print('gen sol part')
+            # display(ode_2_solve)
             
             fm_mat = ode_2_solve._as_fode()._fundamental_matrix
             #display(fm_mat)
@@ -641,7 +668,8 @@ class MultiTimeScaleSolution(ODESystem):
             sol = ode_2_solve.steady_solution.applyfunc(
                 lambda obj: obj.expand()).applyfunc(eqns_map)#.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).sum_expr)
 
-            #display(sol)
+            # print('and its sol')
+            # display(sol)
             #sol_subs_dict = {**sol_subs_dict, **sol.as_dict()}
             #display(*list(sol.as_matrix()))
             sol_list += [sol.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).full_expr).doit()]
@@ -659,22 +687,44 @@ class MultiTimeScaleSolution(ODESystem):
         sol_list = []
         gen_sol = self._general_sol(order)
         
+        # print('gen_sol')
+        # display(*gen_sol)
+        
         if self.eps in self.secular_eq:
-            C_const_sol = self.secular_eq[self.eps].as_first_ode_linear_system(
-            ).expand().linearized().solution.as_dict()
+            # print('sec_eq')
+            ode2check = self.secular_eq[self.eps]#.as_first_ode_linear_system()
+            # print(type(ode2check))
+            # display(ode2check)
+            # display(ode2check._as_fode())
+            # display(ode2check.solution)
+            C_const_sol = self.secular_eq[self.eps]._as_fode().linearized().solution.as_dict()
+            
+            # print('tut')
+            # display(C_const_sol)
+            
         else:
             C_const_sol={}
-
+        # print('tut')
         for order, approx_sol in enumerate(gen_sol):
-
-            solution = approx_sol.subs(C_const_sol).subs(
+            
+            # print('stale: ')
+            # display(C_const_sol)
+            # print('aproox bez subsa')
+            
+            
+            # display(approx_sol.rhs.applyfunc(lambda obj: obj.expand().doit().subs(C_const_sol).subs(C_const_sol)
+            #                                ))
+            solution = approx_sol.applyfunc(lambda obj: obj.expand().doit().subs(C_const_sol).subs(C_const_sol)).subs(
                 {self.t_list[1]: self.eps  * self.ivar})
 
+            # print('aproox ze subsa')
+            # display(solution)
+
             sol_list += [(self.eps**order) *
-                         solution.subs({
-                             self.t_list[1]: self.eps  * self.ivar,
-                             self.t_list[0]: self.ivar
-                         }).rhs   ]
+                            solution.subs({
+                                self.t_list[1]: self.eps  * self.ivar,
+                                self.t_list[0]: self.ivar
+                            }).rhs   ]
             
         #display(*list(SimplifiedExpr._subs_container.values()))
         result = (sum(sol_list, Matrix(2*len(self.dvars)*[0])  )).applyfunc(lambda obj: obj.expand().doit())
@@ -701,12 +751,14 @@ class MultiTimeScaleSolution(ODESystem):
         return self.general_solution
 
 
-    def compute_solution(self,
-                         t_span=None,
-                         ic_list=None,
-                         t_eval=None,
-                         params_values=None,
-                         method='RK45'):
+    def compute_solution(   
+                        self,
+                        t_span=None,
+                        ic_list=None,
+                        t_eval=None,
+                        params_values=None,
+                        method='RK45'
+                        ):
 
         #         print('compute_solution')
         #         display(params_values)
