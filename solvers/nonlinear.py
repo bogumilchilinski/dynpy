@@ -220,7 +220,7 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
         return FirstOrderLinearODESystemWithHarmonics
         #return FirstOrderLinearODESystem
     
-    @cached_property
+    @property
     def _secular_funcs(self):
 
         # weird error occurs, when .remove_secular_terms is called. if secular terms are missing, method returns None,
@@ -234,7 +234,7 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
         
         return secular_funcs
 
-    @cached_property
+    @property
     def secular_terms(self):
 
         #print('secsec')
@@ -244,7 +244,7 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
 
         
         sec_conditions = Matrix(list(set(sum([list(self.odes.applyfunc(lambda entry: entry.coeff(func))) for func in sec_funcs],[]))-{0}))
-           
+
 
         ivar = self._parameters[0]
 
@@ -261,7 +261,12 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
                             ivar=ivar,
                             ode_order=1)
         
+        # display(sec_odes)
+        #fode_harm_rhs = FirstOrderLinearODESystemWithHarmonics.from_ode_system(sec_odes)
         
+        # print('transformed')
+        # display(fode_harm_rhs)
+        # display(type(fode_harm_rhs))
         
         return sec_odes
 
@@ -582,6 +587,8 @@ class MultiTimeScaleSolution(ODESystem):
         # display(approx_eoms_list[0])
         
         sol = approx_eoms_list[0].solution
+        # print('spot_const')
+        # display(sol._spot_constant())
         
         sol_list = [sol]
         sol_subs_list = [sol.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).full_expr).doit() for sol in sol_list]
@@ -697,7 +704,9 @@ class MultiTimeScaleSolution(ODESystem):
             # display(ode2check)
             # display(ode2check._as_fode())
             # display(ode2check.solution)
-            C_const_sol = self.secular_eq[self.eps]._as_fode().linearized().solution.as_dict()
+            #ode2check._as_fode()
+            #ode2check.solution
+            C_const_sol = self.secular_eq[self.eps]._as_fode()._to_rhs_ode().linearized().solution.as_dict()
             
             # print('tut')
             # display(C_const_sol)

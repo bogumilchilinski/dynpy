@@ -31,6 +31,7 @@ from sympy.simplify.fu import TR8, TR10, TR7,TR6, TR5, TR3
 from collections.abc import Iterable
 from sympy.solvers.ode.systems import linodesolve
 from functools import cached_property, lru_cache
+cached_property = property
 
 from .numerical import OdeComputationalCase
 
@@ -744,6 +745,15 @@ class ODESolution(AnalyticalSolution):
         
         return self._ivar
 
+    def append_integration_consts(self,const_list):
+        
+        if self._integration_consts is None:
+            self._integration_consts = const_list
+        else:
+            self._integration_consts += const_list
+            
+        return self
+
     def _spot_constant(self):
         """
         Auxiliary method to spot or get integration constants from the system
@@ -1214,7 +1224,7 @@ class ODESystem(AnalyticalSolution):
 
             return diff_coeffs_mat.inv()*(self.rhs  - self.lhs.subs({elem:0 for elem in diffs }))
 
-    @lru_cache
+    #@lru_cache
     def _to_rhs_ode(self):
         
 
@@ -2072,6 +2082,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         ode_sol = ODESolution(self.dvars,sol).applyfunc(mapper).subs( const_dict )
         
         ode_sol.ivar=self.ivar
+        ode_sol.append_integration_consts(list(const_dict.values()))
         
         return ode_sol
     
@@ -2140,9 +2151,14 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
     
     @property
     def solution(self):
-
         
-        return self.general_solution + self.steady_solution
+        gen_sol = self.general_solution
+        steady_sol = self.steady_solution
+        
+        sol = gen_sol+steady_sol
+        sol.append_integration_consts(gen_sol._spot_constant())
+        
+        return sol
     
 
     def _latex(self,*args):
@@ -2389,7 +2405,8 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
 
         ode_sol = ODESolution(self.dvars,solution)
         ode_sol.ivar=self.ivar
-        
+        self._const_list = C_list
+        ode_sol.append_integration_consts(C_list)    
         
         
         return ode_sol
