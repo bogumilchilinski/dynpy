@@ -2,7 +2,7 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    hessian, Function, flatten, Tuple, im, re, pi, latex,
                    dsolve, solve, fraction, factorial, Add, Mul, exp, zeros, shape,
                    numbered_symbols, integrate, ImmutableMatrix,Expr,Dict,Subs,Derivative,Dummy,
-                   lambdify, Pow, Integral, init_printing, I, N,eye, zeros, det, Integer,separatevars,Heaviside)
+                   lambdify, Pow, Integral, init_printing, I, N,eye, zeros, det, Integer,separatevars,Heaviside,simplify)
 
 from sympy.matrices.matrices import MatrixBase
 from sympy.solvers.ode.systems import matrix_exp, matrix_exp_jordan_form
@@ -1721,6 +1721,47 @@ class ODESystem(AnalyticalSolution):
     
     def _inertia_matrix(self):
         return self.lhs.jacobian(diff(self.dvars,self.ivar,2))
+    
+    def _eigenvals_simplified(self):
+        
+        base_matrix = self._inertia_matrix().inv()*self._stiffness_matrix()
+        base = simplify(base_matrix)
+        base_matrix = base/base[0]
+
+        nom = fraction(((base_matrix.trace()/2)**2 - base_matrix.det()).simplify().radsimp())[0]
+        denom = fraction(((base_matrix.trace()/2)**2 - base_matrix.det()).simplify().radsimp())[1]
+        
+        delta_omg = sqrt(nom)/sqrt(denom)
+
+        omg_mean = (base_matrix.trace()/2).simplify()
+        omg_mean_nom = fraction(omg_mean)[0]
+        omg_mean_denom = fraction(omg_mean)[1]
+
+        omg12_omg22 = base_matrix[1]*-base_matrix[3]
+
+        omg_1 = Symbol('\omega_{n_{1}}')
+        omg_2 = Symbol('\omega_{n_{2}}')
+        omg_n = Symbol('\omega_{n}')
+
+
+        delta_omg_simp = omg_mean**4 - simplify(base_matrix)[1]*simplify(base_matrix)[2]
+
+
+#         eigenval1 = sqrt(omg_mean-delta_omg)
+#         eigenval2 = sqrt(omg_mean+delta_omg)
+
+#         eigenval1 = omg_n*sqrt(1 - sqrt(1-(omg12_omg22)/omg_n**2))
+#         eigenval2 = omg_n*sqrt(1 + sqrt(1-(omg12_omg22)/omg_n**2))
+#        display(eigenval1)
+
+#         display(omg_mean_nom)
+#         display(omg_mean_denom)
+        eigenval1 = Mul(sqrt(1 - sqrt(1-(omg12_omg22)/omg_mean**2)),Mul(omg_mean_nom,1/omg_mean_denom,evaluate=False),evaluate=False)
+        eigenval2 = Mul(sqrt(1 + sqrt(1-(omg12_omg22)/omg_mean**2)),Mul(omg_mean_nom,1/omg_mean_denom,evaluate=False),evaluate=False)
+
+        return Matrix([[eigenval1,0],[0,eigenval2]])
+
+
 
         
     def fundamental_matrix(self):
