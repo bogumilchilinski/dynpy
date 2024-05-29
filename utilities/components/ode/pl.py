@@ -819,7 +819,6 @@ class SeparableODEIntroComponent(ReportComponent):
         display(ReportText('Jednym z fundamentalnych typów równań różniczkowych jest równanie o zmiennych rozdzielonych. Proces rozwiązania tego typu równania polega na separacji wyrazów zawierających $y$ i $x$, przeniesieniu ich na różne strony równania, a następnie zastosowaniu operacji całkowania. Po przeprowadzeniu całkowania nie można zapomnieć o dodaniu do jednej ze stron stałej całkowania. Poniżej znajduje się przykład zadania ilustrującego proces rozwiązania tego rodzaju równania.:'))
 
 class EquationDefinitionComponent(ReportComponent):
-    #title="We consider the following differential equation:"
     title="Rozpatrujemy następujące równanie różniczkowe: "
 
     def append_elements(self):
@@ -827,12 +826,10 @@ class EquationDefinitionComponent(ReportComponent):
         system = self.reported_object
         ode_sys =system
 
-        y_sym = system._variable_name()[2]
-        display(SympyFormula(Eq(ode_sys.lhs[0],ode_sys.rhs[0])))
-        #display(ReportText('Where:')
+        y_sym = system.dvars[0]
+        display(SympyFormula(Eq(ode_sys.lhs[0],ode_sys.rhs[0]).subs(ode_sys._get_dvars_symbols())))
         display(ReportText('Gdzie:'))
         display(SympyFormula(y_sym))
-        #display(ReportText('Is our encountered function.'))
         display(ReportText('Jest naszą szukaną funkcją.'))
 
 class VariablesSeparationComponent(ReportComponent):

@@ -1837,8 +1837,48 @@ class ODESystem(AnalyticalSolution):
     def _classify_ode(self):
         odes=Eq(self.lhs[0]-self.rhs[0],0)
         return classify_ode(odes,self.dvars[0])
+### METODY - Karolina, do przejrzenia i wgl do zastanowienia czy chcemy to czy nie, na pewno dvars symbols sa must have no i te dwie ostatnie one ciagna z fode wsm##
+    def _eqn_coeffs(self):
 
+        system = self
+        ivar = self.ivar
+        dvar = system.dvars[0]
 
+        coeffs_dict = {dvar.diff(ivar,2): system.lhs[0].coeff(dvar.diff(ivar,2)), #2nd derivative
+                       dvar.diff(ivar): system.lhs[0].coeff(dvar.diff(ivar)), #1st derivative
+                       dvar : system.lhs[0].coeff(dvar), #y
+                       'free': system.lhs[0].subs({dvar:0})
+                        }
+
+        return coeffs_dict
+
+    def _ode_solution(self):
+        dvars=self.dvars
+        return ODESolution(dvars,dsolve(self.odes[0],self.dvars[0]).rhs)
+
+    def _get_dvars_symbols(self):
+        system=self
+        dvars = system.dvars[0]
+        ivar = system.ivar
+
+        dvars_str=f"{str(dvars)}".replace(f'({str(ivar)})','')
+
+        return {dvars:Symbol(dvars_str),
+                ivar:ivar,
+                dvars.diff(ivar):Symbol(f"{dvars_str}'"),
+                dvars.diff(ivar,2):Symbol(f"{dvars_str}''")}
+
+    def matrix_fundamental(self):
+        return self._as_fode()._fundamental_matrix
+
+    def _eigenvalues(self):
+        return self._as_fode()._auxiliary_fundamental_matrix.diagonalize()[1]
+
+    def _roots_list(self):
+        return list(self._eigenvalues())
+    
+## koniec metod karoliny pozdraiwam ##
+    
 class FirstOrderODESystem(ODESystem):
     
     
@@ -2583,6 +2623,28 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
           
         return cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar)  
 
+    
+    def _heaviside_sin_comp(self, exct, n=None):
+    
+        if type(exct) == Heaviside:
+    
+            for arg in exct.args:
+                if type(arg) == sin:
+                    sin_coeff = arg.args[0].diff(self.ivar)
+    
+        T = 2*pi/sin_coeff
+    
+        new_expr = 0
+    
+        if n is None:
+            n=6
+    
+        for no in range(n):
+    
+            new_expr = new_expr + (-1)**no * Heaviside(self.ivar - T*no/2)
+    
+        return new_expr
+    
     def _exp_sin_comp(self,omega,amp,a):
 
         damping = self._is_proportional_damping
