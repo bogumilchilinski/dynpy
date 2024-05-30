@@ -218,7 +218,6 @@ class MultivariableTaylorSeries(Expr):
 
     
     
-    
     def doit(self,**hints):
         return self._series().doit()
 
@@ -229,18 +228,18 @@ class AnalyticalSolution(ImmutableMatrix):
 
     _default_doctype = ExampleTemplate
 
-    def __new__(cls, data, rhs=None, evaluate=True, **options):
+    def __new__(cls, elements, vars = None, rhs=None, evaluate=True, **options):
 
         
         
-        if isinstance(data,(dict,Dict)):
-            return cls.from_dict(data,**options)
-        if isinstance(data,Eq):
-            return cls.from_eq(data,**options)
-        if isinstance(data,Matrix) and isinstance(data[0],Eq):
-            return cls.from_eqns_matrix(data,**options)
+        if isinstance(elements,(dict,Dict)):
+            return cls.from_dict(elements,**options)
+        if isinstance(elements,Eq):
+            return cls.from_eq(elements,**options)
+        if isinstance(elements,Iterable) and all([ isinstance(elem,Eq) for elem in  elements ]):
+            return cls.from_eqns_matrix(elements,**options)
         else:
-            return cls._constructor(data, rhs, evaluate=evaluate, **options)
+            return cls._constructor(elements,vars, rhs, evaluate=evaluate, **options)
 
         return obj
 
@@ -248,20 +247,35 @@ class AnalyticalSolution(ImmutableMatrix):
 
     
     @classmethod
-    def _constructor(cls, lhs, rhs=None, evaluate=True, **options):
+    def _constructor(cls, elements, vars= None ,rhs=None, evaluate=True, **options):
         
-        if not isinstance(lhs,Iterable): 
-            lhs = Matrix([lhs])
+        if not isinstance(elements,Iterable): 
+            elems_lhs = Matrix([elements])
+        elif isinstance(elements,Iterable):
+            elems_lhs = Matrix(elements)
             
-        # it should be reimplemented with @property if None as odes_rhs is spotted
-        if rhs is None:
-            rhs = 0*lhs
+            
+        # it should be reimplemented with @property if None as odes_rhs is spotted            
+        if isinstance(rhs,Iterable):
+            # display(rhs)
+            # display(type(rhs))
+            elems_rhs = Matrix(rhs)
+            
+        elif rhs is None:
+            elems_rhs = None
         elif not isinstance(rhs,Iterable):
-            rhs = Matrix([rhs])
+            elems_rhs = Matrix([rhs])            
+            
 
-        obj = super().__new__(cls, rhs ,evaluate=evaluate, **options)
+        if elems_rhs is not None:
+            elems = elems_lhs - elems_rhs
+        else:
+            elems = elems_lhs
 
-        obj._lhs=lhs
+        obj = super().__new__(cls, elems ,evaluate=evaluate, **options)
+
+        obj._rhs= rhs    
+        obj._vars = vars
 
         return obj
     
@@ -313,9 +327,20 @@ class AnalyticalSolution(ImmutableMatrix):
     
         return obj
     
+    def copy(self):
+        
+        obj=self._constructor(list(self),self._vars, self._rhs)
+        obj = self._assign_properties(obj)
+        
+        
+        return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
+    
+    
     def _assign_properties(self,obj):
         
-        obj._lhs=self._lhs        
+        obj._rhs=self._rhs     
+        obj._vars = self._vars
+        #obj._const_list = self._const_list
         
         return obj
     
@@ -323,7 +348,6 @@ class AnalyticalSolution(ImmutableMatrix):
     def subs(self,*args,**kwargs):
         
 
-        
         obj = super().subs(*args,**kwargs)
         obj = self._assign_properties(obj)
         
@@ -449,18 +473,33 @@ class AnalyticalSolution(ImmutableMatrix):
     
     @property
     def lhs(self):
-        return self._lhs
+        if self.rhs is None:
 
-    
+            return Matrix(list(self))
+        else:
+            return Matrix(list(self)) + self.rhs
+
     @property
     def rhs(self):
-        return Matrix(list(self))
-    
+        if self._rhs is None:
+            return Matrix(list(self))*0
+        
+        elif isinstance(self._rhs,Iterable):
+            return Matrix(list(self._rhs)) 
+        
+        else:
+            return Matrix([self._rhs])
+
+    def as_list(self):
+        
+        return list(self)
 
     def as_matrix(self):
-        ''' Returns the right-hand side of the equation as a matrix.
-        It returns Numpy Matrix object'''
-        return Matrix( self.rhs )
+        '''
+        Returns the right-hand side of the equation as a matrix.
+        It returns Sympy Matrix object
+        '''
+        return Matrix(self.as_list())
     
     def as_eq(self):
         ''' Creates an equation using the Eq method from the Sympy library.
@@ -470,7 +509,7 @@ class AnalyticalSolution(ImmutableMatrix):
     
     def as_iterable(self):
 
-        return [(lhs,comp) for lhs,comp  in zip(self._lhs,self)]
+        return [(lhs,comp) for lhs,comp  in zip(self.lhs,self.rhs)]
         
     
     def as_dict(self):
@@ -505,30 +544,33 @@ class AnalyticalSolution(ImmutableMatrix):
     def __repr__(self):
 
         return f'{self._lhs_repr} = {self.rhs}'
- 
+
     # @property
     # def _dvars(self):
     #     return self.lhs
- 
+
     # @_dvars.setter
     # def _dvars(self,dvars):
     #     self._lhs = dvars
- 
+
     @cached_property
     def dvars(self):
-        return self.lhs    
+        return self._vars
     
     @property
     def _fode_dvars(self):
         return self.dvars
     
     def _latex(self,*args):
+        # print('abc')
+        # display(self.lhs)
+        # display(self.rhs)
+        return latex(Eq(self.lhs,self.rhs,evaluate=False))
 
-        return latex(Eq(self._lhs_repr,self.rhs,evaluate=False))
 
     def numerized(self,parameters={},t_span=[],**kwargs):
         
-        ivar = Symbol('t')
+        #ivar = Symbol('t')
         
         solution = self.subs(parameters).doit()
         
