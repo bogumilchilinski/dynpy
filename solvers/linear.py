@@ -241,8 +241,6 @@ class AnalyticalSolution(ImmutableMatrix):
         else:
             return cls._constructor(elements,vars, rhs, evaluate=evaluate, **options)
 
-        return obj
-
 
 
     
@@ -357,7 +355,7 @@ class AnalyticalSolution(ImmutableMatrix):
     def __add__(self,other):
         
         if isinstance(other,AnalyticalSolution):
-            other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
+            other = Matrix([other.as_dict()[coord]  for  coord  in self.vars ])
         
         obj = super().__add__(other)
         obj = self._assign_properties(obj)
@@ -368,7 +366,7 @@ class AnalyticalSolution(ImmutableMatrix):
     def __rsub__(self,other):
 
         if isinstance(other,AnalyticalSolution):
-            other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
+            other = Matrix([other.as_dict()[coord]  for  coord  in self.vars ])
 
         obj = super().__rsub__(other)
         obj = self._assign_properties(obj)
@@ -379,7 +377,7 @@ class AnalyticalSolution(ImmutableMatrix):
     def __sub__(self,other):
 
         if isinstance(other,AnalyticalSolution):
-            other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
+            other = Matrix([other.as_dict()[coord]  for  coord  in self.lhs ])
 
         obj = super().__sub__(other)
         obj = self._assign_properties(obj)
@@ -469,11 +467,18 @@ class AnalyticalSolution(ImmutableMatrix):
                 solution[dvar.diff(self.ivar,2)]=solution[dvar.diff(self.ivar,1)].gradient()
             
             return solution
+
+    @property
+    def vars(self):
+        if self._vars is not None:
+            return self._vars
+        else:
+            return [Symbol(f'Eq_{no}')  for no in range( self.as_list()  )]
     
     
     @property
     def lhs(self):
-        if self.rhs is None:
+        if self._rhs is None:
 
             return Matrix(list(self))
         else:
@@ -509,7 +514,7 @@ class AnalyticalSolution(ImmutableMatrix):
     
     def as_iterable(self):
 
-        return [(lhs,comp) for lhs,comp  in zip(self.lhs,self.rhs)]
+        return [(lhs,comp) for lhs,comp  in zip(self.vars,self.as_list())]
         
     
     def as_dict(self):
@@ -760,10 +765,12 @@ class ODESolution(AnalyticalSolution):
 
     def _assign_properties(self,obj):
         
-        obj._lhs=self._lhs     
+        #obj._lhs=self._lhs     
         obj._ivar = self.ivar
-        
-        
+        obj._rhs = self._rhs
+        #obj._lhs = self._lhs
+        obj._vars = self._vars
+                
         return obj
 
     def expand(self,deep=True, modulus=None, power_base=True, power_exp=True,mul=True, log=True, multinomial=True, basic=True, **hints):
