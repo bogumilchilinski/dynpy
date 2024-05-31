@@ -1155,7 +1155,7 @@ class ODESystem(AnalyticalSolution):
         if not isinstance(dvars,Iterable):
             dvars = Matrix([dvars])
         
-        obj = super()._constructor(odes,odes_rhs,evaluate=evaluate, **options)
+        obj = super()._constructor(elements=odes,vars=dvars,rhs=odes_rhs,evaluate=evaluate, **options)
         
         obj._parameters = parameters
         obj._dvars = dvars
