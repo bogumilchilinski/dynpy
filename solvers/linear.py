@@ -233,11 +233,11 @@ class AnalyticalSolution(ImmutableMatrix):
         
         
         if isinstance(elements,(dict,Dict)):
-            return cls.from_dict(elements,**options)
+            return cls.from_dict(elements,vars=vars,**options)
         if isinstance(elements,Eq):
-            return cls.from_eq(elements,**options)
+            return cls.from_eq(elements,vars=vars,**options)
         if isinstance(elements,Iterable) and all([ isinstance(elem,Eq) for elem in  elements ]):
-            return cls.from_eqns_matrix(elements,**options)
+            return cls.from_eqns_list(elements,vars=vars,**options)
         else:
             return cls._constructor(elements,vars, rhs, evaluate=evaluate, **options)
 
@@ -278,13 +278,31 @@ class AnalyticalSolution(ImmutableMatrix):
         return obj
     
     @classmethod
-    def from_dict(cls,dictionary,**options): # działa
+    def from_dict(cls,dictionary,vars=None,**options): # działa
+        '''
+        This constructor creates object from map in the following form:
         
-        return cls._constructor( Matrix(list(dictionary.keys())),Matrix(list(dictionary.values())) ,**options   )
+        vars -> right hand sides
+        '''
+        vars=Matrix(list(dictionary.keys()))
+        elems=Matrix(list(dictionary.values()))
+        
+        return cls._constructor( vars ,vars = vars, rhs = elems ,**options   )
+
+    @classmethod
+    def from_vars_and_rhs(cls,vars,rhs,**options): # działa
+        '''
+        This constructor creates object from map in the following form:
+        
+        vars -> right hand sides
+        '''
+            
+        return cls._constructor( vars ,vars = vars, rhs = rhs ,**options   )
+
 
     
     @classmethod
-    def from_eq(cls,matrix_eq,**options): #
+    def from_eq(cls,matrix_eq,vars=None,**options): #
         if isinstance(matrix_eq,Eq):
             
             eq = matrix_eq
@@ -293,12 +311,23 @@ class AnalyticalSolution(ImmutableMatrix):
             print ('TypeError: matrix_eq is not Eq')
             return None
         
-        obj = cls._constructor(eq.lhs,eq.rhs ,evaluate=True ,**options   )
+        obj = cls._constructor(eq.lhs,vars=vars,rhs=eq.rhs ,evaluate=True ,**options   )
         
         return obj
 
     @classmethod
-    def from_eqns_matrix(cls,eqns_matrix,**options):
+    def from_eqns_list(cls,eqns_list,vars=None,**options):
+
+        elems=[eqn.lhs for eqn in eqns_list]
+        values=[eqn.rhs for eqn in eqns_list]
+            
+        obj = cls._constructor(Matrix(elems),vars=vars,rhs = Matrix(values),evaluate=True ,**options)
+    
+        return obj
+
+
+    @classmethod
+    def from_eqns_matrix(cls,eqns_matrix,vars=None,**options):
 
         dvars = []
         values = []
@@ -321,7 +350,7 @@ class AnalyticalSolution(ImmutableMatrix):
             value = eq.rhs
             values.append(value)
             
-        obj = cls._constructor(Matrix(dvars),Matrix(values),evaluate=True ,**options)
+        obj = cls._constructor(Matrix(dvars),vars=vars,rhs=Matrix(values),evaluate=True ,**options)
     
         return obj
     
@@ -473,7 +502,7 @@ class AnalyticalSolution(ImmutableMatrix):
         if self._vars is not None:
             return self._vars
         else:
-            return [Symbol(f'Eq_{no}')  for no in range( self.as_list()  )]
+            return [Symbol(f'Eq_{no}')  for no in range( len(self.as_list())  )]
     
     
     @property
@@ -570,7 +599,7 @@ class AnalyticalSolution(ImmutableMatrix):
         # print('abc')
         # display(self.lhs)
         # display(self.rhs)
-        return latex(Eq(self.lhs,self.rhs,evaluate=False))
+        return latex(Eq(self.lhs,self.rhs,evaluate=False)) + f'~~for~~{latex(self.vars)}'
 
 
     def numerized(self,parameters={},t_span=[],**kwargs):
