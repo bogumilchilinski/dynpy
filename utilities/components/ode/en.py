@@ -1348,7 +1348,7 @@ class NormalisedNaturalFrequenciesAnalysisComponent(ReportComponent):
         omg = Symbol('omega_n')
         omg_1 = Symbol('\omega_{n_{1}}')
         omg_2 = Symbol('\omega_{n_{2}}')
-        omg_n = Symbol('\\bar \omega_n')
+        omg_n = Symbol(r'\\bar \omega_n')
         omg12_omg21 = Symbol('\omega_{12}')*Symbol('\omega_{21}')
 
 
