@@ -1193,7 +1193,7 @@ class ODESystem(AnalyticalSolution):
             return ics_init_dict
 
 
-    
+
     
 
     
@@ -1997,6 +1997,34 @@ class ODESystem(AnalyticalSolution):
         return list(self._eigenvalues())
     
 ## koniec metod karoliny pozdraiwam ##
+
+    @staticmethod
+    def _get_code():
+        from dynpy.utilities.report import ObjectCode
+        
+        tmp = ObjectCode('''
+            from dynpy.solvers.linear import ODESystem
+            from sympy import *
+
+            F = Symbol('F', positive=True)
+            Omega = Symbol('Omega', positive=True)
+            t = Symbol('t')
+            c = Symbol('c', positive=True)
+            k = Symbol('k', positive=True)
+            m = Symbol('m', positive=True)
+            x = Function('x')
+            eq = -F*sin(Omega*t) + c*Derivative(x(t), t) + k*x(t) + m*Derivative(x(t), (t, 2))
+
+            dvars = Matrix([[x(t)]])
+            odes = Matrix([[-F*sin(Omega*t) + c*Derivative(x(t), t) + k*x(t) + m*Derivative(x(t), (t, 2))]])
+            ode_order = 2
+
+            odesys = ODESystem(odes = odes , dvars = dvars, ode_order = ode_order)
+
+            display(odesys)
+                         
+                         ''')
+        return tmp
     
 class FirstOrderODESystem(ODESystem):
     
