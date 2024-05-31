@@ -1348,7 +1348,7 @@ class NormalisedNaturalFrequenciesAnalysisComponent(ReportComponent):
         omg = Symbol('omega_n')
         omg_1 = Symbol('\omega_{n_{1}}')
         omg_2 = Symbol('\omega_{n_{2}}')
-        omg_n = Symbol('\=\omega_n')
+        omg_n = Symbol(r'\\bar \omega_n')
         omg12_omg21 = Symbol('\omega_{12}')*Symbol('\omega_{21}')
 
 
@@ -1446,4 +1446,46 @@ class NormalisedNaturalFrequenciesAnalysisComponent(ReportComponent):
 
 
         display(ReportText(self.footer_text))
+        
+class ODESystemCreationComponent_en(ReportComponent):
+    
+    title="Creating a linear differential equation"
+
+    def append_elements(self):
+
+        from dynpy.solvers.tools import CodePrinter
+
+        system = self.reported_object
+        ode_sys = system
+
+        _dvars = system.dvars
+        _odes = system.odes
+
+        _ode_order = system.ode_order
+
+        cls_name = system.__class__.__name__
+
+        string_gc = CodePrinter(_odes[0])._generate_code()
+
+        display(ReportText(f'Creating an instance of a class {cls_name} requires defining the following variables and equations'))
+
+        display(ObjectCode(f'''
+
+
+from dynpy.solvers.linear import {cls_name}
+from sympy import *
+
+{string_gc}
+
+dvars = {_dvars}
+odes = {_odes}
+ode_order = {_ode_order}
+
+odesys = {cls_name}(odes = odes , dvars = dvars, ode_order = ode_order)
+
+display(odesys)
+
+        '''))
+
+        display(ReportText(f'After executing the instruction, we have a ready instance of the class object {cls_name}'))
 

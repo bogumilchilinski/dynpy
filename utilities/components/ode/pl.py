@@ -1213,3 +1213,165 @@ class BernoulliLinearTransformation(ReportComponent):
 
         for elem in list(sep_ode_report)[3:]:
             self.append(elem)
+
+            
+            
+            
+            
+#Karolina i Karol done         
+            
+general_code='''
+from dynpy.models.odes.numerical import *
+system=LinearFirstOrder.from_reference_data()
+system.general_solution
+'''            
+class ODEGeneralSolutionComponent(ReportComponent):
+    
+    title="Wyznaczanie rozwiązania ogólnego";
+
+    @property
+    def import_text(self):
+
+        return "Aby zaimportować przykładowy system  i wywołać rozwiązanie ogólne należy wywołać następujący kod:"
+
+
+    @property
+    def body_text(self):
+
+        return "Rozwiązanie ogólne przyjmuje postać:"
+
+    def append_elements(self):
+        
+        system = self.reported_object
+        t=system.ivar
+        dvars=system.dvars
+
+        display(ReportText(self.import_text))
+        display(ObjectCode(general_code))
+
+        display(ReportText(self.body_text))
+
+        display((SympyFormula(system.general_solution)))
+        
+steady_code='''
+from dynpy.models.odes.numerical import *
+system=LinearFirstOrder.from_reference_data()
+system.steady_solution
+'''        
+class ODESteadySolutionComponent(ReportComponent):
+    
+    title="Wyznaczanie rozwiązania ogólnego";
+
+    @property
+    def import_text(self):
+
+        return "Aby zaimportować przykładowy system  i wywołać rozwiązanie szczególne należy wywołać następujący kod:"
+
+
+    @property
+    def body_text(self):
+
+        return "Rozwiązanie szczególne przyjmuje postać:"
+
+    def append_elements(self):
+        
+        system = self.reported_object
+        t=system.ivar
+        dvars=system.dvars
+
+        display(ReportText(self.import_text))
+        display(ObjectCode(steady_code))
+
+        display(ReportText(self.body_text))
+
+        display((SympyFormula(system.steady_solution)))
+        
+import_code='''
+from dynpy.models.odes.numerical import *
+system=LinearFirstOrder.from_reference_data()
+system.as_eq()  #zwraca równanie
+system.as_matrix()  #zwraca macierz
+system.as_iterable()  #zwraca listę
+system.as_dict()  #zwraca słownik
+system.as_eq_list()  #zwraca równanie w postaci listy
+system._as_fode()  #zwraca równanie pierwszego rzędu
+
+'''        
+class ODESystemRepresentationComponent(ReportComponent):
+    
+    title="Różnorodne reprezentacje systemu"
+
+    @property
+    def import_text(self):
+
+        return "Metody umożliwiające różnorodne reprezentacje systemu powinny być wywoływane w następujący sposób:"
+
+
+    def append_elements(self):
+
+        system = self.reported_object
+        t=system.ivar
+        dvars=system.dvars
+
+        display(ReportText(self.import_text))
+        display(ObjectCode(import_code))
+
+        display(ReportText(r'Metoda .as_eq()'))
+        display((system.as_eq()))
+
+        display(ReportText(r'Metoda .as_matrix()'))
+        display((system.as_matrix()))
+
+        display(ReportText(r'Metoda .as_iterable()'))
+        display((system.as_iterable()))
+
+        display(ReportText(r'Metoda .as_dict()'))
+        display((system.as_dict()))
+
+        display(ReportText(r'Metoda .as_eq_list()'))
+        display((system.as_eq_list()))
+
+        display(ReportText(r'Metoda ._as_fode()'))
+        display((system._as_fode()))
+
+class ODESystemCreationComponent(ReportComponent):
+    
+    title="Stworzenie liniowego równania różniczkowego"
+
+    def append_elements(self):
+
+        from dynpy.solvers.tools import CodePrinter
+
+        system = self.reported_object
+        ode_sys = system
+
+        _dvars = system.dvars
+        _odes = system.odes
+
+        _ode_order = system.ode_order
+
+        cls_name = system.__class__.__name__
+
+        string_gc = CodePrinter(_odes[0])._generate_code()
+
+        display(ReportText(f'Stworzenie instacji klasy {cls_name} wymaga zdefiniowania następujących zmiennych oraz równań:'))
+
+        display(ObjectCode(f'''
+
+
+from dynpy.solvers.linear import {cls_name}
+from sympy import *
+
+{string_gc}
+
+dvars = {_dvars}
+odes = {_odes}
+ode_order = {_ode_order}
+
+odesys = {cls_name}(odes = odes , dvars = dvars, ode_order = ode_order)
+
+display(odesys)
+
+        '''))
+
+        display(ReportText(f'Po wykonaniu instrukcji mamy gotową instancję obiektu klasy {cls_name}'  ))

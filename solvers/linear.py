@@ -2223,7 +2223,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         dvars = self._auxiliary_dvars
         
-        sol = AnalyticalSolution(dvars,linodesolve(A,t=self.ivar,b=0*self.dvars)  )#.applyfunc(self.solution_map)
+        sol = AnalyticalSolution.from_vars_and_rhs(dvars,linodesolve(A,t=self.ivar,b=0*self.dvars)  )#.applyfunc(self.solution_map)
         
         dummies_set= sol.atoms(Dummy)
         const_dict = self._const_mapper(dummies_set)
@@ -2236,9 +2236,9 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         mapper = lambda elem: elem.subs(self._simp_deps,simultaneous=True).subs(self._callback_deps,simultaneous=True) 
         
-        #ode_sol = ODESolution(self.dvars,sol).applyfunc(mapper).subs( const_dict )
+
         
-        ode_sol = ODESolution(self.dvars,sol).applyfunc(mapper).subs( const_dict )
+        ode_sol = ODESolution.from_vars_and_rhs(self.dvars,sol).applyfunc(mapper).subs( const_dict )
         
         ode_sol.ivar=self.ivar
         ode_sol.append_integration_consts(list(const_dict.values()))
@@ -2259,7 +2259,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         #display(A)
         #display(b)
         
-        sol = AnalyticalSolution(dvars,linodesolve(A,t=self.ivar,b=b)).applyfunc(self.solution_map)
+        sol = AnalyticalSolution.from_vars_and_rhs(dvars,linodesolve(A,t=self.ivar,b=b)).applyfunc(self.solution_map)
 
         #display('ss',sol)
         
@@ -2274,7 +2274,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
     
 
 
-        return ODESolution(self.dvars,sol).subs({dum_sym:0 for dum_sym in dummies_set})
+        return ODESolution.from_vars_and_rhs(self.dvars,sol).subs({dum_sym:0 for dum_sym in dummies_set})
 
     @cached_property
     def const_set(self):
@@ -2562,7 +2562,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
             A = self._fundamental_matrix
             solution = (matrix_exp(A, self.ivar)*Matrix( C_list  ))
 
-        ode_sol = ODESolution(self.dvars,solution)
+        ode_sol = ODESolution.from_vars_and_rhs(self.dvars,solution)
         ode_sol.ivar=self.ivar
         self._const_list = C_list
         ode_sol.append_integration_consts(C_list)    
@@ -3016,7 +3016,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 display(elem)
                 print('coeff')
             
-        ode_sol = ODESolution(self.dvars,sol)
+        ode_sol = ODESolution.from_vars_and_rhs(self.dvars,sol)
         ode_sol.ivar=self.ivar
         
         return ode_sol
@@ -3903,7 +3903,7 @@ class SeparableODE(ODESystem):
     
     def _ode_solution(self):
         dvars=self.dvars
-        return ODESolution(dvars,dsolve(self.odes[0],self.dvars[0]).rhs)
+        return ODESolution.from_vars_and_rhs(dvars,dsolve(self.odes[0],self.dvars[0]).rhs)
     def _get_dvars_symbols(self):
         system=self
         dvars = system.dvars[0]
@@ -4095,7 +4095,7 @@ class LinearWithConstCoeffODE(ODESystem):
     
     def _ode_solution(self):
         dvars=self.dvars
-        return ODESolution(dvars,dsolve(self.odes[0],self.dvars[0]).rhs)
+        return ODESolution.from_vars_and_rhs(dvars,dsolve(self.odes[0],self.dvars[0]).rhs)
     
     @cached_property
     def _general_solution(self):
@@ -4259,7 +4259,7 @@ class BernoulliODE(ODESystem):
 
     def _ode_solution(self):
         dvars=self.dvars
-        return ODESolution(dvars,dsolve(self.odes[0],self.dvars[0]).rhs)
+        return ODESolution.from_vars_and_rhs(dvars,dsolve(self.odes[0],self.dvars[0]).rhs)
 
     @cached_property
     def _general_solution(self):

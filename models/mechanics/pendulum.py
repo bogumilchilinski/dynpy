@@ -2957,8 +2957,8 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
     #m=Symbol('m', positive=True)
     ivar=Symbol('t')
     
-    m1=Function('m_1')(ivar)
-    m2=Function('m_2')(ivar)
+    m1=Function('m_alpha')(ivar)
+    m2=Function('m_beta')(ivar)
     l_1=Symbol('l_alpha', positive=True)
     l_2=Symbol('l_beta', positive=True)
     g=Symbol('g', positive=True)
