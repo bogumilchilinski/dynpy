@@ -423,7 +423,10 @@ class AnalyticalSolution(ImmutableMatrix):
         elems_list = [op_func(self.as_explicit_dict()[coord],dict_elems[coord]) for  coord  in self.lhs ]
         
         result = Matrix(elems_list)
-        return type(self).from_vars_and_rhs(self.lhs,result)
+        obj=type(self).from_vars_and_rhs(self.lhs,result)
+        self._assign_properties(obj)
+        
+        return self._assign_properties(obj)
     
     
     def _op_TYPE_sides_form(self,other,op_func):
@@ -441,10 +444,10 @@ class AnalyticalSolution(ImmutableMatrix):
         #lhs = self.lhs.__add__(other_lhs)
         lhs = op_func(self.lhs,other_lhs)
         
-        obj = type(self)(lhs,vars=self.vars,rhs=rhs)
+        obj = type(self)(lhs,self.vars,rhs)
 
         
-        return obj
+        return self._assign_properties(obj)
     
     
     
@@ -908,7 +911,7 @@ class ODESolution(AnalyticalSolution):
         
         #obj._lhs=self._lhs     
         obj._ivar = self.ivar
-        obj._rhs = self._rhs
+        #obj._rhs = self._rhs
         #obj._lhs = self._lhs
         obj._vars = self._vars
                 
@@ -1270,7 +1273,7 @@ class ODESystem(AnalyticalSolution):
         
         
     @classmethod
-    def _constructor(cls,odes,dvars,odes_rhs=None , ivar=None,ode_order=None ,evaluate=True, parameters = None, **options):
+    def _constructor(cls,odes,dvars=None,odes_rhs=None , ivar=None,ode_order=None ,evaluate=True, parameters = None, **options):
         
 
         if not isinstance(dvars,Iterable):
@@ -1618,55 +1621,55 @@ class ODESystem(AnalyticalSolution):
         return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
     
     
-    def __add__(self,other):
+    # def __add__(self,other):
         
-        if isinstance(other,self.__class__):
-            other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
+    #     if isinstance(other,self.__class__):
+    #         other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
         
-        obj = super().__add__(other)
-        obj._dvars=self._dvars
-        obj._ivar = self.ivar
-        obj._ode_order = self.ode_order
+    #     obj = super().__add__(other)
+    #     obj._dvars=self._dvars
+    #     obj._ivar = self.ivar
+    #     obj._ode_order = self.ode_order
         
-        return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
+    #     return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
 
     
-    def __rsub__(self,other):
+    # def __rsub__(self,other):
         
-        if isinstance(other,self.__class__):
-            other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
+    #     if isinstance(other,self.__class__):
+    #         other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
         
-        obj = super().__rsub__(other)
-        obj._lhs=self._lhs
-        obj._ivar = self.ivar
-        obj._ode_order = self.ode_order
+    #     obj = super().__rsub__(other)
+    #     obj._lhs=self._lhs
+    #     obj._ivar = self.ivar
+    #     obj._ode_order = self.ode_order
         
-        return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
+    #     return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
 
     
-    def __sub__(self,other):
+    # def __sub__(self,other):
         
-        if isinstance(other,self.__class__):
-            other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
+    #     if isinstance(other,self.__class__):
+    #         other = Matrix([other.as_dict()[coord]  for  coord  in self._lhs ])
         
-        obj = super().__sub__(other)
+    #     obj = super().__sub__(other)
         
-        obj._dvars=self._dvars
-        obj._ivar = self.ivar
-        obj._ode_order = self.ode_order
+    #     obj._dvars=self._dvars
+    #     obj._ivar = self.ivar
+    #     obj._ode_order = self.ode_order
         
-        return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
+    #     return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
 
     
     
-    def __mul__(self,other):
+    # def __mul__(self,other):
         
-        obj = super().__mul__(other)
-        obj._dvars=self._dvars
-        obj._ivar = self.ivar
-        obj._ode_order = self.ode_order
+    #     obj = super().__mul__(other)
+    #     obj._dvars=self._dvars
+    #     obj._ivar = self.ivar
+    #     obj._ode_order = self.ode_order
         
-        return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
+    #     return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
     
     def doit(self,**hints):
         
