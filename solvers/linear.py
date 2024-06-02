@@ -2126,7 +2126,7 @@ class ODESystem(AnalyticalSolution):
     def _get_code():
         from dynpy.utilities.report import ObjectCode
         
-        tmp = ObjectCode('''
+        code = ObjectCode('''
             from dynpy.solvers.linear import ODESystem
             from sympy import *
 
@@ -2148,7 +2148,7 @@ class ODESystem(AnalyticalSolution):
             display(odesys)
                          
                          ''')
-        return tmp
+        return code
     
 class FirstOrderODESystem(ODESystem):
     

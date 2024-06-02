@@ -2477,6 +2477,20 @@ class ReportText(ReportModule):
         
         return copy.copy(self)
     
+    def call_code(self):
+        #Declaration of command vector used in call_code method
+        self.command_vector = []
+        
+        if self._text != None: self.command_vector.append("text = {}".format(self._text))
+        if self._alignment != None: self.command_vector.append("alignment = {}".format(self._alignment))
+        
+        vector = 'ReportText('
+        
+        for element in self.command_vector:
+            vector += str(element) + ', '
+        
+        print(vector[:-2] + ')')
+    
 class Aspect(Section,ReportModule):
     packages=[#Package('float'),
               #Package('fvextra'),
@@ -2877,6 +2891,22 @@ class Markdown(Environment,ReportModule):
         self.cls_container.append(NoEscape(  latex_code  ))
         
         return copy.copy(self)
+    
+    def call_code(self):
+        #Declaration of command vector used in call_code method
+        self.command_vector = []
+        
+        if self.markdown != None: self.command_vector.append("markdown = {}".format(self.markdown))
+        if self.options != None: self.command_vector.append("options = {}".format(self.options))
+        if self.arguments != None: self.command_vector.append("arguments = {}".format(self.arguments))
+        if self.start_arguments != None: self.command_vector.append("start_arguments = {}".format(self.start_arguments))
+        
+        vector = 'Markdown('
+        
+        for element in self.command_vector:
+            vector += str(element) + ', '
+        
+        print(vector[:-2] + ')')
         
     
 class Block(Environment,ReportModule):
@@ -3142,6 +3172,25 @@ class Picture(Figure,ReportModule):
         self.cls_container.append(self)
         
         return copy.deepcopy(self)
+    
+    def call_code(self):
+        
+        #Declaration of command vector used in call_code method
+        self.command_vector = []
+        
+        if self.image != None: self.command_vector.append("image = {}".format(self.image))
+        if self._position != None: self.command_vector.append("position = {}".format(self._position))
+        if self.caption != None: self.command_vector.append("caption = {}".format(self.caption))
+        if self.width != None: self.command_vector.append("width = {}".format(self.width))
+        if self.height != None: self.command_vector.append("height = {}".format(self.height))
+        if self.marker != None: self.command_vector.append("marker = {}".format(self.marker))
+        
+        vector = 'Picture('
+        
+        for element in self.command_vector:
+            vector += str(element) + ', '
+        
+        print(vector[:-2] + ')')
 
 class ObjectCode(LstListing,ReportModule):
     _latex_name='lstlisting'
@@ -3253,6 +3302,26 @@ class ObjectCode(LstListing,ReportModule):
         
         return '\t'+self.code_type.replace('\n','\n \t')
 
+    def _as_string(self):
+
+        return self.code_type
+        
+    def call_code(self):     
+        #Declaration of command vector used in call_code method
+        self.command_vector = []
+        
+        if self.source != None: self.command_vector.append("source = {}".format(self.source))
+        if self.options != None: self.command_vector.append("options = {}".format(self.options))
+        if self.arguments != None: self.command_vector.append("start_arguments = {}".format(self.start_arguments))
+        if self.start_arguments != None: self.command_vector.append("width = {}".format(self.width))
+        if self._caption != None: self.command_vector.append("caption = {}".format(self._caption))
+        
+        vector = 'ObjectCode('
+        
+        for element in self.command_vector:
+            vector += str(element) + ', '
+        
+        print(vector[:-2] + ')')
     
 guide_code_header = """
 #!!! REMEMBER TO PASTE AND RUN ALL PREVIOUS CELL

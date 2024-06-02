@@ -1358,17 +1358,17 @@ class NormalisedNaturalFrequenciesAnalysisComponent(ReportComponent):
 
         display(ReportText(self.header_text))
     
-        display(ReportText(f'''\n The inertia and stifness matrices are given in ({AutoMarker(Eq(Symbol('M'),system._inertia_matrix(),evaluate=False))}) and ({AutoMarker(Eq(Symbol('K'),system._stiffness_matrix(),evaluate=False))}):
-        '''))
+#         display(ReportText(f'''\n The inertia and stifness matrices are given in ({AutoMarker(Eq(Symbol('M'),system._inertia_matrix(),evaluate=False))}) and ({AutoMarker(Eq(Symbol('K'),system._stiffness_matrix(),evaluate=False))}):
+#         '''))
         
-        display(SympyFormula(Eq(Symbol('M'),system._inertia_matrix(),evaluate=False)))
-        display(SympyFormula(Eq(Symbol('K'),system._stiffness_matrix(),evaluate=False)))
+#         display(SympyFormula(Eq(Symbol('M'),system._inertia_matrix(),evaluate=False)))
+#         display(SympyFormula(Eq(Symbol('K'),system._stiffness_matrix(),evaluate=False)))
         
         r = Symbol('r')
         omg = Symbol('omega')
         
-        display(ReportText('''The stiffness matrix makes possible to determine equilibrium positions of the system and together with the inertia matrix, to determine its natural frequencies creating its the fundamental matrix:
-        '''))
+#         display(ReportText('''The stiffness matrix makes possible to determine equilibrium positions of the system and together with the inertia matrix, to determine its natural frequencies creating its the fundamental matrix:
+#         '''))
         
         fund_mat = system.fundamental_matrix().subs({r:-omg})
         
@@ -1377,7 +1377,7 @@ class NormalisedNaturalFrequenciesAnalysisComponent(ReportComponent):
         display(ReportText(f'''By calculating a determinant of the fundamental matrix, the system natural frequencies can be determined.
         '''))
         
-        display(SympyFormula(Eq(fund_mat.det().collect(omg**2),0,evaluate=False)))
+#         display(SympyFormula(Eq(fund_mat.det().collect(omg**2),0,evaluate=False)))
         
         display(ReportText(f'''Assuming certain dependencies, the formula ({AutoMarker(Eq(Symbol('A'),fund_mat,evaluate=False))}) can be rearranged into a biquadratic polynomial and simplified to the following, where its roots are the system eigenvalues:
         '''))
@@ -1443,7 +1443,15 @@ class NormalisedNaturalFrequenciesAnalysisComponent(ReportComponent):
         
         display(ReportText('''where $\omega_{12}$ and $\omega_{21}$ are the elements of the normalised matrix.
         '''))
+        
+        display(ReportText('''Having the eigenvalue formulas simplified, now the system properties can be put back into the equations resulting in final expressions:
+        '''))
 
+        from dynpy.solvers.linear import ODESystem
+        eigs = ODESystem(odes=Matrix([system.lhs[0],system.lhs[1]]),dvars=Matrix(system.dvars))._eigenvals_simplified()
+        
+        display(SympyFormula(Eq(omg_1, eigs[0])))
+        display(SympyFormula(Eq(omg_2, eigs[3])))
 
         display(ReportText(self.footer_text))
         
