@@ -2822,6 +2822,7 @@ class DampedMeasuringTool(ComposedSystem):
     #detail_real_name =
 
     m = Symbol('m', positive=True)
+    I = Symbol('I', positive=True)
     l = Symbol('l', positive=True)
     k = Symbol('k', positive=True)
     k_t = Symbol('k_t', positive=True)
@@ -2872,7 +2873,9 @@ class DampedMeasuringTool(ComposedSystem):
     def components(self):
         components = {}
 
-        self.bar = Pendulum(self.m, g=0, l=self.l, angle=self.phi, ivar=self.ivar)
+        #self.bar = Pendulum(self.m, g=0, l=self.l, angle=self.phi, ivar=self.ivar)
+        self.bar = MaterialPoint(self.m*self.l**2/3, pos1=self.phi, qs=[self.phi])
+        
         self._upper_spring = Spring(self.k, pos1=self.l * self.phi, qs=[self.phi])
         self._lower_spring = Spring(self.k, pos1=self.l * self.phi, qs=[self.phi])
         self._spiral_spring = TorsionalSpring(self.k_t, self.phi, qs=[self.phi])
@@ -2894,10 +2897,15 @@ class DampedMeasuringTool(ComposedSystem):
 
     def get_default_data(self):
 
-
+        m0, l0, I0, k0, F0, Omg = symbols('m_0 l_0 I_0 k_0 F_0 Omega', positive=True)
+        
         default_data_dict = {
             self.c: [self.lam * (self.k)],
             self.c_t: [self.lam * (self.k_t)],
+            self.F: [F0*cos(Omg*self.ivar)],
+            self.m*self.l**2/3:[S.Half*m0*self.l**2/3,m0*self.l**2/3, 2*self.m0*self.l**2/3 , 3*self.m0*self.l**2/3, 4*self.m0*self.l**2/3],
+            #self.l : [l0, 2*l0],
+            
         }
 
         return default_data_dict

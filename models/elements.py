@@ -469,8 +469,10 @@ class TorsionalSpring(Spring):
     def get_default_data(self):
 
         k0,l0= self.k0,self.l0
+        l=Symbol('l', positive=True)    
         self.default_data_dict={
-            self.stiffness: [S.One *  k0*l0**2 * no for no in range(2,5)],
+            #self.stiffness: [S.One *  k0*l0**2 * no for no in range(2,5)],
+            self.stiffness: [S.One *  k0*l**2 * no for no in range(2,5)],
         }
         #return {**super().get_default_data(),**self.default_data_dict}
         return {**self.default_data_dict}
