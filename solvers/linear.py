@@ -274,6 +274,13 @@ class AnalyticalSolution(ImmutableMatrix):
 
         obj._rhs= rhs    
         obj._vars = vars
+        
+        if obj.vars is not None:
+            if len(obj.vars)!=len(obj):
+            
+                warn_str = '!!!!!!!!!!!!!!!!! WRONG SIZE of VARS and ELEMENTS'
+                print(warn_str)
+                return warn_str
 
         return obj
     
@@ -365,7 +372,7 @@ class AnalyticalSolution(ImmutableMatrix):
     
     def _assign_properties(self,obj):
         
-        obj._rhs=self._rhs     
+        #obj._rhs=self._rhs     
         obj._vars = self._vars
         #obj._const_list = self._const_list
         
@@ -379,60 +386,155 @@ class AnalyticalSolution(ImmutableMatrix):
         obj = self._assign_properties(obj)
         
         return obj
+
+    @cached_property 
+    def _is_rhs_form(self):
+        
+        return self.lhs == self.vars
+
+
+    def _fix_other(self,other):
+        if isinstance(other,AnalyticalSolution):
+            dict_elems = other.as_explicit_dict()
+            
+            display(dict_elems)
+            display(self.vars)
+            other = Matrix([other.as_explicit_dict()[coord]  for  coord  in self.vars ])
+            #other = other.rhs        
+        
+        
+    def _add_rhs_form(self,other):
+        if isinstance(other,AnalyticalSolution):
+            dict_elems = other.as_explicit_dict()
+        else:
+            dict_elems = AnalyticalSolution.from_vars_and_rhs(self.vars,other).as_explicit_dict()
+            
+        result = Matrix([self.as_explicit_dict()[coord]+ dict_elems[coord] for  coord  in self.lhs ])
+        return type(self).from_vars_and_rhs(self.lhs,result)
+
+
+    def _op_TYPE_rhs_form(self,other,op_func):
+        if isinstance(other,AnalyticalSolution):
+            dict_elems = other.as_explicit_dict()
+        else:
+            dict_elems = AnalyticalSolution.from_vars_and_rhs(self.vars,other).as_explicit_dict()
+            
+        
+        elems_list = [op_func(self.as_explicit_dict()[coord],dict_elems[coord]) for  coord  in self.lhs ]
+        
+        result = Matrix(elems_list)
+        return type(self).from_vars_and_rhs(self.lhs,result)
+    
+    
+    def _op_TYPE_sides_form(self,other,op_func):
+
+        if isinstance(other,AnalyticalSolution):
+            other_rhs = other.rhs
+            other_lhs = other.lhs
+        else:
+            other_rhs = other
+            other_lhs = other*0
+        
+        
+        #rhs = self.rhs.__add__(other_rhs)
+        rhs = op_func(self.rhs,other_rhs)
+        #lhs = self.lhs.__add__(other_lhs)
+        lhs = op_func(self.lhs,other_lhs)
+        
+        obj = type(self)(lhs,vars=self.vars,rhs=rhs)
+
+        
+        return obj
+    
     
     
     def __add__(self,other):
         
-        if isinstance(other,AnalyticalSolution):
-            other = Matrix([other.as_dict()[coord]  for  coord  in self.vars ])
+        op_func = lambda obj,other: obj.__add__(other)
         
-        obj = super().__add__(other)
-        obj = self._assign_properties(obj)
+        if self._is_rhs_form:
+            
+            return self._op_TYPE_rhs_form(other,op_func)
+
+        else:
+            
+            return self._op_TYPE_sides_form(other,op_func)
+
+
+    def __radd__(self,other):
+
+        op_func = lambda obj,other: obj.__radd__(other)
         
-        return obj
+        if self._is_rhs_form:
+            
+            return self._op_TYPE_rhs_form(other,op_func)
+
+        else:
+            
+            return self._op_TYPE_sides_form(other,op_func)
+
 
     
     def __rsub__(self,other):
 
-        if isinstance(other,AnalyticalSolution):
-            other = Matrix([other.as_dict()[coord]  for  coord  in self.vars ])
+        op_func = lambda obj,other: obj.__rsub__(other)
+        
+        if self._is_rhs_form:
+            
+            return self._op_TYPE_rhs_form(other,op_func)
 
-        obj = super().__rsub__(other)
-        obj = self._assign_properties(obj)
-
-        return obj
+        else:
+            
+            return self._op_TYPE_sides_form(other,op_func)
 
 
     def __sub__(self,other):
 
-        if isinstance(other,AnalyticalSolution):
-            other = Matrix([other.as_dict()[coord]  for  coord  in self.lhs ])
+        op_func = lambda obj,other: obj.__sub__(other)
+        
+        if self._is_rhs_form:
+            
+            return self._op_TYPE_rhs_form(other,op_func)
 
-        obj = super().__sub__(other)
-        obj = self._assign_properties(obj)
-
-        return obj
+        else:
+            
+            return self._op_TYPE_sides_form(other,op_func)
 
 
     def __mul__(self,other):
 
-        obj = super().__mul__(other)
-        obj = self._assign_properties(obj)
+        op_func = lambda obj,other: obj.__mul__(other)
+        
+        if self._is_rhs_form:
+            
+            return self._op_TYPE_rhs_form(other,op_func)
 
-        return obj
+        else:
+            
+            return self._op_TYPE_sides_form(other,op_func)
+
+
 
     def __rmul__(self,other):
 
-        obj = super().__rmul__(other)
-        obj = self._assign_properties(obj)
+        op_func = lambda obj,other: obj.__rmul__(other)
+        
+        if self._is_rhs_form:
+            
+            return self._op_TYPE_rhs_form(other,op_func)
 
-        return obj
+        else:
+            
+            return self._op_TYPE_sides_form(other,op_func)
+
+
     
     
     def doit(self,**hints):
 
         obj = super().doit(**hints)
         obj = self._assign_properties(obj)
+        obj._rhs = self.rhs.doit(**hints)
 
         return obj
     
@@ -440,6 +542,8 @@ class AnalyticalSolution(ImmutableMatrix):
         
         obj = super()._eval_applyfunc(f)
         obj = self._assign_properties(obj)
+        obj._rhs = self.rhs._eval_applyfunc(f)
+        
         
         return obj
 
@@ -448,7 +552,7 @@ class AnalyticalSolution(ImmutableMatrix):
 
         obj = super().expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
         obj = self._assign_properties(obj)        
-        obj._lhs = obj._lhs.expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
+        obj._rhs = obj.rhs.expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
         #obj._dvars=self._dvars
         #obj._ivar = self.ivar
         
@@ -500,7 +604,11 @@ class AnalyticalSolution(ImmutableMatrix):
     @property
     def vars(self):
         if self._vars is not None:
-            return self._vars
+            if isinstance(self._vars,Iterable):
+                return self._vars
+            else:
+                return Matrix([self._vars])
+                            
         else:
             return [Symbol(f'Eq_{no}')  for no in range( len(self.as_list())  )]
     
@@ -549,6 +657,10 @@ class AnalyticalSolution(ImmutableMatrix):
     def as_dict(self):
 
         return Dict({lhs:rhs  for  lhs,rhs in self.as_iterable()})
+    
+    def as_explicit_dict(self):
+
+        return Dict({lhs:rhs  for  lhs,rhs in zip(self.lhs,self.rhs)})
     
     def as_eq_list(self):
         ''' Creates a zip object consisting of the left side of the self instance and self itself.
@@ -937,8 +1049,14 @@ class ODESolution(AnalyticalSolution):
             ics_list = ics
         #ics_list = [ics[coord]  for coord  in self.dvars]
 
+        # display(self.rhs.subs(self.ivar,self.ivar_0))
+        # display(Matrix(ics_list))
         
-        return Matrix(ics_list) - self.rhs.subs(self.ivar,self.ivar_0)
+        
+        const_eqns=Matrix(ics_list) - self.rhs.subs(self.ivar,self.ivar_0)
+        display(const_eqns)
+        
+        return const_eqns
         
     def _calculate_constant(self,ics=None, sol0=None):
         """_summary_
@@ -950,7 +1068,10 @@ class ODESolution(AnalyticalSolution):
         """
 
         const_eqns=self._get_constant_eqns(ics, sol0)
+        display(const_eqns)
+        
         const_list = self._spot_constant()
+        display(const_list)
         
         return solve(const_eqns,const_list)
     
@@ -961,9 +1082,9 @@ class ODESolution(AnalyticalSolution):
         self._dvars_str = self._get_dvars_str()
         self.ivar_0 = ivar0
         const_dict=self._calculate_constant(ics, sol0)
-        #display(const_dict)
+        display(const_dict)
        
-        return self.subs(const_dict)
+        return ODESolution.from_vars_and_rhs(self.vars,self.rhs.subs(const_dict)) #temporary workaround that replaces subs
     
     def __call__(self,ivar=None,ics=None,params={}):
         
@@ -3025,11 +3146,12 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 
                 # print(f'homo eq + coeff as type {type(odes)}')
                 # display(odes)
-                sol_H = ODESystem.from_ode_system(odes)._as_fode().solution.with_ics(ics_list,ivar0)
+                #sol_H = ODESystem.from_ode_system(odes)._as_fode().solution.with_ics(ics_list,ivar0)
+                sol_H = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes).solution#.with_ics(ics_list,ivar0)
                 
-                # print('heavi result')
-                # display(sol_H)
-                # display(sol_H.rhs*elem)
+                print('heavi result')
+                display(sol_H)
+                display(sol_H.rhs*elem)
                 
                 sol += sol_H.rhs*elem
 
