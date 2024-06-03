@@ -2978,6 +2978,7 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
     u0 = Symbol('u_0',positive=True)
     k = Symbol('k',positive=True)
     b = Symbol('b',positive=True)
+    flow_coeff = Symbol('lambda')
     qs=dynamicsymbols('alpha beta')
     
  
@@ -2997,6 +2998,7 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
                  u0=None,
                  k=None,
                  b=None,
+                 flow_coeff=None,
                  qs=None,
                  ivar=Symbol('t'),
                  **kwargs):
@@ -3016,6 +3018,7 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
         if u0 is not None: self.u0 = u0
         if k is not None: self.k = k
         if b is not None: self.b = b
+        if flow_coeff is not None: self.flow_coeff = flow_coeff
 
         
         self.qs = [self.phi_1,self.phi_2]
@@ -3090,3 +3093,28 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
         }
         return self.sym_desc_dict
     
+    def flow_equation(self):
+        return_eq=Eq(self.m2,(self.m_0-self.m_0*self.trans_expr).expand())
+        
+        return return_eq
+    
+    def upper_mass_equation(self):
+        return_eq=Eq(self.m1,(self.m_0*self.trans_expr).expand())
+        
+        return return_eq
+    
+    def amplitude_envelope(self, signal, var, frame_size=128, hop_length=56):
+        
+        max_vals = [max(signal.iloc[i:i+frame_size][var]) for i in range(0,len(signal),hop_length)]
+        
+        envelope_averaged = pd.DataFrame(max_vals).rolling(10, min_periods=2).mean()
+        
+        return envelope_averaged
+    
+    def instantaneous_frequency(self, signal, var, t_param, frame_size=128, hop_length=56):
+        
+        time_id = [signal.iloc[i:i+frame_size][var].idxmax() for i in range(0,len(signal),hop_length)]
+        
+        insta_freq = pd.DataFrame(time_id).apply(lambda row: t_param*row)
+        
+        return insta_freq
