@@ -46,7 +46,7 @@ from ..utilities.components.ode import pl as ode_comp_pl
 
 import copy
 
-from .tools import CommonFactorDetector, ODE_COMPONENTS_LIST
+from .tools import CommonFactorDetector, ODE_COMPONENTS_LIST, CodeFlowLogger
 
 class MultivariableTaylorSeries(Expr):
     """_summary_
@@ -431,6 +431,8 @@ class AnalyticalSolution(ImmutableMatrix):
     
     def _op_TYPE_sides_form(self,other,op_func):
 
+        CodeFlowLogger(other,'other',self)
+
         if isinstance(other,AnalyticalSolution):
             other_rhs = other.rhs
             other_lhs = other.lhs
@@ -444,9 +446,13 @@ class AnalyticalSolution(ImmutableMatrix):
         #lhs = self.lhs.__add__(other_lhs)
         lhs = op_func(self.lhs,other_lhs)
         
-        obj = type(self)(lhs,self.vars,rhs)
-
+        CodeFlowLogger(rhs,'op rhs',self)
+        CodeFlowLogger(lhs,'op lhs',self)
         
+        obj = type(self)._constructor(lhs,self.vars,rhs)
+
+        CodeFlowLogger(obj,'result',self)
+
         return self._assign_properties(obj)
     
     
@@ -454,6 +460,8 @@ class AnalyticalSolution(ImmutableMatrix):
     def __add__(self,other):
         
         op_func = lambda obj,other: obj.__add__(other)
+        
+        CodeFlowLogger(self._is_rhs_form,'__add__',self)
         
         if self._is_rhs_form:
             
@@ -467,6 +475,8 @@ class AnalyticalSolution(ImmutableMatrix):
     def __radd__(self,other):
 
         op_func = lambda obj,other: obj.__radd__(other)
+        
+        CodeFlowLogger(self._is_rhs_form,'__radd__',self)
         
         if self._is_rhs_form:
             
