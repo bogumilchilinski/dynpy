@@ -1288,6 +1288,7 @@ class ODESteadySolutionComponent(ReportComponent):
         
 import_code='''
 from dynpy.models.odes.numerical import *
+
 system=LinearFirstOrder.from_reference_data()
 system.as_eq()  #zwraca równanie
 system.as_matrix()  #zwraca macierz
@@ -1296,7 +1297,8 @@ system.as_dict()  #zwraca słownik
 system.as_eq_list()  #zwraca równanie w postaci listy
 system._as_fode()  #zwraca równanie pierwszego rzędu
 
-'''        
+'''
+
 class ODESystemRepresentationComponent(ReportComponent):
     
     title="Różnorodne reprezentacje systemu"
