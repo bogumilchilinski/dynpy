@@ -1,4 +1,4 @@
-from ..mechanics import *
+from .en import *
 
 
 
@@ -1352,7 +1352,10 @@ class ODESystemCreationComponent(ReportComponent):
 
         _ode_order = system.ode_order
 
-        cls_name = system.__class__.__name__
+        if _ode_order == 1:
+            cls_name = 'FirstOrderODESystem'
+        else:
+            cls_name = 'ODESystem'
 
         string_gc = CodePrinter(_odes[0])._generate_code()
 

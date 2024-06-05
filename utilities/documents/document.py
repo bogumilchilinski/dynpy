@@ -1125,7 +1125,7 @@ class IntroToPandasGuide(Guide):
         #from ...models.mechanics.tmac import SDOFWinchSystem
         from ...models.mechanics import ForcedSpringMassSystem as DynamicSystem
 
-        return DynamicSystem()    
+        return DynamicSystem()
 
 class BasicsOfODESystemGuide(Guide):
 
@@ -1207,10 +1207,16 @@ class ODESystemOverviewReport(UsageOfDynamicSystemsGuide):
             ode_comp.ODESystemCreationComponent,
             ode_comp.ODEGeneralSolutionComponent,
             ode_comp.ODESteadySolutionComponent,
-            #ode_comp.ODESystemRepresentationComponent
+            ode_comp.ODESystemRepresentationComponent,
 
         ]
 
         return comp_list
 
-    
+    @property
+    def default_reported_object(self):
+
+        #from ...models.mechanics.tmac import SDOFWinchSystem
+        from ...models.odes.linear import LinearFirstOrder
+        
+        return LinearFirstOrder.from_reference_data()
