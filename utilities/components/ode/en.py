@@ -1455,7 +1455,7 @@ class NormalisedNaturalFrequenciesAnalysisComponent(ReportComponent):
 
         display(ReportText(self.footer_text))
         
-class ODESystemCreationComponent_en(ReportComponent):
+class ODESystemCreationComponent(ReportComponent):
     
     title="Creating a linear differential equation"
 
@@ -1480,7 +1480,10 @@ class ODESystemCreationComponent_en(ReportComponent):
         display(ObjectCode(f'''
 
 
-from dynpy.solvers.linear import {cls_name}
+from dynpy.solvers.linear import *
+from dynpy.models.odes.linear import *
+from dynpy.models.odes.numerical import *
+
 from sympy import *
 
 {string_gc}

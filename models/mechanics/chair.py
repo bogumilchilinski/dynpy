@@ -181,21 +181,22 @@ class UndampedChair5DOF(ComposedSystem):
 
         components={}
 
-        self._body_horizontal = MaterialPoint(self.M, self.x+self.z_c*self.phi, qs=self.qs)(label='body_horizontal')
-        self._body_vertical_rotational = RigidBody2D(self.M, self.I_ch, pos_lin=self.z, pos_rot=self.phi, qs=self.qs)(label='body_vertical_rotational')
-        self._rear_wheel_vertical_rotational = RigidBody2D(self.m_rear, self.I_w, pos_lin=self.z_rear, pos_rot=self.x/self.R, qs=self.qs)(label='rear_wheel_vertical_rotational')
-        self._rear_wheel_horizontal = MaterialPoint(self.m_rear, self.x, qs=self.qs)(label='rear_wheel_horizontal')
-        self._front_wheel_vertical = MaterialPoint(self.m_fr, self.z_front, qs=self.qs)(label='front_wheel_vertical')
-        self._front_wheel_horizontal = MaterialPoint(self.m_fr, self.x, qs=self.qs)(label='front_wheel_horizontal')
+        self._body_horizontal = MaterialPoint(self.M, self.x+self.z_c*self.phi, qs=self.qs,frame=base_frame)(label='body_horizontal')
+        self._body_vertical_rotational = RigidBody2D(self.M, self.I_ch, pos_lin=self.z, pos_rot=self.phi, qs=self.qs,frame=base_frame)(label='body_vertical_rotational')
+        self._rear_wheel_vertical_rotational = RigidBody2D(self.m_rear, self.I_w, pos_lin=self.z_rear, pos_rot=self.x/self.R, qs=self.qs,frame=base_frame)(label='rear_wheel_vertical_rotational')
+        self._rear_wheel_horizontal = MaterialPoint(self.m_rear, self.x, qs=self.qs,frame=base_frame)(label='rear_wheel_horizontal')
+        self._front_wheel_vertical = MaterialPoint(self.m_fr, self.z_front, qs=self.qs,frame=base_frame)(label='front_wheel_vertical')
+        self._front_wheel_horizontal = MaterialPoint(self.m_fr, self.x, qs=self.qs,frame=base_frame)(label='front_wheel_horizontal')
         self._front_wheel_gravity = GravitationalForce(self.m_fr, self.g, self.z_front)(label='front_wheel_gravity')
         self._rear_wheel_gravity = GravitationalForce(self.m_rear, self.g, self.z_rear)(label='rear_wheel_gravity')
         self._body_gravity = GravitationalForce(self.M, self.g, self.z+self.z_c*cos(self.phi), qs=self.qs)(label='body_gravity')
-        self._rear_tire_spring = Spring(self.k_rt, self.z_rear-self.u_rrp, qs=self.qs)('rear_tire_spring')
-        self._rear_wheel_spring = Spring(self.k_r, self.u_rsd, qs=self.qs)('rear_wheel_spring')
-        self._front_tire_spring = Spring(self.k_ft, self.z_front-self.u_frp, qs=self.qs)('front_tire_spring')
-        self._front_wheel_spring = Spring(self.k_f, self.u_fsd, qs=self.qs)('front_wheel_spring')
-        self._hand_drive_force = Force(self.F*(sign(cos(self.Omega*self.ivar)-self.pm)+1), pos1=self.x , qs=self.qs)('hand_drive_force')
-        self._hand_drive_force_phi = Force(self.F*self.Omega*self.R*((sign(cos(self.Omega*self.ivar)-self.pm)+1)*cos(self.Omega*self.ivar)), pos1=self.phi , qs=self.qs)('hand_drive_force_phi')
+        self._rear_tire_spring = Spring(self.k_rt, self.z_rear-self.u_rrp, qs=self.qs,frame=base_frame)('rear_tire_spring')
+        self._rear_wheel_spring = Spring(self.k_r, self.u_rsd, qs=self.qs,frame=base_frame)('rear_wheel_spring')
+        self._front_tire_spring = Spring(self.k_ft, self.z_front-self.u_frp, qs=self.qs,frame=base_frame)('front_tire_spring')
+        self._front_wheel_spring = Spring(self.k_f, self.u_fsd, qs=self.qs,frame=base_frame)('front_wheel_spring')
+        self._hand_drive_force = Force(self.F*(sign(cos(self.Omega*self.ivar)-self.pm)+1), pos1=self.x , qs=self.qs,frame=base_frame)('hand_drive_force')
+        self._hand_drive_force_phi = Force(self.F*self.Omega*self.R*((sign(cos(self.Omega*self.ivar)-self.pm)+1)*cos(self.Omega*self.ivar)), pos1=self.phi , qs=self.qs,frame=base_frame)('hand_drive_force_phi')
+
 
         components['_body_horizontal'] = self._body_horizontal
         components['_body_vertical_rotational'] = self._body_vertical_rotational
