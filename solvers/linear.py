@@ -2283,18 +2283,20 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
     
     
     @cached_property
-    def odes_rhs(self):
-        return self.rhs
+    def odes_rhs(self): #hmmmm DAmian/Madi możemy zaryzykować tu w sumie
+        return self._to_rhs_ode().rhs
     
     @cached_property
     def _fundamental_matrix(self):
         
+        #return self._to_rhs_ode().odes_rhs.jacobian(self.dvars)
         return self.odes_rhs.jacobian(self.dvars)
     
     
     @cached_property
     def _free_terms(self):
         
+#         return self._to_rhs_ode().odes_rhs.subs({coord:0 for coord in self.dvars})
         return self.odes_rhs.subs({coord:0 for coord in self.dvars})
 
 
@@ -2311,6 +2313,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
     def _auxiliary_fundamental_matrix(self):
         
         dvars = list(reversed(list(self.dvars)))
+#         odes = list(reversed(list(self._to_rhs_ode().odes_rhs)))
         odes = list(reversed(list(self.odes_rhs)))
     
         
@@ -2324,6 +2327,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
 
         dvars = self.dvars
 
+#         odes_list = list(reversed(list(self._to_rhs_ode().odes_rhs)))
         odes_list = list(reversed(list(self.odes_rhs)))
 
         odes = Matrix(odes_list)
@@ -2493,6 +2497,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     def _auxiliary_fundamental_matrix(self):
         
         dvars = list(reversed(list(self.dvars)))
+#         odes = list(reversed(list(self._to_rhs_ode().odes_rhs)))
         odes = list(reversed(list(self.odes_rhs)))
     
         

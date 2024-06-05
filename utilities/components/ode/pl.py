@@ -1361,7 +1361,8 @@ class ODESystemCreationComponent(ReportComponent):
         display(ObjectCode(f'''
 
 
-from dynpy.solvers.linear import {cls_name}
+from dynpy.solvers.linear import *
+from dynpy.models.odes.linear import *
 from sympy import *
 
 {string_gc}
