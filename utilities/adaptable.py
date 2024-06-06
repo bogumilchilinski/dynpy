@@ -18,7 +18,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import copy
 
+
 from dynpy.utilities.templates import tikz
+
 
 
 from pint import UnitRegistry
@@ -800,9 +802,10 @@ class TikZPlot(TikZ, ReportModule):
 
     _in_figure = False
     _figure_gen = lambda: Figure(position='htbp')
+    _default_figure_env = None
     _image_parameters = {'width': None}
     
-    _floats_no_gen = plots_no()    
+    _floats_no_gen = plots_no()
     _default_path = './tikzplots'
     _filename = None
     _prefix = None
@@ -870,6 +873,29 @@ class TikZPlot(TikZ, ReportModule):
                 self.append(self.axis_type(plotdata,height=self.height,width=self.width))
 
                 
+
+    @classmethod
+    def set_figure_environment(cls,env=None):
+        
+        from .report import Picture,StarredPicture
+
+        if env=='figure*':
+            #self._figure_gen = lambda: StarredPicture(caption=caption,width=NoEscape('\\textwidth'))
+            cls._default_figure_env = StarredPicture
+        elif env=="figure":
+            #self._figure_gen = lambda: Figure(position='htbp')
+            cls._default_figure_env = Picture
+
+
+    @property
+    def _figure_env(self):
+        from .report import Picture
+
+        if self.__class__._default_figure_env is None:
+
+            return Picture
+        else:
+            return self.__class__._default_figure_env
 
 
     @property
@@ -1026,7 +1052,7 @@ class TikZPlot(TikZ, ReportModule):
         if isinstance(self._width,str):
             return self._width
 
-    def in_figure(self,filename=None,caption=None):
+    def in_figure(self,filename=None,position=None, caption=None,width=None,height=None,marker=None, **kwargs):
 
 
         ReportCache.update_existing_files(self.__class__._default_path)
@@ -1052,22 +1078,20 @@ class TikZPlot(TikZ, ReportModule):
 
         if self._picture:
             from .report import Picture
-            
+
             key=standalone_plot.dumps()
-            
+
             if key in ReportCache._file_names:
                 filename = ReportCache._file_names[key]
-            
+
             else:
 
                 standalone_plot.generate_pdf(filename, clean_tex=False,compiler_args=['--lualatex'])
                 ReportCache._file_names[key] = filename
 
+            PictureEnv = self._figure_env
 
-                
-
-
-            fig = Picture(filename+'.pdf', width=width, caption = caption)
+            fig = PictureEnv(filename+'.pdf',  caption = caption,width=width,height=height ,marker=marker,**kwargs)
         else:
             standalone_plot.generate_tex(filename)
 
@@ -1078,7 +1102,7 @@ class TikZPlot(TikZ, ReportModule):
 
     @property    
     def filename(self):
-    
+
         if self._filename is None and self._prefix is None:
             filename = f'{self.__class__._default_path}/plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
 
@@ -1118,7 +1142,7 @@ class TikZPlot(TikZ, ReportModule):
                 width = self.__class__._image_parameters['width']
 
                 
-                fig = Picture(filename+'.pdf', width=width)
+                fig = self.__class__._figure_gen()
             else:
                 standalone_plot.generate_tex(filename)
                 

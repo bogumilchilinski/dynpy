@@ -17,7 +17,8 @@ import IPython as IP
 import numpy as np
 import inspect
 
-from .principles import ComposedSystem, NonlinearComposedSystem,  base_frame, base_origin,cached_property, lru_cache, REPORT_COMPONENTS_LIST
+from .principles import ComposedSystem, NonlinearComposedSystem,  base_frame, base_origin, REPORT_COMPONENTS_LIST
+from functools import cached_property
 
 t,f= symbols('t, f')
 
@@ -211,7 +212,7 @@ class UndampedChair5DOF(ComposedSystem):
         components['_rear_wheel_spring'] = self._rear_wheel_spring
         components['_front_tire_spring'] = self._front_tire_spring
         components['_front_wheel_spring'] = self._front_wheel_spring
-        components['_hand_drive_force'] = self._hand_drive_force
+#         components['_hand_drive_force'] = self._hand_drive_force
         components['_hand_drive_force_phi'] = self._hand_drive_force_phi
         
         return components
@@ -372,7 +373,7 @@ class DampedChair5DOF(UndampedChair5DOF):
     def get_param_values(self):
 
         default_data_dict={
-                            c_mu:0.0001,
+                            self.c_mu:0.0001,
                           }
 
         return {**super().get_param_values(),**self.default_data_dict}

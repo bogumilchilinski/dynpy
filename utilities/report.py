@@ -2989,8 +2989,9 @@ class AlertBlock(Block):
 
 class ExampleBlock(Block):
     pass
-    
 
+
+    
 class Picture(Figure,ReportModule):
     """A class that represents a figure environment."""
 
@@ -3032,8 +3033,10 @@ class Picture(Figure,ReportModule):
     def set_preview_default_size(cls, size):
         cls._preview_default_size = size
         return cls
-    
+
     _latex_name = 'figure'
+        
+        
     def __init__(self, image=None, position=None, caption=None,width=None,height=None,marker=None, **kwargs):
         """
         Args
@@ -3052,6 +3055,8 @@ class Picture(Figure,ReportModule):
         self.image = image
         self.caption = caption
         self.preview_size = None
+        
+
         
         if width is not None:
             self.width = width
@@ -3191,6 +3196,9 @@ class Picture(Figure,ReportModule):
             vector += str(element) + ', '
         
         print(vector[:-2] + ')')
+    
+class StarredPicture(Picture):
+    _latex_name='figure*'
 
 class ObjectCode(LstListing,ReportModule):
     _latex_name='lstlisting'
@@ -3417,6 +3425,7 @@ class TikZPicture(Environment,ReportModule):
         super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
         
         self.append(self.tikzcode)
+        
         
     @property
     def tikzcode(self):
