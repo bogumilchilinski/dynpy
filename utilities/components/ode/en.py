@@ -1455,7 +1455,7 @@ class NormalisedNaturalFrequenciesAnalysisComponent(ReportComponent):
 
         display(ReportText(self.footer_text))
         
-class ODESystemCreationComponent(ReportComponent):
+class ODEInitCodeComponent(ReportComponent):
     
     title="Creating a linear differential equation"
 
@@ -1471,7 +1471,10 @@ class ODESystemCreationComponent(ReportComponent):
 
         _ode_order = system.ode_order
 
-        cls_name = system.__class__.__name__
+        if _ode_order == 1:
+            cls_name = 'FirstOrderODESystem'
+        else:
+            cls_name = 'ODESystem'
 
         string_gc = CodePrinter(_odes[0])._generate_code()
 

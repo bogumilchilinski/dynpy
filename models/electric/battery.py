@@ -1,7 +1,7 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, asin, diff, sqrt, S,
                    diag, Eq, hessian, Function, flatten, Tuple, im, pi, latex,
                    dsolve, solve, fraction, factorial, Subs, Number, oo, Abs,
-                   N, solveset, integrate, lambdify, Heaviside, integrate)
+                   N, solveset, integrate, lambdify, Heaviside, integrate, exp, atan)
 
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
@@ -23,6 +23,7 @@ import inspect
 
 from ..mechanics.trolley import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
 
+t = Symbol('t')
 
 #from dynpy.models.electric import batterycell 
 #mechanics_printing(pretty_print=True)

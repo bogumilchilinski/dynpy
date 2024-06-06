@@ -1336,7 +1336,7 @@ class ODESystemRepresentationComponent(ReportComponent):
         display(ReportText(r'Metoda ._as_fode()'))
         display((system._as_fode()))
 
-class ODESystemCreationComponent(ReportComponent):
+class ODEInitCodeComponent(ReportComponent):
     
     title="Stworzenie liniowego równania różniczkowego"
 
@@ -1381,3 +1381,77 @@ display(odesys)
         '''))
 
         display(ReportText(f'Po wykonaniu instrukcji mamy gotową instancję obiektu klasy {cls_name}'  ))
+        
+class ODESystemAdditionComponent(ODESystemOperations):
+    
+    title="Adding two ODESystem Matrix"
+
+    def append_elements(self):
+            systems = self.reported_object
+            l = len(systems)
+            matrix_add = self.get_zero_ode_sys()
+            count = 1
+            for ode_sys in systems:
+                display(ReportText(f'Macierz {count}'))
+                display(ode_sys)
+                count += 1
+                matrix_add += ode_sys
+            display(ReportText('Suma macierzy'))
+            display(matrix_add)
+
+            
+class ODESystemSubtractionComponent(ODESystemOperations):
+    
+    title="Subtractiing two ODESystem Matrix"
+
+    def append_elements(self):
+            systems = self.reported_object
+            l = len(systems)
+            matrix_sub = systems[0]
+            display(ReportText(f'Macierz 1'))
+            display(systems[0])
+            count = 2
+            for i in range(l -1):
+                display(ReportText(f'Macierz {count}'))
+                display(systems[i])
+                count += 1
+                matrix_sub -= systems[i + 1]
+                
+                
+            display(ReportText('Różnica macierzy'))
+            display(matrix_sub)            
+            
+class ODESystemMultiplicationComponent(ODESystemOperations):
+    
+    title="Multiplying two ODESystem Matrix"
+
+    def append_elements(self):
+            systems = self.reported_object
+            l = len(systems)
+            matrix_mul = 1
+            count = 1
+            for ode_sys in systems:
+                display(ReportText(f'Macierz {count}'))
+                display(ode_sys)
+                count += 1
+                matrix_mul *= ode_sys
+            display(ReportText('Iloczyn macierzy'))
+            display(matrix_mul)
+            
+class ODESystemExponentiationComponent(ReportComponent):
+    title="Exponentiation of ODESystem Matrix"
+
+    def append_elements(self):
+        system = self.reported_object
+        ode_sys = system   #macierz deklarowana
+        
+
+        display(ReportText('Macierz'))
+        display(ode_sys)
+
+        
+        #wyiwtlanie operacji na macierzach
+        display(ReportText('Potęga macierzy'))
+        
+        matrix_exp = ode_sys * ode_sys
+        display(matrix_exp)

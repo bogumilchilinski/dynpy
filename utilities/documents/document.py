@@ -1204,7 +1204,7 @@ class ODESystemOverviewReport(UsageOfDynamicSystemsGuide):
     def _report_components(self):
 
         comp_list=[
-            ode_comp.ODESystemCreationComponent,
+            ode_comp.ODEInitCodeComponent,
             ode_comp.ODEGeneralSolutionComponent,
             ode_comp.ODESteadySolutionComponent,
             ode_comp.ODESystemRepresentationComponent,
