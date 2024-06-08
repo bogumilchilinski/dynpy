@@ -217,27 +217,6 @@ class UndampedChair5DOF(ComposedSystem):
         
         return components
 
-    def get_param_values(self):
-
-        default_data_dict={
-                            self.M:75,
-                            self.I_ch:9.479342+self.M*0.39*0.39,
-                            self.m_rear:1.5,
-                            self.R:0.3,
-                            self.I_w:self.m_rear*self.R**2,
-                            self.m_fr:0.6,
-                            self.g:9.81,
-                            self.z_c:0.4,
-                            self.k_rt:109000,
-                            self.k_r:750000,
-                            self.k_ft:300000,
-                            self.k_f:750000,
-                            self.F:150,
-                            self.Omega:0.3*np.pi*2,
-                            self.pm:0.1,
-                          }
-
-        return default_data_dict
     def symbols_description(self):
         self.sym_desc_dict = {
                                 self.x:'main body center of mass horizontal displacement',
@@ -288,42 +267,43 @@ class UndampedChair5DOF(ComposedSystem):
         return self.default_data_dict
     
     def get_table_values(self):
-        table_data_dict={F:150,
+        table_data_dict={self.F:150,
                    
-                   c_mu:0.0001,
-                   c_lam:0.0001,
-                   l_l:0.2,
-                   l_r:0.4,
+                   self.c_mu:0.0001,
+                   self.c_lam:0.0001,
+                   self.l_l:0.2,
+                   self.l_r:0.4,
                    
-                   k_f:607500,
-                   k_ft:475000,
-                   k_r:580000,
-                   k_rt:400000,
-                   m_3:75,
-                   I_ch:20.8868,
-                   m_rear:1.5,
-                   m_fr:0.6,
-                   pm:0.1,
-                   Omega:0.3454,
-                   R:0.3,
-                   z_c3:0.4,
-                   g:9.81,
-                   I_w:0.135,
-                   l_fr:0.2,
-                   l_rear:0.01,
-                   u0:0.005,
+                   self.k_f:607500,
+                   self.k_ft:475000,
+                   self.k_r:580000,
+                   self.k_rt:400000,
+                   self.m_3:75,
+                   self.I_ch:20.8868,
+                   self.m_rear:1.5,
+                   self.m_fr:0.6,
+                   self.pm:0.1,
+                   self.Omega:0.3454,
+                   self.R:0.3,
+                   self.z_c3:0.4,
+                   self.g:9.81,
+                   self.I_w:0.135,
+                   self.l_fr:0.2,
+                   self.l_rear:0.01,
+                   self.u0:0.005,
 
-                   l_bumps:0.15,
-                   amplitude:0.0165,
-                   length:0.19,
-                   speed:1.7,
-                   axw:0.47}
+                   self.l_bumps:0.15,
+                   self.amplitude:0.0165,
+                   self.length:0.19,
+                   self.speed:1.7,
+                   self.axw:0.47}
         return table_data_dict  
     
     
 class DampedChair5DOF(UndampedChair5DOF):
 
     c_mu=Symbol('c_mu',positive=True)
+    c_lam=Symbol('c_lambda',positive=True)
 
     def __init__(self,
                 x=None,
@@ -380,6 +360,7 @@ class DampedChair5DOF(UndampedChair5DOF):
         if Omega is not None: self.Omega=Omega
         if pm is not None: self.pm=pm
         if c_mu is not None: self.c_mu=c_mu
+        if c_lam is not None: self.c_lam=c_lam
         
         if ivar is not None: self.ivar=ivar
 
