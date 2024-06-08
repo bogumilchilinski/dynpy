@@ -1627,9 +1627,13 @@ class ODESystem(AnalyticalSolution):
         
 
         
-        obj = super().subs(*args,**kwargs)
+        #obj = super().subs(*args,**kwargs)
 
-        obj._lhs = self.lhs.subs(*args,**kwargs)
+        lhs = self.lhs.subs(*args,**kwargs)
+        rhs = self.rhs.subs(*args,**kwargs)
+        
+        obj = type(self)._constructor(lhs,self.vars,rhs)
+        
         obj._dvars=self._dvars
         obj._ivar = self.ivar
         obj._ode_order = self.ode_order
@@ -1690,7 +1694,7 @@ class ODESystem(AnalyticalSolution):
     def doit(self,**hints):
         
         obj = super().doit(**hints)
-        obj._lhs = self._lhs.doit(**hints)
+        obj._rhs = self.rhs.doit(**hints)
         obj._dvars=self._dvars
         obj._ivar = self.ivar
         obj._ode_order = self.ode_order
