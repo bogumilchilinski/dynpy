@@ -382,10 +382,14 @@ class AnalyticalSolution(ImmutableMatrix):
     def subs(self,*args,**kwargs):
         
 
-        obj = super().subs(*args,**kwargs)
-        obj = self._assign_properties(obj)
+        #obj = super().subs(*args,**kwargs)
+        #obj = self._assign_properties(obj)
+        result = self.rhs.subs(*args,**kwargs)
         
-        return obj
+        
+        #obj = self._assign_properties(obj)
+        
+        return type(self).from_vars_and_rhs(self.lhs,result)
 
     @cached_property 
     def _is_rhs_form(self):
@@ -1081,10 +1085,12 @@ class ODESolution(AnalyticalSolution):
         """
 
         const_eqns=self._get_constant_eqns(ics, sol0)
-        display(const_eqns)
+
+        CodeFlowLogger(const_eqns,'const eqns',self)
         
         const_list = self._spot_constant()
-        display(const_list)
+
+        CodeFlowLogger(const_list,'const list',self)
         
         return solve(const_eqns,const_list)
     
@@ -1095,8 +1101,8 @@ class ODESolution(AnalyticalSolution):
         self._dvars_str = self._get_dvars_str()
         self.ivar_0 = ivar0
         const_dict=self._calculate_constant(ics, sol0)
-        display(const_dict)
-       
+        CodeFlowLogger(const_dict,'const dict',self)
+        
         return ODESolution.from_vars_and_rhs(self.vars,self.rhs.subs(const_dict)) #temporary workaround that replaces subs
     
     def __call__(self,ivar=None,ics=None,params={}):
@@ -2284,7 +2290,8 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
     
     @cached_property
     def odes_rhs(self): #hmmmm DAmian/Madi możemy zaryzykować tu w sumie
-        return self._to_rhs_ode().rhs
+        return self.rhs
+        #   return self._to_rhs_ode().rhs
     
     @cached_property
     def _fundamental_matrix(self):
