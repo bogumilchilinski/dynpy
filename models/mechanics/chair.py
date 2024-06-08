@@ -332,6 +332,7 @@ class DampedChair5DOF(UndampedChair5DOF):
                 Omega=None,
                 pm=None,
                 c_mu=None,
+                c_lam=None,
                 **kwargs):
 
         if x is not None: self.x=x
