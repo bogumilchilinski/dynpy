@@ -3178,9 +3178,8 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 #sol_H = ODESystem.from_ode_system(odes)._as_fode().solution.with_ics(ics_list,ivar0)
                 sol_H = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes).solution#.with_ics(ics_list,ivar0)
                 
-                print('heavi result')
-                display(sol_H)
-                display(sol_H.rhs*elem)
+                CodeFlowLogger(sol_H,'Heaviside result')
+                CodeFlowLogger(sol_H.rhs*elem)
                 
                 sol += sol_H.rhs*elem
 
