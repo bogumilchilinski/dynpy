@@ -265,6 +265,61 @@ class UndampedChair5DOF(ComposedSystem):
 
         return self.sym_desc_dict
 
+    def get_param_values(self):
+
+        self.default_data_dict={
+                            self.M:75,
+                            self.I_ch:9.479342+self.M*0.39*0.39,
+                            self.m_rear:1.5,
+                            self.R:0.3,
+                            self.I_w:self.m_rear*self.R**2,
+                            self.m_fr:0.6,
+                            self.g:9.81,
+                            self.z_c:0.4,
+                            self.k_rt:109000,
+                            self.k_r:750000,
+                            self.k_ft:300000,
+                            self.k_f:750000,
+                            self.F:150,
+                            self.Omega:0.3*np.pi*2,
+                            self.pm:0.1,
+                          }
+
+        return self.default_data_dict
+    
+    def get_table_values(self):
+        table_data_dict={F:150,
+                   
+                   c_mu:0.0001,
+                   c_lam:0.0001,
+                   l_l:0.2,
+                   l_r:0.4,
+                   
+                   k_f:607500,
+                   k_ft:475000,
+                   k_r:580000,
+                   k_rt:400000,
+                   m_3:75,
+                   I_ch:20.8868,
+                   m_rear:1.5,
+                   m_fr:0.6,
+                   pm:0.1,
+                   Omega:0.3454,
+                   R:0.3,
+                   z_c3:0.4,
+                   g:9.81,
+                   I_w:0.135,
+                   l_fr:0.2,
+                   l_rear:0.01,
+                   u0:0.005,
+
+                   l_bumps:0.15,
+                   amplitude:0.0165,
+                   length:0.19,
+                   speed:1.7,
+                   axw:0.47}
+        return table_data_dict  
+    
     
 class DampedChair5DOF(UndampedChair5DOF):
 
