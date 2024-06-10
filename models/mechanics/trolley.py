@@ -1458,7 +1458,28 @@ class VariableMassTrolleyWithPendulum(ComposedSystem):
                 self.t_init: r'damping activation time',
             }
             return self.sym_desc_dict
-    
+
+    def _to_msm_form(self):
+
+        M_p = Symbol('M_p',positive=True)
+        M_t = Symbol('M_t',positive=True)
+        Omega1 = Symbol('Omega1',positive=True)
+        Omega2 = Symbol('Omega2',positive=True)
+
+        subs_dict = {self.m_p+self.m_pf:M_p,self.m_t+self.m_tf:M_t}
+
+        odes_lhs = self.linearized()._ode_system.lhs
+
+        ode1 = (odes_lhs.subs(subs_dict)[0]/(M_p+M_t)).expand().doit().ratsimp().subs(self.k,Omega1**2*(M_p+M_t)).ratsimp().expand().collect([self.phi.diff(self.ivar,2)*self.l])
+        ode2 = (odes_lhs.subs(subs_dict)[1]/M_p/self.l/self.l).expand().doit().ratsimp().subs(self.g,Omega2**2*self.l).simplify()
+
+        eps = Symbol('varepsilon')
+        del1 = Symbol('delta1')
+        f = Symbol('f',positive=True)
+
+        from dynpy.solvers.linear import ODESystem
+
+        return ODESystem(odes=Matrix([ode1.subs({ode1.coeff(self.phi.diff(self.ivar,2)):del1/eps,self.F:f*(M_p+M_t)}),ode2.subs(1/self.l,eps)]),dvars=self.q)
 
 
 class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):

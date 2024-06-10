@@ -2822,6 +2822,7 @@ class DampedMeasuringTool(ComposedSystem):
     #detail_real_name =
 
     m = Symbol('m', positive=True)
+    I = Symbol('I', positive=True)
     l = Symbol('l', positive=True)
     k = Symbol('k', positive=True)
     k_t = Symbol('k_t', positive=True)
@@ -2872,7 +2873,9 @@ class DampedMeasuringTool(ComposedSystem):
     def components(self):
         components = {}
 
-        self.bar = Pendulum(self.m, g=0, l=self.l, angle=self.phi, ivar=self.ivar)
+        #self.bar = Pendulum(self.m, g=0, l=self.l, angle=self.phi, ivar=self.ivar)
+        self.bar = MaterialPoint(self.m*self.l**2/3, pos1=self.phi, qs=[self.phi])
+        
         self._upper_spring = Spring(self.k, pos1=self.l * self.phi, qs=[self.phi])
         self._lower_spring = Spring(self.k, pos1=self.l * self.phi, qs=[self.phi])
         self._spiral_spring = TorsionalSpring(self.k_t, self.phi, qs=[self.phi])
@@ -2894,10 +2897,15 @@ class DampedMeasuringTool(ComposedSystem):
 
     def get_default_data(self):
 
-
+        m0, l0, I0, k0, F0, Omg = symbols('m_0 l_0 I_0 k_0 F_0 Omega', positive=True)
+        
         default_data_dict = {
             self.c: [self.lam * (self.k)],
             self.c_t: [self.lam * (self.k_t)],
+            self.F: [F0*cos(Omg*self.ivar)],
+            self.m*self.l**2/3:[S.Half*m0*self.l**2/3,m0*self.l**2/3, 2*self.m0*self.l**2/3 , 3*self.m0*self.l**2/3, 4*self.m0*self.l**2/3],
+            #self.l : [l0, 2*l0],
+            
         }
 
         return default_data_dict
@@ -2957,8 +2965,8 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
     #m=Symbol('m', positive=True)
     ivar=Symbol('t')
     
-    m1=Function('m_1')(ivar)
-    m2=Function('m_2')(ivar)
+    m1=Function('m_alpha')(ivar)
+    m2=Function('m_beta')(ivar)
     l_1=Symbol('l_alpha', positive=True)
     l_2=Symbol('l_beta', positive=True)
     g=Symbol('g', positive=True)
@@ -2970,6 +2978,7 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
     u0 = Symbol('u_0',positive=True)
     k = Symbol('k',positive=True)
     b = Symbol('b',positive=True)
+    flow_coeff = Symbol('lambda')
     qs=dynamicsymbols('alpha beta')
     
  
@@ -2989,6 +2998,7 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
                  u0=None,
                  k=None,
                  b=None,
+                 flow_coeff=None,
                  qs=None,
                  ivar=Symbol('t'),
                  **kwargs):
@@ -3008,6 +3018,7 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
         if u0 is not None: self.u0 = u0
         if k is not None: self.k = k
         if b is not None: self.b = b
+        if flow_coeff is not None: self.flow_coeff = flow_coeff
 
         
         self.qs = [self.phi_1,self.phi_2]
@@ -3082,3 +3093,28 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
         }
         return self.sym_desc_dict
     
+    def flow_equation(self):
+        return_eq=Eq(self.m2,(self.m_0-self.m_0*self.trans_expr).expand())
+        
+        return return_eq
+    
+    def upper_mass_equation(self):
+        return_eq=Eq(self.m1,(self.m_0*self.trans_expr).expand())
+        
+        return return_eq
+    
+    def amplitude_envelope(self, signal, var, frame_size=128, hop_length=56):
+        
+        max_vals = [max(signal.iloc[i:i+frame_size][var]) for i in range(0,len(signal),hop_length)]
+        
+        envelope_averaged = pd.DataFrame(max_vals).rolling(10, min_periods=2).mean()
+        
+        return envelope_averaged
+    
+    def instantaneous_frequency(self, signal, var, t_param, frame_size=128, hop_length=56):
+        
+        time_id = [signal.iloc[i:i+frame_size][var].idxmax() for i in range(0,len(signal),hop_length)]
+        
+        insta_freq = pd.DataFrame(time_id).apply(lambda row: t_param*row)
+        
+        return insta_freq

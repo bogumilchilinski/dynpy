@@ -1323,7 +1323,7 @@ class NormalisedNaturalFrequenciesAnalysisComponent(ReportComponent):
     @property
     def footer_text(self):
 
-        return '''This allows for a more transparent notation of the vibration frequency and therefore easier physical analysis and tuning its TMD parameters.'''
+        return '''This allows for a more transparent notation of the system natural frequencies. Therefore an easier physical analysis and tuning the system TMD parameters can be done in a more comprehensive and controllable manner.'''
 
     def append_elements(self):
 
@@ -1348,25 +1348,27 @@ class NormalisedNaturalFrequenciesAnalysisComponent(ReportComponent):
         omg = Symbol('omega_n')
         omg_1 = Symbol('\omega_{n_{1}}')
         omg_2 = Symbol('\omega_{n_{2}}')
-        omg_n = Symbol('\=\omega_n')
+        omg_n = Symbol('\\bar \omega_n')
+        omg12_omg21 = Symbol('\omega_{12}')*Symbol('\omega_{21}')
 
-        delta_omg_simp = omg_n**2 + simplify(base_matrix)[1]*simplify(base_matrix)[2]
+
+        delta_omg_simp = omg_n**4 - simplify(base_matrix)[1]*simplify(base_matrix)[2]
 #         display(simplify(base_matrix)[1])
 
 
         display(ReportText(self.header_text))
     
-        display(ReportText(f'''\n The inertia and stifness matrices are given in {AutoMarker(Eq(Symbol('M'),system._inertia_matrix(),evaluate=False))} and {AutoMarker(Eq(Symbol('M'),system._stiffness_matrix(),evaluate=False))}:
-        '''))
+#         display(ReportText(f'''\n The inertia and stifness matrices are given in ({AutoMarker(Eq(Symbol('M'),system._inertia_matrix(),evaluate=False))}) and ({AutoMarker(Eq(Symbol('K'),system._stiffness_matrix(),evaluate=False))}):
+#         '''))
         
-        display(SympyFormula(Eq(Symbol('M'),system._inertia_matrix(),evaluate=False)))
-        display(SympyFormula(Eq(Symbol('K'),system._stiffness_matrix(),evaluate=False)))
+#         display(SympyFormula(Eq(Symbol('M'),system._inertia_matrix(),evaluate=False)))
+#         display(SympyFormula(Eq(Symbol('K'),system._stiffness_matrix(),evaluate=False)))
         
         r = Symbol('r')
         omg = Symbol('omega')
         
-        display(ReportText('''The stiffness matrix makes possible to determine equilibrium positions of the system and together with the inertia matrix, to determine its natural frequencies creating its the fundamental matrix:
-        '''))
+#         display(ReportText('''The stiffness matrix makes possible to determine equilibrium positions of the system and together with the inertia matrix, to determine its natural frequencies creating its the fundamental matrix:
+#         '''))
         
         fund_mat = system.fundamental_matrix().subs({r:-omg})
         
@@ -1375,9 +1377,9 @@ class NormalisedNaturalFrequenciesAnalysisComponent(ReportComponent):
         display(ReportText(f'''By calculating a determinant of the fundamental matrix, the system natural frequencies can be determined.
         '''))
         
-        display(SympyFormula(Eq(fund_mat.det().collect(omg**2),0,evaluate=False)))
+#         display(SympyFormula(Eq(fund_mat.det().collect(omg**2),0,evaluate=False)))
         
-        display(ReportText(f'''Assuming certain dependencies, the formula {AutoMarker(Eq(Symbol('A'),fund_mat,evaluate=False))} can be rearranged and simplified to the following:
+        display(ReportText(f'''Assuming certain dependencies, the formula ({AutoMarker(Eq(Symbol('A'),fund_mat,evaluate=False))}) can be rearranged into a biquadratic polynomial and simplified to the following, where its roots are the system eigenvalues:
         '''))
         
         display(SympyFormula(Eq(Symbol('a'),fund_mat.det().collect(omg**2).coeff(omg**4))))
@@ -1386,38 +1388,38 @@ class NormalisedNaturalFrequenciesAnalysisComponent(ReportComponent):
         
         display(SympyFormula(Eq(Symbol('a')*omg**4 + Symbol('b')*omg**2 + Symbol('c'),0)))
         
-        display(ReportText(f'''The purpose of the presented approach is to provide an opportunity to influence the eigenvalues and thus control the system resonant behaviour. The linear form of the equations of motion allows to obtain the system's natural frequencies ({AutoMarker(Eq(Symbol('omega_1'),sqrt(omg_mean-delta_omg)))},{AutoMarker(Eq(Symbol('omega_1'),sqrt(omg_mean+delta_omg)))}) utilising the fundamental matrix {AutoMarker(Eq(Symbol('A'),fund_mat,evaluate=False))}:
+        display(ReportText(f'''The purpose of the presented approach is to provide an opportunity to influence the eigenvalues and thus control the system resonant behaviour. The linear form of the equations of motion allows to obtain the system's natural frequencies ({AutoMarker(Eq(omg_1,sqrt(omg_mean-delta_omg)))}),({AutoMarker(Eq(omg_2,sqrt(omg_mean+delta_omg)))}) utilising the fundamental matrix ({AutoMarker(Eq(Symbol('A'),fund_mat,evaluate=False))}):
         '''))
         
-        display(SympyFormula(Eq(Symbol('\omega^2_{n_{1}}'),Symbol('\\frac{\omega^2_1}{\omega^2_m}'))))
-        display(SympyFormula(Eq(Symbol('\omega^2_{n_{2}}'),Symbol('\\frac{\omega^2_2}{\omega^2_m}'))))
-
+#         display(SympyFormula(Eq(Symbol('\omega^2_{n_{1}}'),Symbol('\\frac{\omega^2_1}{\omega^2_m}'))))
+#         display(SympyFormula(Eq(Symbol('\omega^2_{n_{2}}'),Symbol('\\frac{\omega^2_2}{\omega^2_m}'))))
 
 
         display(SympyFormula(Eq(omg_1,sqrt(omg_mean-delta_omg))))
         display(SympyFormula(Eq(omg_2,sqrt(omg_mean+delta_omg))))
         
         omg11_str=r'$\omega_{11}$'
+        Aomg_str=r'$\omega_{n^2}$'
         
-        display(ReportText(f'''By creating an inverse matrix of matrix $M$ and multiplying it by matrix $K$, it is possible to identify and assign certain frequency relationships in the cosidered system. The matrix elements were normalised to the value of element {omg11_str} ({AutoMarker(Eq(Symbol('omega_11'),simplify(base_matrix)[0],evaluate=False))}) corresponding to a frequency of the main system. This results in a normalised matrix presented in {AutoMarker(Eq(Symbol('A_{omega_n^2}'),simplify(base_matrix),evaluate=False))}:
+        display(ReportText(f'''By creating an inverse matrix of matrix $M$ and multiplying it by matrix $K$, it is possible to identify and assign certain frequency relationships in the cosidered system. The matrix elements were normalised to the value of element {omg11_str} ({AutoMarker(Eq(Symbol('{omg11_str}'),simplify(system._inertia_matrix().inv()*system._stiffness_matrix()[0],evaluate=False)))}) corresponding to a frequency of the main system. This results in a normalised matrix presented in ({AutoMarker(Eq(Symbol('A_{Aomg_str}'),simplify(base_matrix),evaluate=False))}):
         '''))
         
         display(SympyFormula(Eq(Symbol('\omega_11'),simplify(system._inertia_matrix().inv()*system._stiffness_matrix())[0],evaluate=False)))
 
         display(SympyFormula(Eq(Symbol('A_{\omega_n^2}'),simplify(base_matrix),evaluate=False)))
         
-        display(ReportText('''Analyzing the natural frequency components, some dependencies can be noticed. An expression of "a base frequency" can be separated, which is changed by a $\Delta \omega$ value. It can be presented as follows:
+        display(ReportText('''Analyzing the natural frequency components, some dependencies can be noticed. An expression of "a base frequency" ($\omega_n^2$) can be separated. Its value is being changed by some $\Delta \omega^2$ value. It can be presented as follows:
         '''))
         
         display(SympyFormula(Eq(omg_1**2, omg_n**2 - delta * omg**2)))
         display(SympyFormula(Eq(omg_2**2, omg_n**2 + delta * omg**2)))
         
-        display(ReportText('''And the individual components, where a base frequency is defined as:
+        display(ReportText('''And the individual components, where a base frequency $\omega_n^2$ is defined as:
         '''))
 
         display(SympyFormula(Eq(omg_n**2,omg_mean)))
         
-        display(ReportText('''And the separated $\Delta \omega$ component containing also a base frequency term, after some rearangement can be simplified to the following expressions:
+        display(ReportText('''And the separated $\Delta \omega^2$ component containing also a base frequency term, after some rearrangement can be simplified to the following expressions:
         '''))
 
 
@@ -1427,12 +1429,77 @@ class NormalisedNaturalFrequenciesAnalysisComponent(ReportComponent):
 
 
 
-        display(ReportText(f'''Finally, the natural frequencies can be simplified to the expressions presented in {AutoMarker(Eq(omg_1, omg_n**2 - sqrt(delta_omg_simp)))}, {AutoMarker(Eq(omg_2, omg_n**2 + sqrt(delta_omg_simp)))}
+        display(ReportText(f'''Finally, the natural frequencies can be simplified to the expressions presented in ({AutoMarker(Eq(omg_1, sqrt(omg_n**2 - sqrt(delta_omg_simp))))}), ({AutoMarker(Eq(omg_2, sqrt(omg_n**2 + sqrt(delta_omg_simp))))}):
         '''))
 
         display(SympyFormula(Eq(omg_1, sqrt(omg_n**2 - sqrt(delta_omg_simp)))))
         display(SympyFormula(Eq(omg_2, sqrt(omg_n**2 + sqrt(delta_omg_simp)))))
+        
+        display(ReportText(f'''By noting certain dependencies of the normalised matrix ({AutoMarker(Eq(Symbol('A_{omega_n^2}'),simplify(base_matrix),evaluate=False))}), one can simplify the notation of the natural frequencies into a formula containing the basic dependencies:
+        '''))
+        
+        display(SympyFormula(Eq(omg_1, omg_n*sqrt(1 - sqrt(1-(omg12_omg21)/omg_n**2)))))
+        display(SympyFormula(Eq(omg_2, omg_n*sqrt(1 + sqrt(1-(omg12_omg21)/omg_n**2)))))
+        
+        display(ReportText('''where $\omega_{12}$ and $\omega_{21}$ are the elements of the normalised matrix.
+        '''))
+        
+        display(ReportText('''Having the eigenvalue formulas simplified, now the system properties can be put back into the equations resulting in final expressions:
+        '''))
 
+        from dynpy.solvers.linear import ODESystem
+        eigs = ODESystem(odes=Matrix([system.lhs[0],system.lhs[1]]),dvars=Matrix(system.dvars))._eigenvals_simplified()
+        
+        display(SympyFormula(Eq(omg_1, eigs[0])))
+        display(SympyFormula(Eq(omg_2, eigs[3])))
 
         display(ReportText(self.footer_text))
+        
+class ODEInitCodeComponent(ReportComponent):
+    
+    title="Creating a linear differential equation"
+
+    def append_elements(self):
+
+        from dynpy.solvers.tools import CodePrinter
+
+        system = self.reported_object
+        ode_sys = system
+
+        _dvars = system.dvars
+        _odes = system.odes
+
+        _ode_order = system.ode_order
+
+        if _ode_order == 1:
+            cls_name = 'FirstOrderODESystem'
+        else:
+            cls_name = 'ODESystem'
+
+        string_gc = CodePrinter(_odes[0])._generate_code()
+
+        display(ReportText(f'Creating an instance of a class {cls_name} requires defining the following variables and equations'))
+
+        display(ObjectCode(f'''
+
+
+from dynpy.solvers.linear import *
+from dynpy.models.odes.linear import *
+from dynpy.models.odes.numerical import *
+
+from sympy import *
+
+{string_gc}
+
+dvars = {_dvars}
+odes = {_odes}
+ode_order = {_ode_order}
+
+odesys = {cls_name}(odes = odes , dvars = dvars, ode_order = ode_order)
+
+display(odesys)
+
+        '''))
+
+        display(ReportText(f'After executing the instruction, we have a ready instance of the class object {cls_name}'))
 

@@ -2142,7 +2142,7 @@ The following problems have to be checked or fixed, in order to ensure the corre
 
 - [ ] validation of random parameters,
 
-- [ ] validation of  description of parameters,
+- [ ] validation of  description of  description of parameters,
 
 - [ ] validation of units.
 """

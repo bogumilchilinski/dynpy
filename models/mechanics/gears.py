@@ -355,8 +355,11 @@ class EquivalentSDOFGearModel(ComposedSystem):
 
         return new_eq
         
-    def rect_stiff(self):
-        trig=550*sin(self.ivar/self.T)+550
+    def rect_stiff(self,no=6,numerical=False):
+        t=self.ivar
+        omg = self.omega
+        
+        trig=sum([Heaviside(omg*t-1) + 0* Heaviside(omg*t-2)  for ind in range(no)])
         new_eq=self.subs(self.k_var,trig)
         
         return new_eq
@@ -368,7 +371,7 @@ class EquivalentSDOFGearModel(ComposedSystem):
         else:
             amps_list = symbols(f'a_0:{no}')
         
-        rectangular_approx = sum([N(amp,3)*sin(((no)+1)*self.omega*self.ivar) for no,amp in enumerate(amps_list[0:no])])
+        rectangular_approx = sum([N(amp,3)*sin(((ind)+1)*self.omega*self.ivar) for ind,amp in enumerate(amps_list[0:no])])
         new_eq=self.subs({self.k_var:(rectangular_approx)})
         
         return new_eq

@@ -8,6 +8,7 @@ from pylatex.utils import (#italic,
 from ..report import Markdown, CurrentContainer, ReportText, IPMarkdown, ObjectCode,display
 from ..components.mech import en as mech_comp
 from ..components.guides import en as guide_comp
+from ..components.ode import pl as ode_comp
 
 class ReportMethods:
 
@@ -1124,7 +1125,7 @@ class IntroToPandasGuide(Guide):
         #from ...models.mechanics.tmac import SDOFWinchSystem
         from ...models.mechanics import ForcedSpringMassSystem as DynamicSystem
 
-        return DynamicSystem()    
+        return DynamicSystem()
 
 class BasicsOfODESystemGuide(Guide):
 
@@ -1196,3 +1197,26 @@ class BasicsOfReportingGuide(UsageOfDynamicSystemsGuide):
 
         return comp_list
     
+
+class ODESystemOverviewReport(UsageOfDynamicSystemsGuide):
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+            ode_comp.ODEInitCodeComponent,
+            ode_comp.ODEGeneralSolutionComponent,
+            ode_comp.ODESteadySolutionComponent,
+            ode_comp.ODESystemRepresentationComponent,
+
+        ]
+
+        return comp_list
+
+    @property
+    def default_reported_object(self):
+
+        #from ...models.mechanics.tmac import SDOFWinchSystem
+        from ...models.odes.linear import LinearFirstOrder
+        
+        return LinearFirstOrder.from_reference_data()

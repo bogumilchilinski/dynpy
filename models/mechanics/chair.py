@@ -17,7 +17,8 @@ import IPython as IP
 import numpy as np
 import inspect
 
-from .principles import ComposedSystem, NonlinearComposedSystem,  base_frame, base_origin,cached_property, lru_cache, REPORT_COMPONENTS_LIST
+from .principles import ComposedSystem, NonlinearComposedSystem,  base_frame, base_origin, REPORT_COMPONENTS_LIST
+from functools import cached_property
 
 t,f= symbols('t, f')
 
@@ -181,21 +182,22 @@ class UndampedChair5DOF(ComposedSystem):
 
         components={}
 
-        self._body_horizontal = MaterialPoint(self.M, self.x+self.z_c*self.phi, qs=self.qs)(label='body_horizontal')
-        self._body_vertical_rotational = RigidBody2D(self.M, self.I_ch, pos_lin=self.z, pos_rot=self.phi, qs=self.qs)(label='body_vertical_rotational')
-        self._rear_wheel_vertical_rotational = RigidBody2D(self.m_rear, self.I_w, pos_lin=self.z_rear, pos_rot=self.x/self.R, qs=self.qs)(label='rear_wheel_vertical_rotational')
-        self._rear_wheel_horizontal = MaterialPoint(self.m_rear, self.x, qs=self.qs)(label='rear_wheel_horizontal')
-        self._front_wheel_vertical = MaterialPoint(self.m_fr, self.z_front, qs=self.qs)(label='front_wheel_vertical')
-        self._front_wheel_horizontal = MaterialPoint(self.m_fr, self.x, qs=self.qs)(label='front_wheel_horizontal')
+        self._body_horizontal = MaterialPoint(self.M, self.x+self.z_c*self.phi, qs=self.qs,frame=base_frame)(label='body_horizontal')
+        self._body_vertical_rotational = RigidBody2D(self.M, self.I_ch, pos_lin=self.z, pos_rot=self.phi, qs=self.qs,frame=base_frame)(label='body_vertical_rotational')
+        self._rear_wheel_vertical_rotational = RigidBody2D(self.m_rear, self.I_w, pos_lin=self.z_rear, pos_rot=self.x/self.R, qs=self.qs,frame=base_frame)(label='rear_wheel_vertical_rotational')
+        self._rear_wheel_horizontal = MaterialPoint(self.m_rear, self.x, qs=self.qs,frame=base_frame)(label='rear_wheel_horizontal')
+        self._front_wheel_vertical = MaterialPoint(self.m_fr, self.z_front, qs=self.qs,frame=base_frame)(label='front_wheel_vertical')
+        self._front_wheel_horizontal = MaterialPoint(self.m_fr, self.x, qs=self.qs,frame=base_frame)(label='front_wheel_horizontal')
         self._front_wheel_gravity = GravitationalForce(self.m_fr, self.g, self.z_front)(label='front_wheel_gravity')
         self._rear_wheel_gravity = GravitationalForce(self.m_rear, self.g, self.z_rear)(label='rear_wheel_gravity')
         self._body_gravity = GravitationalForce(self.M, self.g, self.z+self.z_c*cos(self.phi), qs=self.qs)(label='body_gravity')
-        self._rear_tire_spring = Spring(self.k_rt, self.z_rear-self.u_rrp, qs=self.qs)('rear_tire_spring')
-        self._rear_wheel_spring = Spring(self.k_r, self.u_rsd, qs=self.qs)('rear_wheel_spring')
-        self._front_tire_spring = Spring(self.k_ft, self.z_front-self.u_frp, qs=self.qs)('front_tire_spring')
-        self._front_wheel_spring = Spring(self.k_f, self.u_fsd, qs=self.qs)('front_wheel_spring')
-        self._hand_drive_force = Force(self.F*(sign(cos(self.Omega*self.ivar)-self.pm)+1), pos1=self.x , qs=self.qs)('hand_drive_force')
-        self._hand_drive_force_phi = Force(self.F*self.Omega*self.R*((sign(cos(self.Omega*self.ivar)-self.pm)+1)*cos(self.Omega*self.ivar)), pos1=self.phi , qs=self.qs)('hand_drive_force_phi')
+        self._rear_tire_spring = Spring(self.k_rt, self.z_rear-self.u_rrp, qs=self.qs,frame=base_frame)('rear_tire_spring')
+        self._rear_wheel_spring = Spring(self.k_r, self.u_rsd, qs=self.qs,frame=base_frame)('rear_wheel_spring')
+        self._front_tire_spring = Spring(self.k_ft, self.z_front-self.u_frp, qs=self.qs,frame=base_frame)('front_tire_spring')
+        self._front_wheel_spring = Spring(self.k_f, self.u_fsd, qs=self.qs,frame=base_frame)('front_wheel_spring')
+        self._hand_drive_force = Force(self.F*(sign(cos(self.Omega*self.ivar)-self.pm)+1), pos1=self.x , qs=self.qs,frame=base_frame)('hand_drive_force')
+        self._hand_drive_force_phi = Force(self.F*self.Omega*self.R*((sign(cos(self.Omega*self.ivar)-self.pm)+1)*cos(self.Omega*self.ivar)), pos1=self.phi , qs=self.qs,frame=base_frame)('hand_drive_force_phi')
+
 
         components['_body_horizontal'] = self._body_horizontal
         components['_body_vertical_rotational'] = self._body_vertical_rotational
@@ -210,32 +212,11 @@ class UndampedChair5DOF(ComposedSystem):
         components['_rear_wheel_spring'] = self._rear_wheel_spring
         components['_front_tire_spring'] = self._front_tire_spring
         components['_front_wheel_spring'] = self._front_wheel_spring
-        components['_hand_drive_force'] = self._hand_drive_force
+#         components['_hand_drive_force'] = self._hand_drive_force
         components['_hand_drive_force_phi'] = self._hand_drive_force_phi
         
         return components
 
-    def get_param_values(self):
-
-        default_data_dict={
-                            self.M:75,
-                            self.I_ch:9.479342+self.M*0.39*0.39,
-                            self.m_rear:1.5,
-                            self.R:0.3,
-                            self.I_w:self.m_rear*self.R**2,
-                            self.m_fr:0.6,
-                            self.g:9.81,
-                            self.z_c:0.4,
-                            self.k_rt:109000,
-                            self.k_r:750000,
-                            self.k_ft:300000,
-                            self.k_f:750000,
-                            self.F:150,
-                            self.Omega:0.3*np.pi*2,
-                            self.pm:0.1,
-                          }
-
-        return default_data_dict
     def symbols_description(self):
         self.sym_desc_dict = {
                                 self.x:'main body center of mass horizontal displacement',
@@ -263,10 +244,66 @@ class UndampedChair5DOF(ComposedSystem):
 
         return self.sym_desc_dict
 
+    def get_param_values(self):
+
+        self.default_data_dict={
+                            self.M:75,
+                            self.I_ch:9.479342+self.M*0.39*0.39,
+                            self.m_rear:1.5,
+                            self.R:0.3,
+                            self.I_w:self.m_rear*self.R**2,
+                            self.m_fr:0.6,
+                            self.g:9.81,
+                            self.z_c:0.4,
+                            self.k_rt:109000,
+                            self.k_r:750000,
+                            self.k_ft:300000,
+                            self.k_f:750000,
+                            self.F:150,
+                            self.Omega:0.3*np.pi*2,
+                            self.pm:0.1,
+                          }
+
+        return self.default_data_dict
+    
+    def get_table_values(self):
+        table_data_dict={self.F:150,
+                   
+                   self.c_mu:0.0001,
+                   self.c_lam:0.0001,
+                   self.l_l:0.2,
+                   self.l_r:0.4,
+                   
+                   self.k_f:607500,
+                   self.k_ft:475000,
+                   self.k_r:580000,
+                   self.k_rt:400000,
+                   self.m_3:75,
+                   self.I_ch:20.8868,
+                   self.m_rear:1.5,
+                   self.m_fr:0.6,
+                   self.pm:0.1,
+                   self.Omega:0.3454,
+                   self.R:0.3,
+                   self.z_c3:0.4,
+                   self.g:9.81,
+                   self.I_w:0.135,
+                   self.l_fr:0.2,
+                   self.l_rear:0.01,
+                   self.u0:0.005,
+
+                   self.l_bumps:0.15,
+                   self.amplitude:0.0165,
+                   self.length:0.19,
+                   self.speed:1.7,
+                   self.axw:0.47}
+        return table_data_dict  
+    
     
 class DampedChair5DOF(UndampedChair5DOF):
 
     c_mu=Symbol('c_mu',positive=True)
+    c_lam=Symbol('c_lambda',positive=True)
 
     def __init__(self,
                 x=None,
@@ -295,6 +332,7 @@ class DampedChair5DOF(UndampedChair5DOF):
                 Omega=None,
                 pm=None,
                 c_mu=None,
+                c_lam=None,
                 **kwargs):
 
         if x is not None: self.x=x
@@ -323,6 +361,7 @@ class DampedChair5DOF(UndampedChair5DOF):
         if Omega is not None: self.Omega=Omega
         if pm is not None: self.pm=pm
         if c_mu is not None: self.c_mu=c_mu
+        if c_lam is not None: self.c_lam=c_lam
         
         if ivar is not None: self.ivar=ivar
 
@@ -371,7 +410,7 @@ class DampedChair5DOF(UndampedChair5DOF):
     def get_param_values(self):
 
         default_data_dict={
-                            c_mu:0.0001,
+                            self.c_mu:0.0001,
                           }
 
         return {**super().get_param_values(),**self.default_data_dict}

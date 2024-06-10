@@ -1701,7 +1701,6 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         #display(self._coords_with_acceleration)
 
-        
         linearized_forces=[(point,MultivariableTaylorSeries((force&base_frame.x).doit(),self._coords_with_acceleration,n=n,x0=x0).doit()*base_frame.x)  for  point,force   in   self.forcelist]
         
 

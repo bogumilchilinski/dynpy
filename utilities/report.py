@@ -2477,6 +2477,20 @@ class ReportText(ReportModule):
         
         return copy.copy(self)
     
+    def call_code(self):
+        #Declaration of command vector used in call_code method
+        self.command_vector = []
+        
+        if self._text != None: self.command_vector.append("text = {}".format(self._text))
+        if self._alignment != None: self.command_vector.append("alignment = {}".format(self._alignment))
+        
+        vector = 'ReportText('
+        
+        for element in self.command_vector:
+            vector += str(element) + ', '
+        
+        print(vector[:-2] + ')')
+    
 class Aspect(Section,ReportModule):
     packages=[#Package('float'),
               #Package('fvextra'),
@@ -2877,6 +2891,22 @@ class Markdown(Environment,ReportModule):
         self.cls_container.append(NoEscape(  latex_code  ))
         
         return copy.copy(self)
+    
+    def call_code(self):
+        #Declaration of command vector used in call_code method
+        self.command_vector = []
+        
+        if self.markdown != None: self.command_vector.append("markdown = {}".format(self.markdown))
+        if self.options != None: self.command_vector.append("options = {}".format(self.options))
+        if self.arguments != None: self.command_vector.append("arguments = {}".format(self.arguments))
+        if self.start_arguments != None: self.command_vector.append("start_arguments = {}".format(self.start_arguments))
+        
+        vector = 'Markdown('
+        
+        for element in self.command_vector:
+            vector += str(element) + ', '
+        
+        print(vector[:-2] + ')')
         
     
 class Block(Environment,ReportModule):
@@ -2959,8 +2989,9 @@ class AlertBlock(Block):
 
 class ExampleBlock(Block):
     pass
-    
 
+
+    
 class Picture(Figure,ReportModule):
     """A class that represents a figure environment."""
 
@@ -3002,8 +3033,10 @@ class Picture(Figure,ReportModule):
     def set_preview_default_size(cls, size):
         cls._preview_default_size = size
         return cls
-    
+
     _latex_name = 'figure'
+        
+        
     def __init__(self, image=None, position=None, caption=None,width=None,height=None,marker=None, **kwargs):
         """
         Args
@@ -3022,6 +3055,8 @@ class Picture(Figure,ReportModule):
         self.image = image
         self.caption = caption
         self.preview_size = None
+        
+
         
         if width is not None:
             self.width = width
@@ -3142,6 +3177,28 @@ class Picture(Figure,ReportModule):
         self.cls_container.append(self)
         
         return copy.deepcopy(self)
+    
+    def call_code(self):
+        
+        #Declaration of command vector used in call_code method
+        self.command_vector = []
+        
+        if self.image != None: self.command_vector.append("image = {}".format(self.image))
+        if self._position != None: self.command_vector.append("position = {}".format(self._position))
+        if self.caption != None: self.command_vector.append("caption = {}".format(self.caption))
+        if self.width != None: self.command_vector.append("width = {}".format(self.width))
+        if self.height != None: self.command_vector.append("height = {}".format(self.height))
+        if self.marker != None: self.command_vector.append("marker = {}".format(self.marker))
+        
+        vector = 'Picture('
+        
+        for element in self.command_vector:
+            vector += str(element) + ', '
+        
+        print(vector[:-2] + ')')
+    
+class StarredPicture(Picture):
+    _latex_name='figure*'
 
 class ObjectCode(LstListing,ReportModule):
     _latex_name='lstlisting'
@@ -3253,6 +3310,26 @@ class ObjectCode(LstListing,ReportModule):
         
         return '\t'+self.code_type.replace('\n','\n \t')
 
+    def _as_string(self):
+
+        return self.code_type
+        
+    def call_code(self):     
+        #Declaration of command vector used in call_code method
+        self.command_vector = []
+        
+        if self.source != None: self.command_vector.append("source = {}".format(self.source))
+        if self.options != None: self.command_vector.append("options = {}".format(self.options))
+        if self.arguments != None: self.command_vector.append("start_arguments = {}".format(self.start_arguments))
+        if self.start_arguments != None: self.command_vector.append("width = {}".format(self.width))
+        if self._caption != None: self.command_vector.append("caption = {}".format(self._caption))
+        
+        vector = 'ObjectCode('
+        
+        for element in self.command_vector:
+            vector += str(element) + ', '
+        
+        print(vector[:-2] + ')')
     
 guide_code_header = """
 #!!! REMEMBER TO PASTE AND RUN ALL PREVIOUS CELL
@@ -3348,6 +3425,7 @@ class TikZPicture(Environment,ReportModule):
         super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
         
         self.append(self.tikzcode)
+        
         
     @property
     def tikzcode(self):

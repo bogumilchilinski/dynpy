@@ -1,4 +1,4 @@
-from ..mechanics import *
+from .en import *
 
 
 
@@ -819,7 +819,6 @@ class SeparableODEIntroComponent(ReportComponent):
         display(ReportText('Jednym z fundamentalnych typów równań różniczkowych jest równanie o zmiennych rozdzielonych. Proces rozwiązania tego typu równania polega na separacji wyrazów zawierających $y$ i $x$, przeniesieniu ich na różne strony równania, a następnie zastosowaniu operacji całkowania. Po przeprowadzeniu całkowania nie można zapomnieć o dodaniu do jednej ze stron stałej całkowania. Poniżej znajduje się przykład zadania ilustrującego proces rozwiązania tego rodzaju równania.:'))
 
 class EquationDefinitionComponent(ReportComponent):
-    #title="We consider the following differential equation:"
     title="Rozpatrujemy następujące równanie różniczkowe: "
 
     def append_elements(self):
@@ -827,12 +826,10 @@ class EquationDefinitionComponent(ReportComponent):
         system = self.reported_object
         ode_sys =system
 
-        y_sym = system._variable_name()[2]
-        display(SympyFormula(Eq(ode_sys.lhs[0],ode_sys.rhs[0])))
-        #display(ReportText('Where:')
+        y_sym = system.dvars[0]
+        display(SympyFormula(Eq(ode_sys.lhs[0],ode_sys.rhs[0]).subs(ode_sys._get_dvars_symbols())))
         display(ReportText('Gdzie:'))
         display(SympyFormula(y_sym))
-        #display(ReportText('Is our encountered function.'))
         display(ReportText('Jest naszą szukaną funkcją.'))
 
 class VariablesSeparationComponent(ReportComponent):
@@ -1216,3 +1213,245 @@ class BernoulliLinearTransformation(ReportComponent):
 
         for elem in list(sep_ode_report)[3:]:
             self.append(elem)
+
+            
+            
+            
+            
+#Karolina i Karol done         
+            
+general_code='''
+from dynpy.models.odes.numerical import *
+system=LinearFirstOrder.from_reference_data()
+system.general_solution
+'''            
+class ODEGeneralSolutionComponent(ReportComponent):
+    
+    title="Wyznaczanie rozwiązania ogólnego";
+
+    @property
+    def import_text(self):
+
+        return "Aby zaimportować przykładowy system  i wywołać rozwiązanie ogólne należy wywołać następujący kod:"
+
+
+    @property
+    def body_text(self):
+
+        return "Rozwiązanie ogólne przyjmuje postać:"
+
+    def append_elements(self):
+        
+        system = self.reported_object
+        t=system.ivar
+        dvars=system.dvars
+
+        display(ReportText(self.import_text))
+        display(ObjectCode(general_code))
+
+        display(ReportText(self.body_text))
+
+        display((SympyFormula(system.general_solution)))
+        
+steady_code='''
+from dynpy.models.odes.numerical import *
+system=LinearFirstOrder.from_reference_data()
+system.steady_solution
+'''        
+class ODESteadySolutionComponent(ReportComponent):
+    
+    title="Wyznaczanie rozwiązania ogólnego";
+
+    @property
+    def import_text(self):
+
+        return "Aby zaimportować przykładowy system  i wywołać rozwiązanie szczególne należy wywołać następujący kod:"
+
+
+    @property
+    def body_text(self):
+
+        return "Rozwiązanie szczególne przyjmuje postać:"
+
+    def append_elements(self):
+        
+        system = self.reported_object
+        t=system.ivar
+        dvars=system.dvars
+
+        display(ReportText(self.import_text))
+        display(ObjectCode(steady_code))
+
+        display(ReportText(self.body_text))
+
+        display((SympyFormula(system.steady_solution)))
+        
+import_code='''
+from dynpy.models.odes.numerical import *
+
+system=LinearFirstOrder.from_reference_data()
+system.as_eq()  #zwraca równanie
+system.as_matrix()  #zwraca macierz
+system.as_iterable()  #zwraca listę
+system.as_dict()  #zwraca słownik
+system.as_eq_list()  #zwraca równanie w postaci listy
+system._as_fode()  #zwraca równanie pierwszego rzędu
+
+'''
+
+class ODESystemRepresentationComponent(ReportComponent):
+    
+    title="Różnorodne reprezentacje systemu"
+
+    @property
+    def import_text(self):
+
+        return "Metody umożliwiające różnorodne reprezentacje systemu powinny być wywoływane w następujący sposób:"
+
+
+    def append_elements(self):
+
+        system = self.reported_object
+        t=system.ivar
+        dvars=system.dvars
+
+        display(ReportText(self.import_text))
+        display(ObjectCode(import_code))
+
+        display(ReportText(r'Metoda .as_eq()'))
+        display((system.as_eq()))
+
+        display(ReportText(r'Metoda .as_matrix()'))
+        display((system.as_matrix()))
+
+        display(ReportText(r'Metoda .as_iterable()'))
+        display((system.as_iterable()))
+
+        display(ReportText(r'Metoda .as_dict()'))
+        display((system.as_dict()))
+
+        display(ReportText(r'Metoda .as_eq_list()'))
+        display((system.as_eq_list()))
+
+        display(ReportText(r'Metoda ._as_fode()'))
+        display((system._as_fode()))
+
+class ODEInitCodeComponent(ReportComponent):
+    
+    title="Stworzenie liniowego równania różniczkowego"
+
+    def append_elements(self):
+
+        from dynpy.solvers.tools import CodePrinter
+
+        system = self.reported_object
+        ode_sys = system
+
+        _dvars = system.dvars
+        _odes = system.odes
+
+        _ode_order = system.ode_order
+
+        if _ode_order == 1:
+            cls_name = 'FirstOrderODESystem'
+        else:
+            cls_name = 'ODESystem'
+
+        string_gc = CodePrinter(_odes[0])._generate_code()
+
+        display(ReportText(f'Stworzenie instacji klasy {cls_name} wymaga zdefiniowania następujących zmiennych oraz równań:'))
+
+        display(ObjectCode(f'''
+
+
+from dynpy.solvers.linear import *
+from dynpy.models.odes.linear import *
+from sympy import *
+
+{string_gc}
+
+dvars = {_dvars}
+odes = {_odes}
+ode_order = {_ode_order}
+
+odesys = {cls_name}(odes = odes , dvars = dvars, ode_order = ode_order)
+
+display(odesys)
+
+        '''))
+
+        display(ReportText(f'Po wykonaniu instrukcji mamy gotową instancję obiektu klasy {cls_name}'  ))
+        
+class ODESystemAdditionComponent(ODESystemOperations):
+    
+    title="Adding two ODESystem Matrix"
+
+    def append_elements(self):
+            systems = self.reported_object
+            l = len(systems)
+            matrix_add = self.get_zero_ode_sys()
+            count = 1
+            for ode_sys in systems:
+                display(ReportText(f'Macierz {count}'))
+                display(ode_sys)
+                count += 1
+                matrix_add += ode_sys
+            display(ReportText('Suma macierzy'))
+            display(matrix_add)
+
+            
+class ODESystemSubtractionComponent(ODESystemOperations):
+    
+    title="Subtractiing two ODESystem Matrix"
+
+    def append_elements(self):
+            systems = self.reported_object
+            l = len(systems)
+            matrix_sub = systems[0]
+            display(ReportText(f'Macierz 1'))
+            display(systems[0])
+            count = 2
+            for i in range(l -1):
+                display(ReportText(f'Macierz {count}'))
+                display(systems[i])
+                count += 1
+                matrix_sub -= systems[i + 1]
+                
+                
+            display(ReportText('Różnica macierzy'))
+            display(matrix_sub)            
+            
+class ODESystemMultiplicationComponent(ODESystemOperations):
+    
+    title="Multiplying two ODESystem Matrix"
+
+    def append_elements(self):
+            systems = self.reported_object
+            l = len(systems)
+            matrix_mul = 1
+            count = 1
+            for ode_sys in systems:
+                display(ReportText(f'Macierz {count}'))
+                display(ode_sys)
+                count += 1
+                matrix_mul *= ode_sys
+            display(ReportText('Iloczyn macierzy'))
+            display(matrix_mul)
+            
+class ODESystemExponentiationComponent(ReportComponent):
+    title="Exponentiation of ODESystem Matrix"
+
+    def append_elements(self):
+        system = self.reported_object
+        ode_sys = system   #macierz deklarowana
+        
+
+        display(ReportText('Macierz'))
+        display(ode_sys)
+
+        
+        #wyiwtlanie operacji na macierzach
+        display(ReportText('Potęga macierzy'))
+        
+        matrix_exp = ode_sys * ode_sys
+        display(matrix_exp)
