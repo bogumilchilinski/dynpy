@@ -2396,11 +2396,16 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         A = self._auxiliary_fundamental_matrix#.applyfunc(lambda elem: elem.subs(self._simp_deps,simultaneous=True))
         
-        #display('A_subs',A,'subs dict',self._simp_deps)
+        CodeFlowLogger(A,"_auxiliary_fundamental_matrix",self)
         
         dvars = self._auxiliary_dvars
+        CodeFlowLogger(dvars,"aux dvars",self)
         
-        sol = AnalyticalSolution.from_vars_and_rhs(dvars,linodesolve(A,t=self.ivar,b=0*self.dvars)  )#.applyfunc(self.solution_map)
+        
+        #sol = AnalyticalSolution.from_vars_and_rhs(dvars,linodesolve(A,t=self.ivar,b=0*self.dvars)  )#.applyfunc(self.solution_map)
+        sol = Matrix(linodesolve(A,t=self.ivar,b=0*self.dvars))
+        
+        CodeFlowLogger(sol,"sol AS",self)
         
         dummies_set= sol.atoms(Dummy)
         const_dict = self._const_mapper(dummies_set)
@@ -2413,12 +2418,14 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         
         mapper = lambda elem: elem.subs(self._simp_deps,simultaneous=True).subs(self._callback_deps,simultaneous=True) 
         
-
+        CodeFlowLogger(sol,"sol list",self)
         
         ode_sol = ODESolution.from_vars_and_rhs(self.dvars,sol).applyfunc(mapper).subs( const_dict )
         
         ode_sol.ivar=self.ivar
         ode_sol.append_integration_consts(list(const_dict.values()))
+        
+        CodeFlowLogger(ode_sol,"ODE sol with Sympy",self)
         
         return ode_sol
     
@@ -2436,7 +2443,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         #display(A)
         #display(b)
         
-        sol = AnalyticalSolution.from_vars_and_rhs(dvars,linodesolve(A,t=self.ivar,b=b)).applyfunc(self.solution_map)
+        sol = Matrix(linodesolve(A,t=self.ivar,b=b)).applyfunc(self.solution_map)
 
         #display('ss',sol)
         
