@@ -14,6 +14,19 @@ class LinearFirstOrder(ODESystem):
         odes = cls(ode_eq,dvars=z,ivar=t,ode_order=1)
 
         return odes
+    
+class LinearFirstOrderNonHomo(ODESystem):
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        z = Function('z')(t)
+        a = Symbol('a',positive=True)
+        ode_eq = z.diff(t)+a*z-cos(t)*Heaviside(t-10)
+
+        odes = cls(ode_eq,dvars=z,ivar=t,ode_order=1)
+
+        return odes
 
 class LinearSecondOrder(ODESystem):
 
