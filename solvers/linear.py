@@ -759,7 +759,7 @@ class AnalyticalSolution(ImmutableMatrix):
         
         t_0=time.time()
 
-        solution = self
+        solution = self.rhs
 
         ivar = list(self.dvars[0].args)[0]
         solution_fixed=solution+Matrix([exp(-ivar)*exp(-(1e6+t_span[0])) if isinstance(expr,Number) else 0  for expr in solution])
@@ -1071,7 +1071,8 @@ class ODESolution(AnalyticalSolution):
         
         
         const_eqns=Matrix(ics_list) - self.rhs.subs(self.ivar,self.ivar_0)
-        display(const_eqns)
+
+        CodeFlowLogger(const_eqns,'const eqns',self)
         
         return const_eqns
         
