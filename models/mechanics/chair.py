@@ -142,6 +142,7 @@ class UndampedChair5DOF(ComposedSystem):
                 F=None,
                 Omega=None,
                 pm=None,
+                l_l=None,
                 **kwargs):
 
         if x is not None: self.x=x
@@ -169,6 +170,7 @@ class UndampedChair5DOF(ComposedSystem):
         if F is not None: self.F=F
         if Omega is not None: self.Omega=Omega
         if pm is not None: self.pm=pm
+        if l_l is not None: self.l_l=l_l
         
         if ivar is not None: self.ivar=ivar
 
