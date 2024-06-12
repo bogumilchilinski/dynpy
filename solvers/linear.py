@@ -1041,9 +1041,13 @@ class ODESolution(AnalyticalSolution):
 
     @ivar_0.setter
     def ivar_0(self,ivar0):
+
         if isinstance(ivar0,(Symbol,Number)):
         
             self._ivar0 = ivar0
+        elif not ivar0.has(self.ivar):
+            self._ivar0 = ivar0
+        
         else:
             print(f'something went wrong - ivar0 = {ivar0} which is not proper type ')
 
@@ -3058,9 +3062,15 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         
         for comp in base_comps_H:
             # print('_get_excitation_comps -> Heaviside only')
-            # display(comp,type(comp))
+            CodeFlowLogger(comp,'_get_excitation_comps -> Heaviside only',self)
             # print('its called by:')
             # display(self)
+
+            # if type(comp.args[0]) in (cos,sin) and comp.args[0].has(self.ivar): #and not type(comp)==Mul:
+            #     #display(terms)
+            #     coeff_of_comp = terms.applyfunc(lambda row: row.coeff(comp))
+            #     components += [(comp,coeff_of_comp)]
+            #     terms  = terms -  coeff_of_comp*comp
             
             if comp.has(self.ivar): #and not type(comp)==Mul:
                 #display(terms)
@@ -3165,7 +3175,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                             omg = arg.args[0].diff(self.ivar).doit()
                     sol += self._exp_cos_comp(omg,coeff,a) + self._exp_sin_comp(omg,0*b,a)
 
-            elif type(elem) == Heaviside:
+            elif type(elem) == Heaviside and type(elem.args[0]) not in (sin,cos):
                 
                 # print('heaviside check')
                 # display(coeff)
@@ -3184,12 +3194,59 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 # print(f'homo eq + coeff as type {type(odes)}')
                 # display(odes)
                 #sol_H = ODESystem.from_ode_system(odes)._as_fode().solution.with_ics(ics_list,ivar0)
-                sol_H = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes).solution#.with_ics(ics_list,ivar0)
+                sol_H = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes).solution.with_ics(ics_list,ivar0)
                 
                 CodeFlowLogger(sol_H,'Heaviside result')
                 CodeFlowLogger(sol_H.rhs*elem)
                 
                 sol += sol_H.rhs*elem
+
+            elif type(elem) == Heaviside and type(elem.args[0]) in (sin,cos):
+                
+                # print('heaviside check')
+                # display(coeff)
+                # display(elem)
+                arg = elem.args[0]
+                
+                if type(arg) == sin:
+                    ivar0 =  0
+                    gap =2*pi/ arg.args[0].diff(self.ivar)
+    
+                elif type(arg) == cos:
+                    ivar0 =  S.Half*pi/ arg.args[0].diff(self.ivar)
+                    gap =2*pi/ arg.args[0].diff(self.ivar)
+                
+                ics_list = list(0*b)
+                # print('homo eq')
+                odes_hg =self._hom_equation()._as_fode()
+                odes = ODESystem(odes_hg.lhs,self.dvars,odes_hg.rhs+coeff,ivar=self.ivar,ode_order=1)
+                
+                # print(f'homo eq of type {type(self._hom_equation())}')
+                # display(self._hom_equation())
+                
+                # print(f'homo eq + coeff as type {type(odes)}')
+                # display(odes)
+                #sol_H = ODESystem.from_ode_system(odes)._as_fode().solution.with_ics(ics_list,ivar0)
+                
+                n = Symbol('n')
+                CodeFlowLogger(ivar0+gap*n,'ivar value',self)
+                
+                
+                #ivar0=Symbol('t0')
+                sol_H = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes).solution.with_ics(ics_list,ivar0+gap*n)
+                
+                from sympy import Sum,oo
+                
+                sol_series =  sol_H.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar - (ivar0+gap*n)),(n,-4,4)   ) )
+                
+                CodeFlowLogger(sol_H,'Heaviside result')
+                CodeFlowLogger(sol_H.rhs*elem)
+                
+                CodeFlowLogger(sol_series,'SolSeries')
+                #CodeFlowLogger(sol_H.rhs*elem)
+                
+                sol += sol_series#*elem
+
 
             elif elem == S.One:
                 sol += self._cos_comp(0,coeff) + self._sin_comp(0,coeff)
