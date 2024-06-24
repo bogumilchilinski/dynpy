@@ -139,6 +139,35 @@ class DCMotor(ComposedSystem):
         }
         return default_data_dict
     
+
+    def _dimensionless_ode(self):
+        
+        from ...solvers.linear import ODESystem,FirstOrderLinearODESystem
+        
+        t = self.ivar
+        tau = Symbol('tau')
+        
+        syms_dict = {
+                    # dcmotor.U_z: 0,
+                    self.R_w: 1,
+                    self.L_w: 1,
+                    # dcmotor.k_e: Symbol('kappa',positive=True),
+                    # dcmotor.k_m: Symbol('kappa',positive=True),
+                    
+                    self.k_e: Symbol('kappa',negative=True),
+                    self.k_m: Symbol('kappa',negative=True),
+                    
+                    self.J: 1,
+                    self.B: 1,
+                    t:tau,
+                    # dcmotor.M_obc: 10,
+                    }
+        dvars = Matrix([[self.i_w], [self.omega_s]]).subs({t:tau})
+        
+        
+        ode = ODESystem(odes=(self._eoms.subs(syms_dict))*-1, dvars = dvars, ode_order=1,ivar=tau)
+        
+        return FirstOrderLinearODESystem.from_ode_system(ode)
     
 
 class CurrentDependentResistor(Spring):

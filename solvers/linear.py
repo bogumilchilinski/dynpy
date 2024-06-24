@@ -1710,7 +1710,8 @@ class ODESystem(AnalyticalSolution):
         
 
         obj = super().expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
-        obj._lhs = self._lhs.expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
+        obj=self.from_ode_system(self)
+        obj._rhs = self.rhs.expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
         obj._dvars=self._dvars
         obj._ivar = self.ivar
         obj._ode_order = self.ode_order
@@ -3188,6 +3189,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 odes_hg =self._hom_equation()._as_fode()
                 odes = ODESystem(odes_hg.lhs,self.dvars,odes_hg.rhs+coeff,ivar=self.ivar,ode_order=1)
                 
+                
                 # print(f'homo eq of type {type(self._hom_equation())}')
                 # display(self._hom_equation())
                 
@@ -3195,6 +3197,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 # display(odes)
                 #sol_H = ODESystem.from_ode_system(odes)._as_fode().solution.with_ics(ics_list,ivar0)
                 sol_H = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes).solution.with_ics(ics_list,ivar0)
+                
                 
                 CodeFlowLogger(sol_H,'Heaviside result')
                 CodeFlowLogger(sol_H.rhs*elem)
@@ -3210,16 +3213,17 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 
                 if type(arg) == sin:
                     ivar0 =  0
-                    gap =2*pi/ arg.args[0].diff(self.ivar)
+                    gap =(2*pi/ arg.args[0].diff(self.ivar))#.n(6)
     
                 elif type(arg) == cos:
-                    ivar0 =  S.Half*pi/ arg.args[0].diff(self.ivar)
-                    gap =2*pi/ arg.args[0].diff(self.ivar)
+                    ivar0 =  -(S.Half*pi/ arg.args[0].diff(self.ivar))#.n(6)
+                    gap =(2*pi/ arg.args[0].diff(self.ivar))#.n(6)
                 
                 ics_list = list(0*b)
                 # print('homo eq')
                 odes_hg =self._hom_equation()._as_fode()
                 odes = ODESystem(odes_hg.lhs,self.dvars,odes_hg.rhs+coeff,ivar=self.ivar,ode_order=1)
+                odes_out = ODESystem(odes_hg.lhs,self.dvars,odes_hg.rhs-coeff,ivar=self.ivar,ode_order=1)
                 
                 # print(f'homo eq of type {type(self._hom_equation())}')
                 # display(self._hom_equation())
@@ -3231,13 +3235,20 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 n = Symbol('n')
                 CodeFlowLogger(ivar0+gap*n,'ivar value',self)
                 
+                ivar_H_start = ivar0+gap*n
+                ivar_H_end = ivar0+gap/2+gap*n
                 
                 #ivar0=Symbol('t0')
-                sol_H = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes).solution.with_ics(ics_list,ivar0+gap*n)
+                sol_H = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes).solution.with_ics(ics_list,ivar_H_start)
+                sol_H_out = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes_out).solution.with_ics(ics_list,ivar_H_end)
                 
                 from sympy import Sum,oo
+                n_num = 5
                 
-                sol_series =  sol_H.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar - (ivar0+gap*n)),(n,-4,4)   ) )
+                sol_series_start =  sol_H.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar - ivar_H_start ),(n,-n_num,n_num,)   ) )
+                sol_series_end =  sol_H_out.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar -  ivar_H_end    ),(n,-n_num,n_num)   ) )
+                
+                sol_series = sol_series_start + sol_series_end
                 
                 CodeFlowLogger(sol_H,'Heaviside result')
                 CodeFlowLogger(sol_H.rhs*elem)
