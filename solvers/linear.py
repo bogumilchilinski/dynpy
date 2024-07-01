@@ -2176,6 +2176,9 @@ class ODESystem(AnalyticalSolution):
                          ''')
         return code
     
+    def as_type(self, ode_type):        
+        return ode_type.from_ode_system(self) 
+    
 class FirstOrderODESystem(ODESystem):
     
     

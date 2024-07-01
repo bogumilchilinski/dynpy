@@ -10,6 +10,8 @@ from ..components.mech import en as mech_comp
 from ..components.guides import en as guide_comp
 from ..components.ode import pl as ode_comp
 
+#from sympy import *
+
 class ReportMethods:
 
     _reported_object = None
@@ -1126,7 +1128,9 @@ class IntroToPandasGuide(Guide):
         from ...models.mechanics import ForcedSpringMassSystem as DynamicSystem
 
         return DynamicSystem()
-
+    
+    
+    
 class BasicsOfODESystemGuide(Guide):
 
     @property
@@ -1220,3 +1224,39 @@ class ODESystemOverviewReport(UsageOfDynamicSystemsGuide):
         from ...models.odes.linear import LinearFirstOrder
         
         return LinearFirstOrder.from_reference_data()
+    
+class ODESystemOverviewReport(Guide):
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+
+            ode_comp.ODESystemAdditionComponent,
+            ode_comp.ODESystemSubtractionComponent,
+            ode_comp.ODESystemMultiplicationComponent,
+            ode_comp.ODESystemExponentiationComponent,
+
+        ]
+
+        return comp_list
+    
+    @property
+    def default_reported_object(self):
+        
+        from sympy import Symbol, Function, Matrix
+        from ...solvers.linear import ODESystem
+        
+        t = Symbol('t')
+        m = Symbol('m',postive=True)
+        g = Symbol('g',postive=True)
+        c = Symbol('c',postive=True)
+
+        alpha = Symbol('alpha', positive=True)
+        v0 = Symbol('v_0',postive=True)
+
+        x,y = Function('x')(t), Function('y')(t)
+
+        ode_ref = ODESystem(odes=Matrix([m * x.diff(t,t)]), dvars=Matrix([x]), odes_rhs=Matrix([- c * x.diff(t) - m * x.diff(t,t) ], ode_order=2))
+        
+        return ode_ref
