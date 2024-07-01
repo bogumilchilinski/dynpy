@@ -2779,3 +2779,4 @@ class WeakNonlinearOscillator(HarmonicOscillator):
             nonhol_coneqs=list(self.coneqs)[len((self._hol_coneqs)):],
             ivar=self.ivar)
 
+6

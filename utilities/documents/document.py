@@ -1143,7 +1143,7 @@ class BasicsOfODESystemGuide(Guide):
 
         ]
 
-        return comp_list    
+        return comp_list
     
 class DynSysOverviewReport(UsageOfDynamicSystemsGuide):
 
@@ -1184,14 +1184,14 @@ class BasicsOfReportingGuide(UsageOfDynamicSystemsGuide):
 
     @property
     def _report_components(self):
-        
+
         comp_list=[
 
             guide_comp.CocalcDynSysListComponent,
             guide_comp.ReportingBasicsComponent,
             guide_comp.DynamicSystemCallComponent,
             guide_comp.SimulationsComponent,
-            guide_comp.SimulationReportComponent,            
+            guide_comp.SimulationReportComponent,
 
         ]
 
