@@ -11,3 +11,9 @@ There are four main parts of the entire project:
 - symbolic and numeric solvers for ODE systems;
 
 - reporting module.
+
+Using the code below in Jupyter enviroment on Ongoing Project we can learn more about how to and what to use Python in engineering calculations:
+''
+from dynpy.utilities.documents.document import IntroToCocalcGuide, UsageOfDynamicSystemsGuide
+IntroToCocalcGuide();
+''
