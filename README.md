@@ -21,9 +21,11 @@ Run this code in the blank Jupyter you have created.
 After running it you will see the guide in Output, i.e. a CELL-by-CELL (step-by-step) procedure
 Next for an example, run the codes below and you will see how it works:
 
+    import sympy 
     from sympy import Symbol
+    
     from dynpy.models.mechanics.pendulum import Pendulum
     
-    Pendulum().preview()
+    Pendulum().interactive_preview()
 
 You can preview the pendulum using such a function.
