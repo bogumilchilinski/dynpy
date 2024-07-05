@@ -18,7 +18,9 @@ Using the code below in Jupyter enviroment on Ongoing Project we can learn more 
     IntroToCocalcGuide();
 
 Run this code in the blank Jupyter you have created.
-You will see the guide in Output after running it, i.e. a CELL-by-CELL (step-by-step) procedure
+
+You will see the guide in Output after running it, i.e. a CELL-by-CELL (step-by-step) procedure. 
+
 Next for an example, run the codes below and you will see how it works:
 
     import sympy 
