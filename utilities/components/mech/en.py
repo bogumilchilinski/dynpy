@@ -80,8 +80,49 @@ class TitlePageComponent(Environment):
 
             
 ######################### Initial point
+class WUTTitlePage(TitlePageComponent):
 
-    
+    def __init__(self, title=None, large_text=None, graphic_path=None, author=None,
+                 system=None, options=None, arguments=None, start_arguments=None,
+                 **kwargs):
+        r"""
+        Args
+        ----
+        title: str
+            Title to be added to the title page
+        large_text: str
+            Large text to be added to the title page
+        graphic_path: str
+            Path to the graphic to be included on the title page
+        author: str
+            Author's name to be added to the title page
+        options: str or list or  `~.Options`
+            Options to be added to the ``\begin`` command
+        arguments: str or list or `~.Arguments`
+            Arguments to be added to the ``\begin`` command
+        start_arguments: str or list or `~.Arguments`
+            Arguments to be added before the options
+        """
+
+        self.title = title
+        self.large_text = large_text
+        self.graphic_path = graphic_path
+        self.author = author
+        
+        super().__init__(system=system, options=options, arguments=arguments, start_arguments=start_arguments, **kwargs)
+
+        if self.title:
+            self.append(Command('title', self.title))
+        
+        if self.large_text:
+            self.append(Command('large', self.large_text))
+        
+        if self.graphic_path:
+            self.append(Command('includegraphics', options='[width=5cm,height=5cm]', arguments=self.graphic_path))
+        
+        if self.author:
+            self.append(Command('author', self.author))
+
     
 # Damian
 class ExemplaryPictureComponent(ReportComponent):
