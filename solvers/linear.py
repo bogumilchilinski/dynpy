@@ -3243,7 +3243,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 sol_H_out = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes_out).solution.with_ics(ics_list,ivar_H_end)
                 
                 from sympy import Sum,oo
-                n_num = 5
+                n_num = Symbol('N')
                 
                 sol_series_start =  sol_H.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar - ivar_H_start ),(n,-n_num,n_num,)   ) )
                 sol_series_end =  sol_H_out.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar -  ivar_H_end    ),(n,-n_num,n_num)   ) )

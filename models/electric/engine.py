@@ -160,7 +160,8 @@ class DCMotor(ComposedSystem):
                     self.J: 1,
                     self.B: 1,
                     t:tau,
-                    # dcmotor.M_obc: 10,
+                    self.M_obc: Symbol('mu',positive=True),
+                    self.U_z: Symbol('upsilon',negative=True),
                     }
         dvars = Matrix([[self.i_w], [self.omega_s]]).subs({t:tau})
         
