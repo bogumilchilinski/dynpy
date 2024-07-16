@@ -536,6 +536,36 @@ class GeneralSolutionComponent(ReportComponent):
             display(SympyFormula(Eq(system._general_solution.lhs[no],system._general_solution.rhs[no])))
 
 #         display(ReportText(  self.footer_text   ))
+
+class FLODESolutionComponent(ReportComponent):
+    
+    title="Solution test component"
+    
+    @property
+    def header_text(self):
+        
+        system = self.reported_object
+
+        return f"Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of t. Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the zeroth and first order approximations are as follows:"
+
+
+    @property
+    def footer_text(self):
+
+        return f"In order to determine the functions \(\operatorname{C_1}\left(t_{1}\right),\operatorname{C_2}\left(t_{1}\right)\) and hence , the first-order approximate equation has to be considered:"
+
+    def append_elements(self):
+
+        system = self.reported_object
+        
+#         display(ReportText(  self.header_text   ))
+
+        from dynpy.solvers.linear import FirstOrderLinearODESystem,FirstOrderLinearODESystemWithHarmonics
+    
+        display(FirstOrderLinearODESystemWithHarmonics.from_ode_system(self.reported_object).solution)
+
+        display(FirstOrderLinearODESystem.from_ode_system(self.reported_object).solution)
+
         
 class SecularTermsEquationsComponent(ReportComponent):
     

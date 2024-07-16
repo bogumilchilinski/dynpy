@@ -1387,17 +1387,30 @@ class ODESystemAdditionComponent(ODESystemOperations):
     title="Adding two ODESystem Matrix"
 
     def append_elements(self):
+            from sympy import Symbol, Function, Matrix
+            
             systems = self.reported_object
             l = len(systems)
             matrix_add = self.get_zero_ode_sys()
+            
+            matrix_mat_lhs = Matrix([0])
+            matrix_mat_rhs = Matrix([0])
+            
             count = 1
+            display(ReportText('#### Sprawdzanie sumy dwóch macierzy:'))
             for ode_sys in systems:
                 display(ReportText(f'Macierz {count}'))
                 display(ode_sys)
                 count += 1
                 matrix_add += ode_sys
-            display(ReportText('Suma macierzy'))
+                
+                matrix_mat_lhs += ode_sys.lhs
+                matrix_mat_rhs += ode_sys.rhs
+                
+            display(ReportText('Suma macierzy ODEsystem'))
             display(matrix_add)
+            display(ReportText('Suma macierzy Sympy'))
+            display(Eq(matrix_mat_lhs, matrix_mat_rhs, evaluate=False))
 
             
 class ODESystemSubtractionComponent(ODESystemOperations):
@@ -1408,18 +1421,27 @@ class ODESystemSubtractionComponent(ODESystemOperations):
             systems = self.reported_object
             l = len(systems)
             matrix_sub = systems[0]
+            
+            matrix_mat_lhs = systems[0].lhs
+            matrix_mat_rhs = systems[0].rhs
+            
+            display(ReportText('#### Sprawdzanie różnicy dwóch macierzy:'))
             display(ReportText(f'Macierz 1'))
             display(systems[0])
             count = 2
-            for i in range(l -1):
+            for ode_sys in systems[1:]:
                 display(ReportText(f'Macierz {count}'))
-                display(systems[i])
+                display(ode_sys)
                 count += 1
-                matrix_sub -= systems[i + 1]
+                matrix_sub -= ode_sys
                 
+                matrix_mat_lhs -= ode_sys.lhs
+                matrix_mat_rhs -= ode_sys.rhs
                 
-            display(ReportText('Różnica macierzy'))
-            display(matrix_sub)            
+            display(ReportText('Różnica macierzy ODEsystem'))
+            display(matrix_sub)
+            display(ReportText('Różnica macierzy Sympy'))
+            display(Eq(matrix_mat_lhs, matrix_mat_rhs, evaluate=False))
             
 class ODESystemMultiplicationComponent(ODESystemOperations):
     
@@ -1430,28 +1452,44 @@ class ODESystemMultiplicationComponent(ODESystemOperations):
             l = len(systems)
             matrix_mul = 1
             count = 1
+            
+            matrix_mat_lhs = Matrix([1])
+            matrix_mat_rhs = Matrix([1])
+            
+            display(ReportText('#### Sprawdzanie iloczynu dwóch macierzy:'))
             for ode_sys in systems:
                 display(ReportText(f'Macierz {count}'))
                 display(ode_sys)
                 count += 1
                 matrix_mul *= ode_sys
-            display(ReportText('Iloczyn macierzy'))
+                
+                matrix_mat_lhs *= ode_sys.lhs
+                matrix_mat_rhs *= ode_sys.rhs
+                
+            display(ReportText('Iloczyn macierzy ODEsystem'))
             display(matrix_mul)
+            display(ReportText('Iloczyn macierzy Sympy'))
+            display(Eq(matrix_mat_lhs, matrix_mat_rhs, evaluate=False))
             
 class ODESystemExponentiationComponent(ReportComponent):
     title="Exponentiation of ODESystem Matrix"
 
     def append_elements(self):
         system = self.reported_object
-        ode_sys = system   #macierz deklarowana
+        ode_sys = system
         
-
+        display(ReportText('#### Sprawdzanie potęgi macierzy:'))
         display(ReportText('Macierz'))
         display(ode_sys)
 
         
-        #wyiwtlanie operacji na macierzach
-        display(ReportText('Potęga macierzy'))
+        display(ReportText('Potęga macierzy ODEsystem'))
         
         matrix_exp = ode_sys * ode_sys
         display(matrix_exp)
+        
+        matrix_mat_lhs = ode_sys.lhs * ode_sys.lhs
+        matrix_mat_rhs = ode_sys.rhs * ode_sys.rhs
+        
+        display(ReportText('Potęga macierzy Sympy'))
+        display(Eq(matrix_mat_lhs, matrix_mat_rhs, evaluate=False))

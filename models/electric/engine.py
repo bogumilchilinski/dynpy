@@ -168,7 +168,8 @@ class DCMotor(ComposedSystem):
         
         ode = ODESystem(odes=(self._eoms.subs(syms_dict))*-1, dvars = dvars, ode_order=1,ivar=tau)
         
-        return FirstOrderLinearODESystem.from_ode_system(ode)
+        #return FirstOrderLinearODESystem.from_ode_system(ode)
+        return ode
     
 
 class CurrentDependentResistor(Spring):

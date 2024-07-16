@@ -12,19 +12,19 @@ from sympy.physics.mechanics import dynamicsymbols
 from ....solvers.linear import *
 from ....dynamics import *
 
-miesiace_list = ['styczeń', 'luty', 'marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']
+months_list = ['January', 'February', 'March','April','May','June','July','August','September','October','November','December']
 
-srednie_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]
+average_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]
 
-Eg_dzienne_list_watogodziny_na_metr2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]
+Eg_daily_list_Wh_per_meter2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]
 
-Eg_dzienne_kilowatogodziny_na_metr2 = [0.6,1,3,3.8,4.8,5.3,4.9,3.3,1.7,0.7,0.5]
+Eg_daily_list_kWh_per_meter2 = [0.6,1,3,3.8,4.8,5.3,4.9,3.3,1.7,0.7,0.5]
 
-długosc_dnia_w_miesiacach_godziny = [8.3,10.0,11.8,13.9,15.7,16.7,16.3,14.7,12.7,10.7,8.8,7.8]
+day_length_in_months_hours = [8.3,10.0,11.8,13.9,15.7,16.7,16.3,14.7,12.7,10.7,8.8,7.8]
 
-data_warunki_atmosferyczne = {'Długość dnia w miesiącu [h]':długosc_dnia_w_miesiacach_godziny,'Dzienne natężenie energii [${kWh/m^2}$]':Eg_dzienne_list_watogodziny_na_metr2,'Średnia temperatura [$^{\circ}$C]':srednie_temp_list}
+data_atmospheric_conditions = {'Day length in a month [h]':day_length_in_months_hours,'Daily energy intensity [${kWh/m^2}$]':Eg_daily_list_Wh_per_meter2,'Average temperature [$^{\circ}$C]':average_temp_list}
 
-df = pd.DataFrame(index = miesiace_list,data = data_warunki_atmosferyczne)
+df = pd.DataFrame(index = months_list,data = data_atmospheric_conditions)
 
 class ReportComponent(Subsection):
 
@@ -454,7 +454,7 @@ from dynpy.models.mechanics import SDOFWinchSystem
 
 class DynamicSystemCallComponent(ReportComponent):
     
-    title="Wprowadzenie"
+    title="Introduction"
 
 
     def append_elements(self):
@@ -462,25 +462,25 @@ class DynamicSystemCallComponent(ReportComponent):
         system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
         system_name = system.__class__.__name__
         
-        display(ReportText('Wymagane importy bibliotek/poszczególnych klas do stworzenia raportu:'))
+        display(ReportText('Required library/class imports to create the report:'))
 
 
         display(GuideCode(imports_code_str.replace('SDOFWinchSystem',system_name)))
 
 
-        display(ReportText('Klasa umożliwiająca rozwiązanie konkretnej problematyki (w tym przypadku problematyki związanej z opisem dźwigu):'))
+        display(ReportText('A class that allows you to solve a specific problem (in this case, a problem related to the description of a crane):'))
 
         display(GuideCode("""from dynpy.models.mechanics import SDOFWinchSystem""".replace('SDOFWinchSystem',system_name)      ))
         
         
         display(GuideCode(f'system={system_name}()'  ))
 
-        display(ReportText('Ścieżka do poszukiwanej klasy na platformie CoCalc:'))
+        display(ReportText('Path to the sought-after class on the CoCalc platform:'))
         #display(Picture('./dynpy/utilities/components/guides/images/sciezka_w.jpg'))
 
         display(ReportText(str(system.__class__)))
         
-        display(ReportText('Sposób wywowałania preview klasy - tzw. podglądu:'))
+        display(ReportText('The way to call out the preview of the class - the so-called preview:'))
 
         display(GuideCode(f'''{system_name}()._as_picture()'''  ))
         display(system._as_picture())
@@ -595,7 +595,7 @@ table_for_report.reported(caption=('Tabela'))
 
 class SimulationsComponent(ReportComponent):
     
-    title="Tworzenie wykresów"
+    title="Creating graphs"
 
     def append_elements(self):
         
@@ -603,27 +603,27 @@ class SimulationsComponent(ReportComponent):
         system_name = system.__class__.__name__
 
 
-        display(ReportText('Definicja wektoru czasu:'))
+        display(ReportText('Definition of time vector:'))
         #display(Picture('./Image/tspan_w.jpg'))
 
         display(GuideCode('''t_span = np.linspace(0,100,200)'''.replace('SDOFWinchSystem',system_name)))
         t_span = np.linspace(0,100,200)
 
 
-        display(ReportText('Sposób tworzenia wykresów z tak zwanego palca:'))
-        display(ReportText('Podstawienie danych z wcześniej stworzonego słownika:'))
+        display(ReportText('The way to create charts manually:'))
+        display(ReportText('Substitution of data from a previously created dictionary:'))
         #display(Picture('./Image/stedisub_w.jpg'))
 
         
         
         display(GuideCode(steady_sol_str.replace('SDOFWinchSystem',system_name)))
-        slownik=system.get_random_parameters()
-        slownik_numerical=system.get_numerical_parameters()
+        dict=system.get_random_parameters()
+        dict_numerical=system.get_numerical_parameters()
         
         steady_solution=system._ode_system.steady_solution[0]
-        steady_solution_subs=steady_solution.subs(slownik_numerical)
+        steady_solution_subs=steady_solution.subs(dict_numerical)
         display(steady_solution_subs)
-        display(ReportText('Zastosowanie metody lambdify umożliwiającej konwersje funkcji do postaci anonimowej'))
+        display(ReportText('Using the lambdify method to convert functions to anonymous form'))
         #display(Picture('./Image/lambdify_w.jpg'))
 
 
@@ -632,7 +632,7 @@ class SimulationsComponent(ReportComponent):
         display(SympyFormula(eq_lambdify))
 
 
-        display(ReportText('Stworzenie wykresu:'))
+        display(ReportText('Creating a graph:'))
         #display(Picture('./Image/plot2_w.jpg'))
         
         #pd.DataFrame(data=eq_lambdify(t_span),index=t_span).plot()
@@ -641,21 +641,21 @@ class SimulationsComponent(ReportComponent):
         display(GuideCode('''pd.DataFrame(index=t_span, data=eq_lamdify(t_span)).plot()'''.replace('SDOFWinchSystem',system_name)))
 
 
-        display(ReportText('Sposób tworzenia wykresów bezpośrednio z wcześniej wywołanej klasy:'))
-        display(ReportText('Podstawienie słownika:'))
-        #display(Picture('./Image/tableq_w.jpg'))
+        display(ReportText('A way to create charts directly from a previously called class:'))
+        display(ReportText('Dictionary substitution:'))
+        #display(Picture('./Image/table_in.jpg'))
 
         
         #zmiana slownik na slownik_numerical
-        table_eq=system._ode_system.steady_solution.subs(slownik_numerical)
+        table_eq=system._ode_system.steady_solution.subs(dict_numerical)
 
 
-        display(GuideCode('''table_eq=system._ode_system.steady_solution.subs(slownik_numerical)'''.replace('SDOFWinchSystem',system_name)))
+        display(GuideCode('''table_eq=system._ode_system.steady_solution.subs(dict_numerical)'''.replace('SDOFWinchSystem',system_name)))
         display(SympyFormula(table_eq))
 
         #jak tabele zrobic + ew jej output
-        display(ReportText('Sposób tworzenia tabeli:'))
-        #display(Picture('./Image/tabela_w.jpg'))
+        display(ReportText('The way to create a table:'))
+        #display(Picture('./Image/table_in.jpg'))
         coord = system.q[0]
         table=table_eq.numerized().compute_solution(t_span)
         table_new=table[coord]
@@ -664,27 +664,27 @@ class SimulationsComponent(ReportComponent):
         display(table)
         display(table_new)
 
-        display(ReportText('Sposób tworzenia wizualizacji zdefiniowanej tabeli:'))
-        #display(Picture('./Image/tabelka_w.jpg'))
+        display(ReportText('The way to create a visualization of the defined table:'))
+        #display(Picture('./Image/table_in.jpg'))
 
-
-        display(ReportText('sposób tworzenia tabeli wyświetlanej w gotowym raporcie:'))
-        #display(Picture('./Image/tworzenie_tabeli_w.png'))
+##### nazwy image tez przetlumaczone
+        display(ReportText('How to create the table displayed in the finished report:'))
+        #display(Picture('./Image/creating_table_in.png'))
 
         display(GuideCode(report_table_define_str.replace('SDOFWinchSystem',system_name)))
 
-        display(ReportText('Wizualizacja wykresu::'))
+        display(ReportText('Visualization of the graph:'))
         #display(Picture('./Image/tikzplot_w.jpg'))
 
         display(GuideCode('''table_new.to_pylatex_tikz().in_figure()'''.replace('SDOFWinchSystem',system_name)))    
 
 section_development_str=(
 '''
-intro=Section('Wprowadzenie')
+intro=Section('Introduction')
 CurrentContainer(intro)
-display(ReportText('schemat układu'))
-schemat=Picture('picture_winch.png')
-display(schemat)
+display(ReportText('system diagram'))
+scheme=Picture('picture_winch.png')
+display(scheme)
 ''')
 
 forming_equation_str=(
@@ -693,9 +693,9 @@ solution_subs = SDOFWinchSystem()._ode_system.steady_solution.subs(slownik_numer
 eq_sol=Eq(solution_subs,0)
 eq_steady_sol=Eq(steady_solution_subs,0)
 
-rownania_ruchu=Section('Równania ruchu')
-CurrentContainer(rownania_ruchu)
-display(ReportText('równania ruchu: '))
+eom=Section('Equations of motion')
+CurrentContainer(eom)
+display(ReportText('Equations of motion: '))
 
 display(SympyFormula(eoms_eq))
 display(SympyFormula(eq_sol))
@@ -707,8 +707,8 @@ report_generation_libraries=(
 doc_final = MechanicalCase('./output/Document',documentclass=NoEscape('article'),document_options=['a4paper','fleqn'],lmodern=False)
 
 doc_final.append(intro)
-doc_final.append(rownania_ruchu)
-doc_final.append(wykres)
+doc_final.append(eom)
+doc_final.append(wykres) ##gdzie to?
 
 doc_final.generate_pdf()
 ''')
@@ -771,7 +771,7 @@ class SimulationReportComponent(ReportComponent):
 
 class DynSysCodeComponent(ReportComponent):
 
-    title="Wywolywanie kodu systemu dynamicznego"
+    title="Calling dynamic system code"
 
 
 
@@ -780,36 +780,36 @@ class DynSysCodeComponent(ReportComponent):
         system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
         system_name = system.__class__.__name__
         
-        display(ReportText('''Kod analizowanej klasy jest nastepujacy'''))
+        display(ReportText('''The code of the analyzed class is as follows'''))
         display(ObjectCode(system.__class__))
-        display(ReportText(f'''Przedstawiony kod klasy {system_name} został pobrany przy pomoc klasy ObjectCode.  '''))
+        display(ReportText(f'''The presented code of the {system_name} class was retrieved with the help of the ObjectCode class.  '''))
         
         
 #pandas guide
 data_code=(
 '''
-miesiace_list = ['styczeń','luty','marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']
-srednie_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]
-długosc_dnia_w_miesiacach_godziny = [8.3,10.0,11.8,13.9,15.7,16.7,16.3,14.7,12.7,10.7,8.8,7.8]
-Eg_dzienne_list_watogodziny_na_metr2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]
-Eg_dzienne_kilowatogodziny_na_metr2 = [0.6,1,3,3.8,4.8,5.3,4.9,3.3,1.7,0.7,0.5]
+months_list = ['January', 'February', 'March','April','May','June','July','August','September','October','November','December']
+average_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]
+day_length_in_months_hours = [8.3,10.0,11.8,13.9,15.7,16.7,16.3,14.7,12.7,10.7,8.8,7.8]
+Eg_daily_list_Wh_per_meter2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]
+Eg_daily_list_kWh_per_meter2 = [0.6,1,3,3.8,4.8,5.3,4.9,3.3,1.7,0.7,0.5]
 ''')
 
 data_dict_code=(
 '''
-data_warunki_atmosferyczne = {'Długość dnia w miesiącu [h]':długosc_dnia_w_miesiacach_godziny,'Dzienne natężenie energii [${kWh/m^2}$]':Eg_dzienne_list_watogodziny_na_metr2,'Średnia temperatura [$^{\circ}$C]':srednie_temp_list}
+data_atmospheric_conditions = {'Day length in a month [h]':day_length_in_months_hours,'Daily energy intensity [${kWh/m^2}$]':Eg_daily_list_Wh_per_meter2,'Average temperature [$^{\circ}$C]':average_temp_list}
 ''')
 output_code=(
 '''
 import pandas as pd
 
-df = pd.DataFrame(index = miesiace_list,data = data_warunki_atmosferyczne)
+df = pd.DataFrame(index = months_list,data = data_atmospheric_conditions)
 df
 ''')
 
 class PandasTableGenerationComponent(ReportComponent):
     
-    title="Tworzenie tabelki"
+    title="Generating a table"
 
 
     def append_elements(self):
@@ -817,17 +817,17 @@ class PandasTableGenerationComponent(ReportComponent):
         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
 
 
-        display(ReportText('Stworzenie listy danych:'))
+        display(ReportText('Creating a list of data:'))
 
         display(GuideCode(data_code))
 
 
-        display(ReportText('Stworzenie słownika:'))
+        display(ReportText('Creating dictionary:'))
 
         display(GuideCode(data_dict_code))
 
 
-        display(ReportText('Wywołanie tabelki:'))
+        display(ReportText('Calling the table:'))
         display(GuideCode(output_code))
         display(df)
         
@@ -930,10 +930,10 @@ class BasicSymComponent(ReportComponent):
         display(GuideCode(f'Wyniki symulacji zostały przedstawione graficznie na wykresie {AutoMarker(sim_plot)}'))
         display(sim_plot)
         
-        
+
 class PandasMethodsComponent(ReportComponent):
     
-    title="Metody biblioteki Pandas"
+    title="Pandas library methods"
 
 
     def append_elements(self):
@@ -941,67 +941,67 @@ class PandasMethodsComponent(ReportComponent):
         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
         
         
-        miesiace_list = ['styczeń', 'luty', 'marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']
+        months_list = ['January', 'February', 'March','April','May','June','July','August','September','October','November','December']
 
-        srednie_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]
+        average_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]
 
-        Eg_dzienne_list_watogodziny_na_metr2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]
+        Eg_daily_list_Wh_per_meter2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]
 
-        Eg_dzienne_kilowatogodziny_na_metr2 = [0.6,1,3,3.8,4.8,5.3,4.9,3.3,1.7,0.7,0.5]
+        Eg_daily_list_kWh_per_meter2 = [0.6,1,3,3.8,4.8,5.3,4.9,3.3,1.7,0.7,0.5]
 
-        długosc_dnia_w_miesiacach_godziny = [8.3,10.0,11.8,13.9,15.7,16.7,16.3,14.7,12.7,10.7,8.8,7.8]
+        day_length_in_months_hours = [8.3,10.0,11.8,13.9,15.7,16.7,16.3,14.7,12.7,10.7,8.8,7.8]
 
-        data_warunki_atmosferyczne = {'Długość dnia w miesiącu [h]':długosc_dnia_w_miesiacach_godziny,'Dzienne natężenie energii [${kWh/m^2}$]':Eg_dzienne_list_watogodziny_na_metr2,'Średnia temperatura [$^{\circ}$C]':srednie_temp_list}
+        data_atmospheric_conditions = {'Day length in a month [h]':day_length_in_months_hours,'Daily energy intensity [${kWh/m^2}$]':Eg_daily_list_Wh_per_meter2,'Average temperature [$^{\circ}$C]':average_temp_list}
 
-        df = pd.DataFrame(index = miesiace_list,data = data_warunki_atmosferyczne)
+        df = pd.DataFrame(index = months_list,data = data_atmospheric_conditions)
 
-        display(ReportText('Metoda iloc:'))
+        display(ReportText('Iloc method:'))
         display(GuideCode('df.iloc[0:3]'))
         display(df.iloc[0:3])
 
         # display(Picture('./Image/iloc.jpg', caption = ""))
 
-        display(ReportText('Metoda loc:'))
-        display(GuideCode('df.loc["styczeń"]'))
-        display(df.loc["styczeń"])
+        display(ReportText('Loc method:'))
+        display(GuideCode('df.loc["January"]'))
+        display(df.loc["January"])
         # display(Picture('./Image/loc.jpg', caption = ""))
 
-        display(ReportText('Metoda set axis działa zarówno dla kolumn jak i rzędów. Dla rzędów:'))
+        display(ReportText('The set axis method works for both columns and rows. For rows:'))
         display(GuideCode("df.set_axis(['a','b','c','d','e','f','g','h','i','j','k','l'],axis = 'index')"))
         display(df.set_axis(['a','b','c','d','e','f','g','h','i','j','k','l'], axis = 'index'))
 
         # display(Picture('./Image/set_axis.jpg', caption = ""))
 
-        display(ReportText('Dla kolumn:'))
+        display(ReportText('For columns:'))
         display(GuideCode("df.set_axis(['a','b','c'],axis = 'columns')"))
         display(df.set_axis(['a','b','c'],axis = 'columns'))
         # display(Picture('./Image/set_axis2.jpg', caption = ""))
 
-        display(ReportText('Metoda rename - Zmienienie pojedynczej kolumny:'))
-        display(GuideCode('''df.rename(columns = {"Długość dnia w miesiącu":'AAA'}, index = {"styczeń":'A'} )'''))
-        display(df.rename(columns = {"Długość dnia w miesiącu":'AAA'}, index = {"styczeń":'A'} ))
+        display(ReportText('Rename method - Changing a single column:'))
+        display(GuideCode('''df.rename(columns = {"Day length in a month":'AAA'}, index = {"January":'A'} )'''))
+        display(df.rename(columns = {"Day length in a month":'AAA'}, index = {"January":'A'} ))
         # display(Picture('./Image/rename.jpg', caption = ""))
 
-        display(ReportText('Metoda map:'))
+        display(ReportText('Map method:'))
         display(GuideCode('df.map(lambda x:x+2)'))
 #         display(df.map(lambda x:x+2)) - nowa wersja pandasa zmieniła nazwę "map" na "applymap" - Michał SZ
         display(df.map(lambda x:x+2))
 
-        # display(ReportText('***Metoda applymap dla kolumny/wiersza:***'))
+        # display(ReportText('***Applymap mthod for colummn/row:***'))
         # display(Markdown('''
-        # Warto pamiętać, że df[NAZWA] => tworzy serię, a df[[Nazwa]] => tworzy nowy frame, który można wykorzystać do użycia .applymap'''))
-        # display(df[['Długość dnia w miesiącu']].applymap(lambda x:x+100))
-        # pd_h = df[['Długość dnia w miesiącu']].applymap(lambda x:x+100)
-        # list1 = pd_h['Długość dnia w miesiącu'].tolist()
-        # df['Długość dnia w miesiącu'] = list1
+        # Remeber, that df[NAME] => creates series, a df[[NAME]] => creates new frame, which can be used with .applymap'''))
+        # display(df[['Day length in a month']].applymap(lambda x:x+100))
+        # pd_h = df[['Day length in a month']].applymap(lambda x:x+100)
+        # list1 = pd_h['Day length in a month'].tolist()
+        # df['Day length in a month'] = list1
 
         # display(df)
 
         # display(Picture('./Image/applymap.jpg', caption = ""))
 
-        display(ReportText('Slicowanie:'))
-        display(GuideCode('''df['Długość dnia w miesiącu [h]']'''))
-        display(df['Długość dnia w miesiącu [h]'])
+        display(ReportText('Slicing:'))
+        display(GuideCode('''df['Day length in a month [h]']'''))
+        display(df['Day length in a month [h]'])
         # display(Picture('./Image/slice2.jpg', caption = ""))
         
         
@@ -1070,7 +1070,7 @@ pd.DataFrame(index = t_span, data = eq2_fun(t_span).plot()
 
 class DifferentSimulationsComponent(ReportComponent):
     
-    title="Symulacje - pozostałe warianty"
+    title="Simulations - other variants"
 
 
 
@@ -1082,7 +1082,7 @@ class DifferentSimulationsComponent(ReportComponent):
         
         SDOFWinchSystem = type(system)
 
-        display(ReportText('Wygenerowanie rozwiazania szczegolnego klasy:'))
+        display(ReportText('Generate a class particular solution:'))
         display(GuideCode(steady_state_code.replace('SDOFWinchSystem',system_name)))
         steady_state = SDOFWinchSystem.from_random_data()._ode_system.solution.with_ics([0,0])[0].subs(SDOFWinchSystem.m0,10)
         display(steady_state)
@@ -1090,7 +1090,7 @@ class DifferentSimulationsComponent(ReportComponent):
         # display(Picture('./Image/steady_sol.jpg', caption = ""))
 
 
-        display(ReportText('Stworzenie listy i tabelki'))
+        display(ReportText('Creating a list and a table'))
         display(GuideCode(list_code))
         Model_number = [1,2,3,4] 
         inertia_list= [1,2,3,4] 
@@ -1109,7 +1109,7 @@ class DifferentSimulationsComponent(ReportComponent):
         # display(Picture('./Image/listatab.jpg', caption = ""))
 
 
-        display(ReportText('Utworzenie wektora - zestaw wartosci czasu dla naszej symulacji: '))
+        display(ReportText('Create a vector - a set of time values for our simulation: '))
         display(GuideCode(lambdify_code_str.replace('SDOFWinchSystem',system_name)))
 
         function = lambdify(SDOFWinchSystem.ivar, steady_state)
@@ -1118,23 +1118,23 @@ class DifferentSimulationsComponent(ReportComponent):
         # display(Picture('./Image/wektor1.jpg', caption = ""))
 
 
-        display(ReportText('Utworzenie słowników z danymi i podstawienie danych w nim zawartych do naszego równania, tak aby było zależne jedynie od czasu: '))
+        display(ReportText('Creating data dictionaries and substituting the data in it into our equation so that it only depends on time: '))
 
         display(GuideCode(dict_code.replace('SDOFWinchSystem',system_name)))
         # display(Picture('./Image/slowniki_sym.jpg', caption = ""))
 
 
-        display(ReportText('Utworzenie listy elementów podstawiając po kolei wartości czasu: '))
+        display(ReportText('Create a list of elements by substituting time values one by one: '))
         display(GuideCode(list_elem.replace('SDOFWinchSystem',system_name)))
         display(Picture('./dynpy/utilities/components/guides/images/eq2_fun.jpg', caption = ""))
 
 
-        display(ReportText('Generowanie wykresu równania szczególnego: '))
+        display(ReportText('Generate a graph of a particular equation: '))
         display(GuideCode(solution_code.replace('SDOFWinchSystem',system_name)))
         display(Picture('./dynpy/utilities/components/guides/images/wykres_niefun.jpg', caption = ""))
 
 
-        display(ReportText('Generowanie wykresu równania ogólnego: '))
+        display(ReportText('Generate a graph of the general equation: '))
         display(GuideCode(sym_gen_sol.replace('SDOFWinchSystem',system_name)))
         display(Picture('./dynpy/utilities/components/guides/images/ogolne_tab.jpg', caption = ""))
         display(Picture('./dynpy/utilities/components/guides/images/ogolne_plot.jpg', caption = ""))
@@ -1159,7 +1159,7 @@ LatexDataFrame.formatted(df.set_axis([a,b,c,d,e],axis='columns'))
 
 class BasicOperationsComponent(ReportComponent):
 
-    title="Podstawowe obiekty i operacje"
+    title="Basic objects and operations"
 
     def append_elements(self):
 
@@ -1175,30 +1175,30 @@ class BasicOperationsComponent(ReportComponent):
         x4 = LatexDataFrame(ss4)
 
         s5=ss1
-        s5.index =['pierwszy','drugi','trzeci','czwarty','piąty','szósty']
+        s5.index =['first','second','third','fourth','fifth','sixth']
         x5 = LatexDataFrame(s5)
 
-        wojewodztwa_list = ['mazowieckie','wielkopolskie','lubelskie','warmińsko-mazurskie','zachodniopomorskie','podlaskie','dolnośląskie','pomorskie','łódzkie','kujawsko-pomorskie','podkarpackie','małopolskie','lubuskie','śląskie','świętokrzyskie','opolskie']
-        powierzchnia_lista=[35558,29826,25122,24173,22892,20187,19947,18310,18219,17972, 17846,15183,13988,12333,11711,9412]
-        ludnosc_lista=[5349114,3475323,2139726,1439675,1710482,1188800,2904207,2307710,2493603,2086210, 2127657,3372618,1018075,4570849,1257179,996011]
-        dochody_lista=[4464,3371,3338,3447,3649,3552,3788,4104,3438,3508,3212, 3395,3187,3586,3268,3112]
-        wydatki_lista=[787,596,623,597,767,697,742,1023,590,778,574,598,365,631,647,431]
-        wojwodztwa_dane={'powierzchnia':powierzchnia_lista,'l.osób':ludnosc_lista,'dochody':dochody_lista,'wydatki':wydatki_lista}
+        voivodeships_list = ['Masovian','Greater Poland','Lublin','Warmian-Masurian','West Pomeranian','Podlaskie','Lower Silesian','Pomeranian','Łódź','Kuyavian-Pomeranian','Subcarpathian','Lesser Poland','Lubusz','Silesian','Holy Cross','Opole']
+        area_list=[35558,29826,25122,24173,22892,20187,19947,18310,18219,17972, 17846,15183,13988,12333,11711,9412]
+        population_list=[5349114,3475323,2139726,1439675,1710482,1188800,2904207,2307710,2493603,2086210, 2127657,3372618,1018075,4570849,1257179,996011]
+        income_list=[4464,3371,3338,3447,3649,3552,3788,4104,3438,3508,3212, 3395,3187,3586,3268,3112]
+        expenses_list=[787,596,623,597,767,697,742,1023,590,778,574,598,365,631,647,431]
+        voivodeships_data={'area':area_list,'no. of people':population_list,'income':income_list,'expenses':expenses_list}
         
-        df = pd.DataFrame(index=wojewodztwa_list,data=wojwodztwa_dane)
+        df = pd.DataFrame(index=voivodeships_list,data=voivodeships_data)
         x6 = LatexDataFrame(df)
 
         area = Symbol('A',positive=True)
-        df['zaludnienie']=df['l.osób']/df['powierzchnia']
+        df['population']=df['no. of people']/df['area']
         x7 = LatexDataFrame(df)
         
         df21=df.iloc[1:3,0:3]
         x8 = LatexDataFrame(df21)
         
-        df22=df.loc['mazowieckie']
+        df22=df.loc['Masovian']
         x9 = LatexDataFrame(df22)
         
-        df.loc['Warszawa',:]=[4000,600000,2500,300,120]
+        df.loc['Warsaw',:]=[4000,600000,2500,300,120]
         x10 = LatexDataFrame(df)
         
         df30=df.set_axis([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],axis='index')
@@ -1206,118 +1206,114 @@ class BasicOperationsComponent(ReportComponent):
         
         a,b,c,d,e = symbols('a b c d e',positive = True)
 
-        units_dict = {a:ureg.meter,b:ureg.second, 'lubuskie':ureg.meter}
+        units_dict = {a:ureg.meter,b:ureg.second, 'Lubusz':ureg.meter}
         LatexDataFrame.set_default_units(units_dict)
 
         df31=df.set_axis([a,b,c,d,e],axis='columns')
         x12 = LatexDataFrame(df31)
         
-        df40=df.rename(columns={'l.osob':'LUDNOŚĆ'},index={'lubuskie':'LUBU...'})
+        df40=df.rename(columns={'no. of people':'POPULATION'},index={'Lubusz':'LUBU...'})
         x21 = LatexDataFrame(df40)
         
-        df50=df.dochody.apply(lambda x: x*2)
+        df50=df.income.apply(lambda x: x*2)
         x13 = LatexDataFrame(df50)
         df60=df.map(lambda x: x*2)
         x14 = LatexDataFrame(df60)
         
         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
         
-        display(ReportText('Importowanie biblioteki Pandas'))
+        display(ReportText('Importing the Pandas library'))
         display(GuideCode('import pandas as pd'))
 
-        display(ReportText('Tworzenie serii (analogicznie do kolumn w Excelu)'))
+        display(ReportText('Create a series ( in analogy to Excel columns)'))
         display(GuideCode('s = pd.Series([2,34,5,-2,8,12])'))
         display(x1.reported())
 
-        display(ReportText('Operacje na seriach'))
+        display(ReportText('Operations on series'))
         display(GuideCode('s*10'))
         display(x2.reported())
 
-        display(ReportText('Funkcja abs() - wartość bezwględna'))
+        display(ReportText('Abs() function - absolute value'))
         display(GuideCode('s.abs()'))
         display(x3.reported())
 
-        display(ReportText('Funkcja describe() - podstawowe statystyki'))
+        display(ReportText('Describe() function - basic statistics'))
         display(GuideCode('s.describe()'))
         display(x4.reported())
 
-        display(ReportText('Zmiana nazw indesków domyślnie zaczynających sie od 0'))
-        display(GuideCode('''s.index =['pierwszy','drugi','trzeci','czwarty','piąty','szósty']'''))
+        display(ReportText('Changing the names of indexes that start with 0 by default'))
+        display(GuideCode('''s.index =['first','second','third','fourth','fifth','sixth']'''))
         display(x5.reported())
         
-        display(ReportText('DataFrame - tabela DataFrame, która powstaje na bazie słownika.'))
-        display(ReportText('Tworzenie listy województw:'))
+        display(ReportText('DataFrame - a DataFrame table that is created from a dictionary'))
+        display(ReportText('Creating a list of voivodeships:'))
         display(GuideCode('''
-wojewodztwa_list = ['mazowieckie','wielkopolskie','lubelskie',
-'warmińsko-mazurskie','zachodniopomorskie','podlaskie',
-'dolnośląskie','pomorskie','łódzkie',
-'kujawsko-pomorskie','podkarpackie','małopolskie',
-'lubuskie','śląskie','świętokrzyskie','opolskie']
+voivodeships_list = ['Masovian','Greater Poland','Lublin','Warmian-Masurian','West Pomeranian','Podlaskie','Lower Silesian','Pomeranian','Łódź','Kuyavian-Pomeranian','Subcarpathian','Lesser Poland','Lubusz','Silesian','Holy Cross','Opole']
             '''))
         
-        display(ReportText('Tworzenie listy zawierającej pola powierzchni poszczególnych województw w ${km^2}$:'))
-        display(GuideCode('powierzchnia_lista=[35558,29826,25122,24173,22892,20187,19947,18310,18219,17972,17846,15183,13988,12333,11711,9412]'))
+        display(ReportText('Creating a list containing the area of each voivodeship in the ${km^2}$:'))
+        display(GuideCode('area_list=[35558,29826,25122,24173,22892,20187,19947,18310,18219,17972,17846,15183,13988,12333,11711,9412]'))
 
-        display(ReportText('Tworzenie listy liczby ludności dla poszczególnych województw:'))
-        display(GuideCode('ludnosc_lista=[5349114,3475323,2139726,1439675,1710482,1188800,2904207,2307710,2493603,2086210,2127657,3372618,1018075,4570849,1257179,996011]'))
+        display(ReportText('Creating a list of population numbers for each voivodeship:'))
+        display(GuideCode('popultaion_list=[5349114,3475323,2139726,1439675,1710482,1188800,2904207,2307710,2493603,2086210,2127657,3372618,1018075,4570849,1257179,996011]'))
         
-        display(ReportText('Tworzenie listy dochodów przypadających na osobę w danym województwie:'))
-        display(GuideCode('dochody_lista=[4464,3371,3338,3447,3649,3552,3788,4104,3438,3508,3212,3395,3187,3586,3268,3112]'))
+        display(ReportText('Creating a list of per capita incomes in a province:'))
+        display(GuideCode('income_list=[4464,3371,3338,3447,3649,3552,3788,4104,3438,3508,3212,3395,3187,3586,3268,3112]'))
 
-        display(ReportText('Tworzenie listy wydatków majątkowych/inwestycyjnych przypadających na osobę w danym województwie:'))
-        display(GuideCode('wydatki_lista=[787,596,623,597,767,697,742,1023,590,778,574,598,365,631,647,431]'))
+        display(ReportText('Creating a list of property/investment expenses per person in the province:'))
+        display(GuideCode('expenses_list=[787,596,623,597,767,697,742,1023,590,778,574,598,365,631,647,431]'))
 
-        display(ReportText('Tworzenie słownika'))
-        display(GuideCode('''wojwodztwa_dane={'pow.':powierzchnia_lista,'l.os.':ludnosc_lista,'dochody':dochody_lista,'wyd.':wydatki_lista}'''))
+        display(ReportText('Creating a dictionary'))
+        display(GuideCode('''voivodeships_data={'area':area_list,'no. of people.':population_list,'income':income_list,'exp.':expenses_list}'''))
 
-        display(ReportText('Wywołanie tabeli'))
+        display(ReportText('Calling a table'))
         display(GuideCode('''
-df = pd.DataFrame(index=wojewodztwa_list,data=wojwodztwa_dane)
+df = pd.DataFrame(index=voivodeships_list,data=voivodeships_data)
 df
         '''))
         display(x6.reported())
 
-        display(ReportText('Operacje na kolumnach - dodanie kolumny z obliczoną gęstością zaludnienia'))
+        display(ReportText('Operations on columns - adding a column with calculated population concentration'))
         display(GuideCode('''
-df['zalud.']=df['l.os.']/df['pow.']
+df['popul.']=df['no. of people']/df['area']
 df
         '''))
         display(x7.reported())
 
-        display(ReportText('Metoda iloc - za pomocą indeksów wykonujemy operacje na wierszach i kolumnach'))
+        display(ReportText('The iloc method - we use indexes to perform operations on rows and columns'))
         display(GuideCode('df.iloc[1:3,0:3]'))
         display(x8.reported())
 
-        display(ReportText('Metoda loc - za pomocą etykiet wykonujemy operacje na wierszach i kolumnach'))
-        display(GuideCode('''df.loc['mazowieckie']'''))
+        display(ReportText('Loc method - using labels, we perform operations on rows and columns'))
+        display(GuideCode('''df.loc['Masovian']'''))
         display(x9.reported())
 
-        display(ReportText('Dodanie wiersza za pomocą metody loc'))
+        display(ReportText('Adding a line using the loc method'))
         display(GuideCode('''
-df.loc['Warszawa',:]=[4000,600000,2500,300,120]
+df.loc['Warsaww',:]=[4000,600000,2500,300,120]
 df
         '''))
         display(x10.reported())
 
-        display(ReportText('Metoda set_axis dla wierszy'))
+        display(ReportText('Set_axis method for rows'))
         display(GuideCode('''df.set_axis([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],axis='index')'''))
         display(x11.reported())
 
-        display(ReportText('Metoda set_axis dla kolumn'))
+        display(ReportText('Set_axis method for columns'))
         display(GuideCode('''df.set_axis([a,b,c,d,e],axis='columns')'''))
         display(x12.reported())
 
-        display(ReportText('Metoda rename - zmienia nazwy kolumn i wierszy'))
+        display(ReportText('Rename method - renames columns and rows'))
         display(GuideCode('''
-df.rename(columns={'l.os.':'LUDNOŚĆ'},index={'lubuskie':'LUBU...'})
+df.rename(columns={'no. of people':'POPULATION'},index={'Lubusz':'LUBU...'})
         '''))
         display(x21.reported())
 
-        display(ReportText('Metoda apply - implementacja funkcji na wybranej kolumnie tabeli'))
-        display(GuideCode('df.dochody.apply(lambda x: x*2)'))
+        display(ReportText('Apply method - implementation of a function on a selected table column'))
+        display(GuideCode('df.income.apply(lambda x: x*2)'))
         display(x13.reported())
 
-        display(ReportText('Metoda map - implementacja funkcji w całej tabeli'))
+        display(ReportText('Map method - implementation of functions across the table'))
         display(GuideCode('df.map(lambda x: x*2)'))
         display(x14.reported())
         

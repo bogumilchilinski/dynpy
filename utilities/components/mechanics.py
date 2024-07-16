@@ -232,15 +232,19 @@ class ReportComponent(Subsection):
 class ODESystemOperations(ReportComponent):
     
     def __init__(self, reported_object):
+        from ...solvers.linear import ODESystem
+        
         if isinstance(reported_object, ODESystem):
             ode_sys = reported_object
             ode_dummy = self.get_dummy()
             reported_object = (ode_sys, ode_dummy)
 
-            super().__init__(reported_object)
+        super().__init__(reported_object)
 
 
     def get_dummy(self):
+        from ...solvers.linear import ODESystem
+        
         t = Symbol('t')
         m = Symbol('m',postive=True)
         g = Symbol('g',postive=True)
@@ -251,6 +255,8 @@ class ODESystemOperations(ReportComponent):
         return  ODESystem(odes=Matrix([m * x.diff(t,t)]), dvars=Matrix([x]), odes_rhs=Matrix([- c * x.diff(t) - b * x.diff(t,t) ], ode_order=2))
     
     def get_zero_ode_sys(self):
+        from ...solvers.linear import ODESystem
+        
         t = Symbol('t')
         x = Function('x')(t)
         return ODESystem(odes=0, dvars=x)
