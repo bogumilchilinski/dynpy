@@ -2796,7 +2796,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
         else:
             coords = coordinates
 
-        params_list = [Eq(parameter,value) for value in span]
+        params_list = [Eq(parameter,value,evaluate=False) for value in span]
         
          
         if isinstance(model,(list,tuple)):

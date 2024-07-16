@@ -1,4 +1,7 @@
 from  ..mechanics import *
+from  ..mechanics import ReportComponent as BaseReportComponent
+
+
 from . import pl
 
 import pandas as pd
@@ -14,6 +17,12 @@ from ....dynamics import *
 
 months_list = ['January', 'February', 'March','April','May','June','July','August','September','October','November','December']
 
+from ..mechanics import display
+import datetime
+
+
+miesiace_list = ['styczeń', 'luty', 'marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']
+
 average_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]
 
 Eg_daily_list_Wh_per_meter2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]
@@ -26,51 +35,9 @@ data_atmospheric_conditions = {'Day length in a month [h]':day_length_in_months_
 
 df = pd.DataFrame(index = months_list,data = data_atmospheric_conditions)
 
-class ReportComponent(Subsection):
-
-    latex_name = 'subsection'
-    packages=[
-              Package('standalone'),
-              Package('siunitx')
-             ]
-    
-    title='Report generic component'
-
-    def __init__(self, reported_object, title=None, numbering=False, *, label=True, **kwargs):
-        """
-        Args
-        ----
-        title: str
-            The section title.
-        numbering: bool
-            Add a number before the section title.
-        label: Label or bool or str
-            Can set a label manually or use a boolean to set
-            preference between automatic or no label
-        """
+class ReportComponent(BaseReportComponent):
 
 
-
-        self.reported_object = reported_object #it's forced by pylatex library
-        
-        
-        if title is None:
-            title = self.title
-        
-        super().__init__(title=title, numbering=numbering, label=label, **kwargs)
-        CurrentContainer(self)
-        
-
-        self.append_elements()
-        
-    def append_elements(self):
-        pass
-
-    def as_frame(self):
-        frame=Frame(title=self.title,options=['allowframebreaks'])
-        #frame.packages +(self.packages)
-        frame+=(list(self))
-        return frame
 
     @property
     def reported_object(self):
@@ -562,9 +529,13 @@ steady_sol_str=(
 '''
 
 slownik_numerical=system.get_numerical_parameters()
+
+steady_solution=SDOFWinchSystem()._ode_system.steady_solution
 steady_solution_subs=steady_solution.subs(slownik_numerical)
 
 ''')
+
+
 
 solution_table_str=(
 '''
@@ -977,9 +948,9 @@ class PandasMethodsComponent(ReportComponent):
         display(df.set_axis(['a','b','c'],axis = 'columns'))
         # display(Picture('./Image/set_axis2.jpg', caption = ""))
 
-        display(ReportText('Rename method - Changing a single column:'))
-        display(GuideCode('''df.rename(columns = {"Day length in a month":'AAA'}, index = {"January":'A'} )'''))
-        display(df.rename(columns = {"Day length in a month":'AAA'}, index = {"January":'A'} ))
+        display(ReportText('Metoda rename - Zmienienie pojedynczej kolumny:'))
+        display(GuideCode('''df.rename(columns = {"Długość dnia w miesiącu [h]":'AAA'}, index = {"styczeń":'A'} )'''))
+        display(df.rename(columns = {"Długość dnia w miesiącu":'AAA'}, index = {"styczeń":'A'} ))
         # display(Picture('./Image/rename.jpg', caption = ""))
 
         display(ReportText('Map method:'))
@@ -1868,11 +1839,11 @@ class ODESimulationComponent(ReportComponent):
         display(Picture('./dynpy/utilities/components/guides/images/solutioon.jpg'))
         display(ReportText('Następnie generujemy tabele niezbędną do symulacji w taki sposób:'))
         display(Picture('./dynpy/utilities/components/guides/images/analityczne.jpg'))
-        display(ReportText('METODA 1B: Innym sposobem jest przeprowadzenie symulacji numerycznych bez obliczeń analitycznych. Potrzebny jest do tego taki                             kod: '))
+        display(ReportText('METODA 1B: Innym sposobem jest przeprowadzenie symulacji numerycznych bez obliczeń analitycznych. Potrzebny jest do tego taki kod: '))
         display(Picture('./dynpy/utilities/components/guides/images/analiticzne.jpg'))
-        display(ReportText('METODA 2: Trzecim sposobem generowania symulacji jest użycie NumericalAnalysisDataFrame, kod wywołania prezentuje się                                     następująco:'))
+        display(ReportText('METODA 2: Trzecim sposobem generowania symulacji jest użycie NumericalAnalysisDataFrame, kod wywołania prezentuje się następująco:'))
         display(Picture('./dynpy/utilities/components/guides/images/analitical_.jpg'))
-        display(ReportText('Aby przeprowadzić symulacje konieczne jest zastosowanie metody perform simulations. Bez zastosowania tej metody dostaniemy                               następujący wynik:'))
+        display(ReportText('Aby przeprowadzić symulacje konieczne jest zastosowanie metody perform simulations. Bez zastosowania tej metody dostaniemy następujący wynik:'))
         display(Picture('./dynpy/utilities/components/guides/images/bez_metody.jpg'))
         display(ReportText('A z jej użyciem, wszystko powinno zadziałać i dostaniemy następujący output:'))
         display(Picture('./dynpy/utilities/components/guides/images/z_metoda.jpg'))
@@ -2217,7 +2188,144 @@ class DynSysImplementationComponent(ReportComponent):
         display(ReportText('Ostatecznie kod implementacji całego systemu ma następującą postać:'))
         display(GuideCode(full_class_str))
         
+## TABELKA InterimSchedule 
+
+spotkanie_1='08.10.24'
+spotkanie_2='15.10.24'
+spotkanie_3='22.10.24'
+spotkanie_4='29.10.24'
+spotkanie_5='05.11.24'
+spotkanie_6='12.11.24'
+spotkanie_7='19.11.24'
+spotkanie_8='26.11.24'
+spotkanie_9='03.12.24'
+spotkanie_10='10.12.24'
+
+
+zadanie_1='Ustalenie tematu pracy przejściowej i wstępnego toku postępowania'
+zadanie_2='Wyprowadzenie równań opisujących zjawisko'
+zadanie_3='Zaimplementowanie równań w środowisku obliczeniowym'
+zadanie_4='Dodanie opisu oraz listy symboli występujących w równaniach'
+zadanie_5='Przeprowadzenie badań/symulacji, uzyskanie danych pomiarowych)'
+zadanie_6='Wykonanie tabeli, przetworzenie jej na wykresy, opis zachodzących zależności'
+zadanie_7='Opracowanie wniosków, wyników odnośnie przeprowadzonych badań/symulacji'
+zadanie_8='Formowanie wstępu  oraz podsumowania pracy '
+zadanie_9='Poprawa błędów'
+zadanie_10='Poprawa błędów, oddanie pracy'
+
+wl='Praca zasadnicza'
+po='Poprawki'
         
+class InterimScheduleComponent(ReportComponent):
+    
+    title="Implementacja systemow dynamicznych"
+
+
+    @property
+    def reported_object(self):
+
         
+        default_data = {'date':datetime.datetime(24,7,16),
+                       'title':'Title of interim project',
+                       'timedelta':7,
+                       'issue_no':359,
+                       }
+
+        
+        if isinstance(self._reported_object, dict):
+            return {**default_data,**self._reported_object}
+
+        elif isinstance(self._reported_object, str):
+            return {**default_data,'date':self._reported_object}
+        
+        elif self._reported_object is None:
+            return default_data
+
+        else:
+            return self._reported_object
+
+
+    @reported_object.setter
+    def reported_object(self, obj):
+        self._reported_object=obj
+
+
+    def append_elements(self):
+        
+        first_meeting_date = self.reported_object['date'] # it's useless in the case of permanent content - it's commented for future usage
+        days_inc = self.reported_object['timedelta']
+
+
+        #przekopiowac tu fragment kodu z guide pamietajac o indentach
+        display(ReportText(f"Pracę rozpoczynamy {first_meeting_date}")) #itp
+        
+        tabela_git = {
+        'Tydzień prac': [1,2,3,4,5,6,7,8,9,10],
+        'Data': [first_meeting_date+datetime.timedelta(days=days_inc*no) for no in  range(10)],
+        'Temat konsultacji': [zadanie_1, zadanie_2, zadanie_3, zadanie_4, zadanie_5, zadanie_6, zadanie_7, zadanie_8, zadanie_9, zadanie_10],
+        'Charakter spotkania': [wl,wl,wl,wl,wl,wl,wl,wl,po,po]
+            
+        
+}
+
+        tabelka_pandas=pd.DataFrame(tabela_git)
+        tabelka_pandas.index += 1
+        tabelka_latex=LatexDataFrame(tabelka_pandas).reported(caption='Harmonogram spotkań')
+        display((display(tabelka_latex)))
+
+class InterimTemplateComponent(InterimScheduleComponent):
+    
+    title="Implementacja systemow dynamicznych"
+
+
+    
+    
+    def append_elements(self):
+        
+        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+
+
+        #przekopiowac tu fragment kodu z guide pamietajac o indentach
+        display(ReportText("Tu kod dla podstawowej formy dokumentu")) #itp
+    
+    
+    
+project_issue_title_str = """
+Maintenance of `{system_name}` class which is dynamic system representation        
+"""
+        
+project_issue_desc_str = """
+
+The following problems have to be checked or fixed, in order to ensure the correctness of implemented system:
+
+- [ ] checking if a class is executable,
+
+- [ ] validation of figures for schemes and real examples,
+
+- [ ] validation of reference parameters,
+
+- [ ] validation of random parameters,
+
+- [ ] validation of  description of  description of parameters,
+
+- [ ] validation of units.
+"""
+        
+class InterimIssuesComponent(InterimScheduleComponent):
+    
+    title="Wzór na tworzenie issues w systemie GitHub dla przejsciowe"
+
+    def append_elements(self):
+        
+        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        system_name = system.__class__.__name__
+        
+        display(ReportText("Przykładowy tekst, który pozwoli na sprawne przygotowywanie issue ma następującą formę:"))
+
+        display(ReportText("# Title: "))
+        display(ObjectCode(project_issue_title_str.format(system_name=system_name)))
+
+        display(ReportText("# Description: "))
+        display(ObjectCode(project_issue_desc_str))
     
     

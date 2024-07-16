@@ -745,7 +745,7 @@ class SteadySolutionComponent(ReportComponent):
         
 
         dyn_sys=system
-        dyn_sys_lin=dyn_sys.linearized()#.subs(system._given_data)
+        dyn_sys_lin=dyn_sys.linearized().subs(system.get_reference_data)
 
 
 
@@ -754,7 +754,7 @@ class SteadySolutionComponent(ReportComponent):
 
         for i,qs in enumerate(system.q):
 
-            display((SympyFormula(  Eq(Symbol(f'X_s_-{qs}'),dyn_sys_lin._ode_system.steady_solution.n(3)[i], evaluate=False) , marker='b',backend=latex  )  ))
+            display((SympyFormula(  Eq(Symbol(f'X_s_-{qs}'),dyn_sys_lin._ode_system.steady_solution.n(3)[i], evaluate=False).simplify().doit() , marker='b',backend=latex  )  ))
 
 
         AutoBreak.latex_backend = latex_store

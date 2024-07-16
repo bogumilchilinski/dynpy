@@ -52,7 +52,7 @@ class AdaptableTunedFluidDamper(VariableMassTrolleyWithPendulumRayleighDamping):
     def simulation_performance(self, params_dict, parameter, param_span, t_span, ic_list):
         
         na_df = self._ode_system.subs(params_dict).numerical_analysis(parameter=parameter, param_span=param_span)
-        
+                
         simulation_result = na_df.compute_solution(t_span = t_span, ic_list = ic_list)
         
         return simulation_result.droplevel(0, axis=1)
@@ -140,9 +140,8 @@ class AdaptableTunedFluidDamper(VariableMassTrolleyWithPendulumRayleighDamping):
                 self.m_pf:0
             }
 
-
         parameter=self.Omega
-
+        
         return self.simulation_performance(params_dict = params_dict, parameter = parameter, param_span = params_list, t_span = t_span, ic_list = ic_list)
 
     def adaptable_tuned_mass_damper_validation(self):
