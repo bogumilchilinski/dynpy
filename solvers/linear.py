@@ -683,6 +683,10 @@ class AnalyticalSolution(ImmutableMatrix):
         ''' Creates a zip object consisting of the left side of the self instance and self itself.
         It returns zip object.'''
         return [ Eq(lhs,comp,evaluate=False) for lhs,comp  in zip(self.lhs,self.rhs)]
+    def as_eq_diff_list(self,ivar,diff_order):
+        ''' Creates a zip object consisting of the left side of the self instance and self itself.
+        It returns zip object.'''
+        return [ Eq(lhs.diff(ivar,diff_order),comp.diff(ivar,diff_order),evaluate=False) for lhs,comp  in zip(self.lhs,self.rhs)]
     
     def system_parameters(self, parameter_values=None):
         '''
