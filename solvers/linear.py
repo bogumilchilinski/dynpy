@@ -1557,7 +1557,7 @@ class ODESystem(AnalyticalSolution):
         
         fode = FirstOrderLinearODESystem.from_ode_system(self)
         
-        # aux_mat=fode._fundamental_matrix
+        fund_mat=fode._fundamental_matrix
         # # # print(type(self))
         # display(aux_mat)
         # display(aux_mat.det())
@@ -1566,7 +1566,12 @@ class ODESystem(AnalyticalSolution):
         # display(det(aux_mat).atoms(Function))
         
         #if Heaviside in det(aux_mat).atoms():
-        aux_mat = Matrix([1])
+        mat_elems = (list(fund_mat))
+        dummy_list = symbols(f'A0:{len(mat_elems)}')
+
+        
+        
+        aux_mat = Matrix(*fund_mat.shape,[dummy_list[no] if elem !=0 else 0  for no,elem in enumerate(mat_elems)])
         
         if det(aux_mat).has(self.ivar):
             return fode
