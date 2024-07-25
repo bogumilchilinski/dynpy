@@ -11,6 +11,12 @@ from sympy.physics.mechanics import dynamicsymbols
 from ....solvers.linear import *
 from ....dynamics import *
 
+from ...report import display as ip_display
+
+
+from ..mechanics import display
+
+
 
 miesiace_list = ['styczeń', 'luty', 'marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']
 

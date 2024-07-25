@@ -113,6 +113,8 @@ class UndampedChair5DOF(ComposedSystem):
     F=Symbol('F',positive=True)
     Omega=Symbol('Omega',positive=True)
     pm=Symbol('PM',positive=True)
+    l_l=Symbol('l_l',positive=True)
+    l_r=Symbol('l_r',positive=True)
     
     ivar=Symbol('t')
 
@@ -143,6 +145,7 @@ class UndampedChair5DOF(ComposedSystem):
                 Omega=None,
                 pm=None,
                 l_l=None,
+                l_r=None,
                 **kwargs):
 
         if x is not None: self.x=x
@@ -171,6 +174,7 @@ class UndampedChair5DOF(ComposedSystem):
         if Omega is not None: self.Omega=Omega
         if pm is not None: self.pm=pm
         if l_l is not None: self.l_l=l_l
+        if l_r is not None: self.l_r=l_r
         
         if ivar is not None: self.ivar=ivar
 
@@ -262,8 +266,12 @@ class UndampedChair5DOF(ComposedSystem):
                             self.k_ft:300000,
                             self.k_f:750000,
                             self.F:150,
-                            self.Omega:0.3*np.pi*2,
+                            self.Omega:0*np.pi*2,
                             self.pm:0.1,
+                            self.c_mu:0.1,
+                            self.l_l:0.2,
+                            self.l_r:0.4,
+            
                           }
 
         return self.default_data_dict
@@ -280,25 +288,22 @@ class UndampedChair5DOF(ComposedSystem):
                    self.k_ft:475000,
                    self.k_r:580000,
                    self.k_rt:400000,
-                   self.m_3:75,
+                   self.M:75,
                    self.I_ch:20.8868,
                    self.m_rear:1.5,
                    self.m_fr:0.6,
                    self.pm:0.1,
                    self.Omega:0.3454,
                    self.R:0.3,
-                   self.z_c3:0.4,
+                   self.z_c:0.4,
                    self.g:9.81,
                    self.I_w:0.135,
-                   self.l_fr:0.2,
-                   self.l_rear:0.01,
-                   self.u0:0.005,
-
-                   self.l_bumps:0.15,
-                   self.amplitude:0.0165,
-                   self.length:0.19,
-                   self.speed:1.7,
-                   self.axw:0.47}
+                   self.l_r:0.2,
+                   self.l_l:0.01,
+                   self.u_rrp:0.005,
+                   self.u_frp:0.005,
+                   self.F:150,
+                        }
         return table_data_dict  
     
     
@@ -379,7 +384,7 @@ class DampedChair5DOF(UndampedChair5DOF):
 
 #         self._undamped_chair_5DOF = UndampedChair5DOF(self.x,self.z,self.phi,self.z_rear,self.z_front,self.M,self.I_ch,self.m_rear,self.I_w,self.R,self.m_fr,self.g,self.z_c,self.k_rt,self.u_rrp,self.k_r,self.u_rsd,self.k_ft,self.u_frp,self.k_f,self.ivar,self.u_fsd,self.F,self.Omega,self.pm)('undamped_chair_5DOF')
         
-        self._undamped_chair_5DOF = UndampedChair5DOF(self.x,self.z,self.phi,self.z_rear,self.z_front,self.M,self.I_ch,self.m_rear,self.I_w,self.R,self.m_fr,self.g,self.z_c,self.k_rt,0,self.k_r,((self.z+self.R*self.phi+Symbol('l_r',positive=True) -self.z_rear)**2 )-Symbol('l_r',positive=True),self.k_ft,0,self.k_f,self.ivar,((self.z-self.R*self.phi+Symbol('l_fr',positive=True)   -self.z_front)**2  )-Symbol('l_fr',positive=True),self.F,self.Omega,self.pm)('undamped_chair_5DOF')
+        self._undamped_chair_5DOF = UndampedChair5DOF(self.x,self.z,self.phi,self.z_rear,self.z_front,self.M,self.I_ch,self.m_rear,self.I_w,self.R,self.m_fr,self.g,self.z_c,self.k_rt,0,self.k_r,((self.z+self.R*self.phi+self.l_l -self.z_rear)**2 )-self.l_l,self.k_ft,0,self.k_f,self.ivar,((self.z-self.R*self.phi+self.l_r-self.z_front)**2  )-self.l_r,self.F,self.Omega,self.pm)('undamped_chair_5DOF')
         self._rear_wheel_damping = Damper(self.I_w*self.c_mu,self.x/self.R,qs=self.qs)('rear_wheel_damping')
 #         self._rayleigh_damping_inertia_x = Damper(self.rayleigh_damping_inertia_x()*self.c_mu,self.x,qs=self.qs)
         self._damping_body_horizontal = Damper(self.M*self.c_mu, self.x+self.z_c*self.phi, qs=self.qs)(label='_damping_body_horizontal')
@@ -1484,7 +1489,7 @@ class DampedChair4DOF(ComposedSystem):
 #         }
 #         return self.sym_desc_dict
     
-sys4=DampedChair4DOF()
+sys4=DampedChair5DOF()
 y=[sys4.q,sys4.z, sys4.z.diff(t,t)]
 ic_list = [0.1,0.1,0,0,0.1,0.1,0,0]
 units_dict = {
@@ -1494,34 +1499,22 @@ units_dict = {
                    sys4.l_l:ureg.meter,
                    sys4.l_r:ureg.meter,
                    sys4.k_f:ureg.newton/ureg.meter,
-                   sys4.k_ft:ureg.kilogram/ureg.second**2,
+                   sys4.k_ft:ureg.newton/ureg.meter,
                    sys4.k_r:ureg.newton/ureg.meter,
-                   sys4.k_rt:ureg.kilogram/ureg.second**2,
-                   sys4.c:ureg.newton*ureg.second/ureg.meter,
-                    sys4.c_fs:ureg.newton*ureg.second/ureg.meter,
-                    sys4.c_rs:ureg.newton*ureg.second/ureg.meter,
-                    sys4.c_ft:ureg.newton*ureg.second/ureg.meter,
-                    sys4.c_rt:ureg.newton*ureg.second/ureg.meter,
+                   sys4.k_rt:ureg.newton/ureg.meter,
+                   sys4.c_mu:ureg.newton*ureg.second/ureg.meter,
+                    sys4.c_lam:ureg.newton*ureg.second/ureg.meter,
                    sys4.I_ch:ureg.meter**2*ureg.kilogram,
                     sys4.M:ureg.kilogram,
                    sys4.m_rear:ureg.kilogram,
                    sys4.m_fr:ureg.kilogram,
                    sys4.Omega:ureg.radian/ureg.second,
                    sys4.R:ureg.meter,
-                   #dyn_sys.z_c3:0.4,
+                   sys4.z_c:ureg.meter,
                    sys4.g:ureg.meter/ureg.second**2,
                    sys4.I_w:ureg.meter**2*ureg.kilogram,
-                   sys4.l_fr:ureg.meter,
-                   sys4.l_rear:ureg.meter,
-                   #dyn_sys.u0:,
-                   sys4.l_bumps:ureg.meter,
-                   sys4.amplitude:ureg.meter,
-                   sys4.length:ureg.meter,
-                   sys4.speed:ureg.meter/ureg.second,
-                   #self.axw:0.47,
-                   sys4.Leng:ureg.meter,
-               sys4.m:ureg.kilogram,
-               sys4.k:(ureg.newton / ureg.meter),
+                   sys4.l_r:ureg.meter,
+                   sys4.l_l:ureg.meter,
                t:ureg.second,
                 f:ureg.hertz,
                 sys4.z:ureg.meter,
@@ -1529,7 +1522,9 @@ units_dict = {
                 sys4.z.diff(t,2):ureg.meter/ureg.second**2,
                 sys4.phi.diff(t,2): ureg.radian/ureg.second**2,
                 sys4.pm:ureg.meter/ureg.meter,
-                sys4.u0:ureg.meter,
+                sys4.u_rrp:ureg.meter,
+                sys4.u_frp:ureg.meter,
+    
               }
 
 # units_dict = {sys4.m:ureg.kilogram,

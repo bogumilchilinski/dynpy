@@ -683,6 +683,10 @@ class AnalyticalSolution(ImmutableMatrix):
         ''' Creates a zip object consisting of the left side of the self instance and self itself.
         It returns zip object.'''
         return [ Eq(lhs,comp,evaluate=False) for lhs,comp  in zip(self.lhs,self.rhs)]
+    def as_eq_diff_list(self,ivar,diff_order):
+        ''' Creates a zip object consisting of the left side of the self instance and self itself.
+        It returns zip object.'''
+        return [ Eq(lhs.diff(ivar,diff_order),comp.diff(ivar,diff_order),evaluate=False) for lhs,comp  in zip(self.lhs,self.rhs)]
     
     def system_parameters(self, parameter_values=None):
         '''
@@ -807,23 +811,22 @@ class AnalyticalSolution(ImmutableMatrix):
 
         parameters = self.system_parameters()
         
+        display(parameters)
+        
         if len(parameters)<1:
             parameters = [Symbol('a')]
 
-        
-
         if parameter is None:
-
             params_included = 1
             params_list = parameters[0:params_included]
         elif isinstance(parameter,Number):
-
             params_included = parameter     
             params_list = parameters[0:params_included]  
         else:
-            
             params_included = 1
             params_list = parameters[0:params_included]
+
+        param_list_el = params_list[0]
             
         if param_span is None:
             #param_span = [0.8,1,1.2]
@@ -836,21 +839,24 @@ class AnalyticalSolution(ImmutableMatrix):
             t_span = [0.0]
 
         reference_data = {ref_val: 1 for ref_val in  self.system_parameters()[params_included:] }
-        #reference_data = {}
-        #display(reference_data)
+#         reference_data = {}
+#         display(reference_data)
 
         system = self
-        
+
         Y = list(system._fode_dvars) + list(dependencies_dict.keys())
-
+        
         index = pd.Index(t_span,name=self.ivar)
-
+        
         df_num = NumericalAnalysisDataFrame.from_model(system,
-                                                        parameter=params_list,
+                                                        #parameter=params_list,
+                                                        parameter=param_list_el,
                                                         span=param_span,
                                                         reference_data=reference_data,
                                                         coordinates=Y,
                                                         index=index)
+        
+        display(df_num)
 
         results_num = df_num#.perform_simulations(model_level_name=0,dependencies=dependencies_dict)
         #results = TimeDataFrame(results_num).droplevel(0,axis=1)

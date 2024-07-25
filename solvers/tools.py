@@ -17,6 +17,11 @@ from ..utilities.adaptable import *
 import sympy as sym
 from sympy.printing import *
 import pint
+import inspect
+from dynpy.utilities.documents import document
+from dynpy.utilities.templates.document import Guide
+from dynpy.utilities.report import Markdown
+
 
 ODE_COMPONENTS_LIST = [
             ode.ODESystemComponent,
@@ -237,3 +242,12 @@ class LatexSize:
             return ureg('dm')
         else:
             return ureg(self._unit)
+
+
+def list_of_guides():
+    md_str='Lista poradników: \n\n'
+    for name, obj in inspect.getmembers(document):
+        if inspect.isclass(obj) and 'Guide' in name:
+                if obj is not Guide:
+                    md_str=md_str+f'\t\t - {name} \n\n'
+    return md_str

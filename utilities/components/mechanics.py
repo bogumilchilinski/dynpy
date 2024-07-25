@@ -11,6 +11,13 @@ from pylatex.utils import (#italic,
 
 from ..adaptable import *
 from ..report import *
+from ..report import display as ip_display
+
+
+def display(obj):
+
+    #ip_display(IPMarkdown('=='*25 +'\n \n \n ==== if u see it let me (@bogumilchilinski) know' ))
+    return ip_display(obj)
 
 
 class MultivariableTaylorSeries(Expr):
@@ -196,7 +203,9 @@ class ReportComponent(Subsection):
         super().__init__(title=title, numbering=numbering, label=label, **kwargs)
         CurrentContainer(self)
         
-
+        if self.title is not None:
+            ip_display(IPMarkdown(f'## {self.title}'))
+        
         self.append_elements()
         
     def append_elements(self):
