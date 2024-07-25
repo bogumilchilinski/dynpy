@@ -1452,14 +1452,32 @@ class ODESystem(AnalyticalSolution):
         
 
         diffs = self._fode_dvars.diff(self.ivar)
+    
         
         if diffs == self.lhs:
             return self.copy()
         else:
-            #display(self.lhs - self.rhs,diffs)
-            rhs_odes_dict=solve(self.lhs - self.rhs,diffs)
-            rhs_odes_mat = Matrix([rhs_odes_dict[coord]  for coord in diffs])
-            #display(rhs_odes_mat)
+            
+            free_terms = self._free_component()
+            
+            diffs = self._highest_diff
+            
+            if diffs == self.lhs:
+                odes_rhs =  self.rhs
+            else: #nonlinear cases have to be implemented
+                diff_coeffs_mat=self.lhs.jacobian(diffs)
+
+                odes_rhs = diff_coeffs_mat.inv()*free_terms
+            
+            rhs_odes_mat = odes_rhs
+        
+            display(self.lhs - self.rhs,diffs)
+            # rhs_odes_dict=solve(self.lhs - self.rhs,diffs)
+            # rhs_odes_mat = Matrix([rhs_odes_dict[coord]  for coord in diffs])
+            display(rhs_odes_mat)
+            
+
+            
             
             new_sys = type(self)._constructor( diffs,
                                             dvars=self.dvars,
@@ -1533,15 +1551,20 @@ class ODESystem(AnalyticalSolution):
         
         fode = FirstOrderLinearODESystem.from_ode_system(self)
         
-        aux_mat=fode._fundamental_matrix
-        # print(type(self))
+        # aux_mat=fode._fundamental_matrix
+        # # # print(type(self))
         # display(aux_mat)
         # display(aux_mat.det())
         
-        # print('det != 0 ')
-        # display(det(aux_mat)!=0)
+        # # print('det != 0 ')
+        # display(det(aux_mat).atoms(Function))
         
-        if det(aux_mat)!=0:
+        #if Heaviside in det(aux_mat).atoms():
+        aux_mat = Matrix([1])
+        
+        if det(aux_mat).has(self.ivar):
+            return fode
+        elif det(aux_mat)!=0:
             _solver = self._default_solver
             # print(_solver.__name__, ' used as solver')
             return _solver.from_ode_system(self)
@@ -1696,27 +1719,27 @@ class ODESystem(AnalyticalSolution):
         
     #     return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
     
-    def doit(self,**hints):
+    # def doit(self,**hints):
         
-        obj = super().doit(**hints)
-        obj._rhs = self.rhs.doit(**hints)
-        obj._dvars=self._dvars
-        obj._ivar = self.ivar
-        obj._ode_order = self.ode_order
+    #     obj = super().doit(**hints)
+    #     obj._rhs = self.rhs.doit(**hints)
+    #     obj._dvars=self._dvars
+    #     obj._ivar = self.ivar
+    #     obj._ode_order = self.ode_order
         
-        return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
+    #     return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
 
-    def expand(self,deep=True, modulus=None, power_base=True, power_exp=True,mul=True, log=True, multinomial=True, basic=True, **hints):
+    # def expand(self,deep=True, modulus=None, power_base=True, power_exp=True,mul=True, log=True, multinomial=True, basic=True, **hints):
         
 
-        obj = super().expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
-        obj=self.from_ode_system(self)
-        obj._rhs = self.rhs.expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
-        obj._dvars=self._dvars
-        obj._ivar = self.ivar
-        obj._ode_order = self.ode_order
+    #     obj = super().expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
+    #     obj=self.from_ode_system(self)
+    #     obj._rhs = self.rhs.expand(deep=deep, modulus=modulus, power_base=power_base, power_exp=power_exp,mul=mul, log=log, multinomial=multinomial, basic=basic,**hints)
+    #     obj._dvars=self._dvars
+    #     obj._ivar = self.ivar
+    #     obj._ode_order = self.ode_order
         
-        return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
+    #     return obj.set_simp_deps(self._simp_dict,self._callback_dict,inplace=True)
     
     
     def copy(self):
@@ -2309,7 +2332,15 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
     @cached_property
     def _fundamental_matrix(self):
         
-        return self._to_rhs_ode().rhs.jacobian(self.dvars)
+        CodeFlowLogger(self._to_rhs_ode().rhs,"_to_odes_rhs",self)  
+        
+        CodeFlowLogger(self.rhs,"odes matrix lhs",self)       
+        
+        A = -self._to_rhs_ode().rhs.jacobian(self.dvars)
+
+        CodeFlowLogger(A,"fundamental_matrix",self)
+        
+        return A
         #return self.odes_rhs.jacobian(self.dvars)
     
     
