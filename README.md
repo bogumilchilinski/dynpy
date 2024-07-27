@@ -12,7 +12,7 @@ There are four main parts of the entire project:
 
 - reporting module.
 
-Using the code below in Jupyter enviroment on Ongoing Project we can learn more about how to and what to use Python in engineering calculations:
+Using the code below in Jupyter enviroment on [Free Access Project](https://cocalc.com/app?project-invite=hXnPFLqokQsoK6TG) <- ([CLICK LINK](https://cocalc.com/app?project-invite=hXnPFLqokQsoK6TG)) we can learn more about how to and what to use Python in engineering calculations:
 
     from dynpy.utilities.documents.document import IntroToCocalcGuide, UsageOfDynamicSystemsGuide
     IntroToCocalcGuide();
