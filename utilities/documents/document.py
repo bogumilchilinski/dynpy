@@ -92,7 +92,7 @@ Examplary setup is as follows:
 
     guide_name = './output/report_name' #path for report file 
 
-    oc = Guide(guide_name)
+    doc = Guide(guide_name)
     doc.append(sec_text) # adding certain sections
     doc.append(sec_formula)
     doc.append(sec_picture)
@@ -170,7 +170,7 @@ display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of pict
 
 guide_name = './output/report_name' #path for report file 
 
-oc = Guide(guide_name)
+doc = Guide(guide_name)
 doc.append(sec_text) # adding certain sections
 doc.append(sec_formula)
 doc.append(sec_picture)
@@ -1196,6 +1196,23 @@ class BasicsOfReportingGuide(UsageOfDynamicSystemsGuide):
             guide_comp.DynamicSystemCallComponent,
             guide_comp.SimulationsComponent,
             guide_comp.SimulationReportComponent,
+            guide_comp.ReportingModuleIntroComponent,
+            guide_comp.LibrariesImportComponent,
+            guide_comp.DocumentComponent,
+            guide_comp.CurrentContainerComponent,
+            guide_comp.ReportTextComponent,
+#             guide_comp.
+            guide_comp.PictureComponent,
+            guide_comp.SympyFormulaComponent,
+            guide_comp.DocumentGenerationComponent,
+            guide_comp.PredefinedSectionComponent,
+#             guide_comp.
+            guide_comp.TablesCreationComponent,
+            guide_comp.AutomarkerIntroComponent ,
+            guide_comp.CodeEmbeddingComponent ,
+#             guide_comp.
+            guide_comp.UnitRegistryIntroComponent
+#             guide_comp.
 
         ]
 
@@ -1268,4 +1285,51 @@ class ResearchProjectGuidelines(UsageOfDynamicSystemsGuide):
         ]
 
         return comp_list
+    
+class BasicsOfReportComponentImplementationGuide(UsageOfDynamicSystemsGuide):
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+
+            guide_comp.ReportCompImplementationComponent,
+            guide_comp.ReportCompImplementationIssueComponent
+
+        ]
+
+        return comp_list
+    
+    @property
+    def default_reported_object(self):
+
+        return None
+    
+class GithubSynchroGuide(UsageOfDynamicSystemsGuide):
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+
+            guide_comp.GitSynchroPanelAccessComponent,
+            guide_comp.GitSynchroIntroComponent,
+
+
+        ]
+
+        return comp_list
+    
+    @property
+    def default_reported_object(self):
+
+        default_data = {'classname':'GitSynchroPanelAccessComponent',
+                       'module':'guide.en.py',
+                       'field':'guide or report',
+                       'target':'`ODESystem` class',
+                       'issue_no':123,
+                       }
+
+
+        return default_data
     

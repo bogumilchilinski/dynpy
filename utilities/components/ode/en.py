@@ -1533,3 +1533,244 @@ display(odesys)
 
         display(ReportText(f'After executing the instruction, we have a ready instance of the class object {cls_name}'))
 
+class ODERootsComponent(ReportComponent):
+    
+    title="Creating roots of the characteristic equation"
+
+    def append_elements(self):
+        system = self.reported_object
+#         _roots = system.fundamental_matrix
+        _roots = system._as_fode()._fundamental_matrix
+
+
+        display(ReportText(f'Creating a matrix of roots from a called out class :'))
+        display(SympyFormula(_roots))
+        
+steady_code='''
+from dynpy.models.odes.numerical import *
+system=LinearFirstOrder.from_reference_data()
+system.steady_solution
+'''    
+        
+class ODESteadySolutionComponent(ReportComponent):
+    
+    title="Wyznaczanie rozwiązania ogólnego";
+
+    @property
+    def import_text(self):
+
+        return "Aby zaimportować przykładowy system  i wywołać rozwiązanie szczególne należy wywołać następujący kod:"
+
+
+    @property
+    def body_text(self):
+
+        return "Rozwiązanie szczególne przyjmuje postać:"
+
+    def append_elements(self):
+        
+        system = self.reported_object
+        t=system.ivar
+        dvars=system.dvars
+
+        display(ReportText(self.import_text))
+        display(ObjectCode(steady_code))
+
+        display(ReportText(self.body_text))
+
+        display((SympyFormula(system.steady_solution)))
+        
+general_code='''
+from dynpy.models.odes.numerical import *
+system=LinearFirstOrder.from_reference_data()
+system.general_solution
+'''            
+class ODEGeneralSolutionComponent(ReportComponent):
+    
+    title="Determining the general solution";
+
+    @property
+    def import_text(self):
+
+        return "To import the sample system and call the generic solution, call the following code:"
+
+
+    @property
+    def body_text(self):
+
+        return "The general solution takes the form:"
+
+    def append_elements(self):
+        
+        system = self.reported_object
+        t=system.ivar
+        dvars=system.dvars
+
+        display(ReportText(self.import_text))
+        display(ObjectCode(general_code))
+
+        display(ReportText(self.body_text))
+
+        display((SympyFormula(system.general_solution)))
+        
+import_code='''
+from dynpy.models.odes.numerical import *
+
+system=LinearFirstOrder.from_reference_data()
+system.as_eq()  #returns equation
+system.as_matrix()  #returns matrix
+system.as_iterable()  #returns list
+system.as_dict()  #returns dictionary
+system.as_eq_list()  #returns an equation in the form of a list
+system._as_fode()  #returns a first-order equation
+
+'''
+
+class ODESystemRepresentationComponent(ReportComponent):
+    
+    title="Diverse representations of the system"
+
+    @property
+    def import_text(self):
+
+        return "Methods that enable a variety of system representations should be called as follows:"
+
+
+    def append_elements(self):
+
+        system = self.reported_object
+        t=system.ivar
+        dvars=system.dvars
+
+        display(ReportText(self.import_text))
+        display(ObjectCode(import_code))
+
+        display(ReportText(r'Method .as_eq()'))
+        display((system.as_eq()))
+
+        display(ReportText(r'Method .as_matrix()'))
+        display((system.as_matrix()))
+
+        display(ReportText(r'Method .as_iterable()'))
+        display((system.as_iterable()))
+
+        display(ReportText(r'Method .as_dict()'))
+        display((system.as_dict()))
+
+        display(ReportText(r'Method .as_eq_list()'))
+        display((system.as_eq_list()))
+
+        display(ReportText(r'Method ._as_fode()'))
+        display((system._as_fode()))
+        
+class ODESystemAdditionComponent(ODESystemOperations):
+    
+    title="Adding two ODESystem Matrix"
+
+    def append_elements(self):
+            from sympy import Symbol, Function, Matrix
+            
+            systems = self.reported_object
+            l = len(systems)
+            matrix_add = self.get_zero_ode_sys()
+            
+            matrix_mat_lhs = Matrix([0])
+            matrix_mat_rhs = Matrix([0])
+            
+            count = 1
+            display(ReportText('#### Checking the sum of matrices:'))
+            for ode_sys in systems:
+                display(ReportText(f'Matrix {count}'))
+                display(ode_sys)
+                count += 1
+                matrix_add += ode_sys
+                
+                matrix_mat_lhs += ode_sys.lhs
+                matrix_mat_rhs += ode_sys.rhs
+                
+            display(ReportText('ODEsystem matrix sum'))
+            display(matrix_add)
+            display(ReportText('Sympy matrix sum'))
+            display(Eq(matrix_mat_lhs, matrix_mat_rhs, evaluate=False))
+            
+class ODESystemSubtractionComponent(ODESystemOperations):
+    
+    title="Subtractiing two ODESystem Matrix"
+
+    def append_elements(self):
+            systems = self.reported_object
+            l = len(systems)
+            matrix_sub = systems[0]
+            
+            matrix_mat_lhs = systems[0].lhs
+            matrix_mat_rhs = systems[0].rhs
+            
+            display(ReportText('#### Checking the difference of a matrix:'))
+            display(ReportText(f'Matrix 1'))
+            display(systems[0])
+            count = 2
+            for ode_sys in systems[1:]:
+                display(ReportText(f'Matrix {count}'))
+                display(ode_sys)
+                count += 1
+                matrix_sub -= ode_sys
+                
+                matrix_mat_lhs -= ode_sys.lhs
+                matrix_mat_rhs -= ode_sys.rhs
+                
+            display(ReportText('ODEsystem matrix difference'))
+            display(matrix_sub)
+            display(ReportText('Sympy matrix difference'))
+            display(Eq(matrix_mat_lhs, matrix_mat_rhs, evaluate=False))
+            
+            
+class ODESystemMultiplicationComponent(ODESystemOperations):
+    
+    title="Multiplying two ODESystem Matrix"
+
+    def append_elements(self):
+            systems = self.reported_object
+            l = len(systems)
+            matrix_mul = 1
+            count = 1
+            
+            matrix_mat_lhs = Matrix([1])
+            matrix_mat_rhs = Matrix([1])
+            
+            display(ReportText('#### Checking the product of matrices:'))
+            for ode_sys in systems:
+                display(ReportText(f'Matrix {count}'))
+                display(ode_sys)
+                count += 1
+                matrix_mul *= ode_sys
+                
+                matrix_mat_lhs *= ode_sys.lhs
+                matrix_mat_rhs *= ode_sys.rhs
+                
+            display(ReportText('ODEsystem matrix product'))
+            display(matrix_mul)
+            display(ReportText('Sympy matrix product'))
+            display(Eq(matrix_mat_lhs, matrix_mat_rhs, evaluate=False))
+            
+class ODESystemExponentiationComponent(ReportComponent):
+    title="Exponentiation of ODESystem Matrix"
+
+    def append_elements(self):
+        system = self.reported_object
+        ode_sys = system
+        
+        display(ReportText('#### Checking the power of a matrix:'))
+        display(ReportText('Matrix'))
+        display(ode_sys)
+
+        
+        display(ReportText('ODEsystem Matrix power'))
+        
+        matrix_exp = ode_sys * ode_sys
+        display(matrix_exp)
+        
+        matrix_mat_lhs = ode_sys.lhs * ode_sys.lhs
+        matrix_mat_rhs = ode_sys.rhs * ode_sys.rhs
+        
+        display(ReportText('Sympy matrix power'))
+        display(Eq(matrix_mat_lhs, matrix_mat_rhs, evaluate=False))

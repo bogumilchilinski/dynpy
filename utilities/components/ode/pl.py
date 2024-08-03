@@ -1397,7 +1397,7 @@ class ODESystemAdditionComponent(ODESystemOperations):
             matrix_mat_rhs = Matrix([0])
             
             count = 1
-            display(ReportText('#### Sprawdzanie sumy dwóch macierzy:'))
+            display(ReportText('#### Sprawdzanie sumy macierzy:'))
             for ode_sys in systems:
                 display(ReportText(f'Macierz {count}'))
                 display(ode_sys)
@@ -1425,7 +1425,7 @@ class ODESystemSubtractionComponent(ODESystemOperations):
             matrix_mat_lhs = systems[0].lhs
             matrix_mat_rhs = systems[0].rhs
             
-            display(ReportText('#### Sprawdzanie różnicy dwóch macierzy:'))
+            display(ReportText('#### Sprawdzanie różnicy macierzy:'))
             display(ReportText(f'Macierz 1'))
             display(systems[0])
             count = 2
@@ -1456,7 +1456,7 @@ class ODESystemMultiplicationComponent(ODESystemOperations):
             matrix_mat_lhs = Matrix([1])
             matrix_mat_rhs = Matrix([1])
             
-            display(ReportText('#### Sprawdzanie iloczynu dwóch macierzy:'))
+            display(ReportText('#### Sprawdzanie iloczynu macierzy:'))
             for ode_sys in systems:
                 display(ReportText(f'Macierz {count}'))
                 display(ode_sys)

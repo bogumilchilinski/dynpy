@@ -2157,7 +2157,8 @@ class ODESystem(AnalyticalSolution):
 
     def _ode_solution(self):
         dvars=self.dvars
-        return ODESolution(dvars,dsolve(self.odes[0],self.dvars[0]).rhs)
+        dsol=dsolve(self.odes[0],self.dvars[0]).rhs
+        return ODESolution(dvars,dvars,dsol)
 
     def _get_dvars_symbols(self):
         system=self
@@ -4558,7 +4559,8 @@ class BernoulliODE(ODESystem):
 
     def _ode_solution(self):
         dvars=self.dvars
-        return ODESolution.from_vars_and_rhs(dvars,dsolve(self.odes[0],self.dvars[0]).rhs)
+        #return ODESolution.from_vars_and_rhs(dvars,dsolve(self.odes[0],self.dvars[0])[0].rhs)
+        return ODESolution(dvars,dvars,dsolve(self.odes[0],self.dvars[0])[0].rhs)
 
     @cached_property
     def _general_solution(self):

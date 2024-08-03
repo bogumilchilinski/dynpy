@@ -1261,7 +1261,7 @@ df
 
         display(ReportText('Adding a line using the loc method'))
         display(GuideCode('''
-df.loc['Warsaww',:]=[4000,600000,2500,300,120]
+df.loc['Warsaw',:]=[4000,600000,2500,300,120]
 df
         '''))
         display(x10.reported())
@@ -1271,7 +1271,7 @@ df
         display(x11.reported())
 
         display(ReportText('Set_axis method for columns'))
-        display(GuideCode('''df.set_axis([a,b,c,d,e],axis='columns')'''))
+        display(GuideCode('''df.set_axis(['a','b','c','d','e'],axis='columns')'''))
         display(x12.reported())
 
         display(ReportText('Rename method - renames columns and rows'))
@@ -1922,240 +1922,22 @@ r0 = Symbol('r0', positive=True)
 phi0 = dynamicsymbols('phi0')
 ''')
 
-innit_str=(
+#innit_str=(
 '''
 def __init__(self,
              m=None,
              g=None,
-             c=None,
-             r=None,
-             phi=None,
-             ivar=Symbol('t'),
-             **kwargs):
+cLatexDataFrame.set_default_units(unit_dict)
 
-    if m is not None: self.m = m
-    if g is not None: self.g = g
-    if c is not None: self.c = c
-    if r is not None: self.r = r
-    if phi is not None: self.phi = phi
-    self.ivar = ivar
+tabelka=LatexDataFrame.formatted(
+    data=dane,
+    index=['Value']).applymap(lambda x: f'${latex(x)}$').rename_axis(
+        'Symbol',
+        axis=1)
 
-    self.qs = [self.phi]
+display(tabelka.reported(caption='Data given in the exercise'))
 
-    self._init_from_components(**kwargs)
-''')
-
-component_str=(
 '''
-@property
-def components(self):
-
-    components = {}
-
-
-    self._mass_x = MaterialPoint(self.m,
-                                 pos1=self.r * sin(self.phi),
-                                 qs=self.qs)
-    self._mass_y = MaterialPoint(self.m,
-                                 pos1=self.r * cos(self.phi),
-                                 qs=self.qs)
-
-    self._gravity_ = GravitationalForce(self.m,
-                                        self.g,
-                                        pos1=self.r * cos(self.phi),
-                                        qs=self.qs)
-
-
-
-    components['_mass_x']=self._mass_x
-    components['_mass_y']=self._mass_y
-    components['_gravity_']=self._gravity_
-
-
-    return components
-''')
-
-
-symb_desc_str=(
-'''
-def symbols_description(self):
-    self.sym_desc_dict = {
-        self.m: r'Mass',
-        self.g: r'Gravity constant',
-        self.c: r'',
-    }
-
-    return self.sym_desc_dict
-''')
-
-def_data_str=(
-'''
-def get_default_data(self):
-
-    m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
-
-    default_data_dict = {
-        self.m: [m0 * no for no in range(1, 8)],
-        self.c: [c0 * no for no in range(1, 8)],
-        self.r: [r0 * no for no in range(1, 8)],
-        self.phi: [phi0 * no for no in range(1, 8)],
-    }
-
-    return default_data_dict
-''')
-
-num_data_str=(
-'''
-def get_numerical_data(self):
-
-    m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
-
-    default_data_dict = {
-        self.m: [m0 * no for no in range(1, 8)],
-        self.c: [c0 * no for no in range(1, 8)],
-        self.r: [r0 * no for no in range(1, 8)],
-        self.phi: [phi0 * no for no in range(1, 8)],
-    }
-
-    return default_data_dict
-''')
-
-dict_str=(
-'''
-def unit_dict(self):
-
-    from pint import UnitRegistry
-    ureg=UnitRegistry()
-
-    unit_dict = {
-        self.m: ureg.kilogram,
-        self.g: ureg.meter/ureg.second/ureg.second,
-        self.c: ureg.kilogram/ureg.second,
-        self.r: ureg.meter,
-        self.phi: ureg.radian,
-        self.c0: ureg.kilogram/ureg.second,
-        self.r0: ureg.meter,
-        self.phi0:  ureg.radian
-    }
-    return unit_dict
-''')
-
-full_class_str=(
-'''
-from dynpy.models.mechanics.principles import ComposedSystem
-from sympy import *
-
-class MyMaterialPointMovement(ComposedSystem):
-
-    m = Symbol('m', positive=True)
-    g = Symbol('g', positive=True)
-    c = Symbol('c', positive=True)
-    r = Symbol('r', positive=True)
-    phi = dynamicsymbols('phi')
-
-    c0 = Symbol('c0', positive=True)
-    r0 = Symbol('r0', positive=True)
-    phi0 = dynamicsymbols('phi0')
-
-    def __init__(self,
-                 m=None,
-                 g=None,
-                 c=None,
-                 r=None,
-                 phi=None,
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        if m is not None: self.m = m
-        if g is not None: self.g = g
-        if c is not None: self.c = c
-        if r is not None: self.r = r
-        if phi is not None: self.phi = phi
-        self.ivar = ivar
-
-        self.qs = [self.phi]
-
-        self._init_from_components(**kwargs)
-
-    @property
-    def components(self):
-
-        components = {}
-
-
-        self._mass_x = MaterialPoint(self.m,
-                                     pos1=self.r * sin(self.phi),
-                                     qs=self.qs)
-        self._mass_y = MaterialPoint(self.m,
-                                     pos1=self.r * cos(self.phi),
-                                     qs=self.qs)
-
-        self._gravity_ = GravitationalForce(self.m,
-                                            self.g,
-                                            pos1=self.r * cos(self.phi),
-                                            qs=self.qs)
-
-
-      
-        components['_mass_x']=self._mass_x
-        components['_mass_y']=self._mass_y
-        components['_gravity_']=self._gravity_
-     
-
-        return components
-
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.m: r'Mass',
-            self.g: r'Gravity constant',
-            self.c: r'',
-        }
-
-        return self.sym_desc_dict
-
-    def get_default_data(self):
-
-        m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
-
-        default_data_dict = {
-            self.m: [m0 * no for no in range(1, 8)],
-            self.c: [c0 * no for no in range(1, 8)],
-            self.r: [r0 * no for no in range(1, 8)],
-            self.phi: [phi0 * no for no in range(1, 8)],
-        }
-
-        return default_data_dict
-
-    def get_numerical_data(self):
-
-        m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
-
-        default_data_dict = {
-            self.m: [m0 * no for no in range(1, 8)],
-            self.c: [c0 * no for no in range(1, 8)],
-            self.r: [r0 * no for no in range(1, 8)],
-            self.phi: [phi0 * no for no in range(1, 8)],
-        }
-
-        return default_data_dict
-        
-    def unit_dict(self):
-
-        from pint import UnitRegistry
-        ureg=UnitRegistry()
-
-        unit_dict = {
-            self.m: ureg.kilogram,
-            self.g: ureg.meter/ureg.second/ureg.second,
-            self.c: ureg.kilogram/ureg.second,
-            self.r: ureg.meter,
-            self.phi: ureg.radian,
-            self.c0: ureg.kilogram/ureg.second,
-            self.r0: ureg.meter,
-            self.phi0:  ureg.radian
-        }
-        return unit_dict        
-''')
 
 class DynSysImplementationComponent(ReportComponent):
     
@@ -2329,3 +2111,1133 @@ class InterimIssuesComponent(InterimScheduleComponent):
         display(ObjectCode(project_issue_desc_str))
     
     
+    
+reportcomp_issue_title_str = """
+Implementation of `{classname}` class that creates a part of a report
+"""
+        
+reportcomp_issue_desc_str = """
+Class is to implement in `{module}` module that creates a part (reporting component - formally child of `ReportComponent` class) of {field} for {target}.
+"""
+    
+class ReportCompImplementationIssueComponent(ReportComponent):
+    
+    title="Issue na implementację komponentów raportujących"
+
+
+
+    def append_elements(self):
+        
+        classname = self.reported_object['classname'] # it's useless in the case of permanent content - it's commented for future usage
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+
+
+        display(ReportText("Przykładowy tekst, który pozwoli na sprawne przygotowywanie issue ma następującą formę:"))
+
+        display(ReportText("# Title: "))
+        display(ObjectCode(reportcomp_issue_title_str.format(classname=classname)))
+
+        display(ReportText("# Description: "))
+        display(ObjectCode(reportcomp_issue_desc_str.format(classname=classname,module=class_module,field=class_field,target=target)))
+        
+        
+rep_comp_call = """
+from dynpy.utilities.components.guides.en import ReportComponent
+from dynpy.utilities.report import ReportText, Markdown, Picture, SympyFormula, Frame, ObjectCode, Block, AlertBlock, ExampleBlock, GuideCode
+
+class {classname}(ReportComponent):
+"""
+
+rep_comp_call_with_pass = rep_comp_call + '\n \t pass'
+
+
+title_call_str="""
+    title="Implementacja komponentów raportujących"
+"""
+
+append_elem_str ="""
+
+    @property
+    def reported_object(self):
+
+
+        default_data = {'classname':'ReportingModuleIntroComponent',
+                       'module':'guide.en.py',
+                       'field':'guide or report',
+                       'target':'`ODESystem` class',
+                       'issue_no':359,
+                       }
+
+
+        if isinstance(self._reported_object, dict):
+            return {**default_data,**self._reported_object}
+
+        elif isinstance(self._reported_object, str):
+            return {**default_data,'classname':self._reported_object}
+
+        elif self._reported_object is None:
+            return default_data
+
+        else:
+            return self._reported_object
+
+
+    @reported_object.setter
+    def reported_object(self, obj):
+        self._reported_object=obj
+
+
+    def append_elements(self):
+        #variables provided by `reported_object` arg
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+    
+        #implement reporting activieties here
+"""
+
+rep_obj_str ="""
+    #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+"""
+
+
+
+
+class ReportCompImplementationComponent(ReportComponent):
+    
+    title="Implementacja komponentów raportujących"
+
+
+    @property
+    def reported_object(self):
+
+        
+        default_data = {'classname':'ReportingModuleIntroComponent',
+                       'module':'guide.en.py',
+                       'field':'guide or report',
+                       'target':'`ODESystem` class',
+                       'issue_no':359,
+                       }
+
+        
+        if isinstance(self._reported_object, dict):
+            return {**default_data,**self._reported_object}
+
+        elif isinstance(self._reported_object, str):
+            return {**default_data,'classname':self._reported_object}
+        
+        elif self._reported_object is None or not isinstance(self._reported_object, dict):
+            return default_data
+
+        else:
+            return self._reported_object
+
+
+    @reported_object.setter
+    def reported_object(self, obj):
+        self._reported_object=obj
+    
+    
+    def append_elements(self):
+        
+        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+
+        #przekopiowac tu fragment kodu z guide pamietajac o indentach
+        display(ReportText("Tworzenie komponentu należy zacząć od wybrania nazwy opisującej nasz komponent raportujący oraz zadeklarowania go w odpowiedni sposób, który został przedstawiony poniżej:")) #itp
+        display(GuideCode(rep_comp_call_with_pass.format(classname=classname)))
+        display(ReportText('Następnie deklarujemy nazwę komponentu, która będzie wyświetlana jako nagłówek.'))
+        display(GuideCode(title_call_str))
+        
+        display(ReportText('Kolejnym krokiem tworzenia komponentu, jest zadeklarowanie metody `append_elements`, która zawiera zasadniczą część komponentu.'))
+        display(GuideCode(append_elem_str))
+        display(ReportText('Dodatkowo na początku tej metody należy umieścić następujący kod, który w razie potrzeby pozwala na to aby komponent obsługiwał dowolny system dynamiczny.'))
+        display(GuideCode(rep_obj_str))
+        
+        display(ReportText('Ostatecznie kod implementacji całego komponentu ma następującą postać:'))
+        display(GuideCode(rep_comp_call.format(classname=classname)   + title_call_str + append_elem_str  ))
+        
+        
+######### GUIDE REPORTING COMPONENTS
+######### GUIDE REPORTING COMPONENTS
+######### GUIDE REPORTING COMPONENTS
+
+doc_gen_str =(
+'''
+
+doc_final = MechanicalCase('./output/nazwa_dokumentu',documentclass=NoEscape('article'),document_options=['a4paper','fleqn'],lmodern=False)
+doc_final.packages.append(Package('natbib', options=['numbers']))
+doc_final.packages.append(Package('booktabs'))
+doc_final.packages.append(Package('float'))
+doc_final.packages.append(Package('siunitx'))
+
+
+doc_final.append(sekcja)
+doc_final.append(sekcja1)
+doc_final.append(sekcja2)
+doc_final.append(sekcja3)
+doc_final.append(sekcja4)
+doc_final.append(sekcja5)
+
+doc_final.generate_pdf()
+
+''')
+
+class DocumentGenerationComponent(ReportComponent):
+
+    title="Generowanie dokumentu"
+
+
+    @property
+    def reported_object(self):
+
+
+        default_data = {'classname':'ReportingModuleIntroComponent',
+                       'module':'guide.en.py',
+                       'field':'guide or report',
+                       'target':'`ODESystem` class',
+                       'issue_no':359,
+                       }
+
+
+        if isinstance(self._reported_object, dict):
+            return {**default_data,**self._reported_object}
+
+        elif isinstance(self._reported_object, str):
+            return {**default_data,'classname':self._reported_object}
+
+        elif self._reported_object is None:
+            return default_data
+
+        elif self._reported_object is None or not isinstance(self._reported_object, dict):
+            return default_data
+        
+        else:
+            return self._reported_object
+
+
+    @reported_object.setter
+    def reported_object(self, obj):
+        self._reported_object=obj
+
+
+    def append_elements(self):
+        #variables provided by `reported_object` arg
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+        
+       
+        #implement reporting activieties here
+        
+        display(ReportText('Ostatni krok to zaapendowanie sekcji i utworzenie dokumentu pdf :'))
+        display(GuideCode(f'{doc_gen_str}'))
+
+
+unit_registry_str = """        
+
+
+t=Symbol('t')
+r=Symbol('r', positive=True)
+a=Symbol('a', positive=True)
+b=Symbol('b', positive=True)
+h=Symbol('h', positive=True)
+vphi = Function('varphi')(t)
+
+dane={
+    vphi.diff():25,
+    r:0.15,
+    a:0.2,
+    b:0.6,
+    h:0.4,
+}
+
+unit_dict = {
+            t:ureg.second,
+            r: ureg.meter,
+            h: ureg.meter,
+            a: ureg.meter,
+            b:ureg.meter,
+            vphi.diff(t):ureg.rad/ureg.sec,
+   }
+
+LatexDataFrame.set_default_units(unit_dict)
+
+tabelka=LatexDataFrame.formatted(
+data=dane,
+index=['Value']).applymap(lambda x: f'${latex(x)}$').rename_axis(
+    'Symbol',
+    axis=1)
+
+display(tabelka.reported(caption='Data given in the exercise'))
+
+"""
+
+class UnitRegistryIntroComponent(DocumentGenerationComponent):
+
+    title="Rejestr jednostek"
+
+
+
+    def append_elements(self):
+        #variables provided by `reported_object` arg
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+
+        display(ReportText('To display the units of symbols used in the report in tables and charts, you must define a register of units:'))
+
+
+        display(GuideCode(f'{unit_registry_str}'))
+
+container_code='''
+nazwa_sekcji=Section('Tytuł')
+CurrentContainer(nazwa_sekcji)
+'''
+class CurrentContainerComponent(DocumentGenerationComponent):
+
+    title="Klasa CurrentContainer i jej zastosowanie"
+
+
+
+    def append_elements(self):
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+        display(ReportText('Wszystko co chcemy, aby znalazło się w naszym raporcie musi być wrzucone do sekcji, które potem zostaną dodane (*zaapendowane*) do naszego dokumentu. Aby utworzyć sekcję należy wywołać kod:'))
+        display(ObjectCode(container_code))
+        display(ReportText('Za pomocą **CurrentContainer** wszystko zostanie zebrane do naszej sekcji do momentu utworzenia nowej. (Zaleca się podział 1 sekcja - 1 cela w jupiterze).'))
+        
+        from dynpy.models.mechanics.engine import Engine
+        
+from dynpy.utilities.components.mech.en import KineticEnergyComponent, KineticEnergySymPyCodeComponent
+
+
+SympyFormulaComponent_str='''
+from sympy import *
+
+    M = Symbol('M')
+
+    t = Symbol('t')
+
+    m_e = Symbol('m_e')
+
+    e = Symbol('e')
+
+    z = Function('z')
+
+    varphi = Function('varphi')
+
+    Ek = M*Derivative(z(t), t)**2/2 + m_e*(e*sin(varphi(t))*Derivative(varphi(t), t) - Derivative(z(t), t))**2/2
+
+    display(Eq(Symbol('T'),Ek))
+'''
+
+
+class SympyFormulaComponent(DocumentGenerationComponent):
+
+    title = "Klasa SympyFormula i jej zastosowanie"
+
+
+
+    def append_elements(self):
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+
+        #implement reporting activieties here
+        display(ReportText('Przykładowe zastosowanie komponentu do obliczeń symbolicznych, na przykładzie energii kinetycznej:'))
+        display(GuideCode(f'{SympyFormulaComponent_str}'))
+
+
+
+Predefined_code='''
+
+rozdzial = KineticEnergyComponent(Engine())
+rozdzial_kod = KineticEnergySymPyCodeComponent(Engine())
+    
+doc_final.append(rozdzial)
+doc_final.append(rozdzial_kod)
+
+'''
+
+
+class PredefinedSectionComponent(DocumentGenerationComponent):
+
+    title="Dodawanie predefiniowanej sekcji"
+
+
+
+    def append_elements(self):
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+    
+        
+        display(ReportText('Istnieje również możliwość wprowadzenia zpredefiniowanych sekcji. Możemy posłużyć się istniejącym komponentem dynamicznym na przykładzie silnika. Wykorzystamy zarówno opis teoretyczny jaki i reprezentację kodu służącą do wygenerowania równania. Aby użyć ich w dokumencie musimy wywołać te sekcje:'))
+        from dynpy.models.mechanics import Engine
+        display(ObjectCode(Predefined_code))
+        display(KineticEnergyComponent(Engine()))
+        display(KineticEnergySymPyCodeComponent(Engine()))
+    
+    
+
+    
+    
+
+    
+
+doc_comp_str = (
+'''
+
+doc = TikzCaSCStandalone(default_filepath='./output/Tytul_Dokumentu')
+Picture._default_width = NoEscape('0.8\\columnwidth')
+
+''')
+class DocumentComponent(DocumentGenerationComponent):
+
+    title="Tworzenie dokumentu"
+
+
+    def append_elements(self):
+        #variables provided by `reported_object` arg
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+    
+        #implement reporting activieties here
+        display(ReportText('Aby stworzyć dokument i nadać mu nazwę należy wywołać kod, jak w komórce nr 2 jupytera, tj. cell [2]:'))
+        display(GuideCode(f'{doc_comp_str}'))
+        
+
+
+
+aut_indx_str1 = (
+'''
+
+x=Symbol('x')
+y=Symbol('y')
+eq=Eq(y,2*x)
+display(ReportText('.. rozpatrujemy następujące równanie'))
+display(SympyFormula(eq))
+display(ReportText(f'Po wstawieniu danych do równania ({AutoMarker(eq)}) otrzymamy ...]'))
+
+''')
+aut_indx_str2 = (
+'''
+
+obrazek=Picture('./dynpy/models/images/engine.png')
+display(ReportText('... rozpatrujemy następujący mechanizm'))
+display(obrazek)
+display(ReportText(f'Jak w wcześniej przedstawionym schemacie ({AutoMarker(obrazek)}) możemy zauważyć ...'))
+
+''')
+aut_indx_str3 = (
+'''
+phi=Function('phi')(t)
+r=Symbol('r', positive=True)
+a=Symbol('a', positive=True)
+b=Symbol('b', positive=True)
+h=Symbol('h', positive=True)
+omg=Symbol('omega')
+ob=Symbol('|OB|')
+dane={
+    phi:pi/2,
+    omg:25,
+    r:0.15,
+    a:0.2,
+    b:0.6,
+    h:0.4,
+    ob:0.42
+}
+tabelka=LatexDataFrame.formatted(
+        data=dane,
+        index=['Wartość']).applymap(lambda x: f'${latex(x)}$').rename_axis(
+            'Symbol',
+            axis=1).reported(caption='Dane z zadania')
+display(ReportText('... rozpatrujemy następujące dane'))
+display(tabelka)
+display(ReportText(f'Podstawiając dane podane w zadaniu ({AutoMarker(tabelka)}) możemy otrzymać wynik ...'))
+
+''')
+
+
+
+class AutomarkerIntroComponent(DocumentGenerationComponent):
+
+    title="Wstęp do wykorzystywania narzędzia AutoMarker"
+
+
+    def append_elements(self):
+        #variables provided by `reported_object` arg
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+    
+        #implement reporting activieties here
+        display(ReportText('Aby w raporcie referować do wcześniej wyświetlanych równań/obrazków/tabelek używamy narzędzia AutoMarker. W przypadku równania         przykładowy kod z użyciem tego narzędzia tworzy się następująco: Na początek należy zdefiniować potrzebne symbole oraz równanie, a następnie               wyświetlić je. Ważne jest to, aby równanie zostało zdefiniowane przed użyciem odniesienia. Następnie, aby zareferować do wcześniej wyświetlonego           równania używamy AutoMarkera. Przkładowy kod pokazany został poniżej:'))
+        display(GuideCode(f'{aut_indx_str1}'))
+        display(ReportText(' W przypadku obrazka przykładowy kod z użyciem tego narzędzia tworzy się następująco: Na początek należy zdefiniować zmienną           która zostanie przypisana do naszego obrazka stworzonego za pomocą klasy Picture (podając odpowiednią ścieżkę), a następnie wyświetlić ją. Ważne           jest to, aby zmienna została zdefiniowana przed użyciem odniesienia. Następnie, aby zareferować do wcześniej wyświetlonego obrazka ponownie używamy         AutoMarkera w ten sam sposób. Przykładowy kod pokazany został poniżej:'))
+        display(GuideCode(f'{aut_indx_str2}'))
+        display(ReportText(' W przypadku tabelki przykładowy kod z użyciem tego narzędzia tworzy się następująco: Na początek należy utowrzyć zmienną która         zostanie przypisana do naszej tabelki(przykładowa tabelka pokazana sekcje wyżej), a następnie wyświetlić ją. Ważne jest to, aby zmienna została             zdefiniowana przed użyciem odniesienia. Następnie, aby zareferować do wcześniej wyświetlonej tabelki ponownie używamy AutoMarkera w ten sam sposób.         Przykładowy kod pokazany został poniżej:'))
+        display(GuideCode(f'{aut_indx_str3}'))
+
+
+class PictureComponent(DocumentGenerationComponent):
+
+    title="Picture component implementation"
+
+
+
+    def append_elements(self):
+        #variables provided by `reported_object` arg
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+    
+        #implement reporting activieties here
+        #display(ReportText('Picture is a class that represents a figure environment'))
+        display(ReportText('''Picture is a class that represents a figure environment. To add picture to document simply call Picture() class. Possible argumnts in Picture class are:
+        \n path - define path to the picture
+        \n position - define picture positioning acording to latex 
+        \n width - define picture width in cm
+        \n height - define picture height in cm
+        \n caption - caption of the picture
+        \n Example picture class call: \n
+        '''))
+        display(ObjectCode('''Picture('pic.PNG', position = 'h', caption = 'Example text', height = '10', width = '20')'''))
+        pic = Picture('./dynpy/utilities/components/guides/images/1.png', caption = 'Example text', width = '10')
+        display(pic)
+
+
+
+CodeEmbeddingComponent_str1 =(
+'''
+
+display(ObjectCode(GeometrySceneDG))
+
+''')
+
+
+CodeEmbeddingComponent_str2 =(
+"""
+
+class GeometrySceneDG:
+
+
+    ax_2d = None
+    ax_3d = None
+
+    #def __init__(self,height=12,width=9,figsize=(12,9)):
+    def __init__(self, init_3d=(30, 10), height=12, width=16, figsize=(12, 9)):
+        
+        
+        
+        plt.figure(figsize=figsize)
+        ax_2d = plt.subplot(121)
+        ax_2d.set(ylabel=(r'<-x | z ->'), xlabel='y')
+
+        plt.xlim(0, width)
+        plt.ylim(-height, height)
+        plt.grid(True)
+
+        ax_2d.set_yticks(range(-12, 12, 1))
+        ax_2d.set_yticklabels(
+            list(map(lambda tick: str(abs(tick)), range(-12, 12, 1))))
+
+        ax_2d.set_xticks(range(0, 16, 1))
+        ax_2d.set_xticklabels(
+            list(map(lambda tick: str(abs(tick)), range(0, 16, 1))))
+
+        ax_3d = plt.subplot(122, projection='3d')
+        ax_3d.set(xlabel='x', ylabel='y', zlabel='z')
+
+        plt.xlim(0, 16)
+        plt.ylim(0, 16)
+
+        ax_3d.set_zlim(0, 16)
+
+        ax_3d.view_init(*init_3d)
+        plt.tight_layout()
+
+        self.__class__.ax_2d = ax_2d
+        self.__class__.ax_3d = ax_3d
+        self.__class__.size_3d=16
+
+""")
+
+class CodeEmbeddingComponent(DocumentGenerationComponent):
+
+    title="Obsadzanie kodu"
+
+
+
+    def append_elements(self):
+        #variables provided by `reported_object` arg
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+    
+    
+        display(ReportText('Klasa umożliwiająca dodanie sformatowanego fragmentu kodu pisanego programu. Jako przykład wykorzystana zostanie klasa **GeomerySceneDG** z biblioteki **dgeometry**.'))
+        display(GuideCode(f'{CodeEmbeddingComponent_str1}'))
+        display(GuideCode(f'{CodeEmbeddingComponent_str2}'))
+        
+ReportTextComponent_str=(
+'''
+display(ReportText('Tutaj wpisujemy tekst, który chcemy wyświetlić w naszym dokumencie'))
+    
+''')
+
+class MarkdownComponent(DocumentGenerationComponent):
+    
+    title='Klasa Markdown'
+    
+
+    def append_elements(self):
+        #variables provided by `reported_object` arg
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+        
+       
+    #implement reporting activieties here
+        
+        
+        
+    display(ReportText('Modułem o rozszerzonej funkcjonalności jest funkcja **Markdown**. Funkcjonalność dostępna po wywołaniu kodu::'))
+#display(GuideCode(f'{MarkdownComponent_str}'))
+    display(Markdown(
+'''
+
+- Tworzenie elementów wypisanych w punktach
+
+- Załączanie lącza internetowego
+
+- Wyswietlanie kodu
+
+'''
+            ))
+display(ReportText('Aby wymienić w punktach należy napisac następujący kod:'))
+# markdown1=Picture('./Image/markdown1.jpg')
+
+display(Markdown(
+'''
+    display(Markdown("""
+    
+            - Tworzenie elementów wypisanych w punktach
+
+            - Załączanie lącza internetowego
+
+            - Wyswietlanie kodu
+
+    """))
+'''))
+
+# display(markdown1)
+
+display(ReportText('Aby załączyć link, na przyklad do spotkania:'))
+
+display(Markdown(
+'''
+    display(Markdown("""Link do spotkania: [SPOTKANIE]
+    (https://wutwaw.sharepoint.com/sites/EfektywnyPythonbySiMR/_layouts/15/stream.aspx?id=%2Fsites%2EfektywnyPythonbySiMR%2FShared%20Documents%2FGeneral%2FRecordings%2FSpotkanie%20na%20kanale%20Ogólnym%2D20230628%5F175853%2DNagrywanie%20spotkania%2Emp4)
+    """))
+'''))
+
+
+
+# markdown2=Picture('./Image/mrkdwn2.jpg')
+
+# display(markdown2)
+
+display(ReportText('Aby wyswietlic kod, przed apostrofami nalezy zapisać literę $f$. Przykładowo :'))
+
+display(Markdown(
+'''
+    display(Markdown("""
+    
+            - Tworzenie elementów wypisanych w punktach
+
+            - Załączanie lącza internetowego
+
+            - Wyswietlanie kodu
+
+    """))
+'''))
+
+
+# markdown3=Picture('./Image/mrkdwn3.jpg')
+
+# display(markdown3)
+
+display(ReportText('Ostatni krok to zaapendowanie sekcji i utworzenie dokumentu pdf :'))
+display(Markdown(
+f'''
+
+
+    doc_final = MechanicalCase('./output/nazwa_dokumentu',documentclass=NoEscape('article'),document_options=['a4paper','fleqn'],lmodern=False)
+    doc_final.packages.append(Package('natbib', options=['numbers']))
+    doc_final.packages.append(Package('booktabs'))
+    doc_final.packages.append(Package('float'))
+    doc_final.packages.append(Package('siunitx'))
+
+
+    doc_final.append(sekcja)
+    doc_final.append(sekcja1)
+    doc_final.append(sekcja2)
+    doc_final.append(sekcja3)
+    doc_final.append(sekcja4)
+    doc_final.append(sekcja5)
+
+    doc_final.generate_pdf()
+
+
+
+'''
+            ))
+
+
+class ReportTextComponent(DocumentGenerationComponent):
+
+    title="Klasa ReportText"
+
+
+    def append_elements(self):
+        #variables provided by `reported_object` arg
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+        
+       
+        #implement reporting activieties here
+        
+        display(ReportText('Narzędziem o podstawowej funkcjonalności jest klasa **ReportText** - umożliwia dodanie i wyświetlanie tekstu, który ma zostać umieszczony w raporcie. Funkcjonalność ta jest dostępna po wywołaniu kodu:'))
+        display(GuideCode(f'{ReportTextComponent_str}'))
+        
+TablesCreationComponent_str=(
+'''
+from dynpy.models.mechanics.tmac import SDOFWinchSystem
+eoms= SDOFWinchSystem()._eoms[0]
+eoms_eq_raw=Eq(eoms,0)
+data=SDOFWinchSystem().get_random_parameters()
+Ms0=Symbol('M_s0')
+b=Symbol('b')
+omg=Symbol('varphi')
+ph1=Symbol('Phi')
+
+winch = SDOFWinchSystem()
+
+Ms=winch.M_s
+t = winch.ivar
+
+dane={
+    Ms0:4700,
+    b:1500,
+    SDOFWinchSystem().m0:10}
+
+
+
+winch_up=SDOFWinchSystem().subs(Ms,Ms0-b*SDOFWinchSystem().phi.diff()).subs(data).subs(dane)
+nowe_ode=winch_up._ode_system
+solution=nowe_ode.solution
+steady_sol=nowe_ode.steady_solution[0]
+t_span = np.linspace(0,100,200)
+phi=winch.q[0]
+
+
+
+units_dict = {phi : ureg.radian,phi.diff(t):ureg.radian,t:ureg.second }
+LatexDataFrame.set_default_units(units_dict)
+
+general_sol_matrix=nowe_ode.solution.with_ics([0,0])
+table_eq=general_sol_matrix.n().numerized().compute_solution(t_span)
+table=table_eq[[phi.diff(t)]]
+table_for_report = table[0::15].to_latex_dataframe()
+
+display(Markdown(' Do tablicy `table_eq` zapisujemy równanie ogólne dla zmiennej czasowej `t_span`   '))
+display(Markdown(
+f"""
+    
+    table_eq=general_sol_matrix.n().numerized().compute_solution(t_span)
+
+"""))
+display(Markdown(f' Do tablicy table przypisujemy wartości ${latex(omg)}$ powstałe w wyniku zróżniczkowania ${latex(ph1)}$ w tablicy `table_eq` '))
+display(Markdown(
+f"""
+    table=table_eq[[phi.diff(t)]]
+   
+"""))
+display(ReportText(' W następnym kroku wybieramy zakres wartości który chcemy umieścić w tabelce przy pomocy naiwasów kwadratowych. Nastepnie przekształcamy tabelę na zgodną z LateX przy pomocy metody: to\_latex\_dataframe()  '))
+display(Markdown(
+f"""
+
+    table_for_report = table[0::15].to_latex_dataframe()
+
+"""))
+display(ReportText(' Naszą tabelkę opisujemy w tekście, pożądane jest użycie AutoMarkerów które zostały opisane w poniższej sekcji tego dokument '))
+display(Markdown(
+f"""
+
+     display(Markdown(f'Wyniki symulacji zostały zestawione w tabeli {AutoMarker(table_for_report)}'))
+
+"""))
+display(ReportText(' Aby wyświetlic tabelkę korzystamy z  klasy display. Metoda .reported umożliwia nam nadanie tabelce podpisu. '))
+display(Markdown(
+f"""
+
+    display(table_for_report.reported(caption='Tabela'))
+
+"""))
+    
+''')
+
+class TablesCreationComponent(DocumentGenerationComponent):
+
+    title="Tworzenie tabelek"
+
+
+    def append_elements(self):
+        #variables provided by `reported_object` arg
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+        
+       
+        #implement reporting activieties here
+        
+        display(ReportText('Aby utworzyć tabelkę najpierw musimy posiadać dane z obliczeń na interesującym nas systemie dynamicznym:'))
+        display(GuideCode(f'{TablesCreationComponent_str}'))
+        
+        
+kod_2='''
+from dynpy.utilities.components.guides.en import ReportComponent
+    from dynpy.utilities.report import ReportText, Markdown, Picture, SympyFormula, Frame, ObjectCode, Block, AlertBlock, ExampleBlock, GuideCode, LatexDataFrame
+    from dynpy.utilities.components.guides.en import ReportCompImplementationComponent,ReportCompImplementationIssueComponent
+    from sympy import *
+    from pint import UnitRegistry
+    import pandas as pd
+'''
+class LibrariesImportComponent(DocumentGenerationComponent):
+
+    title="Klasa LibrariesImportComponent i jej zastosowanie"
+
+
+    def append_elements(self):
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+        display(ReportText('Przed praća w jupiterze należy zaimportować biblioteki'))
+        display(ObjectCode(kod_2))
+        display(ReportText('Dzięki temu możemy korzystać z przygotowanych wcześniej klas i modułów'))
+        
+markdown_reporting_str=("""
+Koncepcję raportowania można przedstawić prosto w następujących punktach:  
+​
+* Biblioteka do raportowania ma budowę modułową. W kodowaniu obiektowo zorientowanym oznacza to, że składa się z szeregu klas. Poszczególne klasy to implementacje programistyczne standardowych elementów, z których składa się każdy raport. To znaczy zaimplementowano klasę do tworzenia dokumentu oraz klasy do kreowania typowych elementów dokumentu, jak rozdział, akapit (tj. blok tekstu), wzór, obraz, wykres.  
+​
+* Przyjęta została współbieżna zasada tworzenia raportów. Według tej zasady, aby zaraportować dany element najpierw musi on zostać wyświetlony w jupyterze, używając nomenklatury informatycznej - wydrukowany na wyjściu komórki jupytera, tzn. jako cell output.  
+​
+* Główna implementacja kodu, czyli używane klasy, znajdują się w module `dynpy.utilities.report`
+​
+* Do zbudowania standardowego raportu używa się następujących klas:  
+    
+    * class `Document`
+    
+    * class `CurrentContainer`
+    
+    * class `ReportText`
+    
+    * class `Markdown`
+    
+    * class `Picture`
+    
+    * class `SympyFormula`
+​
+* W efekcie tworzony jest dokument wynikowy w postacie pliku pdf, wygenrowany w języku zanczników LaTeX w oparciu o bazowy plik jupytera (*.ipynb), który zawiera przejrzysty podgląd dokumentu wynikowego.
+​
+""")
+
+class ReportingModuleIntroComponent(DocumentGenerationComponent):
+
+    title="Implementacja komponentów raportujących"
+
+
+
+    def append_elements(self):
+        #variables provided by `reported_object` arg
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+    
+        #implement reporting activieties here
+        display(Markdown(markdown_reporting_str))
+        
+SympyFormulaComponent_str='''
+from sympy import *
+
+    M = Symbol('M')
+
+    t = Symbol('t')
+
+    m_e = Symbol('m_e')
+
+    e = Symbol('e')
+
+    z = Function('z')
+
+    varphi = Function('varphi')
+
+    Ek = M*Derivative(z(t), t)**2/2 + m_e*(e*sin(varphi(t))*Derivative(varphi(t), t) - Derivative(z(t), t))**2/2
+
+    display(Eq(Symbol('T'),Ek))
+'''
+
+
+class SympyFormulaComponent(DocumentGenerationComponent):
+
+    title = "Klasa SympyFormula i jej zastosowanie"
+
+
+    def append_elements(self):
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+
+        #implement reporting activieties here
+        display(ReportText('Przykładowe zastosowanie komponentu do obliczeń symbolicznych, na przykładzie energii kinetycznej:'))
+        display(GuideCode(f'{SympyFormulaComponent_str}'))
+        
+        
+report_formating_str=("""
+Należy zwrócić uwagę na następujęce aspekty:
+
+- Cele powinny być poopisywane Markdownami żeby mozna bylo sie swobodnie poruszać po dokumencie przez Table of Contents.
+
+- Appendowanie sekcji do dokumentu powinno znajdować się na końcu dokumentu, ponieważ aby zbudować dokument nie trzeba uruchamiać wszystkich cele po kolei.
+
+- Nie można obsadzać nieformatowalnych kodów w 'ReportText'. 
+
+- Jeżeli chcemy obsadzić jednoliniowy kod, musimy użyć ` (apostrof pod tyldą). np: display(Markdown(\"`help`\")). Ten sposób nie zapewnia kolorowania kodu.
+
+- Obsadzamy w tekście zmienne w ten sposób: `${latex(omega_r)}$`, aby globalnie mieć do nich dostęp, możliwość podmiany symbolu bez manualnego szukania w tekście.
+
+- Oznaczamy równania za pomocą klasy `AutoMarker`.
+
+- Gdy mamy zbyt długie równania, szczególnie części pod pierwiastkiem, należy wyciągnąć je do zmiennej i pokazać niżej. Alternatywną metodą na rozwiązanie tego problemu jest wstawienie równania w system dynamiczny.
+
+- Przechowywane wstępne obliczenia / symbole należy umieścić w pliku.py lub wykonać za pomocą klasy jeśli taka istnieje.
+
+Cel pracy i metodyka powinny charakteryzować się nastęującymi cechami:
+
+- stwierdzać fakty,
+
+- być napisane w jednym czasie (przeszły lub teraźnieszy)
+
+- nie uprzedzać faktów, które następują w dalszej częsci pracy,
+
+- mieć charakter planu lub zbioru założeń/oczekiwań np. założono, że zostanie wykonana analiza wrażliwości; stwierdzono, że takie podejście zapewni poprawność modelu
+
+Elementy, które wymagają usprawnienia w szablonie pracy:
+
+- streszczenia w szablonie pracy dyplomowej,
+
+- naprawienie obsługi komendy `\cite` w klasie `Markdown`
+
+- stosowanie `{latex}`
+
+- stosowanie klasy `AutoMarker`
+
+- należy w szablonie PD przenieść Appendowanie na koniec 
+
+""")
+
+class ReportFormattingGuidelinesComponent(DocumentGenerationComponent):
+
+    title="Wytyczne odnośnie formatowania raportu"
+
+    def append_elements(self):
+        #variables provided by `reported_object` arg
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']    
+        
+        #implement reporting activieties here
+        display(Markdown(report_formating_str))
+
+##########################
+##SYNCHRONIZACJA GITHUB### 
+##########################
+        
+class GitSynchroPanelAccessComponent(ReportComponent):
+
+    title="Dostep do panelu synchronizacji Github"
+
+    @property
+    def reported_object(self):
+
+
+        default_data = {'classname':'ReportingModuleIntroComponent',
+                       'module':'guide.en.py',
+                       'field':'guide or report',
+                       'target':'`ODESystem` class',
+                       'issue_no':359,
+                       }
+
+
+        if isinstance(self._reported_object, dict):
+            return {**default_data,**self._reported_object}
+
+        elif isinstance(self._reported_object, str):
+            return {**default_data,'classname':self._reported_object}
+
+        elif self._reported_object is None:
+            return default_data
+
+        else:
+            return self._reported_object
+
+
+    @reported_object.setter
+    def reported_object(self, obj):
+        self._reported_object=obj
+    
+    
+    def append_elements(self):
+        #variables provided by `reported_object` arg
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+
+        display(ReportText(f''' Repozytoria Github'a zmieniają się dosyć dynamicznie, a w przypadku, gdy korzysta z niego więcej niż jedna osoba dobrze by było aby każdy miał dostęp do najnowszej wersji. W tym celu przeprowadza się regularnie synchronizację danego rezpozytorium. '''))
+
+        display(ReportText('Jak się dostać do panelu synchronizacji?'))
+
+        display(ReportText(f''' Wybierz projekt, który chcesz zsynchronizować.'''))
+        display(Picture('./dynpy/utilities/components/guides/images/1.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('11cm'),caption='Wybór projektu z listy'))
+
+        display(ReportText(f'''Przejdź do foledru, który chcesz zsynchronizować. W naszym przypadku zazwyczaj aktualizujemy moduły.'''))
+        display(Picture('./dynpy/utilities/components/guides/images/2.png', position = 'H', height= NoEscape('18cm'), width = NoEscape('18cm'),caption='Wybór folderu do synchronizacji'))
+
+        display(ReportText(f'''Wybierz ikonę VS Code - zostaniesz przeniesiony do nowego okna.'''))
+        display(Picture('./dynpy/utilities/components/guides/images/3.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('11cm'),caption='Przycisk przenoszący do VS Code'))
+
+        display(ReportText(f'''Będąc już w panelu VS Code przjedź do zakładki 'Source control' (trzecia od góry), to tu będą przeprowadzane wszystkie operacje.'''))
+        display(Picture('./dynpy/utilities/components/guides/images/4.png', position = 'H', height= NoEscape('18cm'), width = NoEscape('18cm'),caption='Source control w panelu VS Code'))
+        
+
+example_commit_str=('''
+Przykładowy Commit:
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch master
+# Your branch is up to date with 'origin/master'.
+
+# Changes to be committed:
+#   modified: models/mechanics/disk.py
+#   modified: utilitied/components/ode/en.py
+#   modified: models/mechanics/bridge.py
+''')
+
+example_commented_commit_str=('''
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+
+Here place the title of the Commit
+
+On branch master
+Your branch is up to date with 'origin/master'.
+
+Changes to be committed:
+  modified: models/mechanics/disk.py - class added
+  modified: utilitied/components/ode/en.py - class removed
+  modified: models/mechanics/bridge.py - minor changes
+''')
+
+example_commit_comments_str=('''
+class added
+class fixed
+class removed
+minor changes
+method added
+method fixed
+method removed
+''')
+
+class GitSynchroIntroComponent(GitSynchroPanelAccessComponent):
+
+    title="Wprowadzenie do synchronizacji repozytorium Github"
+
+    def append_elements(self):
+        #variables provided by `reported_object` arg
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+    
+        #implement reporting activieties here
+
+        display(ReportText('Synchronizacja repozytorium.'))
+
+        display(ReportText('Przypadek 1. : "Commit" po lewej stronie NIE działa'))
+
+        display(ReportText(f'''Jeśli "Commit" nie działa to kliknij od razu "Sync changes" lub kółeczka synchronizacji na górze'''))
+        display(Picture('./dynpy/utilities/components/guides/images/10.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('8cm'),caption='Kółeczko synchronizacji'))
+        display(Picture('./dynpy/utilities/components/guides/images/9.png', position = 'H', height= NoEscape('8cm'), width = NoEscape('6cm'),caption='Przycisk, na którym pojawia się "Commit" albo "Sync changes"'))
+
+        display(ReportText('Przypadek 2. : "Commit" po lewej stronie wyświetla się normalnie'))
+
+        display(ReportText(f'''Kliknij "Commit".'''))
+        display(Picture('./dynpy/utilities/components/guides/images/5.png', position = 'H', height= NoEscape('8cm'), width = NoEscape('6cm'),caption='Przycisk "Commit"'))
+
+        display(ReportText(f'''Otworzy się opis Commit'a - odkomentuj linijki z modyfikacjami, czyli wszystko od około 4. linii. '''))
+        # display(Picture('./dynpy/utilities/components/guides/images/6.png', position = 'H', height= NoEscape('13cm'), width = NoEscape('13cm'),caption='''Opis Commit'a '''))
+
+        display(ObjectCode(example_commit_str))
+
+        display(ReportText(f'''Po odkomentowaniu dopisz tytuł synchronizacji oraz krótkie opisy poszczególnych zmian - jest to ważne w kwestii komunikacji między osobami pracującymi nad projektem. '''))
+        # display(Picture('./dynpy/utilities/components/guides/images/7.png', position = 'H', height= NoEscape('13cm'), width = NoEscape('11cm'),caption=''' Przykladowy opis Commit'a '''))
+        display(ReportText('Przykładowy opisany Commit:'))
+        display(ObjectCode(example_commented_commit_str))
+        display(ReportText('Spis przykładowych komenatrzy do Committów:'))
+        display(ObjectCode(example_commit_comments_str))
+
+
+        display(ReportText(f''' Dla pewności poprawności wprowadzonych zmian warto potwierdzić Commita na chatcie do synchronizacji na Slacku'''))
+        display(Picture('./dynpy/utilities/components/guides/images/8_5.png', position = 'H', height= NoEscape('6cm'), width = NoEscape('6cm'),caption='''Kanał do synców '''))
+
+        display(ReportText(f'''Zatwierdź Commit'a klikjąc tick w prawym górnym rogu. Jeśli przycisku nie ma, przełącz karty i spróbuj ponownie.'''))
+        display(Picture('./dynpy/utilities/components/guides/images/8.png', position = 'H', height= NoEscape('20cm'), width = NoEscape('20cm'),caption='Zatwierdzanie zmian'))
+
+        display(ReportText(f'''Po zatwierdzeniu, ze strony Github'a takie zmiany wyglądają następująco '''))
+        display(Picture('./dynpy/utilities/components/guides/images/7_5.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('8cm'),caption='''Zatwierdzone zmiany z perspektywy Github'a'''))
+        display(ReportText('Wystąpienie komunikatu merge'))
+
+        display(ReportText(f'''Taki komunikat będzie oznacza błąd na wyższym szczeblu - nie ruszaj nic więcej i odezwij się do Pana Chilińskiego lub Pana Sierocińskiego. '''))
+        display(Picture('./dynpy/utilities/components/guides/images/11.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('8cm'),caption='Error'))
+
