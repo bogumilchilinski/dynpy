@@ -1774,5 +1774,41 @@ class ODESystemExponentiationComponent(ReportComponent):
         
         display(ReportText('Sympy matrix power'))
         display(Eq(matrix_mat_lhs, matrix_mat_rhs, evaluate=False))
+        
+excitation_code='''
+from dynpy.models.odes.numerical import *
+system=LinearFirstOrder.from_reference_data()
+system._as_fode()._get_excitation_comps
+''' 
+        
+class PredictionOfSteadySolutionComponent(ReportComponent):
+    
+    title="Determining the predicted solution of a special equation";
 
- 
+    @property
+    def import_text(self):
+
+        return "To import an example system and determine its predicted special solution, call the following code:"
+
+
+    @property
+    def body_text(self):
+
+        return "The solution takes the form:"
+
+    def append_elements(self):
+        system = self.reported_object
+        t=system.ivar
+        dvars=system.dvars
+        display(ReportText(self.import_text))
+        display(ObjectCode(excitation_code))
+        display(ReportText(self.body_text))
+        system._as_fode()._get_excitation_comps
+
+        ext_comps_list = system._as_fode()._get_excitation_comps
+
+        for comp,amp in ext_comps_list:
+
+            display(SympyFormula(comp))
+            display(SympyFormula(amp))
+            

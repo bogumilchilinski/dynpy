@@ -1891,35 +1891,43 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
         display(ReportText('Kolejnym kluczowym elementem jest zdefiniowanie parametrów układu, wektora czasu i warunków początkowych.'))
         
         param_dict = system.get_numerical_parameters()
-        t_span = np.linspace(1,100,101)
+        t_span = np.linspace(0,100,1001)
         ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
+        param = system.system_parameters()[0]
+        
         
         display(Markdown(
         '''
         param_dict = system.get_numerical_parameters()
-        t_span = np.linspace(1,100,101)
+        t_span = np.linspace(0,100,1001)
         ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
+        parameter = system.system_parameters()[0]
+        
+        
         '''))
         
         display(ReportText('Następnie należy określić, który parametr ma zostać poddany analizie. Parametr ten należy wówczas zmienić w słowniku parametrów z wartości liczbowej na symbol.'))
         
-#         param_dict.update({system.m: system.m})
+        parameter = system.system_parameters()[0]
+        param_dict = {**param_dict,parameter:parameter}
         
         display(Markdown(
         '''
-        parametr = system.k
-        param_dict.update({parametr: parametr})
+        parameter = system.system_parameters()[0]
+        param_dict = {**param_dict,parameter:parameter}
         '''))
+        
+        
         
         display(ReportText('Ostatnim etapem jest wywołanie metody numerical_analysis dla rozważanego systemu:'))
 
         display(Markdown(
         '''
-        na_df = dyn_sys.subs(param_dict).numerical_analysis(parameter=dyn_sys.m_e, param_span=[6, 9, 12], t_span = t_span)
+        na_df = dyn_sys.subs(param_dict).numerical_analysis(parameter=system.system_parameters()[0], t_span = t_span)
         na_df
         '''))
-        
-        na_df = system.subs(param_dict).numerized()
+        na_df = system.subs(param_dict).numerical_analysis(parameter=system.system_parameters()[0], t_span = t_span)
+        #na_df = system.subs(param_dict).numerized()
         na_df
         
         display(ReportText('Symulacje numeryczną wykonuje się w analogiczny sposób do pozostałych symulacji w następujący sposób:'))
@@ -1931,7 +1939,10 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
         '''))
         
         na_df_sol = na_df.compute_solution(t_span = t_span, ic_list = [0.0,0.0])
-        na_df_sol.plot()
+        (na_df_sol.plot())
+        
+        import matplotlib.pyplot as plt
+        plt.show()
         
 class AnalyticalSimulationComponent(ReportComponent):
 
@@ -1963,7 +1974,7 @@ class AnalyticalSimulationComponent(ReportComponent):
         
         display(SympyFormula(eoms_eq))
         
-        ode_system = ODESystem.from_dynamic_system(system)
+        ode_system = ODESystem.from_dynamic_system(system.linearized())
 
         display(ReportText('Podane równanie w tym przypadku nie będzie odpowiednim wyborem. Do wykonania symulacji analitycznej należy zastosować system dynamiczny w postaci równań różniczkowych zwyczajnych, który można uzyskać za pomocą klasy ODESystem:'))
         
@@ -1971,9 +1982,26 @@ class AnalyticalSimulationComponent(ReportComponent):
 
         display(SympyFormula(ode_system))
         
-        display(ReportText('Aby przeprowadzić symulację analityczną w pierwszej kolejności konieczne jest uzyskanie rozwiązania równań ruchu, co można wykonać za pomocą metod solution i steady_solution w zależności od skomplikowania systemu.'))
+        param_dict = system.get_numerical_parameters()
+        t_span = np.linspace(1,100,101)
+        ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
         
-        ode_solution = ode_system.steady_solution
+        
+        #param_dict = {**param_dict,system.m:system.m}
+        
+        
+        display(Markdown(
+        '''
+        param_dict = system.get_numerical_parameters()
+        t_span = np.linspace(1,100,101)
+        ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
+        #param_dict = {**param_dict,system.m:system.m}
+        '''))
+        
+        
+        display(ReportText('Aby przeprowadzić symulację analityczną w pierwszej kolejności konieczne jest uzyskanie rozwiązania równań ruchu dla podstawionych danych subs(param_dict), co można wykonać za pomocą metod `solution` i `steady_solution` w zależności od skomplikowania systemu.'))
+        
+        ode_solution = ode_system.subs(param_dict).steady_solution
         
         display(ReportText('Wynik jest następujący:'))
         
@@ -1981,16 +2009,7 @@ class AnalyticalSimulationComponent(ReportComponent):
         
         display(ReportText('Do przeprowadzenia symulacji konieczne jest zdefiniowanie parametrów układu, wektora czasu oraz warunków początkowych. Można je uzyskać w następujący sposób:'))
         
-        param_dict = system.get_numerical_parameters()
-        t_span = np.linspace(1,100,101)
-        ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
-        
-        display(Markdown(
-        '''
-        param_dict = system.get_numerical_parameters()
-        t_span = np.linspace(1,100,101)
-        ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
-        '''))
+
         
         display(Markdown(
         '''
@@ -2002,7 +2021,9 @@ class AnalyticalSimulationComponent(ReportComponent):
         
         ode_simulation = ode_solution.subs(param_dict).compute_solution(t_span, ic_list = ic_list)
 
-        ode_simulation.plot()
+        (ode_simulation.plot())
+        import matplotlib.pyplot as plt
+        plt.show()
 
 
 class DynamicSystemCompletenessCheckComponent(ReportComponent):

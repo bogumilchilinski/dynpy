@@ -440,12 +440,12 @@ class DynamicSystemCallComponent(ReportComponent):
         display(GuideCode("""from dynpy.models.mechanics import SDOFWinchSystem""".replace('SDOFWinchSystem',system_name)      ))
         
         
-        display(GuideCode(f'system={system_name}()'  ))
+        display(GuideCode(f'system=dyn_sys={system_name}()'  ))
 
         display(ReportText('Path to the sought-after class on the CoCalc platform:'))
         #display(Picture('./dynpy/utilities/components/guides/images/sciezka_w.jpg'))
 
-        display(ReportText(str(system.__class__)))
+        display(ReportText((system.__class__.__module__)))
         
         display(ReportText('The way to call out the preview of the class - the so-called preview:'))
 
@@ -2425,21 +2425,21 @@ from dynpy.utilities.components.mech.en import KineticEnergyComponent, KineticEn
 SympyFormulaComponent_str='''
 from sympy import *
 
-    M = Symbol('M')
+M = Symbol('M')
 
-    t = Symbol('t')
+t = Symbol('t')
 
-    m_e = Symbol('m_e')
+m_e = Symbol('m_e')
 
-    e = Symbol('e')
+e = Symbol('e')
 
-    z = Function('z')
+z = Function('z')
 
-    varphi = Function('varphi')
+varphi = Function('varphi')
 
-    Ek = M*Derivative(z(t), t)**2/2 + m_e*(e*sin(varphi(t))*Derivative(varphi(t), t) - Derivative(z(t), t))**2/2
+Ek = M*Derivative(z(t), t)**2/2 + m_e*(e*sin(varphi(t))*Derivative(varphi(t), t) - Derivative(z(t), t))**2/2
 
-    display(Eq(Symbol('T'),Ek))
+display(Eq(Symbol('T'),Ek))
 '''
 
 
@@ -2717,101 +2717,101 @@ class MarkdownComponent(DocumentGenerationComponent):
         target = self.reported_object['target']
         
        
-    #implement reporting activieties here
-        
-        
-        
-    display(ReportText('Modułem o rozszerzonej funkcjonalności jest funkcja **Markdown**. Funkcjonalność dostępna po wywołaniu kodu::'))
-#display(GuideCode(f'{MarkdownComponent_str}'))
-    display(Markdown(
-'''
-
-- Tworzenie elementów wypisanych w punktach
-
-- Załączanie lącza internetowego
-
-- Wyswietlanie kodu
-
-'''
-            ))
-display(ReportText('Aby wymienić w punktach należy napisac następujący kod:'))
-# markdown1=Picture('./Image/markdown1.jpg')
-
-display(Markdown(
-'''
-    display(Markdown("""
-    
-            - Tworzenie elementów wypisanych w punktach
-
-            - Załączanie lącza internetowego
-
-            - Wyswietlanie kodu
-
-    """))
-'''))
-
-# display(markdown1)
-
-display(ReportText('Aby załączyć link, na przyklad do spotkania:'))
-
-display(Markdown(
-'''
-    display(Markdown("""Link do spotkania: [SPOTKANIE]
-    (https://wutwaw.sharepoint.com/sites/EfektywnyPythonbySiMR/_layouts/15/stream.aspx?id=%2Fsites%2EfektywnyPythonbySiMR%2FShared%20Documents%2FGeneral%2FRecordings%2FSpotkanie%20na%20kanale%20Ogólnym%2D20230628%5F175853%2DNagrywanie%20spotkania%2Emp4)
-    """))
-'''))
+        #implement reporting activieties here
 
 
 
-# markdown2=Picture('./Image/mrkdwn2.jpg')
+        display(ReportText('Modułem o rozszerzonej funkcjonalności jest funkcja **Markdown**. Funkcjonalność dostępna po wywołaniu kodu::'))
+    #display(GuideCode(f'{MarkdownComponent_str}'))
+        display(Markdown(
+    '''
 
-# display(markdown2)
+    - Tworzenie elementów wypisanych w punktach
 
-display(ReportText('Aby wyswietlic kod, przed apostrofami nalezy zapisać literę $f$. Przykładowo :'))
+    - Załączanie lącza internetowego
 
-display(Markdown(
-'''
-    display(Markdown("""
-    
-            - Tworzenie elementów wypisanych w punktach
+    - Wyswietlanie kodu
 
-            - Załączanie lącza internetowego
+    '''
+                ))
+        display(ReportText('Aby wymienić w punktach należy napisac następujący kod:'))
+        # markdown1=Picture('./Image/markdown1.jpg')
 
-            - Wyswietlanie kodu
+        display(Markdown(
+        '''
+            display(Markdown("""
 
-    """))
-'''))
+                    - Tworzenie elementów wypisanych w punktach
 
+                    - Załączanie lącza internetowego
 
-# markdown3=Picture('./Image/mrkdwn3.jpg')
+                    - Wyswietlanie kodu
 
-# display(markdown3)
+            """))
+        '''))
 
-display(ReportText('Ostatni krok to zaapendowanie sekcji i utworzenie dokumentu pdf :'))
-display(Markdown(
-f'''
+        # display(markdown1)
 
+        display(ReportText('Aby załączyć link, na przyklad do spotkania:'))
 
-    doc_final = MechanicalCase('./output/nazwa_dokumentu',documentclass=NoEscape('article'),document_options=['a4paper','fleqn'],lmodern=False)
-    doc_final.packages.append(Package('natbib', options=['numbers']))
-    doc_final.packages.append(Package('booktabs'))
-    doc_final.packages.append(Package('float'))
-    doc_final.packages.append(Package('siunitx'))
-
-
-    doc_final.append(sekcja)
-    doc_final.append(sekcja1)
-    doc_final.append(sekcja2)
-    doc_final.append(sekcja3)
-    doc_final.append(sekcja4)
-    doc_final.append(sekcja5)
-
-    doc_final.generate_pdf()
+        display(Markdown(
+        '''
+            display(Markdown("""Link do spotkania: [SPOTKANIE]
+            (https://wutwaw.sharepoint.com/sites/EfektywnyPythonbySiMR/_layouts/15/stream.aspx?id=%2Fsites%2EfektywnyPythonbySiMR%2FShared%20Documents%2FGeneral%2FRecordings%2FSpotkanie%20na%20kanale%20Ogólnym%2D20230628%5F175853%2DNagrywanie%20spotkania%2Emp4)
+            """))
+        '''))
 
 
 
-'''
-            ))
+        # markdown2=Picture('./Image/mrkdwn2.jpg')
+
+        # display(markdown2)
+
+        display(ReportText('Aby wyswietlic kod, przed apostrofami nalezy zapisać literę $f$. Przykładowo :'))
+
+        display(Markdown(
+        '''
+            display(Markdown("""
+
+                    - Tworzenie elementów wypisanych w punktach
+
+                    - Załączanie lącza internetowego
+
+                    - Wyswietlanie kodu
+
+            """))
+        '''))
+
+
+        # markdown3=Picture('./Image/mrkdwn3.jpg')
+
+        # display(markdown3)
+
+        display(ReportText('Ostatni krok to zaapendowanie sekcji i utworzenie dokumentu pdf :'))
+        display(Markdown(
+        f'''
+
+
+            doc_final = MechanicalCase('./output/nazwa_dokumentu',documentclass=NoEscape('article'),document_options=['a4paper','fleqn'],lmodern=False)
+            doc_final.packages.append(Package('natbib', options=['numbers']))
+            doc_final.packages.append(Package('booktabs'))
+            doc_final.packages.append(Package('float'))
+            doc_final.packages.append(Package('siunitx'))
+
+
+            doc_final.append(sekcja)
+            doc_final.append(sekcja1)
+            doc_final.append(sekcja2)
+            doc_final.append(sekcja3)
+            doc_final.append(sekcja4)
+            doc_final.append(sekcja5)
+
+            doc_final.generate_pdf()
+
+
+
+        '''
+                    ))
 
 
 class ReportTextComponent(DocumentGenerationComponent):
@@ -3241,3 +3241,30 @@ class GitSynchroIntroComponent(GitSynchroPanelAccessComponent):
         display(ReportText(f'''Taki komunikat będzie oznacza błąd na wyższym szczeblu - nie ruszaj nic więcej i odezwij się do Pana Chilińskiego lub Pana Sierocińskiego. '''))
         display(Picture('./dynpy/utilities/components/guides/images/11.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('8cm'),caption='Error'))
 
+class AlgebraicExpressionComponent(ReportComponent):
+
+    title = "Algebraic expression example"
+
+    def append_elements(self):
+        display(ReportText('Example Algebraic expression in Sympy library:'))
+        display(GuideCode(f'{SympyFormulaComponent_str}'))
+        
+        from sympy import Symbol, Function
+
+        M = Symbol('M')
+
+        t = Symbol('t')
+
+        m_e = Symbol('m_e')
+
+        e = Symbol('e')
+
+        z = Function('z')
+
+        varphi = Function('varphi')
+
+        Ek = M*Derivative(z(t), t)**2/2 + m_e*(e*sin(varphi(t))*Derivative(varphi(t), t) - Derivative(z(t), t))**2/2
+        
+        display(ReportText('After executing above code you can display kinetic energy algebraic expression:'))
+        
+        display(Eq(Symbol('T'),Ek))

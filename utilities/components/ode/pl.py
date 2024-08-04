@@ -1493,3 +1493,40 @@ class ODESystemExponentiationComponent(ReportComponent):
         
         display(ReportText('Potęga macierzy Sympy'))
         display(Eq(matrix_mat_lhs, matrix_mat_rhs, evaluate=False))
+        
+excitation_code='''
+from dynpy.models.odes.numerical import *
+system=LinearFirstOrder.from_reference_data()
+system._as_fode()._get_excitation_comps
+'''    
+        
+class PredictionOfSteadySolutionComponent(ReportComponent):
+    
+    title="Wyznaczanie przewidywanego rozwiązania szczególnego równania";
+
+    @property
+    def import_text(self):
+
+        return "Aby zaimportować przykładowy system  i wyznaczyć jego przewidywane rozwiązanie szczególne należy wywołać następujący kod:"
+
+
+    @property
+    def body_text(self):
+
+        return "Rozwiązanie przyjmuje postać:"
+
+    def append_elements(self):
+        system = self.reported_object
+        t=system.ivar
+        dvars=system.dvars
+        display(ReportText(self.import_text))
+        display(ObjectCode(excitation_code))
+        display(ReportText(self.body_text))
+        system._as_fode()._get_excitation_comps
+
+        ext_comps_list = system._as_fode()._get_excitation_comps
+
+        for comp,amp in ext_comps_list:
+
+            display(SympyFormula(comp))
+            display(SympyFormula(amp))

@@ -1152,15 +1152,26 @@ class BasicsOfODESystemGuide(Guide):
     
 class DynSysOverviewReport(UsageOfDynamicSystemsGuide):
 
+    
+    @property
+    def default_reported_object(self):
+
+        #from ...models.mechanics.tmac import SDOFWinchSystem
+        from ...models.mechanics import ForcedSpringMassSystem as DynamicSystem
+
+        return DynamicSystem()
+    
+    
     @property
     def _report_components(self):
 
         comp_list=[
             guide_comp.IssuePreparationComponent,
             guide_comp.DynamicSystemCallComponent,
-            guide_comp.DynamicSystemMethodsUsageComponent,
-            guide_comp.SimulationsComponent,
-            guide_comp.SimulationReportComponent,
+            guide_comp.NumericalAnalysisSimulationComponent,
+            guide_comp.AnalyticalSimulationComponent,
+            #guide_comp.SimulationsComponent,
+            #guide_comp.SimulationReportComponent,
             guide_comp.DynSysCodeComponent
 
 
@@ -1168,6 +1179,11 @@ class DynSysOverviewReport(UsageOfDynamicSystemsGuide):
 
         return comp_list
 
+    
+    
+    
+    
+    
 class BasicsOfDynSysImplementationGuide(UsageOfDynamicSystemsGuide):
 
     @property
