@@ -3268,3 +3268,55 @@ class AlgebraicExpressionComponent(ReportComponent):
         display(ReportText('After executing above code you can display kinetic energy algebraic expression:'))
         
         display(Eq(Symbol('T'),Ek))
+
+ODEIcsComponent_dec_str = '''
+m, c, k, F, mu = symbols('m c k F mu', positive = True)
+t = Symbol('t')
+x = Function('x')(t)
+
+subs_data = {m: 10, c: 10, k: 10, F: 5, mu: 2}
+
+ode_1 = ODESystem(odes = Matrix([m*x.diff(t,t) + c *x.diff(t)  + k * x]), odes_rhs = Matrix([F*sin(mu * t)]), dvars = Matrix([x]))
+display(ode_1)
+'''
+        
+class ODEIcsComponent(ReportComponent):
+
+    title = "ODESystem solution with set of initial conditions (ICS) component presentation"
+
+    def append_elements(self):
+
+        display(ReportText('First declare ODESystem component:'))
+        
+        ObjectCode(ODEIcsComponent_dec_str)
+        
+        m, c, k, F, mu = symbols('m c k F mu', positive = True)
+        t = Symbol('t')
+        x = Function('x')(t)
+
+        subs_data = {m: 10, c: 10, k: 10, F: 5, mu: 2}
+
+        ode_1 = ODESystem(odes = Matrix([m*x.diff(t,t) + c *x.diff(t)  + k * x]), odes_rhs = Matrix([F*sin(mu * t)]), dvars = Matrix([x]))
+        
+        display(ReportText('After executing above code bellow equation will appear'))
+        
+        display(ode_1)
+
+        display(ReportText('To present solution with initial set of conditions, first you need to calculate solution:'))
+        
+        ObjectCode('sol_sym_1_pre_ics = ode_1.subs(subs_data).solution')
+        
+        sol_sym_1_pre_ics = ode_1.subs(subs_data).solution
+        
+        display(sol_sym_1_pre_ics)
+        
+        display(ReportText('To calculate solution with ICS, declare ics vector, and run with_ics method as shown bellow:'))
+        
+        ObjectCode('''
+        ics = [1, 2]
+        sol_sym_1 = sol_sym_1_pre_ics.with_ics(ics)
+        display(sol_sym_1)''')
+        
+        ics = [1, 2]
+        sol_sym_1 = sol_sym_1_pre_ics.with_ics(ics)
+        display(sol_sym_1)

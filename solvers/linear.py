@@ -916,7 +916,7 @@ class AnalyticalSolution(ImmutableMatrix):
 
     
 
-class ODESolution():
+class ODESolution(AnalyticalSolution):
 
     _ics = None    
     _default_ics = None
