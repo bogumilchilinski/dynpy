@@ -1774,3 +1774,5 @@ class ODESystemExponentiationComponent(ReportComponent):
         
         display(ReportText('Sympy matrix power'))
         display(Eq(matrix_mat_lhs, matrix_mat_rhs, evaluate=False))
+
+ 

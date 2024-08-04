@@ -245,7 +245,7 @@ class AnalyticalSolution(ImmutableMatrix):
 
     
     @classmethod
-    def _constructor(cls, elements, vars= None ,rhs=None, evaluate=True, **options):
+    def _constructor(cls, elements, vars= None ,rhs=None, evaluate=True, ics=None, **options):
         
         if not isinstance(elements,Iterable): 
             elems_lhs = Matrix([elements])
@@ -274,6 +274,7 @@ class AnalyticalSolution(ImmutableMatrix):
 
         obj._rhs= rhs    
         obj._vars = vars
+        obj._ics = ics
         
         if obj.vars is not None:
             if len(obj.vars)!=len(obj):
@@ -297,14 +298,14 @@ class AnalyticalSolution(ImmutableMatrix):
         return cls._constructor( vars ,vars = vars, rhs = elems ,**options   )
 
     @classmethod
-    def from_vars_and_rhs(cls,vars,rhs,**options): # działa
+    def from_vars_and_rhs(cls,vars,rhs, ics=None,**options): # działa
         '''
         This constructor creates object from map in the following form:
         
         vars -> right hand sides
         '''
             
-        return cls._constructor( vars ,vars = vars, rhs = rhs ,**options   )
+        return cls._constructor( vars ,vars = vars, rhs = rhs, ics=ics ,**options   )
 
 
     
@@ -915,7 +916,7 @@ class AnalyticalSolution(ImmutableMatrix):
 
     
 
-class ODESolution(AnalyticalSolution):
+class ODESolution():
 
     _ics = None    
     _default_ics = None
@@ -924,7 +925,6 @@ class ODESolution(AnalyticalSolution):
     _dvars_str = None
     _ivar0 = 0 
     _sol0 = 0
-
 
 
     def _assign_properties(self,obj):
@@ -1107,14 +1107,18 @@ class ODESolution(AnalyticalSolution):
     
     def _get_dvars_str(self):
         return str(type(self.dvars[0]))
+    
+    def get_ics(self):
+        return self._ics
 
     def with_ics(self, ics=None, ivar0=0, sol0=None):
+        self._ics = ics
         self._dvars_str = self._get_dvars_str()
         self.ivar_0 = ivar0
         const_dict=self._calculate_constant(ics, sol0)
         CodeFlowLogger(const_dict,'const dict',self)
         
-        return ODESolution.from_vars_and_rhs(self.vars,self.rhs.subs(const_dict)) #temporary workaround that replaces subs
+        return ODESolution.from_vars_and_rhs(self.vars,self.rhs.subs(const_dict), ics=self._ics) #temporary workaround that replaces subs
     
     def __call__(self,ivar=None,ics=None,params={}):
         
