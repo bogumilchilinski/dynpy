@@ -1923,10 +1923,10 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
 
         display(Markdown(
         '''
-        na_df = dyn_sys.subs(param_dict).numerical_analysis(parameter=system.system_parameters()[0], t_span = t_span)
+        na_df = dyn_sys.subs(param_dict).numerical_analysis(parameter=system.system_parameters()[0],param_span=[1,2,3], t_span = t_span)
         na_df
         '''))
-        na_df = system.subs(param_dict).numerical_analysis(parameter=system.system_parameters()[0], t_span = t_span)
+        na_df = system.subs(param_dict).numerical_analysis(parameter=system.system_parameters()[0],param_span=[1,2,3], t_span = t_span)
         #na_df = system.subs(param_dict).numerized()
         na_df
         
@@ -1943,7 +1943,11 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
         
         import matplotlib.pyplot as plt
         plt.show()
-        
+
+eoms_code='''
+eoms_eq=Eq(eoms,0)
+eoms_eq'''
+
 class AnalyticalSimulationComponent(ReportComponent):
 
     title="Wykonanie symulacji z wykorzystaniem rozwiązania analitycznego"
@@ -1963,11 +1967,7 @@ class AnalyticalSimulationComponent(ReportComponent):
 
         display(ReportText('Wynik jest następujący:'))
         
-        display(Markdown(
-            '''
-        eoms_eq=Eq(eoms,0)
-        eoms_eq
-            '''))
+        display(ObjectCode(eoms_code))
         
         eoms_eq=Eq(eoms,0)
         eoms_eq

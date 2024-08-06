@@ -121,8 +121,8 @@ class UndampedVehicleSuspension(ComposedSystem):
             self.k_l: 2,
             self.F_engine: 9.81,
             self.Omega: 2,
-            self.phi: 3,
-            self.z: 1,
+            #self.phi: 3,
+            #self.z: 1,
         }
         return get_numerical_parameters
 

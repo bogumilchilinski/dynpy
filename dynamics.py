@@ -53,7 +53,7 @@ base_origin=me.Point('O')
 
 from functools import cached_property, lru_cache
 
-
+from .solvers.linear import SystemParameter
 import os
 import re
 
@@ -1620,16 +1620,19 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
 #         print(self.lagrangian())
 #         print(self.q)
-
-        params = self.rhs().free_symbols
-        params.remove(self.ivar)
-        if parameter_values == None:
-            return list(params)
-        else:
-            return {
-                param: parameter_values[no]
-                for no, param in enumerate(params)
-            }
+        expr = self.rhs().free_symbols
+        ivar = self.ivar
+        return SystemParameter(expr, ivar, parameter_values).system_parameters
+        
+#         params = self.rhs().free_symbols
+#         params.remove(self.ivar)
+#         if parameter_values == None:
+#             return list(params)
+#         else:
+#             return {
+#                 param: parameter_values[no]
+#                 for no, param in enumerate(params)
+#             }
 
     def computational_case(self, parameter_values=None):
         ''''

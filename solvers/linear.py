@@ -44,6 +44,8 @@ from ..utilities.templates import tikz
 from ..utilities.components.ode import en as ode
 from ..utilities.components.ode import pl as ode_comp_pl
 
+
+
 import copy
 
 from .tools import CommonFactorDetector, ODE_COMPONENTS_LIST, CodeFlowLogger
@@ -693,17 +695,18 @@ class AnalyticalSolution(ImmutableMatrix):
         '''
         Recognises system parameters as symbols which are not independent variable or its relations and returns the Tuple (Sympy object) containing these elements. It does not take into account undefined functions (instances of Function class) of independent variable.
         '''
-
-        
-        params = (self.lhs-self.rhs).free_symbols
-        params.remove(self.ivar)
-        if parameter_values == None:
-            return list(params)
-        else:
-            return {
-                param: parameter_values[no]
-                for no, param in enumerate(params)
-            }
+        expr = (self.lhs-self.rhs).free_symbols
+        ivar = self.ivar
+        return SystemParameter(expr, ivar, parameter_values).system_parameters
+#         params = (self.lhs-self.rhs).free_symbols
+#         params.remove(self.ivar)
+#         if parameter_values == None:
+#             return list(params)
+#         else:
+#             return {
+#                 param: parameter_values[no]
+#                 for no, param in enumerate(params)
+#             }
     
     @property
     def _lhs_repr(self):
@@ -4603,3 +4606,20 @@ class BernoulliODE(ODESystem):
 
         return sep_ode
     
+class SystemParameter:
+    
+    def __init__(self, expr, ivar, parameter_values=None):
+        
+        
+        params = expr
+        
+        if ivar in params:
+            params.remove(ivar)
+            
+        if parameter_values == None:
+            self.system_parameters = list(params)
+        else:
+            self.system_parameters =  {
+                param: parameter_values[no]
+                for no, param in enumerate(params)
+            }

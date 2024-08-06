@@ -609,7 +609,7 @@ class SimulationsComponent(ReportComponent):
         #pd.DataFrame(data=eq_lambdify(t_span),index=t_span).plot()
         #plt.show
         
-        display(GuideCode('''pd.DataFrame(index=t_span, data=eq_lamdify(t_span)).plot()'''.replace('SDOFWinchSystem',system_name)))
+        display(GuideCode('''pd.DataFrame(index=t_span, data=eq_lambdify(t_span)).plot()'''.replace('SDOFWinchSystem',system_name)))
 
 
         display(ReportText('A way to create charts directly from a previously called class:'))
@@ -949,8 +949,8 @@ class PandasMethodsComponent(ReportComponent):
         # display(Picture('./Image/set_axis2.jpg', caption = ""))
 
         display(ReportText('Metoda rename - Zmienienie pojedynczej kolumny:'))
-        display(GuideCode('''df.rename(columns = {"Długość dnia w miesiącu [h]":'AAA'}, index = {"styczeń":'A'} )'''))
-        display(df.rename(columns = {"Długość dnia w miesiącu":'AAA'}, index = {"styczeń":'A'} ))
+        display(GuideCode('''df.rename(columns = {"Day length in a month [h]":'AAA'}, index = {"January":'A'} )'''))
+        display(df.rename(columns = {"Day length in a month [h]":'AAA'}, index = {"January":'A'} ))
         # display(Picture('./Image/rename.jpg', caption = ""))
 
         display(ReportText('Map method:'))
@@ -1226,7 +1226,7 @@ voivodeships_list = ['Masovian','Greater Poland','Lublin','Warmian-Masurian','We
         display(GuideCode('area_list=[35558,29826,25122,24173,22892,20187,19947,18310,18219,17972,17846,15183,13988,12333,11711,9412]'))
 
         display(ReportText('Creating a list of population numbers for each voivodeship:'))
-        display(GuideCode('popultaion_list=[5349114,3475323,2139726,1439675,1710482,1188800,2904207,2307710,2493603,2086210,2127657,3372618,1018075,4570849,1257179,996011]'))
+        display(GuideCode('population_list=[5349114,3475323,2139726,1439675,1710482,1188800,2904207,2307710,2493603,2086210,2127657,3372618,1018075,4570849,1257179,996011]'))
         
         display(ReportText('Creating a list of per capita incomes in a province:'))
         display(GuideCode('income_list=[4464,3371,3338,3447,3649,3552,3788,4104,3438,3508,3212,3395,3187,3586,3268,3112]'))
@@ -1235,7 +1235,7 @@ voivodeships_list = ['Masovian','Greater Poland','Lublin','Warmian-Masurian','We
         display(GuideCode('expenses_list=[787,596,623,597,767,697,742,1023,590,778,574,598,365,631,647,431]'))
 
         display(ReportText('Creating a dictionary'))
-        display(GuideCode('''voivodeships_data={'area':area_list,'no. of people.':population_list,'income':income_list,'exp.':expenses_list}'''))
+        display(GuideCode('''voivodeships_data={'area':area_list,'no. of people':population_list,'income':income_list,'exp.':expenses_list}'''))
 
         display(ReportText('Calling a table'))
         display(GuideCode('''
@@ -3269,7 +3269,7 @@ class AlgebraicExpressionComponent(ReportComponent):
         
         display(Eq(Symbol('T'),Ek))
 
-ODEIcsComponent_dec_str = '''
+ODEIcsComponent_dec_str = ('''
 m, c, k, F, mu = symbols('m c k F mu', positive = True)
 t = Symbol('t')
 x = Function('x')(t)
@@ -3278,7 +3278,7 @@ subs_data = {m: 10, c: 10, k: 10, F: 5, mu: 2}
 
 ode_1 = ODESystem(odes = Matrix([m*x.diff(t,t) + c *x.diff(t)  + k * x]), odes_rhs = Matrix([F*sin(mu * t)]), dvars = Matrix([x]))
 display(ode_1)
-'''
+''')
         
 class ODEIcsComponent(ReportComponent):
 
@@ -3288,7 +3288,10 @@ class ODEIcsComponent(ReportComponent):
 
         display(ReportText('First declare ODESystem component:'))
         
-        ObjectCode(ODEIcsComponent_dec_str)
+        display(ObjectCode(ODEIcsComponent_dec_str))
+        
+        from dynpy.solvers.linear import AnalyticalSolution, ODESolution, ODESystem
+        import sympy
         
         m, c, k, F, mu = symbols('m c k F mu', positive = True)
         t = Symbol('t')
@@ -3304,7 +3307,7 @@ class ODEIcsComponent(ReportComponent):
 
         display(ReportText('To present solution with initial set of conditions, first you need to calculate solution:'))
         
-        ObjectCode('sol_sym_1_pre_ics = ode_1.subs(subs_data).solution')
+        display(ObjectCode('sol_sym_1_pre_ics = ode_1.subs(subs_data).solution'))
         
         sol_sym_1_pre_ics = ode_1.subs(subs_data).solution
         
@@ -3312,11 +3315,60 @@ class ODEIcsComponent(ReportComponent):
         
         display(ReportText('To calculate solution with ICS, declare ics vector, and run with_ics method as shown bellow:'))
         
-        ObjectCode('''
-        ics = [1, 2]
-        sol_sym_1 = sol_sym_1_pre_ics.with_ics(ics)
-        display(sol_sym_1)''')
+        display(ObjectCode('''
+ics = [1, 2]
+sol_sym_1 = sol_sym_1_pre_ics.with_ics(ics)
+display(sol_sym_1)'''))
         
         ics = [1, 2]
         sol_sym_1 = sol_sym_1_pre_ics.with_ics(ics)
         display(sol_sym_1)
+        
+ODEIcsCodeComponent_str =('''
+m, c, k, F, mu = symbols('m c k F mu', positive = True)
+t = Symbol('t')
+x = Function('x')(t)
+
+subs_data = {m: 10, c: 10, k: 10, F: 5, mu: 2}
+
+ode_1 = ODESystem(odes = Matrix([m*x.diff(t,t) + c *x.diff(t)  + k * x]), odes_rhs = Matrix([F*sin(mu * t)]), dvars = Matrix([x]))
+
+sol_sym_1_pre_ics = ode_1.subs(subs_data).solution
+
+ics = [1, 2]
+
+sol_sym_1 = sol_sym_1_pre_ics.with_ics(ics)
+''')
+
+class ODEIcsCodeComponent(ReportComponent):
+
+    title = "ODESystem solution with set of initial conditions (ICS) component presentation"
+
+    def append_elements(self):
+
+        display(ReportText('For bellow ODESystem component example:'))
+        
+        display(ObjectCode(ODEIcsCodeComponent_str))
+        
+        from dynpy.solvers.linear import AnalyticalSolution, ODESolution, ODESystem
+        import sympy
+        
+        m, c, k, F, mu = symbols('m c k F mu', positive = True)
+        t = Symbol('t')
+        x = Function('x')(t)
+
+        subs_data = {m: 10, c: 10, k: 10, F: 5, mu: 2}
+
+        ode_1 = ODESystem(odes = Matrix([m*x.diff(t,t) + c *x.diff(t)  + k * x]), odes_rhs = Matrix([F*sin(mu * t)]), dvars = Matrix([x]))
+
+        sol_sym_1_pre_ics = ode_1.subs(subs_data).solution
+
+        ics = [1, 2]
+
+        sol_sym_1 = sol_sym_1_pre_ics.with_ics(ics)
+        
+        display(ReportText('To get call code for ICS, run bellow method:'))
+        
+        display(ObjectCode("sol_sym_1.get_ics()"))
+        
+        display(sol_sym_1.get_ics())
