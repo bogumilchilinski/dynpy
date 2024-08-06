@@ -1,5 +1,8 @@
 from .report import Markdown
 from .documents.document import ODESystemOverviewReport
+from github import Github
+import getpass
+from github import Auth
 
 issue_no = 567
 title = 'implementation of ODESystem overview report'
@@ -125,3 +128,91 @@ class MeetingIssueCreator:
     
     def _repr_markdown_(self):
         return self.get_issue_str()
+
+
+class GithubClient():
+
+    def __init__(self):
+
+        pass_code = getpass.getpass('Github token')
+        auth = Auth.Token(pass_code)
+        g = Github(auth=auth)
+        self.g = g
+
+    def open(self):
+
+        if self.g is None:
+            pass_code = getpass.getpass('Github token')
+            auth = Auth.Token(pass_code)
+            g = Github(auth=auth)
+            self.g = g
+        else:
+            pass
+
+    def get_repos_list(self, string=False):
+
+        if string == False:
+            return list(self.g.get_user().get_repos())
+        else:
+            repo_list=[]
+            for repo in list(self.g.get_user().get_repos()):
+                repo_list.append(repo.full_name)
+            return repo_list
+
+    def get_repo(self, full_name='bogumilchilinski/dynpy'):
+
+        return self.g.get_repo(full_name)
+
+
+    def get_issues_list(self, repo_name='none', state='all', assignee='none'):#, milestone='none',  labels='none', sort='none', direction='none', creator='none'):
+
+        issue_list=[]
+        for issue in list(self.g.get_repo(repo_name).get_issues(state=state, assignee=assignee)):#, milestone=milestone,  labels=labels, sort=sort, direction=direction, creator=creator)):
+            issue_list.append(issue)
+        return issue_list
+
+    
+    
+    def as_df(self):
+
+        import pandas as pd
+
+        issue_title_list=[]
+        issue_number_list=[]
+        issue_assignees_list=[]
+        for issue in self.get_issues_list(repo_name='bogumilchilinski/dynpy', state='open', assignee='amvdek'):
+            issue_title_list.append(issue.title)
+            issue_number_list.append(issue.number)
+#             issue_assignees_list.append(issue.assignees)
+
+        data_dict = {'Issue title':issue_title_list, 'Issue number':issue_number_list, }#'Assignees':issue_assignees_list}
+
+        return pd.DataFrame(data_dict)
+
+
+
+    def open_issues(self, state='open', since=None, sort=None):
+
+        if self.g is not None:
+            dp_repo=list(self.g.get_user().get_repos())[1]
+            (dp_repo).full_name
+
+            repo = self.g.get_repo(dp_repo.full_name)
+            open_issues = repo.get_issues(state=state, since=since, sort=sort)
+            for issue in open_issues:
+                if 'class that creates a part of a report' in issue.title:
+                    print(issue.title.split('`')[1])
+
+            [issue.title.split('`')[1] for issue in open_issues if 'class that creates a part of a report' in issue.title ]
+
+        else:
+            return 'Reopen the client'
+
+
+    def close(self):
+
+        if self.g is not None:
+            g = self.g
+            self.g = g.close()
+        else:
+            pass

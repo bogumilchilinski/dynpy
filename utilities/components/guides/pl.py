@@ -598,7 +598,7 @@ class SimulationsComponent(ReportComponent):
 
         display(ReportText('Wizualizacja wykresu::'))
         #display(Picture('./Image/tikzplot_w.jpg'))
-
+        display(table_new.to_pylatex_tikz().in_figure())
         display(ObjectCode('''table_new.to_pylatex_tikz().in_figure()'''))    
 
 section_development_str=(
@@ -624,6 +624,11 @@ display(SympyFormula(eoms_eq))
 display(SympyFormula(eq_sol))
 display(SympyFormula(eq_steady_sol))
 ''')
+
+plot_generation_str=(
+"""
+
+""")
 
 report_generation_libraries=(
 '''
@@ -668,7 +673,19 @@ class SimulationReportComponent(ReportComponent):
 #         eq_steady_sol=Eq(steady_solution_subs,0)
         display(SympyFormula(solution_subs))
 
+#         ode_system = ODESystem.from_dynamic_system(system.linearized())
+#         param_dict = system.get_numerical_parameters()
+        t_span = np.linspace(1,100,101)
+        ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
+#         ode_solution = ode_system.subs(param_dict).steady_solution
+#         display(SympyFormula(ode_solution))
 
+        ode_simulation = steady_solution_subs.compute_solution(t_span, ic_list = ic_list)#ode_solution.subs(param_dict).compute_solution(t_span, ic_list = ic_list)
+    
+        display(ReportText('Wykres: '))
+        picture=ode_simulation.to_pylatex_tikz(subplots=True).in_figure(caption='Otrzymany wykres')
+
+        display(picture)
 
         display(ReportText('równania ruchu: '))
 

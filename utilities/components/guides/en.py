@@ -257,7 +257,7 @@ class JupyterSetUpComponent(ReportComponent):
 
         display(pic17)
 
-        display(ReportText('Aby elementy z których korzystamy działay należy zaimportować potrzebne biblioteki, takie jak na załączonym obrazku oraz w formie tekstu który można skopiowac'))
+        display(ReportText('Aby elementy z których korzystamy działały, należy zaimportować potrzebne biblioteki, takie jak na załączonym obrazku oraz w formie tekstu który można skopiowac'))
 
         pic18 = Picture('./dynpy/utilities/components/guides/images/ImportowanieBibliotek.png', width='9cm')
 
@@ -344,7 +344,7 @@ class CocalcDynSysListComponent(ReportComponent):
 
         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
         
-        display(ReportText(' Możemy również wyswietlić podgląd takiego wahadła używając poniższej funkcji:  '))
+        display(ReportText(' Możemy również wyświetlić podgląd takiego wahadła używając poniższej funkcji:  '))
         display(Picture('./dynpy/utilities/components/guides/images/preview.jpg'))
         display(ReportText(' Co więcej, używając poniższej komendy help, możemy otrzymać wszelkie informacje na temat konkretnego modelu:  '))
         display(Picture('./dynpy/utilities/components/guides/images/help.jpg'))
@@ -354,7 +354,7 @@ class CocalcDynSysListComponent(ReportComponent):
         display(GuideCode(   code_dynsys_list_str   ))
 
 
-        display(ReportText('Poniżej znajduje się lista systemów mechanicznych których można użyć:  '))
+        display(ReportText('Poniżej znajduje się lista systemów mechanicznych, których można użyć:  '))
         from dynpy.models import mechanics
 
 
@@ -721,7 +721,19 @@ class SimulationReportComponent(ReportComponent):
 #         eq_steady_sol=Eq(steady_solution_subs,0)
         display(SympyFormula(solution_subs))
 
+        ode_system = system._ode_system #ESystem.from_dynamic_system(system.linearized())
+        param_dict = system.get_numerical_parameters()
+        t_span = np.linspace(1,10,1001)
+        ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
+        ode_solution = ode_system.subs(param_dict).steady_solution
+        display(SympyFormula(ode_solution))
 
+        ode_simulation = ode_solution.subs(param_dict).compute_solution(t_span, ic_list = ic_list)
+        #de_simulation = steady_solution_subs.compute_solution(t_span, ic_list = ic_list)
+        display(ReportText('Wykres: '))
+        picture=ode_simulation.to_pylatex_tikz(subplots=True).in_figure(caption='Otrzymany wykres')
+
+        display(picture)
 
         display(ReportText('równania ruchu: '))
 

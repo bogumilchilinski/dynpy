@@ -308,7 +308,8 @@ class ForcedSpringMassSystem(SpringMassSystem):
 
             self.m: 0.5, 
             self.k: 20, 
-            self.F: 2,
+            #self.F: 2,
+            self.F: 2 * sin(10*self.ivar),
             self.g: 9.81, 
         }
         return get_numerical_parameters

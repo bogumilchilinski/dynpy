@@ -98,6 +98,8 @@ Examplary setup is as follows:
     doc.append(sec_picture)
     # Generating file
     doc.generate_pdf(clean_tex=True)
+    
+
 
 """
 
