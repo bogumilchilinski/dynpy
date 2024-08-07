@@ -530,8 +530,8 @@ steady_sol_str=(
 
 slownik_numerical=system.get_numerical_parameters()
 
-steady_solution=SDOFWinchSystem()._ode_system.steady_solution
-steady_solution_subs=steady_solution.subs(slownik_numerical)
+steady_solution=SDOFWinchSystem()._ode_system.subs(slownik_numerical).steady_solution
+steady_solution_subs=steady_solution
 
 ''')
 
@@ -598,8 +598,8 @@ class SimulationsComponent(ReportComponent):
         #display(Picture('./Image/lambdify_w.jpg'))
 
 
-        eq_lambdify=lambdify(system.ivar,steady_solution_subs.simplify())
-        display(GuideCode('''eq_lambdify=lambdify(system.ivar,steady_solution_subs.simplify())'''.replace('SDOFWinchSystem',system_name)))
+        eq_lambdify=lambdify(system.ivar, list(steady_solution_subs.rhs))
+        display(GuideCode('''eq_lambdify=lambdify(system.ivar, list(steady_solution_subs.rhs))'''.replace('SDOFWinchSystem',system_name)))
         display(SympyFormula(eq_lambdify))
 
 
@@ -609,7 +609,8 @@ class SimulationsComponent(ReportComponent):
         #pd.DataFrame(data=eq_lambdify(t_span),index=t_span).plot()
         #plt.show
         
-        display(GuideCode('''pd.DataFrame(index=t_span, data=eq_lambdify(t_span)).plot()'''.replace('SDOFWinchSystem',system_name)))
+        display(GuideCode('''df = pd.DataFrame(data=eq_lambdify(t_span))
+df.T.set_index(t_span).plot()'''.replace('SDOFWinchSystem',system_name)))
 
 
         display(ReportText('A way to create charts directly from a previously called class:'))
@@ -2303,7 +2304,8 @@ doc_final.generate_pdf()
 
 class DocumentGenerationComponent(ReportComponent):
 
-    title="Generowanie dokumentu"
+    #title="Generowanie dokumentu"
+    title="Document generation"
 
 
     @property
@@ -2349,7 +2351,8 @@ class DocumentGenerationComponent(ReportComponent):
        
         #implement reporting activieties here
         
-        display(ReportText('Ostatni krok to zaapendowanie sekcji i utworzenie dokumentu pdf :'))
+        #display(ReportText('Ostatni krok to zaapendowanie sekcji i utworzenie dokumentu pdf :'))
+        display(ReportText('The last step is to append a section and create a pdf document :'))
         display(GuideCode(f'{doc_gen_str}'))
 
 
@@ -2486,7 +2489,8 @@ doc_final.append(rozdzial_kod)
 
 class PredefinedSectionComponent(DocumentGenerationComponent):
 
-    title="Dodawanie predefiniowanej sekcji"
+    #title="Dodawanie predefiniowanej sekcji"
+    title="Adding a predefined section"
 
 
 
@@ -2497,7 +2501,8 @@ class PredefinedSectionComponent(DocumentGenerationComponent):
         target = self.reported_object['target']
     
         
-        display(ReportText('Istnieje również możliwość wprowadzenia zpredefiniowanych sekcji. Możemy posłużyć się istniejącym komponentem dynamicznym na przykładzie silnika. Wykorzystamy zarówno opis teoretyczny jaki i reprezentację kodu służącą do wygenerowania równania. Aby użyć ich w dokumencie musimy wywołać te sekcje:'))
+        #display(ReportText('Istnieje również możliwość wprowadzenia zpredefiniowanych sekcji. Możemy posłużyć się istniejącym komponentem dynamicznym na przykładzie silnika. Wykorzystamy zarówno opis teoretyczny jaki i reprezentację kodu służącą do wygenerowania równania. Aby użyć ich w dokumencie musimy wywołać te sekcje:'))
+        display(ReportText('It is also possible to introduce predefined sections. We can use an existing dynamic component in the engine example. We will use both the theoretical description and the code representation used to generate the equation. To use them in the document we need to call these sections:'))
         from dynpy.models.mechanics import Engine
         display(ObjectCode(Predefined_code))
         display(KineticEnergyComponent(Engine()))
@@ -2950,17 +2955,19 @@ from dynpy.utilities.components.guides.en import ReportComponent
 '''
 class LibrariesImportComponent(DocumentGenerationComponent):
 
-    title="Klasa LibrariesImportComponent i jej zastosowanie"
-
+    #title="Klasa LibrariesImportComponent i jej zastosowanie"
+    title="LibrariesImportComponent class and its use"
 
     def append_elements(self):
         classname = self.reported_object['classname']
         class_module = self.reported_object['module']
         class_field = self.reported_object['field']
         target = self.reported_object['target']
-        display(ReportText('Przed praća w jupiterze należy zaimportować biblioteki'))
+        #display(ReportText('Przed pracą w jupiterze należy zaimportować biblioteki'))
+        display(ReportText('Before working in jupiter, import libraries'))
         display(ObjectCode(kod_2))
-        display(ReportText('Dzięki temu możemy korzystać z przygotowanych wcześniej klas i modułów'))
+        #display(ReportText('Dzięki temu możemy korzystać z przygotowanych wcześniej klas i modułów'))
+        display(ReportText('This allows us to use previously prepared classes and modules'))
         
 markdown_reporting_str=("""
 Koncepcję raportowania można przedstawić prosto w następujących punktach:  
@@ -3028,7 +3035,8 @@ from sympy import *
 
 class SympyFormulaComponent(DocumentGenerationComponent):
 
-    title = "Klasa SympyFormula i jej zastosowanie"
+    #title = "Klasa SympyFormula i jej zastosowanie"
+    title = "SympyFormula class and its use"
 
 
     def append_elements(self):
@@ -3038,7 +3046,8 @@ class SympyFormulaComponent(DocumentGenerationComponent):
         target = self.reported_object['target']
 
         #implement reporting activieties here
-        display(ReportText('Przykładowe zastosowanie komponentu do obliczeń symbolicznych, na przykładzie energii kinetycznej:'))
+        #display(ReportText('Przykładowe zastosowanie komponentu do obliczeń symbolicznych, na przykładzie energii kinetycznej:'))
+        display(ReportText('Example application of the component for symbolic calculations, using kinetic energy as an example:'))
         display(GuideCode(f'{SympyFormulaComponent_str}'))
         
         
@@ -3085,9 +3094,54 @@ Elementy, które wymagają usprawnienia w szablonie pracy:
 
 """)
 
+report_formating_en_str=('''
+Pay attention to the following aspects:
+
+- Objectives should be described in Markdown to be able to move freely through the document via Table of Contents.
+
+- Appending sections to the document should be at the end of the document, because it is not necessary to run all the targets one by one to build the document.
+
+- You can't cast unformatable codes in 'ReportText'. 
+
+- If you want to cast a one-line code, you must use ` (apostrophe under the tilde). Ex: display(Markdown(`help`)). This way does not provide code coloring.
+
+- We staff the variables in the text like this: `${latex(omega_r)}$` to globally access them, the ability to substitute the symbol without manually searching in the text.
+
+- We mark equations using the `AutoMarker` class.
+
+- When we have equations that are too long, especially the parts under the root, they should be extracted into a variable and shown below. An alternative method to solve this problem is to insert the equation in the dynamic system.
+
+- The stored precalculations / symbols should be placed in a.py file or made using a class if one exists.
+
+The purpose of the work and the methodology should have the following characteristics:
+
+- state facts,
+
+- be written in one tense (past or present)
+
+- not anticipate the facts that follow in the later part of the work,
+
+- have the character of a plan or a set of assumptions/expectations, e.g., it was assumed that a sensitivity analysis would be performed; it was stated that this approach would ensure the correctness of the model
+
+Elements that need improvement in the thesis template:
+
+- abstracts in the thesis template,
+
+- fixing the handling of the `\cite` command in the `Markdown` class.
+
+- use of `{latex}`
+
+- application of `AutoMarker` class.
+
+- move Append to the end in the PD template 
+
+'''
+)
+
 class ReportFormattingGuidelinesComponent(DocumentGenerationComponent):
 
-    title="Wytyczne odnośnie formatowania raportu"
+    #title="Wytyczne odnośnie formatowania raportu"
+    title="Report formatting guidelines"
 
     def append_elements(self):
         #variables provided by `reported_object` arg
@@ -3097,7 +3151,7 @@ class ReportFormattingGuidelinesComponent(DocumentGenerationComponent):
         target = self.reported_object['target']    
         
         #implement reporting activieties here
-        display(Markdown(report_formating_str))
+        display(Markdown(report_formating_en_str))
 
 ##########################
 ##SYNCHRONIZACJA GITHUB### 
@@ -3384,3 +3438,54 @@ class ODEIcsCodeComponent(ReportComponent):
         display(ObjectCode("sol_sym_1.get_ics()"))
         
         display(sol_sym_1.get_ics())
+        
+git_com_str=("""
+
+from synpy.utilities.components.guides.en import {classname}
+
+{classname}(None);
+""")
+
+class FeedbackComponent(ReportComponent):
+
+    title="Komentarz zamykajacy issue z komponentami"
+
+    @property
+    def reported_object(self):
+
+
+        default_data = {'classname':'Component',
+                       'module':'guide.en.py',
+                       'field':'guide or report',
+                       'target':'`ReportComponent` class',
+                       'issue_no':359,
+                       }
+
+
+        if isinstance(self._reported_object, dict):
+            return {**default_data,**self._reported_object}
+
+        elif isinstance(self._reported_object, str):
+            return {**default_data,'classname':self._reported_object}
+
+        elif self._reported_object is None:
+            return default_data
+
+        else:
+            return self._reported_object
+
+
+    @reported_object.setter
+    def reported_object(self, obj):
+        self._reported_object=obj
+    
+    
+    def append_elements(self):
+        #variables provided by `reported_object` arg
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+
+        display(ReportText('The code was checked with the following call: '))
+        display(ObjectCode(git_com_str.format(classname=classname)))

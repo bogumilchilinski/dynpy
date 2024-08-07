@@ -1550,7 +1550,15 @@ steady_code='''
 from dynpy.models.odes.numerical import *
 system=LinearFirstOrder.from_reference_data()
 system.steady_solution
-'''    
+'''
+
+class ODERootsCodeComponent(ReportComponent):
+        
+    title="Creating roots of the characteristic equation"
+    def append_elements(self):
+        #Class was impelemnted in ODERootsComponent. There you can find call code and call
+        pass
+
         
 class ODESteadySolutionComponent(ReportComponent):
     

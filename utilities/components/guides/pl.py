@@ -1872,8 +1872,41 @@ class DynSysIntroComponent(ReportComponent):
 
             '''))
         display(SympyFormula(steady_solution))
+eoms_code=(
+'''
+eoms_eq=Eq(eoms,0)
+eoms_eq''')
+dict_code=(
+'''
+param_dict = system.get_numerical_parameters()
+t_span = np.linspace(1,100,101)
+ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
+#param_dict = {**param_dict,system.m:system.m}
+''')
+params_code=(
+'''
+parameter = system.system_parameters()[0]
+param_dict = {**param_dict,parameter:parameter}
+''')
 
-        
+na_df_code=(
+'''
+na_df = dyn_sys.subs(param_dict).numerical_analysis(parameter=system.system_parameters()[0],param_span=[1,2,3], t_span = t_span)
+na_df
+''')
+na_df_code_eoms=(
+'''
+na_df = dyn_sys.subs(param_dict).eoms.numerical_analysis(parameter=system.system_parameters()[0],param_span=[1,2,3], t_span = t_span)
+
+''')
+
+na_df_sol_code=(
+'''
+na_df_sol = na_df.compute_solution(t_span = t_span, ic_list = [0.0,0.0])
+na_df_sol.plot()
+''')
+
+
 class NumericalAnalysisSimulationComponent(ReportComponent):
 
     title="Wykonanie symulacji z wykorzystaniem metody numerical_analysis"
@@ -1892,11 +1925,7 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
 
         display(ReportText('Wynik jest następujący:'))
         
-        display(Markdown(
-            '''
-        eoms_eq=Eq(eoms,0)
-        eoms_eq
-            '''))
+        display(ObjectCode(eoms_code))
         
         eoms_eq=Eq(eoms,0)
         eoms_eq
@@ -1913,47 +1942,28 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
         param = system.system_parameters()[0]
         
         
-        display(Markdown(
-        '''
-        param_dict = system.get_numerical_parameters()
-        t_span = np.linspace(0,100,1001)
-        ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
-        parameter = system.system_parameters()[0]
-        
-        
-        '''))
+        display(ObjectCode(dict_code))
         
         display(ReportText('Następnie należy określić, który parametr ma zostać poddany analizie. Parametr ten należy wówczas zmienić w słowniku parametrów z wartości liczbowej na symbol.'))
         
         parameter = system.system_parameters()[0]
         param_dict = {**param_dict,parameter:parameter}
         
-        display(Markdown(
-        '''
-        parameter = system.system_parameters()[0]
-        param_dict = {**param_dict,parameter:parameter}
-        '''))
+        display(ObjectCode(params_code))
         
         
         
-        display(ReportText('Ostatnim etapem jest wywołanie metody numerical_analysis dla rozważanego systemu:'))
-
-        display(Markdown(
-        '''
-        na_df = dyn_sys.subs(param_dict).numerical_analysis(parameter=system.system_parameters()[0],param_span=[1,2,3], t_span = t_span)
-        na_df
-        '''))
+        display(ReportText('Ostatnim etapem jest wywołanie metody numerical_analysis dla rozważanego systemu. Możemy to zrobić przy użyciu property eoms:'))
+        display(ObjectCode(na_df_code_eoms))
+        display(ReportText('Lub bez niej:'))
+        display(ObjectCode(na_df_code))
         na_df = system.subs(param_dict).numerical_analysis(parameter=system.system_parameters()[0],param_span=[1,2,3], t_span = t_span)
         #na_df = system.subs(param_dict).numerized()
         na_df
         
         display(ReportText('Symulacje numeryczną wykonuje się w analogiczny sposób do pozostałych symulacji w następujący sposób:'))
 
-        display(Markdown(
-        '''
-        na_df_sol = na_df.compute_solution(t_span = t_span, ic_list = [0.0,0.0])
-        na_df_sol.plot()
-        '''))
+        display(ObjectCode(na_df_sol_code))
         
         na_df_sol = na_df.compute_solution(t_span = t_span, ic_list = [0.0,0.0])
         (na_df_sol.plot())
@@ -1961,9 +1971,12 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
         import matplotlib.pyplot as plt
         plt.show()
 
-eoms_code='''
-eoms_eq=Eq(eoms,0)
-eoms_eq'''
+
+sim_code=(
+'''
+ode_simulation = ode_solution.subs(param_dict).compute_solution(t_span, ic_list = ic_list)
+ode_simulation.plot()
+''')
 
 class AnalyticalSimulationComponent(ReportComponent):
 
@@ -2007,13 +2020,7 @@ class AnalyticalSimulationComponent(ReportComponent):
         #param_dict = {**param_dict,system.m:system.m}
         
         
-        display(Markdown(
-        '''
-        param_dict = system.get_numerical_parameters()
-        t_span = np.linspace(1,100,101)
-        ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
-        #param_dict = {**param_dict,system.m:system.m}
-        '''))
+        display(ObjectCode(dict_code))
         
         
         display(ReportText('Aby przeprowadzić symulację analityczną w pierwszej kolejności konieczne jest uzyskanie rozwiązania równań ruchu dla podstawionych danych subs(param_dict), co można wykonać za pomocą metod `solution` i `steady_solution` w zależności od skomplikowania systemu.'))
@@ -2028,11 +2035,7 @@ class AnalyticalSimulationComponent(ReportComponent):
         
 
         
-        display(Markdown(
-        '''
-        ode_simulation = ode_solution.subs(param_dict).compute_solution(t_span, ic_list = ic_list)
-        ode_simulation.plot()
-        '''))
+        display(ObjectCode(sim_code))
         
         display(ReportText('Dla zdefiniowanych parametrów symulacja analityczna wygląda w następujący sposób:'))
         
