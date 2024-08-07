@@ -1787,7 +1787,11 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return ODESystem.from_dynamic_system(self)
     
         
-    
+    def doit(self,**hints):
+
+
+
+        return self.copy()
     
     @cached_property
     def _fodes_system(self):
