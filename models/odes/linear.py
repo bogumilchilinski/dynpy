@@ -1,6 +1,9 @@
 from sympy import *
 from dynpy.solvers.linear import ODESystem
 from dynpy.solvers.nonlinear import MultiTimeScaleSolution
+from dynpy.models.mechanics import ForcedSpringMassSystem
+import numpy as np
+import matplotlib.pyplot as plt
 
 class LinearFirstOrder(ODESystem):
 
@@ -67,7 +70,7 @@ class LinearHorizontalSystem(ODESystem):
 #gotowe!!!
 class SpringMassSystem(ODESystem):
 
-    
+
     @classmethod
     def from_reference_data(cls):
         t = Symbol('t')
@@ -80,3 +83,49 @@ class SpringMassSystem(ODESystem):
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
 
         return odes
+
+class HarmonicOscillator(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        system=dyn_sys=ForcedSpringMassSystem()
+        sim_time=250
+        t_span = np.linspace(1,sim_time,sim_time+1)
+        ic_list = [0.0,0.0]
+        sym_num=18
+        sym_list=np.linspace(0,int((sym_num*2)-2),int(sym_num))
+        k_list=np.linspace(0.1,1.5,sym_num)
+        omg=Symbol("omega")
+        param_dict={system.F:1*cos(omg*system.ivar),system.k:omg,system.g:0,system.m:1}
+        na_df = dyn_sys.subs(param_dict).eoms.numerical_analysis(parameter=omg,param_span=k_list, t_span = t_span)
+        na_df_sol = na_df.compute_solution(t_span = t_span, ic_list = [0.1,0.1]).iloc[:,sym_list]
+        plot=na_df_sol.plot()
+        plt.show()
+        max_plot=na_df_sol.set_axis(k_list,axis=1).max().plot()
+        plt.show()
+
+        return plot, max_plot
+
+class ParametricOscillator(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        system=dyn_sys=ForcedSpringMassSystem()
+        sim_time=250
+        t_span = np.linspace(1,sim_time,sim_time+1)
+        ic_list = [0.0,0.0]
+        sym_num=18
+        sym_list=np.linspace(0,int((sym_num*2)-2),int(sym_num))
+        k_list=np.linspace(0.1,1.5,sym_num)
+        omg=Symbol("omega")
+        param_dict_k={system.k:1+0.01*cos(omg*system.ivar),system.F:1*cos(omg*system.ivar),system.g:0,system.m:1}
+        na_df_k = dyn_sys.subs(param_dict_k).eoms.numerical_analysis(parameter=omg,param_span=k_list, t_span = t_span)
+        na_df_sol_k = na_df_k.compute_solution(t_span = t_span, ic_list = [0.1,0.1]).iloc[:,sym_list]
+        plot=na_df_sol_k.plot()
+        plt.show()
+        max_plot=na_df_sol_k.set_axis(k_list,axis=1).max().plot()
+        plt.show()
+        
+        return plot, max_plot
