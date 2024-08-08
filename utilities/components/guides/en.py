@@ -3440,13 +3440,11 @@ class ODEIcsCodeComponent(ReportComponent):
         display(sol_sym_1.get_ics())
         
 git_com_str=("""
-
-from synpy.utilities.components.guides.en import {classname}
-
+from dynpy.utilities.components.guides.en import {classname}
 {classname}(None);
 """)
 
-class FeedbackComponent(ReportComponent):
+class IssueFeedbackComponent(ReportComponent):
 
     title="Komentarz zamykajacy issue z komponentami"
 
@@ -3478,8 +3476,8 @@ class FeedbackComponent(ReportComponent):
     @reported_object.setter
     def reported_object(self, obj):
         self._reported_object=obj
-    
-    
+
+
     def append_elements(self):
         #variables provided by `reported_object` arg
         classname = self.reported_object['classname']
