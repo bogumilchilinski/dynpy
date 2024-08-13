@@ -1128,24 +1128,6 @@ class BernoulliODEIntroComponent(ReportComponent):
         
         display(ReportText(f'Gdzie $y$ to nieznana funkcja zależna od zmiennej $x$, $P(x)$ i $Q(x)$ o dane funkcje zależne od $x$, a $n$ to stała liczba rzeczywista, różna od 0 i 1. Charakterystyczne dla równań Bernoulliego jest to, że są one nieliniowe z powodu obecności wyrazu ${latex(ynpow)}$ po jednej stronie równania. Rozwiązania tego typu równań mogą być trudne do uzyskania w ogólności, ale dla pewnych wartości $n$ można zastosować pewne techniki upraszczające rozwiązanie. W przypadku $n=0$ równanie Bernoulliego staje się liniowe, a dla $n=1$ można je przekształcić do postaci liniowego równania różniczkowego zwyczajnego pierwszego rzędu. W innych przypadkach konieczne może być zastosowanie specjalnych technik, takich jak zamiana zmiennych czy redukcja rzędu, aby uzyskać ogólne rozwiązanie.'))
 
-class EquationDefinitionComponent(ReportComponent):
-    #title="We consider the following differential equation:"
-    title="Rozpatrujemy następujące równanie różniczkowe: "
-
-    def append_elements(self):
-
-        system = self.reported_object
-        ode_sys =system
-        y_sym = system.dvars[0]
-
-        dane=system._get_dvars_symbols()
-        ode_sub=ode_sys.subs(dane)
-        display(SympyFormula(Eq(ode_sub.lhs[0],ode_sub.rhs[0])))
-        #display(ReportText('Where:')
-        display(ReportText('Gdzie:'))
-        #display(ReportText('Is our encountered function.'))
-        display(SympyFormula(y_sym))
-        display(ReportText('Jest naszą szukaną funkcją.'))
         
 
 class BernoulliTransformation(ReportComponent):
@@ -1530,3 +1512,108 @@ class PredictionOfSteadySolutionComponent(ReportComponent):
 
             display(SympyFormula(comp))
             display(SympyFormula(amp))
+
+class HomoPredictionIntroComponent(ReportComponent):
+
+    title="Równanie różniczkowe drugiego rzędu - metoda przewidywań"
+    def append_elements(self):
+        system = self.reported_object
+        dvar=system.dvars[0]
+        ivar=system.ivar
+        display(ReportText('Jednym z podstawowych typów równań różniczkowych drugiego rzędu jest równanie jednorodne o stałych współczynnikach . Proces rozwiązania tego typu równania polega na przewidzeniu rozwiązania, które przyjmuje ogólną postać:'))
+        display(SympyFormula(Eq(dvar,Symbol("C")*exp(Symbol('r')*ivar))))
+        display(ReportText('Na podstawie otrzymanych pierwiastków (rozwiązań) przewidywanego równania dobiera się docelowe równanie ogólne. Poniżej znajduje się przykład zadania ilustrującego proces rozwiązania tego rodzaju równania:'))
+
+
+class MainPredictionComponent(ReportComponent):
+
+    title="Przewidywanie rozwiązania równania jednorodnego"
+
+    def append_elements(self):
+
+        system = self.reported_object._hom_equation()
+        C=Symbol("C",positive=True)
+        r=Symbol("r")
+        y=system.dvars[0]
+        x=system.ivar
+        sym_dict=system._get_dvars_symbols()
+        sys_sub=Eq(system.lhs[0],system.rhs[0])
+
+        prdct=Eq(y,C*exp(r*x))
+        prdct_diff=Eq(prdct.lhs.diff(x),prdct.rhs.diff(x))
+        prdct_ddiff=Eq(prdct.lhs.diff(x,2),prdct.rhs.diff(x,2))
+
+        prdct_dict={y:prdct.rhs, y.diff(x):prdct_diff.rhs, y.diff(x,2):prdct_ddiff.rhs}
+
+        r_eq=Eq(system.fundamental_matrix()[0],0)
+        r0_eq=Eq(y.subs(sym_dict),Symbol("r^0"))
+        r1_eq=Eq(y.diff(x).subs(sym_dict),Symbol("r^1"))
+        r2_eq=Eq(y.diff(x,2).subs(sym_dict),Symbol("r^2"))
+
+        display(ReportText("Pierwszym krokiem do rozwiązania danego równania jest wyznaczenie pochodnych przewidywanego rozwiązania. Przypominając pierwotne równanie które przewidujemy jako nasze rozwiązanie ma następującą postać:"))
+        display(SympyFormula(prdct.subs(sym_dict)))
+        display(ReportText("A następnie znalezienie potrzebnych pochodnych. W przypadku równań drugiego rzędu jak nazwa wskazuje najwyższa pochodna jest drugiego stopnia stąd potrzebne nam dwie pierwsze pochodne przewidywanego rozwiązania. Pierwsza pochodna:"))
+        display(SympyFormula(prdct_diff.subs(sym_dict)))
+        display(ReportText("Druga pochodna:"))
+        display(SympyFormula(prdct_ddiff.subs(sym_dict)))
+        display(ReportText("Następnym krokiem jest podstawienie poszczególnych przewidywań do odpowiednich pochodnych w pierwotnym równaniu:"))
+        display(SympyFormula(sys_sub.subs(prdct_dict)))
+        display(ReportText("Można zauważyć powtarzające się elementy i wyłączyć je przed nawias:"))
+        display(SympyFormula(sys_sub.subs(prdct_dict).simplify()))
+        display(ReportText("Podstawowa zasada matematyki mówi, że jeśli iloczyn dwóch czynników jest równy zero, to przynajmniej jeden z tych czynników musi być równy zero. W metodzie przewidywań nie rozpatruje się jednak dwóch przypadków, ponieważ gdy stała całkowania, a zatem funkcja eksponenty, jest równa zeru to zadanie staje się trywialne i nie wymaga dalszej analizy. Dlatego skupiamy się na drugim czynniku, powszechnie nazywanym równaniem charakterystycznym, które dostarczy nam pierwiastków niezbędnych do przewidzenia ostatecznego równania. Równanie poddawane dalszej analizie ma następująca postać:"))
+        display(SympyFormula(r_eq))
+        display(ReportText("Po rozwiązaniu pewnej liczby zadań można zauważyć pewną zależność wynikającą z powyższego przewidywania, co pozwoli na pominięcie tego kroku i podstawiania odpowiednich wartości zgodnie z poniższymi podstawieniami:"))
+        display(SympyFormula(r0_eq))
+        display(SympyFormula(r1_eq))
+        display(SympyFormula(r2_eq))
+
+class RootsAnalysisComponent(ReportComponent):
+
+    title="Rozwiązanie równania charakterystycznego i ogólna analiza jego rozwiązania w kontekście rozwiązywania równań różniczkowych drugiego rzędu"
+
+    def append_elements(self):
+
+        system = self.reported_object._hom_equation()
+        sym_dict=system._get_dvars_symbols()
+        y=system.dvars[0].subs(sym_dict)
+        x=system.ivar
+        char=system.fundamental_matrix()[0]
+        char_eq=Eq(char,0)
+        roots=system._eigenvalues()
+        C1=Symbol("C_1",positive=True)
+        C2=Symbol("C_2",positive=True)
+        r0=Symbol("r_0")
+        r1=Symbol("r_1")
+        a=Symbol("alpha")
+        b=Symbol("beta")
+        i=Symbol("i")
+
+        r1_img=Eq(r0,a+i*b)
+        r2_img=Eq(r1,a-i*b)
+
+        pred_real=Eq(y,C1*exp(r0*x)+C2*exp(r1*x))
+        pred_one=Eq(y,C1*exp(r0*x)+C2*x*exp(r0*x))
+        pred_imagine=Eq(y,exp(a*x)*(C1*cos(b*x)+C2*sin(b*x)))
+
+        sol_eq=Eq(y,system._ode_solution().rhs[0])
+
+        display(ReportText(f"W równaniach różniczkowych drugiego rzędu równanie charakterystyczne przyjmuje postać równania kwadratowego. Takie równanie może w rozwiązaniu dać trzy typy pierwiastków i w zależności od danego typu dobiera się rozwiązanie ogólne tego równania. Gdy policzona delta jest większa od zera, otrzymujemy dwa pierwiastki rzeczywiste o postaci ${latex(r0)}$ i ${latex(r1)}$, a wtedy przewidywane rozwiązanie przyjmuje postać:"))
+        display(SympyFormula(pred_real))
+        display(ReportText(f"Gdy wyliczona delta jest równa 0, otrzymujemy jeden pierwiastek o postaci ${latex(r0)}$, a wtedy przewidywane rozwiązanie przyjmuje postać:"))
+        display(SympyFormula(pred_one))
+        display(ReportText("Gdy wyliczona delta jest mniejsza od 0, otrzymujemy dwa pierwiastki zespolone o postaci:"))
+        display(SympyFormula(r1_img))
+        display(SympyFormula(r2_img))
+        display(ReportText(f"Gdzie ${latex(a)}$ to część rzeczywista pierwiastka, a ${latex(b)}$ to część urojona. Przewidywane rozwiązanie w takim wypadku przyjmuje następującą postać:"))
+        display(SympyFormula(pred_imagine))
+        display(ReportText("Równanie charakterystyczne w danym przykładzie ma postać:"))
+        display(SympyFormula(char_eq))
+        display(ReportText("Pierwiastki tego równania przyjmują postać:"))
+        i=0
+        lista=system._roots_list()
+        for elem in lista:
+            if elem !=0:
+                display(SympyFormula( Eq(Symbol(f"r_{i}"),elem) , marker=None))
+                i+=1
+        display(ReportText("Po rozpoznaniu typu pierwiastków możemy zapisać rozwiązanie jako:"))
+        display(SympyFormula(sol_eq))

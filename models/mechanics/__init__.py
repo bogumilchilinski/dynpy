@@ -30,11 +30,11 @@ from .trolleys import DDoFTwoNonLinearTrolleys, TrolleysWithSprings, ForcedTroll
 
 from .vehicle import UndampedVehicleSuspension, DampedVehicleSuspension, UndampedSymmetricalVehicleSuspension, QuarterOfVehicle
 from .shaft import SDoFShaft, SDoFShaftHarmonicExcitation, DoubleDiskShaft, DoubleDiskShaftHarmonicExcitation,  DampedDoubleDiskShaftHarmonicExcitation, SDoFDampedShaft
-from .pendulum import Pendulum, PulledPendulum, FreePendulum, KinematicallyExcitedInvertedPendulum, MDoFElasticPendulum, ForcedTriplePendulum, Winch, DDOFCoupledPendulum, DDOFLinearizedCoupledPendulum, InvertedPendulumDDoF, DampedElasticPendulum, LinearizedTriplePendulum, DDoFWinch, DampedMeasuringTool, ExcitedDampedPendulum, DampedPendulum, ExcitedPendulum, MDoFLinearizedThreePendulumsWithSprings, PendulumKinematicExct, DoublePendulum
+from .pendulum import Pendulum, PulledPendulum, FreePendulum, KinematicallyExcitedInvertedPendulum, MDoFElasticPendulum, ForcedTriplePendulum, Winch, DDOFCoupledPendulum, DDOFLinearizedCoupledPendulum, InvertedPendulumDDoF, DampedElasticPendulum, LinearizedTriplePendulum, DDoFWinch, DampedMeasuringTool, ExcitedDampedPendulum, DampedPendulum, ExcitedPendulum, MDoFLinearizedThreePendulumsWithSprings, PendulumKinematicExct, DoublePendulum, RollingBar, ForcedRollingBar
 
 from .skyscraper import skyscraper
 from .engine import EngineHousing, FreeEngine,  FreeEngineWithConstrains, FreeEngineDDOF, Engine, EngineVerticalSpringGravity,  EngineConstantVelocityVerticalSpringGravity,  EngineConstantWithReactionForce,  DampedEngineVerticalSpringGravity,  DampedEngineConstantVelocityVerticalSpringGravity,  InlineEnginePerpendicularSprings,  NonLinearInlineEnginePerpendicularSpringsGravity,  NonLinearBoxerEnginePerpendicularSprings,  DampedEngine, NonlinearEngine,  StraightNonlinearEngine, EngineWithTMD,  VeeEnginePerpendicularSprings, BoxerEnginePerpendicularSprings, NonLinearVeeEnginePerpendicularSprings
-from .disk import ForcedNonLinearDisk, ForcedNonLinearDiskSpring
+from .disk import ForcedNonLinearDisk, ForcedNonLinearDiskSpring, RollingHalfDisk, ForcedRollingHalfDisk
 from .disks import TwoForcedNonLinearDisks, TwoDisksWithThreeSprings, ForcedDisksWithSerialSprings, ForcedDisksWithParallelSprings, MDoFForcedSimpleDisksWithSerialSprings, MDoFForcedSimpleDisksWithParallelSprings, MDoFForcedDisksWithParallelSprings
 from .tensioner import BlowerToothedBelt, DampedBlowerToothedBelt
 from .tmd import TunedMassDamper, TunedMassDamperRelativeMotion

@@ -321,3 +321,241 @@ class ForcedNonLinearDisk(ForcedDiskWithNonlinearSpring):
 
 class ForcedNonLinearDiskSpring(DampedDiskWithNonlinearSpring):
     pass
+
+
+
+### Half Disk classes implementation
+
+
+class RollingHalfDisk(ComposedSystem):
+    """
+    Model of a Single Degree of Freedom - RollingHalfDisc
+
+        Arguments:
+        =========
+            m = Mass
+                -Mass of the Half Disc
+
+            g = gravitional field
+                -value of gravitional field acceleration
+
+            r = radius
+                -radius of the Half Disc
+
+            ivar = symbol object
+                -Independant time variable
+
+            phi = dynamicsymbol object
+                -pendulation angle of the mass m
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+        Example
+        =======
+        A half disc of radius R with optional horisontal force.
+
+        >>> t = symbols('t')
+        >>> R = symbols(' R ',positive=True)
+        >>> RollingHalfDisc(r=R)
+
+        -We define the symbols and dynamicsymbols
+        -determine the instance of the RollingHalfDisc by using class RollingHalfDisc()
+    """
+
+    scheme_name = 'rolling_half_disk.png'
+    real_name = 'rolling_half_disk.png'
+    r=Symbol('r', positive=True)
+    m=Symbol('m', positive=True)
+    g=Symbol('g', positive=True)
+    phi=dynamicsymbols('varphi')
+    qs=[phi]
+
+    def __init__(self,
+                 r=None,
+                 m=None,
+                 g=None,
+                 ivar=Symbol('t'),
+                 phi=None,
+                 qs=None,
+                 **kwargs):
+
+
+        if r is not None: self.r = r
+        if m is not None: self.m = m
+        if g is not None: self.g = g
+
+        if phi is not None: self.phi = phi
+        self.ivar=ivar
+        
+        if qs is not None: self.qs = qs
+        
+        self._init_from_components(**kwargs)
+
+    @cached_property
+    def components(self):
+        components = {}
+
+        d = 4*self.r/3/pi
+        self.y = self.r - d*cos(self.phi)
+        self.x =  self.r*self.phi - d*sin(self.phi)
+
+        self.material_point_1 = MaterialPoint(self.m, self.x,ivar=self.ivar, qs=[self.phi])
+        self.material_point_2 = MaterialPoint(self.m, self.y,ivar=self.ivar, qs=[self.phi])
+        self.material_point_3 = MaterialPoint(((self.m*(self.r**2))/2)-self.m*d**2, self.phi,ivar=self.ivar, qs=[self.phi])
+        self.gravity = GravitationalForce(self.m, self.g, pos1=self.y,ivar=self.ivar, qs=[self.phi])
+
+        components['material_point_1'] = self.material_point_1
+        components['material_point_2'] = self.material_point_2
+        components['material_point_3'] = self.material_point_3
+        components['gravity'] = self.gravity
+
+        return components
+
+    def get_default_data(self):
+
+        m0, r0 = symbols('m_0 r_0', positive=True)
+
+        default_data_dict = {
+            self.m: [S.One * m0 * no for no in range(2,10)],
+            self.r: [2 * r0, 3 * r0, 4 * r0, 5 * r0, 6 * r0],
+        }
+        return default_data_dict
+
+    def get_numerical_data(self):
+        m0, l0, r0 = symbols('m_0 l_0 r_0', positive=True)
+
+        default_data_dict = {
+            self.m: [1],
+            self.r: [1],
+            #self.pi: [3.14],
+        }
+        return default_data_dict
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.r: r'Half disc radius',
+            self.m: r'Mass',
+            self.g: 'Gravity constant',
+        }
+        return self.sym_desc_dict
+
+
+class ForcedRollingHalfDisk(RollingHalfDisk):
+    """
+    Model of a Forced Single Degree of Freedom - ForcedRollingHalfDisk
+
+        Arguments:
+        =========
+            m = Mass
+                -Mass of the Half Disc
+
+            g = gravitional field
+                -value of gravitional field acceleration
+
+            r = radius
+                -radius of the Half Disc
+            
+            M_0 = torque amplitude
+                -amplitude value of horisontal force
+            
+            Omega = Frequency of force
+                -value of frequency force
+            
+            ivar = symbol object
+                -Independant time variable
+
+            phi = dynamicsymbol object
+                -pendulation angle of the mass m
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+        Example
+        =======
+        A half disc of radius R with optional horisontal force.
+
+        >>> t = symbols('t')
+        >>> R, Omega, M_0 = symbols(' R Omega M_0 ',positive=True)
+        >>> ForcedRollingHalfDisk(r=R, Omega=Omega, M_0=M_0 )
+
+        -We define the symbols and dynamicsymbols
+        -determine the instance of the ForcedRollingHalfDisk by using class ForcedRollingHalfDisk()
+    """
+
+    scheme_name = 'forced_rolling_half_disk.png'
+    real_name = 'forced_rolling_half_disk.png'
+    r=Symbol('r', positive=True)
+    l=Symbol('l', positive=True)
+    m=Symbol('m', positive=True)
+    g=Symbol('g', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    M_0=Symbol('M_0', positiv=True)
+    phi=dynamicsymbols('varphi')
+
+    def __init__(self,
+                 r=None,
+                 m=None,
+                 g=None,
+                 M_0=None,
+                 Omega=None,
+                 ivar=Symbol('t'),
+                 phi=None,
+                 **kwargs):
+
+        if r is not None: self.r = r
+        if m is not None: self.m = m
+        if g is not None: self.g = g
+        if phi is not None: self.phi = phi
+        if M_0 is not None: self.M_0 = M_0
+        if Omega is not None: self.Omega = Omega
+        self.ivar=ivar
+        self.qs=[self.phi]
+        self._init_from_components(**kwargs)
+
+    @cached_property
+    def components(self):
+        components = {}
+        #self.rolling_half_disk.x
+        d = 4*self.r/3/pi
+        #self.y = self.r - d*cos(self.phi)
+        x =  self.r*self.phi - d*sin(self.phi)
+        self.rolling_half_disk = RollingHalfDisk(m=self.m, r=self.r, phi=self.phi, qs=self.qs)
+        self.torque = Force(self.M_0*cos(self.Omega*self.ivar), self.phi, qs=self.qs)(label='force')
+
+        components['rolling_half_disk'] = self.rolling_half_disk
+        components['torque'] = self.torque
+        
+        return components
+
+    def get_default_data(self):
+
+        m0, r0 = symbols('m_0 r_0', positive=True)
+
+        default_data_dict = {
+            self.m: [S.One * m0 * no for no in range(2,10)],
+            self.r: [2 * r0, 3 * r0, 4 * r0, 5 * r0, 6 * r0],
+        }
+        return default_data_dict
+
+    def get_numerical_data(self):
+        m0, l0, r0 = symbols('m_0 l_0 r_0', positive=True)
+
+        default_data_dict = {
+            self.m: [1],
+            self.r: [1],
+            self.M_0: [1],
+            self.Omega: [1],
+            #self.pi: [3.14],
+        }
+        return default_data_dict
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.r: r'Half disc radius',
+            self.m: r'Mass',
+            self.g: 'Gravity constant',
+            self.M_0: 'Torque amplitude value',
+            self.Omega: 'Frequency of torque'
+        }
+        return self.sym_desc_dict
+
+

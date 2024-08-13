@@ -588,17 +588,18 @@ class SimulationsComponent(ReportComponent):
         
         
         display(GuideCode(steady_sol_str.replace('SDOFWinchSystem',system_name)))
-        dict=system.get_random_parameters()
+        #dict=system.get_random_parameters()
         dict_numerical=system.get_numerical_parameters()
         
-        steady_solution=system._ode_system.steady_solution[0]
+        steady_solution=system._ode_system.steady_solution.rhs[0]
         steady_solution_subs=steady_solution.subs(dict_numerical)
         display(steady_solution_subs)
         display(ReportText('Using the lambdify method to convert functions to anonymous form'))
         #display(Picture('./Image/lambdify_w.jpg'))
 
 
-        eq_lambdify=lambdify(system.ivar, list(steady_solution_subs.rhs))
+#         eq_lambdify=lambdify(system.ivar, list(steady_solution_subs.rhs))
+        eq_lambdify=lambdify(system.ivar, steady_solution_subs)
         display(GuideCode('''eq_lambdify=lambdify(system.ivar, list(steady_solution_subs.rhs))'''.replace('SDOFWinchSystem',system_name)))
         display(SympyFormula(eq_lambdify))
 
@@ -608,7 +609,8 @@ class SimulationsComponent(ReportComponent):
         
         #pd.DataFrame(data=eq_lambdify(t_span),index=t_span).plot()
         #plt.show
-        
+        df = pd.DataFrame(data=eq_lambdify(t_span))
+        display(df.plot())
         display(GuideCode('''df = pd.DataFrame(data=eq_lambdify(t_span))
 df.T.set_index(t_span).plot()'''.replace('SDOFWinchSystem',system_name)))
 
@@ -1404,7 +1406,8 @@ class DynSysIntroComponent(ReportComponent):
 obiekt_1=(
 '''
 from sympy import *
-
+from dynpy.solvers.linear import ODESystem
+from sympy.physics.mechanics import dynamicsymbols
 
 omega = Symbol('\omega',positive = True)
 Omega = Symbol('\Omega',positive = True)
@@ -1540,13 +1543,20 @@ display(ana_wyn_SMS[x].plot())
 
 ChapterContainer_str=(
 '''
-dokument=Chapter'Stworzenie raportu  klasy ODESystem'
-CurrentCotainer(dokument)
+from pylatex import Document, Section, Package, Table, Subsubsection
+from dynpy.utilities.report import ReportText, Markdown, Picture, SympyFormula, SummaryTable, BaseFrameFormatter, CurrentContainer, ObjectCode, DescriptionsRegistry, SymbolsDescription
+dokument=Section(title='Stworzenie raportu  klasy ODESystem')
+CurrentContainer(dokument)
 ''')
 
 Chapter_SympyFormula=(
 '''
-display(SympyFormula(nazwa_zdefiniowaneg_rownania))
+
+from sympy import Symbol, Eq
+a=Symbol('a')
+b=Symbol('b')
+nazwa_zdefiniowanego_rownania=Eq(a,b)
+display(SympyFormula(nazwa_zdefiniowanego_rownania))
 ''')
 
 ode_components_path_str=(
@@ -1554,13 +1564,37 @@ ode_components_path_str=(
 MarekSkwarka/Shared_files/modules/dynpy/utilities/components/ode/en.py
 ''')
 
+
+
 property_report_formula=(
-'''
-doc_final = DevelopmentGuide('./Output/[PL][Guide][Programming][PL][Guide][ODESystem]Obsługa klasy ODESystem',documentclass=NoEscape('article'),document_options=['a4paper','eqn'],lmodern=False)
-doc_final.packages.appened(Package('natbib',options=['numbers']))
-doc_final.packages.appened(Package('booktabs'))
-doc_final.packages.appened(Package('float'))
-doc_final.packages.appened(Package('siunitx'))
+"""
+from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase, EngeneeringDrawingGuide,DevelopmentGuide
+from pylatex.utils import italic, NoEscape
+
+#doc_final = DevelopmentGuide('./Output/[PL][Guide][Programming][PL][Guide][ODESystem]Obsluga klasy ODESystem',documentclass=NoEscape('article'),document_options=['a4paper','eqn'],lmodern=False)
+
+doc_final = DevelopmentGuide('./output/Obsluga klasy ODESystem',documentclass=NoEscape('article'),document_options=['a4paper','eqn'],lmodern=False)
+doc_final.packages.append(Package('natbib',options=['numbers']))
+doc_final.packages.append(Package('booktabs'))
+doc_final.packages.append(Package('float'))
+doc_final.packages.append(Package('siunitx'))
+
+intro = Section(title='Intro - nazwa')
+CurrentContainer(intro)
+display(Markdown(f'''1
+                tekst tekst'''))
+dokument = Section(title='Dokument- nazwa')
+CurrentContainer(dokument)
+display(Markdown(f'''2
+                tekst tekst'''))
+komponent = Section(title='Komponent - nazwa')
+CurrentContainer(komponent)
+display(Markdown(f'''3
+                tekst tekst'''))
+symki = Section(title='Symki - nazwa')
+CurrentContainer(symki)
+display(Markdown(f'''4
+                tekst tekst'''))
 
 doc_final.append(intro)
 doc_final.append(dokument)
@@ -1570,7 +1604,7 @@ doc_final.append(symki)
 doc_final.generate_pdf()
 result = False
 result = doc_final.generate_pdf()
-''')
+""")
 
 class ODEReportComponent(ReportComponent):
     
@@ -1591,7 +1625,7 @@ class ODEReportComponent(ReportComponent):
         display(ReportText('Co więcej, ODESystem posiada ogromną ilosć komponentów raportujących, które tworzą sekcje raportu za nas. Scieżka do ich odnalezienia jest następująca:'))
         display(ObjectCode(ode_components_path_str)) 
 #        display(Picture('./dynpy/utilities/components/guides/images/sciezka_ode.jpg'))
-        display(ReportText('Co więcej, istnieje też property .report, o którym informacja znajduje się rozdział niżej. Aby wygenerować ładnego pdf z użyciem         konkretnego szablonu potrzebujemy zdefiniować nasz dokuemnt jako wybrany template a następnie standardowo zaapendować sekcje w następujący sposób:'))
+        display(ReportText('Co więcej, istnieje też property .report, o którym informacja znajduje się rozdział niżej. Aby wygenerować plik pdf z użyciem wybranego szablonu należy zdefiniować dokuemnt jako wybrany template. Przypomnienie: Sprawdź, czy wszystkie katalogi w ścieżce poniżej istnieją. Jeśli nie, utwórz brakujące foldery przed próbą wygenerowania pliku PDF. Dobrym nawykiem jest stworzenie katalogu na pliki tekstowe wewnątrz swojego projektu. Następnie dodaj wszystkie sekcje używając metody append'))
         display(ObjectCode(property_report_formula)) 
 #        display(Picture('./dynpy/utilities/components/guides/images/appeend.jpg'))
 
@@ -1754,24 +1788,26 @@ definicja_danych=(
 '''
 m=Symbol('m',positive=True)
 g=Symbol('g')
-alfa=Symbol('\\alpha')
+alfa=Symbol('alpha')
 v_0=Symbol('v_0')
 t=Symbol("t")
 x=Function("x")(t)
 y=Function("y")(t)
 
-dane={m:10,g:10,v_0:20,alfa:pi/4}
+dane = {m: 10, g: 9.81, alpha: pi/6, v_0:20}}
 ''')
 
 rownania_predkosci=(
 '''
 v_x=Eq(x.diff(t),v_0*cos(alfa))
 v_y=Eq(y.diff(t),v_0*sin(alfa)-g*t)
+display(v_x, v_y)
 ''')
 definicja_ode=(
 '''
 ODE_x=ODESystem(odes=Matrix([v_x.lhs-v_x.rhs]),dvars=Matrix([x]),ode_order=1)
 ODE_y=ODESystem(odes=Matrix([v_y.lhs-v_y.rhs]),dvars=Matrix([y]),ode_order=1)
+display(ODE_x, ODE_y)
 ''')
 ode_solution_code=(
 '''
@@ -1787,7 +1823,7 @@ class ProjectileExampleComponent(ReportComponent):
         
         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
         from dynpy.solvers.linear import ODESystem
-        m, g, v, alpha = symbols('m g v \\alpha')
+        m, g, v, alpha = symbols('m g v_0 alpha')
 
         t = Symbol('t')
         x = Function('x')(t)
@@ -1804,7 +1840,9 @@ class ProjectileExampleComponent(ReportComponent):
         ODE_x_sol
         
         display(ReportText('Implementacja biblioteki ODESystem'))
-        display(ObjectCode('''from dynpy.solvers.linear import ODESystem'''))
+        display(ObjectCode('''from sympy import *
+from dynpy.solvers.linear import ODESystem
+from sympy.physics.mechanics import dynamicsymbols'''))
   
         display(ReportText('Definiowanie zmiennych i utworzenie słownika'))
         display(ObjectCode(definicja_danych))
@@ -1935,7 +1973,7 @@ r0 = Symbol('r0', positive=True)
 phi0 = dynamicsymbols('phi0')
 ''')
 
-#innit_str=(
+innit_str=(
 '''
 def __init__(self,
              m=None,
@@ -1950,7 +1988,219 @@ tabelka=LatexDataFrame.formatted(
 
 display(tabelka.reported(caption='Data given in the exercise'))
 
+''')
+
+component_str=(
 '''
+@property
+def components(self):
+
+    components = {}
+
+
+    self._mass_x = MaterialPoint(self.m,
+                                 pos1=self.r * sin(self.phi),
+                                 qs=self.qs)
+    self._mass_y = MaterialPoint(self.m,
+                                 pos1=self.r * cos(self.phi),
+                                 qs=self.qs)
+
+    self._gravity_ = GravitationalForce(self.m,
+                                        self.g,
+                                        pos1=self.r * cos(self.phi),
+                                        qs=self.qs)
+
+
+
+    components['_mass_x']=self._mass_x
+    components['_mass_y']=self._mass_y
+    components['_gravity_']=self._gravity_
+
+
+    return components
+''')
+
+
+symb_desc_str=(
+'''
+def symbols_description(self):
+    self.sym_desc_dict = {
+        self.m: r'Mass',
+        self.g: r'Gravity constant',
+        self.c: r'',
+    }
+
+    return self.sym_desc_dict
+''')
+
+def_data_str=(
+'''
+def get_default_data(self):
+
+    m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+
+    default_data_dict = {
+        self.m: [m0 * no for no in range(1, 8)],
+        self.c: [c0 * no for no in range(1, 8)],
+        self.r: [r0 * no for no in range(1, 8)],
+        self.phi: [phi0 * no for no in range(1, 8)],
+    }
+
+    return default_data_dict
+''')
+
+num_data_str=(
+'''
+def get_numerical_data(self):
+
+    m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+
+    default_data_dict = {
+        self.m: [m0 * no for no in range(1, 8)],
+        self.c: [c0 * no for no in range(1, 8)],
+        self.r: [r0 * no for no in range(1, 8)],
+        self.phi: [phi0 * no for no in range(1, 8)],
+    }
+
+    return default_data_dict
+''')
+
+dict_str=(
+'''
+def unit_dict(self):
+
+    from pint import UnitRegistry
+    ureg=UnitRegistry()
+
+    unit_dict = {
+        self.m: ureg.kilogram,
+        self.g: ureg.meter/ureg.second/ureg.second,
+        self.c: ureg.kilogram/ureg.second,
+        self.r: ureg.meter,
+        self.phi: ureg.radian,
+        self.c0: ureg.kilogram/ureg.second,
+        self.r0: ureg.meter,
+        self.phi0:  ureg.radian
+    }
+    return unit_dict
+''')
+
+full_class_str=(
+'''
+from dynpy.models.mechanics.principles import ComposedSystem
+from sympy import *
+
+class MyMaterialPointMovement(ComposedSystem):
+
+    m = Symbol('m', positive=True)
+    g = Symbol('g', positive=True)
+    c = Symbol('c', positive=True)
+    r = Symbol('r', positive=True)
+    phi = dynamicsymbols('phi')
+
+    c0 = Symbol('c0', positive=True)
+    r0 = Symbol('r0', positive=True)
+    phi0 = dynamicsymbols('phi0')
+
+    def __init__(self,
+                 m=None,
+                 g=None,
+                 c=None,
+                 r=None,
+                 phi=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m is not None: self.m = m
+        if g is not None: self.g = g
+        if c is not None: self.c = c
+        if r is not None: self.r = r
+        if phi is not None: self.phi = phi
+        self.ivar = ivar
+
+        self.qs = [self.phi]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+
+        self._mass_x = MaterialPoint(self.m,
+                                     pos1=self.r * sin(self.phi),
+                                     qs=self.qs)
+        self._mass_y = MaterialPoint(self.m,
+                                     pos1=self.r * cos(self.phi),
+                                     qs=self.qs)
+
+        self._gravity_ = GravitationalForce(self.m,
+                                            self.g,
+                                            pos1=self.r * cos(self.phi),
+                                            qs=self.qs)
+
+
+      
+        components['_mass_x']=self._mass_x
+        components['_mass_y']=self._mass_y
+        components['_gravity_']=self._gravity_
+     
+
+        return components
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass',
+            self.g: r'Gravity constant',
+            self.c: r'',
+        }
+
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+
+        default_data_dict = {
+            self.m: [m0 * no for no in range(1, 8)],
+            self.c: [c0 * no for no in range(1, 8)],
+            self.r: [r0 * no for no in range(1, 8)],
+            self.phi: [phi0 * no for no in range(1, 8)],
+        }
+
+        return default_data_dict
+
+    def get_numerical_data(self):
+
+        m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+
+        default_data_dict = {
+            self.m: [m0 * no for no in range(1, 8)],
+            self.c: [c0 * no for no in range(1, 8)],
+            self.r: [r0 * no for no in range(1, 8)],
+            self.phi: [phi0 * no for no in range(1, 8)],
+        }
+
+        return default_data_dict
+        
+    def unit_dict(self):
+
+        from pint import UnitRegistry
+        ureg=UnitRegistry()
+
+        unit_dict = {
+            self.m: ureg.kilogram,
+            self.g: ureg.meter/ureg.second/ureg.second,
+            self.c: ureg.kilogram/ureg.second,
+            self.r: ureg.meter,
+            self.phi: ureg.radian,
+            self.c0: ureg.kilogram/ureg.second,
+            self.r0: ureg.meter,
+            self.phi0:  ureg.radian
+        }
+        return unit_dict        
+''')
 
 class DynSysImplementationComponent(ReportComponent):
     
@@ -2019,25 +2269,28 @@ class InterimScheduleComponent(ReportComponent):
     @property
     def reported_object(self):
 
-        
-        default_data = {'date':datetime.datetime(24,7,16),
+        default_data = {'date':datetime.datetime(2024,7,16),
                        'title':'Title of interim project',
-                       'timedelta':7,
+                       'timedelta':datetime.timedelta(days=7),
                        'issue_no':359,
                        }
 
+    
         
         if isinstance(self._reported_object, dict):
             return {**default_data,**self._reported_object}
 
+#         elif isinstance(self._reported_object, str):
+#             return {**default_data,'date':self._reported_object}
         elif isinstance(self._reported_object, str):
-            return {**default_data,'date':self._reported_object}
-        
+            return {**default_data, 'date': datetime.datetime.strptime(self._reported_object, "%Y-%m-%d")}
+                    
         elif self._reported_object is None:
             return default_data
 
         else:
-            return self._reported_object
+#             return self._reported_object
+            return {**default_data, 'date': self._reported_object}
 
 
     @reported_object.setter
@@ -2056,7 +2309,7 @@ class InterimScheduleComponent(ReportComponent):
         
         tabela_git = {
         'Tydzień prac': [1,2,3,4,5,6,7,8,9,10],
-        'Data': [first_meeting_date+datetime.timedelta(days=days_inc*no) for no in  range(10)],
+        'Data': [first_meeting_date+datetime.timedelta(days=days_inc.days*no) for no in  range(10)],
         'Temat konsultacji': [zadanie_1, zadanie_2, zadanie_3, zadanie_4, zadanie_5, zadanie_6, zadanie_7, zadanie_8, zadanie_9, zadanie_10],
         'Charakter spotkania': [wl,wl,wl,wl,wl,wl,wl,wl,po,po]
             
@@ -3444,6 +3697,11 @@ from dynpy.utilities.components.guides.en import {classname}
 {classname}(None);
 """)
 
+git_com_str2=("""
+from {module} import {classname}
+{classname}({class_field});
+""")
+
 class IssueFeedbackComponent(ReportComponent):
 
     title="Komentarz zamykajacy issue z komponentami"
@@ -3458,7 +3716,12 @@ class IssueFeedbackComponent(ReportComponent):
                        'target':'`ReportComponent` class',
                        'issue_no':359,
                        }
-
+        default_data = {'classname':'Component',
+                       'module':'dynpy.utilities.components.guides.en',
+                       'field':'None',
+                       'target':'`ReportComponent` class',
+                       'issue_no':359,
+                       }
 
         if isinstance(self._reported_object, dict):
             return {**default_data,**self._reported_object}
@@ -3468,7 +3731,7 @@ class IssueFeedbackComponent(ReportComponent):
 
         elif self._reported_object is None:
             return default_data
-
+        
         else:
             return self._reported_object
 
@@ -3486,4 +3749,354 @@ class IssueFeedbackComponent(ReportComponent):
         target = self.reported_object['target']
 
         display(ReportText('The code was checked with the following call: '))
-        display(ObjectCode(git_com_str.format(classname=classname)))
+#        display(ObjectCode(git_com_str.format(classname=classname)))
+        display(ObjectCode(git_com_str2.format(classname=classname,module=class_module,class_field=class_field)))
+    
+old_class_code = '''class ExemplaryOldImplementedSystem(ComposedSystem):
+
+    m = Symbol('m', positive=True)
+    g = Symbol('g', positive=True)
+    c = Symbol('c', positive=True)
+    r = Symbol('r', positive=True)
+    phi = dynamicsymbols('\\varphi')
+
+    c0 = Symbol('c0', positive=True)
+    r0 = Symbol('r0', positive=True)
+    phi0 = dynamicsymbols('phi0')
+
+    def __init__(self,
+                 m=None,
+                 g=None,
+                 c=None,
+                 r=None,
+                 phi=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m is not None: self.m = m
+        if g is not None: self.g = g
+        if c is not None: self.c = c
+        if r is not None: self.r = r
+        if phi is not None: self.phi = phi
+        self.ivar = ivar
+
+        self.qs = [self.phi]
+
+        self._mass_x = MaterialPoint(self.m,
+                                     pos1=self.r * sin(self.phi),
+                                     qs=self.qs)
+        self._mass_y = MaterialPoint(self.m,
+                                     pos1=self.r * cos(self.phi),
+                                     qs=self.qs)
+
+        self._gravity_ = GravitationalForce(self.m,
+                                            self.g,
+                                            pos1=self.r * cos(self.phi),
+                                            qs=self.qs)
+
+        composed_system = self._mass_x + self._mass_y + self._gravity_
+
+        super().__init__(composed_system, **kwargs)
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass',
+            self.g: r'Gravity constant',
+            self.c: r'',
+        }
+
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+
+        default_data_dict = {
+            self.m: [m0 * no for no in range(1, 8)],
+            self.c: [c0 * no for no in range(1, 8)],
+            self.r: [r0 * no for no in range(1, 8)],
+            self.phi: [phi0 * no for no in range(1, 8)],
+        }
+
+        return default_data_dict
+    
+    def get_numerical_data(self):
+
+        m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+
+        default_data_dict = {
+            self.m: [m0 * no for no in range(1, 8)],
+            self.c: [c0 * no for no in range(1, 8)],
+            self.r: [r0 * no for no in range(1, 8)],
+            self.phi: [phi0 * no for no in range(1, 8)],
+        }
+
+        return default_data_dict
+
+    def max_static_force(self):
+        return S.Zero
+
+    def max_dynamic_force(self):
+        return S.Zero'''
+
+new_class_code = '''class MaterialPointMovement(ComposedSystem):
+
+    m = Symbol('m', positive=True)
+    g = Symbol('g', positive=True)
+    c = Symbol('c', positive=True)
+    r = Symbol('r', positive=True)
+    phi = dynamicsymbols('phi')
+
+    c0 = Symbol('c0', positive=True)
+    r0 = Symbol('r0', positive=True)
+    phi0 = dynamicsymbols('phi0')
+
+    def __init__(self,
+                 m=None,
+                 g=None,
+                 c=None,
+                 r=None,
+                 phi=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m is not None: self.m = m
+        if g is not None: self.g = g
+        if c is not None: self.c = c
+        if r is not None: self.r = r
+        if phi is not None: self.phi = phi
+        self.ivar = ivar
+
+        self.qs = [self.phi]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+
+        self._mass_x = MaterialPoint(self.m,
+                                     pos1=self.r * sin(self.phi),
+                                     qs=self.qs)
+        self._mass_y = MaterialPoint(self.m,
+                                     pos1=self.r * cos(self.phi),
+                                     qs=self.qs)
+
+        self._gravity = GravitationalForce(self.m,
+                                            self.g,
+                                            pos1=self.r * cos(self.phi),
+                                            qs=self.qs)
+
+
+
+        components['_mass_x']=self._mass_x
+        components['_mass_y']=self._mass_y
+        components['_gravity']=self._gravity
+
+
+        return components
+        
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.m: r'Mass',
+            self.g: r'Gravity constant',
+            self.c: r'',
+        }
+
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+
+        default_data_dict = {
+            self.m: [m0 * no for no in range(1, 8)],
+            self.c: [c0 * no for no in range(1, 8)],
+            self.r: [r0 * no for no in range(1, 8)],
+            self.phi: [phi0 * no for no in range(1, 8)],
+        }
+
+        return default_data_dict
+    
+    def get_numerical_data(self):
+
+        m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+
+        default_data_dict = {
+            self.m: [m0 * no for no in range(1, 8)],
+            self.c: [c0 * no for no in range(1, 8)],
+            self.r: [r0 * no for no in range(1, 8)],
+            self.phi: [phi0 * no for no in range(1, 8)],
+        }
+
+        return default_data_dict    
+
+    def max_static_force(self):
+        return S.Zero
+
+    def max_dynamic_force(self):
+        return S.Zero'''
+
+
+class CodeRefactorComponent(ReportComponent):
+
+    title = "DynSys system code refactor component"
+
+    def append_elements(self):
+
+        from dynpy.models.mechanics import Engine
+        
+        display(ReportText('Refactoring is a systematic process of improving code without creating new functionality that can transforma mess into clean code and simple design.'))
+        
+        
+        display(ReportText('Example of old DynSys component before refactoring:'))
+        
+        display(ObjectCode(old_class_code))
+        
+        display(ReportText('Example of current DynSys component after refactoring:'))
+        
+        display(ObjectCode(new_class_code))
+        
+        
+        display(ReportText('After calling system_description() method for Engine model bellow result will be created:'))
+        
+        str_sys_des = Engine().system_description().replace('\n', '\n\n').replace('\t', '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')
+
+        display(ReportText(str_sys_des))
+        
+        display(ReportText('\n\nCalling system_parameters() method will create bellow list:'))
+        
+        lst_sys_par = Engine().system_parameters()
+
+        for element in lst_sys_par:
+
+            display(ReportText(f"* {element}"))
+            
+class DynSysSummaryComponent(ReportComponent):
+
+    title = "DynSys system code refactor component"
+
+    def append_elements(self):
+
+        from dynpy.models import mechanics
+
+
+        display(ReportText('DynSys system consists of the following models:'))
+        
+        mods=inspect.getmembers(mechanics, inspect.ismodule)
+
+        for nam,mod in mods:
+
+            mods_tmp = [name for name,cls in inspect.getmembers(mod, inspect.isclass) if issubclass(cls,mechanics.principles.ComposedSystem)]
+            classes_str=',\n - '.join(mods_tmp)
+            if mods_tmp != []:
+                display(ReportText(f' {nam}'))
+                display(ReportText(f'- {classes_str}'))
+                
+        display(ReportText('All of this models should be refactored according to bellow example:'))
+        CodeRefactorComponent(None)
+
+ds_overview_str=("""
+from dynpy.utilities.documents.document import DynSysOverviewReport
+DynSysOverviewReport();
+""")
+
+dynsys_comp_check_str = '''from dynpy.models.mechanics import ForcedSpringMassSystem
+
+comp = ForcedSpringMassSystem()
+
+DynamicSystemCompletenessCheckComponent(comp)'''
+
+basicsymcomp_str = '''from dynpy.models.mechanics.tmac import SDOFWinchSystem
+
+comp = SDOFWinchSystem()
+
+BasicSymComponent(comp)'''
+
+coderefactorcomp_str = '''from dynpy.utilities.components.guides.en import CodeRefactorComponent
+
+CodeRefactorComponent(None)'''
+
+dynsysimpcomp_str = '''from dynpy.utilities.components.guides.pl import DynSysImplementationComponent
+
+DynSysImplementationComponent(None)'''
+
+diffsimcomp_str = '''from dynpy.utilities.components.guides.en import DifferentSimulationsComponent
+
+comp = SDOFWinchSystem()
+
+DifferentSimulationsComponent(comp)'''
+
+dynintrocomp_str = '''from dynpy.utilities.components.guides.en import *
+DynSysIntroComponent(None)'''
+
+dynsumcomp_str = '''from dynpy.utilities.components.guides.en import *
+
+DynSysSummaryComponent(None)'''
+
+dynmetuscomp_str = '''from dynpy.utilities.components.guides.en import DynamicSystemMethodsUsageComponent
+
+comp = SDOFWinchSystem()
+
+DynamicSystemMethodsUsageComponent(None)'''
+
+class DynSysOverviewUsageComponent(ReportComponent):
+
+    title = "Introduction to usage of DynSysOverviewReport"
+
+    def append_elements(self):
+
+        from dynpy.models import mechanics
+
+
+        display(ReportText('This guide concers in-deepth analysis of exsisting dynamic system that are basic elements of `DynPy` library.'))
+        display(ReportText('Basic call of it is as follows and runs default dynamic system which is `ForcedSpringMassSystem'))
+        display(ObjectCode(ds_overview_str))
+        
+        #display(ReportText('This guide concers in-deepth analysis of exsisting dynamic system that are basic elements of `DynPy` library.'))
+        #display(ReportText('It can be run with any available dynamic system.'))
+        
+        #DynamicSystemCompletenessCheckComponent
+        display(ReportText('This component calls and checks all key elements of the dynamic system'))
+        display(ReportText('It can be run with any available dynamic systems.'))
+        display(ObjectCode(dynsys_comp_check_str))
+        
+        #BasicSymComponent
+        display(ReportText('This component shows how to do basic simulations for dynamic system.'))
+        display(ReportText('It can be run for SDOFWinchSystem, as shown on ballow example call.'))
+        display(ObjectCode(basicsymcomp_str))
+        
+        #CodeRefactorComponent
+        display(ReportText('This component shows how to refactor dynsys component according to latest standard.'))
+        display(ReportText('It is called without any argument.'))
+        display(ObjectCode(coderefactorcomp_str))
+        
+        #DifferentSimulationsComponent
+        display(ReportText('This component explains how to implement dynamic system with ComposedSystem class'))
+        display(ReportText('It is called without any argument.'))
+        display(ObjectCode(diffsimcomp_str))
+        
+        #DynSysImplementationComponent
+        display(ReportText('This component explains how to implement dynamic system with ComposedSystem class'))
+        display(ReportText('It can be run for SDOFWinchSystem, as shown on ballow example call.'))
+        display(ObjectCode(dynsysimpcomp_str))
+        
+        #DynSysIntroComponent
+        display(ReportText('This component is simple introduction to using the DynSys module'))
+        display(ReportText('It can be run for SDOFWinchSystem, as shown on ballow example call.'))
+        display(ObjectCode(dynintrocomp_str))
+            
+        #DynSysSummaryComponent
+        display(ReportText('This component shows idea of code refactoring and additionally displays list of available dynamical systems'))
+        display(ReportText('It is called without any argument.'))
+        display(ObjectCode(dynsumcomp_str))
+        
+        #DynamicSystemMethodsUsageComponent
+        display(ReportText('This component shows equations of motion and other methods avaible on dynsys model'))
+        display(ReportText('It can be run with any available dynamic systems.'))
+        display(ObjectCode(dynmetuscomp_str))
+
+
+        

@@ -1819,4 +1819,107 @@ class PredictionOfSteadySolutionComponent(ReportComponent):
 
             display(SympyFormula(comp))
             display(SympyFormula(amp))
-            
+
+class HomoPredictionIntroComponent(ReportComponent):
+
+    title="Second-order differential equation - prediction method"
+    def append_elements(self):
+        system = self.reported_object
+        dvar=system.dvars[0]
+        ivar=system.ivar
+        display(ReportText('One of the basic types of second-order differential equations is the homogeneous equation with constant coefficients. The process of solving this type of equation involves predicting a solution that takes the general form:'))
+        display(SympyFormula(Eq(dvar,Symbol("C")*exp(Symbol('r')*ivar))))
+        display(ReportText('Based on the obtained roots (solutions) of the predicted equation, the final general equation is formulated. Below is an example problem illustrating the process of solving this type of equation:'))
+
+class MainPredictionComponent(ReportComponent):
+
+    title="Predicting the homogeneous solution"
+
+    def append_elements(self):
+
+        system = self.reported_object._hom_equation()
+        C=Symbol("C",positive=True)
+        r=Symbol("r")
+        y=system.dvars[0]
+        x=system.ivar
+        sym_dict=system._get_dvars_symbols()
+        sys_sub=Eq(system.lhs[0],system.rhs[0])
+
+        prdct=Eq(y,C*exp(r*x))
+        prdct_diff=Eq(prdct.lhs.diff(x),prdct.rhs.diff(x))
+        prdct_ddiff=Eq(prdct.lhs.diff(x,2),prdct.rhs.diff(x,2))
+
+        prdct_dict={y:prdct.rhs, y.diff(x):prdct_diff.rhs, y.diff(x,2):prdct_ddiff.rhs}
+
+        r_eq=Eq(system.fundamental_matrix()[0],0)
+        r0_eq=Eq(y.subs(sym_dict),Symbol("r^0"))
+        r1_eq=Eq(y.diff(x).subs(sym_dict),Symbol("r^1"))
+        r2_eq=Eq(y.diff(x,2).subs(sym_dict),Symbol("r^2"))
+
+        display(ReportText("The first step in solving the given equation is to determine the derivatives of the predicted solution. Recalling the original equation, which we predict as our solution, has the following form:"))
+        display(SympyFormula(prdct.subs(sym_dict)))
+        display(ReportText("And then finding the necessary derivatives. In the case of second-order equations, as the name suggests, the highest derivative is of the second degree. Therefore, we need the first two derivatives of the predicted solution. The first derivative is:"))
+        display(SympyFormula(prdct_diff.subs(sym_dict)))
+        display(ReportText("Second derivative:"))
+        display(SympyFormula(prdct_ddiff.subs(sym_dict)))
+        display(ReportText("The next step is to substitute the respective predictions into the corresponding derivatives in the original equation:"))
+        display(SympyFormula(sys_sub.subs(prdct_dict)))
+        display(ReportText("One can notice recurring elements and factor them out before the parentheses:"))
+        display(SympyFormula(sys_sub.subs(prdct_dict).simplify()))
+        display(ReportText("The fundamental principle of mathematics states that if the product of two factors equals zero, then at least one of those factors must be zero. However, in the method of predictions, we do not consider two cases because when the constant of integration, and thus the exponential function, equals zero, the task becomes trivial and does not require further analysis. Therefore, we focus on the second factor, commonly referred to as the characteristic equation, which will provide us with the necessary roots to predict the final equation. The equation undergoing further analysis has the following form:"))
+        display(SympyFormula(r_eq))
+        display(ReportText("After solving a certain number of problems, one can observe a pattern arising from the above prediction, which allows skipping this step and substituting the appropriate values according to the following substitutions:"))
+        display(SympyFormula(r0_eq))
+        display(SympyFormula(r1_eq))
+        display(SympyFormula(r2_eq))
+
+class RootsAnalysisComponent(ReportComponent):
+
+    title="Solution of the characteristic equation and general analysis of its solutions in the context of solving second-order differential equations"
+
+    def append_elements(self):
+
+        system = self.reported_object._hom_equation()
+        sym_dict=system._get_dvars_symbols()
+        y=system.dvars[0].subs(sym_dict)
+        x=system.ivar
+        char=system.fundamental_matrix()[0]
+        char_eq=Eq(char,0)
+        roots=system._eigenvalues()
+        C1=Symbol("C_1",positive=True)
+        C2=Symbol("C_2",positive=True)
+        r0=Symbol("r_0")
+        r1=Symbol("r_1")
+        a=Symbol("alpha")
+        b=Symbol("beta")
+        i=Symbol("i")
+
+        r1_img=Eq(r0,a+i*b)
+        r2_img=Eq(r1,a-i*b)
+
+        pred_real=Eq(y,C1*exp(r0*x)+C2*exp(r1*x))
+        pred_one=Eq(y,C1*exp(r0*x)+C2*x*exp(r0*x))
+        pred_imagine=Eq(y,exp(a*x)*(C1*cos(b*x)+C2*sin(b*x)))
+
+        sol_eq=Eq(y,system.general_solution.rhs[0])
+
+        display(ReportText(f"In second-order differential equations, the characteristic equation takes the form of a quadratic equation. Such an equation can yield three types of roots in its solution, and depending on the type obtained, we select the general solution of this equation. When the calculated discriminant is greater than zero, we obtain two real roots in the form ${latex(r0)}$ and ${latex(r1)}$. In this case, the predicted solution takes the form:"))
+        display(SympyFormula(pred_real))
+        display(ReportText(f"When the calculated discriminant is equal to 0, we obtain one root in the form ${latex(r0)}$. In this case, the predicted solution takes the form:"))
+        display(SympyFormula(pred_one))
+        display(ReportText("When the calculated discriminant is less than 0, we obtain two complex roots in the form:"))
+        display(SympyFormula(r1_img))
+        display(SympyFormula(r2_img))
+        display(ReportText(f"Where ${latex(a)}$ is the real part of the root, and ${latex(b)}$ is the imaginary part. The predicted solution in this case takes the following form:"))
+        display(SympyFormula(pred_imagine))
+        display(ReportText("The characteristic equation in the given example is:"))
+        display(SympyFormula(char_eq))
+        display(ReportText("The roots of this equation take the form:"))
+        i=0
+        lista=system._roots_list()
+        for elem in lista:
+            if elem !=0:
+                display(SympyFormula( Eq(Symbol(f"r_{i}"),elem) , marker=None))
+                i+=1
+        display(ReportText("After identifying the type of roots, we can express the solution as:"))
+        display(SympyFormula(sol_eq))

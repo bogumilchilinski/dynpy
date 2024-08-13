@@ -3267,3 +3267,275 @@ class DampedPendulumWithVaryingStiffness(ComposedSystem):
             self.A_pipe2:r'cross-section area of the lower member',
         }
         return self.sym_desc_dict
+    
+    
+    
+    
+### Classes of RollingBar
+class RollingBar(ComposedSystem):
+    """
+    Model of a Single Degree of Freedom - RollingBar
+
+        Arguments:
+        =========
+            m = Mass
+                -Mass of the Bar
+
+            l = length
+                -Length of th Bar
+
+            h = thickness
+                -thickness of the Bar
+
+            g = gravitional field
+                -value of gravitional field acceleration
+
+            r = radius
+                -radius of the Half Disc
+
+            ivar = symbol object
+                -Independant time variable
+
+            phi = dynamicsymbol object
+                -angle of the Bar
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+        Example
+        =======
+        A rolling bar on half disc with radius R.
+
+        >>> t = symbols('t')
+        >>> R = symbols(' R ',positive=True)
+        >>> RollingBar(r=R)
+
+        -We define the symbols and dynamicsymbols
+        -determine the instance of the RollingBar by using class RollingBar()
+    """
+
+    scheme_name = 'rolling_bar.png'
+    real_name = 'rolling_bar.png'
+    r=Symbol('r', positive=True)
+    m=Symbol('m', positive=True)
+    g=Symbol('g', positive=True)
+    l=Symbol('l', positive=True)
+    h=Symbol('h', positive=True)
+    phi=dynamicsymbols('varphi')
+
+    def __init__(self,
+                 r=None,
+                 m=None,
+                 l=None,
+                 h=None,
+                 g=None,
+                 ivar=Symbol('t'),
+                 phi=None,
+                 **kwargs):
+
+
+        if r is not None: self.r = r
+        if m is not None: self.m = m
+        if g is not None: self.g = g
+        if l is not None: self.l = l
+        if h is not None: self.h = h
+
+        if phi is not None: self.phi = phi
+        self.ivar=ivar
+        self.qs=[self.phi]
+        self._init_from_components(**kwargs)
+
+    @cached_property
+    def components(self):
+        components = {}
+
+        self.x = (self.r+self.h/2) / cos(self.phi)
+        self.y =  (self.r+self.h/2) * cos(self.phi) - self.r * self.phi * sin(self.phi)
+        I = self.m / 12 * (self.l**2 + self.h**2)
+
+        self.material_point_1 = MaterialPoint(self.m, self.x,ivar=self.ivar, qs=[self.phi])
+        self.material_point_2 = MaterialPoint(self.m, self.y,ivar=self.ivar, qs=[self.phi])
+        self.material_point_3 = MaterialPoint(I, self.phi,ivar=self.ivar, qs=[self.phi])
+        self.gravity = GravitationalForce(self.m, self.g, pos1=-self.y,ivar=self.ivar, qs=[self.phi])
+
+        components['material_point_1'] = self.material_point_1
+        components['material_point_2'] = self.material_point_2
+        components['material_point_3'] = self.material_point_3
+        components['gravity'] = self.gravity
+
+        return components
+
+    def get_default_data(self):
+
+        m0, r0, l0, h0 = symbols('m_0 r_0 l_0 h_0', positive=True)
+
+        default_data_dict = {
+            self.m: [S.One * m0 * no for no in range(2,7)],
+            self.r: [2 * r0, 3 * r0, 4 * r0, 5 * r0, 6 * r0],
+            self.l: [1.4 * l0, 1.5 * l0, 1.6 * l0, 1.7 * l0, 1.8 * l0],
+            self.h: [ S.One*h0* no for no in range(1,7)],
+        }
+        return default_data_dict
+
+    def get_numerical_data(self):
+        m0, l0, r0 = symbols('m_0 l_0 r_0', positive=True)
+
+        default_data_dict = {
+            self.m: [1],
+            self.r: [1],
+            self.h: [0.05],
+            self.l: [1.8],
+        }
+        return default_data_dict
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.r: r'Half disc radius',
+            self.m: r'Mass',
+            self.l: r'Length of the Bar',
+            self.h: r'Thickness of the Bar',
+            self.g: 'Gravity constant',
+        }
+        return self.sym_desc_dict
+
+class ForcedRollingBar(RollingBar):
+    """
+    Model of a Single Degree of Freedom - ForcedRollingBar
+
+        Arguments:
+        =========
+            m = Mass
+                -Mass of the Bar
+
+            l = length
+                -Length of th Bar
+
+            h = thickness
+                -thickness of the Bar
+
+            g = gravitional field
+                -value of gravitional field acceleration
+
+            r = radius
+                -radius of the Half Disc
+            
+            M_0 = torque amplitude
+                -amplitude value of horisontal force
+            
+            Omega = Frequency of force
+                -value of frequency force
+            
+            ivar = symbol object
+                -Independant time variable
+
+            phi = dynamicsymbol object
+                -angle of the Bar
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+        Example
+        =======
+        A rolling bar on half disc with radius R.
+
+        >>> t = symbols('t')
+        >>> R = symbols(' R ',positive=True)
+        >>> ForcedRollingBar(r=R)
+
+        -We define the symbols and dynamicsymbols
+        -determine the instance of the ForcedRollingBar by using class ForcedRollingBar()
+    """
+
+    scheme_name = 'forced_rolling_bar.png'
+    real_name = 'forced_rolling_bar.png'
+    r=Symbol('r', positive=True)
+    m=Symbol('m', positive=True)
+    g=Symbol('g', positive=True)
+    l=Symbol('l', positive=True)
+    h=Symbol('h', positive=True)
+    M_0=Symbol('M_0', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    phi=dynamicsymbols('varphi')
+
+    def __init__(self,
+                 r=None,
+                 m=None,
+                 l=None,
+                 h=None,
+                 g=None,
+                 M_0=None,
+                 Omega=None,
+                 ivar=Symbol('t'),
+                 phi=None,
+                 **kwargs):
+
+
+        if r is not None: self.r = r
+        if m is not None: self.m = m
+        if g is not None: self.g = g
+        if l is not None: self.l = l
+        if h is not None: self.h = h
+        if M_0 is not None: self.M_0 = M_0
+        if Omega is not None: self.Omega = Omega
+
+        if phi is not None: self.phi = phi
+        self.ivar=ivar
+        self.qs=[self.phi]
+        self._init_from_components(**kwargs)
+
+    @cached_property
+    def components(self):
+        components = {}
+
+        self.x = (self.r+self.h/2) / cos(self.phi)
+        self.y =  (self.r+self.h/2) * cos(self.phi) - self.r * self.phi * sin(self.phi)
+        I = self.m / 12 * (self.l**2 + self.h**2)
+
+
+        
+        self.roling_bar = RollingBar(r=self.r,
+                 m=self.m,
+                 l=self.l,
+                 h=self.h,
+                 g=self.g,
+                 phi=self.phi)
+        self.torque = Force(self.M_0*cos(self.Omega * self.ivar), self.phi, qs=self.qs)
+        
+        components['roling_bar'] = self.roling_bar
+        components['torque'] = self.torque
+
+        return components
+
+    def get_default_data(self):
+
+        m0, r0, l0, h0 = symbols('m_0 r_0 l_0 h_0', positive=True)
+
+        default_data_dict = {
+            self.m: [S.One * m0 * no for no in range(2,7)],
+            self.r: [2 * r0, 3 * r0, 4 * r0, 5 * r0, 6 * r0],
+            self.l: [1.4 * l0, 1.5 * l0, 1.6 * l0, 1.7 * l0, 1.8 * l0],
+            self.h: [ S.One*h0* no for no in range(1,7)],
+        }
+        return default_data_dict
+
+    def get_numerical_data(self):
+        m0, l0, r0 = symbols('m_0 l_0 r_0', positive=True)
+
+        default_data_dict = {
+            self.m: [1],
+            self.r: [1],
+            self.h: [0.05],
+            self.l: [1.8],
+            self.M_0: [1],
+            self.Omega: [50],
+        }
+        return default_data_dict
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.r: r'Half disc radius',
+            self.m: r'Mass',
+            self.l: r'Length of the Bar',
+            self.h: r'Thickness of the Bar',
+            self.g: 'Gravity constant',
+        }
+        return self.sym_desc_dict
+

@@ -4623,3 +4623,27 @@ class SystemParameter:
                 param: parameter_values[no]
                 for no, param in enumerate(params)
             }
+class HomoODE2ndOrderPL(ODESystem):
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+        ode_comp_pl.HomoPredictionIntroComponent,
+        ode_comp_pl.EquationDefinitionComponent,
+        ode_comp_pl.MainPredictionComponent,
+        ode_comp_pl.RootsAnalysisComponent,
+        ]
+        return comp_list
+class HomoODE2ndOrderEN(ODESystem):
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+        ode.HomoPredictionIntroComponent,
+        ode.EquationDefinitionComponent,
+        ode.MainPredictionComponent,
+        ode.RootsAnalysisComponent,
+        ]
+        return comp_list

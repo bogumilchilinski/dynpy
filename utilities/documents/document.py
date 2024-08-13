@@ -1168,6 +1168,7 @@ class DynSysOverviewReport(UsageOfDynamicSystemsGuide):
     def _report_components(self):
 
         comp_list=[
+            guide_comp.DynSysOverviewUsageComponent,
             guide_comp.IssuePreparationComponent,
             guide_comp.DynamicSystemCallComponent,
             guide_comp.NumericalAnalysisSimulationComponent,
@@ -1181,11 +1182,7 @@ class DynSysOverviewReport(UsageOfDynamicSystemsGuide):
 
         return comp_list
 
-    
-    
-    
-    
-    
+
 class BasicsOfDynSysImplementationGuide(UsageOfDynamicSystemsGuide):
 
     @property

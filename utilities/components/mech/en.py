@@ -1276,7 +1276,7 @@ f'''
 class FundamentalMatrixComponent(ReportComponent):
 
     #title="Wyznaczanie macierzy fundamentalnej"
-    title="Determining fundemental matrix";
+    title="Determining fundamental matrix";
 
     @property
     def header_text(self):
