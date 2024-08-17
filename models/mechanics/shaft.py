@@ -1057,6 +1057,38 @@ class TripleShaft(ComposedSystem):
     scheme_name = 'MDoFTripleShaft.PNG'
     real_name = 'MDoFTripleShaft_real.jpg'
 
+    
+    m=Symbol('m', positive=True)
+    m_1=Symbol('m_1', positive=True)
+    m_2=Symbol('m_2', positive=True)
+    m_3=Symbol('m_3', positive=True)
+               
+    l_1=Symbol('l_1', positive=True)
+    l_2=Symbol('l_2', positive=True)
+    l_3=Symbol('l_3', positive=True)
+
+    d=Symbol('d', positive=True)
+    d_1=Symbol('d_1', positive=True)
+    d_2=Symbol('d_2', positive=True)
+    d_3=Symbol('d_3', positive=True)
+
+    G = Symbol('G', positive=True)
+    M_1=Symbol('M_1',positive=True)
+    M_2=Symbol('M_2',positive=True)
+    M_3=Symbol('M_3',positive=True)
+
+    Omega=Symbol('Omega',positive=True)
+    delta =Symbol('delta', positive=True)
+    
+    input_displacement=dynamicsymbols('theta')
+    phi_1=dynamicsymbols('\\varphi_1')
+    phi_2=dynamicsymbols('\\varphi_2')
+    phi_3=dynamicsymbols('\\varphi_3')
+    
+    phi_r=dynamicsymbols('\\varphi_r')
+    phi_l=dynamicsymbols('\\varphi_l')
+
+
     def __init__(self,
                  m = symbols('m', positive=True),
                  m_1=Symbol('m_1', positive=True),
@@ -1088,44 +1120,103 @@ class TripleShaft(ComposedSystem):
                  qs=dynamicsymbols('\\varphi_1, \\varphi_2, \\varphi_3,'),
                  **kwargs):
 
+        if  m is not None: self.m = m
+        if  m_1 is not None: self.m_1 = m_1
+        if  m_2 is not None: self.m_2 = m_2
+        if  m_3 is not None: self.m_3 = m_3
+        if  l_1 is not None: self.l_1 = l_1
+        if  l_2 is not None: self.l_2 = l_2
+        if  l_3 is not None: self.l_3 = l_3
+        if  d is not None: self.d = d
+        if  d_1 is not None: self.d_1 = d_1
+        if  d_2 is not None: self.d_2 = d_2
+        if  d_3 is not None: self.d_3 = d_3
+        if  G is not None: self.G = G
+        if  M_1 is not None: self.M_1 = M_1
+        if  M_2 is not None: self.M_2 = M_2
+        if  M_3 is not None: self.M_3 = M_3
+        if Omega is not None: self.Omega = Omega
+        if delta is not None: self.delta = delta
+        if  phi_1 is not None: self.phi_1 = phi_1
+        if  phi_2 is not None: self.phi_2 = phi_2
+        if  phi_3 is not None: self.phi_3 = phi_3
+        if  phi_l is not None: self.phi_l = phi_l
+        if  phi_r is not None: self.phi_r = phi_r
+        if  input_displacement is not None: self.input_displacement = input_displacement
+#         if  qs is not None: self.phi_r = phi_r
+        self.qs = [self.phi_1,self.phi_2,self.phi_3]
+               
+        self.theta = input_displacement
+        self._init_from_components(**kwargs)
 
-        theta = input_displacement
         
-        self.m_1=m_1
-        self.m_2=m_2
-        self.m_3=m_3
-        self.G=G
-
-        self.l_1=l_1
-        self.l_2=l_2
-        self.l_3=l_3
-
-        self.d_1=d_1
-        self.d_2=d_2
-        self.d_3=d_3
-        self.d=d
-
-        self.M_1=M_1
-        self.M_2=M_2
-        self.M_3=M_3
-
-        self.Omega=Omega
-        self.delta=delta
-
-        self.phi_1=phi_1
-        self.phi_2=phi_2
-        self.phi_3=phi_3
         
-        self.phi_l=phi_l
-        self.phi_r=phi_r
+#         self.m_1=m_1
+#         self.m_2=m_2
+#         self.m_3=m_3
+#         self.G=G
 
-        self.input_displacement = input_displacement
-        self.qs = qs
+#         self.l_1=l_1
+#         self.l_2=l_2
+#         self.l_3=l_3
 
-        I_0=S.Half*pi*(d/2)**4
-        I_1=S.Half*m_1*(d_1/2)**2
-        I_2=S.Half*m_2*(d_2/2)**2
-        I_3=S.Half*m_3*(d_3/2)**2
+#         self.d_1=d_1
+#         self.d_2=d_2
+#         self.d_3=d_3
+#         self.d=d
+
+#         self.M_1=M_1
+#         self.M_2=M_2
+#         self.M_3=M_3
+
+#         self.Omega=Omega
+#         self.delta=delta
+
+#         self.phi_1=phi_1
+#         self.phi_2=phi_2
+#         self.phi_3=phi_3
+        
+#         self.phi_l=phi_l
+#         self.phi_r=phi_r
+
+#         self.input_displacement = input_displacement
+#         self.qs = qs
+
+#         I_0=S.Half*pi*(d/2)**4
+#         I_1=S.Half*m_1*(d_1/2)**2
+#         I_2=S.Half*m_2*(d_2/2)**2
+#         I_3=S.Half*m_3*(d_3/2)**2
+        
+#         self.I_m0 = I_0
+#         self.I_m1 = I_1
+#         self.I_m2 = I_2
+#         self.I_m3 = I_3
+        
+
+#         k_1=(G*I_0)/l_1
+#         k_2=(G*I_0)/l_1
+#         k_3=(G*I_0)/l_1
+
+#         self.disk_1 = Disk(I_1, pos1=phi_1, qs=qs) + Force(-M_1 * cos(Omega * ivar + delta), pos1 = phi_1, qs = [phi_1])
+#         self.spring_1 = Spring(k_1, pos1=theta, pos2=phi_1, qs=qs)  # left rod
+#         self.disk_2 = Disk(I_2, pos1=phi_2, qs=qs) + Force(-M_2 * cos(Omega * ivar + delta), pos1 = phi_2, qs = [phi_2])
+#         self.spring_2 = Spring(k_2, pos1=phi_1, pos2=phi_2, qs=qs)  # central rod
+#         self.disk_3 = Disk(I_3, pos1=phi_3, qs=qs) + Force(-M_3 * cos(Omega * ivar + delta), pos1 = phi_3, qs = [phi_3])
+#         self.spring_3 = Spring(k_3, pos1=phi_2, pos2=phi_3, qs=qs)  # right rod
+
+#         system = self.disk_1 + self.disk_2 + self.disk_3 + self.spring_1 + self.spring_2 + self.spring_3
+
+#         super().__init__(system(qs),**kwargs)
+
+
+    @property
+    def components(self):
+        components = {}
+
+        I_0=S.Half*pi*(self.d/2)**4
+        I_1=S.Half*self.m_1*(self.d_1/2)**2
+        I_2=S.Half*self.m_2*(self.d_2/2)**2
+        I_3=S.Half*self.m_3*(self.d_3/2)**2
         
         self.I_m0 = I_0
         self.I_m1 = I_1
@@ -1133,21 +1224,37 @@ class TripleShaft(ComposedSystem):
         self.I_m3 = I_3
         
 
-        k_1=(G*I_0)/l_1
-        k_2=(G*I_0)/l_1
-        k_3=(G*I_0)/l_1
+        self.k_1=(self.G*I_0)/self.l_1
+        self.k_2=(self.G*I_0)/self.l_2
+        self.k_3=(self.G*I_0)/self.l_3
+#         self.qs = [self.phi_1,self.phi_2]
+#         self.k_1 = (self.G*self.I_1)/self.l_1
+#         self.k_2 = (self.G*self.I_2)/self.l_2
 
-        self.disk_1 = Disk(I_1, pos1=phi_1, qs=qs) + Force(-M_1 * cos(Omega * ivar + delta), pos1 = phi_1, qs = [phi_1])
-        self.spring_1 = Spring(k_1, pos1=theta, pos2=phi_1, qs=qs)  # left rod
-        self.disk_2 = Disk(I_2, pos1=phi_2, qs=qs) + Force(-M_2 * cos(Omega * ivar + delta), pos1 = phi_2, qs = [phi_2])
-        self.spring_2 = Spring(k_2, pos1=phi_1, pos2=phi_2, qs=qs)  # central rod
-        self.disk_3 = Disk(I_3, pos1=phi_3, qs=qs) + Force(-M_3 * cos(Omega * ivar + delta), pos1 = phi_3, qs = [phi_3])
-        self.spring_3 = Spring(k_3, pos1=phi_2, pos2=phi_3, qs=qs)  # right rod
+        self.disc_1 = Disk(self.I_m1, pos1=self.phi_1, qs=self.qs)
+        self.spring_1 = Spring(self.k_1, self.phi_1, self.phi_2, qs=self.qs)  # left spring
+        
+        self.disc_2 = Disk(self.I_m2, pos1=self.phi_2, qs=self.qs)
+        self.spring_2 = Spring(self.k_2, pos1=self.phi_2, pos2=self.theta,qs=self.qs)  # right spring
+               
+        self.disc_3 = Disk(self.I_m3, pos1=self.phi_3, qs=self.qs)
+        self.spring_3 = Spring(self.k_3, pos1=self.phi_3, pos2=self.theta,qs=self.qs)
+               
+        self.moment_disc1=Force(self.M_1, pos1=self.phi_1)
+        self.moment_disc2=Force(self.M_2, pos1=self.phi_2)
+        self.moment_disc3=Force(self.M_3, pos1=self.phi_3)
 
-        system = self.disk_1 + self.disk_2 + self.disk_3 + self.spring_1 + self.spring_2 + self.spring_3
+        components['disc_1'] = self.disc_1
+        components['disc_2'] = self.disc_2
+        components['disc_3'] = self.disc_3
+        components['spring_1'] = self.spring_1
+        components['spring_2'] = self.spring_2
+        components['spring_3'] = self.spring_3
+        components['moment_disc1'] = self.moment_disc1
+        components['moment_disc2'] = self.moment_disc2
+        components['moment_disc3'] = self.moment_disc3
 
-        super().__init__(system(qs),**kwargs)
-
+        return components
 #     def symbols_description(self):
 #         self.sym_desc_dict = {
 #             self.I: r'Moment of Inertia',
@@ -1155,13 +1262,43 @@ class TripleShaft(ComposedSystem):
 #             self.k_2: r'',
 #         }
 #         return self.sym_desc_dict
+    def get_numerical_data(self):
 
-    
+        default_data_dict = {
+
+            
+            
+            self.m_1: [1],
+            self.m_2: [1],
+            self.m_3: [1],
+
+            self.l_1: [1],
+            self.l_2: [1],
+            self.l_3: [2],
+
+            self.d_1: [1],
+            self.d_2: [1],
+            self.d_3: [1],
+            self.d: [1],
+
+            self.G:[1],
+            
+            self.delta:[0],
+
+            self.input_displacement:[0],
+            
+            self.theta:[0],
+            
+            self.M_1:[1],
+            self.M_2:[1],
+            self.M_3:[1],
+        }
+        return default_data_dict
     def get_default_data(self):
 
 
         m0, M0, l0 , d0 ,M0= symbols('m_0 M_0 l_0 d_0 M_0', positive=True)
-        theta0, Omega = symbols('theta_0, Omega', positive=True)
+        theta0, Omega = symbols('theta_0 Omega', positive=True)
 
         default_data_dict = {
             
@@ -1190,6 +1327,8 @@ class TripleShaft(ComposedSystem):
             self.delta:[0],
 
             self.input_displacement:[0],
+            
+            self.theta:[0],
             
             self.M_1:[M0],
             self.M_2:[M0],

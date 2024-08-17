@@ -3539,3 +3539,358 @@ class ForcedRollingBar(RollingBar):
         }
         return self.sym_desc_dict
 
+    
+class CompoundPendulum(ComposedSystem):
+    """
+    Model of a sDoF Compound Pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
+
+        Arguments:
+        =========
+            m = Mass
+                -Mass of system on spring
+
+            I = Moment of Inertia
+                -Compound Pendulum moment of inertia
+
+            g = gravitional field
+                -value of gravitional's field acceleration
+
+            l = lenght
+                -Distance of the center of mass of a Compound pendulum from the axis of rotation
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+        Example
+        =======
+        A mass oscillating up and down while being held up by a spring with a spring constant kinematicly 
+
+        >>> t = symbols('t')
+        >>> m, I, g, l = symbols('m, I, g, l')
+        >>> qs = dynamicsymbols('varphi') # Generalized Coordinates
+        >>> CompoundPendulum()
+
+        -We define the symbols and dynamicsymbols
+        -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
+        -determine the instance of the Compound Pendulum by using class Pendulum()
+    """
+    scheme_name = 'undamped_pendulum.png'
+    real_name = 'pendulum_real.jpg' #compoundpendulum
+
+    
+    m=Symbol('m', positive=True)
+    I=Symbol('I', positive=True)
+    g=Symbol('g', positive=True)
+    l=Symbol('l', positive=True)
+    phi=dynamicsymbols('\phi')
+    qs=None
+    
+    m0=Symbol('m_0',positive=True)
+    l0 = Symbol('l_0', positive=True)
+    
+    def __init__(self,
+                 m=None,
+                 I=None,
+                 g=None,
+                 l=None,
+                 phi=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        #if qs == None:
+        #    qs = [angle]
+        #else:
+        #    qs = qs
+
+        if m is not None: self.m = m
+        if I is not None: self.I = I
+        if g is not None: self.g = g
+        if l is not None: self.l = l
+        if phi is not None: self.phi = phi
+        if ivar is not None: self.ivar = ivar
+
+        
+        self.qs = [self.phi]
+
+        self._init_from_components(**kwargs)
+        
+        
+        
+    @cached_property
+    def components(self):
+
+        components = {}
+        self.x=self.l*sin(self.phi)
+        self.y=self.l*(1-cos(self.phi))
+
+        self.material_point_1 = MaterialPoint(self.m, self.x,ivar=self.ivar, qs=[self.phi])
+        self.material_point_2 = MaterialPoint(self.m, self.y,ivar=self.ivar, qs=[self.phi])
+        self.material_point_3 = MaterialPoint(self.I, self.phi,ivar=self.ivar, qs=[self.phi])
+        self.gravity = GravitationalForce(self.m, self.g, pos1=self.y,ivar=self.ivar, qs=[self.phi])
+
+#         self.gravitationalforce = GravitationalForce(self.m, self.g, self.l * (1 - cos(self.angle)), qs = self.qs)
+#         self.material_point = MaterialPoint(self.m * self.l**2, pos1=self.angle, qs=self.qs)
+        
+#         components['Gravitational_Force'] = self.gravitationalforce        
+#         components['Material_Point'] = self.material_point
+        components['material_point_1'] = self.material_point_1
+        components['material_point_2'] = self.material_point_2
+        components['material_point_3'] = self.material_point_3
+        components['gravity'] = self.gravity
+        
+        return components
+        
+    def get_default_data(self):
+
+       
+        m0, l0 = self.m0, self.l0
+        
+        
+        default_data_dict = {
+
+            self.m: [S.One * no * m0 * 10 for no in range(5, 8)],
+            self.l: [S.One * no * l0 for no in range(10, 20)],
+            self.m * self.l**2:[self.m * self.l**2],
+            
+        }
+        return default_data_dict
+
+    def get_numerical_data(self):
+        
+        
+        default_data_dict = {
+
+            self.m: [S.One * no * 10 for no in range(5, 8)],
+            self.l: [S.One * no for no in range(10, 20)],
+            self.I: [S.One * no for no in range(3,9)],
+            
+            
+            
+        }
+        return default_data_dict
+    
+    
+    def symbols_description(self):
+        self.sym_desc_dict = {
+
+            self.m: r'Mass of pendulum',
+            self.g: r'Gravity constant',
+            self.l: r'Pendulum length',
+            self.phi: r'angle of the pendulum',
+            self.phi.diff(self.ivar): r'velocity of the pendulum',
+            self.phi.diff(self.ivar,2): r'acceleration of the pendulum',
+            self.ivar: r'time',
+        }
+        return self.sym_desc_dict
+
+    @property
+    def _report_components(self):
+
+        comp_list = [
+            *REPORT_COMPONENTS_LIST
+        ]
+
+        return comp_list
+
+    def unit_dict(self):
+        units_dict = {
+                self.m: ureg.kilogram,
+                self.g: ureg.meter/ureg.second/ureg.second,
+                self.l: ureg.meter,
+                self.phi: ureg.radian,
+                self.phi.diff(self.ivar): ureg.radian/ureg.second,
+                self.phi.diff(self.ivar,2): ureg.radian/ureg.second/ureg.second,
+                self.ivar: ureg.second,
+                }
+
+        return units_dict
+
+class ForcedCompoundPendulum(ComposedSystem):
+    """
+    Model of a sDoF Compound Pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
+
+        Arguments:
+        =========
+            m = Mass
+                -Mass of system on spring
+
+            I = Moment of Inertia
+                -Compound Pendulum moment of inertia
+
+            g = gravitional field
+                -value of gravitional's field acceleration
+
+            l = lenght
+                -Distance of the center of mass of a Compound pendulum from the axis of rotation
+                
+            F_amp = force amplitude
+                -amplitude value of horisontal force
+            
+            Omega = Frequency of force
+                -value of frequency force
+
+            ivar = symbol object
+                -Independant time variable
+
+            qs = dynamicsymbol object
+                -Generalized coordinates
+
+        Example
+        =======
+        A mass oscillating up and down while being held up by a spring with a spring constant kinematicly 
+
+        >>> t = symbols('t')
+        >>> m, I, g, l = symbols('m, I, g, l')
+        >>> qs = dynamicsymbols('varphi') # Generalized Coordinates
+        >>> CompoundPendulum()
+
+        -We define the symbols and dynamicsymbols
+        -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
+        -determine the instance of the Compound Pendulum by using class Pendulum()
+    """
+    scheme_name = 'undamped_pendulum.png'
+    real_name = 'pendulum_real.jpg' #compoundpendulum
+
+    
+    m=Symbol('m', positive=True)
+    I=Symbol('I', positive=True)
+    g=Symbol('g', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    F_amp=Symbol('M_0', positive=True)
+    l=Symbol('l', positive=True)
+    phi=dynamicsymbols('\phi')
+    qs=None
+    
+    m0=Symbol('m_0',positive=True)
+    l0 = Symbol('l_0', positive=True)
+    
+    def __init__(self,
+                 m=None,
+                 I=None,
+                 g=None,
+                 l=None,
+                 F_amp=None,
+                 Omega=None,
+                 phi=None,
+                 ivar=None,
+                 **kwargs):
+
+        #if qs == None:
+        #    qs = [angle]
+        #else:
+        #    qs = qs
+
+        if m is not None: self.m = m
+        if I is not None: self.I = I
+        if g is not None: self.g = g
+        if l is not None: self.l = l
+        if F_amp is not None: self.F_amp = F_amp
+        if Omega is not None: self.Omega = Omega
+        if phi is not None: self.phi = phi
+        if ivar is not None: self.ivar = ivar
+
+        
+        self.qs = [self.phi]
+
+        self._init_from_components(**kwargs)
+        
+        
+        
+    @cached_property
+    def components(self):
+        components = {}
+#                  m=None,
+#                  I=None,
+#                  g=None,
+#                  l=None,
+#                  phi=None,
+        self.compound_pendulum = CompoundPendulum(m=self.m, l=self.l, phi=self.phi, I=self.I, g=self.g, qs=self.qs)
+        self.force = Force(self.F_amp*cos(self.Omega*self.ivar), self.phi, qs=self.qs)
+
+        components['compound_pendulum'] = self.compound_pendulum
+        components['force'] = self.force
+        
+#         self.x=self.l*sin(self.phi)
+#         self.y=self.l*(1-cos(self.phi))
+
+#         self.material_point_1 = MaterialPoint(self.m, self.x,ivar=self.ivar, qs=[self.phi])
+#         self.material_point_2 = MaterialPoint(self.m, self.y,ivar=self.ivar, qs=[self.phi])
+#         self.material_point_3 = MaterialPoint(self.I, self.phi,ivar=self.ivar, qs=[self.phi])
+#         self.gravity = GravitationalForce(self.m, self.g, pos1=self.y,ivar=self.ivar, qs=[self.phi])
+
+#         components['material_point_1'] = self.material_point_1
+#         components['material_point_2'] = self.material_point_2
+#         components['material_point_3'] = self.material_point_3
+#         components['gravity'] = self.gravity
+        
+        return components
+        
+    def get_default_data(self):
+
+       
+        m0, l0 = self.m0, self.l0
+        
+        
+        default_data_dict = {
+
+            self.m: [S.One * no * m0 * 10 for no in range(5, 8)],
+            self.l: [S.One * no * l0 for no in range(10, 20)],
+            self.m * self.l**2:[self.m * self.l**2],
+            
+        }
+        return default_data_dict
+
+    def get_numerical_data(self):
+        
+        
+        default_data_dict = {
+
+            self.m: [S.One * no * 10 for no in range(5, 8)],
+            self.l: [S.One * no for no in range(10, 20)],
+            self.I: [S.One * no for no in range(3,9)],
+            self.F_amp: [S.One * no for no in range(3,9)],
+            self.Omega: [S.One * no for no in range(60,63)],
+            
+            
+            
+        }
+        return default_data_dict
+    
+    
+    def symbols_description(self):
+        self.sym_desc_dict = {
+
+            self.m: r'Mass of pendulum',
+            self.g: r'Gravity constant',
+            self.l: r'Pendulum length',
+            self.phi: r'angle of the pendulum',
+            self.phi.diff(self.ivar): r'velocity of the pendulum',
+            self.phi.diff(self.ivar,2): r'acceleration of the pendulum',
+            self.ivar: r'time',
+        }
+        return self.sym_desc_dict
+
+    @property
+    def _report_components(self):
+
+        comp_list = [
+            *REPORT_COMPONENTS_LIST
+        ]
+
+        return comp_list
+
+    def unit_dict(self):
+        units_dict = {
+                self.m: ureg.kilogram,
+                self.g: ureg.meter/ureg.second/ureg.second,
+                self.l: ureg.meter,
+                self.phi: ureg.radian,
+                self.phi.diff(self.ivar): ureg.radian/ureg.second,
+                self.phi.diff(self.ivar,2): ureg.radian/ureg.second/ureg.second,
+                self.ivar: ureg.second,
+                }
+
+        return units_dict

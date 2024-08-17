@@ -1734,7 +1734,7 @@ class MDoFForcedTrolleysWithSprings(ComposedSystem):
     
 #TODO(#212 - check)
 #ZAPYTAC SIE BOGUSIA CO Z TYM - PRZENIESIONO Z MODUŁU systems.py
-class MDoFTMD(ComposedSystem):
+class MDoFTMD1(ComposedSystem):
     scheme_name = 'mdof_tmd.png'
     real_name = 'mdof_tmd_real.png'
     """
@@ -1809,7 +1809,7 @@ class MDoFTMD(ComposedSystem):
         return self.sym_desc_dict
 #poprawione MDofTMD1- ready to check
 #TODO(#212 - check)
-class MDoFTMD1(ComposedSystem):
+class MDoFTMD(ComposedSystem):
     
     scheme_name = 'MDoF_new.png'
     real_name = 'mdof_tmd_real.png'
