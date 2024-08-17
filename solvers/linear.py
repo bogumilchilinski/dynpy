@@ -815,7 +815,6 @@ class AnalyticalSolution(ImmutableMatrix):
 
         parameters = self.system_parameters()
         
-        display(parameters)
         
         if len(parameters)<1:
             parameters = [Symbol('a')]
@@ -860,7 +859,7 @@ class AnalyticalSolution(ImmutableMatrix):
                                                         coordinates=Y,
                                                         index=index)
         
-        display(df_num)
+
 
         results_num = df_num#.perform_simulations(model_level_name=0,dependencies=dependencies_dict)
         #results = TimeDataFrame(results_num).droplevel(0,axis=1)
