@@ -389,8 +389,8 @@ class ComposedSystem(HarmonicOscillator):
 
         return parameters_dict
 
-    def numerical_analysis(self, parameter=None, param_span=None, dependencies_dict=None, t_span = None):
-        return ODESystem.from_dynamic_system(self)._as_na_df(parameter=parameter, param_span=param_span, dependencies_dict=dependencies_dict, t_span = t_span)
+    def numerical_analysis(self, parameter=None, param_span=None, dependencies_dict=None,coordinates=None, t_span = None):
+        return ODESystem.from_dynamic_system(self)._as_na_df(parameter=parameter, param_span=param_span, dependencies_dict=dependencies_dict,coordinates=coordinates, t_span = t_span)
 
 
     def to_normal_coordinates(self):

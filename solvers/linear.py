@@ -811,7 +811,7 @@ class AnalyticalSolution(ImmutableMatrix):
         return solution_tdf
 
 
-    def _as_na_df(self,parameter=None,param_span=None,dependencies_dict=None, t_span=None):
+    def _as_na_df(self,parameter=None,param_span=None,dependencies_dict=None,coordinates=None, t_span=None):
 
         parameters = self.system_parameters()
         
@@ -847,7 +847,14 @@ class AnalyticalSolution(ImmutableMatrix):
 
         system = self
 
-        Y = list(system._fode_dvars) + list(dependencies_dict.keys())
+        if coordinates is None:
+            Y = list(system._fode_dvars) + list(dependencies_dict.keys())
+        elif coordinates=='acc' or coordinates==2:
+            Y = list(system._fode_dvars) + list(system._fode_dvars.diff(self.ivar)) + list(dependencies_dict.keys())    
+        else:
+            Y = list(coordinates) + list(dependencies_dict.keys())
+            
+        Y_fixed = list({coord:coord   for coord  in  Y}.keys()    )    
         
         index = pd.Index(t_span,name=self.ivar)
         
@@ -856,7 +863,7 @@ class AnalyticalSolution(ImmutableMatrix):
                                                         parameter=param_list_el,
                                                         span=param_span,
                                                         reference_data=reference_data,
-                                                        coordinates=Y,
+                                                        coordinates=Y_fixed,
                                                         index=index)
         
 
@@ -867,9 +874,9 @@ class AnalyticalSolution(ImmutableMatrix):
 
         return results
     
-    def numerical_analysis(self,parameter=None,param_span=None,dependencies_dict=None, t_span=None):
+    def numerical_analysis(self,parameter=None,param_span=None,dependencies_dict=None,coordinates=None, t_span=None):
                        
-        return self._as_na_df(parameter=parameter, param_span=param_span, dependencies_dict=dependencies_dict, t_span=t_span)
+        return self._as_na_df(parameter=parameter, param_span=param_span, dependencies_dict=dependencies_dict,coordinates=coordinates, t_span=t_span)
 
     @property
     def _report_components(self):
