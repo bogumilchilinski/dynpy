@@ -3539,7 +3539,7 @@ class ForcedRollingBar(RollingBar):
         }
         return self.sym_desc_dict
 
-    
+
 class CompoundPendulum(ComposedSystem):
     """
     Model of a sDoF Compound Pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
@@ -3547,16 +3547,18 @@ class CompoundPendulum(ComposedSystem):
         Arguments:
         =========
             m = Mass
-                -Mass of system on spring
+                -The mass of the entire pendulum system
 
             I = Moment of Inertia
-                -Compound Pendulum moment of inertia
+                -The moment of inertia associated with the rotation of the pendulum around its axis of rotation
 
             g = gravitional field
                 -value of gravitional's field acceleration
 
             l = lenght
                 -Distance of the center of mass of a Compound pendulum from the axis of rotation
+                
+            phi = 
 
             ivar = symbol object
                 -Independant time variable
