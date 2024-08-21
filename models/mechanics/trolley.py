@@ -930,12 +930,12 @@ class DampedTrolleyWithPendulum(TrolleyWithPendulum):
         }
         return default_data_dict
     
-    def get_numerical_data(self):
+    # def get_numerical_data(self):
 
-        default_data_dict = {
-            self.c: [no for no in range(5, 25)]
-        }
-        return default_data_dict
+    #     default_data_dict = {
+    #         self.c: [no for no in range(5, 25)]
+    #     }
+    #     return default_data_dict
     
     def get_numerical_data(self):
 

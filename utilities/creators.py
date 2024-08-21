@@ -42,7 +42,7 @@ meet_guide_issue_code_str ="""The goal is to prepare or improve a guide or repor
 
 ```python
 from {guide_class_module} import {guide_class_name}
-{guide_class_name}();
+{guide_class_name}()
 ```
 
 """
@@ -175,7 +175,7 @@ class MeetingIssueCreator:
         
         return issue_meet,issue_time,issue_arrange,issue_guide
 
-class GithubClient():
+class GitHubInterface():
 
     def __init__(self):
 
