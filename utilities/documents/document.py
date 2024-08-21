@@ -1169,14 +1169,14 @@ class DynSysOverviewReport(UsageOfDynamicSystemsGuide):
 
         comp_list=[
             guide_comp.DynSysOverviewUsageComponent,
-            guide_comp.IssuePreparationComponent,
+
             guide_comp.DynamicSystemCallComponent,
             guide_comp.NumericalAnalysisSimulationComponent,
             guide_comp.AnalyticalSimulationComponent,
             #guide_comp.SimulationsComponent,
             #guide_comp.SimulationReportComponent,
-            guide_comp.DynSysCodeComponent
-
+            guide_comp.DynSysCodeComponent,
+            guide_comp.IssuePreparationComponent,
 
         ]
 

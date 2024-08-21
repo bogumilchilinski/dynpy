@@ -3693,14 +3693,10 @@ class ODEIcsCodeComponent(ReportComponent):
         display(sol_sym_1.get_ics())
         
 git_com_str=("""
-from dynpy.utilities.components.guides.en import {classname}
-{classname}(None);
-""")
-
-git_com_str2=("""
 from {module} import {classname}
 {classname}({class_field});
 """)
+
 
 class IssueFeedbackComponent(ReportComponent):
 
@@ -3708,14 +3704,8 @@ class IssueFeedbackComponent(ReportComponent):
 
     @property
     def reported_object(self):
+        from ....dynamics import LagrangesDynamicSystem
 
-
-        default_data = {'classname':'Component',
-                       'module':'guide.en.py',
-                       'field':'guide or report',
-                       'target':'`ReportComponent` class',
-                       'issue_no':359,
-                       }
         default_data = {'classname':'Component',
                        'module':'dynpy.utilities.components.guides.en',
                        'field':'None',
@@ -3726,6 +3716,9 @@ class IssueFeedbackComponent(ReportComponent):
         if isinstance(self._reported_object, dict):
             return {**default_data,**self._reported_object}
 
+        if isinstance(self._reported_object, ReportComponent) or isinstance(self._reported_object, LagrangesDynamicSystem):
+            return {**default_data,'classname':self._reported_object.__class__.__name__,'module':self._reported_object.__class__.__module__}
+        
         elif isinstance(self._reported_object, str):
             return {**default_data,'classname':self._reported_object}
 
@@ -3750,7 +3743,7 @@ class IssueFeedbackComponent(ReportComponent):
 
         display(ReportText('The code was checked with the following call: '))
 #        display(ObjectCode(git_com_str.format(classname=classname)))
-        display(ObjectCode(git_com_str2.format(classname=classname,module=class_module,class_field=class_field)))
+        display(ObjectCode(git_com_str.format(classname=classname,module=class_module,class_field=class_field)))
     
 old_class_code = '''class ExemplaryOldImplementedSystem(ComposedSystem):
 
@@ -3940,13 +3933,15 @@ new_class_code = '''class MaterialPointMovement(ComposedSystem):
         return S.Zero'''
 
 
-class CodeRefactorComponent(ReportComponent):
+class CodeRefactorComponent(NumericalAnalysisSimulationComponent):
 
     title = "DynSys system code refactor component"
 
     def append_elements(self):
 
         from dynpy.models.mechanics import Engine
+        
+        system = self.reported_object
         
         display(ReportText('Refactoring is a systematic process of improving code without creating new functionality that can transforma mess into clean code and simple design.'))
         
@@ -3962,13 +3957,13 @@ class CodeRefactorComponent(ReportComponent):
         
         display(ReportText('After calling system_description() method for Engine model bellow result will be created:'))
         
-        str_sys_des = Engine().system_description().replace('\n', '\n\n').replace('\t', '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')
+        str_sys_des = system.system_description().replace('\n', '\n\n').replace('\t', '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')
 
         display(ReportText(str_sys_des))
         
         display(ReportText('\n\nCalling system_parameters() method will create bellow list:'))
         
-        lst_sys_par = Engine().system_parameters()
+        lst_sys_par = system.system_parameters()
 
         for element in lst_sys_par:
 
@@ -4000,7 +3995,10 @@ class DynSysSummaryComponent(ReportComponent):
 
 ds_overview_str=("""
 from dynpy.utilities.documents.document import DynSysOverviewReport
-DynSysOverviewReport();
+from dynpy.utilities.components.guides.en import *
+from dynpy.models.mechanics.pendulum import Pendulum
+
+DynSysOverviewReport(reported_object=Pendulum());
 """)
 
 dynsys_comp_check_str = '''from dynpy.models.mechanics import ForcedSpringMassSystem
@@ -4040,7 +4038,7 @@ dynmetuscomp_str = '''from dynpy.utilities.components.guides.en import DynamicSy
 
 comp = SDOFWinchSystem()
 
-DynamicSystemMethodsUsageComponent(None)'''
+DynamicSystemMethodsUsageComponent(comp)'''
 
 class DynSysOverviewUsageComponent(ReportComponent):
 
@@ -4065,11 +4063,11 @@ class DynSysOverviewUsageComponent(ReportComponent):
         
         #BasicSymComponent
         display(ReportText('This component shows how to do basic simulations for dynamic system.'))
-        display(ReportText('It can be run for SDOFWinchSystem, as shown on ballow example call.'))
+        display(ReportText('It can be run for SDOFWinchSystem, as shown on below example call.'))
         display(ObjectCode(basicsymcomp_str))
         
         #CodeRefactorComponent
-        display(ReportText('This component shows how to refactor dynsys component according to latest standard.'))
+        display(ReportText('This component shows how to refactor DynSys component according to latest standard.'))
         display(ReportText('It is called without any argument.'))
         display(ObjectCode(coderefactorcomp_str))
         
@@ -4080,12 +4078,12 @@ class DynSysOverviewUsageComponent(ReportComponent):
         
         #DynSysImplementationComponent
         display(ReportText('This component explains how to implement dynamic system with ComposedSystem class'))
-        display(ReportText('It can be run for SDOFWinchSystem, as shown on ballow example call.'))
+        display(ReportText('It can be run for SDOFWinchSystem, as shown on below example call.'))
         display(ObjectCode(dynsysimpcomp_str))
         
         #DynSysIntroComponent
         display(ReportText('This component is simple introduction to using the DynSys module'))
-        display(ReportText('It can be run for SDOFWinchSystem, as shown on ballow example call.'))
+        display(ReportText('It can be run for SDOFWinchSystem, as shown on baeow example call.'))
         display(ObjectCode(dynintrocomp_str))
             
         #DynSysSummaryComponent
@@ -4094,7 +4092,7 @@ class DynSysOverviewUsageComponent(ReportComponent):
         display(ObjectCode(dynsumcomp_str))
         
         #DynamicSystemMethodsUsageComponent
-        display(ReportText('This component shows equations of motion and other methods avaible on dynsys model'))
+        display(ReportText('This component shows equations of motion and other methods avaible on DynSys model'))
         display(ReportText('It can be run with any available dynamic systems.'))
         display(ObjectCode(dynmetuscomp_str))
 

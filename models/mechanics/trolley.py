@@ -3128,4 +3128,381 @@ class VariableMassTrolleyWithPendulumFunctionWithoutRayleigh(VariableMassTrolley
 
         return components
 
+class DiskOnTrolleyWithFriction(ComposedSystem):
 
+    scheme_name = 'ForcedWinch.png'
+    real_name = 'winch_mechanism_real.PNG'
+
+    r=Symbol('r', positive=True)
+    l=Symbol('l', positive=True)
+    m=Symbol('m', positive=True)
+    g=Symbol('g', positive=True)
+    ivar=Symbol('t')
+    phi=dynamicsymbols('\\varphi')
+    x_1=dynamicsymbols('x_1')
+    x_2=dynamicsymbols('x_2')
+    y_w=dynamicsymbols('y_w')
+    y_d=dynamicsymbols('y_d')
+    F=Symbol('F', positive=True)
+    Fx=Symbol('Fx', positive=True)
+    Fy=Symbol('Fy', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    K=Symbol('K', positive=True)
+    M=Symbol('M', positive=True)
+    N=Symbol('N', positive=True)
+    m_t=Symbol('m_t', positive=True)
+    mu=Symbol('mu', positive=True)
+    I=Symbol('I', positive=True)
+
+    def __init__(self,
+                 r=None,
+                 l=None,
+                 m=None,
+                 phi=None,
+                 F=None,
+                 Omega=None,
+                 g=None,
+                 Fx=None,
+                 Fy=None,
+                 M=None,
+                 N=None,
+                 K=None,
+                 x_1=None,
+                 x_2=None,
+                 x=None,
+                 y_w=None,
+                 y_d=None,
+                 m_t=None,
+                 mu=None,
+                 I=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m is not None: self.m = m
+        if r is not None: self.r = r
+        if l is not None: self.l = l
+        if g is not None: self.g = g
+        if phi is not None: self.phi= phi
+        if N is not None: self.N= N
+        if Omega is not None: self.Omega= Omega
+        if F is not None: self.F= F
+        if Fx is not None: self.Fx= Fx
+        if Fy is not None: self.Fy= Fy
+        if K is not None: self.N= N
+        if M is not None: self.M= M
+        if x_1 is not None: self.x_1= x_1
+        if x_2 is not None: self.x_2= x_2
+        if y_w is not None: self.y_w= y_w
+        if y_d is not None: self.y_w= y_d
+        if m_t is not None: self.m_t= m_t
+        if mu is not None: self.mu= mu
+        if I is not None: self.I= I
+        self.ivar = ivar
+
+        self.qs = [self.x_1,self.phi]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self.x_1 = self.x_1
+        self.y_w = self.y_w
+        self.y_d = self.y_d
+        self.phi=self.phi#self.x_1/self.r
+        self.x_2 = self.x_1+self.r*self.phi
+        self.material_point_1 = MaterialPoint(self.m, self.x_1, qs=self.qs)
+        self.material_point_2 = MaterialPoint(self.M, self.x_2, qs=self.qs)
+        self.rolling_disk = Disk(self.m*self.r**2/2, self.phi, qs=self.qs)
+        self.force_1= Force(self.F-self.K, self.x_1, self.qs)
+        self.force_2= Force(self.K, self.x_2, self.qs)
+        self.force_3= Force(self.N, self.y_d, self.qs)
+        self.force_4= Force(-self.N, self.y_w, self.qs)
+        self.force_5= Force(self.K*self.r, self.phi, self.qs)
+        self.gravity_1=GravitationalForce(self.m,self.g, self.y_w)
+        self.gravity_2=GravitationalForce(self.M,self.g, self.y_d)
+        
+        
+        components['_material_point_1'] = self.material_point_1
+        components['_material_point_2'] = self.material_point_2
+        components['_gravity_1'] = self.gravity_1
+        components['_gravity_2'] = self.gravity_2
+        components['_force_1'] = self.force_1
+        components['_force_2'] = self.force_2
+        components['_force_3'] = self.force_3
+        components['_force_4'] = self.force_4
+        components['_force_5'] = self.force_5
+        components['_rolling_disk'] = self.rolling_disk
+      
+        return components
+    @property
+    def _report_components(self):
+
+        comp_list = [
+            WalecNaDesceForceComponent,
+            WalecNaDesceProblemComponent,
+            WalecNaDesceNewtonComponent,
+            WalecNaDesceWiezyComponent,
+        ]
+
+        return comp_list
+    def walecmoment(self):
+        m=self.m
+        r=self.r
+        return (1/2)*m*r**2
+    def accelerationxp(self):
+        Mp=self.m
+        Mw=self.M
+        F=self.F
+        x_1=self.x_1
+        K=self.K
+        ax1=x_1.diff(t,2)
+        ax1=(F-K)/Mp
+        return ax1
+    def accelerationxw(self):
+        Mw=self.M
+        x_2=self.x_2
+        K=self.K
+        ax2=x_2.diff(t,2)
+        ax2=K/Mw
+        return ax2
+    def accelerationphi(self):
+        r=self.r
+        K=self.K
+        phi=self.phi
+        I=self.walecmoment()
+        aphi=phi.diff(t,2)
+        aphi=-K*r/I
+        return aphi
+    def accelerationphi2(self):
+        r=self.r
+        K=self.K
+        phi=self.phi
+        I=self.I
+        aphi2=phi.diff(t,2)
+        aphi2=-K*r/I
+        return aphi2
+    def position(self):
+        x1=self.x_1
+        x2=self.x_2
+        r=self.r
+        phi=self.phi
+        x2=r*phi+x1
+        return x2
+    def posdiff(self):
+        x2=self.position()
+        x2diff=x2.diff(t,2)
+        return x2diff
+    def inertiamoment0(self):
+        mw=self.M
+        r=self.r
+        I0=mw*r
+        return I0
+    def kcoeff(self):
+        F=self.F
+        mw=self.M
+        mp=self.m
+        r=self.r
+        K=F*mw/(mp*r+mp+mw)
+        return K
+    def tboundary(self):
+        g=self.g
+        m=self.m_t
+        mu=self.mu
+        T=g*m*mu
+        return T
+    def boundaryforce(self):
+        T=self.tboundary()
+        K=self.kcoeff()
+        F=solve(Eq(T,K),self.F)
+        return F
+
+        
+class DiskOnTrolley(ComposedSystem):
+
+    scheme_name = 'ForcedWinch.png'
+    real_name = 'winch_mechanism_real.PNG'
+
+    r=Symbol('r', positive=True)
+    l=Symbol('l', positive=True)
+    m=Symbol('m', positive=True)
+    g=Symbol('g', positive=True)
+    ivar=Symbol('t')
+    phi=dynamicsymbols('\\varphi')
+    x_1=dynamicsymbols('x_1')
+    x_2=dynamicsymbols('x_2')
+    y=dynamicsymbols('y')
+    F=Symbol('F', positive=True)
+    Fx=Symbol('Fx', positive=True)
+    Fy=Symbol('Fy', positive=True)
+    Omega=Symbol('Omega', positive=True)
+    K=Symbol('K', positive=True)
+    M=Symbol('M', positive=True)
+    N=Symbol('N', positive=True)
+    m_t=Symbol('m_t', positive=True)
+    mu=Symbol('mu', positive=True)
+    I=Symbol('I', positive=True)
+
+    def __init__(self,
+                 r=None,
+                 l=None,
+                 m=None,
+                 phi=None,
+                 g=None,
+                 F=None,
+                 Omega=None,
+                 Fx=None,
+                 Fy=None,
+                 M=None,
+                 N=None,
+                 K=None,
+                 x_1=None,
+                 x_2=None,
+                 x=None,
+                 y=None,
+                 m_t=None,
+                 mu=None,
+                 I=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m is not None: self.m = m
+        if r is not None: self.r = r
+        if l is not None: self.l = l
+        if g is not None: self.g = g
+        if phi is not None: self.phi= phi
+        if N is not None: self.N= N
+        if Omega is not None: self.Omega= Omega
+        if F is not None: self.F= F
+        if Fx is not None: self.Fx= Fx
+        if Fy is not None: self.Fy= Fy
+        if K is not None: self.N= N
+        if M is not None: self.M= M
+        if x_1 is not None: self.x_1= x_1
+        if x_2 is not None: self.x_2= x_2
+        if y is not None: self.y= y
+        if m_t is not None: self.m_t= m_t
+        if mu is not None: self.mu= mu
+        if I is not None: self.I= I
+        self.ivar = ivar
+
+        self.qs = [self.x_1,self.x_2,self.phi]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self.x_1 = self.x_1
+        self.y = self.y
+        self.x_2 = self.x_2
+        self.phi=self.phi
+        self.material_point_1 = MaterialPoint(self.m, self.x_1, qs=self.qs)
+        self.material_point_2 = MaterialPoint(self.M, self.x_2, qs=self.qs)
+        self.rolling_disk = Disk(self.m*self.r**2/2, self.phi, qs=self.qs)
+        self.force_1= Force(self.F-self.K, self.x_1, self.qs)
+        self.force_2= Force(self.K, self.x_2, self.qs)
+        self.force_3= Force(self.N, self.y, self.qs)
+        self.force_4= Force(self.K*self.r, self.phi, self.qs)
+        self.gravity_1=GravitationalForce(self.m,self.g, self.y)
+        self.gravity_2=GravitationalForce(self.M,self.g, self.y)
+        
+        
+        components['_material_point_1'] = self.material_point_1
+        components['_material_point_2'] = self.material_point_2
+        components['_gravity_1'] = self.gravity_1
+        components['_gravity_2'] = self.gravity_2
+        components['_force_1'] = self.force_1
+        components['_force_2'] = self.force_2
+        components['_force_3'] = self.force_3
+        components['_force_4'] = self.force_4
+        components['_rolling_disk'] = self.rolling_disk
+      
+        return components
+    @property
+    def _report_components(self):
+
+        comp_list = [
+            WalecNaDesceForceComponent,
+            WalecNaDesceProblemComponent,
+            WalecNaDesceNewtonComponent,
+            WalecNaDesceWiezyComponent,
+        ]
+
+        return comp_list
+    def walecmoment(self):
+        m=self.m
+        r=self.r
+        return (1/2)*m*r**2
+    def accelerationxp(self):
+        Mp=self.m
+        Mw=self.M
+        F=self.F
+        x_1=self.x_1
+        K=self.K
+        ax1=x_1.diff(t,2)
+        ax1=(F-K)/Mp
+        return ax1
+    def accelerationxw(self):
+        Mw=self.M
+        x_2=self.x_2
+        K=self.K
+        ax2=x_2.diff(t,2)
+        ax2=K/Mw
+        return ax2
+    def accelerationphi(self):
+        r=self.r
+        K=self.K
+        phi=self.phi
+        I=self.walecmoment()
+        aphi=phi.diff(t,2)
+        aphi=-K*r/I
+        return aphi
+    def accelerationphi2(self):
+        r=self.r
+        K=self.K
+        phi=self.phi
+        I=self.I
+        aphi2=phi.diff(t,2)
+        aphi2=-K*r/I
+        return aphi2
+    def position(self):
+        x1=self.x_1
+        x2=self.x_2
+        r=self.r
+        phi=self.phi
+        x2=r*phi+x1
+        return x2
+    def posdiff(self):
+        x2=self.position()
+        x2diff=x2.diff(t,2)
+        return x2diff
+    def inertiamoment0(self):
+        mw=self.M
+        r=self.r
+        I0=mw*r
+        return I0
+    def kcoeff(self):
+        F=self.F
+        mw=self.M
+        mp=self.m
+        r=self.r
+        K=F*mw/(mp*r+mp+mw)
+        return K
+    def tboundary(self):
+        g=self.g
+        m=self.m_t
+        mu=self.mu
+        T=g*m*mu
+        return T
+    def boundaryforce(self):
+        T=self.tboundary()
+        K=self.kcoeff()
+        F=solve(Eq(T,K),self.F)
+        return F
+
+        

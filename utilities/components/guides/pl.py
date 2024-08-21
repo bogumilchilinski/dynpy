@@ -1938,7 +1938,7 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
         
         param_dict = system.get_numerical_parameters()
         t_span = np.linspace(0,100,1001)
-        ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
+        ic_list = [1.0,0.0] ### Dla układu o jednym stopniu swobody
         param = system.system_parameters()[0]
         
         
@@ -1965,7 +1965,7 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
 
         display(ObjectCode(na_df_sol_code))
         
-        na_df_sol = na_df.compute_solution(t_span = t_span, ic_list = [0.0,0.0])
+        na_df_sol = na_df.compute_solution(t_span = t_span, ic_list = [100.0,0.0])
         (na_df_sol.plot())
         
         import matplotlib.pyplot as plt
@@ -2014,7 +2014,7 @@ class AnalyticalSimulationComponent(ReportComponent):
         
         param_dict = system.get_numerical_parameters()
         t_span = np.linspace(1,100,101)
-        ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
+        ic_list = [1.0,0.0] ### Dla układu o jednym stopniu swobody
         
         
         #param_dict = {**param_dict,system.m:system.m}

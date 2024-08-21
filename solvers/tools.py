@@ -244,10 +244,3 @@ class LatexSize:
             return ureg(self._unit)
 
 
-def list_of_guides():
-    md_str='Lista poradników: \n\n'
-    for name, obj in inspect.getmembers(document):
-        if inspect.isclass(obj) and 'Guide' in name:
-                if obj is not Guide:
-                    md_str=md_str+f'\t\t - {name} \n\n'
-    return md_str

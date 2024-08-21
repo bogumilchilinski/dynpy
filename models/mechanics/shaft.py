@@ -1022,64 +1022,89 @@ class DampedDoubleDiskShaftHarmonicExcitation(DoubleDiskShaftHarmonicExcitation)
         return (2*self.max_dynamic_disk_2_bearing_force())/(kd*h)
     
     
-#TO_DO 158
+#TO_DO 158 AF
 class TripleShaft(ComposedSystem):
-    """Ready to use sample Double Degree of Freedom System represents the Kinematicly excited shaft with two disks.
+    """
+     Triple Shaft system representing a kinematically excited shaft with three disks.
+     Describes a physical model of a triple elastic shaft system with three rotating discs subjected to external moments. The class simulates the dynamics of such a system by defining the relevant parameters, dynamics and components.
+    Arguments:
     =========
-            I = Moment of Inertia
-                -Moment of Inertia in case of both disc
+            m = Mass
+            - The total mass of the shaft. (Całkowita masa wału.)
 
-            k_1 =Right spring coefficient
-                -Right spring carrying the system
+        m_1, m_2, m_3 = Masses of the Disks
+            - The masses of the first, second, and third disks, respectively. 
+              (Masy pierwszego, drugiego i trzeciego dysku.)
 
-            k_2 =Left spring coefficient
-                -Left spring carrying the system
+        l_1, l_2, l_3 = Lengths of the Shaft Segments
+            - The lengths of the shaft segments between the disks. 
+              (Długości segmentów wału pomiędzy dyskami.)
 
-            ivar = symbol object
-                -Independant time variable
+        d, d_1, d_2, d_3 = Diameters of the Shaft and Disks
+            - The diameters of the shaft and each disk, respectively.
+              (Średnica wału i każdego z trzech dysków.)
 
-            qs = dynamicsymbol object
-                -Generalized coordinates
+        G = Kirchhoff module
+
+        M_1, M_2, M_3 = Applied Moments
+            - The moments applied to the first, second, and third disks, respectively.
+              (Moment siły przyłożony do pierwszego, drugiego i trzeciego dysku.)
+
+        Omega = Angular Frequency
+            - The angular frequency of the system's motion. (Częstotliwość kątowa ruchu układu.)
+
+        delta = Phase Shift
+            - The phase shift of the oscillatory input. (Przesunięcie fazowe wejściowego sygnału oscylacyjnego.)
+
+        input_displacement = Angular Displacement
+            - The angular displacement of the shaft input. (Przemieszczenie kątowe wejścia wału.)
+
+        ivar = Symbol object
+            - The independent time variable. (Zmienna niezależna czasu.)
+
+        qs = Dynamicsymbol object
+            - Generalized coordinates of the system. (Uogólnione współrzędne układu.)
+            
+
 
     Example
     =======
-    A mass oscillating up and down while being held up by a spring with a spring constant k
-
+   A shaft with three disks oscillating due to an applied moment and connected by springs.
+ 
     >>> t = symbols('t')
-    >>> I, k1, k2 = symbols('I, k_1, k_2')
-    >>> qs = dynamicsymbols('phi_1, phi_2') # Generalized Coordinates
-    >>> DDoFShaft()
+    >>> m, m_1, m_2, m_3 = symbols('m m_1 m_2 m_3')
+    >>> l_1, l_2, l_3 = symbols('l_1 l_2 l_3')
+    >>> G, Omega, delta = symbols('G Omega delta')
+    >>> qs = dynamicsymbols('phi_1, phi_2, phi_3') # Generalized Coordinates
+    >>> TripleShaft()
 
     -defines the symbols and dynamicsymbols
-    -finally determines the instance of the system using class DDoFShaft
+    -finally determines the instance of the Triple Shaft system using the TripleShaft class.
     """
 
     scheme_name = 'MDoFTripleShaft.PNG'
     real_name = 'MDoFTripleShaft_real.jpg'
 
-    
+    # Symbol definitions with default positive values
     m=Symbol('m', positive=True)
     m_1=Symbol('m_1', positive=True)
     m_2=Symbol('m_2', positive=True)
     m_3=Symbol('m_3', positive=True)
-               
     l_1=Symbol('l_1', positive=True)
     l_2=Symbol('l_2', positive=True)
     l_3=Symbol('l_3', positive=True)
-
     d=Symbol('d', positive=True)
     d_1=Symbol('d_1', positive=True)
     d_2=Symbol('d_2', positive=True)
     d_3=Symbol('d_3', positive=True)
-
     G = Symbol('G', positive=True)
     M_1=Symbol('M_1',positive=True)
     M_2=Symbol('M_2',positive=True)
     M_3=Symbol('M_3',positive=True)
-
     Omega=Symbol('Omega',positive=True)
     delta =Symbol('delta', positive=True)
     
+    # Dynamicsymbols for generalized coordinates and input displacement
     input_displacement=dynamicsymbols('theta')
     phi_1=dynamicsymbols('\\varphi_1')
     phi_2=dynamicsymbols('\\varphi_2')
@@ -1087,7 +1112,6 @@ class TripleShaft(ComposedSystem):
     
     phi_r=dynamicsymbols('\\varphi_r')
     phi_l=dynamicsymbols('\\varphi_l')
-
 
     def __init__(self,
                  m = symbols('m', positive=True),
@@ -1120,6 +1144,7 @@ class TripleShaft(ComposedSystem):
                  qs=dynamicsymbols('\\varphi_1, \\varphi_2, \\varphi_3,'),
                  **kwargs):
 
+        # Initializing class attributes with provided arguments or default values
         if  m is not None: self.m = m
         if  m_1 is not None: self.m_1 = m_1
         if  m_2 is not None: self.m_2 = m_2
@@ -1143,7 +1168,7 @@ class TripleShaft(ComposedSystem):
         if  phi_l is not None: self.phi_l = phi_l
         if  phi_r is not None: self.phi_r = phi_r
         if  input_displacement is not None: self.input_displacement = input_displacement
-#         if  qs is not None: self.phi_r = phi_r
+
         self.qs = [self.phi_1,self.phi_2,self.phi_3]
                
         self.theta = input_displacement
@@ -1151,86 +1176,30 @@ class TripleShaft(ComposedSystem):
 
         
         
-#         self.m_1=m_1
-#         self.m_2=m_2
-#         self.m_3=m_3
-#         self.G=G
-
-#         self.l_1=l_1
-#         self.l_2=l_2
-#         self.l_3=l_3
-
-#         self.d_1=d_1
-#         self.d_2=d_2
-#         self.d_3=d_3
-#         self.d=d
-
-#         self.M_1=M_1
-#         self.M_2=M_2
-#         self.M_3=M_3
-
-#         self.Omega=Omega
-#         self.delta=delta
-
-#         self.phi_1=phi_1
-#         self.phi_2=phi_2
-#         self.phi_3=phi_3
-        
-#         self.phi_l=phi_l
-#         self.phi_r=phi_r
-
-#         self.input_displacement = input_displacement
-#         self.qs = qs
-
-#         I_0=S.Half*pi*(d/2)**4
-#         I_1=S.Half*m_1*(d_1/2)**2
-#         I_2=S.Half*m_2*(d_2/2)**2
-#         I_3=S.Half*m_3*(d_3/2)**2
-        
-#         self.I_m0 = I_0
-#         self.I_m1 = I_1
-#         self.I_m2 = I_2
-#         self.I_m3 = I_3
-        
-
-#         k_1=(G*I_0)/l_1
-#         k_2=(G*I_0)/l_1
-#         k_3=(G*I_0)/l_1
-
-#         self.disk_1 = Disk(I_1, pos1=phi_1, qs=qs) + Force(-M_1 * cos(Omega * ivar + delta), pos1 = phi_1, qs = [phi_1])
-#         self.spring_1 = Spring(k_1, pos1=theta, pos2=phi_1, qs=qs)  # left rod
-#         self.disk_2 = Disk(I_2, pos1=phi_2, qs=qs) + Force(-M_2 * cos(Omega * ivar + delta), pos1 = phi_2, qs = [phi_2])
-#         self.spring_2 = Spring(k_2, pos1=phi_1, pos2=phi_2, qs=qs)  # central rod
-#         self.disk_3 = Disk(I_3, pos1=phi_3, qs=qs) + Force(-M_3 * cos(Omega * ivar + delta), pos1 = phi_3, qs = [phi_3])
-#         self.spring_3 = Spring(k_3, pos1=phi_2, pos2=phi_3, qs=qs)  # right rod
-
-#         system = self.disk_1 + self.disk_2 + self.disk_3 + self.spring_1 + self.spring_2 + self.spring_3
-
-#         super().__init__(system(qs),**kwargs)
 
 
     @property
     def components(self):
         components = {}
 
+        # Moment of inertia calculations
         I_0=S.Half*pi*(self.d/2)**4
         I_1=S.Half*self.m_1*(self.d_1/2)**2
         I_2=S.Half*self.m_2*(self.d_2/2)**2
         I_3=S.Half*self.m_3*(self.d_3/2)**2
         
+        # Assigning calculated moments of inertia to class attributes
         self.I_m0 = I_0
         self.I_m1 = I_1
         self.I_m2 = I_2
         self.I_m3 = I_3
         
-
+        # Spring coefficients
         self.k_1=(self.G*I_0)/self.l_1
         self.k_2=(self.G*I_0)/self.l_2
         self.k_3=(self.G*I_0)/self.l_3
-#         self.qs = [self.phi_1,self.phi_2]
-#         self.k_1 = (self.G*self.I_1)/self.l_1
-#         self.k_2 = (self.G*self.I_2)/self.l_2
 
+        # Defining system components
         self.disc_1 = Disk(self.I_m1, pos1=self.phi_1, qs=self.qs)
         self.spring_1 = Spring(self.k_1, self.phi_1, self.phi_2, qs=self.qs)  # left spring
         
@@ -1320,9 +1289,9 @@ class TripleShaft(ComposedSystem):
             self.d_3: [2 * d0, 4 * d0, S.Half * d0, 2 * d0, S.Half * d0],
             self.d: [2 * d0, 4 * d0, S.Half * d0, 2 * d0, S.Half * d0],
 
-            self.phi_1:[self.phi_l,0],
-            self.phi_2:[self.phi_l,self.phi_r],
-            self.phi_3:[self.phi_r,0],
+#             self.phi_1:[self.phi_l,0],
+#             self.phi_2:[self.phi_l,self.phi_r],
+#             self.phi_3:[self.phi_r,0],
             
             self.delta:[0],
 
@@ -1408,6 +1377,34 @@ class TripleShaft(ComposedSystem):
         kd=Symbol('k_d', positive=True)
         h=Symbol('h', positive=True)
         return (2*self.max_dynamic_disk_2_bearing_force())/(kd*h)
+    
+    def unit_dict(self):
+        units_dict = {
+            self.m: ureg.kilogram,  # Mass of the shaft
+            self.m_1: ureg.kilogram,  # Mass of the first disk
+            self.m_2: ureg.kilogram,  # Mass of the second disk
+            self.m_3: ureg.kilogram,  # Mass of the third disk
+            self.l_1: ureg.meter,  # Length of the first shaft segment
+            self.l_2: ureg.meter,  # Length of the second shaft segment
+            self.l_3: ureg.meter,  # Length of the third shaft segment
+            self.d: ureg.meter,  # Diameter of the shaft
+            self.d_1: ureg.meter,  # Diameter of the first disk
+            self.d_2: ureg.meter,  # Diameter of the second disk
+            self.d_3: ureg.meter,  # Diameter of the third disk
+            self.G: ureg.pascal,  # Shear modulus (Moduł Kirchhoffa)
+            self.M_1: ureg.newton * ureg.meter,  # Moment applied on the first disk (torque)
+            self.M_2: ureg.newton * ureg.meter,  # Moment applied on the second disk (torque)
+            self.M_3: ureg.newton * ureg.meter,  # Moment applied on the third disk (torque)
+            self.Omega: ureg.radian / ureg.second,  # Angular velocity (rad/s)
+            self.delta: ureg.radian,  # Phase difference (radians)
+            self.input_displacement: ureg.radian,  # Input angular displacement (radians)
+            self.phi_1: ureg.radian,  # Angular displacement of the first disk (radians)
+            self.phi_2: ureg.radian,  # Angular displacement of the second disk (radians)
+            self.phi_3: ureg.radian,  # Angular displacement of the third disk (radians)
+            self.phi_r: ureg.radian,  # Angular displacement on the right side (radians)
+            self.phi_l: ureg.radian,  # Angular displacement on the left side (radians)
+            self.ivar: ureg.second,  # Time (seconds)
+            }
 
 #Grześ
 class SDoFDampedShaft(ComposedSystem):

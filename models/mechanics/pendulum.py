@@ -3396,6 +3396,22 @@ class RollingBar(ComposedSystem):
             self.g: 'Gravity constant',
         }
         return self.sym_desc_dict
+    
+    def unit_dict(self):
+
+        unit_dict = {
+
+            self.r: ureg.meter,
+            self.l: ureg.meter,
+            self.h: ureg.meter,
+            self.m: ureg.kilogram,
+            self.g: ureg.meter/ureg.second/ureg.second,
+            self.ivar: ureg.second,
+            self.phi: ureg.radian,
+            self.phi.diff(self.ivar): ureg.radian/ureg.second,
+            self.phi.diff(self.ivar,2): ureg.radian/ureg.second/ureg.second,
+        }
+        return unit_dict
 
 class ForcedRollingBar(RollingBar):
     """
@@ -3535,21 +3551,41 @@ class ForcedRollingBar(RollingBar):
             self.m: r'Mass',
             self.l: r'Length of the Bar',
             self.h: r'Thickness of the Bar',
-            self.g: 'Gravity constant',
+            self.g: r'Gravity constant',
+            self.M_0: r'Torque amplitude',
+            self.Omega: r'Angular frequency of torque',
         }
         return self.sym_desc_dict
 
+    def unit_dict(self):
+
+        unit_dict = {
+
+            self.r: ureg.meter,
+            self.l: ureg.meter,
+            self.h: ureg.meter,
+            self.m: ureg.kilogram,
+            self.g: ureg.meter/ureg.second/ureg.second,
+            self.ivar: ureg.second,
+            self.phi: ureg.radian,
+            self.phi.diff(self.ivar): ureg.radian/ureg.second,
+            self.phi.diff(self.ivar,2): ureg.radian/ureg.second/ureg.second,
+            self.M_0: ureg.newton*ureg.meter,
+            self.Omega: ureg.radian/ureg.second,
+        }
+        return unit_dict
 
 class CompoundPendulum(ComposedSystem):
     """
-    Model of a sDoF Compound Pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
+    The CompoundPendulum class models the motion of a compound pendulum by describing its dynamics based on fundamental physical parameters such as mass, moment of inertia, length, gravity, and deflection angle. These parameters are then used to calculate the position of the mass in space, as well as to model the forces acting on the system.
+
 
         Arguments:
         =========
-            m = Mass
+            m = mass
                 -The mass of the entire pendulum system
 
-            I = Moment of Inertia
+            I = moment of inertia
                 -The moment of inertia associated with the rotation of the pendulum around its axis of rotation
 
             g = gravitional field
@@ -3557,22 +3593,23 @@ class CompoundPendulum(ComposedSystem):
 
             l = lenght
                 -Distance of the center of mass of a Compound pendulum from the axis of rotation
-                
-            phi = 
+
+            phi = angle
+                -A dynamic variable that represents the angle of rotation of the pendulum as a function of time
 
             ivar = symbol object
                 -Independant time variable
 
             qs = dynamicsymbol object
-                -Generalized coordinates
+                -Represents time as an independent variable, upon which all dynamic changes in the system are based
 
         Example
         =======
-        A mass oscillating up and down while being held up by a spring with a spring constant kinematicly 
+        A compound pendulum swinging with a rotation angle `phi` around its pivot. 
 
-        >>> t = symbols('t')
-        >>> m, I, g, l = symbols('m, I, g, l')
-        >>> qs = dynamicsymbols('varphi') # Generalized Coordinates
+        >>> t = symbols('t') # Time variable
+        >>> m, I, g, l = symbols('m, I, g, l') # Physical parameters
+        >>> qs = dynamicsymbols('varphi') # Generalized Coordinates (angle)
         >>> CompoundPendulum()
 
         -We define the symbols and dynamicsymbols
@@ -3623,7 +3660,18 @@ class CompoundPendulum(ComposedSystem):
         
     @cached_property
     def components(self):
-
+        """
+        System Components:
+        =========
+            x = The position of the pendulum's mass along the horizontal axis, dependent on the angle phi.
+            
+            y = The position of the pendulum's mass along the vertical axis, dependent on the angle phi.
+            
+            material_point_1 = Material point associated with motion along the x-axis
+            material_point_2 = Material point associated with motion along the y-axis
+            material_point_3 = Material point associated with rotational motion
+            gravity = Gravitational force
+        """
         components = {}
         self.x=self.l*sin(self.phi)
         self.y=self.l*(1-cos(self.phi))
@@ -3636,7 +3684,7 @@ class CompoundPendulum(ComposedSystem):
 #         self.gravitationalforce = GravitationalForce(self.m, self.g, self.l * (1 - cos(self.angle)), qs = self.qs)
 #         self.material_point = MaterialPoint(self.m * self.l**2, pos1=self.angle, qs=self.qs)
         
-#         components['Gravitational_Force'] = self.gravitationalforce        
+
 #         components['Material_Point'] = self.material_point
         components['material_point_1'] = self.material_point_1
         components['material_point_2'] = self.material_point_2
@@ -3699,55 +3747,60 @@ class CompoundPendulum(ComposedSystem):
 
     def unit_dict(self):
         units_dict = {
-                self.m: ureg.kilogram,
-                self.g: ureg.meter/ureg.second/ureg.second,
-                self.l: ureg.meter,
-                self.phi: ureg.radian,
-                self.phi.diff(self.ivar): ureg.radian/ureg.second,
-                self.phi.diff(self.ivar,2): ureg.radian/ureg.second/ureg.second,
-                self.ivar: ureg.second,
+                self.m: ureg.kilogram,  # Mass of the pendulum
+                self.I: ureg.kilogram * ureg.meter**2,  # Moment of inertia
+                self.g: ureg.meter / ureg.second**2,  # Gravitational acceleration
+                self.l: ureg.meter,  # Length of the pendulum
+                self.phi: ureg.radian,  # Angular displacement (radians)
+                self.phi.diff(self.ivar): ureg.radian / ureg.second,  # Angular velocity (rad/s)
+                self.phi.diff(self.ivar, 2): ureg.radian / ureg.second**2,  # Angular acceleration (rad/s^2)
+                self.ivar: ureg.second,  # Time (seconds)
                 }
 
         return units_dict
-
 class ForcedCompoundPendulum(ComposedSystem):
     """
-    Model of a sDoF Compound Pendulum. The "trig" arg follows up on defining the angle of rotation over a specific axis hence choosing apporperietly either sin or cos.
+Model of a Forced Compound Pendulum with an external periodic force applied horizontally.
+
 
         Arguments:
         =========
-            m = Mass
-                -Mass of system on spring
+            m = mass
+                -The mass of the entire pendulum system
 
-            I = Moment of Inertia
-                -Compound Pendulum moment of inertia
+            I = moment of inertia
+                -The moment of inertia associated with the rotation of the pendulum around its axis of rotation
 
             g = gravitional field
                 -value of gravitional's field acceleration
 
             l = lenght
                 -Distance of the center of mass of a Compound pendulum from the axis of rotation
-                
-            F_amp = force amplitude
-                -amplitude value of horisontal force
-            
+
+            phi = angle
+                -A dynamic variable that represents the angle of rotation of the pendulum as a function of time
+
+            M_0 = force amplitude
+                -Amplitude of the horizontal force applied to the pendulum
+
             Omega = Frequency of force
-                -value of frequency force
+                -Frequency of the applied horizontal force.
 
             ivar = symbol object
                 -Independant time variable
 
             qs = dynamicsymbol object
-                -Generalized coordinates
+                -Represents time as an independent variable, upon which all dynamic changes in the system are based
 
         Example
         =======
         A mass oscillating up and down while being held up by a spring with a spring constant kinematicly 
 
-        >>> t = symbols('t')
-        >>> m, I, g, l = symbols('m, I, g, l')
+        >>> t = symbols('t')  # Time variable
+        >>> m, I, g, l, M_0, Omega = symbols('m I g l M_0 Omega')  # Physical parameters
+
         >>> qs = dynamicsymbols('varphi') # Generalized Coordinates
-        >>> CompoundPendulum()
+        >>> ForcedCompoundPendulum()
 
         -We define the symbols and dynamicsymbols
         -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
@@ -3756,12 +3809,12 @@ class ForcedCompoundPendulum(ComposedSystem):
     scheme_name = 'undamped_pendulum.png'
     real_name = 'pendulum_real.jpg' #compoundpendulum
 
-    
+    # Define default symbols for the class
     m=Symbol('m', positive=True)
     I=Symbol('I', positive=True)
     g=Symbol('g', positive=True)
     Omega=Symbol('Omega', positive=True)
-    F_amp=Symbol('M_0', positive=True)
+    M_0=Symbol('M_0', positive=True)
     l=Symbol('l', positive=True)
     phi=dynamicsymbols('\phi')
     qs=None
@@ -3774,29 +3827,27 @@ class ForcedCompoundPendulum(ComposedSystem):
                  I=None,
                  g=None,
                  l=None,
-                 F_amp=None,
+                 M_0=None,
                  Omega=None,
                  phi=None,
                  ivar=None,
                  **kwargs):
 
-        #if qs == None:
-        #    qs = [angle]
-        #else:
-        #    qs = qs
 
+        # Initialize the parameters only if they are provided; otherwise, use defaults
         if m is not None: self.m = m
         if I is not None: self.I = I
         if g is not None: self.g = g
         if l is not None: self.l = l
-        if F_amp is not None: self.F_amp = F_amp
+        if M_0 is not None: self.M_0 = M_0
         if Omega is not None: self.Omega = Omega
         if phi is not None: self.phi = phi
         if ivar is not None: self.ivar = ivar
 
-        
+        # Set the generalized coordinate
         self.qs = [self.phi]
 
+        # Initialize the components of the system
         self._init_from_components(**kwargs)
         
         
@@ -3804,29 +3855,14 @@ class ForcedCompoundPendulum(ComposedSystem):
     @cached_property
     def components(self):
         components = {}
-#                  m=None,
-#                  I=None,
-#                  g=None,
-#                  l=None,
-#                  phi=None,
+        #Create a compound pendulum component using the given parameters
         self.compound_pendulum = CompoundPendulum(m=self.m, l=self.l, phi=self.phi, I=self.I, g=self.g, qs=self.qs)
-        self.force = Force(self.F_amp*cos(self.Omega*self.ivar), self.phi, qs=self.qs)
-
+        # Define the external horizontal force applied to the pendulum
+        self.force = Force(self.M_0*cos(self.Omega*self.ivar), self.phi, qs=self.qs)
+        # Store the components in the dictionary
         components['compound_pendulum'] = self.compound_pendulum
         components['force'] = self.force
-        
-#         self.x=self.l*sin(self.phi)
-#         self.y=self.l*(1-cos(self.phi))
 
-#         self.material_point_1 = MaterialPoint(self.m, self.x,ivar=self.ivar, qs=[self.phi])
-#         self.material_point_2 = MaterialPoint(self.m, self.y,ivar=self.ivar, qs=[self.phi])
-#         self.material_point_3 = MaterialPoint(self.I, self.phi,ivar=self.ivar, qs=[self.phi])
-#         self.gravity = GravitationalForce(self.m, self.g, pos1=self.y,ivar=self.ivar, qs=[self.phi])
-
-#         components['material_point_1'] = self.material_point_1
-#         components['material_point_2'] = self.material_point_2
-#         components['material_point_3'] = self.material_point_3
-#         components['gravity'] = self.gravity
         
         return components
         
@@ -3853,7 +3889,7 @@ class ForcedCompoundPendulum(ComposedSystem):
             self.m: [S.One * no * 10 for no in range(5, 8)],
             self.l: [S.One * no for no in range(10, 20)],
             self.I: [S.One * no for no in range(3,9)],
-            self.F_amp: [S.One * no for no in range(3,9)],
+            self.M_0: [S.One * no for no in range(3,9)],
             self.Omega: [S.One * no for no in range(60,63)],
             
             
@@ -3872,6 +3908,8 @@ class ForcedCompoundPendulum(ComposedSystem):
             self.phi.diff(self.ivar): r'velocity of the pendulum',
             self.phi.diff(self.ivar,2): r'acceleration of the pendulum',
             self.ivar: r'time',
+            self.M_0: r'Torque amplitude',
+            self.Omega: r'Angular frequency of torque',
         }
         return self.sym_desc_dict
 
@@ -3886,13 +3924,16 @@ class ForcedCompoundPendulum(ComposedSystem):
 
     def unit_dict(self):
         units_dict = {
-                self.m: ureg.kilogram,
-                self.g: ureg.meter/ureg.second/ureg.second,
-                self.l: ureg.meter,
-                self.phi: ureg.radian,
-                self.phi.diff(self.ivar): ureg.radian/ureg.second,
-                self.phi.diff(self.ivar,2): ureg.radian/ureg.second/ureg.second,
-                self.ivar: ureg.second,
+                self.m: ureg.kilogram,  # Mass of the pendulum
+                self.I: ureg.kilogram * ureg.meter**2,  # Moment of inertia
+                self.g: ureg.meter / ureg.second**2,  # Gravitational acceleration
+                self.l: ureg.meter,  # Length of the pendulum
+                self.M_0: ureg.newton*ureg.meter,  # Moment of force - torque (newton-metre)
+                self.Omega: ureg.radian / ureg.second,  # Frequency of the force (rad/s)
+                self.phi: ureg.radian,  # Angular displacement (radians)
+                self.phi.diff(self.ivar): ureg.radian / ureg.second,  # Angular velocity (rad/s)
+                self.phi.diff(self.ivar, 2): ureg.radian / ureg.second**2,  # Angular acceleration (rad/s^2)
+                self.ivar: ureg.second,  # Time (seconds)
                 }
 
         return units_dict

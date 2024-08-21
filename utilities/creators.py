@@ -3,6 +3,10 @@ from .documents.document import ODESystemOverviewReport
 from github import Github
 import getpass
 from github import Auth
+import pint
+import inspect
+from dynpy.utilities.documents import document
+from dynpy.utilities.templates.document import Guide
 
 issue_no = 567
 title = 'implementation of overview report for `ODESystem` child classes'
@@ -261,3 +265,10 @@ class GitHubInterface():
             self.g = g.close()
         else:
             pass
+def list_of_guides():
+    md_str='Lista poradników: \n\n'
+    for name, obj in inspect.getmembers(document):
+        if inspect.isclass(obj) and 'Guide' in name:
+                if obj is not Guide:
+                    md_str=md_str+f'\t\t - {name} \n\n'
+    return md_str

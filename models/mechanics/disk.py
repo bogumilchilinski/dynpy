@@ -21,6 +21,11 @@ from functools import cached_property, lru_cache
 
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
 
+from pint import UnitRegistry
+ureg = UnitRegistry()
+
+
+
 class RollingDisk(ComposedSystem):
     m1 = Symbol('m_1', positive=True)
     R = Symbol('R', positive=True)
@@ -438,7 +443,20 @@ class RollingHalfDisk(ComposedSystem):
             self.g: 'Gravity constant',
         }
         return self.sym_desc_dict
+    
+    def unit_dict(self):
 
+        unit_dict = {
+
+            self.r: ureg.meter,
+            self.m: ureg.kilogram,
+            self.g: ureg.meter/ureg.second/ureg.second,
+            self.ivar: ureg.second,
+            self.phi: ureg.radian,
+            self.phi.diff(self.ivar): ureg.radian/ureg.second,
+            self.phi.diff(self.ivar,2): ureg.radian/ureg.second/ureg.second,
+        }
+        return unit_dict
 
 class ForcedRollingHalfDisk(RollingHalfDisk):
     """
@@ -558,4 +576,18 @@ class ForcedRollingHalfDisk(RollingHalfDisk):
         }
         return self.sym_desc_dict
 
+    def unit_dict(self):
 
+        unit_dict = {
+
+            self.r: ureg.meter,
+            self.m: ureg.kilogram,
+            self.g: ureg.meter/ureg.second/ureg.second,
+            self.ivar: ureg.second,
+            self.phi: ureg.radian,
+            self.phi.diff(self.ivar): ureg.radian/ureg.second,
+            self.phi.diff(self.ivar,2): ureg.radian/ureg.second/ureg.second,
+            self.M_0: ureg.newton*ureg.meter,
+            self.Omega: ureg.radian/ureg.second,
+        }
+        return unit_dict
