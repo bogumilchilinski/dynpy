@@ -420,6 +420,19 @@ class ComposedSystem(HarmonicOscillator):
         diagonalized_form_eoms = result_stiffness* Matrix(dvars) + Matrix(dvars).diff(self.ivar,2) - result_forces
 
         return ODESystem(odes = diagonalized_form_eoms, ode_order=2, dvars=Matrix([dvars]))
+    def _as_force(self):
+        qs=self.qs
+        system=self
+        eoms_matrix=self.eoms.as_matrix()
+        qs_matrix=self.q
+        matrix_lenght=len(eoms_matrix)
+        force=Force(0,qs_matrix[0],qs_matrix)
+        if matrix_lenght!=0:
+            for i in range(matrix_lenght):
+                force=force+Force(eoms_matrix[i],qs_matrix[i],qs_matrix)
+        return force
+    def as_force(self):
+        return self._as_force()
 
 class NonlinearComposedSystem(ComposedSystem):
 

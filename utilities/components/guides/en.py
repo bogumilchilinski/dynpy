@@ -4039,6 +4039,12 @@ dynmetuscomp_str = '''from dynpy.utilities.components.guides.en import DynamicSy
 comp = SDOFWinchSystem()
 
 DynamicSystemMethodsUsageComponent(comp)'''
+dyncompov_str = '''Guide consist of bellow components which can be called separatelly with most of avaible dynsys models:
+*DynamicSystemCallComponent
+*NumericalAnalysisSimulationComponent
+*AnalyticalSimulationComponent
+*DynSysCodeComponent
+*IssuePreparationComponent'''
 
 class DynSysOverviewUsageComponent(ReportComponent):
 
@@ -4053,9 +4059,11 @@ class DynSysOverviewUsageComponent(ReportComponent):
         display(ReportText('Basic call of it is as follows and runs default dynamic system which is `ForcedSpringMassSystem'))
         display(ObjectCode(ds_overview_str))
         
+        display(ReportText(dyncompov_str))
+        
         #display(ReportText('This guide concers in-deepth analysis of exsisting dynamic system that are basic elements of `DynPy` library.'))
         #display(ReportText('It can be run with any available dynamic system.'))
-        
+        '''
         #DynamicSystemCompletenessCheckComponent
         display(ReportText('This component calls and checks all key elements of the dynamic system'))
         display(ReportText('It can be run with any available dynamic systems.'))
@@ -4095,6 +4103,6 @@ class DynSysOverviewUsageComponent(ReportComponent):
         display(ReportText('This component shows equations of motion and other methods avaible on DynSys model'))
         display(ReportText('It can be run with any available dynamic systems.'))
         display(ObjectCode(dynmetuscomp_str))
-
+        '''
 
         
