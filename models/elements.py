@@ -207,6 +207,19 @@ class Element(LagrangesDynamicSystem):
 
     def _get_virtual_work(self):
         return Eq(Symbol('\delta W'), Symbol(latex(self.force)) * Symbol(f'\delta({latex(self._pos1)})')  )
+    def _as_force(self):
+        #qs=self.qs
+        system=self
+        eoms_matrix=self.eoms.as_matrix()
+        qs_matrix=self.q
+        matrix_lenght=len(eoms_matrix)
+        force=Force(0,qs_matrix[0],qs_matrix)
+        if matrix_lenght!=0:
+            for i in range(matrix_lenght):
+                force=force+Force(eoms_matrix[i],qs_matrix[i],qs_matrix)
+        return force
+    def as_force(self):
+        return self._as_force()
     
 #Pati
 class MaterialPoint(Element):
