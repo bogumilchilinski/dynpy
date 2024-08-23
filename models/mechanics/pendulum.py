@@ -3616,8 +3616,8 @@ class CompoundPendulum(ComposedSystem):
         -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
         -determine the instance of the Compound Pendulum by using class Pendulum()
     """
-    scheme_name = 'undamped_pendulum.png'
-    real_name = 'pendulum_real.jpg' #compoundpendulum
+    scheme_name = 'compound_pendulum.png'
+    real_name = 'compound_pendulum.png'
 
     
     m=Symbol('m', positive=True)
@@ -3806,8 +3806,8 @@ Model of a Forced Compound Pendulum with an external periodic force applied hori
         -if dynamicsymbols is not defined that parameter would be set as "varphi" as a default
         -determine the instance of the Compound Pendulum by using class Pendulum()
     """
-    scheme_name = 'undamped_pendulum.png'
-    real_name = 'pendulum_real.jpg' #compoundpendulum
+    scheme_name = 'forced_compound_pendulum.png'
+    real_name = 'forced_compound_pendulum.png'
 
     # Define default symbols for the class
     m=Symbol('m', positive=True)

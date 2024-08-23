@@ -1,3 +1,5 @@
+import dynpy
+from dynpy.utilities.report import ReportText
 from .report import Markdown
 from .documents.document import ODESystemOverviewReport
 from github import Github
@@ -221,7 +223,6 @@ class GitHubInterface():
         return issue_list
 
     
-    
     def as_df(self):
 
         import pandas as pd
@@ -265,10 +266,154 @@ class GitHubInterface():
             self.g = g.close()
         else:
             pass
-def list_of_guides():
+
+
+class ClassLister:
+    
+    '''
+    This is temporary solution, working on better one.
+    
+    Example of call code:
+    
+    ###############################
+    import dynpy
+    from dynpy.utilities.report import ReportText
+
+    dir_str = 'dynpy.utilities.components.guides'
+
+    ClassLister(dir_str).printer()
+    ###############################
+    '''
+    
+    import dynpy
+    from datetime import date, time
+
+    
+    def __init__(self, directory):
+        self.directory = directory
+        
+        import_str = f'from {directory} import *'
+        exec(import_str) #exec i eval to dwie funkcje pozwalające na wykonanie komendy podanej jako string
+    
+    def submodgetter(self): 
+        '''
+        metoda zbiera liste sbmodułów z wskazanej scieżki
+        
+        '''
+        import os.path, pkgutil
+        
+        pkgpath_str = f"os.path.dirname({self.directory}.__file__)"
+        
+        pkgpath = eval(pkgpath_str)
+        list_of_sub_modules = [name for _, name, _ in pkgutil.iter_modules([pkgpath])]
+
+        return list_of_sub_modules
+    
+    def classlistgetter(self, submod):
+        
+        '''
+        metoda zbiera liste klass w podanym submodule
+        
+        init: submod
+        '''
+        
+        import inspect
+
+        import_str = f"from {self.directory}.{submod} import *"
+        command_str = f"inspect.getmembers({self.directory}.{submod}, predicate=inspect.isclass)" #ta komenda zbiera liste wszystkich klas istniejących w danym submodule, niestety sa tu też klasy nas nie interesujące np. importy klas z numpy czy pandasa etc, dlatego dalej ta lista jest filtrowana
+        
+        import_eval = exec(import_str)
+        members = eval(command_str)
+
+        tmp_list = []
+
+        for i in range(len(members)):
+            if "__class__" in members[i][0]: #ten warunek doda klase do listy w przypadku gdy submoduł ma ta samą nazwe co klasa sama w sobie 
+                tmp_list.append(submod)
+            elif f'{self.directory}.{submod}' in str(members[i][1]):
+                tmp_list.append(members[i][0])
+
+        return tmp_list
+    
+    def printer(self):
+        lst = []
+        lst = self.submodgetter()
+        
+        cnt = 0
+        
+        for submod in lst:    
+            class_lst = self.classlistgetter(submod)
+            size = len(class_lst)
+            
+            if size != 0:
+                display(ReportText(f'# {submod}'))
+
+            for cl in class_lst:
+                    display(ReportText(f'* {cl}'))
+                    cnt += 1
+        display(ReportText(f'Total class count is:{cnt}'))
+    
+    
+    def initupdater(self):
+        intro_str = f'''"""
+This module provides the examples of mechanical models being practically used in calculations
+
+Last update was done on {date.today()}
+
+"""
+
+import importlib
+
+'''
+
+        from datetime import date, time
+        
+        f = open('./output/test.py', 'w')
+        f.write(intro_str)
+        
+        lst = []
+        lst = self.submodgetter()
+        for submod in lst:    
+            class_lst = self.classlistgetter(submod)
+            f.write(f'from .{submod} import ')
+
+            size = len(class_lst)
+            i = 1
+
+            for cl in class_lst:
+
+                if i < size:
+                    f.write(f'{cl}, ')
+                else:
+                    f.write(f'{cl}')
+
+                i += 1 
+
+            f.write('\n\n')
+
+        f.close()
+
+def list_of_guides_prime():
     md_str='Lista poradników: \n\n'
     for name, obj in inspect.getmembers(document):
         if inspect.isclass(obj) and 'Guide' in name:
                 if obj is not Guide:
                     md_str=md_str+f'\t\t - {name} \n\n'
     return md_str
+
+def list_of_guides():
+
+    dir_str = 'dynpy.utilities.documents'
+
+    return ClassLister(dir_str).printer()
+
+def list_of_components():
+
+    dir_str = 'dynpy.utilities.components'
+
+    return ClassLister(dir_str).printer()
+def list_of_systems():
+
+    dir_str = 'dynpy.models.mechanics'
+
+    return ClassLister(dir_str).printer()
