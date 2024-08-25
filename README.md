@@ -31,3 +31,8 @@ Next for an example, run the codes below and you will see how it works:
     Pendulum().interactive_preview()
 
 You can preview the pendulum using such a function.
+
+If you are looking for information on reporting and creating a PDF file, we can use the command below to view the tutorial:
+
+	from dynpy.utilities.documents.document import BasicsOfReportingGuide, UsageOfDynamicSystemsGuide
+	BasicsOfReportingGuide(UsageOfDynamicSystemsGuide);
