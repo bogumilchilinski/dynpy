@@ -624,7 +624,9 @@ df.T.set_index(t_span).plot()'''.replace('SDOFWinchSystem',system_name)))
         table_eq=system._ode_system.steady_solution.subs(dict_numerical)
 
 
-        display(GuideCode('''table_eq=system._ode_system.steady_solution.subs(dict_numerical)'''.replace('SDOFWinchSystem',system_name)))
+        display(GuideCode('''dict_numerical=system.get_numerical_parameters()
+table_eq=system._ode_system.steady_solution.subs(dict_numerical)
+table_eq'''.replace('SDOFWinchSystem',system_name)))
         display(SympyFormula(table_eq))
 
         #jak tabele zrobic + ew jej output
@@ -1629,47 +1631,189 @@ class ODEReportComponent(ReportComponent):
         display(ObjectCode(property_report_formula)) 
 #        display(Picture('./dynpy/utilities/components/guides/images/appeend.jpg'))
 
-num_system_code_str = '''
+sym_num_system_code_str = ('''
 
 m,F,c,k,x=symbols('m,F,c,k,x', positive=True)
 t=Symbol('t')
 x=Function(x)(t)
 
- subs_dict={m:100 ,
+subs_dict={m:100 ,
           F:200 ,
           c:50 ,
-          k:500 
+          k:500,
           }
 
 ics_list = [0.0,0.0]
 
-'''
+''')
 
 
-dys_sys_code_str =(
+
+sym_harmonic_oscilator_eq = ('''
+
+harmonic_oscilator_eq = Eq(m*x.diff(t,t) -F + c*x.diff(t) + k*x,0)
+harmonic_oscilator_eq
+
+''')
+
+sym_harmonic_oscylator_ode = ('''
+
+harmonic_oscylator_ode = ODESystem(odes= Matrix([(harmonic_oscilator_eq.lhs/m).expand()]),dvars = Matrix([x]),ode_order=2 )
+harmonic_oscylator_ode
+
+''')
+
+
+sym_harmonic_oscylator_sol = ('''
+
+harmonic_oscylator_sol = harmonic_oscylator_ode.numerized(subs_dict)
+display(harmonic_oscylator_sol)
+harmonic_oscylator_sym = harmonic_oscylator_sol.compute_solution(t_span=t_span, ic_list=ics_list)
+display(harmonic_oscylator_sym)
+harmonic_oscylator_sym.plot()
+
+''')
+
+
+
+
+sym_Example_PulledPendulum =(
 '''
+
+from dynpy.models.mechanics.pendulum import  PulledPendulum
+t_span=np.linspace(0, 2, 1000)
 
 dyn_sys_P = PulledPendulum()
-dyn_sys_P._eoms
+display(dyn_sys_P._eoms)
 
 subs_dict_P = dyn_sys_P.get_numerical_parameters()
-subs_dict_P = {dyn_sys_P.F: 10, dyn_sys_P.Omega: 3.14/5, **subs_dict_P}
-
-
-subs_dict_P
-ics_list_P = [0.0,0.0] # 1 stopień swobody
+display(subs_dict_P)
+subs_dict_P = { **subs_dict_P, dyn_sys_P.F: 10, dyn_sys_P.Omega: 3.14/5}
+for key, item in subs_dict_P.items():
+    print(key)
+    if key == dyn_sys_P.l**2*dyn_sys_P.m:
+        key_to_pop  = key
+subs_dict_P.pop(key_to_pop)
+display(subs_dict_P)
+ics_list_P = [0.0,0.0] # 1 stopien swobody
 
 ''')
-sym_wyn_code=(
-'''
-sym_wyn_P = ode_sol_P.subs(subs_dict_P).compute_solution(t_span)
+
+sym_ode_sol_P_plot = ('''
+
+ode_sol_P = dyn_sys_P._ode_system.numerized(subs_dict_P)
+
+display(ode_sol_P)
+
+sym_wyn_P = ode_sol_P.compute_solution(t_span=t_span, ic_list=ics_list_P)
 sym_wyn_P.plot()
+
 ''')
-wywolanie_helpa=(
+
+sym_ode_sys_P =( '''
+
+ode_sys_P = ODESystem.from_dynamic_system(dyn_sys_P.linearized())
+ode_sys_P
+
+
+''')
+
+sym_ode_sol_P =( '''
+
+ode_sol_P = ode_sys_P.solution.with_ics(ics_list)
+ode_sol_P
+
+''')
+
+sym_num_sol_P=(
+'''
+num_sol_P = num_mod_P.compute_solution(t_span=t_span, ic_list=ics_list_P)
+
+display(num_sol_P.plot())
+''')
+
+sym_coords=(
+'''
+display(harmonic_oscylator_ode)
+
+display(harmonic_oscylator_sol)
+
+coords= ode_sol_P.lhs
+display(coords)
+display(ode_sys_P)
+display(subs_dict_P)
+nadf = NumericalAnalysisDataFrame.from_model(ode_sys_P,F,[10, 20, 30], reference_data=subs_dict_P,coordinates=list(coords), index=pd.Index(t_span, name=t),ics=None)
+
+nadf_sol = nadf.perform_simulations()
+
+nadf_sol.columns = nadf_sol.columns.droplevel(0)
+nadf_sol
+
+''')
+
+sym_wywolanie_helpa=(
 '''
 help(NumericalAnalysisDataFrame)
-type(coords)
 ''')
+
+sym_nadf=(
+'''
+nadf_sol.plot()
+''')
+
+sym_sms=(
+"""
+Omega = Symbol('Omega', positive=True)
+
+subs_dict={m:10,
+    F:100,
+    c:0.01,
+    k:500,
+    }
+
+t_span = np.linspace(1,2000,2001)
+
+ode_sys_SMS = harmonic_oscylator_ode.subs({F: F*sin(Omega*t)}).subs({Omega: sqrt(k/m)+0.01})
+
+ode_sys_SMS
+""")
+
+sym_num_wyn_SMSe=(
+'''
+num_wyn_SMS = ode_sys_SMS.subs(subs_dict).numerized().with_ics(ics_list).compute_solution(t_span)
+''')
+
+sym_ana_wyn_SMS=(
+'''
+ana_wyn_SMS = ode_sol_SMS.subs(subs_dict).with_ics(ics_list).compute_solution(t_span)
+''')
+
+sym_sms_plot=(
+'''
+display(num_wyn_SMS[x].plot())
+''')
+
+sym_comparison=(
+"""
+sym_comparison = pd.DataFrame(num_wyn_SMS[x])
+sym_comparison[Symbol('x(t)_a')] = ana_wyn_SMS[x]
+
+sym_comparison = TimeDataFrame(sym_comparison)
+""")
+
+sym_comparison_plot=(
+'''
+sym_comparison.to_frequency_domain().single_sided_rms().truncate(0,0.2).plot()
+''')
+
+
+
+# sym_wyn_code=(
+# '''
+# sym_wyn_P = ode_sol_P.subs(subs_dict_P).compute_solution(t_span)
+# sym_wyn_P.plot()
+# ''')
+
 
 
 class ODENumericalSimulationsComponent(ReportComponent):
@@ -1681,126 +1825,128 @@ class ODENumericalSimulationsComponent(ReportComponent):
         
         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
 
-        display(ReportText('Przeprowadzenei symulacji przy pomocy ODE'))
+        display(ReportText('Przeprowadzenie symulacji przy pomocy ODE'))
         display(ReportText('W pierwszej kolejności zdefiniowano parametry potrzebne do przeprowadzenia do obliczeń'))
 
-        display(ObjectCode( num_system_code_str ))
+        display(ObjectCode(sym_num_system_code_str))
 
         display(ReportText('Wyprowadzenie wzoru na oscylator harmoniczny'))
-
-        display(ObjectCode(harmonic_esc_str))
+        display(ObjectCode(sym_harmonic_oscilator_eq))
+        #display(ObjectCode(harmonic_esc_str))
 
         display(ReportText('Przeprowadzenie symulacji w ODE'))
 
 
-        display(ObjectCode(harmonic_oscylator_ode))
+        display(ObjectCode(sym_harmonic_oscylator_ode))
 
 
-        display(ObjectCode(harmonic_oscylator_sol))
+        display(ObjectCode(sym_harmonic_oscylator_sol))
 
-        display(ObjectCode)
+        #display(ObjectCode)
 
-        display(ObjectCode(harmonic_oscylator_sym))
+        #display(ObjectCode())
 
         display(ReportText('Wprowadzenie systemu dynamicznego, zdefiniowano również pojawiającą się Omegę '))
-        display(ObjectCode(  dys_sys_code_str ))
+        display(ObjectCode(sym_Example_PulledPendulum))
 
-        display(ObjectCode(sym_wyn_code))
-        display(ObjectCode(ode_sys_P))
-        display(ObjectCode(ode_sol_P))
-        display(ObjectCode(num_mod_P))
-
-
-        display(ReportText('Wyplotowanie solvera'))
-        display(ObjectCode(num_sol_str))
-        display(ObjectCode(num_sol_P))
+        display(ObjectCode(sym_ode_sol_P_plot))
+        display(ObjectCode(sym_ode_sys_P))
+        display(ObjectCode(sym_ode_sol_P))
 
         display(ReportText('Symulacje używając systemu dynamicznego zdefiniowanego przy użyciu modułu dynpy'))
 
-
-        display(ReportText('Sprawdzenie za pomocą helpa czy tak na prawdę jest NumericalAnalysisDataFrame'))
-        display(ObjectCode(wywolanie_helpa))
+        display(ReportText('Sprawdzenie za pomocą helpa czym tak na prawdę jest NumericalAnalysisDataFrame'))
+        display(ObjectCode(sym_wywolanie_helpa))
 
         display(ReportText('Wyświetlenie poszczególnych wykresów, wyników oraz tablicy'))
-        display(ObjectCode('''
-        display(harmonic_oscylator_ode)
-
-        display(harmonic_oscylator_sol)
-
-        coords= harmonic_oscylator_sol.lhs
-
-        nadf = NumericalAnalysisDataFrame.from_model(harmonic_oscylator_sol,F,[10, 20, 30], reference_data=subs_dict,coordinates=list(coords), index=pd.Index(t_span, name=t),ics=None)
-
-        nadf_sol = nadf.perform_simulations()
-
-        nadf_sol.columns = nadf_sol.columns.droplevel(0)
-
-        nadf_sol
-        '''))
-
-        display(ObjectCode('''nadf_sol.plot()'''))
-
+        display(ObjectCode(sym_coords))
+        display(ObjectCode(sym_nadf))
         display(ReportText('Analiza porównawcza symulacji rozwiązania analitycznego i numerycznego'))
+        display(ObjectCode(sym_sms))
+        display(ObjectCode(sym_num_wyn_SMSe))
+        display(ObjectCode(sym_ana_wyn_SMS))
+        display(ObjectCode(sym_sms_plot))
+        display(ObjectCode(sym_comparison))
+
+#         display(ObjectCode('''
+#         display(harmonic_oscylator_ode)
+
+#         display(harmonic_oscylator_sol)
+
+#         coords= harmonic_oscylator_sol.lhs
+
+#         nadf = NumericalAnalysisDataFrame.from_model(harmonic_oscylator_sol,F,[10, 20, 30], reference_data=subs_dict,coordinates=list(coords), index=pd.Index(t_span, name=t),ics=None)
+
+#         nadf_sol = nadf.perform_simulations()
+
+#         nadf_sol.columns = nadf_sol.columns.droplevel(0)
+
+#         nadf_sol
+#         '''))
+
+#         display(ObjectCode('''nadf_sol.plot()'''))
 
 
-        display(ObjectCode('''
-        Omega = Symbol('Omega', positive=True)
-
-        subs_dict={m:10,
-                   F:100,
-                   c:0.01,
-                   k:500,
-                   }
-
-        t_span = np.linspace(1,2000,2001)
-
-        ode_sys_SMS = harmonic_oscylator_ode.subs({F: F*sin(Omega*t)}).subs({Omega: sqrt(k/m)+0.01})
-
-        ode_sys_SMS
-        '''))
 
 
-        display(ObjectCode('''
-        ode_sol_SMS = ode_sys_SMS.solution
-        ode_sol_SMS.with_ics(ics_list)
+#         display(ObjectCode('''
+#         Omega = Symbol('Omega', positive=True)
 
-        '''))
+#         subs_dict={m:10,
+#                    F:100,
+#                    c:0.01,
+#                    k:500,
+#                    }
 
-        display(ObjectCode(num_wyn_SMS))
+#         t_span = np.linspace(1,2000,2001)
+
+#         ode_sys_SMS = harmonic_oscylator_ode.subs({F: F*sin(Omega*t)}).subs({Omega: sqrt(k/m)+0.01})
+
+#         ode_sys_SMS
+#         '''))
 
 
-        display(ObjectCode(ana_wyn_SMS))
-        display(ObjectCode(num_wyn_SMS_plot))
-        display(ObjectCode(ana_wyn_SMS_plot))
+#         display(ObjectCode('''
+#         ode_sol_SMS = ode_sys_SMS.solution
+#         ode_sol_SMS.with_ics(ics_list)
 
-        display(ObjectCode('''
-        sym_comparison = pd.DataFrame(num_wyn_SMS[x])
-        sym_comparison[Symbol('x(t)_a')] = ana_wyn_SMS[x]
+#         '''))
 
-        sym_comparison = TimeDataFrame(sym_comparison)
-        '''))
+#         display(ObjectCode(num_wyn_SMS))
 
-        display(ObjectCode('''
-        sym_comparison.to_frequency_domain().single_sided_rms().truncate(0,0.2).plot()
-        '''))
+
+#         display(ObjectCode(ana_wyn_SMS))
+#         display(ObjectCode(num_wyn_SMS_plot))
+#         display(ObjectCode(ana_wyn_SMS_plot))
+
+#         display(ObjectCode('''
+#         sym_comparison = pd.DataFrame(num_wyn_SMS[x])
+#         sym_comparison[Symbol('x(t)_a')] = ana_wyn_SMS[x]
+
+#         sym_comparison = TimeDataFrame(sym_comparison)
+#         '''))
+
+#         display(ObjectCode('''
+#         sym_comparison.to_frequency_domain().single_sided_rms().truncate(0,0.2).plot()
+#         '''))
 
 definicja_danych=(
 '''
 m=Symbol('m',positive=True)
 g=Symbol('g')
-alfa=Symbol('alpha')
+alpha=Symbol('alpha')
 v_0=Symbol('v_0')
 t=Symbol("t")
 x=Function("x")(t)
 y=Function("y")(t)
 
-dane = {m: 10, g: 9.81, alpha: pi/6, v_0:20}}
+dane = {m: 10, g: 9.81, alpha: pi/6, v_0:20}
 ''')
 
 rownania_predkosci=(
 '''
-v_x=Eq(x.diff(t),v_0*cos(alfa))
-v_y=Eq(y.diff(t),v_0*sin(alfa)-g*t)
+v_x=Eq(x.diff(t),v_0*cos(alpha))
+v_y=Eq(y.diff(t),v_0*sin(alpha)-g*t)
 display(v_x, v_y)
 ''')
 definicja_ode=(
@@ -1863,7 +2009,8 @@ from sympy.physics.mechanics import dynamicsymbols'''))
         display(SympyFormula(ode_x_x.solution[0]))
         display(ObjectCode('''ODE_x.solution.subs(dane)'''))
 
-        display(SympyFormula(ode_x_x.solution.subs(dane)))
+        display(SympyFormula(ode_x_x.solution.subs(dane)))#Fsimulations
+        
         display(ObjectCode(ode_solution_code))
 
         display(SympyFormula(ODE_x_sol))
@@ -1871,9 +2018,135 @@ from sympy.physics.mechanics import dynamicsymbols'''))
         display(ObjectCode('''dsolve(v_y.subs(dane))'''))
         display(SympyFormula(dsolve(predkosc_y.subs(dane))))
 
+        
+ode_import=(
+'''
+import numpy as np
+import matplotlib.pylab as plt
+import pandas as pd
+from dynpy.solvers.linear import ODESystem
+from sympy import Symbol, symbols, Function, Matrix
+from dynpy.utilities.adaptable import *
+''')
+
+ode_variables=(
+"""
+t = Symbol('t')
+
+U_z, R_w, L_w, E, U_Rw, U_Lw, k_e = symbols('U_z R_w L_w E U_Rw U_Lw k_e', positive=True)
+M_s, B, J, M_obc, k_m = symbols('M_s B J M_obc k_m', positive=True)
+
+i_w = Function('i_w')(t)
+omega_s = Function('omega_s')(t)
+
+dane = {
+    U_z: 10,
+    R_w: 2,
+    L_w: 0.1,
+    k_e: 0.1,
+    k_m: 0.1,
+    J: 0.1,
+    B: 0.5,
+    M_obc: 0
+}
+
+t_span = np.linspace(0, 1, 100)
+""")
+
+ode_objrctM=(
+'''
+ode = ODESystem(
+    odes=Matrix([
+        U_z - R_w * i_w - L_w * i_w.diff(t) - k_e * omega_s,
+        k_m * i_w - J * omega_s.diff(t) - B * omega_s - M_obc
+    ]),
+    dvars=Matrix([i_w, omega_s]),
+    ode_order=1
+)
+ode
+''')
+
+ode_met_1A=(
+'''
+ode.subs(dane).solution.with_ics([0,0])
+''')
+
+ode_tab_1A=(
+'''
+sym_an = ode.solution.with_ics([0,0]).subs(dane).numerized().compute_solution(t_span=t_span)
+sym_an[[i_w, omega_s]]
+''')
+
+ode_met_1B=(
+'''
+sym_num = ode.subs(dane).numerized().compute_solution(t_span=t_span, ic_list=[0, 0])
+sym_num[[i_w, omega_s]]
+''')
+
+ode_met_2=(
+'''
+X = [i_w, omega_s]
+
+num_df = NumericalAnalysisDataFrame.from_model(
+    ode.solution.with_ics([0, 0]),
+    U_z,
+    [10, 20, 50],
+    reference_data=dane,
+    coordinates=X,
+    index=pd.Index(t_span, name=t)
+)
+num_df
+''')
+
+ode_met_PS=(
+'''
+sym_wyn = num_df.perform_simulations().droplevel(0,axis=1)
+
+display(sym_wyn)
+''')
+
+ode_import_example=(
+'''
+from dynpy.models.mechanics.trolley import SpringDamperMassSystem
+
+dyn_sys = SpringDamperMassSystem()
+
+dyn_sys._ode_system
+''')
+
+ode_example2=(
+'''
+dane = dyn_sys.get_numerical_parameters()
+
+data_dict = {**dane, dyn_sys.F: 1000}
+
+data_dict
+''')
+
+ode_simulation=(
+'''
+simulation = dyn_sys._ode_system.subs(data_dict).numerized().compute_solution(
+    np.linspace(0, 2, 1000), ic_list=[10, -5]
+)
+
+simulation
+''')
+
+ode_simulation_plot=(
+'''
+simulation.plot()
+plt.grid()
+plt.show()
+''')
+
+
+
+
+        
 class ODESimulationComponent(ReportComponent):
     
     title="Przeprowadzanie symulacji"
+    
 
 
     def append_elements(self):
@@ -1881,37 +2154,38 @@ class ODESimulationComponent(ReportComponent):
         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
 
         display(ReportText('To od czego standardowo powinno się zacząć to importy oraz definicja zmiennych. Potrzebne importy:'))
-        display(Picture('./dynpy/utilities/components/guides/images/importyy.jpg'))
+        display(ObjectCode(ode_import))
         display(ReportText('Definiowanie zmiennych:'))
-        display(Picture('./dynpy/utilities/components/guides/images/definicja.jpg'))
+        display(ObjectCode(ode_variables))
         display(ReportText('Kolejny niezbędny krok to tworzenie obiektu ODE. Należy go wykonać w następujący sposób:'))
-        display(Picture('./dynpy/utilities/components/guides/images/obiekt_ode.jpg'))
+        display(ObjectCode(ode_objrctM))
         display(ReportText('METODA 1A: Przeprowadzenie symulacji na gotowm rozwiazaniu analitycznym poprzez użycie property solution. Samo wywołanie                                 odpowiedniego rozwiązania analitycznego pokazuje nam poniższy kod:'))
-        display(Picture('./dynpy/utilities/components/guides/images/solutioon.jpg'))
+        display(ObjectCode(ode_met_1A))
         display(ReportText('Następnie generujemy tabele niezbędną do symulacji w taki sposób:'))
-        display(Picture('./dynpy/utilities/components/guides/images/analityczne.jpg'))
+        display(ObjectCode(ode_tab_1A))
         display(ReportText('METODA 1B: Innym sposobem jest przeprowadzenie symulacji numerycznych bez obliczeń analitycznych. Potrzebny jest do tego taki kod: '))
-        display(Picture('./dynpy/utilities/components/guides/images/analiticzne.jpg'))
+        display(ObjectCode(ode_met_1B))
         display(ReportText('METODA 2: Trzecim sposobem generowania symulacji jest użycie NumericalAnalysisDataFrame, kod wywołania prezentuje się następująco:'))
-        display(Picture('./dynpy/utilities/components/guides/images/analitical_.jpg'))
+        display(ObjectCode(ode_met_2))
         display(ReportText('Aby przeprowadzić symulacje konieczne jest zastosowanie metody perform simulations. Bez zastosowania tej metody dostaniemy następujący wynik:'))
-        display(Picture('./dynpy/utilities/components/guides/images/bez_metody.jpg'))
         display(ReportText('A z jej użyciem, wszystko powinno zadziałać i dostaniemy następujący output:'))
-        display(Picture('./dynpy/utilities/components/guides/images/z_metoda.jpg'))
+        display(ObjectCode(ode_met_PS))
         display(ReportText('Dla lepszego zrozumienia zagdnień poniżej przedstawione zostało zastosowanie symulacji na konkretnym przykładzie. Skorzystamy z                           prostej klasy SpringDamperMassSystem. Na dobry początek należy zaimportować tę klasę oraz przypisać ją do zmiennej. W przeprowadzeniu                                     symulacji pomoże nam wykorzystanie metody $ode system$ w celu pozyskania równania ruchu naszego systemu dynamicznego. Aby pozyskać dane w                                 prosty sposób korzystamy z metody $get numerical parameters$ oraz wrzucamy te dane w słownik. Kod do wykonania tych czynnosci prezentuje się                             następująco: '))
-        display(Picture('./dynpy/utilities/components/guides/images/przyklad_sys.jpg'))
+        display(ObjectCode(ode_import_example))
         display(ReportText('Następnie stosując jedną z wyżej pokazanych metod, możemy stworzyć tabelę:'))
-        display(Picture('./dynpy/utilities/components/guides/images/metoda1.jpg'))
+        display(ObjectCode(ode_example2))
         display(ReportText('Ostatnim krokiem jest wizualizacja danych, czyli stworzenie wykresu. Aby taki wykres uzyskać wystarczy wpisać kod widoczny na                             obrazku:'))
-        display(Picture('./dynpy/utilities/components/guides/images/wykresoo.jpg'))
+        display(ObjectCode(ode_simulation))
+        display(ObjectCode(ode_simulation_plot))
 
-####     
+####
 omega, omega2 = symbols('omega Omega')
 t=Symbol('t')
 x=Function('x')(t)
 y=Function('y')(t)
 ode=(
 '''
+omega, omega2 = symbols('omega Omega')
 ODESystem(odes=Matrix([omega**2*x-sin(omega2*t)+x.diff(t,t)]),dvars=Matrix([x]),ode_order=1)
 ''')   
         
@@ -1926,7 +2200,6 @@ class ReportCompUseComponent(ReportComponent):
 
         komponent = Chapter('Podstawy używania komponentu raportującego')
         CurrentContainer(komponent)        
-        
         display(ReportText('W celu użycia komponentu raportującego należy użyć $.report$. Przykładowo wpisując *odesys.report* otrzyma się następujący output:'))
         display(ReportText('The investigated system is described by differential equations being as follows:'))
         display(ObjectCode(ode))

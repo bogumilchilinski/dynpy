@@ -101,8 +101,8 @@ class Pendulum(NonlinearComposedSystem):
 
         components = {}
         
-        self.gravitationalforce = GravitationalForce(self.m, self.g, self.l * (1 - cos(self.angle)), qs = self.qs)
-        self.material_point = MaterialPoint(self.m * self.l**2, pos1=self.angle, qs=self.qs)
+        self.gravitationalforce = GravitationalForce(self.m, self.g, self.l**2 * (1 - cos(self.angle)), qs = self.qs)
+        self.material_point = MaterialPoint(self.m * self.l**2, pos1=self.angle*self.l, qs=self.qs)
         
         components['Gravitational_Force'] = self.gravitationalforce        
         components['Material_Point'] = self.material_point
@@ -132,6 +132,7 @@ class Pendulum(NonlinearComposedSystem):
 
             self.m: [S.One * no * 10 for no in range(5, 8)],
             self.l: [S.One * no for no in range(10, 20)],
+            self.m * self.l**2:[self.m * self.l**2],
             
         }
         return default_data_dict
@@ -251,7 +252,7 @@ class PulledPendulum(Pendulum):
         components = {}
         
         self._pendulum = Pendulum(self.m,self.g,self.l,self.angle,self.ivar)(label="Pendulum")
-        self._force = Force(-self.F*self.l*sin(self.Omega*self.ivar), pos1=self.angle, qs=self.qs)
+        self._force = Force(-self.F*self.l*sin(self.Omega*self.ivar), pos1=self.angle*self.l, qs=self.qs)
 
         components['_pendulum'] = self._pendulum
         components['_force'] = self._force
@@ -269,6 +270,7 @@ class PulledPendulum(Pendulum):
 
             self.m: [S.One * no * m0 * 10 for no in range(5, 8)],
             self.l: [S.One * no * l0 for no in range(10, 20)],
+            self.m * self.l**2:[self.m * self.l**2],
             
         }
         return default_data_dict
@@ -281,10 +283,14 @@ class PulledPendulum(Pendulum):
         
         
         default_data_dict = {
-
+            self.l: [self.l],
+            self.m: [self.m],
             self.m: [S.One * no * 10 for no in range(5, 8)],
             self.l: [S.One * no for no in range(10, 20)],
+            self.m * self.l**2:[self.m * self.l**2],
             
+            self.Omega: [50],
+            self.F: [100]
         }
         return default_data_dict
 

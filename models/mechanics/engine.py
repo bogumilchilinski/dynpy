@@ -139,27 +139,39 @@ class FreeEngine(ComposedSystem):
         t = self.ivar
         
         default_data_dict = {
-#             self.M: [10 * self.m0 * no / 100 for no in range(10, 150)],
-#             self.m_e: [self.m0 * no / 100 for no in range(80, 120)],
+            self.M: [10 * self.m0 * no / 100 for no in range(10, 150)],
+            self.m_e: [self.m0 * no / 100 for no in range(80, 120)],
             self.e: [S.One *self.e0 * no  for no in range(8, 12)],
             self.phi: [self.omega * self.ivar],
             self.phi.diff(self.ivar):[self.omega],
-            self.phi.diff(self.ivar,self.ivar):0,
+            self.phi.diff(self.ivar,self.ivar):[0],
         }
         return default_data_dict
 
     def get_numerical_data(self):
 
         default_data_dict = {
-#             self.M: [4 * no for no in range(10, 150)],
-#             self.m_e: [0.5 * no for no in range(80, 120)],
+            self.M: [4 * no for no in range(10, 150)],
+            self.m_e: [0.5 * no for no in range(80, 120)],
             self.e: [2/100 * no for no in range(5, 15)],
             self.phi: [2 * 3.14 * 10 * self.ivar],
-            self.phi.diff(self.ivar):62.8,
-            self.phi.diff(self.ivar,self.ivar):0,
+            self.phi.diff(self.ivar):[62.8],
+            self.phi.diff(self.ivar,self.ivar):[0],
         }
         return default_data_dict
-
+    def unit_dict(self):
+        
+        units_dict = {self.M: ureg.kilogram,
+                 self.k_m: ureg.newton/ureg.meter,
+                 self.m_e: ureg.kilogram,
+                 self.g: ureg.meter/ureg.second,
+                 self.e: ureg.meter,
+                 self.z: ureg.meter,
+                 self.phi: ureg.radian,
+                 self.ivar: ureg.second,
+                }
+        
+        return units_dict
     
     
 #DONE #Mateusz
@@ -327,28 +339,28 @@ class FreeEngineDDOF(FreeEngine):
         }
         return self.sym_desc_dict
 
-#     def get_default_data(self):
+    def get_default_data(self):
 
-#         t = self.ivar
+        t = self.ivar
         
-#         default_data_dict = {
-#             self.M: [10 * self.m0 * no / 100 for no in range(10, 150)],
-#             self.m_e: [self.m0 * no / 100 for no in range(80, 120)],
-#             self.e: [self.e0 * no / 100 for no in range(80, 120)],
-#             self.phi: [2 * 3.14 * self.ivar]
-#         }
-#         return default_data_dict
+        default_data_dict = {
+            self.M: [10 * self.m0 * no / 100 for no in range(10, 150)],
+            self.m_e: [self.m0 * no / 100 for no in range(80, 120)],
+            self.e: [self.e0 * no / 100 for no in range(80, 120)],
+            self.phi: [2 * 3.14 * self.ivar]
+        }
+        return default_data_dict
 
-#     def get_numerical_data(self):
+    def get_numerical_data(self):
 
-#         default_data_dict = {
-#             self.M: [4 * no for no in range(10, 150)],
-#             self.m_e: [0.5 * no for no in range(80, 120)],
-#             self.e: [2/100 * no for no in range(5, 15)],
-#             self.phi: [2 * 3.14 * 10 * self.ivar],
-#             self.g: [9.81]
-#         }
-#         return default_data_dict
+        default_data_dict = {
+            self.M: [4 * no for no in range(10, 150)],
+            self.m_e: [0.5 * no for no in range(80, 120)],
+            self.e: [2/100 * no for no in range(5, 15)],
+            self.phi: [2 * 3.14 * 10 * self.ivar],
+            self.g: [9.81]
+        }
+        return default_data_dict
 #dobrać dane numeryczne
 #####
 #DONE #Sav 
@@ -471,7 +483,41 @@ class Engine(ComposedSystem):
                 }
         
         return units_dict
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.M: r'Mass of the engine block',
+            self.m_e: r'Reduced mass of the crank system',
+            self.e: r'Length of the crank - radius of the circular motion',
+            self.g: r'Gravity constant',
+            self.z: r'Displacement coordinate'
+        }
+        return self.sym_desc_dict
 
+    def get_default_data(self):
+
+        t = self.ivar
+        
+        default_data_dict = {
+            self.M: [10 * self.m0 * no / 100 for no in range(10, 150)],
+            self.m_e: [self.m0 * no / 100 for no in range(80, 120)],
+            self.e: [S.One *self.e0 * no  for no in range(8, 12)],
+            self.phi: [self.omega * self.ivar],
+            self.phi.diff(self.ivar):[self.omega],
+            self.phi.diff(self.ivar,self.ivar):[0],
+        }
+        return default_data_dict
+
+    def get_numerical_data(self):
+
+        default_data_dict = {
+            self.M: [4 * no for no in range(10, 150)],
+            self.m_e: [0.5 * no for no in range(80, 120)],
+            self.e: [2/100 * no for no in range(5, 15)],
+            self.phi: [2 * 3.14 * 10 * self.ivar],
+            self.phi.diff(self.ivar):[62.8],
+            self.phi.diff(self.ivar,self.ivar):[0],
+        }
+        return default_data_dict
 
     
 #DONE 

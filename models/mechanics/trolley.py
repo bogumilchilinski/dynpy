@@ -1728,10 +1728,10 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
 
 
 #Amadi
+#klasa zastępuje MDoFTMD
 class TrolleyWithTMD(ComposedSystem):
-
-    scheme_name = 'kin_exct_pendulum.PNG'
-    real_name = 'elastic_pendulum_real.PNG'
+    scheme_name = 'MDoF_new.png'
+    real_name = 'mdof_tmd_real.png'
 
     
     m = Symbol('m_trolley', positive=True)

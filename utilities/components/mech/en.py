@@ -1694,7 +1694,7 @@ class SpringForce(ReportComponent):
 
         display(ReportText(self.middle_text))
         
-        display(SympyFormula( Eq(Symbol('F'),-1*system._left_mount.stiffness*system._ode_system.steady_solution[0],evaluate=False)))
+        display(SympyFormula( Eq(Symbol('F'),-1*system._left_mount.stiffness*system._ode_system.steady_solution.rhs[0],evaluate=False)))
         
         display(ReportText(self.footer_text))
         
@@ -1723,7 +1723,7 @@ class DamperForce(ReportComponent):
              #"zastępuje prędkość jako pochodna steady stolution po czasie:"
         return "replaces velocity as a derivative of the steady solution over time:"
 
-        display(SympyFormula( Eq(Symbol('F'),-1*system.c*system.steady_solution().diff(system.ivar),evaluate=False)))
+        display(SympyFormula( Eq(Symbol('F'),-1*system.c*system._ode_system.steady_solution().rhs.diff(system.ivar),evaluate=False)))
 
     @property
     def footer_text(self):
@@ -1814,7 +1814,7 @@ class SteadySolutionComponent(ReportComponent):
 #         display((SympyFormula(  Eq(Symbol('X_s'), dyn_sys_lin._ode_system.steady_solution.n(3), evaluate=False) , marker='b',backend=latex  )  ))
         for i,qs in enumerate(system.q):
 
-            display((SympyFormula(  Eq(Symbol(f'X_s_-{qs}'),dyn_sys_lin._ode_system.steady_solution.n(3)[i], evaluate=False) , marker='b',backend=latex  )  ))
+            display((SympyFormula(  Eq(Symbol(f'X_s_-{qs}'),dyn_sys_lin._ode_system.steady_solution.rhs.n(3)[i], evaluate=False) , marker='b',backend=latex  )  ))
 
         AutoBreak.latex_backend = latex_store
 
@@ -1945,7 +1945,7 @@ class TensionerForce(ReportComponent):
 
         display(ReportText(self.middle_text))
         
-        display(SympyFormula( Eq(Symbol('F'),-1*system._tensioner.stiffness*system.steady_solution()[0],evaluate=False)))
+        display(SympyFormula( Eq(Symbol('F'),-1*system._tensioner.stiffness*system.steady_solution().rhs[0],evaluate=False)))
         
         display(ReportText(self.footer_text))
         
@@ -1986,7 +1986,7 @@ class TensionerDamperForce(ReportComponent):
 
         display(ReportText(self.middle_text))
         
-        display(SympyFormula( Eq(Symbol('F'),-1*system._tensioner_damping.c*system.steady_solution()[0].diff(system.ivar),evaluate=False)))
+        display(SympyFormula( Eq(Symbol('F'),-1*system._tensioner_damping.c*system.steady_solution().rhs[0].diff(system.ivar),evaluate=False)))
         
         display(ReportText(self.footer_text))
         

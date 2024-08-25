@@ -641,6 +641,19 @@ class BeamBridge(ComposedSystem):
         }
         return unit_dict
     
+    def reference_data_dict(self):
+
+        E=Symbol('E',positive=True)
+        I=Symbol('I',positive=True)
+        l=Symbol('l',positive=True)
+
+        default_data_dict={
+            self.k_beam:[S.One * 48 * E * I / l**3 ],
+
+        }
+        return default_data_dict
+
+    
 #Amadi
 class BeamBridgeDamped(BeamBridge):
     """Ready to use model of damped bridge represented by the mass supported by elastic beam.
