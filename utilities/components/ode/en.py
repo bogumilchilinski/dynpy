@@ -1631,7 +1631,8 @@ system.as_iterable()  #returns list
 system.as_dict()  #returns dictionary
 system.as_eq_list()  #returns an equation in the form of a list
 system._as_fode()  #returns a first-order equation
-
+system.lhs #returns left-hand side of equation 
+system.rhs #returns right-hand side of equation 
 '''
 
 class ODESystemRepresentationComponent(ReportComponent):
@@ -1670,6 +1671,12 @@ class ODESystemRepresentationComponent(ReportComponent):
 
         display(ReportText(r'Method ._as_fode()'))
         display((system._as_fode()))
+        
+        display(ReportText(r'Method .lhs'))
+        display((system.lhs))
+        
+        display(ReportText(r'Method .rhs'))
+        display((system.rhs))
         
 class ODESystemAdditionComponent(ODESystemOperations):
     

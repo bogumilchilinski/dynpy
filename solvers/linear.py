@@ -922,6 +922,33 @@ class AnalyticalSolution(ImmutableMatrix):
     def _format_str(self, printer=None):
 
         return self.__str__()
+    
+    @staticmethod
+    def _get_code():
+        from dynpy.utilities.report import ObjectCode
+        
+        code = ObjectCode('''
+from dynpy.solvers.linear import AnalyticalSolution
+from sympy import *
+import numpy as np
+
+t=Symbol('t')
+x=Function('x')(t)
+
+t_span = np.linspace(0,10,1000)
+
+func = Eq(x,sin(pi*t))
+
+an = AnalyticalSolution(func,vars=Matrix([x]))
+
+display(an)
+
+ansol = an.compute_solution(t_span)[[x]]
+
+ansol.plot()
+                         
+                         ''')
+        return code  
 
     
 
@@ -2749,7 +2776,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     def _general_solution(self):
 
         '''
-        Solves the problem in the symbolic way and rteurns matrix of solution (in the form of equations (objects of Eq class)).
+        Solves the problem in the symbolic way and returns matrix of solution (in the form of equations (objects of Eq class)).
         '''
         
         

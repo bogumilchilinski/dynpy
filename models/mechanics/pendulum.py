@@ -3625,17 +3625,17 @@ class CompoundPendulum(ComposedSystem):
     scheme_name = 'compound_pendulum.png'
     real_name = 'compound_pendulum.png'
 
-    
+
     m=Symbol('m', positive=True)
     I=Symbol('I', positive=True)
     g=Symbol('g', positive=True)
     l=Symbol('l', positive=True)
     phi=dynamicsymbols('\phi')
     qs=None
-    
+
     m0=Symbol('m_0',positive=True)
     l0 = Symbol('l_0', positive=True)
-    
+
     def __init__(self,
                  m=None,
                  I=None,
@@ -3645,11 +3645,6 @@ class CompoundPendulum(ComposedSystem):
                  ivar=Symbol('t'),
                  **kwargs):
 
-        #if qs == None:
-        #    qs = [angle]
-        #else:
-        #    qs = qs
-
         if m is not None: self.m = m
         if I is not None: self.I = I
         if g is not None: self.g = g
@@ -3657,22 +3652,17 @@ class CompoundPendulum(ComposedSystem):
         if phi is not None: self.phi = phi
         if ivar is not None: self.ivar = ivar
 
-        
         self.qs = [self.phi]
-
         self._init_from_components(**kwargs)
-        
-        
-        
+
     @cached_property
     def components(self):
         """
         System Components:
         =========
-            x = The position of the pendulum's mass along the horizontal axis, dependent on the angle phi.
-            
-            y = The position of the pendulum's mass along the vertical axis, dependent on the angle phi.
-            
+            x = The position of the pendulum's mass along the horizontal axis, dependent on the angle phi
+            y = The position of the pendulum's mass along the vertical axis, dependent on the angle phi
+
             material_point_1 = Material point associated with motion along the x-axis
             material_point_2 = Material point associated with motion along the y-axis
             material_point_3 = Material point associated with rotational motion
@@ -3687,48 +3677,35 @@ class CompoundPendulum(ComposedSystem):
         self.material_point_3 = MaterialPoint(self.I, self.phi,ivar=self.ivar, qs=[self.phi])
         self.gravity = GravitationalForce(self.m, self.g, pos1=self.y,ivar=self.ivar, qs=[self.phi])
 
-#         self.gravitationalforce = GravitationalForce(self.m, self.g, self.l * (1 - cos(self.angle)), qs = self.qs)
-#         self.material_point = MaterialPoint(self.m * self.l**2, pos1=self.angle, qs=self.qs)
-        
-
-#         components['Material_Point'] = self.material_point
         components['material_point_1'] = self.material_point_1
         components['material_point_2'] = self.material_point_2
         components['material_point_3'] = self.material_point_3
         components['gravity'] = self.gravity
-        
+
         return components
-        
+
     def get_default_data(self):
 
-       
         m0, l0 = self.m0, self.l0
-        
-        
+
         default_data_dict = {
 
             self.m: [S.One * no * m0 * 10 for no in range(5, 8)],
             self.l: [S.One * no * l0 for no in range(10, 20)],
             self.m * self.l**2:[self.m * self.l**2],
-            
         }
         return default_data_dict
 
     def get_numerical_data(self):
-        
-        
+
         default_data_dict = {
 
             self.m: [S.One * no * 10 for no in range(5, 8)],
             self.l: [S.One * no for no in range(10, 20)],
             self.I: [S.One * no for no in range(3,9)],
-            
-            
-            
         }
         return default_data_dict
-    
-    
+
     def symbols_description(self):
         self.sym_desc_dict = {
 
@@ -3764,6 +3741,7 @@ class CompoundPendulum(ComposedSystem):
                 }
 
         return units_dict
+
 class ForcedCompoundPendulum(ComposedSystem):
     """
 Model of a Forced Compound Pendulum with an external periodic force applied horizontally.
@@ -3824,10 +3802,8 @@ Model of a Forced Compound Pendulum with an external periodic force applied hori
     l=Symbol('l', positive=True)
     phi=dynamicsymbols('\phi')
     qs=None
-    
     m0=Symbol('m_0',positive=True)
     l0 = Symbol('l_0', positive=True)
-    
     def __init__(self,
                  m=None,
                  I=None,
@@ -3855,9 +3831,7 @@ Model of a Forced Compound Pendulum with an external periodic force applied hori
 
         # Initialize the components of the system
         self._init_from_components(**kwargs)
-        
-        
-        
+
     @cached_property
     def components(self):
         components = {}
@@ -3869,27 +3843,23 @@ Model of a Forced Compound Pendulum with an external periodic force applied hori
         components['compound_pendulum'] = self.compound_pendulum
         components['force'] = self.force
 
-        
         return components
-        
+
     def get_default_data(self):
 
-       
+
         m0, l0 = self.m0, self.l0
-        
-        
+
         default_data_dict = {
 
             self.m: [S.One * no * m0 * 10 for no in range(5, 8)],
             self.l: [S.One * no * l0 for no in range(10, 20)],
             self.m * self.l**2:[self.m * self.l**2],
-            
         }
         return default_data_dict
 
     def get_numerical_data(self):
-        
-        
+
         default_data_dict = {
 
             self.m: [S.One * no * 10 for no in range(5, 8)],
@@ -3897,13 +3867,9 @@ Model of a Forced Compound Pendulum with an external periodic force applied hori
             self.I: [S.One * no for no in range(3,9)],
             self.M_0: [S.One * no for no in range(3,9)],
             self.Omega: [S.One * no for no in range(60,63)],
-            
-            
-            
         }
         return default_data_dict
-    
-    
+
     def symbols_description(self):
         self.sym_desc_dict = {
 

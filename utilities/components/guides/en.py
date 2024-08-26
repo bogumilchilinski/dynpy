@@ -1451,7 +1451,7 @@ class BasicUsageOfODESystemComponent(ReportComponent):
         display(ObjectCode('''eq = Eq(x.diff(t, t) + omega**2 * x,sin(Omega*t))'''))
 
 
-        display(ReportText('- Definiowanie ODESystem, gdzie " odes " to przeniesione na jedną stronę równanie, które będziemy rozwiązywać (najlepiej podawać w macierzy), a " dvars " to zmienne, po których rozwiązujemy nasze równanie (równierz podajemy jako macierz):'))
+        display(ReportText('- Definiowanie ODESystem, gdzie " odes " to przeniesione na jedną stronę równanie, które będziemy rozwiązywać (najlepiej podawać w macierzy), a " dvars " to zmienne, po których rozwiązujemy nasze równanie (również podajemy jako macierz):'))
 
         display(ObjectCode('''odesys = ODESystem(odes=Matrix([eq.lhs-eq.rhs]),dvars=Matrix([x]), ode_order=2)'''))
 
@@ -3832,6 +3832,28 @@ class GitSynchroIntroComponent(GitSynchroPanelAccessComponent):
 
         display(ReportText(f'''Taki komunikat będzie oznacza błąd na wyższym szczeblu - nie ruszaj nic więcej i odezwij się do Pana Chilińskiego lub Pana Sierocińskiego. '''))
         display(Picture('./dynpy/utilities/components/guides/images/11.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('8cm'),caption='Error'))
+        
+class UsageOfGitHubInterfacesComponent(GitSynchroPanelAccessComponent):
+
+    title="Wprowadzenie do GitHubInterface"
+
+    def append_elements(self):
+        #variables provided by `reported_object` arg
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+    
+        #implement reporting activieties here
+
+        display(ReportText('Obsluga rytynowych czynności w dynpy jest wykonanywana przez klasę GitHubInterface'))
+
+        display(ObjectCode(GitHubInterface))
+
+        display(ReportText('Więcej informacji możesz uzyskać w helpie'))
+
+        display(ObjectCode("help(GitHubInterface)"))
+        display(ObjectCode(help(GitHubInterface)))
 
 class AlgebraicExpressionComponent(ReportComponent):
 

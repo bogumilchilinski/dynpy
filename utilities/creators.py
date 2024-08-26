@@ -183,6 +183,22 @@ class MeetingIssueCreator:
 
 class GitHubInterface():
 
+    '''
+    GitHubInterface is a class to use the Github API v3. With it, you can manage your Github resources (repositories, user profiles, organizations, etc.) from Python scripts. It is based on Github class from PyGithub library and it mimics its methods.
+
+    Examples:
+
+    from dynpy.utilities.creators import GitHubInterface
+
+    # Authentication is defined via github.Auth
+    # using an access token to Public Web Github
+
+    client = GitHubInterface()
+
+    repos = client.get_issues_list(repo_name="bogumilchilinski/dynpy", state='open', assignee='amvdek')
+
+    '''
+
     def __init__(self):
 
         pass_code = getpass.getpass('Github token')
@@ -191,7 +207,18 @@ class GitHubInterface():
         self.g = g
 
     def open(self):
+        '''
+        This method opens the connection with GitHub API by entering the token.
 
+        Example:
+
+        client = GitHubInterface()
+
+        client.close()
+
+        client.open()
+
+        '''
         if self.g is None:
             pass_code = getpass.getpass('Github token')
             auth = Auth.Token(pass_code)
@@ -201,6 +228,16 @@ class GitHubInterface():
             pass
 
     def get_repos_list(self, string=False):
+        '''
+        This method returns the list of the repositories in form of Repository classes or in string type depending on boolean value of string argument.
+
+        Example:
+
+        client = GitHubInterface()
+
+        client.get_repos_list(string=True)
+
+        '''
 
         if string == False:
             return list(self.g.get_user().get_repos())
@@ -211,12 +248,33 @@ class GitHubInterface():
             return repo_list
 
     def get_repo(self, full_name='bogumilchilinski/dynpy'):
+        '''
+        This method returns the Repository class from GitHub.
 
+        Example:
+
+        client = GitHubInterface()
+
+        client.get_repo(full_name='bogumilchilinski/dynpy')
+
+        '''
         return self.g.get_repo(full_name)
 
 
     def get_issues_list(self, repo_name='none', state='all', assignee='none'):#, milestone='none',  labels='none', sort='none', direction='none', creator='none'):
 
+        '''
+        This method returns the list of the issues from GitHub Repository in form of Issue classes.
+
+        Example:
+
+        client = GitHubInterface()
+
+        client.get_issues_list(repo_name='bogumilchilinski/dynpy', state='all', assignee='amvdek')
+        client.get_issues_list(repo_name='bogumilchilinski/dynpy', state='open', assignee='amvdek')
+        client.get_issues_list(repo_name='bogumilchilinski/dynpy', state='closed', assignee='amvdek')
+
+        '''
         issue_list=[]
         for issue in list(self.g.get_repo(repo_name).get_issues(state=state, assignee=assignee)):#, milestone=milestone,  labels=labels, sort=sort, direction=direction, creator=creator)):
             issue_list.append(issue)
@@ -224,6 +282,16 @@ class GitHubInterface():
 
     
     def as_df(self):
+        '''
+        This method returns the Pandas DataFrame containing Issues.
+
+        Example:
+
+        client = GitHubInterface()
+
+        client.as_df()
+
+        '''
 
         import pandas as pd
 
@@ -242,7 +310,16 @@ class GitHubInterface():
 
 
     def open_issues(self, state='open', since=None, sort=None):
+        '''
+        This method returns the list of the Issues.
 
+        Example:
+
+        client = GitHubInterface()
+
+        client.open_issues(state='open', since=None, sort=None)
+
+        '''
         if self.g is not None:
             dp_repo=list(self.g.get_user().get_repos())[1]
             (dp_repo).full_name
@@ -260,7 +337,16 @@ class GitHubInterface():
 
 
     def close(self):
+        '''
+        This method closes the connection with GitHub API.
 
+        Example:
+
+        client = GitHubInterface()
+
+        client.close()
+
+        '''
         if self.g is not None:
             g = self.g
             self.g = g.close()

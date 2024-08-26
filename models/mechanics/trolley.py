@@ -1764,6 +1764,8 @@ class TrolleyWithTMD(ComposedSystem):
         if Omega is not None: self.Omega = Omega
         if F is not None: self.F = F
         self.ivar = ivar
+        
+        self.qs = [self.x, self.x_e]
         self._init_from_components(**kwargs)
         
 

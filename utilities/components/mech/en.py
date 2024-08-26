@@ -1498,7 +1498,7 @@ class GeneralSolutionComponent(ReportComponent):
 
         for i,qs in enumerate(system.q):
 
-            display((SympyFormula(  Eq(Symbol(f'X_g_-{qs}'),dyn_sys_lin._ode_system.general_solution.n(3)[i], evaluate=False) , marker='a',backend=latex  )  ))
+            display((SympyFormula(  Eq(Symbol(f'X_g_-{qs}'),dyn_sys_lin._ode_system.general_solution.rhs.n(3)[i], evaluate=False) , marker='a',backend=latex  )  ))
 
         display(ReportText(self.footer_text))
 

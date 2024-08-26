@@ -1329,6 +1329,7 @@ class GithubSynchroGuide(UsageOfDynamicSystemsGuide):
 
             guide_comp.GitSynchroPanelAccessComponent,
             guide_comp.GitSynchroIntroComponent,
+            guide_comp.UsageOfGitHubInterfacesComponent,
 
 
         ]
