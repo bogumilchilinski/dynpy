@@ -2223,33 +2223,16 @@ class ODESystem(AnalyticalSolution):
     
 ## koniec metod karoliny pozdraiwam ##
 
-    @staticmethod
-    def _get_code():
-        from dynpy.utilities.report import ObjectCode
+    def _get_code(self):
+        code_str = f'''
+odes = {self.odes}
+dvars = {self.dvars}
+ivar = {self.ivar}
+ode_order = {self.ode_order}
         
-        code = ObjectCode('''
-            from dynpy.solvers.linear import ODESystem
-            from sympy import *
-
-            F = Symbol('F', positive=True)
-            Omega = Symbol('Omega', positive=True)
-            t = Symbol('t')
-            c = Symbol('c', positive=True)
-            k = Symbol('k', positive=True)
-            m = Symbol('m', positive=True)
-            x = Function('x')
-            eq = -F*sin(Omega*t) + c*Derivative(x(t), t) + k*x(t) + m*Derivative(x(t), (t, 2))
-
-            dvars = Matrix([[x(t)]])
-            odes = Matrix([[-F*sin(Omega*t) + c*Derivative(x(t), t) + k*x(t) + m*Derivative(x(t), (t, 2))]])
-            ode_order = 2
-
-            odesys = ODESystem(odes = odes , dvars = dvars, ode_order = ode_order)
-
-            display(odesys)
-                         
-                         ''')
-        return code
+ODESystem({self.odes}, {self.dvars}, {self.ivar}, {self.ode_order})
+        '''
+        return code_str  
     
     def as_type(self, ode_type):        
         return ode_type.from_ode_system(self) 

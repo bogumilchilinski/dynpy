@@ -261,7 +261,7 @@ class GitHubInterface():
         return self.g.get_repo(full_name)
 
 
-    def get_issues_list(self, repo_name='none', state='all', assignee='none'):#, milestone='none',  labels='none', sort='none', direction='none', creator='none'):
+    def get_issues_list(self, repo_name='none', state='all', assignee='none', sort='none', since='none'):#, milestone='none',  labels='none', sort='none', direction='none', creator='none'):
 
         '''
         This method returns the list of the issues from GitHub Repository in form of Issue classes.
@@ -276,7 +276,7 @@ class GitHubInterface():
 
         '''
         issue_list=[]
-        for issue in list(self.g.get_repo(repo_name).get_issues(state=state, assignee=assignee)):#, milestone=milestone,  labels=labels, sort=sort, direction=direction, creator=creator)):
+        for issue in list(self.g.get_repo(repo_name).get_issues(state=state, assignee=assignee, sort=sort, since=since)):#, milestone=milestone,  labels=labels, sort=sort, direction=direction, creator=creator)):
             issue_list.append(issue)
         return issue_list
 
@@ -478,6 +478,21 @@ import importlib
             f.write('\n\n')
 
         f.close()
+#karolina - na szybko zrobilam to:
+    def lister(self):
+        lst = []
+        lst = self.submodgetter()
+        all_classes = []
+        
+        cnt = 0
+        
+        for submod in lst:
+            class_lst = self.classlistgetter(submod)
+            size = len(class_lst)
+            if size != 0:
+                all_classes.extend(class_lst)
+        return all_classes
+
 
 def list_of_guides_prime():
     md_str='Lista poradników: \n\n'
@@ -487,19 +502,155 @@ def list_of_guides_prime():
                     md_str=md_str+f'\t\t - {name} \n\n'
     return md_str
 
+
+
+class ModuleStructure:
+    
+    
+    def __init__(self, directory):
+        
+        import dynpy
+        from datetime import date, time
+        import inspect, os, types
+        from dynpy.utilities.report import ReportText
+        
+        self.full_list = []
+
+        if isinstance(directory, types.ModuleType):
+            s = str(directory)
+            self.directory = s[s.find("module '")+len("module '"):s.rfind("' from ")]
+        elif isinstance(directory, str):
+            self.directory = directory
+        
+        import_str = f'from {self.directory} import *'
+        exec(import_str)
+
+    def submodgetter(self): 
+        
+        import inspect
+        import dynpy
+        
+        tmp_list = eval(f"inspect.getmembers({self.directory}, predicate=inspect.ismodule)")
+        
+        self.mod_list = []
+        
+        for i in range(len(tmp_list)):
+            s = str(tmp_list[i][1])
+
+            tmp = s[s.find("module '")+len("module '"):s.rfind("' from ")]
+            
+            
+            if "dynpy" in tmp:
+                self.mod_list.append(f'{tmp}')
+                
+        tmp_list.clear()
+        
+        for element in self.mod_list:
+            exec(f'from {element} import *')
+            tmp_list = eval(f"inspect.getmembers({element}, predicate=inspect.ismodule)")
+            if tmp_list is not None:
+                for i in range(len(tmp_list)):
+                    s = str(tmp_list[i][1])
+                    tmp = s[s.find("module '")+len("module '"):s.rfind("' from ")]
+                    if ("dynpy" in tmp) and (tmp not in self.mod_list):
+                        self.mod_list.append(f'{tmp}')
+        
+        self.mod_list = sorted(self.mod_list)
+        
+        return self.mod_list
+
+    def classlistgetter(self, submod, keyword):
+        
+        '''
+        metoda zbiera liste klass w podanym submodule
+        keyword - opcjonalny argument, słowo klucz po którym szukane są klasy
+        
+        init: submod
+        '''
+        
+        import inspect
+
+        import_str = f"from {submod} import *"
+        command_str = f"inspect.getmembers({submod}, predicate=inspect.isclass)" 
+        
+        import_eval = exec(import_str)
+        members = eval(command_str)
+
+        tmp_list = []
+
+        for i in range(len(members)):
+            if "__class__" in members[i][0]: 
+                if (keyword != None) and (keyword in members[i][0]):
+                    tmp_list.append(submod)
+                elif keyword == None:
+                    tmp_list.append(submod)
+            elif f'{submod}' in str(members[i][1]):
+                if (keyword != None) and (keyword in members[i][0]):
+                    tmp_list.append(members[i][0])
+                elif keyword == None:
+                    tmp_list.append(members[i][0])
+
+        return tmp_list
+    
+    def lister(self, keyword = None):
+        self.submodgetter()
+        
+        self.full_list = []
+        
+        cnt = 0
+        
+        for submod in self.mod_list:    
+            class_lst = self.classlistgetter(submod, keyword)
+            size = len(class_lst)
+            
+            if size != 0:
+                for cl in class_lst:
+                        self.full_list.append((submod, cl))
+                        
+                        cnt += 1
+        
+        return self.full_list
+    
+    def printer(self, keyword = None):
+        
+        if not self.full_list:
+            self.lister(keyword)
+        
+        i = 0
+        a = 0
+        
+        submod_prev = None
+        class_name = self.full_list[0][1]
+        
+        for element in self.full_list:
+            if submod_prev == self.full_list[i][0]:
+                display(ReportText(f'* {self.full_list[i][1]}'))
+                submod_prev = self.full_list[i][0]
+            else:
+                display(ReportText(f'### {self.full_list[i][0]}'))
+                display(ReportText(f'* {self.full_list[i][1]}'))
+                
+                submod_prev = self.full_list[i][0]
+
+            i = i+1 
+        
+        display(ReportText(f'Total class count is: {i}'))
+
+        
+        
 def list_of_guides():
 
     dir_str = 'dynpy.utilities.documents'
 
-    return ClassLister(dir_str).printer()
+    return ClassLister(dir_str).lister()
 
 def list_of_components():
 
     dir_str = 'dynpy.utilities.components'
 
-    return ClassLister(dir_str).printer()
+    return ClassLister(dir_str).lister()
 def list_of_systems():
 
     dir_str = 'dynpy.models.mechanics'
 
-    return ClassLister(dir_str).printer()
+    return ClassLister(dir_str).lister()
