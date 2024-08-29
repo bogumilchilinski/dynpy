@@ -656,26 +656,65 @@ table_eq'''.replace('SDOFWinchSystem',system_name)))
 
 section_development_str=(
 '''
+from dynpy.utilities.report import ReportText
 intro=Section('Introduction')
 CurrentContainer(intro)
-display(ReportText('system diagram'))
-scheme=Picture('picture_winch.png')
-display(scheme)
+
+#scheme=Picture('picture_winch.png')
+#display(scheme)
+
+picture = Picture(system._as_picture().__dict__['image'], caption = f'System diagram')
+display(picture)
 ''')
 
 forming_equation_str=(
 '''
-solution_subs = SDOFWinchSystem()._ode_system.steady_solution.subs(slownik_numerical)
-eq_sol=Eq(solution_subs,0)
-eq_steady_sol=Eq(steady_solution_subs,0)
-
 eom=Section('Equations of motion')
 CurrentContainer(eom)
 display(ReportText('Equations of motion: '))
+eoms=system._eoms[0]
+
+slownik=system.get_random_parameters()
+slownik_numerical=system.get_numerical_parameters()
+
+eoms_eq=Eq(eoms,0)
+solution_subs = system._ode_system.steady_solution.subs(slownik_numerical)
+steady_solution=system._ode_system.steady_solution[0]
+steady_solution_subs=steady_solution.subs(slownik_numerical)
+#zmiana slownik na slownik numerical
+
+steady_solution_subs
+display(solution_subs)
+
+ode_system = system._ode_system #ESystem.from_dynamic_system(system.linearized())
+param_dict = system.get_numerical_parameters()
+t_span = np.linspace(1,10,1001)
+ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
+ode_solution = ode_system.subs(param_dict).steady_solution
+
+display(ode_solution)
 
 display(SympyFormula(eoms_eq))
-display(SympyFormula(eq_sol))
-display(SympyFormula(eq_steady_sol))
+display(SympyFormula(solution_subs))
+display(SympyFormula(steady_solution_subs))
+''')
+
+figure_eoms=(
+'''
+wykres=Section('Wykres')
+CurrentContainer(wykres)
+display(ReportText('The graph shows the solution of the equations of motion for the dynamic system under consideration. The graph shows the dependence of the displacement (or other relevant quantity, depending on the type of system) as a function of time, obtained from the solution of the differential equations.'))
+
+ode_simulation = ode_solution.subs(param_dict).compute_solution(t_span, ic_list = ic_list)
+picture=ode_simulation.to_pylatex_tikz(subplots=True).in_figure(caption='Otrzymany wykres')
+
+display(picture)
+
+display('równania ruchu:')
+
+display(eoms_eq)
+display(solution_subs)
+display(steady_solution_subs)
 ''')
 
 report_generation_libraries=(
@@ -684,10 +723,11 @@ doc_final = MechanicalCase('./output/Document',documentclass=NoEscape('article')
 
 doc_final.append(intro)
 doc_final.append(eom)
-doc_final.append(wykres) ##gdzie to?
+doc_final.append(wykres)
 
 doc_final.generate_pdf()
 ''')
+
 
 class SimulationReportComponent(ReportComponent):
     
@@ -710,6 +750,7 @@ class SimulationReportComponent(ReportComponent):
 
 
         display(ReportText('poniżej przedstawiony jest sposób tworzenia wykresu dla podanych danych: '))
+        
         eoms=system._eoms[0]
         
         slownik=system.get_random_parameters()
@@ -733,6 +774,8 @@ class SimulationReportComponent(ReportComponent):
         ode_solution = ode_system.subs(param_dict).steady_solution
         display(SympyFormula(ode_solution))
 
+        display(GuideCode(figure_eoms))
+        
         ode_simulation = ode_solution.subs(param_dict).compute_solution(t_span, ic_list = ic_list)
         #de_simulation = steady_solution_subs.compute_solution(t_span, ic_list = ic_list)
         display(ReportText('Wykres: '))

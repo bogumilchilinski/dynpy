@@ -258,8 +258,8 @@ class GitHubInterface():
         client.get_repo(full_name='bogumilchilinski/dynpy')
 
         '''
-        return self.g.get_repo(full_name)
 
+        return self.g.get_repo(full_name)
 
     def get_issues_list(self, repo_name='none', state='all', assignee='none', sort='none', since='none'):#, milestone='none',  labels='none', sort='none', direction='none', creator='none'):
 
@@ -506,6 +506,20 @@ def list_of_guides_prime():
 
 class ModuleStructure:
     
+    '''
+Class was created to support development work on dynsys.
+
+Example usage:
+===========================================================================================
+import dynpy
+from dynpy.utilities.report import ReportText
+
+example = ModuleStructure(dynpy.utilities.components)
+example.lister('Code') #Creates a list of components. Optional keyword used for filtering
+example.printer() #Prints list in user friendly format
+example.tree() #Prints created list in tree format
+===========================================================================================
+    '''
     
     def __init__(self, directory):
         
@@ -525,8 +539,12 @@ class ModuleStructure:
         import_str = f'from {self.directory} import *'
         exec(import_str)
 
-    def submodgetter(self): 
+    def submodgetter(self):
+        '''
+Method collects a list of submodules in the given module
         
+init: None
+        '''
         import inspect
         import dynpy
         
@@ -538,7 +556,6 @@ class ModuleStructure:
             s = str(tmp_list[i][1])
 
             tmp = s[s.find("module '")+len("module '"):s.rfind("' from ")]
-            
             
             if "dynpy" in tmp:
                 self.mod_list.append(f'{tmp}')
@@ -559,13 +576,12 @@ class ModuleStructure:
         
         return self.mod_list
 
-    def classlistgetter(self, submod, keyword):
-        
+    def _classlistgetter(self, submod, keyword):
         '''
-        metoda zbiera liste klass w podanym submodule
-        keyword - opcjonalny argument, słowo klucz po którym szukane są klasy
+Method collects a list of classes in the given submodule
+keyword - optional argument, keyword by which the classes are searched for
         
-        init: submod
+init: submod,keyword
         '''
         
         import inspect
@@ -593,6 +609,14 @@ class ModuleStructure:
         return tmp_list
     
     def lister(self, keyword = None):
+        
+        '''
+Method collects a list of classes and parent submodule directory in the given module
+keyword - optional argument, keyword by which the classes are searched for
+        
+init: keyword
+        '''
+        
         self.submodgetter()
         
         self.full_list = []
@@ -600,7 +624,7 @@ class ModuleStructure:
         cnt = 0
         
         for submod in self.mod_list:    
-            class_lst = self.classlistgetter(submod, keyword)
+            class_lst = self._classlistgetter(submod, keyword)
             size = len(class_lst)
             
             if size != 0:
@@ -612,6 +636,13 @@ class ModuleStructure:
         return self.full_list
     
     def printer(self, keyword = None):
+        
+        '''
+Method prints a list of classes and parent submodule directory in the given module
+keyword - optional argument, keyword by which the classes are searched for
+        
+init: keyword
+        '''
         
         if not self.full_list:
             self.lister(keyword)
@@ -635,22 +666,96 @@ class ModuleStructure:
             i = i+1 
         
         display(ReportText(f'Total class count is: {i}'))
+        
+    def tree(self, keyword = None):
+        
+        '''
+Method prints a tree of classes
+keyword - optional argument, keyword by which the classes are searched for
+        
+init: keyword
+        '''
+        
+        if not self.full_list:
+            self.lister(keyword)
+        
+        lst_comp = []
+        i = 0
 
+        while i != len(self.full_list):
+            t_str = f'{self.full_list[i][0]}.{self.full_list[i][1]}'
+            lst_comp.append(t_str)
+            i=i+1
+            
+        root = TreeNode("dynpy")
+
+        for element in lst_comp:
+            root.find_and_insert(root, element.split(".")[1:])
+        root.print()
+
+class TreeNode:
+    '''
+Supporting class for ModuleStructure class    
+    '''
+    def __init__(self, name, parent = None):
+        self.parent = parent
+        self.name = name
+        self.children = []
+
+    def add_child(self, node):
+        self.children.append(node)
+        return node
+
+    def print(self, is_root = True):
+        pre_0 = "    "
+        pre_1 = "│   "
+        pre_2 = "├── "
+        pre_3 = "└── "
+
+        tree = self
+        prefix = pre_2 if tree.parent and id(tree) != id(tree.parent.children[-1]) else pre_3
+
+        while tree.parent and tree.parent.parent:
+            if tree.parent.parent and id(tree.parent) != id(tree.parent.parent.children[-1]):
+                prefix = pre_1 + prefix
+            else:
+                prefix = pre_0 + prefix
+
+            tree = tree.parent
+
+        if is_root:
+            print(self.name)
+        else:
+            print(prefix + self.name)
+
+        for child in self.children:
+            child.print(False)
+    
+    @staticmethod
+    def find_and_insert(parent, edges):
+        if not edges:
+            return
+
+        match = [tree for tree in parent.children if tree.name == edges[0]]
+
+        tree = match[0] if match else parent.add_child(TreeNode(edges[0], parent))
+
+        __class__.find_and_insert(tree, edges[1:])        
         
         
 def list_of_guides():
 
     dir_str = 'dynpy.utilities.documents'
 
-    return ClassLister(dir_str).lister()
+    return ModuleStructure(dir_str).lister()
 
 def list_of_components():
 
     dir_str = 'dynpy.utilities.components'
-
-    return ClassLister(dir_str).lister()
+    
+    return ModuleStructure(dir_str).lister()
 def list_of_systems():
 
     dir_str = 'dynpy.models.mechanics'
 
-    return ClassLister(dir_str).lister()
+    return ModuleStructure(dir_str).lister()
