@@ -1309,7 +1309,8 @@ class BasicsOfReportComponentImplementationGuide(UsageOfDynamicSystemsGuide):
         comp_list=[
 
             guide_comp.ReportCompImplementationComponent,
-            guide_comp.ReportCompImplementationIssueComponent
+            guide_comp.ReportCompImplementationIssueComponent,
+            guide_comp.ReportingComponentsList
 
         ]
 

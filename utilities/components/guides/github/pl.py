@@ -1,4 +1,5 @@
-from ..mechanics import *
+from  dynpy.utilities.components.mechanics import *
+from  dynpy.utilities.components.mechanics import ReportComponent as BaseReportComponent
 
 import pandas as pd
 import numpy as np
@@ -8,13 +9,13 @@ from sympy import *
 from pandas import *
 from sympy.physics.mechanics import dynamicsymbols
 
-from ....solvers.linear import *
-from ....dynamics import *
+from .....solvers.linear import *
+from .....dynamics import *
 
-from ...report import display as ip_display
+from ....report import display as ip_display
 
 
-from ..mechanics import display
+from  dynpy.utilities.components.mechanics import display
 
 
 
@@ -137,101 +138,101 @@ class CocalcLoginComponent(ReportComponent):
 
 #Zakladanie Jupytera        
 
-dynpy_imports_code=(
-'''
+# dynpy_imports_code=(
+# '''
 
-from sympy import* 
-from sympy.physics.mechanics import dynamicsymbols, init_vprinting
-from sympy.abc import* 
-init_vprinting()
-from sympy import S
-from dynpy.solvers.linear import ODESystem
-import pandas as pd
-from dynpy.models.mechanics import Pendulum
-from dynpy.models import mechanics
+# from sympy import* 
+# from sympy.physics.mechanics import dynamicsymbols, init_vprinting
+# from sympy.abc import* 
+# init_vprinting()
+# from sympy import S
+# from dynpy.solvers.linear import ODESystem
+# import pandas as pd
+# from dynpy.models.mechanics import Pendulum
+# from dynpy.models import mechanics
 
-from pylatex import Document, Section, Subsection, Itemize, Package,  HorizontalSpace, Description, Marker, Command
-from pylatex.section import Paragraph, Chapter
-from pylatex.utils import italic, NoEscape
-from dynpy.utilities.adaptable import *
-from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase, EngeneeringDrawingGuide,DevelopmentGuide
-from dynpy.utilities.templates.tikz import TikzCaSCStandalone
-from dynpy.utilities.report import ReportText, Markdown, Picture, SympyFormula, Frame, ObjectCode, Block, AlertBlock, ExampleBlock
-from dynpy.utilities.report import (SystemDynamicsAnalyzer, DataPlot, AccelerationComparison, FFTComparison, ReportEntry,             SimulationalBlock, ReportText, SimulationFFT, DataStorage, Markdown, SummaryTable, SympyFormula, SymbolsDescription, DescriptionsRegistry,             ObjectCode,CurrentContainer)
-from dynpy.models import mechanics
-import inspect
+# from pylatex import Document, Section, Subsection, Itemize, Package,  HorizontalSpace, Description, Marker, Command
+# from pylatex.section import Paragraph, Chapter
+# from pylatex.utils import italic, NoEscape
+# from dynpy.utilities.adaptable import *
+# from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase, EngeneeringDrawingGuide,DevelopmentGuide
+# from dynpy.utilities.templates.tikz import TikzCaSCStandalone
+# from dynpy.utilities.report import ReportText, Markdown, Picture, SympyFormula, Frame, ObjectCode, Block, AlertBlock, ExampleBlock
+# from dynpy.utilities.report import (SystemDynamicsAnalyzer, DataPlot, AccelerationComparison, FFTComparison, ReportEntry,             SimulationalBlock, ReportText, SimulationFFT, DataStorage, Markdown, SummaryTable, SympyFormula, SymbolsDescription, DescriptionsRegistry,             ObjectCode,CurrentContainer)
+# from dynpy.models import mechanics
+# import inspect
 
-''')
+# ''')
 
-class JupyterSetUpComponent(ReportComponent):
+# class JupyterSetUpComponent(ReportComponent):
     
-    title="Zakładanie Jupytera"
+#     title="Zakładanie Jupytera"
 
 
-    def append_elements(self):
+#     def append_elements(self):
 
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
-        display(ReportText('Posługując sie Jupyterem będziemy tworzyć cele i wykonywali w nich pewne zadania.  '))
+#         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+#         display(ReportText('Posługując sie Jupyterem będziemy tworzyć cele i wykonywali w nich pewne zadania.  '))
 
-        pic9 = Picture('./dynpy/utilities/components/guides/images/PoDodaniuCeli.png', width='9cm')
+#         pic9 = Picture('./dynpy/utilities/components/guides/images/PoDodaniuCeli.png', width='9cm')
 
-        display(pic9)
+#         display(pic9)
 
-        display(ReportText('Aby dodac nową cele wystarczy kliknąć na "prostokąt" i pod nim pojawią się opcje takie jak Code czy Text'))
-
-
-        pic10 = Picture('./dynpy/utilities/components/guides/images/Markdown.png', width='9cm')
-
-        display(pic10)
-
-        display(ReportText('Po wybraniu opcji Text będziemy mogli napisać opis zadania, które wykonujemy lub nadać sekcji nagłówek  '))
-
-        pic11 = Picture('./dynpy/utilities/components/guides/images/Plotki-w-naglowk.png', width='9cm')
+#         display(ReportText('Aby dodac nową cele wystarczy kliknąć na "prostokąt" i pod nim pojawią się opcje takie jak Code czy Text'))
 
 
-        display(ReportText('Aby dodać nagłowek wystarczy wpisac znak Hashtag/płotek, ważne jest to że każdy nagłówek będzie traktowany jako sekcja niższego stopnia (\# główna sekcja, \#\# podsekcja itd...)'))
+#         pic10 = Picture('./dynpy/utilities/components/guides/images/Markdown.png', width='9cm')
 
-        display(pic11)
+#         display(pic10)
 
-        pic12 = Picture('./dynpy/utilities/components/guides/images//Nazywanie-naglowka.png', width='9cm')
+#         display(ReportText('Po wybraniu opcji Text będziemy mogli napisać opis zadania, które wykonujemy lub nadać sekcji nagłówek  '))
 
-        display(pic12)
-
-
-        display(ReportText('Po wejsciu w zakładkę Edit ukażą nam się poniższe opcje, takie jak usuwanie cel.'))
-
-        pic13 = Picture('./dynpy/utilities/components/guides/images/Del-inne-opcje.png', width='9cm')
-
-        display(pic13)
+#         pic11 = Picture('./dynpy/utilities/components/guides/images/Plotki-w-naglowk.png', width='9cm')
 
 
-        display(ReportText('Czasami gdy Jupyter się zawiesi można spróbować go zrestartować uzywając poniższego przycisku'))
+#         display(ReportText('Aby dodać nagłowek wystarczy wpisac znak Hashtag/płotek, ważne jest to że każdy nagłówek będzie traktowany jako sekcja niższego stopnia (\# główna sekcja, \#\# podsekcja itd...)'))
 
-        pic14 = Picture('./dynpy/utilities/components/guides/images/Restart.jpeg', width='9cm')
+#         display(pic11)
 
-        display(pic14)
+#         pic12 = Picture('./dynpy/utilities/components/guides/images//Nazywanie-naglowka.png', width='9cm')
 
-        pic15 = Picture('./dynpy/utilities/components/guides/images/Restart-kernel.png', width='9cm')
+#         display(pic12)
 
-        display(pic15)
 
-        display(ReportText('Aby mieć pewność że w naszym kodzie uwzględnione zostały wszystkie zaimportowane biblioteki warto uruchamiając jupytera użyć opcji Run all cells pokazanej na poniższych obrazkach'))
+#         display(ReportText('Po wejsciu w zakładkę Edit ukażą nam się poniższe opcje, takie jak usuwanie cel.'))
 
-        pic16 = Picture('./dynpy/utilities/components/guides/images/RunAll.jpeg', width='9cm')
+#         pic13 = Picture('./dynpy/utilities/components/guides/images/Del-inne-opcje.png', width='9cm')
 
-        display(pic16)
+#         display(pic13)
 
-        pic17 = Picture('./dynpy/utilities/components/guides/images/Run_all.png', width='9cm')
 
-        display(pic17)
+#         display(ReportText('Czasami gdy Jupyter się zawiesi można spróbować go zrestartować uzywając poniższego przycisku'))
 
-        display(ReportText('Aby elementy z których korzystamy działay należy zaimportować potrzebne biblioteki, takie jak na załączonym obrazku oraz w formie tekstu który można skopiowac'))
+#         pic14 = Picture('./dynpy/utilities/components/guides/images/Restart.jpeg', width='9cm')
 
-        pic18 = Picture('./dynpy/utilities/components/guides/images/ImportowanieBibliotek.png', width='9cm')
+#         display(pic14)
 
-        # display(pic18)
+#         pic15 = Picture('./dynpy/utilities/components/guides/images/Restart-kernel.png', width='9cm')
 
-        display(ObjectCode(dynpy_imports_code))
+#         display(pic15)
+
+#         display(ReportText('Aby mieć pewność że w naszym kodzie uwzględnione zostały wszystkie zaimportowane biblioteki warto uruchamiając jupytera użyć opcji Run all cells pokazanej na poniższych obrazkach'))
+
+#         pic16 = Picture('./dynpy/utilities/components/guides/images/RunAll.jpeg', width='9cm')
+
+#         display(pic16)
+
+#         pic17 = Picture('./dynpy/utilities/components/guides/images/Run_all.png', width='9cm')
+
+#         display(pic17)
+
+#         display(ReportText('Aby elementy z których korzystamy działay należy zaimportować potrzebne biblioteki, takie jak na załączonym obrazku oraz w formie tekstu który można skopiowac'))
+
+#         pic18 = Picture('./dynpy/utilities/components/guides/images/ImportowanieBibliotek.png', width='9cm')
+
+#         # display(pic18)
+
+#         display(ObjectCode(dynpy_imports_code))
 
 
 class CocalcFolderComponent(ReportComponent):
@@ -706,47 +707,47 @@ class SimulationReportComponent(ReportComponent):
         
         
 #pandas guide
-data_code=(
-'''
-miesiace_list = ['styczeń','luty','marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']  
-srednie_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]  
-Eg_dzienne_list_watogodziny_na_metr2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]  
-Eg_dzienne_kilowatogodziny_na_metr2 = [0.6,1,3,3.8,4.8,5.3,4.9,3.3,1.7,0.7,0.5]
-''')
+# data_code=(
+# '''
+# miesiace_list = ['styczeń','luty','marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']  
+# srednie_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]  
+# Eg_dzienne_list_watogodziny_na_metr2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]  
+# Eg_dzienne_kilowatogodziny_na_metr2 = [0.6,1,3,3.8,4.8,5.3,4.9,3.3,1.7,0.7,0.5]
+# ''')
 
-dict_code=(
-'''
-data_warunki_atmosferyczne = {'Długość dnia w miesiącu':długosc_dnia_w_miesiacach_godziny,'Dzienne natezenie energii         [kWh/m^2]':Eg_dzienne_list_watogodziny_na_metr2,'Średnia             temperatura':srednie_temp_list}
-''')
-output_code=(
-'''
-df = pd.DataFrame(index = miesiace_list,data = data_warunki_atmosferyczne)
-df
-''')
+# dict_code=(
+# '''
+# data_warunki_atmosferyczne = {'Długość dnia w miesiącu':długosc_dnia_w_miesiacach_godziny,'Dzienne natezenie energii         [kWh/m^2]':Eg_dzienne_list_watogodziny_na_metr2,'Średnia             temperatura':srednie_temp_list}
+# ''')
+# output_code=(
+# '''
+# df = pd.DataFrame(index = miesiace_list,data = data_warunki_atmosferyczne)
+# df
+# ''')
 
-class PandasTableGenerationComponent(ReportComponent):
+# class PandasTableGenerationComponent(ReportComponent):
     
-    title="Tworzenie tabelki"
+#     title="Tworzenie tabelki"
 
 
-    def append_elements(self):
+#     def append_elements(self):
         
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+#         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
 
 
-        display(ReportText('Stworzenie listy danych:'))
+#         display(ReportText('Stworzenie listy danych:'))
 
-        display(ObjectCode(data_code))
-
-
-        display(ReportText('Stworzenie słownika:'))
-
-        display(ObjectCode(dict_code))
+#         display(ObjectCode(data_code))
 
 
-        display(ReportText('Wywolanie tabelki:'))
-        display(ObjectCode(output_code))
-        display(df)
+#         display(ReportText('Stworzenie słownika:'))
+
+#         display(ObjectCode(dict_code))
+
+
+#         display(ReportText('Wywolanie tabelki:'))
+#         display(ObjectCode(output_code))
+#         display(df)
         
 
 winch_pandas_code=(
@@ -848,77 +849,77 @@ class BasicSymComponent(ReportComponent):
         display(sim_plot)
         
         
-class PandasMethodsComponent(ReportComponent):
+# class PandasMethodsComponent(ReportComponent):
     
-    title="Metody biblioteki Pandas"
+#     title="Metody biblioteki Pandas"
 
 
-    def append_elements(self):
+#     def append_elements(self):
         
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+#         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
         
         
-        miesiace_list = ['styczeń', 'luty', 'marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']
+#         miesiace_list = ['styczeń', 'luty', 'marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']
 
-        srednie_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]
+#         srednie_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]
 
-        Eg_dzienne_list_watogodziny_na_metr2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]
+#         Eg_dzienne_list_watogodziny_na_metr2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]
 
-        Eg_dzienne_kilowatogodziny_na_metr2 = [0.6,1,3,3.8,4.8,5.3,4.9,3.3,1.7,0.7,0.5]
+#         Eg_dzienne_kilowatogodziny_na_metr2 = [0.6,1,3,3.8,4.8,5.3,4.9,3.3,1.7,0.7,0.5]
 
-        długosc_dnia_w_miesiacach_godziny = [8.3,10.0,11.8,13.9,15.7,16.7,16.3,14.7,12.7,10.7,8.8,7.8]
+#         długosc_dnia_w_miesiacach_godziny = [8.3,10.0,11.8,13.9,15.7,16.7,16.3,14.7,12.7,10.7,8.8,7.8]
 
-        data_warunki_atmosferyczne = {'Długość dnia w miesiącu':długosc_dnia_w_miesiacach_godziny,'Dzienne natezenie energii [kWh/m^2]':Eg_dzienne_list_watogodziny_na_metr2,'Średnia temperatura':srednie_temp_list}
+#         data_warunki_atmosferyczne = {'Długość dnia w miesiącu':długosc_dnia_w_miesiacach_godziny,'Dzienne natezenie energii [kWh/m^2]':Eg_dzienne_list_watogodziny_na_metr2,'Średnia temperatura':srednie_temp_list}
 
-        df = pd.DataFrame(index = miesiace_list,data = data_warunki_atmosferyczne)
+#         df = pd.DataFrame(index = miesiace_list,data = data_warunki_atmosferyczne)
 
-        display(ReportText('***Metoda iloc:***'))
-        display(ObjectCode('df.iloc[0:3]'))
-        display(df.iloc[0:3])
+#         display(ReportText('***Metoda iloc:***'))
+#         display(ObjectCode('df.iloc[0:3]'))
+#         display(df.iloc[0:3])
 
-        # display(Picture('./Image/iloc.jpg', caption = ""))
+#         # display(Picture('./Image/iloc.jpg', caption = ""))
 
-        display(ReportText('***Metoda loc:***'))
-        display(ObjectCode('df.loc["styczeń"]'))
-        display(df.loc["styczeń"])
-        # display(Picture('./Image/loc.jpg', caption = ""))
+#         display(ReportText('***Metoda loc:***'))
+#         display(ObjectCode('df.loc["styczeń"]'))
+#         display(df.loc["styczeń"])
+#         # display(Picture('./Image/loc.jpg', caption = ""))
 
-        display(ReportText('***Metoda set axis dziala za rowno dla kolumn jak i rzędów. Dla rzędów:***'))
-        display(ObjectCode("def.set_axis(['a','b','c','d','e','f','g','h','i','j','k','l'],axis = 'index')"))
-        display(df.set_axis(['a','b','c','d','e','f','g','h','i','j','k','l'], axis = 'index'))
+#         display(ReportText('***Metoda set axis dziala za rowno dla kolumn jak i rzędów. Dla rzędów:***'))
+#         display(ObjectCode("def.set_axis(['a','b','c','d','e','f','g','h','i','j','k','l'],axis = 'index')"))
+#         display(df.set_axis(['a','b','c','d','e','f','g','h','i','j','k','l'], axis = 'index'))
 
-        # display(Picture('./Image/set_axis.jpg', caption = ""))
+#         # display(Picture('./Image/set_axis.jpg', caption = ""))
 
-        display(ReportText('***Dla kolumn:***'))
-        display(ObjectCode("df.set_axis(['a','b','c'],axis = 'columns')"))
-        display(df.set_axis(['a','b','c'],axis = 'columns'))
-        # display(Picture('./Image/set_axis2.jpg', caption = ""))
+#         display(ReportText('***Dla kolumn:***'))
+#         display(ObjectCode("df.set_axis(['a','b','c'],axis = 'columns')"))
+#         display(df.set_axis(['a','b','c'],axis = 'columns'))
+#         # display(Picture('./Image/set_axis2.jpg', caption = ""))
 
-        display(ReportText('***Metoda rename - Zmienienie pojedynczej kolumny:***'))
-        display(ObjectCode('''df.rename(columns = {"Długość dnia w miesiącu":'AAA'}, index = {"styczeń":'A'} )'''))
-        display(df.rename(columns = {"Długość dnia w miesiącu":'AAA'}, index = {"styczeń":'A'} ))
-        # display(Picture('./Image/rename.jpg', caption = ""))
+#         display(ReportText('***Metoda rename - Zmienienie pojedynczej kolumny:***'))
+#         display(ObjectCode('''df.rename(columns = {"Długość dnia w miesiącu":'AAA'}, index = {"styczeń":'A'} )'''))
+#         display(df.rename(columns = {"Długość dnia w miesiącu":'AAA'}, index = {"styczeń":'A'} ))
+#         # display(Picture('./Image/rename.jpg', caption = ""))
 
-        display(ReportText('***Metoda applymap:***'))
-        display(ObjectCode('     df.applymap(lambda x:x+2)'))
-        display(df.applymap(lambda x:x+2))
+#         display(ReportText('***Metoda applymap:***'))
+#         display(ObjectCode('     df.applymap(lambda x:x+2)'))
+#         display(df.applymap(lambda x:x+2))
 
-        # display(ReportText('***Metoda applymap dla kolumny/wiersza:***'))
-        # display(Markdown('''
-        # Warto pamiętać, że df[NAZWA] => tworzy serię, a df[[Nazwa]] => tworzy nowy frame, który można wykorzystać do użycia .applymap'''))
-        # display(df[['Długość dnia w miesiącu']].applymap(lambda x:x+100))
-        # pd_h = df[['Długość dnia w miesiącu']].applymap(lambda x:x+100)
-        # list1 = pd_h['Długość dnia w miesiącu'].tolist()
-        # df['Długość dnia w miesiącu'] = list1
+#         # display(ReportText('***Metoda applymap dla kolumny/wiersza:***'))
+#         # display(Markdown('''
+#         # Warto pamiętać, że df[NAZWA] => tworzy serię, a df[[Nazwa]] => tworzy nowy frame, który można wykorzystać do użycia .applymap'''))
+#         # display(df[['Długość dnia w miesiącu']].applymap(lambda x:x+100))
+#         # pd_h = df[['Długość dnia w miesiącu']].applymap(lambda x:x+100)
+#         # list1 = pd_h['Długość dnia w miesiącu'].tolist()
+#         # df['Długość dnia w miesiącu'] = list1
 
-        # display(df)
+#         # display(df)
 
-        # display(Picture('./Image/applymap.jpg', caption = ""))
+#         # display(Picture('./Image/applymap.jpg', caption = ""))
 
-        display(ReportText('***Slicowanie:***'))
-        display(ObjectCode('''df['Długość dnia w miesiącu']'''))
-        display(df['Długość dnia w miesiącu'])
-        # display(Picture('./Image/slice2.jpg', caption = ""))
+#         display(ReportText('***Slicowanie:***'))
+#         display(ObjectCode('''df['Długość dnia w miesiącu']'''))
+#         display(df['Długość dnia w miesiącu'])
+#         # display(Picture('./Image/slice2.jpg', caption = ""))
         
         
 steady_state_code=(
@@ -1872,39 +1873,39 @@ class DynSysIntroComponent(ReportComponent):
 
             '''))
         display(SympyFormula(steady_solution))
-eoms_code=(
-'''
-eoms_eq=Eq(eoms,0)
-eoms_eq''')
-dict_code=(
-'''
-param_dict = system.get_numerical_parameters()
-t_span = np.linspace(1,100,101)
-ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
-#param_dict = {**param_dict,system.m:system.m}
-''')
-params_code=(
-'''
-parameter = system.system_parameters()[0]
-param_dict = {**param_dict,parameter:parameter}
-''')
+# eoms_code=(
+# '''
+# eoms_eq=Eq(eoms,0)
+# eoms_eq''')
+# dict_code=(
+# '''
+# param_dict = system.get_numerical_parameters()
+# t_span = np.linspace(1,100,101)
+# ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
+# #param_dict = {**param_dict,system.m:system.m}
+# ''')
+# params_code=(
+# '''
+# parameter = system.system_parameters()[0]
+# param_dict = {**param_dict,parameter:parameter}
+# ''')
 
-na_df_code=(
-'''
-na_df = dyn_sys.subs(param_dict).numerical_analysis(parameter=system.system_parameters()[0],param_span=[1,2,3], t_span = t_span)
-na_df
-''')
-na_df_code_eoms=(
-'''
-na_df = dyn_sys.subs(param_dict).eoms.numerical_analysis(parameter=system.system_parameters()[0],param_span=[1,2,3], t_span = t_span)
+# na_df_code=(
+# '''
+# na_df = dyn_sys.subs(param_dict).numerical_analysis(parameter=system.system_parameters()[0],param_span=[1,2,3], t_span = t_span)
+# na_df
+# ''')
+# na_df_code_eoms=(
+# '''
+# na_df = dyn_sys.subs(param_dict).eoms.numerical_analysis(parameter=system.system_parameters()[0],param_span=[1,2,3], t_span = t_span)
 
-''')
+# ''')
 
-na_df_sol_code=(
-'''
-na_df_sol = na_df.compute_solution(t_span = t_span, ic_list = [0.0,0.0])
-na_df_sol.plot()
-''')
+# na_df_sol_code=(
+# '''
+# na_df_sol = na_df.compute_solution(t_span = t_span, ic_list = [0.0,0.0])
+# na_df_sol.plot()
+# ''')
 
 
 class NumericalAnalysisSimulationComponent(ReportComponent):
@@ -1935,12 +1936,13 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
         display(ReportText('Zaprezentowane równanie pozwala sprawdzić, czy rozważany układ jest poprawnie zaimportowany do przestrzeni roboczej.'))
         
         display(ReportText('Kolejnym kluczowym elementem jest zdefiniowanie parametrów układu, wektora czasu i warunków początkowych.'))
-             
+        
         param_dict = system.get_numerical_parameters()
         t_span = np.linspace(0,100,1001)
-        ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
+        ic_list = [1.0,0.0] ### Dla układu o jednym stopniu swobody
         param = system.system_parameters()[0]
-                
+        
+        
         display(ObjectCode(dict_code))
         
         display(ReportText('Następnie należy określić, który parametr ma zostać poddany analizie. Parametr ten należy wówczas zmienić w słowniku parametrów z wartości liczbowej na symbol.'))
@@ -1977,72 +1979,72 @@ ode_simulation = ode_solution.subs(param_dict).compute_solution(t_span, ic_list 
 ode_simulation.plot()
 ''')
 
-class AnalyticalSimulationComponent(ReportComponent):
+# class AnalyticalSimulationComponent(ReportComponent):
 
-    title="Wykonanie symulacji z wykorzystaniem rozwiązania analitycznego"
+#     title="Wykonanie symulacji z wykorzystaniem rozwiązania analitycznego"
 
     
     
-    def append_elements(self):
+#     def append_elements(self):
 
-        from ....solvers.linear import ODESystem
+#         from ....solvers.linear import ODESystem
         
-        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+#         system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
         
-        eoms=system._eoms[0]
-        eoms
+#         eoms=system._eoms[0]
+#         eoms
 
-        display(ReportText('Proces wywołowania równania ruchu za pomoca metody eoms:'))
+#         display(ReportText('Proces wywołowania równania ruchu za pomoca metody eoms:'))
 
-        display(ReportText('Wynik jest następujący:'))
+#         display(ReportText('Wynik jest następujący:'))
         
-        display(ObjectCode(eoms_code))
+#         display(ObjectCode(eoms_code))
         
-        eoms_eq=Eq(eoms,0)
-        eoms_eq
+#         eoms_eq=Eq(eoms,0)
+#         eoms_eq
         
-        display(SympyFormula(eoms_eq))
+#         display(SympyFormula(eoms_eq))
         
-        ode_system = ODESystem.from_dynamic_system(system.linearized())
+#         ode_system = ODESystem.from_dynamic_system(system.linearized())
 
-        display(ReportText('Podane równanie w tym przypadku nie będzie odpowiednim wyborem. Do wykonania symulacji analitycznej należy zastosować system dynamiczny w postaci równań różniczkowych zwyczajnych, który można uzyskać za pomocą klasy ODESystem:'))
+#         display(ReportText('Podane równanie w tym przypadku nie będzie odpowiednim wyborem. Do wykonania symulacji analitycznej należy zastosować system dynamiczny w postaci równań różniczkowych zwyczajnych, który można uzyskać za pomocą klasy ODESystem:'))
         
-        display(ReportText('Wynik jest następujący:'))
+#         display(ReportText('Wynik jest następujący:'))
 
-        display(SympyFormula(ode_system))
+#         display(SympyFormula(ode_system))
         
-        param_dict = system.get_numerical_parameters()
-        t_span = np.linspace(1,100,101)
-        ic_list = [1.0,0.0] ### Dla układu o jednym stopniu swobody
-        
-        
-        #param_dict = {**param_dict,system.m:system.m}
+#         param_dict = system.get_numerical_parameters()
+#         t_span = np.linspace(1,100,101)
+#         ic_list = [1.0,0.0] ### Dla układu o jednym stopniu swobody
         
         
-        display(ObjectCode(dict_code))
+#         #param_dict = {**param_dict,system.m:system.m}
         
         
-        display(ReportText('Aby przeprowadzić symulację analityczną w pierwszej kolejności konieczne jest uzyskanie rozwiązania równań ruchu dla podstawionych danych subs(param_dict), co można wykonać za pomocą metod `solution` i `steady_solution` w zależności od skomplikowania systemu.'))
+#         display(ObjectCode(dict_code))
         
-        ode_solution = ode_system.subs(param_dict).steady_solution
         
-        display(ReportText('Wynik jest następujący:'))
+#         display(ReportText('Aby przeprowadzić symulację analityczną w pierwszej kolejności konieczne jest uzyskanie rozwiązania równań ruchu dla podstawionych danych subs(param_dict), co można wykonać za pomocą metod `solution` i `steady_solution` w zależności od skomplikowania systemu.'))
         
-        display(SympyFormula(ode_solution))
+#         ode_solution = ode_system.subs(param_dict).steady_solution
         
-        display(ReportText('Do przeprowadzenia symulacji konieczne jest zdefiniowanie parametrów układu, wektora czasu oraz warunków początkowych. Można je uzyskać w następujący sposób:'))
+#         display(ReportText('Wynik jest następujący:'))
+        
+#         display(SympyFormula(ode_solution))
+        
+#         display(ReportText('Do przeprowadzenia symulacji konieczne jest zdefiniowanie parametrów układu, wektora czasu oraz warunków początkowych. Można je uzyskać w następujący sposób:'))
         
 
         
-        display(ObjectCode(sim_code))
+#         display(ObjectCode(sim_code))
         
-        display(ReportText('Dla zdefiniowanych parametrów symulacja analityczna wygląda w następujący sposób:'))
+#         display(ReportText('Dla zdefiniowanych parametrów symulacja analityczna wygląda w następujący sposób:'))
         
-        ode_simulation = ode_solution.subs(param_dict).compute_solution(t_span, ic_list = ic_list)
+#         ode_simulation = ode_solution.subs(param_dict).compute_solution(t_span, ic_list = ic_list)
 
-        (ode_simulation.plot())
-        import matplotlib.pyplot as plt
-        plt.show()
+#         (ode_simulation.plot())
+#         import matplotlib.pyplot as plt
+#         plt.show()
 
 
 class DynamicSystemCompletenessCheckComponent(ReportComponent):

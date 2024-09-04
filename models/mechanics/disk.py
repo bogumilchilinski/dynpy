@@ -433,7 +433,6 @@ class RollingHalfDisk(ComposedSystem):
         default_data_dict = {
             self.m: [1],
             self.r: [1],
-            #self.pi: [3.14],
         }
         return default_data_dict
     def symbols_description(self):
@@ -474,7 +473,7 @@ class ForcedRollingHalfDisk(RollingHalfDisk):
                 -radius of the Half Disc
             
             M_0 = torque amplitude
-                -amplitude value of horisontal force
+                -amplitude value of torque
             
             Omega = Frequency of force
                 -value of frequency force
@@ -507,7 +506,7 @@ class ForcedRollingHalfDisk(RollingHalfDisk):
     m=Symbol('m', positive=True)
     g=Symbol('g', positive=True)
     Omega=Symbol('Omega', positive=True)
-    M_0=Symbol('M_0', positiv=True)
+    M_0=Symbol('M_0', positive=True)
     phi=dynamicsymbols('varphi')
 
     def __init__(self,

@@ -1,5 +1,5 @@
-from  ..mechanics import *
-from  ..mechanics import ReportComponent as BaseReportComponent
+from  dynpy.utilities.components.mechanics import *
+from  dynpy.utilities.components.mechanics import ReportComponent as BaseReportComponent
 
 
 from . import pl
@@ -12,12 +12,12 @@ from sympy import *
 from pandas import *
 from sympy.physics.mechanics import dynamicsymbols
 
-from ....solvers.linear import *
-from ....dynamics import *
+from .....solvers.linear import *
+from .....dynamics import *
 
 months_list = ['January', 'February', 'March','April','May','June','July','August','September','October','November','December']
 
-from ..mechanics import display
+from  dynpy.utilities.components.mechanics import display
 import datetime
 
 
@@ -42,7 +42,7 @@ class ReportComponent(BaseReportComponent):
     @property
     def reported_object(self):
 
-        from ....solvers.linear import ODESystem
+        from .....solvers.linear import ODESystem
         
         if isinstance(self._reported_object, ODESystem):
             return self._reported_object
@@ -137,38 +137,38 @@ class TitlePageComponent(Environment):
 
 
 #obsluga kolaka
-
-class CocalcLoginComponent(ReportComponent):
-    
-    title="Logowanie do CoCalc"
-
-
-    def append_elements(self):
-
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
-
-
-        display(ReportText('''Link do CoCalca: [LINK](https://cocalc.com/) '''))
-
-        pic1 = Picture('./dynpy/utilities/components/guides/images/ColacSignIn.png', caption = "Przed Zalogowaniem",width='9cm')
-
-        display(pic1)
-
-        display(ReportText('Teraz należy zalogować się'))
-
-        pic2 = Picture('./dynpy/utilities/components/guides/images/MetLogow.png', caption = "Metody logowania",width='9cm')
-
-        display(pic2)
-
-        pic3 = Picture('./dynpy/utilities/components/guides/images/Zalogowany.png', caption = "Zalogowany",width='9cm')
-
-        display(pic3)
-
-        display(ReportText('''Poprzez tego linka można dołączyć do projektu Ongoing: [ONGOING](https://cocalc.com/app?project-invite=dS62jsbRJvcfj2Mu) '''))
-        
-
+#git
+# class CocalcLoginComponent(ReportComponent):
+#     
+#     title="Logowanie do CoCalc"
+# 
+# 
+#     def append_elements(self):
+# 
+#        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+# 
+# 
+#         display(ReportText('''Link do CoCalca: [LINK](https://cocalc.com/) '''))
+# 
+#         pic1 = Picture('./dynpy/utilities/components/guides/images/ColacSignIn.png', caption = "Przed Zalogowaniem",width='9cm')
+# 
+#         display(pic1)
+# 
+#         display(ReportText('Teraz należy zalogować się'))
+# 
+#         pic2 = Picture('./dynpy/utilities/components/guides/images/MetLogow.png', caption = "Metody logowania",width='9cm')
+# 
+#         display(pic2)
+# 
+#         pic3 = Picture('./dynpy/utilities/components/guides/images/Zalogowany.png', caption = "Zalogowany",width='9cm')
+# 
+#         display(pic3)
+# 
+#         display(ReportText('''Poprzez tego linka można dołączyć do projektu Ongoing: [ONGOING](https://cocalc.com/app?project-invite=dS62jsbRJvcfj2Mu) '''))
+#         
+# 
 #Zakladanie Jupytera        
-
+# 
 dynpy_imports_code=(
 '''
 
@@ -265,53 +265,53 @@ class JupyterSetUpComponent(ReportComponent):
 
         display(GuideCode(dynpy_imports_code))
 
-
-class CocalcFolderComponent(ReportComponent):
-    
-    title="Tworzenie Folderu i Jupytera"
-
-
-    def append_elements(self):
-        
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
-
-        display(ReportText('Tworzenie Folderu i Jupytera'))
-        
-        pic4 = Picture('./dynpy/utilities/components/guides/images/OtwarcieOngo.png', width='9cm')
-        
-        display(pic4)
-        
-        display(ReportText('W wyszukiwarce szukamy "Ongoing" i otwieramy projekt  '))
-        
-        pic5 = Picture('./dynpy/utilities/components/guides/images/PoWejsciuWOngo.png', width='9cm')
-        
-        display(pic5)
-        
-        display(ReportText('Otworzenie folderu UCZESTNICY  '))
-        
-        
-        display(ReportText('Nadajemy nazwę folderu od naszego imieniem i nazwiskiem jak na zalączonym obrazku i klikamy create folder:'))
-        
-        pic6 = Picture('./dynpy/utilities/components/guides/images/NazwanieFolderu.png', width='9cm')
-        
-        display(pic6)
-        
-        
-        display(ReportText('Po utworzeniu folderu klikamy przycisk NEW i utworzymy pierwszego Jupytera. W tym celu po nazwaniu Jupytera wybieramy zakladke Jupyter Notebook.'))
-        
-        
-        pic7 = Picture('./dynpy/utilities/components/guides/images/WyborKernela.png', width='9cm')
-        
-        display(pic7)
-        
-        display(ReportText('Wybieramy Python 3 (system - wide)  '))
-        display(ReportText('Po wybraniu Kernela utworzony zostanie nasz Jupyter.'))
-        
-        pic8 = Picture('./dynpy/utilities/components/guides/images/JupekUtworzony.png', width='9cm')
-        
-        display(pic8)
-        ####
-
+#git
+# class CocalcFolderComponent(ReportComponent):
+#     
+#     title="Tworzenie Folderu i Jupytera"
+# 
+# 
+#     def append_elements(self):
+#         
+#        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+# 
+#         display(ReportText('Tworzenie Folderu i Jupytera'))
+#         
+#         pic4 = Picture('./dynpy/utilities/components/guides/images/OtwarcieOngo.png', width='9cm')
+#         
+#         display(pic4)
+#         
+#         display(ReportText('W wyszukiwarce szukamy "Ongoing" i otwieramy projekt  '))
+#         
+#         pic5 = Picture('./dynpy/utilities/components/guides/images/PoWejsciuWOngo.png', width='9cm')
+#         
+#         display(pic5)
+#         
+#         display(ReportText('Otworzenie folderu UCZESTNICY  '))
+#         
+#         
+#         display(ReportText('Nadajemy nazwę folderu od naszego imieniem i nazwiskiem jak na zalączonym obrazku i klikamy create folder:'))
+#         
+#         pic6 = Picture('./dynpy/utilities/components/guides/images/NazwanieFolderu.png', width='9cm')
+#         
+#         display(pic6)
+#         
+#         
+#         display(ReportText('Po utworzeniu folderu klikamy przycisk NEW i utworzymy pierwszego Jupytera. W tym celu po nazwaniu Jupytera wybieramy zakladke Jupyter Notebook.'))
+#         
+#         
+#         pic7 = Picture('./dynpy/utilities/components/guides/images/WyborKernela.png', width='9cm')
+#         
+#         display(pic7)
+#         
+#         display(ReportText('Wybieramy Python 3 (system - wide)  '))
+#         display(ReportText('Po wybraniu Kernela utworzony zostanie nasz Jupyter.'))
+#         
+#         pic8 = Picture('./dynpy/utilities/components/guides/images/JupekUtworzony.png', width='9cm')
+#         
+#         display(pic8)
+       ###
+# 
 #podstawy raportowania
         
 
@@ -334,40 +334,40 @@ help(Pendulum)
 '''
 
 
-
-class CocalcDynSysListComponent(ReportComponent):
-    
-    title="Lista systemów dynamicznych"
-
-
-    def append_elements(self):
-
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
-        
-        display(ReportText(' Możemy również wyświetlić podgląd takiego wahadła używając poniższej funkcji:  '))
-        display(Picture('./dynpy/utilities/components/guides/images/preview.jpg'))
-        display(ReportText(' Co więcej, używając poniższej komendy help, możemy otrzymać wszelkie informacje na temat konkretnego modelu:  '))
-        display(Picture('./dynpy/utilities/components/guides/images/help.jpg'))
-
-        display(ReportText('''Kod wywołania pomocy jest następujący:'''))
-        
-        display(GuideCode(   code_dynsys_list_str   ))
-
-
-        display(ReportText('Poniżej znajduje się lista systemów mechanicznych, których można użyć:  '))
-        from dynpy.models import mechanics
-
-
-        moduly=inspect.getmembers(mechanics, inspect.ismodule)
-
-
-        for nazwa,modul in moduly:
-
-            mods_tmp = [name for name,cls in inspect.getmembers(modul, inspect.isclass) if issubclass(cls,mechanics.principles.ComposedSystem)]
-            classes_str=',\n - '.join(mods_tmp)
-            if mods_tmp != []:
-                display(ReportText( '\\par' + f'-{nazwa}'+ '\\par'))
-                display(ReportText(f'- {classes_str}'))
+#git
+# class CocalcDynSysListComponent(ReportComponent):
+#     
+#     title="Lista systemów dynamicznych"
+# 
+# 
+#     def append_elements(self):
+# 
+#        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+#         
+#         display(ReportText(' Możemy również wyświetlić podgląd takiego wahadła używając poniższej funkcji:  '))
+#         display(Picture('./dynpy/utilities/components/guides/images/preview.jpg'))
+#         display(ReportText(' Co więcej, używając poniższej komendy help, możemy otrzymać wszelkie informacje na temat konkretnego modelu:  '))
+#         display(Picture('./dynpy/utilities/components/guides/images/help.jpg'))
+# 
+#         display(ReportText('''Kod wywołania pomocy jest następujący:'''))
+#         
+#         display(GuideCode(   code_dynsys_list_str   ))
+# 
+# 
+#         display(ReportText('Poniżej znajduje się lista systemów mechanicznych, których można użyć:  '))
+#         from dynpy.models import mechanics
+# 
+# 
+#         moduly=inspect.getmembers(mechanics, inspect.ismodule)
+# 
+# 
+#         for nazwa,modul in moduly:
+# 
+#             mods_tmp = [name for name,cls in inspect.getmembers(modul, inspect.isclass) if issubclass(cls,mechanics.principles.ComposedSystem)]
+#             classes_str=',\n - '.join(mods_tmp)
+#             if mods_tmp != []:
+#                 display(ReportText( '\\par' + f'-{nazwa}'+ '\\par'))
+#                 display(ReportText(f'- {classes_str}'))
 
 
 class ReportingBasicsComponent(ReportComponent):
@@ -453,75 +453,75 @@ class DynamicSystemCallComponent(ReportComponent):
         display(system._as_picture())
         
         
-class DynamicSystemMethodsUsageComponent(ReportComponent):
+# class DynamicSystemMethodsUsageComponent(ReportComponent):
 
-    title="Wywoływanie równań ruchu oraz innych metod"
+#     title="Wywolywanie rownan ruchu oraz innych metod"
 
 
 
-    def append_elements(self):
+#     def append_elements(self):
         
-        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
-        system_name = system.__class__.__name__
+#         system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+#         system_name = system.__class__.__name__
         
-        #from dynpy.models.mechanics import ForcedSpringMassSystem as SDOFWinchSystem
+#         #from dynpy.models.mechanics import ForcedSpringMassSystem as SDOFWinchSystem
         
-        eoms=system._eoms[0]
+#         eoms=system._eoms[0]
 
-        display(ReportText('Proces wywoływania równania ruchu za pomocą metody eoms:'))
-        display(GuideCode('''eoms=SDOFWinchSystem()._eoms[0]'''.replace('SDOFWinchSystem',system_name)))
-
-
-
-        display(ReportText('Wynik jest następujący:'))
-        #display(SympyFormula(eoms))
+#         display(ReportText('Proces wywołowania równania ruchu za pomoca metody eoms:'))
+#         display(GuideCode('''eoms=SDOFWinchSystem()._eoms[0]'''.replace('SDOFWinchSystem',system_name)))
 
 
-        eoms_eq=Eq(eoms,0)
-        eoms_eq
 
-        display(ReportText('Proces tworzenia równania z wcześniej wywołanego równania ruchu (równanie początkowo jest wywoływane jako ciąg znaków reprezentujący opis danego problemu, jednak nie jest on wówczas równaniem, które możemy zastosować do obliczeń):'))
-        display(GuideCode('eoms_eq=Eq(eoms,0)'.replace('SDOFWinchSystem',system_name)))
-        display(ReportText('Wynik jest następujący:'))
-        display(SympyFormula(eoms))
+#         display(ReportText('Wynik jest następujący:'))
+#         #display(SympyFormula(eoms))
 
-        #display(Picture('./Image/eomseq_w.jpg'))
+
+#         eoms_eq=Eq(eoms,0)
+#         eoms_eq
+
+#         display(ReportText('Proces tworzenia równania z wcześniej wywołanego równania ruchu (równanie początkowo jest wywoływane jako ciąg znaków reprezentujący opis danego problemu, jednak nie jest on wówczas równaniem, które możemy zastosować do obliczeń):'))
+#         display(GuideCode('eoms_eq=Eq(eoms,0)'.replace('SDOFWinchSystem',system_name)))
+#         display(ReportText('Wynik jest następujący:'))
+#         display(SympyFormula(eoms))
+
+#         #display(Picture('./Image/eomseq_w.jpg'))
         
-        slownik=system.get_random_parameters()
+#         slownik=system.get_random_parameters()
         
-        slownik_numerical=system.get_numerical_parameters()
+#         slownik_numerical=system.get_numerical_parameters()
         
-        display(ReportText('Słownik z losowymi wartościami parametrów symbolicznych systemu wygląda następująco:'))
+#         display(ReportText('Słownik z losowymi wartościami parametrów symbolicznych systemu wygląda następująco:'))
         
-        display(SympyFormula(Dict(slownik)))
+#         display(SympyFormula(Dict(slownik)))
         
-        display(ReportText('Słownik z losowymi wartościami liczbowymi do analizy numerycznej systemu, wygląda następująco:'))
+#         display(ReportText('Słownik z losowymi wartościami liczbowymi do analizy numerycznej systemu, wygląda następująco:'))
         
-        display(SympyFormula(Dict(slownik_numerical)))
+#         display(SympyFormula(Dict(slownik_numerical)))
 
-        display(ReportText('Tworzenie słownika (w tym przypadku z losowymi wartościami) umożliwiający nadanie wartości zmiennym:'))
+#         display(ReportText('Tworzenie słownika (w tym przypadku z losowymi wartościami) umożliwiający nadanie wartości zmiennym:'))
         
         
 
-        display(GuideCode('slownik=SDOFWinchSystem().get_random_parameters()'.replace('SDOFWinchSystem',system_name)))
-        display(GuideCode('slownik_numerical=SDOFWinchSystem().get_numerical_parameters()'.replace('SDOFWinchSystem',system_name)))
-        #display(Picture('./Image/slownik_w.jpg'))
+#         display(GuideCode('slownik=SDOFWinchSystem().get_random_parameters()'.replace('SDOFWinchSystem',system_name)))
+#         display(GuideCode('slownik_numerical=SDOFWinchSystem().get_numerical_parameters()'.replace('SDOFWinchSystem',system_name)))
+#         #display(Picture('./Image/slownik_w.jpg'))
 
-        display(ReportText('Rozwiązanie ogólne równania:'))
-        #display(Picture('./Image/ogolne_w.jpg'))
+#         display(ReportText('Rozwiązanie ogólne równania:'))
+#         #display(Picture('./Image/ogolne_w.jpg'))
 
-        solution=system._ode_system.solution[0]
-        display(GuideCode('''solution=SDOFWinchSystem()._ode_system.solution[0]'''.replace('SDOFWinchSystem',system_name)))
-        display(GuideCode('solution_sym=SDOFWinchSystem()._ode_system.solution'.replace('SDOFWinchSystem',system_name)))
-        display(SympyFormula(solution))
+#         solution=system._ode_system.solution[0]
+#         display(GuideCode('''solution=SDOFWinchSystem()._ode_system.solution[0]'''.replace('SDOFWinchSystem',system_name)))
+#         display(GuideCode('solution_sym=SDOFWinchSystem()._ode_system.solution'.replace('SDOFWinchSystem',system_name)))
+#         display(SympyFormula(solution))
 
-        display(ReportText('Rozwiązanie szczególne równania:'))
+#         display(ReportText('Rozwiązanie szczególne równania:'))
 
 
 
-        steady_solution=system._ode_system.steady_solution[0]
-        display(GuideCode('''steady_solution=SDOFWinchSystem()._ode_system.steady_solution[0]'''.replace('SDOFWinchSystem',system_name)))
-        display(SympyFormula(steady_solution))
+#         steady_solution=system._ode_system.steady_solution[0]
+#         display(GuideCode('''steady_solution=SDOFWinchSystem()._ode_system.steady_solution[0]'''.replace('SDOFWinchSystem',system_name)))
+#         display(SympyFormula(steady_solution))
     
     
     
@@ -548,7 +548,7 @@ table_new=table[[coord]]
 report_table_define_str=(
 '''
 
-tabela = Section('Table')
+tabela = Section('Tabela')
 CurrentContainer(tabela)
 coord = system.q[0]
 solution_sym=ForcedSpringMassSystem()._ode_system.subs(slownik_numerical).steady_solution
@@ -560,102 +560,110 @@ table=table_eq
 
 table_for_report = table.iloc[0:10].to_latex_dataframe()
 
-table_for_report.reported(caption=('Table'))
+table_for_report.reported(caption=('Tabela'))
 
 
 ''')
 
-class SimulationsComponent(ReportComponent):
+# class SimulationsComponent(ReportComponent):
     
-    title="Creating graphs"
+#     title="Creating graphs"
 
-    def append_elements(self):
+#     def append_elements(self):
         
-        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
-        system_name = system.__class__.__name__
+#         system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+#         system_name = system.__class__.__name__
 
 
-        display(ReportText('Definition of time vector:'))
-        #display(Picture('./Image/tspan_w.jpg'))
+#         display(ReportText('Definition of time vector:'))
+#         #display(Picture('./Image/tspan_w.jpg'))
 
-        display(GuideCode('''t_span = np.linspace(0,100,200)'''.replace('SDOFWinchSystem',system_name)))
-        t_span = np.linspace(0,100,200)
-
-
-        display(ReportText('The way to create charts manually:'))
-        display(ReportText('Substitution of data from a previously created dictionary:'))
-        #display(Picture('./Image/stedisub_w.jpg'))
-
-        
-        
-        display(GuideCode(steady_sol_str.replace('SDOFWinchSystem',system_name)))
-        #dict=system.get_random_parameters()
-        dict_numerical=system.get_numerical_parameters()
-        
-        steady_solution=system._ode_system.steady_solution.rhs[0]
-        steady_solution_subs=steady_solution.subs(dict_numerical)
-        display(steady_solution_subs)
-        display(ReportText('Using the lambdify method to convert functions to anonymous form'))
+#         display(GuideCode('''t_span = np.linspace(0,100,200)'''.replace('SDOFWinchSystem',system_name)))
+#         t_span = np.linspace(0,100,200)
 
 
-        eq_lambdify=lambdify(system.ivar, steady_solution_subs)
-        display(GuideCode('''eq_lambdify=lambdify(system.ivar, list(steady_solution_subs.rhs))'''.replace('SDOFWinchSystem',system_name)))
-        display(SympyFormula(eq_lambdify))
-
-
-        display(ReportText('Creating a graph:'))
-
-        df = pd.DataFrame(data=eq_lambdify(t_span))
-        display(df.plot())
-        display(GuideCode('''df = pd.DataFrame(data=eq_lambdify(t_span))
-df.T.set_index(t_span).plot()'''.replace('SDOFWinchSystem',system_name)))
-
-
-        display(ReportText('A way to create charts directly from a previously called class:'))
-        display(ReportText('Dictionary substitution:'))
-        #display(Picture('./Image/table_in.jpg'))
+#         display(ReportText('The way to create charts manually:'))
+#         display(ReportText('Substitution of data from a previously created dictionary:'))
+#         #display(Picture('./Image/stedisub_w.jpg'))
 
         
-        #zmiana slownik na slownik_numerical
-        table_eq=system._ode_system.steady_solution.subs(dict_numerical)
+        
+#         display(GuideCode(steady_sol_str.replace('SDOFWinchSystem',system_name)))
+#         #dict=system.get_random_parameters()
+#         dict_numerical=system.get_numerical_parameters()
+        
+#         steady_solution=system._ode_system.steady_solution.rhs[0]
+#         steady_solution_subs=steady_solution.subs(dict_numerical)
+#         display(steady_solution_subs)
+#         display(ReportText('Using the lambdify method to convert functions to anonymous form'))
+#         #display(Picture('./Image/lambdify_w.jpg'))
 
 
-        display(GuideCode('''dict_numerical=system.get_numerical_parameters()
-table_eq=system._ode_system.steady_solution.subs(dict_numerical)
-table_eq'''.replace('SDOFWinchSystem',system_name)))
-        display(SympyFormula(table_eq))
+# #         eq_lambdify=lambdify(system.ivar, list(steady_solution_subs.rhs))
+#         eq_lambdify=lambdify(system.ivar, steady_solution_subs)
+#         display(GuideCode('''eq_lambdify=lambdify(system.ivar, list(steady_solution_subs.rhs))'''.replace('SDOFWinchSystem',system_name)))
+#         display(SympyFormula(eq_lambdify))
 
-        #jak tabele zrobic + ew jej output
-        display(ReportText('The way to create a table:'))
-        #display(Picture('./Image/table_in.jpg'))
-        coord = system.q[0]
-        table=table_eq.numerized().compute_solution(t_span)
-        table_new=table[coord]
 
-        display(GuideCode(solution_table_str.replace('SDOFWinchSystem',system_name)))
-        display(table)
-        display(table_new)
+#         display(ReportText('Creating a graph:'))
+#         #display(Picture('./Image/plot2_w.jpg'))
+        
+#         #pd.DataFrame(data=eq_lambdify(t_span),index=t_span).plot()
+#         #plt.show
+#         df = pd.DataFrame(data=eq_lambdify(t_span))
+#         display(df.plot())
+#         display(GuideCode('''df = pd.DataFrame(data=eq_lambdify(t_span))
+# df.T.set_index(t_span).plot()'''.replace('SDOFWinchSystem',system_name)))
 
-        display(ReportText('The way to create a visualization of the defined table:'))
-        #display(Picture('./Image/table_in.jpg'))
 
-##### nazwy image tez przetlumaczone
-        display(ReportText('How to create the table displayed in the finished report:'))
-        #display(Picture('./Image/creating_table_in.png'))
+#         display(ReportText('A way to create charts directly from a previously called class:'))
+#         display(ReportText('Dictionary substitution:'))
+#         #display(Picture('./Image/table_in.jpg'))
 
-        display(GuideCode(report_table_define_str.replace('SDOFWinchSystem',system_name)))
+        
+#         #zmiana slownik na slownik_numerical
+#         table_eq=system._ode_system.steady_solution.subs(dict_numerical)
 
-        display(ReportText('Visualization of the graph:'))
-        #display(Picture('./Image/tikzplot_w.jpg'))
 
-        #display(GuideCode('''table_new.to_pylatex_tikz().in_figure()'''.replace('SDOFWinchSystem',system_name)))
-        #display('''table_new.to_pylatex_tikz().in_figure()'''.replace('SDOFWinchSystem',system_name))
+#         display(GuideCode('''dict_numerical=system.get_numerical_parameters()
+# table_eq=system._ode_system.steady_solution.subs(dict_numerical)
+# table_eq'''.replace('SDOFWinchSystem',system_name)))
+#         display(SympyFormula(table_eq))
+
+#         #jak tabele zrobic + ew jej output
+#         display(ReportText('The way to create a table:'))
+#         #display(Picture('./Image/table_in.jpg'))
+#         coord = system.q[0]
+#         table=table_eq.numerized().compute_solution(t_span)
+#         table_new=table[coord]
+
+#         display(GuideCode(solution_table_str.replace('SDOFWinchSystem',system_name)))
+#         display(table)
+#         display(table_new)
+
+#         display(ReportText('The way to create a visualization of the defined table:'))
+#         #display(Picture('./Image/table_in.jpg'))
+
+# ##### nazwy image tez przetlumaczone
+#         display(ReportText('How to create the table displayed in the finished report:'))
+#         #display(Picture('./Image/creating_table_in.png'))
+
+#         display(GuideCode(report_table_define_str.replace('SDOFWinchSystem',system_name)))
+
+#         display(ReportText('Visualization of the graph:'))
+#         #display(Picture('./Image/tikzplot_w.jpg'))
+
+#         display(GuideCode('''table_new.to_pylatex_tikz().in_figure()'''.replace('SDOFWinchSystem',system_name)))    
 
 section_development_str=(
 '''
 from dynpy.utilities.report import ReportText
 intro=Section('Introduction')
 CurrentContainer(intro)
+
+#scheme=Picture('picture_winch.png')
+#display(scheme)
+
 picture = Picture(system._as_picture().__dict__['image'], caption = f'System diagram')
 display(picture)
 ''')
@@ -664,7 +672,7 @@ forming_equation_str=(
 '''
 eom=Section('Equations of motion')
 CurrentContainer(eom)
-display(ReportText('Equations of motion and their solution: '))
+display(ReportText('Equations of motion: '))
 eoms=system._eoms[0]
 
 slownik=system.get_random_parameters()
@@ -710,15 +718,12 @@ display(solution_subs)
 display(steady_solution_subs)
 ''')
 
-
-
 report_generation_libraries=(
 '''
 doc_final = MechanicalCase('./output/Document',documentclass=NoEscape('article'),document_options=['a4paper','fleqn'],lmodern=False)
 
 doc_final.append(intro)
 doc_final.append(eom)
-doc_final.append(tabela)
 doc_final.append(wykres)
 
 doc_final.generate_pdf()
@@ -796,67 +801,67 @@ class SimulationReportComponent(ReportComponent):
         display(Picture('./dynpy/utilities/components/guides/images/sekcja3_w.jpg'))
         
 
-class DynSysCodeComponent(ReportComponent):
+# class DynSysCodeComponent(ReportComponent):
 
-    title="Calling dynamic system code"
+#     title="Calling dynamic system code"
 
 
 
-    def append_elements(self):
+#     def append_elements(self):
         
-        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
-        system_name = system.__class__.__name__
+#         system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+#         system_name = system.__class__.__name__
         
-        display(ReportText('''The code of the analyzed class is as follows'''))
-        display(ObjectCode(system.__class__))
-        display(ReportText(f'''The presented code of the {system_name} class was retrieved with the help of the ObjectCode class.  '''))
+#         display(ReportText('''The code of the analyzed class is as follows'''))
+#         display(ObjectCode(system.__class__))
+#         display(ReportText(f'''The presented code of the {system_name} class was retrieved with the help of the ObjectCode class.  '''))
         
         
 #pandas guide
-data_code=(
-'''
-months_list = ['January', 'February', 'March','April','May','June','July','August','September','October','November','December']
-average_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]
-day_length_in_months_hours = [8.3,10.0,11.8,13.9,15.7,16.7,16.3,14.7,12.7,10.7,8.8,7.8]
-Eg_daily_list_Wh_per_meter2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]
-Eg_daily_list_kWh_per_meter2 = [0.6,1,3,3.8,4.8,5.3,4.9,3.3,1.7,0.7,0.5]
-''')
+# data_code=(
+# '''
+# months_list = ['January', 'February', 'March','April','May','June','July','August','September','October','November','December']
+# average_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]
+# day_length_in_months_hours = [8.3,10.0,11.8,13.9,15.7,16.7,16.3,14.7,12.7,10.7,8.8,7.8]
+# Eg_daily_list_Wh_per_meter2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]
+# Eg_daily_list_kWh_per_meter2 = [0.6,1,3,3.8,4.8,5.3,4.9,3.3,1.7,0.7,0.5]
+# ''')
 
-data_dict_code=(
-'''
-data_atmospheric_conditions = {'Day length in a month [h]':day_length_in_months_hours,'Daily energy intensity [${kWh/m^2}$]':Eg_daily_list_Wh_per_meter2,'Average temperature [$^{\circ}$C]':average_temp_list}
-''')
-output_code=(
-'''
-import pandas as pd
+# data_dict_code=(
+# '''
+# data_atmospheric_conditions = {'Day length in a month [h]':day_length_in_months_hours,'Daily energy intensity [${kWh/m^2}$]':Eg_daily_list_Wh_per_meter2,'Average temperature [$^{\circ}$C]':average_temp_list}
+# ''')
+# output_code=(
+# '''
+# import pandas as pd
 
-df = pd.DataFrame(index = months_list,data = data_atmospheric_conditions)
-df
-''')
+# df = pd.DataFrame(index = months_list,data = data_atmospheric_conditions)
+# df
+# ''')
 
-class PandasTableGenerationComponent(ReportComponent):
+# class PandasTableGenerationComponent(ReportComponent):
     
-    title="Generating a table"
+#     title="Generating a table"
 
 
-    def append_elements(self):
+#     def append_elements(self):
         
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+#         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
 
 
-        display(ReportText('Creating a list of data:'))
+#         display(ReportText('Creating a list of data:'))
 
-        display(GuideCode(data_code))
-
-
-        display(ReportText('Creating dictionary:'))
-
-        display(GuideCode(data_dict_code))
+#         display(GuideCode(data_code))
 
 
-        display(ReportText('Calling the table:'))
-        display(GuideCode(output_code))
-        display(df)
+#         display(ReportText('Creating dictionary:'))
+
+#         display(GuideCode(data_dict_code))
+
+
+#         display(ReportText('Calling the table:'))
+#         display(GuideCode(output_code))
+#         display(df)
         
 
 winch_pandas_code=(
@@ -958,78 +963,78 @@ class BasicSymComponent(ReportComponent):
         display(sim_plot)
         
 
-class PandasMethodsComponent(ReportComponent):
+# class PandasMethodsComponent(ReportComponent):
     
-    title="Pandas library methods"
+#     title="Pandas library methods"
 
 
-    def append_elements(self):
+#     def append_elements(self):
         
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+#         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
         
         
-        months_list = ['January', 'February', 'March','April','May','June','July','August','September','October','November','December']
+#         months_list = ['January', 'February', 'March','April','May','June','July','August','September','October','November','December']
 
-        average_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]
+#         average_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]
 
-        Eg_daily_list_Wh_per_meter2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]
+#         Eg_daily_list_Wh_per_meter2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]
 
-        Eg_daily_list_kWh_per_meter2 = [0.6,1,3,3.8,4.8,5.3,4.9,3.3,1.7,0.7,0.5]
+#         Eg_daily_list_kWh_per_meter2 = [0.6,1,3,3.8,4.8,5.3,4.9,3.3,1.7,0.7,0.5]
 
-        day_length_in_months_hours = [8.3,10.0,11.8,13.9,15.7,16.7,16.3,14.7,12.7,10.7,8.8,7.8]
+#         day_length_in_months_hours = [8.3,10.0,11.8,13.9,15.7,16.7,16.3,14.7,12.7,10.7,8.8,7.8]
 
-        data_atmospheric_conditions = {'Day length in a month [h]':day_length_in_months_hours,'Daily energy intensity [${kWh/m^2}$]':Eg_daily_list_Wh_per_meter2,'Average temperature [$^{\circ}$C]':average_temp_list}
+#         data_atmospheric_conditions = {'Day length in a month [h]':day_length_in_months_hours,'Daily energy intensity [${kWh/m^2}$]':Eg_daily_list_Wh_per_meter2,'Average temperature [$^{\circ}$C]':average_temp_list}
 
-        df = pd.DataFrame(index = months_list,data = data_atmospheric_conditions)
+#         df = pd.DataFrame(index = months_list,data = data_atmospheric_conditions)
 
-        display(ReportText('Iloc method:'))
-        display(GuideCode('df.iloc[0:3]'))
-        display(df.iloc[0:3])
+#         display(ReportText('Iloc method:'))
+#         display(GuideCode('df.iloc[0:3]'))
+#         display(df.iloc[0:3])
 
-        # display(Picture('./Image/iloc.jpg', caption = ""))
+#         # display(Picture('./Image/iloc.jpg', caption = ""))
 
-        display(ReportText('Loc method:'))
-        display(GuideCode('df.loc["January"]'))
-        display(df.loc["January"])
-        # display(Picture('./Image/loc.jpg', caption = ""))
+#         display(ReportText('Loc method:'))
+#         display(GuideCode('df.loc["January"]'))
+#         display(df.loc["January"])
+#         # display(Picture('./Image/loc.jpg', caption = ""))
 
-        display(ReportText('The set axis method works for both columns and rows. For rows:'))
-        display(GuideCode("df.set_axis(['a','b','c','d','e','f','g','h','i','j','k','l'],axis = 'index')"))
-        display(df.set_axis(['a','b','c','d','e','f','g','h','i','j','k','l'], axis = 'index'))
+#         display(ReportText('The set axis method works for both columns and rows. For rows:'))
+#         display(GuideCode("df.set_axis(['a','b','c','d','e','f','g','h','i','j','k','l'],axis = 'index')"))
+#         display(df.set_axis(['a','b','c','d','e','f','g','h','i','j','k','l'], axis = 'index'))
 
-        # display(Picture('./Image/set_axis.jpg', caption = ""))
+#         # display(Picture('./Image/set_axis.jpg', caption = ""))
 
-        display(ReportText('For columns:'))
-        display(GuideCode("df.set_axis(['a','b','c'],axis = 'columns')"))
-        display(df.set_axis(['a','b','c'],axis = 'columns'))
-        # display(Picture('./Image/set_axis2.jpg', caption = ""))
+#         display(ReportText('For columns:'))
+#         display(GuideCode("df.set_axis(['a','b','c'],axis = 'columns')"))
+#         display(df.set_axis(['a','b','c'],axis = 'columns'))
+#         # display(Picture('./Image/set_axis2.jpg', caption = ""))
 
-        display(ReportText('Metoda rename - Zmienienie pojedynczej kolumny:'))
-        display(GuideCode('''df.rename(columns = {"Day length in a month [h]":'AAA'}, index = {"January":'A'} )'''))
-        display(df.rename(columns = {"Day length in a month [h]":'AAA'}, index = {"January":'A'} ))
-        # display(Picture('./Image/rename.jpg', caption = ""))
+#         display(ReportText('Metoda rename - Zmienienie pojedynczej kolumny:'))
+#         display(GuideCode('''df.rename(columns = {"Day length in a month [h]":'AAA'}, index = {"January":'A'} )'''))
+#         display(df.rename(columns = {"Day length in a month [h]":'AAA'}, index = {"January":'A'} ))
+#         # display(Picture('./Image/rename.jpg', caption = ""))
 
-        display(ReportText('Map method:'))
-        display(GuideCode('df.map(lambda x:x+2)'))
-#         display(df.map(lambda x:x+2)) - nowa wersja pandasa zmieniła nazwę "map" na "applymap" - Michał SZ
-        display(df.map(lambda x:x+2))
+#         display(ReportText('Map method:'))
+#         display(GuideCode('df.map(lambda x:x+2)'))
+# #         display(df.map(lambda x:x+2)) - nowa wersja pandasa zmieniła nazwę "map" na "applymap" - Michał SZ
+#         display(df.map(lambda x:x+2))
 
-        # display(ReportText('***Applymap mthod for colummn/row:***'))
-        # display(Markdown('''
-        # Remeber, that df[NAME] => creates series, a df[[NAME]] => creates new frame, which can be used with .applymap'''))
-        # display(df[['Day length in a month']].applymap(lambda x:x+100))
-        # pd_h = df[['Day length in a month']].applymap(lambda x:x+100)
-        # list1 = pd_h['Day length in a month'].tolist()
-        # df['Day length in a month'] = list1
+#         # display(ReportText('***Applymap mthod for colummn/row:***'))
+#         # display(Markdown('''
+#         # Remeber, that df[NAME] => creates series, a df[[NAME]] => creates new frame, which can be used with .applymap'''))
+#         # display(df[['Day length in a month']].applymap(lambda x:x+100))
+#         # pd_h = df[['Day length in a month']].applymap(lambda x:x+100)
+#         # list1 = pd_h['Day length in a month'].tolist()
+#         # df['Day length in a month'] = list1
 
-        # display(df)
+#         # display(df)
 
-        # display(Picture('./Image/applymap.jpg', caption = ""))
+#         # display(Picture('./Image/applymap.jpg', caption = ""))
 
-        display(ReportText('Slicing:'))
-        display(GuideCode('''df['Day length in a month [h]']'''))
-        display(df['Day length in a month [h]'])
-        # display(Picture('./Image/slice2.jpg', caption = ""))
+#         display(ReportText('Slicing:'))
+#         display(GuideCode('''df['Day length in a month [h]']'''))
+#         display(df['Day length in a month [h]'])
+#         # display(Picture('./Image/slice2.jpg', caption = ""))
         
         
 steady_state_code=(
@@ -1344,102 +1349,102 @@ df.rename(columns={'no. of people':'POPULATION'},index={'Lubusz':'LUBU...'})
         display(GuideCode('df.map(lambda x: x*2)'))
         display(x14.reported())
         
-class DynSysIntroComponent(ReportComponent):
+# class DynSysIntroComponent(ReportComponent):
 
-    title="Introduction to using the DynSys module"
+#     title="Introduction to using the DynSys module"
     
-    def append_elements(self): 
-        from dynpy.models.mechanics.tmac import SDOFWinchSystem
+#     def append_elements(self): 
+#         from dynpy.models.mechanics.tmac import SDOFWinchSystem
         
-        display(ReportText('Required imports of libraries/individual classes to create the report:'))
-        display(ObjectCode(
-        '''
-                from sympy import *
-                import numpy as np
-                from pandas import *
-                from sympy.physics.mechanics import init_vprinting, dynamicsymbols
-                from pylatex import Document, Section, Subsection, Itemize, Package, HorizontalSpace, Description, Marker, Command 
-                from pylatex.section import Paragraph, Chapter 
-                from pylatex.utils import italic, NoEscape 
-                from dynpy.utilities.adaptable import *
-                from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase 
-                from dynpy.utilities.templates.tikz import TikzCaSCStandalone
-                from dynpy.utilities.report import (SystemDynamicsAnalyzer, DataPlot, AccelerationComparison, FFTComparison, ReportEntry, SimulationalBlock,               ReportText, SimulationFFT, DataStorage, Markdown, SummaryTable, Picture, SympyFormula, SymbolsDescription, DescriptionsRegistry,
-                ObjectCode, CurrentContainer)
-                from dynpy.solvers.linear import ODESystem
-                init_vprinting()
-                from dynpy.models.mechanics.tmac import SDOFWinchSystem
+#         display(ReportText('Required imports of libraries/individual classes to create the report:'))
+#         display(ObjectCode(
+#         '''
+#                 from sympy import *
+#                 import numpy as np
+#                 from pandas import *
+#                 from sympy.physics.mechanics import init_vprinting, dynamicsymbols
+#                 from pylatex import Document, Section, Subsection, Itemize, Package, HorizontalSpace, Description, Marker, Command 
+#                 from pylatex.section import Paragraph, Chapter 
+#                 from pylatex.utils import italic, NoEscape 
+#                 from dynpy.utilities.adaptable import *
+#                 from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase 
+#                 from dynpy.utilities.templates.tikz import TikzCaSCStandalone
+#                 from dynpy.utilities.report import (SystemDynamicsAnalyzer, DataPlot, AccelerationComparison, FFTComparison, ReportEntry, SimulationalBlock,               ReportText, SimulationFFT, DataStorage, Markdown, SummaryTable, Picture, SympyFormula, SymbolsDescription, DescriptionsRegistry,
+#                 ObjectCode, CurrentContainer)
+#                 from dynpy.solvers.linear import ODESystem
+#                 init_vprinting()
+#                 from dynpy.models.mechanics.tmac import SDOFWinchSystem
 
-        '''))
-        display(ReportText('A class that allows you to solve a specific problem (in this case, a problem related to the description of a crane):'))
-        display(Markdown('''
-            from dynpy.models.mechanics.tmac import SDOFWinchSystem
-            '''))
+#         '''))
+#         display(ReportText('A class that allows you to solve a specific problem (in this case, a problem related to the description of a crane):'))
+#         display(Markdown('''
+#             from dynpy.models.mechanics.tmac import SDOFWinchSystem
+#             '''))
 
-        display(ReportText('The way to call the class preview:'))
+#         display(ReportText('The way to call the class preview:'))
 
-        display(ObjectCode('''
-            SDOFWinchSystem().preview()
-            '''))
+#         display(ObjectCode('''
+#             SDOFWinchSystem().preview()
+#             '''))
 
   
-        eoms=SDOFWinchSystem()._eoms[0]
-        eoms
+#         eoms=SDOFWinchSystem()._eoms[0]
+#         eoms
 
-        display(ReportText('The process of calling the equation of motion using the eoms method:'))
-        display(ObjectCode(
-            '''
-            eoms=SDOFWinchSystem()._eoms[0]
-            eoms
-            '''))
+#         display(ReportText('The process of calling the equation of motion using the eoms method:'))
+#         display(ObjectCode(
+#             '''
+#             eoms=SDOFWinchSystem()._eoms[0]
+#             eoms
+#             '''))
 
-        display(ReportText('The result is:'))
-        display(SympyFormula(eoms))
-
-
-        eoms_eq=Eq(eoms,0)
-        eoms_eq
-        display(ReportText('The process of creating an equation from a previously called equation of motion (the equation is initially called as a string representing a description of the problem at hand, but it is not then an equation that we can use for calculations):'))
-        display(ObjectCode('''
-            eoms_eq=Eq(eoms,0)
-            eoms_eq
-            '''))
-        display(ReportText('The result is:'))
-        display(SympyFormula(eoms))
-
-        slownik=SDOFWinchSystem().get_random_parameters()
+#         display(ReportText('The result is:'))
+#         display(SympyFormula(eoms))
 
 
-        display(ReportText('Create a dictionary (in this case with random values) that allows you to assign values to variables:'))
-        display(ObjectCode('''
-            slownik=SDOFWinchSystem().get_random_parameters()
-            slownik
-            '''))
-        display(slownik)
+#         eoms_eq=Eq(eoms,0)
+#         eoms_eq
+#         display(ReportText('The process of creating an equation from a previously called equation of motion (the equation is initially called as a string representing a description of the problem at hand, but it is not then an equation that we can use for calculations):'))
+#         display(ObjectCode('''
+#             eoms_eq=Eq(eoms,0)
+#             eoms_eq
+#             '''))
+#         display(ReportText('The result is:'))
+#         display(SympyFormula(eoms))
 
-        display(ReportText('General solution of the equation:'))
-
-        solution=SDOFWinchSystem()._ode_system.solution[0]
-        display(ObjectCode(
-            '''
-                solution=SDOFWinchSystem()._ode_system.solution[0]
-                solution
-
-            '''))
-        display(SympyFormula(solution))
-
-        display(ReportText('Special solution of the equation:'))
+#         slownik=SDOFWinchSystem().get_random_parameters()
 
 
+#         display(ReportText('Create a dictionary (in this case with random values) that allows you to assign values to variables:'))
+#         display(ObjectCode('''
+#             slownik=SDOFWinchSystem().get_random_parameters()
+#             slownik
+#             '''))
+#         display(slownik)
 
-        steady_solution=SDOFWinchSystem()._ode_system.steady_solution[0]
-        display(ObjectCode(
-            '''
-                steady_solution=SDOFWinchSystem()._ode_system.steady_solution[0]
-                steady_solution
+#         display(ReportText('General solution of the equation:'))
 
-            '''))
-        display(SympyFormula(steady_solution))
+#         solution=SDOFWinchSystem()._ode_system.solution[0]
+#         display(ObjectCode(
+#             '''
+#                 solution=SDOFWinchSystem()._ode_system.solution[0]
+#                 solution
+
+#             '''))
+#         display(SympyFormula(solution))
+
+#         display(ReportText('Special solution of the equation:'))
+
+
+
+#         steady_solution=SDOFWinchSystem()._ode_system.steady_solution[0]
+#         display(ObjectCode(
+#             '''
+#                 steady_solution=SDOFWinchSystem()._ode_system.steady_solution[0]
+#                 steady_solution
+
+#             '''))
+#         display(SympyFormula(steady_solution))
         
 ##ODESystem wprowadzenie
 
@@ -1647,28 +1652,28 @@ result = False
 result = doc_final.generate_pdf()
 """)
 
-class ODEReportComponent(ReportComponent):
+# class ODEReportComponent(ReportComponent):
     
-    title="Stworzenie raportu"
+#     title="Stworzenie raportu"
 
 
-    def append_elements(self):
+#     def append_elements(self):
         
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+#         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
 
 
-        display(ReportText('Aby utworzyć dokument, standardowo należy utworzyć sekcje lub rozdziały w następujący sposób:'))
-#        display(Picture('./dynpy/utilities/components/guides/images/dok.jpg'))
-        display(ObjectCode(ChapterContainer_str))
-        display(ReportText('Jeżeli chcemy żeby nasze równania ładnie wyswietlały się w dokumencie nie możemy zapominac o użyciu SympyFormula:'))
-        display(ObjectCode(Chapter_SympyFormula))
-#        display(Picture('./dynpy/utilities/components/guides/images/sympaj.jpg'))
-        display(ReportText('Co więcej, ODESystem posiada ogromną ilosć komponentów raportujących, które tworzą sekcje raportu za nas. Scieżka do ich odnalezienia jest następująca:'))
-        display(ObjectCode(ode_components_path_str)) 
-#        display(Picture('./dynpy/utilities/components/guides/images/sciezka_ode.jpg'))
-        display(ReportText('Co więcej, istnieje też property .report, o którym informacja znajduje się rozdział niżej. Aby wygenerować plik pdf z użyciem wybranego szablonu należy zdefiniować dokuemnt jako wybrany template. Przypomnienie: Sprawdź, czy wszystkie katalogi w ścieżce poniżej istnieją. Jeśli nie, utwórz brakujące foldery przed próbą wygenerowania pliku PDF. Dobrym nawykiem jest stworzenie katalogu na pliki tekstowe wewnątrz swojego projektu. Następnie dodaj wszystkie sekcje używając metody append'))
-        display(ObjectCode(property_report_formula)) 
-#        display(Picture('./dynpy/utilities/components/guides/images/appeend.jpg'))
+#         display(ReportText('Aby utworzyć dokument, standardowo należy utworzyć sekcje lub rozdziały w następujący sposób:'))
+# #        display(Picture('./dynpy/utilities/components/guides/images/dok.jpg'))
+#         display(ObjectCode(ChapterContainer_str))
+#         display(ReportText('Jeżeli chcemy żeby nasze równania ładnie wyswietlały się w dokumencie nie możemy zapominac o użyciu SympyFormula:'))
+#         display(ObjectCode(Chapter_SympyFormula))
+# #        display(Picture('./dynpy/utilities/components/guides/images/sympaj.jpg'))
+#         display(ReportText('Co więcej, ODESystem posiada ogromną ilosć komponentów raportujących, które tworzą sekcje raportu za nas. Scieżka do ich odnalezienia jest następująca:'))
+#         display(ObjectCode(ode_components_path_str)) 
+# #        display(Picture('./dynpy/utilities/components/guides/images/sciezka_ode.jpg'))
+#         display(ReportText('Co więcej, istnieje też property .report, o którym informacja znajduje się rozdział niżej. Aby wygenerować plik pdf z użyciem wybranego szablonu należy zdefiniować dokuemnt jako wybrany template. Przypomnienie: Sprawdź, czy wszystkie katalogi w ścieżce poniżej istnieją. Jeśli nie, utwórz brakujące foldery przed próbą wygenerowania pliku PDF. Dobrym nawykiem jest stworzenie katalogu na pliki tekstowe wewnątrz swojego projektu. Następnie dodaj wszystkie sekcje używając metody append'))
+#         display(ObjectCode(property_report_formula)) 
+# #        display(Picture('./dynpy/utilities/components/guides/images/appeend.jpg'))
 
 sym_num_system_code_str = ('''
 
@@ -1855,57 +1860,57 @@ sym_comparison.to_frequency_domain().single_sided_rms().truncate(0,0.2).plot()
 
 
 
-class ODENumericalSimulationsComponent(ReportComponent):
+# class ODENumericalSimulationsComponent(ReportComponent):
     
-    title="Symulacje numeryczne- różne techniki symulacji"
+#     title="Symulacje numeryczne- różne techniki symulacji"
 
 
-    def append_elements(self):
+#     def append_elements(self):
         
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+#         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
 
-        display(ReportText('Przeprowadzenie symulacji przy pomocy ODE'))
-        display(ReportText('W pierwszej kolejności zdefiniowano parametry potrzebne do przeprowadzenia do obliczeń'))
+#         display(ReportText('Przeprowadzenie symulacji przy pomocy ODE'))
+#         display(ReportText('W pierwszej kolejności zdefiniowano parametry potrzebne do przeprowadzenia do obliczeń'))
 
-        display(ObjectCode(sym_num_system_code_str))
+#         display(ObjectCode(sym_num_system_code_str))
 
-        display(ReportText('Wyprowadzenie wzoru na oscylator harmoniczny'))
-        display(ObjectCode(sym_harmonic_oscilator_eq))
-        #display(ObjectCode(harmonic_esc_str))
+#         display(ReportText('Wyprowadzenie wzoru na oscylator harmoniczny'))
+#         display(ObjectCode(sym_harmonic_oscilator_eq))
+#         #display(ObjectCode(harmonic_esc_str))
 
-        display(ReportText('Przeprowadzenie symulacji w ODE'))
-
-
-        display(ObjectCode(sym_harmonic_oscylator_ode))
+#         display(ReportText('Przeprowadzenie symulacji w ODE'))
 
 
-        display(ObjectCode(sym_harmonic_oscylator_sol))
+#         display(ObjectCode(sym_harmonic_oscylator_ode))
 
-        #display(ObjectCode)
 
-        #display(ObjectCode())
+#         display(ObjectCode(sym_harmonic_oscylator_sol))
 
-        display(ReportText('Wprowadzenie systemu dynamicznego, zdefiniowano również pojawiającą się Omegę '))
-        display(ObjectCode(sym_Example_PulledPendulum))
+#         #display(ObjectCode)
 
-        display(ObjectCode(sym_ode_sol_P_plot))
-        display(ObjectCode(sym_ode_sys_P))
-        display(ObjectCode(sym_ode_sol_P))
+#         #display(ObjectCode())
 
-        display(ReportText('Symulacje używając systemu dynamicznego zdefiniowanego przy użyciu modułu dynpy'))
+#         display(ReportText('Wprowadzenie systemu dynamicznego, zdefiniowano również pojawiającą się Omegę '))
+#         display(ObjectCode(sym_Example_PulledPendulum))
 
-        display(ReportText('Sprawdzenie za pomocą helpa czym tak na prawdę jest NumericalAnalysisDataFrame'))
-        display(ObjectCode(sym_wywolanie_helpa))
+#         display(ObjectCode(sym_ode_sol_P_plot))
+#         display(ObjectCode(sym_ode_sys_P))
+#         display(ObjectCode(sym_ode_sol_P))
 
-        display(ReportText('Wyświetlenie poszczególnych wykresów, wyników oraz tablicy'))
-        display(ObjectCode(sym_coords))
-        display(ObjectCode(sym_nadf))
-        display(ReportText('Analiza porównawcza symulacji rozwiązania analitycznego i numerycznego'))
-        display(ObjectCode(sym_sms))
-        display(ObjectCode(sym_num_wyn_SMSe))
-        display(ObjectCode(sym_ana_wyn_SMS))
-        display(ObjectCode(sym_sms_plot))
-        display(ObjectCode(sym_comparison))
+#         display(ReportText('Symulacje używając systemu dynamicznego zdefiniowanego przy użyciu modułu dynpy'))
+
+#         display(ReportText('Sprawdzenie za pomocą helpa czym tak na prawdę jest NumericalAnalysisDataFrame'))
+#         display(ObjectCode(sym_wywolanie_helpa))
+
+#         display(ReportText('Wyświetlenie poszczególnych wykresów, wyników oraz tablicy'))
+#         display(ObjectCode(sym_coords))
+#         display(ObjectCode(sym_nadf))
+#         display(ReportText('Analiza porównawcza symulacji rozwiązania analitycznego i numerycznego'))
+#         display(ObjectCode(sym_sms))
+#         display(ObjectCode(sym_num_wyn_SMSe))
+#         display(ObjectCode(sym_ana_wyn_SMS))
+#         display(ObjectCode(sym_sms_plot))
+#         display(ObjectCode(sym_comparison))
 
 #         display(ObjectCode('''
 #         display(harmonic_oscylator_ode)
@@ -2058,175 +2063,175 @@ from sympy.physics.mechanics import dynamicsymbols'''))
         display(SympyFormula(dsolve(predkosc_y.subs(dane))))
 
         
-ode_import=(
-'''
-import numpy as np
-import matplotlib.pylab as plt
-import pandas as pd
-from dynpy.solvers.linear import ODESystem
-from sympy import Symbol, symbols, Function, Matrix
-from dynpy.utilities.adaptable import *
-''')
+# ode_import=(
+# '''
+# import numpy as np
+# import matplotlib.pylab as plt
+# import pandas as pd
+# from dynpy.solvers.linear import ODESystem
+# from sympy import Symbol, symbols, Function, Matrix
+# from dynpy.utilities.adaptable import *
+# ''')
 
-ode_variables=(
-"""
-t = Symbol('t')
+# ode_variables=(
+# """
+# t = Symbol('t')
 
-U_z, R_w, L_w, E, U_Rw, U_Lw, k_e = symbols('U_z R_w L_w E U_Rw U_Lw k_e', positive=True)
-M_s, B, J, M_obc, k_m = symbols('M_s B J M_obc k_m', positive=True)
+# U_z, R_w, L_w, E, U_Rw, U_Lw, k_e = symbols('U_z R_w L_w E U_Rw U_Lw k_e', positive=True)
+# M_s, B, J, M_obc, k_m = symbols('M_s B J M_obc k_m', positive=True)
 
-i_w = Function('i_w')(t)
-omega_s = Function('omega_s')(t)
+# i_w = Function('i_w')(t)
+# omega_s = Function('omega_s')(t)
 
-dane = {
-    U_z: 10,
-    R_w: 2,
-    L_w: 0.1,
-    k_e: 0.1,
-    k_m: 0.1,
-    J: 0.1,
-    B: 0.5,
-    M_obc: 0
-}
+# dane = {
+#     U_z: 10,
+#     R_w: 2,
+#     L_w: 0.1,
+#     k_e: 0.1,
+#     k_m: 0.1,
+#     J: 0.1,
+#     B: 0.5,
+#     M_obc: 0
+# }
 
-t_span = np.linspace(0, 1, 100)
-""")
+# t_span = np.linspace(0, 1, 100)
+# """)
 
-ode_objrctM=(
-'''
-ode = ODESystem(
-    odes=Matrix([
-        U_z - R_w * i_w - L_w * i_w.diff(t) - k_e * omega_s,
-        k_m * i_w - J * omega_s.diff(t) - B * omega_s - M_obc
-    ]),
-    dvars=Matrix([i_w, omega_s]),
-    ode_order=1
-)
-ode
-''')
+# ode_objrctM=(
+# '''
+# ode = ODESystem(
+#     odes=Matrix([
+#         U_z - R_w * i_w - L_w * i_w.diff(t) - k_e * omega_s,
+#         k_m * i_w - J * omega_s.diff(t) - B * omega_s - M_obc
+#     ]),
+#     dvars=Matrix([i_w, omega_s]),
+#     ode_order=1
+# )
+# ode
+# ''')
 
-ode_met_1A=(
-'''
-ode.subs(dane).solution.with_ics([0,0])
-''')
+# ode_met_1A=(
+# '''
+# ode.subs(dane).solution.with_ics([0,0])
+# ''')
 
-ode_tab_1A=(
-'''
-sym_an = ode.solution.with_ics([0,0]).subs(dane).numerized().compute_solution(t_span=t_span)
-sym_an[[i_w, omega_s]]
-''')
+# ode_tab_1A=(
+# '''
+# sym_an = ode.solution.with_ics([0,0]).subs(dane).numerized().compute_solution(t_span=t_span)
+# sym_an[[i_w, omega_s]]
+# ''')
 
-ode_met_1B=(
-'''
-sym_num = ode.subs(dane).numerized().compute_solution(t_span=t_span, ic_list=[0, 0])
-sym_num[[i_w, omega_s]]
-''')
+# ode_met_1B=(
+# '''
+# sym_num = ode.subs(dane).numerized().compute_solution(t_span=t_span, ic_list=[0, 0])
+# sym_num[[i_w, omega_s]]
+# ''')
 
-ode_met_2=(
-'''
-X = [i_w, omega_s]
+# ode_met_2=(
+# '''
+# X = [i_w, omega_s]
 
-num_df = NumericalAnalysisDataFrame.from_model(
-    ode.solution.with_ics([0, 0]),
-    U_z,
-    [10, 20, 50],
-    reference_data=dane,
-    coordinates=X,
-    index=pd.Index(t_span, name=t)
-)
-num_df
-''')
+# num_df = NumericalAnalysisDataFrame.from_model(
+#     ode.solution.with_ics([0, 0]),
+#     U_z,
+#     [10, 20, 50],
+#     reference_data=dane,
+#     coordinates=X,
+#     index=pd.Index(t_span, name=t)
+# )
+# num_df
+# ''')
 
-ode_met_PS=(
-'''
-sym_wyn = num_df.perform_simulations().droplevel(0,axis=1)
+# ode_met_PS=(
+# '''
+# sym_wyn = num_df.perform_simulations().droplevel(0,axis=1)
 
-display(sym_wyn)
-''')
+# display(sym_wyn)
+# ''')
 
-ode_import_example=(
-'''
-from dynpy.models.mechanics.trolley import SpringDamperMassSystem
+# ode_import_example=(
+# '''
+# from dynpy.models.mechanics.trolley import SpringDamperMassSystem
 
-dyn_sys = SpringDamperMassSystem()
+# dyn_sys = SpringDamperMassSystem()
 
-dyn_sys._ode_system
-''')
+# dyn_sys._ode_system
+# ''')
 
-ode_example2=(
-'''
-dane = dyn_sys.get_numerical_parameters()
+# ode_example2=(
+# '''
+# dane = dyn_sys.get_numerical_parameters()
 
-data_dict = {**dane, dyn_sys.F: 1000}
+# data_dict = {**dane, dyn_sys.F: 1000}
 
-data_dict
-''')
+# data_dict
+# ''')
 
-ode_simulation=(
-'''
-simulation = dyn_sys._ode_system.subs(data_dict).numerized().compute_solution(
-    np.linspace(0, 2, 1000), ic_list=[10, -5]
-)
+# ode_simulation=(
+# '''
+# simulation = dyn_sys._ode_system.subs(data_dict).numerized().compute_solution(
+#     np.linspace(0, 2, 1000), ic_list=[10, -5]
+# )
 
-simulation
-''')
+# simulation
+# ''')
 
-ode_simulation_plot=(
-'''
-simulation.plot()
-plt.grid()
-plt.show()
-''')
+# ode_simulation_plot=(
+# '''
+# simulation.plot()
+# plt.grid()
+# plt.show()
+# ''')
 
 
 
 
         
-class ODESimulationComponent(ReportComponent):
+# class ODESimulationComponent(ReportComponent):
     
-    title="Przeprowadzanie symulacji"
+#     title="Przeprowadzanie symulacji"
     
 
 
-    def append_elements(self):
+#     def append_elements(self):
         
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+#         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
 
-        display(ReportText('To od czego standardowo powinno się zacząć to importy oraz definicja zmiennych. Potrzebne importy:'))
-        display(ObjectCode(ode_import))
-        display(ReportText('Definiowanie zmiennych:'))
-        display(ObjectCode(ode_variables))
-        display(ReportText('Kolejny niezbędny krok to tworzenie obiektu ODE. Należy go wykonać w następujący sposób:'))
-        display(ObjectCode(ode_objrctM))
-        display(ReportText('METODA 1A: Przeprowadzenie symulacji na gotowm rozwiazaniu analitycznym poprzez użycie property solution. Samo wywołanie                                 odpowiedniego rozwiązania analitycznego pokazuje nam poniższy kod:'))
-        display(ObjectCode(ode_met_1A))
-        display(ReportText('Następnie generujemy tabele niezbędną do symulacji w taki sposób:'))
-        display(ObjectCode(ode_tab_1A))
-        display(ReportText('METODA 1B: Innym sposobem jest przeprowadzenie symulacji numerycznych bez obliczeń analitycznych. Potrzebny jest do tego taki kod: '))
-        display(ObjectCode(ode_met_1B))
-        display(ReportText('METODA 2: Trzecim sposobem generowania symulacji jest użycie NumericalAnalysisDataFrame, kod wywołania prezentuje się następująco:'))
-        display(ObjectCode(ode_met_2))
-        display(ReportText('Aby przeprowadzić symulacje konieczne jest zastosowanie metody perform simulations. Bez zastosowania tej metody dostaniemy następujący wynik:'))
-        display(ReportText('A z jej użyciem, wszystko powinno zadziałać i dostaniemy następujący output:'))
-        display(ObjectCode(ode_met_PS))
-        display(ReportText('Dla lepszego zrozumienia zagdnień poniżej przedstawione zostało zastosowanie symulacji na konkretnym przykładzie. Skorzystamy z                           prostej klasy SpringDamperMassSystem. Na dobry początek należy zaimportować tę klasę oraz przypisać ją do zmiennej. W przeprowadzeniu                                     symulacji pomoże nam wykorzystanie metody $ode system$ w celu pozyskania równania ruchu naszego systemu dynamicznego. Aby pozyskać dane w                                 prosty sposób korzystamy z metody $get numerical parameters$ oraz wrzucamy te dane w słownik. Kod do wykonania tych czynnosci prezentuje się                             następująco: '))
-        display(ObjectCode(ode_import_example))
-        display(ReportText('Następnie stosując jedną z wyżej pokazanych metod, możemy stworzyć tabelę:'))
-        display(ObjectCode(ode_example2))
-        display(ReportText('Ostatnim krokiem jest wizualizacja danych, czyli stworzenie wykresu. Aby taki wykres uzyskać wystarczy wpisać kod widoczny na                             obrazku:'))
-        display(ObjectCode(ode_simulation))
-        display(ObjectCode(ode_simulation_plot))
+#         display(ReportText('To od czego standardowo powinno się zacząć to importy oraz definicja zmiennych. Potrzebne importy:'))
+#         display(ObjectCode(ode_import))
+#         display(ReportText('Definiowanie zmiennych:'))
+#         display(ObjectCode(ode_variables))
+#         display(ReportText('Kolejny niezbędny krok to tworzenie obiektu ODE. Należy go wykonać w następujący sposób:'))
+#         display(ObjectCode(ode_objrctM))
+#         display(ReportText('METODA 1A: Przeprowadzenie symulacji na gotowm rozwiazaniu analitycznym poprzez użycie property solution. Samo wywołanie                                 odpowiedniego rozwiązania analitycznego pokazuje nam poniższy kod:'))
+#         display(ObjectCode(ode_met_1A))
+#         display(ReportText('Następnie generujemy tabele niezbędną do symulacji w taki sposób:'))
+#         display(ObjectCode(ode_tab_1A))
+#         display(ReportText('METODA 1B: Innym sposobem jest przeprowadzenie symulacji numerycznych bez obliczeń analitycznych. Potrzebny jest do tego taki kod: '))
+#         display(ObjectCode(ode_met_1B))
+#         display(ReportText('METODA 2: Trzecim sposobem generowania symulacji jest użycie NumericalAnalysisDataFrame, kod wywołania prezentuje się następująco:'))
+#         display(ObjectCode(ode_met_2))
+#         display(ReportText('Aby przeprowadzić symulacje konieczne jest zastosowanie metody perform simulations. Bez zastosowania tej metody dostaniemy następujący wynik:'))
+#         display(ReportText('A z jej użyciem, wszystko powinno zadziałać i dostaniemy następujący output:'))
+#         display(ObjectCode(ode_met_PS))
+#         display(ReportText('Dla lepszego zrozumienia zagdnień poniżej przedstawione zostało zastosowanie symulacji na konkretnym przykładzie. Skorzystamy z                           prostej klasy SpringDamperMassSystem. Na dobry początek należy zaimportować tę klasę oraz przypisać ją do zmiennej. W przeprowadzeniu                                     symulacji pomoże nam wykorzystanie metody $ode system$ w celu pozyskania równania ruchu naszego systemu dynamicznego. Aby pozyskać dane w                                 prosty sposób korzystamy z metody $get numerical parameters$ oraz wrzucamy te dane w słownik. Kod do wykonania tych czynnosci prezentuje się                             następująco: '))
+#         display(ObjectCode(ode_import_example))
+#         display(ReportText('Następnie stosując jedną z wyżej pokazanych metod, możemy stworzyć tabelę:'))
+#         display(ObjectCode(ode_example2))
+#         display(ReportText('Ostatnim krokiem jest wizualizacja danych, czyli stworzenie wykresu. Aby taki wykres uzyskać wystarczy wpisać kod widoczny na                             obrazku:'))
+#         display(ObjectCode(ode_simulation))
+#         display(ObjectCode(ode_simulation_plot))
 
-####
-omega, omega2 = symbols('omega Omega')
-t=Symbol('t')
-x=Function('x')(t)
-y=Function('y')(t)
-ode=(
-'''
-omega, omega2 = symbols('omega Omega')
-ODESystem(odes=Matrix([omega**2*x-sin(omega2*t)+x.diff(t,t)]),dvars=Matrix([x]),ode_order=1)
-''')   
+# ####
+# omega, omega2 = symbols('omega Omega')
+# t=Symbol('t')
+# x=Function('x')(t)
+# y=Function('y')(t)
+# ode=(
+# '''
+# omega, omega2 = symbols('omega Omega')
+# ODESystem(odes=Matrix([omega**2*x-sin(omega2*t)+x.diff(t,t)]),dvars=Matrix([x]),ode_order=1)
+# ''')   
         
         
 class ReportCompUseComponent(ReportComponent):
@@ -2245,305 +2250,308 @@ class ReportCompUseComponent(ReportComponent):
         display(ReportText('To solve the problem serve several methods depending on the equation type. As dynamic systems s behaviour is described by an ordinary differential equation, the variables of the equation are as follows: t [x]'))
         display(ReportText('The variables allow to study and analyse the system s dynamics varying with time.'))
         
-class NumericalAnalysisSimulationComponent(pl.NumericalAnalysisSimulationComponent):
+# class NumericalAnalysisSimulationComponent(pl.NumericalAnalysisSimulationComponent):
     
-    title="Numerical analysis simulation Component"
+#     title="Numerical analysis simulation Component"
 
-class AnalyticalSimulationComponent(pl.AnalyticalSimulationComponent):
+# class AnalyticalSimulationComponent(pl.AnalyticalSimulationComponent):
     
-    title="Analytical simulation Component"
+#     title="Analytical simulation Component"
     
 class DynamicSystemCompletenessCheckComponent(pl.DynamicSystemCompletenessCheckComponent):
     
     title="Dynamic system completeness check component"
+ 
     
-class IssuePreparationComponent(pl.IssuePreparationComponent):
+    #git
     
-    title="Issue preparation component"
+# class IssuePreparationComponent(pl.IssuePreparationComponent):
+#     
+#     title="Issue preparation component"
+# 
+#     
+#     
+# class_call_str=(
+# '''
+# from dynpy.models.mechanics.principles import ComposedSystem
+# from sympy import *
+# 
+# class MyMaterialPointMovement(ComposedSystem):
+#     pass
+# ''')
+# 
+# atributes_str=(
+# '''
+# m = Symbol('m', positive=True)
+# g = Symbol('g', positive=True)
+# c = Symbol('c', positive=True)
+# r = Symbol('r', positive=True)
+# phi = dynamicsymbols('phi')
+# 
+# c0 = Symbol('c0', positive=True)
+# r0 = Symbol('r0', positive=True)
+# phi0 = dynamicsymbols('phi0')
+# ''')
+# 
+# innit_str=(
+# '''
+# def __init__(self,
+#              m=None,
+#              g=None,
+# cLatexDataFrame.set_default_units(unit_dict)
+# 
+# tabelka=LatexDataFrame.formatted(
+#     data=dane,
+#     index=['Value']).applymap(lambda x: f'${latex(x)}$').rename_axis(
+#         'Symbol',
+#         axis=1)
+# 
+# display(tabelka.reported(caption='Data given in the exercise'))
+# 
+# ''')
+# 
+# component_str=(
+# '''
+# @property
+# def components(self):
+# 
+#     components = {}
+# 
+# 
+#     self._mass_x = MaterialPoint(self.m,
+#                                  pos1=self.r * sin(self.phi),
+#                                  qs=self.qs)
+#     self._mass_y = MaterialPoint(self.m,
+#                                  pos1=self.r * cos(self.phi),
+#                                  qs=self.qs)
+# 
+#     self._gravity_ = GravitationalForce(self.m,
+#                                         self.g,
+#                                         pos1=self.r * cos(self.phi),
+#                                         qs=self.qs)
+# 
+# 
+# 
+#     components['_mass_x']=self._mass_x
+#     components['_mass_y']=self._mass_y
+#     components['_gravity_']=self._gravity_
+# 
+# 
+#     return components
+# ''')
+# 
+# 
+# symb_desc_str=(
+# '''
+# def symbols_description(self):
+#     self.sym_desc_dict = {
+#         self.m: r'Mass',
+#         self.g: r'Gravity constant',
+#         self.c: r'',
+#     }
+# 
+#     return self.sym_desc_dict
+# ''')
+# 
+# def_data_str=(
+# '''
+# def get_default_data(self):
+# 
+#     m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+# 
+#     default_data_dict = {
+#         self.m: [m0 * no for no in range(1, 8)],
+#         self.c: [c0 * no for no in range(1, 8)],
+#         self.r: [r0 * no for no in range(1, 8)],
+#         self.phi: [phi0 * no for no in range(1, 8)],
+#     }
+# 
+#     return default_data_dict
+# ''')
+# 
+# num_data_str=(
+# '''
+# def get_numerical_data(self):
+# 
+#     m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+# 
+#     default_data_dict = {
+#         self.m: [m0 * no for no in range(1, 8)],
+#         self.c: [c0 * no for no in range(1, 8)],
+#         self.r: [r0 * no for no in range(1, 8)],
+#         self.phi: [phi0 * no for no in range(1, 8)],
+#     }
+# 
+#     return default_data_dict
+# ''')
+# 
+# dict_str=(
+# '''
+# def unit_dict(self):
+# 
+#     from pint import UnitRegistry
+#     ureg=UnitRegistry()
+# 
+#     unit_dict = {
+#         self.m: ureg.kilogram,
+#         self.g: ureg.meter/ureg.second/ureg.second,
+#         self.c: ureg.kilogram/ureg.second,
+#         self.r: ureg.meter,
+#         self.phi: ureg.radian,
+#         self.c0: ureg.kilogram/ureg.second,
+#         self.r0: ureg.meter,
+#         self.phi0:  ureg.radian
+#     }
+#     return unit_dict
+# ''')
+# 
+# full_class_str=(
+# '''
+# from dynpy.models.mechanics.principles import ComposedSystem
+# from sympy import *
+# 
+# class MyMaterialPointMovement(ComposedSystem):
+# 
+#     m = Symbol('m', positive=True)
+#     g = Symbol('g', positive=True)
+#     c = Symbol('c', positive=True)
+#     r = Symbol('r', positive=True)
+#     phi = dynamicsymbols('phi')
+# 
+#     c0 = Symbol('c0', positive=True)
+#     r0 = Symbol('r0', positive=True)
+#     phi0 = dynamicsymbols('phi0')
+# 
+#     def __init__(self,
+#                  m=None,
+#                  g=None,
+#                  c=None,
+#                  r=None,
+#                  phi=None,
+#                  ivar=Symbol('t'),
+#                  **kwargs):
+# 
+#         if m is not None: self.m = m
+#         if g is not None: self.g = g
+#         if c is not None: self.c = c
+#         if r is not None: self.r = r
+#         if phi is not None: self.phi = phi
+#         self.ivar = ivar
+# 
+#         self.qs = [self.phi]
+# 
+#         self._init_from_components(**kwargs)
+# 
+#     @property
+#     def components(self):
+# 
+#         components = {}
+# 
+# 
+#         self._mass_x = MaterialPoint(self.m,
+#                                      pos1=self.r * sin(self.phi),
+#                                      qs=self.qs)
+#         self._mass_y = MaterialPoint(self.m,
+#                                      pos1=self.r * cos(self.phi),
+#                                      qs=self.qs)
+# 
+#         self._gravity_ = GravitationalForce(self.m,
+#                                             self.g,
+#                                             pos1=self.r * cos(self.phi),
+#                                             qs=self.qs)
+# 
+# 
+#       
+#         components['_mass_x']=self._mass_x
+#         components['_mass_y']=self._mass_y
+#         components['_gravity_']=self._gravity_
+#      
+# 
+#         return components
+# 
+#     def symbols_description(self):
+#         self.sym_desc_dict = {
+#             self.m: r'Mass',
+#             self.g: r'Gravity constant',
+#             self.c: r'',
+#         }
+# 
+#         return self.sym_desc_dict
+# 
+#     def get_default_data(self):
+# 
+#         m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+# 
+#         default_data_dict = {
+#             self.m: [m0 * no for no in range(1, 8)],
+#             self.c: [c0 * no for no in range(1, 8)],
+#             self.r: [r0 * no for no in range(1, 8)],
+#             self.phi: [phi0 * no for no in range(1, 8)],
+#         }
+# 
+#         return default_data_dict
+# 
+#     def get_numerical_data(self):
+# 
+#         m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
+# 
+#         default_data_dict = {
+#             self.m: [m0 * no for no in range(1, 8)],
+#             self.c: [c0 * no for no in range(1, 8)],
+#             self.r: [r0 * no for no in range(1, 8)],
+#             self.phi: [phi0 * no for no in range(1, 8)],
+#         }
+# 
+#         return default_data_dict
+#         
+#     def unit_dict(self):
+# 
+#         from pint import UnitRegistry
+#         ureg=UnitRegistry()
+# 
+#         unit_dict = {
+#             self.m: ureg.kilogram,
+#             self.g: ureg.meter/ureg.second/ureg.second,
+#             self.c: ureg.kilogram/ureg.second,
+#             self.r: ureg.meter,
+#             self.phi: ureg.radian,
+#             self.c0: ureg.kilogram/ureg.second,
+#             self.r0: ureg.meter,
+#             self.phi0:  ureg.radian
+#         }
+#         return unit_dict        
+# ''')
 
+# class DynSysImplementationComponent(ReportComponent):
     
-    
-class_call_str=(
-'''
-from dynpy.models.mechanics.principles import ComposedSystem
-from sympy import *
-
-class MyMaterialPointMovement(ComposedSystem):
-    pass
-''')
-
-atributes_str=(
-'''
-m = Symbol('m', positive=True)
-g = Symbol('g', positive=True)
-c = Symbol('c', positive=True)
-r = Symbol('r', positive=True)
-phi = dynamicsymbols('phi')
-
-c0 = Symbol('c0', positive=True)
-r0 = Symbol('r0', positive=True)
-phi0 = dynamicsymbols('phi0')
-''')
-
-innit_str=(
-'''
-def __init__(self,
-             m=None,
-             g=None,
-cLatexDataFrame.set_default_units(unit_dict)
-
-tabelka=LatexDataFrame.formatted(
-    data=dane,
-    index=['Value']).applymap(lambda x: f'${latex(x)}$').rename_axis(
-        'Symbol',
-        axis=1)
-
-display(tabelka.reported(caption='Data given in the exercise'))
-
-''')
-
-component_str=(
-'''
-@property
-def components(self):
-
-    components = {}
+#     title="Implementacja systemow dynamicznych"
 
 
-    self._mass_x = MaterialPoint(self.m,
-                                 pos1=self.r * sin(self.phi),
-                                 qs=self.qs)
-    self._mass_y = MaterialPoint(self.m,
-                                 pos1=self.r * cos(self.phi),
-                                 qs=self.qs)
-
-    self._gravity_ = GravitationalForce(self.m,
-                                        self.g,
-                                        pos1=self.r * cos(self.phi),
-                                        qs=self.qs)
-
-
-
-    components['_mass_x']=self._mass_x
-    components['_mass_y']=self._mass_y
-    components['_gravity_']=self._gravity_
-
-
-    return components
-''')
-
-
-symb_desc_str=(
-'''
-def symbols_description(self):
-    self.sym_desc_dict = {
-        self.m: r'Mass',
-        self.g: r'Gravity constant',
-        self.c: r'',
-    }
-
-    return self.sym_desc_dict
-''')
-
-def_data_str=(
-'''
-def get_default_data(self):
-
-    m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
-
-    default_data_dict = {
-        self.m: [m0 * no for no in range(1, 8)],
-        self.c: [c0 * no for no in range(1, 8)],
-        self.r: [r0 * no for no in range(1, 8)],
-        self.phi: [phi0 * no for no in range(1, 8)],
-    }
-
-    return default_data_dict
-''')
-
-num_data_str=(
-'''
-def get_numerical_data(self):
-
-    m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
-
-    default_data_dict = {
-        self.m: [m0 * no for no in range(1, 8)],
-        self.c: [c0 * no for no in range(1, 8)],
-        self.r: [r0 * no for no in range(1, 8)],
-        self.phi: [phi0 * no for no in range(1, 8)],
-    }
-
-    return default_data_dict
-''')
-
-dict_str=(
-'''
-def unit_dict(self):
-
-    from pint import UnitRegistry
-    ureg=UnitRegistry()
-
-    unit_dict = {
-        self.m: ureg.kilogram,
-        self.g: ureg.meter/ureg.second/ureg.second,
-        self.c: ureg.kilogram/ureg.second,
-        self.r: ureg.meter,
-        self.phi: ureg.radian,
-        self.c0: ureg.kilogram/ureg.second,
-        self.r0: ureg.meter,
-        self.phi0:  ureg.radian
-    }
-    return unit_dict
-''')
-
-full_class_str=(
-'''
-from dynpy.models.mechanics.principles import ComposedSystem
-from sympy import *
-
-class MyMaterialPointMovement(ComposedSystem):
-
-    m = Symbol('m', positive=True)
-    g = Symbol('g', positive=True)
-    c = Symbol('c', positive=True)
-    r = Symbol('r', positive=True)
-    phi = dynamicsymbols('phi')
-
-    c0 = Symbol('c0', positive=True)
-    r0 = Symbol('r0', positive=True)
-    phi0 = dynamicsymbols('phi0')
-
-    def __init__(self,
-                 m=None,
-                 g=None,
-                 c=None,
-                 r=None,
-                 phi=None,
-                 ivar=Symbol('t'),
-                 **kwargs):
-
-        if m is not None: self.m = m
-        if g is not None: self.g = g
-        if c is not None: self.c = c
-        if r is not None: self.r = r
-        if phi is not None: self.phi = phi
-        self.ivar = ivar
-
-        self.qs = [self.phi]
-
-        self._init_from_components(**kwargs)
-
-    @property
-    def components(self):
-
-        components = {}
-
-
-        self._mass_x = MaterialPoint(self.m,
-                                     pos1=self.r * sin(self.phi),
-                                     qs=self.qs)
-        self._mass_y = MaterialPoint(self.m,
-                                     pos1=self.r * cos(self.phi),
-                                     qs=self.qs)
-
-        self._gravity_ = GravitationalForce(self.m,
-                                            self.g,
-                                            pos1=self.r * cos(self.phi),
-                                            qs=self.qs)
-
-
-      
-        components['_mass_x']=self._mass_x
-        components['_mass_y']=self._mass_y
-        components['_gravity_']=self._gravity_
-     
-
-        return components
-
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.m: r'Mass',
-            self.g: r'Gravity constant',
-            self.c: r'',
-        }
-
-        return self.sym_desc_dict
-
-    def get_default_data(self):
-
-        m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
-
-        default_data_dict = {
-            self.m: [m0 * no for no in range(1, 8)],
-            self.c: [c0 * no for no in range(1, 8)],
-            self.r: [r0 * no for no in range(1, 8)],
-            self.phi: [phi0 * no for no in range(1, 8)],
-        }
-
-        return default_data_dict
-
-    def get_numerical_data(self):
-
-        m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
-
-        default_data_dict = {
-            self.m: [m0 * no for no in range(1, 8)],
-            self.c: [c0 * no for no in range(1, 8)],
-            self.r: [r0 * no for no in range(1, 8)],
-            self.phi: [phi0 * no for no in range(1, 8)],
-        }
-
-        return default_data_dict
+#     def append_elements(self):
         
-    def unit_dict(self):
-
-        from pint import UnitRegistry
-        ureg=UnitRegistry()
-
-        unit_dict = {
-            self.m: ureg.kilogram,
-            self.g: ureg.meter/ureg.second/ureg.second,
-            self.c: ureg.kilogram/ureg.second,
-            self.r: ureg.meter,
-            self.phi: ureg.radian,
-            self.c0: ureg.kilogram/ureg.second,
-            self.r0: ureg.meter,
-            self.phi0:  ureg.radian
-        }
-        return unit_dict        
-''')
-
-class DynSysImplementationComponent(ReportComponent):
-    
-    title="Implementacja systemow dynamicznych"
+#         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
 
 
-    def append_elements(self):
+#         #przekopiowac tu fragment kodu z guide pamietajac o indentach
+#         display(ReportText("Tworzenie klasy należy zacząć od wybrania nazwy opisującej nasz system oraz zadeklarowania jej w odpowiedni sposób, który został przedstawiony poniżej:")) #itp
+#         display(GuideCode(class_call_str))
+#         display(ReportText('Następnie deklarujemy atrybuty/symbole, które są niezbędne do opisania danego obiektu'))
+#         display(GuideCode(atributes_str))
+#         display(ReportText('Do zdefiniowania inicjalizacji obiektu klasy z określonymi atrybutami służy poniższa struktura.'))
+#         display(GuideCode(innit_str))
+#         display(ReportText('W tym kroku korzystamy z predefiniowanych elementów takich jak punkty materialne, dyski, itp.'))
+#         display(GuideCode(component_str))
+#         display(ReportText('W tej części opisujemy parametry klasy, np. masę'))
+#         display(GuideCode(symb_desc_str))
+#         display(ReportText('Sekcja ta przedstawia inicjalizację słownika zawierającego dane symboliczne do równań analitycznych systemu:'))
+#         display(GuideCode(def_data_str))
+#         display(ReportText('Kolejnym krokiem jest przypisanie słowników zawierających dane do symulacji numerycznych:'))
+#         display(GuideCode(num_data_str))
+#         display(ReportText('Ta sekcja opisuje definiowanie jednostek używanych przez system dynamiczny:'))
+#         display(GuideCode(dict_str))
         
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
-
-
-        #przekopiowac tu fragment kodu z guide pamietajac o indentach
-        display(ReportText("Tworzenie klasy należy zacząć od wybrania nazwy opisującej nasz system oraz zadeklarowania jej w odpowiedni sposób, który został przedstawiony poniżej:")) #itp
-        display(GuideCode(class_call_str))
-        display(ReportText('Następnie deklarujemy atrybuty/symbole, które są niezbędne do opisania danego obiektu'))
-        display(GuideCode(atributes_str))
-        display(ReportText('Do zdefiniowania inicjalizacji obiektu klasy z określonymi atrybutami służy poniższa struktura.'))
-        display(GuideCode(innit_str))
-        display(ReportText('W tym kroku korzystamy z predefiniowanych elementów takich jak punkty materialne, dyski, itp.'))
-        display(GuideCode(component_str))
-        display(ReportText('W tej części opisujemy parametry klasy, np. masę'))
-        display(GuideCode(symb_desc_str))
-        display(ReportText('Sekcja ta przedstawia inicjalizację słownika zawierającego dane symboliczne do równań analitycznych systemu:'))
-        display(GuideCode(def_data_str))
-        display(ReportText('Kolejnym krokiem jest przypisanie słowników zawierających dane do symulacji numerycznych:'))
-        display(GuideCode(num_data_str))
-        display(ReportText('Ta sekcja opisuje definiowanie jednostek używanych przez system dynamiczny:'))
-        display(GuideCode(dict_str))
-        
-        display(ReportText('Ostatecznie kod implementacji całego systemu ma następującą postać:'))
-        display(GuideCode(full_class_str))
+#         display(ReportText('Ostatecznie kod implementacji całego systemu ma następującą postać:'))
+#         display(GuideCode(full_class_str))
         
 ## TABELKA InterimSchedule 
 
@@ -2573,120 +2581,120 @@ zadanie_10='Poprawa błędów, oddanie pracy'
 wl='Praca zasadnicza'
 po='Poprawki'
         
-class InterimScheduleComponent(ReportComponent):
+# class InterimScheduleComponent(ReportComponent):
     
-    title="Implementacja systemow dynamicznych"
+#     title="Implementacja systemow dynamicznych"
 
 
-    @property
-    def reported_object(self):
+#     @property
+#     def reported_object(self):
 
-        default_data = {'date':datetime.datetime(2024,7,16),
-                       'title':'Title of interim project',
-                       'timedelta':datetime.timedelta(days=7),
-                       'issue_no':359,
-                       }
+#         default_data = {'date':datetime.datetime(2024,7,16),
+#                        'title':'Title of interim project',
+#                        'timedelta':datetime.timedelta(days=7),
+#                        'issue_no':359,
+#                        }
 
     
         
-        if isinstance(self._reported_object, dict):
-            return {**default_data,**self._reported_object}
+#         if isinstance(self._reported_object, dict):
+#             return {**default_data,**self._reported_object}
 
+# #         elif isinstance(self._reported_object, str):
+# #             return {**default_data,'date':self._reported_object}
 #         elif isinstance(self._reported_object, str):
-#             return {**default_data,'date':self._reported_object}
-        elif isinstance(self._reported_object, str):
-            return {**default_data, 'date': datetime.datetime.strptime(self._reported_object, "%Y-%m-%d")}
+#             return {**default_data, 'date': datetime.datetime.strptime(self._reported_object, "%Y-%m-%d")}
                     
-        elif self._reported_object is None:
-            return default_data
+#         elif self._reported_object is None:
+#             return default_data
 
-        else:
-#             return self._reported_object
-            return {**default_data, 'date': self._reported_object}
-
-
-    @reported_object.setter
-    def reported_object(self, obj):
-        self._reported_object=obj
+#         else:
+# #             return self._reported_object
+#             return {**default_data, 'date': self._reported_object}
 
 
-    def append_elements(self):
+#     @reported_object.setter
+#     def reported_object(self, obj):
+#         self._reported_object=obj
+
+
+#     def append_elements(self):
         
-        first_meeting_date = self.reported_object['date'] # it's useless in the case of permanent content - it's commented for future usage
-        days_inc = self.reported_object['timedelta']
+#         first_meeting_date = self.reported_object['date'] # it's useless in the case of permanent content - it's commented for future usage
+#         days_inc = self.reported_object['timedelta']
 
 
-        #przekopiowac tu fragment kodu z guide pamietajac o indentach
-        display(ReportText(f"Pracę rozpoczynamy {first_meeting_date}")) #itp
+#         #przekopiowac tu fragment kodu z guide pamietajac o indentach
+#         display(ReportText(f"Pracę rozpoczynamy {first_meeting_date}")) #itp
         
-        tabela_git = {
-        'Tydzień prac': [1,2,3,4,5,6,7,8,9,10],
-        'Data': [first_meeting_date+datetime.timedelta(days=days_inc.days*no) for no in  range(10)],
-        'Temat konsultacji': [zadanie_1, zadanie_2, zadanie_3, zadanie_4, zadanie_5, zadanie_6, zadanie_7, zadanie_8, zadanie_9, zadanie_10],
-        'Charakter spotkania': [wl,wl,wl,wl,wl,wl,wl,wl,po,po]
+#         tabela_git = {
+#         'Tydzień prac': [1,2,3,4,5,6,7,8,9,10],
+#         'Data': [first_meeting_date+datetime.timedelta(days=days_inc.days*no) for no in  range(10)],
+#         'Temat konsultacji': [zadanie_1, zadanie_2, zadanie_3, zadanie_4, zadanie_5, zadanie_6, zadanie_7, zadanie_8, zadanie_9, zadanie_10],
+#         'Charakter spotkania': [wl,wl,wl,wl,wl,wl,wl,wl,po,po]
             
         
-}
+# }
 
-        tabelka_pandas=pd.DataFrame(tabela_git)
-        tabelka_pandas.index += 1
-        tabelka_latex=LatexDataFrame(tabelka_pandas).reported(caption='Harmonogram spotkań')
-        display((display(tabelka_latex)))
+#         tabelka_pandas=pd.DataFrame(tabela_git)
+#         tabelka_pandas.index += 1
+#         tabelka_latex=LatexDataFrame(tabelka_pandas).reported(caption='Harmonogram spotkań')
+#         display((display(tabelka_latex)))
 
-class InterimTemplateComponent(InterimScheduleComponent):
+# class InterimTemplateComponent(InterimScheduleComponent):
     
-    title="Implementacja systemow dynamicznych"
+#     title="Implementacja systemow dynamicznych"
 
 
     
     
-    def append_elements(self):
+#     def append_elements(self):
         
-        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+#         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
 
 
-        #przekopiowac tu fragment kodu z guide pamietajac o indentach
-        display(ReportText("Tu kod dla podstawowej formy dokumentu")) #itp
+#         #przekopiowac tu fragment kodu z guide pamietajac o indentach
+#         display(ReportText("Tu kod dla podstawowej formy dokumentu")) #itp
     
     
     
-project_issue_title_str = """
-Maintenance of `{system_name}` class which is dynamic system representation        
-"""
+# project_issue_title_str = """
+# Maintenance of `{system_name}` class which is dynamic system representation        
+# """
         
-project_issue_desc_str = """
+# project_issue_desc_str = """
 
-The following problems have to be checked or fixed, in order to ensure the correctness of implemented system:
+# The following problems have to be checked or fixed, in order to ensure the correctness of implemented system:
 
-- [ ] checking if a class is executable,
+# - [ ] checking if a class is executable,
 
-- [ ] validation of figures for schemes and real examples,
+# - [ ] validation of figures for schemes and real examples,
 
-- [ ] validation of reference parameters,
+# - [ ] validation of reference parameters,
 
-- [ ] validation of random parameters,
+# - [ ] validation of random parameters,
 
-- [ ] validation of  description of  description of parameters,
+# - [ ] validation of  description of  description of parameters,
 
-- [ ] validation of units.
-"""
+# - [ ] validation of units.
+# """
         
-class InterimIssuesComponent(InterimScheduleComponent):
+# class InterimIssuesComponent(InterimScheduleComponent):
     
-    title="Wzór na tworzenie issues w systemie GitHub dla przejsciowe"
+#     title="Wzór na tworzenie issues w systemie GitHub dla przejsciowe"
 
-    def append_elements(self):
+#     def append_elements(self):
         
-        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
-        system_name = system.__class__.__name__
+#         system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+#         system_name = system.__class__.__name__
         
-        display(ReportText("Przykładowy tekst, który pozwoli na sprawne przygotowywanie issue ma następującą formę:"))
+#         display(ReportText("Przykładowy tekst, który pozwoli na sprawne przygotowywanie issue ma następującą formę:"))
 
-        display(ReportText("# Title: "))
-        display(ObjectCode(project_issue_title_str.format(system_name=system_name)))
+#         display(ReportText("# Title: "))
+#         display(ObjectCode(project_issue_title_str.format(system_name=system_name)))
 
-        display(ReportText("# Description: "))
-        display(ObjectCode(project_issue_desc_str))
+#         display(ReportText("# Description: "))
+#         display(ObjectCode(project_issue_desc_str))
     
     
     
@@ -3023,21 +3031,21 @@ display(Eq(Symbol('T'),Ek))
 '''
 
 
-class SympyFormulaComponent(DocumentGenerationComponent):
+# class SympyFormulaComponent(DocumentGenerationComponent):
 
-    title = "Klasa SympyFormula i jej zastosowanie"
+#     title = "Klasa SympyFormula i jej zastosowanie"
 
 
 
-    def append_elements(self):
-        classname = self.reported_object['classname']
-        class_module = self.reported_object['module']
-        class_field = self.reported_object['field']
-        target = self.reported_object['target']
+#     def append_elements(self):
+#         classname = self.reported_object['classname']
+#         class_module = self.reported_object['module']
+#         class_field = self.reported_object['field']
+#         target = self.reported_object['target']
 
-        #implement reporting activieties here
-        display(ReportText('Przykładowe zastosowanie komponentu do obliczeń symbolicznych, na przykładzie energii kinetycznej:'))
-        display(GuideCode(f'{SympyFormulaComponent_str}'))
+#         #implement reporting activieties here
+#         display(ReportText('Przykładowe zastosowanie komponentu do obliczeń symbolicznych, na przykładzie energii kinetycznej:'))
+#         display(GuideCode(f'{SympyFormulaComponent_str}'))
 
 
 
@@ -3414,100 +3422,100 @@ class ReportTextComponent(DocumentGenerationComponent):
         display(ReportText('Narzędziem o podstawowej funkcjonalności jest klasa **ReportText** - umożliwia dodanie i wyświetlanie tekstu, który ma zostać umieszczony w raporcie. Funkcjonalność ta jest dostępna po wywołaniu kodu:'))
         display(GuideCode(f'{ReportTextComponent_str}'))
         
-TablesCreationComponent_str=(
-'''
-from dynpy.models.mechanics.tmac import SDOFWinchSystem
-eoms= SDOFWinchSystem()._eoms[0]
-eoms_eq_raw=Eq(eoms,0)
-data=SDOFWinchSystem().get_random_parameters()
-Ms0=Symbol('M_s0')
-b=Symbol('b')
-omg=Symbol('varphi')
-ph1=Symbol('Phi')
+# TablesCreationComponent_str=(
+# '''
+# from dynpy.models.mechanics.tmac import SDOFWinchSystem
+# eoms= SDOFWinchSystem()._eoms[0]
+# eoms_eq_raw=Eq(eoms,0)
+# data=SDOFWinchSystem().get_random_parameters()
+# Ms0=Symbol('M_s0')
+# b=Symbol('b')
+# omg=Symbol('varphi')
+# ph1=Symbol('Phi')
 
-winch = SDOFWinchSystem()
+# winch = SDOFWinchSystem()
 
-Ms=winch.M_s
-t = winch.ivar
+# Ms=winch.M_s
+# t = winch.ivar
 
-dane={
-    Ms0:4700,
-    b:1500,
-    SDOFWinchSystem().m0:10}
-
-
-
-winch_up=SDOFWinchSystem().subs(Ms,Ms0-b*SDOFWinchSystem().phi.diff()).subs(data).subs(dane)
-nowe_ode=winch_up._ode_system
-solution=nowe_ode.solution
-steady_sol=nowe_ode.steady_solution[0]
-t_span = np.linspace(0,100,200)
-phi=winch.q[0]
+# dane={
+#     Ms0:4700,
+#     b:1500,
+#     SDOFWinchSystem().m0:10}
 
 
 
-units_dict = {phi : ureg.radian,phi.diff(t):ureg.radian,t:ureg.second }
-LatexDataFrame.set_default_units(units_dict)
+# winch_up=SDOFWinchSystem().subs(Ms,Ms0-b*SDOFWinchSystem().phi.diff()).subs(data).subs(dane)
+# nowe_ode=winch_up._ode_system
+# solution=nowe_ode.solution
+# steady_sol=nowe_ode.steady_solution[0]
+# t_span = np.linspace(0,100,200)
+# phi=winch.q[0]
 
-general_sol_matrix=nowe_ode.solution.with_ics([0,0])
-table_eq=general_sol_matrix.n().numerized().compute_solution(t_span)
-table=table_eq[[phi.diff(t)]]
-table_for_report = table[0::15].to_latex_dataframe()
 
-display(Markdown(' Do tablicy `table_eq` zapisujemy równanie ogólne dla zmiennej czasowej `t_span`   '))
-display(Markdown(
-f"""
+
+# units_dict = {phi : ureg.radian,phi.diff(t):ureg.radian,t:ureg.second }
+# LatexDataFrame.set_default_units(units_dict)
+
+# general_sol_matrix=nowe_ode.solution.with_ics([0,0])
+# table_eq=general_sol_matrix.n().numerized().compute_solution(t_span)
+# table=table_eq[[phi.diff(t)]]
+# table_for_report = table[0::15].to_latex_dataframe()
+
+# display(Markdown(' Do tablicy `table_eq` zapisujemy równanie ogólne dla zmiennej czasowej `t_span`   '))
+# display(Markdown(
+# f"""
     
-    table_eq=general_sol_matrix.n().numerized().compute_solution(t_span)
+#     table_eq=general_sol_matrix.n().numerized().compute_solution(t_span)
 
-"""))
-display(Markdown(f' Do tablicy table przypisujemy wartości ${latex(omg)}$ powstałe w wyniku zróżniczkowania ${latex(ph1)}$ w tablicy `table_eq` '))
-display(Markdown(
-f"""
-    table=table_eq[[phi.diff(t)]]
+# """))
+# display(Markdown(f' Do tablicy table przypisujemy wartości ${latex(omg)}$ powstałe w wyniku zróżniczkowania ${latex(ph1)}$ w tablicy `table_eq` '))
+# display(Markdown(
+# f"""
+#     table=table_eq[[phi.diff(t)]]
    
-"""))
-display(ReportText(' W następnym kroku wybieramy zakres wartości który chcemy umieścić w tabelce przy pomocy naiwasów kwadratowych. Nastepnie przekształcamy tabelę na zgodną z LateX przy pomocy metody: to\_latex\_dataframe()  '))
-display(Markdown(
-f"""
+# """))
+# display(ReportText(' W następnym kroku wybieramy zakres wartości który chcemy umieścić w tabelce przy pomocy naiwasów kwadratowych. Nastepnie przekształcamy tabelę na zgodną z LateX przy pomocy metody: to\_latex\_dataframe()  '))
+# display(Markdown(
+# f"""
 
-    table_for_report = table[0::15].to_latex_dataframe()
+#     table_for_report = table[0::15].to_latex_dataframe()
 
-"""))
-display(ReportText(' Naszą tabelkę opisujemy w tekście, pożądane jest użycie AutoMarkerów które zostały opisane w poniższej sekcji tego dokument '))
-display(Markdown(
-f"""
+# """))
+# display(ReportText(' Naszą tabelkę opisujemy w tekście, pożądane jest użycie AutoMarkerów które zostały opisane w poniższej sekcji tego dokument '))
+# display(Markdown(
+# f"""
 
-     display(Markdown(f'Wyniki symulacji zostały zestawione w tabeli {AutoMarker(table_for_report)}'))
+#      display(Markdown(f'Wyniki symulacji zostały zestawione w tabeli {AutoMarker(table_for_report)}'))
 
-"""))
-display(ReportText(' Aby wyświetlic tabelkę korzystamy z  klasy display. Metoda .reported umożliwia nam nadanie tabelce podpisu. '))
-display(Markdown(
-f"""
+# """))
+# display(ReportText(' Aby wyświetlic tabelkę korzystamy z  klasy display. Metoda .reported umożliwia nam nadanie tabelce podpisu. '))
+# display(Markdown(
+# f"""
 
-    display(table_for_report.reported(caption='Tabela'))
+#     display(table_for_report.reported(caption='Tabela'))
 
-"""))
+# """))
     
-''')
+# ''')
 
-class TablesCreationComponent(DocumentGenerationComponent):
+# class TablesCreationComponent(DocumentGenerationComponent):
 
-    title="Tworzenie tabelek"
+#     title="Tworzenie tabelek"
 
 
-    def append_elements(self):
-        #variables provided by `reported_object` arg
-        classname = self.reported_object['classname']
-        class_module = self.reported_object['module']
-        class_field = self.reported_object['field']
-        target = self.reported_object['target']
+#     def append_elements(self):
+#         #variables provided by `reported_object` arg
+#         classname = self.reported_object['classname']
+#         class_module = self.reported_object['module']
+#         class_field = self.reported_object['field']
+#         target = self.reported_object['target']
         
        
-        #implement reporting activieties here
+#         #implement reporting activieties here
         
-        display(ReportText('Aby utworzyć tabelkę najpierw musimy posiadać dane z obliczeń na interesującym nas systemie dynamicznym:'))
-        display(GuideCode(f'{TablesCreationComponent_str}'))
+#         display(ReportText('Aby utworzyć tabelkę najpierw musimy posiadać dane z obliczeń na interesującym nas systemie dynamicznym:'))
+#         display(GuideCode(f'{TablesCreationComponent_str}'))
         
         
 kod_2='''
@@ -3721,364 +3729,371 @@ class ReportFormattingGuidelinesComponent(DocumentGenerationComponent):
 ##########################
 ##SYNCHRONIZACJA GITHUB### 
 ##########################
-        
-class GitSynchroPanelAccessComponent(ReportComponent):
 
-    title="Dostep do panelu synchronizacji Github"
+#git
 
-    @property
-    def reported_object(self):
-
-
-        default_data = {'classname':'ReportingModuleIntroComponent',
-                       'module':'guide.en.py',
-                       'field':'guide or report',
-                       'target':'`ODESystem` class',
-                       'issue_no':359,
-                       }
-
-
-        if isinstance(self._reported_object, dict):
-            return {**default_data,**self._reported_object}
-
-        elif isinstance(self._reported_object, str):
-            return {**default_data,'classname':self._reported_object}
-
-        elif self._reported_object is None:
-            return default_data
-
-        else:
-            return self._reported_object
-
-
-    @reported_object.setter
-    def reported_object(self, obj):
-        self._reported_object=obj
-    
-    
-    def append_elements(self):
-        #variables provided by `reported_object` arg
-        classname = self.reported_object['classname']
-        class_module = self.reported_object['module']
-        class_field = self.reported_object['field']
-        target = self.reported_object['target']
-
-        display(ReportText(f''' Repozytoria Github'a zmieniają się dosyć dynamicznie, a w przypadku, gdy korzysta z niego więcej niż jedna osoba dobrze by było aby każdy miał dostęp do najnowszej wersji. W tym celu przeprowadza się regularnie synchronizację danego rezpozytorium. '''))
-
-        display(ReportText('Jak się dostać do panelu synchronizacji?'))
-
-        display(ReportText(f''' Wybierz projekt, który chcesz zsynchronizować.'''))
-        display(Picture('./dynpy/utilities/components/guides/images/1.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('11cm'),caption='Wybór projektu z listy'))
-
-        display(ReportText(f'''Przejdź do foledru, który chcesz zsynchronizować. W naszym przypadku zazwyczaj aktualizujemy moduły.'''))
-        display(Picture('./dynpy/utilities/components/guides/images/2.png', position = 'H', height= NoEscape('18cm'), width = NoEscape('18cm'),caption='Wybór folderu do synchronizacji'))
-
-        display(ReportText(f'''Wybierz ikonę VS Code - zostaniesz przeniesiony do nowego okna.'''))
-        display(Picture('./dynpy/utilities/components/guides/images/3.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('11cm'),caption='Przycisk przenoszący do VS Code'))
-
-        display(ReportText(f'''Będąc już w panelu VS Code przjedź do zakładki 'Source control' (trzecia od góry), to tu będą przeprowadzane wszystkie operacje.'''))
-        display(Picture('./dynpy/utilities/components/guides/images/4.png', position = 'H', height= NoEscape('18cm'), width = NoEscape('18cm'),caption='Source control w panelu VS Code'))
-        
-
-example_commit_str=('''
-Przykładowy Commit:
-
-# Please enter the commit message for your changes. Lines starting
-# with '#' will be ignored, and an empty message aborts the commit.
-#
+# class GitSynchroPanelAccessComponent(ReportComponent):
+# 
+#     title="Dostep do panelu synchronizacji Github"
+# 
+#     @property
+#     def reported_object(self):
+# 
+# 
+#         default_data = {'classname':'ReportingModuleIntroComponent',
+#                        'module':'guide.en.py',
+#                        'field':'guide or report',
+#                        'target':'`ODESystem` class',
+#                        'issue_no':359,
+#                        }
+# 
+# 
+#         if isinstance(self._reported_object, dict):
+#             return {**default_data,**self._reported_object}
+# 
+#         elif isinstance(self._reported_object, str):
+#             return {**default_data,'classname':self._reported_object}
+# 
+#         elif self._reported_object is None:
+#             return default_data
+# 
+#         else:
+#             return self._reported_object
+# 
+# 
+#     @reported_object.setter
+#     def reported_object(self, obj):
+#         self._reported_object=obj
+#     
+#     
+#     def append_elements(self):
+#       variables provided by `reported_object` arg
+#         classname = self.reported_object['classname']
+#         class_module = self.reported_object['module']
+#         class_field = self.reported_object['field']
+#         target = self.reported_object['target']
+# 
+#         display(ReportText(f''' Repozytoria Github'a zmieniają się dosyć dynamicznie, a w przypadku, gdy korzysta z niego więcej niż jedna osoba dobrze by było aby każdy miał dostęp do najnowszej wersji. W tym celu przeprowadza się regularnie synchronizację danego rezpozytorium. '''))
+# 
+#         display(ReportText('Jak się dostać do panelu synchronizacji?'))
+# 
+#         display(ReportText(f''' Wybierz projekt, który chcesz zsynchronizować.'''))
+#         display(Picture('./dynpy/utilities/components/guides/images/1.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('11cm'),caption='Wybór projektu z listy'))
+# 
+#         display(ReportText(f'''Przejdź do foledru, który chcesz zsynchronizować. W naszym przypadku zazwyczaj aktualizujemy moduły.'''))
+#         display(Picture('./dynpy/utilities/components/guides/images/2.png', position = 'H', height= NoEscape('18cm'), width = NoEscape('18cm'),caption='Wybór folderu do synchronizacji'))
+# 
+#         display(ReportText(f'''Wybierz ikonę VS Code - zostaniesz przeniesiony do nowego okna.'''))
+#         display(Picture('./dynpy/utilities/components/guides/images/3.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('11cm'),caption='Przycisk przenoszący do VS Code'))
+# 
+#         display(ReportText(f'''Będąc już w panelu VS Code przjedź do zakładki 'Source control' (trzecia od góry), to tu będą przeprowadzane wszystkie operacje.'''))
+#         display(Picture('./dynpy/utilities/components/guides/images/4.png', position = 'H', height= NoEscape('18cm'), width = NoEscape('18cm'),caption='Source control w panelu VS Code'))
+#         
+# 
+# example_commit_str=('''
+# Przykładowy Commit:
+# 
+#Please enter the commit message for your changes. Lines starting
+#with '#' will be ignored, and an empty message aborts the commit.
+# #
+#On branch master
+#Your branch is up to date with 'origin/master'.
+# 
+#Changes to be committed:
+#  modified: models/mechanics/disk.py
+#  modified: utilitied/components/ode/en.py
+#  modified: models/mechanics/bridge.py
+# ''')
+# 
+# example_commented_commit_str=('''
+#Please enter the commit message for your changes. Lines starting
+#with '#' will be ignored, and an empty message aborts the commit.
+# 
+# Here place the title of the Commit
+# 
 # On branch master
 # Your branch is up to date with 'origin/master'.
-
+# 
 # Changes to be committed:
-#   modified: models/mechanics/disk.py
-#   modified: utilitied/components/ode/en.py
-#   modified: models/mechanics/bridge.py
-''')
+#   modified: models/mechanics/disk.py - class added
+#   modified: utilitied/components/ode/en.py - class removed
+#   modified: models/mechanics/bridge.py - minor changes
+# ''')
+# 
+# example_commit_comments_str=('''
+# class added
+# class fixed
+# class removed
+# minor changes
+# method added
+# method fixed
+# method removed
+# ''')
 
-example_commented_commit_str=('''
-# Please enter the commit message for your changes. Lines starting
-# with '#' will be ignored, and an empty message aborts the commit.
+#git
 
-Here place the title of the Commit
+# class GitSynchroIntroComponent(GitSynchroPanelAccessComponent):
 
-On branch master
-Your branch is up to date with 'origin/master'.
+#     title="Wprowadzenie do synchronizacji repozytorium Github"
 
-Changes to be committed:
-  modified: models/mechanics/disk.py - class added
-  modified: utilitied/components/ode/en.py - class removed
-  modified: models/mechanics/bridge.py - minor changes
-''')
-
-example_commit_comments_str=('''
-class added
-class fixed
-class removed
-minor changes
-method added
-method fixed
-method removed
-''')
-
-class GitSynchroIntroComponent(GitSynchroPanelAccessComponent):
-
-    title="Wprowadzenie do synchronizacji repozytorium Github"
-
-    def append_elements(self):
-        #variables provided by `reported_object` arg
-        classname = self.reported_object['classname']
-        class_module = self.reported_object['module']
-        class_field = self.reported_object['field']
-        target = self.reported_object['target']
+#     def append_elements(self):
+#         #variables provided by `reported_object` arg
+#         classname = self.reported_object['classname']
+#         class_module = self.reported_object['module']
+#         class_field = self.reported_object['field']
+#         target = self.reported_object['target']
     
-        #implement reporting activieties here
+#         #implement reporting activieties here
 
-        display(ReportText('Synchronizacja repozytorium.'))
+#         display(ReportText('Synchronizacja repozytorium.'))
 
-        display(ReportText('Przypadek 1. : "Commit" po lewej stronie NIE działa'))
+#         display(ReportText('Przypadek 1. : "Commit" po lewej stronie NIE działa'))
 
-        display(ReportText(f'''Jeśli "Commit" nie działa to kliknij od razu "Sync changes" lub kółeczka synchronizacji na górze'''))
-        display(Picture('./dynpy/utilities/components/guides/images/10.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('8cm'),caption='Kółeczko synchronizacji'))
-        display(Picture('./dynpy/utilities/components/guides/images/9.png', position = 'H', height= NoEscape('8cm'), width = NoEscape('6cm'),caption='Przycisk, na którym pojawia się "Commit" albo "Sync changes"'))
+#         display(ReportText(f'''Jeśli "Commit" nie działa to kliknij od razu "Sync changes" lub kółeczka synchronizacji na górze'''))
+#         display(Picture('./dynpy/utilities/components/guides/images/10.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('8cm'),caption='Kółeczko synchronizacji'))
+#         display(Picture('./dynpy/utilities/components/guides/images/9.png', position = 'H', height= NoEscape('8cm'), width = NoEscape('6cm'),caption='Przycisk, na którym pojawia się "Commit" albo "Sync changes"'))
 
-        display(ReportText('Przypadek 2. : "Commit" po lewej stronie wyświetla się normalnie'))
+#         display(ReportText('Przypadek 2. : "Commit" po lewej stronie wyświetla się normalnie'))
 
-        display(ReportText(f'''Kliknij "Commit".'''))
-        display(Picture('./dynpy/utilities/components/guides/images/5.png', position = 'H', height= NoEscape('8cm'), width = NoEscape('6cm'),caption='Przycisk "Commit"'))
+#         display(ReportText(f'''Kliknij "Commit".'''))
+#         display(Picture('./dynpy/utilities/components/guides/images/5.png', position = 'H', height= NoEscape('8cm'), width = NoEscape('6cm'),caption='Przycisk "Commit"'))
 
-        display(ReportText(f'''Otworzy się opis Commit'a - odkomentuj linijki z modyfikacjami, czyli wszystko od około 4. linii. '''))
-        # display(Picture('./dynpy/utilities/components/guides/images/6.png', position = 'H', height= NoEscape('13cm'), width = NoEscape('13cm'),caption='''Opis Commit'a '''))
+#         display(ReportText(f'''Otworzy się opis Commit'a - odkomentuj linijki z modyfikacjami, czyli wszystko od około 4. linii. '''))
+#         # display(Picture('./dynpy/utilities/components/guides/images/6.png', position = 'H', height= NoEscape('13cm'), width = NoEscape('13cm'),caption='''Opis Commit'a '''))
 
-        display(ObjectCode(example_commit_str))
+#         display(ObjectCode(example_commit_str))
 
-        display(ReportText(f'''Po odkomentowaniu dopisz tytuł synchronizacji oraz krótkie opisy poszczególnych zmian - jest to ważne w kwestii komunikacji między osobami pracującymi nad projektem. '''))
-        # display(Picture('./dynpy/utilities/components/guides/images/7.png', position = 'H', height= NoEscape('13cm'), width = NoEscape('11cm'),caption=''' Przykladowy opis Commit'a '''))
-        display(ReportText('Przykładowy opisany Commit:'))
-        display(ObjectCode(example_commented_commit_str))
-        display(ReportText('Spis przykładowych komenatrzy do Committów:'))
-        display(ObjectCode(example_commit_comments_str))
+#         display(ReportText(f'''Po odkomentowaniu dopisz tytuł synchronizacji oraz krótkie opisy poszczególnych zmian - jest to ważne w kwestii komunikacji między osobami pracującymi nad projektem. '''))
+#         # display(Picture('./dynpy/utilities/components/guides/images/7.png', position = 'H', height= NoEscape('13cm'), width = NoEscape('11cm'),caption=''' Przykladowy opis Commit'a '''))
+#         display(ReportText('Przykładowy opisany Commit:'))
+#         display(ObjectCode(example_commented_commit_str))
+#         display(ReportText('Spis przykładowych komenatrzy do Committów:'))
+#         display(ObjectCode(example_commit_comments_str))
 
 
-        display(ReportText(f''' Dla pewności poprawności wprowadzonych zmian warto potwierdzić Commita na chatcie do synchronizacji na Slacku'''))
-        display(Picture('./dynpy/utilities/components/guides/images/8_5.png', position = 'H', height= NoEscape('6cm'), width = NoEscape('6cm'),caption='''Kanał do synców '''))
+#         display(ReportText(f''' Dla pewności poprawności wprowadzonych zmian warto potwierdzić Commita na chatcie do synchronizacji na Slacku'''))
+#         display(Picture('./dynpy/utilities/components/guides/images/8_5.png', position = 'H', height= NoEscape('6cm'), width = NoEscape('6cm'),caption='''Kanał do synców '''))
 
-        display(ReportText(f'''Zatwierdź Commit'a klikjąc tick w prawym górnym rogu. Jeśli przycisku nie ma, przełącz karty i spróbuj ponownie.'''))
-        display(Picture('./dynpy/utilities/components/guides/images/8.png', position = 'H', height= NoEscape('20cm'), width = NoEscape('20cm'),caption='Zatwierdzanie zmian'))
+#         display(ReportText(f'''Zatwierdź Commit'a klikjąc tick w prawym górnym rogu. Jeśli przycisku nie ma, przełącz karty i spróbuj ponownie.'''))
+#         display(Picture('./dynpy/utilities/components/guides/images/8.png', position = 'H', height= NoEscape('20cm'), width = NoEscape('20cm'),caption='Zatwierdzanie zmian'))
 
-        display(ReportText(f'''Po zatwierdzeniu, ze strony Github'a takie zmiany wyglądają następująco '''))
-        display(Picture('./dynpy/utilities/components/guides/images/7_5.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('8cm'),caption='''Zatwierdzone zmiany z perspektywy Github'a'''))
-        display(ReportText('Wystąpienie komunikatu merge'))
+#         display(ReportText(f'''Po zatwierdzeniu, ze strony Github'a takie zmiany wyglądają następująco '''))
+#         display(Picture('./dynpy/utilities/components/guides/images/7_5.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('8cm'),caption='''Zatwierdzone zmiany z perspektywy Github'a'''))
+#         display(ReportText('Wystąpienie komunikatu merge'))
 
-        display(ReportText(f'''Taki komunikat będzie oznacza błąd na wyższym szczeblu - nie ruszaj nic więcej i odezwij się do Pana Chilińskiego lub Pana Sierocińskiego. '''))
-        display(Picture('./dynpy/utilities/components/guides/images/11.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('8cm'),caption='Error'))
+#         display(ReportText(f'''Taki komunikat będzie oznacza błąd na wyższym szczeblu - nie ruszaj nic więcej i odezwij się do Pana Chilińskiego lub Pana Sierocińskiego. '''))
+#         display(Picture('./dynpy/utilities/components/guides/images/11.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('8cm'),caption='Error'))
         
-class UsageOfGitHubInterfacesComponent(GitSynchroPanelAccessComponent):
-
-    title="Wprowadzenie do GitHubInterface"
-
-    def append_elements(self):
-        #variables provided by `reported_object` arg
-        classname = self.reported_object['classname']
-        class_module = self.reported_object['module']
-        class_field = self.reported_object['field']
-        target = self.reported_object['target']
-    
-        #implement reporting activieties here
-
-        display(ReportText('Obsluga rytynowych czynności w dynpy jest wykonanywana przez klasę GitHubInterface'))
-
-        display(ObjectCode(GitHubInterface))
-
-        display(ReportText('Więcej informacji możesz uzyskać w helpie'))
-
-        display(ObjectCode("help(GitHubInterface)"))
-        display(ObjectCode(help(GitHubInterface)))
-
-class AlgebraicExpressionComponent(ReportComponent):
-
-    title = "Algebraic expression example"
-
-    def append_elements(self):
-        display(ReportText('Example Algebraic expression in Sympy library:'))
-        display(GuideCode(f'{SympyFormulaComponent_str}'))
+#         #git
         
-        from sympy import Symbol, Function
+# class UsageOfGitHubInterfacesComponent(GitSynchroPanelAccessComponent):
+# 
+#     title="Wprowadzenie do GitHubInterface"
+# 
+#     def append_elements(self):
+#       variables provided by `reported_object` arg
+#         classname = self.reported_object['classname']
+#         class_module = self.reported_object['module']
+#         class_field = self.reported_object['field']
+#         target = self.reported_object['target']
+#     
+#       implement reporting activieties here
+# 
+#         display(ReportText('Obsluga rytynowych czynności w dynpy jest wykonanywana przez klasę GitHubInterface'))
+# 
+#         display(ObjectCode(GitHubInterface))
+# 
+#         display(ReportText('Więcej informacji możesz uzyskać w helpie'))
+# 
+#         display(ObjectCode("help(GitHubInterface)"))
+#         display(ObjectCode(help(GitHubInterface)))
 
-        M = Symbol('M')
+# class AlgebraicExpressionComponent(ReportComponent):
 
-        t = Symbol('t')
+#     title = "Algebraic expression example"
 
-        m_e = Symbol('m_e')
-
-        e = Symbol('e')
-
-        z = Function('z')
-
-        varphi = Function('varphi')
-
-        Ek = M*Derivative(z(t), t)**2/2 + m_e*(e*sin(varphi(t))*Derivative(varphi(t), t) - Derivative(z(t), t))**2/2
+#     def append_elements(self):
+#         display(ReportText('Example Algebraic expression in Sympy library:'))
+#         display(GuideCode(f'{SympyFormulaComponent_str}'))
         
-        display(ReportText('After executing above code you can display kinetic energy algebraic expression:'))
+#         from sympy import Symbol, Function
+
+#         M = Symbol('M')
+
+#         t = Symbol('t')
+
+#         m_e = Symbol('m_e')
+
+#         e = Symbol('e')
+
+#         z = Function('z')
+
+#         varphi = Function('varphi')
+
+#         Ek = M*Derivative(z(t), t)**2/2 + m_e*(e*sin(varphi(t))*Derivative(varphi(t), t) - Derivative(z(t), t))**2/2
         
-        display(Eq(Symbol('T'),Ek))
-
-ODEIcsComponent_dec_str = ('''
-m, c, k, F, mu = symbols('m c k F mu', positive = True)
-t = Symbol('t')
-x = Function('x')(t)
-
-subs_data = {m: 10, c: 10, k: 10, F: 5, mu: 2}
-
-ode_1 = ODESystem(odes = Matrix([m*x.diff(t,t) + c *x.diff(t)  + k * x]), odes_rhs = Matrix([F*sin(mu * t)]), dvars = Matrix([x]))
-display(ode_1)
-''')
+#         display(ReportText('After executing above code you can display kinetic energy algebraic expression:'))
         
-class ODEIcsComponent(ReportComponent):
+#         display(Eq(Symbol('T'),Ek))
 
-    title = "ODESystem solution with set of initial conditions (ICS) component presentation"
+# ODEIcsComponent_dec_str = ('''
+# m, c, k, F, mu = symbols('m c k F mu', positive = True)
+# t = Symbol('t')
+# x = Function('x')(t)
 
-    def append_elements(self):
+# subs_data = {m: 10, c: 10, k: 10, F: 5, mu: 2}
 
-        display(ReportText('First declare ODESystem component:'))
+# ode_1 = ODESystem(odes = Matrix([m*x.diff(t,t) + c *x.diff(t)  + k * x]), odes_rhs = Matrix([F*sin(mu * t)]), dvars = Matrix([x]))
+# display(ode_1)
+# ''')
         
-        display(ObjectCode(ODEIcsComponent_dec_str))
+# class ODEIcsComponent(ReportComponent):
+
+#     title = "ODESystem solution with set of initial conditions (ICS) component presentation"
+
+#     def append_elements(self):
+
+#         display(ReportText('First declare ODESystem component:'))
         
-        from dynpy.solvers.linear import AnalyticalSolution, ODESolution, ODESystem
-        import sympy
+#         display(ObjectCode(ODEIcsComponent_dec_str))
         
-        m, c, k, F, mu = symbols('m c k F mu', positive = True)
-        t = Symbol('t')
-        x = Function('x')(t)
-
-        subs_data = {m: 10, c: 10, k: 10, F: 5, mu: 2}
-
-        ode_1 = ODESystem(odes = Matrix([m*x.diff(t,t) + c *x.diff(t)  + k * x]), odes_rhs = Matrix([F*sin(mu * t)]), dvars = Matrix([x]))
+#         from dynpy.solvers.linear import AnalyticalSolution, ODESolution, ODESystem
+#         import sympy
         
-        display(ReportText('After executing above code bellow equation will appear'))
+#         m, c, k, F, mu = symbols('m c k F mu', positive = True)
+#         t = Symbol('t')
+#         x = Function('x')(t)
+
+#         subs_data = {m: 10, c: 10, k: 10, F: 5, mu: 2}
+
+#         ode_1 = ODESystem(odes = Matrix([m*x.diff(t,t) + c *x.diff(t)  + k * x]), odes_rhs = Matrix([F*sin(mu * t)]), dvars = Matrix([x]))
         
-        display(ode_1)
-
-        display(ReportText('To present solution with initial set of conditions, first you need to calculate solution:'))
+#         display(ReportText('After executing above code bellow equation will appear'))
         
-        display(ObjectCode('sol_sym_1_pre_ics = ode_1.subs(subs_data).solution'))
+#         display(ode_1)
+
+#         display(ReportText('To present solution with initial set of conditions, first you need to calculate solution:'))
         
-        sol_sym_1_pre_ics = ode_1.subs(subs_data).solution
+#         display(ObjectCode('sol_sym_1_pre_ics = ode_1.subs(subs_data).solution'))
         
-        display(sol_sym_1_pre_ics)
+#         sol_sym_1_pre_ics = ode_1.subs(subs_data).solution
         
-        display(ReportText('To calculate solution with ICS, declare ics vector, and run with_ics method as shown bellow:'))
+#         display(sol_sym_1_pre_ics)
         
-        display(ObjectCode('''
-ics = [1, 2]
-sol_sym_1 = sol_sym_1_pre_ics.with_ics(ics)
-display(sol_sym_1)'''))
+#         display(ReportText('To calculate solution with ICS, declare ics vector, and run with_ics method as shown bellow:'))
         
-        ics = [1, 2]
-        sol_sym_1 = sol_sym_1_pre_ics.with_ics(ics)
-        display(sol_sym_1)
+#         display(ObjectCode('''
+# ics = [1, 2]
+# sol_sym_1 = sol_sym_1_pre_ics.with_ics(ics)
+# display(sol_sym_1)'''))
         
-ODEIcsCodeComponent_str =('''
-m, c, k, F, mu = symbols('m c k F mu', positive = True)
-t = Symbol('t')
-x = Function('x')(t)
-
-subs_data = {m: 10, c: 10, k: 10, F: 5, mu: 2}
-
-ode_1 = ODESystem(odes = Matrix([m*x.diff(t,t) + c *x.diff(t)  + k * x]), odes_rhs = Matrix([F*sin(mu * t)]), dvars = Matrix([x]))
-
-sol_sym_1_pre_ics = ode_1.subs(subs_data).solution
-
-ics = [1, 2]
-
-sol_sym_1 = sol_sym_1_pre_ics.with_ics(ics)
-''')
-
-class ODEIcsCodeComponent(ReportComponent):
-
-    title = "ODESystem solution with set of initial conditions (ICS) component presentation"
-
-    def append_elements(self):
-
-        display(ReportText('For bellow ODESystem component example:'))
+#         ics = [1, 2]
+#         sol_sym_1 = sol_sym_1_pre_ics.with_ics(ics)
+#         display(sol_sym_1)
         
-        display(ObjectCode(ODEIcsCodeComponent_str))
+# ODEIcsCodeComponent_str =('''
+# m, c, k, F, mu = symbols('m c k F mu', positive = True)
+# t = Symbol('t')
+# x = Function('x')(t)
+
+# subs_data = {m: 10, c: 10, k: 10, F: 5, mu: 2}
+
+# ode_1 = ODESystem(odes = Matrix([m*x.diff(t,t) + c *x.diff(t)  + k * x]), odes_rhs = Matrix([F*sin(mu * t)]), dvars = Matrix([x]))
+
+# sol_sym_1_pre_ics = ode_1.subs(subs_data).solution
+
+# ics = [1, 2]
+
+# sol_sym_1 = sol_sym_1_pre_ics.with_ics(ics)
+# ''')
+
+# class ODEIcsCodeComponent(ReportComponent):
+
+#     title = "ODESystem solution with set of initial conditions (ICS) component presentation"
+
+#     def append_elements(self):
+
+#         display(ReportText('For bellow ODESystem component example:'))
         
-        from dynpy.solvers.linear import AnalyticalSolution, ODESolution, ODESystem
-        import sympy
+#         display(ObjectCode(ODEIcsCodeComponent_str))
         
-        m, c, k, F, mu = symbols('m c k F mu', positive = True)
-        t = Symbol('t')
-        x = Function('x')(t)
-
-        subs_data = {m: 10, c: 10, k: 10, F: 5, mu: 2}
-
-        ode_1 = ODESystem(odes = Matrix([m*x.diff(t,t) + c *x.diff(t)  + k * x]), odes_rhs = Matrix([F*sin(mu * t)]), dvars = Matrix([x]))
-
-        sol_sym_1_pre_ics = ode_1.subs(subs_data).solution
-
-        ics = [1, 2]
-
-        sol_sym_1 = sol_sym_1_pre_ics.with_ics(ics)
+#         from dynpy.solvers.linear import AnalyticalSolution, ODESolution, ODESystem
+#         import sympy
         
-        display(ReportText('To get call code for ICS, run bellow method:'))
+#         m, c, k, F, mu = symbols('m c k F mu', positive = True)
+#         t = Symbol('t')
+#         x = Function('x')(t)
+
+#         subs_data = {m: 10, c: 10, k: 10, F: 5, mu: 2}
+
+#         ode_1 = ODESystem(odes = Matrix([m*x.diff(t,t) + c *x.diff(t)  + k * x]), odes_rhs = Matrix([F*sin(mu * t)]), dvars = Matrix([x]))
+
+#         sol_sym_1_pre_ics = ode_1.subs(subs_data).solution
+
+#         ics = [1, 2]
+
+#         sol_sym_1 = sol_sym_1_pre_ics.with_ics(ics)
         
-        display(ObjectCode("sol_sym_1.get_ics()"))
+#         display(ReportText('To get call code for ICS, run bellow method:'))
         
-        display(sol_sym_1.get_ics())
+#         display(ObjectCode("sol_sym_1.get_ics()"))
         
-git_com_str=("""
-from {module} import {classname}
-{classname}({class_field});
-""")
-
-
-class IssueFeedbackComponent(ReportComponent):
-
-    title="Komentarz zamykajacy issue z komponentami"
-
-    @property
-    def reported_object(self):
-        from ....dynamics import LagrangesDynamicSystem
-
-        default_data = {'classname':'Component',
-                       'module':'dynpy.utilities.components.guides.en',
-                       'field':'None',
-                       'target':'`ReportComponent` class',
-                       'issue_no':359,
-                       }
-
-        if isinstance(self._reported_object, dict):
-            return {**default_data,**self._reported_object}
-
-        if isinstance(self._reported_object, ReportComponent) or isinstance(self._reported_object, LagrangesDynamicSystem):
-            return {**default_data,'classname':self._reported_object.__class__.__name__,'module':self._reported_object.__class__.__module__}
+#         display(sol_sym_1.get_ics())
         
-        elif isinstance(self._reported_object, str):
-            return {**default_data,'classname':self._reported_object}
+# git_com_str=("""
+# from {module} import {classname}
+# {classname}({class_field});
+# """)
 
-        elif self._reported_object is None:
-            return default_data
-        
-        else:
-            return self._reported_object
+#github
 
-
-    @reported_object.setter
-    def reported_object(self, obj):
-        self._reported_object=obj
-
-
-    def append_elements(self):
-        #variables provided by `reported_object` arg
-        classname = self.reported_object['classname']
-        class_module = self.reported_object['module']
-        class_field = self.reported_object['field']
-        target = self.reported_object['target']
-
-        display(ReportText('The code was checked with the following call: '))
+# class IssueFeedbackComponent(ReportComponent):
+# 
+#     title="Komentarz zamykajacy issue z komponentami"
+# 
+#     @property
+#     def reported_object(self):
+#         from ....dynamics import LagrangesDynamicSystem
+# 
+#         default_data = {'classname':'Component',
+#                        'module':'dynpy.utilities.components.guides.en',
+#                        'field':'None',
+#                        'target':'`ReportComponent` class',
+#                        'issue_no':359,
+#                        }
+# 
+#         if isinstance(self._reported_object, dict):
+#             return {**default_data,**self._reported_object}
+# 
+#         if isinstance(self._reported_object, ReportComponent) or isinstance(self._reported_object, LagrangesDynamicSystem):
+#             return {**default_data,'classname':self._reported_object.__class__.__name__,'module':self._reported_object.__class__.__module__}
+#         
+#         elif isinstance(self._reported_object, str):
+#             return {**default_data,'classname':self._reported_object}
+# 
+#         elif self._reported_object is None:
+#             return default_data
+#         
+#         else:
+#             return self._reported_object
+# 
+# 
+#     @reported_object.setter
+#     def reported_object(self, obj):
+#         self._reported_object=obj
+# 
+# 
+#     def append_elements(self):
+#        variables provided by `reported_object` arg
+#         classname = self.reported_object['classname']
+#         class_module = self.reported_object['module']
+#         class_field = self.reported_object['field']
+#         target = self.reported_object['target']
+# 
+#         display(ReportText('The code was checked with the following call: '))
 #        display(ObjectCode(git_com_str.format(classname=classname)))
-        display(ObjectCode(git_com_str.format(classname=classname,module=class_module,class_field=class_field)))
-    
+#         display(ObjectCode(git_com_str.format(classname=classname,module=class_module,class_field=class_field)))
+#     
 old_class_code = '''class ExemplaryOldImplementedSystem(ComposedSystem):
 
     m = Symbol('m', positive=True)
@@ -4165,7 +4180,7 @@ old_class_code = '''class ExemplaryOldImplementedSystem(ComposedSystem):
 
     def max_dynamic_force(self):
         return S.Zero'''
-
+# 
 new_class_code = '''class MaterialPointMovement(ComposedSystem):
 
     m = Symbol('m', positive=True)
@@ -4267,7 +4282,7 @@ new_class_code = '''class MaterialPointMovement(ComposedSystem):
         return S.Zero'''
 
 
-class CodeRefactorComponent(NumericalAnalysisSimulationComponent):
+class CodeRefactorComponent(ReportComponent):
 
     title = "DynSys system code refactor component"
 
@@ -4303,29 +4318,29 @@ class CodeRefactorComponent(NumericalAnalysisSimulationComponent):
 
             display(ReportText(f"* {element}"))
             
-class DynSysSummaryComponent(ReportComponent):
+# class DynSysSummaryComponent(ReportComponent):
 
-    title = "DynSys system code refactor component"
+#     title = "DynSys system code refactor component"
 
-    def append_elements(self):
+#     def append_elements(self):
 
-        from dynpy.models import mechanics
+#         from dynpy.models import mechanics
 
 
-        display(ReportText('DynSys system consists of the following models:'))
+#         display(ReportText('DynSys system consists of the following models:'))
         
-        mods=inspect.getmembers(mechanics, inspect.ismodule)
+#         mods=inspect.getmembers(mechanics, inspect.ismodule)
 
-        for nam,mod in mods:
+#         for nam,mod in mods:
 
-            mods_tmp = [name for name,cls in inspect.getmembers(mod, inspect.isclass) if issubclass(cls,mechanics.principles.ComposedSystem)]
-            classes_str=',\n - '.join(mods_tmp)
-            if mods_tmp != []:
-                display(ReportText(f' {nam}'))
-                display(ReportText(f'- {classes_str}'))
+#             mods_tmp = [name for name,cls in inspect.getmembers(mod, inspect.isclass) if issubclass(cls,mechanics.principles.ComposedSystem)]
+#             classes_str=',\n - '.join(mods_tmp)
+#             if mods_tmp != []:
+#                 display(ReportText(f' {nam}'))
+#                 display(ReportText(f'- {classes_str}'))
                 
-        display(ReportText('All of this models should be refactored according to bellow example:'))
-        CodeRefactorComponent(None)
+#         display(ReportText('All of this models should be refactored according to bellow example:'))
+#         CodeRefactorComponent(None)
 
 ds_overview_str=("""
 from dynpy.utilities.documents.document import DynSysOverviewReport
@@ -4380,75 +4395,63 @@ dyncompov_str = '''Guide consist of bellow components which can be called separa
 *DynSysCodeComponent
 *IssuePreparationComponent'''
 
-class DynSysOverviewUsageComponent(ReportComponent):
+# class DynSysOverviewUsageComponent(ReportComponent):
 
-    title = "Introduction to usage of DynSysOverviewReport"
+#     title = "Introduction to usage of DynSysOverviewReport"
 
-    def append_elements(self):
+#     def append_elements(self):
 
-        from dynpy.models import mechanics
-        import dynpy
-        from dynpy.utilities.creators import ModuleStructure
+#         from dynpy.models import mechanics
 
 
-        display(ReportText('This guide concers in-deepth analysis of exsisting dynamic system that are basic elements of `DynPy` library.'))
-        display(ReportText('Basic call of it is as follows and runs default dynamic system which is `ForcedSpringMassSystem` but you can also call it with any other system. Bellow is the example'))
-        display(ObjectCode(ds_overview_str))
+#         display(ReportText('This guide concers in-deepth analysis of exsisting dynamic system that are basic elements of `DynPy` library.'))
+#         display(ReportText('Basic call of it is as follows and runs default dynamic system which is `ForcedSpringMassSystem'))
+#         display(ObjectCode(ds_overview_str))
         
-        display(ReportText(dyncompov_str))
+#         display(ReportText(dyncompov_str))
         
-        display(ReportText('You can also call any of the components one by one. Bellow is the full list of currently avaible components:'))
-
-        display(ReportText(ModuleStructure(dynpy.utilities.components).tree()))
+#         #display(ReportText('This guide concers in-deepth analysis of exsisting dynamic system that are basic elements of `DynPy` library.'))
+#         #display(ReportText('It can be run with any available dynamic system.'))
+#         '''
+#         #DynamicSystemCompletenessCheckComponent
+#         display(ReportText('This component calls and checks all key elements of the dynamic system'))
+#         display(ReportText('It can be run with any available dynamic systems.'))
+#         display(ObjectCode(dynsys_comp_check_str))
         
-        #display(ReportText('This guide concers in-deepth analysis of exsisting dynamic system that are basic elements of `DynPy` library.'))
-        #display(ReportText('It can be run with any available dynamic system.'))
-        '''
-        #DynamicSystemCompletenessCheckComponent
-        display(ReportText('This component calls and checks all key elements of the dynamic system'))
-        display(ReportText('It can be run with any available dynamic systems.'))
-        display(ObjectCode(dynsys_comp_check_str))
+#         #BasicSymComponent
+#         display(ReportText('This component shows how to do basic simulations for dynamic system.'))
+#         display(ReportText('It can be run for SDOFWinchSystem, as shown on below example call.'))
+#         display(ObjectCode(basicsymcomp_str))
         
-        #BasicSymComponent
-        display(ReportText('This component shows how to do basic simulations for dynamic system.'))
-        display(ReportText('It can be run for SDOFWinchSystem, as shown on below example call.'))
-        display(ObjectCode(basicsymcomp_str))
+#         #CodeRefactorComponent
+#         display(ReportText('This component shows how to refactor DynSys component according to latest standard.'))
+#         display(ReportText('It is called without any argument.'))
+#         display(ObjectCode(coderefactorcomp_str))
         
-        #CodeRefactorComponent
-        display(ReportText('This component shows how to refactor DynSys component according to latest standard.'))
-        display(ReportText('It is called without any argument.'))
-        display(ObjectCode(coderefactorcomp_str))
+#         #DifferentSimulationsComponent
+#         display(ReportText('This component explains how to implement dynamic system with ComposedSystem class'))
+#         display(ReportText('It is called without any argument.'))
+#         display(ObjectCode(diffsimcomp_str))
         
-        #DifferentSimulationsComponent
-        display(ReportText('This component explains how to implement dynamic system with ComposedSystem class'))
-        display(ReportText('It is called without any argument.'))
-        display(ObjectCode(diffsimcomp_str))
+#         #DynSysImplementationComponent
+#         display(ReportText('This component explains how to implement dynamic system with ComposedSystem class'))
+#         display(ReportText('It can be run for SDOFWinchSystem, as shown on below example call.'))
+#         display(ObjectCode(dynsysimpcomp_str))
         
-        #DynSysImplementationComponent
-        display(ReportText('This component explains how to implement dynamic system with ComposedSystem class'))
-        display(ReportText('It can be run for SDOFWinchSystem, as shown on below example call.'))
-        display(ObjectCode(dynsysimpcomp_str))
-        
-        #DynSysIntroComponent
-        display(ReportText('This component is simple introduction to using the DynSys module'))
-        display(ReportText('It can be run for SDOFWinchSystem, as shown on baeow example call.'))
-        display(ObjectCode(dynintrocomp_str))
+#         #DynSysIntroComponent
+#         display(ReportText('This component is simple introduction to using the DynSys module'))
+#         display(ReportText('It can be run for SDOFWinchSystem, as shown on baeow example call.'))
+#         display(ObjectCode(dynintrocomp_str))
             
-        #DynSysSummaryComponent
-        display(ReportText('This component shows idea of code refactoring and additionally displays list of available dynamical systems'))
-        display(ReportText('It is called without any argument.'))
-        display(ObjectCode(dynsumcomp_str))
+#         #DynSysSummaryComponent
+#         display(ReportText('This component shows idea of code refactoring and additionally displays list of available dynamical systems'))
+#         display(ReportText('It is called without any argument.'))
+#         display(ObjectCode(dynsumcomp_str))
         
-        #DynamicSystemMethodsUsageComponent
-        display(ReportText('This component shows equations of motion and other methods avaible on DynSys model'))
-        display(ReportText('It can be run with any available dynamic systems.'))
-        display(ObjectCode(dynmetuscomp_str))
-        '''
+#         #DynamicSystemMethodsUsageComponent
+#         display(ReportText('This component shows equations of motion and other methods avaible on DynSys model'))
+#         display(ReportText('It can be run with any available dynamic systems.'))
+#         display(ObjectCode(dynmetuscomp_str))
+#         '''
 
-class ReportingComponentsList(ReportComponent):
-    title="Tu wstawić tytuł"
-
-    def append_elements(self):
-
-        system = self.reported_object
-        display(ReportText('Tu wstawić kod i tekst'))
+        
