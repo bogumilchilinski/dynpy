@@ -373,6 +373,68 @@ class HelicalGearModelScheme(TikZPicture):
     \node at (0, -1.6) {$r_{b1}$};
 
     % Draw the second circle with radius 2
+    \draw [thick] (6,0) circle (2);
+    \node at (6,0) {$O_{2}$};
+    \node at (6, -2.3) {$J_{2}$};
+    \node at (6, -2.6) {$r_{b2}$};
+
+    % Draw the curved arrow for the first circle
+    \draw[->, red, thick] (-1.3,0) arc[start angle=-10, end angle=45, radius=-1];
+    \node[red] at (-1.2,-1.2) {$T_1$};
+
+    % Draw the curved arrow for the second circle
+    \draw[->, red, thick] (8.5,0) arc[start angle=0, end angle=45, radius=2];
+    \node[red] at (8.5,1) {$T_2$};
+    
+    %Drawing the phi1 coordinates arrows
+    \draw[<-, thick] (-1.3,0) arc[start angle=-10, end angle=-45, radius=-1];
+    \node  at (-1.6,0.6) {$\phi_{1}(t)$};
+    
+    %Drawing the phi2 coordinate arrow
+    \draw[->, thick] (8.5,0) arc[start angle=0, end angle=-45, radius=2];
+    \node  at (8.9,-0.6) {$\phi_{2}(t)$};
+    
+    %Drawing the spring and damper connection
+   \draw [thick] (0.28,-0.97) -- (2.3,0.17);
+   \draw [thick] (4.8,1.6) -- (3.37,0.78);
+   \draw [spring]  (2.02,0.571) -- (3.06,1.212);
+   \draw [damper]  (2.705,-0.383) -- (3.745,0.293);
+   \draw (2.02,0.571) -- (2.705,-0.383);
+   \draw (3.06,1.212) -- (3.745,0.293);
+   \node at (2.5,1.4) {$k_{m}(t)$};
+   \node at (3.5,-0.6) {$c_{m}(t)$};
+
+
+    """
+        return code
+    
+    
+class HelicalGearVerticalModelScheme(TikZPicture):
+
+    def _scheme_desc(self):
+
+        
+        code=r"""
+        
+    \tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.2cm,post length=0.2cm,segment length=0.2cm}]
+
+    \tikzstyle{damper}=[thick,decoration={markings,  
+    mark connection node=dmp,
+    mark=at position 0.5 with 
+    {
+    \node (dmp) [thick,inner sep=0pt,transform shape,rotate=-90,minimum width=15pt,minimum height=3pt,draw=none] {};
+    \draw [thick] ($(dmp.north east)+(2pt,0)$) -- (dmp.south east) -- (dmp.south west) -- ($(dmp.north west)+(2pt,0)$);
+    \draw [thick] ($(dmp.north)+(0,-5pt)$) -- ($(dmp.north)+(0,5pt)$);
+    }
+    }, decorate]
+
+    % Draw the first circle with radius 1
+    \draw[thick] (0,0) circle (1);
+    \node at (0,0) {$O_{1}$};
+    \node at (0, -1.3) {$J_{1}$};
+    \node at (0, -1.6) {$r_{b1}$};
+
+    % Draw the second circle with radius 2
     \draw [thick] (0,6) circle (2);
     \node at (0,6) {$O_{2}$};
     \node at (0, -2.3) {$J_{2}$};
@@ -407,3 +469,4 @@ class HelicalGearModelScheme(TikZPicture):
 
     """
         return code
+    
