@@ -650,19 +650,6 @@ class NonLinearTrolley(NonlinearComposedSystem):
 #Zrobione Amadi
 class TrolleyWithPendulum(ComposedSystem):
     
-    def unit_dict(self):
-        
-        units_dict = {self.M: ureg.kilogram,
-                 self.k_m: ureg.newton/ureg.meter,
-                 self.m_e: ureg.kilogram,
-                 self.g: ureg.meter/ureg.second,
-                 self.e: ureg.meter,
-                 self.z: ureg.meter,
-                 self.phi: ureg.radian,
-                 self.ivar: ureg.second,
-                }
-        
-        return units_dict
 
     scheme_name = 'trolley_pendulum_tmd.png'
     real_name = 'taipei101.png'

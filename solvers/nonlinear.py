@@ -27,6 +27,8 @@ from time import time
 from collections.abc import Iterable
 from functools import cached_property
 
+from .tools import CommonFactorDetector, ODE_COMPONENTS_LIST, CodeFlowLogger
+
 def const_no_gen():
     num = 0
     while True:
@@ -376,9 +378,11 @@ class MultiTimeScaleSolution(ODESystem):
     @property
     def eps(self):
         return self._eps
+    
     @eps.setter
     def eps(self,eps):
         self._eps=eps
+        
     @property
     def order(self):
         return self._order
@@ -424,17 +428,19 @@ class MultiTimeScaleSolution(ODESystem):
         ode_comp.ODESystemComponent,
         ode_comp.VariablesComponent,
 
-        ode_comp.ODESystemComponent,
         ode_comp.ODESystemCodeComponent,
-        ode_comp.VariablesComponent,
+        ode_comp.MSMCalculationsOrderComponent,        
+        ode_comp.PredictedSolutionComponent,
+
         ode_comp.GoverningEquationComponent,
-#         ode_comp.ApproximatedNonlinearGoverningEquationComponent,
+
+        #ode_comp.ApproximatedNonlinearGoverningEquationComponent,
 #         ode_comp.FundamentalMatrixComponent,
         ode_comp.ZerothOrderApproximatedEqComponent,
         ode_comp.FirstOrderApproximatedEqComponent,
-        ode_comp.PredictedSolutionComponent,
-        ode_comp.GeneralSolutionComponent,
-        ode_comp.SecularTermsEquationsComponent,
+
+        # ode_comp.GeneralSolutionComponent,
+        # ode_comp.SecularTermsEquationsComponent,
             
         ]
         
@@ -456,6 +462,14 @@ class MultiTimeScaleSolution(ODESystem):
         new_ode.order = order
         
         return new_ode
+    
+    def _assign_properties(self,obj):
+        
+        obj._eps=self.eps     
+        obj._vars = self._vars
+        #obj._const_list = self._const_list
+        
+        return obj
     
     
     @property
@@ -504,12 +518,15 @@ class MultiTimeScaleSolution(ODESystem):
             (self.approximation_function(comp_ord, order) * self.eps**comp_ord
              for comp_ord in range(order + 1)), sym.zeros(dvars_no, 1))
 
-        return ODESolution(self.dvars, solution)
+        return ODESolution.from_vars_and_rhs(self.dvars, solution)
 
-    def eoms_approximation(self, order=3, odes_system=None):
+    def eoms_approximation(self, order=None, odes_system=None):
 
+        if order is None:
+            order = self.order
+        
         if not odes_system:
-            odes_system = self.odes_system
+            odes_system = self.as_matrix()
 
         first_ord_subs = {
             t_i.diff(self.ivar): self.eps**t_ord
@@ -523,7 +540,7 @@ class MultiTimeScaleSolution(ODESystem):
         #display(self.predicted_solution(order).as_dict().subs(sec_ord_subs).doit().subs(first_ord_subs).doit())
 
         
-        odes_rhs = self.lhs.subs(self.predicted_solution(
+        odes_rhs = self.as_matrix().subs(self.predicted_solution(
             order).as_dict()).subs(sec_ord_subs).doit().subs(first_ord_subs).doit()
 
         #display()
@@ -544,6 +561,9 @@ class MultiTimeScaleSolution(ODESystem):
                     ], [])
                 })
         })
+
+        CodeFlowLogger(eoms_approximated,'eoms for approximation before subs',self)
+        CodeFlowLogger(t_fun_subs_dict,'dict with time subs',self)
 
         return eoms_approximated.subs(t_fun_subs_dict).doit()
 

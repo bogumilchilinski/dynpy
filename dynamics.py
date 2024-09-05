@@ -1885,11 +1885,16 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return self._ode_system.numerized(parameter_values=parameter_values, ic_list=ic_list, backend=backend, **kwargs)
 
 
-    def _as_na_df(self,parameter=None,param_span=None,dependencies_dict=None):
+    def _as_na_df(self, parameter=None, param_span=None, dependencies_dict=None,coordinates=None, t_span = None):
 
-        return self._ode_system._as_na_df(parameter=parameter,param_span=param_span,dependencies_dict=dependencies_dict)
+        return self._ode_system._as_na_df(parameter=parameter, param_span=param_span, dependencies_dict=dependencies_dict,coordinates=coordinates, t_span = t_span)
 
-
+    def numerical_analysis(self, parameter=None, param_span=None, dependencies_dict=None,coordinates=None, t_span = None):
+        
+        ode = ODESystem.from_dynamic_system(self)
+        na_df = ode._as_na_df(parameter=parameter, param_span=param_span, dependencies_dict=dependencies_dict,coordinates=coordinates, t_span = t_span)
+        
+        return na_df.rename(columns={ode:self})
 
 
 class LinearDynamicSystem(LagrangesDynamicSystem):
