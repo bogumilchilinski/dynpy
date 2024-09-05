@@ -691,7 +691,9 @@ init: keyword
 
         for element in lst_comp:
             root.find_and_insert(root, element.split(".")[1:])
-        root.print()
+        tree_str = root.print()
+        
+        return root.unpack(tree_str)
 
 class TreeNode:
     '''
@@ -701,6 +703,7 @@ Supporting class for ModuleStructure class
         self.parent = parent
         self.name = name
         self.children = []
+        self.str_out = []
 
     def add_child(self, node):
         self.children.append(node)
@@ -724,12 +727,14 @@ Supporting class for ModuleStructure class
             tree = tree.parent
 
         if is_root:
-            print(self.name)
+            self.str_out.append(self.name)
         else:
-            print(prefix + self.name)
+            self.str_out.append(prefix + self.name)
 
         for child in self.children:
-            child.print(False)
+            self.str_out.append(child.print(False))
+            
+        return self.str_out
     
     @staticmethod
     def find_and_insert(parent, edges):
@@ -740,7 +745,26 @@ Supporting class for ModuleStructure class
 
         tree = match[0] if match else parent.add_child(TreeNode(edges[0], parent))
 
-        __class__.find_and_insert(tree, edges[1:])        
+        __class__.find_and_insert(tree, edges[1:])
+        
+    @staticmethod
+    def unpack(lst_to_unpack):
+        '''
+This method is a helper to unpack nested list returned by print method.
+Method will return string. To typecast this list in ObjectCode, use unpack_to_objectcode() method 
+
+init: list returned from print() method
+        '''
+        
+        unpacked_lst = []
+        for element in lst_to_unpack:
+            if isinstance(element, list):
+                unpacked_lst.extend(__class__.unpack(element))
+            else:
+                unpacked_lst.append(element)
+                unpacked_lst.append('\n')
+            lst = ''.join(unpacked_lst)
+        return lst
         
         
 def list_of_guides():

@@ -455,7 +455,7 @@ class DynamicSystemCallComponent(ReportComponent):
         
 class DynamicSystemMethodsUsageComponent(ReportComponent):
 
-    title="Wywoływanie równań ruchu oraz innych metod"
+    title="Wywolywanie rownan ruchu oraz innych metod"
 
 
 
@@ -468,7 +468,7 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
         
         eoms=system._eoms[0]
 
-        display(ReportText('Proces wywoływania równania ruchu za pomocą metody eoms:'))
+        display(ReportText('Proces wywołowania równania ruchu za pomoca metody eoms:'))
         display(GuideCode('''eoms=SDOFWinchSystem()._eoms[0]'''.replace('SDOFWinchSystem',system_name)))
 
 
@@ -548,7 +548,7 @@ table_new=table[[coord]]
 report_table_define_str=(
 '''
 
-tabela = Section('Table')
+tabela = Section('Tabela')
 CurrentContainer(tabela)
 coord = system.q[0]
 solution_sym=ForcedSpringMassSystem()._ode_system.subs(slownik_numerical).steady_solution
@@ -560,7 +560,7 @@ table=table_eq
 
 table_for_report = table.iloc[0:10].to_latex_dataframe()
 
-table_for_report.reported(caption=('Table'))
+table_for_report.reported(caption=('Tabela'))
 
 
 ''')
@@ -596,15 +596,20 @@ class SimulationsComponent(ReportComponent):
         steady_solution_subs=steady_solution.subs(dict_numerical)
         display(steady_solution_subs)
         display(ReportText('Using the lambdify method to convert functions to anonymous form'))
+        #display(Picture('./Image/lambdify_w.jpg'))
 
 
+#         eq_lambdify=lambdify(system.ivar, list(steady_solution_subs.rhs))
         eq_lambdify=lambdify(system.ivar, steady_solution_subs)
         display(GuideCode('''eq_lambdify=lambdify(system.ivar, list(steady_solution_subs.rhs))'''.replace('SDOFWinchSystem',system_name)))
         display(SympyFormula(eq_lambdify))
 
 
         display(ReportText('Creating a graph:'))
-
+        #display(Picture('./Image/plot2_w.jpg'))
+        
+        #pd.DataFrame(data=eq_lambdify(t_span),index=t_span).plot()
+        #plt.show
         df = pd.DataFrame(data=eq_lambdify(t_span))
         display(df.plot())
         display(GuideCode('''df = pd.DataFrame(data=eq_lambdify(t_span))
@@ -648,14 +653,17 @@ table_eq'''.replace('SDOFWinchSystem',system_name)))
         display(ReportText('Visualization of the graph:'))
         #display(Picture('./Image/tikzplot_w.jpg'))
 
-        #display(GuideCode('''table_new.to_pylatex_tikz().in_figure()'''.replace('SDOFWinchSystem',system_name)))
-        #display('''table_new.to_pylatex_tikz().in_figure()'''.replace('SDOFWinchSystem',system_name))
+        display(GuideCode('''table_new.to_pylatex_tikz().in_figure()'''.replace('SDOFWinchSystem',system_name)))    
 
 section_development_str=(
 '''
 from dynpy.utilities.report import ReportText
 intro=Section('Introduction')
 CurrentContainer(intro)
+
+#scheme=Picture('picture_winch.png')
+#display(scheme)
+
 picture = Picture(system._as_picture().__dict__['image'], caption = f'System diagram')
 display(picture)
 ''')
@@ -664,7 +672,7 @@ forming_equation_str=(
 '''
 eom=Section('Equations of motion')
 CurrentContainer(eom)
-display(ReportText('Equations of motion and their solution: '))
+display(ReportText('Equations of motion: '))
 eoms=system._eoms[0]
 
 slownik=system.get_random_parameters()
@@ -710,15 +718,12 @@ display(solution_subs)
 display(steady_solution_subs)
 ''')
 
-
-
 report_generation_libraries=(
 '''
 doc_final = MechanicalCase('./output/Document',documentclass=NoEscape('article'),document_options=['a4paper','fleqn'],lmodern=False)
 
 doc_final.append(intro)
 doc_final.append(eom)
-doc_final.append(tabela)
 doc_final.append(wykres)
 
 doc_final.generate_pdf()
@@ -4387,19 +4392,13 @@ class DynSysOverviewUsageComponent(ReportComponent):
     def append_elements(self):
 
         from dynpy.models import mechanics
-        import dynpy
-        from dynpy.utilities.creators import ModuleStructure
 
 
         display(ReportText('This guide concers in-deepth analysis of exsisting dynamic system that are basic elements of `DynPy` library.'))
-        display(ReportText('Basic call of it is as follows and runs default dynamic system which is `ForcedSpringMassSystem` but you can also call it with any other system. Bellow is the example'))
+        display(ReportText('Basic call of it is as follows and runs default dynamic system which is `ForcedSpringMassSystem'))
         display(ObjectCode(ds_overview_str))
         
         display(ReportText(dyncompov_str))
-        
-        display(ReportText('You can also call any of the components one by one. Bellow is the full list of currently avaible components:'))
-
-        display(ReportText(ModuleStructure(dynpy.utilities.components).tree()))
         
         #display(ReportText('This guide concers in-deepth analysis of exsisting dynamic system that are basic elements of `DynPy` library.'))
         #display(ReportText('It can be run with any available dynamic system.'))
@@ -4445,10 +4444,4 @@ class DynSysOverviewUsageComponent(ReportComponent):
         display(ObjectCode(dynmetuscomp_str))
         '''
 
-class ReportingComponentsList(ReportComponent):
-    title="Tu wstawić tytuł"
-
-    def append_elements(self):
-
-        system = self.reported_object
-        display(ReportText('Tu wstawić kod i tekst'))
+        

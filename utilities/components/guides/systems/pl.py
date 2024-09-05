@@ -1935,12 +1935,13 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
         display(ReportText('Zaprezentowane równanie pozwala sprawdzić, czy rozważany układ jest poprawnie zaimportowany do przestrzeni roboczej.'))
         
         display(ReportText('Kolejnym kluczowym elementem jest zdefiniowanie parametrów układu, wektora czasu i warunków początkowych.'))
-             
+        
         param_dict = system.get_numerical_parameters()
         t_span = np.linspace(0,100,1001)
-        ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
+        ic_list = [1.0,0.0] ### Dla układu o jednym stopniu swobody
         param = system.system_parameters()[0]
-                
+        
+        
         display(ObjectCode(dict_code))
         
         display(ReportText('Następnie należy określić, który parametr ma zostać poddany analizie. Parametr ten należy wówczas zmienić w słowniku parametrów z wartości liczbowej na symbol.'))
