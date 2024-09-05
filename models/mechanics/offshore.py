@@ -7,7 +7,7 @@ from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
 
-from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin
+from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin, Element
 from  ..continuous import ContinuousSystem, PlaneStressProblem
 
 import base64
