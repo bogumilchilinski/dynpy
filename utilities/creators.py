@@ -694,6 +694,9 @@ init: keyword
         tree_str = root.print()
         
         return root.unpack(tree_str)
+    
+    def __repr__(self):
+        return self.tree()
 
 class TreeNode:
     '''
