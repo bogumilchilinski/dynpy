@@ -57,8 +57,7 @@ class ReportComponent(BaseReportComponent):
     @property
     def _system(self):
         print('Kod do poprawienia #################### bo stosujesz starą zmienną self._system')
-        print('zamień se self._system na self.
-              _object')
+        print('zamień se self._system na self._object')
         
         return self.reported_object
 
