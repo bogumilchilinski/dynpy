@@ -4469,3 +4469,150 @@ class GithubIssueComponent(ReportComponent):
         display(ReportText('\\newline'))
         display(ReportText('-'*100))
         display(ReportText('\\newline'))
+class DynamicSystemCompletenessCheckComponent(ReportComponent):
+
+    title="Wywoływanie i sprawdzanie wszystkich kluczowych elementów systemu dynamicznego"
+
+
+    def append_elements(self):
+        
+        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        
+        eoms=system._eoms[0]
+        eoms
+
+        display(ReportText('Wywołanie systemu w pierwszej kolejności można sprawdzić przez sprawdzenie równania ruchu metodą _eoms.'))
+
+        display(ReportText('Wynik jest następujący:'))
+        
+        display(Markdown(
+            '''
+        eoms_eq=Eq(eoms,0)
+        eoms_eq
+            '''))
+        
+        eoms_eq=Eq(eoms,0)
+        eoms_eq
+        
+        display(SympyFormula(eoms_eq))
+        
+        display(ReportText('Następnie wykonuje się analizę metody __init__ klasy:'))
+        
+        display(ObjectCode(system.__init__))
+        
+        display(ReportText('Kolejnym etapem jest sprawdzenie, czy schemat oraz zdjęcie reczywiste systemu są zdefiniowane:'))
+        
+        display(Markdown(
+            '''
+        system._as_picture()
+        system.preview(example = 'detail_real_name')
+            '''))
+        
+        system._as_picture()
+        system.preview(example = 'detail_real_name')
+        
+        display(ReportText('Kolejnym etapem jest sprawdzenie, czy zdefiniowane są słowniki z parametrami:'))
+        
+        display(Markdown(
+            '''
+        system.get_random_parameters()
+        system.get_numerical_parameters()
+            '''))
+        
+        display(ReportText('Jeśli podczas wywołania pojawia się błąd o braku tej metody lub parametry są inne niż w metodzie __init__ należy zmodyfikować klasę analogicznie do pokazanego rozwiązania:'))
+        
+        display(Markdown(
+            '''
+        
+        def get_default_data(self):
+
+            m0, k0 = self.m0, self.k0
+
+            default_data_dict = {
+
+                self.m: [S.One * no * m0 /100 for no in range(80, 120)], # percentage
+                self.k_r: [S.One * no * k0/100 for no in range(80, 120)], # percentage
+                self.k_l: [S.One * no * k0/100 for no in range(70, 110)], # percentage
+            }
+            return default_data_dict
+
+        def get_numerical_data(self):
+
+
+            m0, k0 = 100, 1000
+
+
+            default_data_dict = {
+                self.m: [S.One * no * m0 /100 for no in range(80, 120)], # percentage
+                self.k_r: [S.One * no * k0/100 for no in range(80, 120)], # percentage
+                self.k_l: [S.One * no * k0/100 for no in range(70, 110)], # percentage
+
+            }
+            return default_data_dict
+            '''))
+        
+        system.get_random_parameters()
+        system.get_numerical_parameters()
+        
+        display(ReportText('Następnie konieczne jest sprawdzenie opisów symboli oraz jednostek:'))
+        
+        display(Markdown(
+            '''
+        system.symbols_description()
+        system.unit_dict()
+            '''))
+        
+        display(ReportText('Jeśli podczas wywołania tej metody pojawia się błąd, należy wykonać modyfikację w analogizny sposób do:'))
+        
+                
+        display(Markdown(
+            '''
+        def symbols_description(self):
+            self.sym_desc_dict = {
+                self.m: r'system's mass',
+                self.k_l: r'left spring stiffness',
+                self.k_r: r'left spring stiffness',
+            }
+            return self.sym_desc_dict
+
+        def unit_dict(self):
+        
+            from pint import UnitRegistry
+            ureg=UnitRegistry()
+
+            unit_dict = {
+                self.m: ureg.kilogram,
+                self.k_l: ureg.Newton/ureg.meter,
+                self.k_r: ureg.Newton/ureg.meter,
+            }
+            return unit_dict
+
+            '''))
+        
+        from pint import UnitRegistry
+        ureg=UnitRegistry()
+        
+        system.symbols_description()
+        system.unit_dict()
+        
+        
+issue_title_str = """
+Maintenance of `{system_name}` class which is dynamic system representation        
+"""
+        
+issue_desc_str = """
+
+The following problems have to be checked or fixed, in order to ensure the correctness of implemented system:
+
+- [ ] checking if a class is executable,
+
+- [ ] validation of figures for schemes and real examples,
+
+- [ ] validation of reference parameters,
+
+- [ ] validation of random parameters,
+
+- [ ] validation of  description of  description of parameters,
+
+- [ ] validation of units.
+"""
