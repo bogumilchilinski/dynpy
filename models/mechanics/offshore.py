@@ -24,99 +24,132 @@ ureg = pint.UnitRegistry()
 
 #TODO
 #ISSUE #149
-class DDoFVessel(ComposedSystem):
+class VesselWithHeaveAndRotation(ComposedSystem):
 
     scheme_name = 'vessel.jpg'
-
+    
+    m_vessel=Symbol('M_vessel', positive=True)
+    
+    I_5=Symbol('I_5', positive=True)
+    
+    wave_level=dynamicsymbols('W')
+    wave_slope=dynamicsymbols('S')
+    rho=Symbol('rho', positive=True)
+    g=Symbol('g', positive=True)
+    A_wl=Symbol('A_wl',positive=True)
+    V=Symbol('V', positive=True)
+    GM_L=Symbol('GM_L', positive=True)
+    CoB=Symbol('CoB', positive=True)
+    CoF=Symbol('CoF', positive=True)
+    A_h=Symbol('A_h',positive=True)
+    Phi_h=Symbol('Phi_h',positive=True)
+    omega=Symbol('omega',positive=True)
+    
+    H = dynamicsymbols('H')
+    Phi = dynamicsymbols('Phi')
+    qs=dynamicsymbols('H, Phi')
+    ivar=Symbol('t')
+    
     def __init__(self,
-                 m_vessel=Symbol('M_vessel', positive=True),
-                 I_5=Symbol('I_5', positive=True),
-                 qs=dynamicsymbols('H, Phi'),
-                 wave_level=dynamicsymbols('W'),
-                 wave_slope=dynamicsymbols('S'),
-                 rho=Symbol('rho', positive=True),
-                 g=Symbol('g', positive=True),
-                 A_wl=Symbol('A_wl',positive=True),
-                 V=Symbol('V', positive=True),
-                 GM_L=Symbol('GM_L', positive=True),
-                 CoB=Symbol('CoB', positive=True),
-                 CoF=Symbol('CoF', positive=True),
-                 A_h=Symbol('A_h',positive=True),
-                 Phi_h=Symbol('Phi_h',positive=True),
-                 omega=Symbol('omega',positive=True),
-                 ivar=Symbol('t'),
-                 **kwargs
-                 ):
+                 m_vessel=None,
+                 I_5=None,
 
-        self.m_vessel = m_vessel
-        self.I_5 = I_5
-        self.wave_level = wave_level
-        self.wave_slope = wave_slope
-        self.rho = rho
-        self.g = g
-        self.A_wl = A_wl
-        self.V = V
-        self.GM_L = GM_L
-        self.CoB = CoB
-        self.CoF = CoF
-        self.A_h = A_h
-        self.Phi_h = Phi_h
-        self.omega = omega
+                 wave_level=None,
+                 wave_slope=None,
+                 rho=None,
+                 g=None,
+                 A_wl=None,
+                 V=None,
+                 GM_L=None,
+                 CoB=None,
+                 CoF=None,
+                 A_h=None,
+                 Phi_h=None,
+                 omega=None,
+                 qs=None,
+                 H=None,
+                 Phi=None,
+                 
+                 ivar=Symbol('t'),
+                 **kwargs):
+
+        if m_vessel is not None:self.m_vessel = m_vessel
+        if I_5 is not None:self.I_5 = I_5
+        if wave_level is not None:self.wave_level = wave_level
+        if wave_slope is not None:self.wave_slope = wave_slope
+        if rho is not None:self.rho = rho
+        if g is not None:self.g = g
+        if A_wl is not None:self.A_wl = A_wl
+        if V is not None:self.V = V
+        if GM_L is not None:self.GM_L = GM_L
+        if CoB is not None:self.CoB = CoB
+        if CoF is not None:self.CoF = CoF
+        if A_h is not None:self.A_h = A_h
+        if Phi_h is not None:self.Phi_h = Phi_h
+        if omega is not None:self.omega = omega
+        if H is not None:self.H = H
+        if Phi is not None:self.H = Phi
+        
+        self.ivar = ivar
+
+        
+        
+        self.M_matrix = Matrix([[self.m_vessel, 0], [0, self.I_5]]) #wszedzie teraz pobiera None # dopisz wszędzie self tut
+        self.K_matrix = Matrix([[self.rho * self.g * self.A_wl, -self.rho * self.g * self.A_wl * (self.CoF - self.CoB)],#trzeba ify popsać? #ify jużsą tylko na to H i Phi brakue chyba
+                           [-self.rho * self.g * self.A_wl * (self.CoF - self.CoB),
+                            self.rho * self.g * self.V * self.GM_L]])
+        
+        if qs is not None: self.qs = qs
+        self.qs = [self.H, self.Phi]
         
 
+        
         # vessel mass and stiffness matrix
-        M_matrix = Matrix([[m_vessel, 0], [0, I_5]])
+        #M_matrix = Matrix([[m_vessel, 0], [0, I_5]])
 
-        K_matrix = Matrix([[rho * g * A_wl, -rho * g * A_wl * (CoF - CoB)],
-                           [-rho * g * A_wl * (CoF - CoB),
-                            rho * g * V * GM_L]])
+        #K_matrix = Matrix([[rho * g * A_wl, -rho * g * A_wl * (CoF - CoB)],
+                           #[-rho * g * A_wl * (CoF - CoB),
+                            #rho * g * V * GM_L]])
 
         # generalized displacements and velocities
         
-#         wave_level = A_h*cos(omega*self.ivar + Phi_h)
-#         wave_slope = diff(wave_level,self.ivar)*(omega/g)
+        #wave_level = A_h*cos(omega*self.ivar + Phi_h)
+        #wave_slope = diff(wave_level,self.ivar)*(omega/g)
         
         #dh_wave_slope = diff(wave_level,t,t)*(omega/g)   # TU JEST TEN MAGICZNY FORMUŁ, KTÓRY CHYBA JEDNAK POWINNIŚMY WPROWADZIĆ BO dq go tak nie policzy XD #
         
-        q = Matrix(qs) + Matrix([wave_level, wave_slope])
-        dq = q.diff(ivar)
+        q = Matrix(self.qs) + Matrix([self.wave_level, self.wave_slope])
+        dq = q.diff(self.ivar)
+        
+        
 
         # lagrangian components definition
-        self.kinetic_energy = S.Half * sum(dq.T * M_matrix * dq)
-        self.potential_energy = S.Half * sum(
-            Matrix(qs).T * K_matrix * Matrix(qs))
+        
+        self.kinetic_energy = S.Half * sum(dq.T * self.M_matrix * dq)
+        self.potential_energy = S.Half * sum(Matrix(self.qs).T * self.K_matrix * Matrix(self.qs))
+        
+        self._init_from_components(**kwargs)
+        
+    @property
+    def components(self):
 
-        super().__init__(Lagrangian=self.kinetic_energy -
-                         self.potential_energy,
-                         qs=qs,
-                         ivar=ivar,**kwargs)
+        components = {}
 
-#     def symbols_description(self):
-#         self.sym_desc_dict = {
-#             self.m_vessel: r'mass of vessel \si{[\kilogram]},',
-#             self.I_5:
-#             r'moment of inertia of \num{5}-th degree (with respect to \(y\) axis, determined by the radius of gyration) \si{[\kilo\gram\metre\squared]},',
-#             tuple(self.q): r'generalized coordinates,',
-#             self.wave_level: r'???,',
-#             self.wave_slope: r'???,',
-#             self.rho: r'fluid density \si{[\kilo\gram/\cubic\metre]},',
-#             self.g: r'acceleration of gravity \si{[\metre/\second\squared]},',
-#             self.A_wl: r'wetted area \si{[\metre\squared]},',
-#             self.V: r'submerged volume of the vessel \si{[\cubic\metre]},',
-#             self.GM_L: r'longitudinal metacentric height \si{[\metre]},',
-#             self.CoB: r'centre of buoyancy \si{[\metre]},',
-#             self.CoF: r'centre of floatation \si{[\metre]},',
-#             self.ivar: r'independent time variable.',
-#         }
+        self._vessel_inertia = Element(self.kinetic_energy,
+                                 qs=self.qs)
+        self._buoyancy_stiffness = Element(-self.potential_energy,
+                                 qs=self.qs)
 
-#         return self.sym_desc_dict
+        components['_vessel_inertia']=self._vessel_inertia
+        components['_buoyancy_stiffnes']=self._buoyancy_stiffness
+
+        return components
 
     def symbols_description(self):
         self.sym_desc_dict = {
             self.m_vessel: r'mass of vessel,',
-            self.I_5:
-            r'moment of inertia of 5-th degree (with respect to y axis, determined by the radius of gyration),',
-            tuple(self.q): r'vessel generalized coordinates,',
+            self.I_5: r'moment of inertia of 5-th degree (with respect to y axis, determined by the radius of gyration),',
+            self.q: r'vessel generalized coordinates,',
             self.wave_level: r'wave level,',
             self.wave_slope: r'wave slope,',
             self.rho: r'fluid density,',
@@ -135,8 +168,8 @@ class DDoFVessel(ComposedSystem):
         numbers_dict={
             self.I_5:21*self.m_vessel,
             self.m_vessel: 1e7,
-#             self.wave_level: 0.5 * cos(2/7 * pi * self.ivar),
-#             self.wave_slope: 0.5 * cos(2/7 * pi * self.ivar),
+            self.wave_level: 0.5 * cos(2/7 * pi * self.ivar),
+            self.wave_slope: 0.5 * cos(2/7 * pi * self.ivar),
             self.rho:1025,
             self.g: 9.81,
             self.A_wl:4025,
@@ -148,7 +181,29 @@ class DDoFVessel(ComposedSystem):
             self.Phi_h:-2.95,
         }
         
-        return numbers_dict    
+        return numbers_dict
+    
+    def get_numerical_parameters(self):
+
+        m_vessel, I_5, g, rho, A_wl, V, GM_L, CoB, CoF, A_h, Phi_h, wave_level, wave_slope = self.m_vessel, self.I_5, self.g, self.rho, self.A_wl, self.V, self.GM_L, self.CoB, self.CoF, self.A_h, self.Phi_h, self.wave_level, self.wave_slope
+        
+        get_numerical_parameters = {
+
+            self.I_5:21*self.m_vessel,
+            self.m_vessel: 1e7,
+            self.wave_level: 0.5 * cos(2/7 * pi * self.ivar),
+            self.wave_slope: 0.5 * cos(2/7 * pi * self.ivar),
+            self.rho:1025,
+            self.g: 9.81,
+            self.A_wl:4025,
+            self.V:25000,
+            self.GM_L:290,
+            self.CoB:3.6,
+            self.CoF:13,
+            self.A_h:0.45,
+            self.Phi_h:-2.95, 
+        }
+        return get_numerical_parameters
     
     def units(self):
         units_dict={
