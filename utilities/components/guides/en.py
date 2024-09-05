@@ -57,7 +57,8 @@ class ReportComponent(BaseReportComponent):
     @property
     def _system(self):
         print('Kod do poprawienia #################### bo stosujesz starą zmienną self._system')
-        print('zamień se self._system na self.reported_object')
+        print('zamień se self._system na self.
+              _object')
         
         return self.reported_object
 
@@ -4452,3 +4453,20 @@ class ReportingComponentsList(ReportComponent):
 
         system = self.reported_object
         display(ReportText('Tu wstawić kod i tekst'))
+              
+class GithubIssueComponent(ReportComponent):
+
+    title="Details of GitHub issue"
+
+    def append_elements(self):
+        
+        issue = self.reported_object
+        display(Markdown((f'Issue title: {issue.title} Issue number: {issue.number}')))
+        display(ReportText('\\newline'))
+        if issue.body is None:
+            display(Markdown("No issue description"))
+        else:
+            display(Markdown("Issue description: " + issue.body))
+        display(ReportText('\\newline'))
+        display(ReportText('-'*100))
+        display(ReportText('\\newline'))
