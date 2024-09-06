@@ -395,6 +395,11 @@ class DampedChair5DOF(UndampedChair5DOF):
         self._damping_rear_wheel_horizontal = Damper(self.m_rear*self.c_mu, self.x, qs=self.qs)(label='damping_rear_wheel_horizontal')
         self._damping_front_wheel_vertical = Damper(self.m_fr*self.c_mu, self.z_front, qs=self.qs)(label='damping_front_wheel_vertical')
         self._damping_front_wheel_horizontal = Damper(self.m_fr*self.c_mu, self.x, qs=self.qs)(label='damping_front_wheel_horizontal')
+        
+        self._damping_front_suspension = Damper(self.k_f*self.c_lam, ((self.z-self.R*self.phi+self.l_r-self.z_front)**2  )-self.l_r, qs=self.qs)(label='_damping_front_suspension')
+        self._damping_rear_suspension = Damper(self.k_r*self.c_lam, ((self.z+self.R*self.phi+self.l_l -self.z_rear)**2 )-self.l_l, qs=self.qs)(label='damping_rear_suspension')
+        self._damping_front_tire = Damper(self.k_ft*self.c_lam, self.z_front-self.u_frp, qs=self.qs)(label='damping_front_tire')
+        self._damping_rear_tire = Damper(self.k_rt*self.c_lam, self.z_rear-self.u_rrp, qs=self.qs)(label='damping_rear_tire')
             
         components['_undamped_chair_5DOF'] = self._undamped_chair_5DOF
         components['_damping_body_horizontal'] = self._damping_body_horizontal
@@ -405,6 +410,13 @@ class DampedChair5DOF(UndampedChair5DOF):
         components['_damping_rear_wheel_horizontal'] = self._damping_rear_wheel_horizontal
         components['_damping_front_wheel_vertical'] = self._damping_front_wheel_vertical
         components['_damping_front_wheel_horizontal'] = self._damping_front_wheel_horizontal
+        
+        components['_damping_front_suspension'] = self._damping_front_suspension
+        components['_damping_rear_suspension'] = self._damping_rear_suspension
+        components['_damping_front_tire'] = self._damping_front_tire
+        components['_damping_rear_tire'] = self._damping_rear_tire
+        
+
 
 
         return components
@@ -418,13 +430,15 @@ class DampedChair5DOF(UndampedChair5DOF):
 
         default_data_dict={
                             self.c_mu:0.0001,
+                            self.c_lam:0.0001
                           }
 
         return {**super().get_param_values(),**self.default_data_dict}
     
     def symbols_description(self):
         self.sym_desc_dict = {
-                                self.c_mu:"Rayileigh's damping mass matrix coefficient"
+                                self.c_mu:"Rayileigh's damping mass matrix coefficient",
+                                self.c_lam:"Rayileigh's damping stiffness matrix coefficient"
         }
 
         return {**super().symbols_description(),**self.sym_desc_dict}
@@ -614,6 +628,7 @@ class BasicUndampedChair5DOF(ComposedSystem):
 class BasicDampedChair5DOF(BasicUndampedChair5DOF):
 
     c_mu=Symbol('c_mu',positive=True)
+    c_lam=Symbol('c_lambda',positive=True)
 
     def __init__(self,
                 x=None,
@@ -642,6 +657,7 @@ class BasicDampedChair5DOF(BasicUndampedChair5DOF):
                 Omega=None,
                 pm=None,
                 c_mu=None,
+                c_lam=None,
                 **kwargs):
 
         if x is not None: self.x=x
@@ -670,6 +686,7 @@ class BasicDampedChair5DOF(BasicUndampedChair5DOF):
         if Omega is not None: self.Omega=Omega
         if pm is not None: self.pm=pm
         if c_mu is not None: self.c_mu=c_mu
+        if c_lam is not None: self.c_lam=c_lam
         
         if ivar is not None: self.ivar=ivar
 
@@ -693,6 +710,12 @@ class BasicDampedChair5DOF(BasicUndampedChair5DOF):
         self._damping_rear_wheel_horizontal = Damper(self.m_rear*self.c_mu, self.x, qs=self.qs)(label='damping_rear_wheel_horizontal')
         self._damping_front_wheel_vertical = Damper(self.m_fr*self.c_mu, self.z_front, qs=self.qs)(label='damping_front_wheel_vertical')
         self._damping_front_wheel_horizontal = Damper(self.m_fr*self.c_mu, self.x, qs=self.qs)(label='damping_front_wheel_horizontal')
+        
+        self._damping_front_suspension = Damper(self.k_f*self.c_lam, self.u_fsd, qs=self.qs)(label='_damping_front_suspension')
+        self._damping_rear_suspension = Damper(self.k_r*self.c_lam, self.u_rsd, qs=self.qs)(label='damping_rear_suspension')
+        self._damping_front_tire = Damper(self.k_ft*self.c_lam, self.z_front-self.u_frp, qs=self.qs)(label='damping_front_tire')
+        self._damping_rear_tire = Damper(self.k_rt*self.c_lam, self.z_rear-self.u_rrp, qs=self.qs)(label='damping_rear_tire')
+
 
         components['_undamped_chair_5DOF'] = self._undamped_chair_5DOF
         components['_damping_body_horizontal'] = self._damping_body_horizontal
@@ -703,7 +726,10 @@ class BasicDampedChair5DOF(BasicUndampedChair5DOF):
         components['_damping_rear_wheel_horizontal'] = self._damping_rear_wheel_horizontal
         components['_damping_front_wheel_vertical'] = self._damping_front_wheel_vertical
         components['_damping_front_wheel_horizontal'] = self._damping_front_wheel_horizontal
-
+        components['_damping_front_suspension'] = self._damping_front_suspension
+        components['_damping_rear_suspension'] = self._damping_rear_suspension
+        components['_damping_front_tire'] = self._damping_front_tire
+        components['_damping_rear_tire'] = self._damping_rear_tire
 
         return components
 
@@ -711,13 +737,15 @@ class BasicDampedChair5DOF(BasicUndampedChair5DOF):
 
         self.default_data_dict={
                             self.c_mu:0.0001,
+                            self.c_lam:0.0001
                           }
 
         return {**self.default_data_dict,**super().get_param_values()}
     
     def symbols_description(self):
         self.sym_desc_dict = {
-                                self.c_mu:"Rayileigh's damping mass matrix coefficient"
+                                self.c_mu:"Rayileigh's damping mass matrix coefficient",
+                                self.c_mu:"Rayileigh's damping stiffness matrix coefficient"
         }
 
         return {**self.sym_desc_dict,**super().symbols_description(),}
