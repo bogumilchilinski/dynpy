@@ -541,7 +541,7 @@ class MultiTimeScaleSolution(ODESystem):
 
         
         odes_rhs = self.as_matrix().subs(self.predicted_solution(
-            order).as_dict()).subs(sec_ord_subs).doit().subs(first_ord_subs).doit()
+            order).as_explicit_dict()).subs(sec_ord_subs).doit().subs(first_ord_subs).doit()
 
         #display()
         #eoms_approximated = ODESystem(odes_system,dvars=self.dvars,parameters = self.t_list).subs(

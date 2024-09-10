@@ -487,7 +487,7 @@ class PredictedSolutionComponent(ReportComponent):
             
             display(ReportText(  f'Order of prediction: {ord}'    ))
             display(SympyFormula(system.predicted_solution(ord)))
-            display(SympyFormula(Eq(system.dvars[0],system.predicted_solution(ord)[0],evaluate=False)))
+            display(SympyFormula(Eq(system.dvars[0],system.predicted_solution(ord).rhs[0],evaluate=False)))
 
 #         display(ReportText(  self.footer_text   ))
 

@@ -675,8 +675,8 @@ class AnalyticalSolution(ImmutableMatrix):
         
     
     def as_dict(self):
-
-        return Dict({lhs:rhs  for  lhs,rhs in self.as_iterable()})
+        # temporary change should be consider - method could return the same outpus as `as_explicit_dict`
+        return Dict({lhs:rhs  for  lhs,rhs in self.as_iterable()}) 
     
     def as_explicit_dict(self):
 
@@ -686,6 +686,7 @@ class AnalyticalSolution(ImmutableMatrix):
         ''' Creates a zip object consisting of the left side of the self instance and self itself.
         It returns zip object.'''
         return [ Eq(lhs,comp,evaluate=False) for lhs,comp  in zip(self.lhs,self.rhs)]
+    
     def as_eq_diff_list(self,ivar,diff_order):
         ''' Creates a zip object consisting of the left side of the self instance and self itself.
         It returns zip object.'''
