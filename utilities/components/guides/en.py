@@ -1,7 +1,6 @@
 from  ..mechanics import *
 from  ..mechanics import ReportComponent as BaseReportComponent
 
-
 from . import pl
 
 import pandas as pd
@@ -17,6 +16,9 @@ from ....dynamics import *
 
 months_list = ['January', 'February', 'March','April','May','June','July','August','September','October','November','December']
 
+
+from ..mechanics import *
+from ..mechanics import ReportComponent as BaseReportComponent
 from ..mechanics import display
 import datetime
 
@@ -3839,12 +3841,12 @@ class GitSynchroIntroComponent(GitSynchroPanelAccessComponent):
 
         display(ReportText(f'''Jeśli "Commit" nie działa to kliknij od razu "Sync changes" lub kółeczka synchronizacji na górze'''))
         display(Picture('./dynpy/utilities/components/guides/images/10.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('8cm'),caption='Kółeczko synchronizacji'))
-        display(Picture('./dynpy/utilities/components/guides/images/9.png', position = 'H', height= NoEscape('8cm'), width = NoEscape('6cm'),caption='Przycisk, na którym pojawia się "Commit" albo "Sync changes"'))
-
+        display(Picture('./dynpy/utilities/components/guides/images/9.png', position = 'H', height= NoEscape('11cm'), width = NoEscape('8cm'),caption='Przycisk, na którym pojawia się \'Commit\' lub \'Sync changes\''))
+    
         display(ReportText('Przypadek 2. : "Commit" po lewej stronie wyświetla się normalnie'))
 
         display(ReportText(f'''Kliknij "Commit".'''))
-        display(Picture('./dynpy/utilities/components/guides/images/5.png', position = 'H', height= NoEscape('8cm'), width = NoEscape('6cm'),caption='Przycisk "Commit"'))
+        display(Picture('./dynpy/utilities/components/guides/images/5.png', position = 'H', height= NoEscape('20cm'), width = NoEscape('20cm'),caption='Przycisk Commit'))
 
         display(ReportText(f'''Otworzy się opis Commit'a - odkomentuj linijki z modyfikacjami, czyli wszystko od około 4. linii. '''))
         # display(Picture('./dynpy/utilities/components/guides/images/6.png', position = 'H', height= NoEscape('13cm'), width = NoEscape('13cm'),caption='''Opis Commit'a '''))
@@ -3884,13 +3886,10 @@ class UsageOfGitHubInterfacesComponent(GitSynchroPanelAccessComponent):
         target = self.reported_object['target']
     
         #implement reporting activieties here
-
+        from dynpy.utilities.creators import GitHubInterface
         display(ReportText('Obsluga rytynowych czynności w dynpy jest wykonanywana przez klasę GitHubInterface'))
-
         display(ObjectCode(GitHubInterface))
-
         display(ReportText('Więcej informacji możesz uzyskać w helpie'))
-
         display(ObjectCode("help(GitHubInterface)"))
         display(ObjectCode(help(GitHubInterface)))
 
@@ -4347,7 +4346,8 @@ comp = SDOFWinchSystem()
 
 BasicSymComponent(comp)'''
 
-coderefactorcomp_str = '''from dynpy.utilities.components.guides.en import CodeRefactorComponent
+coderefactorcomp_str = '''from dynpy.utilities.components.guides.en import 
+
 
 CodeRefactorComponent(None)'''
 
@@ -4380,15 +4380,21 @@ dyncompov_str = '''Guide consist of bellow components which can be called separa
 *DynSysCodeComponent
 *IssuePreparationComponent'''
 
+list_of_dynsys_code = '''
+from dynpy.utilities.creators import list_of_mechanical_systems
+print(list_of_mechanical_systems())
+'''
+
+
 class DynSysOverviewUsageComponent(ReportComponent):
 
     title = "Introduction to usage of DynSysOverviewReport"
 
     def append_elements(self):
 
-        from dynpy.models import mechanics
-        import dynpy
-        from dynpy.utilities.creators import ModuleStructure
+        from ....models import mechanics
+
+        from ....utilities.creators import ModuleStructure,list_of_mechanical_systems
 
 
         display(ReportText('This guide concers in-deepth analysis of exsisting dynamic system that are basic elements of `DynPy` library.'))
@@ -4397,9 +4403,14 @@ class DynSysOverviewUsageComponent(ReportComponent):
         
         display(ReportText(dyncompov_str))
         
-        display(ReportText('You can also call any of the components one by one. Bellow is the full list of currently avaible components:'))
+        display(ReportText('You can also call any of the components one by one. Bellow is code that lists the of currently avaible components:'))
+        display(ObjectCode(  list_of_dynsys_code  ))
+        
+        #dir_str = 'dynpy.utilities.components.guides'
 
-        display(ReportText(ModuleStructure(dynpy.utilities.components).tree()))
+        #ModuleStructure(dir_str).printer()
+
+        #display(ReportText(ModuleStructure(dynpy.utilities.components).tree()))
         
         #display(ReportText('This guide concers in-deepth analysis of exsisting dynamic system that are basic elements of `DynPy` library.'))
         #display(ReportText('It can be run with any available dynamic system.'))
@@ -4446,20 +4457,25 @@ class DynSysOverviewUsageComponent(ReportComponent):
         '''
 
 class ReportingComponentsList(ReportComponent):
-    title="Tu wstawić tytuł"
+    title="Lista komponentów raportujących"
 
     def append_elements(self):
 
         system = self.reported_object
-        display(ReportText('Tu wstawić kod i tekst'))
+        import dynpy
+        from ....utilities.creators import ModuleStructure
+        display(ObjectCode(ModuleStructure(dynpy.utilities.components).get_module_tree()))
               
-class GithubIssueComponent(ReportComponent):
+class GithubIssueReportComponent(ReportComponent):
 
     title="Details of GitHub issue"
 
     def append_elements(self):
         
         issue = self.reported_object
+        if issue==None:
+            from github.Issue import Issue
+            issue = Issue(requester = 'lsikor', headers = {'title' : 'TEST'}, attributes = {'body':'Przykladowy opis - nie został podany żaden argument', 'title':'TEST', 'number': 999}, completed = False)
         display(Markdown((f'Issue title: {issue.title} Issue number: {issue.number}')))
         display(ReportText('\\newline'))
         if issue.body is None:
@@ -4467,8 +4483,11 @@ class GithubIssueComponent(ReportComponent):
         else:
             display(Markdown("Issue description: " + issue.body))
         display(ReportText('\\newline'))
-        display(ReportText('-'*100))
+        display(ReportText('-'*130))
         display(ReportText('\\newline'))
+        
+        
+        
 class DynamicSystemCompletenessCheckComponent(ReportComponent):
 
     title="Wywoływanie i sprawdzanie wszystkich kluczowych elementów systemu dynamicznego"
@@ -4616,3 +4635,153 @@ The following problems have to be checked or fixed, in order to ensure the corre
 
 - [ ] validation of units.
 """
+                
+rep_comp_call = """
+    from dynpy.utilities.components.guides.en import GithubIssueReportComponent
+    GithubIssueReportComponent(None)
+"""
+
+comp_output_str ="""
+    Details of GitHub issue
+    Issue title: TEST Issue number: 999
+
+
+
+    Issue description: Przykladowy opis - nie został podany żaden argument
+
+
+"""
+comp_var_str ="""
+    def append_elements(self):
+        
+        issue = self.reported_object
+"""
+
+rep_obj_str ="""
+    class GithubIssueReportComponent(ReportComponent):
+
+    title="Details of GitHub issue"
+
+    def append_elements(self):
+        
+        issue = self.reported_object #Tutaj przypisujemy do zmiennej argument
+        if issue==None:
+            from github.Issue import Issue
+            issue = Issue(requester = 'lsikor', headers = {'title' : 'TEST'}, attributes = {'body':'Przykladowy opis - nie został podany żaden argument', 'title':'TEST', 'number': 999}, completed = False)
+        display(Markdown((f'Issue title: {issue.title} Issue number: {issue.number}')))
+        display(ReportText('\\newline'))
+        if issue.body is None:
+            display(Markdown("No issue description"))
+        else:
+            display(Markdown("Issue description: " + issue.body))
+        display(ReportText('\\newline'))
+        display(ReportText('-'*130))
+        display(ReportText('\\newline'))
+"""
+
+rep_jup_str ="""
+    from dynpy.utilities.creators import GitHubInterface
+    from dynpy.utilities.components.guides.en import GithubIssueReportComponent
+    from datetime import datetime
+    user = '*' # Podaj nazwę uzytkownika github, podanie * oznacza wylistowanie wszystkich
+    since_date = "2024-09-05" # Zmień datę, od której ma listować issues
+    # token = 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 # Token autoryzujący dostep do repo, każdy powinien wygenerować własny, można googlowac
+    client = GitHubInterface()
+
+    date_string = since_date + "T00:00:00Z" # Dodanie do podanej wyżej daty odpowiedniego formatu, który przyjmuje atrybut Pygithub
+    date_object = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ") # Zamiana daty na dateobject z odpowiednim formatowaniem
+
+    list_open=[] #pusta lista
+    list_open = client.get_issues_list(repo_name='bogumilchilinski/dynpy', state='open', assignee=user, sort='created', since=date_object) # pozyskanie listy issues z repo
+
+    for single_issue in list_open: # pętla na wylistowanie issues 
+        GithubIssueReportComponent(single_issue) # wykorzystanie zaimplementowanego komponentu, argument jaki przekazujemy to pojedyńcze issue z listy
+"""
+
+
+
+
+class ReportingCompsUsageComponent(ReportComponent):
+    
+    title="Działanie komponentów raportujących"
+
+
+    @property
+    def reported_object(self):
+
+        
+        default_data = {'classname':'ReportingCompsUsageComponent',
+                       'module':'guide.en.py',
+                       'field':'guide or report',
+                       'target':'`ODESystem` class',
+                       'issue_no':359,
+                       }
+
+        
+        if isinstance(self._reported_object, dict):
+            return {**default_data,**self._reported_object}
+
+        elif isinstance(self._reported_object, str):
+            return {**default_data,'classname':self._reported_object}
+        
+        elif self._reported_object is None or not isinstance(self._reported_object, dict):
+            return default_data
+
+        else:
+            return self._reported_object
+
+
+    @reported_object.setter
+    def reported_object(self, obj):
+        self._reported_object=obj
+    
+    
+    def append_elements(self):
+        
+        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+
+        display(ReportText("""Po stworzeniu komponentu możesz go wywołać poprzez zaimportowanie odpowiedniej klasy we własnym 
+                           jupku,poniżej zostanie opisany konkretny przykład, aby lepiej zrozumieć działanie komponentu"""))
+        display(ObjectCode(rep_comp_call))
+        display(ReportText('Aby dokładniej zrozumieć metodę `append_elements` należy przyjrzeć się temu co mamy w (), domyślnie każdy komponent sprawdzamy wpisując tam `None`'))
+        display(ReportText("""`None` - jest to argument jaki przekazujemy klasie, w tym przypadku oznacza to, że nie przekazujemy żadnego konkretnego argumentu, ponieważ None = Nic
+                           Jeżeli komponent został zabezpieczny to podanie tego argumentu pokaże tylko przykład zaimplementowany w metodzie
+                           Uruchamiając poprzedni przykład w jupku otrzymamy poniższy output:"""))
+        display(ObjectCode(comp_output_str))
+        display(ReportText('W metodzie `append_elements` zostało przypisane, aby komponent przekazał argument do zmiennej.'))
+        display(ObjectCode(comp_var_str))
+        display(ReportText('Przypisany w () argument zostaje przekazany do klasy ReportComponent, dokładniej do metody _init_ a następnie przypisany do `self.reported_object`'))
+        display(ReportText('Wygląda to następująco: JUPYTER > WYWOŁANIE KOMPONENTU > _INIT_(ReportComponent) > SELF.REPORTED_OBJECT'))
+        rep_pic1 = Picture('./dynpy/utilities/components/guides/images/OpOfComp.png', caption = "Droga podanego argumentu",width='9cm')
+        display(rep_pic1)
+        display(ReportText('Poniżej pełny kod tego przykładowego komponentu:'))
+        display(ObjectCode(rep_obj_str))
+        display(ReportText('A tutaj przykładowy jupek z wykorzystaniem tego komponentu:'))
+        display(ObjectCode(rep_jup_str))
+class DynamicSystemCheckerComponent(ReportComponent):
+
+    title="DynamicSystemCheckerComponent"
+
+    def append_elements(self):
+        
+        display(ReportText('Aby sprawdzić poszczególne metody i atrybuty systemu należy wywołać następujący kod'))
+        system_check_code = '''
+        from dynpy.utilities.tools import DynSysChecker
+        from dynpy.models.mechanics import ForcedSpringMassSystem
+        system = ForcedSpringMassSystem
+        test = DynSysChecker(system, debug=True)
+        test_result = {f"{system.__name__}": {
+            "check_init": test.check_init(),
+            "check_components": test.check_components(),
+            "check_default_data": test.check_default_data(),
+            "check_numerical_data": test.check_numerical_data(),
+            "check_symbols_description": test.check_symbols_description(),
+            "check_unit_dict": test.check_unit_dict(),
+        }}
+        print(test_result)
+        '''
+        display(ObjectCode(system_check_code))

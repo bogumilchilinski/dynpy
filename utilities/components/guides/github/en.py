@@ -1,5 +1,5 @@
-from  dynpy.utilities.components.mechanics import *
-from  dynpy.utilities.components.mechanics import ReportComponent as BaseReportComponent
+from  ...mechanics import *
+from  ...mechanics import ReportComponent as BaseReportComponent
 
 
 from . import pl
@@ -17,7 +17,7 @@ from .....dynamics import *
 
 months_list = ['January', 'February', 'March','April','May','June','July','August','September','October','November','December']
 
-from  dynpy.utilities.components.mechanics import display
+from  ...mechanics import display
 import datetime
 
 
@@ -4457,4 +4457,22 @@ dyncompov_str = '''Guide consist of bellow components which can be called separa
 #         display(ObjectCode(dynmetuscomp_str))
 #         '''
 
+class GithubIssueReportComponent(ReportComponent):
+
+    title="Details of GitHub issue"
+
+    def append_elements(self):
         
+        issue = self.reported_object
+        if issue==None:
+            from github.Issue import Issue
+            issue = Issue(requester = 'lsikor', headers = {'title' : 'TEST'}, attributes = {'body':'Przykladowy opis - nie został podany żaden argument', 'title':'TEST', 'number': 999}, completed = False)
+        display(Markdown((f'Issue title: {issue.title} Issue number: {issue.number}')))
+        display(ReportText('\\newline'))
+        if issue.body is None:
+            display(Markdown("No issue description"))
+        else:
+            display(Markdown("Issue description: " + issue.body))
+        display(ReportText('\\newline'))
+        display(ReportText('-'*130))
+        display(ReportText('\\newline'))

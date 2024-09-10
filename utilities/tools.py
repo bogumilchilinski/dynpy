@@ -117,3 +117,119 @@ class LatexAnalyzerV3:
             }
 
         return counts
+
+class DynSysChecker:
+    def __init__(self, system, debug= False):
+        self.system = system
+        self.runnable = False
+        self.debug = debug
+        
+    def check_init(self):
+
+        if not hasattr(self.system, '__init__'):
+            return False
+
+        try:
+            _ = self.system()
+        except TypeError as e:
+            print(e)
+            return False
+        self.runnable = True
+        return True
+    
+    def check_components(self):
+
+        if not hasattr(self.system, 'components'):
+            return False
+        
+        if self.runnable:
+            try:
+                self.system().components
+            except Exception as e:
+                if self.debug:
+                    print(e)
+                return False
+        else:
+            try:
+                self.system.components
+            except Exception as e:
+                print(e)
+                return False
+        return True
+    
+    def check_default_data(self):
+
+        if not hasattr(self.system, 'get_default_data'):
+            return False
+        
+        if self.runnable:
+            try:
+                self.system().get_default_data()
+            except Exception as e:
+                if self.debug:
+                    print(e)
+                return False
+        else:
+            try:
+                self.system.get_default_data()
+            except Exception as e:
+                return False
+        return True
+        
+    def check_numerical_data(self):
+
+        if not hasattr(self.system, 'get_numerical_data'):
+            return False
+        
+        if self.runnable:
+            try:
+                self.system().get_numerical_data()
+            except Exception as e:
+                if self.debug:
+                    print(e)
+                return False
+        else:
+            try:
+                self.system.get_numerical_data()
+            except Exception:
+                return False
+        return True
+        
+    def check_symbols_description(self):
+
+        if not hasattr(self.system, 'symbols_description'):
+            return False
+        
+        if self.runnable:
+            try:
+                self.system().symbols_description()
+            except Exception as e:
+                if self.debug:
+                    print(e)
+                return False
+        else:
+            try:
+                self.system.symbols_description()
+            except Exception:
+                return False
+        return True
+    
+    def check_unit_dict(self):
+
+        if not hasattr(self.system, 'unit_dict'):
+            return False
+        
+        if self.runnable:
+            try:
+                self.system().unit_dict()
+            except Exception as e:
+                if self.debug:
+                    print(e)
+                return False
+        else:
+            try:
+                self.system.unit_dict()
+            except Exception:
+                return False
+        return True
+    

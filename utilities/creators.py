@@ -478,20 +478,7 @@ import importlib
             f.write('\n\n')
 
         f.close()
-#karolina - na szybko zrobilam to:
-    def lister(self):
-        lst = []
-        lst = self.submodgetter()
-        all_classes = []
-        
-        cnt = 0
-        
-        for submod in lst:
-            class_lst = self.classlistgetter(submod)
-            size = len(class_lst)
-            if size != 0:
-                all_classes.extend(class_lst)
-        return all_classes
+
 
 
 def list_of_guides_prime():
@@ -515,13 +502,13 @@ import dynpy
 from dynpy.utilities.report import ReportText
 
 example = ModuleStructure(dynpy.utilities.components)
-example.lister('Code') #Creates a list of components. Optional keyword used for filtering
+example.get_classes('Code') #Creates a list of components. Optional keyword used for filtering
 example.printer() #Prints list in user friendly format
 example.tree() #Prints created list in tree format
 ===========================================================================================
     '''
     
-    def __init__(self, directory):
+    def __init__(self, directory, depth = False):
         
         import dynpy
         from datetime import date, time
@@ -529,6 +516,8 @@ example.tree() #Prints created list in tree format
         from dynpy.utilities.report import ReportText
         
         self.full_list = []
+        self.tree_str = []
+        self.depth = depth
 
         if isinstance(directory, types.ModuleType):
             s = str(directory)
@@ -547,6 +536,7 @@ init: None
         '''
         import inspect
         import dynpy
+        import dynpy.models
         
         tmp_list = eval(f"inspect.getmembers({self.directory}, predicate=inspect.ismodule)")
         
@@ -557,10 +547,13 @@ init: None
 
             tmp = s[s.find("module '")+len("module '"):s.rfind("' from ")]
             
-            if "dynpy" in tmp:
-                self.mod_list.append(f'{tmp}')
-                
+            if f"{self.directory}" in tmp: 
+                self.mod_list.append(f'{self.directory}')
         tmp_list.clear()
+        
+        if self.depth == 1:
+            self.mod_list = sorted(self.mod_list)
+            return self.mod_list
         
         for element in self.mod_list:
             exec(f'from {element} import *')
@@ -569,7 +562,7 @@ init: None
                 for i in range(len(tmp_list)):
                     s = str(tmp_list[i][1])
                     tmp = s[s.find("module '")+len("module '"):s.rfind("' from ")]
-                    if ("dynpy" in tmp) and (tmp not in self.mod_list):
+                    if (f"{self.directory}" in tmp) and (tmp not in self.mod_list):
                         self.mod_list.append(f'{tmp}')
         
         self.mod_list = sorted(self.mod_list)
@@ -597,18 +590,22 @@ init: submod,keyword
         for i in range(len(members)):
             if "__class__" in members[i][0]: 
                 if (keyword != None) and (keyword in members[i][0]):
-                    tmp_list.append(submod)
+                    tmp_list.append((f'{self.directory}.submod', submod))
                 elif keyword == None:
-                    tmp_list.append(submod)
-            elif f'{submod}' in str(members[i][1]):
+                    tmp_list.append((f'{self.directory}.submod', submod))
+            if f'{submod}' in str(members[i][1]):
                 if (keyword != None) and (keyword in members[i][0]):
-                    tmp_list.append(members[i][0])
+                    s = str(members[i][1])
+                    tmp = s[s.find("<class '")+len("<class '"):s.rfind(f".{members[i][0]}'>")]
+                    tmp_list.append((tmp,members[i][0]))
                 elif keyword == None:
-                    tmp_list.append(members[i][0])
-
+                    s = str(members[i][1])
+                    tmp = s[s.find("<class '")+len("<class '"):s.rfind(f".{members[i][0]}'>")]
+                    tmp_list.append((tmp,members[i][0]))
+                    
         return tmp_list
     
-    def lister(self, keyword = None):
+    def get_classes(self, keyword = None):
         
         '''
 Method collects a list of classes and parent submodule directory in the given module
@@ -629,9 +626,10 @@ init: keyword
             
             if size != 0:
                 for cl in class_lst:
-                        self.full_list.append((submod, cl))
+                        self.full_list.append(cl)
                         
                         cnt += 1
+        
         
         return self.full_list
     
@@ -645,7 +643,7 @@ init: keyword
         '''
         
         if not self.full_list:
-            self.lister(keyword)
+            self.get_classes(keyword)
         
         i = 0
         a = 0
@@ -667,7 +665,7 @@ init: keyword
         
         display(ReportText(f'Total class count is: {i}'))
         
-    def tree(self, keyword = None):
+    def get_module_tree(self, keyword = None):
         
         '''
 Method prints a tree of classes
@@ -677,30 +675,54 @@ init: keyword
         '''
         
         if not self.full_list:
-            self.lister(keyword)
+            self.get_classes(keyword)
         
-        lst_comp = []
-        i = 0
-
-        while i != len(self.full_list):
-            t_str = f'{self.full_list[i][0]}.{self.full_list[i][1]}'
-            lst_comp.append(t_str)
-            i=i+1
+        self.tree_str = TreeNode.build_tree(self.full_list)
+        
+        return self.tree_str
+    
+    def as_reporttext(self, keyword = None):
+        '''
+Method format tree for ReportText and Markdown 
+keyword - optional argument, keyword by which the classes are searched for        
+        '''
+        from dynpy.utilities.report import ReportText
+        
+        if not self.full_list:
+            self.et_list(keyword)
+        
+        return ReportText(TreeNode.as_reporttext(self.full_list).replace('\n', "<br />"))
+    
+    def as_objectcode(self, keyword = None):
+        '''
+Method format tree for ObjectCode
+keyword - optional argument, keyword by which the classes are searched for        
+        '''
+        from dynpy.utilities.report import ObjectCode
+        
+        if not self.full_list:
+            self.get_classes(keyword)
             
-        root = TreeNode("dynpy")
-
-        for element in lst_comp:
-            root.find_and_insert(root, element.split(".")[1:])
-        tree_str = root.print()
+        if not self.tree_str:
+            self.tree_str = TreeNode.build_tree(self.full_list)
         
-        return root.unpack(tree_str)
+        return ObjectCode(self.tree_str)
     
     def __repr__(self):
-        return self.tree()
+        return self.get_module_tree()
 
 class TreeNode:
     '''
-Supporting class for ModuleStructure class    
+Class created to present table of directories in tree format known from commandline tool in Unix systems.
+
+To call tree use bellow call code:
+
+    TreeNode.build_tree(full_list, separator, rootnode)
+
+    Where:
+        full_list - list, where each node is separated by some symbol, for example: dynpy.utilities.components
+        separator (optional, by defualt it is '.') - symbol used to separate each node '.' in above example 
+        rootnode (optional, by defualt it is 'dynpy'- node that starts creating tree, for example 'dynpy'
     '''
     def __init__(self, name, parent = None):
         self.parent = parent
@@ -712,11 +734,24 @@ Supporting class for ModuleStructure class
         self.children.append(node)
         return node
 
-    def print(self, is_root = True):
-        pre_0 = "    "
-        pre_1 = "│   "
-        pre_2 = "├── "
-        pre_3 = "└── "
+    def print(self, is_root = True, syntax = True):
+        '''
+Method is used to create tree string.
+
+init: 
+syntax - is used to define tab sign, Object code accept normal spaces, Markdown and ReportText require &nbsp; instead of tab
+        '''
+        if syntax is True:
+            pre_0 = "    "
+            pre_1 = "│   "
+            pre_2 = "├── "
+            pre_3 = "└── "
+        elif syntax is False:
+            pre_0 = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            pre_1 = "│&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+            pre_2 = "├──&nbsp;"
+            pre_3 = "└──&nbsp;"
+
 
         tree = self
         prefix = pre_2 if tree.parent and id(tree) != id(tree.parent.children[-1]) else pre_3
@@ -735,10 +770,10 @@ Supporting class for ModuleStructure class
             self.str_out.append(prefix + self.name)
 
         for child in self.children:
-            self.str_out.append(child.print(False))
+            self.str_out.append(child.print(is_root = False, syntax = syntax))
             
         return self.str_out
-    
+
     @staticmethod
     def find_and_insert(parent, edges):
         if not edges:
@@ -754,7 +789,7 @@ Supporting class for ModuleStructure class
     def unpack(lst_to_unpack):
         '''
 This method is a helper to unpack nested list returned by print method.
-Method will return string. To typecast this list in ObjectCode, use unpack_to_objectcode() method 
+Method will return string ready to use by ObjectCode.
 
 init: list returned from print() method
         '''
@@ -768,21 +803,76 @@ init: list returned from print() method
                 unpacked_lst.append('\n')
             lst = ''.join(unpacked_lst)
         return lst
+    
+    @classmethod
+    def build_tree(cls, full_list, separator = '.', rootnode = 'dynpy'):
+        
+        '''
+Method created to build full tree from declared list
+
+init: full_list, separator, rootnode
+
+        '''
+        
+        lst_comp = []
+        i = 0
+
+        while i != len(full_list):
+            t_str = f'{full_list[i][0]}.{full_list[i][1]}'
+            lst_comp.append(t_str)
+            i=i+1
+            
+        root = __class__(rootnode)
+
+        for element in lst_comp:
+            root.find_and_insert(root, element.split(separator)[1:])
+        tree_str = root.print()
+        
+        cls.tree_comp = __class__.unpack(tree_str)
+        
+        return cls.tree_comp
+    
+    
+    @classmethod
+    def as_reporttext(cls, full_list, separator = '.', rootnode = 'dynpy'):
+        '''
+Staticmethod return tree string in ReportText format
+
+Init: tree_comp - string returned by build_tree method
+        '''
+        lst_comp = []
+        i = 0
+
+        while i != len(full_list):
+            t_str = f'{full_list[i][0]}.{full_list[i][1]}'
+            lst_comp.append(t_str)
+            i=i+1
+            
+        root = __class__(rootnode)
+
+        for element in lst_comp:
+            root.find_and_insert(root, element.split(separator)[1:])
+        tree_str = root.print(is_root = True, syntax = False)
+        
+        comp = __class__.unpack(tree_str)
+        
+        return comp
         
         
 def list_of_guides():
 
     dir_str = 'dynpy.utilities.documents'
 
-    return ModuleStructure(dir_str).lister()
+    return ModuleStructure(dir_str).get_classes()
 
 def list_of_components():
 
     dir_str = 'dynpy.utilities.components'
     
-    return ModuleStructure(dir_str).lister()
-def list_of_systems():
+    return ModuleStructure(dir_str).get_classes()
+
+def list_of_mechanical_systems():
 
     dir_str = 'dynpy.models.mechanics'
 
-    return ModuleStructure(dir_str).lister()
+    return ModuleStructure(dir_str).get_classes()

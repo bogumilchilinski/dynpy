@@ -1169,7 +1169,6 @@ class DynSysOverviewReport(UsageOfDynamicSystemsGuide):
 
         comp_list=[
             guide_comp.DynSysOverviewUsageComponent,
-
             guide_comp.DynamicSystemCallComponent,
             guide_comp.NumericalAnalysisSimulationComponent,
             guide_comp.AnalyticalSimulationComponent,
@@ -1177,6 +1176,7 @@ class DynSysOverviewReport(UsageOfDynamicSystemsGuide):
             #guide_comp.SimulationReportComponent,
             guide_comp.DynSysCodeComponent,
             guide_comp.IssuePreparationComponent,
+            guide_comp.DynamicSystemCheckerComponent,
 
         ]
 
@@ -1309,7 +1309,8 @@ class BasicsOfReportComponentImplementationGuide(UsageOfDynamicSystemsGuide):
         comp_list=[
 
             guide_comp.ReportCompImplementationComponent,
-            guide_comp.ReportCompImplementationIssueComponent,
+            guide_comp.ReportingCompsUsageComponent,
+#             guide_comp.ReportCompImplementationIssueComponent, #Obecnie jest problem z argumentem reported_object, dokładniej classname i sypie błędem
             guide_comp.ReportingComponentsList
 
         ]
@@ -1331,7 +1332,7 @@ class GithubSynchroGuide(UsageOfDynamicSystemsGuide):
             guide_comp.GitSynchroPanelAccessComponent,
             guide_comp.GitSynchroIntroComponent,
             guide_comp.UsageOfGitHubInterfacesComponent,
-            #guide_comp.GithubIssueComponent, #zakomentować jak będzie sypało błędami
+            #guide_comp.GithubIssueReportComponent, #zakomentować jak będzie sypało błędami
 
         ]
 

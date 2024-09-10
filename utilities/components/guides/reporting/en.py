@@ -1,5 +1,5 @@
-from  dynpy.utilities.components.mechanics import *
-from  dynpy.utilities.components.mechanics import ReportComponent as BaseReportComponent
+from  ...mechanics import *
+from  ...mechanics import ReportComponent as BaseReportComponent
 
 
 from . import pl
@@ -17,7 +17,7 @@ from .....dynamics import *
 
 months_list = ['January', 'February', 'March','April','May','June','July','August','September','October','November','December']
 
-from  dynpy.utilities.components.mechanics import display
+from  ...mechanics import display
 import datetime
 
 
@@ -419,38 +419,38 @@ from dynpy.models.mechanics import SDOFWinchSystem
 
 
 
-class DynamicSystemCallComponent(ReportComponent):
+# class DynamicSystemCallComponent(ReportComponent):
     
-    title="Introduction"
+#     title="Introduction"
 
 
-    def append_elements(self):
+#     def append_elements(self):
 
-        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
-        system_name = system.__class__.__name__
+#         system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+#         system_name = system.__class__.__name__
         
-        display(ReportText('Required library/class imports to create the report:'))
+#         display(ReportText('Required library/class imports to create the report:'))
 
 
-        display(GuideCode(imports_code_str.replace('SDOFWinchSystem',system_name)))
+#         display(GuideCode(imports_code_str.replace('SDOFWinchSystem',system_name)))
 
 
-        display(ReportText('A class that allows you to solve a specific problem (in this case, a problem related to the description of a crane):'))
+#         display(ReportText('A class that allows you to solve a specific problem (in this case, a problem related to the description of a crane):'))
 
-        display(GuideCode("""from dynpy.models.mechanics import SDOFWinchSystem""".replace('SDOFWinchSystem',system_name)      ))
+#         display(GuideCode("""from dynpy.models.mechanics import SDOFWinchSystem""".replace('SDOFWinchSystem',system_name)      ))
         
         
-        display(GuideCode(f'system=dyn_sys={system_name}()'  ))
+#         display(GuideCode(f'system=dyn_sys={system_name}()'  ))
 
-        display(ReportText('Path to the sought-after class on the CoCalc platform:'))
-        #display(Picture('./dynpy/utilities/components/guides/images/sciezka_w.jpg'))
+#         display(ReportText('Path to the sought-after class on the CoCalc platform:'))
+#         #display(Picture('./dynpy/utilities/components/guides/images/sciezka_w.jpg'))
 
-        display(ReportText((system.__class__.__module__)))
+#         display(ReportText((system.__class__.__module__)))
         
-        display(ReportText('The way to call out the preview of the class - the so-called preview:'))
+#         display(ReportText('The way to call out the preview of the class - the so-called preview:'))
 
-        display(GuideCode(f'''{system_name}()._as_picture()'''  ))
-        display(system._as_picture())
+#         display(GuideCode(f'''{system_name}()._as_picture()'''  ))
+#         display(system._as_picture())
         
         
 # class DynamicSystemMethodsUsageComponent(ReportComponent):
@@ -4454,4 +4454,206 @@ dyncompov_str = '''Guide consist of bellow components which can be called separa
 #         display(ObjectCode(dynmetuscomp_str))
 #         '''
 
+class UsageOfDynamicSystemsGuide(Guide):
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+
+            guide_comp.DynamicSystemCallComponent,
+            guide_comp.DynamicSystemMethodsUsageComponent,
+            guide_comp.SimulationsComponent,
+            guide_comp.SimulationReportComponent,
+
+        ]
+
+        return comp_list
+    
+    @property
+    def default_reported_object(self):
         
+        #from ...models.mechanics.tmac import SDOFWinchSystem
+        from ...models.mechanics import ForcedSpringMassSystem as DynamicSystem
+        
+        return DynamicSystem()
+
+
+class BasicsOfReportComponentImplementationGuide(UsageOfDynamicSystemsGuide):
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+
+            guide_comp.ReportCompImplementationComponent,
+            guide_comp.ReportingCompsUsageComponent,
+#             guide_comp.ReportCompImplementationIssueComponent, #Obecnie jest problem z argumentem reported_object, dokładniej classname i sypie błędem
+            guide_comp.ReportingComponentsList
+
+        ]
+
+        return comp_list
+    
+    @property
+    def default_reported_object(self):
+
+        return None
+
+class ReportingComponentsList(ReportComponent):
+    title="Lista komponentów raportujących"
+
+    def append_elements(self):
+
+        system = self.reported_object
+        import dynpy
+        from .....utilities.creators import ModuleStructure
+        display(ObjectCode(ModuleStructure(dynpy.utilities.components).get_module_tree()))
+
+issue_title_str = """
+Maintenance of `{system_name}` class which is dynamic system representation        
+"""
+        
+issue_desc_str = """
+
+The following problems have to be checked or fixed, in order to ensure the correctness of implemented system:
+
+- [ ] checking if a class is executable,
+
+- [ ] validation of figures for schemes and real examples,
+
+- [ ] validation of reference parameters,
+
+- [ ] validation of random parameters,
+
+- [ ] validation of  description of  description of parameters,
+
+- [ ] validation of units.
+"""
+                
+rep_comp_call = """
+    from dynpy.utilities.components.guides.en import GithubIssueReportComponent
+    GithubIssueReportComponent(None)
+"""
+
+comp_output_str ="""
+    Details of GitHub issue
+    Issue title: TEST Issue number: 999
+
+
+
+    Issue description: Przykladowy opis - nie został podany żaden argument
+
+
+"""
+comp_var_str ="""
+    def append_elements(self):
+        
+        issue = self.reported_object
+"""
+
+rep_obj_str ="""
+    class GithubIssueReportComponent(ReportComponent):
+
+    title="Details of GitHub issue"
+
+    def append_elements(self):
+        
+        issue = self.reported_object #Tutaj przypisujemy do zmiennej argument
+        if issue==None:
+            from github.Issue import Issue
+            issue = Issue(requester = 'lsikor', headers = {'title' : 'TEST'}, attributes = {'body':'Przykladowy opis - nie został podany żaden argument', 'title':'TEST', 'number': 999}, completed = False)
+        display(Markdown((f'Issue title: {issue.title} Issue number: {issue.number}')))
+        display(ReportText('\\newline'))
+        if issue.body is None:
+            display(Markdown("No issue description"))
+        else:
+            display(Markdown("Issue description: " + issue.body))
+        display(ReportText('\\newline'))
+        display(ReportText('-'*130))
+        display(ReportText('\\newline'))
+"""
+
+rep_jup_str ="""
+    from dynpy.utilities.creators import GitHubInterface
+    from dynpy.utilities.components.guides.en import GithubIssueReportComponent
+    from datetime import datetime
+    user = '*' # Podaj nazwę uzytkownika github, podanie * oznacza wylistowanie wszystkich
+    since_date = "2024-09-05" # Zmień datę, od której ma listować issues
+    # token = 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 # Token autoryzujący dostep do repo, każdy powinien wygenerować własny, można googlowac
+    client = GitHubInterface()
+
+    date_string = since_date + "T00:00:00Z" # Dodanie do podanej wyżej daty odpowiedniego formatu, który przyjmuje atrybut Pygithub
+    date_object = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ") # Zamiana daty na dateobject z odpowiednim formatowaniem
+
+    list_open=[] #pusta lista
+    list_open = client.get_issues_list(repo_name='bogumilchilinski/dynpy', state='open', assignee=user, sort='created', since=date_object) # pozyskanie listy issues z repo
+
+    for single_issue in list_open: # pętla na wylistowanie issues 
+        GithubIssueReportComponent(single_issue) # wykorzystanie zaimplementowanego komponentu, argument jaki przekazujemy to pojedyńcze issue z listy
+"""
+
+
+
+
+class ReportingCompsUsageComponent(ReportComponent):
+    
+    title="Działanie komponentów raportujących"
+
+
+    @property
+    def reported_object(self):
+
+        
+        default_data = {'classname':'ReportingCompsUsageComponent',
+                       'module':'guide.en.py',
+                       'field':'guide or report',
+                       'target':'`ODESystem` class',
+                       'issue_no':359,
+                       }
+
+        
+        if isinstance(self._reported_object, dict):
+            return {**default_data,**self._reported_object}
+
+        elif isinstance(self._reported_object, str):
+            return {**default_data,'classname':self._reported_object}
+        
+        elif self._reported_object is None or not isinstance(self._reported_object, dict):
+            return default_data
+
+        else:
+            return self._reported_object
+
+
+    @reported_object.setter
+    def reported_object(self, obj):
+        self._reported_object=obj
+    
+    
+    def append_elements(self):
+        
+        #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+
+        display(ReportText("""Po stworzeniu komponentu możesz go wywołać poprzez zaimportowanie odpowiedniej klasy we własnym 
+                           jupku,poniżej zostanie opisany konkretny przykład, aby lepiej zrozumieć działanie komponentu"""))
+        display(ObjectCode(rep_comp_call))
+        display(ReportText('Aby dokładniej zrozumieć metodę `append_elements` należy przyjrzeć się temu co mamy w (), domyślnie każdy komponent sprawdzamy wpisując tam `None`'))
+        display(ReportText("""`None` - jest to argument jaki przekazujemy klasie, w tym przypadku oznacza to, że nie przekazujemy żadnego konkretnego argumentu, ponieważ None = Nic
+                           Jeżeli komponent został zabezpieczny to podanie tego argumentu pokaże tylko przykład zaimplementowany w metodzie
+                           Uruchamiając poprzedni przykład w jupku otrzymamy poniższy output:"""))
+        display(ObjectCode(comp_output_str))
+        display(ReportText('W metodzie `append_elements` zostało przypisane, aby komponent przekazał argument do zmiennej.'))
+        display(ObjectCode(comp_var_str))
+        display(ReportText('Przypisany w () argument zostaje przekazany do klasy ReportComponent, dokładniej do metody _init_ a następnie przypisany do `self.reported_object`'))
+        display(ReportText('Wygląda to następująco: JUPYTER > WYWOŁANIE KOMPONENTU > _INIT_(ReportComponent) > SELF.REPORTED_OBJECT'))
+        rep_pic1 = Picture('./dynpy/utilities/components/guides/images/OpOfComp.png', caption = "Droga podanego argumentu",width='9cm')
+        display(rep_pic1)
+        display(ReportText('Poniżej pełny kod tego przykładowego komponentu:'))
+        display(ObjectCode(rep_obj_str))
+        display(ReportText('A tutaj przykładowy jupek z wykorzystaniem tego komponentu:'))
+        display(ObjectCode(rep_jup_str))

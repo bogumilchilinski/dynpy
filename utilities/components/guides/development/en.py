@@ -1,5 +1,5 @@
-from  dynpy.utilities.components.mechanics import *
-from  dynpy.utilities.components.mechanics import ReportComponent as BaseReportComponent
+from  ...mechanics import *
+from  ...mechanics import ReportComponent as BaseReportComponent
 
 
 from . import pl
@@ -17,7 +17,7 @@ from .....dynamics import *
 
 months_list = ['January', 'February', 'March','April','May','June','July','August','September','October','November','December']
 
-from  dynpy.utilities.components.mechanics import display
+from  ...mechanics import display
 import datetime
 
 
