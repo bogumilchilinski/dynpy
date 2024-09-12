@@ -855,8 +855,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         self_dict = self._kwargs()
         other_dict = other._kwargs()
 
-        self_dict[
-            'Lagrangian'] = self_dict['Lagrangian'] + other_dict['Lagrangian']
+        self_dict['Lagrangian'] = self_dict['Lagrangian'] + other_dict['Lagrangian']
 
         self_dict['qs'] = list(self_dict['qs']) + list(
             coord

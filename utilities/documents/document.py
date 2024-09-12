@@ -1350,7 +1350,7 @@ class GithubSynchroGuide(UsageOfDynamicSystemsGuide):
             guide_comp.GitSynchroPanelAccessComponent,
             guide_comp.GitSynchroIntroComponent,
             guide_comp.UsageOfGitHubInterfacesComponent,
-            #guide_comp.GithubIssueReportComponent, #zakomentować jak będzie sypało błędami
+            #guide_comp.GithubIssueReportComponent, #komponent do listowania issue, chyba nie jest tutaj potrzebny do pokazania
 
         ]
 
