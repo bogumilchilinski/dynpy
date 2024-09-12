@@ -1856,7 +1856,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
 # #             return OdeComputationalCase(**computed_case,backend=backend, evaluate=True)
 #             return self._ode_system.numerized(parameters=parameter_values, backend=backend, **kwargs)
-    def numerized(self, parameter_values=None, ic_list=None, backend='fortran',**kwargs):
+    def numerized(self, parameter_values=None, ic_list=None, backend='fortran',expand=False,**kwargs):
         '''
         Takes values of parameters. Redirects the numerizing to ODESystem method numerized which does the variables types conversion and then proceeds to execution method _numerized wchih has lru_cache.
         Arguments:
@@ -1882,7 +1882,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         - if necessary the created numerized system can be solved in order to represent displacement, velocity, or acceleration 
         '''
 
-        return self._ode_system.numerized(parameter_values=parameter_values, ic_list=ic_list, backend=backend, **kwargs)
+        return self._ode_system.numerized(parameter_values=parameter_values, ic_list=ic_list, backend=backend,expand=expand, **kwargs)
 
 
     def _as_na_df(self, parameter=None, param_span=None, dependencies_dict=None,coordinates=None, t_span = None):

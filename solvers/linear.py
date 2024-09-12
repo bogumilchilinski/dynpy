@@ -1845,7 +1845,7 @@ class ODESystem(AnalyticalSolution):
     #     '''
     #     return OdeComputationalCase(odes_system=self.odes_rhs,dvars=self.dvars,ivar=self.ivar)
 
-    def numerized(self,parameter_values=None,ic_list=None,backend='fortran',**kwrags):
+    def numerized(self,parameter_values=None,ic_list=None,backend='fortran',expand=False,**kwrags):
         '''
         Takes values of parameters, substitute it into the sympy Dict. Redirects the numerizing to exectution method _numerized which has lru cache.
         '''
@@ -1860,15 +1860,17 @@ class ODESystem(AnalyticalSolution):
         elif isinstance(ic_list, tuple): ic_tuple = ic_list
         else: print("Podano zły typ danych - podaj list lub tuple na ic_list")
 
-        return self._numerized(parameters=parameters_sympy_dict, ic_tuple=ic_tuple, backend=backend)
+        return self._numerized(parameters=parameters_sympy_dict, ic_tuple=ic_tuple, backend=backend,expand=expand)
 
     #@lru_cache
-    def _numerized(self,parameters=Dict(),ic_tuple=(),backend='fortran',**kwrags):
+    def _numerized(self,parameters=Dict(),ic_tuple=(),backend='fortran',expand=False,**kwrags):
         '''
         Execution method that assumes all Args are hashable due to application of lru cache. Takes values of parameters and returns instance of class OdeComputationalCase.
         '''
-
-        ode=self.as_first_ode_linear_system()._to_rhs_ode()
+        if expand is True:
+            ode=self.as_first_ode_linear_system()._to_rhs_ode().expand()
+        else:
+            ode=self.as_first_ode_linear_system()._to_rhs_ode()
 
         return OdeComputationalCase(odes_system=ode.rhs,ivar=ode.ivar,dvars=ode.dvars,params= parameters,backend=backend)
     
@@ -2178,9 +2180,10 @@ class ODESystem(AnalyticalSolution):
         else:
             return self.copy()
 
-    def _classify_ode(self):
+    def _classify(self):
         odes=Eq(self.lhs[0]-self.rhs[0],0)
         return classify_ode(odes,self.dvars[0])
+    
 ### METODY - Karolina, do przejrzenia i wgl do zastanowienia czy chcemy to czy nie, na pewno dvars symbols sa must have no i te dwie ostatnie one ciagna z fode wsm##
     def _eqn_coeffs(self):
 
