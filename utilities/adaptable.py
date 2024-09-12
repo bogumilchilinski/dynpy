@@ -2916,7 +2916,8 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
                             coord_level_name=-1,
                             ics=None,
                             backend=None,
-                            dependencies=None):
+                            dependencies=None,
+                            expand = False):
         """
         A method that allows you to perform numerical simulations on the created DataFrame.
 
@@ -2938,8 +2939,11 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
             columns=self.columns.droplevel(coord_level_name).unique())
 
         for case_data in self.columns.droplevel(coord_level_name).unique():
-
-            model = case_data[model_level_name]
+            
+            if expand is False:
+                model = case_data[model_level_name]
+            else:
+                model = case_data[model_level_name].expand()
 
             params_dict = {}
 
@@ -3016,6 +3020,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
         backend=None,
         dependencies=None,
         output=None,
+        expand = False,
     ):
 
         computed_data = self.copy()
@@ -3029,7 +3034,8 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
             ics=ic_list,
             backend=backend,
             dependencies=dependencies,
-        )
+            expand = expand
+            )
 
         if output == "NA":
             return TimeDataFrame(result.droplevel(0))

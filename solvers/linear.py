@@ -1845,7 +1845,7 @@ class ODESystem(AnalyticalSolution):
     #     '''
     #     return OdeComputationalCase(odes_system=self.odes_rhs,dvars=self.dvars,ivar=self.ivar)
 
-    def numerized(self,parameter_values=None,ic_list=None,backend='fortran',expand=False,**kwrags):
+    def numerized(self,parameter_values=None,ic_list=None,backend='numpy',expand=False,**kwrags):
         '''
         Takes values of parameters, substitute it into the sympy Dict. Redirects the numerizing to exectution method _numerized which has lru cache.
         '''

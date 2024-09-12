@@ -1856,7 +1856,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
 # #             return OdeComputationalCase(**computed_case,backend=backend, evaluate=True)
 #             return self._ode_system.numerized(parameters=parameter_values, backend=backend, **kwargs)
-    def numerized(self, parameter_values=None, ic_list=None, backend='fortran',expand=False,**kwargs):
+    def numerized(self, parameter_values=None, ic_list=None, backend='numpy',expand=False,**kwargs):
+
         '''
         Takes values of parameters. Redirects the numerizing to ODESystem method numerized which does the variables types conversion and then proceeds to execution method _numerized wchih has lru_cache.
         Arguments:
