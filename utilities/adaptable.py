@@ -2940,10 +2940,9 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
         for case_data in self.columns.droplevel(coord_level_name).unique():
             
-            if expand is False:
-                model = case_data[model_level_name]
-            else:
-                model = case_data[model_level_name].expand()
+
+            model = case_data[model_level_name]
+
 
             params_dict = {}
 
@@ -2951,7 +2950,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
                 params_dict[param_eq.lhs] = param_eq.rhs
 
-            numerized_model = model.numerized(params_dict, backend=backend)
+            numerized_model = model.numerized(params_dict, backend=backend,expand=expand)
 
             t_span = np.asarray((self.index))
 
