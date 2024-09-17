@@ -1301,6 +1301,24 @@ class ResearchProjectGuidelines(UsageOfDynamicSystemsGuide):
 
         return comp_list
     
+class IntroDynPyProjectGuidelines(UsageOfDynamicSystemsGuide):
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+
+            guide_comp.InterimScheduleComponent,
+            guide_comp.InterimTemplateComponent,
+#             guide_comp.DynamicSystemCallComponent,
+#             guide_comp.SimulationsComponent,
+#             guide_comp.SimulationReportComponent,
+
+        ]
+
+        return comp_list
+    
+    
 class BasicsOfReportComponentImplementationGuide(UsageOfDynamicSystemsGuide):
 
     @property
