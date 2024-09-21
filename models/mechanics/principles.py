@@ -695,6 +695,18 @@ class LagrangeIOnMathFunction(ComposedSystem):
         system = HarmonicOscillator(S.Half*m*x.diff(ivar)**2+S.Half*m*y.diff(ivar)**2-m*g*y,qs=[x,y])
 
         super().__init__(system(qs),**kwargs)
+    def components(self):
+        
+        components = {}
+        
+        self._material_point_1 = MaterialPoint(self.m, self.x, qs=self.qs)
+        self._material_point_2 = MaterialPoint(self.m, self.y, qs=self.qs)
+        self.gravity = GravitationalForce(self.m, self.g, pos1=self.y,ivar=self.ivar, qs=self.qs)
+
+        components['material_point_1'] = self._material_point_1
+        components['material_point_2'] = self._material_point_2
+        components['gravity'] = self.gravity
+        
 
     def get_default_data(self):
 

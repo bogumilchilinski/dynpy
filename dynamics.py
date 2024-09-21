@@ -320,6 +320,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         cls._settle_dynpy()
         return Picture(pic_path, position=position, caption=caption, width=width, height=height, marker=marker, **kwargs)
         
+    @classmethod
+    def as_picture(cls, position=None, caption=None,width=None,height=None,marker=None, **kwargs):
+        
+
+        return cls._as_picture(position=position, caption=caption,width=width,height=height,marker=marker, **kwargs)
+        
     
     @classmethod
     def _scheme(cls):

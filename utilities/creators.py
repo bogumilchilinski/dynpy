@@ -9,6 +9,7 @@ import pint
 import inspect
 from dynpy.utilities.documents import document
 from dynpy.utilities.templates.document import Guide
+from datetime import datetime
 
 issue_no = 567
 title = 'implementation of overview report for `ODESystem` child classes'
@@ -199,12 +200,23 @@ class GitHubInterface():
 
     '''
 
-    def __init__(self):
+    _repo_name= "bogumilchilinski/dynpy"
 
-        pass_code = getpass.getpass('Github token')
-        auth = Auth.Token(pass_code)
+    def __init__(self, token=None, repo_name=None):
+
+        if token is None:
+            pass_code = getpass.getpass('Github token')
+            auth = Auth.Token(pass_code)
+        else:
+            auth = Auth.Token(token)
+
+
         g = Github(auth=auth)
         self.g = g
+
+        if repo_name is not None:
+            self._repo_name = repo_name
+            
 
     def open(self):
         '''
@@ -247,7 +259,7 @@ class GitHubInterface():
                 repo_list.append(repo.full_name)
             return repo_list
 
-    def get_repo(self, full_name='bogumilchilinski/dynpy'):
+    def get_repo(self, full_name=None):
         '''
         This method returns the Repository class from GitHub.
 
@@ -258,10 +270,12 @@ class GitHubInterface():
         client.get_repo(full_name='bogumilchilinski/dynpy')
 
         '''
+        if full_name is None:
+            full_name = self._repo_name
 
         return self.g.get_repo(full_name)
 
-    def get_issues_list(self, repo_name='none', state='all', assignee='none', sort='none', since='none'):#, milestone='none',  labels='none', sort='none', direction='none', creator='none'):
+    def get_issues_list(self, repo_name=None, state='all', assignee=None, sort='none', since=None):#, milestone='none',  labels='none', sort='none', direction='none', creator='none', since='none'):
 
         '''
         This method returns the list of the issues from GitHub Repository in form of Issue classes.
@@ -275,13 +289,39 @@ class GitHubInterface():
         client.get_issues_list(repo_name='bogumilchilinski/dynpy', state='closed', assignee='amvdek')
 
         '''
+
+        if assignee is not None:
+            arg_dict =  {'assignee':assignee}
+        else:
+            arg_dict = {}
+            
+        if since is not None:
+            arg_since =  {'since':since}
+        else:
+            from datetime import datetime
+            since_date = "2024-09-01"
+            date_string = since_date + "T00:00:00Z"
+            date_object = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ")
+            arg_since = {'since':date_object}
+
+        if repo_name is None:
+            repo_name = self._repo_name
+
         issue_list=[]
-        for issue in list(self.g.get_repo(repo_name).get_issues(state=state, assignee=assignee, sort=sort, since=since)):#, milestone=milestone,  labels=labels, sort=sort, direction=direction, creator=creator)):
+        for issue in list(self.g.get_repo(repo_name).get_issues(state=state, sort=sort, **arg_since, **arg_dict)):#, milestone=milestone,  labels=labels, sort=sort, direction=direction, creator=creator)):
             issue_list.append(issue)
         return issue_list
 
-    
-    def as_df(self):
+
+    def issues_list(self, repo_name=None, state='all', assignee=None, sort='none', since=None):
+
+        if repo_name is None:
+            repo_name = self._repo_name
+
+        return self.get_issues_list(repo_name=repo_name, state=state, assignee=assignee, sort=sort, since=since)
+
+
+    def get_issues_as_df(self):
         '''
         This method returns the Pandas DataFrame containing Issues.
 
@@ -298,7 +338,7 @@ class GitHubInterface():
         issue_title_list=[]
         issue_number_list=[]
         issue_assignees_list=[]
-        for issue in self.get_issues_list(repo_name='bogumilchilinski/dynpy', state='open', assignee='amvdek'):
+        for issue in self.get_issues_list(repo_name=self._repo_name, state='open', assignee='amvdek'):
             issue_title_list.append(issue.title)
             issue_number_list.append(issue.number)
 #             issue_assignees_list.append(issue.assignees)
@@ -352,6 +392,80 @@ class GitHubInterface():
             self.g = g.close()
         else:
             pass
+
+
+    def str_to_print_issue(self, issue):
+
+
+        title = issue.title
+        body = issue.body
+        no = issue.number
+        asignees = issue.assignees
+        id = issue.id
+        comms = issue.comments
+        labels = issue.labels
+        created = issue.created_at
+        closed = issue.closed_at
+
+        label_names='/ '
+
+        for label in labels:
+            label_names = label_names + label.name + ' / '
+
+
+        asignees_names='/ '
+
+        for asignee in asignees:
+            asignees_names = asignees_names + asignee.login + ' / '
+
+        str_to_print =f'''
+
+        ---------------------\n
+        Title: {title} --- number {no} \n
+        ---------------------\n
+        Assignees: {asignees_names} \n
+        ---------------------\n
+        Issue created at {created} \n
+        ---------------------\n
+        Issue closed at {closed}
+        ---------------------\n
+        Labels: {label_names}
+        ---------------------\n
+        Description: {body} \n
+        ---------------------\n
+
+
+        '''
+
+
+        return str_to_print
+
+    def print_issue(self, issue):
+
+        return print(self.str_to_print_issue(issue=issue))
+
+
+    def get_issue(self, repo_name=None, user = None, issue_number = None):
+                                        
+        #SyntaxError: non-default argument follows default argument, w poprzedniej wersji pojawiał się błąd, tymczasowo dodałem None do pozostałych argumentów. d.stryjewski
+
+        if repo_name is None:
+            repo_name = self._repo_name
+
+
+        since_date = "2018-08-26"
+        date_string = since_date + "T00:00:00Z"
+        date_object = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ")
+
+        issues_list = self.get_issues_list(repo_name=repo_name, state='all', assignee=user, sort='none', since=date_object)
+
+        for issue in issues_list:
+
+            if issue.number == issue_number:
+                break
+
+        return issue
+
 
 
 class ClassLister:
@@ -478,6 +592,33 @@ import importlib
             f.write('\n\n')
 
         f.close()
+        
+    def get_init_file_content(self):
+        from datetime import date, time
+        from dynpy.utilities.report import ObjectCode
+        
+        output_str = f'#Last update was done on {date.today()} \n\n'
+        
+        lst = []
+        lst = self.submodgetter()
+        for submod in lst:    
+            class_lst = self.classlistgetter(submod)
+            output_str = output_str + f'from .{submod} import '
+
+            size = len(class_lst)
+            i = 1
+
+            for cl in class_lst:
+
+                if i < size:
+                    output_str = output_str + f'{cl}, '
+                else:
+                    output_str = output_str + f'{cl}'
+
+                i += 1 
+
+            output_str = output_str + '\n\n'
+        return output_str
 
 
 
@@ -710,6 +851,88 @@ keyword - optional argument, keyword by which the classes are searched for
     
     def __repr__(self):
         return self.get_module_tree()
+    
+    def _get_init(self):
+        from datetime import date, time
+        from dynpy.utilities.report import ObjectCode
+
+        output_str = f'''#Last update was done on {date.today()}  '''
+        
+        self.get_classes()
+        self.full_list = list(set(self.full_list))        
+        self.full_list = sorted(self.full_list)
+        
+        if len(self.full_list) == 0:
+            try:
+                output_str = ClassLister(self.directory).get_init_file_content()
+            except:
+                pass
+
+        prev = []
+        
+        for element in self.full_list:
+            if element[0] != prev:
+                
+                prev = element[0]
+                output_str = output_str[:-2]
+                output_str = output_str + '\n\n'
+                
+                s = prev
+                s = s[s.find(self.directory)+len(self.directory):s.rfind("")]
+                if "'" in s:
+                    s = s[:-1]
+                output_str = output_str + f'from {s} import '
+
+                output_str = output_str + f'{element[1]}, '
+            else:
+                output_str = output_str + f'{element[1]}, '
+
+        if output_str[-2] == ',':
+            output_str = output_str[:-2]
+            
+        return output_str
+    
+    @staticmethod
+    def get_init_file_content(dir_list = None):
+        
+        from dynpy.utilities.report import ReportText, ObjectCode
+        
+        if dir_list == None:
+            dir_list = [
+    'dynpy',
+    'dynpy.models',
+    'dynpy.models.control',
+    'dynpy.models.electric',
+    'dynpy.models.mechanics',
+    'dynpy.models.odes',
+    'dynpy.solvers',
+    'dynpy.utilities',
+    'dynpy.utilities.components',
+    'dynpy.utilities.components.guides',
+    'dynpy.utilities.components.guides.development',
+    'dynpy.utilities.components.guides.github',
+    'dynpy.utilities.components.guides.pandas',
+    'dynpy.utilities.components.guides.reporting',
+    'dynpy.utilities.components.guides.systems',
+    'dynpy.utilities.components.mech',
+    'dynpy.utilities.components.ode',
+    'dynpy.utilities.components.miscellaneous',
+    'dynpy.utilities.documents',
+                        ]
+        for element in dir_list:
+            display(ReportText(f'This is __init__.py content for {element} module'))
+            display(ObjectCode(__class__(element)._get_init()))
+    
+    @staticmethod
+    def get_import(keyword):
+        from dynpy.utilities.report import ObjectCode
+        
+        tmp = __class__('dynpy').get_classes(keyword)
+
+        if len(tmp) == 0:
+            return "Couldn't get import"
+        else:
+            return ObjectCode(f'from {tmp[0][0]} import {tmp[0][1]}')
 
 class TreeNode:
     '''

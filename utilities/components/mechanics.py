@@ -198,7 +198,9 @@ class ReportComponent(Subsection):
         
         
         if title is None:
-            title = self.title
+            title = self.dynamic_title()
+        
+        
         
         super().__init__(title=title, numbering=numbering, label=label, **kwargs)
         CurrentContainer(self)
@@ -207,6 +209,10 @@ class ReportComponent(Subsection):
             ip_display(IPMarkdown(f'## {self.title}'))
         
         self.append_elements()
+        
+        
+    def dynamic_title(self):
+        return self.title
         
     def append_elements(self):
         pass

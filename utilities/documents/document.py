@@ -10,6 +10,12 @@ from ..components.mech import en as mech_comp
 from ..components.guides import en as guide_comp
 from ..components.ode import pl as ode_comp
 
+from ..components.guides.reporting import en as reporting_comp
+from ..components.guides.github import en as github_comp
+from ..components.guides.systems import en as systems_comp
+from ..components.guides.development import en as development_comp
+from ..components.guides.pandas import en as pandas_comp
+
 #from sympy import *
 import datetime
 
@@ -1069,12 +1075,12 @@ class IntroToCocalcGuide(Guide):
         
         comp_list=[
 
-            guide_comp.CocalcLoginComponent,
-            guide_comp.JupyterSetUpComponent,
-            guide_comp.CocalcFolderComponent,
+            github_comp.CocalcLoginComponent,
+            development_comp.JupyterSetUpComponent,
+            github_comp.CocalcFolderComponent,
 
-            guide_comp.CocalcDynSysListComponent,
-            guide_comp.ReportingBasicsComponent,
+            github_comp.CocalcDynSysListComponent,
+            reporting_comp.ReportingBasicsComponent,
             
 
         ]
@@ -1088,10 +1094,10 @@ class UsageOfDynamicSystemsGuide(Guide):
 
         comp_list=[
 
-            guide_comp.DynamicSystemCallComponent,
-            guide_comp.DynamicSystemMethodsUsageComponent,
-            guide_comp.SimulationsComponent,
-            guide_comp.SimulationReportComponent,
+            systems_comp.DynamicSystemCallComponent,
+            systems_comp.DynamicSystemMethodsUsageComponent,
+            systems_comp.SimulationsComponent,
+            reporting_comp.SimulationReportComponent,
 
         ]
 
@@ -1112,12 +1118,12 @@ class IntroToPandasGuide(Guide):
 
         comp_list=[
 
-            guide_comp.PandasTableGenerationComponent,
-            guide_comp.PandasMethodsComponent,
-            guide_comp.BasicOperationsComponent,
-            guide_comp.DynamicSystemCallComponent,
-            guide_comp.SimulationsComponent, #Common with *UsageOfDynamicSystemsGuide* class
-            guide_comp.DifferentSimulationsComponent,
+            pandas_comp.PandasTableGenerationComponent,
+            pandas_comp.PandasMethodsComponent,
+            reporting_comp.BasicOperationsComponent,
+            systems_comp.DynamicSystemCallComponent,
+            systems_comp.SimulationsComponent, #Common with *UsageOfDynamicSystemsGuide* class
+            reporting_comp.DifferentSimulationsComponent,
 
 
         ]
@@ -1141,12 +1147,12 @@ class BasicsOfODESystemGuide(Guide):
 
         comp_list=[
 
-            guide_comp.BasicUsageOfODESystemComponent,
-            guide_comp.ODEReportComponent,
-            guide_comp.ReportCompUseComponent,
-            guide_comp.ProjectileExampleComponent,
-            guide_comp.ODESimulationComponent,
-            guide_comp.ODENumericalSimulationsComponent
+            reporting_comp.BasicUsageOfODESystemComponent,
+            reporting_comp.ODEReportComponent,
+            reporting_comp.ReportCompUseComponent,
+            reporting_comp.ProjectileExampleComponent,
+            systems_comp.ODESimulationComponent,
+            systems_comp.ODENumericalSimulationsComponent
 
         ]
 
@@ -1168,15 +1174,15 @@ class DynSysOverviewReport(UsageOfDynamicSystemsGuide):
     def _report_components(self):
 
         comp_list=[
-            guide_comp.DynSysOverviewUsageComponent,
-            guide_comp.DynamicSystemCallComponent,
-            guide_comp.NumericalAnalysisSimulationComponent,
-            guide_comp.AnalyticalSimulationComponent,
-            #guide_comp.SimulationsComponent,
-            #guide_comp.SimulationReportComponent,
-            guide_comp.DynSysCodeComponent,
-            guide_comp.IssuePreparationComponent,
-            guide_comp.DynamicSystemCheckerComponent,
+            systems_comp.DynSysOverviewUsageComponent,
+            systems_comp.DynamicSystemCallComponent,
+            pandas_comp.NumericalAnalysisSimulationComponent,
+            pandas_comp.AnalyticalSimulationComponent,
+            #systems_comp.SimulationsComponent,
+            #reporting_comp.SimulationReportComponent,
+            systems_comp.DynSysCodeComponent,
+            github_comp.IssuePreparationComponent,
+            systems_comp.DynamicSystemCheckerComponent,
 
         ]
 
@@ -1189,11 +1195,11 @@ class BasicsOfDynSysImplementationGuide(UsageOfDynamicSystemsGuide):
     def _report_components(self):
 
         comp_list=[
-            guide_comp.DynSysImplementationComponent,
-            guide_comp.DynamicSystemCallComponent,
-            guide_comp.DynamicSystemMethodsUsageComponent,
-            guide_comp.SimulationsComponent,
-            guide_comp.DynSysCodeComponent,
+            systems_comp.DynSysImplementationComponent,
+            systems_comp.DynamicSystemCallComponent,
+            systems_comp.DynamicSystemMethodsUsageComponent,
+            systems_comp.SimulationsComponent,
+            systems_comp.DynSysCodeComponent,
 
         ]
 
@@ -1207,26 +1213,26 @@ class BasicsOfReportingGuide(UsageOfDynamicSystemsGuide):
 
         comp_list=[
 
-            guide_comp.ReportingBasicsComponent,
-            guide_comp.DynamicSystemCallComponent,
-            guide_comp.SimulationsComponent,
-            guide_comp.SimulationReportComponent,
-            guide_comp.ReportingModuleIntroComponent,
-            guide_comp.LibrariesImportComponent,
-            guide_comp.DocumentComponent,
-            guide_comp.CurrentContainerComponent,
-            guide_comp.ReportTextComponent,
+            reporting_comp.ReportingBasicsComponent,
+            systems_comp.DynamicSystemCallComponent,
+            systems_comp.SimulationsComponent,
+            reporting_comp.SimulationReportComponent,
+            reporting_comp.ReportingModuleIntroComponent,
+            reporting_comp.LibrariesImportComponent,
+            reporting_comp.DocumentComponent,
+            reporting_comp.CurrentContainerComponent,
+            reporting_comp.ReportTextComponent,
 #             guide_comp.
-            guide_comp.PictureComponent,
-            guide_comp.SympyFormulaComponent,
-            guide_comp.DocumentGenerationComponent,
-            guide_comp.PredefinedSectionComponent,
+            reporting_comp.PictureComponent,
+            reporting_comp.SympyFormulaComponent,
+            reporting_comp.DocumentGenerationComponent,
+            reporting_comp.PredefinedSectionComponent,
 #             guide_comp.
-            guide_comp.TablesCreationComponent,
-            guide_comp.AutomarkerIntroComponent ,
-            guide_comp.CodeEmbeddingComponent ,
+            pandas_comp.TablesCreationComponent,
+            reporting_comp.AutomarkerIntroComponent,
+            reporting_comp.CodeEmbeddingComponent,
 #             guide_comp.
-            guide_comp.UnitRegistryIntroComponent
+            reporting_comp.UnitRegistryIntroComponent
 #             guide_comp.
 
         ]
@@ -1240,10 +1246,10 @@ class ODESystemOverviewReport(UsageOfDynamicSystemsGuide):
     def _report_components(self):
 
         comp_list=[
-            ode_comp.ODEInitCodeComponent,
-            ode_comp.ODEGeneralSolutionComponent,
-            ode_comp.ODESteadySolutionComponent,
-            ode_comp.ODESystemRepresentationComponent,
+            systems_comp.ODEInitCodeComponent,
+            systems_comp.ODEGeneralSolutionComponent,
+            systems_comp.ODESteadySolutionComponent,
+            systems_comp.ODESystemRepresentationComponent,
 
         ]
 
@@ -1265,11 +1271,11 @@ class InterimProjectGuidelines(UsageOfDynamicSystemsGuide):
 
         comp_list=[
 
-            guide_comp.InterimScheduleComponent,
-            guide_comp.InterimTemplateComponent,
-#             guide_comp.DynamicSystemCallComponent,
-#             guide_comp.SimulationsComponent,
-#             guide_comp.SimulationReportComponent,
+            development_comp.InterimScheduleComponent,
+            development_comp.InterimTemplateComponent,
+#             systems_comp.DynamicSystemCallComponent,
+#             systems_comp.SimulationsComponent,
+#             reporting_comp.SimulationReportComponent,
 
         ]
 
@@ -1291,11 +1297,11 @@ class ResearchProjectGuidelines(UsageOfDynamicSystemsGuide):
 
         comp_list=[
 
-            guide_comp.InterimScheduleComponent,
-            guide_comp.InterimTemplateComponent,
-#             guide_comp.DynamicSystemCallComponent,
-#             guide_comp.SimulationsComponent,
-#             guide_comp.SimulationReportComponent,
+            development_comp.InterimScheduleComponent,
+            development_comp.InterimTemplateComponent,
+#             systems_comp.DynamicSystemCallComponent,
+#             systems_comp.SimulationsComponent,
+#             reporting_comp.SimulationReportComponent,
 
         ]
 
@@ -1326,10 +1332,10 @@ class BasicsOfReportComponentImplementationGuide(UsageOfDynamicSystemsGuide):
 
         comp_list=[
 
-            guide_comp.ReportCompImplementationComponent,
-            guide_comp.ReportingCompsUsageComponent,
-#             guide_comp.ReportCompImplementationIssueComponent, #Obecnie jest problem z argumentem reported_object, dokładniej classname i sypie błędem
-            guide_comp.ReportingComponentsList
+            reporting_comp.ReportCompImplementationComponent,
+            reporting_comp.ReportingCompsUsageComponent,
+#             reporting_comp.ReportCompImplementationIssueComponent, #Obecnie jest problem z argumentem reported_object, dokładniej classname i sypie błędem
+            reporting_comp.ReportingComponentsList
 
         ]
 
@@ -1347,10 +1353,11 @@ class GithubSynchroGuide(UsageOfDynamicSystemsGuide):
 
         comp_list=[
 
-            guide_comp.GitSynchroPanelAccessComponent,
-            guide_comp.GitSynchroIntroComponent,
-            guide_comp.UsageOfGitHubInterfacesComponent,
-            #guide_comp.GithubIssueReportComponent, #komponent do listowania issue, chyba nie jest tutaj potrzebny do pokazania
+            github_comp.GitSynchroPanelAccessComponent,
+            github_comp.GitSynchroIntroComponent,
+            github_comp.UsageOfGitHubInterfacesComponent,
+            github_comp.UsageOfMeetingCreatorComponent,
+            #github_comp.GithubIssueReportComponent, #komponent do listowania issue, chyba nie jest tutaj potrzebny do pokazania
 
         ]
 
@@ -1368,4 +1375,3 @@ class GithubSynchroGuide(UsageOfDynamicSystemsGuide):
 
 
         return default_data
-    

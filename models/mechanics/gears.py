@@ -318,6 +318,13 @@ class EquivalentSDOFGearModel(ComposedSystem):
         }
 
         return self.sym_desc_dict
+    def _report_components(self):
+
+        comp_list = [
+            *REPORT_COMPONENTS_LIST
+        ]
+
+        return comp_list
 
     def units(self):
         units_dict={

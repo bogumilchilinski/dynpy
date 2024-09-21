@@ -1256,11 +1256,13 @@ class ODESystem(AnalyticalSolution):
         dvars = sys.q
         ivar = sys.ivar
         
-        if parameters == None:
+        if parameters is None:
             parameters = cls._parameters
 
-        if ode_order == None:
-            ode_order = cls._ode_order
+        #if ode_order is None: # try of order spotting
+        #    ode_order = cls._ode_order
+
+            
 
         return cls._constructor(ds_lhs, dvars, ivar=ivar, ode_order = ode_order, parameters = parameters)
 
@@ -1359,6 +1361,8 @@ class ODESystem(AnalyticalSolution):
 
         if ode_order is not None:
             obj._ode_order = ode_order
+        else:
+            obj._ode_order = min(obj.spot_order().values())
 
             
         return obj

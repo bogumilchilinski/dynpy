@@ -1,7 +1,7 @@
 from sympy import *
 from dynpy.solvers.linear import ODESystem
 from dynpy.solvers.nonlinear import MultiTimeScaleSolution
-from dynpy.models.mechanics.trolleys import MDoFTMD1
+# from dynpy.models.mechanics.trolleys import MDoFTMD1
 
 class LinearSecondOrderMSM(ODESystem):
     

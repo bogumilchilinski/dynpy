@@ -135,7 +135,7 @@ class ODESystemCodeComponent(ReportComponent):
     @property
     def footer_text(self):
 
-        return "Presented method can change a type of the equation represantation."
+        return "Presented method can change a type of the equation representation."
 
     def append_elements(self):
 

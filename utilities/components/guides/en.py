@@ -4465,11 +4465,33 @@ class ReportingComponentsList(ReportComponent):
         import dynpy
         from ....utilities.creators import ModuleStructure
         display(ObjectCode(ModuleStructure(dynpy.utilities.components).get_module_tree()))
-              
+        
+class UsageOfMeetingCreatorComponent(ReportComponent):
+    
+    
+    title="Github meeting creator class"
+
+    def append_elements(self):
+        from ....utilities.creators import MeetingIssueCreator
+        display(ReportText('This class is used to create meeting issues through API. The class consists of the following code: \\newline'))
+        system = self.reported_object
+        display(ObjectCode(MeetingIssueCreator))
+        display(ReportText(' \\newline To learn more about this class use help. \\newline'))
+
 class GithubIssueReportComponent(ReportComponent):
 
     title="Details of GitHub issue"
 
+    def dynamic_title(self):
+        
+        
+        issue = self.reported_object
+        if issue==None:
+            from github.Issue import Issue
+            issue = Issue(requester = 'lsikor', headers = {'title' : 'TEST'}, attributes = {'body':'Przykladowy opis - nie został podany żaden argument', 'title':'TEST', 'number': 999}, completed = False)
+        
+        return "Details of " + issue.title + "- No: " + str(issue.number)
+    
     def append_elements(self):
         
         issue = self.reported_object
@@ -4483,7 +4505,7 @@ class GithubIssueReportComponent(ReportComponent):
         else:
             display(Markdown("Issue description: " + issue.body))
         display(ReportText('\\newline'))
-        display(ReportText('-'*130))
+        display(ReportText('-'*100))
         display(ReportText('\\newline'))
         
         
@@ -4762,6 +4784,7 @@ class ReportingCompsUsageComponent(ReportComponent):
         display(ObjectCode(rep_obj_str))
         display(ReportText('A tutaj przykładowy jupek z wykorzystaniem tego komponentu:'))
         display(ObjectCode(rep_jup_str))
+
 class DynamicSystemCheckerComponent(ReportComponent):
 
     title="DynamicSystemCheckerComponent"
@@ -4785,3 +4808,30 @@ class DynamicSystemCheckerComponent(ReportComponent):
         print(test_result)
         '''
         display(ObjectCode(system_check_code))
+        
+class ModuleStructureComponent(ReportComponent):
+
+    title="Introduction to ModuleStructure class"
+    def append_elements(self):
+        display(ReportText('ModuleStructure is a class that can be used to report dynsys class structure. There are few methods implemented. First method get_classes will return list of classes and modules. It can be called using bellow code:'))
+        display(ObjectCode('''import dynpy
+from dynpy.utilities.creators import ModuleStructure
+
+ModuleStructure('dynpy.utilities.components').get_classes()
+        '''))
+        display(ReportText('You can also display this sstructure as tree using bellow method:'))
+        display(ObjectCode('''import dynpy
+from dynpy.utilities.creators import ModuleStructure
+
+display(ObjectCode(ModuleStructure(dynpy.utilities.components).get_module_tree()))
+        '''))
+        display(ReportText('This class can also be used for updating init files in submodules. Bellow call will outout ready to use text for init file:'))
+        display(ObjectCode('''from dynpy.utilities.creators import ModuleStructure
+
+ModuleStructure.get_init_file_content()
+        '''))
+        display(ReportText('Another usefull feature might be geting import command for any class used in dynpy'))
+        display(ObjectCode('''from dynpy.utilities.creators import ModuleStructure
+
+ModuleStructure.get_import('ObjectCode')
+        '''))
