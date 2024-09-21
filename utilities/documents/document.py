@@ -1096,8 +1096,11 @@ class UsageOfDynamicSystemsGuide(Guide):
 
             systems_comp.DynamicSystemCallComponent,
             systems_comp.DynamicSystemMethodsUsageComponent,
-            systems_comp.SimulationsComponent,
-            reporting_comp.SimulationReportComponent,
+
+            pandas_comp.NumericalAnalysisSimulationComponent,
+            
+            # systems_comp.SimulationsComponent, # entire component to rewrite
+            # reporting_comp.SimulationReportComponent,
 
         ]
 

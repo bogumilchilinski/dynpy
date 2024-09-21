@@ -177,20 +177,28 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
         display(ReportText('Rozwiązanie ogólne równania:'))
         #display(Picture('./Image/ogolne_w.jpg'))
 
-        solution=system._ode_system.solution[0]
-        display(GuideCode('''solution=SDOFWinchSystem()._ode_system.solution[0]'''.replace('SDOFWinchSystem',system_name)))
-        display(GuideCode('solution_sym=SDOFWinchSystem()._ode_system.solution'.replace('SDOFWinchSystem',system_name)))
-        display(SympyFormula(solution))
+#         solution=system._ode_system.steady_solution[0]
+#         display(GuideCode('''solution=SDOFWinchSystem()._ode_system.solution[0]'''.replace('SDOFWinchSystem',system_name)))
+#         display(GuideCode('solution_sym=SDOFWinchSystem()._ode_system.solution'.replace('SDOFWinchSystem',system_name)))
+#         display(SympyFormula(solution))
 
-        display(ReportText('Rozwiązanie szczególne równania:'))
+#         display(ReportText('Rozwiązanie szczególne równania:'))
 
 
 
-        steady_solution=system._ode_system.steady_solution[0]
-        display(GuideCode('''steady_solution=SDOFWinchSystem()._ode_system.steady_solution[0]'''.replace('SDOFWinchSystem',system_name)))
-        display(SympyFormula(steady_solution))
+#         steady_solution=system._ode_system.steady_solution[0]
+#         display(GuideCode('''steady_solution=SDOFWinchSystem()._ode_system.steady_solution[0]'''.replace('SDOFWinchSystem',system_name)))
+#         display(SympyFormula(steady_solution))
     
-    
+steady_sol_str=(
+'''
+
+slownik_numerical=system.get_numerical_parameters()
+
+steady_solution=SDOFWinchSystem()._ode_system.subs(slownik_numerical).steady_solution
+steady_solution_subs=steady_solution
+
+''')    
 
 
 class SimulationsComponent(ReportComponent):

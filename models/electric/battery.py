@@ -39,6 +39,10 @@ class BatteryCell(ComposedSystem):
 
     R_1=Symbol('R_1', positive=True)
     R_2=Symbol('R_2', positive=True)
+
+    L_1=Symbol('L_1', positive=True)
+    L_2=Symbol('L_2', positive=True)
+    
     C=Symbol('C', positive=True)
     U=Symbol('U', positive=True)
     q_1=dynamicsymbols('q_1')
@@ -91,11 +95,19 @@ class BatteryCell(ComposedSystem):
     @property
     def components(self):
         components = {}
+        
+        self._coil_1 = Inductor(self.L_1, self.q_1, qs=[self.q_1])
+        self._coil_2 = Inductor(self.L_2, self.q_2, qs=[self.q_2])
+        
         self._resistor_1 = Resistor(self.R_1, self.q_1, qs=[self.q_1])
         self._resistor_2 = Resistor(self.R_2, q0=self.q_2, qs=[self.q_2])
         self._voltagesource = VoltageSource(self.U, q0 = self.q_1, qs=[self.q_1])
         self._capacitor = Capacitor(self.C, q0 = self.q_1-self.q_2, qs=[self.q_1, self.q_2])
 
+        
+        components['coil_1'] = self._coil_1
+        components['coil_2'] = self._coil_2
+        
         components['resistor_1'] = self._resistor_1
         components['resistor_2'] = self._resistor_2
         components['voltagesource'] = self._voltagesource
