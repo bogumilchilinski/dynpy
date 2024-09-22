@@ -348,6 +348,7 @@ class MultiTimeScaleSolution(ODESystem):
         if label == None:
             label = obj._label = obj.__class__.__name__ + ' with ' + str(
                 len(obj.dvars)) + ' equations'
+            
         obj._label = 123
                 
         obj.eps = eps
@@ -396,6 +397,7 @@ class MultiTimeScaleSolution(ODESystem):
     @omega.setter
     def omega(self, omega):
         self._omega = omega
+        
     @property
     def ics(self):
         return self._ics
@@ -458,10 +460,9 @@ class MultiTimeScaleSolution(ODESystem):
 
     def set_order(self,order):
         
-        new_ode = self#.copy()
-        new_ode.order = order
+
         
-        return new_ode
+        return MultiTimeScaleSolution(self.as_matrix(),self.vars,ivar=self.ivar,omega=S.One,order=order,eps=self.eps )   
     
     def _assign_properties(self,obj):
         
@@ -492,7 +493,7 @@ class MultiTimeScaleSolution(ODESystem):
 
         self._t_list = [
             t_i(self.ivar)
-            for t_i in symbols(f't_0:{self._order+1}', cls=Function, real=True)
+            for t_i in symbols(f't_0:{self.order+1}', cls=Function, real=True)
         ]
 
         return self._t_list

@@ -328,8 +328,11 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
     @property
     def header_text(self):
         
+        from  ....solvers.nonlinear import MultiTimeScaleSolution
+        base_system = self.reported_object
         
-        system = self.reported_object.set_order(1)
+        #system = MultiTimeScaleSolution(base_system.as_matrix(),base_system.vars,ivar=base_system.ivar,order=1)
+                                
 #         approx_sys = system.approximated(3)
 
         zeroth_ord_eq = Symbol('Omega')#system.nth_eoms_approximation(0)
@@ -340,7 +343,10 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
     @property
     def middle_text(self):
         
-        system = self.reported_object.set_order(1)
+        from  ....solvers.nonlinear import MultiTimeScaleSolution
+        base_system = self.reported_object
+        #system = MultiTimeScaleSolution(base_system.as_matrix(),base_system.vars,ivar=base_system.ivar,order=1)
+                                
 
         zeroth_ord_approx_eq = Symbol('Omega')#Eq(system.nth_eoms_approximation(0).lhs[1]-system.nth_eoms_approximation(0).rhs[1],0)
 
@@ -350,14 +356,20 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
     @property
     def footer_text(self):
         
-        system = self.reported_object
-        t_list = system.t_list
+        from  ....solvers.nonlinear import MultiTimeScaleSolution
+        base_system = self.reported_object
+        system = MultiTimeScaleSolution(base_system.as_matrix(),base_system.vars,ivar=base_system.ivar,order=1)
+                                        
+        t_list = base_system.t_list
 
         return f"Since ${latex(t_list[0])}$ and ${latex(t_list[1])}$ are treated as independent, the differential equation becomes a partial differential equation for a function of two variables {t_list[0]} and {t_list[1]}. Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of {t_list[1]}."
 
     def append_elements(self):
         
-        system = self.reported_object.set_order(1)
+        from  ....solvers.nonlinear import MultiTimeScaleSolution
+        
+        base_system = self.reported_object
+        system = MultiTimeScaleSolution(base_system.as_matrix(),base_system.vars,ivar=base_system.ivar,order=1)
         
 
         t_list = system.t_list
