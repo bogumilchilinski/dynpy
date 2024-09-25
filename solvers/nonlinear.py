@@ -209,7 +209,7 @@ class ODESystemDsolve(ODESystem):
         #return FirstOrderLinearODESystem 
     
 class NthOrderODEsApproximation(FirstOrderLinearODESystem):
-    _ode_order=1
+    _ode_order=2
 
     _simp_dict = {}
     _callback_dict = {}
@@ -517,7 +517,7 @@ class MultiTimeScaleSolution(ODESystem):
 
         solution = sum(
             (self.approximation_function(comp_ord, order) * self.eps**comp_ord
-             for comp_ord in range(order + 1)), sym.zeros(dvars_no, 1))
+            for comp_ord in range(order + 1)), sym.zeros(dvars_no, 1))
 
         return ODESolution.from_vars_and_rhs(self.dvars, solution)
 
@@ -588,13 +588,13 @@ class MultiTimeScaleSolution(ODESystem):
                 dvars=self.approximation_function(order),
                 ivar=self.t_list[0],
                 ode_order=2,
-                parameters=self.t_list).as_first_ode_linear_system()
+                parameters=self.t_list)
             for order in range(min_order, max_order + 1)
         ]
         
         
-        #return approx_list
-        return [NthOrderODEsApproximation.from_ode_system(approx_ode)   for approx_ode in approx_list]
+        return approx_list
+        #return [NthOrderODEsApproximation.from_ode_system(approx_ode)   for approx_ode in approx_list]
 
     def _general_sol(self, order=1):
 
@@ -625,6 +625,7 @@ class MultiTimeScaleSolution(ODESystem):
         for order, approx in enumerate(approx_eoms_list[1:]):
 
             approx._parameters = self._t_list[1:]
+            approx = approx.as_first_ode_linear_system()
 
             eqns_map = lambda obj: (TR10(TR8(TR10(obj.expand()).expand())).
                                     expand().doit().expand())

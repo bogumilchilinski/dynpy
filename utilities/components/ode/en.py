@@ -345,7 +345,7 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
         
         from  ....solvers.nonlinear import MultiTimeScaleSolution
         base_system = self.reported_object
-        #system = MultiTimeScaleSolution(base_system.as_matrix(),base_system.vars,ivar=base_system.ivar,order=1)
+        system = base_system.set_order(0)
                                 
 
         zeroth_ord_approx_eq = Symbol('Omega')#Eq(system.nth_eoms_approximation(0).lhs[1]-system.nth_eoms_approximation(0).rhs[1],0)
@@ -358,7 +358,7 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
         
         from  ....solvers.nonlinear import MultiTimeScaleSolution
         base_system = self.reported_object
-        system = MultiTimeScaleSolution(base_system.as_matrix(),base_system.vars,ivar=base_system.ivar,order=1)
+        system = system = base_system.set_order(0)
                                         
         t_list = base_system.t_list
 
@@ -369,12 +369,12 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
         from  ....solvers.nonlinear import MultiTimeScaleSolution
         
         base_system = self.reported_object
-        system = MultiTimeScaleSolution(base_system.as_matrix(),base_system.vars,ivar=base_system.ivar,order=1)
+        system = base_system.set_order(0)
         
 
         t_list = system.t_list
         zeroth_ord_approx = system.eoms_approximation_list()[0]
-        zeroth_ord_approx_eq = Eq((zeroth_ord_approx.lhs-zeroth_ord_approx.rhs)[1],0,evaluate=False)
+        zeroth_ord_approx_eq = Eq((zeroth_ord_approx.lhs-zeroth_ord_approx.rhs)[0],0,evaluate=False)
 
         display(ReportText(  self.header_text   ))
 
@@ -427,7 +427,7 @@ class FirstOrderApproximatedEqComponent(ReportComponent):
 
         t_list = system.t_list
         first_ord_approx = system.eoms_approximation_list()[1]
-        first_ord_approx_eq = Eq((first_ord_approx.lhs[1]-first_ord_approx.rhs[1]),0,evaluate=False)
+        first_ord_approx_eq = Eq((first_ord_approx.lhs[0]-first_ord_approx.rhs[0]),0,evaluate=False)
 
         display(ReportText(  self.header_text   ))
 
@@ -461,13 +461,18 @@ class MSMCalculationsOrderComponent(ReportComponent):
 
     def append_elements(self):
 
-        system = self.reported_object
+        system = ode = self.reported_object
 
         display(ReportText(  "First step involves method for prediction of solution"  ))       
         display(ObjectCode("ode.predicted_solution()"))     
 
-        display(ReportText(  "Next stage is approximation of eoms - the related method is as follows:"  ))       
+        display(ReportText(  "Next stage is approximation of eoms - the related method is as follows - it substitutes result of previous method:"  ))       
         display(ObjectCode("ode.eoms_approximation()"))   
+        display(ReportText(  f"This method returns object of {type(ode.eoms_approximation())} type that is used to create list of approximation odes."  ))   
+        
+        display(ReportText(  f"Odes approximation allows to find list of new ode systems, it's handled by the following method:"  ))
+        display(ObjectCode("ode.eoms_approximation_list()"))  
+        
 
 class PredictedSolutionComponent(ReportComponent):
     
