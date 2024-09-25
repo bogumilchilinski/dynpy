@@ -1378,3 +1378,35 @@ class GithubSynchroGuide(UsageOfDynamicSystemsGuide):
 
 
         return default_data
+    
+class MSMethodOverviewReport(UsageOfDynamicSystemsGuide):
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+        ode_comp.ODESystemComponent,
+        ode_comp.VariablesComponent,
+        ode_comp.ODESystemCodeComponent,
+        ode_comp.MSMCalculationsOrderComponent,
+        ode_comp.PredictedSolutionComponent,
+        ode_comp.ZerothOrderApproximatedEqComponent,
+        ode_comp.FirstOrderApproximatedEqComponent,
+        ]
+
+        return comp_list
+
+
+    @property
+    def default_reported_object(self):
+        from dynpy.models.mechanics.gears import EquivalentSDOFGearModel
+
+        sys = EquivalentSDOFGearModel()
+
+        t=ivar=Symbol('t')
+        z = sys.z
+        delta = Symbol('delta',positive=True)
+        eps=sys.eps
+
+        nonlin_ode = MultiTimeScaleSolution(z.diff(t,2)+z*(1+delta*eps+eps*sin(t)), z, ivar=ivar, omega=S.One, order=3,eps=eps)
+        return nonlin_ode

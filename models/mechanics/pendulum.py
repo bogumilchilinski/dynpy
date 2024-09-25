@@ -101,8 +101,8 @@ class Pendulum(NonlinearComposedSystem):
 
         components = {}
         
-        self.gravitationalforce = GravitationalForce(self.m, self.g, self.l**2 * (1 - cos(self.angle)), qs = self.qs)
-        self.material_point = MaterialPoint(self.m * self.l**2, pos1=self.angle*self.l, qs=self.qs)
+        self.gravitationalforce = GravitationalForce(self.m, self.g, self.l * (1 - cos(self.angle)), qs = self.qs)
+        self.material_point = MaterialPoint(self.m , pos1=self.angle*self.l, qs=self.qs)
         
         components['Gravitational_Force'] = self.gravitationalforce        
         components['Material_Point'] = self.material_point

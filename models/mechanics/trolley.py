@@ -837,7 +837,7 @@ class TrolleyWithPendulum(ComposedSystem):
 #Zrobione Amadi
 class DampedTrolleyWithPendulum(TrolleyWithPendulum):
 
-    scheme_name = 'kin_exct_pendulum.PNG'
+    scheme_name = 'trolley_pendulum_tmd.png'
     real_name = 'elastic_pendulum_real.PNG'
 
     l = Symbol('l', positive=True)
