@@ -76,11 +76,8 @@ class CurrentContainer:
         Picture.set_container(self._container)
         SympyFormula.set_container(self._container)
         
-        
-        
-        
+
         Markdown.set_container(self._container)
-        
         
         LatexDataFrame.set_container(self._container)
         LatexDataFrame.set_picture_mode(True)

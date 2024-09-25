@@ -228,6 +228,7 @@ class MultivariableTaylorSeries(Expr):
 
 class AnalyticalSolution(ImmutableMatrix):
 
+    _numerical_expand = False
     _default_doctype = ExampleTemplate
 
     def __new__(cls, elements, vars = None, rhs=None, evaluate=True, **options):
@@ -1866,13 +1867,17 @@ class ODESystem(AnalyticalSolution):
 
         return self._numerized(parameters=parameters_sympy_dict, ic_tuple=ic_tuple, backend=backend,expand=expand)
 
-    #@lru_cache
-    def _numerized(self,parameters=Dict(),ic_tuple=(),backend='fortran',expand=False,**kwrags):
+    @lru_cache
+    def _numerized(self,parameters=Dict(),ic_tuple=(),backend='numpy',expand=None,**kwrags):
         '''
         Execution method that assumes all Args are hashable due to application of lru cache. Takes values of parameters and returns instance of class OdeComputationalCase.
         '''
+        
+        if expand is None:
+            expand = ODESystem._numerical_expand
+        
         if expand is True:
-            ode=self.as_first_ode_linear_system()._to_rhs_ode().expand()
+            ode=self.expand().as_first_ode_linear_system()._to_rhs_ode()
         else:
             ode=self.as_first_ode_linear_system()._to_rhs_ode()
 

@@ -497,6 +497,7 @@ class MultiTimeScaleSolution(ODESystem):
         ]
 
         return self._t_list
+    
 
     def approximation_function(self, order, max_order=1):
 
@@ -511,6 +512,20 @@ class MultiTimeScaleSolution(ODESystem):
 
         return Matrix(aprrox_fun)
 
+    def approximation_function_without_scales(self, order, max_order=1):
+
+        dvars_no = len(self.dvars)
+
+        t_list = [self.ivar]
+
+        aprrox_fun = [
+            sym.Function('Z_{' + str(order) + '}')(*t_list)
+            for dvar_no, dvar in enumerate(self.dvars)
+        ]
+
+        return Matrix(aprrox_fun)
+
+
     def predicted_solution(self, order=1, dict=False, equation=False):
 
         dvars_no = len(self.dvars)
@@ -520,6 +535,18 @@ class MultiTimeScaleSolution(ODESystem):
              for comp_ord in range(order + 1)), sym.zeros(dvars_no, 1))
 
         return ODESolution.from_vars_and_rhs(self.dvars, solution)
+
+    def predicted_solution_without_scales(self, order=1, dict=False, equation=False):
+
+        dvars_no = len(self.dvars)
+
+        solution = sum(
+            (self.approximation_function_without_scales(comp_ord, order) * self.eps**comp_ord
+             for comp_ord in range(order + 1)), sym.zeros(dvars_no, 1))
+
+        return ODESolution.from_vars_and_rhs(self.dvars, solution)
+
+
 
     def eoms_approximation(self, order=None, odes_system=None):
 
@@ -871,14 +898,18 @@ class WeakNonlinearProblemSolution(LinearODESolution):
 
         return solution
 
-    def approximation_function(self, order):
+    def approximation_function(self, order, max_order=1):
 
         dvars_no = len(self.dvars)
 
-        return Matrix([
-            me.dynamicsymbols('Y_{' + str(dvar_no) + str(order) + '}')
+        t_list = self.t_list
+
+        aprrox_fun = [
+            sym.Function('Y_{' + str(dvar_no) + str(order) + '}')(*t_list)
             for dvar_no, dvar in enumerate(self.dvars)
-        ])
+        ]
+
+        return Matrix(aprrox_fun)
 
     def predicted_solution(self, order=1, dict=False, equation=False):
 

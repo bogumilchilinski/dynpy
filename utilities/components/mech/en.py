@@ -2632,3 +2632,78 @@ class GivenDataComponent(ReportComponent):
 # '''
 #             ))
 #         display(ReportText( self.footer_text ))
+class FouerierExpansionComponent(ReportComponent):
+    title='Specific process of Fourier expansion'
+    
+    @property
+    def reported_object(self):
+        from dynpy.solvers.linear import ODESystem
+        if isinstance(self._reported_object, ODESystem):
+            return self._reported_object
+        
+        elif isinstance(type(self._reported_object), Expr):
+                reported_object = self._reported_object
+                return reported_object
+                
+                
+        elif isinstance(type(self._reported_object), Eq):
+                reported_object = self._reported_object.rhs
+                return reported_object
+                
+        else:
+            t=Symbol('t')
+            return sin(t)
+
+    @reported_object.setter
+    def reported_object(self, obj):
+        self._reported_object=obj
+        
+        
+    
+    
+    
+    @property
+    def SeriesFormula(self):
+        t = Symbol('t')
+        kpt = Function('k_p')('t')
+        T=Symbol('T')
+        n=Symbol('n')
+        a0=Symbol('a_0')
+        an=Symbol('a_n')
+        bn=Symbol('b_n')
+        formula=SympyFormula(Eq(kpt,a0/2 + summation(an * cos((n * pi * kpt) / T) + bn * sin((n * pi * kpt) / T), (n, 1, oo))))
+        return formula
+    
+    @property
+    def SeriesCoeffs(self):
+        t = Symbol('t')
+        kpt = Function('k_p')('t')
+        T=Symbol('T')
+        n=Symbol('n')
+        a0=Symbol('a_0')
+        an=Symbol('a_n')
+        bn=Symbol('b_n')
+        coeff1=SympyFormula(Eq(a0,(1/T) * integrate(kpt, (t, -T, T))))
+        coeff2=SympyFormula(Eq(an,(2/T) * integrate(kpt * cos((n * pi * t) / T), (t, -T, T))))
+        coeff3=SympyFormula(Eq(bn,(2/T) * integrate(kpt * sin((n * pi * t) / T), (t, -T, T))))
+        coeffs = [coeff1,coeff2,coeff3]
+        return coeffs
+    
+    @property
+    def FFT(self):
+        expr=self.reported_object
+        fft=expr.to_frequency_domain()
+        return fft
+        
+    
+
+    def append_elements(self):
+        
+        system = self.reported_object
+
+        display(ReportText("General formula for the Fourier expansion is the following"))
+        display(self.SeriesFormula)
+        display(ReportText("Formlas for the coefficients of the Fourier series are established in the following manner"))
+        for coeff in self.SeriesCoeffs:
+            display(coeff)
+        
