@@ -498,32 +498,47 @@ class MultiTimeScaleSolution(ODESystem):
 
         return self._t_list
     
+    def approx_function_symbol(self):
+        
+        func = str(self.vars[0]).replace("(t)","_{")
+        
+        return func
 
     def approximation_function(self, order, max_order=1):
 
         dvars_no = len(self.dvars)
 
         t_list = self.t_list
+        
+        if dvars_no>1:
 
-        aprrox_fun = [
-            sym.Function('Y_{' + str(dvar_no) + str(order) + '}')(*t_list)
-            for dvar_no, dvar in enumerate(self.dvars)
-        ]
+            aprrox_fun = [
+                sym.Function('Y_{' + str(dvar_no) + str(order) + '}')(*t_list)
+                for dvar_no, dvar in enumerate(self.dvars)
+            ]
+        else:
 
-        return Matrix(aprrox_fun)
+            t_list = [self.ivar]
 
-    def approximation_function_without_scales(self, order, max_order=1):
-
-        dvars_no = len(self.dvars)
-
-        t_list = [self.ivar]
-
-        aprrox_fun = [
-            sym.Function('Z_{' + str(order) + '}')(*t_list)
-            for dvar_no, dvar in enumerate(self.dvars)
-        ]
+            aprrox_fun = [
+                sym.Function(self.approx_function_symbol() + str(order) + '}')(*t_list)
+                for dvar_no, dvar in enumerate(self.dvars)
+            ]
 
         return Matrix(aprrox_fun)
+
+#     def approximation_function_without_scales(self, order, max_order=1):
+
+#         dvars_no = len(self.dvars)
+
+#         t_list = [self.ivar]
+
+#         aprrox_fun = [
+#             sym.Function('Z_{' + str(order) + '}')(*t_list)
+#             for dvar_no, dvar in enumerate(self.dvars)
+#         ]
+
+#         return Matrix(aprrox_fun)
 
 
     def predicted_solution(self, order=1, dict=False, equation=False):
@@ -541,7 +556,7 @@ class MultiTimeScaleSolution(ODESystem):
         dvars_no = len(self.dvars)
 
         solution = sum(
-            (self.approximation_function_without_scales(comp_ord, order) * self.eps**comp_ord
+            (self.approximation_function(comp_ord, order) * self.eps**comp_ord
              for comp_ord in range(order + 1)), sym.zeros(dvars_no, 1))
 
         return ODESolution.from_vars_and_rhs(self.dvars, solution)
