@@ -404,32 +404,45 @@ class BPASTSPaper(Document):
     
     latex_name = 'document'
     packages = [
-                    Package('natbib', options=['numbers']),
+#                     Package('natbib', options=['numbers']),
                     Package('booktabs'),
                     Package('float'),
                     Package('standalone'),
                     Package('siunitx'),
                     Package('bpasts', options=['accepted']),
+                    Package('t1enc'),
+                    Package('amsmath'),
+                    Package('amssymb'),
+                    Package('amsfonts'),
+                    Package('graphicx'),
+                    Package('flushend'),
+                    Package('hyperref',['colorlinks=true', 'allcolors=bpastsblue', NoEscape('pdfborder={0 0 0}')])
 
     ]
+    
+    abtitle='Paper for BPASTS'
+    abauthor='Authors'
+    title='Basic title'
 
-
+    
     def __init__(self,
                  default_filepath='default_filepath',
-                 title='Basic title',
+                 title=None,
                  *,
                  documentclass='article',
-                 document_options=['10pt','twoside','twocolumn','a4paper'],
-                 fontenc='T1',
+                 document_options=['10pt','twoside','twocolumn','a4paper'], # for submission
+                 fontenc=None,
                  inputenc='utf8',
                  font_size='normalsize',
                  lmodern=False,
-                 textcomp=True,
-                 microtype=True,
+                 textcomp=False,
+                 microtype=False,
                  page_numbers=True,
                  indent=None,
-                 geometry_options=None,#['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
+                 geometry_options=['inner=30mm', 'outer=20mm', 'bindingoffset=10mm', 'top=25mm', 'bottom=25mm'],#,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
                  data=None):
+
+        if title is not None: self.title=title
 
         super().__init__(
             default_filepath=default_filepath,
@@ -446,16 +459,63 @@ class BPASTSPaper(Document):
             geometry_options=geometry_options,
             data=data,
         )
-#         label=self.label
-        self.title=title
-        self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
-        self.packages.append(Command('author', arguments=['Author']))
-        self.packages.append(Command('abauthor', arguments=['Author']))
-        self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
+        
+        self.preamble.append(Command('abtitle',arguments=[self.abtitle]))
+        self.preamble.append(NoEscape('\\title{'+f'{self.title}'+'}'))
+        self.preamble.append(NoEscape('\\abauthor{'+f'{self.abauthor}'+'}'))
+        
+        self.preamble.append(NoEscape('%%%% EDITORS SECTION'))
+        self.preamble.append(NoEscape('\\vol{XX} \\no{Y} \\year{2024}'))
+        self.preamble.append(NoEscape('\\setcounter{page}{1}'))
+        self.preamble.append(NoEscape('\\doi{10.24425/bpasts.yyyy.xxxxxx}'))
+        self.preamble.append(NoEscape('%%%%%%%%%%%%%%%%%%%%'))
         self.append(Command('maketitle'))
         #self.append(NewPage())
         # tu implementować co tam potrzeba
         
+    def authors(self,nameno,affiliation=None,coremail=None,corno=0):
+        
+        #nameno - dict; of author name (string) and affiliation number (0 to x integer)
+        #affiliation - dcit; affiliation number (0 to x integer) and affiliation (string)
+        #coremail - str; corresponding author email
+        #corno - int; which of the authors in the dict is the corresponding author, count starting from 0
+        
+        #HOW TO USE?
+        
+        #Doc1 = BPASTSTemplate(default_filepath='./output/method_test',title=NoEscape('''Your title'''))
+        #author_names={'Damian Sierociński':1,'Bogumił Chiliński':1, 'Karolina Ziąbrowska':2, 'Jakub Szydłowski':2}
+        #author_affiliations={1:'Institute of Machine Design Fundamentals, Faculty of Automotive and Construction Machinery Engineering, Warsaw University of Technology',2:'Faculty of Automotive and Construction Machinery Engineering, Warsaw University of Technology'}
+        #correspondence='damian.sierocinski@pw.edu.pl'
+        #Doc1.authors(nameno=author_names,affiliation=author_affiliations,coremail=correspondence)
+        
+        counter=0
+        auth_string=''
+        addr_string=''
+        for name,no in nameno.items():
+            auth_string=auth_string+name+'$^{'+f'{no}'+'}$'
+            if counter==corno:
+                auth_string=auth_string+'\email{'+coremail+'}'
+            counter=counter+1
+            
+            if counter != len(nameno):
+                auth_string=auth_string+', '
+        
+        counter_addr=1
+        for no,addr in affiliation.items():
+            addr_string=addr_string+'$^'+f'{no}'+'$'+addr
+            if counter_addr!=len(affiliation):
+                addr_string=addr_string+', '
+            counter_addr=counter_addr+1
+
+        self.preamble.append(Command('author',arguments=[NoEscape(auth_string)]))
+        self.preamble.append(Command('Address',arguments=[NoEscape(addr_string)]))
+
+    def abstract(self,container=None):
+        for num, val in enumerate(container):
+            self.preamble.append(Command('Abstract',arguments=[ReportText(val)]))
+            
+    def keywords(self,keywords=None):
+        self.preamble.append(Command('Keywords',arguments=[keywords]))
         
 class WutThesis(Document):
     
