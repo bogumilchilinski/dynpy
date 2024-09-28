@@ -499,7 +499,7 @@ class PredictedSolutionComponent(ReportComponent):
 
         
 
-        for ord in range(system.order):
+        for ord in range(system.order+1):
             
             
             display(ReportText(  f'Order of prediction: {ord}'    ))
@@ -570,9 +570,47 @@ class FLODESolutionComponent(ReportComponent):
         display(FirstOrderLinearODESystem.from_ode_system(self.reported_object).solution)
 
         
-class SecularTermsEquationsComponent(ReportComponent):
+class ZerothOrderSolutionComponent(ReportComponent):
     
     title="Zeroth-order approximated solution"
+    
+    
+    @property
+    def header_text(self):
+        t_list = self.reported_object.t_list
+        
+        return f"Zeroth-order approximated solution is"
+
+        
+    @property
+    def footer_text(self):
+
+        return "Zeroth-order approximated solution has following consts"
+
+    def append_elements(self):
+
+
+        system = self.reported_object
+
+        
+        display(ReportText(  self.header_text   ))
+        
+        
+        ode_0th_approx=system.eoms_approximation_list()[0]
+        
+        display(SympyFormula(  ode_0th_approx.solution   ))
+        
+        display(ReportText(  "Secular functions are as follows:"   ))
+        
+        for sec_fun in ode_0th_approx._secular_funcs:
+            display(SympyFormula(  sec_fun   ))
+        
+
+
+
+class SecularTermsEquationsComponent(ReportComponent):
+    
+    title="First-order approximated solution and secular terms"
     
     
     @property
@@ -596,13 +634,13 @@ class SecularTermsEquationsComponent(ReportComponent):
         display(ReportText(  self.header_text   ))
         
         
-        system.general_solution
-        #display(system.secular_eq)
-        sec_eqns = system.secular_eq[system.eps].as_first_ode_linear_system().lhs - system.secular_eq[system.eps].as_first_ode_linear_system().rhs
+        #system.general_solution
+        # #display(system.secular_eq)
+        # sec_eqns = system.secular_eq[system.eps].as_first_ode_linear_system().lhs - system.secular_eq[system.eps].as_first_ode_linear_system().rhs
 
-        for no,eq in enumerate(sec_eqns):
+        # for no,eq in enumerate(sec_eqns):
 
-            display(SympyFormula(Eq(eq,0)))
+        #     display(SympyFormula(Eq(eq,0)))
             
         display(ReportText(  self.footer_text   ))
         

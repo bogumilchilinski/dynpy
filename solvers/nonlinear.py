@@ -208,7 +208,7 @@ class ODESystemDsolve(ODESystem):
         return FirstOrderLinearODESystemWithHarmonics
         #return FirstOrderLinearODESystem 
     
-class NthOrderODEsApproximation(FirstOrderLinearODESystem):
+class NthOrderODEsApproximation(ODESystem):
     _ode_order=2
 
     _simp_dict = {}
@@ -230,11 +230,11 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
         
         #const_to_add=[eqn for eqn in self._const_list ]
         
-        secular_funcs = set() | (self.general_solution.atoms(Function) - set(
+        secular_funcs = set() | (self.general_solution.rhs.atoms(Function) - set(
             self._const_list) - set(self._parameters) - {self.ivar})
         #display(secular_funcs)
         
-        return secular_funcs
+        return {sec_fun for sec_fun in secular_funcs if sec_fun.has(self.ivar)}
 
     @property
     def secular_terms(self):
@@ -275,7 +275,7 @@ class NthOrderODEsApproximation(FirstOrderLinearODESystem):
     def remove_secular_terms(self):
 
 
-        obj = FirstOrderLinearODESystemWithHarmonics.from_ode_system(self)
+        obj = ODESystem.from_ode_system(self)
 
         # subs_dict = {comp: 0 for comp in self._secular_funcs}
         
@@ -309,6 +309,7 @@ class MultiTimeScaleSolution(ODESystem):
 
     _saved_numerized = {}
     _order = 2
+    _scales_no = None
 
     def __new__(cls,
                 odes_system,
@@ -318,6 +319,7 @@ class MultiTimeScaleSolution(ODESystem):
                 eps=Symbol('varepsilon'),
                 omega=None,
                 order=2,
+                scales_no=None,
                 t_span=[],
                 params=[],
                 params_values={},
@@ -353,6 +355,9 @@ class MultiTimeScaleSolution(ODESystem):
                 
         obj.eps = eps
         obj._order = order
+        
+        if scales_no is None:
+            obj._scales_no = obj.order+1
 
         obj._stored_solution = None
         obj._saved_solution = {}
@@ -387,9 +392,19 @@ class MultiTimeScaleSolution(ODESystem):
     @property
     def order(self):
         return self._order
-    @order.setter
-    def order(self,order):
-        self._order = order
+    
+    @property
+    def scales_no(self):
+        if self._scales_no is None:
+            return self.order+1
+        else:
+            return self._scales_no
+    
+    @scales_no.setter
+    def scales_no(self,no):
+        
+        self._scales_no = no
+    
     @property
     def omega(self):
         return self._omega
@@ -442,7 +457,8 @@ class MultiTimeScaleSolution(ODESystem):
         ode_comp.FirstOrderApproximatedEqComponent,
 
         # ode_comp.GeneralSolutionComponent,
-        # ode_comp.SecularTermsEquationsComponent,
+        ode_comp.ZerothOrderSolutionComponent,
+        ode_comp.SecularTermsEquationsComponent,
             
         ]
         
@@ -460,9 +476,11 @@ class MultiTimeScaleSolution(ODESystem):
 
     def set_order(self,order):
         
-
         
-        return MultiTimeScaleSolution(self.as_matrix(),self.vars,ivar=self.ivar,omega=S.One,order=order,eps=self.eps )   
+        new_msm = MultiTimeScaleSolution(self.as_matrix(),self.vars,ivar=self.ivar,omega=S.One,order=order,scales_no=self.scales_no,eps=self.eps )
+        new_msm._scales_no = self._scales_no
+        
+        return new_msm
     
     def _assign_properties(self,obj):
         
@@ -493,70 +511,70 @@ class MultiTimeScaleSolution(ODESystem):
 
         self._t_list = [
             t_i(self.ivar)
-            for t_i in symbols(f't_0:{self.order+1}', cls=Function, real=True)
+            for t_i in symbols(f't_0:{self.scales_no}', cls=Function, real=True)
         ]
 
         return self._t_list
     
-    def approx_function_symbol(self):
-        
-        func = str(self.vars[0]).replace("(t)","_{")
-        
-        return func
-
-    def approximation_function(self, order, max_order=1):
-
+    def approx_function_symbol(self,order=0):
+      
         dvars_no = len(self.dvars)
-
-        t_list = self.t_list
         
-        if dvars_no>1:
+        if dvars_no==1:
+        
+            func_str = str(self.vars[0]).replace(f"({self.ivar})","")
+        else:
+            func_str = 'Y'
+        
+        return func_str + f"_{{{str(order)}}}"
+
+    def approximation_function(self, order, max_order=1, ivar_list = None ):
+
+        dvars_no = len(self.vars)
+
+        if ivar_list is None:
+            t_list = self.t_list
+        else:
+            t_list = ivar_list
+        
+        fun_str = self.approx_function_symbol(order)
+        
+        if dvars_no==1:
 
             aprrox_fun = [
-                sym.Function('Y_{' + str(dvar_no) + str(order) + '}')(*t_list)
-                for dvar_no, dvar in enumerate(self.dvars)
+                sym.Function(fun_str)(*t_list)
+                for dvar_no, dvar in enumerate(self.vars)
             ]
         else:
 
-            t_list = [self.ivar]
 
             aprrox_fun = [
-                sym.Function(self.approx_function_symbol() + str(order) + '}')(*t_list)
-                for dvar_no, dvar in enumerate(self.dvars)
+                sym.Function(fun_str + '_{' + str(order) + '}')(*t_list)
+                for dvar_no, dvar in enumerate(self.vars)
             ]
 
         return Matrix(aprrox_fun)
 
-#     def approximation_function_without_scales(self, order, max_order=1):
+    def approximation_function_without_scales(self, order, max_order=1):
 
-#         dvars_no = len(self.dvars)
-
-#         t_list = [self.ivar]
-
-#         aprrox_fun = [
-#             sym.Function('Z_{' + str(order) + '}')(*t_list)
-#             for dvar_no, dvar in enumerate(self.dvars)
-#         ]
-
-#         return Matrix(aprrox_fun)
-
+        return self.approximation_function(order=order,max_order=max_order,ivar_list=[self.ivar])
 
     def predicted_solution(self, order=1, dict=False, equation=False):
 
-        dvars_no = len(self.dvars)
+        dvars_no = len(self.vars)
 
         solution = sum(
             (self.approximation_function(comp_ord, order) * self.eps**comp_ord
             for comp_ord in range(order + 1)), sym.zeros(dvars_no, 1))
 
-        return ODESolution.from_vars_and_rhs(self.dvars, solution)
+        return ODESolution.from_vars_and_rhs(self.vars, solution)
 
     def predicted_solution_without_scales(self, order=1, dict=False, equation=False):
 
         dvars_no = len(self.dvars)
 
         solution = sum(
-            (self.approximation_function(comp_ord, order) * self.eps**comp_ord
+            (self.approximation_function_without_scales(comp_ord,order) * self.eps**comp_ord
              for comp_ord in range(order + 1)), sym.zeros(dvars_no, 1))
 
         return ODESolution.from_vars_and_rhs(self.dvars, solution)
@@ -625,7 +643,7 @@ class MultiTimeScaleSolution(ODESystem):
         
         
         approx_list=[
-            ODESystemApproximation(
+            NthOrderODEsApproximation(
                 eoms_approximated.applyfunc(lambda obj: order_get(obj, order)),
                 dvars=self.approximation_function(order),
                 ivar=self.t_list[0],
