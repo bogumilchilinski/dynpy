@@ -464,14 +464,14 @@ class MSMCalculationsOrderComponent(ReportComponent):
         system = ode = self.reported_object
 
         display(ReportText(  "First step involves method for prediction of solution"  ))       
-        display(ObjectCode("ode.predicted_solution()"))     
+        display(ObjectCode("ord = 2 # given order of approximation  \node.predicted_solution(ord)"))     
 
         display(ReportText(  "Next stage is approximation of eoms - the related method is as follows - it substitutes result of previous method:"  ))       
-        display(ObjectCode("ode.eoms_approximation()"))   
+        display(ObjectCode("ord = 2 # given order of approximation  \node.eoms_approximation(ord)"))   
         display(ReportText(  f"This method returns object of {type(ode.eoms_approximation())} type that is used to create list of approximation odes."  ))   
         
         display(ReportText(  f"Odes approximation allows to find list of new ode systems, it's handled by the following method:"  ))
-        display(ObjectCode("ode.eoms_approximation_list()"))  
+        display(ObjectCode("ord = 2 # given order of approximation  \node.eoms_approximation_list(ord)"))  
         
 
 class PredictedSolutionComponent(ReportComponent):
@@ -505,6 +505,52 @@ class PredictedSolutionComponent(ReportComponent):
             display(ReportText(  f'Order of prediction: {ord}'    ))
             display(SympyFormula(system.predicted_solution(ord)))
             display(SympyFormula(Eq(system.dvars[0],system.predicted_solution(ord).rhs[0],evaluate=False)))
+
+#         display(ReportText(  self.footer_text   ))
+
+
+class DetailsOfPredictedSolutionComponent(ReportComponent):
+    
+    title="Details of predicted solution with calls"
+    
+    
+    @property
+    def header_text(self):
+
+        return f"Rough (first) approximation in time domain has the following form:"
+
+    @property
+    def footer_text(self):
+
+        return "Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of {t_list[1]}. Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the zeroth-order approximation {approx_fun} has the following form:"
+
+    def append_elements(self):
+
+        system = self.reported_object
+
+#         t_list = system.t_list
+        
+        display(ReportText(  self.header_text   ))
+        display(SympyFormula( system.predicted_solution_without_scales().as_eq_list()[0]                                               ))
+        display(SympyFormula(  system.predicted_solution().as_eq_list()[0]  ))        
+
+        display(ReportText(  "Comparison of Approximation without and with scales has a following form"   ))        
+
+        for ord in range(system.order+1):
+            
+            
+            display(ReportText(  f'Order of prediction: {ord}'    ))
+            
+            display(SympyFormula(system.predicted_solution_without_scales(ord)))
+            display(SympyFormula(system.predicted_solution(ord)))
+            
+            
+            display(SympyFormula(Eq(system.dvars[0],system.predicted_solution_without_scales(ord).rhs[0],evaluate=False)))
+            display(SympyFormula(Eq(system.dvars[0],system.predicted_solution(ord).rhs[0],evaluate=False)))
+            
+            
+            display(ObjectCode(f"ord = {ord} # given order of approximation  \node.predicted_solution(ord)"))   
+            
 
 #         display(ReportText(  self.footer_text   ))
 

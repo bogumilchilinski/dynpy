@@ -448,6 +448,7 @@ class MultiTimeScaleSolution(ODESystem):
         ode_comp.ODESystemCodeComponent,
         ode_comp.MSMCalculationsOrderComponent,        
         ode_comp.PredictedSolutionComponent,
+        ode_comp.DetailsOfPredictedSolutionComponent,
 
         ode_comp.GoverningEquationComponent,
 
