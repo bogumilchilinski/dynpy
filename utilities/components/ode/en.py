@@ -467,12 +467,13 @@ class MSMCalculationsOrderComponent(ReportComponent):
         display(ObjectCode("ord = 2 # given order of approximation  \node.predicted_solution(ord)"))     
 
         display(ReportText(  "Next stage is approximation of eoms - the related method is as follows - it substitutes result of previous method:"  ))       
-        display(ObjectCode("ord = 2 # given order of approximation  \node.eoms_approximation(ord)"))   
-        display(ReportText(  f"This method returns object of {type(ode.eoms_approximation())} type that is used to create list of approximation odes."  ))   
+        display(ObjectCode("ord = 2 # given order of approximation  \node.eoms_approximation(ord)"))
+                display(ReportText(  f"This method returns object of {type(ode.eoms_approximation())} type that is used to create list of approximation odes."  ))   
         
         display(ReportText(  f"Odes approximation allows to find list of new ode systems, it's handled by the following method:"  ))
         display(ObjectCode("ord = 2 # given order of approximation  \node.eoms_approximation_list(ord)"))  
         
+
 
 class PredictedSolutionComponent(ReportComponent):
     

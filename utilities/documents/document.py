@@ -1466,7 +1466,7 @@ class MSMethodOverviewReport(UsageOfDynamicSystemsGuide):
         t=ivar=Symbol('t')
         z = sys.z
         delta = Symbol('delta',positive=True)
-        eps=sys.eps
+        eps=sys.eterps
 
         nonlin_ode = MultiTimeScaleSolution(z.diff(t,2)+z*(1+delta*eps+eps*sin(t)), z, ivar=ivar, omega=S.One, order=3,eps=eps)
         return nonlin_ode

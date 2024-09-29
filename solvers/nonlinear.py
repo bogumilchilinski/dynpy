@@ -570,15 +570,15 @@ class MultiTimeScaleSolution(ODESystem):
 
         return ODESolution.from_vars_and_rhs(self.vars, solution)
 
-    def predicted_solution_without_scales(self, order=1, dict=False, equation=False):
+#     def predicted_solution_without_scales(self, order=1, dict=False, equation=False):
 
-        dvars_no = len(self.dvars)
+#         dvars_no = len(self.dvars)
 
-        solution = sum(
-            (self.approximation_function_without_scales(comp_ord,order) * self.eps**comp_ord
-             for comp_ord in range(order + 1)), sym.zeros(dvars_no, 1))
+#         solution = sum(
+#             (self.approximation_function(comp_ord, order) * self.eps**comp_ord
+#              for comp_ord in range(order + 1)), sym.zeros(dvars_no, 1))
 
-        return ODESolution.from_vars_and_rhs(self.dvars, solution)
+#         return ODESolution.from_vars_and_rhs(self.dvars, solution)
 
 
 
