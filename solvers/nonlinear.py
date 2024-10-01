@@ -517,6 +517,18 @@ class MultiTimeScaleSolution(ODESystem):
 
         return self._t_list
     
+    @cached_property
+    def _scales_formula(self):
+        r"""
+        Returns the list of time domanin slow varying function
+        """
+
+        t_list = self.t_list
+        expr_list = [self.ivar*self.eps**no for no in range(len(t_list))]
+
+        return AnalyticalSolution.from_vars_and_rhs(t_list, expr_list)
+    
+    
     def approx_function_symbol(self,order=0):
       
         dvars_no = len(self.dvars)
@@ -570,15 +582,22 @@ class MultiTimeScaleSolution(ODESystem):
 
         return ODESolution.from_vars_and_rhs(self.vars, solution)
 
-#     def predicted_solution_without_scales(self, order=1, dict=False, equation=False):
+    def predicted_solution_without_scales(self, order=1, dict=False, equation=False):
 
-#         dvars_no = len(self.dvars)
+        dvars_no = len(self.dvars)
 
-#         solution = sum(
-#             (self.approximation_function(comp_ord, order) * self.eps**comp_ord
-#              for comp_ord in range(order + 1)), sym.zeros(dvars_no, 1))
+        solution = sum(
+             (self.approximation_function_without_scales(comp_ord, order) * self.eps**comp_ord
+             for comp_ord in range(order + 1)), sym.zeros(dvars_no, 1))
 
-#         return ODESolution.from_vars_and_rhs(self.dvars, solution)
+        return ODESolution.from_vars_and_rhs(self.dvars, solution)
+    
+    def derivative_without_scale(self, degree, order=1, dict=False, equation=False):
+        
+        derivative_rhs = self.predicted_solution_without_scales(self.order).as_eq_list()[0].n(3).rhs.diff(self.ivar,degree)
+        derivative_lhs = self.dvars[0].diff(self.ivar,degree)
+        
+        return AnalyticalSolution(derivative_lhs, rhs = derivative_rhs, vars = self.dvars[0])
 
 
 
