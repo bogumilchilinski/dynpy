@@ -159,7 +159,45 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
         display(SympyFormula(steady_solution))
     
     
+steady_sol_str=(
+'''
 
+slownik_numerical=system.get_numerical_parameters()
+
+steady_solution=SDOFWinchSystem()._ode_system.subs(slownik_numerical).steady_solution
+steady_solution_subs=steady_solution
+
+''')
+
+
+
+solution_table_str=(
+'''
+coord = system.q[0]
+table=table_eq.numerized().compute_solution(t_span)
+table_new=table[[coord]]
+
+''')
+
+report_table_define_str=(
+'''
+
+tabela = Section('Table')
+CurrentContainer(tabela)
+coord = system.q[0]
+solution_sym=ForcedSpringMassSystem()._ode_system.subs(slownik_numerical).steady_solution
+
+general_sol_matrix=solution_sym
+display(general_sol_matrix)
+table_eq=general_sol_matrix.numerized(slownik_numerical).compute_solution(t_span)
+table=table_eq
+
+table_for_report = table.iloc[0:10].to_latex_dataframe()
+
+table_for_report.reported(caption=('Table'))
+
+
+''')
 
 class SimulationsComponent(ReportComponent):
     
@@ -2216,6 +2254,3 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
         
 #         display(ReportText('Ostatecznie kod implementacji całego systemu ma następującą postać:'))
 #         display(GuideCode(full_class_str))
-        
-        
-        

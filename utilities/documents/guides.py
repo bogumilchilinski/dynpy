@@ -393,8 +393,8 @@ class UsageOfDynamicSystemsGuide(Guide):
 
             pandas_comp.NumericalAnalysisSimulationComponent,
             
-            # systems_comp.SimulationsComponent, # entire component to rewrite
-            # reporting_comp.SimulationReportComponent,
+            systems_comp.SimulationsComponent, # entire component to rewrite
+            reporting_comp.SimulationReportComponent,
 
         ]
 
@@ -542,11 +542,12 @@ class ResearchProjectGuidelines(UsageOfDynamicSystemsGuide):
 
         comp_list=[
 
-            development_comp.InterimScheduleComponent,
-            development_comp.InterimTemplateComponent,
-#             systems_comp.DynamicSystemCallComponent,
-#             systems_comp.SimulationsComponent,
-#             reporting_comp.SimulationReportComponent,
+
+           development_comp.InterimTemplateComponent,
+           development_comp.ModellingInPythonGuidelinesComponent,
+            # systems_comp.DynamicSystemCallComponent,
+            #systems_comp.SimulationsComponent,
+            #reporting_comp.SimulationReportComponent,
 
         ]
 
@@ -559,8 +560,8 @@ class IntroDynPyProjectGuidelines(UsageOfDynamicSystemsGuide):
 
         comp_list=[
 
-            guide_comp.InterimScheduleComponent,
-            guide_comp.InterimTemplateComponent,
+            development_comp.PythonBasicsGuidelinesComponent,
+            development_comp.InterimTemplateComponent,
 #             guide_comp.DynamicSystemCallComponent,
 #             guide_comp.SimulationsComponent,
 #             guide_comp.SimulationReportComponent,

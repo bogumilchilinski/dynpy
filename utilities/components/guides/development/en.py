@@ -477,6 +477,26 @@ class LibrariesImportComponent(DocumentGenerationComponent):
         display(ObjectCode(kod_2))
         #display(ReportText('Dzięki temu możemy korzystać z przygotowanych wcześniej klas i modułów'))
         display(ReportText('This allows us to use previously prepared classes and modules'))
+
+        
+        
+class ModellingInPythonGuidelinesComponent(ReportComponent):
+
+    #title="Klasa LibrariesImportComponent i jej zastosowanie"
+    title="Schedule of course on Advanced Modelling In Python"
+
+    def append_elements(self):
+        #classname = self.reported_object['classname']
+        #class_module = self.reported_object['module']
+        #class_field = self.reported_object['field']
+        #target = self.reported_object['target']
+        
+        #display(ReportText('Przed pracą w jupiterze należy zaimportować biblioteki'))
+        display(ReportText('Crucial information about the course on Advanced Modelling In Python'))
+        display(ObjectCode(kod_2))
+        #display(ReportText('Dzięki temu możemy korzystać z przygotowanych wcześniej klas i modułów'))
+        display(ReportText('exemplary entry - fill as needed'))
+        
         
 class ModuleStructureComponent(ReportComponent):
 
@@ -503,4 +523,198 @@ ModuleStructure.get_init_file_content()
         display(ObjectCode('''from dynpy.utilities.creators import ModuleStructure
 
 ModuleStructure.get_import('ObjectCode')
+        '''))
+        
+class ModellingInPythonScheduleComponent(ReportComponent):
+
+    #title="Klasa LibrariesImportComponent i jej zastosowanie"
+    title="Schedule of course on Advanced Modelling In Python"
+
+    def append_elements(self):
+        #classname = self.reported_object['classname']
+        #class_module = self.reported_object['module']
+        #class_field = self.reported_object['field']
+        #target = self.reported_object['target']
+        
+        #display(ReportText('Przed pracą w jupiterze należy zaimportować biblioteki'))
+        display(ReportText('Crucial information about the course schedule....'))
+        display(ObjectCode(kod_2))
+        #display(ReportText('Dzięki temu możemy korzystać z przygotowanych wcześniej klas i modułów'))
+        display(ReportText('exemplary entry - fill as needed'))        
+
+class PythonBasicsScheduleComponent(ReportComponent):
+
+    #title="Klasa LibrariesImportComponent i jej zastosowanie"
+    title="Schedule of course on Python Basics"
+
+    def append_elements(self):
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+        #display(ReportText('Przed pracą w jupiterze należy zaimportować biblioteki'))
+        display(ReportText('Before working in jupiter, import libraries'))
+        display(ObjectCode(kod_2))
+        #display(ReportText('Dzięki temu możemy korzystać z przygotowanych wcześniej klas i modułów'))
+        display(ReportText('This allows us to use previously prepared classes and modules'))
+        
+        #display(ReportText('Przed pracą w jupiterze należy zaimportować biblioteki'))
+        display(Markdown('''The course consists of following classes:
+
+    -'zajecia_1': 'Wprowadzenie do przedmiotu, Przedstawienie guide z obsługi cocalca i zakładania jupytera, Syntax, typy zmiennych, przydzielenie tematów do prezentacji i rozpisanie issues - IntroToCocalc. (Tematy do prezentacji: Cocalc, Jupyter Notebook, import bibliotek - na przykłądnie sympy, numpy)'
+    
+    -'zajecia_2': "Podstawy gołego Pythona - podstawowe operacje na zmiennych, funkcje, klasy"
+    
+    -'zajecia_3': 'Biblioteki typu numpy, sympy itd. (studenkie propozycje przykladow zastoseowani z np prostej symulacji)',
+    
+    -'zajecia_4': 'Raportowanie zaawansowane (guide z raportowania)',
+    
+    -'zajecia_5': 'Odesystemy (przykładowe rozwiazanie równania różniczkowego i np. trajektoria)',
+    
+    -'zajecia_6': 'Pandas + symulacja a obiekcie pandas',
+    
+    -'zajecia_7': 'Wprowadzenia do modułu DynPy - helpy, guidy, tworzenie nowych systemów itd. gdzie szukać jak używać żeby pokazać co można finalnie stworzyć',
+    
+    -'zajecia_8': 'Budowanie komponentów i tutaj już jakiś zrobić np do systemu zrobionego wcześniej' ??,
+    
+    -'zajecia_9': 'Full raport na systemie i komponentach stworzony od zera (tutaj może już z tych trzech mini projekt w postaci zastowania pythona) - ???',
+    
+    -'zajecia_10': 'PROJEKT',
+    
+    -'zajecia_11': 'PROJEKT',
+    
+    -'zajecia_12': 'PROJEKT',
+    
+    -'zajecia_13': 'PROJEKT',
+    
+    -'zajecia_14': 'PROJEKT',
+    
+    -'zajecia_15': 'PROJEKT',
+
+'''))
+
+        display(ReportText('exemplary entry - fill as needed'))        
+
+        
+class PythonBasicsGuidelinesComponent(ReportComponent):
+
+    #title="Klasa LibrariesImportComponent i jej zastosowanie"
+    title="Main requirenents for Python Basics course"
+        
+    def append_elements(self):
+#         classname = self.reported_object['classname']
+#         class_module = self.reported_object['module']
+#         class_field = self.reported_object['field']
+#         target = self.reported_object['target']
+        #display(ReportText('Przed pracą w jupiterze należy zaimportować biblioteki'))
+        display(ReportText('Before working in jupiter, import libraries'))
+        display(ObjectCode(kod_2))
+        #display(ReportText('Dzięki temu możemy korzystać z przygotowanych wcześniej klas i modułów'))
+        display(ReportText('This allows us to use previously prepared classes and modules'))
+        zajecia = {}
+        tematy = {}
+
+
+        zajecia_list = [
+            'Wprowadzenie do przedmiotu, cocalc biblioteki importy (na przykłądnie sympy nu,py) Kernel its (guide z obsługi cocalca i zakładania jupytera), raportowanie, przydzielenie prezenracja i rozpisanie issues - IntroToCocalc.',
+            'Podstawy gołego pythona(prosty guide/raport z np importów i np min max, pętli.',
+            'Biblioteki typu numpy sympy itd.(studenkie propozycje przyllakdow zastoseowani z np prostej symulacji).',
+            'Raportowanie zaawansowane (guide z raportowanie ???)',
+            'Odesystemy(przykładowe rozwiazanie rra i np trajektoria)',
+            'Systemy dynamicczne tabelki(przedstawienie wyników obliczen z 6 i 7 w formie tabeli)',
+            'Symulacje(pełny raport z symulacji)',
+            'Przedstawienie obsługi dynpow typu helpy guidy its, gdzie szukać jak używać żeby pokazać co można finalnie stworzyć',
+            'Budowanie systemów i tutaj już może coś zbudować',
+            'Budowanie komponentów i tutaj już jakiś zrobić np do systemu zrobionego wcześniej',
+            'Full raport na systemie i komponentach stworzony od zera#(tutaj może już z tych trzech mini projekt w postaci zastowania pythona'
+
+    ]
+
+        tematy_list = [
+            'Celem pracy jest przygotowanie środowiska języka programowania Python do implementacji modeli związanych z mechaniką analityczną oraz klasyczną, z naciskiem na klasy związane z metodami małego parametru(metody pertubacyjne).',
+            'Celem pracy jest przygotowanie środowiska języka programowania Python do implementacji modeli związanych z mechaniką analityczna oraz klasyczną, z naciskiem na opis różnych technik symulacji.',
+            'Celem pracy jest zamodelowanie systemu autonomicznej jazdy w środowisku Python (aktywnego tempomatu) oraz zastosowanie Python’a jako narzędzia programistycznego do obliczeń inżynierskich.',
+            'The objective of this paper is to examine the parametric vibration of a gearbox with variable mesh stiffness using the multiple time scale method. The study employs two linear models: a two-degree-of-freedom model for numerical analyses and a simplified one-degree-of-freedom gear model for deriving the analytical solution.',
+            'Celem pracy jest rozpoznanie możliwości zastosowania języka programowania Python do analizy i badania układów dynamicznych oraz jako narzędzia dla inżynierów z wykorzystaniem biblioteki DynPy.',
+            'Celem pracy jest przygotowanie klas wspomagających raportowanie w środowisku języka programowania Python. Stanowią one uzupełnienie do narzędzia umożliwiającego interaktywne rozwiązywanie zagadnień z zakresu mechaniki teoretycznej, z naciskiem na umożliwienie docelowemu użytkownikowi na uzyskanie szczegółowych informacji o metodach analizy.',
+            'Celem pracy jest użycie języka programowania Python celem zbadania i analizy dynamiki ogniwa li-ion zastosowanego w modelu pojazdu elektrycznego.',
+            'The aim of the thesis is to create model of theoretical battery in Python programming language, as module to Dynpy library.',
+            'The thesis aims to conduct a comprehensive comparative analysis of various Battery Management System (BMS) models to assess their performance metrics using simulation techniques in Python. The study will focus on evaluating critical factors such as energy efficiency, state-of-charge estimation, battery lifespan maximization, and overall system reliability. It will also investigate the adaptability of these models to different types of battery chemistries and configurations. The goal is to identify the most effective BMS model that optimizes battery usage and extends the operational life of battery-powered systems.',
+            'Celem pracy jest przygotowanie środowiska języka programowania Python do wspomagania prac projektowych z projektu Podstaw Konstrukcji Maszyn',
+            'The aim of the paper is investigation of possiblities of utilisation of Python programming language in complex engineering calculations with an outcome in form of academic specialized text',
+            'The  goal  of  the  paper  is  to  analyze  the  parametricvibration  of  a  gearbox  with  variable  mesh  stiffness  using  the  multiple  time  scale  method.  It  wasassumed  that  two  linear  models  will  be  used  for  the  study:  a  model  with  two  degrees  of  freedom(numerical  analyses)  and  a  reduced  gear  model  with  one  degree  of  freedom  (to  determine  the analytical solution).', 
+            'Celem pracy jest użycie języka programowania Python do modelowania i analizy dynamiki pojazdów z uzgleniem wytrzymałości zmęczeniowej, zjawiska rezonansu oraz bilansu energetycznego'
+    ]
+
+        display(ReportText('''
+        Python w zastosowaniach inżynierskich i naukowych
+
+        - Przedmiot został stworzony na potrzeby nowej specjalności „Zaawansowane metody projektowania i rozwoju produktu w inżynierii mechanicznej” na studiach II stopnia (magisterskich). Odpowiada potrzebie opracowywania i zastosowania w praktyce innowacyjnych metod kształcenia opartych na pracy zespołowej i rozwiązywaniu problemów projektowych.
+
+        - Idą było stworzenie i uruchamianie modułowych zajęć dydaktycznych o charakterze interdyscyplinarnym, które będą koncentrowały się na wykonywaniu zadań związanych z modelowaniem i rozwiązywaniem kompleksowych problemów inżynierskich oraz naukowych przy użyciu języka programowania Python.
+
+        - Moduł zajęć dydaktyczny tworzą dwa powiązane przedmioty:
+        1. Python w zastosowaniach inżynierskich i naukowych.
+        2. Zaawansowane metody komputerowego modelowania maszyn i pojazdów.
+
+        - Kompetencje zdobyte na przedmiocie Python w zastosowaniach inżynierskich i naukowych stanowią podstawę dla bardziej zaawansowanych zastosowań języka programowania Python, które realizowane są na przedmiocie Zaawansowane metody komputerowego modelowania maszyn i pojazdów.
+
+        - Podczas zajęć studenci zapoznają się z metodykami programowania w paradygmacie obiektowym z wykorzystaniem mechanizmów języka Python. Opanowują składnię tego języka programowania w kontekście bogatego ekosystemu bibliotek i technologii, które przyczyniają się do jego dużej i wciąż rosnącej popularności. Jednocześnie zdobywają wiedzę z zakresu matematyki obliczeniowej: algorytmy, obliczenia symboliczne i numeryczne, przetwarzanie oraz analiza i wizualizacja danych.
+
+        - Zadania będą realizowane zespołowo. Taka forma sprzyja rozwijaniu umiejętność pracy grupowej, tworzy przestrzeń do „burzy mózgów” i pozwala na efektywniejsze zdobywanie umiejętności projektowania i programowania obiektowego w kontekście rozważanego zagadnienia. Ułatwi to tworzenie adekwatnej architektury aplikacji z uwagi na zakres wymagań.
+
+        - Tworząc przyjazną przestrzeń własnej pracy zespołowej, studenci nabędą umiejętności, które są przydatne podczas studiów, pracy naukowej, a przede wszystkim na współczesnym rynku pracy. Praktykują stosowanie technik i technologii programistycznych przedstawionych na zajęciach wykonując zadania związane z modelowaniem i rozwiązywaniem kompleksowych problemów.
+        '''))
+
+        display(ReportText('''
+        Adaptacyjna forma zajęć:
+        Jest to pierwsza edycja ww. zajęć, które będą poprowadzone na nowej specjalności studiów II st. magisterskich.
+        - Wcześniej przeprowadziliśmy kilka względnie krótkich kursów „wdrożeniowych” dla studentów SiMR skupionych wokół grupy naukowo-dydaktycznej Effective Python, którą wspólnie założyliśmy i prowadzimy od 21.02.2022.
+        - Tak więc, sami jesteśmy ciekawi jak to ostatecznie wyjdzie. Drodzy Studenci, wspólnie z nami będziecie kreować obraz zajęć w ramach tych dwóch przedmiotów modułowych. W dużej mierze to od Was, waszych chęci i zaangażowania będzie zależało to ile i jak uda nam się zrobić.
+        - W ogólnym ujęciu zajęcia podzielone są na 2 fazy:
+        I.	Szkolenie z podstaw programowania obiektowego z użyciem języka Python
+        \(9 tygodni\)
+        II.	Projekt (zespołowy) – praktyczne rozwiązanie zadanego/wybranego problemu
+        \(6 tygodni\)
+        '''))
+
+        for i in range(11):
+            zajecia[str(i + 1)] = zajecia_list[i]
+            tematy[str(i + 1)] = tematy_list[i]
+
+        df = pd.DataFrame(data={'Tematyka zajęć': zajecia, 'Guide': tematy})
+        df1 = LatexDataFrame(df)
+
+
+        display(df1.reported())
+        display(Markdown('''
+        FAZA I
+        - Poszczególne zagadnienia przedmiotowe realizowane według harmonogramu zajęć.
+        - Każde zajęcia podsumowuje raport konkretnego zastosowania Pythona.
+        - Studenci prowadzą spotkania zajęciowe.
+        Spokojnie, bez ciśnień, bez stresu. Chodzi o samokształcenie i swobodną formę zajęć, w ramach których na forum grupy każdy student przedstawia swoim kolegom/koleżankom wybrane zagadnienie podstawowe z harmonogramu, tzn. prezentuje i omawia dany guide, wyjaśnia prosto, jak korzystać. Tak jak to bywa w pracy na spotkaniach grupy projektowej czy programistycznej (sprinty Scrum).
+        - Fazę I kończy spotkanie grupy, mające na celu podsumowanie dotychczasowych działań, wytyczenie kierunku dalszych prac, tzn. wydanie zadań do wykonania.
+        '''))
+
+        display(ReportText('''A przyświeca temu idea, którą określają trzy znane cytaty:
+
+        “If you can't explain it simply, you don't understand it well enough”.
+        (Jeśli nie potrafisz czegoś wyjaśnić prosto, nie rozumiesz tego wystarczająco dobrze.)
+        Albert Einstein
+
+        “What we don't understand we can make mean anything”.
+        (To, czego nie rozumiemy, może mieć dowolne znaczenie.)
+        Chuck Palahniuk
+        A chodzi o to, żeby to miało właściwe znaczenie, żeby nie przeinaczasz sensu. ;-)
+
+        “Knowing is not enough; we must apply. Willing is not enough; we must do”.
+        (Wiedza nie wystarczy, musimy ją zastosować. Chęć nie wystarczy, musimy działać.
+        Johann Wolfgang von Goethe'''))
+
+        display(Markdown('''
+        FAZA II
+        - Planowanie i śledzenie postępu prac: zadania (issues) wyznaczone na GitHub. To jest hostingowy serwis internetowy przeznaczony do projektów programistycznych wspieranych przez system kontroli wersji Git.
+        - Spotkania cotygodniowe poświęcone na weryfikację progresu prac (sprinty Scrum).
+        - Wykonanie szablonowych raportów z zadań, według wytycznych.
+        - Fazę II kończy spotkanie grupy, poświęcone podsumowaniu efektów prac: rozliczenie raportu i wykonanych zadań (issues).
         '''))

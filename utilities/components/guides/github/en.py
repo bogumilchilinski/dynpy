@@ -329,20 +329,17 @@ class UsageOfGitHubInterfacesComponent(GitSynchroPanelAccessComponent):
     title="Wprowadzenie do GitHubInterface"
 
     def append_elements(self):
-#       variables provided by `reported_object` arg
+        #variables provided by `reported_object` arg
         classname = self.reported_object['classname']
         class_module = self.reported_object['module']
         class_field = self.reported_object['field']
         target = self.reported_object['target']
     
-#       implement reporting activieties here
-
+        #implement reporting activieties here
+        from dynpy.utilities.creators import GitHubInterface
         display(ReportText('Obsluga rytynowych czynności w dynpy jest wykonanywana przez klasę GitHubInterface'))
-
         display(ObjectCode(GitHubInterface))
-
         display(ReportText('Więcej informacji możesz uzyskać w helpie'))
-
         display(ObjectCode("help(GitHubInterface)"))
         display(ObjectCode(help(GitHubInterface)))
 
@@ -400,6 +397,16 @@ class GithubIssueReportComponent(ReportComponent):
 
     title="Details of GitHub issue"
 
+    def dynamic_title(self):
+        
+        
+        issue = self.reported_object
+        if issue==None:
+            from github.Issue import Issue
+            issue = Issue(requester = 'lsikor', headers = {'title' : 'TEST'}, attributes = {'body':'Przykladowy opis - nie został podany żaden argument', 'title':'TEST', 'number': 999}, completed = False)
+        
+        return "Details of " + issue.title + "- No: " + str(issue.number)
+    
     def append_elements(self):
         
         issue = self.reported_object
@@ -413,5 +420,18 @@ class GithubIssueReportComponent(ReportComponent):
         else:
             display(Markdown("Issue description: " + issue.body))
         display(ReportText('\\newline'))
-        display(ReportText('-'*130))
+        display(ReportText('-'*100))
         display(ReportText('\\newline'))
+
+class UsageOfMeetingCreatorComponent(ReportComponent):
+    
+    
+    title="Github meeting creator class"
+
+    def append_elements(self):
+        from .....utilities.creators import MeetingIssueCreator
+        display(ReportText('This class is used to create meeting issues through API. The class consists of the following code: \\newline'))
+        system = self.reported_object
+        display(ObjectCode(MeetingIssueCreator))
+        display(ReportText(' \\newline To learn more about this class use help. \\newline'))
+

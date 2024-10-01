@@ -3893,6 +3893,53 @@ class UsageOfGitHubInterfacesComponent(GitSynchroPanelAccessComponent):
         display(ObjectCode("help(GitHubInterface)"))
         display(ObjectCode(help(GitHubInterface)))
 
+class IssueFeedbackComponent(ReportComponent):
+
+    title="Komentarz zamykajacy issue z komponentami"
+
+    @property
+    def reported_object(self):
+        from .....dynamics import LagrangesDynamicSystem
+
+        default_data = {'classname':'Component',
+                       'module':'dynpy.utilities.components.guides.en',
+                       'field':'None',
+                       'target':'`ReportComponent` class',
+                       'issue_no':359,
+                       }
+
+        if isinstance(self._reported_object, dict):
+            return {**default_data,**self._reported_object}
+
+        if isinstance(self._reported_object, ReportComponent) or isinstance(self._reported_object, LagrangesDynamicSystem):
+            return {**default_data,'classname':self._reported_object.__class__.__name__,'module':self._reported_object.__class__.__module__}
+        
+        elif isinstance(self._reported_object, str):
+            return {**default_data,'classname':self._reported_object}
+
+        elif self._reported_object is None:
+            return default_data
+        
+        else:
+            return self._reported_object
+
+
+    @reported_object.setter
+    def reported_object(self, obj):
+        self._reported_object=obj
+
+
+    def append_elements(self):
+        #variables provided by `reported_object` arg
+        classname = self.reported_object['classname']
+        class_module = self.reported_object['module']
+        class_field = self.reported_object['field']
+        target = self.reported_object['target']
+
+        display(ReportText('The code was checked with the following call: '))
+        #display(ObjectCode(git_com_str.format(classname=classname)))
+        #display(ObjectCode(git_com_str.format(classname=classname,module=class_module,class_field=class_field)))
+        
 class AlgebraicExpressionComponent(ReportComponent):
 
     title = "Algebraic expression example"

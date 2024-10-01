@@ -55,12 +55,24 @@ from {guide_class_module} import {guide_class_name}
 """
 
 class MeetingIssueCreator:
+
+    """
+
+    Example:
+    from dynpy.utilities.creators import MeetingIssueCreator
+    from dynpy.utilities.documents.document import IntroDynPyProjectGuidelines
+    title="Issue"
+    last_issue_no=533
+    MeetingIssueCreator(title=title,no=last_issue_no+1,guide=IntroDynPyProjectGuidelines,date='2024.09.26',time='20:30',done=False)
+
+    """
+
     _title = 'implementation of ODESystem overview report'
     _issue_no = 567
     _guide = ODESystemOverviewReport
     _time = '20:30'
     _date = '2024.07.27'
-    
+
     def __init__(self,title=None,no=None,guide=None,date=None,time=None,done=False,*args,**kwargs):
         if title is not None: self._title = title
         if no is not None: self._issue_no = no
@@ -68,8 +80,7 @@ class MeetingIssueCreator:
         if date is not None: self._date= date
         if time is not None: self._time = time
         self._done = done
-        
-    
+
     def _get_elems_dict(self):
 
         if self._done: tic = 'x'
@@ -89,12 +100,11 @@ class MeetingIssueCreator:
                 'time':self._time,
                 'tic':tic
                 }
-        
+
         return elems_dict
-    
+
     def get_issues_titles(self):
-        
-        
+
         # Issue no. #{issue_no}
         ## Preparation of meeting and guide for {title}
 
@@ -107,21 +117,21 @@ class MeetingIssueCreator:
                         'arrange':f'Arrangement and execution of the meeting for {title} (issue #{issue_no} related)',
                         'guide':f'Preparation or improvement of the guide for {title} (issue #{issue_no} related)',
                         }
-        
+
         return titles_dict
-        
+
     def get_issue_str(self):
         elems_dict = self._get_elems_dict()
         issue_no = self._issue_no
-        
+
         titles = self.get_issues_titles()
-        
+
         meet_issue_dict = self.get_meet_issue_dict()
         time_issue_dict = self.get_time_issue_dict()
         arrange_issue_dict = self.get_arrange_issue_dict()
         guide_issue_dict = self.get_guide_issue_dict()
-        
-        
+
+
         issue_code_str = (f'# Issue no. #{issue_no} \n '+
                         '## '+meet_issue_dict['title'] + '\n ' +
                         meet_issue_dict['body'] + '\n ' +
@@ -134,44 +144,42 @@ class MeetingIssueCreator:
                         f'# Issue no. #{issue_no+3} \n ' +
                         '## '+guide_issue_dict['title'] + '\n ' +
                         guide_issue_dict['body'])
-        
+
         return issue_code_str
 
 
     def get_meet_issue_dict(self):
         elems_dict = self._get_elems_dict()
         titles = self.get_issues_titles()
-                
+
         return {'title':titles['meet'],'body':meet_issue_code_str.format(**elems_dict)}
 
     def get_time_issue_dict(self):
         elems_dict = self._get_elems_dict()
         titles = self.get_issues_titles()
-                
+
         return {'title':titles['time'],'body':meet_time_issue_code_str.format(**elems_dict)}
 
 
     def get_arrange_issue_dict(self):
         elems_dict = self._get_elems_dict()
         titles = self.get_issues_titles()
-                
+
         return {'title':titles['arrange'],'body':meet_arrange_issue_code_str.format(**elems_dict)}
-    
-    
+
     def get_guide_issue_dict(self):
         elems_dict = self._get_elems_dict()
         titles = self.get_issues_titles()
-                
+
         return {'title':titles['guide'],'body':meet_guide_issue_code_str.format(**elems_dict)}
 
-    
     def _repr_markdown_(self):
         return self.get_issue_str()
 
     def publish_on_github(self,repository):
-        
+
         guide_label=repository.get_label('guidance')
-        
+
         issue_meet=repository.create_issue(**self.get_meet_issue_dict(),labels=[guide_label]#,assignees=wykon
                                 )
         issue_time=repository.create_issue(**self.get_time_issue_dict(),labels=[guide_label],assignee='bogumilchilinski')
@@ -179,7 +187,7 @@ class MeetingIssueCreator:
                                 )
         issue_guide=repository.create_issue(**self.get_guide_issue_dict(),labels=[guide_label]#,assignees=wykon
                                 )
-        
+
         return issue_meet,issue_time,issue_arrange,issue_guide
 
 class GitHubInterface():
@@ -1084,7 +1092,7 @@ Init: tree_comp - string returned by build_tree method
         
 def list_of_guides():
 
-    dir_str = 'dynpy.utilities.documents'
+    dir_str = 'dynpy.utilities.guides'
 
     return ModuleStructure(dir_str).get_classes()
 
@@ -1099,3 +1107,451 @@ def list_of_mechanical_systems():
     dir_str = 'dynpy.models.mechanics'
 
     return ModuleStructure(dir_str).get_classes()
+
+advanced_modeling_schedule_code_str = """Następujące zadania mają na celu przygotowanie projektu wybranego przez studentów układu dynamicznego. Konieczne jest zaplanowanie wykonania kamieni milowych w terminie do {date} i w czasie {time}, celem utrzymania ciągłości realizacji projektu:
+
+- [{tic}] #{issue_no+1}
+
+- [{tic}] #{issue_no+2}
+
+- [{tic}] #{issue_no+3}
+
+- [{tic}] #{issue_no+4}
+
+- [{tic}] #{issue_no+5}
+
+- [{tic}] #{issue_no+6}
+
+- [{tic}] #{issue_no+7}
+
+"""
+ 
+
+advanced_modeling_intro_code_str = """Celem jest przygotowanie toku postępowania, dzięki któremu możliwe będzie sprawne przygotowanie projektu zaawansowanego modelu dynamicznego:
+
+########## FAZA I - WSTĘPNA - X godziny ####################### (ZESPÓŁ/ 1 osoby)
+
+- [{tic}] Określenie wymagań oraz oczekiwań do projektu, w jakiej dziedzinie chcemy wykonać pracę:
+                mechaniczna np. przekładnie, silniki, 
+                elektryczna np. akumulatory, filtry, uklady sterowania
+                budowlana np. dynamiczne eliminatory drgań, żurawie 
+                dynamiczne np. zawieszenia, 
+                kinematyczne np. ruch "pojazdu" po trasie wraz z jego charakteryzacją
+
+- [{tic}] Wybór rzeczywistego obiektu, mechanizmu lub zjawiska, na bazie którego wykonany zostanie model.
+
+- [{tic}] Prezentacja przykładowego rzeczywistego modelu doświadczalnego, który nawiązuje do modelu symulacyjnego
+
+- [{tic}] Wybór metodyki stworzenia modelu dynamicznego,
+
+- [{tic}] Określenie założeń do modelu, stopnia zaawansowania oraz konkretnych wyników jakie chcemy uzyskać
+
+"""
+
+advanced_modeling_basics_code_str = """Celem jest przygotowanie toku postępowania, dzięki któremu możliwe będzie sprawne przygotowanie projektu zaawansowanego modelu dynamicznego:
+
+########## FAZA II - PRZYGOTOWANIA PRACY - X godziny ####################### (2 osoby)
+
+- [{tic}] Przegląd aktualnego stanu wiedzy oraz zawartości środowiska DynPy, celem rozpoznania możliwości,
+
+- [{tic}] Przygotowanie dokumentu, w którym zaprezentowane będą podstawowe klasy i metody na bazie których możliwe będzie wykonanie projektu oraz raportu,
+
+- [{tic}] Wyszukanie grafiki obiektu, mechanizmu lub zjawisa na podstawie którego należy wykonać rysunek schematyczny (np. w SolidWorks/Autocad/TiKz) 
+
+- [{tic}] Przeprowadzenie całkowitej charakterystyki modelu (LSS, współrzędne, wiezy,  energie, rownania ruchu)
+
+"""
+
+advanced_modelling_modelling_code_str = """Celem jest przygotowanie toku postępowania, dzięki któremu możliwe będzie sprawne przygotowanie projektu zaawansowanego modelu dynamicznego:
+
+########## FAZA III - WYKONANIA MODELU - X godziny ####################### (1 osoby)
+
+- [{tic}] Wybór modelu z biblioteki DynPy, który przypomina zdefiniowany model w poprzedniej fazie,
+
+- [{tic}] Bazując na modelu, przygotować wszystkie potrzebne do analizy równania, 
+
+- [{tic}] Dobrać odpowiednie dane i parametry do wybranego modelu symulacyjnego,
+
+- [{tic}] Przeprowadzenie weryfikacji poprawności zaprogramowanych funckji,
+
+"""
+
+advanced_modeling_simulation_code_str = """Celem jest przygotowanie toku postępowania, dzięki któremu możliwe będzie sprawne przygotowanie projektu zaawansowanego modelu dynamicznego:
+
+########## FAZA IV - WYKONANIA SYMULACJI - X godziny ####################### (2 osoby) 
+
+- [{tic}] Przygotowanie odpowiednich funckji do wykonania symulacji analitycznych i numerycznych,
+
+- [{tic}] Wykonanie symulacji z wykorzystaniem analitycznych rozwiązań równanań ruchu,
+
+- [{tic}] Przeprowadzenie symulacji z wykorzystaniem modelu znumeryzowanego,
+
+- [{tic}] Przeprowadzenie analizy poprawności dobranych danych oraz wykonanie ewentualnej modyfikacji,
+
+- [{tic}] Stworzenie matrycy porównującej wyniki obu symulacji,
+
+- [{tic}] (+) Wykonanie obliczeń wielkości innych niż "x,v,a",
+
+"""
+
+advanced_modeling_analysis_code_str = """Celem jest przygotowanie toku postępowania, dzięki któremu możliwe będzie sprawne przygotowanie projektu zaawansowanego modelu dynamicznego:
+
+########## FAZA V - ANALIZY WYNIKÓW - X godziny ####################### (1 osoby)
+
+- [{tic}] Zaprezentowanie wyników w formie zbioru tabel
+
+- [{tic}] Prezentacja wyników w formie wykresów wraz
+
+- [{tic}] Wykonanie analizy wyników i zdefiniowanie zauważonych zjawisk
+
+"""
+
+advanced_modeling_report_code_str = """Celem jest przygotowanie toku postępowania, dzięki któremu możliwe będzie sprawne przygotowanie projektu zaawansowanego modelu dynamicznego:
+
+########## FAZA VI - WYKONANIA RAPORTU KOŃCOWEGO - X godziny ####################### (1 osoby)
+
+- [{tic}] Stowrzenie krótkiego opisu aktualnego stanu wiedzy wraz z opisem idei modelowania (FAZA II),
+
+- [{tic}] Zaprezentowanie wybranego modelu rzeczywistego oraz jego interpretacji fizycznej (FAZA I),
+
+- [{tic}] Prezentacja wykorzystanych równań charakteryzujących obiekt (FAZA III),
+
+- [{tic}] Przygotowanie opisu stosowanego programu (FAZA III),
+
+- [{tic}] Wykonanie tabel i wykresów oraz ich opis (FAZA IV, V)
+
+- [{tic}] Sformułowanie wniosków (FAZA VI)
+
+"""
+
+advanced_modeling_schedule_code_str_en = """The following tasks aim to prepare the student-selected dynamic system project. It is necessary to plan the completion of milestones by {date} and at {time} to ensure the continuity of the project execution:
+
+- [{tic}] #{issue_no+1}
+
+- [{tic}] #{issue_no+2}
+
+- [{tic}] #{issue_no+3}
+
+- [{tic}] #{issue_no+4}
+
+- [{tic}] #{issue_no+5}
+
+- [{tic}] #{issue_no+6}
+
+- [{tic}] #{issue_no+7}
+
+"""
+ 
+
+advanced_modeling_intro_code_str_en = """The goal is to prepare a procedure that will enable the efficient preparation of an advanced dynamic model project:
+
+########## PHASE I - PRELIMINARY - X hours ####################### (TEAM/ 1 person)
+
+[{tic}] Defining the requirements and expectations for the project, determining the field in which the work will be conducted: mechanical, e.g. gears, engines, electrical, e.g. batteries, filters, control systems, structural, e.g. dynamic vibration dampers, cranes, dynamic, e.g. suspensions, kinematic, e.g. vehicle movement along a route, along with its characterization.
+
+[{tic}] Selection of a real object, mechanism, or phenomenon on which the model will be based.
+
+[{tic}] Presentation of an example of a real experimental model that relates to the simulation model.
+
+[{tic}] Selection of a methodology for creating the dynamic model.
+
+[{tic}] Defining the assumptions for the model, the level of advancement, and the specific results we aim to achieve.
+
+"""
+
+advanced_modeling_basics_code_str_en = """The goal is to prepare a procedure that will enable the efficient completion of an advanced dynamic model project:
+
+########## PHASE II - PROJECT PREPARATION - X hours ####################### (2 people)
+
+[{tic}] Review of the current state of knowledge and the contents of the DynPy environment to assess its capabilities,
+
+[{tic}] Preparation of a document presenting the fundamental classes and methods that will form the basis of the project and report,
+
+[{tic}] Search for graphics of the object, mechanism, or phenomenon on which the schematic drawing will be based (e.g., in SolidWorks/AutoCAD/TiKz),
+
+[{tic}] Conduct a complete characterization of the model (LSS, coordinates, constraints, energies, equations of motion).
+
+"""
+
+advanced_modelling_modelling_code_str_en = """The goal is to prepare a procedure that will enable the efficient completion of an advanced dynamic model project:
+
+########## PHASE III - MODEL DEVELOPMENT - X hours ####################### (1 person)
+
+[{tic}] Selection of a model from the DynPy library that resembles the model defined in the previous phase,
+
+[{tic}] Based on the model, prepare all the necessary equations for the analysis,
+
+[{tic}] Select appropriate data and parameters for the chosen simulation model,
+
+[{tic}] Conduct verification of the programmed functions to ensure correctness.
+
+"""
+
+advanced_modeling_simulation_code_str_en = """The goal is to prepare a procedure that will enable the efficient completion of an advanced dynamic model project:
+
+########## PHASE IV - SIMULATION EXECUTION - X hours ####################### (2 people)
+
+[{tic}] Preparation of appropriate functions for conducting analytical and numerical simulations,
+
+[{tic}] Execution of simulations using analytical solutions of the equations of motion,
+
+[{tic}] Conduct simulations using the numerically discretized model,
+
+[{tic}] Analyze the accuracy of the selected data and make any necessary adjustments,
+
+[{tic}] Create a matrix comparing the results of both simulations,
+
+[{tic}] (+) Perform calculations for quantities other than "x, v, a".
+
+"""
+
+advanced_modeling_analysis_code_str_en = """The goal is to prepare a procedure that will enable the efficient completion of an advanced dynamic model project:
+
+########## PHASE V - RESULTS ANALYSIS - X hours ####################### (1 person)
+
+[{tic}] Present the results in the form of a set of tables,
+
+[{tic}] Display the results in the form of graphs,
+
+[{tic}] Perform an analysis of the results and identify the observed phenomena.
+
+"""
+
+advanced_modeling_report_code_str_en = """The goal is to prepare a procedure that will enable the efficient completion of an advanced dynamic model project:
+
+########## PHASE VI - FINAL REPORT PREPARATION - X hours ####################### (1 person)
+
+[{tic}] Create a brief summary of the current state of knowledge along with a description of the modeling concept (PHASE II),
+
+[{tic}] Present the selected real model and its physical interpretation (PHASE I),
+
+[{tic}] Present the equations used to characterize the object (PHASE III),
+
+[{tic}] Prepare a description of the applied software (PHASE III),
+
+[{tic}] Prepare tables and graphs along with their descriptions (PHASE IV, V),
+
+[{tic}] Formulate conclusions (PHASE VI).
+
+"""
+
+class AdvancedModellingIssueGenerator:
+    
+    _title = 'nazwa przedmiotu'
+    _issue_no = 567
+    _guide = ODESystemOverviewReport #### ResearchProjectGuidelines
+    _time = '14:30' ## 
+    _date = '2024.10.10' ##
+    _lang = 'en'
+
+    def __init__(self,title=None,no=None,guide=None,date=None,time=None,done=False,lang=None,*args,**kwargs):
+        if title is not None: self._title = title
+        if no is not None: self._issue_no = no
+        if guide is not None: self._guide = guide
+        if date is not None: self._date= date
+        if time is not None: self._time = time
+        if lang is not None: self._lang = lang
+        self._done = done
+        
+    
+    def _get_elems_dict(self):
+
+        if self._done: tic = 'x'
+        else: tic = ' '
+
+        guide_class = self._guide
+
+        elems_dict = {
+                'title':self._title,
+                'issue_no':self._issue_no,
+                'issue_no+1':self._issue_no+1,
+                'issue_no+2':self._issue_no+2,
+                'issue_no+3':self._issue_no+3, #### 7 ISSUE
+                'issue_no+4':self._issue_no+4,
+                'issue_no+5':self._issue_no+5,
+                'issue_no+6':self._issue_no+6,
+                'issue_no+7':self._issue_no+7,
+                'guide_class_module':guide_class.__module__,
+                'guide_class_name':guide_class.__name__,
+                'date':self._date,
+                'time':self._time,
+                'tic':tic
+                }
+        
+        return elems_dict
+    
+    def get_issues_titles(self):
+        
+        
+        # Issue no. #{issue_no}
+        ## Preparation of meeting and guide for {title}
+
+        issue_no = self._issue_no
+        title = self._title
+        lang = self._lang
+        
+        
+        if lang == 'en':
+
+
+            titles_dict =   {
+                        'schedule': f'Presentation of the work schedule during the classes for the course {title}', ### 
+                        'intro': f'Introduction to the DynPy environment for the work related to the course {title} (related to issue #{issue_no})', ### 
+                        'basics': f'Preparation of basic information about the model and proposal of a research setup concept for the course {title} (related to issue #{issue_no})', ### 
+                        'modelling': f'Creation of a simulation model for the selected topic in the course {title} (related to issue #{issue_no})', ### 
+                        'simulation': f'Conducting numerical and analytical simulations for the considered model in the course {title} (related to issue #{issue_no})', ### 
+                        'analysis': f'Analysis of the obtained results in the course {title} (related to issue #{issue_no})', ### 
+                        'report': f'Preparation of a report covering all phases of the project for the course {title} (related to issue #{issue_no})', ###
+                        }
+            
+        else:
+            titles_dict =   {
+                        'schedule':f'Prezentacja harmonogramu prac na zajęciach z przedmiotu {title}', ### 
+                        'intro':f'Wprowadzenie do środowiska DynPy do wykonania prac z przedmiotu {title} (powiązane z issue #{issue_no})', ### 
+                        'basics':f'Przygotowanie podstawowych informacji o modelu oraz zaproponowanie koncepcji stanowiska badawczego z przedmiotu {title} (powiązane z issue #{issue_no})', ###
+                        'modelling':f'Wykonanie modelu symulacyjnego z wybranego zagadnienia z przedmiotu {title} (powiązane z issue #{issue_no})', ###
+                        'simulation':f'Przeporwadzenie symulacji numerycznych i analitycznych rozważanego modelu z przedmiotu {title} (powiązane z issue #{issue_no})', ###
+                        'analysis':f'Analiza otrzymanych wyników z przedmiotu {title} (powiązane z issue #{issue_no})', ###
+                        'report':f'Przygotowanie raportu z wszystkich faz projektu z przedmiotu {title} (powiązane z issue #{issue_no})', ###
+                        }
+
+        return titles_dict
+        
+    def get_issue_str(self):
+        elems_dict = self._get_elems_dict()
+        issue_no = self._issue_no
+        
+        titles = self.get_issues_titles()
+        
+        schedule_issue_dict = self.get_schedule_issue_dict()
+        intro_issue_dict = self.get_intro_issue_dict()
+        basics_issue_dict = self.get_basics_issue_dict()
+        modelling_issue_dict = self.get_modelling_issue_dict()
+        simulation_issue_dict = self.get_simulation_issue_dict()
+        analysis_issue_dict = self.get_analysis_issue_dict()
+        report_issue_dict = self.get_report_issue_dict()
+        
+        
+        issue_code_str = (f'# Issue no. #{issue_no} \n '+
+                        '## '+schedule_issue_dict['title'] + '\n ' +
+                        schedule_issue_dict['body'] + '\n ' +
+                        f'# Issue no. #{issue_no+1} \n '+
+                        '## '+ intro_issue_dict['title'] + '\n ' +
+                        intro_issue_dict['body'] + '\n ' +
+                        f'# Issue no. #{issue_no+2} \n '+
+                        '## '+basics_issue_dict['title'] + '\n ' +
+                        basics_issue_dict['body'] + '\n ' +
+                        f'# Issue no. #{issue_no+3} \n '+
+                        '## '+modelling_issue_dict['title'] + '\n ' +
+                        modelling_issue_dict['body'] + '\n ' +
+                        f'# Issue no. #{issue_no+4} \n '+
+                        '## '+simulation_issue_dict['title'] + '\n ' +
+                        simulation_issue_dict['body'] + '\n ' +
+                        f'# Issue no. #{issue_no+5} \n '+
+                        '## '+analysis_issue_dict['title'] + '\n ' +
+                        analysis_issue_dict['body'] + '\n ' +
+                        f'# Issue no. #{issue_no+6} \n '+
+                        '## '+report_issue_dict['title'] + '\n ' +
+                        report_issue_dict['body'])
+        
+        return issue_code_str
+
+
+    def get_schedule_issue_dict(self):
+        elems_dict = self._get_elems_dict()
+        titles = self.get_issues_titles()
+        lang = self._lang
+
+        if lang == 'en':
+            return {'title':titles['schedule'],'body':advanced_modeling_schedule_code_str_en.format(**elems_dict)}
+        else:
+            return {'title':titles['schedule'],'body':advanced_modeling_schedule_code_str.format(**elems_dict)}
+
+    def get_intro_issue_dict(self):
+        elems_dict = self._get_elems_dict()
+        titles = self.get_issues_titles()
+        lang = self._lang
+
+        if lang == 'en':
+            return {'title':titles['intro'],'body':advanced_modeling_intro_code_str_en.format(**elems_dict)}
+        else:
+            return {'title':titles['intro'],'body':advanced_modeling_intro_code_str.format(**elems_dict)}
+
+    def get_basics_issue_dict(self):
+        elems_dict = self._get_elems_dict()
+        titles = self.get_issues_titles()
+        lang = self._lang
+
+        if lang == 'en':
+            return {'title':titles['basics'],'body':advanced_modeling_basics_code_str_en.format(**elems_dict)}
+        else:
+            return {'title':titles['basics'],'body':advanced_modeling_basics_code_str.format(**elems_dict)}
+    
+    def get_modelling_issue_dict(self):
+        elems_dict = self._get_elems_dict()
+        titles = self.get_issues_titles()
+        lang = self._lang
+
+        if lang == 'en':
+            return {'title':titles['modelling'],'body':advanced_modelling_modelling_code_str_en.format(**elems_dict)}
+        else:
+            return {'title':titles['modelling'],'body':advanced_modelling_modelling_code_str.format(**elems_dict)}
+    
+    def get_simulation_issue_dict(self):
+        elems_dict = self._get_elems_dict()
+        titles = self.get_issues_titles()
+        lang = self._lang
+        
+        if lang == 'en':
+            return {'title':titles['simulation'],'body':advanced_modeling_simulation_code_str_en.format(**elems_dict)}
+        else:
+            return {'title':titles['simulation'],'body':advanced_modeling_simulation_code_str.format(**elems_dict)}
+    
+    def get_analysis_issue_dict(self):
+        elems_dict = self._get_elems_dict()
+        titles = self.get_issues_titles()
+        lang = self._lang
+        
+        if lang == 'en':
+            return {'title':titles['analysis'],'body':advanced_modeling_analysis_code_str_en.format(**elems_dict)}
+        else:
+            return {'title':titles['analysis'],'body':advanced_modeling_analysis_code_str.format(**elems_dict)}
+    
+    def get_report_issue_dict(self):
+        elems_dict = self._get_elems_dict()
+        titles = self.get_issues_titles()
+        lang = self._lang
+
+        if lang == 'en':
+            return {'title':titles['report'],'body':advanced_modeling_report_code_str_en.format(**elems_dict)}
+        else:
+            return {'title':titles['report'],'body':advanced_modeling_report_code_str.format(**elems_dict)}
+    
+    def _repr_markdown_(self):
+        return self.get_issue_str()
+
+    def publish_on_github(self,repository):
+        
+        guide_label=repository.get_label('guidance')
+        
+        issue_schedule = repository.create_issue(**self.get_schedule_issue_dict(),labels=[guide_label]#,assignees=wykon
+                                )
+        
+        issue_intro = repository.create_issue(**self.get_intro_issue_dict(),labels=[guide_label]#,assignees=wykon
+                                )
+        
+        issue_basics = repository.create_issue(**self.get_basics_issue_dict(),labels=[guide_label]#,assignees=wykon
+                                )
+        
+        issue_modelling = repository.create_issue(**self.get_modelling_issue_dict(),labels=[guide_label],assignee='bogumilchilinski')
+        
+        issue_simulation = repository.create_issue(**self.get_simulation_issue_dict(),labels=[guide_label]#,assignees=wykon
+                                )
+        
+        issue_analysis = repository.create_issue(**self.get_analysis_issue_dict(),labels=[guide_label]#,assignees=wykon
+                                )
+        
+        issue_report = repository.create_issue(**self.get_report_issue_dict(),labels=[guide_label]#,assignees=wykon
+                                )
+        
+        return issue_schedule, issue_intro, issue_basics, issue_modelling, issue_simulation, issue_analysis, issue_report
