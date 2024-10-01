@@ -14,7 +14,6 @@ There are four main parts of the entire project:
 
 Using the code below in Jupyter enviroment on [Free Access Project](https://cocalc.com/app?project-invite=hXnPFLqokQsoK6TG) <- ([CLICK LINK](https://cocalc.com/app?project-invite=hXnPFLqokQsoK6TG)) we can learn more about how to and what to use Python in engineering calculations:
 
-
 ```python {kernel="python3"}
 from dynpy.utilities.documents.guides import IntroToCocalcGuide, UsageOfDynamicSystemsGuide
 
@@ -32,21 +31,20 @@ from dynpy.utilities.documents.guides import BasicsOfReportingGuide
 BasicsOfReportingGuide();
 ```
 
+# Help and guides for DynPy
 
-
-You can preview the pendulum using such a function.
-
-
-If you are looking for information on reporting and creating a PDF file, we can use the command below to view the tutorial:
+You can list all of the available guides with the following call:
 
 ```python {kernel="python3"}
-from dynpy.utilities.documents.document import BasicsOfReportingGuide
-BasicsOfReportingGuide();
+from dynpy.utilities.creators import list_of_guides
+list_of_guides()
 ```
 
 # Dynamic systems
 
 Next for an example, run the codes below and you will see how it works:
+
+You can preview the pendulum using such a function.
 
 ```python {kernel="python3"}
 import sympy 
@@ -56,3 +54,4 @@ from dynpy.models.mechanics.pendulum import Pendulum
 
 Pendulum().interactive_preview()
 ```
+

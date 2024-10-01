@@ -769,6 +769,13 @@ init: keyword
         
         cnt = 0
         
+        if not self.mod_list:
+            class_lst = self._classlistgetter(self.directory, keyword)
+            
+            if len(class_lst) != 0:
+                for cl in class_lst:
+                        self.full_list.append(cl)
+        
         for submod in self.mod_list:    
             class_lst = self._classlistgetter(submod, keyword)
             size = len(class_lst)
@@ -1092,9 +1099,9 @@ Init: tree_comp - string returned by build_tree method
         
 def list_of_guides():
 
-    dir_str = 'dynpy.utilities.guides'
+    dir_str = 'dynpy.utilities.documents'
 
-    return ModuleStructure(dir_str).get_classes()
+    return [guide_cls for guide_cls in ModuleStructure(dir_str).get_classes() if 'guides' in guide_cls[0]]
 
 def list_of_components():
 
@@ -1107,6 +1114,7 @@ def list_of_mechanical_systems():
     dir_str = 'dynpy.models.mechanics'
 
     return ModuleStructure(dir_str).get_classes()
+
 
 advanced_modeling_schedule_code_str = """Następujące zadania mają na celu przygotowanie projektu wybranego przez studentów układu dynamicznego. Konieczne jest zaplanowanie wykonania kamieni milowych w terminie do {date} i w czasie {time}, celem utrzymania ciągłości realizacji projektu:
 

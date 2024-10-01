@@ -2406,3 +2406,4 @@ class ReportingCompsUsageComponent(ReportComponent):
         display(ObjectCode(rep_obj_str))
         display(ReportText('A tutaj przykładowy jupek z wykorzystaniem tego komponentu:'))
         display(ObjectCode(rep_jup_str))
+
