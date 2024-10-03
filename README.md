@@ -12,6 +12,12 @@ There are four main parts of the entire project:
 
 - reporting module.
 
+First step for starting a project is to create an account in [COCALC](https://cocalc.com/). 
+
+Then, using the following [LINK](https://cocalc.com/app?project-invite=hXnPFLqokQsoK6TG), accept the invitation.
+
+Afterwards, you will be directed to the page, where you should click the [README FIRST](https://cocalc.com/projects/b51ce971-5b39-4911-ad97-ef59f15f0039/files/README%20FIRST.ipynb) file (you can click this link if you have trouble seeing the page), to have access to the introductory code, which is prepared for you.
+
 Using the code below in Jupyter enviroment on [Free Access Project](https://cocalc.com/app?project-invite=hXnPFLqokQsoK6TG) <- ([CLICK LINK](https://cocalc.com/app?project-invite=hXnPFLqokQsoK6TG)) we can learn more about how to and what to use Python in engineering calculations:
 
 ```python {kernel="python3"}
