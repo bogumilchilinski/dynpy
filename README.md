@@ -18,7 +18,12 @@ Then, using the following [LINK](https://cocalc.com/app?project-invite=hXnPFLqok
 
 Afterwards, you will be directed to the page, where you should click the [README FIRST](https://cocalc.com/projects/b51ce971-5b39-4911-ad97-ef59f15f0039/files/README%20FIRST.ipynb) file (you can click this link if you have trouble seeing the page), to have access to the introductory code, which is prepared for you.
 
-Using the code below in Jupyter enviroment on [Free Access Project](https://cocalc.com/app?project-invite=hXnPFLqokQsoK6TG) <- ([CLICK LINK](https://cocalc.com/app?project-invite=hXnPFLqokQsoK6TG)) we can learn more about how to and what to use Python in engineering calculations:
+There, you will find the essential information on how to create a blank Jupiter (where you will run the codes), use Cocalc, access usefull commands and more...
+
+
+# Help and guides for DynPy
+
+You can access the introductory guide with the following code:
 
 ```python {kernel="python3"}
 from dynpy.utilities.documents.guides import IntroToCocalcGuide, UsageOfDynamicSystemsGuide
@@ -26,24 +31,18 @@ from dynpy.utilities.documents.guides import IntroToCocalcGuide, UsageOfDynamicS
 IntroToCocalcGuide();
 ```
 
-Run this code in the blank Jupyter you have created.
+You can list all of the available guides with the following call:
 
-You will see the guide in Output after running it, i.e. a CELL\-by\-CELL \(step\-by\-step\) procedure.
+```python {kernel="python3"}
+from dynpy.utilities.creators import list_of_guides
+list_of_guides()
+```
 
 If you are looking for information on reporting and creating a PDF file, we can use the command below to view the tutorial:
 
 ```python {kernel="python3"}
 from dynpy.utilities.documents.guides import BasicsOfReportingGuide
 BasicsOfReportingGuide();
-```
-
-# Help and guides for DynPy
-
-You can list all of the available guides with the following call:
-
-```python {kernel="python3"}
-from dynpy.utilities.creators import list_of_guides
-list_of_guides()
 ```
 
 # Dynamic systems
