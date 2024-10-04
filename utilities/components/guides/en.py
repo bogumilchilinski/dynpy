@@ -2193,7 +2193,6 @@ class ODESimulationComponent(ReportComponent):
     def append_elements(self):
         
         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
-
         display(ReportText('To od czego standardowo powinno się zacząć to importy oraz definicja zmiennych. Potrzebne importy:'))
         display(ObjectCode(ode_import))
         display(ReportText('Definiowanie zmiennych:'))
@@ -2224,13 +2223,12 @@ omega, omega2 = symbols('omega Omega')
 t=Symbol('t')
 x=Function('x')(t)
 y=Function('y')(t)
-ode=(
+ode_xyz=(
 '''
 omega, omega2 = symbols('omega Omega')
 ODESystem(odes=Matrix([omega**2*x-sin(omega2*t)+x.diff(t,t)]),dvars=Matrix([x]),ode_order=1)
-''')   
-        
-        
+''')
+
 class ReportCompUseComponent(ReportComponent):
     
     title="Podstawy używania komponentu raportującego"
@@ -2238,12 +2236,18 @@ class ReportCompUseComponent(ReportComponent):
 
     def append_elements(self): 
         #system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
-
+        from dynpy.solvers.linear import ODESystem
+        omega, omega2 = symbols('omega Omega')
+        t=Symbol('t')
+        x=Function('x')(t)
+        y=Function('y')(t)
+        ode_xyz=ODESystem(odes=Matrix([omega**2*x-sin(omega2*t)+x.diff(t,t)]),dvars=Matrix([x]),ode_order=1)
+ 
         komponent = Chapter('Podstawy używania komponentu raportującego')
         CurrentContainer(komponent)        
         display(ReportText('W celu użycia komponentu raportującego należy użyć $.report$. Przykładowo wpisując *odesys.report* otrzyma się następujący output:'))
         display(ReportText('The investigated system is described by differential equations being as follows:'))
-        display(ObjectCode(ode))
+        display(ObjectCode(ode_xyz))
         display(ReportText('To solve the problem serve several methods depending on the equation type. As dynamic systems s behaviour is described by an ordinary differential equation, the variables of the equation are as follows: t [x]'))
         display(ReportText('The variables allow to study and analyse the system s dynamics varying with time.'))
         

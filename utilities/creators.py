@@ -4,7 +4,7 @@ from .report import Markdown
 from .documents.document import ODESystemOverviewReport
 from github import Github
 import getpass
-from github import Auth
+
 import pint
 import inspect
 from dynpy.utilities.documents import document
@@ -211,6 +211,8 @@ class GitHubInterface():
     _repo_name= "bogumilchilinski/dynpy"
 
     def __init__(self, token=None, repo_name=None):
+        
+        from github import Auth
 
         if token is None:
             pass_code = getpass.getpass('Github token')
@@ -239,6 +241,9 @@ class GitHubInterface():
         client.open()
 
         '''
+        
+        from github import Auth
+        
         if self.g is None:
             pass_code = getpass.getpass('Github token')
             auth = Auth.Token(pass_code)
@@ -530,8 +535,13 @@ class ClassLister:
         import_str = f"from {self.directory}.{submod} import *"
         command_str = f"inspect.getmembers({self.directory}.{submod}, predicate=inspect.isclass)" #ta komenda zbiera liste wszystkich klas istniejących w danym submodule, niestety sa tu też klasy nas nie interesujące np. importy klas z numpy czy pandasa etc, dlatego dalej ta lista jest filtrowana
         
-        import_eval = exec(import_str)
-        members = eval(command_str)
+        try:
+            import_eval = exec(import_str)
+            members = eval(command_str)
+        except:
+                pass
+            
+        #members = eval(command_str)
 
         tmp_list = []
 
@@ -939,15 +949,23 @@ keyword - optional argument, keyword by which the classes are searched for
             display(ObjectCode(__class__(element)._get_init()))
     
     @staticmethod
-    def get_import(keyword):
+    def get_import(keyword , as_type = 'ObjectCode'):
         from dynpy.utilities.report import ObjectCode
         
         tmp = __class__('dynpy').get_classes(keyword)
+        lst = []
 
         if len(tmp) == 0:
             return "Couldn't get import"
         else:
-            return ObjectCode(f'from {tmp[0][0]} import {tmp[0][1]}')
+            for element in tmp:
+                lst.append(f'from {element[0]} import {element[1]}')
+            
+            if as_type == 'ObjectCode':
+                lst = '\n'.join(lst)
+                return ObjectCode(lst)
+            elif as_type == str:
+                return lst
 
 class TreeNode:
     '''
@@ -1099,9 +1117,11 @@ Init: tree_comp - string returned by build_tree method
         
 def list_of_guides():
 
-    dir_str = 'dynpy.utilities.documents'
+    #dir_str = 'dynpy.utilities.documents'
 
-    return [guide_cls for guide_cls in ModuleStructure(dir_str).get_classes() if 'guides' in guide_cls[0]]
+    #return [guide_cls for guide_cls in ModuleStructure(dir_str).get_classes() if 'guides' in guide_cls[0]]
+    
+    return ModuleStructure(dynpy.utilities.documents.guides).get_classes()
 
 def list_of_components():
 
