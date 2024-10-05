@@ -528,6 +528,7 @@ class DetailsOfPredictedSolutionComponent(ReportComponent):
     def append_elements(self):
 
         system = self.reported_object
+        ivar = system.ivar
 
 #         t_list = system.t_list
         
@@ -551,9 +552,38 @@ class DetailsOfPredictedSolutionComponent(ReportComponent):
             
             
             display(ObjectCode(f"ord = {ord} # given order of approximation  \node.predicted_solution(ord)"))   
-            
+        
+        display(ReportText(  "Finally, formulas of predicted solution and its derivatives are as follows:"   ))           
+        for degree in range(0,system.order+1):
+            display(SympyFormula(system.derivative_without_scale(degree).as_eq_list()[0]))
+        
+        
+        
+        display(ReportText("Also multiple time scales are introduced:" ))
 
-#         display(ReportText(  self.footer_text   ))
+        predicted_sol_scales = system.predicted_solution(2).as_eq_list()[0]
+
+        display(SympyFormula( predicted_sol_scales )   )
+        display(SympyFormula( Eq(predicted_sol_scales.lhs.diff(ivar) ,predicted_sol_scales.rhs.diff(ivar) ).expand()   ))
+        display(SympyFormula( Eq(predicted_sol_scales.lhs.diff(ivar,2) ,predicted_sol_scales.rhs.diff(ivar,2) ).expand()   ))
+            
+        display(ReportText(  "Time scales are given by the following functions:"   ))     
+        
+        for tm_scale in system._scales_formula.as_eq_list():
+            display(SympyFormula(tm_scale))
+
+        display(ReportText(  "First derivatives of the scales (needed for further calculations) are as follows:"   ))  
+
+        for tm_scale in system._scales_formula.as_eq_list():
+            display(SympyFormula(Eq(tm_scale.lhs.diff(ivar),tm_scale.rhs.diff(ivar))))
+
+
+        display(ReportText(  "All second derivatives of the scales are zero:"   ))  
+
+        for tm_scale in system._scales_formula.as_eq_list():
+            display(SympyFormula(Eq(tm_scale.lhs.diff(ivar,2),tm_scale.rhs.diff(ivar,2))))
+        #display(ReportText(  self.footer_text   ))
+
 
 
 class GeneralSolutionComponent(ReportComponent):

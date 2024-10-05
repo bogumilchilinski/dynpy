@@ -14,7 +14,10 @@ from ..components.guides.github import en as github_comp
 from ..components.guides.systems import en as systems_comp
 from ..components.guides.development import en as development_comp
 from ..components.guides.pandas import en as pandas_comp
-from .guides import (UsageOfDynamicSystemsGuide, Guide, EngeneeringDrawingGuide, DevelopmentGuide, IntroToPandasGuide, BasicsOfODESystemGuide, BasicsOfDynSysImplementationGuide, BasicsOfReportingGuide, ResearchProjectGuidelines,InterimProjectGuidelines,IntroDynPyProjectGuidelines, BasicsOfReportComponentImplementationGuide, GithubSynchroGuide, IntroToCocalcGuide)
+from .guides import (UsageOfDynamicSystemsGuide, Guide, EngeneeringDrawingGuide, DevelopmentGuide, IntroToPandasGuide, 
+                    BasicsOfODESystemGuide, BasicsOfDynSysImplementationGuide, BasicsOfReportingGuide, ResearchProjectGuidelines,
+                    InterimProjectGuidelines,IntroDynPyProjectGuidelines, BasicsOfReportComponentImplementationGuide, 
+                    GithubSynchroGuide, IntroToCocalcGuide)
 #from sympy import *
 import datetime
 
