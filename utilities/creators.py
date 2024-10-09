@@ -1252,7 +1252,19 @@ advanced_modeling_report_code_str = """Celem jest przygotowanie toku postępowan
 
 """
 
-advanced_modeling_schedule_code_str_en = """The following tasks aim to prepare the student-selected dynamic system project. It is necessary to plan the completion of milestones by {date} and at {time} to ensure the continuity of the project execution:
+advanced_modeling_schedule_code_str_en = """
+The aim of the issue is to accomplish 
+The following activities are to do:
+
+- [{tic}] assignment of tasks;
+
+- [{tic}] presentation of requirements that need to be fulfilled (code, issues, other things);
+
+- [{tic}] ???
+
+- [{tic}] presentation of performed activities;
+
+The tasks to complete are as follows:
 
 - [{tic}] #{issue_no+1}
 
@@ -1363,14 +1375,15 @@ advanced_modeling_report_code_str_en = """The goal is to prepare a procedure tha
 
 """
 
-class AdvancedModellingIssueGenerator:
+class ResearchProjectIssueCreator:
     
-    _title = 'nazwa przedmiotu'
+    _title = 'name of the research project'
     _issue_no = 567
     _guide = ODESystemOverviewReport #### ResearchProjectGuidelines
     _time = '14:30' ## 
     _date = '2024.10.10' ##
     _lang = 'en'
+    _type = 'Research project'
 
     def __init__(self,title=None,no=None,guide=None,date=None,time=None,done=False,lang=None,*args,**kwargs):
         if title is not None: self._title = title
@@ -1403,7 +1416,8 @@ class AdvancedModellingIssueGenerator:
                 'guide_class_name':guide_class.__name__,
                 'date':self._date,
                 'time':self._time,
-                'tic':tic
+                'tic':tic,
+                'type':self._type,
                 }
         
         return elems_dict
@@ -1423,13 +1437,13 @@ class AdvancedModellingIssueGenerator:
 
 
             titles_dict =   {
-                        'schedule': f'Presentation of the work schedule during the classes for the course {title}', ### 
-                        'intro': f'Introduction to the DynPy environment for the work related to the course {title} (related to issue #{issue_no})', ### 
-                        'basics': f'Preparation of basic information about the model and proposal of a research setup concept for the course {title} (related to issue #{issue_no})', ### 
-                        'modelling': f'Creation of a simulation model for the selected topic in the course {title} (related to issue #{issue_no})', ### 
-                        'simulation': f'Conducting numerical and analytical simulations for the considered model in the course {title} (related to issue #{issue_no})', ### 
-                        'analysis': f'Analysis of the obtained results in the course {title} (related to issue #{issue_no})', ### 
-                        'report': f'Preparation of a report covering all phases of the project for the course {title} (related to issue #{issue_no})', ###
+                        'schedule': f'{type} on {title}', ### 
+                        'intro': f'Preparation of the environment (report draft) for execution of {type.lower()} on {title} (issue #{issue_no} related)', ### 
+                        'basics': f'Ivestigation of state of the art and research methodology for {title} (issue #{issue_no} related)', ### 
+                        'modelling': f'Creation of a simulation model for the selected topic in the course {title} (issue #{issue_no} related)', ### 
+                        'simulation': f'Numerical and analytical simulations of in the course {title} (issue #{issue_no} related)', ### 
+                        'analysis': f'Analysis of the obtained results in the course {title} (issue #{issue_no} related)', ### 
+                        'report': f'Preparation of a report covering all phases of the project for the course {title} (issue #{issue_no} related)', ###
                         }
             
         else:
