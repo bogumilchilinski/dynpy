@@ -1253,7 +1253,7 @@ advanced_modeling_report_code_str = """Celem jest przygotowanie toku postępowan
 """
 
 advanced_modeling_schedule_code_str_en = """
-The aim of the issue is to accomplish 
+The aim of the issue is to manage the process of project implementation.
 The following activities are to do:
 
 - [{tic}] assignment of tasks;
@@ -1281,9 +1281,10 @@ The tasks to complete are as follows:
 - [{tic}] #{issue_no+7}
 
 """
- 
 
-advanced_modeling_intro_code_str_en = """The goal is to prepare a procedure that will enable the efficient preparation of an advanced dynamic model project:
+
+advanced_modeling_intro_code_str_en = """
+The goal is to prepare a procedure that will enable the efficient preparation of an advanced dynamic model project:
 
 ########## PHASE I - PRELIMINARY - X hours ####################### (TEAM/ 1 person)
 
@@ -1383,7 +1384,7 @@ class ResearchProjectIssueCreator:
     _time = '14:30' ## 
     _date = '2024.10.10' ##
     _lang = 'en'
-    _type = 'Research project'
+    _project_type = 'research'
 
     def __init__(self,title=None,no=None,guide=None,date=None,time=None,done=False,lang=None,*args,**kwargs):
         if title is not None: self._title = title
@@ -1417,7 +1418,7 @@ class ResearchProjectIssueCreator:
                 'date':self._date,
                 'time':self._time,
                 'tic':tic,
-                'type':self._type,
+                'type':self._project_type,
                 }
         
         return elems_dict
@@ -1431,16 +1432,17 @@ class ResearchProjectIssueCreator:
         issue_no = self._issue_no
         title = self._title
         lang = self._lang
+        project_type = self._project_type
         
         
         if lang == 'en':
 
 
             titles_dict =   {
-                        'schedule': f'{type} on {title}', ### 
-                        'intro': f'Preparation of the environment (report draft) for execution of {type.lower()} on {title} (issue #{issue_no} related)', ### 
-                        'basics': f'Ivestigation of state of the art and research methodology for {title} (issue #{issue_no} related)', ### 
-                        'modelling': f'Creation of a simulation model for the selected topic in the course {title} (issue #{issue_no} related)', ### 
+                        'schedule': f'{project_type.capitalize()} project on {title}', ### 
+                        'intro': f'Preparation of the environment (report draft) for execution of {project_type} project on {title} (issue #{issue_no} related)', ### 
+                        'basics': f'Investigation of state of the art and research methodology for {title} (issue #{issue_no} related)', ### 
+                        'modelling': f'Modelling of the investigated object for the {title} (issue #{issue_no} related)', ### 
                         'simulation': f'Numerical and analytical simulations of in the course {title} (issue #{issue_no} related)', ### 
                         'analysis': f'Analysis of the obtained results in the course {title} (issue #{issue_no} related)', ### 
                         'report': f'Preparation of a report covering all phases of the project for the course {title} (issue #{issue_no} related)', ###
