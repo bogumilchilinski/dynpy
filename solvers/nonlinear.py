@@ -243,7 +243,7 @@ class NthOrderODEsApproximation(ODESystem):
         sec_funcs = self._secular_funcs
         #self._const_list
 
-
+        display(sec_funcs)
         
         sec_conditions = Matrix(list(set(sum([list(self.odes.applyfunc(lambda entry: entry.coeff(func))) for func in sec_funcs],[]))-{0}))
 
@@ -255,15 +255,19 @@ class NthOrderODEsApproximation(ODESystem):
         
         # print('some check fof sec eq')
         
-        # display(sec_conditions)
-        # display(self._const_list)
+        display(sec_conditions)
+        
+        const_list = [fun_cons for fun_cons in list(sec_conditions.atoms(Function)) if  'C' in str(fun_cons) ]
+        
+        display(const_list)
+        
         
         sec_odes=ODESystem((sec_conditions),
-                            dvars=Matrix(self._const_list),
-                            ivar=ivar,
-                            ode_order=1)
+                            dvars=Matrix(const_list),
+                            ivar=ivar,  
+                            ode_order=None)
         
-        # display(sec_odes)
+        display(sec_odes.solution)
         #fode_harm_rhs = FirstOrderLinearODESystemWithHarmonics.from_ode_system(sec_odes)
         
         # print('transformed')
@@ -693,7 +697,7 @@ class MultiTimeScaleSolution(ODESystem):
         
         sol_list = [sol]
         sol_subs_list = [sol.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).full_expr).doit() for sol in sol_list]
-        sol_subs_dict  = {  dvar:eqn     for  sol   in sol_subs_list  for dvar, eqn in sol.as_dict().items()}
+        sol_subs_dict  = {  dvar:eqn     for  sol   in sol_subs_list  for dvar, eqn in sol.as_explicit_dict().items()}
 
         
         # print('_gen_sol')
@@ -705,7 +709,7 @@ class MultiTimeScaleSolution(ODESystem):
         for order, approx in enumerate(approx_eoms_list[1:]):
 
             approx._parameters = self._t_list[1:]
-            approx = approx.as_first_ode_linear_system()
+            #approx = approx.as_first_ode_linear_system()
 
             eqns_map = lambda obj: (TR10(TR8(TR10(obj.expand()).expand())).
                                     expand().doit().expand())
@@ -727,17 +731,20 @@ class MultiTimeScaleSolution(ODESystem):
             # display(approx)
             
             sol_subs_list = [sol.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).full_expr).doit() for sol in sol_list]
-            sol_subs_dict  = {  dvar:eqn     for  sol   in sol_subs_list  for dvar, eqn in sol.as_dict().items()}
+            sol_subs_dict  = {  dvar:eqn     for  sol   in sol_subs_list  for dvar, eqn in sol.as_explicit_dict().items()}
         
             approx_subs = approx.applyfunc(eqns_map).subs(
                 sol_subs_dict).applyfunc(eqns_map)
             
             # display(approx_subs)
 
-            
+            approx_subs = NthOrderODEsApproximation.from_ode_system(approx_subs)
             approx_subs._parameters = self._t_list[1:]
             
-
+            display(approx_subs)
+            display(approx_subs.ivar)
+            display(approx_subs.secular_terms)
+            display(type(approx_subs.secular_terms))
 
             self.secular_eq[self.eps**(order +
                                        1)] = (approx_subs.secular_terms)
@@ -766,13 +773,20 @@ class MultiTimeScaleSolution(ODESystem):
             #SolverClass = FirstOrderLinearODESystem
             
             
-            ode_2_solve = SolverClass.from_ode_system(approx_subs)
-            # print('gen sol part')
-            # display(ode_2_solve)
+            ode_2_solve = ODESystem.from_ode_system(approx_subs)
             
-            fm_mat = ode_2_solve._as_fode()._fundamental_matrix
+            ode_2_solve._ivar = self._t_list[0]
+            
+            ode_2_solve = FirstOrderLinearODESystem.from_ode_system(ode_2_solve)
+            # print('gen sol part')
+            display(ode_2_solve)
+            
+            #fm_mat = ode_2_solve._as_fode()._fundamental_matrix
             #display(fm_mat)
             #display(fm_mat.diagonalize())
+            
+            print('O to jest general')
+            display(ode_2_solve.general_solution)
             
             sol = ode_2_solve.steady_solution.applyfunc(
                 lambda obj: obj.expand()).applyfunc(eqns_map)#.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).sum_expr)

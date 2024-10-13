@@ -1323,8 +1323,8 @@ class ODESystem(AnalyticalSolution):
             return cls.from_dict(odes,**options)
         if isinstance(odes,Eq):
             return cls.from_eq(odes,**options)
-        if isinstance(odes,MatrixBase) and odes.jacobian(dvars.diff(ivar,ode_order)).det()==0:
-            return cls.from_rhs(odes_rhs=odes,dvars=dvars,ivar=ivar,ode_order=ode_order,parameters = parameters)
+        # if isinstance(odes,MatrixBase) and odes.jacobian(dvars.diff(ivar,ode_order)).det()==0:
+        #     return cls.from_rhs(odes_rhs=odes,dvars=dvars,ivar=ivar,ode_order=ode_order,parameters = parameters)
         else:
             return cls._constructor(odes,dvars,odes_rhs=odes_rhs , ivar=ivar,ode_order=ode_order ,evaluate=evaluate, parameters = parameters, **options)
 
@@ -3119,7 +3119,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     
             exp_cos_comp = -(A.inv() * omega**2 + A).inv()*b
             exp_sin_comp = -omega*A.inv() * exp_cos_comp
-          
+            
         return exp_cos_comp*exp(a*self.ivar)*cos(omega*self.ivar) +  exp_sin_comp*exp(a*self.ivar)*sin(omega*self.ivar)
     
 
