@@ -8,6 +8,7 @@ from ..report import Markdown, CurrentContainer, ReportText, IPMarkdown, ObjectC
 from ..components.mech import en as mech_compIntroDynPyProjectGuidlines
 from ..components.guides import en as guide_comp
 from ..components.ode import pl as ode_comp
+from ..components.ode import en as ode_comp_en
 from ..components.guides.reporting import en as reporting_comp
 from ..components.guides.github import en as github_comp
 from ..components.guides.systems import en as systems_comp
@@ -1066,6 +1067,11 @@ class ODESystemOverviewReport(UsageOfDynamicSystemsGuide):
             systems_comp.ODEGeneralSolutionComponent,
             systems_comp.ODESteadySolutionComponent,
             systems_comp.ODESystemRepresentationComponent,
+            ode_comp_en.ODESystemExponentiationComponent,
+            ode_comp_en.PredictionOfSteadySolutionComponent,
+            ode_comp_en.HomoPredictionIntroComponent,
+            ode_comp_en.MainPredictionComponent,
+            ode_comp_en.RootsAnalysisComponent,
 
         ]
 

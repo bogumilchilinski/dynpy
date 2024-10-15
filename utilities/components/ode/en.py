@@ -1911,7 +1911,7 @@ class ODESystemExponentiationComponent(ReportComponent):
 excitation_code='''
 from dynpy.models.odes.numerical import *
 system=LinearFirstOrder.from_reference_data()
-system._as_fode()._get_excitation_comps
+system.as_type(FirstOrderLinearODESystemWithHarmonics)._get_excitation_comps
 ''' 
         
 class PredictionOfSteadySolutionComponent(ReportComponent):
@@ -1930,16 +1930,16 @@ class PredictionOfSteadySolutionComponent(ReportComponent):
         return "The solution takes the form:"
 
     def append_elements(self):
+        from dynpy.solvers.linear import FirstOrderLinearODESystemWithHarmonics
         system = self.reported_object
         t=system.ivar
         dvars=system.dvars
         display(ReportText(self.import_text))
         display(ObjectCode(excitation_code))
         display(ReportText(self.body_text))
-        system._as_fode()._get_excitation_comps
-
-        ext_comps_list = system._as_fode()._get_excitation_comps
-
+        system.as_type(FirstOrderLinearODESystemWithHarmonics)._get_excitation_comps
+        ext_comps_list = system.as_type(FirstOrderLinearODESystemWithHarmonics)._get_excitation_comps
+        display(ext_comps_list)
         for comp,amp in ext_comps_list:
 
             display(SympyFormula(comp))
@@ -2048,3 +2048,26 @@ class RootsAnalysisComponent(ReportComponent):
                 i+=1
         display(ReportText("After identifying the type of roots, we can express the solution as:"))
         display(SympyFormula(sol_eq))
+        
+class SolutionComparisonComponent(ReportComponent):
+
+    title="Multiple time scale solution and ODESystem solution"
+
+    def append_elements(self):
+
+        from dynpy.solvers.linear import FirstOrderLinearODESystem,FirstOrderLinearODESystemWithHarmonics, ODESystem
+        from dynpy.solvers.nonlinear import MultiTimeScaleSolution
+
+        system = self.reported_object
+        #jezeli ktos chce odkomentowac ify to trzeba o jeden tab wszystko to co w srodku funkcji if/elif/else jest pamietajcie bo inaczej nie bedzie dzialac :)
+        #if type(system) == ODESystem:
+        display(SympyFormula(system.as_type(FirstOrderLinearODESystem).solution))
+        display(ReportText("as_type method used:"))
+        display(SympyFormula(system.as_type(FirstOrderLinearODESystemWithHarmonics).solution))
+            
+        #elif type(system) == MultiTimeScaleSolution:
+        display(ReportText("Multiple time scales solution is following:"))
+        display(SympyFormula(system.as_type(FirstOrderLinearODESystemWithHarmonics).solution))
+       # else:
+#       display(ReportText("Given system is neither ODESystem nor MultiTimeScaleSolution"))
+        

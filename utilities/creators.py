@@ -1196,9 +1196,9 @@ advanced_modelling_modelling_code_str = """Celem jest przygotowanie toku postęp
 
 - [{tic}] Wybór modelu z biblioteki DynPy, który przypomina zdefiniowany model w poprzedniej fazie,
 
-- [{tic}] Bazując na modelu, przygotować wszystkie potrzebne do analizy równania, 
+- [{tic}] Przygotowanie, bazując na modelu,  wszystkich potrzebnych do analizy równań, 
 
-- [{tic}] Dobrać odpowiednie dane i parametry do wybranego modelu symulacyjnego,
+- [{tic}] Dobranie odpowiednich danych i parametrów do wybranego modelu symulacyjnego,
 
 - [{tic}] Przeprowadzenie weryfikacji poprawności zaprogramowanych funckji,
 
@@ -1238,7 +1238,7 @@ advanced_modeling_report_code_str = """Celem jest przygotowanie toku postępowan
 
 ########## FAZA VI - WYKONANIA RAPORTU KOŃCOWEGO - X godziny ####################### (1 osoby)
 
-- [{tic}] Stowrzenie krótkiego opisu aktualnego stanu wiedzy wraz z opisem idei modelowania (FAZA II),
+- [{tic}] Stworzenie krótkiego opisu aktualnego stanu wiedzy wraz z opisem idei modelowania (FAZA II),
 
 - [{tic}] Zaprezentowanie wybranego modelu rzeczywistego oraz jego interpretacji fizycznej (FAZA I),
 
@@ -1288,47 +1288,51 @@ The goal is to prepare a procedure that will enable the efficient preparation of
 
 ########## PHASE I - PRELIMINARY - X hours ####################### (TEAM/ 1 person)
 
-[{tic}] Defining the requirements and expectations for the project, determining the field in which the work will be conducted: mechanical, e.g. gears, engines, electrical, e.g. batteries, filters, control systems, structural, e.g. dynamic vibration dampers, cranes, dynamic, e.g. suspensions, kinematic, e.g. vehicle movement along a route, along with its characterization.
+[{tic}] Preparation of folder structure, necessary files and preleminary content report,
 
-[{tic}] Selection of a real object, mechanism, or phenomenon on which the model will be based.
+[{tic}] Definition of the requirements and expectations for the project, determination of the field in which the work will be conducted: mechanical, electrical, structural, dynamic, kinematic along a route, along with its characterization,
 
-[{tic}] Presentation of an example of a real experimental model that relates to the simulation model.
+[{tic}] Selection of a real object, mechanism, or phenomenon on which the model will be based,
 
-[{tic}] Selection of a methodology for creating the dynamic model.
+[{tic}] Presentation of an example of a real experimental model that relates to the simulation model,
 
-[{tic}] Defining the assumptions for the model, the level of advancement, and the specific results we aim to achieve.
+[{tic}] Definition of the assumptions for the model, the level of advancement, and the specific results we aim to achieve.
 
 """
 
-advanced_modeling_basics_code_str_en = """The goal is to prepare a procedure that will enable the efficient completion of an advanced dynamic model project:
+advanced_modeling_basics_code_str_en = """The goal is preparation of a procedure that will enable the efficient completion of an advanced dynamic model project:
 
 ########## PHASE II - PROJECT PREPARATION - X hours ####################### (2 people)
 
-[{tic}] Review of the current state of knowledge and the contents of the DynPy environment to assess its capabilities,
+[{tic}] Revision of the current state of knowledge,
+
+[{tic}] Revision of the DynPy environment to assess its capabilities,
+
+[{tic}] Selection of a methodology for creating the dynamic model,
 
 [{tic}] Preparation of a document presenting the fundamental classes and methods that will form the basis of the project and report,
 
-[{tic}] Search for graphics of the object, mechanism, or phenomenon on which the schematic drawing will be based (e.g., in SolidWorks/AutoCAD/TiKz),
+[{tic}] Searching for graphics of the object, mechanism, or phenomenon on which the schematic drawing will be based (e.g., in SolidWorks/AutoCAD/TiKz),
 
-[{tic}] Conduct a complete characterization of the model (LSS, coordinates, constraints, energies, equations of motion).
+[{tic}] Conduction a complete characterization of the model (LSS, coordinates, constraints, energies, equations of motion).
 
 """
 
-advanced_modelling_modelling_code_str_en = """The goal is to prepare a procedure that will enable the efficient completion of an advanced dynamic model project:
+advanced_modelling_modelling_code_str_en = """The goal is preparation of a procedure that will enable the efficient completion of an advanced dynamic model project:
 
 ########## PHASE III - MODEL DEVELOPMENT - X hours ####################### (1 person)
 
 [{tic}] Selection of a model from the DynPy library that resembles the model defined in the previous phase,
 
-[{tic}] Based on the model, prepare all the necessary equations for the analysis,
+[{tic}] Praparation, based on the model, of all the necessary equations for the analysis,
 
-[{tic}] Select appropriate data and parameters for the chosen simulation model,
+[{tic}] Selection of appropriate data and parameters for the chosen simulation model,
 
-[{tic}] Conduct verification of the programmed functions to ensure correctness.
+[{tic}] Conduction verification process of the programmed functions to ensure correctness.
 
 """
 
-advanced_modeling_simulation_code_str_en = """The goal is to prepare a procedure that will enable the efficient completion of an advanced dynamic model project:
+advanced_modeling_simulation_code_str_en = """The goal is preparation of a procedure that will enable the efficient completion of an advanced dynamic model project:
 
 ########## PHASE IV - SIMULATION EXECUTION - X hours ####################### (2 people)
 
@@ -1336,43 +1340,43 @@ advanced_modeling_simulation_code_str_en = """The goal is to prepare a procedure
 
 [{tic}] Execution of simulations using analytical solutions of the equations of motion,
 
-[{tic}] Conduct simulations using the numerically discretized model,
+[{tic}] Conduction of simulations using the numerically discretized model,
 
-[{tic}] Analyze the accuracy of the selected data and make any necessary adjustments,
+[{tic}] Analysing accuracy of the selected data and making any necessary adjustments,
 
-[{tic}] Create a matrix comparing the results of both simulations,
+[{tic}] Creation of a matrix comparing the results of both simulations,
 
-[{tic}] (+) Perform calculations for quantities other than "x, v, a".
+[{tic}] (+) Performation of calculations for quantities other than "x, v, a".
 
 """
 
-advanced_modeling_analysis_code_str_en = """The goal is to prepare a procedure that will enable the efficient completion of an advanced dynamic model project:
+advanced_modeling_analysis_code_str_en = """The goal is a preparation of procedure that will enable the efficient completion of an advanced dynamic model project:
 
 ########## PHASE V - RESULTS ANALYSIS - X hours ####################### (1 person)
 
-[{tic}] Present the results in the form of a set of tables,
+[{tic}] Presentation of the results in the form of a set of tables,
 
-[{tic}] Display the results in the form of graphs,
+[{tic}] Displaying of the results in the form of graphs,
 
-[{tic}] Perform an analysis of the results and identify the observed phenomena.
+[{tic}] Performing of an analysis of the results and identification of the observed phenomena.
 
 """
 
-advanced_modeling_report_code_str_en = """The goal is to prepare a procedure that will enable the efficient completion of an advanced dynamic model project:
+advanced_modeling_report_code_str_en = """The goal is preparation of a procedure that will enable the efficient completion of an advanced dynamic model project:
 
 ########## PHASE VI - FINAL REPORT PREPARATION - X hours ####################### (1 person)
 
-[{tic}] Create a brief summary of the current state of knowledge along with a description of the modeling concept (PHASE II),
+[{tic}] Creation of a brief summary of the current state of knowledge along with a description of the modeling concept (PHASE II),
 
-[{tic}] Present the selected real model and its physical interpretation (PHASE I),
+[{tic}] Presentation of the selected real model and its physical interpretation (PHASE I),
 
-[{tic}] Present the equations used to characterize the object (PHASE III),
+[{tic}] Presentation  of the equations used to characterize the object (PHASE III),
 
-[{tic}] Prepare a description of the applied software (PHASE III),
+[{tic}] Preparation a description of the applied software (PHASE III),
 
-[{tic}] Prepare tables and graphs along with their descriptions (PHASE IV, V),
+[{tic}] Preparation of tables and graphs along with their descriptions (PHASE IV, V),
 
-[{tic}] Formulate conclusions (PHASE VI).
+[{tic}] Formulation of conclusions (PHASE VI).
 
 """
 
@@ -1440,12 +1444,12 @@ class ResearchProjectIssueCreator:
 
             titles_dict =   {
                         'schedule': f'{project_type.capitalize()} project on {title}', ### 
-                        'intro': f'Preparation of the environment (report draft) for execution of {project_type} project on {title} (issue #{issue_no} related)', ### 
+                        'intro': f'Preparation of the preleminary content report for {project_type} on {title} (issue #{issue_no} related)', ### 
                         'basics': f'Investigation of state of the art and research methodology for {title} (issue #{issue_no} related)', ### 
                         'modelling': f'Modelling of the investigated object for the {title} (issue #{issue_no} related)', ### 
-                        'simulation': f'Numerical and analytical simulations of in the course {title} (issue #{issue_no} related)', ### 
-                        'analysis': f'Analysis of the obtained results in the course {title} (issue #{issue_no} related)', ### 
-                        'report': f'Preparation of a report covering all phases of the project for the course {title} (issue #{issue_no} related)', ###
+                        'simulation': f'Performing simulations of investigated case in the {project_type} {title} (issue #{issue_no} related)', ### 
+                        'analysis': f'Analysis and validation of obtained results in the {project_type} on {title} (issue #{issue_no} related)', ### 
+                        'report': f'Revision of a report covering all phases of {project_type} on {title} (issue #{issue_no} related)', ###
                         }
             
         else:
@@ -1454,9 +1458,9 @@ class ResearchProjectIssueCreator:
                         'intro':f'Wprowadzenie do środowiska DynPy do wykonania prac z przedmiotu {title} (powiązane z issue #{issue_no})', ### 
                         'basics':f'Przygotowanie podstawowych informacji o modelu oraz zaproponowanie koncepcji stanowiska badawczego z przedmiotu {title} (powiązane z issue #{issue_no})', ###
                         'modelling':f'Wykonanie modelu symulacyjnego z wybranego zagadnienia z przedmiotu {title} (powiązane z issue #{issue_no})', ###
-                        'simulation':f'Przeporwadzenie symulacji numerycznych i analitycznych rozważanego modelu z przedmiotu {title} (powiązane z issue #{issue_no})', ###
-                        'analysis':f'Analiza otrzymanych wyników z przedmiotu {title} (powiązane z issue #{issue_no})', ###
-                        'report':f'Przygotowanie raportu z wszystkich faz projektu z przedmiotu {title} (powiązane z issue #{issue_no})', ###
+                        'simulation':f'Przeporwadzenie symulacji rozważanego modelu z {project_type} o {title} (powiązane z issue #{issue_no})', ###
+                        'analysis':f'Analiza otrzymanych wyników z {project_type} o {title} (powiązane z issue #{issue_no})', ###
+                        'report':f'Analiza raportu z wszystkich faz {project_type} o {title} (powiązane z issue #{issue_no})', ###
                         }
 
         return titles_dict
