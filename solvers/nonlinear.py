@@ -777,16 +777,16 @@ class MultiTimeScaleSolution(ODESystem):
             
             ode_2_solve._ivar = self._t_list[0]
             
-            ode_2_solve = FirstOrderLinearODESystem.from_ode_system(ode_2_solve)
+            ode_2_solve = FirstOrderLinearODESystemWithHarmonics.from_ode_system(ode_2_solve)
             # print('gen sol part')
-            display(ode_2_solve)
+            display(*ode_2_solve._get_excitation_comps)
             
             #fm_mat = ode_2_solve._as_fode()._fundamental_matrix
             #display(fm_mat)
             #display(fm_mat.diagonalize())
             
             print('O to jest general')
-            display(ode_2_solve.general_solution)
+            display(ode_2_solve.general)
             
             sol = ode_2_solve.steady_solution.applyfunc(
                 lambda obj: obj.expand()).applyfunc(eqns_map)#.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).sum_expr)
@@ -822,7 +822,7 @@ class MultiTimeScaleSolution(ODESystem):
             # display(ode2check.solution)
             #ode2check._as_fode()
             #ode2check.solution
-            C_const_sol = self.secular_eq[self.eps]._as_fode()._to_rhs_ode().linearized().solution.as_dict()
+            C_const_sol = self.secular_eq[self.eps]._as_fode()._to_rhs_ode().linearized().solution.as_explicit_dict()
             
             # print('tut')
             # display(C_const_sol)
@@ -854,7 +854,7 @@ class MultiTimeScaleSolution(ODESystem):
         #display(*list(SimplifiedExpr._subs_container.values()))
         result = (sum(sol_list, Matrix(2*len(self.dvars)*[0])  )).applyfunc(lambda obj: obj.expand().doit())
         
-        new_res = PerturbationODESolution(Matrix(list(self.dvars) +  list(self.dvars.diff(self.ivar)) ) , result)#.set_small_parameter(self.eps)
+        new_res = PerturbationODESolution.from_vars_and_rhs(Matrix(list(self.dvars) +  list(self.dvars.diff(self.ivar)) ) , result)#.set_small_parameter(self.eps)
         new_res.small_parameter = self.eps
         new_res.ivar = self.ivar
 
