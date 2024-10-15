@@ -288,7 +288,7 @@ class NthOrderODEsApproximation(ODESystem):
         secular_expr_list = [obj.applyfunc(lambda row: row.coeff(comp)*comp).rhs  for comp in self._secular_funcs]
         secular_expr = sum(secular_expr_list,Matrix( [0]*len(obj) ))
 
-        return (obj - secular_expr).expand()
+        return ODESystem((obj.as_matrix() - secular_expr).expand().subs({comp:0 for comp in self._secular_funcs}).doit(),obj.dvars,ivar=obj.ivar)
 
 
 
@@ -750,11 +750,12 @@ class MultiTimeScaleSolution(ODESystem):
                                        1)] = (approx_subs.secular_terms)
             
             
-            # print('secular eq check')
-            # display(self.secular_eq)
+            print('with secular terms')
+            display(approx_subs)
             approx_subs = approx_subs.remove_secular_terms()
             
-            
+            print('without secular terms')
+            display(approx_subs)
 
             #display(approx_subs.lhs,approx_subs.rhs)
             #display(approx_subs)
@@ -779,14 +780,13 @@ class MultiTimeScaleSolution(ODESystem):
             
             ode_2_solve = FirstOrderLinearODESystemWithHarmonics.from_ode_system(ode_2_solve)
             # print('gen sol part')
-            display(*ode_2_solve._get_excitation_comps)
+            display(*FirstOrderLinearODESystemWithHarmonics.from_ode_system(ode_2_solve)._get_excitation_comps)
             
             #fm_mat = ode_2_solve._as_fode()._fundamental_matrix
             #display(fm_mat)
             #display(fm_mat.diagonalize())
             
-            print('O to jest general')
-            display(ode_2_solve.general)
+
             
             sol = ode_2_solve.steady_solution.applyfunc(
                 lambda obj: obj.expand()).applyfunc(eqns_map)#.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).sum_expr)
