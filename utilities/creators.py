@@ -1157,7 +1157,7 @@ advanced_modeling_schedule_code_str = """Następujące zadania mają na celu prz
 
 advanced_modeling_intro_code_str = """Celem jest przygotowanie toku postępowania, dzięki któremu możliwe będzie sprawne przygotowanie projektu zaawansowanego modelu dynamicznego:
 
-########## FAZA I - WSTĘPNA - X godziny ####################### (ZESPÓŁ/ 1 osoby)
+ FAZA I - WSTĘPNA - 1 tydzień (ZESPÓŁ/ 1 osoba)
 
 - [{tic}] Określenie wymagań oraz oczekiwań do projektu, w jakiej dziedzinie chcemy wykonać pracę:
                 mechaniczna np. przekładnie, silniki, 
@@ -1178,7 +1178,7 @@ advanced_modeling_intro_code_str = """Celem jest przygotowanie toku postępowani
 
 advanced_modeling_basics_code_str = """Celem jest przygotowanie toku postępowania, dzięki któremu możliwe będzie sprawne przygotowanie projektu zaawansowanego modelu dynamicznego:
 
-########## FAZA II - PRZYGOTOWANIA PRACY - X godziny ####################### (2 osoby)
+ FAZA II - PRZYGOTOWANIA PRACY - 2 tygodnie (1 osoba)
 
 - [{tic}] Przegląd aktualnego stanu wiedzy oraz zawartości środowiska DynPy, celem rozpoznania możliwości,
 
@@ -1192,7 +1192,7 @@ advanced_modeling_basics_code_str = """Celem jest przygotowanie toku postępowan
 
 advanced_modelling_modelling_code_str = """Celem jest przygotowanie toku postępowania, dzięki któremu możliwe będzie sprawne przygotowanie projektu zaawansowanego modelu dynamicznego:
 
-########## FAZA III - WYKONANIA MODELU - X godziny ####################### (1 osoby)
+ FAZA III - WYKONANIA MODELU - 3 tygodnie (1 osoba)
 
 - [{tic}] Wybór modelu z biblioteki DynPy, który przypomina zdefiniowany model w poprzedniej fazie,
 
@@ -1206,7 +1206,7 @@ advanced_modelling_modelling_code_str = """Celem jest przygotowanie toku postęp
 
 advanced_modeling_simulation_code_str = """Celem jest przygotowanie toku postępowania, dzięki któremu możliwe będzie sprawne przygotowanie projektu zaawansowanego modelu dynamicznego:
 
-########## FAZA IV - WYKONANIA SYMULACJI - X godziny ####################### (2 osoby) 
+ FAZA IV - WYKONANIA SYMULACJI - 2 tygodnie (1 osoba) 
 
 - [{tic}] Przygotowanie odpowiednich funckji do wykonania symulacji analitycznych i numerycznych,
 
@@ -1224,7 +1224,7 @@ advanced_modeling_simulation_code_str = """Celem jest przygotowanie toku postęp
 
 advanced_modeling_analysis_code_str = """Celem jest przygotowanie toku postępowania, dzięki któremu możliwe będzie sprawne przygotowanie projektu zaawansowanego modelu dynamicznego:
 
-########## FAZA V - ANALIZY WYNIKÓW - X godziny ####################### (1 osoby)
+ FAZA V - ANALIZY WYNIKÓW - 1 tydzień (1 osoba)
 
 - [{tic}] Zaprezentowanie wyników w formie zbioru tabel
 
@@ -1236,7 +1236,7 @@ advanced_modeling_analysis_code_str = """Celem jest przygotowanie toku postępow
 
 advanced_modeling_report_code_str = """Celem jest przygotowanie toku postępowania, dzięki któremu możliwe będzie sprawne przygotowanie projektu zaawansowanego modelu dynamicznego:
 
-########## FAZA VI - WYKONANIA RAPORTU KOŃCOWEGO - X godziny ####################### (1 osoby)
+ FAZA VI - WYKONANIA RAPORTU KOŃCOWEGO - 2 tygodnie (1 osoba)
 
 - [{tic}] Stworzenie krótkiego opisu aktualnego stanu wiedzy wraz z opisem idei modelowania (FAZA II),
 
@@ -1283,10 +1283,9 @@ The tasks to complete are as follows:
 """
 
 
-advanced_modeling_intro_code_str_en = """
-The goal is to prepare a procedure that will enable the efficient preparation of an advanced dynamic model project:
+advanced_modeling_intro_code_str_en = """The goal is preparation of work environment and initial content (draft) version of the report:
 
-########## PHASE I - PRELIMINARY - X hours ####################### (TEAM/ 1 person)
+ PHASE I - PRELIMINARY - 1 week (TEAM/ 1 person)
 
 [{tic}] Preparation of folder structure, necessary files and preleminary content report,
 
@@ -1300,9 +1299,9 @@ The goal is to prepare a procedure that will enable the efficient preparation of
 
 """
 
-advanced_modeling_basics_code_str_en = """The goal is preparation of a procedure that will enable the efficient completion of an advanced dynamic model project:
+advanced_modeling_basics_code_str_en = """The goal is research on current state of art about the topic and methodology needed for project:
 
-########## PHASE II - PROJECT PREPARATION - X hours ####################### (2 people)
+ PHASE II - PROJECT PREPARATION - 2 weeks (1 person)
 
 [{tic}] Revision of the current state of knowledge,
 
@@ -1318,9 +1317,9 @@ advanced_modeling_basics_code_str_en = """The goal is preparation of a procedure
 
 """
 
-advanced_modelling_modelling_code_str_en = """The goal is preparation of a procedure that will enable the efficient completion of an advanced dynamic model project:
+advanced_modelling_modelling_code_str_en = """The goal is creating the mathematical model of investigated object:
 
-########## PHASE III - MODEL DEVELOPMENT - X hours ####################### (1 person)
+ PHASE III - MODEL DEVELOPMENT - 3 weeks (1 person)
 
 [{tic}] Selection of a model from the DynPy library that resembles the model defined in the previous phase,
 
@@ -1332,9 +1331,9 @@ advanced_modelling_modelling_code_str_en = """The goal is preparation of a proce
 
 """
 
-advanced_modeling_simulation_code_str_en = """The goal is preparation of a procedure that will enable the efficient completion of an advanced dynamic model project:
+advanced_modeling_simulation_code_str_en = """The goal is using the model to perform all necessary simulations and got valuable data:
 
-########## PHASE IV - SIMULATION EXECUTION - X hours ####################### (2 people)
+ PHASE IV - SIMULATION EXECUTION - 2 weeks (1 person)
 
 [{tic}] Preparation of appropriate functions for conducting analytical and numerical simulations,
 
@@ -1350,9 +1349,9 @@ advanced_modeling_simulation_code_str_en = """The goal is preparation of a proce
 
 """
 
-advanced_modeling_analysis_code_str_en = """The goal is a preparation of procedure that will enable the efficient completion of an advanced dynamic model project:
+advanced_modeling_analysis_code_str_en = """The goal is validation and proper visualization of all acquired data:
 
-########## PHASE V - RESULTS ANALYSIS - X hours ####################### (1 person)
+ PHASE V - RESULTS ANALYSIS - 1 week (1 person)
 
 [{tic}] Presentation of the results in the form of a set of tables,
 
@@ -1362,9 +1361,9 @@ advanced_modeling_analysis_code_str_en = """The goal is a preparation of procedu
 
 """
 
-advanced_modeling_report_code_str_en = """The goal is preparation of a procedure that will enable the efficient completion of an advanced dynamic model project:
+advanced_modeling_report_code_str_en = """The goal is revision of all steps of the research and creation of the final report.
 
-########## PHASE VI - FINAL REPORT PREPARATION - X hours ####################### (1 person)
+ PHASE VI - FINAL REPORT PREPARATION - 2 weeks (1 person)
 
 [{tic}] Creation of a brief summary of the current state of knowledge along with a description of the modeling concept (PHASE II),
 
@@ -1449,7 +1448,7 @@ class ResearchProjectIssueCreator:
                         'modelling': f'Modelling of the investigated object for the {title} (issue #{issue_no} related)', ### 
                         'simulation': f'Performing simulations of investigated case in the {project_type} {title} (issue #{issue_no} related)', ### 
                         'analysis': f'Analysis and validation of obtained results in the {project_type} on {title} (issue #{issue_no} related)', ### 
-                        'report': f'Revision of a report covering all phases of {project_type} on {title} (issue #{issue_no} related)', ###
+                        'report': f'Ending revision of a report covering all phases of {project_type} on {title} (issue #{issue_no} related)', ###
                         }
             
         else:
@@ -1459,8 +1458,8 @@ class ResearchProjectIssueCreator:
                         'basics':f'Przygotowanie podstawowych informacji o modelu oraz zaproponowanie koncepcji stanowiska badawczego z przedmiotu {title} (powiązane z issue #{issue_no})', ###
                         'modelling':f'Wykonanie modelu symulacyjnego z wybranego zagadnienia z przedmiotu {title} (powiązane z issue #{issue_no})', ###
                         'simulation':f'Przeporwadzenie symulacji rozważanego modelu z {project_type} o {title} (powiązane z issue #{issue_no})', ###
-                        'analysis':f'Analiza otrzymanych wyników z {project_type} o {title} (powiązane z issue #{issue_no})', ###
-                        'report':f'Analiza raportu z wszystkich faz {project_type} o {title} (powiązane z issue #{issue_no})', ###
+                        'analysis':f'Analiza i zatwierdzenie otrzymanych wyników z {project_type} o {title} (powiązane z issue #{issue_no})', ###
+                        'report':f'Końcowa rewizja raportu z wszystkich faz {project_type} o {title} (powiązane z issue #{issue_no})', ###
                         }
 
         return titles_dict

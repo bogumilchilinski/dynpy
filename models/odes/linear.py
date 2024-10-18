@@ -127,5 +127,7 @@ class ParametricOscillator(ODESystem):
         plt.show()
         max_plot=na_df_sol_k.set_axis(k_list,axis=1).max().plot()
         plt.show()
-        
+
         return plot, max_plot
+
+

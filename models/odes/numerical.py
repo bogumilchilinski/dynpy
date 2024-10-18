@@ -67,3 +67,237 @@ class SpringMassSystem(ODESystem):
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
 
         return odes
+#przyklady FODE
+class BasicFODE(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t)+x-1,0)
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=1)
+
+        return odes
+
+class FODEexpExcitation(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t)+x-1,exp(2*t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=1)
+
+        return odes
+
+class FODEexpResonance(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t)+x-1,exp(t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=1)
+
+        return odes
+
+class FODEsinExcitation(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t)+x-1,sin(2*t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=1)
+
+        return odes
+
+class FODEsinResonance(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t)+x-1,sin(t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=1)
+
+        return odes
+
+class FODEcosExcitation(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t)+x-1,cos(2*t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=1)
+
+        return odes
+
+class FODEcosResonance(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t)+x-1,cos(t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=1)
+
+        return odes
+
+class FODEexpSumExcitation(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t)+x-1,exp(2*t)+exp(3*t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=1)
+
+        return odes
+
+class FODEsinSumExcitation(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t)+x-1,sin(t)+sin(3*t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=1)
+
+        return odes
+#PRZYKLADY 2ND ORDER ODE
+class BasicSODE(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x-1,0)
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
+
+        return odes
+
+class SODEexpExcitation(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x-1,exp(2*t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
+
+        return odes
+
+class SODEexpResonance(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x-1,exp(t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
+
+        return odes
+
+class SODEsinExcitation(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x-1,sin(2*t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
+
+        return odes
+
+class SODEsinResonance(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x-1,sin(t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
+
+        return odes
+
+class SODEcosExcitation(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x-1,cos(2*t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
+
+        return odes
+
+class SODEcosResonance(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x-1,cos(t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
+
+        return odes
+
+class SODEexpSumExcitation(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x-1,exp(2*t)+exp(3*t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
+
+        return odes
+
+class SODEsinSumExcitation(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x-1,sin(t)+sin(3*t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
+
+        return odes
