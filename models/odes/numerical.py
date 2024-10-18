@@ -75,7 +75,7 @@ class BasicFODE(ODESystem):
     def from_reference_data(cls):
         t = Symbol('t')
         x= Function('x')(t)
-        ode_eq=Eq(x.diff(t)+x-1,0)
+        ode_eq=Eq(x.diff(t)-2*x+1,0)
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=1)
 
@@ -88,7 +88,7 @@ class FODEexpExcitation(ODESystem):
     def from_reference_data(cls):
         t = Symbol('t')
         x= Function('x')(t)
-        ode_eq=Eq(x.diff(t)+x-1,exp(2*t))
+        ode_eq=Eq(x.diff(t)-x+1,exp(2*t))
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=1)
 
@@ -101,7 +101,7 @@ class FODEexpResonance(ODESystem):
     def from_reference_data(cls):
         t = Symbol('t')
         x= Function('x')(t)
-        ode_eq=Eq(x.diff(t)+x-1,exp(t))
+        ode_eq=Eq(x.diff(t)-x+1,exp(t))
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=1)
 
@@ -114,7 +114,7 @@ class FODEsinExcitation(ODESystem):
     def from_reference_data(cls):
         t = Symbol('t')
         x= Function('x')(t)
-        ode_eq=Eq(x.diff(t)+x-1,sin(2*t))
+        ode_eq=Eq(x.diff(t)-x+1,sin(2*t))
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=1)
 
@@ -127,7 +127,7 @@ class FODEsinResonance(ODESystem):
     def from_reference_data(cls):
         t = Symbol('t')
         x= Function('x')(t)
-        ode_eq=Eq(x.diff(t)+x-1,sin(t))
+        ode_eq=Eq(x.diff(t)-x+1,sin(t))
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=1)
 
@@ -140,7 +140,7 @@ class FODEcosExcitation(ODESystem):
     def from_reference_data(cls):
         t = Symbol('t')
         x= Function('x')(t)
-        ode_eq=Eq(x.diff(t)+x-1,cos(2*t))
+        ode_eq=Eq(x.diff(t)-x-1,cos(2*t))
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=1)
 
@@ -153,7 +153,7 @@ class FODEcosResonance(ODESystem):
     def from_reference_data(cls):
         t = Symbol('t')
         x= Function('x')(t)
-        ode_eq=Eq(x.diff(t)+x-1,cos(t))
+        ode_eq=Eq(x.diff(t)-x+1,cos(t))
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=1)
 
@@ -166,7 +166,7 @@ class FODEexpSumExcitation(ODESystem):
     def from_reference_data(cls):
         t = Symbol('t')
         x= Function('x')(t)
-        ode_eq=Eq(x.diff(t)+x-1,exp(2*t)+exp(3*t))
+        ode_eq=Eq(x.diff(t)-x+1,exp(2*t)+exp(3*t))
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=1)
 
@@ -179,7 +179,7 @@ class FODEsinSumExcitation(ODESystem):
     def from_reference_data(cls):
         t = Symbol('t')
         x= Function('x')(t)
-        ode_eq=Eq(x.diff(t)+x-1,sin(t)+sin(3*t))
+        ode_eq=Eq(x.diff(t)-x+1,sin(t)+sin(3*t))
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=1)
 
@@ -192,7 +192,7 @@ class BasicSODE(ODESystem):
     def from_reference_data(cls):
         t = Symbol('t')
         x= Function('x')(t)
-        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x-1,0)
+        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x+1,0)
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
 
@@ -205,7 +205,7 @@ class SODEexpExcitation(ODESystem):
     def from_reference_data(cls):
         t = Symbol('t')
         x= Function('x')(t)
-        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x-1,exp(2*t))
+        ode_eq=Eq(x.diff(t,2)-2*x.diff(t)+x+1,exp(2*t))
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
 
@@ -218,7 +218,7 @@ class SODEexpResonance(ODESystem):
     def from_reference_data(cls):
         t = Symbol('t')
         x= Function('x')(t)
-        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x-1,exp(t))
+        ode_eq=Eq(x.diff(t,2)-2*x.diff(t)+x+1,exp(t))
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
 
@@ -231,7 +231,7 @@ class SODEsinExcitation(ODESystem):
     def from_reference_data(cls):
         t = Symbol('t')
         x= Function('x')(t)
-        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x-1,sin(2*t))
+        ode_eq=Eq(x.diff(t,2)-2*x.diff(t)+x+1,sin(2*t))
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
 
@@ -244,7 +244,7 @@ class SODEsinResonance(ODESystem):
     def from_reference_data(cls):
         t = Symbol('t')
         x= Function('x')(t)
-        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x-1,sin(t))
+        ode_eq=Eq(x.diff(t,2)-2*x.diff(t)+x+1,sin(t))
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
 
@@ -257,7 +257,7 @@ class SODEcosExcitation(ODESystem):
     def from_reference_data(cls):
         t = Symbol('t')
         x= Function('x')(t)
-        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x-1,cos(2*t))
+        ode_eq=Eq(x.diff(t,2)-2*x.diff(t)+x+1,cos(2*t))
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
 
@@ -270,7 +270,7 @@ class SODEcosResonance(ODESystem):
     def from_reference_data(cls):
         t = Symbol('t')
         x= Function('x')(t)
-        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x-1,cos(t))
+        ode_eq=Eq(x.diff(t,2)-2*x.diff(t)+x+1,cos(t))
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
 
@@ -283,7 +283,7 @@ class SODEexpSumExcitation(ODESystem):
     def from_reference_data(cls):
         t = Symbol('t')
         x= Function('x')(t)
-        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x-1,exp(2*t)+exp(3*t))
+        ode_eq=Eq(x.diff(t,2)-2*x.diff(t)+x+1,exp(2*t)+exp(3*t))
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
 
@@ -296,7 +296,7 @@ class SODEsinSumExcitation(ODESystem):
     def from_reference_data(cls):
         t = Symbol('t')
         x= Function('x')(t)
-        ode_eq=Eq(x.diff(t,2)+x.diff(t)+x-1,sin(t)+sin(3*t))
+        ode_eq=Eq(x.diff(t,2)-2*x.diff(t)+x+1,sin(t)+sin(3*t))
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
 
