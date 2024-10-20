@@ -198,6 +198,20 @@ class BasicSODE(ODESystem):
 
         return odes
 
+class BasicSODEWithoutXDot(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t,2)+x+1,0)
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
+
+        return odes
+    
+    
 class SODEexpExcitation(ODESystem):
 
 
