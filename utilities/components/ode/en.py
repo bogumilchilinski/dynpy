@@ -2059,7 +2059,6 @@ class SolutionComparisonComponent(ReportComponent):
         from dynpy.solvers.nonlinear import MultiTimeScaleSolution
 
         system = self.reported_object
-        #jezeli ktos chce odkomentowac ify to trzeba o jeden tab wszystko to co w srodku funkcji if/elif/else jest pamietajcie bo inaczej nie bedzie dzialac :)
         #if type(system) == ODESystem:
         display(SympyFormula(system.as_type(FirstOrderLinearODESystem).solution))
         display(ReportText("as_type method used:"))
@@ -2070,4 +2069,48 @@ class SolutionComparisonComponent(ReportComponent):
         display(SympyFormula(system.as_type(FirstOrderLinearODESystemWithHarmonics).solution))
        # else:
 #       display(ReportText("Given system is neither ODESystem nor MultiTimeScaleSolution"))
+
+
+class SolutionDiagnosticComponent(ReportComponent):
+
+    title="Multiple time scale solution and ODESystem solution"
+
+    def append_elements(self):
+
+        system = self.reported_object._as_fode()
         
+        display(ReportText("_auxiliary_fundamental_matrix:"))
+        display(SympyFormula(system._auxiliary_fundamental_matrix))
+        
+        display(ReportText("_reduced_fundamental_matrix:"))
+        display(SympyFormula(system._reduced_fundamental_matrix))
+        
+        display(ReportText("_trig_fundamental_matrix:"))
+        display(SympyFormula(system._trig_fundamental_matrix))
+        
+        display(ReportText("_reduced_eigenvalues:"))
+        display(SympyFormula(system._reduced_eigenvalues))
+        
+        display(ReportText("_trig_eigenvalues:"))
+        display(SympyFormula(system._trig_eigenvalues))
+        
+        display(ReportText("_reduced_modes:"))
+        display(SympyFormula(system._reduced_modes))
+        
+        display(ReportText("_combined_modes:"))
+        display(SympyFormula(system._combined_modes))
+                
+        display(ReportText("_trig_modes:"))
+        display(SympyFormula(system._trig_modes))
+                
+        display(ReportText("eigenvalues:"))
+        display(SympyFormula(system.eigenvalues))
+                
+#         display(ReportText("modes:"))
+#         display(SympyFormula(system.modes()))
+                
+        display(ReportText("_is_proportional_damping:"))
+        display(SympyFormula(system._is_proportional_damping))
+
+        display(ReportText("_general_solution:"))
+        display(SympyFormula(system._general_solution))
