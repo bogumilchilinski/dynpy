@@ -3,6 +3,7 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, asin, diff, sqrt, S,
                    dsolve, solve, fraction, factorial, Subs, Number, oo, Abs,
                    N, solveset)
 
+from sympy import Heaviside
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
@@ -328,6 +329,119 @@ class DCMotorIIOrder(ComposedSystem):
         
         #return FirstOrderLinearODESystem.from_ode_system(ode)
         return ode
+    
+class DCMotorHeaviside(DCMotor):
+    scheme_name = 'DC_motor.png'
+    
+    U_z = Symbol('U_z', positive=True)
+    R_w = Symbol('R_w', positive=True)
+    L_w = Symbol('L_w', positive=True)
+    E = Symbol('E', positive=True)
+    U_Rw = Symbol('U_Rw', positive=True)
+    U_Lw = Symbol('U_Lw', positive=True)
+    k_e = Symbol('k_e', positive=True)
+    M_s = Symbol('M_s', positive=True)
+    B = Symbol('B', positive=True)
+    J = Symbol('J', positive=True)
+    M_obc = Symbol('M_l', positive=True)
+    k_m = Symbol('k_m', positive=True)
+    M_a = Symbol('M_a', positive=True)
+    M_r = Symbol('M_r', positive=True)
+    i_w=dynamicsymbols('i_w')
+    
+    omega_s=dynamicsymbols('omega_s')
+    T = Symbol('T', positive=True)
+
+    
+    def __init__(self,
+                 U_z=None, 
+                 R_w=None,
+                 L_w=None, 
+                 E=None, 
+                 U_Rw=None, 
+                 U_Lw=None, 
+                 k_e=None,
+                 M_s=None, 
+                 B=None, 
+                 J=None, 
+                 M_obc=None, 
+                 k_m=None,
+                 M_a=None,
+                 M_r=None,
+                 T=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+        
+        if U_z is not None: self.U_z = U_z
+        if R_w is not None: self.R_w = R_w
+        if L_w is not None: self.L_w = L_w
+        if E is not None: self.E = E
+        if U_Rw is not None: self.U_Rw = U_Rw
+        if U_Lw is not None: self.U_Lw = U_Lw
+        if k_e is not None: self.k_e = k_e
+        if M_s is not None: self.M_s = M_s
+        if B is not None: self.B = B
+        if J is not None: self.J = J
+        if M_obc is not None: self.M_obc = M_obc
+        if k_m is not None: self.k_m = k_m
+        if M_a is not None: self.M_a = M_a
+        if M_r is not None: self.M_r = M_r
+        if T is not None: self.T = T
+        
+        self.ivar = ivar
+        self.qs = [self.i_w, self.omega_s]
+        self._init_from_components(**kwargs)
+    @property
+    def components(self):
+        components = {}
+
+        self.resistor = CurrentDependentResistor(-self.R_w, self.i_w,  qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.inductor = Resistor(-self.L_w, self.i_w, qs=self.qs, ivar=self.ivar, frame=base_frame)
+    #         self.inductor = Inductor(-self.L_w, self.i_w, qs=self.qs, ivar=self.ivar, frame=base_frame)
+        self.voltage_source = VoltageSource(-self.U_z*Heaviside(sin(2*pi*self.ivar/self.T)), self.i_w, qs=self.qs, ivar=self.ivar , frame=base_frame)
+#         self.voltage_source = VoltageSource(-self.U_z*(Heaviside(self.ivar)-Heaviside(self.ivar-2)+Heaviside(self.ivar-4)-Heaviside(self.ivar-6)+Heaviside(self.ivar-8)), self.i_w, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.electromotive_force = ElectromotiveForce(self.k_e*self.omega_s, self.i_w, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.engine_load_torque = EngineLoadTorque(self.M_obc*Heaviside(sin(2*pi*self.ivar/self.T-pi/2)), self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
+#         self.engine_load_torque = EngineLoadTorque(self.M_obc*(Heaviside(self.ivar-1)-Heaviside(self.ivar-3)+Heaviside(self.ivar-5)-Heaviside(self.ivar-7)+Heaviside(self.ivar-9)), self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.rotor_torque = RotorTorque(-self.k_m*self.i_w, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.rotor_angular_acceleration_torque = RotorAngularAccelerationTorque(-self.J, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.rotor_resistance_movement_torque = ResistanceMovementTorque(-self.B, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
+
+        components['resistor'] = self.resistor
+        components['inductor'] = self.inductor
+        components['voltage_source'] = self.voltage_source
+        components['electromotive_force'] = self.electromotive_force
+        components['engine_load_torque'] = self.engine_load_torque
+        components['rotor_torque'] = self.rotor_torque
+        components['rotor_angular_acceleration_torque'] = self.rotor_angular_acceleration_torque
+        components['rotor_resistance_movement_torque'] = self.rotor_resistance_movement_torque
+
+        return components
+    def symbols_description(self):
+        i_roc=self.i_w.diff(self.ivar)
+        self.sym_desc_dict = {
+            self.U_z: r'voltage supplying the rotor',
+            self.R_w: r'equivalent resistance of the rotor windings',
+            self.L_w: r'equivalent inductance of the rotor windings',
+            self.E: r'electromotive force of induction',
+            self.U_Rw: r'voltage across the rotor winding resistance',
+            self.U_Lw: r'voltage related to the rotor inductance',
+            self.k_e: r'electric constant',
+            self.M_s: r'rotor torque',
+            self.B: r'coefficient of viscous friction reduced to the rotor shaft',
+            self.J: r'moment of inertia reduced to the rotor shaft',
+            self.M_obc: r'motor load torque',
+            self.k_m: r'mechanical constant',
+            self.i_w: r'rotor winding current',
+            i_roc:r'rotor winding current rate of change',
+            self.omega_s:r'angular velocity of the rotor',
+            self.M_a:r'rotor angular acceleration torque',
+            self.M_r:r'rotor motion resistance torque',
+            self.omega_s.diff(self.ivar):r'angular acceleration of the rotor',
+            self.T:"Heaviside cycle length",
+            Symbol('\Theta'):'Heaviside function'
+        }
+        return self.sym_desc_dict
     
 
 class CurrentDependentResistor(Spring):
