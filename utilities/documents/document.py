@@ -20,6 +20,8 @@ from .guides import (UsageOfDynamicSystemsGuide, Guide, EngeneeringDrawingGuide,
                     GithubSynchroGuide, IntroToCocalcGuide)
 #from sympy import *
 import datetime
+import shutil
+import os
 
 class ReportMethods:
 
@@ -413,7 +415,7 @@ class BPASTSPaper(Document):
         
         #HOW TO USE?
         
-        #Doc1 = BPASTSTemplate(default_filepath='./output/method_test',title=NoEscape('''Your title'''))
+        #Doc1 = BPASTSPaper(default_filepath='./output/method_test',title=NoEscape('''Your title'''))
         #author_names={'Damian Sierociński':1,'Bogumił Chiliński':1, 'Karolina Ziąbrowska':2, 'Jakub Szydłowski':2}
         #author_affiliations={1:'Institute of Machine Design Fundamentals, Faculty of Automotive and Construction Machinery Engineering, Warsaw University of Technology',2:'Faculty of Automotive and Construction Machinery Engineering, Warsaw University of Technology'}
         #correspondence='damian.sierocinski@pw.edu.pl'
@@ -724,6 +726,7 @@ doc.generate_pdf(clean_tex=True)
 
 """)    
         return ObjectCode(preliminary_str)
+
 
         
         
