@@ -193,7 +193,9 @@ class MeetingIssueCreator:
 class GitHubInterface():
 
     '''
-    GitHubInterface is a class to use the Github API v3. With it, you can manage your Github resources (repositories, user profiles, organizations, etc.) from Python scripts. It is based on Github class from PyGithub library and it mimics its methods.
+    GitHubInterface is a class to use the Github API v3. With it, you can manage your Github resources (repositories, user profiles, organizations, etc.) from Python scripts.
+    
+    It is based on Github class from PyGithub library and it mimics its methods.
 
     Examples:
 
@@ -327,6 +329,16 @@ class GitHubInterface():
 
 
     def issues_list(self, repo_name=None, state='all', assignee=None, sort='none', since=None):
+        '''
+        This method refers to the method get_issues_list
+        
+        Example:
+
+        client = GitHubInterface()
+
+        client.issues_list(repo_name='bogumilchilinski/dynpy', state='all', assignee='lsikor')
+        
+        '''
 
         if repo_name is None:
             repo_name = self._repo_name
@@ -334,7 +346,7 @@ class GitHubInterface():
         return self.get_issues_list(repo_name=repo_name, state=state, assignee=assignee, sort=sort, since=since)
 
 
-    def get_issues_as_df(self):
+    def issues_table(self, repo_name=None, state='all', assignee=None, sort='none', since=None):
         '''
         This method returns the Pandas DataFrame containing Issues.
 
@@ -342,16 +354,33 @@ class GitHubInterface():
 
         client = GitHubInterface()
 
-        client.as_df()
+        client.issues_table(repo_name='bogumilchilinski/dynpy', state='open', assignee='lsikor')
 
         '''
 
         import pandas as pd
+        
+        if assignee is not None:
+            arg_dict =  {'assignee':assignee}
+        else:
+            arg_dict = {}
+            
+        if since is not None:
+            arg_since =  {'since':since}
+        else:
+            from datetime import datetime
+            since_date = "2018-09-01"
+            date_string = since_date + "T00:00:00Z"
+            date_object = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ")
+            arg_since = {'since':date_object}
+
+        if repo_name is None:
+            repo_name = self._repo_name
 
         issue_title_list=[]
         issue_number_list=[]
         issue_assignees_list=[]
-        for issue in self.get_issues_list(repo_name=self._repo_name, state='open', assignee='amvdek'):
+        for issue in list(self.g.get_repo(repo_name).get_issues(state=state, sort=sort, **arg_since, **arg_dict)):
             issue_title_list.append(issue.title)
             issue_number_list.append(issue.number)
 #             issue_assignees_list.append(issue.assignees)
@@ -360,7 +389,23 @@ class GitHubInterface():
 
         return pd.DataFrame(data_dict)
 
+    def prepare_meeting_issues(self,title=None,last_issue_no=None,guide=None,date=None,time=None,done=False):
+        '''
+        This method prepare meeting issues by using class MeetingIssueCreator.
 
+        Example:
+        
+        from dynpy.utilities.creators import GitHubInterface
+        title="Issue"
+        last_issue_no=999
+        client = GitHubInterface(token)
+        client.prepare_meeting_issues(title,last_issue_no)
+
+        '''
+        if last_issue_no is None:
+            last_issue_no = 9999
+        return MeetingIssueCreator(title=title,no=last_issue_no+1,guide=guide,date=date,time=time,done=done)
+    
 
     def open_issues(self, state='open', since=None, sort=None):
         '''
@@ -408,8 +453,7 @@ class GitHubInterface():
 
 
     def str_to_print_issue(self, issue):
-
-
+        
         title = issue.title
         body = issue.body
         no = issue.number
@@ -454,7 +498,11 @@ class GitHubInterface():
         return str_to_print
 
     def print_issue(self, issue):
-
+        '''
+        
+        This method refers to the method str_to_print_issue
+        
+        '''
         return print(self.str_to_print_issue(issue=issue))
 
 
@@ -479,7 +527,53 @@ class GitHubInterface():
 
         return issue
 
+    def project_summary(self, repo_name=None, issue_number = None):
+        '''
+        This method returns the list of the related issues with assigness as dataframe.
 
+        Example:
+
+        from dynpy.utilities.creators import GitHubInterface
+        client = GitHubInterface()
+        client.project_summary(issue_number = 954)
+
+        '''
+        
+        import pandas as pd
+        
+        if repo_name is None:
+            repo_name = self._repo_name
+            
+        if issue_number is None:
+            issue_number = 954
+
+        issues_list = self.get_issues_list(repo_name=repo_name, state='all', assignee="*", sort='none')
+        issue_title_list=[]
+        issue_number_list=[]
+        issue_assignees_list=[]
+        
+        for issue in issues_list:
+
+            if issue.number == issue_number:
+                issue_title_list.append(issue.title)
+                issue_number_list.append(issue.number)
+                asignees = issue.assignees
+                asignees_names=''
+                for asignee in asignees:
+                    asignees_names = asignees_names + asignee.login + ' / '
+                issue_assignees_list.append(asignees_names)
+            elif "issue #" + str(issue_number) + " related" in issue.title:
+                issue_title_list.append(issue.title)
+                issue_number_list.append(issue.number)
+                asignees = issue.assignees
+                asignees_names=''
+                for asignee in asignees:
+                    asignees_names = asignees_names + asignee.login + ' / '
+                issue_assignees_list.append(asignees_names)
+            
+        data_dict = {'Issue number':issue_number_list, 'Issue title':issue_title_list, 'Assignees':issue_assignees_list}
+
+        return pd.DataFrame(data_dict)
 
 class ClassLister:
     
@@ -795,7 +889,7 @@ init: keyword
                         self.full_list.append(cl)
                         
                         cnt += 1
-        
+        self.full_list = list(set(self.full_list))
         
         return self.full_list
     
@@ -1134,6 +1228,14 @@ def list_of_mechanical_systems():
     dir_str = 'dynpy.models.mechanics'
 
     return ModuleStructure(dir_str).get_classes()
+
+def list_of_dynamic_systems():
+        
+    dyn_lst = []
+         
+    dyn_lst = ModuleStructure('dynpy.models.mechanics').get_classes() + ModuleStructure('dynpy.models.electric').get_classes()   
+ 
+    return dyn_lst
 
 
 advanced_modeling_schedule_code_str = """Następujące zadania mają na celu przygotowanie projektu wybranego przez studentów układu dynamicznego. Konieczne jest zaplanowanie wykonania kamieni milowych w terminie do {date} i w czasie {time}, celem utrzymania ciągłości realizacji projektu:

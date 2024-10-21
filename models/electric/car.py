@@ -20,6 +20,8 @@ import inspect
 
 from dynpy.models.mechanics.trolley import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
 
+from dynpy.models.mechanics.car import CarMovementConstantThrottle
+
 
 class ElectricCarMovementConstantThrottle(ComposedSystem):
 

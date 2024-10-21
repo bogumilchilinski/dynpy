@@ -19,7 +19,8 @@ months_list = ['January', 'February', 'March','April','May','June','July','Augus
 from  ...mechanics import display
 import datetime
 
-from dynpy.utilities.components.guides.en import ODEReportComponent
+
+#from dynpy.utilities.components.guides.en import ODEReportComponent
 
 miesiace_list = ['styczeń', 'luty', 'marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']
 

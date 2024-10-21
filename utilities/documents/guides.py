@@ -362,7 +362,7 @@ class DevelopmentGuide(Guide):
 
         
         
-class IntroToCocalcGuide(Guide):
+class IntroToCocalcGuideV2(Guide):
 
     @property
     def _report_components(self):
@@ -370,6 +370,25 @@ class IntroToCocalcGuide(Guide):
         comp_list=[
 
             github_comp.CocalcLoginComponent,
+#             development_comp.JupyterSetUpComponent,
+#             github_comp.CocalcFolderComponent,
+
+#             github_comp.CocalcDynSysListComponent,
+#             reporting_comp.ReportingBasicsComponent,
+
+        ]
+
+        return comp_list
+        
+        
+class IntroToCocalcGuide(Guide):
+
+    @property
+    def _report_components(self):
+        
+        comp_list=[
+
+            #github_comp.CocalcLoginComponent,
             development_comp.JupyterSetUpComponent,
             github_comp.CocalcFolderComponent,
 

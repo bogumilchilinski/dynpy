@@ -1830,3 +1830,26 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
         system.symbols_description()
         system.unit_dict()
 
+class DynSysSummaryComponent(ReportComponent):
+
+    title = "DynSys system code refactor component"
+
+    def append_elements(self):
+
+        from dynpy.models import mechanics
+
+
+        display(ReportText('DynSys system consists of the following models:'))
+        
+        mods=inspect.getmembers(mechanics, inspect.ismodule)
+
+        for nam,mod in mods:
+
+            mods_tmp = [name for name,cls in inspect.getmembers(mod, inspect.isclass) if issubclass(cls,mechanics.principles.ComposedSystem)]
+            classes_str=',\n - '.join(mods_tmp)
+            if mods_tmp != []:
+                display(ReportText(f' {nam}'))
+                display(ReportText(f'- {classes_str}'))
+                
+        display(ReportText('All of this models should be refactored according to bellow example:'))
+        CodeRefactorComponent(None)

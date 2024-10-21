@@ -718,3 +718,22 @@ class PythonBasicsGuidelinesComponent(ReportComponent):
         - Wykonanie szablonowych raportów z zadań, według wytycznych.
         - Fazę II kończy spotkanie grupy, poświęcone podsumowaniu efektów prac: rozliczenie raportu i wykonanych zadań (issues).
         '''))
+        
+sample_code=('''
+from dynpy.utilities.creators import ReserachIssueProjectCreator
+ReserachIssueProjectCreator('Your issue name')
+''')
+class SampleComponent(ReportComponent):
+
+
+    title="ReserachIssueProjectCreator class and its use"
+        
+    #def append_elements(self):
+        #display(ReportText('Your text here'))
+        #display(ObjectCode(sample_code))
+    def append_elements(self):
+        from .....utilities.creators import MeetingIssueCreator
+        display(ReportText('This class is used to create meeting issues through API. The class consists of the following code: \\newline'))
+        system = self.reported_object
+        display(ObjectCode(sample_code))
+        display(ReportText(' \\newline To learn more about this class use help. \\newline'))
