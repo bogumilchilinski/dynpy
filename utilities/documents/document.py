@@ -33,7 +33,7 @@ class ReportMethods:
         preliminary_str=(
 """
 
-Examplary setup is as follows:
+#Examplary setup is as follows:
 
 ## CELL 1
 ## Imports
@@ -1005,7 +1005,7 @@ class LandscapeScheduleTemplate(ScheduleTemplate):
         self.preamble.append(Command('hypersetup', 'urlcolor=blue'))
         self.preamble.append(Command('newcolumntype', arguments='R',options='1',extra_arguments=NoEscape('>{\\raggedleft\\let\\newline\\\\\\arraybackslash\\hspace{0pt}}m{#1}')))
         
-class BeamerTemplate(Document):
+class BeamerPresentation(Document):
 
     latex_name = 'document'
     packages = [
@@ -1025,6 +1025,47 @@ class BeamerTemplate(Document):
                   Command('graphicspath', arguments=[NoEscape('{../}')])
 
             ]
+    @classmethod
+    def base_setup(cls):
+        
+        
+        preliminary_str=(
+"""
+
+Examplary setup is as follows:
+
+from dynpy.utilities.documents.document import BeamerPresentation
+from dynpy.utilities.report import*
+
+
+#CELL_1
+frame_1=Frame(title='Introduction',options=[])
+CurrentContainer(frame_1)
+display(ReportText('abc '*100))
+
+
+#CELL_2
+frame_2=Frame(title='Physical model',options=['allowframebreaks'])
+CurrentContainer(frame_2)
+display(ReportText('abc '*100))
+
+
+#CELL_3
+frame_3=CodeFrame(title='Simulation results',options=[])
+CurrentContainer(frame_3)
+display(ReportText('abc '*100))
+
+#CELL_4
+doc = BeamerPresentation('Example_beamer',title='Exemplary presentation')
+doc.append(frame_1)
+doc.append(frame_2)
+doc.append(frame_3)
+doc.generate_pdf(clean_tex=False)
+    
+
+"""
+)
+        return ObjectCode(preliminary_str)
 
     def __init__(self,
                  default_filepath='default_filepath',
@@ -1074,6 +1115,11 @@ class BeamerTemplate(Document):
                 self.packages.append(Command('author', arguments=[self.author], options=['']))
             
         self.append(Command('frame', arguments=[NoEscape(r'\titlepage')]))
+        
+        
+class BeamerTemplate(BeamerPresentation):
+
+    pass
 
 class DGBeamer(Document):
 
