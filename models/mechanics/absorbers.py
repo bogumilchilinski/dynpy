@@ -53,7 +53,7 @@ class AdaptableTunedFluidDamper(VariableMassTrolleyWithPendulumRayleighDamping):
         
         na_df = self._ode_system.subs(params_dict).numerical_analysis(parameter=parameter, param_span=param_span)
                 
-        simulation_result = na_df.compute_solution(t_span = t_span, ic_list = ic_list)
+        simulation_result = na_df.compute_solution(t_span = t_span, ic_list = ic_list,backend='numpy')
         
         return simulation_result.droplevel(0, axis=1)
     
