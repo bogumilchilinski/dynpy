@@ -552,7 +552,7 @@ class WutThesis(Document):
         
     @classmethod
     def base_setup(cls):
-        
+
         
         preliminary_str=(
 """
@@ -639,20 +639,21 @@ Examplary setup is as follows:
     thesis_name = './output/report_name' #path for report file 
 
     doc = WutThesis(thesis_name)
+    # Bibliography of quotations
+    doc.preamble.append(NoEscape(r'\\usepackage[backend=bibtex, sorting=none]{biblatex}'))
+    doc.preamble.append(NoEscape(r'\addbibresource{elementy_bibliagrafia.bib}'))
     doc.append(sec_text) # adding certain sections
     doc.append(sec_formula)
     doc.append(sec_picture)
+    doc.append(NoEscape(r'\printbibliography[title={Bibliografia}]'))
     # Generating file
     doc.generate_pdf(clean_tex=True)
-    
-
 """
+        )
 
-)
-        
         display(IPMarkdown(preliminary_str))    
 
-        
+
         preliminary_str=(
 """
 #Perform basic setup for document creation.
@@ -717,14 +718,18 @@ display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of pict
 
 guide_name = './output/report_name' #path for report file 
 
+# Bibliography of quotations
+doc.preamble.append(NoEscape(r'\\usepackage[backend=bibtex, sorting=none]{biblatex}'))
+doc.preamble.append(NoEscape(r'\addbibresource{elementy_bibliagrafia.bib}'))
 doc = Guide(guide_name)
 doc.append(sec_text) # adding certain sections
 doc.append(sec_formula)
 doc.append(sec_picture)
+doc.append(NoEscape(r'\printbibliography[title={Bibliografia}]'))
 # Generating file
 doc.generate_pdf(clean_tex=True)
 
-""")    
+""")
         return ObjectCode(preliminary_str)
 
 

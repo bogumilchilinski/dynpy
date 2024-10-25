@@ -464,7 +464,7 @@ class BasicsOfODESystemGuide(Guide):
         comp_list=[
 
             reporting_comp.BasicUsageOfODESystemComponent,
-            reporting_comp.ODEReportComponent,
+            #reporting_comp.ODEReportComponent,
             reporting_comp.ReportCompUseComponent,
             reporting_comp.ProjectileExampleComponent,
             systems_comp.ODESimulationComponent,
