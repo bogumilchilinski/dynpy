@@ -2843,6 +2843,12 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         
         return ode_sol
     
+    
+    @cached_property
+    def general_solution(self):
+
+        return self.as_type(FirstOrderLinearODESystem).general_solution
+    
     def eigenfunctions(self):
         
         

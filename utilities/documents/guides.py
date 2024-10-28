@@ -369,12 +369,12 @@ class IntroToCocalcGuideV2(Guide):
         
         comp_list=[
 
-            github_comp.CocalcLoginComponent,
-#             development_comp.JupyterSetUpComponent,
+#             github_comp.CocalcLoginComponent,
+#              development_comp.JupyterSetUpComponent,
 #             github_comp.CocalcFolderComponent,
 
 #             github_comp.CocalcDynSysListComponent,
-#             reporting_comp.ReportingBasicsComponent,
+            reporting_comp.ReportingBasicsComponent,
 
         ]
 
