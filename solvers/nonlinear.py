@@ -630,12 +630,12 @@ class MultiTimeScaleSolution(ODESystem):
         if not odes_system:
             odes_system = self.as_matrix()
 
-        first_ord_subs = self.first_order_subs()
+        first_ord_subs = self.first_order_subs().as_explicit_dict()
 #         {
 #             t_i.diff(self.ivar): self.eps**t_ord
 #             for t_ord, t_i in enumerate(self.t_list)
 #         }
-        sec_ord_subs = self.second_order_subs()
+        sec_ord_subs = self.second_order_subs().as_explicit_dict()
 #         {
 #             t_i.diff(self.ivar, 2): 0
 #             for t_ord, t_i in enumerate(self.t_list)
