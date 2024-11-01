@@ -369,12 +369,12 @@ class IntroToCocalcGuideV2(Guide):
         
         comp_list=[
 
-            github_comp.CocalcLoginComponent,
-#             development_comp.JupyterSetUpComponent,
+#             github_comp.CocalcLoginComponent,
+#              development_comp.JupyterSetUpComponent,
 #             github_comp.CocalcFolderComponent,
 
 #             github_comp.CocalcDynSysListComponent,
-#             reporting_comp.ReportingBasicsComponent,
+            reporting_comp.ReportingBasicsComponent,
 
         ]
 
@@ -464,7 +464,7 @@ class BasicsOfODESystemGuide(Guide):
         comp_list=[
 
             reporting_comp.BasicUsageOfODESystemComponent,
-            reporting_comp.ODEReportComponent,
+            #reporting_comp.ODEReportComponent,
             reporting_comp.ReportCompUseComponent,
             reporting_comp.ProjectileExampleComponent,
             systems_comp.ODESimulationComponent,

@@ -33,7 +33,7 @@ class ReportMethods:
         preliminary_str=(
 """
 
-Examplary setup is as follows:
+#Examplary setup is as follows:
 
 ## CELL 1
 ## Imports
@@ -552,7 +552,7 @@ class WutThesis(Document):
         
     @classmethod
     def base_setup(cls):
-        
+
         
         preliminary_str=(
 """
@@ -563,6 +563,158 @@ Examplary setup is as follows:
 ## Imports
 
 
+    #Create file output
+    #Create file Images
+    #In file output create bibliography as .bib file (dynpy123)
+
+    from dynpy.utilities.report import *
+    from dynpy.utilities.templates.document import WutThesis
+
+    doc = WutThesis('./output/thesis_name')
+    
+
+
+## CELL 2
+## Thesis introduction
+    
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_intro = Section('Section that presents text reporting')
+    CurrentContainer(sec_intro)
+    
+    sub_problem_outline = Subsection('Outline of the problem')
+    CurrentContainer(sub_problem_outline)
+    display(ReportText('This subsection provides information about investigated problem. '*100))
+    
+    sub_obj_assum = Subsection('Objectives and assumptions')
+    CurrentContainer(sub_obj_assum)
+    display(ReportText('This subsection provides objectives and assumptions. '*100))
+    
+    sub_SOT = Subsection('State of the art')
+    CurrentContainer(sub_SOT)
+    display(ReportText('This subsection provides state of the art. '*100))
+    
+    sub_methodology = Subsection('Methodology')
+    CurrentContainer(sub_methodology)
+    display(ReportText('This subsection provides methodology. '*100))
+    
+    
+    
+## CELL 3
+## Math 
+
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+    from sympy import Eq, Symbol, symbols
+    
+    sec_formula = Section('Section that presents formulas reporting')
+    CurrentContainer(sec_formula)
+    
+    display(ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.'))
+    
+    a,b = symbols('a b')
+    display(SympyFormula(Eq(a,b)))
+
+
+## CELL 4
+## Picture
+    
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_picture = Section('Section that presents pictures reporting')
+    CurrentContainer(sec_picture)
+
+    display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))
+
+
+
+
+## CELL 5
+## Simulation
+ 
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_simulation = Section('Section that contains simulation')
+    CurrentContainer(sec_simulation)
+    
+     display(ReportText('Simulation '*200))
+    
+## CELL 6
+## Veryfication
+ 
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_verification = Section('Section that verificates research results')
+    CurrentContainer(sec_verification)
+    
+     display(ReportText('Verifications '*200))
+    
+## CELL 7
+## Conclusion
+ 
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_conclusion = Section('Section that contains final conclusions')
+    CurrentContainer(sec_conclusion)
+    
+    display(ReportText('Conclusions '*200))
+
+## CELL 8
+## Document
+
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+    # Creating file
+    # Be sure *output* folder is in the current directory
+
+    thesis_name = './output/report_name' #path for report file 
+
+    doc = WutThesis(thesis_name)
+    # Bibliography of quotations
+    doc.preamble.append(NoEscape(r'\\usepackage[backend=bibtex, sorting=none]{biblatex}'))
+    doc.preamble.append(NoEscape(r'\addbibresource{elementy_bibliagrafia.bib}'))
+    doc.append(sec_intro) # adding certain sections
+    doc.append(sub_problem_outline)
+    doc.append(sub_obj_assum)
+    doc.append(sub_SOT)
+    doc.append(sub_methodology)
+    doc.append(sec_formula)
+    doc.append(sec_picture)
+    doc.append(sec_simulation)
+    doc.append(sec_verification)
+    doc.append(sec_conclusion)
+    # Generating file
+    doc.generate_pdf(clean_tex=True)
+    
+    
+    
+    
+
+"""
+        )
+
+        display(IPMarkdown(preliminary_str))    
+
+
+        preliminary_str=(
+"""
+
+Examplary setup is as follows:
+
+## CELL 1
+## Imports
+
+
+
+    #Create file output
+    #In file output create bibliography as .bib file
 
     from dynpy.utilities.report import *
     from dynpy.utilities.templates.document import WutThesis
@@ -628,6 +780,42 @@ Examplary setup is as follows:
 
 
 ## CELL 5
+## Simulation
+ 
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_simulation = Section('Section that contains simulation')
+    CurrentContainer(sec_simulation)
+    
+     display(ReportText('Simulation '*200))
+    
+## CELL 6
+## Veryfication
+ 
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_verification = Section('Section that verificates research results')
+    CurrentContainer(sec_verification)
+    
+     display(ReportText('Verifications '*200))
+    
+## CELL 7
+## Conclusion
+ 
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_conclusion = Section('Section that contains final conclusions')
+    CurrentContainer(sec_conclusion)
+    
+    display(ReportText('Conclusions '*200))
+
+    
+    
+
+## CELL 8
 ## Document
 
     #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
@@ -638,93 +826,29 @@ Examplary setup is as follows:
 
     thesis_name = './output/report_name' #path for report file 
 
-    doc = WutThesis(thesis_name)
-    doc.append(sec_text) # adding certain sections
+    # Bibliography of quotations
+doc.preamble.append(NoEscape(r'\\usepackage[backend=bibtex, sorting=none]{biblatex}'))
+doc.preamble.append(NoEscape(r'\addbibresource{elementy_bibliagrafia.bib}'))
+doc = WutThesis(thesis_name)
+    doc.append(sec_intro) # adding certain sections
+    doc.append(sub_problem_outline)
+    doc.append(sub_obj_assum)
+    doc.append(sub_SOT)
+    doc.append(sub_methodology)
     doc.append(sec_formula)
     doc.append(sec_picture)
-    # Generating file
+    doc.append(sec_simulation)
+    doc.append(sec_verification)
+    doc.append(sec_conclusion)
+    doc.append(NoEscape(r'\printbibliography[title={Bibliografia}]'))
+# Generating file
     doc.generate_pdf(clean_tex=True)
     
-
-"""
-
-)
-        
-        display(IPMarkdown(preliminary_str))    
-
-        
-        preliminary_str=(
-"""
-#Perform basic setup for document creation.
-
-#This method initializes the document and prepares it for content addition.
-
-#Example:
-
-#To prepare a simple document with text and images:
-
-#Good practice here is to allocate 1 section per 1 cell
-
-## ############### CELL 1 ###########################
-## Imports
-
-from dynpy.utilities.report import *
-from dynpy.utilities.templates.document import Guide
-
-doc = Guide('./output/report_name')
-    
-
-## ############### CELL 2 ###########################
-## Text reporting
-    
-sec_text = Section('Section that presents text reporting')
-CurrentContainer(sec_text)
-
-display(ReportText('Exemplary text'*100))
-
-#will not work in some projects, restrict usage 
-display(Markdown('Formatted text'*100)) 
     
     
-## ############### CELL 3 ###########################
-## Math 
+    
 
-from sympy import Eq, Symbol, symbols
-
-sec_formula = Section('Section that presents formulas reporting')
-CurrentContainer(sec_formula)
-
-display(ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.'))
-
-a,b = symbols('a b')
-display(SympyFormula(Eq(a,b)))
-
-## ############### CELL 4 ###########################
-## Picture
-
-sec_picture = Section('Section that presents pictures reporting')
-CurrentContainer(sec_picture)
-
-display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))
-
-
-
-## ############### CELL 5 ###########################
-## Document
-
-# Creating file
-# Be sure *output* folder is in the current directory
-
-guide_name = './output/report_name' #path for report file 
-
-doc = Guide(guide_name)
-doc.append(sec_text) # adding certain sections
-doc.append(sec_formula)
-doc.append(sec_picture)
-# Generating file
-doc.generate_pdf(clean_tex=True)
-
-""")    
+""")
         return ObjectCode(preliminary_str)
 
 
@@ -1005,7 +1129,7 @@ class LandscapeScheduleTemplate(ScheduleTemplate):
         self.preamble.append(Command('hypersetup', 'urlcolor=blue'))
         self.preamble.append(Command('newcolumntype', arguments='R',options='1',extra_arguments=NoEscape('>{\\raggedleft\\let\\newline\\\\\\arraybackslash\\hspace{0pt}}m{#1}')))
         
-class BeamerTemplate(Document):
+class BeamerPresentation(Document):
 
     latex_name = 'document'
     packages = [
@@ -1025,6 +1149,47 @@ class BeamerTemplate(Document):
                   Command('graphicspath', arguments=[NoEscape('{../}')])
 
             ]
+    @classmethod
+    def base_setup(cls):
+        
+        
+        preliminary_str=(
+"""
+
+Examplary setup is as follows:
+
+from dynpy.utilities.documents.document import BeamerPresentation
+from dynpy.utilities.report import*
+
+
+#CELL_1
+frame_1=Frame(title='Introduction',options=[])
+CurrentContainer(frame_1)
+display(ReportText('abc '*100))
+
+
+#CELL_2
+frame_2=Frame(title='Physical model',options=['allowframebreaks'])
+CurrentContainer(frame_2)
+display(ReportText('abc '*100))
+
+
+#CELL_3
+frame_3=CodeFrame(title='Simulation results',options=[])
+CurrentContainer(frame_3)
+display(ReportText('abc '*100))
+
+#CELL_4
+doc = BeamerPresentation('Example_beamer',title='Exemplary presentation')
+doc.append(frame_1)
+doc.append(frame_2)
+doc.append(frame_3)
+doc.generate_pdf(clean_tex=False)
+    
+
+"""
+)
+        return ObjectCode(preliminary_str)
 
     def __init__(self,
                  default_filepath='default_filepath',
@@ -1074,6 +1239,11 @@ class BeamerTemplate(Document):
                 self.packages.append(Command('author', arguments=[self.author], options=['']))
             
         self.append(Command('frame', arguments=[NoEscape(r'\titlepage')]))
+        
+        
+class BeamerTemplate(BeamerPresentation):
+
+    pass
 
 class DGBeamer(Document):
 

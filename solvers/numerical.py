@@ -65,7 +65,7 @@ class OdeComputationalCase:
                  ic_point=None,
                  evaluate=False,
                  label=None,
-                 backend='fortran',
+                 backend='numpy',
                  ):
 
 
@@ -220,10 +220,11 @@ class OdeComputationalCase:
         if odes_key in self.__class__._cached_odes:
             odes_rhs = self.__class__._cached_odes[odes_key]
         else:
-            if self._backend == 'numpy':
-                odes_rhs = self.__numpy_odes_rhs()        
-            else:
+            if self._backend == 'fortran':
                 odes_rhs = self.__fortran_odes_rhs()
+            else:
+
+                odes_rhs = self.__numpy_odes_rhs()    
 
         self.__numerical_odes = lambda t, y, *args, **kwargs: np.asarray(
             (odes_rhs(t, *y, *args, **kwargs))).reshape(y.shape)

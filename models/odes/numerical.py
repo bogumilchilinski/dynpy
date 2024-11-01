@@ -315,3 +315,29 @@ class SODEsinSumExcitation(ODESystem):
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
 
         return odes
+
+class FODEsincosExcitation(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t)-x+1,sin(t)*cos(t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
+
+        return odes
+
+class SODEsincosExcitation(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t,2)-2*x.diff(t)+x+1,sin(t)*cos(t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
+
+        return odes
