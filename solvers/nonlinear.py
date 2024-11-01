@@ -267,7 +267,7 @@ class NthOrderODEsApproximation(ODESystem):
                             ivar=ivar,  
                             ode_order=None)
         
-        display(sec_odes.solution)
+        display(sec_odes.as_type(FirstOrderLinearODESystem).solution)
         #fode_harm_rhs = FirstOrderLinearODESystemWithHarmonics.from_ode_system(sec_odes)
         
         # print('transformed')
