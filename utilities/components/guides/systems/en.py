@@ -1830,7 +1830,7 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
         system.symbols_description()
         system.unit_dict()
 
-<<<<<<< HEAD
+
 class DynSysSummaryComponent(ReportComponent):
 
     title = "DynSys system code refactor component"
@@ -1854,7 +1854,7 @@ class DynSysSummaryComponent(ReportComponent):
                 
         display(ReportText('All of this models should be refactored according to bellow example:'))
         CodeRefactorComponent(None)
-=======
+
 class DynSysCompletenessCheckerVerbosedComponent(ReportComponent):
 
     title="Checking completeness of dynamic systems"
@@ -1886,4 +1886,3 @@ class DynSysCompletenessCheckerComponent(ReportComponent):
         from dynpy.utilities.tools import DynsysCheckerTable
         
         display(DynsysCheckerTable(system).get_table())
->>>>>>> 7795fb5 ( Committer: Daniel Stryjewski <danielstryjewski@mbp-daniel.home>)
