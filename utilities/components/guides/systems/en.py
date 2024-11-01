@@ -1830,6 +1830,7 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
         system.symbols_description()
         system.unit_dict()
 
+<<<<<<< HEAD
 class DynSysSummaryComponent(ReportComponent):
 
     title = "DynSys system code refactor component"
@@ -1853,3 +1854,36 @@ class DynSysSummaryComponent(ReportComponent):
                 
         display(ReportText('All of this models should be refactored according to bellow example:'))
         CodeRefactorComponent(None)
+=======
+class DynSysCompletenessCheckerVerbosedComponent(ReportComponent):
+
+    title="Checking completeness of dynamic systems"
+
+
+
+    def append_elements(self):
+        
+        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        system_name = system.__class__.__name__
+        
+        display(ReportText('''Bellow table present result of completeness check of givem dynamic systems'''))
+        
+        from dynpy.utilities.tools import DynsysCheckerTable
+        
+        display(DynsysCheckerTable(system, verbosity= True).get_table())
+
+class DynSysCompletenessCheckerComponent(ReportComponent):
+
+    title="Checking completeness of dynamic systems"
+
+    def append_elements(self):
+        
+        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        system_name = system.__class__.__name__
+        
+        display(ReportText('''Bellow table present result of completeness check of givem dynamic systems'''))
+        
+        from dynpy.utilities.tools import DynsysCheckerTable
+        
+        display(DynsysCheckerTable(system).get_table())
+>>>>>>> 7795fb5 ( Committer: Daniel Stryjewski <danielstryjewski@mbp-daniel.home>)

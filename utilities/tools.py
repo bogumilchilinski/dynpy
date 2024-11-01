@@ -119,10 +119,11 @@ class LatexAnalyzerV3:
         return counts
 
 class DynSysChecker:
-    def __init__(self, system, debug= False):
+    def __init__(self, system, debug= False, verbosity = False):
         self.system = system
         self.runnable = False
         self.debug = debug
+        self.verbosity = verbosity 
         
     def check_init(self):
 
@@ -144,18 +145,21 @@ class DynSysChecker:
         
         if self.runnable:
             try:
-                self.system().components
+                comp = self.system().components
             except Exception as e:
                 if self.debug:
                     print(e)
                 return False
         else:
             try:
-                self.system.components
+                comp = self.system.components
             except Exception as e:
                 print(e)
                 return False
-        return True
+        if self.verbosity is True:
+            return comp
+        else:
+            return True
     
     def check_default_data(self):
 
@@ -164,17 +168,20 @@ class DynSysChecker:
         
         if self.runnable:
             try:
-                self.system().get_default_data()
+                def_data = self.system().get_default_data()
             except Exception as e:
                 if self.debug:
                     print(e)
                 return False
         else:
             try:
-                self.system.get_default_data()
+                def_data = self.system.get_default_data()
             except Exception as e:
                 return False
-        return True
+        if self.verbosity is True:
+            return def_data
+        else:
+            return True
         
     def check_numerical_data(self):
 
@@ -183,17 +190,20 @@ class DynSysChecker:
         
         if self.runnable:
             try:
-                self.system().get_numerical_data()
+                data_num = self.system().get_numerical_data()
             except Exception as e:
                 if self.debug:
                     print(e)
                 return False
         else:
             try:
-                self.system.get_numerical_data()
+                data_num = self.system.get_numerical_data()
             except Exception:
                 return False
-        return True
+        if self.verbosity is True:
+            return data_num
+        else:
+            return True
         
     def check_symbols_description(self):
 
@@ -202,17 +212,20 @@ class DynSysChecker:
         
         if self.runnable:
             try:
-                self.system().symbols_description()
+                sym_desc = self.system().symbols_description()
             except Exception as e:
                 if self.debug:
                     print(e)
                 return False
         else:
             try:
-                self.system.symbols_description()
+                sym_desc = self.system.symbols_description()
             except Exception:
                 return False
-        return True
+        if self.verbosity is True:
+            return sym_desc
+        else:
+            return True
     
     def check_unit_dict(self):
 
@@ -221,15 +234,136 @@ class DynSysChecker:
         
         if self.runnable:
             try:
-                self.system().unit_dict()
+                unit_dict = self.system().unit_dict()
             except Exception as e:
                 if self.debug:
                     print(e)
                 return False
         else:
             try:
-                self.system.unit_dict()
+                unit_dict = self.system.unit_dict()
             except Exception:
                 return False
-        return True
+        if self.verbosity is True:
+            return unit_dict
+        else:
+            return True
     
+    def check_equation(self):
+        
+        if self.runnable:
+            try:
+                equ = self.system()._eoms[0]
+            except Exception as e:
+                if self.debug:
+                    print(e)
+                return False
+        else:
+            try:
+                equ = self.system._eoms[0]
+            except Exception:
+                return False
+        if self.verbosity:
+            return equ
+        else:
+            return True
+        
+    def check_picture(self):
+        
+        if self.runnable:
+            try:
+                self.system()._as_picture();
+                pic = self.system().preview(example = 'detail_real_name');
+            except Exception as e:
+                if self.debug:
+                    print(e)
+                return False
+        else:
+            try:
+                self.system._as_picture();
+                pic = self.system.preview(example = 'detail_real_name');
+            except Exception:
+                return False
+        if self.verbosity:
+            return pic
+        else:
+            return True
+    
+class DynsysCheckerTable:
+    def __init__(self, system, verbosity = False):
+        import pandas as pd
+        initial_data = {'System Name': [], 
+                        'Init': [],
+                        'Components': [],
+                        'Default Data': [],
+                        'Numerical Parameters': [],
+                        'Symbols Description': [],
+                        'Units': [],
+                        'Equation': [],   
+                        'Picture': [],
+                        'Result':[]}
+        
+        self.df = pd.DataFrame(initial_data)
+        pd.set_option("display.max_colwidth", None)
+        pd.set_option('future.no_silent_downcasting', True)
+        
+        self.verbosity = verbosity
+        
+        if isinstance(system, __builtins__.__class__):
+            self.list_from_Modulestructure(system)
+        elif isinstance(system, str):
+            self.list_from_Modulestructure(system)
+        elif isinstance(system, list):
+            self.table_loop(system)
+        else:
+            self.system = system
+            self.table_append(system)
+        
+        
+    def list_from_Modulestructure(self, path):
+        from dynpy.utilities.creators import ModuleStructure
+        lst = ModuleStructure(path).get_classes()
+
+        import importlib  
+        for element in lst:
+            m = importlib.import_module(element[0])
+            tmp = getattr(m, element[1])
+            self.table_append(tmp()) 
+    
+    def table_append(self, sys):
+            
+            import pandas as pd
+            
+            try:
+                self.df
+            except:
+                self.init_table()
+            
+            param = DynSysChecker(sys, verbosity=self.verbosity)
+            
+            new_row = {'System Name': sys.__class__.__name__, 
+                        'Init': param.check_init(),
+                        'Components': param.check_components(),
+                        'Default Data': param.check_default_data(),
+                        'Numerical Parameters': param.check_numerical_data(),
+                        'Symbols Description': param.check_symbols_description(),
+                        'Units': param.check_unit_dict(),
+                        'Equation': param.check_equation(),   
+                        'Picture': param.check_picture(),
+                        'Result': []}
+            if False in new_row.values():
+                res = False
+            else:
+                res = True
+            self.df = pd.concat([self.df, pd.DataFrame([new_row])], ignore_index=True)
+            self.df.loc[self.df.index[-1], 'Result'] = res
+            
+   
+    def table_loop(self, sys):
+        for element in sys:
+            self.table_append(element)
+    
+    def get_table(self):
+        if self.verbosity is False:
+            return self.df.replace({1.0: True, 0.0: False})
+        return self.df
