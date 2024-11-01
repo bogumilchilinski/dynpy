@@ -1463,3 +1463,70 @@ class MSMethodOverviewReport(UsageOfDynamicSystemsGuide):
         eps=sys.eps
         nonlin_ode = MultiTimeScaleSolution(z.diff(t,2)+z*(1+delta*eps+eps*sin(t)), z, ivar=ivar, omega=S.One, order=3,eps=eps)
         return nonlin_ode
+    
+class MDPIPaper(Document):
+    
+    latex_name = 'document'
+    packages = []
+    title = 'abc'
+
+    def __init__(self,
+                 default_filepath='default_filepath',
+                 title=None,
+                 *,
+                 documentclass=None,
+                 journal=None,
+                 document_options=None, # for submission
+                 fontenc=None,
+                 inputenc='utf8',
+                 font_size='normalsize',
+                 lmodern=False,
+                 textcomp=False,
+                 microtype=False,
+                 page_numbers=True,
+                 indent=None,
+                 geometry_options=['inner=30mm', 'outer=20mm', 'bindingoffset=10mm', 'top=25mm', 'bottom=25mm'],#,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
+                 data=None):
+
+
+        if document_options is None:
+            document_options=[journal, 'article','submit','pdftex','moreauthors']
+
+        super().__init__(
+            default_filepath=default_filepath,
+            documentclass=['Definitions/mdpi'],
+            document_options=document_options,
+            fontenc=fontenc,
+            inputenc=inputenc,
+            font_size=font_size,
+            lmodern=lmodern,
+            textcomp=textcomp,
+            microtype=microtype,
+            page_numbers=page_numbers,
+            indent=indent,
+            geometry_options=geometry_options,
+            data=data,
+        )
+        
+
+
+        
+        self.preamble.append(NoEscape('%%%% EDITORS SECTION'))
+        self.preamble.append(NoEscape('\\vol{XX} \\no{Y} \\year{2024}'))
+        self.preamble.append(NoEscape('\\setcounter{page}{1}'))
+        self.preamble.append(NoEscape('\\doi{10.24425/bpasts.yyyy.xxxxxx}'))
+        self.preamble.append(NoEscape('%%%%%%%%%%%%%%%%%%%%'))
+        self.append(Command('maketitle'))
+        #self.append(NewPage())
+        # tu implementować co tam potrzeba
+        
+        cwd=os.getcwd()
+        
+        source_path=f'/home/user/Shared files/modules/dynpy/utilities/documents/Definitions'
+        path1=f'{cwd}/Definitions'
+        path2=f'{cwd}/output/Definitions'
+        
+        if os.path.exists(path1)==False:
+            shutil.copytree(source_path, path1)
+        if os.path.exists(path2)==False:
+            shutil.copytree(source_path, path2)
