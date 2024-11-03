@@ -827,9 +827,9 @@ Examplary setup is as follows:
     thesis_name = './output/report_name' #path for report file 
 
     # Bibliography of quotations
-doc.preamble.append(NoEscape(r'\\usepackage[backend=bibtex, sorting=none]{biblatex}'))
-doc.preamble.append(NoEscape(r'\addbibresource{elementy_bibliagrafia.bib}'))
-doc = WutThesis(thesis_name)
+    doc.preamble.append(NoEscape(r'\\usepackage[backend=bibtex, sorting=none]{biblatex}'))
+    doc.preamble.append(NoEscape(r'\addbibresource{elementy_bibliagrafia.bib}'))
+    doc = WutThesis(thesis_name)
     doc.append(sec_intro) # adding certain sections
     doc.append(sub_problem_outline)
     doc.append(sub_obj_assum)

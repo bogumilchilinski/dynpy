@@ -1715,7 +1715,7 @@ class VariableMassTrolleyWithPendulumRayleighDamping(ComposedSystem):
 
 
 #Amadi
-#klasa zastępuje MDoFTMD
+#klasa zastępuje MDoFTMD 
 class TrolleyWithTMD(ComposedSystem):
     scheme_name = 'MDoF_new.png'
     real_name = 'mdof_tmd_real.png'
@@ -1806,6 +1806,24 @@ class TrolleyWithTMD(ComposedSystem):
             self.k: [no for no in range(50, 100)],
         }
         return default_data_dict
+    
+    def unit_dict(self):
+        units_dict = {
+            self.m: ureg.kilogram,                    # Mass of the trolley
+            self.m_TMD: ureg.kilogram,                # Mass of TMD
+            self.k: ureg.newton / ureg.meter,         # Stiffness of the spring for trolley
+            self.k_TMD: ureg.newton / ureg.meter,     # Stiffness of the TMD spring
+            self.F: ureg.newton,                      # Force applied to the system
+            self.Omega: ureg.radian / ureg.second,    # Frequency of excitation
+            self.x: ureg.meter,                       # Displacement of the trolley
+            self.x.diff(self.ivar): ureg.meter / ureg.second,  # Velocity of the trolley
+            self.x.diff(self.ivar, 2): ureg.meter / ureg.second**2,  # Acceleration of the trolley
+            self.x_e: ureg.meter,                     # Displacement of the TMD relative to trolley
+            self.x_e.diff(self.ivar): ureg.meter / ureg.second,  # Velocity of the TMD relative to trolley
+            self.x_e.diff(self.ivar, 2): ureg.meter / ureg.second**2,  # Acceleration of the TMD relative to trolley
+            self.ivar: ureg.second                    # Time
+        }
+        return units_dict
 
 
 

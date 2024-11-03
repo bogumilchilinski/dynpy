@@ -2764,8 +2764,50 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
 
         else:
             return False
-        
 
+    @cached_property
+    def _gen_sol_method_selector(self):
+    
+        matrix = self._fundamental_matrix
+    
+        shape = matrix.shape
+    
+        def split_matrix(shape):
+            rows = Integer(shape[0]/2)
+            cols = Integer(shape[1]/2)
+    
+    
+            top_left_minor = matrix[:rows,:cols]
+            top_right_minor = matrix[:rows,cols:]
+            bottom_right_minor = matrix[rows:,cols:]
+            bottom_left_minor = matrix[rows:,:cols]
+    
+            return top_left_minor,top_right_minor,bottom_right_minor,bottom_left_minor
+    
+        if shape == (4,4):
+    
+            top_left_minor,top_right_minor,bottom_right_minor,bottom_left_minor = split_matrix(shape)
+    
+            if top_left_minor == Matrix([[0,0],[0,0]]) and top_right_minor == Matrix([[-1,0],[0,-1]]) and bottom_right_minor == Matrix([0,0],[0,0]):
+    
+                bottom_right_minor == Matrix([0,0],[0,0])
+    
+                return self._mdof_undamped_osc_gen_sol
+    
+            else:
+                return self._as_type(FirstOrderLinearODESystem).general_solution
+    
+    
+        elif shape == (2,2):
+    
+            top_left_minor,top_right_minor,bottom_right_minor,bottom_left_minor = split_matrix(shape)
+    
+            if top_left_minor == Matrix([0]) and top_right_minor == Matrix([-1]):
+    
+                return self._sdof_osc_gen_sol
+    
+            else:
+                return self._as_type(FirstOrderLinearODESystem).general_solution
     
     
     @cached_property
@@ -2848,6 +2890,65 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     def general_solution(self):
 
         return self.as_type(FirstOrderLinearODESystem).general_solution
+
+
+    @cached_property
+    def _mdof_undamped_osc_gen_sol(self):
+    
+        '''
+        Solves the problem in the symbolic way and returns matrix of solution (in the form of equations (objects of `AnalyticalSolution` class)).
+        '''
+    
+        matrix = self._fundamental_matrix
+        shape = matrix.shape
+        rows = Integer(shape[0]/2)
+        cols = Integer(shape[1]/2)
+        bottom_left_minor = matrix[rows:,:cols]
+    
+    
+        C = numbered_symbols('C', start=1)
+    
+        C_list = []
+    
+        for i in range(len(self.dvars) * 2):
+    
+            C_list += [next(C)]
+    
+        args_list = self.dvars[0].args
+    
+        if len(self.dvars[0].args) > 1:
+    
+            params = {*args_list} - {self.ivar}
+    
+            C_list = [Function(str(C_tmp)) for C_tmp in C_list]
+            C_list = [(C_tmp)(*params) for C_tmp in C_list]
+    
+        #         print('o tu')
+        #         display(self.odes_system)
+    
+    #     self.__class__._const_list |= set(C_list)
+    
+        modes, eigs = bottom_left_minor.diagonalize()
+    
+    
+        Y_mat = Matrix(self.dvars)
+    
+        #diff_eqs = Y_mat.diff(self.ivar, 2) + eigs * Y_mat
+    
+        t_sol = self.ivar
+    
+    #     solution = [(C_list[2 * i] * modes[:, i] *
+    #                  sin(im(eigs[2 * i + 1, 2 * i + 1]).doit() * t_sol) +
+    #                  C_list[2 * i + 1] * modes[:, i] *
+    #                  cos(im(eigs[2 * i + 1, 2 * i + 1]).doit() * t_sol)) *
+    #                 exp(re(eigs[i, i]).doit() * t_sol)
+    #                 for i, coord in enumerate(self.dvars)]
+        
+    #     sum_sol = sum(solution, Matrix([0] * len(Y_mat)))
+    
+        return AnalyticalSolution.from_vars_and_rhs(self.dvars,self.dvars*0 )
+    
+            
     
     def eigenfunctions(self):
         
