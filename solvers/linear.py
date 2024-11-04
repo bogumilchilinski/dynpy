@@ -2948,6 +2948,61 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     
         return AnalyticalSolution.from_vars_and_rhs(self.dvars,self.dvars*0 )
     
+    @cached_property
+    def _sdof_osc_gen_sol(self):
+    
+    
+        matrix = self._fundamental_matrix
+    
+        shape = matrix.shape
+    
+        def split_matrix(shape):
+            rows = Integer(shape[0]/2)
+            cols = Integer(shape[1]/2)
+    
+    
+            top_left_minor = matrix[:rows,:cols]
+            top_right_minor = matrix[:rows,cols:]
+            bottom_right_minor = matrix[rows:,cols:]
+            bottom_left_minor = matrix[rows:,:cols]
+    
+            return top_left_minor,top_right_minor,bottom_right_minor,bottom_left_minor
+    
+        C = numbered_symbols('C', start=1)
+    
+        C_list = []
+    
+        for i in range(len(self.dvars) * 2):
+    
+            C_list += [next(C)]
+    
+        args_list = self.dvars[0].args
+    
+        if len(self.dvars[0].args) > 1:
+    
+            params = {*args_list} - {self.ivar}
+    
+            C_list = [Function(str(C_tmp)) for C_tmp in C_list]
+            C_list = [(C_tmp)(*params) for C_tmp in C_list]
+    
+    
+    #     self.__class__._const_list |= set(C_list)
+    
+        top_left_minor,top_right_minor,bottom_right_minor,bottom_left_minor = split_matrix(shape)
+    
+    
+        h = bottom_right_minor[0]
+        omg_h = sqrt(bottom_left_minor[0]**2-(h/2)**2)
+    
+    
+        solution_position = [exp(-h * self.ivar)*(C_list[i] * sin(omg_h * self.ivar) + C_list[i+1] * cos(omg_h * self.ivar)) for i in range(1)]
+        solution_velocity = [-h * exp(-h * self.ivar)*(C_list[i] * sin(omg_h * self.ivar) + C_list[i+1] * cos(omg_h * self.ivar)) + exp(-h * self.ivar)*(C_list[i] * omg_h * cos(omg_h * self.ivar) - C_list[i+1] * omg_h * sin(omg_h * self.ivar)) for i in range(1)]
+    
+    
+        solution = solution_position+solution_velocity
+    
+        return AnalyticalSolution.from_vars_and_rhs(self.dvars, solution)
+    
             
     
     def eigenfunctions(self):
