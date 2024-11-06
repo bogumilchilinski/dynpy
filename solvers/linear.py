@@ -2714,7 +2714,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
 
 
         return self._auxiliary_fundamental_matrix.diagonalize()[1]
-  
+
     @cached_property
     def modes(self):
         '''
@@ -2808,17 +2808,10 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     
             else:
                 return self._as_type(FirstOrderLinearODESystem).general_solution
-    
-    
-    @cached_property
-    def _general_solution(self):
 
-        '''
-        Solves the problem in the symbolic way and returns matrix of solution (in the form of equations (objects of Eq class)).
-        '''
-        
-        
-        
+    @cached_property
+    def _integration_cost_list(self):
+            
         C = numbered_symbols('C', start=1)
         C_list = []
 
@@ -2832,64 +2825,120 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
             params = {*args_list} - {self.ivar}
 
             C_list = [Function(str(C_tmp)) for C_tmp in C_list]
-            C_list = [(C_tmp)(*params) for C_tmp in C_list]
-                
-                
+            C_list = [(C_tmp)(*params) for C_tmp in C_list] 
         
-        fund_det=self._fundamental_matrix.det()
+        return C_list
+    
+    # old implementation
+    
+    # @cached_property
+    # def _general_solution(self):
+
+    #     '''
+    #     Solves the problem in the symbolic way and returns matrix of solution (in the form of equations (objects of Eq class)).
+    #     '''
+
+                
+    #     C_list =  self._integration_cost_list
+        
+    #     fund_det=self._fundamental_matrix.det()
 
         
-        if fund_det!=0:
+    #     if fund_det!=0:
 
 
-            #         print('o tu')
-            #         display(self.odes_system)
+    #         #         print('o tu')
+    #         #         display(self.odes_system)
 
-            #self.__class__._const_list |= set(C_list)
-            damping = self._is_proportional_damping
-            if damping is not False:
-                #print('rayleight damping')
-                modes = self._combined_modes
+    #         #self.__class__._const_list |= set(C_list)
+    #         damping = self._is_proportional_damping
+    #         if damping is not False:
+    #             #print('rayleight damping')
+    #             modes = self._combined_modes
 
+    #         else:
+    #             #print('rayleight damping zero')
+    #             modes = self.modes
+
+
+
+
+    #         Y_mat = Matrix(self.dvars)
+
+            
+            
+            
+    #         #display(self.eigenfunctions())
+    #         solution = self._combined_modes*Matrix([C_list[no]*self.eigenfunctions()[no] for   no   in range(len(self.dvars))]  )#.applyfunc(lambda elem: elem.rewrite(sin))
+            
+    #         if damping is not False:
+    #             sl=int(N((len(self.dvars))/2))
+    #             solution[sl:,:] = solution[:sl,:].diff(self.ivar)
+            
+            
+            
+    #     else:
+            
+    #         A = self._fundamental_matrix
+    #         solution = (matrix_exp(A, self.ivar)*Matrix( C_list  ))
+
+    #     ode_sol = ODESolution.from_vars_and_rhs(self.dvars,solution)
+    #     ode_sol.ivar=self.ivar
+    #     self._const_list = C_list
+    #     ode_sol.append_integration_consts(C_list)    
+        
+        
+    #     return ode_sol
+
+    @cached_property
+    def _general_solution(self):
+        matrix = self._fundamental_matrix
+    
+        shape = matrix.shape
+    
+        def split_matrix(shape):
+            rows = Integer(shape[0]/2)
+            cols = Integer(shape[1]/2)
+    
+    
+            top_left_minor = matrix[:rows,:cols]
+            top_right_minor = matrix[:rows,cols:]
+            bottom_right_minor = matrix[rows:,cols:]
+            bottom_left_minor = matrix[rows:,:cols]
+    
+            return top_left_minor,top_right_minor,bottom_right_minor,bottom_left_minor
+    
+        if shape == (4,4):
+    
+            top_left_minor,top_right_minor,bottom_right_minor,bottom_left_minor = split_matrix(shape)
+    
+            if top_left_minor == Matrix([[0,0],[0,0]]) and top_right_minor == Matrix([[-1,0],[0,-1]]) and bottom_right_minor == Matrix([0,0],[0,0]):
+    
+                bottom_right_minor == Matrix([0,0],[0,0])
+    
+                return self._mdof_undamped_osc_gen_sol
+    
             else:
-                #print('rayleight damping zero')
-                modes = self.modes
-
-
-
-
-            Y_mat = Matrix(self.dvars)
-
-            
-            
-            
-            #display(self.eigenfunctions())
-            solution = self._combined_modes*Matrix([C_list[no]*self.eigenfunctions()[no] for   no   in range(len(self.dvars))]  )#.applyfunc(lambda elem: elem.rewrite(sin))
-            
-            if damping is not False:
-                sl=int(N((len(self.dvars))/2))
-                solution[sl:,:] = solution[:sl,:].diff(self.ivar)
-            
-            
-            
-        else:
-            
-            A = self._fundamental_matrix
-            solution = (matrix_exp(A, self.ivar)*Matrix( C_list  ))
-
-        ode_sol = ODESolution.from_vars_and_rhs(self.dvars,solution)
-        ode_sol.ivar=self.ivar
-        self._const_list = C_list
-        ode_sol.append_integration_consts(C_list)    
-        
-        
-        return ode_sol
+                return self.as_type(FirstOrderLinearODESystem).general_solution
+    
+    
+        elif shape == (2,2):
+    
+            top_left_minor,top_right_minor,bottom_right_minor,bottom_left_minor = split_matrix(shape)
+    
+            if top_left_minor == Matrix([0]) and top_right_minor == Matrix([-1]):
+    
+                return self._sdof_osc_gen_sol
+    
+            else:
+                return self.as_type(FirstOrderLinearODESystem).general_solution
     
     
     @cached_property
     def general_solution(self):
 
-        return self.as_type(FirstOrderLinearODESystem).general_solution
+        #return self.as_type(FirstOrderLinearODESystem).general_solution
+        return self._general_solution
 
 
     @cached_property
@@ -2906,23 +2955,25 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         bottom_left_minor = matrix[rows:,:cols]
     
     
-        C = numbered_symbols('C', start=1)
+        # C = numbered_symbols('C', start=1)
     
-        C_list = []
+        # C_list = []
     
-        for i in range(len(self.dvars) * 2):
+        # for i in range(len(self.dvars) * 2):
     
-            C_list += [next(C)]
+        #     C_list += [next(C)]
     
-        args_list = self.dvars[0].args
+        # args_list = self.dvars[0].args
     
-        if len(self.dvars[0].args) > 1:
+        # if len(self.dvars[0].args) > 1:
     
-            params = {*args_list} - {self.ivar}
+        #     params = {*args_list} - {self.ivar}
     
-            C_list = [Function(str(C_tmp)) for C_tmp in C_list]
-            C_list = [(C_tmp)(*params) for C_tmp in C_list]
-    
+        #     C_list = [Function(str(C_tmp)) for C_tmp in C_list]
+        #     C_list = [(C_tmp)(*params) for C_tmp in C_list]
+            
+            
+        C_list =  self._integration_cost_list
         #         print('o tu')
         #         display(self.odes_system)
     
@@ -2937,16 +2988,18 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     
         t_sol = self.ivar
     
-    #     solution = [(C_list[2 * i] * modes[:, i] *
-    #                  sin(im(eigs[2 * i + 1, 2 * i + 1]).doit() * t_sol) +
-    #                  C_list[2 * i + 1] * modes[:, i] *
-    #                  cos(im(eigs[2 * i + 1, 2 * i + 1]).doit() * t_sol)) *
-    #                 exp(re(eigs[i, i]).doit() * t_sol)
-    #                 for i, coord in enumerate(self.dvars)]
+        solution = [(C_list[2 * i] * modes[:, i] *
+                     sin(im(eigs[2 * i + 1, 2 * i + 1]).doit() * t_sol) +
+                     C_list[2 * i + 1] * modes[:, i] *
+                     cos(im(eigs[2 * i + 1, 2 * i + 1]).doit() * t_sol)) *
+                    exp(re(eigs[i, i]).doit() * t_sol)
+                    for i, coord in enumerate(Integer(self.dvars/2))]
         
-    #     sum_sol = sum(solution, Matrix([0] * len(Y_mat)))
+        solution_diff =  [ diff(elem,self.ivar)  for elem in solution]
+        
+        sum_sol = sum(Matrix(solution+solution_diff), Matrix([0] * len(Y_mat)))
     
-        return AnalyticalSolution.from_vars_and_rhs(self.dvars,self.dvars*0 )
+        return ODESolution.from_vars_and_rhs(self.dvars,sum_sol )
     
     @cached_property
     def _sdof_osc_gen_sol(self):
@@ -2968,23 +3021,24 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     
             return top_left_minor,top_right_minor,bottom_right_minor,bottom_left_minor
     
-        C = numbered_symbols('C', start=1)
+        # C = numbered_symbols('C', start=1)
     
-        C_list = []
+        # C_list = []
     
-        for i in range(len(self.dvars) * 2):
+        # for i in range(len(self.dvars) * 2):
     
-            C_list += [next(C)]
+        #     C_list += [next(C)]
     
-        args_list = self.dvars[0].args
+        # args_list = self.dvars[0].args
     
-        if len(self.dvars[0].args) > 1:
+        # if len(self.dvars[0].args) > 1:
     
-            params = {*args_list} - {self.ivar}
+        #     params = {*args_list} - {self.ivar}
     
-            C_list = [Function(str(C_tmp)) for C_tmp in C_list]
-            C_list = [(C_tmp)(*params) for C_tmp in C_list]
-    
+        #     C_list = [Function(str(C_tmp)) for C_tmp in C_list]
+        #     C_list = [(C_tmp)(*params) for C_tmp in C_list]
+        
+        C_list =  self._integration_cost_list
     
     #     self.__class__._const_list |= set(C_list)
     
@@ -2992,7 +3046,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     
     
         h = bottom_right_minor[0]
-        omg_h = sqrt(bottom_left_minor[0]**2-(h/2)**2)
+        omg_h = sqrt(bottom_left_minor[0]-(h/2)**2)
     
     
         solution_position = [exp(-h * self.ivar)*(C_list[i] * sin(omg_h * self.ivar) + C_list[i+1] * cos(omg_h * self.ivar)) for i in range(1)]
@@ -3001,7 +3055,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     
         solution = solution_position+solution_velocity
     
-        return AnalyticalSolution.from_vars_and_rhs(self.dvars, solution)
+        return ODESolution.from_vars_and_rhs(self.dvars, solution)
     
             
     
@@ -3072,9 +3126,10 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         
         damping = self._is_proportional_damping
         #print('damping = ',damping)
-        
+        #damping = False 
+                      
         if damping is not False:
-            
+         
             
             sl=int(N((len(self.dvars))/2))
             #print('rayleight damping - new code stedy')
@@ -3113,8 +3168,8 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
             b = amp
 
 
-            sin_comp = -(A.inv() * omega**2 + A).inv()*b
-            cos_comp = +omega*A.inv() * sin_comp
+            sin_comp = (A.inv() * omega**2 + A).inv()*b
+            cos_comp = -omega*A.inv() * sin_comp
             
         return (cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar) ) 
     
@@ -3134,6 +3189,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         
         damping = self._is_proportional_damping
         #print('damping = ',damping)
+        #damping = False
         
         if damping is not False:
 
@@ -3172,9 +3228,9 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
             A = self._fundamental_matrix
             b = amp
 
-            cos_comp = -(A.inv() * omega**2 + A).inv()*b
-            sin_comp = -omega*A.inv() * cos_comp
-          
+            cos_comp = (A.inv() * omega**2 + A).inv()*b
+            sin_comp = +omega*A.inv() * cos_comp
+
         return cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar)  
 
     
@@ -3202,6 +3258,8 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     def _exp_sin_comp(self,omega,amp,a):
 
         damping = self._is_proportional_damping
+
+        
         if damping is not False:
     
             sl=int(N((len(self.dvars))/2))
@@ -3337,7 +3395,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 coeff_of_comp = terms.applyfunc(lambda row: row.coeff(comp))
                 components += [(comp,coeff_of_comp)]
                 terms  = terms -  coeff_of_comp*comp
-  
+
         base_comps_fun = terms.atoms(Function)
 
         #display(terms)
