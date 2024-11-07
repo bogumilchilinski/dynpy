@@ -1454,7 +1454,7 @@ class MSMethodOverviewReport(UsageOfDynamicSystemsGuide):
     @property
     def default_reported_object(self):
         from sympy import Symbol, sin, S
-        from dynpy.solvers.nonlinear import MultiTimeScaleSolution
+        from dynpy.solvers.perturbational import MultiTimeScaleSolution
         from dynpy.models.mechanics.gears import EquivalentSDOFGearModel
         sys = EquivalentSDOFGearModel()
         t=ivar=Symbol('t')
