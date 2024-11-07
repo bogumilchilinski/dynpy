@@ -338,7 +338,7 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
         zeroth_ord_eq = Symbol('Omega')#system.nth_eoms_approximation(0)
         eps = Symbol('\\varepsilon')
 
-        return "The ordering and separation of equation {AutoMarker(system.odes[0])} in terms of the power of a small parameter {eps} leads to obtaining a recursive sequence of linear equations of motion leading to the solution of the nonlinear equation. The zeroth-order approximate linear equation is given in {AutoMarker(zeroth_ord_eq)} where the dependency {approx_fun} was assumed for the zeroth-order solution of the time variable:"
+        return f"The ordering and separation of equation ${AutoMarker(base_system.odes[0])}$ in terms of the power of a small parameter {eps} leads to obtaining a recursive sequence of linear equations of motion leading to the solution of the nonlinear equation. The zeroth-order approximate linear equation is given in ${AutoMarker(zeroth_ord_eq)}$ where the dependency was assumed for the zeroth-order solution of the time variable:"
     
     @property
     def middle_text(self):
@@ -504,11 +504,41 @@ class PredictedSolutionComponent(ReportComponent):
             
             
             display(ReportText(  f'Order of prediction: {ord}'    ))
-            display(SympyFormula(system.predicted_solution(ord)))
             display(SympyFormula(Eq(system.dvars[0],system.predicted_solution(ord).rhs[0],evaluate=False)))
 
 #         display(ReportText(  self.footer_text   ))
 
+
+class RawPredictedSolutionComponent(ReportComponent):
+    
+    title="Predicted solution equation in ODE System form"
+    
+    
+    @property
+    def header_text(self):
+
+        return f"Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the consecutive approximations (depending on the accuracy assumed) have the following form:"
+
+    @property
+    def footer_text(self):
+
+        return "Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of {t_list[1]}. Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the zeroth-order approximation {approx_fun} has the following form:"
+
+    def append_elements(self):
+
+        system = self.reported_object
+
+#         t_list = system.t_list
+        
+        display(ReportText(  self.header_text   ))
+
+        
+
+        for ord in range(system.order+1):
+            
+            
+            display(ReportText(  f'Order of prediction: {ord}'    ))
+            display(SympyFormula(system.predicted_solution(ord)))
 
 class DetailsOfPredictedSolutionComponent(ReportComponent):
     
@@ -543,8 +573,8 @@ class DetailsOfPredictedSolutionComponent(ReportComponent):
             
             display(ReportText(  f'Order of prediction: {ord}'    ))
             
-            display(SympyFormula(system.predicted_solution_without_scales(ord)))
-            display(SympyFormula(system.predicted_solution(ord)))
+#             display(SympyFormula(system.predicted_solution_without_scales(ord)))
+#             display(SympyFormula(system.predicted_solution(ord)))
             
             
             display(SympyFormula(Eq(system.dvars[0],system.predicted_solution_without_scales(ord).rhs[0],evaluate=False)))
@@ -2052,6 +2082,32 @@ class RootsAnalysisComponent(ReportComponent):
 class SolutionComparisonComponent(ReportComponent):
 
     title="Multiple time scale solution and ODESystem solution"
+
+    def append_elements(self):
+
+        from dynpy.solvers.linear import FirstOrderLinearODESystem,FirstOrderLinearODESystemWithHarmonics, ODESystem
+        from dynpy.solvers.nonlinear import MultiTimeScaleSolution
+
+        system = self.reported_object
+        #if type(system) == ODESystem:
+        display(SympyFormula(Eq(system.as_type(FirstOrderLinearODESystem).solution.lhs[0],system.as_type(FirstOrderLinearODESystem).solution.rhs[0])))
+        display(SympyFormula(Eq(system.as_type(FirstOrderLinearODESystem).solution.lhs[1],system.as_type(FirstOrderLinearODESystem).solution.rhs[1])))
+
+        display(ReportText("as_type method used:"))
+        display(SympyFormula(Eq(system.as_type(FirstOrderLinearODESystem).solution.lhs[0],system.as_type(FirstOrderLinearODESystem).solution.rhs[0])))
+        display(SympyFormula(Eq(system.as_type(FirstOrderLinearODESystem).solution.lhs[1],system.as_type(FirstOrderLinearODESystem).solution.rhs[1])))
+            
+        #elif type(system) == MultiTimeScaleSolution:
+        display(ReportText("Multiple time scales solution is following:"))
+        display(SympyFormula(Eq(system.as_type(FirstOrderLinearODESystemWithHarmonics).solution.lhs[0],system.as_type(FirstOrderLinearODESystemWithHarmonics).solution.rhs[0])))
+        display(SympyFormula(Eq(system.as_type(FirstOrderLinearODESystemWithHarmonics).solution.lhs[1],system.as_type(FirstOrderLinearODESystemWithHarmonics).solution.rhs[1])))
+
+       # else:
+#       display(ReportText("Given system is neither ODESystem nor MultiTimeScaleSolution"))
+
+class RawSolutionComparisonComponent(ReportComponent):
+
+    title="Multiple time scale solution and ODESystem solution with ODESystem output"
 
     def append_elements(self):
 
