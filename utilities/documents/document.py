@@ -852,6 +852,311 @@ Examplary setup is as follows:
         return ObjectCode(preliminary_str)
 
 
+class ResearchProjectReport(WutThesis):
+
+    @classmethod
+    def base_setup(cls):
+
+        
+        preliminary_str=(
+"""
+
+Examplary setup is as follows:
+
+## CELL 1
+## Imports
+
+
+    #Create file output
+    #Create file Images
+    
+    #In file output create bibliography as .bib file (dynpy123)
+
+    from dynpy.utilities.report import *
+    from dynpy.utilities.templates.document import ResearchProjectReport
+
+    doc = ResearchProjectReport('./output/thesis_name')
+    
+
+
+## CELL 2
+## Thesis introduction
+    
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_intro = Section('Section that presents text reporting')
+    CurrentContainer(sec_intro)
+    
+    sub_problem_outline = Subsection('Outline of the problem')
+    CurrentContainer(sub_problem_outline)
+    display(ReportText('This subsection provides information about investigated problem. '*100))
+    
+    sub_obj_assum = Subsection('Objectives and assumptions')
+    CurrentContainer(sub_obj_assum)
+    display(ReportText('This subsection provides objectives and assumptions. '*100))
+    
+    sub_SOT = Subsection('State of the art')
+    CurrentContainer(sub_SOT)
+    display(ReportText('This subsection provides state of the art. '*100))
+    
+    sub_methodology = Subsection('Methodology')
+    CurrentContainer(sub_methodology)
+    display(ReportText('This subsection provides methodology. '*100))
+    
+    
+    
+## CELL 3
+## Math 
+
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+    from sympy import Eq, Symbol, symbols
+    
+    sec_formula = Section('Section that presents formulas reporting')
+    CurrentContainer(sec_formula)
+    
+    display(ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.'))
+    
+    a,b = symbols('a b')
+    display(SympyFormula(Eq(a,b)))
+
+
+## CELL 4
+## Picture
+    
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_picture = Section('Section that presents pictures reporting')
+    CurrentContainer(sec_picture)
+
+    display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))
+
+
+
+
+## CELL 5
+## Simulation
+ 
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_simulation = Section('Section that contains simulation')
+    CurrentContainer(sec_simulation)
+    
+     display(ReportText('Simulation '*200))
+    
+## CELL 6
+## Veryfication
+ 
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_verification = Section('Section that verificates research results')
+    CurrentContainer(sec_verification)
+    
+     display(ReportText('Verifications '*200))
+    
+## CELL 7
+## Conclusion
+ 
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_conclusion = Section('Section that contains final conclusions')
+    CurrentContainer(sec_conclusion)
+    
+    display(ReportText('Conclusions '*200))
+
+## CELL 8
+## Document
+
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+    # Creating file
+    # Be sure *output* folder is in the current directory
+
+    thesis_name = './output/report_name' #path for report file 
+
+    doc = ResearchProjectReport(thesis_name)
+    # Bibliography of quotations
+    doc.preamble.append(NoEscape(r'\\usepackage[backend=bibtex, sorting=none]{biblatex}'))
+    doc.preamble.append(NoEscape(r'\addbibresource{elementy_bibliagrafia.bib}'))
+    doc.append(sec_intro) # adding certain sections
+    doc.append(sub_problem_outline)
+    doc.append(sub_obj_assum)
+    doc.append(sub_SOT)
+    doc.append(sub_methodology)
+    doc.append(sec_formula)
+    doc.append(sec_picture)
+    doc.append(sec_simulation)
+    doc.append(sec_verification)
+    doc.append(sec_conclusion)
+    # Generating file
+    doc.generate_pdf(clean_tex=True)
+    
+    
+    
+    
+
+"""
+        )
+
+        display(IPMarkdown(preliminary_str))    
+
+
+        preliminary_str=(
+"""
+
+Examplary setup is as follows:
+
+## CELL 1
+## Imports
+
+
+
+    #Create file output
+    #In file output create bibliography as .bib file
+
+    from dynpy.utilities.report import *
+    from dynpy.utilities.templates.document import ResearchProjectReport
+
+    doc = ResearchProjectReport('./output/thesis_name')
+    
+
+## CELL 2
+## Thesis introduction
+    
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_intro = Section('Section that presents text reporting')
+    CurrentContainer(sec_intro)
+    
+    sub_problem_outline = Subsection('Outline of the problem')
+    CurrentContainer(sub_problem_outline)
+    display(ReportText('This subsection provides information about investigated problem. '*100))
+    
+    sub_obj_assum = Subsection('Objectives and assumptions')
+    CurrentContainer(sub_obj_assum)
+    display(ReportText('This subsection provides objectives and assumptions. '*100))
+    
+    sub_SOT = Subsection('State of the art')
+    CurrentContainer(sub_SOT)
+    display(ReportText('This subsection provides state of the art. '*100))
+    
+    sub_methodology = Subsection('Methodology')
+    CurrentContainer(sub_methodology)
+    display(ReportText('This subsection provides methodology. '*100))
+    
+    
+    
+## CELL 3
+## Math 
+
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+    from sympy import Eq, Symbol, symbols
+    
+    sec_formula = Section('Section that presents formulas reporting')
+    CurrentContainer(sec_formula)
+    
+    display(ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.'))
+    
+    a,b = symbols('a b')
+    display(SympyFormula(Eq(a,b)))
+
+
+## CELL 4
+## Picture
+    
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_picture = Section('Section that presents pictures reporting')
+    CurrentContainer(sec_picture)
+
+    display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))
+
+
+
+## CELL 5
+## Simulation
+ 
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_simulation = Section('Section that contains simulation')
+    CurrentContainer(sec_simulation)
+    
+     display(ReportText('Simulation '*200))
+    
+## CELL 6
+## Veryfication
+ 
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_verification = Section('Section that verificates research results')
+    CurrentContainer(sec_verification)
+    
+     display(ReportText('Verifications '*200))
+    
+## CELL 7
+## Conclusion
+ 
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_conclusion = Section('Section that contains final conclusions')
+    CurrentContainer(sec_conclusion)
+    
+    display(ReportText('Conclusions '*200))
+
+    
+    
+
+## CELL 8
+## Document
+
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+    # Creating file
+    # Be sure *output* folder is in the current directory
+
+    thesis_name = './output/report_name' #path for report file 
+
+    # Bibliography of quotations
+    doc.preamble.append(NoEscape(r'\\usepackage[backend=bibtex, sorting=none]{biblatex}'))
+    doc.preamble.append(NoEscape(r'\addbibresource{elementy_bibliagrafia.bib}'))
+    doc = ResearchProjectReport(thesis_name)
+    doc.append(sec_intro) # adding certain sections
+    doc.append(sub_problem_outline)
+    doc.append(sub_obj_assum)
+    doc.append(sub_SOT)
+    doc.append(sub_methodology)
+    doc.append(sec_formula)
+    doc.append(sec_picture)
+    doc.append(sec_simulation)
+    doc.append(sec_verification)
+    doc.append(sec_conclusion)
+    doc.append(NoEscape(r'\printbibliography[title={Bibliografia}]'))
+    # Generating file
+    doc.generate_pdf(clean_tex=True)
+    
+    
+    
+    
+
+""")
+        return ObjectCode(preliminary_str)
+    
+    
         
         
 class ThesisTemplate(WutThesis):
