@@ -1773,7 +1773,6 @@ class MDPIPaper(Document):
     
     latex_name = 'document'
     packages = []
-    title = 'abc'
 
     def __init__(self,
                  default_filepath='default_filepath',
@@ -1790,7 +1789,7 @@ class MDPIPaper(Document):
                  microtype=False,
                  page_numbers=True,
                  indent=None,
-                 geometry_options=['inner=30mm', 'outer=20mm', 'bindingoffset=10mm', 'top=25mm', 'bottom=25mm'],#,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
+                 geometry_options=None,#,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
                  data=None):
 
 
@@ -1815,13 +1814,24 @@ class MDPIPaper(Document):
         
 
 
-        
-        self.preamble.append(NoEscape('%%%% EDITORS SECTION'))
-        self.preamble.append(NoEscape('\\vol{XX} \\no{Y} \\year{2024}'))
-        self.preamble.append(NoEscape('\\setcounter{page}{1}'))
-        self.preamble.append(NoEscape('\\doi{10.24425/bpasts.yyyy.xxxxxx}'))
-        self.preamble.append(NoEscape('%%%%%%%%%%%%%%%%%%%%'))
-        self.append(Command('maketitle'))
+        self.preamble.append(Command('firstpage','1'))
+        self.preamble.append(Command('makeatletter'))
+        self.preamble.append(NoEscape('\\setcounter{page}{\@firstpage}'))
+        self.preamble.append(Command('makeatother'))
+        self.preamble.append(Command('pubvolume','1'))
+        self.preamble.append(Command('issuenum','1'))
+        self.preamble.append(Command('articlenumber','0'))
+        self.preamble.append(Command('pubyear','2024'))
+        self.preamble.append(Command('copyrightyear','2024'))
+        self.preamble.append(Command('datereceived',' '))
+        self.preamble.append(Command('daterevised',' '))
+        self.preamble.append(Command('dateaccepted',' '))
+        self.preamble.append(Command('datepublished',' '))
+        self.preamble.append(Command('hreflink','https://doi.org/'))
+        self.preamble.append(Command('Title',title))
+        self.preamble.append(Command('TitleCitation',title))
+        self.preamble.append(Command('firstnote','Current address: Affiliation'))
+        self.preamble.append(Command('secondnote','These authors contributed equally to this work.'))
         #self.append(NewPage())
         # tu implementować co tam potrzeba
         
@@ -1835,3 +1845,104 @@ class MDPIPaper(Document):
             shutil.copytree(source_path, path1)
         if os.path.exists(path2)==False:
             shutil.copytree(source_path, path2)
+            
+    def authors(self,orcid_dict,corr_no=1):
+        
+        ######## should be edited further if more affiliations!
+        #for orcid_dict provide: consecutive capital latin alphabet letters : [orcid_number,firstnameandlastname]; {A:[00001,'Damian Sierociński'],B:[000002,'Bogumił Chiliński'],...}
+        #corr_no: which of the authors in provided list is the corresponding author; int; count starts from 1
+        affiliation_no=1
+        author_no=1
+        authors_no=len(orcid_dict)
+        author_string='\\Author{'
+        authornames_string='\\AuthorNames{'
+        authorcitation_string='\\AuthorCitation{'
+        self.od=orcid_dict
+        for key, val in orcid_dict.items():
+            display(key)
+            self.preamble.append(NoEscape('\\newcommand{\\orcidauthor'+key+'}{'+val[0]+'}'))
+            author_string+=val[1]+' $^{'+str(affiliation_no)+',\\dagger,\\ddagger'
+            authornames_string+=val[1]
+            if author_no == corr_no:
+                author_string+=',*'
+            author_string+='}$\\orcid'+key+'{}'
+            if author_no != authors_no and author_no!=authors_no-1:
+                author_string+=', '
+                authornames_string+=', '
+            elif author_no==authors_no-1:
+                author_string+=' and '
+                authornames_string+=' and '
+                
+            author_no+=1
+
+        self.preamble.append(NoEscape(author_string+'}'))
+        self.preamble.append(NoEscape(authornames_string+'}'))
+        self.preamble.append(NoEscape(authorcitation_string+self._citation_format()+'}'))
+        
+
+        
+        
+    def _citation_format(self):
+        display(self.od)
+        cit_string=''
+        for key,val in self.od.items():
+            firstname=val[1].split(' ')[0]
+            firstname=firstname[0]+'.'
+            lastname=val[1].split(' ')[1]
+            display(firstname)
+            display(lastname)
+            cit_string+=lastname+' '+firstname+'; '
+            
+        return cit_string[:-2]
+    def address(self):
+        ######## should be edited further if more affiliations!
+        self.preamble.append(NoEscape('\\address{$^{1}$ \\quad Department of Computer Techniques, Institute of Machine Design Fundamentals, Faculty of Automotive and Construction Machinery Engineering, Warsaw University of Technology; 84 Ludwika Narbutta Street, 02-524 Warsaw, Poland}'))
+        
+    def correspondence(self,email):
+        self.preamble.append(NoEscape('\\corres{Correspondence: '+email+'}'))
+    def abstract(self,text):
+        self.preamble.append(Command('abstract',text))
+    def keywords(self,keywords_list):
+        
+        kwl_string='\\keyword{'
+        key_num=0
+        for num,val in enumerate(keywords_list):
+            kwl_string+=val
+            if key_num != len(keywords_list)-1:
+                kwl_string+='; '
+            key_num+=1
+        self.preamble.append(NoEscape(kwl_string+'}'))
+
+
+#             \AuthorCitation{Lastname, F.; Lastname, F.; Lastname, F.}
+        
+        
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+        

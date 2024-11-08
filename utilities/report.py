@@ -69,13 +69,13 @@ plots_no_gen = plots_no()
 
 
 class CurrentContainer:
+    mdpi=False
     def __init__(self,container):
         self._container = container
         
         ReportText.set_container(self._container)
         Picture.set_container(self._container)
         SympyFormula.set_container(self._container)
-        
 
         Markdown.set_container(self._container)
         
@@ -2812,6 +2812,7 @@ class Markdown(Environment,ReportModule):
         Package('markdown'),
         Package('hyperref'),
         ]
+
     
     r"""A base class for LaTeX environments.
     This class implements the basics of a LaTeX environment. A LaTeX
@@ -2904,6 +2905,12 @@ class Markdown(Environment,ReportModule):
             vector += str(element) + ', '
         
         print(vector[:-2] + ')')
+        
+    @classmethod
+    def set_mdpi(cls):
+        cls.packages = [
+                Package('markdown'),
+                ]
         
     
 class Block(Environment,ReportModule):
