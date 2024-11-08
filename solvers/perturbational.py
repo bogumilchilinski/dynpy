@@ -573,6 +573,7 @@ class MultiTimeScaleSolution(ODESystem):
     def predicted_solution(self, order=1, dict=False, equation=False):
 
         dvars_no = len(self.vars)
+        order = self.order
 
         solution = sum(
             (self.approximation_function(comp_ord, order) * self.eps**comp_ord
@@ -615,11 +616,11 @@ class MultiTimeScaleSolution(ODESystem):
 
         return AnalyticalSolution.from_dict(sec_ord_subs)
     
-    @lru_cache
+    #@lru_cache
     def eoms_approximation(self, order=None, odes_system=None):
 
-        if order is None:
-            order = self.order
+        
+        order = self.order
         
         if not odes_system:
             odes_system = self.as_matrix()
@@ -657,7 +658,7 @@ class MultiTimeScaleSolution(ODESystem):
 
         return eoms_approximated.subs(t_fun_subs_dict).doit()
 
-    @lru_cache
+    #@lru_cache
     def eoms_approximation_list(self,
                                 max_order=3,
                                 min_order=0,
@@ -686,12 +687,12 @@ class MultiTimeScaleSolution(ODESystem):
         return approx_list
         #return [NthOrderODEsApproximation.from_ode_system(approx_ode)   for approx_ode in approx_list]
 
-    @lru_cache
+    #@lru_cache
     def eoms_approx_with_const(self, order=1):
 
         self.secular_eq = {}
 
-        approx_eoms_list = self.eoms_approximation_list(order)
+        approx_eoms_list = self.eoms_approximation_list(self.order)
 
         approx_eoms_list[0]._parameters = self._t_list[1:]
         
@@ -702,7 +703,10 @@ class MultiTimeScaleSolution(ODESystem):
         # print('spot_const')
         # display(sol._spot_constant())
         
+        #### !!!! 
         sol_list = [sol]
+        
+        
         sol_subs_list = [sol.applyfunc(lambda row: SimplifiedExpr(row,ivar=self._t_list[0],parameters=self._t_list[1:]).full_expr).doit() for sol in sol_list]
         sol_subs_dict  = {  dvar:eqn     for  sol   in sol_subs_list  for dvar, eqn in sol.as_explicit_dict().items()}
 
@@ -751,7 +755,7 @@ class MultiTimeScaleSolution(ODESystem):
             # display(approx_subs)
 
             approx_subs = NthOrderODEsApproximation.from_ode_system(approx_subs)
-            approx_subs._parameters = self._t_list[1:]
+            approx_subs._parameters = self.t_list[1:]
             
             approx_with_const += [approx_subs]
             
@@ -773,25 +777,25 @@ class MultiTimeScaleSolution(ODESystem):
             approx_subs = approx
             self.secular_eq[self.eps**(order +1)] = (approx_subs.secular_terms.as_type(FirstOrderLinearODESystem))
             
+            #nonlin_ode.eoms_approx_with_const()[0].remove_secular_terms().steady_solution.rhs
+            approx_subs = approx_subs.remove_secular_terms()#.steady_solution.rhs
+            
+            #aux_mat=approx_subs.jacobian(approx_subs.dvars)
+            # if det(aux_mat)==0:
 
-            approx_subs = approx_subs.remove_secular_terms()
-            
-            aux_mat=approx_subs.jacobian(approx_subs.dvars)
-            if det(aux_mat)==0:
+            #     SolverClass = FirstOrderLinearODESystem
+            # else:
+            #     SolverClass = FirstOrderLinearODESystemWithHarmonics
 
-                SolverClass = FirstOrderLinearODESystem
-            else:
-                SolverClass = FirstOrderLinearODESystemWithHarmonics
-
-            #SolverClass = FirstOrderLinearODESystemWithHarmonics
-            #SolverClass = FirstOrderLinearODESystem
+            # SolverClass = FirstOrderLinearODESystemWithHarmonics
+            # #SolverClass = FirstOrderLinearODESystem
             
             
-            ode_2_solve = ODESystem.from_ode_system(approx_subs)
+            ode_2_solve = approx_subs
             
-            ode_2_solve._ivar = self._t_list[0]
+            # ode_2_solve._ivar = self.t_list[0]
             
-            ode_2_solve = SolverClass.from_ode_system(ode_2_solve)
+            # ode_2_solve = SolverClass.from_ode_system(ode_2_solve)
 
             
 
@@ -854,10 +858,10 @@ class MultiTimeScaleSolution(ODESystem):
             # display(solution)
 
             sol_list += [(self.eps**order) *
-                            solution.subs({
+                            solution.rhs.subs({
                                 self.t_list[1]: self.eps  * self.ivar,
                                 self.t_list[0]: self.ivar
-                            }).rhs   ]
+                            })   ]
             
         #display(*list(SimplifiedExpr._subs_container.values()))
         result = (sum(sol_list, Matrix(2*len(self.dvars)*[0])  )).applyfunc(lambda obj: obj.expand().doit())
