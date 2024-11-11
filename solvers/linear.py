@@ -3564,13 +3564,18 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
             elif elem == S.One:
                 sol += self._cos_comp(0,coeff) + self._sin_comp(0,coeff)
             
+            
+            
             else:
-                print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-                print('element skiped - improve code')
-                print(f'called by {type(self)}')
-                print(f'elem - base of type {type(elem)}')
-                display(elem)
-                print('coeff')
+                if coeff == 0*self.dvars:
+                    pass
+                else:
+                    print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+                    print('element skiped - improve code')
+                    print(f'called by {type(self)}')
+                    print(f'elem - base of type {type(elem)}')
+                    display(elem)
+                    print('coeff')
             
         ode_sol = ODESolution.from_vars_and_rhs(self.dvars,sol)
         ode_sol.ivar=self.ivar

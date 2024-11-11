@@ -219,8 +219,13 @@ class NthOrderODEsApproximation(ODESystem):
         
         #const_to_add=[eqn for eqn in self._const_list ]
         
+        if self._parameters is None:
+            params = []
+        else:
+            params = self._parameters
+        
         secular_funcs = set() | (self.general_solution.rhs.atoms(Function) - set(
-            self._const_list) - set(self._parameters) - {self.ivar})
+            self._const_list) - set(params) - {self.ivar})
         #display(secular_funcs)
         
         return {sec_fun for sec_fun in secular_funcs if sec_fun.has(self.ivar)}
@@ -276,6 +281,24 @@ class NthOrderODEsApproximation(ODESystem):
         # subs_dict = {comp: 0 for comp in self._secular_funcs}
         
         # return obj.subs(subs_dict).doit().subs(zoo,0).doit()
+        
+        def eqns_map(obj):
+
+            oper_expr = lambda obj: (TR10(
+                TR8(TR10(TR0(obj.expand())).expand())).expand().doit().expand())
+
+            #oper_expr = lambda obj: TR8(obj).expand()
+
+            #oper_expr = lambda obj: obj.doit().expand()
+
+            if isinstance(obj, Add):
+                elems = obj.args
+                return sum(oper_expr(elem) for elem in elems)
+            else:
+                return oper_expr(obj)
+            
+
+        obj = obj.applyfunc(eqns_map)
         
         secular_expr_list = [obj.applyfunc(lambda row: row.coeff(comp)*comp).rhs  for comp in self._secular_funcs]
         secular_expr = sum(secular_expr_list,Matrix( [0]*len(obj) ))
@@ -778,7 +801,7 @@ class MultiTimeScaleSolution(ODESystem):
             self.secular_eq[self.eps**(order +1)] = (approx_subs.secular_terms.as_type(FirstOrderLinearODESystem))
             
             #nonlin_ode.eoms_approx_with_const()[0].remove_secular_terms().steady_solution.rhs
-            approx_subs = approx_subs.remove_secular_terms()#.steady_solution.rhs
+            approx_subs = approx_subs#.steady_solution.rhs
             
             #aux_mat=approx_subs.jacobian(approx_subs.dvars)
             # if det(aux_mat)==0:
@@ -790,8 +813,10 @@ class MultiTimeScaleSolution(ODESystem):
             # SolverClass = FirstOrderLinearODESystemWithHarmonics
             # #SolverClass = FirstOrderLinearODESystem
             
-            
-            ode_2_solve = approx_subs
+            if len(sol) > 0:
+                ode_2_solve = approx_subs.subs(sol_list[-1].as_explicit_dict()).remove_secular_terms()
+            else:
+                ode_2_solve = approx_subs.remove_secular_terms()
             
             # ode_2_solve._ivar = self.t_list[0]
             
