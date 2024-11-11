@@ -592,7 +592,30 @@ class MultiTimeScaleSolution(ODESystem):
     def approximation_function_without_scales(self, order, max_order=1):
 
         return self.approximation_function(order=order,max_order=max_order,ivar_list=[self.ivar])
+    
+    def part_derivative(self, order=1):
+        return Eq(self.approximation_function_without_scales(order).diff(self.ivar)[0],self.approximation_function(order).diff(self.ivar)[0])
+    
+    def part_derivative_subs(self, order=1):
+        deriv_dict = {}
 
+        for index, value in enumerate(self._scales_formula):
+            scales_lhs = self._scales_formula.lhs[index]
+            scales_rhs = self._scales_formula.rhs[index]
+
+            scales_lhs_deriv = self.first_order_subs().lhs[index]
+            scales_rhs_deriv = self.first_order_subs().rhs[index]
+
+            scales_lhs_second_deriv = self.second_order_subs().lhs[index]
+            scales_rhs_second_deriv = self.second_order_subs().lhs[index]
+
+            deriv_dict[scales_lhs] = scales_rhs
+            deriv_dict[scales_lhs_deriv] = scales_rhs_deriv
+            deriv_dict[scales_lhs_second_deriv] = scales_rhs_second_deriv
+
+        return Eq(self.approximation_function_without_scales(order).diff(self.ivar)[0],self.part_derivative(order).rhs.subs(deriv_dict).simplify().expand())
+
+    
     def predicted_solution(self, order=1, dict=False, equation=False):
 
         dvars_no = len(self.vars)

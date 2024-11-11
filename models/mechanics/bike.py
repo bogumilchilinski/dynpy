@@ -26,7 +26,7 @@ class ReducedMotorbike(ComposedSystem):
     T=Symbol('T')
 
     x=dynamicsymbols('x')
-    phi=dynamicsymbols('\phi')
+    phi=dynamicsymbols('phi')
 
     def __init__(self,
                  M=None,
@@ -86,7 +86,8 @@ class ReducedMotorbike(ComposedSystem):
         self.rear_wheel=RollingDisk(self.m_r, R=self.r, x=self.x, qs=self.qs, ivar = self.ivar)(label='Rear wheel')
         self.front_wheel=RollingDisk(self.m_f, R=self.r, x=self.x, qs=self.qs, ivar = self.ivar)(label='Front wheel')
         self.engine_moment=Force(self.T,pos1 = self.angular_displacement,qs =self.qs,ivar=self.ivar)(label='Bike engine')
-        self.drag_force=Force(-S.One/2*self.Ad*self.Cd*self.Af*(self.linear_velocity)**2,self.x,qs=self.qs,ivar=self.ivar)
+        self.drag_force=Force(-S.One/2*self.Ad*self.Cd*self.Af*(self.linear_velocity )**2,self.x,qs=self.qs,ivar=self.ivar)
+        
         components['mass_bike'] = self.mass_bike
         components['mass_driver']=self.mass_driver
         components['rear_wheel']=self.rear_wheel
@@ -190,6 +191,12 @@ class ReducedMotorbike(ComposedSystem):
 
         #return FirstOrderLinearODESystem.from_ode_system(ode)
         return ode
+
+    def atan_torque(self,k=1,steady_val=3500):
+
+        torque_expr=(k*(1/2 - (1 / 3.14) * atan((60*self.x.diff(self.ivar)/(2*pi.n()*self.r)) - steady_val)))
+
+        return self.subs(self.T,torque_expr)
 
 class MotorbikeReducedToDisk(ReducedMotorbike):
 

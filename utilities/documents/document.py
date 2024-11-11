@@ -559,6 +559,10 @@ class WutThesis(Document):
 
 Examplary setup is as follows:
 
+#References to guide imports needed to include - to see the list of available guides insert and run the code below:
+#from.dynpy.utilities.creators import list_of_guides
+#list_of_guides()
+
 ## CELL 1
 ## Imports
 
@@ -612,7 +616,58 @@ Examplary setup is as follows:
     sec_formula = Section('Section that presents formulas reporting')
     CurrentContainer(sec_formula)
     
-    display(ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.'))
+    description = Subsection('Description of dynamic model')
+    CurrentContainer(description)
+    display(ReportText('This subsection provides description of the model. '*100))
+    
+    from dynpy.models.mechanics.pendulum import Pendulum
+    dyn_sys = Pendulum()
+    dyn_sys.as_picture()
+    
+    lagrangian = Subsection('Lagrangian and derivatives')
+    CurrentContainer(lagrangian)
+    display(ReportText('This subsection provides calculation of lagrangian and derivatives. '*100))
+    
+    lagrangian = dyn_sys.L[0]
+    lagrangian
+    
+    diff1 = lagrangian.diff(dyn_sys.angle.diff(dyn_sys.ivar))
+    for eqq1 in diff1.as_eq_list():
+        display(SympyFormula(eqq1))
+    diff2 = lagrangian.diff(dyn_sys.angle.diff(dyn_sys.ivar)).diff(dyn_sys.ivar)
+    for eqq2 in diff2.as_eq_list():
+        display(SympyFormula(eqq2))
+    diff3 = lagrangian.diff(dyn_sys.qs[0])
+    for eqq3 in diff3.as_eq_list():
+        display(SympyFormula(eqq3))
+    
+    equations = Subsection('Equations of motion')
+    CurrentContainer(equations)
+    display(ReportText('This subsection provides calculation of equations of motion and solution of the system. '*100))
+    
+    ds1=dyn_sys._ode_system
+
+    for eq1 in ds1.as_eq_list():
+        display(SympyFormula(eq1.simplify()))
+        
+    ds2=dyn_sys.linearized()._ode_system.general_solution
+
+    for eq2 in ds2.as_eq_list():
+        display(SympyFormula(eq2.simplify()))
+        
+    ds3=dyn_sys.linearized()._ode_system.steady_solution
+
+    for eq3 in ds3.as_eq_list():
+        display(SympyFormula(eq3.simplify()))
+        
+    ds4=dyn_sys.linearized()._ode_system.solution
+
+    for eq4 in ds4.as_eq_list():
+        display(SympyFormula(eq4.simplify()))
+    
+    
+    
+    
     
     a,b = symbols('a b')
     display(SympyFormula(Eq(a,b)))
@@ -1751,6 +1806,7 @@ class MSMethodOverviewReport(UsageOfDynamicSystemsGuide):
             ode_comp.ODESystemCodeComponent,
             ode_comp.MSMCalculationsOrderComponent,
             ode_comp.PredictedSolutionComponent,
+            ode_comp.ParticularDerivativesComponent,
             ode_comp.ZerothOrderApproximatedEqComponent,
             ode_comp.FirstOrderApproximatedEqComponent,
         ]
