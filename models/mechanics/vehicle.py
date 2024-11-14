@@ -20,11 +20,6 @@ from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, bas
 from functools import cached_property
 
 
-
-
-        
-
-
     
 class UndampedVehicleSuspension(ComposedSystem):
 
@@ -53,7 +48,6 @@ class UndampedVehicleSuspension(ComposedSystem):
     lam0=Symbol('\lambda_0', positive=True)
     Omega0=Symbol('Omega_0', positive=True)
     F0=Symbol('F_0', positive=True)
-    
 
     def __init__(self,
                  m=None,
@@ -141,11 +135,7 @@ class UndampedVehicleSuspension(ComposedSystem):
             self.phi: r'Angular position of suspension',
             self.z: r'Linear position of suspension',}
         return {**super().symbols_description(),**self.sym_desc_dict}
-    
-    
-    
-    
-    
+
     def unit_dict(self):
 
         from pint import UnitRegistry
@@ -160,25 +150,14 @@ class UndampedVehicleSuspension(ComposedSystem):
             self.l_l: ureg.meter,
             self.l_r: ureg.meter,
             self.l_rod: ureg.meter,
+            self.Omega: ureg.radian / ureg.second,
         }
         return unit_dict
-#    def max_dynamic_force_pin(self):
-#        return self.frequency_response_function()*self.stiffness_matrix()[0]
-    
-#    def dynamic_bearing_force(self):
-       
-#       return self.max_dynamic_force_pin() * self.sqrt(L)
 
-#     def max_static_force_pin(self):
-#         return self.components['_spring_l'].subs({coord:0 for coord in self.q})
-
-    
     def max_static_force_pin(self):
 
         ans=self.static_force()
-        
         return abs(ans)
-
 
     def static_force(self):
         data=self._given_data
@@ -191,21 +170,6 @@ class UndampedVehicleSuspension(ComposedSystem):
         Re=Symbol('R_e', positive=True)
         return ((4*self.max_static_force_pin())/(pi*kt*Re))**(1/2)
 
-
-#     def max_dynamic_force_pin(self):
-#         frf=self._frf
-#         return (frf[0] + frf[1]*self.l_l)*self.k_l
-
-    
-#     def max_dynamic_force_pin(self):
-        
-#         amps = self._frf()
-#         force = self.components['_spring_l'].force().doit().expand()#.doit()
-#         data=self._given_data
-#         display(abs(self.components['_spring_l'].force()))
-#         return abs((self.components['_spring_l'].force().subs({coord:amp for amp,coord in zip(amps,self.q)})).subs(data)).doit()
-    
-    
     def dynamic_force(self):
         
         amps = self._fodes_system.steady_solution.as_dict()
@@ -244,15 +208,12 @@ class UndampedVehicleSuspension(ComposedSystem):
         kt=Symbol('k_t', positive=True)
         Re=Symbol('R_e', positive=True)
         
-        
         load = abs(self.max_dynamic_force_pin())
         
         return ((4*load)/(pi*kt*Re))**(1/2)
     
-
     def get_default_data(self):
 
-        #m0, l0, c0, k_0, l_l0, omega, F_0 = symbols('m_0 l_0 c_0 k_0 l_l0 Omega F_0', positive=True)
         c0, k_0, l_l0, omega, F_0 = symbols('c_0 k_0 l_l0 Omega F_0', positive=True)
         m0, l0  = self.m0,self.l0
         c0, k0= self.c0,self.k0

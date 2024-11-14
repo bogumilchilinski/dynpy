@@ -551,8 +551,10 @@ class WutThesis(Document):
         # tu implementować co tam potrzeba
         
     @classmethod
-    def base_setup(cls):
+    def base_setup(cls, create_file = False):
 
+        if create_file is True:
+            return cls._create_base_setup_env()
         
         preliminary_str=(
 """
@@ -906,6 +908,310 @@ Examplary setup is as follows:
 """)
         return ObjectCode(preliminary_str)
 
+    Jupyter_file_content = """{
+    "cells": [
+        {
+            "cell_type": "code",
+            "execution_count": 0,
+            "id": "d3000c",
+            "metadata": {
+                "collapsed": false
+            },
+            "outputs": [],
+            "source": [
+                "from dynpy.utilities.report import *",
+                "\\n",
+                "from dynpy.utilities.templates.document import WutThesis",
+                "\\n",
+                "",
+                "doc = WutThesis('./output/thesis_name')"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": 0,
+            "id": "c3d54b",
+            "metadata": {
+                "collapsed": false
+            },
+            "outputs": [],
+            "source": [
+                "doc.base_setup()"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": 0,
+            "id": "11531d",
+            "metadata": {
+                "collapsed": false
+            },
+            "outputs": [],
+            "source": []
+        }
+    ],
+    "metadata": {
+        "kernelspec": {
+            "argv": [
+                "/usr/bin/python3",
+                "-m",
+                "ipykernel",
+                "--HistoryManager.enabled=False",
+                "--matplotlib=inline",
+                "-c",
+                "%config InlineBackend.figure_formats = set(['retina'])import matplotlib; matplotlib.rcParams['figure.figsize'] = (12, 7)",
+                "-f",
+                "{connection_file}"
+            ],
+            "display_name": "Python 3 (system-wide)",
+            "env": {},
+            "language": "python",
+            "metadata": {
+                "cocalc": {
+                    "description": "Python 3 programming language",
+                    "priority": 100,
+                    "url": "https://www.python.org/"
+                }
+            },
+            "name": "python3",
+            "resource_dir": "/ext/jupyter/kernels/python3"
+        },
+        "language_info": {
+            "codemirror_mode": {
+                "name": "ipython",
+                "version": 3
+            },
+            "file_extension": ".py",
+            "mimetype": "text/x-python",
+            "name": "python",
+            "nbconvert_exporter": "python",
+            "pygments_lexer": "ipython3",
+            "version": "3.10.12"
+        }
+    },
+    "nbformat": 4,
+    "nbformat_minor": 4
+}"""
+    articles_bib = '''@INPROCEEDINGS{brief_history_of_simulations,
+  author={Goldsman, David and Nance, Richard E. and Wilson, James R.},
+  booktitle={Proceedings of the 2010 Winter Simulation Conference}, 
+  title={A brief history of simulation revisited}, 
+  year={2010},
+  volume={},
+  number={},
+  pages={567-574},
+  doi={10.1109/WSC.2010.5679129}
+}
+@article{eckhardt1987stan,
+  title={Stan Ulam, John von Neumann},
+  author={Eckhardt, Roger},
+  journal={Los Alamos Science},
+  volume={100},
+  number={15},
+  pages={131},
+  year={1987},
+  publisher={Los Alamos Scientific Laboratory}
+}
+@book{lutz2001programming,
+  title={Programming python},
+  author={Lutz, Mark},
+  year={2001},
+  publisher={" O'Reilly Media, Inc."}
+}
+@misc{NumPy, url={https://numpy.org/}, journal={NumPy}}
+@misc{pandas, url={https://pandas.pydata.org/}, journal={pandas}}
+@misc{RTPW,
+  author = {mgr Tomasz Duda},
+  title = {Rysunek Techniczny Podstawowe Wiadomości},
+  journal = {},
+  year = {},
+  number = {},
+  pages = {10},
+  doi = {}
+}
+'''
+    def _create_directory(path):
+        '''
+Method create directory from given path
+
+Arguments:
+path - (str), name of directory that method will create, if subdirectories shall be created, path should look like this: 'directory/subdirectory' 
+        '''
+        import os
+
+        try:
+            os.makedirs(path)
+            print(f"Directory '{path}' created")
+
+        except FileExistsError:
+            print(f"Directory '{path}' exists.")
+
+        except PermissionError:
+            print(f"Permission denied, you don't have sudo permission")
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
+        
+        
+    def _create_file(name, content = None, path = None):
+        '''
+Method create file and write content to it
+
+Arguments:
+name - (str), name of file created by method,
+content - (str), optional,  string with a content of file, that is going to be writen to it,
+path - (str), optional, directory where file should be created
+        '''
+        import os
+
+        if path is not None:
+            if not os.path.exists(path):
+                _create_directory(path)
+
+            with open(os.path.join(path, name), 'w') as file: 
+                file.write(content)
+
+        else:
+            with open(name, 'w') as file:
+                file.write(content)
+
+        file.close()
+    @classmethod    
+    def _create_base_setup_env(cls):
+        '''
+Method that create Jupyter notebook file with WUT thesis base setup and output directory with .bib file
+        '''
+        
+        Jupyter_file_content = """{
+    "cells": [
+        {
+            "cell_type": "code",
+            "execution_count": 0,
+            "id": "d3000c",
+            "metadata": {
+                "collapsed": false
+            },
+            "outputs": [],
+            "source": [
+                "from dynpy.utilities.report import *",
+                "\\n",
+                "from dynpy.utilities.templates.document import WutThesis",
+                "\\n",
+                "",
+                "doc = WutThesis('./output/thesis_name')"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": 0,
+            "id": "c3d54b",
+            "metadata": {
+                "collapsed": false
+            },
+            "outputs": [],
+            "source": [
+                "doc.base_setup()"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": 0,
+            "id": "11531d",
+            "metadata": {
+                "collapsed": false
+            },
+            "outputs": [],
+            "source": []
+        }
+    ],
+    "metadata": {
+        "kernelspec": {
+            "argv": [
+                "/usr/bin/python3",
+                "-m",
+                "ipykernel",
+                "--HistoryManager.enabled=False",
+                "--matplotlib=inline",
+                "-c",
+                "%config InlineBackend.figure_formats = set(['retina'])import matplotlib; matplotlib.rcParams['figure.figsize'] = (12, 7)",
+                "-f",
+                "{connection_file}"
+            ],
+            "display_name": "Python 3 (system-wide)",
+            "env": {},
+            "language": "python",
+            "metadata": {
+                "cocalc": {
+                    "description": "Python 3 programming language",
+                    "priority": 100,
+                    "url": "https://www.python.org/"
+                }
+            },
+            "name": "python3",
+            "resource_dir": "/ext/jupyter/kernels/python3"
+        },
+        "language_info": {
+            "codemirror_mode": {
+                "name": "ipython",
+                "version": 3
+            },
+            "file_extension": ".py",
+            "mimetype": "text/x-python",
+            "name": "python",
+            "nbconvert_exporter": "python",
+            "pygments_lexer": "ipython3",
+            "version": "3.10.12"
+        }
+    },
+    "nbformat": 4,
+    "nbformat_minor": 4
+}"""
+        articles_bib = '''@INPROCEEDINGS{brief_history_of_simulations,
+  author={Goldsman, David and Nance, Richard E. and Wilson, James R.},
+  booktitle={Proceedings of the 2010 Winter Simulation Conference}, 
+  title={A brief history of simulation revisited}, 
+  year={2010},
+  volume={},
+  number={},
+  pages={567-574},
+  doi={10.1109/WSC.2010.5679129}
+}
+@article{eckhardt1987stan,
+  title={Stan Ulam, John von Neumann},
+  author={Eckhardt, Roger},
+  journal={Los Alamos Science},
+  volume={100},
+  number={15},
+  pages={131},
+  year={1987},
+  publisher={Los Alamos Scientific Laboratory}
+}
+@book{lutz2001programming,
+  title={Programming python},
+  author={Lutz, Mark},
+  year={2001},
+  publisher={" O'Reilly Media, Inc."}
+}
+@misc{NumPy, url={https://numpy.org/}, journal={NumPy}}
+@misc{pandas, url={https://pandas.pydata.org/}, journal={pandas}}
+@misc{RTPW,
+  author = {mgr Tomasz Duda},
+  title = {Rysunek Techniczny Podstawowe Wiadomości},
+  journal = {},
+  year = {},
+  number = {},
+  pages = {10},
+  doi = {}
+}
+'''
+        cls._create_file('WUT_Thesis_starter.ipynb', Jupyter_file_content)
+
+        os.makedirs('output')
+        os.makedirs('tikzplots')
+
+        cls._create_file('articles.bib', articles_bib, 'output')
+        
+        
 
 class ResearchProjectReport(WutThesis):
 
@@ -1756,7 +2062,7 @@ class DynSysOverviewReport(UsageOfDynamicSystemsGuide):
             #reporting_comp.SimulationReportComponent,
             systems_comp.DynSysCodeComponent,
             github_comp.IssuePreparationComponent,
-            systems_comp.DynamicSystemCheckerComponent,
+            #systems_comp.DynamicSystemCheckerComponent,
 
         ]
 

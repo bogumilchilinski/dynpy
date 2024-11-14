@@ -67,20 +67,27 @@ class ReportComponent(BaseReportComponent):
 # #obsluga systemow dynamicznych
 
 
+# imports_code_str = '''
+# from sympy import *
+# import numpy as np
+# from pandas import *
+# from sympy.physics.mechanics import init_vprinting, dynamicsymbols
+# from pylatex import Document, Section, Subsection, Itemize, Package, HorizontalSpace, Description, Marker, Command 
+# from pylatex.section import Paragraph, Chapter 
+# from pylatex.utils import italic, NoEscape 
+# from dynpy.utilities.adaptable import *
+# from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase 
+# from dynpy.utilities.templates.tikz import TikzCaSCStandalone
+# from dynpy.utilities.report import (Markdown, Picture, SympyFormula, SymbolsDescription, DescriptionsRegistry, ObjectCode, CurrentContainer)
+# from dynpy.solvers.linear import ODESystem
+# init_vprinting()
+# from dynpy.models.mechanics import SDOFWinchSystem
+
+# '''
 imports_code_str = '''
 from sympy import *
 import numpy as np
-from pandas import *
-from sympy.physics.mechanics import init_vprinting, dynamicsymbols
-from pylatex import Document, Section, Subsection, Itemize, Package, HorizontalSpace, Description, Marker, Command 
-from pylatex.section import Paragraph, Chapter 
-from pylatex.utils import italic, NoEscape 
-from dynpy.utilities.adaptable import *
-from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase 
-from dynpy.utilities.templates.tikz import TikzCaSCStandalone
-from dynpy.utilities.report import (Markdown, Picture, SympyFormula, SymbolsDescription, DescriptionsRegistry, ObjectCode, CurrentContainer)
-from dynpy.solvers.linear import ODESystem
-init_vprinting()
+
 from dynpy.models.mechanics import SDOFWinchSystem
 
 '''
@@ -103,10 +110,12 @@ class DynamicSystemCallComponent(ReportComponent):
         display(GuideCode(imports_code_str.replace('SDOFWinchSystem',system_name)))
 
 
-        display(ReportText('A class that allows you to solve a specific problem (in this case, a problem related to the description of a crane):'))
+        display(ReportText('A class that allows you to solve a specific problem (in this case, a problem related to the description of a system under consideration):'))
 
         display(GuideCode("""from dynpy.models.mechanics import SDOFWinchSystem""".replace('SDOFWinchSystem',system_name)      ))
         
+        
+        display(Markdown('Przypisujemy zaimportowany obiekt klasy do zmiennej o nazwie `dyn_sys` lub `system` w celu skrócenia jej zapisu'))
         
         display(GuideCode(f'system=dyn_sys={system_name}()'  ))
 
@@ -117,7 +126,7 @@ class DynamicSystemCallComponent(ReportComponent):
         
         display(ReportText('The way to call out the preview of the class - the so-called preview:'))
 
-        display(GuideCode(f'''{system_name}().as_picture()'''  ))
+        display(GuideCode('''dyn_sys.as_picture()'''  ))
         display(system.as_picture())
         
         
@@ -135,19 +144,38 @@ class DynamicSystemMethodsUsageComponent(ReportComponent):
         #from dynpy.models.mechanics import ForcedSpringMassSystem as SDOFWinchSystem
         
         eoms=system._eoms[0]
-
-        display(ReportText('Proces wywołowania równania ruchu za pomoca metody eoms:'))
-        display(GuideCode('''eoms=SDOFWinchSystem()._eoms[0]'''.replace('SDOFWinchSystem',system_name)))
+        
+        display(Markdown('''Definiujemy zmienną eoms w celu otrzymania równania w postaci wyrażenia sympy (Do raportu z obliczeniami),
+            przypisujemy jej atrybut "_eoms[zmienna]" który wywołuje równanie ruchu
+            w miejsce "zmienna" wpisujemy indeks równania ruchu, w przyadku równania o jednym stopniu swobody wpisujemy 0'
+            '''))
+        
+        
+        
+        display(Markdown('Proces wywołowania równania ruchu za pomoca metody `_eoms`:'))
+        display(GuideCode('''eoms_expr=dyn_sys._eoms[0]'''.replace('SDOFWinchSystem',system_name)))
 
 
 
         display(ReportText('Wynik jest następujący:'))
-        #display(SympyFormula(eoms))
+        display(SympyFormula(eoms))
 
 
         eoms_eq=Eq(eoms,0)
         eoms_eq
+        
+        display(Markdown('''Definiujemy zmienną odesys w celu przeprowadzenia obliczen
+        obiekt odesys jest strukturą wyjaśnioną w guide basics of odesystems
+        przypisujemy jej atrybut eoms który wywołuje równanie ruchu układu mechanicznego
+        '''))
 
+        display(GuideCode('''ode_sys=dyn_sys.eoms'''.replace('SDOFWinchSystem',system_name)))
+        display(ReportText('Wynik jest następujący:'))
+    
+        display(SympyFormula(system.eoms))
+        
+        display(GuideCode('''ode_sys.as_eq_list()'''.replace('SDOFWinchSystem',system_name)))        
+        
         display(ReportText('Proces tworzenia równania z wcześniej wywołanego równania ruchu (równanie początkowo jest wywoływane jako ciąg znaków reprezentujący opis danego problemu, jednak nie jest on wówczas równaniem, które możemy zastosować do obliczeń):'))
         display(GuideCode('eoms_eq=Eq(eoms,0)'.replace('SDOFWinchSystem',system_name)))
         display(ReportText('Wynik jest następujący:'))

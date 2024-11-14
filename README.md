@@ -20,7 +20,6 @@ Afterwards, you will be directed to the page, where you should click the [README
 
 In this file, you will find the essential information on how to create a blank Jupiter (where you will run the codes), use Cocalc, access usefull commands and more...
 
-
 # Help and guides for DynPy
 
 You can access the introductory guide with the following code:
