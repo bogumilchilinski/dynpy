@@ -798,7 +798,7 @@ class MultiTimeScaleSolution(ODESystem):
         for order, approx in enumerate(approx_with_const[1:]):
 
             approx_subs = approx
-            self.secular_eq[self.eps**(order +1)] = (approx_subs.secular_terms.as_type(FirstOrderLinearODESystem))
+            self.secular_eq[self.eps**(order +1)] = approx_subs.secular_terms#.as_type(FirstOrderLinearODESystem)
             
             #nonlin_ode.eoms_approx_with_const()[0].remove_secular_terms().steady_solution.rhs
             approx_subs = approx_subs#.steady_solution.rhs
