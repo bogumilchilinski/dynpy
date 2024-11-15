@@ -84,6 +84,65 @@ class SpringMassSystem(ODESystem):
 
         return odes
 
+class SpringMassEps(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        eps=Symbol('\epsilon')
+        omega=Symbol('\omega',positive=True)
+        ode_eq=Eq(x.diff(t,2) + eps*diff(x) + omega**2*x,0)
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
+
+        return odes
+
+class SpringMassMSM(MultiTimeScaleSolution):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        eps=Symbol('\epsilon')
+        omega=Symbol('\omega',positive=True)
+        ode_eq=Eq(x.diff(t,2) + eps*diff(x) + omega**2*x,0)
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x, eps=eps)
+
+        return odes
+
+class ExcitationSpringMassMSM(MultiTimeScaleSolution):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        eps=Symbol('\epsilon')
+        omega=Symbol('\omega',positive=True)
+        omega_0 = Symbol('omega_0',positive = True)
+        Omega = Symbol('Omega', positive = True)
+        A = Symbol('A', positive = True)
+        delta = Symbol('delta', positive = True)
+        k=Symbol('k',positive=True)
+        m=Symbol('m',positive=True)
+        
+        MSM_eq=Eq(x.diff(t,2) + eps*diff(x) + omega_0**2*x,eps*A*sin(Omega * t))
+        MSM = cls(MSM_eq.lhs-MSM_eq.rhs,dvars=x, eps=eps)
+        exc_dict = {omega_0:Omega**2+eps*delta}
+        MSM_sol_sub = MSM.solution.subs(exc_dict)
+        omg_eq = Eq(omega_0, Omega**2+eps*delta)
+        omg_sol = solve(omg_eq, Omega)[1]
+        sec_dict = {A:1, delta:0, Omega: omg_sol, omega_0:k/m}
+        
+        MSM_sol_fin = MSM_sol_sub.subs(sec_dict)
+        
+        return MSM_sol_fin
+
+
 class HarmonicOscillator(ODESystem):
 
 

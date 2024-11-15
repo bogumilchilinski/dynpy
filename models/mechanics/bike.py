@@ -1,7 +1,7 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, asin, diff, sqrt, S,
                    diag, Eq, hessian, Function, flatten, Tuple, im, pi, latex,
                    dsolve, solve, fraction, factorial, Subs, Number, oo, Abs,
-                   N, solveset, atan)
+                   N, solveset, atan, exp)
 
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
@@ -26,7 +26,7 @@ class ReducedMotorbike(ComposedSystem):
     T=Symbol('T')
 
     x=dynamicsymbols('x')
-    phi=dynamicsymbols('\phi')
+    phi=dynamicsymbols('phi')
 
     def __init__(self,
                  M=None,
@@ -86,7 +86,8 @@ class ReducedMotorbike(ComposedSystem):
         self.rear_wheel=RollingDisk(self.m_r, R=self.r, x=self.x, qs=self.qs, ivar = self.ivar)(label='Rear wheel')
         self.front_wheel=RollingDisk(self.m_f, R=self.r, x=self.x, qs=self.qs, ivar = self.ivar)(label='Front wheel')
         self.engine_moment=Force(self.T,pos1 = self.angular_displacement,qs =self.qs,ivar=self.ivar)(label='Bike engine')
-        self.drag_force=Force(-S.One/2*self.Ad*self.Cd*self.Af*(self.linear_velocity)**2,self.x,qs=self.qs,ivar=self.ivar)
+        self.drag_force=Force(-S.One/2*self.Ad*self.Cd*self.Af*(self.linear_velocity )**2,self.x,qs=self.qs,ivar=self.ivar)
+        
         components['mass_bike'] = self.mass_bike
         components['mass_driver']=self.mass_driver
         components['rear_wheel']=self.rear_wheel
@@ -124,18 +125,19 @@ class ReducedMotorbike(ComposedSystem):
 #             self.M_a:r'rotor angular acceleration torque',
 #             self.M_r:r'rotor motion resistance torque',
 #             self.omega_s.diff(self.ivar):r'angular acceleration of the rotor',
-             self.m_b: r'Mass of the motorcycle',
-             self.m_d: r'Mass of the driver ',
-             self.r: r'Dynamic radius of the motorcycle',
-             self.m_f: r'Mass of the front wheel',
-             self.m_r: r'Mass of the rear wheel',
-             self.x.diff(): r'Velocity of the system',
-             self.x.diff(self.ivar,2): r'Acceleration of the system',
-             self.ivar: r'Time',
-             self.T: r'Torque',
-             self.Cd: r'Drag coefficient',
-             self.Ad: r'Air density',
-             self.Af: r'Frontal area of the motorcycle',
+            self.m_b: r'Mass of the motorcycle',
+            self.m_d: r'Mass of the driver ',
+            self.r: r'Dynamic radius of the motorcycle',
+            self.m_f: r'Mass of the front wheel',
+            self.m_r: r'Mass of the rear wheel',
+            self.x.diff(): r'Velocity of the system',
+            self.x.diff(self.ivar,2): r'Acceleration of the system',
+            self.ivar: r'Time',
+            self.T: r'Torque',
+            self.Cd: r'Drag coefficient',
+            self.Ad: r'Air density',
+            self.Af: r'Frontal area of the motorcycle',
+            self.x: r'The displacement of the system'
         }
         return self.sym_desc_dict
 
@@ -190,6 +192,13 @@ class ReducedMotorbike(ComposedSystem):
 
         #return FirstOrderLinearODESystem.from_ode_system(ode)
         return ode
+
+    def atan_torque(self,k=1,steady_val=3500):
+
+        torque_expr=(k*(1/2 - (1 / 3.14) * atan((60*self.x.diff(self.ivar)/(2*pi.n()*self.r)) - steady_val)))
+
+
+        return self.subs(self.T,torque_expr)
 
 class MotorbikeReducedToDisk(ReducedMotorbike):
 

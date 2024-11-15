@@ -65,6 +65,7 @@ class TrolleysWithSprings(NonlinearComposedSystem):
         self.qs = [self.x_1, self.x_2]
         self._init_from_components(**kwargs)
 
+
     @property
     def components(self):
 
@@ -447,7 +448,21 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
 #     def subs(self, *args, **kwargs):
         
 #         return super().subs(*args, **kwargs).subs(*args, **kwargs)
+    def unit_dict(self):
+        units_dict = {
+        self.m: ureg.kilogram,  # Mass of the trolley
+        self.Omega: ureg.radian / ureg.second,  # Frequency of the force (rad/s)
+        self.ivar: ureg.second,  # Time (seconds)
+        self.k_l: ureg.newton / ureg.meter,  # Spring constant (units depend on spring type)
+        self.k_r: ureg.newton / ureg.meter,  # Spring constant (units depend on spring type)
+        self.k_c: ureg.newton / ureg.meter,  # Spring constant (units depend on spring type)
+        self.c_l: ureg.newton*ureg.second / ureg.meter,  # Damping coefficient
+        self.c_r: ureg.newton*ureg.second / ureg.meter,  # Damping coefficient
+        self.c_c: ureg.newton*ureg.second / ureg.meter,  # Damping coefficient
+        self.F: ureg.newton,  # Force amplitude
+        }
 
+        return units_dict
 
 
     def max_static_force_pin(self):
@@ -1723,3 +1738,7 @@ class ForcedTrolleysWithSprings(ComposedSystem):
 #poprawione MDofTMD- ready to check
 #klasa MDoFTMD została usunięta- zastępuje ją teraz TrolleyWithTMD
 #TODO(#212 - check)
+
+
+
+

@@ -3045,7 +3045,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         top_left_minor,top_right_minor,bottom_right_minor,bottom_left_minor = split_matrix(shape)
     
     
-        h = bottom_right_minor[0]
+        h = bottom_right_minor[0]/2
         omg_h = sqrt(bottom_left_minor[0]-(h/2)**2)
     
     

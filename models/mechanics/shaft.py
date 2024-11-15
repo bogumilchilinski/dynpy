@@ -16,6 +16,9 @@ import IPython as IP
 import numpy as np
 import inspect
 
+from pint import UnitRegistry
+ureg = UnitRegistry()
+
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
 
     
@@ -1405,6 +1408,8 @@ class TripleShaft(ComposedSystem):
             self.phi_l: ureg.radian,  # Angular displacement on the left side (radians)
             self.ivar: ureg.second,  # Time (seconds)
             }
+        
+        return units_dict
 
 #Grześ
 class SDoFDampedShaft(ComposedSystem):

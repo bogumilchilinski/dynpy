@@ -3793,7 +3793,6 @@ Model of a Forced Compound Pendulum with an external periodic force applied hori
     scheme_name = 'forced_compound_pendulum.png'
     real_name = 'forced_compound_pendulum.png'
 
-    # Define default symbols for the class
     m=Symbol('m', positive=True)
     I=Symbol('I', positive=True)
     g=Symbol('g', positive=True)
@@ -3815,8 +3814,6 @@ Model of a Forced Compound Pendulum with an external periodic force applied hori
                  ivar=None,
                  **kwargs):
 
-
-        # Initialize the parameters only if they are provided; otherwise, use defaults
         if m is not None: self.m = m
         if I is not None: self.I = I
         if g is not None: self.g = g
@@ -3826,20 +3823,15 @@ Model of a Forced Compound Pendulum with an external periodic force applied hori
         if phi is not None: self.phi = phi
         if ivar is not None: self.ivar = ivar
 
-        # Set the generalized coordinate
         self.qs = [self.phi]
 
-        # Initialize the components of the system
         self._init_from_components(**kwargs)
 
     @cached_property
     def components(self):
         components = {}
-        #Create a compound pendulum component using the given parameters
         self.compound_pendulum = CompoundPendulum(m=self.m, l=self.l, phi=self.phi, I=self.I, g=self.g, qs=self.qs)
-        # Define the external horizontal force applied to the pendulum
         self.force = Force(self.M_0*cos(self.Omega*self.ivar), self.phi, qs=self.qs)
-        # Store the components in the dictionary
         components['compound_pendulum'] = self.compound_pendulum
         components['force'] = self.force
 

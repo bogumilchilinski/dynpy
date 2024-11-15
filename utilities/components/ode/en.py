@@ -2170,3 +2170,25 @@ class SolutionDiagnosticComponent(ReportComponent):
 
         display(ReportText("_general_solution:"))
         display(SympyFormula(system._general_solution))
+
+class ParticularDerivativesComponent(ReportComponent):
+
+    title="Derivatives of approximation functions"
+
+    def append_elements(self):
+
+        from dynpy.solvers.linear import FirstOrderLinearODESystem,FirstOrderLinearODESystemWithHarmonics, ODESystem
+        from dynpy.solvers.perturbational import MultiTimeScaleSolution
+
+        system = self.reported_object
+        
+        display(SympyFormula('To clarify the solving process, the derivatives of the approximation functions are presented below, both with and without the substitution of time scales and their corresponding derivatives.'))
+        for index, value in enumerate(system._scales_formula):
+            display(ReportText('For the function:'))
+            display(SympyFormula(system.approximation_function(index)))
+            display(SympyFormula(system.part_derivative(index)))
+              
+        for index, value in enumerate(system._scales_formula):
+            display(ReportText("After the substitution of time scales and their derivatives:"))
+            display(SympyFormula(system.approximation_function(index)))
+            display(SympyFormula(system.part_derivative_subs(index)))
