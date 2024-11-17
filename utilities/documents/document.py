@@ -691,15 +691,32 @@ Examplary setup is as follows:
 
 ## CELL 5
 ## Simulation
+##
  
     #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
     #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
     
-    sec_simulation = Section('Section that contains simulation')
-    CurrentContainer(sec_simulation)
     
-     display(ReportText('Simulation '*200))
+     sec_simulation = Section('Section that contains simulation')
+     CurrentContainer(sec_simulation)
     
+     display(ReportText(' Basics of ODESystem based simulations are covered in guide to ODESystem '))
+     display(ObjectCode(from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide))
+     
+     sec_ODESystem = Subsection('ODESystem simulation')
+     CurrentContainer(sec_ODESystem)
+     
+     display(ReportText('Firstly create an ODESystem or import it from dynpy.modes.odes.linear.py'))
+     display(ObjectCode(spring = SpringMassEps.from_reference_data()))
+     
+     display(ReportText('Secondly solve the equation using solution method:'))
+     display(ObjectCode(spring_sol = spring.solution))
+     
+     display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
+     spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()))
+     
+     #MSM
+     
 ## CELL 6
 ## Veryfication
  

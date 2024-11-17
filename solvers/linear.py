@@ -3046,7 +3046,9 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     
     
         h = bottom_right_minor[0]/2
-        omg_h = sqrt(bottom_left_minor[0]-(h/2)**2)
+        omg0_sq = bottom_left_minor[0]
+        
+        omg_h = sqrt(omg0_sq-h**2)
     
     
         solution_position = [exp(-h * self.ivar)*(C_list[i] * sin(omg_h * self.ivar) + C_list[i+1] * cos(omg_h * self.ivar)) for i in range(1)]

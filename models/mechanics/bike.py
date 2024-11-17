@@ -106,6 +106,7 @@ class ReducedMotorbike(ComposedSystem):
     
     def symbols_description(self):
         #i_roc=self.i_w.diff(self.ivar)
+        vmax=Symbol("v_{max}",positive=True)
         self.sym_desc_dict = {
 #             self.U_z: r'voltage supplying the rotor',
 #             self.R_w: r'equivalent resistance of the rotor windings',
@@ -137,7 +138,8 @@ class ReducedMotorbike(ComposedSystem):
             self.Cd: r'Drag coefficient',
             self.Ad: r'Air density',
             self.Af: r'Frontal area of the motorcycle',
-            self.x: r'The displacement of the system'
+            self.x: r'The displacement of the system',
+            vmax: 'The maximum speed'
         }
         return self.sym_desc_dict
 

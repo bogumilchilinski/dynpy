@@ -3945,6 +3945,30 @@ class NumbersList(NoEscape):
 
 
 class DescriptionsRegistry:
+    '''
+    A class representing LaTeX description registry of Symbols.
+
+    classmethods:
+    - set_descriprtions() - argument is the dictionary containing the descriptions of the symbols
+    - set_description_mode() - argument is string containing the name of the chosen mode
+    available modes:
+        - single or one_occurence - each symbol makes only one occurence in the document (default)
+        - all - for each equations all of the symbols are shown - and repeated
+
+    Example of usage:
+    a=Symbol("a", positive=True)
+    b=Symbol("b", positive=True)
+    c=Symbol("c", positive=True)
+
+    eq=Eq(a**2+b**2,c**2)
+    symbol_desc={
+        a: 'Length of the side a',
+        b: 'Length of the side b',
+        c: 'Length of the side c'
+    }
+
+    DescriptionsRegistry.set_descriptions(symbol_desc)
+    '''
 
     _descriptions = {}
     _described_elements = {}
