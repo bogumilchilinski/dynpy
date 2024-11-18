@@ -619,7 +619,7 @@ class MultiTimeScaleSolution(ODESystem):
     def predicted_solution(self, order=1, dict=False, equation=False):
 
         dvars_no = len(self.vars)
-        order = self.order
+       # order = self.order
 
         solution = sum(
             (self.approximation_function(comp_ord, order) * self.eps**comp_ord

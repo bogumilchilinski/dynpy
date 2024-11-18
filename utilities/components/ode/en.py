@@ -2182,7 +2182,7 @@ class ParticularDerivativesComponent(ReportComponent):
 
         system = self.reported_object
         
-        display(SympyFormula('To clarify the solving process, the derivatives of the approximation functions are presented below, both with and without the substitution of time scales and their corresponding derivatives.'))
+        display(ReportText('To clarify the solving process, the derivatives of the approximation functions are presented below, both with and without the substitution of time scales and their corresponding derivatives.'))
         for index, value in enumerate(system._scales_formula):
             display(ReportText('For the function:'))
             display(SympyFormula(system.approximation_function(index)))
