@@ -2095,6 +2095,7 @@ class ODESystemOverviewReport(UsageOfDynamicSystemsGuide):
     def _report_components(self):
 
         comp_list=[
+            systems_comp.ODESystemOverviewUsageComponent,
             systems_comp.ODEInitCodeComponent,
             systems_comp.ODEGeneralSolutionComponent,
             systems_comp.ODESteadySolutionComponent,

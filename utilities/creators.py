@@ -1704,3 +1704,31 @@ class ResearchProjectIssueCreator:
                                 )
         
         return issue_schedule, issue_intro, issue_basics, issue_modelling, issue_simulation, issue_analysis, issue_report
+    
+class PDF_link:
+    '''
+Class create hyperlink to PDF file, that will open document in new browser tab.
+
+====================================================================================================
+Arguments:
+    
+    document - instance of class from dynpy.utilities.templates.document like Guide, WUTthesis etc.
+====================================================================================================
+Use example:
+
+    from dynpy.utilities.templates.document import WutThesis, Guide
+
+    doc = WutThesis('./output/file')
+    doc.generate_pdf(clean_tex=True)
+
+    PDF_link(doc)
+====================================================================================================
+    '''
+    def __init__(self, document):
+        import IPython
+        from IPython.display import display_pdf
+        path = f'{document.default_filepath}'
+        with open((document.default_filepath + '.pdf'), "rb") as f:
+            display_pdf(f.read(),raw=True)
+
+        f.close()

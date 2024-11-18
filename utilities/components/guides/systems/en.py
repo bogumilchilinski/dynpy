@@ -1914,3 +1914,39 @@ class DynSysCompletenessCheckerComponent(ReportComponent):
         from dynpy.utilities.tools import DynsysCheckerTable
         
         display(DynsysCheckerTable(system).get_table())
+        
+ode_overview_str=("""
+from dynpy.utilities.documents.document import ODESystemOverviewReport
+from dynpy.utilities.components.guides.en import *
+from dynpy.models.mechanics.pendulum import Pendulum
+
+ODESystemOverviewReport(reported_object=Pendulum());
+
+""")
+
+odecompsov_str =('''Guide consist of bellow components which can be called separatelly with most of avaible ODESystem models:
+*ODEInitCodeComponent
+*ODEGeneralSolutionComponent
+*ODESteadySolutionComponent
+*ODESystemRepresentationComponent
+*ODESystemExponentiationComponent
+*PredictionOfSteadySolutionComponent
+*HomoPredictionIntroComponent
+*MainPredictionComponent
+*RootsAnalysisComponent
+''')
+
+class ODESystemOverviewUsageComponent(ReportComponent):
+
+    title = "Introduction to usage of ODESystemOverviewReport"
+
+    def append_elements(self):
+
+        from dynpy.models import mechanics
+
+
+        display(ReportText('This guide concers in-deepth analysis of ODESystem solver capabilities that are crucial for simulating system from `DynPy` library.'))
+#         display(ReportText('Basic call of it is as follows and runs default dynamic system which is `ForcedSpringMassSystem'))
+        display(ObjectCode(ds_overview_str))
+        
+        display(ReportText(odecompsov_str))
