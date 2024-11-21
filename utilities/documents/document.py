@@ -764,6 +764,7 @@ Examplary setup is as follows:
     doc.append(sec_simulation)
     doc.append(sec_verification)
     doc.append(sec_conclusion)
+    doc.append(Command('bibliography',arguments=["articles"])) # .bib file as "articles"
     # Generating file
     doc.generate_pdf(clean_tex=True)
     

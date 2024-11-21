@@ -246,10 +246,10 @@ class EquivalentSDOFGearModel(ComposedSystem):
     scheme_name = 'engine.png'
     real_name = 'engine_real.PNG'
 
-    m=Symbol('m', positive=True)
-    k=Symbol('k', positive=True)
+    m=Symbol('m_eq', positive=True)
+    k=Symbol('k_g', positive=True)
     F=Symbol('F', positive=True)
-    c=Symbol('c',positive=True)
+    c=Symbol('c_g',positive=True)
     T=Symbol('T',positive=True)
     omega=Symbol('omega',positive=True)
     ivar=Symbol('t')
