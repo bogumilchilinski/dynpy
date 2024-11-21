@@ -742,8 +742,28 @@ display(ReportText('This subsection provides methodology. '*100))
     CurrentContainer(sec_conclusion)
     
     display(ReportText('Conclusions '*200))
-
 ## CELL 8
+## Symbols description
+ 
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_symbols = Section('Section that contains all symbols descriptions')
+    CurrentContainer(sec_symbols)
+    
+    E_K,F = symbols('E_K,F')
+    descriptions = {
+    E_K:r"Kinetic energy", 
+    F:r"Force",  
+    }
+    syms_dict = descriptions
+    DescriptionsRegistry().set_descriptions({**syms_dict})
+    DescriptionsRegistry().reset_registry()
+    SymbolsDescription.set_default_header('  ')
+
+    display(SymbolsDescription({**syms_dict}))
+
+## CELL 9
 ## Document
 
     #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
@@ -756,8 +776,12 @@ display(ReportText('This subsection provides methodology. '*100))
 
     doc = WutThesis(thesis_name)
     # Bibliography of quotations
-    doc.preamble.append(NoEscape(r'\\usepackage[backend=bibtex, sorting=none]{biblatex}'))
-    doc.preamble.append(NoEscape(r'\addbibresource{elementy_bibliagrafia.bib}'))
+    ### Select one
+    ####### BibLatex
+    doc.preamble.append(NoEscape(r'\usepackage[backend=biber, sorting=none]{biblatex}'))
+    doc.preamble.append(NoEscape(r'\\addbibresource{elementy_bibliagrafia.bib}'))
+    ####### Natbib
+    doc.preamble.append(NoEscape(r'\usepackage[backend=biber, sorting=none]{biblatex}'))
     doc.append(sec_intro) # adding certain sections
     doc.append(sub_problem_outline)
     doc.append(sub_obj_assum)
@@ -767,6 +791,7 @@ display(ReportText('This subsection provides methodology. '*100))
     doc.append(sec_picture)
     doc.append(sec_simulation)
     doc.append(sec_verification)
+    doc.append(sec_symbols)
     doc.append(sec_conclusion)
     doc.append(Command('bibliography',arguments=["articles"])) # .bib file as "articles"
     # Generating file
@@ -890,11 +915,30 @@ Examplary setup is as follows:
     CurrentContainer(sec_conclusion)
     
     display(ReportText('Conclusions '*200))
-
     
-    
-
 ## CELL 8
+## Symbols description
+ 
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_symbols = Section('Section that contains all symbols descriptions')
+    CurrentContainer(sec_symbols)
+    
+    E_K,F = symbols('E_K,F')
+    descriptions = {
+    E_K:r"Kinetic energy", 
+    F:r"Force",  
+    }
+    syms_dict = descriptions
+    DescriptionsRegistry().set_descriptions({**syms_dict})
+    DescriptionsRegistry().reset_registry()
+    SymbolsDescription.set_default_header('  ')
+
+    display(SymbolsDescription({**syms_dict}))
+    
+
+## CELL 9
 ## Document
 
     #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
@@ -906,8 +950,13 @@ Examplary setup is as follows:
     thesis_name = './output/report_name' #path for report file 
 
     # Bibliography of quotations
-    doc.preamble.append(NoEscape(r'\\usepackage[backend=bibtex, sorting=none]{biblatex}'))
-    doc.preamble.append(NoEscape(r'\addbibresource{elementy_bibliagrafia.bib}'))
+    ### Select one
+    ####### BibLatex
+    doc.preamble.append(NoEscape(r'\usepackage[backend=biber, sorting=none]{biblatex}'))
+    doc.preamble.append(NoEscape(r'\\addbibresource{elementy_bibliagrafia.bib}'))
+    ####### Natbib
+    doc.preamble.append(NoEscape(r'\usepackage[backend=biber, sorting=none]{biblatex}'))
+
     doc = WutThesis(thesis_name)
     doc.append(sec_intro) # adding certain sections
     doc.append(sub_problem_outline)
@@ -918,6 +967,7 @@ Examplary setup is as follows:
     doc.append(sec_picture)
     doc.append(sec_simulation)
     doc.append(sec_verification)
+    doc.append(sec_symbols)
     doc.append(sec_conclusion)
     doc.append(NoEscape(r'\printbibliography[title={Bibliografia}]'))
 # Generating file
