@@ -562,49 +562,53 @@ class WutThesis(Document):
 Examplary setup is as follows:
 
 #References to guide imports needed to include - to see the list of available guides insert and run the code below:
-#from.dynpy.utilities.creators import list_of_guides
-#list_of_guides()
+```{python}
+from.dynpy.utilities.creators import list_of_guides
+list_of_guides()
+```
 
 ## CELL 1
 ## Imports
 
+```{python}
+#Create file output
+#Create file Images
+#In file output create bibliography as .bib file (dynpy123)
 
-    #Create file output
-    #Create file Images
-    #In file output create bibliography as .bib file (dynpy123)
+from dynpy.utilities.report import *
+from dynpy.utilities.documents.document import WutThesis
 
-    from dynpy.utilities.report import *
-    from dynpy.utilities.templates.document import WutThesis
-
-    doc = WutThesis('./output/thesis_name')
+doc = WutThesis('./output/thesis_name')
+```
     
 
 
 ## CELL 2
 ## Thesis introduction
-    
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_intro = Section('Section that presents text reporting')
-    CurrentContainer(sec_intro)
-    
-    sub_problem_outline = Subsection('Outline of the problem')
-    CurrentContainer(sub_problem_outline)
-    display(ReportText('This subsection provides information about investigated problem. '*100))
-    
-    sub_obj_assum = Subsection('Objectives and assumptions')
-    CurrentContainer(sub_obj_assum)
-    display(ReportText('This subsection provides objectives and assumptions. '*100))
-    
-    sub_SOT = Subsection('State of the art')
-    CurrentContainer(sub_SOT)
-    display(ReportText('This subsection provides state of the art. '*100))
-    
-    sub_methodology = Subsection('Methodology')
-    CurrentContainer(sub_methodology)
-    display(ReportText('This subsection provides methodology. '*100))
-    
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_intro = Section('Section that presents text reporting')
+CurrentContainer(sec_intro)
+
+sub_problem_outline = Subsection('Outline of the problem')
+CurrentContainer(sub_problem_outline)
+display(ReportText('This subsection provides information about investigated problem. '*100))
+
+sub_obj_assum = Subsection('Objectives and assumptions')
+CurrentContainer(sub_obj_assum)
+display(ReportText('This subsection provides objectives and assumptions. '*100))
+
+sub_SOT = Subsection('State of the art')
+CurrentContainer(sub_SOT)
+display(ReportText('This subsection provides state of the art. '*100))
+
+sub_methodology = Subsection('Methodology')
+CurrentContainer(sub_methodology)
+display(ReportText('This subsection provides methodology. '*100))
+```    
     
     
 ## CELL 3
