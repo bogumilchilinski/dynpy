@@ -3058,7 +3058,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         return ODESolution.from_vars_and_rhs(self.dvars, solution)
     
             
-    
+    @cached_property
     def eigenfunctions(self):
         
         
@@ -3111,7 +3111,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         return eig_fun
 
     ############################### NEW code
-    
+    #@lru_cache
     def _sin_comp(self,omega,amp): 
         '''
         It applies generic form solution for the following differential equation
@@ -3173,7 +3173,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
             
         return (cos_comp*cos(omega*self.ivar) +  sin_comp*sin(omega*self.ivar) ) 
     
-    
+    #@lru_cache
     def _cos_comp(self,omega,amp):
         
         '''
