@@ -551,9 +551,9 @@ class MultiTimeScaleSolution(ODESystem):
     
     
     def approx_function_symbol(self,order=0):
-      
+
         dvars_no = len(self.dvars)
-        
+
         if dvars_no==1:
         
             func_str = str(self.vars[0]).replace(f"({self.ivar})","")
@@ -596,6 +596,9 @@ class MultiTimeScaleSolution(ODESystem):
     def part_derivative(self, order=1):
         return Eq(self.approximation_function_without_scales(order).diff(self.ivar)[0],self.approximation_function(order).diff(self.ivar)[0])
     
+    def sec_part_derivative(self, order=1):
+        return Eq(self.approximation_function_without_scales(order).diff(self.ivar,2)[0],self.approximation_function(order).diff(self.ivar,2)[0])
+    
     def part_derivative_subs(self, order=1):
         deriv_dict = {}
 
@@ -614,6 +617,25 @@ class MultiTimeScaleSolution(ODESystem):
             deriv_dict[scales_lhs_second_deriv] = scales_rhs_second_deriv
 
         return Eq(self.approximation_function_without_scales(order).diff(self.ivar)[0],self.part_derivative(order).rhs.subs(deriv_dict).simplify().expand())
+    
+    def sec_part_derivative_subs(self, order=1):
+        deriv_dict = {}
+
+        for index, value in enumerate(self._scales_formula):
+            scales_lhs = self._scales_formula.lhs[index]
+            scales_rhs = self._scales_formula.rhs[index]
+
+            scales_lhs_deriv = self.first_order_subs().lhs[index]
+            scales_rhs_deriv = self.first_order_subs().rhs[index]
+
+            scales_lhs_second_deriv = self.second_order_subs().lhs[index]
+            scales_rhs_second_deriv = self.second_order_subs().lhs[index]
+
+            deriv_dict[scales_lhs] = scales_rhs
+            deriv_dict[scales_lhs_deriv] = scales_rhs_deriv
+            deriv_dict[scales_lhs_second_deriv] = scales_rhs_second_deriv
+
+        return Eq(self.approximation_function_without_scales(order).diff(self.ivar)[0],self.sec_part_derivative(order).rhs.subs(deriv_dict).simplify().expand())
 
     
     def predicted_solution(self, order=1, dict=False, equation=False):
@@ -637,7 +659,7 @@ class MultiTimeScaleSolution(ODESystem):
 
         return ODESolution.from_vars_and_rhs(self.dvars, solution)
     
-    def derivative_without_scale(self, degree, order=1, dict=False, equation=False):
+    def derivative_without_scale(self, degree, order=2, dict=False, equation=False):
         
         derivative_rhs = self.predicted_solution_without_scales(self.order).as_eq_list()[0].n(3).rhs.diff(self.ivar,degree)
         derivative_lhs = self.dvars[0].diff(self.ivar,degree)

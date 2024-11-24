@@ -2188,6 +2188,7 @@ class MSMethodOverviewReport(UsageOfDynamicSystemsGuide):
             ode_comp.ParticularDerivativesComponent,
             ode_comp.ZerothOrderApproximatedEqComponent,
             ode_comp.FirstOrderApproximatedEqComponent,
+            ode_comp.GeneralSolutionComponent,
         ]
         return comp_list
 

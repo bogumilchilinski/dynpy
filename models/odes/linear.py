@@ -78,7 +78,9 @@ class SpringMassSystem(ODESystem):
         c=Symbol('c',positive=True)
         k=Symbol('k',positive=True)
         m=Symbol('m',positive=True)
-        ode_eq=Eq(m*x.diff(t,2)+c*x.diff(t)+k*x,0)
+        F=Symbol('F',positive=True)
+        Omega=Symbol('Omega', positive=True)
+        ode_eq=Eq(m*x.diff(t,2)+c*x.diff(t)+k*x,F*sin(Omega*t))
 
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
 

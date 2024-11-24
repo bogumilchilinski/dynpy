@@ -495,3 +495,6 @@ class DDOFGearMechanism(ComposedSystem):
             self.T2:ureg.newton*ureg.meter,
            }
         return units_dict
+    
+    def as_equivalent_sdof(self):
+        return EquivalentSDOFGearModel()

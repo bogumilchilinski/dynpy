@@ -338,7 +338,10 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
         zeroth_ord_eq = Symbol('Omega')#system.nth_eoms_approximation(0)
         eps = Symbol('\\varepsilon')
 
-        return f"The ordering and separation of equation ${AutoMarker(base_system.odes[0])}$ in terms of the power of a small parameter {eps} leads to obtaining a recursive sequence of linear equations of motion leading to the solution of the nonlinear equation. The zeroth-order approximate linear equation is given in ${AutoMarker(zeroth_ord_eq)}$ where the dependency was assumed for the zeroth-order solution of the time variable:"
+        
+        return f"The ordering and separation of predicted solution in terms of the power of a small parameter {eps} leads to obtaining a recursive sequence of linear equations of motion leading to the solution of the nonlinear equation. The zeroth-order approximate linear equation is given below where the dependency was assumed for the zeroth-order solution of the time variable:"
+
+#         return f"The ordering and separation of equation ${AutoMarker(base_system.odes[0])}$ in terms of the power of a small parameter {eps} leads to obtaining a recursive sequence of linear equations of motion leading to the solution of the nonlinear equation. The zeroth-order approximate linear equation is given in ${AutoMarker(zeroth_ord_eq)}$ where the dependency was assumed for the zeroth-order solution of the time variable:"
     
     @property
     def middle_text(self):
@@ -350,7 +353,7 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
 
         zeroth_ord_approx_eq = Symbol('Omega')#Eq(system.nth_eoms_approximation(0).lhs[1]-system.nth_eoms_approximation(0).rhs[1],0)
 
-        return f"Or transformed to the second order ODE {AutoMarker(zeroth_ord_approx_eq)}:"
+        return f"Or transformed to the second order ODE:" #{AutoMarker(zeroth_ord_approx_eq)}:
 
         
     @property
@@ -463,16 +466,40 @@ class MSMCalculationsOrderComponent(ReportComponent):
 
         system = ode = self.reported_object
 
-        display(ReportText(  "First step involves method for prediction of solution"  ))       
-        display(ObjectCode("ord = 2 # given order of approximation  \node.predicted_solution(ord)"))     
+        display(ReportText('''First step is to establish the approximation function. This is done using the method'''))
+        display(ObjectCode("ord = 2 # given order of approximation \node.approximation_function(ord)"))
+        
+        display(ReportText(  "Next step is prediction of solution using following method"  ))       
+        display(ObjectCode("ord = 2 # given order of approximation  \node.predicted_solution(ord)"))
+        display(Markdown("This method uses `approximation_function` method and multiplies it by small parameter to obtain the desired predicted solution."))
+        
+        display(ReportText(  "Later the derivative of predicted solutoin should be calculated. This is done using:"  ))
+        display(ObjectCode("ord = 2 # given order of approximation  \node.derivative_without_scale(ord)"))
+        display(Markdown("This method uses `predicted_solution_without_scales` method and calculates a derivatives."))
+        
+        display(ReportText(  "Derivatives of each approximation function is calculated by:"  ))
+        display(ObjectCode("ord = 2 # given order of approximation  \node.part_derivative(ord)"))
+        display(ReportText("This method calculates derivatives of approximation function."))
+        
+        display(ReportText( "After that time scales and their derivatives are calculated." ))
+        display(ObjectCode( "ord = 2 # given order of approximation  \node._scales_formula(ord)" ))
+           
+        display(ReportText( "Substitution of time scales is done using the method:" ))
+        display(ObjectCode("ord = 2 # given order of approximation  \node.part_derivative_subs(ord)"))
 
-        display(ReportText(  "Next stage is approximation of eoms - the related method is as follows - it substitutes result of previous method:"  ))       
+        display(ReportText( "Next step is the substitution of approximation function to predicted solution." ))
         display(ObjectCode("ord = 2 # given order of approximation  \node.eoms_approximation(ord)"))
-        display(ReportText(  f"This method returns object of {type(ode.eoms_approximation())} type that is used to create list of approximation odes."  ))   
+        display(ReportText(  f"This method returns object of {type(ode.eoms_approximation())} type that is used to create list of approximation odes."  ))
         
         display(ReportText(  f"Odes approximation allows to find list of new ode systems, it's handled by the following method:"  ))
-        display(ObjectCode("ord = 2 # given order of approximation  \node.eoms_approximation_list(ord)")) 
+        display(ObjectCode("ord = 2 # given order of approximation  \node.eoms_approximation_list(ord)"))
+
+        display(ReportText("General solution of the resulting equation can be found using"))
+        display(ObjectCode("ord = 2 # given order of approximation  \node.general_sol"))
+        display(Markdown("This method is using `eoms_approx_with_const` method."))
         
+        display(ReportText( "Resulting equation is solved" ))
+        display(ObjectCode("ord = 2 # given order of approximation  \node.solution"))
 
 
 class PredictedSolutionComponent(ReportComponent):
@@ -584,7 +611,7 @@ class DetailsOfPredictedSolutionComponent(ReportComponent):
             display(ObjectCode(f"ord = {ord} # given order of approximation  \node.predicted_solution(ord)"))   
         
         display(ReportText(  "Finally, formulas of predicted solution and its derivatives are as follows:"   ))           
-        for degree in range(0,system.order+1):
+        for degree in range(0,3):
             display(SympyFormula(system.derivative_without_scale(degree).as_eq_list()[0]))
         
         
@@ -730,7 +757,9 @@ class SecularTermsEquationsComponent(ReportComponent):
     @property
     def footer_text(self):
 
-        return "In order to determine the functions \(\operatorname{C_1}\left(t_{1}\right),\operatorname{C_2}\left(t_{1}\right)\) and hence , the first-order approximate equation has to be considered:"
+        return "In order to determine the functions $\(\operatorname{C_1}\left(t_{1})$,$\operatorname{C_2}\left(t_{1})$ and hence , the first-order approximate equation has to be considered:"
+        
+#         return "In order to determine the functions \(\operatorname{C_1}\left(t_{1}\right),\operatorname{C_2}\left(t_{1}\right)\) and hence , the first-order approximate equation has to be considered:"
 
     def append_elements(self):
 
@@ -2185,10 +2214,12 @@ class ParticularDerivativesComponent(ReportComponent):
         display(ReportText('To clarify the solving process, the derivatives of the approximation functions are presented below, both with and without the substitution of time scales and their corresponding derivatives.'))
         for index, value in enumerate(system._scales_formula):
             display(ReportText('For the function:'))
-            display(SympyFormula(system.approximation_function(index)))
+            display(SympyFormula(system.approximation_function(index)[0]))
             display(SympyFormula(system.part_derivative(index)))
+            display(SympyFormula(system.sec_part_derivative(index)))
               
         for index, value in enumerate(system._scales_formula):
             display(ReportText("After the substitution of time scales and their derivatives:"))
-            display(SympyFormula(system.approximation_function(index)))
+            display(SympyFormula(system.approximation_function(index)[0]))
             display(SympyFormula(system.part_derivative_subs(index)))
+            display(SympyFormula(system.sec_part_derivative_subs(index)))
