@@ -776,12 +776,18 @@ display(ReportText('This subsection provides methodology. '*100))
 
     doc = WutThesis(thesis_name)
     # Bibliography of quotations
-    ### Select one
+    ### Select one bibligraphy managment system
     ####### BibLatex
-    doc.preamble.append(NoEscape(r'\usepackage[backend=biber, sorting=none]{biblatex}'))
-    doc.preamble.append(NoEscape(r'\\addbibresource{elementy_bibliagrafia.bib}'))
+
+    doc.preamble.append(Package('biblatex',arguments=["backend=biber","sorting=none"]))
+    doc.preamble.append(Command('addbibresource','elementy_bibliagrafia.bib'))
     ####### Natbib
-    doc.preamble.append(NoEscape(r'\usepackage[backend=biber, sorting=none]{biblatex}'))
+    #doc.preamble.append(Package('natbib')
+    #doc.preamble.append(Command('bibliographystyle','unsrt'))
+
+    # TOC
+    doc.append(Command('tableofcontents')) #adds TOC
+
     doc.append(sec_intro) # adding certain sections
     doc.append(sub_problem_outline)
     doc.append(sub_obj_assum)
@@ -793,13 +799,30 @@ display(ReportText('This subsection provides methodology. '*100))
     doc.append(sec_verification)
     doc.append(sec_symbols)
     doc.append(sec_conclusion)
-    doc.append(Command('bibliography',arguments=["articles"])) # .bib file as "articles"
+    
+    ### BibLatex
+    doc.append(Command('printbibliography',arguments=["title={Bibliography}"]))
+    ### Natbib
+    #doc.append(Command('bibliography',arguments=["references"])) # .bib file as "references"
+    
+    
+    #FIGURES LIST
+
+    doc.append(Command('addcontentsline{toc}{section}{List of figures}'))
+    doc.append(Command('listoffigures'))
+    doc.append(Command('pagestyle{plain}'))
+    doc.append(Command('newpage'))
+
+    #TABLES LIST
+
+    doc.append(Command('addcontentsline{toc}{section}{List of tables}'))
+    doc.append(Command('renewcommand{\listtablename}{List of tables}'))
+    doc.append(Command('listoftables'))
+    doc.append(Command('pagestyle{plain}'))
+    doc.append(Command('newpage'))
+
     # Generating file
     doc.generate_pdf(clean_tex=True)
-    
-    
-    
-    
 
 """
         )
@@ -948,16 +971,22 @@ Examplary setup is as follows:
     # Be sure *output* folder is in the current directory
 
     thesis_name = './output/report_name' #path for report file 
+    doc = WutThesis(thesis_name)
+
 
     # Bibliography of quotations
-    ### Select one
+    ### Select one bibligraphy managment system
     ####### BibLatex
-    doc.preamble.append(NoEscape(r'\usepackage[backend=biber, sorting=none]{biblatex}'))
-    doc.preamble.append(NoEscape(r'\\addbibresource{elementy_bibliagrafia.bib}'))
-    ####### Natbib
-    doc.preamble.append(NoEscape(r'\usepackage[backend=biber, sorting=none]{biblatex}'))
 
-    doc = WutThesis(thesis_name)
+    doc.preamble.append(Package('biblatex',arguments=["backend=biber","sorting=none"]))
+    doc.preamble.append(Command('addbibresource','elementy_bibliagrafia.bib'))
+    ####### Natbib
+    #doc.preamble.append(Package('natbib')
+    #doc.preamble.append(Command('bibliographystyle','unsrt'))
+
+    # TOC
+    doc.append(Command('tableofcontents')) #adds TOC
+
     doc.append(sec_intro) # adding certain sections
     doc.append(sub_problem_outline)
     doc.append(sub_obj_assum)
@@ -969,15 +998,31 @@ Examplary setup is as follows:
     doc.append(sec_verification)
     doc.append(sec_symbols)
     doc.append(sec_conclusion)
-    doc.append(NoEscape(r'\printbibliography[title={Bibliografia}]'))
-# Generating file
-    doc.generate_pdf(clean_tex=True)
-    
-    
-    
-    
 
-""")
+    ### BibLatex
+    doc.append(Command('printbibliography',arguments=["title={Bibliography}"]))
+    ### Natbib
+    #doc.append(Command('bibliography',arguments=["references"])) # .bib file as "references"
+
+    #FIGURES LIST
+
+    doc.append(Command('addcontentsline{toc}{section}{List of figures}'))
+    doc.append(Command('listoffigures'))
+    doc.append(Command('pagestyle{plain}'))
+    doc.append(Command('newpage'))
+
+    #TABLES LIST
+
+    doc.append(Command('addcontentsline{toc}{section}{List of tables}'))
+    doc.append(Command('renewcommand{\listtablename}{List of tables}'))
+    doc.append(Command('listoftables'))
+    doc.append(Command('pagestyle{plain}'))
+    doc.append(Command('newpage'))
+
+    # Generating file
+    doc.generate_pdf(clean_tex=True)
+"""
+        )
         return ObjectCode(preliminary_str)
 
     Jupyter_file_content = """{
