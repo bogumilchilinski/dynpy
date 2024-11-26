@@ -4410,7 +4410,7 @@ class AutoBreak(Environment):
                 (any([elem.is_negative for elem in obj.args]))):
                 #print(' any negative')
                 #display(obj)
-                new_terms += [Symbol('\n -'), -obj]
+                new_terms += [Symbol('\n -'), obj]
                 
             elif isinstance(obj, Mul) and not (
                 (any([elem.is_negative for elem in obj.args]))):
