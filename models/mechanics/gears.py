@@ -253,7 +253,7 @@ class EquivalentSDOFGearModel(ComposedSystem):
     T=Symbol('T',positive=True)
     omega=Symbol('omega',positive=True)
     ivar=Symbol('t')
-    k_var=Symbol('k_var', positive=True)
+    k_var=Symbol('kappa_mesh', positive=True)
     eps=Symbol('varepsilon', positive=True)
     c_var=Symbol('c_var', positive=True)
     
