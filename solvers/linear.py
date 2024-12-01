@@ -1504,7 +1504,11 @@ class ODESystem(AnalyticalSolution):
         
 
         diffs = self._fode_dvars.diff(self.ivar)
-    
+        #display(diffs)
+        #display(self)
+        CodeFlowLogger(diffs,"diff in _to_odes_rhs",self)
+        CodeFlowLogger(self,"object itself in _to_odes_rhs",self)        
+        
         
         if diffs == self.lhs:
             return self.copy()
@@ -1519,14 +1523,16 @@ class ODESystem(AnalyticalSolution):
             else: #nonlinear cases have to be implemented
                 diff_coeffs_mat=self.lhs.jacobian(diffs)
 
-                odes_rhs = diff_coeffs_mat.inv()*free_terms
+                coeffs_mat = (self.lhs - self.rhs).jacobian(self.dvars)
+                
+                odes_rhs = -diff_coeffs_mat.inv()*coeffs_mat*self.dvars + free_terms
             
             rhs_odes_mat = odes_rhs
         
-            display(self.lhs - self.rhs,diffs)
+            #display(self.lhs - self.rhs,diffs)
             # rhs_odes_dict=solve(self.lhs - self.rhs,diffs)
             # rhs_odes_mat = Matrix([rhs_odes_dict[coord]  for coord in diffs])
-            display(rhs_odes_mat)
+            #display(rhs_odes_mat)
             
 
             
@@ -2410,16 +2416,18 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
 
     @cached_property
     def _auxiliary_fundamental_matrix(self):
-        
-        dvars = list(reversed(list(self.dvars)))
-#         odes = list(reversed(list(self._to_rhs_ode().odes_rhs)))
-        odes = list(reversed(list(self.odes_rhs)))
-    
-        
-        return Matrix(odes).jacobian(dvars)  
-    
 
-    
+        dvars_list=list(reversed(list(self.dvars)))
+        if len(dvars_list)!=1:
+
+            dvars = dvars_list
+    #         odes = list(reversed(list(self._to_rhs_ode().odes_rhs)))
+            odes = list(reversed(list(self.odes_rhs)))
+
+            return Matrix(odes).jacobian(dvars)
+        else:
+            return self._fundamental_matrix
+
     @cached_property
     def _auxiliary_free_terms(self):
 
@@ -2599,15 +2607,15 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
     
 class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
 
-    @cached_property
-    def _auxiliary_fundamental_matrix(self):
+#     @cached_property
+#     def _auxiliary_fundamental_matrix(self):
         
-        dvars = list(reversed(list(self.dvars)))
-#         odes = list(reversed(list(self._to_rhs_ode().odes_rhs)))
-        odes = list(reversed(list(self.odes_rhs)))
+#         dvars = list(reversed(list(self.dvars)))
+# #         odes = list(reversed(list(self._to_rhs_ode().odes_rhs)))
+#         odes = list(reversed(list(self.odes_rhs)))
     
         
-        return Matrix(odes).jacobian(dvars)  
+#         return Matrix(odes).jacobian(dvars)  
     
     @cached_property
     def _reduced_fundamental_matrix(self):
@@ -2932,6 +2940,9 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     
             else:
                 return self.as_type(FirstOrderLinearODESystem).general_solution
+            
+        else:
+            return self.as_type(FirstOrderLinearODESystem).general_solution
     
     
     @cached_property

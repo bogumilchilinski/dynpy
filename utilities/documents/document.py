@@ -35,7 +35,7 @@ class ReportMethods:
 
 #Examplary setup is as follows:
 
-## CELL 1
+## 
 ## Imports
 
 
@@ -703,7 +703,7 @@ display(ReportText('This subsection provides methodology. '*100))
     
      sec_simulation = Section('Section that contains simulation')
      CurrentContainer(sec_simulation)
-    
+
      display(ReportText(' Basics of ODESystem based simulations are covered in guide to ODESystem '))
      display(ObjectCode(from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide))
      
@@ -719,7 +719,19 @@ display(ReportText('This subsection provides methodology. '*100))
      display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
      spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()))
      
-     #MSM
+     MSM_sim = Subsection('MSM simulation')
+     CurrentContainer(MSM_sim)
+     
+     display(ReportText('Firstly create an MultiTimeScaleSolution system or import it from dynpy.modes.odes.linear.py'))
+     display(ObjectCode(spring = SpringMassMSM.from_reference_data()))
+     
+     display(ReportText('Secondly solve the equation using solution method:'))
+     display(ObjectCode(spring_sol = spring.solution))
+     
+     display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
+     spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()))
+     
+     
      
 ## CELL 6
 ## Veryfication
