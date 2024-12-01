@@ -256,6 +256,7 @@ class EquivalentSDOFGearModel(ComposedSystem):
     k_var=Symbol('kappa_mesh', positive=True)
     eps=Symbol('varepsilon', positive=True)
     c_var=Symbol('c_var', positive=True)
+    f=Symbol('f', positive=True)
     
     z=dynamicsymbols('z')
     
@@ -270,6 +271,7 @@ class EquivalentSDOFGearModel(ComposedSystem):
                  k_var=None,
                  eps=None,
                  c_var=None,
+                 f=None,
                  **kwargs):
 
         if k_var is not None: self.k_var = k_var
@@ -282,6 +284,7 @@ class EquivalentSDOFGearModel(ComposedSystem):
         if T is not None: self.T= T
         if c_var is not None: self.c_var = c_var
         if ivar is not None: self.ivar = ivar
+        if f is not None: self.f=f
 
         
    
@@ -327,11 +330,16 @@ class EquivalentSDOFGearModel(ComposedSystem):
         return comp_list
 
     def units(self):
+        f=Symbol('f')
         units_dict={
+            self.k:ureg.newton/ureg.meter,
             self.m:ureg.kilogram,
             self.F:ureg.newton,
             self.ivar:ureg.second,
             self.T:ureg.newton*ureg.meter,
+            self.z.diff(self.ivar,2):ureg.meter/ureg.second**2,
+            self.c:ureg.newton*ureg.second/ureg.meter,
+            self.f:ureg.hertz
            }
         return units_dict
     

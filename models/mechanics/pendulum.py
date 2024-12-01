@@ -35,7 +35,7 @@ class Pendulum(NonlinearComposedSystem):
             g = gravitional field
                 -value of gravitional's field acceleration
 
-            l = lenght
+            l = length
                 -Dimension of pendulum's strong
 
             ivar = symbol object

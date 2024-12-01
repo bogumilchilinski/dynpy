@@ -4428,8 +4428,15 @@ class AutoBreak(Environment):
                 new_terms += [obj]
 
         prev_term=''
-        self.append('\n')
-        for term in new_terms[1:]:
+        
+        
+        if new_terms[0] == Symbol('\n -'):
+            new_terms_loop = new_terms
+        else:
+            self.append('\n')
+            new_terms_loop = new_terms[1:]
+        
+        for term in new_terms_loop:
 #             print('+++',self.__class__.latex_backend(term))
 #             print('++ prev +++',prev_term)
 #             self.append(self.__class__.latex_backend(term)) ######### TA LINIA ZAKOMENTOWANA /AMADI

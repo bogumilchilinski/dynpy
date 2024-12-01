@@ -725,6 +725,11 @@ class MultiTimeScaleSolution(ODESystem):
         CodeFlowLogger(t_fun_subs_dict,'dict with time subs',self)
 
         return eoms_approximated.subs(t_fun_subs_dict).doit()
+    
+    def eoms_approximation_as_eq_list(self):
+        defined_eoms=self.eoms_approximation()
+        approx_eoms=[Eq(-eap,0) for eap in defined_eoms]
+        return approx_eoms
 
     #@lru_cache
     def eoms_approximation_list(self,
