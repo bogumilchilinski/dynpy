@@ -784,7 +784,7 @@ df
 
         display(ReportText('Operations on columns - adding a column with calculated population concentration'))
         display(GuideCode('''
-df['popul.']=df['no. of people']/df['area']
+df['population']=df['no. of people']/df['area']
 df
         '''))
         display(x7.reported())

@@ -159,31 +159,31 @@ eoms_eq=Eq(eoms,0)
 eoms_eq''')
 dict_code=(
 '''
-param_dict = system.get_numerical_parameters()
-t_span = np.linspace(1,100,101)
+param_dict = dyn_sys.get_numerical_parameters()
+t_span = np.linspace(0,100,1001)
 ic_list = [0.0,0.0] ### Dla układu o jednym stopniu swobody
-#param_dict = {**param_dict,system.m:system.m}
+#param_dict = {**param_dict,dyn_sys.m:dyn_sys.m}
 ''')
 params_code=(
 '''
-parameter = system.system_parameters()[0]
+parameter = dyn_sys.system_parameters()[0]
 param_dict = {**param_dict,parameter:parameter}
 ''')
 
 na_df_code=(
 '''
-na_df = dyn_sys.subs(param_dict).numerical_analysis(parameter=system.system_parameters()[0],param_span=[1,2,3], t_span = t_span)
+na_df = dyn_sys.subs(param_dict).numerical_analysis(parameter=parameter,param_span=[1,2,3], t_span = t_span)
 na_df
 ''')
 na_df_code_eoms=(
 '''
-na_df = dyn_sys.subs(param_dict).eoms.numerical_analysis(parameter=system.system_parameters()[0],param_span=[1,2,3], t_span = t_span)
-
+na_df = dyn_sys.subs(param_dict).eoms.numerical_analysis(parameter=parameter,param_span=[1,2,3], t_span = t_span)
+na_df
 ''')
 
 na_df_sol_code=(
 '''
-na_df_sol = na_df.compute_solution(t_span = t_span, ic_list = [0.0,0.0])
+na_df_sol = na_df.with_ics([2.0,0.0]).compute_solution(t_span)
 na_df_sol.plot()
 ''')
 
@@ -197,9 +197,9 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
 
         from .....solvers.linear import ODESystem
         
-        system = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
+        dyn_sys = self.reported_object # it's useless in the case of permanent content - it's commented for future usage
         
-        eoms=system._eoms[0]
+        eoms=dyn_sys._eoms[0]
         eoms
 
         display(ReportText('Proces wywołowania równania ruchu za pomoca metody eoms:'))
@@ -217,17 +217,17 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
         
         display(ReportText('Kolejnym kluczowym elementem jest zdefiniowanie parametrów układu, wektora czasu i warunków początkowych.'))
         
-        param_dict = system.get_numerical_parameters()
+        param_dict = dyn_sys.get_numerical_parameters()
         t_span = np.linspace(0,100,1001)
         ic_list = [1.0,0.0] ### Dla układu o jednym stopniu swobody
-        param = system.system_parameters()[0]
+        param = dyn_sys.system_parameters()[0]
         
         
         display(ObjectCode(dict_code))
         
         display(ReportText('Następnie należy określić, który parametr ma zostać poddany analizie. Parametr ten należy wówczas zmienić w słowniku parametrów z wartości liczbowej na symbol.'))
         
-        parameter = system.system_parameters()[0]
+        parameter = dyn_sys.system_parameters()[0]
         param_dict = {**param_dict,parameter:parameter}
         
         display(ObjectCode(params_code))
@@ -238,7 +238,7 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
         display(ObjectCode(na_df_code_eoms))
         display(ReportText('Lub bez niej:'))
         display(ObjectCode(na_df_code))
-        na_df = system.subs(param_dict).numerical_analysis(parameter=system.system_parameters()[0],param_span=[1,2,3], t_span = t_span)
+        na_df = dyn_sys.subs(param_dict).numerical_analysis(parameter=dyn_sys.system_parameters()[0],param_span=[1,2,3], t_span = t_span).with_ics([2.0,0.0])
         #na_df = system.subs(param_dict).numerized()
         na_df
         
@@ -246,7 +246,7 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
 
         display(ObjectCode(na_df_sol_code))
         
-        na_df_sol = na_df.compute_solution(t_span = t_span, ic_list = [100.0,0.0])
+        na_df_sol = na_df.compute_solution(t_span = t_span, ic_list = [2.0,0.0])
         (na_df_sol.plot())
         
         import matplotlib.pyplot as plt

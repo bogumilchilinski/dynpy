@@ -123,7 +123,8 @@ class DynSysChecker:
         self.system = system
         self.runnable = False
         self.debug = debug
-        self.verbosity = verbosity 
+        self.verbosity = verbosity
+        self.major = [None,None]
         
     def check_init(self):
 
@@ -158,6 +159,9 @@ class DynSysChecker:
                 return False
         if self.verbosity is True:
             return comp
+        elif self.verbosity == 'basic':
+            comp = str(self.system.components.values()).replace('dict_values([', '').replace('])', '')
+            return comp
         else:
             return True
     
@@ -180,6 +184,19 @@ class DynSysChecker:
                 return False
         if self.verbosity is True:
             return def_data
+        elif self.verbosity == 'basic':
+            if self.major[0] != 'check_numerical_data':
+                data_num = len(self.system().get_numerical_data().keys())
+            else:
+                def_data = self.major[1]
+            def_data = len(def_data.keys())
+            if data_num > def_data:
+                res = f'{str(def_data)} of {str(data_num)}'
+            else:
+                res = f'{str(data_num)} of {str(def_data)}'
+            self.major[0] = 'check_default_data'
+            self.major[1] = def_data
+            return res
         else:
             return True
         
@@ -202,6 +219,19 @@ class DynSysChecker:
                 return False
         if self.verbosity is True:
             return data_num
+        elif self.verbosity == 'basic':
+            if self.major[0] != 'check_default_data':
+                def_data = len(self.system().get_default_data().keys())
+            else:
+                def_data = self.major[1]
+            data_num = len(data_num.keys())
+            if data_num > def_data:
+                res = f'{str(def_data)} of {str(data_num)}'
+            else:
+                res = f'{str(data_num)} of {str(def_data)}'
+            self.major[0] = 'check_numerical_data'
+            self.major[1] = data_num
+            return res
         else:
             return True
         
@@ -224,6 +254,19 @@ class DynSysChecker:
                 return False
         if self.verbosity is True:
             return sym_desc
+        elif self.verbosity == 'basic':
+            if self.major[0] != 'check_unit_dict':
+                unit_dict = len(self.system().unit_dict().keys())
+            else:
+                unit_dict = self.major[1]
+            sym_desc = len(sym_desc.keys())
+            if sym_desc > unit_dict:
+                res = f'{str(unit_dict)} of {str(sym_desc)}'
+            else:
+                res = f'{str(sym_desc)} of {str(unit_dict)}'
+            self.major[0] = 'check_symbols_description'
+            self.major[1] = sym_desc
+            return res
         else:
             return True
     
@@ -246,6 +289,19 @@ class DynSysChecker:
                 return False
         if self.verbosity is True:
             return unit_dict
+        elif self.verbosity == 'basic':
+            if self.major[0] != 'check_symbols_description':
+                sym_desc = len(self.system().symbols_description().keys())
+            else:
+                sym_desc = self.major[1]
+            unit_dict = len(unit_dict.keys())
+            if sym_desc > unit_dict:
+                res = f'{str(unit_dict)} of {str(sym_desc)}'
+            else:
+                res = f'{str(sym_desc)} of {str(unit_dict)}'
+            self.major[0] = 'check_unit_dict'
+            self.major[1] = unit_dict
+            return res
         else:
             return True
     
@@ -263,8 +319,10 @@ class DynSysChecker:
                 equ = self.system._eoms[0]
             except Exception:
                 return False
-        if self.verbosity:
+        if self.verbosity == True:
             return equ
+        elif self.verbosity == 'basic':
+            return True
         else:
             return True
         
@@ -272,25 +330,26 @@ class DynSysChecker:
         
         if self.runnable:
             try:
-                self.system()._as_picture();
-                pic = self.system().preview(example = 'detail_real_name');
+                pic = self.system()._as_picture();
+                #pic = self.system().preview(example = 'detail_real_name');
             except Exception as e:
                 if self.debug:
                     print(e)
                 return False
         else:
             try:
-                self.system._as_picture();
-                pic = self.system.preview(example = 'detail_real_name');
+                pic = self.system._as_picture();
+                #pic = self.system.preview(example = 'detail_real_name');
             except Exception:
                 return False
         if self.verbosity:
-            return pic
+            return True
+        elif self.verbosity == 'basic':
+            return True
         else:
             return True
-    
 class DynsysCheckerTable:
-    def __init__(self, system, verbosity = False):
+    def __init__(self, system, verbosity = False, format_for_latex = False):
         import pandas as pd
         initial_data = {'System Name': [], 
                         'Init': [],
@@ -304,10 +363,11 @@ class DynsysCheckerTable:
                         'Result':[]}
         
         self.df = pd.DataFrame(initial_data)
-        pd.set_option("display.max_colwidth", None)
-        pd.set_option('future.no_silent_downcasting', True)
+        pd.set_option("display.max_colwidth", 0)
+        #pd.set_option('future.no_silent_downcasting', True)
         
         self.verbosity = verbosity
+        self.format_for_latex = format_for_latex
         
         if isinstance(system, __builtins__.__class__):
             self.list_from_Modulestructure(system)
@@ -341,16 +401,28 @@ class DynsysCheckerTable:
             
             param = DynSysChecker(sys, verbosity=self.verbosity)
             
-            new_row = {'System Name': sys.__class__.__name__, 
-                        'Init': param.check_init(),
-                        'Components': param.check_components(),
-                        'Default Data': param.check_default_data(),
-                        'Numerical Parameters': param.check_numerical_data(),
-                        'Symbols Description': param.check_symbols_description(),
-                        'Units': param.check_unit_dict(),
-                        'Equation': param.check_equation(),   
-                        'Picture': param.check_picture(),
-                        'Result': []}
+            if self.format_for_latex:
+                new_row = {'System Name': sys.__class__.__name__, 
+                            'Init': param.check_init(),
+                            'Components': str(param.check_components()).replace('_', '\\textunderscore'),
+                            'Default Data': str(param.check_default_data()).replace('_', '\textunderscore'),
+                            'Numerical Parameters': str(param.check_numerical_data()).replace('_', '\\textunderscore'),
+                            'Symbols Description': str(param.check_symbols_description()).replace('_', '\\textunderscore'),
+                            'Units': str(param.check_unit_dict()).replace('_', '\\textunderscore'),
+                            'Equation': str(param.check_equation()).replace('_', '\\textunderscore'),   
+                            'Picture': str(param.check_picture()).replace('_', '\\textunderscore'),
+                            'Result': []}
+            else: 
+                new_row = {'System Name': sys.__class__.__name__, 
+                            'Init': param.check_init(),
+                            'Components': param.check_components(),
+                            'Default Data': param.check_default_data(),
+                            'Numerical Parameters': param.check_numerical_data(),
+                            'Symbols Description': param.check_symbols_description(),
+                            'Units': param.check_unit_dict(),
+                            'Equation': param.check_equation(),   
+                            'Picture': param.check_picture(),
+                            'Result': []}
             if False in new_row.values():
                 res = False
             else:
@@ -364,6 +436,4 @@ class DynsysCheckerTable:
             self.table_append(element)
     
     def get_table(self):
-        if self.verbosity is False:
-            return self.df.replace({1.0: True, 0.0: False})
-        return self.df
+        return self.df.replace({1.0: True, 0.0: False})

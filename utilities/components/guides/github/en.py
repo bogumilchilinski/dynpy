@@ -418,7 +418,8 @@ class GithubIssueReportComponent(ReportComponent):
         if issue.body is None:
             display(Markdown("No issue description"))
         else:
-            display(Markdown("Issue description: " + issue.body))
+#             display(Markdown("Issue description: " + issue.body))
+            display(IPMarkdown("Issue description: " + issue.body))
         display(ReportText('\\newline'))
         display(ReportText('-'*100))
         display(ReportText('\\newline'))

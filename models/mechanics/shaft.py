@@ -1395,9 +1395,9 @@ class TripleShaft(ComposedSystem):
             self.d_2: ureg.meter,  # Diameter of the second disk
             self.d_3: ureg.meter,  # Diameter of the third disk
             self.G: ureg.pascal,  # Shear modulus (Moduł Kirchhoffa)
-            self.M_1: ureg.newton * ureg.meter,  # Moment applied on the first disk (torque)
-            self.M_2: ureg.newton * ureg.meter,  # Moment applied on the second disk (torque)
-            self.M_3: ureg.newton * ureg.meter,  # Moment applied on the third disk (torque)
+            self.M_1: ureg.Nm,  # Moment applied on the first disk (torque)
+            self.M_2: ureg.Nm,  # Moment applied on the second disk (torque)
+            self.M_3: ureg.Nm,  # Moment applied on the third disk (torque)
             self.Omega: ureg.radian / ureg.second,  # Angular velocity (rad/s)
             self.delta: ureg.radian,  # Phase difference (radians)
             self.input_displacement: ureg.radian,  # Input angular displacement (radians)

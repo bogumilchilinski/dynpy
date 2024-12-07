@@ -518,8 +518,9 @@ class BasicsOfReportingGuide(UsageOfDynamicSystemsGuide):
             pandas_comp.TablesCreationComponent,
             reporting_comp.AutomarkerIntroComponent,
             reporting_comp.CodeEmbeddingComponent,
-#             guide_comp.
-            reporting_comp.UnitRegistryIntroComponent
+
+            reporting_comp.UnitRegistryIntroComponent,
+            reporting_comp.ReportFormattingGuidelinesComponent,
 #             guide_comp.
 
         ]

@@ -476,7 +476,7 @@ class WutThesis(Document):
                   Command('newcommand{\promotor}', arguments=['Wpisać promotora']),
                   Command('newcommand{\konsultant}', arguments=['Wpisać konsultanta']),
                   Command('newcommand{\\tytul}', arguments=['Wpisać tytuł pracy dyplomowej po polsku']),
-                  Command('newcommand{\\album}', arguments=['297537']),
+                  Command('newcommand{\\album}', arguments=['Wpisać numer albumu']),
                   Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']),
                   Command('newcommand{\\rok}', arguments=['Rok składania pracy']),
                   Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']),
@@ -563,7 +563,7 @@ Examplary setup is as follows:
 
 #References to guide imports needed to include - to see the list of available guides insert and run the code below:
 ```{python}
-from.dynpy.utilities.creators import list_of_guides
+from dynpy.utilities.creators import list_of_guides
 list_of_guides()
 ```
 
@@ -577,6 +577,14 @@ list_of_guides()
 
 from dynpy.utilities.report import *
 from dynpy.utilities.documents.document import WutThesis
+from dynpy.models.odes.linear import SpringMassEps
+from sympy import symbols, Eq
+from sympy.printing.latex import latex
+from IPython.display import display, Math
+import tikzplotlib
+from dynpy.utilities.adaptable import TimeDataFrame
+import pandas as pd
+
 
 doc = WutThesis('./output/thesis_name')
 ```
@@ -608,89 +616,107 @@ display(ReportText('This subsection provides state of the art. '*100))
 sub_methodology = Subsection('Methodology')
 CurrentContainer(sub_methodology)
 display(ReportText('This subsection provides methodology. '*100))
-```    
+```
     
     
 ## CELL 3
 ## Math 
 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+```{python}
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
-    from sympy import Eq, Symbol, symbols
-    
-    sec_formula = Section('Section that presents formulas reporting')
-    CurrentContainer(sec_formula)
-    
-    description = Subsection('Description of dynamic model')
-    CurrentContainer(description)
-    display(ReportText('This subsection provides description of the model. '*100))
-    
-    from dynpy.models.mechanics.pendulum import Pendulum
-    dyn_sys = Pendulum()
-    dyn_sys.as_picture()
-    
-    lagrangian = Subsection('Lagrangian and derivatives')
-    CurrentContainer(lagrangian)
-    display(ReportText('This subsection provides calculation of lagrangian and derivatives. '*100))
-    
-    lagrangian = dyn_sys.L[0]
-    lagrangian
-    
-    diff1 = lagrangian.diff(dyn_sys.angle.diff(dyn_sys.ivar))
-    for eqq1 in diff1.as_eq_list():
-        display(SympyFormula(eqq1))
-    diff2 = lagrangian.diff(dyn_sys.angle.diff(dyn_sys.ivar)).diff(dyn_sys.ivar)
-    for eqq2 in diff2.as_eq_list():
-        display(SympyFormula(eqq2))
-    diff3 = lagrangian.diff(dyn_sys.qs[0])
-    for eqq3 in diff3.as_eq_list():
-        display(SympyFormula(eqq3))
-    
-    equations = Subsection('Equations of motion')
-    CurrentContainer(equations)
-    display(ReportText('This subsection provides calculation of equations of motion and solution of the system. '*100))
-    
-    ds1=dyn_sys._ode_system
+from sympy import Eq, Symbol, symbols
 
-    for eq1 in ds1.as_eq_list():
-        display(SympyFormula(eq1.simplify()))
-        
-    ds2=dyn_sys.linearized()._ode_system.general_solution
+sec_formula = Section('Section that presents formulas reporting')
+CurrentContainer(sec_formula)
 
-    for eq2 in ds2.as_eq_list():
-        display(SympyFormula(eq2.simplify()))
-        
-    ds3=dyn_sys.linearized()._ode_system.steady_solution
+description = Subsection('Description of dynamic model')
+CurrentContainer(description)
+display(ReportText('This subsection provides description of the model. '*100))
 
-    for eq3 in ds3.as_eq_list():
-        display(SympyFormula(eq3.simplify()))
-        
-    ds4=dyn_sys.linearized()._ode_system.solution
+from dynpy.models.mechanics.pendulum import Pendulum
+dyn_sys = Pendulum()
+dyn_sys.as_picture()
 
-    for eq4 in ds4.as_eq_list():
-        display(SympyFormula(eq4.simplify()))
+lagrangian = Subsection('Lagrangian and derivatives')
+CurrentContainer(lagrangian)
+display(ReportText('This subsection provides calculation of lagrangian and derivatives. '*100))
+
+lagrangian = dyn_sys.L[0]
+lagrangian
+
+t=dyn_sys.ivar
+
+
+for coord in dyn_sys.q:
+
+    display(ReportText(f'Calculations of derivatives for ${vlatex(coord)}$'))
+
+
+    vel=coord.diff(t)
+    diff1 = lagrangian.diff(vel)
+    diff2 = diff1.diff(t) 
+    diff3 = lagrangian.diff(coord)
+
+
+    diff1_sym = Symbol(f'\\frac{{\\partial L}}{{\\partial {vlatex(vel)}}}')
+    diff2_sym = Symbol(f' \\frac{{d }}{{dt}}  {diff1_sym}'  )
+    diff3_sym = Symbol(f'\\frac{{\\partial L}}{{\\partial {vlatex(coord)}}}')
+
+
+    display(SympyFormula(  Eq(diff1_sym,diff1)  ))    
+    display(SympyFormula(  Eq( diff2_sym ,diff2)  ))
+    display(SympyFormula(  Eq( diff3_sym ,  diff3)  ))
+
+display(ReportText('Outcomes of governing equations analysis. '*100))
     
+
+equations = Subsection('Equations of motion')
+CurrentContainer(equations)
+
+
+display(ReportText('This subsection provides calculation of equations of motion and solution of the system. '*100))
+
+ds1=dyn_sys.eoms
+
+for eq1 in ds1.as_eq_list():
+    display(SympyFormula(eq1.simplify()))
     
+ds2=dyn_sys.linearized()._ode_system.general_solution
+
+for eq2 in ds2.as_eq_list():
+    display(SympyFormula(eq2.simplify()))
     
+ds3=dyn_sys.linearized()._ode_system.steady_solution
+
+for eq3 in ds3.as_eq_list():
+    display(SympyFormula(eq3.simplify()))
     
-    
-    a,b = symbols('a b')
-    display(SympyFormula(Eq(a,b)))
+ds4=dyn_sys.linearized().eoms.solution
+
+for eq4 in ds4.as_eq_list():
+    display(SympyFormula(eq4.simplify()))
+
+
+```
 
 
 ## CELL 4
 ## Picture
     
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
     
-    sec_picture = Section('Section that presents pictures reporting')
-    CurrentContainer(sec_picture)
+```{python}
+    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
-    display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))
+sec_picture = Section('Section that presents pictures reporting')
+CurrentContainer(sec_picture)
 
+display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))
 
+```
 
 
 ## CELL 5
@@ -717,7 +743,7 @@ display(ReportText('This subsection provides methodology. '*100))
      display(ObjectCode(spring_sol = spring.solution))
      
      display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
-     spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()))
+     spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()
      
      MSM_sim = Subsection('MSM simulation')
      CurrentContainer(MSM_sim)
@@ -736,13 +762,62 @@ display(ReportText('This subsection provides methodology. '*100))
 ## CELL 6
 ## Veryfication
  
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_verification = Section('Section that verificates research results')
-    CurrentContainer(sec_verification)
-    
-     display(ReportText('Verifications '*200))
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+```
+from sympy import *
+from pint import UnitRegistry
+ureg = UnitRegistry()
+
+import pandas as pd
+
+t = Symbol('t')
+power = Symbol('P')
+work = Symbol('W')
+
+unit_dict = {
+t: ureg.second,
+power: ureg.watt,
+}
+
+LatexDataFrame.set_default_units(unit_dict)
+
+
+
+sec_verification = Section('Section that verificates research results')
+CurrentContainer(sec_verification)
+
+display(ReportText('Description of verifications concept. '*200))
+     
+
+
+### SELECT ONE CASE
+
+## 1st CASE
+## import of external data if path "./data_from_ml/test_1.csv" exists
+
+#test_data = './data_from_ml/test_1.csv'
+#df = pd.read_csv(filename, header = None)
+
+## 2st CASE
+df = pd.DataFrame({t:[0,1,2],'a':[2,3,4],'b':[8,7,6]}).set_index(t)
+
+df_cols = df.set_axis([power,work],axis=1)
+
+data_tab = TimeDataFrame(df_cols).to_latex_dataframe().reported(caption='Caption')
+graph = TimeDataFrame(df_cols).to_pylatex_tikz().in_figure(caption='Caption')
+
+
+
+display(data_tab)
+
+display(ReportText('Obtained data analysis. '*200))
+
+display(graph)
+
+display(ReportText('Description of verifications outcomes. '*200))
+```
     
 ## CELL 7
 ## Conclusion
@@ -754,7 +829,9 @@ display(ReportText('This subsection provides methodology. '*100))
     CurrentContainer(sec_conclusion)
     
     display(ReportText('Conclusions '*200))
-## CELL 8
+
+
+## CELL 9
 ## Symbols description
  
     #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
@@ -775,66 +852,72 @@ display(ReportText('This subsection provides methodology. '*100))
 
     display(SymbolsDescription({**syms_dict}))
 
-## CELL 9
+## CELL 10
 ## Document
 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+```{python}
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
-    # Creating file
-    # Be sure *output* folder is in the current directory
+# Creating file
+# Be sure *output* folder is in the current directory
 
-    thesis_name = './output/report_name' #path for report file 
+thesis_name = './output/report_name' #path for report file 
 
-    doc = WutThesis(thesis_name)
-    # Bibliography of quotations
-    ### Select one bibligraphy managment system
-    ####### BibLatex
+doc = WutThesis(thesis_name)
+# Bibliography of quotations
+### Select one bibligraphy managment system
+####### BibLatex
 
-    doc.preamble.append(Package('biblatex',arguments=["backend=biber","sorting=none"]))
-    doc.preamble.append(Command('addbibresource','elementy_bibliagrafia.bib'))
-    ####### Natbib
-    #doc.preamble.append(Package('natbib')
-    #doc.preamble.append(Command('bibliographystyle','unsrt'))
+doc.preamble.append(Package('biblatex',arguments=["backend=biber","sorting=none"]))
+doc.preamble.append(Command('addbibresource','elementy_bibliagrafia.bib'))
+####### Natbib
+#doc.preamble.append(Package('natbib')
+#doc.preamble.append(Command('bibliographystyle','unsrt'))
 
-    # TOC
-    doc.append(Command('tableofcontents')) #adds TOC
+# TOC
+doc.append(Command('tableofcontents')) #adds TOC
 
-    doc.append(sec_intro) # adding certain sections
-    doc.append(sub_problem_outline)
-    doc.append(sub_obj_assum)
-    doc.append(sub_SOT)
-    doc.append(sub_methodology)
-    doc.append(sec_formula)
-    doc.append(sec_picture)
-    doc.append(sec_simulation)
-    doc.append(sec_verification)
-    doc.append(sec_symbols)
-    doc.append(sec_conclusion)
-    
-    ### BibLatex
-    doc.append(Command('printbibliography',arguments=["title={Bibliography}"]))
-    ### Natbib
-    #doc.append(Command('bibliography',arguments=["references"])) # .bib file as "references"
-    
-    
-    #FIGURES LIST
+doc.append(sec_intro) # adding certain sections
+doc.append(sub_problem_outline)
+doc.append(sub_obj_assum)
+doc.append(sub_SOT)
+doc.append(sub_methodology)
+doc.append(sec_formula)
+doc.append(sec_picture)
+doc.append(sec_simulation)
+doc.append(sec_verification)
+doc.append(sec_tables)
+doc.append(sec_symbols)
+doc.append(sec_conclusion)
 
-    doc.append(Command('addcontentsline{toc}{section}{List of figures}'))
-    doc.append(Command('listoffigures'))
-    doc.append(Command('pagestyle{plain}'))
-    doc.append(Command('newpage'))
 
-    #TABLES LIST
+### BibLatex
+#doc.append(Command('printbibliography',arguments=["title={Bibliography}"])) - argument is to improve
+doc.append(Command('printbibliography')
 
-    doc.append(Command('addcontentsline{toc}{section}{List of tables}'))
-    doc.append(Command('renewcommand{\listtablename}{List of tables}'))
-    doc.append(Command('listoftables'))
-    doc.append(Command('pagestyle{plain}'))
-    doc.append(Command('newpage'))
+### Natbib
+#doc.append(Command('bibliography',arguments=["references"])) # .bib file as "references"
 
-    # Generating file
-    doc.generate_pdf(clean_tex=True)
+
+#FIGURES LIST
+
+doc.append(Command('addcontentsline{toc}{section}{List of figures}'))
+doc.append(Command('listoffigures'))
+doc.append(Command('pagestyle{plain}'))
+doc.append(Command('newpage'))
+
+#TABLES LIST
+
+doc.append(Command('addcontentsline{toc}{section}{List of tables}'))
+doc.append(Command('renewcommand{\listtablename}{List of tables}'))
+doc.append(Command('listoftables'))
+doc.append(Command('pagestyle{plain}'))
+doc.append(Command('newpage'))
+
+# Generating file
+doc.generate_pdf(clean_tex=True)
+```
 
 """
         )
@@ -845,194 +928,323 @@ display(ReportText('This subsection provides methodology. '*100))
         preliminary_str=(
 """
 
-Examplary setup is as follows:
+#Example:
+
+#To prepare a simple document with text and images:
+
+#Good practice here is to allocate 1 section per 1 cell
+
+
 
 ## CELL 1
 ## Imports
 
 
 
-    #Create file output
-    #In file output create bibliography as .bib file
+#Create file output
+#In file output create bibliography as .bib file
 
-    from dynpy.utilities.report import *
-    from dynpy.utilities.templates.document import WutThesis
+from dynpy.utilities.report import *
+from dynpy.utilities.templates.document import WutThesis
 
-    doc = WutThesis('./output/thesis_name')
-    
+doc = WutThesis('./output/thesis_name')
+
 
 ## CELL 2
 ## Thesis introduction
-    
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_intro = Section('Section that presents text reporting')
-    CurrentContainer(sec_intro)
-    
-    sub_problem_outline = Subsection('Outline of the problem')
-    CurrentContainer(sub_problem_outline)
-    display(ReportText('This subsection provides information about investigated problem. '*100))
-    
-    sub_obj_assum = Subsection('Objectives and assumptions')
-    CurrentContainer(sub_obj_assum)
-    display(ReportText('This subsection provides objectives and assumptions. '*100))
-    
-    sub_SOT = Subsection('State of the art')
-    CurrentContainer(sub_SOT)
-    display(ReportText('This subsection provides state of the art. '*100))
-    
-    sub_methodology = Subsection('Methodology')
-    CurrentContainer(sub_methodology)
-    display(ReportText('This subsection provides methodology. '*100))
-    
-    
-    
+
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_intro = Section('Section that presents text reporting')
+CurrentContainer(sec_intro)
+
+sub_problem_outline = Subsection('Outline of the problem')
+CurrentContainer(sub_problem_outline)
+display(ReportText('This subsection provides information about investigated problem. '*100))
+
+sub_obj_assum = Subsection('Objectives and assumptions')
+CurrentContainer(sub_obj_assum)
+display(ReportText('This subsection provides objectives and assumptions. '*100))
+
+sub_SOT = Subsection('State of the art')
+CurrentContainer(sub_SOT)
+display(ReportText('This subsection provides state of the art. '*100))
+
+sub_methodology = Subsection('Methodology')
+CurrentContainer(sub_methodology)
+display(ReportText('This subsection provides methodology. '*100))
+
+
+
 ## CELL 3
 ## Math 
 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
-    from sympy import Eq, Symbol, symbols
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+from sympy import Eq, Symbol, symbols
+
+sec_formula = Section('Section that presents formulas reporting')
+CurrentContainer(sec_formula)
+
+description = Subsection('Description of dynamic model')
+CurrentContainer(description)
+display(ReportText('This subsection provides description of the model. '*100))
+
+from dynpy.models.mechanics import ForcedSpringMassSystem as DynamicSys
+dyn_sys = DynamicSys()
+dyn_sys.as_picture()
+
+lagrangian = Subsection('Lagrangian and derivatives')
+CurrentContainer(lagrangian)
+display(ReportText('This subsection provides calculation of lagrangian and derivatives. '*100))
+
+lagrangian = dyn_sys.L[0]
+lagrangian
+
+t=dyn_sys.ivar
+
+
+for coord in dyn_sys.q:
+
+    display(ReportText(f'Calculations of derivatives for ${vlatex(coord)}$'))
+
+
+    vel=coord.diff(t)
+    diff1 = lagrangian.diff(vel)
+    diff2 = diff1.diff(t) 
+    diff3 = lagrangian.diff(coord)
+
+
+    diff1_sym = Symbol(f'\\frac{{\\partial L}}{{\\partial {vlatex(vel)}}}')
+    diff2_sym = Symbol(f' \\frac{{d }}{{dt}}  {diff1_sym}'  )
+    diff3_sym = Symbol(f'\\frac{{\\partial L}}{{\\partial {vlatex(coord)}}}')
+
+
+    display(SympyFormula(  Eq(diff1_sym,diff1)  ))    
+    display(SympyFormula(  Eq( diff2_sym ,diff2)  ))
+    display(SympyFormula(  Eq( diff3_sym ,  diff3)  ))
+
+display(ReportText('Outcomes of governing equations analysis. '*100))
     
-    sec_formula = Section('Section that presents formulas reporting')
-    CurrentContainer(sec_formula)
+
+equations = Subsection('Equations of motion')
+CurrentContainer(equations)
+
+
+display(ReportText('This subsection provides calculation of equations of motion and solution of the system. '*100))
+
+ds1=dyn_sys.eoms
+
+for eq1 in ds1.as_eq_list():
+    display(SympyFormula(eq1.simplify()))
     
-    display(ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.'))
+ds2=dyn_sys.linearized()._ode_system.general_solution
+
+for eq2 in ds2.as_eq_list():
+    display(SympyFormula(eq2.simplify()))
     
-    a,b = symbols('a b')
-    display(SympyFormula(Eq(a,b)))
+ds3=dyn_sys.linearized()._ode_system.steady_solution
+
+for eq3 in ds3.as_eq_list():
+    display(SympyFormula(eq3.simplify()))
+    
+ds4=dyn_sys.linearized().eoms.solution
+
+for eq4 in ds4.as_eq_list():
+    display(SympyFormula(eq4.simplify()))
+
+
 
 
 ## CELL 4
 ## Picture
-    
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_picture = Section('Section that presents pictures reporting')
-    CurrentContainer(sec_picture)
 
-    display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_picture = Section('Section that presents pictures reporting')
+CurrentContainer(sec_picture)
+
+display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))
 
 
 
 ## CELL 5
 ## Simulation
- 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_simulation = Section('Section that contains simulation')
-    CurrentContainer(sec_simulation)
-    
-     display(ReportText('Simulation '*200))
-    
+
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_simulation = Section('Section that contains simulation')
+CurrentContainer(sec_simulation)
+
+display(ReportText('Simulation '*200))
+
+
+
 ## CELL 6
 ## Veryfication
- 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_verification = Section('Section that verificates research results')
-    CurrentContainer(sec_verification)
-    
-     display(ReportText('Verifications '*200))
-    
+
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+
+from sympy import *
+from pint import UnitRegistry
+ureg = UnitRegistry()
+
+import pandas as pd
+
+t = Symbol('t')
+power = Symbol('P')
+work = Symbol('W')
+
+unit_dict = {
+t: ureg.second,
+power: ureg.watt,
+}
+
+LatexDataFrame.set_default_units(unit_dict)
+
+
+
+sec_verification = Section('Section that verificates research results')
+CurrentContainer(sec_verification)
+
+display(ReportText('Description of verifications concept. '*200))
+
+
+
+### SELECT ONE CASE
+
+## 1st CASE
+## import of external data if path "./data_from_ml/test_1.csv" exists
+
+#test_data = './data_from_ml/test_1.csv'
+#df = pd.read_csv(filename, header = None)
+
+## 2st CASE
+df = pd.DataFrame({t:[0,1,2],'a':[2,3,4],'b':[8,7,6]}).set_index(t)
+
+df_cols = df.set_axis([power,work],axis=1)
+
+data_tab = TimeDataFrame(df_cols).to_latex_dataframe().reported(caption='Caption')
+graph = TimeDataFrame(df_cols).to_pylatex_tikz().in_figure(caption='Caption')
+
+
+
+display(data_tab)
+
+display(ReportText('Obtained data analysis. '*200))
+
+display(graph)
+
+display(ReportText('Description of verifications outcomes. '*200))
+
 ## CELL 7
 ## Conclusion
- 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_conclusion = Section('Section that contains final conclusions')
-    CurrentContainer(sec_conclusion)
-    
-    display(ReportText('Conclusions '*200))
-    
-## CELL 8
-## Symbols description
- 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_symbols = Section('Section that contains all symbols descriptions')
-    CurrentContainer(sec_symbols)
-    
-    E_K,F = symbols('E_K,F')
-    descriptions = {
-    E_K:r"Kinetic energy", 
-    F:r"Force",  
-    }
-    syms_dict = descriptions
-    DescriptionsRegistry().set_descriptions({**syms_dict})
-    DescriptionsRegistry().reset_registry()
-    SymbolsDescription.set_default_header('  ')
 
-    display(SymbolsDescription({**syms_dict}))
-    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_conclusion = Section('Section that contains final conclusions')
+CurrentContainer(sec_conclusion)
+
+display(ReportText('Conclusions '*200))
+
 
 ## CELL 9
+## Symbols description
+
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_symbols = Section('Section that contains all symbols descriptions')
+CurrentContainer(sec_symbols)
+
+E_K,F = symbols('E_K,F')
+descriptions = {
+E_K:r"Kinetic energy", 
+F:r"Force",  
+}
+syms_dict = descriptions
+DescriptionsRegistry().set_descriptions({**syms_dict})
+DescriptionsRegistry().reset_registry()
+SymbolsDescription.set_default_header('  ')
+
+display(SymbolsDescription({**syms_dict}))
+
+
+## CELL 10
 ## Document
 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
-    # Creating file
-    # Be sure *output* folder is in the current directory
+# Creating file
+# Be sure *output* folder is in the current directory
 
-    thesis_name = './output/report_name' #path for report file 
-    doc = WutThesis(thesis_name)
+thesis_name = './output/report_name' #path for report file 
+doc = WutThesis(thesis_name)
 
 
-    # Bibliography of quotations
-    ### Select one bibligraphy managment system
-    ####### BibLatex
+# Bibliography of quotations
+### Select one bibligraphy managment system
+####### BibLatex
 
-    doc.preamble.append(Package('biblatex',arguments=["backend=biber","sorting=none"]))
-    doc.preamble.append(Command('addbibresource','elementy_bibliagrafia.bib'))
-    ####### Natbib
-    #doc.preamble.append(Package('natbib')
-    #doc.preamble.append(Command('bibliographystyle','unsrt'))
+doc.preamble.append(Package('biblatex',arguments=["backend=biber","sorting=none"]))
+doc.preamble.append(Command('addbibresource','elementy_bibliografia.bib'))
+####### Natbib
+#doc.preamble.append(Package('natbib')
+#doc.preamble.append(Command('bibliographystyle','unsrt'))
 
-    # TOC
-    doc.append(Command('tableofcontents')) #adds TOC
+# TOC
+doc.append(Command('tableofcontents')) #adds TOC
 
-    doc.append(sec_intro) # adding certain sections
-    doc.append(sub_problem_outline)
-    doc.append(sub_obj_assum)
-    doc.append(sub_SOT)
-    doc.append(sub_methodology)
-    doc.append(sec_formula)
-    doc.append(sec_picture)
-    doc.append(sec_simulation)
-    doc.append(sec_verification)
-    doc.append(sec_symbols)
-    doc.append(sec_conclusion)
+doc.append(sec_intro) # adding certain sections
+doc.append(sub_problem_outline)
+doc.append(sub_obj_assum)
+doc.append(sub_SOT)
+doc.append(sub_methodology)
+doc.append(sec_formula)
+doc.append(sec_picture)
+doc.append(sec_simulation)
+doc.append(sec_verification)
+doc.append(sec_tables)
+doc.append(sec_symbols)
+doc.append(sec_conclusion)
 
-    ### BibLatex
-    doc.append(Command('printbibliography',arguments=["title={Bibliography}"]))
-    ### Natbib
-    #doc.append(Command('bibliography',arguments=["references"])) # .bib file as "references"
+### BibLatex
+#doc.append(Command('printbibliography',arguments=["title={Bibliography}"])) - argument is to improve
+doc.append(Command('printbibliography')
 
-    #FIGURES LIST
+### Natbib
+#doc.append(Command('bibliography',arguments=["references"])) # .bib file as "references"
 
-    doc.append(Command('addcontentsline{toc}{section}{List of figures}'))
-    doc.append(Command('listoffigures'))
-    doc.append(Command('pagestyle{plain}'))
-    doc.append(Command('newpage'))
+#FIGURES LIST
 
-    #TABLES LIST
+doc.append(Command('addcontentsline{toc}{section}{List of figures}'))
+doc.append(Command('listoffigures'))
+doc.append(Command('pagestyle{plain}'))
+doc.append(Command('newpage'))
 
-    doc.append(Command('addcontentsline{toc}{section}{List of tables}'))
-    doc.append(Command('renewcommand{\listtablename}{List of tables}'))
-    doc.append(Command('listoftables'))
-    doc.append(Command('pagestyle{plain}'))
-    doc.append(Command('newpage'))
+#TABLES LIST
 
-    # Generating file
-    doc.generate_pdf(clean_tex=True)
+doc.append(Command('addcontentsline{toc}{section}{List of tables}'))
+doc.append(Command('renewcommand{\listtablename}{List of tables}'))
+doc.append(Command('listoftables'))
+doc.append(Command('pagestyle{plain}'))
+doc.append(Command('newpage'))
+
+# Generating file
+doc.generate_pdf(clean_tex=True)
+
+
 """
         )
         return ObjectCode(preliminary_str)

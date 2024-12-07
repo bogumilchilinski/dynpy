@@ -949,7 +949,7 @@ keyword - optional argument, keyword by which the classes are searched for
         from dynpy.utilities.report import ReportText
         
         if not self.full_list:
-            self.et_list(keyword)
+            self.get_classes(keyword)
         
         return ReportText(TreeNode.as_reporttext(self.full_list).replace('\n', "<br />"))
     

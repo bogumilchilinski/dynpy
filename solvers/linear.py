@@ -2243,7 +2243,13 @@ class ODESystem(AnalyticalSolution):
 ## koniec metod karoliny pozdraiwam ##
 
     def _get_code(self):
-        code_str = f'''
+        
+        from .tools import CodePrinter
+        
+        codeprinter_str = CodePrinter(self)._generate_code()
+        
+        code_str = f'''{codeprinter_str}
+        
 odes = {self.odes}
 dvars = {self.dvars}
 ivar = {self.ivar}
@@ -2251,6 +2257,15 @@ ode_order = {self.ode_order}
         
 ODESystem({self.odes}, {self.dvars}, {self.ivar}, {self.ode_order})
         '''
+        
+        symbols_org = [*self.odes.free_symbols]
+
+        for element in symbols_org:
+            element = str(element)
+            
+            if element in code_str:
+                code_str = code_str.replace(element, element.replace('\\', ''))
+        
         return code_str  
     
     def as_type(self, ode_type):        
