@@ -894,7 +894,7 @@ doc.append(sec_conclusion)
 
 ### BibLatex
 #doc.append(Command('printbibliography',arguments=["title={Bibliography}"])) - argument is to improve
-doc.append(Command('printbibliography')
+doc.append(Command('printbibliography',options=[NoEscape("title={Bibliography}")]))
 
 ### Natbib
 #doc.append(Command('bibliography',arguments=["references"])) # .bib file as "references"
@@ -1221,7 +1221,7 @@ doc.append(sec_conclusion)
 
 ### BibLatex
 #doc.append(Command('printbibliography',arguments=["title={Bibliography}"])) - argument is to improve
-doc.append(Command('printbibliography')
+doc.append(Command('printbibliography',options=[NoEscape("title={Bibliography}")]))
 
 ### Natbib
 #doc.append(Command('bibliography',arguments=["references"])) # .bib file as "references"
