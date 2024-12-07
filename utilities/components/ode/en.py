@@ -339,9 +339,9 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
         eps = Symbol('\\varepsilon')
 
         
-        return f"The ordering and separation of predicted solution in terms of the power of a small parameter {eps} leads to obtaining a recursive sequence of linear equations of motion leading to the solution of the nonlinear equation. The zeroth-order approximate linear equation is given below where the dependency was assumed for the zeroth-order solution of the time variable:"
+#         return f"The ordering and separation of predicted solution in terms of the power of a small parameter ${eps}$ leads to obtaining a recursive sequence of linear equations of motion leading to the solution of the nonlinear equation. The zeroth-order approximate linear equation is given below where the dependency was assumed for the zeroth-order solution of the time variable:"
 
-#         return f"The ordering and separation of equation ${AutoMarker(base_system.odes[0])}$ in terms of the power of a small parameter {eps} leads to obtaining a recursive sequence of linear equations of motion leading to the solution of the nonlinear equation. The zeroth-order approximate linear equation is given in ${AutoMarker(zeroth_ord_eq)}$ where the dependency was assumed for the zeroth-order solution of the time variable:"
+        return f"The ordering and separation of equation ${AutoMarker(base_system.odes[0])}$ in terms of the power of a small parameter ${eps}$ leads to obtaining a recursive sequence of linear equations of motion leading to the solution of the nonlinear equation. The zeroth-order approximate linear equation is given in ${AutoMarker(zeroth_ord_eq)}$ where the dependency was assumed for the zeroth-order solution of the time variable:"
     
     @property
     def middle_text(self):
@@ -365,7 +365,7 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
                                         
         t_list = base_system.t_list
 
-        return f"Since ${latex(t_list[0])}$ and ${latex(t_list[1])}$ are treated as independent, the differential equation becomes a partial differential equation for a function of two variables {t_list[0]} and {t_list[1]}. Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of {t_list[1]}."
+        return f"Since ${latex(t_list[0])}$ and ${latex(t_list[1])}$ are treated as independent, the differential equation becomes a partial differential equation for a function of two variables ${t_list[0]}$ and ${t_list[1]}$. Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of ${t_list[1]}$."
 
     def append_elements(self):
         
@@ -751,7 +751,7 @@ class SecularTermsEquationsComponent(ReportComponent):
     def header_text(self):
         t_list = self.reported_object.t_list
         
-        return f"Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of {t_list[1]}. Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the zeroth and first order approximations are as follows:"
+        return f"Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of ${latex(t_list[1])}$. Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the zeroth and first order approximations are as follows:"
 
         
     @property

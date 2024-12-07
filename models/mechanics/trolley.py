@@ -856,7 +856,7 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
     k = Symbol('k', positive=True)
     g = Symbol('g', positive=True)
     Omega = Symbol('Omega', positive=True)
-    F=Symbol('F', positive=True)
+    F = Symbol('F', positive=True)
     phi = dynamicsymbols('\\varphi')
     x = dynamicsymbols('x')
     u = dynamicsymbols('u')
@@ -914,16 +914,11 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
         
 
         
-        #zle
         self._material_point_1=MaterialPoint(self.m_p,self.x+(self.l+self.u+self.u_0)*sin(self.phi),qs=self.qs)
         self._material_point_2=MaterialPoint(self.m_p,(self.l+self.u+self.u_0)*cos(self.phi),qs=self.qs)
         self._gravity = GravitationalForce(self.m_p, self.g, -(self.l+self.u+self.u_0)*cos(self.phi), qs=self.qs)
 
-#prze
-    #jeszcze masz cos  i sin xle w MP    
-    #i już git teraz nie?
-    # piękinie :*
-    #dobra to już rozumiem
+
 #         self._material_point_1=MaterialPoint(self.m_p,self.x+(self.l+self.u)*sin(self.phi),qs=self.qs)
 #         self._material_point_2=MaterialPoint(self.m_p,(self.l+self.u)*cos(self.phi),qs=self.qs)
 #         self._gravity = GravitationalForce(self.m_p, self.g, -(self.l+self.u)*cos(self.phi), qs = self.qs)        
@@ -931,11 +926,7 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
         self._spring_2=Spring(self.k_l,self.u,qs=self.qs) # zostaw xD tu jesty ok
         
         
-#czaje
-# znow zle jest xD posułem celowo
 
-#dobra to ja narazie lece i potem z chłopakami ciśniemy dalej
-        
         components['_trolley'] = self._trolley
         #components['_pendulum'] = self._pendulum
         components['_force'] = self._force
