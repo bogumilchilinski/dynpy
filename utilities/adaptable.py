@@ -1169,7 +1169,10 @@ class TikZPlot(TikZ, ReportModule):
         self._report()
         
         return ' '
-
+    
+    @classmethod
+    def set_default_path(cls,path):
+        cls._default_path=path
 
 class DataMethods:
 
@@ -2951,7 +2954,9 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
 
                 params_dict[param_eq.lhs] = param_eq.rhs
 
-            numerized_model = model.numerized(params_dict, backend=backend,expand=expand)
+            #numerized_model = model.numerized(params_dict, backend=backend,expand=expand)
+            #try
+            numerized_model = model.subs(params_dict).numerized(backend=backend,expand=expand)
 
             t_span = np.asarray((self.index))
 

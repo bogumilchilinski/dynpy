@@ -851,8 +851,8 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
     real_name = 'taipei101.png'
 
     l = Symbol('l', positive=True)
-    m_t = Symbol('m_trolley', positive=True)
-    m_p = Symbol('m_pendulum', positive=True)
+    m_t = Symbol('m_t', positive=True)
+    m_p = Symbol('m_p', positive=True)
     k = Symbol('k', positive=True)
     g = Symbol('g', positive=True)
     Omega = Symbol('Omega', positive=True)
@@ -896,7 +896,6 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
         if y is not None: self.y = y
         if k_l is not None: self.k_l = k_l
         if u_0 is not None: self.u_0 = self.m_p * self.g / self.k_l
-      #  if u_0 is not None: u_0 = self.m_p * self.g / self.k_l
         self.ivar = ivar
         self.qs = [self.x,self.phi,self.u]
         self.u_0=self.g*self.l/self.k_l        
@@ -907,7 +906,6 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
     def components(self):
         components = {}
         
-        #self.u_0 = self.m_p * self.g / self.k_l
         self._trolley = SpringMassSystem(self.m_t, self.k, self.x, self.ivar)(label='Trolley')
         #self._pendulum = PendulumKinematicExct(self.l+self.u, self.m_p, self.g, self.phi, self.x, self.ivar)(label='Pendulum')
         self._force=Force(self.F*sin(self.Omega*self.ivar), pos1=self.qs[0], qs=self.qs)(label='Force')
@@ -919,9 +917,9 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
         self._gravity = GravitationalForce(self.m_p, self.g, -(self.l+self.u+self.u_0)*cos(self.phi), qs=self.qs)
 
 
-#         self._material_point_1=MaterialPoint(self.m_p,self.x+(self.l+self.u)*sin(self.phi),qs=self.qs)
-#         self._material_point_2=MaterialPoint(self.m_p,(self.l+self.u)*cos(self.phi),qs=self.qs)
-#         self._gravity = GravitationalForce(self.m_p, self.g, -(self.l+self.u)*cos(self.phi), qs = self.qs)        
+        # self._material_point_1=MaterialPoint(self.m_p,self.x+(self.l+self.u)*sin(self.phi),qs=self.qs)
+        # self._material_point_2=MaterialPoint(self.m_p,(self.l+self.u)*cos(self.phi),qs=self.qs)
+        # self._gravity = GravitationalForce(self.m_p, self.g, -(self.l+self.u)*cos(self.phi), qs = self.qs)        
 
         self._spring_2=Spring(self.k_l,self.u,qs=self.qs) # zostaw xD tu jesty ok
         
@@ -942,8 +940,9 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
         self.sym_desc_dict = {
             self.l: r'Pendulum length',
             self.k: r'Stiffness of a beam showed as a spring stiffness in trolley member',
-            self.k_l: r'Stiffness of a pendulum',
+            self.k_l: r'pendulum stiffness',
             self.x: r'Kinematic lateral excitation',
+            self.u: r'Kinematic excitation along the pendulum',
             self.phi: r'Angle of a pendulum',
             self.m_p: r'Mass of pendulum',
             self.m_t: r'Mass of trolley',
@@ -985,7 +984,7 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
         else:
 
             self.sym_desc_dict = {
-                self.m_t: r'trolley initial mass',
+                self.m_t: r'Mass of trolley',
                 self.m_p: r'pendulum initial mass',
                 self.k: r'mounting spring stiffness',
                 self.k_l: r'pendulum stiffness',
@@ -1028,8 +1027,8 @@ class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
 
     l = Symbol('l', positive=True)
     k_l = Symbol('k_l', positive=True)
-    m_t = Symbol('m_trolley', positive=True)
-    m_p = Symbol('m_pendulum', positive=True)
+    m_t = Symbol('m_t', positive=True)
+    m_p = Symbol('m_p', positive=True)
     k = Symbol('k', positive=True)
     g = Symbol('g', positive=True)
     Omega = Symbol('Omega', positive=True)
@@ -1039,6 +1038,9 @@ class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
     c = Symbol('c', positive=True)
     u = dynamicsymbols('u', positive=True)
     v = Symbol('v', positive=True)
+    alpha = Symbol('\\alpha')
+    beta = Symbol('\\beta')
+    rayleigh_damping_matrix = Symbol('rayleigh_damping_matrix', positive=True)
 
     def __init__(self,
                  l=None,
@@ -1047,9 +1049,12 @@ class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
                  m_p=None,
                  k=None,
                  g=None,
+                 alpha=None,
+                 beta=None,
                  Omega=None,
                  phi=None,
                  x=None,
+                 rayleigh_damping_matrix=None,
                  F=None,
                  c=None,
                  u=None,
@@ -1063,6 +1068,7 @@ class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
         if g is not None: self.g = g
         if phi is not None: self.phi = phi
         if x is not None: self.x = x
+        if rayleigh_damping_matrix is not None: self.rayleigh_damping_matrix = rayleigh_damping_matrix
         if k is not None: self.k = k
         if Omega is not None: self.Omega = Omega
         if F is not None: self.F = F
@@ -1099,6 +1105,8 @@ class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
             self.phi: r'Angle of a pendulum',
             self.m_p: r'Mass of pendulum',
             self.m_t: r'Mass of trolley',
+            self.alpha: r'inertia matrix Rayleigh damping coefficient',
+            self.beta: r'stiffness matrix Rayleigh damping coefficient',
             self.g: r'Gravity constant',
             self.F: r'Force',
             self.Omega: r'Excitation frequency',
@@ -1127,10 +1135,12 @@ class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
                 self.k_l: r'sztywność wahadła',
                 self.l: r'długość wahadła',
                 self.Omega: r'częstotliwość wymuszenia',
+                self.alpha: r'współczynnik tłumienia Rayleigha przy macierzy bezwładności',
+                self.beta: r'współczynnik tłumienia Rayleigha przy macierzy sztywności',
                 self.F: r'wartość siły wymuszającej',
                 self.g: r'przyspieszenie ziemskie',
                 self.flow_coeff: r'współczynnik przepływu cieczy',
-                    self.t_init: r'czas aktywacji tłumienia',
+                self.t_init: r'czas aktywacji tłumienia',
                 }
             return self.sym_desc_dict
 
@@ -1142,6 +1152,8 @@ class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
                 self.k: r'mounting spring stiffness',
                 self.k_l: r'pendulum stiffness',
                 self.l: r'pendulum length',
+                self.alpha: r'inertia matrix Rayleigh damping coefficient',
+                self.beta: r'stiffness matrix Rayleigh damping coefficient',
                 self.Omega: r'excitation frequency',
                 self.F: r'excitation force',
                 self.g: r'gravity constant',
@@ -1150,28 +1162,7 @@ class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
             }
             return self.sym_desc_dict
         
-### KACPER
-#     def _to_msm_form(self):
 
-#         #M_p = Symbol('M_p',positive=True)
-#         #M_t = Symbol('M_t',positive=True)
-#         Omega1 = Symbol('Omega1',positive=True)
-#         Omega2 = Symbol('Omega2',positive=True)
-
-#         #subs_dict = {self.m_p+self.m_pf:M_p,self.m_t+self.m_tf:M_t}
-
-#         odes_lhs = self.linearized()._ode_system.lhs
-
-#         ode1 = (odes_lhs.subs(subs_dict)[0]/(m_p+m_t)).expand().doit().ratsimp().subs(self.k,Omega1**2*(m_p+m_t)).ratsimp().expand().collect([self.phi.diff(self.ivar,2)*self.l])
-#         ode2 = (odes_lhs.subs(subs_dict)[1]/m_p/self.l/self.l).expand().doit().ratsimp().subs(self.g,Omega2**2*self.l).simplify()
-
-#         eps = Symbol('varepsilon')
-#         del1 = Symbol('delta1')
-#         f = Symbol('f',positive=True)
-
-#     from dynpy.solvers.linear import ODESystem
-
-#     return ODESystem(odes=Matrix([ode1.subs({ode1.coeff(self.phi.diff(self.ivar,2)):del1/eps,self.F:f*(m_p+m_t)}),ode2.subs(1/self.l,eps)]),dvars=self.q)
     
 #Zrobione Amadi
 class DampedTrolleyWithPendulum(TrolleyWithPendulum):
