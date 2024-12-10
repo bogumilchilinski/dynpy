@@ -1950,3 +1950,105 @@ class ODESystemOverviewUsageComponent(ReportComponent):
         display(ObjectCode(ds_overview_str))
         
         display(ReportText(odecompsov_str))
+
+        
+basic_dyn_sys_impl_intro_call_str=("""
+from dynpy.utilities.documents.guides import BasicsOfDynSysImplementationGuide
+from dynpy.utilities.components.guides.en import *
+BasicsOfDynSysImplementationGuide();
+""")
+
+
+basic_dsys_impl_intro_str =('''Guide consist of bellow components which can be called separatelly:
+*BasicsOfDynSysImplementationIntroComponent
+*DynSysImplementationComponent
+*DynamicSystemCallComponent
+*DynamicSystemMethodsUsageComponent
+*SimulationsComponent
+*DynSysCodeComponent
+''')
+
+class BasicsOfDynSysImplementationIntroComponent(ReportComponent):
+
+    title = "Introduction to basics of dynamic systems implementation"
+
+    def append_elements(self):
+
+        from dynpy.models import mechanics
+
+
+        display(ReportText('This guide concers basics of structure and implementation of dynamic systems in `DynPy` library.'))
+        display(ReportText('Basic call of it is as follows and runs default dynamic system which is `ForcedSpringMassSystem'))
+        display(ObjectCode(basic_dyn_sys_impl_intro_call_str))
+        
+        display(ReportText(basic_dsys_impl_intro_str))
+        
+        
+ODE_sys_intro_call_str=("""
+from dynpy.utilities.documents.guides import BasicsOfODESystemGuide
+from dynpy.utilities.components.guides.en import *
+from dynpy.models.mechanics.pendulum import ForcedSpringMassSystem
+
+BasicsOfODESystemGuide(reported_object=ForcedSpringMassSystem());
+
+""")
+
+
+ODE_sys_intro_str =('''Guide consist of bellow components which can be called separatelly:
+*ODESystemsUsageIntroComponent
+*BasicUsageOfODESystemComponent
+*ReportCompUseComponent
+*ProjectileExampleComponent
+*ODESimulationComponent
+*ODENumericalSimulationsComponent
+''')
+
+class ODESystemsUsageIntroComponent(ReportComponent):
+
+    title = "Introduction to basics of ODE systems"
+
+    def append_elements(self):
+
+        from dynpy.models import mechanics
+
+
+        display(ReportText('This guide concers basics of structure and usage of ODE systems in  `DynPy` library.'))
+        display(ReportText('Basic call of it is as follows and runs default dynamic system which is `ForcedSpringMassSystem'))
+        display(ObjectCode(ODE_sys_intro_call_str))
+        
+        display(ReportText(ODE_sys_intro_str))
+        
+        
+dyn_sys_intro_call_str=("""
+from dynpy.utilities.documents.guides import UsageOfDynamicSystemsGuide
+from dynpy.utilities.components.guides.en import *
+from dynpy.models.mechanics.pendulum import ForcedSpringMassSystem
+
+UsageOfDynamicSystemsGuide(reported_object=ForcedSpringMassSystem());
+
+""")
+
+
+dsys_intro_str =('''Guide consist of bellow components which can be called separatelly:
+*DynamicSystemsUsageIntroComponent
+*DynamicSystemCallComponent
+*DynamicSystemMethodsUsageComponent
+*NumericalAnalysisSimulationComponent
+*SimulationsComponent
+*SimulationReportComponent
+''')
+
+class DynamicSystemsUsageIntroComponent(ReportComponent):
+
+    title = "Introduction to basics of dynamic systems"
+
+    def append_elements(self):
+
+        from dynpy.models import mechanics
+
+
+        display(ReportText('This guide concers basics of structure and usage of dynamic systems in  `DynPy` library.'))
+        display(ReportText('Basic call of it is as follows and runs default dynamic system which is `ForcedSpringMassSystem'))
+        display(ObjectCode(dyn_sys_intro_call_str))
+        
+        display(ReportText(dsys_intro_str))

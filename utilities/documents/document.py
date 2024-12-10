@@ -961,19 +961,19 @@ CurrentContainer(sec_intro)
 
 sub_problem_outline = Subsection('Outline of the problem')
 CurrentContainer(sub_problem_outline)
-display(ReportText('This subsection provides information about investigated problem. '*100))
+display(ReportText('This subsection provides information about investigated problem. '*10))
 
 sub_obj_assum = Subsection('Objectives and assumptions')
 CurrentContainer(sub_obj_assum)
-display(ReportText('This subsection provides objectives and assumptions. '*100))
+display(ReportText('This subsection provides objectives and assumptions. '*10))
 
 sub_SOT = Subsection('State of the art')
 CurrentContainer(sub_SOT)
-display(ReportText('This subsection provides state of the art. '*100))
+display(ReportText('This subsection provides state of the art. '*10))
 
 sub_methodology = Subsection('Methodology')
 CurrentContainer(sub_methodology)
-display(ReportText('This subsection provides methodology. '*100))
+display(ReportText('This subsection provides methodology. '*10))
 
 
 
@@ -991,17 +991,19 @@ from sympy import Eq, Symbol, symbols
 sec_formula = Section('Section that presents formulas reporting')
 CurrentContainer(sec_formula)
 
-description = Subsection('Description of dynamic model')
-CurrentContainer(description)
-display(ReportText('This subsection provides description of the model. '*100))
+sec_description = Subsection('Description of dynamic model')
+CurrentContainer(sec_description)
+display(ReportText('This subsection provides description of the model. '*10))
 
 from dynpy.models.mechanics import ForcedSpringMassSystem as DynamicSys
-dyn_sys = DynamicSys()
-dyn_sys.as_picture()
 
-lagrangian = Subsection('Lagrangian and derivatives')
-CurrentContainer(lagrangian)
-display(ReportText('This subsection provides calculation of lagrangian and derivatives. '*100))
+dyn_sys = DynamicSys()
+display(dyn_sys.as_picture())
+
+
+sec_lagrangian = Subsection('Lagrangian and derivatives')
+CurrentContainer(sec_lagrangian)
+display(ReportText('This subsection provides calculation of lagrangian and derivatives. '*10))
 
 lagrangian = dyn_sys.L[0]
 lagrangian
@@ -1020,23 +1022,23 @@ for coord in dyn_sys.q:
     diff3 = lagrangian.diff(coord)
 
 
-    diff1_sym = Symbol(f'\\frac{{\\partial L}}{{\\partial {vlatex(vel)}}}')
-    diff2_sym = Symbol(f' \\frac{{d }}{{dt}}  {diff1_sym}'  )
-    diff3_sym = Symbol(f'\\frac{{\\partial L}}{{\\partial {vlatex(coord)}}}')
+    diff1_sym = Symbol(f'\\\\frac{{\\\\partial L}}{{\\\\partial {vlatex(vel)}}}')
+    diff2_sym = Symbol(f' \\\\frac{{d }}{{dt}}  {diff1_sym}'  )
+    diff3_sym = Symbol(f'\\\\frac{{\\\\partial L}}{{\\\\partial {vlatex(coord)}}}')
 
 
     display(SympyFormula(  Eq(diff1_sym,diff1)  ))    
     display(SympyFormula(  Eq( diff2_sym ,diff2)  ))
     display(SympyFormula(  Eq( diff3_sym ,  diff3)  ))
 
-display(ReportText('Outcomes of governing equations analysis. '*100))
+display(ReportText('Outcomes of governing equations analysis. '*10))
     
 
-equations = Subsection('Equations of motion')
-CurrentContainer(equations)
+sec_equations = Subsection('Equations of motion')
+CurrentContainer(sec_equations)
 
 
-display(ReportText('This subsection provides calculation of equations of motion and solution of the system. '*100))
+display(ReportText('This subsection provides calculation of equations of motion and solution of the system. '*10))
 
 ds1=dyn_sys.eoms
 
@@ -1083,11 +1085,59 @@ display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of pict
 sec_simulation = Section('Section that contains simulation')
 CurrentContainer(sec_simulation)
 
-display(ReportText('Simulation '*200))
+display(ReportText('Simulation '*50))
+
+## CELL 6 - Preparing of simulations - results
+
+import numpy as np
+
+
+from dynpy.models.mechanics import ForcedSpringMassSystem as DynamicSys
+dyn_sys = DynamicSys()
+
+param_dict = dyn_sys.get_numerical_parameters()
+t_span = np.linspace(0,1,1001)
+
+parameter = dyn_sys.system_parameters()[0] # 0-1 change a plot from const mass to const k
+param_dict = {**param_dict,parameter:parameter}
+
+
+display(param_dict)
+
+na_df = dyn_sys.subs(param_dict).numerical_analysis(parameter=parameter,param_span=[10,20], t_span = t_span).with_ics([0.0,2.0])
+
+
+na_df_sol_1 = na_df.compute_solution(t_span)
+na_df_sol_1.iloc[:,[0,2]]#.plot() #it creates only preview in notebook uncomment if needed
+
+
+#-----------------------------------------------------------
+
+ic_list = [0.0,0.0] ### Dla ukladu o jednym stopniu swobody
+parameter = dyn_sys.system_parameters()[0] # 0-1 change a plot from const mass to const k
+param_dict = {**param_dict,parameter:parameter}
+na_df = dyn_sys.subs(param_dict).eoms.numerical_analysis(parameter=parameter,param_span=[1,2,3], t_span = t_span)
+
+na_df_sol_2 = na_df.with_ics([2.0,0.0]).compute_solution(t_span)
+na_df_sol_2.iloc[:,[0,2]]#.plot() #it creates only preview in notebook uncomment if needed
+
+# CELL 7 Results plotting
+
+sec_plots = Subsection ('Plots')
+CurrentContainer (sec_plots) 
+
+plot_obj = na_df_sol_1.droplevel(0,axis=1)
+my_wykres=plot_obj.to_pylatex_tikz(subplots=True).in_figure(caption='??')
+display(my_wykres)
+
+plot_obj = na_df_sol_2.droplevel(0,axis=1)
+my_wykres=plot_obj.to_pylatex_tikz(subplots=True).in_figure(caption='??')
+display(my_wykres)
 
 
 
-## CELL 6
+
+## CELL 8
 ## Veryfication
 
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
@@ -1116,7 +1166,7 @@ LatexDataFrame.set_default_units(unit_dict)
 sec_verification = Section('Section that verificates research results')
 CurrentContainer(sec_verification)
 
-display(ReportText('Description of verifications concept. '*200))
+display(ReportText('Description of verifications concept. '*20))
 
 
 
@@ -1140,13 +1190,13 @@ graph = TimeDataFrame(df_cols).to_pylatex_tikz().in_figure(caption='Caption')
 
 display(data_tab)
 
-display(ReportText('Obtained data analysis. '*200))
+display(ReportText('Obtained data analysis. '*20))
 
 display(graph)
 
-display(ReportText('Description of verifications outcomes. '*200))
+display(ReportText('Description of verifications outcomes. '*20))
 
-## CELL 7
+## CELL 9
 ## Conclusion
 
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
@@ -1155,10 +1205,10 @@ display(ReportText('Description of verifications outcomes. '*200))
 sec_conclusion = Section('Section that contains final conclusions')
 CurrentContainer(sec_conclusion)
 
-display(ReportText('Conclusions '*200))
+display(ReportText('Conclusions '*20))
 
 
-## CELL 9
+## CELL 10
 ## Symbols description
 
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
@@ -1170,7 +1220,7 @@ CurrentContainer(sec_symbols)
 E_K,F = symbols('E_K,F')
 descriptions = {
 E_K:r"Kinetic energy", 
-F:r"Force",  
+F:r"Force",
 }
 syms_dict = descriptions
 DescriptionsRegistry().set_descriptions({**syms_dict})
@@ -1180,7 +1230,7 @@ SymbolsDescription.set_default_header('  ')
 display(SymbolsDescription({**syms_dict}))
 
 
-## CELL 10
+## CELL 11
 ## Document
 
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
@@ -1197,7 +1247,7 @@ doc = WutThesis(thesis_name)
 ### Select one bibligraphy managment system
 ####### BibLatex
 
-doc.preamble.append(Package('biblatex',arguments=["backend=biber","sorting=none"]))
+doc.preamble.append(Package('biblatex',["backend=biber","sorting=none"]))
 doc.preamble.append(Command('addbibresource','elementy_bibliografia.bib'))
 ####### Natbib
 #doc.preamble.append(Package('natbib')
@@ -1213,9 +1263,15 @@ doc.append(sub_SOT)
 doc.append(sub_methodology)
 doc.append(sec_formula)
 doc.append(sec_picture)
+
+doc.append(sec_description)
+doc.append(sec_lagrangian)
+doc.append(sec_equations)
+
 doc.append(sec_simulation)
+doc.append(sec_plots)
 doc.append(sec_verification)
-doc.append(sec_tables)
+#doc.append(sec_tables)
 doc.append(sec_symbols)
 doc.append(sec_conclusion)
 
@@ -1861,6 +1917,155 @@ Examplary setup is as follows:
     
         
         
+class StateOfTheArtReport(WutThesis):
+
+    @classmethod
+    def base_setup(cls):
+
+        
+        preliminary_str=(
+"""
+
+Examplary setup is as follows:
+
+## CELL 1
+## Imports
+
+
+
+    #Create file output
+    #In file output create bibliography as .bib file
+
+    from dynpy.utilities.report import *
+    from dynpy.utilities.templates.document import ResearchProjectReport
+
+    doc = ResearchProjectReport('./output/thesis_name')
+    
+
+## CELL 2
+## Thesis introduction
+    
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_intro = Section('Section that presents text reporting')
+    CurrentContainer(sec_intro)
+    
+    sub_problem_outline = Subsection('Outline of the problem')
+    CurrentContainer(sub_problem_outline)
+    display(ReportText('This subsection provides information about investigated problem. '*100))
+
+    sub_SOT = Subsection('State of the art')
+    CurrentContainer(sub_SOT)
+    display(ReportText('This subsection provides state of the art. '*100))
+    
+    sub_conclusions = Subsection('Conclusions')
+    CurrentContainer(sub_conclusions)
+    display(ReportText('This subsection provides conclusions. '*100))
+
+## CELL 3
+## Document
+
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+    # Creating file
+    # Be sure *output* folder is in the current directory
+
+    thesis_name = './output/report_name' #path for report file 
+
+    # Bibliography of quotations
+    doc.preamble.append(NoEscape(r'\\usepackage[backend=bibtex, sorting=none]{biblatex}'))
+    doc.preamble.append(NoEscape(r'\addbibresource{elementy_bibliagrafia.bib}'))
+    doc = ResearchProjectReport(thesis_name)
+    doc.append(sec_intro) # adding certain sections
+    doc.append(sub_problem_outline)
+    doc.append(sub_SOT)
+    doc.append(sub_conclusions)
+    doc.append(sec_conclusion)
+    doc.append(NoEscape(r'\printbibliography[title={Bibliografia}]'))
+    # Generating file
+    doc.generate_pdf(clean_tex=True)
+    
+    
+    
+
+"""
+        )
+
+        display(IPMarkdown(preliminary_str))    
+
+
+        preliminary_str=(
+"""
+
+Examplary setup is as follows:
+
+## CELL 1
+## Imports
+
+
+
+    #Create file output
+    #In file output create bibliography as .bib file
+
+    from dynpy.utilities.report import *
+    from dynpy.utilities.templates.document import ResearchProjectReport
+
+    doc = ResearchProjectReport('./output/thesis_name')
+    
+
+## CELL 2
+## Thesis introduction
+    
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+    sec_intro = Section('Section that presents text reporting')
+    CurrentContainer(sec_intro)
+    
+    sub_problem_outline = Subsection('Outline of the problem')
+    CurrentContainer(sub_problem_outline)
+    display(ReportText('This subsection provides information about investigated problem. '*100))
+
+    sub_SOT = Subsection('State of the art')
+    CurrentContainer(sub_SOT)
+    display(ReportText('This subsection provides state of the art. '*100))
+    
+    sub_conclusions = Subsection('Conclusions')
+    CurrentContainer(sub_conclusions)
+    display(ReportText('This subsection provides conclusions. '*100))
+
+## CELL 3
+## Document
+
+    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+    # Creating file
+    # Be sure *output* folder is in the current directory
+
+    thesis_name = './output/report_name' #path for report file 
+
+    # Bibliography of quotations
+    doc.preamble.append(NoEscape(r'\\usepackage[backend=bibtex, sorting=none]{biblatex}'))
+    doc.preamble.append(NoEscape(r'\addbibresource{elementy_bibliagrafia.bib}'))
+    doc = ResearchProjectReport(thesis_name)
+    doc.append(sec_intro) # adding certain sections
+    doc.append(sub_problem_outline)
+    doc.append(sub_SOT)
+    doc.append(sub_conclusions)
+    doc.append(sec_conclusion)
+    doc.append(NoEscape(r'\printbibliography[title={Bibliografia}]'))
+    # Generating file
+    doc.generate_pdf(clean_tex=True)
+    
+    
+    
+    
+
+""")
+        return ObjectCode(preliminary_str)        
 class ThesisTemplate(WutThesis):
     pass
         

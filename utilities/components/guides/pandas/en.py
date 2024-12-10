@@ -412,3 +412,39 @@ class AlgebraicExpressionComponent(ReportComponent):
         
         display(Eq(Symbol('T'),Ek))
 
+
+pandas_intro_call_str=("""
+from dynpy.utilities.documents.guides import IntroToPandasGuide
+from dynpy.utilities.components.guides.en import *
+from dynpy.models.mechanics.pendulum import ForcedSpringMassSystem
+
+IntroToPandasGuide(reported_object=ForcedSpringMassSystem());
+
+""")
+
+
+pandas_intro_str =('''Guide consist of bellow components which can be called separatelly:
+*IntroToPandasUsageComponent
+*PandasTableGenerationComponent
+*PandasMethodsComponent
+*BasicOperationsComponent
+*DynamicSystemCallComponent
+*SimulationsComponent
+*DifferentSimulationsComponent
+''')
+
+class IntroToPandasUsageComponent(ReportComponent):
+
+    title = "Introduction to basics of pandas library"
+
+    def append_elements(self):
+
+        from dynpy.models import mechanics
+
+
+        display(ReportText('This guide concers basic usage of pandas library with dynamical systems simulations in `DynPy` library.'))
+        display(ReportText('Basic call of it is as follows and runs default dynamic system which is `ForcedSpringMassSystem'))
+        display(ObjectCode(pandas_intro_call_str))
+        
+        display(ReportText(pandas_intro_str))
+

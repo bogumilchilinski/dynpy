@@ -389,6 +389,7 @@ class IntroToCocalcGuide(Guide):
         comp_list=[
 
             #github_comp.CocalcLoginComponent,
+            github_comp.CocalcUsageComponent,
             development_comp.JupyterSetUpComponent,
             github_comp.CocalcFolderComponent,
 
@@ -406,7 +407,7 @@ class UsageOfDynamicSystemsGuide(Guide):
     def _report_components(self):
 
         comp_list=[
-
+            systems_comp.DynamicSystemsUsageIntroComponent,
             systems_comp.DynamicSystemCallComponent,
             systems_comp.DynamicSystemMethodsUsageComponent,
 
@@ -433,7 +434,7 @@ class IntroToPandasGuide(Guide):
     def _report_components(self):
 
         comp_list=[
-
+            pandas_comp.IntroToPandasUsageComponent,
             pandas_comp.PandasTableGenerationComponent,
             pandas_comp.PandasMethodsComponent,
             reporting_comp.BasicOperationsComponent,
@@ -462,7 +463,7 @@ class BasicsOfODESystemGuide(Guide):
     def _report_components(self):
 
         comp_list=[
-
+            systems_comp.ODESystemsUsageIntroComponent,
             reporting_comp.BasicUsageOfODESystemComponent,
             #reporting_comp.ODEReportComponent,
             reporting_comp.ReportCompUseComponent,
@@ -482,6 +483,7 @@ class BasicsOfDynSysImplementationGuide(UsageOfDynamicSystemsGuide):
     def _report_components(self):
 
         comp_list=[
+            systems_comp.BasicsOfDynSysImplementationIntroComponent,
             systems_comp.DynSysImplementationComponent,
             systems_comp.DynamicSystemCallComponent,
             systems_comp.DynamicSystemMethodsUsageComponent,
@@ -499,7 +501,7 @@ class BasicsOfReportingGuide(UsageOfDynamicSystemsGuide):
     def _report_components(self):
 
         comp_list=[
-
+            reporting_comp.BasicsOfReportingIntroComponent,
             reporting_comp.ReportingBasicsComponent,
             systems_comp.DynamicSystemCallComponent,
             systems_comp.SimulationsComponent,
@@ -618,7 +620,7 @@ class GithubSynchroGuide(UsageOfDynamicSystemsGuide):
     def _report_components(self):
 
         comp_list=[
-
+            github_comp.GithubSynchroIntroComponent,
             github_comp.GitSynchroPanelAccessComponent,
             github_comp.GitSynchroIntroComponent,
             github_comp.UsageOfGitHubInterfacesComponent,

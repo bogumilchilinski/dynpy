@@ -3355,8 +3355,10 @@ class RollingBar(ComposedSystem):
     def components(self):
         components = {}
 
-        self.x = (self.r+self.h/2) / cos(self.phi)
-        self.y =  (self.r+self.h/2) * cos(self.phi) - self.r * self.phi * sin(self.phi)
+#         self.x = (self.r+self.h/2) / cos(self.phi)
+#         self.y =  (self.r+self.h/2) * cos(self.phi) - self.r * self.phi * sin(self.phi)
+        self.x = (self.r+self.h/2)* sin(self.phi) - (self.r*self.phi*cos(self.phi))
+        self.y =  (self.r+self.h/2) * cos(self.phi) + self.r * self.phi * sin(self.phi)
         I = self.m / 12 * (self.l**2 + self.h**2)
 
         self.material_point_1 = MaterialPoint(self.m, self.x,ivar=self.ivar, qs=[self.phi])
@@ -3508,8 +3510,10 @@ class ForcedRollingBar(RollingBar):
     def components(self):
         components = {}
 
-        self.x = (self.r+self.h/2) / cos(self.phi)
-        self.y =  (self.r+self.h/2) * cos(self.phi) - self.r * self.phi * sin(self.phi)
+#         self.x = (self.r+self.h/2) / cos(self.phi)
+#         self.y =  (self.r+self.h/2) * cos(self.phi) - self.r * self.phi * sin(self.phi)
+        self.x = (self.r+self.h/2)* sin(self.phi) - (self.r*self.phi*cos(self.phi))
+        self.y =  (self.r+self.h/2) * cos(self.phi) + self.r * self.phi * sin(self.phi)
         I = self.m / 12 * (self.l**2 + self.h**2)
 
 

@@ -436,3 +436,66 @@ class UsageOfMeetingCreatorComponent(ReportComponent):
         display(ObjectCode(MeetingIssueCreator))
         display(ReportText(' \\newline To learn more about this class use help. \\newline'))
 
+git_synchro_intro_call_str=("""
+from dynpy.utilities.documents.guides import GithubSynchroGuide
+from dynpy.utilities.components.guides.en import *
+
+GithubSynchroGuide();
+
+""")
+
+
+git_synchro_intro_str =('''Guide consist of bellow components which can be called separatelly:
+*GithubSynchroIntroComponent
+*GitSynchroPanelAccessComponent
+*GitSynchroIntroComponent
+*UsageOfGitHubInterfacesComponent
+*UsageOfMeetingCreatorComponent
+''')
+
+class GithubSynchroIntroComponent(ReportComponent):
+
+    title = "Introduction to basics of GithubSynchronization panel"
+
+    def append_elements(self):
+
+        from dynpy import mechanics
+
+
+        display(ReportText('This guide concers basics of GithubSynchronization panel.'))
+        #display(ReportText('Basic call of it is as follows and runs default dynamic system which is `ForcedSpringMassSystem'))
+        display(ObjectCode(git_synchro_intro_call_str))
+        
+        display(ReportText(git_synchro_intro_str))
+
+
+cocalc_setup_str=("""
+from dynpy.utilities.documents.guides import IntroToCocalcGuide
+from dynpy.utilities.components.guides.en import *
+
+IntroToCocalcGuide(None);
+
+""")
+
+cocalcus_str =('''Guide consist of bellow components which can be called separatelly:
+*CocalcUsageComponent
+*JupyterSetUpComponent
+*CocalcFolderComponent
+*CocalcDynSysListComponent
+*ReportingBasicsComponent
+''')
+
+class CocalcUsageComponent(ReportComponent):
+
+    title = "Introduction to usage of Cocalc"
+
+    def append_elements(self):
+
+        from dynpy.models import mechanics
+
+
+        display(ReportText('This guide concers basics of Cocalc enviroment capabilities that are crucial for explorating `DynPy` library.'))
+#         display(ReportText('Basic call of it is as follows and runs default dynamic system which is `ForcedSpringMassSystem'))
+        display(ObjectCode(cocalc_setup_str))
+        
+        display(ReportText(cocalcus_str))

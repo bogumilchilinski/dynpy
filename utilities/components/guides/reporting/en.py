@@ -2424,3 +2424,50 @@ class ReportingCompsUsageComponent(ReportComponent):
         display(ReportText('A tutaj przykładowy jupek z wykorzystaniem tego komponentu:'))
         display(ObjectCode(rep_jup_str))
 
+
+        
+reporting_intro_call_str=("""
+from dynpy.utilities.documents.guides import BasicsOfReportingGuide
+from dynpy.utilities.components.guides.en import *
+
+BasicsOfReportingGuide();
+
+""")
+
+
+reporting_intro_str =('''Guide consist of bellow components which can be called separatelly:
+*BasicsOfReportingIntroComponent
+*ReportingBasicsComponent
+*DynamicSystemCallComponent
+*SimulationsComponent
+*SimulationReportComponent
+*ReportingModuleIntroComponent
+*LibrariesImportComponent
+*DocumentComponent
+*CurrentContainerComponent
+*ReportTextComponent
+*PictureComponent
+*SympyFormulaComponent
+*DocumentGenerationComponent
+*PredefinedSectionComponent
+*TablesCreationComponent
+*AutomarkerIntroComponent
+*CodeEmbeddingComponent
+*UnitRegistryIntroComponent
+*ReportFormattingGuidelinesComponent
+''')
+
+class BasicsOfReportingIntroComponent(ReportComponent):
+
+    title = "Introduction to basics of reporting with DynPy"
+
+    def append_elements(self):
+
+        from dynpy import mechanics
+
+
+        display(ReportText('This guide concers basics of reporting in  `DynPy` library.'))
+        #display(ReportText('Basic call of it is as follows and runs default dynamic system which is `ForcedSpringMassSystem'))
+        display(ObjectCode(reporting_intro_call_str))
+        
+        display(ReportText(reporting_intro_str))

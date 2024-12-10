@@ -1369,11 +1369,52 @@ class ODESystem(AnalyticalSolution):
         return obj
 
 
-    def _as_msm(self):
-        ode=self
-        from dynpy.solvers.nonlinear import MultiTimeScaleSolution
+#     def _as_msm(self):
+#         ode=self
+#         from dynpy.solvers.nonlinear import MultiTimeScaleSolution
         
-        msm_eq=MultiTimeScaleSolution.from_ode_system(ode)
+#         msm_eq=MultiTimeScaleSolution.from_ode_system(ode)
+#         return msm_eq
+
+    def _as_msm(self, eps=None):
+
+        from dynpy.solvers.nonlinear import MultiTimeScaleSolution
+
+        if eps is None:
+            eps = Symbol('epsilon', positive=True)
+
+        iner_mat = self._inertia_matrix()
+        damp_mat = self._damping_matrix()
+        stiff_mat = self._stiffness_matrix()
+        exct_mat = self._free_component()
+
+        iner_mat_inv = iner_mat.inv()
+
+        iner_mat_dim = iner_mat * iner_mat_inv
+        damp_mat_dim = damp_mat * iner_mat_inv
+        stiff_mat_dim = stiff_mat * iner_mat_inv
+        exct_mat_dim = exct_mat * iner_mat_inv
+
+        delta = Symbol('\Delta', positive=True)
+        Omega = Symbol('Omega', positive=True)
+
+
+        if len(damp_mat) == 1:
+            if damp_mat[0] != 0:
+                damp_mat_dim = Matrix([eps])
+
+        if len(stiff_mat) == 1:
+            if stiff_mat[0] != 0:
+                stiff_mat_dim = Matrix([eps*delta + Omega**2])
+
+        if len(exct_mat) == 1:
+            if exct_mat[0] != 0:
+                exct_mat_dim = Matrix([eps*cos(Omega*self.ivar)])
+
+        dvars = self.dvars
+
+        msm_eq = MultiTimeScaleSolution(iner_mat_dim*dvars.diff(self.ivar,2) + damp_mat_dim*dvars.diff(self.ivar) + stiff_mat_dim * dvars - exct_mat_dim, self.dvars, eps = eps)
+
         return msm_eq
     
     def default_ics(self,critical_point=False):
@@ -2041,6 +2082,9 @@ class ODESystem(AnalyticalSolution):
     
     def _inertia_matrix(self):
         return self.lhs.jacobian(diff(self.dvars,self.ivar,2))
+    
+    def _damping_matrix(self):
+        return self.lhs.jacobian(diff(self.dvars))
     
     def _eigenvals_simplified(self):
         
