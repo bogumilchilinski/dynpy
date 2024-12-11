@@ -1372,7 +1372,7 @@ class ODESystem(AnalyticalSolution):
 #     def _as_msm(self):
 #         ode=self
 #         from dynpy.solvers.nonlinear import MultiTimeScaleSolution
-        
+
 #         msm_eq=MultiTimeScaleSolution.from_ode_system(ode)
 #         return msm_eq
 

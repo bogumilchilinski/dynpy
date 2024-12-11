@@ -654,7 +654,7 @@ class CircutRC(ComposedSystem):
     
     
     
-class CircutRLC(ComposedSystem):
+class CircuitRLC(ComposedSystem):
     """
     A class that determines the equation of an electrical circuit in an RLC system
     """
@@ -665,8 +665,7 @@ class CircutRLC(ComposedSystem):
     resistance=Symbol('R', positive=True)
     inductance=Symbol('L', positive=True)
     capacity=Symbol('C', positive=True)
-    q0=dynamicsymbols('q_c')
-    qs=dynamicsymbols('qs')
+    q0=dynamicsymbols('q')
     frame=Symbol('frame', positive=True)
     ivar=Symbol('t')
     
@@ -678,7 +677,6 @@ class CircutRLC(ComposedSystem):
                  capacity=None,
                  ivar=None,
                  q0=None,
-                 qs=None,
                  frame=None,
                  z=None,
                  **kwargs):
@@ -691,7 +689,6 @@ class CircutRLC(ComposedSystem):
         if ivar is not None: self.ivar = ivar
         if z is not None: self.z = z
         if q0 is not None: self.q0 = q0
-        if qs is not None: self.qs = qs
         if frame is not None: self.frame = frame
 
         self.qs = [self.q0]
@@ -722,6 +719,136 @@ class CircutRLC(ComposedSystem):
         }
 
         return self.sym_desc_dict
+    
+class CircuitRLCWithPWM(CircuitRLC):
+    """
+    A class that determines the equation of an electrical circuit in an RLC system
+    """
+    # scheme_name = 'engine.png'
+    # real_name = 'engine_real.PNG'
+    
+
+    resistance=Symbol('R', positive=True)
+    inductance=Symbol('L', positive=True)
+    capacity=Symbol('C', positive=True)
+    U=Symbol('U',positive=True)
+    eps=Symbol('varepsilon',postive=True)
+    rho=Symbol('rho',positive=True)
+    delta=Symbol('delta',positive=True)
+    q0=dynamicsymbols('q')
+    omega=Symbol('omega',positive=True)
+    ivar=Symbol('t')
+    
+    
+    
+    def __init__(self,
+                 resistance=None,
+                 inductance=None,
+                 capacity=None,
+                 U=None,
+                 eps=None,
+                 rho=None,
+                 delta=None,
+                 ivar=None,
+                 q0=None,
+                 frame=None,
+                 z=None,
+                 **kwargs):
+
+        
+        
+        if resistance is not None: self.resistance = resistance
+        if inductance is not None: self.inductance = inductance
+        if capacity is not None: self.capacity = capacity
+        if U is not None: self.U=U
+        if eps is not None: self.eps=eps
+        if rho is not None: self.rho=rho
+        if delta is not None: self.delta=delta
+        if ivar is not None: self.ivar = ivar
+        if z is not None: self.z = z
+        if q0 is not None: self.q0 = q0
+        if frame is not None: self.frame = frame
+
+        self.qs = [self.q0]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+        self.r_var = self.resistance*(1+self.eps*self.rho  ) 
+        
+        
+        self.resistor = Resistor(self.r_var, self.q0,  qs=self.qs,ivar=self.ivar , frame=base_frame)('resistor')
+        self.inductor = Inductor(self.inductance, self.q0, ivar=self.ivar, qs=self.qs, frame=base_frame)('inductor')
+        self.capacitor = Capacitor(self.capacity/self.delta/self.eps, self.q0, ivar=self.ivar, qs=self.qs, frame=base_frame)('capacitor')
+        self.voltage= VoltageSource(self.U,self.q0,ivar=self.ivar,qs=self.qs)
+        
+        components['resistor'] = self.resistor
+        components['inductor'] = self.inductor
+        components['capacitor'] = self.capacitor
+        components['voltage'] = self.voltage
+
+        
+        return components
+        
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.resistance: r'resistance',
+            self.inductance: r'inductance',
+            self.capacity: r'capacity',
+            self.U:r'source voltage',
+            self.eps:r'small parameter',
+            self.rho:r'formula representing resistance variation'
+            
+        }
+
+        return self.sym_desc_dict
+    
+#     def trig_stiff(self, angle=2*pi):
+#         trig = sin(self.omega * self.ivar)
+#         new_eq = self.subs(self.k_var,trig)
+        
+#         return new_eq
+    
+#     def wave_stiff(self):
+#         wave1=(100*(sin(self.ivar/self.T))+1000)*Heaviside(sin(self.ivar/self.T))
+#         wave2=(100*(-sin(self.ivar/self.T)))*Heaviside(-sin(self.ivar/self.T))
+#         waves=wave1+wave2
+#         new_eq = self.subs(self.k_var,waves)
+
+#         return new_eq
+        
+#     def rect_stiff(self,no=6,numerical=False):
+#         t=self.ivar
+#         omg = self.omega
+        
+#         trig=sum([Heaviside(omg*t-1) + 0* Heaviside(omg*t-2)  for ind in range(no)])
+#         new_eq=self.subs(self.k_var,trig)
+        
+#         return new_eq
+    
+    def approx_rect(self,no=6,numerical=False):
+        
+        if numerical is True:
+            amps_list = [2.27348466531425,0, 0.757408805199249,0, 0.453942816897038,0, 0.323708002807428,0, 0.25121830779797,0, 0.204977919963796,0, 0.172873394602606,0, 0.149252079729775,0, 0.131121653619234,0, 0.116749954968057,0]
+        else:
+            amps_list = symbols(f'a_0:{no}')
+        
+        rectangular_approx = sum([N(amp,3)*sin(((ind)+1)*self.omega*self.ivar) for ind,amp in enumerate(amps_list[0:no])])
+        new_eq=self.subs({self.r_var:(rectangular_approx)})
+        
+        return new_eq
+    
+#     def ode_with_delta(self):
+#         delta=Symbol('delta', positive=True)
+#         eps =Symbol('varepsilon', positive=True)
+        
+#         with_delta = self._eoms[0]+self.resistance*eps*delta*self.q0.diff(self.ivar)
+#         delta_sys = type(self._ode_system)(with_delta, Matrix([self.q0]), ivar=self.ivar, ode_order=2)
+
+#         return delta_sys
 # class BatteryCharging(ComposedSystem):
     
 #     V_OCV = Symbol('V_OCV',positive=True)

@@ -824,10 +824,10 @@ class MultiTimeScaleSolution(ODESystem):
             # display(approx_subs.ivar)
             # display(approx_subs.secular_terms)
             # display(type(approx_subs.secular_terms))
+            print("HERE")
+            display(approx_subs)
+            self.secular_eq[self.eps**(order +1)] = (approx_subs.secular_terms.as_type(FirstOrderLinearODESystem))
 
-            self.secular_eq[self.eps**(order +
-                                       1)] = (approx_subs.secular_terms.as_type(FirstOrderLinearODESystem))
-            
             
             #print('with secular terms')
             #display(approx_subs)

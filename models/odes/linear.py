@@ -1,6 +1,6 @@
 from sympy import *
 from dynpy.solvers.linear import ODESystem
-from dynpy.solvers.nonlinear import MultiTimeScaleSolution
+from dynpy.solvers.perturbational import MultiTimeScaleSolution
 from dynpy.models.mechanics import ForcedSpringMassSystem
 import numpy as np
 import matplotlib.pyplot as plt
@@ -134,15 +134,10 @@ class ExcitationSpringMassMSM(MultiTimeScaleSolution):
         
         MSM_eq=Eq(x.diff(t,2) + eps*diff(x) + omega_0**2*x,eps*A*sin(Omega * t))
         MSM = cls(MSM_eq.lhs-MSM_eq.rhs,dvars=x, eps=eps)
-        exc_dict = {omega_0:Omega**2+eps*delta}
-        MSM_sol_sub = MSM.solution.subs(exc_dict)
-        omg_eq = Eq(omega_0, Omega**2+eps*delta)
-        omg_sol = solve(omg_eq, Omega)[1]
-        sec_dict = {A:1, delta:0, Omega: omg_sol, omega_0:k/m}
+#         exc_dict = {omega_0:Omega**2+eps*delta}
+#         MSM_sol_sub = MSM.solution.subs(exc_dict)
         
-        MSM_sol_fin = MSM_sol_sub.subs(sec_dict)
-        
-        return MSM_sol_fin
+        return MSM
 
 
 class HarmonicOscillator(ODESystem):

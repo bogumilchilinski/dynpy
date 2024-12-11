@@ -551,3 +551,6 @@ class DDOFGearMechanism(ComposedSystem):
     
     def as_equivalent_sdof(self):
         return EquivalentSDOFGearModel()
+
+class EquivalentSDOFGearModel(EquivalentGearModel):
+    pass

@@ -365,7 +365,7 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
                                         
         t_list = base_system.t_list
 
-        return f"Since ${latex(t_list[0])}$ and ${latex(t_list[1])}$ are treated as independent, the differential equation becomes a partial differential equation for a function of two variables ${t_list[0]}$ and ${t_list[1]}$. Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of ${t_list[1]}$."
+        return f"Since ${latex(t_list[0])}$ and ${latex(t_list[1])}$ are treated as independent, the differential equation becomes a partial differential equation for a function of two variables ${latex(t_list[0])}$ and ${latex(t_list[1])}$. Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of ${latex(t_list[1])}$."
 
     def append_elements(self):
         
