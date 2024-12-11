@@ -1,6 +1,7 @@
 from pylatex import (Document, Package, Command, NewPage, Tabularx
                      #Section, Subsection, Subsubsection, Itemize,  HorizontalSpace, Description, Marker
                     )
+from pylatex.base_classes import Environment
 #from pylatex.section import Paragraph, Chapter
 from pylatex.utils import (#italic, 
                            NoEscape)
@@ -449,6 +450,133 @@ class BPASTSPaper(Document):
             
     def keywords(self,keywords=None):
         self.preamble.append(Command('Keywords',arguments=[keywords]))
+        
+class Keywords(Environment):
+    latex_name='keyword'
+class Abstract(Environment):
+    latex_name='abstract'
+
+
+class ElsevierPaper(Document):
+    
+    '''
+    Doc = ElsevierTemplate(default_filepath='./output/paper')
+    Doc.journal('Advances in Engineering Software')
+
+    Doc.begin_frontmatter
+
+    Doc.corresponding_author('Damian Sierociński','damian.sierocinski@pw.edu.pl')
+    Doc.authors(['Bogumił Chiliński','Franciszek Gawiński','Piotr Przybyłowicz','Amadeusz Radomski'])
+    Doc.abstract([NoEscape('\\textit{DynPy} is an open-source library implemented in \\textit{Python} programming language which aims to provide a versatile set of functionalities, that enable the user to model, solve, simulate, and report an analysis of a dynamic system in a single environment. In the paper examples for obtaining analytical and numerical solutions of the systems described with ordinary differential equations were presented. The assessment of solver accuracy was conducted utilising a model of a direct current motor and \\textit{MATLAB/Simulink} was used as a reference tool. The model was solved in \\textit{DynPy} with the hybrid analytical-numerical method and fully analytically, while in \\textit{MATLAB/Simulink} strictly numerical simulations were run. The comparison of the results obtained from both tools not only proved the credibility of the developed library but also showed its superiority in specific conditions. Moreover, the versatility of the tool was confirmed, as the whole process – from the definition of the model to the output of the formatted paper – was handled in the scope of a single \\textit{Jupyter} notebook.')])
+    Doc.keywords(['engineering software','numerical simulations','analytical solution','electrical circuit',NoEscape('\\textit{Python} programming language')])
+    Doc.title(NoEscape("An assessment of \\textit{DynPy} solver accuracy"))
+    Doc.end_frontmatter
+    '''
+    
+    latex_name = 'document'
+    packages = [
+#                   Package('geometry',options=['lmargin=30mm', 'rmargin=30mm',  'top=25mm', 'bmargin=25mm', 'headheight=50mm']),
+#                   Package('microtype'),
+#                   Package('authoraftertitle'),
+#                   Package('listings'),
+#                   Package('titlesec'),
+#                   Package('fancyhdr'),
+#                   Package('graphicx'),
+#                   Package('indentfirst'),
+#                   Package('pdfpages'),
+                  Package('fontspec'),
+                  Package('amsmath'),
+                  Package('amssymb'),
+                  Package('epsfig'),
+#                   Command('graphicspath{{../}}'),
+#                   Command('frenchspacing'),
+#                   Command('counterwithin{figure}{section}'),
+#                   Command('counterwithin{table}{section}'),
+#                   Command('fancypagestyle{headings}{\\fancyhead{} \\renewcommand{\headrulewidth}{1pt} \\fancyheadoffset{0cm} \\fancyhead[RO]{\\nouppercase{\\leftmark}} \\fancyhead[LE]{\\nouppercase{\\leftmark}} \\fancyfoot{} \\fancyfoot[LE,RO]{\\thepage}}'),
+#                   Command('fancypagestyle{plain}{\\fancyhf{} \\renewcommand{\\headrulewidth}{0pt} \\fancyfoot[LE,RO]{\\thepage}}'),
+#                   Command('numberwithin{equation}{section}'),
+#                   Command('renewcommand{\\familydefault}{\\sfdefault}'),
+        #\renewcommand{\familydefault}{\sfdefault}
+        
+    ]
+    
+    
+    
+    def __init__(self,
+                 default_filepath='default_filepath',
+                 title='Basic title',
+                 *,
+                 documentclass='elsarticle',
+                 document_options=['final', 'times'], # for submission
+#                  document_options=['final', '5p', 'times' ,'twocolumn'], for preview
+                 fontenc=None,
+                 inputenc='utf8',
+                 font_size='normalsize',
+                 lmodern=False,
+                 textcomp=True,
+                 microtype=True,
+                 page_numbers=True,
+                 indent=None,
+                 geometry_options=['inner=30mm', 'outer=20mm', 'bindingoffset=10mm', 'top=25mm', 'bottom=25mm'],#,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
+                 data=None):
+
+        super().__init__(
+            default_filepath=default_filepath,
+            documentclass=documentclass,
+            document_options=document_options,
+            fontenc=fontenc,
+            inputenc=inputenc,
+            font_size=font_size,
+            lmodern=lmodern,
+            textcomp=textcomp,
+            microtype=microtype,
+            page_numbers=page_numbers,
+            indent=indent,
+            geometry_options=geometry_options,
+            data=data,
+        )
+    @property
+    def begin_frontmatter(self):
+        self.append(ReportText(NoEscape('\\begin{frontmatter}')))
+        
+    @property
+    def end_frontmatter(self):
+        self.append(ReportText(NoEscape('\\end{frontmatter}')))
+        
+    def corresponding_author(self,author=None,email=None):
+        
+
+        self.append( Command('author[label1]',arguments=[NoEscape(f'{author}\\corref{{cor1}}')])) 
+        self.append(Command('ead',arguments=[f'{email}']))
+#         self.append(Command('fntext[label2]'))
+        self.append(Command('cortext[cor1]{Corresponding author.}'))
+        self.append(Command('affiliation[label1]',arguments=[NoEscape('organization={Warsaw Univeristy of Technology, Faculty of Automotive and Constrction Machinery Engineering},addressline={Ludwika Narbutta 84},city={Warsaw},postcode={02-524},state={Masovian Voivodeship},country={Poland}')]))
+        
+    def keywords(self,keywords_list=None):
+        kwl=len(keywords_list)
+        with self.create(Keywords()):
+            for num, val in enumerate(keywords_list):
+                self.append(val)
+                if num<kwl-1:
+                    self.append(NoEscape('\sep'))
+
+    def authors(self,authors_list=None):
+        self.authors_list=authors_list
+        
+        for num,val in enumerate(self.authors_list):
+            self.append( Command('author[label1]',arguments=[val]))
+            
+    def journal(self,journal_name=None):
+        self.preamble.append(Command('journal',arguments=[journal_name]))
+    def title(self,title=None):
+        self.preamble.append(Command('title',arguments=[title]))
+    def abstract(self,container=None):
+        with self.create(Abstract()):
+            for num, val in enumerate(container):
+                self.append(ReportText(val))
+
+            
+
         
 class WutThesis(Document):
     
@@ -2643,7 +2771,7 @@ class ODESystemOverviewReport(UsageOfDynamicSystemsGuide):
     def default_reported_object(self):
 
         #from ...models.mechanics.tmac import SDOFWinchSystem
-        from ...models.odes.linear import LinearFirstOrder
+        from ...modf.odes.linear import LinearFirstOrder
         
         return LinearFirstOrder.from_reference_data()
     
@@ -2723,7 +2851,8 @@ class MDPIPaper(Document):
         )
         
 
-
+        Markdown.set_mdpi() #deletes hyperref package associated with Markdown class to avoid clash
+        
         self.preamble.append(Command('firstpage','1'))
         self.preamble.append(Command('makeatletter'))
         self.preamble.append(NoEscape('\\setcounter{page}{\@firstpage}'))

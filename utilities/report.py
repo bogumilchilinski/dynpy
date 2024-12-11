@@ -2909,7 +2909,7 @@ class Markdown(Environment,ReportModule):
     @classmethod
     def set_mdpi(cls):
         cls.packages = [
-                Package('markdown'),
+#                 Package('markdown'),
                 ]
         
     

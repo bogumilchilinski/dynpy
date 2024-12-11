@@ -1,7 +1,7 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, asin, diff, sqrt, S,
                    diag, Eq, hessian, Function, flatten, Tuple, im, pi, latex,
                    dsolve, solve, fraction, factorial, Subs, Number, oo, Abs,
-                   N, solveset, atan,Heaviside)
+                   N, solveset, atan,Heaviside,sign)
 
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
@@ -208,7 +208,7 @@ class ForcedSpringMassSystem(SpringMassSystem):
 #dziedziczenie po SpringMass
 #owner: KrzychT
 #supervision: Boogi
-class EquivalentSDOFGearModel(ComposedSystem):
+class EquivalentGearModel(ComposedSystem):
     """Ready to use sample Single Degree of Freedom System with mass on spring
         Arguments:
         =========
@@ -399,6 +399,51 @@ class EquivalentSDOFGearModel(ComposedSystem):
         delta_sys = type(self._ode_system)(with_delta, Matrix([self.z]), ivar=self.ivar, ode_order=2)
 
         return delta_sys
+
+
+    
+    
+    def _stiffness_models(self):
+    
+        #parabola
+        #para_series = 80*(t_values%(T_value/2))*((t_values%(T_value/2))-(T_value/2))*(-0.4)
+        #para_series_heave =  10*np.heaviside(np.sin(2*np.pi/(T_value)*t_values),0.5)
+        #para_values=(0.5*(para_series+para_series_heave-6))
+        
+
+        #wave
+        t = self.ivar
+        T = self.T
+        
+        wave1=(1*(sin(2*pi*t/T))+2.0)*(1/2 + 1/2*sign(sin(2*pi*t/T)))
+        wave2=(1*(-sin(2*pi*t/T))-3.0)*(1/2+ 1/2*sign(-sin(2*pi*t/T)))
+        waves=wave1+wave2
+
+
+
+        #rectangular
+        rectangular=5*((1/2+1/2*sign(sin(2*pi*t/T)))-S.Half)
+
+
+
+        #rectangular_approx
+        amps_list = [2.27348466531425, 0.757408805199249, 0.453942816897038, 0.323708002807428, 0.25121830779797, 0.204977919963796, 0.172873394602606, 0.149252079729775, 0.131121653619234, 0.116749954968057]
+        rectangular_approx = sum([amp*2/sqrt(2)*sin((2*(no)+1)*2*pi*t/T) for no,amp in enumerate(amps_list[0:])])
+
+
+        
+        return {'wave':waves, 'rect':rectangular, 'approx':rectangular_approx}
+
+    def _stiffness_waveforms(self):
+        
+        from sympy import lambdify
+        
+        t = self.ivar
+        T = self.T
+        
+        return {label:lambdify((t, T), waveform)   for label,waveform in self._stiffness_models().items() }
+    
+    
     
 class DDOFGearMechanism(ComposedSystem):
     scheme_name = 'MDOF_Forced_Disks_With_Serial_Springs.PNG'
