@@ -424,9 +424,9 @@ class DynsysCheckerTable:
                             'Picture': param.check_picture(),
                             'Result': []}
             if False in new_row.values():
-                res = False
+                res = 'To Improve'
             else:
-                res = True
+                res = "Correct"
             self.df = pd.concat([self.df, pd.DataFrame([new_row])], ignore_index=True)
             self.df.loc[self.df.index[-1], 'Result'] = res
             
@@ -436,4 +436,4 @@ class DynsysCheckerTable:
             self.table_append(element)
     
     def get_table(self):
-        return self.df.replace({1.0: True, 0.0: False})
+        return self.df.replace({1.0: True, 0.0: False}).replace({True: 'Correct', False: 'To Improve'})

@@ -459,7 +459,7 @@ class GithubSynchroIntroComponent(ReportComponent):
 
     def append_elements(self):
 
-        from dynpy import mechanics
+        #from dynpy import mechanics
 
 
         display(ReportText('This guide concers basics of GithubSynchronization panel.'))
