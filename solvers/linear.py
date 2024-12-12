@@ -1378,7 +1378,7 @@ class ODESystem(AnalyticalSolution):
 
     def _as_msm(self, eps=None):
 
-        from dynpy.solvers.nonlinear import MultiTimeScaleSolution
+        from dynpy.solvers.perturbational import MultiTimeScaleSolution
 
         if eps is None:
             eps = Symbol('epsilon', positive=True)

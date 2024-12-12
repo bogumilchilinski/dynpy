@@ -2463,7 +2463,7 @@ class BasicsOfReportingIntroComponent(ReportComponent):
 
     def append_elements(self):
 
-        from dynpy import mechanics
+        from dynpy.models import mechanics
 
 
         display(ReportText('This guide concers basics of reporting in  `DynPy` library.'))

@@ -3312,7 +3312,7 @@ class ObjectCode(LstListing,ReportModule):
         self.reported()
         #print(self.code_type)
         
-        return '\t'+self.code_type.replace('\n','\n \t')
+        return '```python \n'+self.code_type + '\n``` '
 
     def _as_string(self):
 
