@@ -3314,7 +3314,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 if type(arg) == sin:
                     sin_coeff = arg.args[0].diff(self.ivar)
     
-        T = 2*pi/sin_coeff
+        T = -2*pi/sin_coeff
     
         new_expr = 0
     
@@ -3507,8 +3507,6 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         #display(rest)
         return components+[(S.One,rest)]
 
-
-                                 
     @cached_property
     def _steady_solution(self):
         '''
@@ -3550,6 +3548,81 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                             omg = arg.args[0].diff(self.ivar).doit()
                     sol += self._exp_cos_comp(omg,coeff,a) + self._exp_sin_comp(omg,0*b,a)
 
+
+
+            elif type(elem) == Heaviside and (type(elem.args[0]) in (sin,cos) or type(elem.args[0]*(-1)) in (sin,cos) ):
+                
+                # print('heaviside check')
+                # display(coeff)
+                # display(elem)
+                arg = elem.args[0]
+#                 display(arg)
+#                 display(-arg)
+                if type(arg) == sin:
+                    ivar0 =  0
+                    gap =(2*pi/ arg.args[0].diff(self.ivar))#.n(6)
+#                     display('args0 sin')
+#                     display(arg.args[0])
+#                     display('gap sin')
+#                     display(gap)
+    
+                elif type(arg) == cos:
+                    ivar0 =  -(S.Half*pi/ arg.args[0].diff(self.ivar))#.n(6)
+#                     display('ivar0 cos')
+#                     display(ivar0)
+                    gap =(2*pi/ arg.args[0].diff(self.ivar))#.n(6)
+                elif type(-arg) == cos:
+                    ivar0=(S.Half*pi/arg.args[1].args[0].diff(self.ivar))
+#                     display('ivar0 cos')
+#                     display(ivar0)
+                    gap =0#2*pi/arg.args[1].args[0].diff(self.ivar)
+#                     display('arg0 cos')
+#                     display(arg.args[1].args[0])
+#                     display('gap -cos')
+#                     display(gap)
+                    
+
+                
+                ics_list = list(0*b)
+                # print('homo eq')
+                odes_hg =self._hom_equation()._as_fode()
+                odes = ODESystem(odes_hg.lhs,self.dvars,odes_hg.rhs+coeff,ivar=self.ivar,ode_order=1)
+                odes_out = ODESystem(odes_hg.lhs,self.dvars,odes_hg.rhs-coeff,ivar=self.ivar,ode_order=1)
+
+                # print(f'homo eq of type {type(self._hom_equation())}')
+                # display(self._hom_equation())
+
+                # print(f'homo eq + coeff as type {type(odes)}')
+                # display(odes)
+                #sol_H = ODESystem.from_ode_system(odes)._as_fode().solution.with_ics(ics_list,ivar0)
+
+                n = Symbol('n')
+                CodeFlowLogger(ivar0+gap*n,'ivar value',self)
+
+                ivar_H_start = ivar0+gap*n
+                ivar_H_end = ivar0+gap/2+gap*n
+
+                #ivar0=Symbol('t0')
+                sol_H = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes).solution.with_ics(ics_list,ivar_H_start)
+                display(sol_H)
+                sol_H_out = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes_out).solution.with_ics(ics_list,ivar_H_end)
+
+                from sympy import Sum,oo
+                n_num = Symbol('N')
+
+                sol_series_start =  sol_H.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar - ivar_H_start ),(n,-n_num,n_num,)   ) )
+                sol_series_end =  sol_H_out.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar -  ivar_H_end    ),(n,-n_num,n_num)   ) )
+
+                sol_series = sol_series_start + sol_series_end
+
+                CodeFlowLogger(sol_H,'Heaviside result')
+                CodeFlowLogger(sol_H.rhs*elem)
+
+                CodeFlowLogger(sol_series,'SolSeries')
+                #CodeFlowLogger(sol_H.rhs*elem)
+
+                sol += sol_series#*elem
+
             elif type(elem) == Heaviside and type(elem.args[0]) not in (sin,cos):
                 
                 # print('heaviside check')
@@ -3577,62 +3650,6 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 CodeFlowLogger(sol_H.rhs*elem)
                 
                 sol += sol_H.rhs*elem
-
-            elif type(elem) == Heaviside and type(elem.args[0]) in (sin,cos):
-                
-                # print('heaviside check')
-                # display(coeff)
-                # display(elem)
-                arg = elem.args[0]
-                
-                if type(arg) == sin:
-                    ivar0 =  0
-                    gap =(2*pi/ arg.args[0].diff(self.ivar))#.n(6)
-    
-                elif type(arg) == cos:
-                    ivar0 =  -(S.Half*pi/ arg.args[0].diff(self.ivar))#.n(6)
-                    gap =(2*pi/ arg.args[0].diff(self.ivar))#.n(6)
-                
-                ics_list = list(0*b)
-                # print('homo eq')
-                odes_hg =self._hom_equation()._as_fode()
-                odes = ODESystem(odes_hg.lhs,self.dvars,odes_hg.rhs+coeff,ivar=self.ivar,ode_order=1)
-                odes_out = ODESystem(odes_hg.lhs,self.dvars,odes_hg.rhs-coeff,ivar=self.ivar,ode_order=1)
-                
-                # print(f'homo eq of type {type(self._hom_equation())}')
-                # display(self._hom_equation())
-                
-                # print(f'homo eq + coeff as type {type(odes)}')
-                # display(odes)
-                #sol_H = ODESystem.from_ode_system(odes)._as_fode().solution.with_ics(ics_list,ivar0)
-                
-                n = Symbol('n')
-                CodeFlowLogger(ivar0+gap*n,'ivar value',self)
-                
-                ivar_H_start = ivar0+gap*n
-                ivar_H_end = ivar0+gap/2+gap*n
-                
-                #ivar0=Symbol('t0')
-                sol_H = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes).solution.with_ics(ics_list,ivar_H_start)
-                sol_H_out = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes_out).solution.with_ics(ics_list,ivar_H_end)
-                
-                from sympy import Sum,oo
-                n_num = Symbol('N')
-                
-                sol_series_start =  sol_H.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar - ivar_H_start ),(n,-n_num,n_num,)   ) )
-                sol_series_end =  sol_H_out.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar -  ivar_H_end    ),(n,-n_num,n_num)   ) )
-                
-                sol_series = sol_series_start + sol_series_end
-                
-                CodeFlowLogger(sol_H,'Heaviside result')
-                CodeFlowLogger(sol_H.rhs*elem)
-                
-                CodeFlowLogger(sol_series,'SolSeries')
-                #CodeFlowLogger(sol_H.rhs*elem)
-                
-                sol += sol_series#*elem
-
-
             elif elem == S.One:
                 sol += self._cos_comp(0,coeff) + self._sin_comp(0,coeff)
             
@@ -3653,6 +3670,206 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         ode_sol.ivar=self.ivar
         
         return ode_sol
+                                 
+#     @cached_property
+#     def _steady_solution(self):
+#         '''
+#         It applies generic form solution for the following differential equation
+#         \dot Y + A Y = F \cos(\Omega t)
+        
+#         The generic form is:
+        
+#         C = (A^{-1} \Omega^2 + A)^{-1}  F 
+#         D =  \Omega A^{-1} * C
+#         '''
+        
+
+#         A = self._fundamental_matrix
+#         b = self._free_terms
+#         self.A=A
+#         self.b=b
+        
+#         sol = 0*b
+
+        
+#         #print([elem for elem,coeff in self._get_excitation_comps]) 
+        
+#         for elem,coeff in self._get_excitation_comps:
+#             display(elem,coeff)
+#             if type(elem) == cos:
+#                 omg = (elem.args[0].diff(self.ivar)).doit()
+#                 sol += self._cos_comp(omg,coeff) + self._sin_comp(omg,0*b)
+#             elif type(elem) == sin:
+#                 omg = (elem.args[0].diff(self.ivar)).doit()
+#                 sol += self._cos_comp(omg,0*b) + self._sin_comp(omg,coeff)
+
+#             elif type(elem) == exp:
+#                 a = (elem.args[0].diff(self.ivar)).doit()
+#                 if coeff[1,0].has(sin) == True:
+#                     for arg in coeff[1,0].args:
+#                         if type(arg) == sin:
+#                             omg = arg.args[0].diff(self.ivar).doit()
+#                     sol += self._exp_cos_comp(omg,0*b,a) + self._exp_sin_comp(omg,coeff,a)
+#                 elif coeff[1,0].has(cos) == True:
+#                     for arg in coeff[1,0].args:
+#                         if type(arg) == cos:
+#                             omg = arg.args[0].diff(self.ivar).doit()
+#                     sol += self._exp_cos_comp(omg,coeff,a) + self._exp_sin_comp(omg,0*b,a)
+                    
+#             elif type(elem)==Heaviside:
+#                 sol+=self._heaviside_flag(elem=elem,coeff=coeff,sol=sol)
+# #             elif type(elem) == Heaviside and type(elem.args[0]) not in (sin,cos) and hv=False:
+# #                 ivar0 = -elem.args[0].subs(self.ivar,0)
+# #                 #   display(ivar0)
+# #                 display("źle")
+# #                 ics_list = list(0*b)
+# #                 # print('homo eq')
+# #                 odes_hg =self._hom_equation()._as_fode()
+# #                 odes = ODESystem(odes_hg.lhs,self.dvars,odes_hg.rhs+coeff,ivar=self.ivar,ode_order=1)
+
+
+# #                 # print(f'homo eq of type {type(self._hom_equation())}')
+# #                 # display(self._hom_equation())
+
+# #                 # print(f'homo eq + coeff as type {type(odes)}')
+# #                 # display(odes)
+# #                 #sol_H = ODESystem.from_ode_system(odes)._as_fode().solution.with_ics(ics_list,ivar0)
+# #                 sol_H = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes).solution.with_ics(ics_list,ivar0)
+
+
+# #                 CodeFlowLogger(sol_H,'Heaviside result')
+# #                 CodeFlowLogger(sol_H.rhs*elem)
+
+# #                 sol += sol_H.rhs*elem
+# #                 hv=True
+
+#             elif elem == S.One:
+#                 sol += self._cos_comp(0,coeff) + self._sin_comp(0,coeff)
+            
+            
+            
+#             else:
+#                 if coeff == 0*self.dvars:
+#                     pass
+#                 else:
+#                     print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+#                     print('element skiped - improve code')
+#                     print(f'called by {type(self)}')
+#                     print(f'elem - base of type {type(elem)}')
+#                     display(elem)
+#                     print('coeff')
+#         display(sol)
+#         ode_sol = ODESolution.from_vars_and_rhs(self.dvars,sol)
+#         ode_sol.ivar=self.ivar
+        
+        
+#         return ode_sol
+                    
+#     def _heaviside_flag(self,elem,coeff,sol):
+#         A=self.A
+#         b=sol
+        
+#         if type(elem) == Heaviside and type(elem.args[0]) not in (sin,cos):
+#             display(elem.args[0])
+#             arg = elem.args[0]
+#             display('dobrze')
+#             display(arg)
+
+#             ivar0 =  -(S.Half*pi/ arg.args[0].diff(self.ivar))#.n(6)
+#             gap =(2*pi/ arg.args[0].diff(self.ivar))#.n(6)
+
+#             ics_list = list(0*b)
+
+#             odes_hg =self._hom_equation()._as_fode()
+#             odes = ODESystem(odes_hg.lhs,self.dvars,odes_hg.rhs+coeff,ivar=self.ivar,ode_order=1)
+#             odes_out = ODESystem(odes_hg.lhs,self.dvars,odes_hg.rhs-coeff,ivar=self.ivar,ode_order=1)
+
+
+
+#             n = Symbol('n')
+#             CodeFlowLogger(ivar0+gap*n,'ivar value',self)
+
+#             ivar_H_start = ivar0+gap*n
+#             ivar_H_end = ivar0+gap/2+gap*n
+
+
+#             sol_H = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes).solution.with_ics(ics_list,ivar_H_start)
+#             sol_H_out = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes_out).solution.with_ics(ics_list,ivar_H_end)
+
+#             from sympy import Sum,oo
+#             n_num = Symbol('N')
+
+#             sol_series_start =  sol_H.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar - ivar_H_start ),(n,-n_num,n_num,)   ) )
+#             sol_series_end =  sol_H_out.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar -  ivar_H_end    ),(n,-n_num,n_num)   ) )
+
+#             sol_series = sol_series_start + sol_series_end
+
+#             CodeFlowLogger(sol_H,'Heaviside result')
+#             CodeFlowLogger(sol_H.rhs*elem)
+
+#             CodeFlowLogger(sol_series,'SolSeries')
+
+
+#             sol += sol_series#*elem
+
+#         elif type(elem) == Heaviside and type(elem.args[0]) in (sin,cos):
+
+#             display(elem.args[0])
+#             arg = elem.args[0]
+#             display('AARG')
+#             display(arg)
+#             if type(arg) == sin:
+#                 display('JAK TAK PATRZĘ TO MNIE WIDAĆ')
+#                 ivar0 =  0
+#                 gap =(2*pi/ arg.args[0].diff(self.ivar))#.n(6)
+
+#             elif type(arg) == cos:
+#                 display('JAK TAK PATRZĘ TO MNIE NIE WIDAĆ')
+#                 ivar0 =  -(S.Half*pi/ arg.args[0].diff(self.ivar))#.n(6)
+#                 gap =(2*pi/ arg.args[0].diff(self.ivar))#.n(6)
+
+#             ics_list = list(0*b)
+
+#             odes_hg =self._hom_equation()._as_fode()
+#             odes = ODESystem(odes_hg.lhs,self.dvars,odes_hg.rhs+coeff,ivar=self.ivar,ode_order=1)
+#             odes_out = ODESystem(odes_hg.lhs,self.dvars,odes_hg.rhs-coeff,ivar=self.ivar,ode_order=1)
+
+
+
+#             n = Symbol('n')
+#             CodeFlowLogger(ivar0+gap*n,'ivar value',self)
+
+#             ivar_H_start = ivar0+gap*n
+#             ivar_H_end = ivar0+gap/2+gap*n
+
+
+#             sol_H = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes).solution.with_ics(ics_list,ivar_H_start)
+#             sol_H_out = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes_out).solution.with_ics(ics_list,ivar_H_end)
+
+#             from sympy import Sum,oo
+#             n_num = Symbol('N')
+
+#             sol_series_start =  sol_H.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar - ivar_H_start ),(n,-n_num,n_num,)   ) )
+#             sol_series_end =  sol_H_out.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar -  ivar_H_end    ),(n,-n_num,n_num)   ) )
+
+#             sol_series = sol_series_start + sol_series_end
+
+#             CodeFlowLogger(sol_H,'Heaviside result')
+#             CodeFlowLogger(sol_H.rhs*elem)
+
+#             CodeFlowLogger(sol_series,'SolSeries')
+
+
+#             sol += sol_series#*elem
+#             display(sol)
+#         return sol
+
+            
+
+
+
+            
+
     
 class FirstOrderODE:
     """

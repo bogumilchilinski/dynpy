@@ -86,7 +86,7 @@ class SpringMassSystem(ODESystem):
 
         return odes
 
-class SpringMassEps(ODESystem):
+class SpringMassSmallParameter(ODESystem):
 
 
     @classmethod
@@ -101,7 +101,7 @@ class SpringMassEps(ODESystem):
 
         return odes
 
-class SpringMassMSM(MultiTimeScaleSolution):
+class SpringMassDamperMSM(MultiTimeScaleSolution):
 
 
     @classmethod
@@ -116,7 +116,7 @@ class SpringMassMSM(MultiTimeScaleSolution):
 
         return odes
 
-class ExcitationSpringMassMSM(MultiTimeScaleSolution):
+class SpringMassDamperExcitedMSM(MultiTimeScaleSolution):
 
 
     @classmethod
@@ -132,7 +132,30 @@ class ExcitationSpringMassMSM(MultiTimeScaleSolution):
         k=Symbol('k',positive=True)
         m=Symbol('m',positive=True)
         
-        MSM_eq=Eq(x.diff(t,2) + eps*diff(x) + omega_0**2*x,eps*A*sin(Omega * t))
+        MSM_eq=Eq(x.diff(t,2) + eps*diff(x) + omega_0**2*x,eps*sin(Omega * t))
+        MSM = cls(MSM_eq.lhs-MSM_eq.rhs,dvars=x, eps=eps)
+#         exc_dict = {omega_0:Omega**2+eps*delta}
+#         MSM_sol_sub = MSM.solution.subs(exc_dict)
+        
+        return MSM
+    
+class SpringMassExcitedMSM(MultiTimeScaleSolution):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        eps=Symbol('\epsilon')
+        omega=Symbol('\omega',positive=True)
+        omega_0 = Symbol('omega_0',positive = True)
+        Omega = Symbol('Omega', positive = True)
+        A = Symbol('A', positive = True)
+        delta = Symbol('delta', positive = True)
+        k=Symbol('k',positive=True)
+        m=Symbol('m',positive=True)
+        
+        MSM_eq=Eq(x.diff(t,2) + omega_0**2*x,eps*sin(Omega * t))
         MSM = cls(MSM_eq.lhs-MSM_eq.rhs,dvars=x, eps=eps)
 #         exc_dict = {omega_0:Omega**2+eps*delta}
 #         MSM_sol_sub = MSM.solution.subs(exc_dict)

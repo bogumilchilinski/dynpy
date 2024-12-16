@@ -1,7 +1,7 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, asin, diff, sqrt, S,
                    diag, Eq, hessian, Function, flatten, Tuple, im, pi, latex,
                    dsolve, solve, fraction, factorial, Subs, Number, oo, Abs,
-                   N, solveset, integrate, lambdify, Heaviside, integrate, exp, atan)
+                   N, solveset, integrate, lambdify, Heaviside, integrate, exp, atan, sign, sign)
 
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
@@ -735,6 +735,7 @@ class CircuitRLCWithPWM(CircuitRLC):
     eps=Symbol('varepsilon',postive=True)
     rho=Symbol('rho',positive=True)
     delta=Symbol('delta',positive=True)
+    T=Symbol('T',positive=True)
     q0=dynamicsymbols('q')
     omega=Symbol('omega',positive=True)
     ivar=Symbol('t')
@@ -749,6 +750,7 @@ class CircuitRLCWithPWM(CircuitRLC):
                  eps=None,
                  rho=None,
                  delta=None,
+                 T=None,
                  ivar=None,
                  q0=None,
                  frame=None,
@@ -764,6 +766,7 @@ class CircuitRLCWithPWM(CircuitRLC):
         if eps is not None: self.eps=eps
         if rho is not None: self.rho=rho
         if delta is not None: self.delta=delta
+        if T is not None: self.T=T
         if ivar is not None: self.ivar = ivar
         if z is not None: self.z = z
         if q0 is not None: self.q0 = q0
@@ -794,40 +797,51 @@ class CircuitRLCWithPWM(CircuitRLC):
         return components
         
     def symbols_description(self):
+        
         self.sym_desc_dict = {
             self.resistance: r'resistance',
             self.inductance: r'inductance',
-            self.capacity: r'capacity',
+            self.capacity: r'capacitance',
             self.U:r'source voltage',
             self.eps:r'small parameter',
-            self.rho:r'formula representing resistance variation'
-            
+            self.rho:r'formula representing resistance variation',
+            self.q0:r'electric charge',
+            self.q0.diff(self.ivar):r'current',
+            self.q0.diff(self.ivar,self.ivar):r'current rate of change'
+
         }
 
         return self.sym_desc_dict
     
-#     def trig_stiff(self, angle=2*pi):
-#         trig = sin(self.omega * self.ivar)
-#         new_eq = self.subs(self.k_var,trig)
-        
-#         return new_eq
+    def para(self, angle=2*pi):
+        para_series_heave =  10*Heaviside(sin(2*pi/(self.T)*self.ivar),0.5)
+        new_eq=self.subs(self.rho,para_series_heave)
+        return new_eq
     
-#     def wave_stiff(self):
+    def wave(self):
+        
+        wave1=(1*(sin(2*pi*self.ivar/self.T))+2.0)*(1/2 + 1/2*sign(sin(2*pi*self.ivar/self.T)))
+        wave2=(1*(-sin(2*pi*self.ivar/self.T))-3.0)*(1/2+ 1/2*sign(-sin(2*pi*self.ivar/self.T)))
+        waves=wave1+wave2
 #         wave1=(100*(sin(self.ivar/self.T))+1000)*Heaviside(sin(self.ivar/self.T))
 #         wave2=(100*(-sin(self.ivar/self.T)))*Heaviside(-sin(self.ivar/self.T))
-#         waves=wave1+wave2
-#         new_eq = self.subs(self.k_var,waves)
+        waves=wave1+wave2
+        new_eq = self.subs(self.rho,waves)
 
-#         return new_eq
+        return new_eq
         
-#     def rect_stiff(self,no=6,numerical=False):
-#         t=self.ivar
-#         omg = self.omega
+    def rect(self,no=6,numerical=False):
+        t=self.ivar
+        omg = self.omega
+        rectangular=5*((1/2+1/2*sign(sin(2*pi*self.ivar/self.self.T)))-S.Half)
+#         rectangular_func = lambdify((t, T), rectangular)
+#         rectangular_values = rectangular_func(t_values, T_value)
         
 #         trig=sum([Heaviside(omg*t-1) + 0* Heaviside(omg*t-2)  for ind in range(no)])
-#         new_eq=self.subs(self.k_var,trig)
+#         new_eq=self.subs(self.rho,trig)
+        new_eq=self.subs(self.rho,rectangular)
         
-#         return new_eq
+        return new_eq
     
     def approx_rect(self,no=6,numerical=False):
         
@@ -835,9 +849,8 @@ class CircuitRLCWithPWM(CircuitRLC):
             amps_list = [2.27348466531425,0, 0.757408805199249,0, 0.453942816897038,0, 0.323708002807428,0, 0.25121830779797,0, 0.204977919963796,0, 0.172873394602606,0, 0.149252079729775,0, 0.131121653619234,0, 0.116749954968057,0]
         else:
             amps_list = symbols(f'a_0:{no}')
-        
-        rectangular_approx = sum([N(amp,3)*sin(((ind)+1)*self.omega*self.ivar) for ind,amp in enumerate(amps_list[0:no])])
-        new_eq=self.subs({self.r_var:(rectangular_approx)})
+        rectangular_approx = sum([amp*2/sqrt(2)*sin((2*(no)+1)*2*pi*self.ivar/self.T) for no,amp in enumerate(amps_list[0:])])
+        new_eq=self.subs({self.rho:rectangular_approx})
         
         return new_eq
     

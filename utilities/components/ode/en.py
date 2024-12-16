@@ -341,7 +341,7 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
         
 #         return f"The ordering and separation of predicted solution in terms of the power of a small parameter ${eps}$ leads to obtaining a recursive sequence of linear equations of motion leading to the solution of the nonlinear equation. The zeroth-order approximate linear equation is given below where the dependency was assumed for the zeroth-order solution of the time variable:"
 
-        return f"The ordering and separation of equation ${AutoMarker(base_system.odes[0])}$ in terms of the power of a small parameter ${eps}$ leads to obtaining a recursive sequence of linear equations of motion leading to the solution of the nonlinear equation. The zeroth-order approximate linear equation is given in ${AutoMarker(zeroth_ord_eq)}$ where the dependency was assumed for the zeroth-order solution of the time variable:"
+        return f"The ordering and separation of equation {AutoMarker(base_system.odes[0])} in terms of the power of a small parameter ${eps}$ leads to obtaining a recursive sequence of linear equations of motion leading to the solution of the nonlinear equation. The zeroth-order approximate linear equation is given in {AutoMarker(zeroth_ord_eq)} where the dependency was assumed for the zeroth-order solution of the time variable:"
     
     @property
     def middle_text(self):

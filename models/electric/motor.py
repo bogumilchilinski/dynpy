@@ -82,15 +82,15 @@ class DCMotor(ComposedSystem):
     def components(self):
         components = {}
         
-        self.resistor = CurrentDependentResistor(-self.R_w, self.i_w,  qs=self.qs, ivar=self.ivar , frame=base_frame)
-        self.inductor = Resistor(-self.L_w, self.i_w, qs=self.qs, ivar=self.ivar, frame=base_frame)
+        self.resistor = CurrentDependentResistor(self.R_w, self.i_w,  qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.inductor = Resistor(self.L_w, self.i_w, qs=self.qs, ivar=self.ivar, frame=base_frame)
 #         self.inductor = Inductor(-self.L_w, self.i_w, qs=self.qs, ivar=self.ivar, frame=base_frame)
-        self.voltage_source = VoltageSource(-self.U_z, self.i_w, qs=self.qs, ivar=self.ivar , frame=base_frame)
-        self.electromotive_force = ElectromotiveForce(self.k_e*self.omega_s, self.i_w, qs=self.qs, ivar=self.ivar , frame=base_frame)
-        self.engine_load_torque = EngineLoadTorque(self.M_obc, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
-        self.rotor_torque = RotorTorque(-self.k_m*self.i_w, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
-        self.rotor_angular_acceleration_torque = RotorAngularAccelerationTorque(-self.J, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
-        self.rotor_resistance_movement_torque = ResistanceMovementTorque(-self.B, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.voltage_source = VoltageSource(self.U_z, self.i_w, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.electromotive_force = ElectromotiveForce(-self.k_e*self.omega_s, self.i_w, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.engine_load_torque = EngineLoadTorque(-self.M_obc, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.rotor_torque = RotorTorque(self.k_m*self.i_w, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.rotor_angular_acceleration_torque = RotorAngularAccelerationTorque(self.J, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.rotor_resistance_movement_torque = ResistanceMovementTorque(self.B, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
         
         components['resistor'] = self.resistor
         components['inductor'] = self.inductor
@@ -244,7 +244,7 @@ class DCMotorIIOrder(ComposedSystem):
 #         self.inductor = Inductor(-self.L_w, self.i_w, qs=self.qs, ivar=self.ivar, frame=base_frame)
         self.voltage_source = VoltageSource(-self.U_z, self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
         self.electromotive_force = ElectromotiveForce(-self.k_m*self.charge.diff(self.ivar), self.phi, qs=self.qs, ivar=self.ivar , frame=base_frame)
-        self.engine_load_torque = EngineLoadTorque(self.M_obc, self.phi, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.engine_load_torque = EngineLoadTorque(-self.M_obc, self.phi, qs=self.qs, ivar=self.ivar , frame=base_frame)
         self.rotor_torque = RotorTorque(self.k_e*self.phi.diff(self.ivar), self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
 #         self.rotor_angular_acceleration_torque = RotorAngularAccelerationTorque(-self.J, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
 #         self.rotor_resistance_movement_torque = ResistanceMovementTorque(-self.B, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
@@ -395,17 +395,17 @@ class DCMotorHeaviside(DCMotor):
     def components(self):
         components = {}
 
-        self.resistor = CurrentDependentResistor(-self.R_w, self.i_w,  qs=self.qs, ivar=self.ivar , frame=base_frame)
-        self.inductor = Resistor(-self.L_w, self.i_w, qs=self.qs, ivar=self.ivar, frame=base_frame)
+        self.resistor = CurrentDependentResistor(self.R_w, self.i_w,  qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.inductor = Resistor(self.L_w, self.i_w, qs=self.qs, ivar=self.ivar, frame=base_frame)
     #         self.inductor = Inductor(-self.L_w, self.i_w, qs=self.qs, ivar=self.ivar, frame=base_frame)
         self.voltage_source = VoltageSource(-self.U_z*Heaviside(sin(2*pi*self.ivar/self.T)), self.i_w, qs=self.qs, ivar=self.ivar , frame=base_frame)
 #         self.voltage_source = VoltageSource(-self.U_z*(Heaviside(self.ivar)-Heaviside(self.ivar-2)+Heaviside(self.ivar-4)-Heaviside(self.ivar-6)+Heaviside(self.ivar-8)), self.i_w, qs=self.qs, ivar=self.ivar , frame=base_frame)
-        self.electromotive_force = ElectromotiveForce(self.k_e*self.omega_s, self.i_w, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.electromotive_force = ElectromotiveForce(-self.k_e*self.omega_s, self.i_w, qs=self.qs, ivar=self.ivar , frame=base_frame)
         self.engine_load_torque = EngineLoadTorque(self.M_obc*Heaviside(sin(2*pi*self.ivar/self.T-pi/2)), self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
 #         self.engine_load_torque = EngineLoadTorque(self.M_obc*(Heaviside(self.ivar-1)-Heaviside(self.ivar-3)+Heaviside(self.ivar-5)-Heaviside(self.ivar-7)+Heaviside(self.ivar-9)), self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
-        self.rotor_torque = RotorTorque(-self.k_m*self.i_w, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
-        self.rotor_angular_acceleration_torque = RotorAngularAccelerationTorque(-self.J, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
-        self.rotor_resistance_movement_torque = ResistanceMovementTorque(-self.B, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.rotor_torque = RotorTorque(self.k_m*self.i_w, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.rotor_angular_acceleration_torque = RotorAngularAccelerationTorque(self.J, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.rotor_resistance_movement_torque = ResistanceMovementTorque(self.B, self.omega_s, qs=self.qs, ivar=self.ivar , frame=base_frame)
 
         components['resistor'] = self.resistor
         components['inductor'] = self.inductor
