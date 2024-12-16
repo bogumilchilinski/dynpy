@@ -1566,7 +1566,9 @@ class ODESystem(AnalyticalSolution):
 
                 coeffs_mat = (self.lhs - self.rhs).jacobian(self.dvars)
                 
-                odes_rhs = -diff_coeffs_mat.inv()*coeffs_mat*self.dvars + free_terms
+                diff_coeffs_inv=diff_coeffs_mat.inv()
+                
+                odes_rhs = -diff_coeffs_inv*coeffs_mat*self.dvars + diff_coeffs_inv*free_terms
             
             rhs_odes_mat = odes_rhs
         
@@ -2480,7 +2482,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
         if len(dvars_list)!=1:
 
             dvars = dvars_list
-    #         odes = list(reversed(list(self._to_rhs_ode().odes_rhs)))
+            #odes = list(reversed(list(self._to_rhs_ode().odes_rhs)))
             odes = list(reversed(list(self.odes_rhs)))
 
             return Matrix(odes).jacobian(dvars)
@@ -3197,9 +3199,9 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         damping = self._is_proportional_damping
         #print('damping = ',damping)
         #damping = False 
-                      
+
         if damping is not False:
-         
+
             
             sl=int(N((len(self.dvars))/2))
             #print('rayleight damping - new code stedy')
