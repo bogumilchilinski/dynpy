@@ -3559,28 +3559,27 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
 #                 display(arg)
 #                 display(-arg)
                 if type(arg) == sin:
-                    ivar0 =  0
+                    
+
+                    
                     gap =(2*pi/ arg.args[0].diff(self.ivar))#.n(6)
-#                     display('args0 sin')
-#                     display(arg.args[0])
-#                     display('gap sin')
-#                     display(gap)
+                    ivar0 =  0
+                    
     
                 elif type(arg) == cos:
-                    ivar0 =  -(S.Half*pi/ arg.args[0].diff(self.ivar))#.n(6)
-#                     display('ivar0 cos')
-#                     display(ivar0)
+                    ivar0 = 0  #-(S.Half*pi/ arg.args[0].diff(self.ivar))#.n(6)
+
                     gap =(2*pi/ arg.args[0].diff(self.ivar))#.n(6)
-                elif type(-arg) == cos:
-                    ivar0=(S.Half*pi/arg.args[1].args[0].diff(self.ivar))
-#                     display('ivar0 cos')
-#                     display(ivar0)
-                    gap =0#2*pi/arg.args[1].args[0].diff(self.ivar)
-#                     display('arg0 cos')
-#                     display(arg.args[1].args[0])
-#                     display('gap -cos')
-#                     display(gap)
+                    ivar0 = - gap/4
                     
+                elif type(-arg) == cos:
+                    ivar0= 0 #(S.Half*pi/arg.args[1].args[0].diff(self.ivar))
+
+
+
+                    gap = (2*pi/ (-arg).args[0].diff(self.ivar))#.n(6)
+                    ivar0 =  gap/4                    
+
 
                 
                 ics_list = list(0*b)
@@ -3604,7 +3603,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
 
                 #ivar0=Symbol('t0')
                 sol_H = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes).solution.with_ics(ics_list,ivar_H_start)
-                display(sol_H)
+                #display(sol_H)
                 sol_H_out = FirstOrderLinearODESystemWithHarmonics.from_ode_system(odes_out).solution.with_ics(ics_list,ivar_H_end)
 
                 from sympy import Sum,oo
