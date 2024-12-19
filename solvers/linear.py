@@ -2869,11 +2869,21 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     
         elif shape == (2,2):
     
+            print('hejo')
+    
             top_left_minor,top_right_minor,bottom_right_minor,bottom_left_minor = split_matrix(shape)
+        
+            h = bottom_right_minor[0]/2
+            omg_h = sqrt(bottom_left_minor[0]-(h/2)**2)
     
             if top_left_minor == Matrix([0]) and top_right_minor == Matrix([-1]):
+            
+                if h**2 >= omg_h**2:
+                    display('changing cosh sinh')
+                    return self._as_type(FirstOrderLinearODESystem).general_solution
+                else:
     
-                return self._sdof_osc_gen_sol
+                    return self._sdof_osc_gen_sol
     
             else:
                 return self._as_type(FirstOrderLinearODESystem).general_solution
