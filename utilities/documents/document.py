@@ -3057,8 +3057,8 @@ class MSMethodOverviewReport(UsageOfDynamicSystemsGuide):
     def default_reported_object(self):
         from sympy import Symbol, sin, S
         from dynpy.solvers.perturbational import MultiTimeScaleSolution
-        from dynpy.models.mechanics.gears import EquivalentSDOFGearModel
-        sys = EquivalentSDOFGearModel()
+        from dynpy.models.mechanics.gears import EquivalentGearModel
+        sys = EquivalentGearModel()
         t=ivar=Symbol('t')
         z = sys.z
         delta = Symbol('delta',positive=True)
