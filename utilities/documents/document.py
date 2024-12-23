@@ -121,13 +121,9 @@ class ReportMethods:
         
         preliminary_str=(
 """
-#Perform basic setup for document creation.
+#Code below is the exact same, as the one presented in the beginning of the guide. Duplicated for esier copying and pasting.
 
-#This method initializes the document and prepares it for content addition.
-
-#Example:
-
-#To prepare a simple document with text and images:
+#Method presented below initializes a simple document and prepares it for content addition.
 
 #Good practice here is to allocate 1 section per 1 cell
 
@@ -684,22 +680,7 @@ class WutThesis(Document):
         if create_file is True:
             return cls._create_base_setup_env()
         
-        preliminary_str=(
-"""
-
-Examplary setup is as follows:
-
-#References to guide imports needed to include - to see the list of available guides insert and run the code below:
-```{python}
-from dynpy.utilities.creators import list_of_guides
-list_of_guides()
-```
-
-## CELL 1
-## Imports
-
-```{python}
-#Create file output
+        imports_str = '''#Create file output
 #Create file Images
 #In file output create bibliography as .bib file (dynpy123)
 
@@ -714,16 +695,9 @@ from dynpy.utilities.adaptable import TimeDataFrame
 import pandas as pd
 
 
-doc = WutThesis('./output/thesis_name')
-```
-    
+doc = WutThesis('./output/thesis_name')'''
 
-
-## CELL 2
-## Thesis introduction
-
-```{python}    
-#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+        thesis_introduction_str = '''#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
 sec_intro = Section('Section that presents text reporting')
@@ -743,378 +717,10 @@ display(ReportText('This subsection provides state of the art. '*100))
 
 sub_methodology = Subsection('Methodology')
 CurrentContainer(sub_methodology)
-display(ReportText('This subsection provides methodology. '*100))
-```
-    
-    
-## CELL 3
-## Math 
-
-```{python}
-#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-
-from sympy import Eq, Symbol, symbols
-
-sec_formula = Section('Section that presents formulas reporting')
-CurrentContainer(sec_formula)
-
-description = Subsection('Description of dynamic model')
-CurrentContainer(description)
-display(ReportText('This subsection provides description of the model. '*100))
-
-from dynpy.models.mechanics.pendulum import Pendulum
-dyn_sys = Pendulum()
-dyn_sys.as_picture()
-
-lagrangian = Subsection('Lagrangian and derivatives')
-CurrentContainer(lagrangian)
-display(ReportText('This subsection provides calculation of lagrangian and derivatives. '*100))
-
-lagrangian = dyn_sys.L[0]
-lagrangian
-
-t=dyn_sys.ivar
-
-
-for coord in dyn_sys.q:
-
-    display(ReportText(f'Calculations of derivatives for ${vlatex(coord)}$'))
-
-
-    vel=coord.diff(t)
-    diff1 = lagrangian.diff(vel)
-    diff2 = diff1.diff(t) 
-    diff3 = lagrangian.diff(coord)
-
-
-    diff1_sym = Symbol(f'\\frac{{\\partial L}}{{\\partial {vlatex(vel)}}}')
-    diff2_sym = Symbol(f' \\frac{{d }}{{dt}}  {diff1_sym}'  )
-    diff3_sym = Symbol(f'\\frac{{\\partial L}}{{\\partial {vlatex(coord)}}}')
-
-
-    display(SympyFormula(  Eq(diff1_sym,diff1)  ))    
-    display(SympyFormula(  Eq( diff2_sym ,diff2)  ))
-    display(SympyFormula(  Eq( diff3_sym ,  diff3)  ))
-
-display(ReportText('Outcomes of governing equations analysis. '*100))
-    
-
-equations = Subsection('Equations of motion')
-CurrentContainer(equations)
-
-
-display(ReportText('This subsection provides calculation of equations of motion and solution of the system. '*100))
-
-ds1=dyn_sys.eoms
-
-for eq1 in ds1.as_eq_list():
-    display(SympyFormula(eq1.simplify()))
-    
-ds2=dyn_sys.linearized()._ode_system.general_solution
-
-for eq2 in ds2.as_eq_list():
-    display(SympyFormula(eq2.simplify()))
-    
-ds3=dyn_sys.linearized()._ode_system.steady_solution
-
-for eq3 in ds3.as_eq_list():
-    display(SympyFormula(eq3.simplify()))
-    
-ds4=dyn_sys.linearized().eoms.solution
-
-for eq4 in ds4.as_eq_list():
-    display(SympyFormula(eq4.simplify()))
-
-
-```
-
-
-## CELL 4
-## Picture
-    
-    
-```{python}
-    
-#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-
-sec_picture = Section('Section that presents pictures reporting')
-CurrentContainer(sec_picture)
-
-display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))
-
-```
-
-
-## CELL 5
-## Simulation
-##
- 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    
-     sec_simulation = Section('Section that contains simulation')
-     CurrentContainer(sec_simulation)
-
-     display(ReportText(' Basics of ODESystem based simulations are covered in guide to ODESystem '))
-     display(ObjectCode(from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide))
-     
-     sec_ODESystem = Subsection('ODESystem simulation')
-     CurrentContainer(sec_ODESystem)
-     
-     display(ReportText('Firstly create an ODESystem or import it from dynpy.modes.odes.linear.py'))
-     display(ObjectCode(spring = SpringMassEps.from_reference_data()))
-     
-     display(ReportText('Secondly solve the equation using solution method:'))
-     display(ObjectCode(spring_sol = spring.solution))
-     
-     display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
-     spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()
-     
-     MSM_sim = Subsection('MSM simulation')
-     CurrentContainer(MSM_sim)
-     
-     display(ReportText('Firstly create an MultiTimeScaleSolution system or import it from dynpy.modes.odes.linear.py'))
-     display(ObjectCode(spring = SpringMassMSM.from_reference_data()))
-     
-     display(ReportText('Secondly solve the equation using solution method:'))
-     display(ObjectCode(spring_sol = spring.solution))
-     
-     display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
-     spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()))
-     
-     
-     
-## CELL 6
-## Veryfication
- 
-#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-
-```
-from sympy import *
-from pint import UnitRegistry
-ureg = UnitRegistry()
-
-import pandas as pd
-
-t = Symbol('t')
-power = Symbol('P')
-work = Symbol('W')
-
-unit_dict = {
-t: ureg.second,
-power: ureg.watt,
-}
-
-LatexDataFrame.set_default_units(unit_dict)
-
-
-
-sec_verification = Section('Section that verificates research results')
-CurrentContainer(sec_verification)
-
-display(ReportText('Description of verifications concept. '*200))
-     
-
-
-### SELECT ONE CASE
-
-## 1st CASE
-## import of external data if path "./data_from_ml/test_1.csv" exists
-
-#test_data = './data_from_ml/test_1.csv'
-#df = pd.read_csv(filename, header = None)
-
-## 2st CASE
-df = pd.DataFrame({t:[0,1,2],'a':[2,3,4],'b':[8,7,6]}).set_index(t)
-
-df_cols = df.set_axis([power,work],axis=1)
-
-data_tab = TimeDataFrame(df_cols).to_latex_dataframe().reported(caption='Caption')
-graph = TimeDataFrame(df_cols).to_pylatex_tikz().in_figure(caption='Caption')
-
-
-
-display(data_tab)
-
-display(ReportText('Obtained data analysis. '*200))
-
-display(graph)
-
-display(ReportText('Description of verifications outcomes. '*200))
-```
-    
-## CELL 7
-## Conclusion
- 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_conclusion = Section('Section that contains final conclusions')
-    CurrentContainer(sec_conclusion)
-    
-    display(ReportText('Conclusions '*200))
-
-
-## CELL 9
-## Symbols description
- 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_symbols = Section('Section that contains all symbols descriptions')
-    CurrentContainer(sec_symbols)
-    
-    E_K,F = symbols('E_K,F')
-    descriptions = {
-    E_K:r"Kinetic energy", 
-    F:r"Force",  
-    }
-    syms_dict = descriptions
-    DescriptionsRegistry().set_descriptions({**syms_dict})
-    DescriptionsRegistry().reset_registry()
-    SymbolsDescription.set_default_header('  ')
-
-    display(SymbolsDescription({**syms_dict}))
-
-## CELL 10
-## Document
-
-```{python}
-#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-
-# Creating file
-# Be sure *output* folder is in the current directory
-
-thesis_name = './output/report_name' #path for report file 
-
-doc = WutThesis(thesis_name)
-# Bibliography of quotations
-### Select one bibligraphy managment system
-####### BibLatex
-
-doc.preamble.append(Package('biblatex',arguments=["backend=biber","sorting=none"]))
-doc.preamble.append(Command('addbibresource','elementy_bibliagrafia.bib'))
-####### Natbib
-#doc.preamble.append(Package('natbib')
-#doc.preamble.append(Command('bibliographystyle','unsrt'))
-
-# TOC
-doc.append(Command('tableofcontents')) #adds TOC
-
-doc.append(sec_intro) # adding certain sections
-doc.append(sub_problem_outline)
-doc.append(sub_obj_assum)
-doc.append(sub_SOT)
-doc.append(sub_methodology)
-doc.append(sec_formula)
-doc.append(sec_picture)
-doc.append(sec_simulation)
-doc.append(sec_verification)
-doc.append(sec_tables)
-doc.append(sec_symbols)
-doc.append(sec_conclusion)
-
-
-### BibLatex
-#doc.append(Command('printbibliography',arguments=["title={Bibliography}"])) - argument is to improve
-doc.append(Command('printbibliography',options=[NoEscape("title={Bibliography}")]))
-
-### Natbib
-#doc.append(Command('bibliography',arguments=["references"])) # .bib file as "references"
-
-
-#FIGURES LIST
-
-doc.append(Command('addcontentsline{toc}{section}{List of figures}'))
-doc.append(Command('listoffigures'))
-doc.append(Command('pagestyle{plain}'))
-doc.append(Command('newpage'))
-
-#TABLES LIST
-
-doc.append(Command('addcontentsline{toc}{section}{List of tables}'))
-doc.append(Command('renewcommand{\listtablename}{List of tables}'))
-doc.append(Command('listoftables'))
-doc.append(Command('pagestyle{plain}'))
-doc.append(Command('newpage'))
-
-# Generating file
-doc.generate_pdf(clean_tex=True)
-```
-
-"""
-        )
-
-        display(IPMarkdown(preliminary_str))    
-
-
-        preliminary_str=(
-"""
-
-#Example:
-
-#To prepare a simple document with text and images:
-
-#Good practice here is to allocate 1 section per 1 cell
-
-
-
-## CELL 1
-## Imports
-
-
-
-#Create file output
-#In file output create bibliography as .bib file
-
+display(ReportText('This subsection provides methodology. '*100))'''
+        math_str = '''from sympy import Eq, Symbol, symbols
 from dynpy.utilities.report import *
-from dynpy.utilities.templates.document import WutThesis
 
-doc = WutThesis('./output/thesis_name')
-
-
-## CELL 2
-## Thesis introduction
-
-#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-
-sec_intro = Section('Section that presents text reporting')
-CurrentContainer(sec_intro)
-
-sub_problem_outline = Subsection('Outline of the problem')
-CurrentContainer(sub_problem_outline)
-display(ReportText('This subsection provides information about investigated problem. '*10))
-
-sub_obj_assum = Subsection('Objectives and assumptions')
-CurrentContainer(sub_obj_assum)
-display(ReportText('This subsection provides objectives and assumptions. '*10))
-
-sub_SOT = Subsection('State of the art')
-CurrentContainer(sub_SOT)
-display(ReportText('This subsection provides state of the art. '*10))
-
-sub_methodology = Subsection('Methodology')
-CurrentContainer(sub_methodology)
-display(ReportText('This subsection provides methodology. '*10))
-
-
-
-## CELL 3
-## Math 
-
-#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-
-#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-
-from sympy import Eq, Symbol, symbols
 
 sec_formula = Section('Section that presents formulas reporting')
 CurrentContainer(sec_formula)
@@ -1188,91 +794,69 @@ ds4=dyn_sys.linearized().eoms.solution
 for eq4 in ds4.as_eq_list():
     display(SympyFormula(eq4.simplify()))
 
+display(ReportText(f'Outcomes of governing equations {AutoMarker(ds4_eqns[0])} {AutoMarker(ds4_eqns[1])}) analysis.'))
+
+sec_math_desc = Subsection('Section that contains all symbols descriptions')
+CurrentContainer(sec_math_desc)
 
 
 
-## CELL 4
-## Picture
+E_K,F = symbols('E_K,F')
+descriptions = {
+E_K:r"Kinetic energy", 
+F:r"Force",  
+}
+syms_dict = descriptions
+DescriptionsRegistry().set_descriptions({**syms_dict})
+DescriptionsRegistry().reset_registry()
+SymbolsDescription.set_default_header('where:')
 
-#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+display(ReportText('Symbols description is as follows: '))
 
-sec_picture = Section('Section that presents pictures reporting')
+
+display(SymbolsDescription(expr=E_K*F))'''
+
+        picture_str = '''sec_picture = Section('Section that presents pictures reporting')
 CurrentContainer(sec_picture)
 
-display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))
+display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))'''
 
+        simulaion_str = '''from dynpy.utilities.report import *
+from sympy import *
 
-
-## CELL 5
-## Simulation
-
-#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
 sec_simulation = Section('Section that contains simulation')
 CurrentContainer(sec_simulation)
 
-display(ReportText('Simulation '*50))
+# Basics of ODESystem based simulations are covered in guide to ODESystem, use the followin call
+# from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide 
+# BasicsOfODESystemGuide()
 
-## CELL 6 - Preparing of simulations - results
+sec_ODESystem = Subsection('ODESystem simulation')
+CurrentContainer(sec_ODESystem)
 
-import numpy as np
+display(ReportText('Firstly create an ODESystem or import it from dynpy.modes.odes.linear.py'))
+display(ObjectCode(spring = SpringMassEps.from_reference_data()))
 
+display(ReportText('Secondly solve the equation using solution method:'))
+display(ObjectCode(spring_sol = spring.solution))
 
-from dynpy.models.mechanics import ForcedSpringMassSystem as DynamicSys
-dyn_sys = DynamicSys()
+display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
+spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()
 
-param_dict = dyn_sys.get_numerical_parameters()
-t_span = np.linspace(0,1,1001)
+MSM_sim = Subsection('MSM simulation')
+CurrentContainer(MSM_sim)
 
-parameter = dyn_sys.system_parameters()[0] # 0-1 change a plot from const mass to const k
-param_dict = {**param_dict,parameter:parameter}
+display(ReportText('Firstly create an MultiTimeScaleSolution system or import it from dynpy.modes.odes.linear.py'))
+display(ObjectCode(spring = SpringMassMSM.from_reference_data()))
 
+display(ReportText('Secondly solve the equation using solution method:'))
+display(ObjectCode(spring_sol = spring.solution))
 
-display(param_dict)
+display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
+spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()'''
 
-na_df = dyn_sys.subs(param_dict).numerical_analysis(parameter=parameter,param_span=[10,20], t_span = t_span).with_ics([0.0,2.0])
-
-
-na_df_sol_1 = na_df.compute_solution(t_span)
-na_df_sol_1.iloc[:,[0,2]]#.plot() #it creates only preview in notebook uncomment if needed
-
-
-#-----------------------------------------------------------
-
-ic_list = [0.0,0.0] ### Dla ukladu o jednym stopniu swobody
-parameter = dyn_sys.system_parameters()[0] # 0-1 change a plot from const mass to const k
-param_dict = {**param_dict,parameter:parameter}
-na_df = dyn_sys.subs(param_dict).eoms.numerical_analysis(parameter=parameter,param_span=[1,2,3], t_span = t_span)
-
-na_df_sol_2 = na_df.with_ics([2.0,0.0]).compute_solution(t_span)
-na_df_sol_2.iloc[:,[0,2]]#.plot() #it creates only preview in notebook uncomment if needed
-
-# CELL 7 Results plotting
-
-sec_plots = Subsection ('Plots')
-CurrentContainer (sec_plots) 
-
-plot_obj = na_df_sol_1.droplevel(0,axis=1)
-my_wykres=plot_obj.to_pylatex_tikz(subplots=True).in_figure(caption='??')
-display(my_wykres)
-
-plot_obj = na_df_sol_2.droplevel(0,axis=1)
-my_wykres=plot_obj.to_pylatex_tikz(subplots=True).in_figure(caption='??')
-display(my_wykres)
-
-
-
-
-## CELL 8
-## Veryfication
-
-#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-
-
-from sympy import *
+        veryfication_str = '''from sympy import *
 from pint import UnitRegistry
 ureg = UnitRegistry()
 
@@ -1294,12 +878,11 @@ LatexDataFrame.set_default_units(unit_dict)
 sec_verification = Section('Section that verificates research results')
 CurrentContainer(sec_verification)
 
-display(ReportText('Description of verifications concept. '*20))
-
+display(ReportText('Description of verifications concept. '*200))
+     
 
 
 ### SELECT ONE CASE
-
 ## 1st CASE
 ## import of external data if path "./data_from_ml/test_1.csv" exists
 
@@ -1318,70 +901,60 @@ graph = TimeDataFrame(df_cols).to_pylatex_tikz().in_figure(caption='Caption')
 
 display(data_tab)
 
-display(ReportText('Obtained data analysis. '*20))
+display(ReportText('Obtained data analysis. '*200))
 
 display(graph)
 
-display(ReportText('Description of verifications outcomes. '*20))
+display(ReportText('Description of verifications outcomes. '*200))'''
 
-## CELL 9
-## Conclusion
-
-#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-
-sec_conclusion = Section('Section that contains final conclusions')
+        conclusion_str = '''sec_conclusion = Section('Section that contains final conclusions')
 CurrentContainer(sec_conclusion)
 
-display(ReportText('Conclusions '*20))
+display(ReportText('Conclusions '*200))'''
 
-
-## CELL 10
-## Symbols description
-
-#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-
-sec_symbols = Section('Section that contains all symbols descriptions')
+        symbols_description_str = '''sec_symbols = Section('Section that contains all symbols descriptions')
 CurrentContainer(sec_symbols)
 
 E_K,F = symbols('E_K,F')
 descriptions = {
 E_K:r"Kinetic energy", 
-F:r"Force",
+F:r"Force",  
 }
 syms_dict = descriptions
 DescriptionsRegistry().set_descriptions({**syms_dict})
 DescriptionsRegistry().reset_registry()
 SymbolsDescription.set_default_header('  ')
 
-display(SymbolsDescription({**syms_dict}))
+display(SymbolsDescription({**syms_dict}))'''
 
-
-## CELL 11
-## Document
-
-#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-
-# Creating file
+        document_str = '''# Creating file
 # Be sure *output* folder is in the current directory
 
 thesis_name = './output/report_name' #path for report file 
+
 doc = WutThesis(thesis_name)
-
-
 # Bibliography of quotations
 ### Select one bibligraphy managment system
 ####### BibLatex
 
-doc.preamble.append(Package('biblatex',["backend=biber","sorting=none"]))
-doc.preamble.append(Command('addbibresource','elementy_bibliografia.bib'))
+doc.preamble.append(Package('biblatex',arguments=["backend=biber","sorting=none"]))
+doc.preamble.append(Command('addbibresource','elementy_bibliagrafia.bib'))
 ####### Natbib
 #doc.preamble.append(Package('natbib')
 #doc.preamble.append(Command('bibliographystyle','unsrt'))
 
 # TOC
+
+doc.append(Command('includepdf{./Images/Front_Page.pdf}')) #includes front page
+doc.append(Command('pagestyle{plain}'))
+doc.append(Command('cleardoublepage'))
+doc.append(Command('includepdf{./Images/oswiadczenie_autora_pracy.pdf}'))
+doc.append(Command('pagestyle{plain}'))
+doc.append(Command('cleardoublepage'))
+doc.append(Command('includepdf{./output/oswiadczenie_biblioteczne.pdf}'))
+doc.append(Command('pagestyle{plain}'))
+doc.append(Command('cleardoublepage'))
+
 doc.append(Command('tableofcontents')) #adds TOC
 
 doc.append(sec_intro) # adding certain sections
@@ -1391,17 +964,13 @@ doc.append(sub_SOT)
 doc.append(sub_methodology)
 doc.append(sec_formula)
 doc.append(sec_picture)
-
-doc.append(sec_description)
-doc.append(sec_lagrangian)
-doc.append(sec_equations)
-
+doc.append(sec_math_desc)
 doc.append(sec_simulation)
-doc.append(sec_plots)
 doc.append(sec_verification)
-#doc.append(sec_tables)
+doc.append(sec_tables)
 doc.append(sec_symbols)
 doc.append(sec_conclusion)
+
 
 ### BibLatex
 #doc.append(Command('printbibliography',arguments=["title={Bibliography}"])) - argument is to improve
@@ -1409,6 +978,7 @@ doc.append(Command('printbibliography',options=[NoEscape("title={Bibliography}")
 
 ### Natbib
 #doc.append(Command('bibliography',arguments=["references"])) # .bib file as "references"
+
 
 #FIGURES LIST
 
@@ -1426,8 +996,183 @@ doc.append(Command('pagestyle{plain}'))
 doc.append(Command('newpage'))
 
 # Generating file
-doc.generate_pdf(clean_tex=True)
+doc.generate_pdf(clean_tex=True)'''        
+        
+        preliminary_str=(
+f"""
+Examplary setup is as follows:
 
+#References to guide imports needed to include - to see the list of available guides insert and run the code below:
+```python
+from dynpy.utilities.creators import list_of_guides
+list_of_guides()
+```
+
+## CELL 1
+## Imports
+
+```python
+{imports_str}
+```
+    
+
+
+## CELL 2
+## Thesis introduction
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+{thesis_introduction_str}
+```
+
+
+
+## CELL 3
+## Math 
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+{math_str}
+```
+
+
+## CELL 4
+## Picture
+    
+    
+```python
+    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+{picture_str}
+
+```
+
+
+## CELL 5
+## Simulation
+
+Basics of ODESystem based simulations are covered in guide to ODESystem, use the following call:
+
+```python
+from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide 
+BasicsOfODESystemGuide();
+```
+
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+
+{simulaion_str}
+
+```
+     
+     
+## CELL 6
+## Veryfication
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+{veryfication_str}
+
+```
+    
+## CELL 7
+## Conclusion
+ 
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+{conclusion_str}
+
+```
+
+## CELL 9
+## Symbols description
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+{symbols_description_str}
+
+```
+
+## CELL 10
+## Document
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+{document_str}
+```
+
+"""
+        )
+
+        display(IPMarkdown(preliminary_str))    
+
+
+        preliminary_str=(
+f"""
+#Example:
+
+#To prepare a simple document with text and images:
+
+#Good practice here is to allocate 1 section per 1 cell
+
+## CELL 1
+## Imports
+
+{imports_str}
+    
+## CELL 2
+## Thesis introduction
+
+{thesis_introduction_str}
+
+## CELL 3
+## Math 
+
+{math_str}
+
+## CELL 4
+## Picture
+
+{picture_str}
+
+## CELL 5
+## Simulation
+
+{simulaion_str}
+     
+## CELL 6
+## Veryfication
+
+{veryfication_str}
+    
+## CELL 7
+## Conclusion
+
+{conclusion_str}
+
+## CELL 9
+## Symbols description
+
+{symbols_description_str}
+
+## CELL 10
+## Document
+
+{document_str}
 
 """
         )

@@ -1597,8 +1597,6 @@ class PictureComponent(DocumentGenerationComponent):
 
     title="Picture component implementation"
 
-
-
     def append_elements(self):
         #variables provided by `reported_object` arg
         classname = self.reported_object['classname']

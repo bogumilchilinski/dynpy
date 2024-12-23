@@ -436,4 +436,4 @@ class DynsysCheckerTable:
             self.table_append(element)
     
     def get_table(self):
-        return self.df.replace({1.0: True, 0.0: False}).replace({True: 'Correct', False: 'To Improve'})
+        return self.df.replace({1.0: True, 0.0: False}).replace({True: 'Correct', False: 'To Improve'}).replace({'True': 'Correct', 'False': 'To Improve'})

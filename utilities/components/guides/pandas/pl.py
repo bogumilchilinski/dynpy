@@ -170,14 +170,20 @@ parameter = dyn_sys.system_parameters()[0]
 param_dict = {**param_dict,parameter:parameter}
 ''')
 
+num_sys_df_code=(
+'''
+num_sys=dyn_sys.subs(param_dict)('Num')
+'''
+)
+
 na_df_code=(
 '''
-na_df = dyn_sys.subs(param_dict).numerical_analysis(parameter=parameter,param_span=[1,2,3], t_span = t_span)
+na_df = num_sys.numerical_analysis(parameter=parameter,param_span=[1,2,3], t_span = t_span)
 na_df
 ''')
 na_df_code_eoms=(
 '''
-na_df = dyn_sys.subs(param_dict).eoms.numerical_analysis(parameter=parameter,param_span=[1,2,3], t_span = t_span)
+na_df = num_sys.eoms.numerical_analysis(parameter=parameter,param_span=[1,2,3], t_span = t_span)
 na_df
 ''')
 
@@ -187,6 +193,23 @@ na_df_sol = na_df.with_ics([2.0,0.0]).compute_solution(t_span)
 na_df_sol.plot()
 ''')
 
+full_example_na_df_sol_code=(
+f'''
+{eoms_code}
+
+{dict_code}
+
+{params_code}
+
+{num_sys_df_code}
+
+{na_df_code}
+
+{na_df_code_eoms}
+
+{na_df_sol_code}
+
+''')
 
 class NumericalAnalysisSimulationComponent(ReportComponent):
 
@@ -231,13 +254,14 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
         param_dict = {**param_dict,parameter:parameter}
         
         display(ObjectCode(params_code))
-        
+        display(ObjectCode(num_sys_df_code))
         
         
         display(ReportText('Ostatnim etapem jest wywołanie metody numerical_analysis dla rozważanego systemu. Możemy to zrobić przy użyciu property eoms:'))
         display(ObjectCode(na_df_code_eoms))
         display(ReportText('Lub bez niej:'))
         display(ObjectCode(na_df_code))
+        num_sys=dyn_sys.subs(param_dict)('Num')
         na_df = dyn_sys.subs(param_dict).numerical_analysis(parameter=dyn_sys.system_parameters()[0],param_span=[1,2,3], t_span = t_span).with_ics([2.0,0.0])
         #na_df = system.subs(param_dict).numerized()
         na_df
@@ -251,6 +275,9 @@ class NumericalAnalysisSimulationComponent(ReportComponent):
         
         import matplotlib.pyplot as plt
         plt.show()
+        
+        display(ReportText('Pełny kod potrzebny do uzyskania symulacji wygląda następująco:'))
+        display(ObjectCode(full_example_na_df_sol_code))
 
 
 sim_code=(
