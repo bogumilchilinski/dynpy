@@ -2486,7 +2486,7 @@ class ReportText(ReportModule):
         for element in self.command_vector:
             vector += str(element) + ', '
         
-        print(vector[:-2] + ')')
+        return vector[:-2] + ')'
     
 class Aspect(Section,ReportModule):
     packages=[#Package('float'),
