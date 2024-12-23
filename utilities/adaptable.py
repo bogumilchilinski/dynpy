@@ -428,6 +428,8 @@ class DataAxis(Axis, ReportModule):
     _line_style = None
     _legend_pos = 'north east'
     _default_transformer = BaseIndexTransformer
+    
+    _manual_at=None
 
     def __init__(self,
                  plotdata=None,
@@ -479,7 +481,10 @@ class DataAxis(Axis, ReportModule):
             for data in self._plots:
                 self.append(data)
 
-    
+    @classmethod
+    def set_at(self,at_val):
+        self._manual_at=at_val
+        
     @classmethod
     def set_default_colours(cls, colour=None):
         cls._default_colours = colour
@@ -500,7 +505,7 @@ class DataAxis(Axis, ReportModule):
     @property
     def handle(self):
         return self._handle
-
+    
     @property
     def at(self):
         
@@ -525,8 +530,16 @@ class DataAxis(Axis, ReportModule):
             kwargs['name'] = self.handle
 
         at_option = []
-        if self.at is not None:
+        
+        if self.at is  not None:
             at_option = [NoEscape(f'at={self.at}')]
+
+        if self._manual_at is not None:
+            display('MANUAL')
+            display(self._manual_at)
+            at_option = [NoEscape('legend style={font=\small,at='+self._manual_at+'}')]
+#         else: 
+#             at_option = ['']
 
 
         if self._x_axis_empty:
@@ -3247,6 +3260,8 @@ class SpectrumFrame(AdaptableDataFrame, SpectralMethods):
 
         if y_axis_description == None:
             y_axis_description = 'ylabel={$' + self.name + '$},'
+
+
 
         return super().to_tikz_plot(filename=filename,
                                     labels_list=labels_list,

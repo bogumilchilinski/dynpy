@@ -2869,7 +2869,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     
         elif shape == (2,2):
     
-            print('hejo')
+            #print('hejo')
     
             top_left_minor,top_right_minor,bottom_right_minor,bottom_left_minor = split_matrix(shape)
         
@@ -3583,7 +3583,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                     ivar0 = - gap/4
                     
                 elif type(-arg) == cos:
-                    ivar0= 0 #(S.Half*pi/arg.args[1].args[0].diff(self.ivar))
+                    #ivar0= 0 #(S.Half*pi/arg.args[1].args[0].diff(self.ivar))
 
 
 
@@ -3619,8 +3619,8 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 from sympy import Sum,oo
                 n_num = Symbol('N')
 
-                sol_series_start =  sol_H.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar - ivar_H_start ),(n,-n_num,n_num,)   ) )
-                sol_series_end =  sol_H_out.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar -  ivar_H_end    ),(n,-n_num,n_num)   ) )
+                sol_series_start =  sol_H.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar - ivar_H_start ),(n,-1,n_num,)   ) )
+                sol_series_end =  sol_H_out.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar -  ivar_H_end    ),(n,-1,n_num)   ) )
 
                 sol_series = sol_series_start + sol_series_end
 

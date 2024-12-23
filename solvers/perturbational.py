@@ -583,7 +583,7 @@ class MultiTimeScaleSolution(ODESystem):
 
 
             aprrox_fun = [
-                sym.Function(fun_str + '_{' + str(order) + '}')(*t_list)
+                sym.Function(fun_str[0:-1] +  str(dvar_no) + '}')(*t_list)
                 for dvar_no, dvar in enumerate(self.vars)
             ]
 

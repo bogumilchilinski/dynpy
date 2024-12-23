@@ -946,12 +946,10 @@ class CircuitRLCWithHeavisidePWM(CircuitRLCWithPWM):
         
         self.sym_desc_dict = {
             self.resistance: r'amplitude of the variable part of the resistance',
-            sel.R_min:r'constant value of the resistance',
+            self.R_min:r'constant value of the resistance',
             self.inductance: r'inductance',
             self.capacity: r'capacitance',
             self.U:r'source voltage',
-            self.eps:r'small parameter',
-            self.rho:r'formula representing resistance variation',
             self.q0:r'electric charge',
             self.q0.diff(self.ivar):r'current',
             self.q0.diff(self.ivar,self.ivar):r'current rate of change'

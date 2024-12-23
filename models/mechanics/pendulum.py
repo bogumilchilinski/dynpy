@@ -65,6 +65,7 @@ class Pendulum(NonlinearComposedSystem):
     g=Symbol('g', positive=True)
     l=Symbol('l', positive=True)
     angle=dynamicsymbols('\phi')
+    p_t = dynamicsymbols('p')
     qs=None
     
     m0=Symbol('m_0',positive=True)
@@ -75,6 +76,7 @@ class Pendulum(NonlinearComposedSystem):
                  g=None,
                  l=None,
                  angle=None,
+                 p_t=None,
                  ivar=None,
                  **kwargs):
 
@@ -87,6 +89,7 @@ class Pendulum(NonlinearComposedSystem):
         if g is not None: self.g = g
         if l is not None: self.l = l
         if angle is not None: self.angle = angle
+        if p_t is not None: self.p_t = p_t
         if ivar is not None: self.ivar = ivar
 
         
@@ -172,6 +175,17 @@ class Pendulum(NonlinearComposedSystem):
                 }
 
         return units_dict
+
+    def canonical_transformation(self):
+
+        ham_approx = self.approximated(3).hamiltonian()
+
+        p = Symbol('p_'+'{'+str(self.q[0]).replace('(' + str(self.ivar) + ')', '')+'}')
+
+        dpdt = - ham_approx.rhs.subs(p,self.p_t).diff(self.q)[0]
+        dqdt = ham_approx.rhs.subs(p,self.p_t).diff(self.p_t)
+
+        return dpdt,dqdt
     
     
 #DONE
