@@ -550,11 +550,7 @@ class DDOFGearMechanism(ComposedSystem):
         return units_dict
     
     def as_equivalent_sdof(self):
-<<<<<<< HEAD
         return EquivalentSDOFGearModel()
 
 class EquivalentSDOFGearModel(EquivalentGearModel):
     pass
-=======
-        return EquivalentGearModel()
->>>>>>> 21ff5b2 ( Changes to be committed:)
