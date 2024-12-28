@@ -8,7 +8,7 @@ from sympy.physics.vector import vpprint, vlatex
 from dynpy.models.mechanics.principles import ComposedSystem
 from dynpy.models.mechanics.disk import RollingDisk
 from dynpy.models.electric.elements import *
-from dynpy.models.electric.engine import *
+#from dynpy.models.electric.engine import *
 from functools import cached_property, lru_cache
 
 class ReducedMotorbike(ComposedSystem):

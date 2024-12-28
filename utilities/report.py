@@ -3957,6 +3957,9 @@ class DescriptionsRegistry:
         - all - for each equations all of the symbols are shown - and repeated
 
     Example of usage:
+    from sympy import *
+    from dynpy.utilities.report import SympyFormula, DescriptionsRegistry, SymbolsDescription
+
     a=Symbol("a", positive=True)
     b=Symbol("b", positive=True)
     c=Symbol("c", positive=True)
@@ -4035,7 +4038,26 @@ class DescriptionsRegistry:
 
 
 class SymbolsDescription(Description,ReportModule):
-    """A class representing LaTeX description environment of Symbols explained in description_dict."""
+    """A class representing LaTeX description environment of Symbols explained in description_dict.
+    Example of usage:
+    from sympy import *
+    from dynpy.utilities.report import SympyFormula, DescriptionsRegistry, SymbolsDescription
+
+    a=Symbol("a", positive=True)
+    b=Symbol("b", positive=True)
+    c=Symbol("c", positive=True)
+
+    eq=Eq(a**2+b**2,c**2)
+    symbol_desc={
+        a: 'Length of the side a',
+        b: 'Length of the side b',
+        c: 'Length of the side c'
+    }
+
+    DescriptionsRegistry.set_descriptions(symbol_desc)
+    display(SympyFormula(eq))
+    display(SymbolsDescription(expr=eq))
+    """
     _latex_name = 'description'
     cls_container = []
     _description_head = 'where:'

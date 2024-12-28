@@ -770,13 +770,13 @@ class SecularTermsEquationsComponent(ReportComponent):
         display(ReportText(  self.header_text   ))
         
         
-        #system.general_solution
-        # #display(system.secular_eq)
-        # sec_eqns = system.secular_eq[system.eps].as_first_ode_linear_system().lhs - system.secular_eq[system.eps].as_first_ode_linear_system().rhs
+        system.general_solution
+        display(system.secular_eq)
+        sec_eqns = system.secular_eq[system.eps].as_first_ode_linear_system().lhs - system.secular_eq[system.eps].as_first_ode_linear_system().rhs
 
-        # for no,eq in enumerate(sec_eqns):
+        for no,eq in enumerate(sec_eqns):
 
-        #     display(SympyFormula(Eq(eq,0)))
+            display(SympyFormula(Eq(eq,0)))
             
         display(ReportText(  self.footer_text   ))
         

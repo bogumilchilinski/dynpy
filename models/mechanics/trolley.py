@@ -901,7 +901,6 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
         self.u_0=self.g*self.l/self.k_l        
         self._init_from_components(**kwargs)
 
-
     @cached_property
     def components(self):
         components = {}
@@ -909,14 +908,11 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
         self._trolley = SpringMassSystem(self.m_t, self.k, self.x, self.ivar)(label='Trolley')
         #self._pendulum = PendulumKinematicExct(self.l+self.u, self.m_p, self.g, self.phi, self.x, self.ivar)(label='Pendulum')
         self._force=Force(self.F*sin(self.Omega*self.ivar), pos1=self.qs[0], qs=self.qs)(label='Force')
-        
-
-        
+       
         self._material_point_1=MaterialPoint(self.m_p,self.x+(self.l+self.u+self.u_0)*sin(self.phi),qs=self.qs)
         self._material_point_2=MaterialPoint(self.m_p,(self.l+self.u+self.u_0)*cos(self.phi),qs=self.qs)
         self._gravity = GravitationalForce(self.m_p, self.g, -(self.l+self.u+self.u_0)*cos(self.phi), qs=self.qs)
-
-
+        
         # self._material_point_1=MaterialPoint(self.m_p,self.x+(self.l+self.u)*sin(self.phi),qs=self.qs)
         # self._material_point_2=MaterialPoint(self.m_p,(self.l+self.u)*cos(self.phi),qs=self.qs)
         # self._gravity = GravitationalForce(self.m_p, self.g, -(self.l+self.u)*cos(self.phi), qs = self.qs)        
