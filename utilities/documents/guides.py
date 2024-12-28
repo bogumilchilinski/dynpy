@@ -529,9 +529,47 @@ class BasicsOfReportingGuide(UsageOfDynamicSystemsGuide):
 
         return comp_list
 
+   
+class ResearchProjectGuidelines(BasicsOfReportingGuide):
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+
+
+           development_comp.InterimTemplateComponent,
+           development_comp.ModellingInPythonGuidelinesComponent,
+            # systems_comp.DynamicSystemCallComponent,
+            #systems_comp.SimulationsComponent,
+            #reporting_comp.SimulationReportComponent,
+
+        ]
+
+        return comp_list 
+    
+class ThesisGuidelines(ResearchProjectGuidelines):
+
+    @property
+    def _report_components(self):
+
+        comp_list=[
+
+
+           development_comp.InterimTemplateComponent,
+           development_comp.ModellingInPythonGuidelinesComponent,
+            # systems_comp.DynamicSystemCallComponent,
+            #systems_comp.SimulationsComponent,
+            #reporting_comp.SimulationReportComponent,
+
+        ]
+
+        return comp_list
+
+
     
     
-class InterimProjectGuidelines(UsageOfDynamicSystemsGuide):
+class InterimProjectGuidelines(ResearchProjectGuidelines):
 
     @property
     def _report_components(self):
@@ -557,23 +595,7 @@ class InterimProjectGuidelines(UsageOfDynamicSystemsGuide):
         return datetime.datetime(2024,7,13)
     
     
-class ResearchProjectGuidelines(UsageOfDynamicSystemsGuide):
 
-    @property
-    def _report_components(self):
-
-        comp_list=[
-
-
-           development_comp.InterimTemplateComponent,
-           development_comp.ModellingInPythonGuidelinesComponent,
-            # systems_comp.DynamicSystemCallComponent,
-            #systems_comp.SimulationsComponent,
-            #reporting_comp.SimulationReportComponent,
-
-        ]
-
-        return comp_list
     
 class IntroDynPyProjectGuidelines(UsageOfDynamicSystemsGuide):
 

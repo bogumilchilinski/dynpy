@@ -72,14 +72,16 @@ class MeetingIssueCreator:
     _guide = ODESystemOverviewReport
     _time = '20:30'
     _date = '2024.07.27'
+    _assignees = ['bogumilchilinski']
 
-    def __init__(self,title=None,no=None,guide=None,date=None,time=None,done=False,*args,**kwargs):
+    def __init__(self,title=None,no=None,guide=None,date=None,time=None,assignees=None,done=False,*args,**kwargs):
         if title is not None: self._title = title
         if no is not None: self._issue_no = no
         if guide is not None: self._guide = guide
         if date is not None: self._date= date
         if time is not None: self._time = time
         self._done = done
+        if assignees is not None: self._assignees = assignees
 
     def _get_elems_dict(self):
 
@@ -179,16 +181,320 @@ class MeetingIssueCreator:
     def publish_on_github(self,repository):
 
         guide_label=repository.get_label('guidance')
+        assignees=self._assignees
 
-        issue_meet=repository.create_issue(**self.get_meet_issue_dict(),labels=[guide_label]#,assignees=wykon
+        issue_meet=repository.create_issue(**self.get_meet_issue_dict(),labels=[guide_label],assignees=assignees
                                 )
-        issue_time=repository.create_issue(**self.get_time_issue_dict(),labels=[guide_label],assignee='bogumilchilinski')
-        issue_arrange=repository.create_issue(**self.get_arrange_issue_dict(),labels=[guide_label]#,assignees=wykon
+        issue_time=repository.create_issue(**self.get_time_issue_dict(),labels=[guide_label],assignees=['bogumilchilinski'])
+        issue_arrange=repository.create_issue(**self.get_arrange_issue_dict(),labels=[guide_label],assignees=assignees
                                 )
-        issue_guide=repository.create_issue(**self.get_guide_issue_dict(),labels=[guide_label]#,assignees=wykon
+        issue_guide=repository.create_issue(**self.get_guide_issue_dict(),labels=[guide_label],assignees=assignees
                                 )
 
         return issue_meet,issue_time,issue_arrange,issue_guide
+
+
+
+
+
+class HelpImplementationIssueCreator:
+
+    """
+    Example:
+    from dynpy.utilities.creators import MeetingIssueCreator
+    from dynpy.utilities.documents.document import IntroDynPyProjectGuidelines
+    title="Issue"
+    last_issue_no=533
+    MeetingIssueCreator(title=title,no=last_issue_no+1,guide=IntroDynPyProjectGuidelines,date='2024.09.26',time='20:30',done=False)
+
+    """
+    
+    _obj = ODESystemOverviewReport
+    _issue_no = 567
+    _guide = ODESystemOverviewReport
+    _time = '20:30'
+    _date = '2024.07.27'
+    _assignees = ['bogumilchilinski']
+    _module = 'exemplary.module'
+    _default_labels = ['documentation','enhancement','maintenance']
+    _issue_type = 'Help'
+    _goal = 'creates a part of a report'
+
+    def __init__(self,obj=None,goal=None,module=None,no=None,assignees=None,done=False,*args,**kwargs):
+        if obj is not None: self._obj = obj
+        if no is not None: self._issue_no = no
+        if module is not None: self._module = module
+        if goal is not None: self._goal = goal
+
+        self._done = done
+        if assignees is not None: self._assignees = assignees
+
+    def _get_elems_dict(self):
+
+        if self._done: tic = 'x'
+        else: tic = ' '
+
+        obj = self._obj
+
+        elems_dict = {
+                'obj':obj,
+                'goal':self._goal,
+                'issue_no':self._issue_no,
+                'issue_no+1':self._issue_no+1,
+                'issue_no+2':self._issue_no+2,
+                'issue_no+3':self._issue_no+3,
+                'obj_class_module':obj.__module__,
+                'obj_class_name':obj.__name__,
+                # 'date':self._date,
+                # 'time':self._time,
+                'tic':tic
+                }
+
+        return elems_dict
+
+    @property
+    def title(self):
+        
+        issue_no = self._issue_no
+        obj_class_module= self._obj.__module__
+        obj_class_name=self._obj.__name__
+        
+        return f'Help for `{obj_class_name}` class from `{obj_class_module}` module'
+
+    @property
+    def body_text(self):
+        
+        issue_no = self._issue_no
+        obj_class_module= self._obj.__module__
+        obj_class_name=self._obj.__name__
+        
+        issue_code_str=(f'Help *docstring* is to implement for `{obj_class_name}` class that is defined in `{obj_class_module}`. '+
+        'It should list of all available information about class.')
+        
+        return issue_code_str
+
+    @property
+    def closing_comment_text(self):
+        
+        obj_class_module= self._obj.__module__
+        obj_class_name=self._obj.__name__
+        
+        comment_str_h1 = '> *Exemplary comment. You can copy example below and close issue with new comment or modify it and close the issue.* '
+        comment_str_h2 = '*Remove this message or keep it if new comment is created.*'
+        
+        comment_str_2 = 'Help *docstring* added. \n\nThe code was checked with the following call:'
+        comment_call_code = f'```python \nfrom {obj_class_module} import {obj_class_name} \n{obj_class_name}() \n```'
+        
+        return f'{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}\n{comment_call_code}'
+
+
+
+    def get_issues_titles(self):
+
+        # Issue no. #{issue_no}
+        ## Preparation of meeting and guide for {title}
+
+
+
+        titles_dict =   {
+                        'issue':self.title,
+                        }
+
+        return titles_dict
+
+    def get_issue_str(self):
+        elems_dict = self._get_elems_dict()
+        issue_no = self._issue_no
+
+        titles = self.get_issues_titles()
+
+        issue_dict = self.get_issue_dict()
+
+        issue_code_str = (f'# Issue no. #{issue_no} \n '+
+                        '## '+issue_dict['title'] + '\n ' +
+                        issue_dict['body'] + '\n ' +
+                        '### Closing comment (example)' + '\n ' +
+                        self.closing_comment_text
+                        )
+
+        return issue_code_str
+
+
+
+    def get_issue_dict(self):
+        elems_dict = self._get_elems_dict()
+        titles = self.get_issues_titles()
+
+        issue_code_str=('Help *docstring* is to implement for `{obj_class_name}` class that is defined in `{obj_class_module}`. '+
+        'It should list of all available information about class.')
+
+        return {'title':self.title,'body':self.body_text.format(**elems_dict)}
+
+
+    def _repr_markdown_(self):
+        return self.get_issue_str()
+
+
+    def publish_on_github(self,repository,labels=[]):
+
+        labels = self._default_labels+labels
+
+        issue_labels=[repository.get_label(label_arg) for label_arg in labels]
+        assignees=self._assignees
+
+        issue_help=repository.create_issue(**self.get_issue_dict(),labels=issue_labels,assignees=assignees
+                                )
+        
+        issue_help.create_comment(self.closing_comment_text)
+
+        return issue_help
+
+
+class ReportComponentImplementationIssueCreator(HelpImplementationIssueCreator):
+    
+    _default_labels = ['documentation','enhancement','guide','maintenance','reporting']
+    _issue_type = 'Implementation'
+    _goal = 'creates a part of a report'
+    
+    @property
+    def title(self):
+        
+        issue_no = self._issue_no
+        obj_class_module= self._obj.__module__
+        obj_class_name=self._obj.__name__
+        goal = self._goal
+        
+        issue_type = self._issue_type
+        
+        return f'{issue_type} of `{obj_class_name}` class that {goal} (defined in `{obj_class_module}` module)'
+
+    @property
+    def body_text(self):
+        
+        issue_no = self._issue_no
+        obj_class_module= self._obj.__module__
+        obj_class_name=self._obj.__name__
+        goal = self._goal
+        
+        
+
+        issue_code_str=(f'`{obj_class_name}` class (report component) is to implement in `{obj_class_module}` module. '+
+        'It should provide code that {goal}.')
+        
+        return issue_code_str
+
+    @property
+    def closing_comment_text(self):
+        
+        obj_class_module= self._obj.__module__
+        obj_class_name=self._obj.__name__
+        
+        comment_str_h1 = '> *Exemplary comment. You can copy example below and close issue with new comment or modify it and close the issue.* '
+        comment_str_h2 = '*Remove this message or keep it if new comment is created.*'
+        
+        comment_str_2 = 'The code was checked with the following call:'
+        comment_call_code = f'```python \nfrom {obj_class_module} import {obj_class_name} \n{obj_class_name}(None) \n```'
+        
+        return f'{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}\n{comment_call_code}'
+
+
+class ReportComponentDevelopmentIssueCreator(HelpImplementationIssueCreator):
+    
+    _default_labels = ['documentation','enhancement','guide','maintenance','reporting']
+    _issue_type = 'Development'
+    _goal = 'creates a part of a report'
+    
+    @property
+    def title(self):
+        
+        issue_no = self._issue_no
+        obj_class_module= self._obj.__module__
+        obj_class_name=self._obj.__name__
+        goal = self._goal
+        
+        issue_type = self._issue_type
+        
+        return f'{issue_type} of `{obj_class_name}` class that {goal} (defined in `{obj_class_module}` module)'
+
+    @property
+    def body_text(self):
+        
+        issue_no = self._issue_no
+        obj_class_module= self._obj.__module__
+        obj_class_name=self._obj.__name__
+        goal = self._goal
+        
+        
+
+        issue_code_str=(f'`{obj_class_name}` class (report component) is to develop in `{obj_class_module}` module. '+
+        'It should provide code that {goal}.')
+        
+        return issue_code_str
+
+    @property
+    def closing_comment_text(self):
+        
+        obj_class_module= self._obj.__module__
+        obj_class_name=self._obj.__name__
+        
+        comment_str_h1 = '> *Exemplary comment. You can copy example below and close issue with new comment or modify it and close the issue.* '
+        comment_str_h2 = '*Remove this message or keep it if new comment is created.*'
+        
+        comment_str_2 = 'The code was checked with the following call:'
+        comment_call_code = f'```python \nfrom {obj_class_module} import {obj_class_name} \n{obj_class_name}(None) \n```'
+        
+        return f'{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}\n{comment_call_code}'
+
+
+
+class MethodImplementationIssueCreator(HelpImplementationIssueCreator):
+    
+    _default_labels = ['documentation','enhancement','guide','maintenance','reporting']
+    _issue_type = 'Implementation'
+    _goal = 'creates a part of a report'
+    
+    @property
+    def title(self):
+        
+        issue_no = self._issue_no
+        obj_class_module= self._obj.__module__
+        obj_class_name=self._obj.__qualname__
+        goal = self._goal
+        
+        issue_type = self._issue_type
+        
+        return f'{issue_type} of `{obj_class_name}` method that {goal} (defined in `{obj_class_module}` module)'
+
+    @property
+    def body_text(self):
+        
+        issue_no = self._issue_no
+        obj_class_module= self._obj.__module__
+        obj_class_name=self._obj.__qualname__
+        goal = self._goal
+        
+        
+
+        issue_code_str=(f'`{obj_class_name}` method is to implement in `{obj_class_module}` class. '+
+        'It should provide code that {goal}.')
+        
+        return issue_code_str
+
+    @property
+    def closing_comment_text(self):
+        
+        obj_class_module= self._obj.__module__
+        obj_class_name=self._obj.__qualname__
+        
+        comment_str_h1 = '> *Exemplary comment. You can copy example below and close issue with new comment or modify it and close the issue.* '
+        comment_str_h2 = '*Remove this message or keep it if new comment is created.*'
+        
+        comment_str_2 = 'The code was checked with the following call:'
+        comment_call_code = f'```python \nfrom {obj_class_module} import {obj_class_name} \n{obj_class_name}(None) \n```'
+        
+        return f'{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}\n{comment_call_code}'
+
+
 
 class GitHubInterface():
 
