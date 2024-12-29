@@ -3588,8 +3588,15 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
 
 
                     gap = (2*pi/ (-arg).args[0].diff(self.ivar))#.n(6)
-                    ivar0 =  gap/4                    
+                    ivar0 =  gap/4   
 
+                elif type(-arg) == sin:
+                    #ivar0= 0 #(S.Half*pi/arg.args[1].args[0].diff(self.ivar))
+
+
+
+                    gap = (2*pi/ (-arg).args[0].diff(self.ivar))#.n(6)
+                    ivar0 =  gap/2 
 
                 
                 ics_list = list(0*b)
@@ -3619,8 +3626,8 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
                 from sympy import Sum,oo
                 n_num = Symbol('N')
 
-                sol_series_start =  sol_H.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar - ivar_H_start ),(n,-1,n_num,)   ) )
-                sol_series_end =  sol_H_out.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar -  ivar_H_end    ),(n,-1,n_num)   ) )
+                sol_series_start =  sol_H.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar - ivar_H_start ),(n,0,n_num,)   ) )
+                sol_series_end =  sol_H_out.rhs.applyfunc(lambda row:  Sum(row*Heaviside(self.ivar -  ivar_H_end    ),(n,0,n_num)   ) )
 
                 sol_series = sol_series_start + sol_series_end
 

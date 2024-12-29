@@ -3,7 +3,7 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, asin, diff, sqrt, S,
                    dsolve, solve, fraction, factorial, Subs, Number, oo, Abs,
                    N, solveset)
 
-from sympy import Heaviside
+from sympy import Heaviside, DiracDelta
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
 from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
@@ -18,7 +18,8 @@ import numpy as np
 import inspect
 
 from dynpy.models.mechanics.trolley import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin
-from dynpy.models.electric.engine import ElectromotiveForce, RotorTorque
+from dynpy.models.electric.motor import ElectromotiveForce, RotorTorque
+from dynpy.solvers.linear import ODESystem
 
 class ElectricMotorcycle2DoF(ComposedSystem):
     scheme_name = 'DC_motor.png'
@@ -50,6 +51,11 @@ class ElectricMotorcycle2DoF(ComposedSystem):
     charge=dynamicsymbols('q')
     x=dynamicsymbols('x')
 
+    current=dynamicsymbols('i')
+    velocity=dynamicsymbols('v')
+    
+    ic1=Symbol('i_c1',positive=True)
+    ic2=Symbol('i_c2',positive=True)
     
     def __init__(self,
                  U_z=None,
@@ -71,6 +77,8 @@ class ElectricMotorcycle2DoF(ComposedSystem):
                  ft=None,
                  eta_p=None,
                  v=None,
+                 ic1=None,
+                 ic2=None,
                  ivar=Symbol('t'),
                  **kwargs):
         
@@ -97,6 +105,9 @@ class ElectricMotorcycle2DoF(ComposedSystem):
         if eta_p is not None: self.eta_p=eta_p
         if v is not None: self.v=v
         
+        if ic1 is not None: self.ic1=ic1
+        if ic2 is not None: self.ic2=ic2
+        
         self.ivar = ivar
         
         self.qs = [self.charge, self.x]
@@ -104,6 +115,8 @@ class ElectricMotorcycle2DoF(ComposedSystem):
         
     @property
     def components(self):
+        self.cut1=self.ic1
+        self.cut2=self.ic2
         components = {}
         
         self.resistance=Resistor(-self.R_w,self.charge,qs=self.qs,ivar=self.ivar)
@@ -114,8 +127,8 @@ class ElectricMotorcycle2DoF(ComposedSystem):
         self.electromotive_force = ElectromotiveForce(-self.k_m*self.charge.diff(self.ivar)*self.i, self.x/self.r, qs=self.qs, ivar=self.ivar , frame=base_frame)
         self.rotor_torque = RotorTorque(self.k_e*self.x.diff(self.ivar)/self.r, self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
         self.air_drag=Force(S.One/2*self.Ad*self.Cd*self.Af*(self.x.diff(self.ivar))**2,self.x,qs=self.qs,ivar=self.ivar)
-        self.pwm=Force(self.Rpwm*Heaviside(-(self.ivar)+5)*Heaviside(self.charge.diff(self.ivar)-700)*self.charge.diff(self.ivar), self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
-        self.pwm2=Force(self.Rpwm2*Heaviside((self.ivar)-5)*Heaviside(self.charge.diff(self.ivar)-300)*self.charge.diff(self.ivar), self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.pwm=Force(self.Rpwm*Heaviside(-(self.ivar)+5)*Heaviside(self.charge.diff(self.ivar)-self.cut1)*self.charge.diff(self.ivar), self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.pwm2=Force(self.Rpwm2*Heaviside((self.ivar)-5)*Heaviside(self.charge.diff(self.ivar)-self.cut2)*self.charge.diff(self.ivar), self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
 
         components['resistor'] = self.resistance
         components['inductor'] = self.inductor
@@ -164,19 +177,23 @@ class ElectricMotorcycle2DoF(ComposedSystem):
     
     def get_default_data(self):
         default_data_dict = {
-            self.R_w: [2],
-            self.L_w: [0.1],
-            self.k_e: [0.1],
-            self.k_m: [0.1],
-            self.J: [0.1],
-            self.B: [0.5],
-            self.M_obc: [0.2],
-            self.r:[0.5],
-            self.c:[1000],
-            self.m:[250],
-            self.Cd:[0.65],
-            self.Ad:[1.2047],
-            self.Af:[0.6]
+            self.R_w: 0.0105,
+            self.L_w: 0.000182,
+            self.k_e: 0.224,
+            self.k_m: 0.224,
+            self.J: 20,
+            self.B: 0.004794,
+            self.r:0.3175,
+            self.m:250,
+            self.Cd:0.65,
+            self.Ad:1.2047,
+            self.Af:0.6,
+#             self.eps:0.18,
+#             self.delta:0,
+            self.U_z:96,
+            self.i:1.925,
+            self.Rpwm:0.126,
+            self.Rpwm2:0.28
         }
         return default_data_dict
     
@@ -210,3 +227,136 @@ class ElectricMotorcycle2DoF(ComposedSystem):
         
         #return FirstOrderLinearODESystem.from_ode_system(ode)
         return ode
+    
+    @property
+    def as_first_order_em(self):
+        inert_mat=self.mass_matrix
+        damp_mat=self.damping_matrix().subs(self.charge,self.current).subs(DiracDelta(self.current.diff(self.ivar)-self.cut1),0).subs(Heaviside(self.current.diff(self.ivar)-self.cut1),Heaviside(self.current-self.cut1)).subs(self.Ad*self.Af*self.Cd*self.x.diff(self.ivar),self.Ad*self.Af*self.Cd*self.velocity*S.Half).subs(DiracDelta(self.current.diff(self.ivar)-self.cut2),0).subs(Heaviside(self.current.diff(self.ivar)-self.cut2),Heaviside(self.current-self.cut2))
+        sec_to_first_comp=inert_mat*Matrix([[self.current.diff(self.ivar)],[self.velocity.diff(self.ivar)]])
+        first_to_zero_comp=(damp_mat*Matrix([[self.current],[self.velocity]]))
+        eoms_mat=sec_to_first_comp+first_to_zero_comp-self.external_forces()
+        return ODESystem(eoms_mat,Matrix([[self.current],[self.velocity]]),ivar=self.ivar,ode_order=None)
+    
+class ElectricMotorcycle2DoFMSM(ElectricMotorcycle2DoF):
+    eps=Symbol('varepsilon',positive=True)
+    delta=Symbol('delta',positive=True)
+    
+    @property
+    def components(self):
+        components = {}
+        self.cut=self.ic
+        r_pwm_1=self.Rpwm*(Heaviside(self.charge.diff(self.ivar)-self.cut)*self.eps+1)
+        
+        
+        self.resistance=Resistor(-self.R_w,self.charge,qs=self.qs,ivar=self.ivar)
+        self.inductor = Inductor(-self.L_w, self.charge, qs=self.qs, ivar=self.ivar, frame=base_frame)
+        self.voltage_source = VoltageSource(-self.U_z, self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.inertia=Inductor(-self.J, self.x/self.r, qs=self.qs, ivar=self.ivar, frame=base_frame)
+        self.viscous_friction=Resistor(-self.B,self.x/self.r,qs=self.qs,ivar=self.ivar)
+        self.electromotive_force = ElectromotiveForce(-self.k_m*self.charge.diff(self.ivar)*self.i, self.x/self.r, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.rotor_torque = RotorTorque(self.k_e*self.x.diff(self.ivar)/self.r, self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.air_drag=Force(S.One/2*self.Ad*self.Cd*self.Af*(self.x.diff(self.ivar))**2,self.x,qs=self.qs,ivar=self.ivar)
+        self.pwm=Force(r_pwm_1*self.charge.diff(self.ivar), self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
+#         self.pwm2=Force(self.Rpwm2*Heaviside((self.ivar)-5)*Heaviside(self.charge.diff(self.ivar)-300)*self.charge.diff(self.ivar), self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
+
+        components['resistor'] = self.resistance
+        components['inductor'] = self.inductor
+        components['voltage_source'] = self.voltage_source
+        components['inertia'] = self.inertia
+        components['viscous_friction'] = self.viscous_friction
+        components['electromotive_force'] = self.electromotive_force
+        components['rotor_torque'] = self.rotor_torque
+        components['air_drag'] = self.air_drag
+        components['pwm']=self.pwm
+#         components['pwm2']=self.pwm2
+
+        return components
+
+    @property
+    def as_first_order_em(self):
+        inert_mat=self.mass_matrix
+        damp_mat=self.damping_matrix().subs(self.charge,self.current).subs(DiracDelta(self.current.diff(self.ivar)-self.cut),0).subs(Heaviside(self.current.diff(self.ivar)-self.cut),Heaviside(self.current-self.cut)).subs(self.Ad*self.Af*self.Cd*self.x.diff(self.ivar),self.Ad*self.Af*self.Cd*self.velocity*S.Half)
+        sec_to_first_comp=inert_mat*Matrix([[self.current.diff(self.ivar)],[self.velocity.diff(self.ivar)]])
+        first_to_zero_comp=(damp_mat*Matrix([[self.current],[self.velocity]]))
+        eoms_mat=sec_to_first_comp+first_to_zero_comp-self.external_forces()
+        return ODESystem(eoms_mat,Matrix([[self.current],[self.velocity]]),ivar=self.ivar,ode_order=None)
+    def get_default_data(self):
+        default_data_dict = {
+            self.R_w: 0.0105,
+            self.L_w: 0.000182,
+            self.k_e: 0.224,
+            self.k_m: 0.224,
+            self.J: 20,
+            self.B: 0.004794,
+            self.r:0.3175,
+            self.m:250,
+            self.Cd:0.65,
+            self.Ad:1.2047,
+            self.Af:0.6,
+            self.eps:0.18,
+            self.delta:0,
+            self.U_z:96,
+            self.i:1.925,
+            self.Rpwm:0.18
+        }
+        return default_data_dict
+    
+class RegenerativeBrakingElectricMotorcycle2DoFMSM(ElectricMotorcycle2DoFMSM):
+    eps=Symbol('varepsilon',positive=True)
+    delta=Symbol('delta',positive=True)
+    
+    @property
+    def components(self):
+        components = {}
+        r_pwm_1=self.Rpwm*(1+self.eps*Heaviside(self.charge.diff(self.ivar)+20))
+        
+        
+        self.resistance=Resistor(-self.R_w,self.charge,qs=self.qs,ivar=self.ivar)
+        self.inductor = Inductor(-self.L_w, self.charge, qs=self.qs, ivar=self.ivar, frame=base_frame)
+        self.voltage_source = VoltageSource(-self.U_z, self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.inertia=Inductor(-self.J, self.x/self.r, qs=self.qs, ivar=self.ivar, frame=base_frame)
+        self.viscous_friction=Resistor(-self.B,self.x/self.r,qs=self.qs,ivar=self.ivar)
+        self.electromotive_force = ElectromotiveForce(-self.k_m*self.charge.diff(self.ivar)*self.i, self.x/self.r, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.rotor_torque = RotorTorque(self.k_e*self.x.diff(self.ivar)/self.r, self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.air_drag=Force(S.One/2*self.Ad*self.Cd*self.Af*(self.x.diff(self.ivar))**2,self.x,qs=self.qs,ivar=self.ivar)
+        self.pwm=Force(r_pwm_1*self.charge.diff(self.ivar), self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
+#         self.pwm2=Force(self.Rpwm2*Heaviside((self.ivar)-5)*Heaviside(self.charge.diff(self.ivar)-300)*self.charge.diff(self.ivar), self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
+
+        components['resistor'] = self.resistance
+        components['inductor'] = self.inductor
+        components['voltage_source'] = self.voltage_source
+        components['inertia'] = self.inertia
+        components['viscous_friction'] = self.viscous_friction
+        components['electromotive_force'] = self.electromotive_force
+        components['rotor_torque'] = self.rotor_torque
+        components['air_drag'] = self.air_drag
+        components['pwm']=self.pwm
+#         components['pwm2']=self.pwm2
+
+        return components
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
