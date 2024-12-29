@@ -412,7 +412,7 @@ class FirstOrderApproximatedEqComponent(ReportComponent):
         
         system = self.reported_object.set_order(1)
         
-        first_ord_approx_eq = Eq(system.eoms_approximation_list()[0].lhs-system.eoms_approximation_list()[0].rhs,0)
+#         first_ord_approx_eq = Eq(system.eoms_approximation_list()[0].lhs-system.eoms_approximation_list()[0].rhs,0)
 
         return f"Or transformed to the second order ODE {AutoMarker(first_ord_approx_eq)}:"
 
@@ -422,7 +422,7 @@ class FirstOrderApproximatedEqComponent(ReportComponent):
         system = self.reported_object.set_order(1)
         t_list = system.t_list
 
-        return f"Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of {t_list[1]}."
+        return f"Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of ${latex(t_list[1])}$."
 
     def append_elements(self):
 

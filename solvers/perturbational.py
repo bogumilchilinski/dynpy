@@ -555,8 +555,8 @@ class MultiTimeScaleSolution(ODESystem):
         dvars_no = len(self.dvars)
 
         if dvars_no==1:
-        
-            func_str = str(self.vars[0]).replace(f"({self.ivar})","")
+
+            func_str = '\\'+str(self.vars[0]).replace(f"({self.ivar})","")
         else:
             func_str = 'Y'
         
@@ -1011,7 +1011,7 @@ class MultiTimeScaleSolution(ODESystem):
         delta = Symbol('delta', positive=True)
 
         # Initialize systems with substitutions
-        msm_exc = MultiTimeScaleSolution(self.odes.subs(exc_dict), self.dvars)
+        msm_exc = MultiTimeScaleSolution(self.odes.subs(exc_dict), self.dvars, eps=self.eps)
         ode_exc = ODESystem(self.odes.subs(exc_dict), self.dvars)
 
         msm_sim = []  # List for MSM simulations
@@ -1033,8 +1033,8 @@ class MultiTimeScaleSolution(ODESystem):
         comparisons = []
         for i, epsilon in enumerate(eps_array):
             comparison = TimeDataFrame({
-                (f'Using ODESystem, {self.dvars[0]}', f'\epsilon={epsilon}'): ode_sim[i].iloc[:, 0],
-                (f'Using MultiScaleSolution, {self.dvars[0]}', f'\epsilon={epsilon}'): msm_sim[i].iloc[:, 0],
+                (f'ODESystem', f'\epsilon={epsilon}', self.dvars[0]): ode_sim[i].iloc[:, 0],
+                (f'MultiScaleSolution',  f'\epsilon={epsilon}', self.dvars[0]): msm_sim[i].iloc[:, 0],
             })
             comparisons.append(comparison)
 

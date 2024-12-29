@@ -1,6 +1,6 @@
 from sympy import *
 from dynpy.solvers.linear import ODESystem
-from dynpy.solvers.nonlinear import MultiTimeScaleSolution
+from dynpy.solvers.perturbational import MultiTimeScaleSolution
 # from dynpy.models.mechanics.trolleys import MDoFTMD1
 
 class LinearSecondOrderMSM(ODESystem):
@@ -51,6 +51,7 @@ class MDoFTMDMSM(MultiTimeScaleSolution):
         odesy = cls(odes,Matrix([xb,xe]),order=2,eps=eps)#._as_msm()
         
         return odesy
+    
 class WeakNonLinearOscillatorMSM(MultiTimeScaleSolution):
     
     @classmethod
@@ -68,6 +69,7 @@ class WeakNonLinearOscillatorMSM(MultiTimeScaleSolution):
         odes = cls(ode.odes[0], ode.dvars[0], ivar=ode.ivar, omega=S.One, order=2,eps=eps)
         
         return odes
+    
 class CubicWeakOscillatorMSM(MultiTimeScaleSolution):
     
     @classmethod
