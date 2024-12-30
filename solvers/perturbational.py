@@ -1094,3 +1094,66 @@ class MultiTimeScaleSolution(ODESystem):
             comparisons.append(comparison)
 
         return comparisons
+    
+    
+    def _numerical_comparison(self,t_span, eps_array=[0.1], fixed_params=None, ics=None):
+        """
+        Perform simulations for different \epsilon values and generate DataFrame comparisons 
+        between ODESystem and MultiTimeScaleSolution results.
+
+        Parameters:
+            eps_array (list): List of \epsilon values for the simulations.
+            exc_dict (dict): Dictionary to substitute natural frequency.
+            fixed_params (dict): Dictionary of other fixed parameters (e.g., c, k, m).
+            ics (dict): Initial conditions for the system.
+            t_span (array-like): Time span for the simulations.
+
+        Returns:
+            comparisons (list): List of TimeDataFrame comparisons for each \epsilon.
+        """
+        # Define symbols
+        c = Symbol('c', positive=True)
+        k = Symbol('k', positive=True)
+        m = Symbol('m', positive=True)
+        eps = self.eps
+        omega = Symbol('\omega', positive=True)
+        omega_0 = Symbol('omega_0', positive=True)
+        Omega = Symbol('Omega', positive=True)
+        delta = Symbol('delta', positive=True)
+
+        if fixed_params is None:
+            fixed_params = {}
+
+        # Initialize systems with substitutions
+        msm_exc = self
+        ode_exc = ODESystem(self.odes, self.dvars)
+
+        msm_sim = []  # List for MSM simulations
+        ode_sim = []  # List for ODE simulations
+
+
+        if ics is None:
+            ics = [0.0,0.0]
+        
+        # Construct `data_arr` using eps_array and fixed_params
+        data_arr = [{**fixed_params, eps: epsilon} for epsilon in eps_array]
+
+        # Loop through the data array and compute solutions
+        for value in data_arr:
+            msm_sim_i = msm_exc.solution.subs(value).expand().with_ics(ics).expand().n(6).numerized().compute_solution(t_span)
+            ode_sim_i = ode_exc.subs(value).n(6).numerized().with_ics(ics).compute_solution(t_span)
+
+            # Append to the respective arrays
+            msm_sim.append(msm_sim_i)
+            ode_sim.append(ode_sim_i)
+
+        # Dynamically create comparisons for all eps values in data_arr
+        comparisons = []
+        for i, epsilon in enumerate(eps_array):
+            comparison = TimeDataFrame({
+                (f'Using ODESystem, {self.dvars[0]}', f'\epsilon={epsilon}'): ode_sim[i].iloc[:, 0],
+                (f'Using MultiScaleSolution, {self.dvars[0]}', f'\epsilon={epsilon}'): msm_sim[i].iloc[:, 0],
+            })
+            comparisons.append(comparison)
+
+        return comparisons

@@ -445,11 +445,56 @@ class ReportComponentDevelopmentIssueCreator(HelpImplementationIssueCreator):
         
         return f'{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}\n{comment_call_code}'
 
+class ClassImplementationIssueCreator(HelpImplementationIssueCreator):
+    
+    _default_labels = ['enhancement','module']
+    _issue_type = 'Implementation'
+    _goal = 'creates a part of a report'
+    
+    @property
+    def title(self):
+        
+        issue_no = self._issue_no
+        obj_class_module= self._obj.__module__
+        obj_class_name=self._obj.__name__
+        goal = self._goal
+        
+        issue_type = self._issue_type
+        
+        return f'{issue_type} of `{obj_class_name}` class that {goal} (defined in `{obj_class_module}` module)'
 
+    @property
+    def body_text(self):
+        
+        issue_no = self._issue_no
+        obj_class_module= self._obj.__module__
+        obj_class_name=self._obj.__name__
+        goal = self._goal
+        
+        
+
+        issue_code_str=(f'`{obj_class_name}` class is to implement in `{obj_class_module}` module. '+
+        'It should provide code that {goal}.')
+        
+        return issue_code_str
+
+    @property
+    def closing_comment_text(self):
+        
+        obj_class_module= self._obj.__module__
+        obj_class_name=self._obj.__name__
+        
+        comment_str_h1 = '> *Exemplary comment. You can copy example below and close issue with new comment or modify it and close the issue.* '
+        comment_str_h2 = '*Remove this message or keep it if new comment is created.*'
+        
+        comment_str_2 = 'The code was checked with the following call:'
+        comment_call_code = f'```python \nfrom {obj_class_module} import {obj_class_name} \n{obj_class_name}(None) \n```'
+        
+        return f'{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}\n{comment_call_code}'
 
 class MethodImplementationIssueCreator(HelpImplementationIssueCreator):
     
-    _default_labels = ['documentation','enhancement','guide','maintenance','reporting']
+    _default_labels = ['enhancement','module']
     _issue_type = 'Implementation'
     _goal = 'creates a part of a report'
     
@@ -475,7 +520,7 @@ class MethodImplementationIssueCreator(HelpImplementationIssueCreator):
         
         
 
-        issue_code_str=(f'`{obj_class_name}` method is to implement in `{obj_class_module}` class. '+
+        issue_code_str=(f'`{obj_class_name}` method is to implement in `{obj_class_module}` module. '+
         'It should provide code that {goal}.')
         
         return issue_code_str

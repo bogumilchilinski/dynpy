@@ -554,7 +554,3 @@ class DDOFGearMechanism(ComposedSystem):
 
 class EquivalentSDOFGearModel(EquivalentGearModel):
     pass
-<<<<<<< HEAD
-=======
-
->>>>>>> 425a651 ( On branch master)
