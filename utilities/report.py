@@ -239,31 +239,23 @@ class BaseSeriesFormatter(TimeSeries):
 
         Example:
             >>> import pandas as pd
-            >>> from sympy import symbols
             >>> from dynpy.utilities.report import BaseSeriesFormatter
 
-            >>> # Create a sample TimeSeries object (BaseSeriesFormatter extends TimeSeries)
-            >>> data = pd.Series([1, 2, 3], index=pd.date_range("2024-01-01", periods=3))
+            >>> data = pd.Series([1, 2, 3], index=[("Temperature", "Day1"), ("Pressure", "Day2"), ("Humidity", "Day3")])
             >>> formatter = BaseSeriesFormatter(data)
 
-            >>> # Set column separator
             >>> formatter.set_column_separator(" | ")
 
-            >>> # Apply a custom data filter
             >>> formatter.set_data_filtter(lambda df: df * 2)
 
-            >>> # Set units for columns
             >>> formatter.set_units_dict({"temperature": "C", "pressure": "Pa"})
 
-            >>> # Format index labels
             >>> labels = formatter.format_labels()
 
-            >>> # Set x-axis and y-axis labels
             >>> xlabel = formatter.set_xlabel()
             >>> ylabel = formatter.set_ylabel()
 
-            >>> # Use cut_coord to filter by coordinate (if MultiIndex is used)
-            >>> filtered_data = formatter.cut_coord("some_coord")
+            >>> filtered_data = formatter.cut_coord(("Temperature", "Day1"))
 
             >>> print(labels, xlabel, ylabel)
     """
@@ -306,9 +298,16 @@ class BaseSeriesFormatter(TimeSeries):
 
             Example:
                 >>> import pandas as pd
-                >>> data = pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]})
+                >>> from dynpy.utilities.report import BaseSeriesFormatter
+
+                >>> data = pd.Series([1, 2, 3], index=[1, 2, 3])
                 >>> formatter = BaseSeriesFormatter(data)
-                >>> formatter.set_data_filtter(lambda df: df[df["A"] > 1])
+
+                >>> formatter.set_data_filtter(lambda s, *args: s * 2)
+
+                >>> filtered_data = formatter._data_filtter(formatter)
+
+                >>> print(filtered_data)
 
             Returns:
                 BaseSeriesFormatter: The class with the updated data filter.
@@ -393,13 +392,21 @@ class BaseSeriesFormatter(TimeSeries):
 
             Example:
                 >>> import pandas as pd
-                >>> data = pd.Series([1, 2, 3], index=[("A", 1), ("B", 2), ("C", 3)])
+                >>> from dynpy.utilities.report import BaseSeriesFormatter
+
+                >>> data = pd.Series([1, 2, 3], index=["A", "B", "C"])
                 >>> formatter = BaseSeriesFormatter(data)
-                >>> formatter.set_multiindex()
+
+                >>> formatter.index = [("Group1", "A"), ("Group1", "B"), ("Group2", "C")]
+
+                >>> multiindex_formatter = formatter.set_multiindex()
+
+                >>> print(multiindex_formatter.index)
         """
 
         midx = pd.MultiIndex.from_tuples(self.index)
-        new_obj = self.__class__(self).index = midx
+        new_obj = self.__class__(self.copy())
+        new_obj.index = midx
 
         return new_obj
 
@@ -428,6 +435,8 @@ class BaseSeriesFormatter(TimeSeries):
 
         if isinstance(self.index, pd.MultiIndex):
             return self.index.tolist()
+        else:
+            return self.index.tolist()
 
     def set_ylabel(self, label: str = None) -> str:
         """
@@ -441,15 +450,19 @@ class BaseSeriesFormatter(TimeSeries):
 
             Example:
                 >>> import pandas as pd
-                >>> from sympy import symbols
+
                 >>> data = pd.Series([1, 2, 3], index=[("Temperature", "Zone1"), ("Pressure", "Zone2"), ("Humidity", "Zone3")])
                 >>> formatter = BaseSeriesFormatter(data)
+
                 >>> ylabel = formatter.set_ylabel()
+
                 >>> print(ylabel)  # Outputs: Temperature
         """
-        if label == None:
-            for label in self.format_labels():
-                label = f'$ {latex(label[0])} )$'
+
+        if label is None:
+            labels = self.format_labels()
+            if labels:
+                label = f'$ {latex(labels[0])} )$'
 
         return label
 
@@ -458,22 +471,29 @@ class BaseSeriesFormatter(TimeSeries):
             Sets the x-axis label for a plot.
 
             Args:
-                label (str or None): The x-axis label to set. If None, uses the index name or generates it from the MultiIndex structure.
+                label (str or None): The x-axis label to set. If None, the method attempts to generate a label
+                                     based on the index name or structure.
 
             Returns:
-                str: The x-axis label. If no custom label is provided, it defaults to the index name or the first element of the index.
+                str: The x-axis label. If no custom label is provided, it defaults to the index name or a generic label.
 
             Example:
                 >>> import pandas as pd
-                >>> data = pd.Series([1, 2, 3], index=[("Time", "Start"), ("Time", "Middle"), ("Time", "End")])
+                >>> from dynpy.utilities.report import BaseSeriesFormatter
+
+                >>> data = pd.Series([1, 2, 3], index=pd.MultiIndex.from_tuples([("Time", "Start"), ("Time", "Middle"), ("Time", "End")], names=["Category", "Subcategory"],))
                 >>> formatter = BaseSeriesFormatter(data)
+
                 >>> xlabel = formatter.set_xlabel()
-                >>> print(xlabel)  # Outputs: Time
+
+                >>> print(xlabel)  # Outputs: Category
         """
 
-        if isinstance(self.index, pd.MultiIndex):
-            if label is None:
-                label = self.index.name or self.index[0][0]
+        if label is None:
+            if isinstance(self.index, pd.MultiIndex):
+                label = self.index.names[0] if self.index.names else "Index"
+            else:
+                label = self.index.name if self.index.name else "Index"
 
         return label
 
@@ -490,10 +510,26 @@ class BaseSeriesFormatter(TimeSeries):
 
             Example:
                 >>> import pandas as pd
-                >>> data = pd.DataFrame({"A": [1, 2, 3], "B": [4, 5, 6]})
+                >>> from dynpy.utilities.report import BaseSeriesFormatter
+
+                >>> # Create a Series with a name
+                >>> data = pd.Series([1, 2, 3], name="Sample Series")
                 >>> formatter = BaseSeriesFormatter(data)
-                >>> legends = formatter.set_legend(["Series A", "Series B"])
-                >>> print(legends)  # Outputs: ["Series A", "Series B"]
+
+                >>> # Case 1: Provide a custom legend
+                >>> custom_legend = formatter.set_legend(["Custom Label"])
+                >>> print(custom_legend)  # Outputs: ["Custom Label"]
+
+                >>> # Case 2: Use automatic legend generation
+                >>> auto_legend = formatter.set_legend()
+                >>> print(auto_legend)  # Outputs: ["Sample Series"]
+
+                >>> # Case 3: Mismatched legend length (not applicable here since Series expects only one label)
+                >>> try:
+                >>>     formatter.set_legend(["Too Many", "Labels"])
+                >>> except ValueError as e:
+                >>>     print(e)  # Outputs: "Legend for a Series must be a single label."
+
         """
 
         if legend is None:
