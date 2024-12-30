@@ -240,7 +240,7 @@ class BaseSeriesFormatter(TimeSeries):
         Example:
             >>> import pandas as pd
             >>> from sympy import symbols
-            >>> from some_module import BaseSeriesFormatter
+            >>> from dynpy.utilities.report import BaseSeriesFormatter
 
             >>> # Create a sample TimeSeries object (BaseSeriesFormatter extends TimeSeries)
             >>> data = pd.Series([1, 2, 3], index=pd.date_range("2024-01-01", periods=3))
@@ -474,7 +474,7 @@ class BaseSeriesFormatter(TimeSeries):
         if isinstance(self.index, pd.MultiIndex):
             if label is None:
                 label = self.index.name or self.index[0][0]
-                
+
         return label
 
     def set_legend(self, legend: list = None) -> list:
