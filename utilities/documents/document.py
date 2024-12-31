@@ -734,6 +734,17 @@ from dynpy.models.mechanics import ForcedSpringMassSystem as DynamicSys
 dyn_sys = DynamicSys()
 display(dyn_sys.as_picture())
 
+display(ReportText('Summary of the subsection highlighting its major achievements. '*10))
+
+sub_model_code = Subsection('Virtual model of the object')
+CurrentContainer(sub_model_code)
+
+from dynpy.utilities.report import ObjectCode
+
+display(ReportText('This subsection provides code of the model. '*10))
+display(ObjectCode(DynamicSys))
+display(ReportText('Summary of the subsection highlighting its major achievements. '*10))
+
 
 sec_lagrangian = Subsection('Lagrangian and derivatives')
 CurrentContainer(sec_lagrangian)
@@ -963,9 +974,12 @@ doc.append(sub_obj_assum)
 doc.append(sub_SOT)
 doc.append(sub_methodology)
 doc.append(sec_formula)
-doc.append(sec_picture)
+
+doc.append(sub_model_code)
 doc.append(sec_math_desc)
 doc.append(sec_simulation)
+
+doc.append(sec_picture)
 doc.append(sec_verification)
 doc.append(sec_tables)
 doc.append(sec_symbols)
