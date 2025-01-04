@@ -3308,11 +3308,33 @@ class ExampleBlock(Block):
 
 
     
-class Picture(Figure,ReportModule):
-    """A class that represents a figure environment."""
+class Picture(Figure, ReportModule):
+    """
+        A class that represents a figure environment in a LaTeX document.
 
-    #: By default floats are positioned inside a separate paragraph.
-    #: Setting this to option to `False` will change that.
+        This class is used to insert and customize an image into the document, with options for caption, size, and position.
+
+        Attributes:
+            separate_paragraph (bool): Whether the float is positioned in a separate paragraph.
+            _default_width (str): Default width of the image.
+            packages (List[Union[Package, Command]]): Required LaTeX packages and commands for the Picture class.
+            _position (str): Default position for the floating environment.
+            _preview_default_size (str): Default size for previewing the image.
+
+        Exemplary Usage:
+            >>> Picture('./assets/exemplary-image.png', caption='Exemplary caption.')
+
+        Costomised exemplary usage:
+            >>> Picture(
+            >>>     image='./assets/exemplary-image.png',
+            >>>     caption='Exemplary caption.',
+            >>>     position='h',
+            >>>     width='0.5\\textwidth',
+            >>>     height='10cm',
+            >>>     marker='fig:example'
+            >>> )
+    """
+
     separate_paragraph = True
     _default_width = NoEscape('0.8\\textwidth')
     packages=[Package('float'),
@@ -3342,11 +3364,11 @@ class Picture(Figure,ReportModule):
 #         return Picture(pic_path, position=position, caption=caption, width=width, height=height, marker=marker, **kwargs)
     
     @classmethod
-    def set_default_position(cls, position=""):
+    def set_default_position(cls, position: str = "") -> None:
         cls._position = position
     
     @classmethod
-    def set_preview_default_size(cls, size):
+    def set_preview_default_size(cls, size: str) -> 'Picture':
         cls._preview_default_size = size
         return cls
 
@@ -3355,17 +3377,18 @@ class Picture(Figure,ReportModule):
         
     def __init__(self, image=None, position=None, caption=None,width=None,height=None,marker=None, **kwargs):
         """
-        Args
-        ----
-        position: str
-            Define the positioning of a floating environment, for instance
-            ``'h'``. See the references for more information.
-        width: str
-            Documentation entry
-            
-        References
-        ----------
-            * https://www.sharelatex.com/learn/Positioning_of_Figures
+            Initialize the Picture class.
+
+            Args:
+                image (Optional[str]): Path to the image file.
+                position (Optional[str]): LaTeX position specifier for the figure.
+                caption (Optional[str]): Caption for the image.
+                width (Optional[str]): Width of the image (e.g., '0.5\\textwidth').
+                height (Optional[str]): Height of the image.
+                marker (Optional[str]): Marker for referencing the figure in LaTeX.
+
+            References:
+                https://www.sharelatex.com/learn/Positioning_of_Figures
         """
     
         self.image = image
@@ -3431,10 +3454,23 @@ class Picture(Figure,ReportModule):
 
 
 
-    def _get_str_key(self):
+    def _get_str_key(self) -> str:
+        """
+           Generate a string key for the image based on its attributes.
+
+           Returns:
+               str: A string representation of the image key.
+       """
+
         return self.image + '_caption:'+str(self.caption    )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """
+            Represent the Picture object as a string.
+
+            Returns:
+                str: A string representation of the Picture object.
+        """
 
         if self.image is not None:
             path = (self.image)
@@ -3452,7 +3488,13 @@ class Picture(Figure,ReportModule):
         
         return repr_string
 
-    def _repr_markdown_(self):
+    def _repr_markdown_(self) -> str:
+        """
+            Generate a Markdown representation of the Picture object.
+
+            Returns:
+                str: A Markdown representation for preview.
+        """
         
         self.cls_container.append(self)
         from wand.image import Image as WImage
