@@ -15,6 +15,7 @@ from ..components.guides.github import en as github_comp
 from ..components.guides.systems import en as systems_comp
 from ..components.guides.development import en as development_comp
 from ..components.guides.pandas import en as pandas_comp
+from typing import Optional, List, Union
 
 #from sympy import *
 import datetime
@@ -244,7 +245,54 @@ doc.generate_pdf(clean_tex=True)
     
 
         
-class Guide(Document,ReportMethods):
+class Guide(Document, ReportMethods):
+    """
+        A class to generate a structured LaTeX document with pre-configured packages and settings.
+
+        Inherits from `Document` and provides additional methods to simplify LaTeX report creation.
+
+        Attributes:
+            _documentclass (str): The LaTeX document class (default is 'article').
+            latex_name (str): Name of the document.
+            packages (List[Union[Package, Command]]): List of LaTeX packages and commands to include in the document.
+            _reported_object (Optional[object]): The object being reported on, if any.
+
+        Exemplary Usage:
+            >>> from dynpy.utilities.report import *
+            >>> from dynpy.utilities.documents.guides import Guide
+
+            >>> doc = Guide('./output/sample_report', title="Sample Report")
+
+            >>> section = Section('Exemplary section name')
+            >>> CurrentContainer(section)
+
+            >>> display(Markdown(''' Exemplary Markdown text in the section '''))
+            >>> display(ReportText(' Exemplary text appended into section '))
+
+            >>> doc.append(section)
+
+            >>> doc.generate_pdf(clean_tex=True)
+
+
+
+        Example of Customization of the document properties:
+            >>> from dynpy.utilities.report import *
+            >>> from dynpy.utilities.documents.guides import Guide
+
+            >>> custom_geometry = ['lmargin=20mm', 'rmargin=20mm', 'top=25mm', 'bmargin=25mm']
+
+            >>> doc = Guide(
+            >>>     default_filepath='./output/custom_report',
+            >>>     title='Custom Report',
+            >>>     geometry_options=custom_geometry
+            >>> )
+
+            >>> section = Section('Exemplary Custom Section Name')
+
+            >>> doc.append(section)
+
+            >>> doc.generate_pdf(clean_tex=True)
+    """
 
     _documentclass = 'article'
     latex_name = 'document'
@@ -263,27 +311,46 @@ class Guide(Document,ReportMethods):
                   Command('fancyhead', arguments=['Mechanical vibration, 2023'],options=['L']),
                   Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
                   ]
-        
 
+    def __init__(
+            self,
+            default_filepath: str = 'default_filepath',
+            title: str = 'Basic title',
+            reported_object: Optional[object] = None,
+            *,
+            documentclass: Optional[str] = None,
+            document_options: Optional[List[str]] = None,
+            fontenc: str = 'T1',
+            inputenc: str = 'utf8',
+            font_size: str = 'normalsize',
+            lmodern: bool = False,
+            textcomp: bool = True,
+            microtype: bool = True,
+            page_numbers: bool = True,
+            indent: Optional[Union[str, int]] = None,
+            geometry_options: Optional[List[str]] = None,
+            data: Optional[dict] = None,
+    ):
+        """
+            Initialize the Guide class with optional customization.
 
-    
-    def __init__(self,
-                 default_filepath='default_filepath',
-                 title='Basic title',
-                 reported_object=None,
-                 *,
-                 documentclass=None,
-                 document_options=None,
-                 fontenc='T1',
-                 inputenc='utf8',
-                 font_size='normalsize',
-                 lmodern=False,
-                 textcomp=True,
-                 microtype=True,
-                 page_numbers=True,
-                 indent=None,
-                 geometry_options=None,#['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
-                 data=None):
+            Args:
+                default_filepath (str): Path for the generated document.
+                title (str): Title of the document.
+                reported_object (Optional[object]): Object being reported on, if any.
+                documentclass (Optional[str]): LaTeX document class (e.g., 'article').
+                document_options (Optional[List[str]]): Options for the document class.
+                fontenc (str): Font encoding (default 'T1').
+                inputenc (str): Input encoding (default 'utf8').
+                font_size (str): Font size (default 'normalsize').
+                lmodern (bool): Whether to use Latin Modern fonts.
+                textcomp (bool): Whether to use the `textcomp` package.
+                microtype (bool): Whether to use the `microtype` package.
+                page_numbers (bool): Whether to include page numbers.
+                indent (Optional[Union[str, int]]): Indentation settings.
+                geometry_options (Optional[List[str]]): Geometry options for page layout.
+                data (Optional[dict]): Additional data for customization.
+        """
 
         if documentclass is not None: self._documentclass
 
