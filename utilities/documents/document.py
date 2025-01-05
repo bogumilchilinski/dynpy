@@ -581,7 +581,7 @@ class WutThesis(Document):
                   Package('geometry',options=['lmargin=30mm', 'rmargin=30mm',  'top=25mm', 'bmargin=25mm', 'headheight=50mm']),
                   Package('microtype'),
                   Package('authoraftertitle'),
-                  Package('polski',options=['MeX']),
+                  #Package('polski',options=['MeX']),
                   #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
                   Package('listings'),
                   Package('titlesec'),
@@ -680,13 +680,13 @@ class WutThesis(Document):
         if create_file is True:
             return cls._create_base_setup_env()
         
-        imports_str = '''#Create file output
+        imports_str = """#Create file output
 #Create file Images
 #In file output create bibliography as .bib file (dynpy123)
 
 from dynpy.utilities.report import *
 from dynpy.utilities.documents.document import WutThesis
-from dynpy.models.odes.linear import SpringMassEps
+from dynpy.models.odes.linear import SpringMassDamperMSM
 from sympy import symbols, Eq
 from sympy.printing.latex import latex
 from IPython.display import display, Math
@@ -695,7 +695,8 @@ from dynpy.utilities.adaptable import TimeDataFrame
 import pandas as pd
 
 
-doc = WutThesis('./output/thesis_name')'''
+doc = WutThesis('./output/thesis_name')
+#doc.preamble.append(NoEscape(r'\\usepackage[MeX]{polski}')) #to set polish as main language"""
 
         thesis_introduction_str = '''#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
