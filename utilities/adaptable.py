@@ -428,7 +428,7 @@ class DataAxis(Axis, ReportModule):
     _line_style = None
     _legend_pos = 'north east'
     _default_transformer = BaseIndexTransformer
-    
+    _reversedx=None
     _manual_at=None
 
     def __init__(self,
@@ -441,6 +441,7 @@ class DataAxis(Axis, ReportModule):
                  x_axis_empty = None,
                  colour =None,
                  at=None,
+                 reversedx=None,
                  handle=None,
                  data=None):
         """
@@ -470,6 +471,10 @@ class DataAxis(Axis, ReportModule):
 
         if y_limit is not None:
             self._y_limit = y_limit
+            
+        if reversedx is not None:
+            self._reversedx=reversedx
+            display('Reversed x is '+self._reversedx)
             
         if options is None:
             options = self._axis_options
@@ -540,20 +545,23 @@ class DataAxis(Axis, ReportModule):
             at_option = [NoEscape('legend style={font=\small,at='+self._manual_at+'}')]
 #         else: 
 #             at_option = ['']
-
+        ax_options=[]
 
         if self._x_axis_empty:
-            ax_options = [NoEscape('xticklabels=\empty'),
-                         ]
+            ax_options.append(NoEscape('xticklabels=\empty'),
+                         )
         else:
-            ax_options = [NoEscape(f'xlabel= {self.x_axis_name}'),
-                         ]
+            ax_options.append(NoEscape(f'xlabel= {self.x_axis_name}'),
+                         )
 
         if self.__class__._y_limit is not None:
             ay_options = [NoEscape(f'ymin={(self.__class__._y_limit)[0]}'),
                        NoEscape(f'ymax={(self.__class__._y_limit)[1]}')]
         else:
             ay_options = []
+            
+        if self._reversedx == True:
+            ax_options.append('x dir=reverse')
 
         base_options = ['grid style=dashed',
                         f'legend pos={self._legend_pos}',
@@ -822,6 +830,7 @@ class TikZPlot(TikZ, ReportModule):
     _default_path = './tikzplots'
     _filename = None
     _prefix = None
+    _reverse_x=None
     
     _picture = True
     _caption = 'Default caption'
@@ -831,6 +840,7 @@ class TikZPlot(TikZ, ReportModule):
                  subplots=None,
                  height=None,
                  width=None,
+                 reverse_x=None,
                  options=None,
                  *,
                  arguments=None, start_arguments=None,
@@ -852,6 +862,9 @@ class TikZPlot(TikZ, ReportModule):
 
         if width is not None:
             self._width = width
+        
+        if reverse_x is not None:
+            self._reverse_x=reverse_x
             
         self._selected_colours = None
 
@@ -876,14 +889,17 @@ class TikZPlot(TikZ, ReportModule):
                     
                     data=plotdata[[column]]
                     #data.columns.name = labels[no]
-                    
-                    
-                    ax_data = self.axis_type(data,height=self.subplot_height,width=self.subplot_width,x_axis_empty=empty_axis,colour=colours_list[no],at = pos,handle=f'subplot{no}')
+                    if reverse_x == True:
+                        ax_data = self.axis_type(data,height=self.subplot_height,width=self.subplot_width,x_axis_empty=empty_axis,colour=colours_list[no],at = pos,handle=f'subplot{no}',reversedx=self._reverse_x)
+                    else:
+                        ax_data = self.axis_type(data,height=self.subplot_height,width=self.subplot_width,x_axis_empty=empty_axis,colour=colours_list[no],at = pos,handle=f'subplot{no}')
 
                     self.append(ax_data)
             else:
-                
-                self.append(self.axis_type(plotdata,height=self.height,width=self.width))
+                if reverse_x == True:
+                    self.append(self.axis_type(plotdata,height=self.height,width=self.width,reversedx=self._reverse_x))
+                else:
+                    self.append(self.axis_type(plotdata,height=self.height,width=self.width))
 
                 
 
@@ -943,6 +959,9 @@ class TikZPlot(TikZ, ReportModule):
     def _axis_options(self):
 
         return None
+
+        
+
         if isinstance(self._ylim, list):
             return Options('grid style=dashed',
                            NoEscape('legend style={font=\small}'),
@@ -969,6 +988,7 @@ class TikZPlot(TikZ, ReportModule):
                            xmajorgrids='true',
                            xlabel=self._x_axis_name,
                            ylabel=self._y_axis_name)
+
 
                 
     @property
@@ -1488,8 +1508,8 @@ class DataMethods:
 
         return fig
 
-    def to_pylatex_tikz(self,height=None,width=None,subplots=None,options=None):
-        return TikZPlot(LatexDataFrame.formatted(self),height=height,width=width,subplots=subplots,options=options)
+    def to_pylatex_tikz(self,height=None,width=None,subplots=None,reverse_x=None,options=None):
+        return TikZPlot(LatexDataFrame.formatted(self),height=height,width=width,subplots=subplots,reverse_x=reverse_x,options=options)
 
     
     def to_latex_dataframe(self):

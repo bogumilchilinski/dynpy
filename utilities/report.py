@@ -21,7 +21,7 @@ from pylatex.utils import NoEscape, italic
 from sympy import Matrix, symbols, Symbol, Eq, Expr, Number, Equality, Add, Mul,Subs
 from sympy.core.relational import Relational
 
-from sympy import Symbol, Function, Derivative, latex, sin, cos, tan, exp, atan, ImmutableMatrix, sign, StrictGreaterThan,LessThan, GreaterThan,StrictLessThan
+from sympy import Symbol, Function, Derivative, latex, sin, cos, tan, exp, atan, ImmutableMatrix, sign, StrictGreaterThan,LessThan, GreaterThan,StrictLessThan, Heaviside
 
 from sympy.physics.vector.printing import vlatex, vpprint
 
@@ -4452,7 +4452,7 @@ class SymbolsDescription(Description,ReportModule):
         if description_dict is not None and expr is not None:
 
             symbols_set = expr.atoms(
-                Symbol, Function, Derivative) - expr.atoms(sin, cos, tan, exp)
+                Symbol, Function, Derivative) - expr.atoms(sin, cos, tan, exp, Heaviside)
 
             symbols_to_add = {
                 sym: desc
@@ -4468,12 +4468,12 @@ class SymbolsDescription(Description,ReportModule):
                 for elem in expr:
                     symbols_set |= elem.atoms(Symbol, Function,
                                               Derivative) - elem.atoms(
-                                                  sin, cos, tan, exp, atan, sign)
+                                                  sin, cos, tan, exp, atan, sign, Heaviside)
             #print(symbols_set)
             else:
                 symbols_set |= expr.atoms(Symbol, Function,
                                           Derivative) - expr.atoms(
-                                              sin, cos, tan, exp, atan, sign)
+                                              sin, cos, tan, exp, atan, sign, Heaviside)
 
             description_dict = DescriptionsRegistry()._get_description(
                 symbols_set)
