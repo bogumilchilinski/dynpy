@@ -474,7 +474,7 @@ class DataAxis(Axis, ReportModule):
             
         if reversedx is not None:
             self._reversedx=reversedx
-            display('Reversed x is '+self._reversedx)
+            display('Reversed x is '+f'{self._reversedx}')
             
         if options is None:
             options = self._axis_options
