@@ -181,7 +181,7 @@ class ElectricMotorcycle2DoF(ComposedSystem):
             self.ft:r'friction coefficient',
 #             self.omega_s.diff(self.ivar):r'angular acceleration of the rotor',
             self.preq:r'required power',
-            self.time_cut:r'current swich time',
+            self.time_cut:r'current switch time',
             self.Rpwm2:r'lower current control resistance',
             self.Rpwm:r'higher current control resistance',
             self.ic1:r'higher current cut value',
