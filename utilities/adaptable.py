@@ -420,6 +420,7 @@ class DataAxis(Axis, ReportModule):
     _y_axis_name = 'y'
     _legend_fontsize = r'\small '
     _default_colours = default_colors
+    _default_columns_no=2
 
     _height = NoEscape(r'5cm')
     _width = '0.9\\textwidth'
@@ -566,6 +567,7 @@ class DataAxis(Axis, ReportModule):
         base_options = ['grid style=dashed',
                         f'legend pos={self._legend_pos}',
                        NoEscape('legend style={font=\small}'),
+                       NoEscape(f'legend columns={self._default_columns_no}'),
 
                        #NoEscape('at={(0,0)}'),
 
@@ -810,6 +812,7 @@ class TikZPlot(TikZ, ReportModule):
     _y_axis_name = 'y'
     _legend_fontsize = r'\small '
     _default_colours = default_colors
+    _default_columns_no = 1
 
     _subplots = False
     _height = 5
@@ -825,6 +828,7 @@ class TikZPlot(TikZ, ReportModule):
     _figure_gen = lambda: Figure(position='htbp')
     _default_figure_env = None
     _image_parameters = {'width': None}
+    
     
     _floats_no_gen = plots_no()
     _default_path = './tikzplots'
@@ -965,6 +969,7 @@ class TikZPlot(TikZ, ReportModule):
         if isinstance(self._ylim, list):
             return Options('grid style=dashed',
                            NoEscape('legend style={font=\small}'),
+                           NoEscape(f'legend columns={self._default_columns_no}'),
                            NoEscape(f'width={self._width}'),
                            NoEscape(f'xmin={min(self._plotdata.index)}'),
                            NoEscape(f'xmax={max(self._plotdata.index)}'),
@@ -979,6 +984,7 @@ class TikZPlot(TikZ, ReportModule):
         elif self._ylim is None:
             return Options('grid style=dashed',
                            NoEscape('legend style={font=\small}'),
+                           NoEscape(f'legend columns={self._default_columns_no}'),
                            NoEscape(f'width={self._width}'),
                            NoEscape(f'xmin={min(self._plotdata.index)}'),
                            NoEscape(f'xmax={max(self._plotdata.index)}'),

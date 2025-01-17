@@ -229,6 +229,15 @@ class NthOrderODEsApproximation(ODESystem):
         #display(secular_funcs)
         
         return {sec_fun for sec_fun in secular_funcs if sec_fun.has(self.ivar)}
+    
+    @property
+    def _secular_conditions(self):
+
+        sec_funcs = self._secular_funcs
+
+        sec_conditions = Matrix(list(set(sum([list(self.odes.applyfunc(lambda entry: entry.coeff(func))) for func in sec_funcs],[]))-{0}))
+
+        return sec_conditions
 
     @property
     def secular_terms(self):
@@ -237,14 +246,12 @@ class NthOrderODEsApproximation(ODESystem):
         sec_funcs = self._secular_funcs
         #self._const_list
 
-
+        display('sec_funcs',sec_funcs)
         CodeFlowLogger(sec_funcs,'sec_funcs',self)
         
-        sec_conditions = Matrix(list(set(sum([list(self.odes.applyfunc(lambda entry: entry.coeff(func))) for func in sec_funcs],[]))-{0}))
-
-
+        sec_conditions = self._secular_conditions
+        display('sec_conditions',sec_conditions)
         ivar = self._parameters[0]
-
         
         #sec_conditions =FirstOrderODESystem.from_ode_system(ODESystem([sec_conditions[1][1],sec_conditions[3][1]],dvars = self._const_list ,ivar=ivar  )).linearized().solution
         
@@ -548,46 +555,84 @@ class MultiTimeScaleSolution(ODESystem):
         expr_list = [self.ivar*self.eps**no for no in range(len(t_list))]
 
         return AnalyticalSolution.from_vars_and_rhs(t_list, expr_list)
-    
-    
-    def approx_function_symbol(self,order=0):
-
+  
+    def approx_function_symbol(self, order=0):
         dvars_no = len(self.dvars)
 
-        if dvars_no==1:
-
-            func_str = '\\'+str(self.vars[0]).replace(f"({self.ivar})","")
+        if dvars_no == 1:
+            func_str = str(self.vars[0]).replace(f"({self.ivar})", "")
         else:
             func_str = 'Y'
-        
-        return func_str + f"_{{{str(order)}}}"
 
-    def approximation_function(self, order, max_order=1, ivar_list = None ):
+        return func_str + f"_{{{order}}}"
 
+    def approximation_function(self, order, max_order=1, ivar_list=None):
         dvars_no = len(self.vars)
 
         if ivar_list is None:
             t_list = self.t_list
         else:
             t_list = ivar_list
-        
-        fun_str = self.approx_function_symbol(order)
-        
-        if dvars_no==1:
 
-            aprrox_fun = [
+        fun_str = self.approx_function_symbol(order)
+
+        if dvars_no == 1:
+            approx_fun = [
                 sym.Function(fun_str)(*t_list)
                 for dvar_no, dvar in enumerate(self.vars)
             ]
         else:
-
-
-            aprrox_fun = [
-                sym.Function(fun_str[0:-1] +  str(dvar_no) + '}')(*t_list)
+            approx_fun = [
+                sym.Function(f"{fun_str[:-1]}{dvar_no}"+'}')(*t_list)
                 for dvar_no, dvar in enumerate(self.vars)
             ]
 
-        return Matrix(aprrox_fun)
+        return Matrix(approx_fun)
+
+    
+#     def approx_function_symbol(self,order=0):
+
+#         dvars_no = len(self.dvars)
+
+#         if dvars_no==1:
+
+#             func_str = '\\'+str(self.vars[0]).replace(f"({self.ivar})","")
+#         else:
+#             func_str = 'Y'
+        
+#         return func_str + f"_{{{str(order)}}}"
+
+#     def approximation_function(self, order, max_order=1, ivar_list = None ):
+
+#         dvars_no = len(self.vars)
+
+#         if ivar_list is None:
+#             t_list = self.t_list
+#         else:
+#             t_list = ivar_list
+        
+#         fun_str = self.approx_function_symbol(order)
+        
+#         if dvars_no==1:
+
+#             aprrox_fun = [
+#                 sym.Function(fun_str)(*t_list)
+#                 for dvar_no, dvar in enumerate(self.vars)
+#             ]
+#         else:
+
+#             aprrox_fun = [
+#                 sym.Function(fun_str +  str(dvar_no) + '}')(*t_list)
+#                 for dvar_no, dvar in enumerate(self.vars)
+#             ]
+
+
+# #             aprrox_fun = [
+# #                 sym.Function(fun_str[0:-1] +  str(dvar_no) + '}')(*t_list)
+# #                 for dvar_no, dvar in enumerate(self.vars)
+# #             ]
+
+#         return Matrix(aprrox_fun)
 
     def approximation_function_without_scales(self, order, max_order=1):
 

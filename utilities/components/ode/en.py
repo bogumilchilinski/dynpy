@@ -118,8 +118,11 @@ class ODESystemComponent(ReportComponent):
         display(ReportText(  self.header_text   ))
 
         for no,eq in enumerate(system):
-            display(SympyFormula(Eq(system.lhs[no],system.rhs[no])))
-
+#             display(SympyFormula(Eq(system.lhs[no],system.rhs[no])))
+            equation = Eq(system.lhs[no],system.rhs[no])
+            display(SympyFormula(equation))
+            display(SymbolsDescription(expr = equation))
+        
         display(ReportText(  self.footer_text   ))
 
         
@@ -171,7 +174,8 @@ class VariablesComponent(ReportComponent):
 
         display(SympyFormula(  system.ivar))
         display(SympyFormula(  system.dvars[0]))
-
+        display(SymbolsDescription(expr = system.ivar))
+        
         display(ReportText(  self.footer_text   ))
 
 
@@ -331,17 +335,11 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
         from  ....solvers.nonlinear import MultiTimeScaleSolution
         base_system = self.reported_object
         
-        #system = MultiTimeScaleSolution(base_system.as_matrix(),base_system.vars,ivar=base_system.ivar,order=1)
-                                
-#         approx_sys = system.approximated(3)
 
         zeroth_ord_eq = Symbol('Omega')#system.nth_eoms_approximation(0)
         eps = Symbol('\\varepsilon')
 
-        
-#         return f"The ordering and separation of predicted solution in terms of the power of a small parameter ${eps}$ leads to obtaining a recursive sequence of linear equations of motion leading to the solution of the nonlinear equation. The zeroth-order approximate linear equation is given below where the dependency was assumed for the zeroth-order solution of the time variable:"
-
-        return f"The ordering and separation of equation {AutoMarker(base_system.odes[0])} in terms of the power of a small parameter ${eps}$ leads to obtaining a recursive sequence of linear equations of motion leading to the solution of the nonlinear equation. The zeroth-order approximate linear equation is given in {AutoMarker(zeroth_ord_eq)} where the dependency was assumed for the zeroth-order solution of the time variable:"
+        return f"The ordering and separation of approximation equation in terms of the power of a small parameter ${eps}$ leads to obtaining a recursive sequence of linear equations of motion leading to the solution of the nonlinear equation. The zeroth-order approximate linear equation is given in the following paragraph where the dependency was assumed for the zeroth-order solution of the time variable:"
     
     @property
     def middle_text(self):
@@ -351,9 +349,9 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
         system = base_system.set_order(0)
                                 
 
-        zeroth_ord_approx_eq = Symbol('Omega')#Eq(system.nth_eoms_approximation(0).lhs[1]-system.nth_eoms_approximation(0).rhs[1],0)
+        zeroth_ord_approx_eq = Symbol('Omega')
 
-        return f"Or transformed to the second order ODE:" #{AutoMarker(zeroth_ord_approx_eq)}:
+        return f"Or transformed to the second order ODE:"
 
         
     @property
@@ -365,7 +363,7 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
                                         
         t_list = base_system.t_list
 
-        return f"Since ${latex(t_list[0])}$ and ${latex(t_list[1])}$ are treated as independent, the differential equation becomes a partial differential equation for a function of two variables ${latex(t_list[0])}$ and ${latex(t_list[1])}$. Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of ${latex(t_list[1])}$."
+        return f"Since ${latex(t_list[0])}$ and ${latex(t_list[1])}$ are treated as independent, the differential equation becomes a partial differential equation for a function of two variables ${latex(t_list[0])}$ and ${latex(t_list[1])}$."
 
     def append_elements(self):
         
@@ -388,10 +386,6 @@ class ZerothOrderApproximatedEqComponent(ReportComponent):
             if isinstance(eq_to_check,Eq):
                 display(SympyFormula(eq_to_check))
 
-        display(ReportText(  self.middle_text   ))
-
-        display(SympyFormula(zeroth_ord_approx_eq))
-
         display(ReportText(  self.footer_text   ))
         
 class FirstOrderApproximatedEqComponent(ReportComponent):
@@ -405,14 +399,13 @@ class FirstOrderApproximatedEqComponent(ReportComponent):
         system = self.reported_object.set_order(1)
         first_ord_eq = system.eoms_approximation_list()[1]
 
-        return f"The next component of a recursive sequence of linear equations of motion leading to the solution of the considered nonlinear one is given in {AutoMarker(first_ord_eq)}:"
+        return f"The next component of a recursive sequence of linear equations of motion leading to the solution of the considered nonlinear one is given as follows:"#{AutoMarker(first_ord_eq)}:"
     
     @property
     def middle_text(self):
         
         system = self.reported_object.set_order(1)
-        
-#         first_ord_approx_eq = Eq(system.eoms_approximation_list()[0].lhs-system.eoms_approximation_list()[0].rhs,0)
+        first_ord_approx_eq = Eq(system.eoms_approximation_list()[0].lhs-system.eoms_approximation_list()[0].rhs,0)
 
         return f"Or transformed to the second order ODE {AutoMarker(first_ord_approx_eq)}:"
 
@@ -441,35 +434,21 @@ class FirstOrderApproximatedEqComponent(ReportComponent):
             if isinstance(eq_to_check,Eq):
                 display(SympyFormula(eq_to_check))
 
-        display(ReportText(  self.middle_text   ))
-
-        display(SympyFormula(first_ord_approx_eq))
-
         display(ReportText(  self.footer_text   ))
 
 class MSMCalculationsOrderComponent(ReportComponent):
     
     title="Calculation algorithm for MSM"
     
-    
-    @property
-    def header_text(self):
-
-        return f"Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the consecutive approximations (depending on the accuracy assumed) have the following form:"
-
-    @property
-    def footer_text(self):
-
-        return "Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of {t_list[1]}. Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the zeroth-order approximation {approx_fun} has the following form:"
 
     def append_elements(self):
 
         system = ode = self.reported_object
 
-        display(ReportText('''First step is to establish the approximation function. This is done using the method'''))
+        display(ReportText( "First step is to establish the approximation function. This is done using the method" ))
         display(ObjectCode("ord = 2 # given order of approximation \node.approximation_function(ord)"))
         
-        display(ReportText(  "Next step is prediction of solution using following method"  ))       
+        display(ReportText(  "Next step is prediction of solution using following method"  ))
         display(ObjectCode("ord = 2 # given order of approximation  \node.predicted_solution(ord)"))
         display(Markdown("This method uses `approximation_function` method and multiplies it by small parameter to obtain the desired predicted solution."))
         
@@ -506,34 +485,26 @@ class PredictedSolutionComponent(ReportComponent):
     
     title="Predicted solution equation"
     
-    
     @property
     def header_text(self):
-
-        return f"Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the consecutive approximations (depending on the accuracy assumed) have the following form:"
-
-    @property
-    def footer_text(self):
-
-        return "Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of {t_list[1]}. Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the zeroth-order approximation {approx_fun} has the following form:"
+        
+        return "Solving the given equation begins with assuming predicted solutions, which are determined based on the chosen order of approximation."
 
     def append_elements(self):
 
         system = self.reported_object
-
-#         t_list = system.t_list
         
-        display(ReportText(  self.header_text   ))
-
-        
+        display(ReportText(self.header_text))
 
         for ord in range(system.order+1):
             
             
-            display(ReportText(  f'Order of prediction: {ord}'    ))
-            display(SympyFormula(Eq(system.dvars[0],system.predicted_solution(ord).rhs[0],evaluate=False)))
-
-#         display(ReportText(  self.footer_text   ))
+            display(ReportText(  f'\n Order of prediction: {ord}'    ))
+            predicted_sol = Eq(system.dvars[0],system.predicted_solution(ord).rhs[0],evaluate=False)
+            display(SympyFormula(predicted_sol))
+        
+        display(SymbolsDescription(expr = predicted_sol))
+            
 
 
 class RawPredictedSolutionComponent(ReportComponent):
@@ -575,12 +546,7 @@ class DetailsOfPredictedSolutionComponent(ReportComponent):
     @property
     def header_text(self):
 
-        return f"Rough (first) approximation in time domain has the following form:"
-
-    @property
-    def footer_text(self):
-
-        return "Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of {t_list[1]}. Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the zeroth-order approximation {approx_fun} has the following form:"
+        return f"Rough (first) approximation in time domain has the following form:\n"
 
     def append_elements(self):
 
@@ -599,10 +565,6 @@ class DetailsOfPredictedSolutionComponent(ReportComponent):
             
             
             display(ReportText(  f'Order of prediction: {ord}'    ))
-            
-#             display(SympyFormula(system.predicted_solution_without_scales(ord)))
-#             display(SympyFormula(system.predicted_solution(ord)))
-            
             
             display(SympyFormula(Eq(system.dvars[0],system.predicted_solution_without_scales(ord).rhs[0],evaluate=False)))
             display(SympyFormula(Eq(system.dvars[0],system.predicted_solution(ord).rhs[0],evaluate=False)))
@@ -639,8 +601,6 @@ class DetailsOfPredictedSolutionComponent(ReportComponent):
 
         for tm_scale in system._scales_formula.as_eq_list():
             display(SympyFormula(Eq(tm_scale.lhs.diff(ivar,2),tm_scale.rhs.diff(ivar,2))))
-        #display(ReportText(  self.footer_text   ))
-
 
 
 class GeneralSolutionComponent(ReportComponent):
@@ -667,12 +627,9 @@ class GeneralSolutionComponent(ReportComponent):
         
         display(ReportText(  self.header_text   ))
         
-#         display(SympyFormula(system.general_solution))
 
         for no,eq in enumerate(system._general_solution):
             display(SympyFormula(Eq(system._general_solution.lhs[no],system._general_solution.rhs[no])))
-
-#         display(ReportText(  self.footer_text   ))
 
 class FLODESolutionComponent(ReportComponent):
     
@@ -683,13 +640,13 @@ class FLODESolutionComponent(ReportComponent):
         
         system = self.reported_object
 
-        return f"Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of t. Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the zeroth and first order approximations are as follows:"
+        return f"Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the zeroth and first order approximations are as follows:"
 
 
     @property
     def footer_text(self):
 
-        return f"In order to determine the functions \(\operatorname{C_1}\left(t_{1}\right),\operatorname{C_2}\left(t_{1}\right)\) and hence , the first-order approximate equation has to be considered:"
+        return "In order to determine the functions $\\operatorname{C_1}(t_{1})$, $\\operatorname{C_2}(t_{1})$ and hence , the first-order approximate equation has to be considered:"
 
     def append_elements(self):
 
@@ -731,9 +688,8 @@ class ZerothOrderSolutionComponent(ReportComponent):
         
         
         ode_0th_approx=system.eoms_approximation_list()[0]
-        
-        display(SympyFormula(  ode_0th_approx.solution   ))
-        
+        display(SympyFormula( Eq(ode_0th_approx.solution.lhs[0], ode_0th_approx.solution.rhs[0]  )))
+        display(SympyFormula( Eq(ode_0th_approx.solution.lhs[1], ode_0th_approx.solution.rhs[1]  )))        
         display(ReportText(  "Secular functions are as follows:"   ))
         
         for sec_fun in ode_0th_approx._secular_funcs:
@@ -751,15 +707,13 @@ class SecularTermsEquationsComponent(ReportComponent):
     def header_text(self):
         t_list = self.reported_object.t_list
         
-        return f"Therefore the general solution may be obtained from the general solution of the corresponding ordinary differential equation by the assumptions of the arbitrary constants becoming the arbitrary functions of ${latex(t_list[1])}$. Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the zeroth and first order approximations are as follows:"
+        return f"Thus solving the considered equation for the unformulated initial conditions, it can be assumed that the predicted solution for the zeroth and first order approximations are as follows:"
 
         
     @property
     def footer_text(self):
 
-        return "In order to determine the functions $\(\operatorname{C_1}\left(t_{1})$,$\operatorname{C_2}\left(t_{1})$ and hence , the first-order approximate equation has to be considered:"
-        
-#         return "In order to determine the functions \(\operatorname{C_1}\left(t_{1}\right),\operatorname{C_2}\left(t_{1}\right)\) and hence , the first-order approximate equation has to be considered:"
+        return "In order to determine the functions $\\operatorname{C_1}(t_{1})$, $\\operatorname{C_2}(t_{1})$, the aforementioned first-order approximate equation has to be considered."
 
     def append_elements(self):
 
@@ -778,8 +732,117 @@ class SecularTermsEquationsComponent(ReportComponent):
 
             display(SympyFormula(Eq(eq,0)))
             
+        display(SymbolsDescription(expr = system.secular_eq[system.eps].dvars))
+            
         display(ReportText(  self.footer_text   ))
         
+        
+class GoverningEqnsWithConstFuncsComponent(ReportComponent):
+    
+    title='Governing equations with constant functions'
+
+    @property
+    def header_text(self):
+        return 'The rearranged governing equations contaning the functions of $\\operatorname{C_1}(t_{1})$, $\\operatorname{C_2}(t_{1})$ are prepared in order to furhter spot and remove the secular terms from the equations. These are as follows:'
+    
+    @property
+    def footer_text(self):
+        return 'At this stage it needs to be checked whether all the expected functions contained.'
+    
+    def append_elements(self):
+        
+        system = self.reported_object
+        approx_no = 1
+        
+        display(ReportText(self.header_text))
+        
+        for no,eq in enumerate(system.eoms_approximation_list(approx_no)):
+            display(ReportText(f'The equation for the approximation number {no} is:'))
+            display(SympyFormula(Eq(system.eoms_approx_with_const()[no].lhs,system.eoms_approx_with_const()[no].rhs)))
+            
+        display(ReportText(self.footer_text))
+
+    
+class SecularFuncsComponent(ReportComponent):
+    
+    title='Secular functions'
+
+    @property
+    def header_text(self):
+        return 'Text'
+    
+    @property
+    def footer_text(self):
+        return 'Text'
+    
+    def append_elements(self):
+        
+        system = self.reported_object
+        approx_no = 1
+        
+        display(ReportText(self.header_text))
+        
+        for no,eq in enumerate(system.eoms_approximation_list(approx_no)):
+            display(ReportText(f'Set of secular functions for the approximated solution {no} is:'))
+            display(SympyFormula(Eq(Symbol(f'Set_{no}'),system.eoms_approx_with_const()[no]._secular_funcs,evaluate=False)))
+            
+        display(ReportText(self.footer_text))
+        
+
+    
+class SecularConditionsComponent(ReportComponent):
+
+    title='Secular conditions'
+    
+    @property
+    def header_text(self):
+        return 'Text'
+    
+    @property
+    def footer_text(self):
+        return 'Text'
+        
+    
+    def append_elements(self):
+        
+        system = self.reported_object
+        approx_no = 1
+        
+        display(ReportText(self.header_text))
+        
+        for no,eq in enumerate(system.eoms_approximation_list(approx_no)):
+            display(ReportText(f'Secular conditions for the approximated solution {no} is:'))
+            display(SympyFormula(Eq(Symbol(f'C_{no}'),system.eoms_approx_with_const()[no]._secular_conditions,evaluate=False)))
+            
+        display(ReportText(self.footer_text))
+        
+
+class SolutionWithConstFuncsComponent(ReportComponent):
+    
+    title='Approximated solutions with constant functions'
+
+    @property
+    def header_text(self):
+        return 'In order to investigate the early stage of particular solutions, the following equations are analysed and chcecked in terms of whether they contain the expected functions:'
+    
+    @property
+    def footer_text(self):
+        return 'Having the solutions with constants $\\operatorname{C_1}(t_{1})$, $\\operatorname{C_2}(t_{1})$ as expected, the next step is to solve the secular equations.'
+    
+    def append_elements(self):
+        
+        system = self.reported_object
+        approx_no = 1
+        
+        display(ReportText(self.header_text))
+        
+        for no,eq in enumerate(system.eoms_approximation_list(approx_no)):
+            display(ReportText(f'Solution for {no} approximation is then:'))
+            display(SympyFormula(Eq(system.eoms_approx_with_const()[no].solution.lhs,system.eoms_approx_with_const()[no].solution.rhs)))
+#             display(system.eoms_approx_with_const()[no].solution)
+        
+        display(ReportText(self.footer_text))
+
         
 class HomEquationComponent(ReportComponent):
     
@@ -2118,21 +2181,15 @@ class SolutionComparisonComponent(ReportComponent):
         from dynpy.solvers.nonlinear import MultiTimeScaleSolution
 
         system = self.reported_object
-        #if type(system) == ODESystem:
-        display(SympyFormula(Eq(system.as_type(FirstOrderLinearODESystem).solution.lhs[0],system.as_type(FirstOrderLinearODESystem).solution.rhs[0])))
-        display(SympyFormula(Eq(system.as_type(FirstOrderLinearODESystem).solution.lhs[1],system.as_type(FirstOrderLinearODESystem).solution.rhs[1])))
 
-        display(ReportText("as_type method used:"))
+        display(Markdown("`as_type` method used:"))
         display(SympyFormula(Eq(system.as_type(FirstOrderLinearODESystem).solution.lhs[0],system.as_type(FirstOrderLinearODESystem).solution.rhs[0])))
         display(SympyFormula(Eq(system.as_type(FirstOrderLinearODESystem).solution.lhs[1],system.as_type(FirstOrderLinearODESystem).solution.rhs[1])))
             
-        #elif type(system) == MultiTimeScaleSolution:
         display(ReportText("Multiple time scales solution is following:"))
         display(SympyFormula(Eq(system.as_type(FirstOrderLinearODESystemWithHarmonics).solution.lhs[0],system.as_type(FirstOrderLinearODESystemWithHarmonics).solution.rhs[0])))
         display(SympyFormula(Eq(system.as_type(FirstOrderLinearODESystemWithHarmonics).solution.lhs[1],system.as_type(FirstOrderLinearODESystemWithHarmonics).solution.rhs[1])))
 
-       # else:
-#       display(ReportText("Given system is neither ODESystem nor MultiTimeScaleSolution"))
 
 class RawSolutionComparisonComponent(ReportComponent):
 
@@ -2191,8 +2248,6 @@ class SolutionDiagnosticComponent(ReportComponent):
         display(ReportText("eigenvalues:"))
         display(SympyFormula(system.eigenvalues))
                 
-#         display(ReportText("modes:"))
-#         display(SympyFormula(system.modes()))
                 
         display(ReportText("_is_proportional_damping:"))
         display(SympyFormula(system._is_proportional_damping))

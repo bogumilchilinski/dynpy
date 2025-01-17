@@ -846,7 +846,6 @@ class TrolleyWithPendulum(ComposedSystem):
     
 class TrolleyWithElasticPendulum(TrolleyWithPendulum):
     
-
     scheme_name = 'trolley_pendulum_tmd.png'
     real_name = 'taipei101.png'
 
@@ -908,19 +907,11 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
         self._trolley = SpringMassSystem(self.m_t, self.k, self.x, self.ivar)(label='Trolley')
         #self._pendulum = PendulumKinematicExct(self.l+self.u, self.m_p, self.g, self.phi, self.x, self.ivar)(label='Pendulum')
         self._force=Force(self.F*sin(self.Omega*self.ivar), pos1=self.qs[0], qs=self.qs)(label='Force')
-       
         self._material_point_1=MaterialPoint(self.m_p,self.x+(self.l+self.u+self.u_0)*sin(self.phi),qs=self.qs)
         self._material_point_2=MaterialPoint(self.m_p,(self.l+self.u+self.u_0)*cos(self.phi),qs=self.qs)
-        self._gravity = GravitationalForce(self.m_p, self.g, -(self.l+self.u+self.u_0)*cos(self.phi), qs=self.qs)
-        
-        # self._material_point_1=MaterialPoint(self.m_p,self.x+(self.l+self.u)*sin(self.phi),qs=self.qs)
-        # self._material_point_2=MaterialPoint(self.m_p,(self.l+self.u)*cos(self.phi),qs=self.qs)
-        # self._gravity = GravitationalForce(self.m_p, self.g, -(self.l+self.u)*cos(self.phi), qs = self.qs)        
-
+        self._gravity = GravitationalForce(self.m_p, self.g, -(self.l+self.u+self.u_0)*cos(self.phi), qs=self.qs) 
         self._spring_2=Spring(self.k_l,self.u,qs=self.qs) # zostaw xD tu jesty ok
         
-        
-
         components['_trolley'] = self._trolley
         #components['_pendulum'] = self._pendulum
         components['_force'] = self._force
@@ -929,40 +920,11 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
         #components['_spring_1'] = self._spring_1
         components['_spring_2'] = self._spring_2
         components['_gravity'] = self._gravity
-
         return components    
     
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.l: r'Pendulum length',
-            self.k: r'Stiffness of a beam showed as a spring stiffness in trolley member',
-            self.k_l: r'pendulum stiffness',
-            self.x: r'Kinematic lateral excitation',
-            self.u: r'Kinematic excitation along the pendulum',
-            self.phi: r'Angle of a pendulum',
-            self.m_p: r'Mass of pendulum',
-            self.m_t: r'Mass of trolley',
-            self.g: r'Gravity constant',
-            self.F: r'Force',
-            self.Omega: r'Excitation frequency',
-        }
-        return self.sym_desc_dict
     
-    
-    #def get_default_data(self):
-    
-    #return default_data_dict
-    
-    
-    #def get_numerical_data(self):
-    
-    #return default_data_dict
-    
-    
-    def symbols_description(self, lang = 'en'):
-        
+    def symbols_description(self, lang = 'en'):    
         if lang == 'pl':
-
             self.sym_desc_dict = {
                 self.m_t: r'masa początkowa wózka',
                 self.m_p: r'masa początkowa wahadła',
@@ -978,7 +940,6 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
             return self.sym_desc_dict
 
         else:
-
             self.sym_desc_dict = {
                 self.m_t: r'Mass of trolley',
                 self.m_p: r'pendulum initial mass',
@@ -992,28 +953,7 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
                 self.t_init: r'damping activation time',
             }
             return self.sym_desc_dict
-        
-#     def _to_msm_form(self):
-
-#         #M_p = Symbol('M_p',positive=True)
-#         #M_t = Symbol('M_t',positive=True)
-#         Omega1 = Symbol('Omega1',positive=True)
-#         Omega2 = Symbol('Omega2',positive=True)
-
-#         #subs_dict = {self.m_p+self.m_pf:M_p,self.m_t+self.m_tf:M_t}
-
-#         odes_lhs = self.linearized()._ode_system.lhs
-
-#         ode1 = (odes_lhs.subs(subs_dict)[0]/(m_p+m_t)).expand().doit().ratsimp().subs(self.k,Omega1**2*(m_p+m_t)).ratsimp().expand().collect([self.phi.diff(self.ivar,2)*self.l])
-#         ode2 = (odes_lhs.subs(subs_dict)[1]/m_p/self.l/self.l).expand().doit().ratsimp().subs(self.g,Omega2**2*self.l).simplify()
-
-#         eps = Symbol('varepsilon')
-#         del1 = Symbol('delta1')
-#         f = Symbol('f',positive=True)
-
-#     from dynpy.solvers.linear import ODESystem
-
-#     return ODESystem(odes=Matrix([ode1.subs({ode1.coeff(self.phi.diff(self.ivar,2)):del1/eps,self.F:f*(m_p+m_t)}),ode2.subs(1/self.l,eps)]),dvars=self.q)
+       
         
     
 class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):

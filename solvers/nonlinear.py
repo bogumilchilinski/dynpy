@@ -196,7 +196,7 @@ class ODESystemApproximation(ODESystem):
         
         return FirstOrderLinearODESystemWithHarmonics
         #return FirstOrderLinearODESystem
-   
+
 class ODESystemDsolve(ODESystem):
     _ode_order=2
     _simp_dict = {}

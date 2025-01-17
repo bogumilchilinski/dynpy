@@ -957,6 +957,9 @@ doc.preamble.append(Command('addbibresource','elementy_bibliagrafia.bib'))
 #doc.preamble.append(Package('natbib')
 #doc.preamble.append(Command('bibliographystyle','unsrt'))
 
+## Units
+doc.preamble.append(Package('siunitx'))
+
 # TOC
 
 doc.append(Command('includepdf{./Images/Front_Page.pdf}')) #includes front page
@@ -3058,15 +3061,21 @@ class MSMethodOverviewReport(UsageOfDynamicSystemsGuide):
     @property
     def _report_components(self):
         comp_list=[
-            ode_comp.ODESystemComponent,
-            ode_comp.VariablesComponent,
-            ode_comp.ODESystemCodeComponent,
-            ode_comp.MSMCalculationsOrderComponent,
-            ode_comp.PredictedSolutionComponent,
-            ode_comp.ParticularDerivativesComponent,
-            ode_comp.ZerothOrderApproximatedEqComponent,
-            ode_comp.FirstOrderApproximatedEqComponent,
-#             ode_comp.GeneralSolutionComponent,
+                ode_comp.ODESystemComponent,
+                ode_comp.VariablesComponent,
+                ode_comp.ODESystemCodeComponent,
+                ode_comp.MSMCalculationsOrderComponent,
+                ode_comp.PredictedSolutionComponent,
+                ode_comp.DetailsOfPredictedSolutionComponent,
+                ode_comp.ParticularDerivativesComponent,
+                ode_comp_en.GoverningEqnsWithConstFuncsComponent,
+                ode_comp_en.SecularFuncsComponent,
+                ode_comp_en.SecularConditionsComponent,
+                ode_comp_en.SolutionWithConstFuncsComponent,
+                ode_comp.ZerothOrderApproximatedEqComponent,
+                ode_comp.FirstOrderApproximatedEqComponent,
+                ode_comp.SecularTermsEquationsComponent,
+                ode_comp.ZerothOrderSolutionComponent
         ]
         return comp_list
 
