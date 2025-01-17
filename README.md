@@ -20,7 +20,6 @@ Afterwards, you will be directed to the page, where you should click the [README
 
 In this file, you will find the essential information on how to create a blank Jupiter (where you will run the codes), use Cocalc, access usefull commands and more...
 
-
 # Help and guides for DynPy
 
 You can access the introductory guide with the following code:
@@ -59,7 +58,6 @@ from dynpy.models.mechanics.pendulum import Pendulum
 
 Pendulum().interactive_preview()
 ```
-
 
 # Reporting Module Usage
 
@@ -100,6 +98,7 @@ pip install wand
 ```
 
 ### Option 2: Using requirements.txt
+
 Alternatively, You can install all the dependencies at once by running the following command:
 
 ```bash
@@ -107,6 +106,7 @@ pip install -r requirements.txt
 ```
 
 ### Verify Installation
+
 After installation, you can verify that the libraries have been successfully installed by running the following Python script:
 
 ```python
@@ -124,9 +124,11 @@ print("All libraries are installed successfully!")
 ```
 
 # Creating a Simple Document
+
 To create a document, follow the steps below.
 
 ## Import the Required Modules
+
 Begin by importing the necessary libraries from dynpy and sympy:
 
 ```python
@@ -135,6 +137,7 @@ from dynpy.utilities.templates.document import Guide
 ```
 
 ## Initialize the Document
+
 To start creating a document, use the Guide class to specify the output file location and filename:
 
 ```python
@@ -144,9 +147,11 @@ doc = Guide('./path/to/save/the/document/exemplary-file-name')
 This initializes the document and sets the location where the final PDF file will be saved.
 
 ## Creating Sections and Subsections
+
 Documents are structured into sections and subsections. Use the Section and Subsection classes to create these.
 
 ### Creating a Section:
+
 ```python
 exemplary_section = Section('Exemplary section name')
 ```
@@ -160,18 +165,22 @@ CurrentContainer(exemplary_section)
 ```
 
 ### Creating a Subsection:
+
 Similarly, subsections can be created within sections:
 
 ```python
 exemplary_subsection = Subsection('Exemplary subsection name')
 CurrentContainer(exemplary_subsection)
 ```
+
 This creates a subsection and makes it the current container.
 
 ## Adding Content to Sections
+
 Various types of content, such as text, Markdown, images, and symbolic formulas, can be added to the sections and subsections.
 
 ### Adding Plain Text
+
 To add plain text to a section or subsection, use the ReportText class with display:
 
 ```python
@@ -179,6 +188,7 @@ display(ReportText('Exemplary text'))
 ```
 
 ### Adding Markdown Text
+
 You can add Markdown-formatted text using the Markdown class:
 
 ```python
@@ -186,6 +196,7 @@ display(Markdown('''Exemplary Markdown text'''))
 ```
 
 ### Adding Images
+
 To add an image, use the Picture class. You can also add optional captions and set custom widths for the image:
 
 ```python
@@ -193,6 +204,7 @@ Picture('path/to/file/', caption='Exemplary caption.', width=NoEscape('0.3\\text
 ```
 
 ### Adding Sympy Formulas
+
 You can insert symbolic mathematical formulas using SympyFormula. For example, to display a symbolic formula defined in sympy, use:
 
 ```python
@@ -209,9 +221,11 @@ exemplary_formula = sp.Eq(
 
 display(SympyFormula(exemplary_formula))
 ```
+
 This will render the symbolic formula in LaTeX format.
 
 ## Appending Sections to the Document
+
 Once you've created sections and added content, append the sections to the document:
 
 ```python
@@ -220,6 +234,7 @@ doc.append(exemplary_subsection)
 ```
 
 ## Generating the PDF
+
 After adding all the content, you can generate the PDF using the generate_pdf() function. The clean_tex=True option automatically removes the intermediate LaTeX files:
 
 ```python

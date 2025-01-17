@@ -753,7 +753,22 @@ class EngineConstantVelocityVerticalSpringGravity(Engine):
         ]
 
         return comp_list
+    
+    def unit_dict(self):
 
+        units_dict = {self.M: ureg.kilogram,
+                 self.k_m: ureg.newton/ureg.meter,
+                 self.m_e: ureg.kilogram,
+                 self.g: ureg.meter/ureg.second,
+                 self.e: ureg.meter,
+                 self.z: ureg.meter,
+                 self.z.diff(self.ivar): ureg.meter/ureg.second,
+                 self.z.diff(self.ivar,2): ureg.meter/ureg.second/ureg.second,
+                 self.phi: ureg.radian,
+                 self.ivar: ureg.second,
+                }
+
+        return units_dict
     
     
     def static_force(self):
@@ -2302,4 +2317,112 @@ class VeeEnginePerpendicularSprings(ComposedSystem):
         return self.sym_desc_dict
 
 
-    
+class SingleGear(ComposedSystem):
+    alfa_tw = Symbol('alfa_tw') #kąt przyporu 
+    beta_w = Symbol('\\beta') #kąt pochylenia lini śrubowej
+    theta = Symbol('\\theta') #kąt odchylenia siły obwodowej
+    d = Symbol('d') #średnica toczna(chyba) koła
+    Fo = Symbol('F_o') # siła obwodowa
+    Force_fr = Symbol('F_fr') #siła promieniowa
+    Force_fw = Symbol('F_fw') #siła wzdłużna
+    F_fr_XY = Symbol('F_fr_XY')
+    F_fr_XZ = Symbol('F_fr_XZ')
+    F_fw_XY = Symbol('F_fw_XY')
+    F_fw_XZ = Symbol('F_fw_XZ')
+    F_o_XY = Symbol('F_o_XY')
+    F_o_XZ = Symbol('F_o_XZ')
+    I = Symbol('I')
+    x = Symbol('x')
+    y = Symbol('y')
+    z = Symbol('z')
+
+
+    def __init__(self,
+                alfa_tw = None,
+                beta_w = None,
+                theta = None,
+                d = None,
+                Fo = None,
+                x = None,
+                y = None,
+                z = None):
+
+        if alfa_tw is not None: self.alfa_tw = alfa_tw
+        if beta_w is not None: self.beta_w = beta_w
+        if theta is not None: self.theta = theta
+        if d is not None: self.d = d
+        if Fo is not None: self.Fo = Fo
+        if x is not None: self.x = x
+        if y is not None: self.y = y
+        if z is not None: self.z = z
+        
+#         if qs is None:
+#             self.qs = [self.x]
+#         else:
+#             self.qs = qs
+
+#         self.ivar=ivar
+
+#         self._init_from_components(**kwargs)
+
+    @property
+    def force_matrix(self):
+
+        self.tan_alfa_tw = tan(self.alfa_tw)/cos(self.beta_w)
+
+        self.Force_fr = self.Fo * self.tan_alfa_tw
+
+        self.Force_fw = self.Fo * tan(self.beta_w)
+
+        self.FR = Matrix([0,-self.Force_fr * cos(self.theta),-self.Force_fr * sin(self.theta)])
+
+        self.FW = Matrix([self.Force_fw,0,0])
+
+        self.FO = Matrix([0,-self.Fo * cos(self.theta),-self.Fo * sin(self.theta)])
+
+        self.F_sum = (self.FR  + self.FW  + self.FO )
+
+
+        display(f'Macierz sumy sił dla koła:')
+        display(self.F_sum)
+
+
+        display(f'siła promieniowa wynosi: {self.Force_fr = :.0f}')
+        display(f'siła wzdłużna wynosi: {self.Force_fw = :.0f}')
+
+
+        display('-'*100)
+
+        return (self.F_sum)
+
+
+    @property
+    def moment_matrix(self):
+
+        xo = 0 + self.x
+        yo = self.d*cos(self.theta) + self.y
+        zo = self.d + self.z
+        
+        self.M_X = self.F_Z*yo - self.F_Y*zo
+        self.M_Y = self.F_X*zo - self.F_Z*xo
+        self.M_Z = self.F_Y*xo - self.F_X*yo
+
+        return Matrix([self.M_X,self.M_Y,self.M_Z])
+
+
+    @cached_property
+    def components(self):
+
+        components = {}
+        self._disk = Disk(I, pos1, qs=None)
+        self._fr = Force(self.Force_fr, pos1=None, qs=None)
+        self._fo = Force(self.Fo, pos1=None, qs=None)
+        self._fw = Force( self.Force_fw, pos1=None, qs=None)
+
+        components['_disk'] = self._disk
+        components['_fr'] = self._fr
+        components['_fo'] = self._fo
+        components['_fw'] = self._fw
+        return components
+
+

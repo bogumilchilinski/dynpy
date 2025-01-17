@@ -377,42 +377,6 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
 
         return default_data_dict
 
-    
-#     def get_default_data(self):
-
-#         m0, k0, lam, Omega0, F0 = symbols('m_0 k_0 lambda Omega_0 F_0', positive=True)
-
-#         default_data_dict = {
-#             self.k_l: [S.One * self.k_c],
-#             self.k_r: [S.One * self.k_c],
-#             self.c_r: [S.One * lam * self.k_r],
-#             self.c_l: [S.One * lam * self.k_l],
-#             self.c_c: [S.One * lam * self.k_c],
-
-#             self.m_2: [S.One * self.m],
-#             self.m_1: [S.One* self.m],
-            
-# #             self.Omega: [S.One * Omega0],
-#             self.F: [S.One * F0 * 20],
-#             self.m: [S.One * m0 * 2],
-#             self.m_2: [S.One * m0 * no for no in range(1,5)],
-#             self.m_1: [S.One * m0 * no for no in range(1,5)],
-            
-            
-
-#             self.k_c: [S.One * k0 * no for no in  [74,74.01,74.02]],
-#             self.k_l: [S.One * k0 * 65],
-#             self.k_r: [S.One * k0 * 65],            
-# #             self.c_r: [S.One * lam * self.k_c],
-# #             self.c_l: [S.One * lam * self.k_c],
-# #             self.c_c: [S.One * lam * self.k_c],
-            
-#         }
-
-#         return default_data_dict    
-    
-    
-    
     def get_numerical_data(self):
 
         default_data_dict = {
@@ -456,6 +420,12 @@ class ForcedDampedTrolleysWithSprings(ComposedSystem):
         self.k_l: ureg.newton / ureg.meter,  # Spring constant (units depend on spring type)
         self.k_r: ureg.newton / ureg.meter,  # Spring constant (units depend on spring type)
         self.k_c: ureg.newton / ureg.meter,  # Spring constant (units depend on spring type)
+        self.x_l: ureg.meter,
+        self.x_r: ureg.meter,
+        self.x_l.diff(self.ivar): ureg.meter/ureg.second,
+        self.x_r.diff(self.ivar): ureg.meter/ureg.second,
+        self.x_l.diff(self.ivar,2): ureg.meter/ureg.second/ureg.second,
+        self.x_r.diff(self.ivar,2): ureg.meter/ureg.second/ureg.second,
         self.c_l: ureg.newton*ureg.second / ureg.meter,  # Damping coefficient
         self.c_r: ureg.newton*ureg.second / ureg.meter,  # Damping coefficient
         self.c_c: ureg.newton*ureg.second / ureg.meter,  # Damping coefficient
@@ -1341,6 +1311,8 @@ class DoubleTrolleyDifferentWheels(ComposedSystem):
             self.c_cr: ureg.newton/(ureg.meter/ureg.second),
             self.c_cc: ureg.newton/(ureg.meter/ureg.second),
             self.c_cl: ureg.newton/(ureg.meter/ureg.second),
+            self.x_l: ureg.meter,
+            self.x_r: ureg.meter,
             self.x_l.diff(self.ivar): ureg.meter/ureg.second,
             self.x_r.diff(self.ivar): ureg.meter/ureg.second,
             self.x_l.diff(self.ivar,2): ureg.meter/ureg.second/ureg.second,
@@ -1507,6 +1479,8 @@ class DampedTrolleysWithSprings(DoubleTrolleyDifferentWheels):
             self.c_cr: ureg.newton/(ureg.meter/ureg.second),
             self.c_cc: ureg.newton/(ureg.meter/ureg.second),
             self.c_cl: ureg.newton/(ureg.meter/ureg.second),
+            self.x_l: ureg.meter,
+            self.x_r: ureg.meter,
             self.x_l.diff(self.ivar): ureg.meter/ureg.second,
             self.x_r.diff(self.ivar): ureg.meter/ureg.second,
             self.x_l.diff(self.ivar,2): ureg.meter/ureg.second/ureg.second,

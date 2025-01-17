@@ -802,9 +802,11 @@ for eq3 in ds3.as_eq_list():
     display(SympyFormula(eq3.simplify()))
     
 ds4=dyn_sys.linearized().eoms.solution
+ds4_eqns = ds4.as_eq_list()
 
-for eq4 in ds4.as_eq_list():
+for eq4 in ds4_eqns:
     display(SympyFormula(eq4.simplify()))
+
 
 display(ReportText(f'Outcomes of governing equations {AutoMarker(ds4_eqns[0])} {AutoMarker(ds4_eqns[1])}) analysis.'))
 
@@ -848,25 +850,25 @@ sec_ODESystem = Subsection('ODESystem simulation')
 CurrentContainer(sec_ODESystem)
 
 display(ReportText('Firstly create an ODESystem or import it from dynpy.modes.odes.linear.py'))
-display(ObjectCode(spring = SpringMassEps.from_reference_data()))
+display(ObjectCode('spring = SpringMassEps.from_reference_data()''))
 
 display(ReportText('Secondly solve the equation using solution method:'))
-display(ObjectCode(spring_sol = spring.solution))
+display(ObjectCode('spring_sol = spring.solution'))
 
 display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
 spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()
 
-MSM_sim = Subsection('MSM simulation')
-CurrentContainer(MSM_sim)
+# MSM_sim = Subsection('MSM simulation')
+# CurrentContainer(MSM_sim)
 
-display(ReportText('Firstly create an MultiTimeScaleSolution system or import it from dynpy.modes.odes.linear.py'))
-display(ObjectCode(spring = SpringMassMSM.from_reference_data()))
+# display(ReportText('Firstly create an MultiTimeScaleSolution system or import it from dynpy.modes.odes.linear.py'))
+# display(ObjectCode('spring = SpringMassMSM.from_reference_data()'))
 
-display(ReportText('Secondly solve the equation using solution method:'))
-display(ObjectCode(spring_sol = spring.solution))
+# display(ReportText('Secondly solve the equation using solution method:'))
+# display(ObjectCode('spring_sol = spring.solution'))
 
-display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
-spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()'''
+# display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
+# spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()'''
 
         veryfication_str = '''from sympy import *
 from pint import UnitRegistry

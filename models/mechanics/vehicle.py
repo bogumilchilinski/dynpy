@@ -151,6 +151,13 @@ class UndampedVehicleSuspension(ComposedSystem):
             self.l_r: ureg.meter,
             self.l_rod: ureg.meter,
             self.Omega: ureg.radian / ureg.second,
+            self.z: ureg.meter,
+            self.z.diff(self.ivar): ureg.meter / ureg.second,
+            self.z.diff(self.ivar, 2): ureg.meter / ureg.second**2,
+            self.phi: ureg.radian,
+            self.phi.diff(self.ivar): ureg.radian / ureg.second,
+            self.phi.diff(self.ivar, 2): ureg.radian / ureg.second**2,
+            self.ivar: ureg.second,
         }
         return unit_dict
 
@@ -846,4 +853,3 @@ class QuarterOfVehicle(ComposedSystem):
         }
         return self.sym_desc_dict 
 
-    

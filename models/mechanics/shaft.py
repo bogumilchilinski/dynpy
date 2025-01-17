@@ -1406,6 +1406,12 @@ class TripleShaft(ComposedSystem):
             self.phi_3: ureg.radian,  # Angular displacement of the third disk (radians)
             self.phi_r: ureg.radian,  # Angular displacement on the right side (radians)
             self.phi_l: ureg.radian,  # Angular displacement on the left side (radians)
+            self.phi_1.diff(self.ivar): ureg.radian / ureg.second,  # Angular velocity of the first disk (rad/s)
+            self.phi_1.diff(self.ivar, 2): ureg.radian / ureg.second**2,  # Angular acceleration of the first disk (rad/s**2)
+            self.phi_2.diff(self.ivar): ureg.radian / ureg.second,  # Angular velocity of the second disk (rad/s)
+            self.phi_2.diff(self.ivar, 2): ureg.radian / ureg.second**2,# Angular acceleration of the second disk (rad/s**2)
+            self.phi_3.diff(self.ivar): ureg.radian / ureg.second,  # Angular velocity of the third disk (rad/s)
+            self.phi_3.diff(self.ivar, 2): ureg.radian / ureg.second**2,# Angular acceleration of the third disk (rad/s**2)
             self.ivar: ureg.second,  # Time (seconds)
             }
         
