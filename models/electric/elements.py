@@ -1,4 +1,4 @@
-from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Derivative, Expr)
+from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Derivative, Expr, Heaviside)
 from numbers import Number
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
@@ -53,6 +53,17 @@ class VoltageSource(Force):
     """
     scheme_name = 'voltgesrc.png'
     real_name = 'spring.png'
+
+    def __init__(self, voltage, q0,  qs=None,ivar=Symbol('t'), frame = base_frame):
+        super().__init__(force=voltage, pos1=q0, qs=qs,ivar=ivar, frame = frame)
+        
+class EMForce(Force):
+
+    """
+    Creates enforcement that shows the effect of EM coupling.
+    """
+    scheme_name = ''
+    real_name = ''
 
     def __init__(self, voltage, q0,  qs=None,ivar=Symbol('t'), frame = base_frame):
         super().__init__(force=voltage, pos1=q0, qs=qs,ivar=ivar, frame = frame)
