@@ -23,6 +23,7 @@ from .guides import (UsageOfDynamicSystemsGuide, Guide, EngeneeringDrawingGuide,
 import datetime
 import shutil
 import os
+from typing import Optional, Union
 
 class ReportMethods:
 
@@ -575,7 +576,36 @@ class ElsevierPaper(Document):
 
         
 class WutThesis(Document):
-    
+    """
+        A class for creating a Warsaw University of Technology (WUT) thesis document.
+
+        This class extends the `Document` class to include all necessary LaTeX packages, commands, and configurations required for WUT thesis formatting. It provides an easy way to create and manage thesis documents with pre-configured settings.
+
+        Attributes:
+            latex_name (str): Name of the document type ('document').
+            packages (list): List of LaTeX packages and commands preloaded for thesis formatting.
+
+        Example Usage:
+            >>> from dynpy.utilities.documents.document import WutThesis
+            >>> from pylatex import Section
+            >>> doc = WutThesis('./output/thesis_name')
+            >>> section = Section('Introduction')
+            >>> doc.append(section)
+            >>> doc.generate_pdf(clean_tex=True)
+
+        Example of Full Thesis Workflow:
+            >>> from dynpy.utilities.documents.document import WutThesis
+            >>> from pylatex import Section, Command
+            >>> doc = WutThesis('./output/thesis_name')
+            >>> doc.append(Command('title', arguments=['Thesis Title']))
+            >>> doc.append(Command('author', arguments=['Student Name']))
+            >>> doc.append(Command('date', arguments=['\today']))
+            >>> doc.append(Command('maketitle'))
+            >>> section = Section('Introduction')
+            >>> doc.append(section)
+            >>> doc.generate_pdf(clean_tex=True)
+    """
+
     latex_name = 'document'
     packages = [
                   Package('geometry',options=['lmargin=30mm', 'rmargin=30mm',  'top=25mm', 'bmargin=25mm', 'headheight=50mm']),
@@ -616,25 +646,44 @@ class WutThesis(Document):
         #\renewcommand{\familydefault}{\sfdefault}
         
     ]
-    
-    
-    
-    def __init__(self,
-                 default_filepath='default_filepath',
-                 title='Basic title',
-                 *,
-                 documentclass='article',
-                 document_options=['a4paper','11pt','twoside'],
-                 fontenc='T1',
-                 inputenc='utf8',
-                 font_size='normalsize',
-                 lmodern=False,
-                 textcomp=True,
-                 microtype=True,
-                 page_numbers=True,
-                 indent=None,
-                 geometry_options=['inner=30mm', 'outer=20mm', 'bindingoffset=10mm', 'top=25mm', 'bottom=25mm'],#,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
-                 data=None):
+
+    def __init__(
+            self,
+            default_filepath: str = 'default_filepath',
+            title: str = 'Basic title',
+            *,
+            documentclass: str = 'article',
+            document_options: list = ['a4paper', '11pt', 'twoside'],
+            fontenc: str = 'T1',
+            inputenc: str = 'utf8',
+            font_size: str = 'normalsize',
+            lmodern: bool = False,
+            textcomp: bool = True,
+            microtype: bool = True,
+            page_numbers: bool = True,
+            indent: Optional[Union[str, int]] = None,
+            geometry_options: Optional[list] = ['inner=30mm', 'outer=20mm', 'bindingoffset=10mm', 'top=25mm', 'bottom=25mm'],
+            data: Optional[dict] = None
+    ):
+        """
+            Initialize the WutThesis class with optional customization.
+
+            Args:
+                default_filepath (str): Path for the generated document.
+                title (str): Title of the document.
+                documentclass (str): LaTeX document class (e.g., 'article').
+                document_options (list): Options for the document class.
+                fontenc (str): Font encoding (default 'T1').
+                inputenc (str): Input encoding (default 'utf8').
+                font_size (str): Font size (default 'normalsize').
+                lmodern (bool): Whether to use Latin Modern fonts.
+                textcomp (bool): Whether to use the `textcomp` package.
+                microtype (bool): Whether to use the `microtype` package.
+                page_numbers (bool): Whether to include page numbers.
+                indent (Optional[Union[str, int]]): Indentation settings.
+                geometry_options (Optional[list]): Geometry options for page layout.
+                data (Optional[dict]): Additional data for customization.
+        """
 
         super().__init__(
             default_filepath=default_filepath,
@@ -653,7 +702,7 @@ class WutThesis(Document):
         )
 #         label=self.label
         self.title=title
-        #self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
+        # self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
 #         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
 #         self.packages.append(Command('newcommand{\praca}', arguments=['Praca dyplomowa']))
 #         self.packages.append(Command('newcommand{\dyplom}', arguments=['Magisterska']))
@@ -675,7 +724,27 @@ class WutThesis(Document):
         # tu implementować co tam potrzeba
         
     @classmethod
-    def base_setup(cls, create_file = False):
+    def base_setup(cls, create_file: bool = False):
+        """
+        Sets up the base template for the WUT thesis document.
+
+        This method provides an easy way to initialize a thesis document with the necessary sections, structure, and configuration.
+
+        Args:
+            create_file (bool): If True, creates a base setup environment including necessary directories and files.
+
+        Returns:
+            Optional[str]: Returns setup content if `create_file` is False, otherwise creates the environment.
+
+        Usage Example:
+            >>> from dynpy.utilities.documents.document import WutThesis
+            >>> WutThesis.base_setup()
+
+        When to use:
+            - Use this method when starting a new WUT thesis document.
+            - If `create_file=True`, it will generate all required directories and files for a structured thesis.
+            - If `create_file=False`, it returns a string with setup instructions that can be used manually.
+        """
 
         if create_file is True:
             return cls._create_base_setup_env()
@@ -719,6 +788,7 @@ display(ReportText('This subsection provides state of the art. '*100))
 sub_methodology = Subsection('Methodology')
 CurrentContainer(sub_methodology)
 display(ReportText('This subsection provides methodology. '*100))'''
+
         math_str = '''from sympy import Eq, Symbol, symbols
 from dynpy.utilities.report import *
 
@@ -1018,8 +1088,7 @@ doc.append(Command('newpage'))
 # Generating file
 doc.generate_pdf(clean_tex=True)'''        
         
-        preliminary_str=(
-f"""
+        preliminary_str=(f"""
 Examplary setup is as follows:
 
 #References to guide imports needed to include - to see the list of available guides insert and run the code below:
@@ -1135,14 +1204,11 @@ BasicsOfODESystemGuide();
 {document_str}
 ```
 
-"""
-        )
+""")
 
         display(IPMarkdown(preliminary_str))    
 
-
-        preliminary_str=(
-f"""
+        preliminary_str=(f"""
 #Example:
 
 #To prepare a simple document with text and images:
@@ -1194,8 +1260,8 @@ f"""
 
 {document_str}
 
-"""
-        )
+""")
+
         return ObjectCode(preliminary_str)
 
     Jupyter_file_content = """{
@@ -1320,13 +1386,15 @@ f"""
   doi = {}
 }
 '''
-    def _create_directory(path):
-        '''
-Method create directory from given path
 
-Arguments:
-path - (str), name of directory that method will create, if subdirectories shall be created, path should look like this: 'directory/subdirectory' 
-        '''
+    def _create_directory(path: str) -> None:
+        """
+            Creates a directory at the specified path.
+
+            Args:
+                path (str): The directory path to be created. If subdirectories are needed,
+                            the path should be structured like 'directory/subdirectory'.
+        """
         import os
 
         try:
@@ -1342,16 +1410,16 @@ path - (str), name of directory that method will create, if subdirectories shall
         except Exception as e:
             print(f"An error occurred: {e}")
         
-        
-    def _create_file(name, content = None, path = None):
-        '''
-Method create file and write content to it
+    def _create_file(name: str, content: str = None, path: str = None) -> None:
+        """
+            Creates a file and writes content to it.
 
-Arguments:
-name - (str), name of file created by method,
-content - (str), optional,  string with a content of file, that is going to be writen to it,
-path - (str), optional, directory where file should be created
-        '''
+            Args:
+                name (str): The name of the file to be created.
+                content (str, optional): The content to write into the file.
+                path (str, optional): The directory where the file should be created.
+                                      If specified, it will ensure the directory exists.
+        """
         import os
 
         if path is not None:
@@ -1366,11 +1434,12 @@ path - (str), optional, directory where file should be created
                 file.write(content)
 
         file.close()
+
     @classmethod    
-    def _create_base_setup_env(cls):
-        '''
-Method that create Jupyter notebook file with WUT thesis base setup and output directory with .bib file
-        '''
+    def _create_base_setup_env(cls) -> None:
+        """
+            Creates a Jupyter notebook file with WUT thesis base setup and an output directory containing a .bib file.
+        """
         
         Jupyter_file_content = """{
     "cells": [
