@@ -756,17 +756,24 @@ class DataAxis(Axis, ReportModule):
 
         coords_pack = self._coordinates
         labels = self.labels
+        plots_no = len(self._coordinates)
         
 
         
         colours = [
             self._label_colour(no) for no, elem in enumerate(coords_pack)
         ]
-
+        
+        
         if self._line_style is None:
-            line_style='solid'
+            line_style_list=['solid']*plots_no
+
+        elif type(self._line_style)==list:
+            
+            line_style_list=(self._line_style*plots_no)[0:plots_no]
+
         else:
-            line_style = self._line_style
+            line_style_list = [self._line_style]*plots_no
 
         #return list(zip(coords_pack,labels,colours))
         if self.at is not None:
@@ -775,7 +782,7 @@ class DataAxis(Axis, ReportModule):
                 NoEscape(self.legend_fontsize) + NoEscape(str(label))),
                  coordinates=list(coords),
                  options=Options(f'{line_style}', color=colour))
-            for coords, label, colour in (zip(coords_pack, labels, colours))
+            for coords, label, colour,line_style in (zip(coords_pack, labels, colours,line_style_list))
             ]
         else:
             plot_list = [
@@ -783,7 +790,7 @@ class DataAxis(Axis, ReportModule):
                 NoEscape(self.legend_fontsize) + NoEscape(str(label))),
                  coordinates=list(coords),
                  options=Options(f'{line_style}', color=colour))
-            for coords, label, colour in (zip(coords_pack, labels, colours))
+            for coords, label, colour,line_style in (zip(coords_pack, labels, colours,line_style_list))
             ]
         
         return plot_list
@@ -1710,6 +1717,7 @@ class EntryWithUnit:
             return f'{self._obj}'
 
 
+        
 class DataTable(Table,ReportModule):
 
     _position = 'H'
@@ -1760,6 +1768,7 @@ class DataTable(Table,ReportModule):
                                  '\\toprule \n \\midrule').replace(
                                      '\\bottomrule',
                                      '\\midrule \n \\bottomrule')
+
         
         self.append(
             NoEscape(latex_code))
@@ -1774,7 +1783,52 @@ class DataTable(Table,ReportModule):
         cls.packages.append(Command('captionsetup[table]{skip='+str(space)+'pt}'))
         
         return cls
+
+class BPASTSDataTable(DataTable):
+    def add_table(self, numerical_data=None, index=False, longtable=False,multirow=True, column_format=None):
+        self.append(NoEscape('\\centering'))
+        self.append(NoEscape('%%%%%%%%%%%%%% Table %%%%%%%%%%%%%%%'))
+        #         if numerical_data!=None:
+        #             self._numerical_data=numerical_data
+
+        tab = self._numerical_data
         
+        
+#         latex_code=tab.style.to_latex(#index=index, 
+#                                    #escape=False,
+#                              #longtable=longtable,
+# #                    multirow=multirow,
+#                     hrules=True,
+#                     column_format=column_format).replace(
+#                                  '\\toprule',
+#                                  '\\toprule \n \\midrule').replace(
+#                                      '\\bottomrule',
+#                                      '\\midrule \n \\bottomrule')
+
+        format_string="|l"
+        col_format=len(tab.columns)*format_string+"|"
+        if index is not False:
+            col_format=col_format+"l|"
+        latex_code=tab.to_latex(index=index, 
+                                   #escape=False,
+                             #longtable=longtable,
+#                    multirow=multirow,
+                    #hrules=True,
+                    
+                    column_format=col_format).replace(
+                                     '\\\\',
+                                     '\\\\ \\hline').replace(
+                                 '\\toprule',
+                                 '\\hline').replace(
+                                     '\\midrule',
+                                     '\\hline').replace(
+                                     '\\bottomrule',
+                                     '')
+
+        
+        self.append(
+            NoEscape(latex_code)) 
+
 class MarkerRegistry(dict):
 
     _prefix = 'automrk'
@@ -2461,6 +2515,7 @@ class BasicFormattingTools(DataMethods):
                  multirow=True,
                  column_format=None,
                  longtable=None,
+                 style=None,
                  *args,
                  **kwargs):
 
@@ -2468,9 +2523,12 @@ class BasicFormattingTools(DataMethods):
             container = self.__class__._container
 
         tab = DataTable(self)
+        if style=="bpasts":
+            tab=BPASTSDataTable(self)
 
         if caption is not None:
             tab.add_caption(NoEscape(caption))
+        
 
         tab.add_table(index=index,multirow=multirow,column_format=column_format,longtable=longtable,**kwargs)
 

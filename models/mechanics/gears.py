@@ -246,7 +246,7 @@ class EquivalentGearModel(ComposedSystem):
     scheme_name = 'engine.png'
     real_name = 'engine_real.PNG'
 
-    m=Symbol('m_eq', positive=True)
+    m=Symbol('m_{eq}', positive=True)
     k=Symbol('k_g', positive=True)
     F=Symbol('F', positive=True)
     c=Symbol('c_g',positive=True)
@@ -405,15 +405,12 @@ class EquivalentGearModel(ComposedSystem):
     
     def _stiffness_models(self):
     
-        #parabola
-        #para_series = 80*(t_values%(T_value/2))*((t_values%(T_value/2))-(T_value/2))*(-0.4)
-        #para_series_heave =  10*np.heaviside(np.sin(2*np.pi/(T_value)*t_values),0.5)
-        #para_values=(0.5*(para_series+para_series_heave-6))
         
 
         #wave
         t = self.ivar
         T = self.T
+        
         
         wave1=(1*(sin(2*pi*t/T))+2.0)*(1/2 + 1/2*sign(sin(2*pi*t/T)))
         wave2=(1*(-sin(2*pi*t/T))-3.0)*(1/2+ 1/2*sign(-sin(2*pi*t/T)))
