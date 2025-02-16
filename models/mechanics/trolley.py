@@ -2093,7 +2093,7 @@ class TrolleyWithTMD(ComposedSystem):
 
 
 #AF - system Amadiego, zmienne uspójnione zgodnie z obrazkiem (m_TMD-> m_e itd.)
-class TrolleyWithTMD_1(ComposedSystem): 
+class TrolleyWithTMD1(ComposedSystem): 
     scheme_name = 'MDoF_new.png'
     real_name = 'mdof_tmd_real.png'
 
