@@ -341,3 +341,34 @@ class SODEsincosExcitation(ODESystem):
         odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
 
         return odes
+    
+class SODEsinexpExcitation(ODESystem):
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        x= Function('x')(t)
+        ode_eq=Eq(x.diff(t,2)-2*x.diff(t)+x+1,sin(t)*exp(t))
+
+        odes = cls(ode_eq.lhs-ode_eq.rhs,dvars=x,ivar=t,ode_order=2)
+
+        return odes
+class SODERectExcitation(ODESystem):
+    """
+    Class for defining an ODE with rectangular wave excitation.
+    """
+    @classmethod
+    def from_reference_data(cls, period=2*pi, amplitude=1):
+        t = Symbol('t')
+        x = Function('x')(t)
+
+        # Rectangular wave function
+        rect_wave = amplitude * (Heaviside(t % period - period/2) - Heaviside(t % period - period)) 
+
+        # ODE equation
+        ode_eq = Eq(x.diff(t, 2) - 2*x.diff(t) + x + 1, rect_wave) 
+
+        odes = cls(ode_eq.lhs - ode_eq.rhs, dvars=x, ivar=t, ode_order=2)
+
+        return odes

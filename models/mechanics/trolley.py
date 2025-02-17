@@ -846,7 +846,6 @@ class TrolleyWithPendulum(ComposedSystem):
     
 class TrolleyWithElasticPendulum(TrolleyWithPendulum):
     
-
     scheme_name = 'trolley_pendulum_tmd.png'
     real_name = 'taipei101.png'
 
@@ -908,19 +907,11 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
         self._trolley = SpringMassSystem(self.m_t, self.k, self.x, self.ivar)(label='Trolley')
         #self._pendulum = PendulumKinematicExct(self.l+self.u, self.m_p, self.g, self.phi, self.x, self.ivar)(label='Pendulum')
         self._force=Force(self.F*sin(self.Omega*self.ivar), pos1=self.qs[0], qs=self.qs)(label='Force')
-       
         self._material_point_1=MaterialPoint(self.m_p,self.x+(self.l+self.u+self.u_0)*sin(self.phi),qs=self.qs)
         self._material_point_2=MaterialPoint(self.m_p,(self.l+self.u+self.u_0)*cos(self.phi),qs=self.qs)
-        self._gravity = GravitationalForce(self.m_p, self.g, -(self.l+self.u+self.u_0)*cos(self.phi), qs=self.qs)
-        
-        # self._material_point_1=MaterialPoint(self.m_p,self.x+(self.l+self.u)*sin(self.phi),qs=self.qs)
-        # self._material_point_2=MaterialPoint(self.m_p,(self.l+self.u)*cos(self.phi),qs=self.qs)
-        # self._gravity = GravitationalForce(self.m_p, self.g, -(self.l+self.u)*cos(self.phi), qs = self.qs)        
-
+        self._gravity = GravitationalForce(self.m_p, self.g, -(self.l+self.u+self.u_0)*cos(self.phi), qs=self.qs) 
         self._spring_2=Spring(self.k_l,self.u,qs=self.qs) # zostaw xD tu jesty ok
         
-        
-
         components['_trolley'] = self._trolley
         #components['_pendulum'] = self._pendulum
         components['_force'] = self._force
@@ -929,40 +920,11 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
         #components['_spring_1'] = self._spring_1
         components['_spring_2'] = self._spring_2
         components['_gravity'] = self._gravity
-
         return components    
     
-    def symbols_description(self):
-        self.sym_desc_dict = {
-            self.l: r'Pendulum length',
-            self.k: r'Stiffness of a beam showed as a spring stiffness in trolley member',
-            self.k_l: r'pendulum stiffness',
-            self.x: r'Kinematic lateral excitation',
-            self.u: r'Kinematic excitation along the pendulum',
-            self.phi: r'Angle of a pendulum',
-            self.m_p: r'Mass of pendulum',
-            self.m_t: r'Mass of trolley',
-            self.g: r'Gravity constant',
-            self.F: r'Force',
-            self.Omega: r'Excitation frequency',
-        }
-        return self.sym_desc_dict
     
-    
-    #def get_default_data(self):
-    
-    #return default_data_dict
-    
-    
-    #def get_numerical_data(self):
-    
-    #return default_data_dict
-    
-    
-    def symbols_description(self, lang = 'en'):
-        
+    def symbols_description(self, lang = 'en'):    
         if lang == 'pl':
-
             self.sym_desc_dict = {
                 self.m_t: r'masa początkowa wózka',
                 self.m_p: r'masa początkowa wahadła',
@@ -978,7 +940,6 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
             return self.sym_desc_dict
 
         else:
-
             self.sym_desc_dict = {
                 self.m_t: r'Mass of trolley',
                 self.m_p: r'pendulum initial mass',
@@ -992,28 +953,7 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
                 self.t_init: r'damping activation time',
             }
             return self.sym_desc_dict
-        
-#     def _to_msm_form(self):
-
-#         #M_p = Symbol('M_p',positive=True)
-#         #M_t = Symbol('M_t',positive=True)
-#         Omega1 = Symbol('Omega1',positive=True)
-#         Omega2 = Symbol('Omega2',positive=True)
-
-#         #subs_dict = {self.m_p+self.m_pf:M_p,self.m_t+self.m_tf:M_t}
-
-#         odes_lhs = self.linearized()._ode_system.lhs
-
-#         ode1 = (odes_lhs.subs(subs_dict)[0]/(m_p+m_t)).expand().doit().ratsimp().subs(self.k,Omega1**2*(m_p+m_t)).ratsimp().expand().collect([self.phi.diff(self.ivar,2)*self.l])
-#         ode2 = (odes_lhs.subs(subs_dict)[1]/m_p/self.l/self.l).expand().doit().ratsimp().subs(self.g,Omega2**2*self.l).simplify()
-
-#         eps = Symbol('varepsilon')
-#         del1 = Symbol('delta1')
-#         f = Symbol('f',positive=True)
-
-#     from dynpy.solvers.linear import ODESystem
-
-#     return ODESystem(odes=Matrix([ode1.subs({ode1.coeff(self.phi.diff(self.ivar,2)):del1/eps,self.F:f*(m_p+m_t)}),ode2.subs(1/self.l,eps)]),dvars=self.q)
+       
         
     
 class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
@@ -2135,23 +2075,133 @@ class TrolleyWithTMD(ComposedSystem):
     
     def unit_dict(self):
         units_dict = {
-            self.m: ureg.kilogram,                    # Mass of the trolley
-            self.m_TMD: ureg.kilogram,                # Mass of TMD
-            self.k: ureg.newton / ureg.meter,         # Stiffness of the spring for trolley
-            self.k_TMD: ureg.newton / ureg.meter,     # Stiffness of the TMD spring
-            self.F: ureg.newton,                      # Force applied to the system
-            self.Omega: ureg.radian / ureg.second,    # Frequency of excitation
-            self.x: ureg.meter,                       # Displacement of the trolley
+            self.m: ureg.kilogram, # Mass of the trolley
+            self.m_TMD: ureg.kilogram, # Mass of TMD
+            self.k: ureg.newton / ureg.meter, # Stiffness of the spring for trolley
+            self.k_TMD: ureg.newton / ureg.meter, # Stiffness of the TMD spring
+            self.F: ureg.newton, # Force applied to the system
+            self.Omega: ureg.radian / ureg.second, # Frequency of excitation
+            self.x: ureg.meter, # Displacement of the trolley
             self.x.diff(self.ivar): ureg.meter / ureg.second,  # Velocity of the trolley
-            self.x.diff(self.ivar, 2): ureg.meter / ureg.second**2,  # Acceleration of the trolley
-            self.x_e: ureg.meter,                     # Displacement of the TMD relative to trolley
-            self.x_e.diff(self.ivar): ureg.meter / ureg.second,  # Velocity of the TMD relative to trolley
-            self.x_e.diff(self.ivar, 2): ureg.meter / ureg.second**2,  # Acceleration of the TMD relative to trolley
-            self.ivar: ureg.second                    # Time
+            self.x.diff(self.ivar, 2): ureg.meter / ureg.second**2, # Acceleration of the trolley
+            self.x_e: ureg.meter, # Displacement of the TMD relative to trolley
+            self.x_e.diff(self.ivar): ureg.meter / ureg.second, # Velocity of the TMD relative to trolley
+            self.x_e.diff(self.ivar, 2): ureg.meter / ureg.second**2, # Acceleration of the TMD relative to trolley
+            self.ivar: ureg.second # Time
         }
         return units_dict
 
 
+#AF - system Amadiego, zmienne uspójnione zgodnie z obrazkiem (m_TMD-> m_e itd.)
+class TrolleyWithTMD1(ComposedSystem): 
+    scheme_name = 'MDoF_new.png'
+    real_name = 'mdof_tmd_real.png'
+
+    m = Symbol('m', positive=True)
+    m_e = Symbol('m_e', positive=True)
+    k = Symbol('k', positive=True)
+    k_e = Symbol('k_e', positive=True)
+    g = Symbol('g', positive=True)
+    Omega = Symbol('Omega', positive=True)
+    F = Symbol('F', positive=True)
+    x_e = dynamicsymbols('x_e')
+    x = dynamicsymbols('x')
+
+    def __init__(self,
+                 m=None,
+                 m_e=None,
+                 k=None,
+                 k_e=None,
+                 Omega=None,
+                 x_e=None,
+                 x=None,
+                 F=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+        if m_e is not None: self.m_e = m_e
+        if m is not None: self.m = m
+        if x_e is not None: self.x_e = x_e
+        if x is not None: self.x = x
+        if k is not None: self.k = k
+        if k_e is not None: self.k_e = k_e
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        self.ivar = ivar
+        
+        self.qs = [self.x, self.x_e]
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+        components = {}
+
+        self._trolley = SpringMassSystem(self.m, self.k, self.x, self.ivar)(label='Trolley')
+        self._TMD = TunedMassDamperRelativeMotion(self.m_e, self.k_e, self.x_e, self.x, self.ivar)(label='Tuned Mass Damper')
+        self._force = Force(self.F*sin(self.Omega*self.ivar), pos1=self.x, qs=[self.x, self.x_e])(label='Force')
+
+        components['_trolley'] = self._trolley
+        components['_TMD'] = self._TMD
+        components['_force'] = self._force
+
+        return components
+
+    def symbols_description(self):
+        self.sym_desc_dict = {
+            self.k: r'Stiffness of a beam showed as a spring stiffness in trolley member',
+            self.x: r'Kinematic lateral excitation',
+            self.x_e: r'Angle of a pendulum',
+            self.m: r'Mass of trolley',
+            self.m_e: r'Mass of TMD',
+            self.F: r'Force',
+            self.Omega: r'Excitation frequency',
+        }
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+
+        m0, F0, Omega0, k0 = symbols('m_0 F_0 Omega_0 k_0', positive=True)
+
+        default_data_dict = {
+            self.m: [S.One * m0 * no for no in range(20, 30)],
+            self.m_e: [S.One * m0 * no for no in range(1, 10)],
+            self.F: [S.One * F0 * no for no in range(50, 100)],
+            self.Omega: [S.One * Omega0],
+            self.k: [S.One * k0 * no for no in range(50, 100)],
+            self.x: [self.x]
+        }
+        return default_data_dict
+    
+    def get_numerical_data(self):
+
+        default_data_dict = {
+            self.m: [no for no in range(20, 30)],
+            self.m_e: [no for no in range(1, 10)],
+            self.F: [no for no in range(50, 100)],
+            self.Omega: [3.14 * no for no in range(1,6)],
+            self.k: [no for no in range(50, 100)],
+        }
+        return default_data_dict
+    
+    def unit_dict(self):
+        units_dict = {
+            self.m: ureg.kilogram, # Mass of the trolley
+            self.m_e: ureg.kilogram, # Mass of TMD
+            self.k: ureg.newton / ureg.meter, # Stiffness of the spring for trolley
+            self.k_e: ureg.newton / ureg.meter, # Stiffness of the TMD spring
+            self.F: ureg.newton, # Force applied to the system
+            self.Omega: ureg.radian / ureg.second, # Frequency of excitation
+            self.x: ureg.meter, # Displacement of the trolley
+            self.x.diff(self.ivar): ureg.meter / ureg.second,  # Velocity of the trolley
+            self.x.diff(self.ivar, 2): ureg.meter / ureg.second**2, # Acceleration of the trolley
+            self.x_e: ureg.meter, # Displacement of the TMD relative to trolley
+            self.x_e.diff(self.ivar): ureg.meter / ureg.second, # Velocity of the TMD relative to trolley
+            self.x_e.diff(self.ivar, 2): ureg.meter / ureg.second**2, # Acceleration of the TMD relative to trolley
+            self.ivar: ureg.second # Time
+        }
+        return units_dict
+    
+    
+    
 
 class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
 

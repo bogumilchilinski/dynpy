@@ -420,6 +420,7 @@ class DataAxis(Axis, ReportModule):
     _y_axis_name = 'y'
     _legend_fontsize = r'\small '
     _default_colours = default_colors
+    _default_columns_no=2
 
     _height = NoEscape(r'5cm')
     _width = '0.9\\textwidth'
@@ -428,7 +429,7 @@ class DataAxis(Axis, ReportModule):
     _line_style = None
     _legend_pos = 'north east'
     _default_transformer = BaseIndexTransformer
-    
+    _reversedx=None
     _manual_at=None
 
     def __init__(self,
@@ -441,6 +442,7 @@ class DataAxis(Axis, ReportModule):
                  x_axis_empty = None,
                  colour =None,
                  at=None,
+                 reversedx=None,
                  handle=None,
                  data=None):
         """
@@ -470,6 +472,10 @@ class DataAxis(Axis, ReportModule):
 
         if y_limit is not None:
             self._y_limit = y_limit
+            
+        if reversedx is not None:
+            self._reversedx=reversedx
+            display('Reversed x is '+f'{self._reversedx}')
             
         if options is None:
             options = self._axis_options
@@ -540,24 +546,28 @@ class DataAxis(Axis, ReportModule):
             at_option = [NoEscape('legend style={font=\small,at='+self._manual_at+'}')]
 #         else: 
 #             at_option = ['']
-
+        ax_options=[]
 
         if self._x_axis_empty:
-            ax_options = [NoEscape('xticklabels=\empty'),
-                         ]
+            ax_options.append(NoEscape('xticklabels=\empty'),
+                         )
         else:
-            ax_options = [NoEscape(f'xlabel= {self.x_axis_name}'),
-                         ]
+            ax_options.append(NoEscape(f'xlabel= {self.x_axis_name}'),
+                         )
 
         if self.__class__._y_limit is not None:
             ay_options = [NoEscape(f'ymin={(self.__class__._y_limit)[0]}'),
                        NoEscape(f'ymax={(self.__class__._y_limit)[1]}')]
         else:
             ay_options = []
+            
+        if self._reversedx == True:
+            ax_options.append('x dir=reverse')
 
         base_options = ['grid style=dashed',
                         f'legend pos={self._legend_pos}',
                        NoEscape('legend style={font=\small}'),
+                       NoEscape(f'legend columns={self._default_columns_no}'),
 
                        #NoEscape('at={(0,0)}'),
 
@@ -746,17 +756,24 @@ class DataAxis(Axis, ReportModule):
 
         coords_pack = self._coordinates
         labels = self.labels
+        plots_no = len(self._coordinates)
         
 
         
         colours = [
             self._label_colour(no) for no, elem in enumerate(coords_pack)
         ]
-
+        
+        
         if self._line_style is None:
-            line_style='solid'
+            line_style_list=['solid']*plots_no
+
+        elif type(self._line_style)==list:
+            
+            line_style_list=(self._line_style*plots_no)[0:plots_no]
+
         else:
-            line_style = self._line_style
+            line_style_list = [self._line_style]*plots_no
 
         #return list(zip(coords_pack,labels,colours))
         if self.at is not None:
@@ -765,7 +782,7 @@ class DataAxis(Axis, ReportModule):
                 NoEscape(self.legend_fontsize) + NoEscape(str(label))),
                  coordinates=list(coords),
                  options=Options(f'{line_style}', color=colour))
-            for coords, label, colour in (zip(coords_pack, labels, colours))
+            for coords, label, colour,line_style in (zip(coords_pack, labels, colours,line_style_list))
             ]
         else:
             plot_list = [
@@ -773,7 +790,7 @@ class DataAxis(Axis, ReportModule):
                 NoEscape(self.legend_fontsize) + NoEscape(str(label))),
                  coordinates=list(coords),
                  options=Options(f'{line_style}', color=colour))
-            for coords, label, colour in (zip(coords_pack, labels, colours))
+            for coords, label, colour,line_style in (zip(coords_pack, labels, colours,line_style_list))
             ]
         
         return plot_list
@@ -802,6 +819,7 @@ class TikZPlot(TikZ, ReportModule):
     _y_axis_name = 'y'
     _legend_fontsize = r'\small '
     _default_colours = default_colors
+    _default_columns_no = 1
 
     _subplots = False
     _height = 5
@@ -818,10 +836,12 @@ class TikZPlot(TikZ, ReportModule):
     _default_figure_env = None
     _image_parameters = {'width': None}
     
+    
     _floats_no_gen = plots_no()
     _default_path = './tikzplots'
     _filename = None
     _prefix = None
+    _reverse_x=None
     
     _picture = True
     _caption = 'Default caption'
@@ -831,6 +851,7 @@ class TikZPlot(TikZ, ReportModule):
                  subplots=None,
                  height=None,
                  width=None,
+                 reverse_x=None,
                  options=None,
                  *,
                  arguments=None, start_arguments=None,
@@ -852,6 +873,9 @@ class TikZPlot(TikZ, ReportModule):
 
         if width is not None:
             self._width = width
+        
+        if reverse_x is not None:
+            self._reverse_x=reverse_x
             
         self._selected_colours = None
 
@@ -876,14 +900,17 @@ class TikZPlot(TikZ, ReportModule):
                     
                     data=plotdata[[column]]
                     #data.columns.name = labels[no]
-                    
-                    
-                    ax_data = self.axis_type(data,height=self.subplot_height,width=self.subplot_width,x_axis_empty=empty_axis,colour=colours_list[no],at = pos,handle=f'subplot{no}')
+                    if reverse_x == True:
+                        ax_data = self.axis_type(data,height=self.subplot_height,width=self.subplot_width,x_axis_empty=empty_axis,colour=colours_list[no],at = pos,handle=f'subplot{no}',reversedx=self._reverse_x)
+                    else:
+                        ax_data = self.axis_type(data,height=self.subplot_height,width=self.subplot_width,x_axis_empty=empty_axis,colour=colours_list[no],at = pos,handle=f'subplot{no}')
 
                     self.append(ax_data)
             else:
-                
-                self.append(self.axis_type(plotdata,height=self.height,width=self.width))
+                if reverse_x == True:
+                    self.append(self.axis_type(plotdata,height=self.height,width=self.width,reversedx=self._reverse_x))
+                else:
+                    self.append(self.axis_type(plotdata,height=self.height,width=self.width))
 
                 
 
@@ -943,9 +970,13 @@ class TikZPlot(TikZ, ReportModule):
     def _axis_options(self):
 
         return None
+
+        
+
         if isinstance(self._ylim, list):
             return Options('grid style=dashed',
                            NoEscape('legend style={font=\small}'),
+                           NoEscape(f'legend columns={self._default_columns_no}'),
                            NoEscape(f'width={self._width}'),
                            NoEscape(f'xmin={min(self._plotdata.index)}'),
                            NoEscape(f'xmax={max(self._plotdata.index)}'),
@@ -960,6 +991,7 @@ class TikZPlot(TikZ, ReportModule):
         elif self._ylim is None:
             return Options('grid style=dashed',
                            NoEscape('legend style={font=\small}'),
+                           NoEscape(f'legend columns={self._default_columns_no}'),
                            NoEscape(f'width={self._width}'),
                            NoEscape(f'xmin={min(self._plotdata.index)}'),
                            NoEscape(f'xmax={max(self._plotdata.index)}'),
@@ -969,6 +1001,7 @@ class TikZPlot(TikZ, ReportModule):
                            xmajorgrids='true',
                            xlabel=self._x_axis_name,
                            ylabel=self._y_axis_name)
+
 
                 
     @property
@@ -1488,8 +1521,8 @@ class DataMethods:
 
         return fig
 
-    def to_pylatex_tikz(self,height=None,width=None,subplots=None,options=None):
-        return TikZPlot(LatexDataFrame.formatted(self),height=height,width=width,subplots=subplots,options=options)
+    def to_pylatex_tikz(self,height=None,width=None,subplots=None,reverse_x=None,options=None):
+        return TikZPlot(LatexDataFrame.formatted(self),height=height,width=width,subplots=subplots,reverse_x=reverse_x,options=options)
 
     
     def to_latex_dataframe(self):
@@ -1684,6 +1717,7 @@ class EntryWithUnit:
             return f'{self._obj}'
 
 
+        
 class DataTable(Table,ReportModule):
 
     _position = 'H'
@@ -1734,6 +1768,7 @@ class DataTable(Table,ReportModule):
                                  '\\toprule \n \\midrule').replace(
                                      '\\bottomrule',
                                      '\\midrule \n \\bottomrule')
+
         
         self.append(
             NoEscape(latex_code))
@@ -1748,7 +1783,52 @@ class DataTable(Table,ReportModule):
         cls.packages.append(Command('captionsetup[table]{skip='+str(space)+'pt}'))
         
         return cls
+
+class BPASTSDataTable(DataTable):
+    def add_table(self, numerical_data=None, index=False, longtable=False,multirow=True, column_format=None):
+        self.append(NoEscape('\\centering'))
+        self.append(NoEscape('%%%%%%%%%%%%%% Table %%%%%%%%%%%%%%%'))
+        #         if numerical_data!=None:
+        #             self._numerical_data=numerical_data
+
+        tab = self._numerical_data
         
+        
+#         latex_code=tab.style.to_latex(#index=index, 
+#                                    #escape=False,
+#                              #longtable=longtable,
+# #                    multirow=multirow,
+#                     hrules=True,
+#                     column_format=column_format).replace(
+#                                  '\\toprule',
+#                                  '\\toprule \n \\midrule').replace(
+#                                      '\\bottomrule',
+#                                      '\\midrule \n \\bottomrule')
+
+        format_string="|l"
+        col_format=len(tab.columns)*format_string+"|"
+        if index is not False:
+            col_format=col_format+"l|"
+        latex_code=tab.to_latex(index=index, 
+                                   #escape=False,
+                             #longtable=longtable,
+#                    multirow=multirow,
+                    #hrules=True,
+                    
+                    column_format=col_format).replace(
+                                     '\\\\',
+                                     '\\\\ \\hline').replace(
+                                 '\\toprule',
+                                 '\\hline').replace(
+                                     '\\midrule',
+                                     '\\hline').replace(
+                                     '\\bottomrule',
+                                     '')
+
+        
+        self.append(
+            NoEscape(latex_code)) 
+
 class MarkerRegistry(dict):
 
     _prefix = 'automrk'
@@ -2435,6 +2515,7 @@ class BasicFormattingTools(DataMethods):
                  multirow=True,
                  column_format=None,
                  longtable=None,
+                 style=None,
                  *args,
                  **kwargs):
 
@@ -2442,9 +2523,12 @@ class BasicFormattingTools(DataMethods):
             container = self.__class__._container
 
         tab = DataTable(self)
+        if style=="bpasts":
+            tab=BPASTSDataTable(self)
 
         if caption is not None:
             tab.add_caption(NoEscape(caption))
+        
 
         tab.add_table(index=index,multirow=multirow,column_format=column_format,longtable=longtable,**kwargs)
 

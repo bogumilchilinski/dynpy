@@ -37,10 +37,10 @@ class ElectricMotorcycle2DoF(ComposedSystem):
     Cd=Symbol('C_d',positive=True) #dragcoefficient
     Ad=Symbol('A_d',positive=True) #air density
     Af=Symbol('A_f',positive=True) #front area of the vehicle
-    i=Symbol('i',positive=True) #przełożenie
+    i=Symbol('i_r',positive=True) #przełożenie
     
-    Rpwm=Symbol('R_pwm',positive=True)
-    Rpwm2=Symbol('R_pwm2',positive=True)
+    Rpwm=Symbol('R_{pwm1}',positive=True)
+    Rpwm2=Symbol('R_{pwm2}',positive=True)
     
     m=Symbol('m',positive=True)
     g=Symbol('g',positive=True)
@@ -54,8 +54,10 @@ class ElectricMotorcycle2DoF(ComposedSystem):
     current=dynamicsymbols('i')
     velocity=dynamicsymbols('v')
     
-    ic1=Symbol('i_c1',positive=True)
-    ic2=Symbol('i_c2',positive=True)
+    ic1=Symbol('i_{c1}',positive=True)
+    ic2=Symbol('i_{c2}',positive=True)
+    
+    time_cut=Symbol('t_c',positive=True)
     
     def __init__(self,
                  U_z=None,
@@ -79,6 +81,7 @@ class ElectricMotorcycle2DoF(ComposedSystem):
                  v=None,
                  ic1=None,
                  ic2=None,
+                 time_cut=None,
                  ivar=Symbol('t'),
                  **kwargs):
         
@@ -107,6 +110,9 @@ class ElectricMotorcycle2DoF(ComposedSystem):
         
         if ic1 is not None: self.ic1=ic1
         if ic2 is not None: self.ic2=ic2
+        if time_cut is not None: self.time_cut=time_cut
+        
+        self.preq=Symbol('P_{req}',positive=True)
         
         self.ivar = ivar
         
@@ -127,8 +133,8 @@ class ElectricMotorcycle2DoF(ComposedSystem):
         self.electromotive_force = ElectromotiveForce(-self.k_m*self.charge.diff(self.ivar)*self.i, self.x/self.r, qs=self.qs, ivar=self.ivar , frame=base_frame)
         self.rotor_torque = RotorTorque(self.k_e*self.x.diff(self.ivar)/self.r, self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
         self.air_drag=Force(S.One/2*self.Ad*self.Cd*self.Af*(self.x.diff(self.ivar))**2,self.x,qs=self.qs,ivar=self.ivar)
-        self.pwm=Force(self.Rpwm*Heaviside(-(self.ivar)+5)*Heaviside(self.charge.diff(self.ivar)-self.cut1)*self.charge.diff(self.ivar), self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
-        self.pwm2=Force(self.Rpwm2*Heaviside((self.ivar)-5)*Heaviside(self.charge.diff(self.ivar)-self.cut2)*self.charge.diff(self.ivar), self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.pwm=Force(self.Rpwm*Heaviside(-(self.ivar)+self.time_cut)*Heaviside(self.charge.diff(self.ivar)-self.cut1)*self.charge.diff(self.ivar), self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
+        self.pwm2=Force(self.Rpwm2*Heaviside((self.ivar)-self.time_cut)*Heaviside(self.charge.diff(self.ivar)-self.cut2)*self.charge.diff(self.ivar), self.charge, qs=self.qs, ivar=self.ivar , frame=base_frame)
 
         components['resistor'] = self.resistance
         components['inductor'] = self.inductor
@@ -144,34 +150,51 @@ class ElectricMotorcycle2DoF(ComposedSystem):
         return components
     
     def required_power(self):
-        preq=Symbol('P_req',positive=True)
-        preq_eq=Eq(preq,(self.m*self.g*self.ft+(self.Cd*self.Ad*(self.v**2)/2*self.Af))/self.eta_p*self.v)
+
+        preq_eq=Eq(self.preq,(self.m*self.g*self.ft+(self.Cd*self.Ad*(self.v**2)/2*self.Af))/self.eta_p*self.v)
         return preq_eq
     
     def power_dict(self):
         return {self.m:350,self.g:9.81,self.ft:0.015,self.Cd:0.65,self.Ad:1.2047,self.Af:0.6,self.eta_p:0.98,self.v:41.6}
         
     def symbols_description(self):
-        i_roc=self.i_w.diff(self.ivar)
+        i_roc=self.charge.diff(self.ivar)
         self.sym_desc_dict = {
             self.U_z: r'voltage supplying the rotor',
             self.R_w: r'equivalent resistance of the rotor windings',
             self.L_w: r'equivalent inductance of the rotor windings',
-            self.E: r'electromotive force of induction',
-            self.U_Rw: r'voltage across the rotor winding resistance',
-            self.U_Lw: r'voltage related to the rotor inductance',
+            self.eta_p:r'efficiency',
+            self.Cd:r'aerodynamic drag coefficient',
+            self.Ad:r'air density',
             self.k_e: r'back electromotive force constant',
-            self.M_s: r'rotor torque',
+            self.v:r'maximum velocity',
             self.B: r'coefficient of viscous friction reduced to the rotor shaft',
             self.J: r'moment of inertia reduced to the rotor shaft',
-            self.M_obc: r'engine load torque',
+            self.Af:r'frontal area',
             self.k_m: r'torque constant',
-            self.i_w: r'rotor winding current',
-            i_roc:r'rotor winding current rate of change',
-            self.omega_s:r'angular velocity of the rotor',
-            self.M_a:r'rotor angular acceleration torque',
-            self.M_r:r'rotor motion resistance torque',
-            self.omega_s.diff(self.ivar):r'angular acceleration of the rotor',
+            self.charge:r'electric charge',
+            self.charge.diff(self.ivar): r'current',
+            self.charge.diff(self.ivar,self.ivar):r'current rate of change',
+#             i_roc:r'rotor winding current rate of change',
+            self.m:r'mass',
+            self.g:r'gravitational acceleration',
+            self.ft:r'friction coefficient',
+#             self.omega_s.diff(self.ivar):r'angular acceleration of the rotor',
+            self.preq:r'required power',
+            self.time_cut:r'current switch time',
+            self.Rpwm2:r'lower current control resistance',
+            self.Rpwm:r'higher current control resistance',
+            self.ic1:r'higher current cut value',
+            self.ic2:r'lower current cut value',
+            self.i:r'final drive ratio',
+            self.r:r'wheel radius',
+            self.x:r'linear displacement',
+            self.x.diff(self.ivar):r'velocity',
+            self.x.diff(self.ivar,self.ivar):r'acceleration',
+            self.velocity.diff(self.ivar):r'acceleration',
+            self.current:r'current',
+            self.current.diff(self.ivar):r'current rate of change',
+            self.velocity:r'velocity'
         }
         return self.sym_desc_dict
     
@@ -193,7 +216,8 @@ class ElectricMotorcycle2DoF(ComposedSystem):
             self.U_z:96,
             self.i:1.925,
             self.Rpwm:0.126,
-            self.Rpwm2:0.28
+            self.Rpwm2:0.28,
+            self.time_cut:5,
         }
         return default_data_dict
     
@@ -235,7 +259,7 @@ class ElectricMotorcycle2DoF(ComposedSystem):
         sec_to_first_comp=inert_mat*Matrix([[self.current.diff(self.ivar)],[self.velocity.diff(self.ivar)]])
         first_to_zero_comp=(damp_mat*Matrix([[self.current],[self.velocity]]))
         eoms_mat=sec_to_first_comp+first_to_zero_comp-self.external_forces()
-        return ODESystem(eoms_mat,Matrix([[self.current],[self.velocity]]),ivar=self.ivar,ode_order=None)
+        return ODESystem(-eoms_mat,Matrix([[self.current],[self.velocity]]),ivar=self.ivar,ode_order=None)
     
 class ElectricMotorcycle2DoFMSM(ElectricMotorcycle2DoF):
     eps=Symbol('varepsilon',positive=True)
@@ -338,9 +362,69 @@ class RegenerativeBrakingElectricMotorcycle2DoFMSM(ElectricMotorcycle2DoFMSM):
     
     
     
+class adtest(ComposedSystem):
+    scheme_name = 'DC_motor.png'
     
+
     
+    Cd=Symbol('C_d',positive=True) #dragcoefficient
+    Ad=Symbol('A_d',positive=True) #air density
+    Af=Symbol('A_f',positive=True) #front area of the vehicle
+
+    m=Symbol('m',positive=True)
+    g=Symbol('g',positive=True)
+
+    x=dynamicsymbols('x')
+
     
+    def __init__(self,
+                 Cd=None,
+                 Ad=None,
+                 Af=None,
+                 m=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+        
+
+        
+        if Cd is not None: self.Cd = Cd
+        if Ad is not None: self.Ad = Ad
+        if Af is not None: self.Af = Af
+        
+        
+        if m is not None: self.m=m
+
+
+        
+        self.ivar = ivar
+        
+        self.qs = [self.x]
+        self._init_from_components(**kwargs)
+        
+    @property
+    def components(self):
+
+        components = {}
+        
+        self.mass=MaterialPoint(-self.m,self.x,qs=self.qs,ivar=self.ivar)
+        self.air_drag=Force(S.One/2*self.Ad*self.Cd*self.Af*(self.x.diff(self.ivar))**2,self.x,qs=self.qs,ivar=self.ivar)
+        self.friction=Force(0.015*self.m*9.81,self.x,qs=self.qs,ivar=self.ivar)
+
+        components['resistor'] = self.mass
+
+        components['air_drag'] = self.air_drag
+        components['fric'] = self.friction
+
+        return components
+    
+    def get_default_data(self):
+        default_data_dict = {
+            self.m:350,
+            self.Cd:0.65,
+            self.Ad:1.2047,
+            self.Af:0.6,
+        }
+        return default_data_dict
     
     
     

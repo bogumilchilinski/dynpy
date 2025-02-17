@@ -48,7 +48,56 @@ class LinearSecondOrder(ODESystem):
 
         return odes
 
+class LinearSecondOrderExpSin(ODESystem):
 
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        z= Function('z')(t)
+        h=Symbol('h',positive=True)
+        omg0=Symbol('omega_0',positive=True)
+        fs=Symbol('f_s',positive=True)
+        fd=Symbol('f_d',positive=True)
+        omg=Symbol('Omega',positive=True)
+        ode_eq=z.diff(t,2)+2*h*z.diff(t)+omg0**2*z-fd*exp(-h*t)*sin(omg*t)-fs
+
+        odes = cls(ode_eq,dvars=z,ivar=t,ode_order=2)
+
+        return odes
+    
+class LinearSecondOrderExpCos(ODESystem):
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        z= Function('z')(t)
+        h=Symbol('h',positive=True)
+        omg0=Symbol('omega_0',positive=True)
+        fs=Symbol('f_s',positive=True)
+        fd=Symbol('f_d',positive=True)
+        omg=Symbol('Omega',positive=True)
+        ode_eq=z.diff(t,2)+2*h*z.diff(t)+omg0**2*z-fd*exp(-h*t)*cos(omg*t)-fs
+
+        odes = cls(ode_eq,dvars=z,ivar=t,ode_order=2)
+
+        return odes
+    
+class LinearSecondOrderHeavisideComp(ODESystem):
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        z= Function('z')(t)
+        h=Symbol('h',positive=True)
+        omg0=Symbol('omega_0',positive=True)
+        fs=Symbol('f_s',positive=True)
+        fd=Symbol('f_d',positive=True)
+        omg=Symbol('Omega',positive=True)
+        ode_eq=z.diff(t,2)+2*h*z.diff(t)+omg0**2*z-fd*Heaviside(omg*t)-fs
+
+        odes = cls(ode_eq,dvars=z,ivar=t,ode_order=2)
+
+        return odes
 
 class LinearHorizontalSystem(ODESystem):
 

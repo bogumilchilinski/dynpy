@@ -23,6 +23,375 @@ from .guides import (UsageOfDynamicSystemsGuide, Guide, EngeneeringDrawingGuide,
 import datetime
 import shutil
 import os
+from typing import Optional, Union
+
+imports_str = """
+#Create file output
+#Create file Images
+#In file output create bibliography as .bib file (dynpy123)
+
+from dynpy.utilities.report import *
+from dynpy.utilities.documents.document import WutThesis
+from dynpy.models.odes.linear import SpringMassDamperMSM
+from sympy import symbols, Eq
+from sympy.printing.latex import latex
+from IPython.display import display, Math
+import tikzplotlib
+from dynpy.utilities.adaptable import TimeDataFrame
+import pandas as pd
+
+
+doc = WutThesis('./output/thesis_name')
+#doc.preamble.append(NoEscape(r'\\usepackage[MeX]{polski}')) #to set polish as main language"""
+
+thesis_introduction_str = '''
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_intro = Section('Section that presents text reporting')
+CurrentContainer(sec_intro)
+
+sub_problem_outline = Subsection('Outline of the problem')
+CurrentContainer(sub_problem_outline)
+display(ReportText('This subsection provides information about investigated problem. '*100))
+
+sub_obj_assum = Subsection('Objectives and assumptions')
+CurrentContainer(sub_obj_assum)
+display(ReportText('This subsection provides objectives and assumptions. '*100))
+
+sub_SOT = Subsection('State of the art')
+CurrentContainer(sub_SOT)
+display(ReportText('This subsection provides state of the art. '*100))
+
+sub_methodology = Subsection('Methodology')
+CurrentContainer(sub_methodology)
+display(ReportText('This subsection provides methodology. '*100))'''
+
+thesis_introduction_str_research = '''
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_intro = Section('Section that presents text reporting')
+CurrentContainer(sec_intro)
+
+sub_problem_outline = Subsection('Outline of the problem')
+CurrentContainer(sub_problem_outline)
+display(ReportText('This subsection provides information about investigated problem. '*100))
+
+sub_obj_assum = Subsection('Objectives and assumptions')
+CurrentContainer(sub_obj_assum)
+display(ReportText('This subsection provides objectives and assumptions. '*100))
+
+sub_methodology = Subsection('Methodology')
+CurrentContainer(sub_methodology)
+display(ReportText('This subsection provides methodology / model description / parameters. '*100))'''
+
+math_str = '''
+from sympy import Eq, Symbol, symbols
+from dynpy.utilities.report import *
+
+
+sec_formula = Section('Section that presents formulas reporting')
+CurrentContainer(sec_formula)
+
+sec_description = Subsection('Description of dynamic model')
+CurrentContainer(sec_description)
+display(ReportText('This subsection provides description of the model. '*10))
+
+from dynpy.models.mechanics import ForcedSpringMassSystem as DynamicSys
+
+dyn_sys = DynamicSys()
+display(dyn_sys.as_picture())
+
+display(ReportText('Summary of the subsection highlighting its major achievements. '*10))
+
+sub_model_code = Subsection('Virtual model of the object')
+CurrentContainer(sub_model_code)
+
+from dynpy.utilities.report import ObjectCode
+
+display(ReportText('This subsection provides code of the model. '*10))
+display(ObjectCode(DynamicSys))
+display(ReportText('Summary of the subsection highlighting its major achievements. '*10))
+
+
+sec_lagrangian = Subsection('Lagrangian and derivatives')
+CurrentContainer(sec_lagrangian)
+display(ReportText('This subsection provides calculation of lagrangian and derivatives. '*10))
+
+lagrangian = dyn_sys.L[0]
+lagrangian
+
+t=dyn_sys.ivar
+
+
+for coord in dyn_sys.q:
+
+    display(ReportText(f'Calculations of derivatives for ${vlatex(coord)}$'))
+
+
+    vel=coord.diff(t)
+    diff1 = lagrangian.diff(vel)
+    diff2 = diff1.diff(t) 
+    diff3 = lagrangian.diff(coord)
+
+
+    diff1_sym = Symbol(f'\\\\frac{{\\\\partial L}}{{\\\\partial {vlatex(vel)}}}')
+    diff2_sym = Symbol(f' \\\\frac{{d }}{{dt}}  {diff1_sym}'  )
+    diff3_sym = Symbol(f'\\\\frac{{\\\\partial L}}{{\\\\partial {vlatex(coord)}}}')
+
+
+    display(SympyFormula(  Eq(diff1_sym,diff1)  ))    
+    display(SympyFormula(  Eq( diff2_sym ,diff2)  ))
+    display(SympyFormula(  Eq( diff3_sym ,  diff3)  ))
+
+display(ReportText('Outcomes of governing equations analysis. '*10))
+    
+
+sec_equations = Subsection('Equations of motion')
+CurrentContainer(sec_equations)
+
+
+display(ReportText('This subsection provides calculation of equations of motion and solution of the system. '*10))
+
+ds1=dyn_sys.eoms
+
+for eq1 in ds1.as_eq_list():
+    display(SympyFormula(eq1.simplify()))
+    
+ds2=dyn_sys.linearized()._ode_system.general_solution
+
+for eq2 in ds2.as_eq_list():
+    display(SympyFormula(eq2.simplify()))
+    
+ds3=dyn_sys.linearized()._ode_system.steady_solution
+
+for eq3 in ds3.as_eq_list():
+    display(SympyFormula(eq3.simplify()))
+    
+ds4=dyn_sys.linearized().eoms.solution
+ds4_eqns = ds4.as_eq_list()
+
+for eq4 in ds4_eqns:
+    display(SympyFormula(eq4.simplify()))
+
+
+display(ReportText(f'Outcomes of governing equations {AutoMarker(ds4_eqns[0])} {AutoMarker(ds4_eqns[1])}) analysis.'))
+
+sec_math_desc = Subsection('Section that contains all symbols descriptions')
+CurrentContainer(sec_math_desc)
+
+
+
+E_K,F = symbols('E_K,F')
+descriptions = {
+E_K:r"Kinetic energy", 
+F:r"Force",  
+}
+syms_dict = descriptions
+DescriptionsRegistry().set_descriptions({**syms_dict})
+DescriptionsRegistry().reset_registry()
+SymbolsDescription.set_default_header('where:')
+
+display(ReportText('Symbols description is as follows: '))
+
+
+display(SymbolsDescription(expr=E_K*F))'''
+
+picture_str = '''
+sec_picture = Section('Section that presents pictures reporting')
+CurrentContainer(sec_picture)
+
+display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))'''
+
+simulaion_str = '''
+from dynpy.utilities.report import *
+from sympy import *
+
+
+sec_simulation = Section('Section that contains simulation')
+CurrentContainer(sec_simulation)
+
+# Basics of ODESystem based simulations are covered in guide to ODESystem, use the followin call
+# from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide 
+# BasicsOfODESystemGuide()
+
+sec_ODESystem = Subsection('ODESystem simulation')
+CurrentContainer(sec_ODESystem)
+
+display(ReportText('Firstly create an ODESystem or import it from dynpy.modes.odes.linear.py'))
+display(ObjectCode('spring = SpringMassEps.from_reference_data()''))
+
+display(ReportText('Secondly solve the equation using solution method:'))
+display(ObjectCode('spring_sol = spring.solution'))
+
+display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
+spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()
+
+# MSM_sim = Subsection('MSM simulation')
+# CurrentContainer(MSM_sim)
+
+# display(ReportText('Firstly create an MultiTimeScaleSolution system or import it from dynpy.modes.odes.linear.py'))
+# display(ObjectCode('spring = SpringMassMSM.from_reference_data()'))
+
+# display(ReportText('Secondly solve the equation using solution method:'))
+# display(ObjectCode('spring_sol = spring.solution'))
+
+# display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
+# spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()'''
+
+veryfication_str = '''
+from sympy import *
+from pint import UnitRegistry
+ureg = UnitRegistry()
+
+import pandas as pd
+
+t = Symbol('t')
+power = Symbol('P')
+work = Symbol('W')
+
+unit_dict = {
+t: ureg.second,
+power: ureg.watt,
+}
+
+LatexDataFrame.set_default_units(unit_dict)
+
+
+
+sec_verification = Section('Section that verificates research results')
+CurrentContainer(sec_verification)
+
+display(ReportText('Description of verifications concept. '*200))
+     
+
+
+### SELECT ONE CASE
+## 1st CASE
+## import of external data if path "./data_from_ml/test_1.csv" exists
+
+#test_data = './data_from_ml/test_1.csv'
+#df = pd.read_csv(filename, header = None)
+
+## 2st CASE
+df = pd.DataFrame({t:[0,1,2],'a':[2,3,4],'b':[8,7,6]}).set_index(t)
+
+df_cols = df.set_axis([power,work],axis=1)
+
+data_tab = TimeDataFrame(df_cols).to_latex_dataframe().reported(caption='Caption')
+graph = TimeDataFrame(df_cols).to_pylatex_tikz().in_figure(caption='Caption')
+
+
+
+display(data_tab)
+
+display(ReportText('Obtained data analysis. '*200))
+
+display(graph)
+
+display(ReportText('Description of verifications outcomes. '*200))'''
+    
+conclusion_str = '''
+sec_conclusion = Section('Section that contains final conclusions')
+CurrentContainer(sec_conclusion)
+
+display(ReportText('Conclusions '*200))'''
+    
+symbols_description_str = '''
+sec_symbols = Section('Section that contains all symbols descriptions')
+CurrentContainer(sec_symbols)
+
+E_K,F = symbols('E_K,F')
+descriptions = {
+E_K:r"Kinetic energy", 
+F:r"Force",  
+}
+syms_dict = descriptions
+DescriptionsRegistry().set_descriptions({**syms_dict})
+DescriptionsRegistry().reset_registry()
+SymbolsDescription.set_default_header('  ')
+
+display(SymbolsDescription({**syms_dict}))'''
+    
+document_str = '''
+# Creating file
+# Be sure *output* folder is in the current directory
+
+thesis_name = './output/report_name' #path for report file 
+
+doc = WutThesis(thesis_name)
+# Bibliography of quotations
+### Select one bibligraphy managment system
+####### BibLatex
+
+doc.preamble.append(Package('biblatex',arguments=["backend=biber","sorting=none"]))
+doc.preamble.append(Command('addbibresource','elementy_bibliagrafia.bib'))
+####### Natbib
+#doc.preamble.append(Package('natbib')
+#doc.preamble.append(Command('bibliographystyle','unsrt'))
+
+## Units
+doc.preamble.append(Package('siunitx'))
+
+# TOC
+
+doc.append(Command('includepdf{./Images/Front_Page.pdf}')) #includes front page
+doc.append(Command('pagestyle{plain}'))
+doc.append(Command('cleardoublepage'))
+doc.append(Command('includepdf{./Images/oswiadczenie_autora_pracy.pdf}'))
+doc.append(Command('pagestyle{plain}'))
+doc.append(Command('cleardoublepage'))
+doc.append(Command('includepdf{./output/oswiadczenie_biblioteczne.pdf}'))
+doc.append(Command('pagestyle{plain}'))
+doc.append(Command('cleardoublepage'))
+
+doc.append(Command('tableofcontents')) #adds TOC
+
+doc.append(sec_intro) # adding certain sections
+doc.append(sub_problem_outline)
+doc.append(sub_obj_assum)
+doc.append(sub_SOT)
+doc.append(sub_methodology)
+doc.append(sec_formula)
+
+doc.append(sub_model_code)
+doc.append(sec_math_desc)
+doc.append(sec_simulation)
+
+doc.append(sec_picture)
+doc.append(sec_verification)
+doc.append(sec_tables)
+doc.append(sec_symbols)
+doc.append(sec_conclusion)
+
+
+### BibLatex
+#doc.append(Command('printbibliography',arguments=["title={Bibliography}"])) - argument is to improve
+doc.append(Command('printbibliography',options=[NoEscape("title={Bibliography}")]))
+
+### Natbib
+#doc.append(Command('bibliography',arguments=["references"])) # .bib file as "references"
+
+
+#FIGURES LIST
+
+doc.append(Command('addcontentsline{toc}{section}{List of figures}'))
+doc.append(Command('listoffigures'))
+doc.append(Command('pagestyle{plain}'))
+doc.append(Command('newpage'))
+
+#TABLES LIST
+
+doc.append(Command('addcontentsline{toc}{section}{List of tables}'))
+doc.append(Command('renewcommand{\listtablename}{List of tables}'))
+doc.append(Command('listoftables'))
+doc.append(Command('pagestyle{plain}'))
+doc.append(Command('newpage'))
+
+# Generating file
+doc.generate_pdf(clean_tex=True)'''        
+
 
 class ReportMethods:
 
@@ -121,7 +490,7 @@ class ReportMethods:
         
         preliminary_str=(
 """
-#Code below is the exact same, as the one presented in the beginning of the guide. Duplicated for esier copying and pasting.
+#Code below is the exact same, as the one presented in the beginning of the guide. Duplicated for easier copying and pasting.
 
 #Method presented below initializes a simple document and prepares it for content addition.
 
@@ -575,7 +944,36 @@ class ElsevierPaper(Document):
 
         
 class WutThesis(Document):
-    
+    """
+        A class for creating a Warsaw University of Technology (WUT) thesis document.
+
+        This class extends the `Document` class to include all necessary LaTeX packages, commands, and configurations required for WUT thesis formatting. It provides an easy way to create and manage thesis documents with pre-configured settings.
+
+        Attributes:
+            latex_name (str): Name of the document type ('document').
+            packages (list): List of LaTeX packages and commands preloaded for thesis formatting.
+
+        Example Usage:
+            >>> from dynpy.utilities.documents.document import WutThesis
+            >>> from pylatex import Section
+            >>> doc = WutThesis('./output/thesis_name')
+            >>> section = Section('Introduction')
+            >>> doc.append(section)
+            >>> doc.generate_pdf(clean_tex=True)
+
+        Example of Full Thesis Workflow:
+            >>> from dynpy.utilities.documents.document import WutThesis
+            >>> from pylatex import Section, Command
+            >>> doc = WutThesis('./output/thesis_name')
+            >>> doc.append(Command('title', arguments=['Thesis Title']))
+            >>> doc.append(Command('author', arguments=['Student Name']))
+            >>> doc.append(Command('date', arguments=['\today']))
+            >>> doc.append(Command('maketitle'))
+            >>> section = Section('Introduction')
+            >>> doc.append(section)
+            >>> doc.generate_pdf(clean_tex=True)
+    """
+
     latex_name = 'document'
     packages = [
                   Package('geometry',options=['lmargin=30mm', 'rmargin=30mm',  'top=25mm', 'bmargin=25mm', 'headheight=50mm']),
@@ -616,25 +1014,44 @@ class WutThesis(Document):
         #\renewcommand{\familydefault}{\sfdefault}
         
     ]
-    
-    
-    
-    def __init__(self,
-                 default_filepath='default_filepath',
-                 title='Basic title',
-                 *,
-                 documentclass='article',
-                 document_options=['a4paper','11pt','twoside'],
-                 fontenc='T1',
-                 inputenc='utf8',
-                 font_size='normalsize',
-                 lmodern=False,
-                 textcomp=True,
-                 microtype=True,
-                 page_numbers=True,
-                 indent=None,
-                 geometry_options=['inner=30mm', 'outer=20mm', 'bindingoffset=10mm', 'top=25mm', 'bottom=25mm'],#,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
-                 data=None):
+
+    def __init__(
+            self,
+            default_filepath: str = 'default_filepath',
+            title: str = 'Basic title',
+            *,
+            documentclass: str = 'article',
+            document_options: list = ['a4paper', '11pt', 'twoside'],
+            fontenc: str = 'T1',
+            inputenc: str = 'utf8',
+            font_size: str = 'normalsize',
+            lmodern: bool = False,
+            textcomp: bool = True,
+            microtype: bool = True,
+            page_numbers: bool = True,
+            indent: Optional[Union[str, int]] = None,
+            geometry_options: Optional[list] = ['inner=30mm', 'outer=20mm', 'bindingoffset=10mm', 'top=25mm', 'bottom=25mm'],
+            data: Optional[dict] = None
+    ):
+        """
+            Initialize the WutThesis class with optional customization.
+
+            Args:
+                default_filepath (str): Path for the generated document.
+                title (str): Title of the document.
+                documentclass (str): LaTeX document class (e.g., 'article').
+                document_options (list): Options for the document class.
+                fontenc (str): Font encoding (default 'T1').
+                inputenc (str): Input encoding (default 'utf8').
+                font_size (str): Font size (default 'normalsize').
+                lmodern (bool): Whether to use Latin Modern fonts.
+                textcomp (bool): Whether to use the `textcomp` package.
+                microtype (bool): Whether to use the `microtype` package.
+                page_numbers (bool): Whether to include page numbers.
+                indent (Optional[Union[str, int]]): Indentation settings.
+                geometry_options (Optional[list]): Geometry options for page layout.
+                data (Optional[dict]): Additional data for customization.
+        """
 
         super().__init__(
             default_filepath=default_filepath,
@@ -653,7 +1070,7 @@ class WutThesis(Document):
         )
 #         label=self.label
         self.title=title
-        #self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
+        # self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
 #         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
 #         self.packages.append(Command('newcommand{\praca}', arguments=['Praca dyplomowa']))
 #         self.packages.append(Command('newcommand{\dyplom}', arguments=['Magisterska']))
@@ -675,27 +1092,35 @@ class WutThesis(Document):
         # tu implementować co tam potrzeba
         
     @classmethod
-    def base_setup(cls, create_file = False):
+    def base_setup(cls, create_file: bool = False):
+        """
+        Sets up the base template for the WUT thesis document.
+
+        This method provides an easy way to initialize a thesis document with the necessary sections, structure, and configuration.
+
+        Args:
+            create_file (bool): If True, creates a base setup environment including necessary directories and files.
+
+        Returns:
+            Optional[str]: Returns setup content if `create_file` is False, otherwise creates the environment.
+
+        Usage Example:
+            >>> from dynpy.utilities.documents.document import WutThesis
+            >>> WutThesis.base_setup()
+
+        When to use:
+            - Use this method when starting a new WUT thesis document.
+            - If `create_file=True`, it will generate all required directories and files for a structured thesis.
+            - If `create_file=False`, it returns a string with setup instructions that can be used manually.
+        """
 
         if create_file is True:
             return cls._create_base_setup_env()
-        
-        imports_str = """#Create file output
-#Create file Images
-#In file output create bibliography as .bib file (dynpy123)
-
-from dynpy.utilities.report import *
-from dynpy.utilities.documents.document import WutThesis
-from dynpy.models.odes.linear import SpringMassDamperMSM
-from sympy import symbols, Eq
-from sympy.printing.latex import latex
-from IPython.display import display, Math
-import tikzplotlib
-from dynpy.utilities.adaptable import TimeDataFrame
-import pandas as pd
 
 
-doc = WutThesis('./output/thesis_name')
+
+
+# doc = WutThesis('./output/thesis_name')
 #doc.preamble.append(NoEscape(r'\\usepackage[MeX]{polski}')) #to set polish as main language"""
 
         thesis_introduction_str = '''#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
@@ -719,6 +1144,7 @@ display(ReportText('This subsection provides state of the art. '*100))
 sub_methodology = Subsection('Methodology')
 CurrentContainer(sub_methodology)
 display(ReportText('This subsection provides methodology. '*100))'''
+
         math_str = '''from sympy import Eq, Symbol, symbols
 from dynpy.utilities.report import *
 
@@ -802,9 +1228,11 @@ for eq3 in ds3.as_eq_list():
     display(SympyFormula(eq3.simplify()))
     
 ds4=dyn_sys.linearized().eoms.solution
+ds4_eqns = ds4.as_eq_list()
 
-for eq4 in ds4.as_eq_list():
+for eq4 in ds4_eqns:
     display(SympyFormula(eq4.simplify()))
+
 
 display(ReportText(f'Outcomes of governing equations {AutoMarker(ds4_eqns[0])} {AutoMarker(ds4_eqns[1])}) analysis.'))
 
@@ -848,25 +1276,25 @@ sec_ODESystem = Subsection('ODESystem simulation')
 CurrentContainer(sec_ODESystem)
 
 display(ReportText('Firstly create an ODESystem or import it from dynpy.modes.odes.linear.py'))
-display(ObjectCode(spring = SpringMassEps.from_reference_data()))
+display(ObjectCode('spring = SpringMassEps.from_reference_data()''))
 
 display(ReportText('Secondly solve the equation using solution method:'))
-display(ObjectCode(spring_sol = spring.solution))
+display(ObjectCode('spring_sol = spring.solution'))
 
 display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
 spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()
 
-MSM_sim = Subsection('MSM simulation')
-CurrentContainer(MSM_sim)
+# MSM_sim = Subsection('MSM simulation')
+# CurrentContainer(MSM_sim)
 
-display(ReportText('Firstly create an MultiTimeScaleSolution system or import it from dynpy.modes.odes.linear.py'))
-display(ObjectCode(spring = SpringMassMSM.from_reference_data()))
+# display(ReportText('Firstly create an MultiTimeScaleSolution system or import it from dynpy.modes.odes.linear.py'))
+# display(ObjectCode('spring = SpringMassMSM.from_reference_data()'))
 
-display(ReportText('Secondly solve the equation using solution method:'))
-display(ObjectCode(spring_sol = spring.solution))
+# display(ReportText('Secondly solve the equation using solution method:'))
+# display(ObjectCode('spring_sol = spring.solution'))
 
-display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
-spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()'''
+# display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
+# spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()'''
 
         veryfication_str = '''from sympy import *
 from pint import UnitRegistry
@@ -955,6 +1383,9 @@ doc.preamble.append(Command('addbibresource','elementy_bibliagrafia.bib'))
 #doc.preamble.append(Package('natbib')
 #doc.preamble.append(Command('bibliographystyle','unsrt'))
 
+## Units
+doc.preamble.append(Package('siunitx'))
+
 # TOC
 
 doc.append(Command('includepdf{./Images/Front_Page.pdf}')) #includes front page
@@ -1013,8 +1444,11 @@ doc.append(Command('newpage'))
 # Generating file
 doc.generate_pdf(clean_tex=True)'''        
         
+#         preliminary_str=(f"""
+# =======
         preliminary_str=(
 f"""
+>>>>>>> 5b388c4 (  Changes to be committed:)
 Examplary setup is as follows:
 
 #References to guide imports needed to include - to see the list of available guides insert and run the code below:
@@ -1130,14 +1564,11 @@ BasicsOfODESystemGuide();
 {document_str}
 ```
 
-"""
-        )
+""")
 
         display(IPMarkdown(preliminary_str))    
 
-
-        preliminary_str=(
-f"""
+        preliminary_str=(f"""
 #Example:
 
 #To prepare a simple document with text and images:
@@ -1189,8 +1620,8 @@ f"""
 
 {document_str}
 
-"""
-        )
+""")
+
         return ObjectCode(preliminary_str)
 
     Jupyter_file_content = """{
@@ -1315,13 +1746,16 @@ f"""
   doi = {}
 }
 '''
-    def _create_directory(path):
-        '''
-Method create directory from given path
 
-Arguments:
-path - (str), name of directory that method will create, if subdirectories shall be created, path should look like this: 'directory/subdirectory' 
-        '''
+    def _create_directory(path: str) -> None:
+        # """
+        # Creates a directory at the specified path.
+
+        # Args:
+        #     path (str): The directory path to be created. If subdirectories are needed     #     the path should be structured like 'directory/subdirectory'.
+
+        # """
+
         import os
 
         try:
@@ -1337,16 +1771,16 @@ path - (str), name of directory that method will create, if subdirectories shall
         except Exception as e:
             print(f"An error occurred: {e}")
         
-        
-    def _create_file(name, content = None, path = None):
-        '''
-Method create file and write content to it
+    def _create_file(name: str, content: str = None, path: str = None) -> None:
+        # """
+        #     Creates a file and writes content to it.
 
-Arguments:
-name - (str), name of file created by method,
-content - (str), optional,  string with a content of file, that is going to be writen to it,
-path - (str), optional, directory where file should be created
-        '''
+        #     Args:
+        #         name (str): The name of the file to be created.
+        #         content (str, optional): The content to write into the file.
+        #         path (str, optional): The directory where the file should be created.
+        #                               If specified, it will ensure the directory exists.
+        # """
         import os
 
         if path is not None:
@@ -1361,11 +1795,12 @@ path - (str), optional, directory where file should be created
                 file.write(content)
 
         file.close()
+
     @classmethod    
-    def _create_base_setup_env(cls):
-        '''
-Method that create Jupyter notebook file with WUT thesis base setup and output directory with .bib file
-        '''
+    def _create_base_setup_env(cls) -> None:
+        """
+            Creates a Jupyter notebook file with WUT thesis base setup and an output directory containing a .bib file.
+        """
         
         Jupyter_file_content = """{
     "cells": [
@@ -1497,15 +1932,14 @@ Method that create Jupyter notebook file with WUT thesis base setup and output d
         cls._create_file('articles.bib', articles_bib, 'output')
         
         
-
 class ResearchProjectReport(WutThesis):
 
     @classmethod
     def base_setup(cls):
 
-        
+
         preliminary_str=(
-"""
+f"""
 
 Examplary setup is as follows:
 
@@ -1513,140 +1947,112 @@ Examplary setup is as follows:
 ## Imports
 
 
-    #Create file output
-    #Create file Images
-    
-    #In file output create bibliography as .bib file (dynpy123)
-
-    from dynpy.utilities.report import *
-    from dynpy.utilities.templates.document import ResearchProjectReport
-
-    doc = ResearchProjectReport('./output/thesis_name')
-    
+```python
+{imports_str.replace('WutThesis', 'ResearchProjectReport')}
+```
 
 
 ## CELL 2
-## Thesis introduction
-    
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_intro = Section('Section that presents text reporting')
-    CurrentContainer(sec_intro)
-    
-    sub_problem_outline = Subsection('Outline of the problem')
-    CurrentContainer(sub_problem_outline)
-    display(ReportText('This subsection provides information about investigated problem. '*100))
-    
-    sub_obj_assum = Subsection('Objectives and assumptions')
-    CurrentContainer(sub_obj_assum)
-    display(ReportText('This subsection provides objectives and assumptions. '*100))
-    
-    sub_SOT = Subsection('State of the art')
-    CurrentContainer(sub_SOT)
-    display(ReportText('This subsection provides state of the art. '*100))
-    
-    sub_methodology = Subsection('Methodology')
-    CurrentContainer(sub_methodology)
-    display(ReportText('This subsection provides methodology. '*100))
-    
-    
-    
+## Project introduction
+
+```python
+{thesis_introduction_str_research}
+```
+
+
 ## CELL 3
 ## Math 
 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
-    from sympy import Eq, Symbol, symbols
-    
-    sec_formula = Section('Section that presents formulas reporting')
-    CurrentContainer(sec_formula)
-    
-    display(ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.'))
-    
-    a,b = symbols('a b')
-    display(SympyFormula(Eq(a,b)))
+from sympy import Eq, Symbol, symbols
 
+sec_formula = Section('Section that presents formulas reporting')
+CurrentContainer(sec_formula)
+
+display(ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.'))
+
+a,b = symbols('a b')
+display(SympyFormula(Eq(a,b)))
+```
 
 ## CELL 4
 ## Picture
-    
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_picture = Section('Section that presents pictures reporting')
-    CurrentContainer(sec_picture)
 
-    display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))
-
-
-
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+{picture_str}
+```
 
 ## CELL 5
 ## Simulation
- 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_simulation = Section('Section that contains simulation')
-    CurrentContainer(sec_simulation)
-    
-     display(ReportText('Simulation '*200))
-    
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+{simulaion_str}
+```
+
 ## CELL 6
 ## Veryfication
- 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_verification = Section('Section that verificates research results')
-    CurrentContainer(sec_verification)
-    
-     display(ReportText('Verifications '*200))
-    
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_verification = Section('Section that verificates research results')
+CurrentContainer(sec_verification)
+
+display(ReportText('Description of verifications concept '*200))
+```
+
 ## CELL 7
 ## Conclusion
- 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_conclusion = Section('Section that contains final conclusions')
-    CurrentContainer(sec_conclusion)
-    
-    display(ReportText('Conclusions '*200))
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    {conclusion_str}
+```
+
 
 ## CELL 8
 ## Document
 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
-    # Creating file
-    # Be sure *output* folder is in the current directory
+# Creating file
+# Be sure *output* folder is in the current directory
 
-    thesis_name = './output/report_name' #path for report file 
+project_name = './output/report_name' #path for report file
 
-    doc = ResearchProjectReport(thesis_name)
-    # Bibliography of quotations
-    doc.preamble.append(NoEscape(r'\\usepackage[backend=bibtex, sorting=none]{biblatex}'))
-    doc.preamble.append(NoEscape(r'\addbibresource{elementy_bibliagrafia.bib}'))
-    doc.append(sec_intro) # adding certain sections
-    doc.append(sub_problem_outline)
-    doc.append(sub_obj_assum)
-    doc.append(sub_SOT)
-    doc.append(sub_methodology)
-    doc.append(sec_formula)
-    doc.append(sec_picture)
-    doc.append(sec_simulation)
-    doc.append(sec_verification)
-    doc.append(sec_conclusion)
-    # Generating file
-    doc.generate_pdf(clean_tex=True)
-    
-    
-    
-    
+doc = ResearchProjectReport(project_name)
+# Bibliography of quotations
+doc.preamble.append(NoEscape(r'\\usepackage[backend=bibtex, sorting=none]{{biblatex}}'))
+doc.preamble.append(NoEscape(r'\addbibresource{{elementy_bibliagrafia.bib}}'))
+doc.append(sec_intro) # adding certain sections
+doc.append(sub_problem_outline)
+doc.append(sub_obj_assum)
+doc.append(sub_SOT)
+doc.append(sub_methodology)
+doc.append(sec_formula)
+doc.append(sec_picture)
+doc.append(sec_simulation)
+doc.append(sec_ODESystem)
+# doc.append(sec_MSM_sim)
+doc.append(sec_verification)
+doc.append(sec_conclusion)
+
+# Generating file
+doc.generate_pdf(clean_tex=True)
+```
+
+
 
 """
         )
@@ -1655,7 +2061,111 @@ Examplary setup is as follows:
 
 
         preliminary_str=(
+f"""
+
+# Examplary setup is as follows:
+
+## CELL 1
+## Imports
+
+
+{imports_str.replace('WutThesis', 'ResearchProjectReport')}
+
+
+## CELL 2
+## Project introduction
+
+{thesis_introduction_str}
+
+
+
+## CELL 3
+## Math 
+
+
+from sympy import Eq, Symbol, symbols
+
+sec_formula = Section('Section that presents formulas reporting')
+CurrentContainer(sec_formula)
+
+display(ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.'))
+
+a,b = symbols('a b')
+display(SympyFormula(Eq(a,b)))
+
+
+## CELL 4
+## Picture
+
+
+{picture_str}
+
+
+
+## CELL 5
+## Simulation
+
+{simulaion_str}
+
+## CELL 6
+## Veryfication
+
+
+sec_verification = Section('Section that verificates research results')
+CurrentContainer(sec_verification)
+
+display(ReportText('Description of verifications concept '*200))
+
+## CELL 7
+## Conclusion
+
+{conclusion_str}
+
+## CELL 8
+## Document
+
+# Creating file
+# Be sure *output* folder is in the current directory
+
+project_name = './output/report_name' #path for report file
+
+doc = ResearchProjectReport(project_name)
+# Bibliography of quotations
+doc.preamble.append(NoEscape(r'\\usepackage[backend=bibtex, sorting=none]{{biblatex}}'))
+doc.preamble.append(NoEscape(r'\addbibresource{{elementy_bibliagrafia.bib}}'))
+doc.append(sec_intro) # adding certain sections
+doc.append(sub_problem_outline)
+doc.append(sub_obj_assum)
+doc.append(sub_SOT)
+doc.append(sub_methodology)
+doc.append(sec_formula)
+doc.append(sec_picture)
+doc.append(sec_simulation)
+doc.append(sec_ODESystem)
+doc.append(sec_MSM_sim)
+doc.append(sec_verification)
+doc.append(sec_conclusion)
+
+# Generating file
+doc.generate_pdf(clean_tex=True)
+
+
+
+
 """
+                    )
+
+        return ObjectCode(preliminary_str)
+
+    
+class DevelopmentProjectReport(WutThesis):
+
+    @classmethod
+    def base_setup(cls):
+
+
+        preliminary_str=(
+f"""
 
 Examplary setup is as follows:
 
@@ -1663,146 +2173,216 @@ Examplary setup is as follows:
 ## Imports
 
 
+```python
+{imports_str.replace('WutThesis', 'DevelopmentProjectReport')}
+```
 
-    #Create file output
-    #In file output create bibliography as .bib file
-
-    from dynpy.utilities.report import *
-    from dynpy.utilities.templates.document import ResearchProjectReport
-
-    doc = ResearchProjectReport('./output/thesis_name')
-    
 
 ## CELL 2
-## Thesis introduction
-    
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_intro = Section('Section that presents text reporting')
-    CurrentContainer(sec_intro)
-    
-    sub_problem_outline = Subsection('Outline of the problem')
-    CurrentContainer(sub_problem_outline)
-    display(ReportText('This subsection provides information about investigated problem. '*100))
-    
-    sub_obj_assum = Subsection('Objectives and assumptions')
-    CurrentContainer(sub_obj_assum)
-    display(ReportText('This subsection provides objectives and assumptions. '*100))
-    
-    sub_SOT = Subsection('State of the art')
-    CurrentContainer(sub_SOT)
-    display(ReportText('This subsection provides state of the art. '*100))
-    
-    sub_methodology = Subsection('Methodology')
-    CurrentContainer(sub_methodology)
-    display(ReportText('This subsection provides methodology. '*100))
-    
-    
-    
+## Project introduction
+
+```python
+{thesis_introduction_str}
+```
+
+
 ## CELL 3
 ## Math 
 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
-    from sympy import Eq, Symbol, symbols
-    
-    sec_formula = Section('Section that presents formulas reporting')
-    CurrentContainer(sec_formula)
-    
-    display(ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.'))
-    
-    a,b = symbols('a b')
-    display(SympyFormula(Eq(a,b)))
+from sympy import Eq, Symbol, symbols
+
+sec_formula = Section('Section that presents formulas reporting')
+CurrentContainer(sec_formula)
+
+display(ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.'))
+
+a,b = symbols('a b')
+display(SympyFormula(Eq(a,b)))
+```
+
+## CELL 4
+## Picture
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+{picture_str}
+```
+
+## CELL 5
+## Simulation
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+{simulaion_str}
+```
+
+## CELL 6
+## Veryfication
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_verification = Section('Section that verificates research results')
+CurrentContainer(sec_verification)
+
+display(ReportText('Description of verifications concept '*200))
+```
+
+## CELL 7
+## Conclusion
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    {conclusion_str}
+```
+
+
+## CELL 8
+## Document
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+# Creating file
+# Be sure *output* folder is in the current directory
+
+project_name = './output/report_name' #path for report file
+
+doc = ResearchProjectReport(project_name)
+# Bibliography of quotations
+doc.preamble.append(NoEscape(r'\\usepackage[backend=bibtex, sorting=none]{{biblatex}}'))
+doc.preamble.append(NoEscape(r'\addbibresource{{elementy_bibliagrafia.bib}}'))
+doc.append(sec_intro) # adding certain sections
+doc.append(sub_problem_outline)
+doc.append(sub_obj_assum)
+doc.append(sub_SOT)
+doc.append(sub_methodology)
+doc.append(sec_formula)
+doc.append(sec_picture)
+doc.append(sec_simulation)
+doc.append(sec_ODESystem)
+# doc.append(sec_MSM_sim)
+doc.append(sec_verification)
+doc.append(sec_conclusion)
+
+# Generating file
+doc.generate_pdf(clean_tex=True)
+```
+
+
+
+"""
+        )
+
+        display(IPMarkdown(preliminary_str))    
+
+
+        preliminary_str=(
+f"""
+
+# Examplary setup is as follows:
+
+## CELL 1
+## Imports
+
+
+{imports_str.replace('WutThesis', 'DevelopmentProjectReport')}
+
+
+## CELL 2
+## Project introduction
+
+{thesis_introduction_str}
+
+
+
+## CELL 3
+## Math 
+
+
+from sympy import Eq, Symbol, symbols
+
+sec_formula = Section('Section that presents formulas reporting')
+CurrentContainer(sec_formula)
+
+display(ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.'))
+
+a,b = symbols('a b')
+display(SympyFormula(Eq(a,b)))
 
 
 ## CELL 4
 ## Picture
-    
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_picture = Section('Section that presents pictures reporting')
-    CurrentContainer(sec_picture)
 
-    display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))
+
+{picture_str}
 
 
 
 ## CELL 5
 ## Simulation
- 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_simulation = Section('Section that contains simulation')
-    CurrentContainer(sec_simulation)
-    
-     display(ReportText('Simulation '*200))
-    
+
+{simulaion_str}
+
 ## CELL 6
 ## Veryfication
- 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_verification = Section('Section that verificates research results')
-    CurrentContainer(sec_verification)
-    
-     display(ReportText('Verifications '*200))
-    
+
+
+sec_verification = Section('Section that verificates research results')
+CurrentContainer(sec_verification)
+
+display(ReportText('Description of verifications concept '*200))
+
 ## CELL 7
 ## Conclusion
- 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_conclusion = Section('Section that contains final conclusions')
-    CurrentContainer(sec_conclusion)
-    
-    display(ReportText('Conclusions '*200))
 
-    
-    
+{conclusion_str}
 
 ## CELL 8
 ## Document
 
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+# Creating file
+# Be sure *output* folder is in the current directory
 
-    # Creating file
-    # Be sure *output* folder is in the current directory
+project_name = './output/report_name' #path for report file
 
-    thesis_name = './output/report_name' #path for report file 
+doc = ResearchProjectReport(project_name)
+# Bibliography of quotations
+doc.preamble.append(NoEscape(r'\\usepackage[backend=bibtex, sorting=none]{{biblatex}}'))
+doc.preamble.append(NoEscape(r'\addbibresource{{elementy_bibliagrafia.bib}}'))
+doc.append(sec_intro) # adding certain sections
+doc.append(sub_problem_outline)
+doc.append(sub_obj_assum)
+doc.append(sub_SOT)
+doc.append(sub_methodology)
+doc.append(sec_formula)
+doc.append(sec_picture)
+doc.append(sec_simulation)
+doc.append(sec_ODESystem)
+doc.append(sec_MSM_sim)
+doc.append(sec_verification)
+doc.append(sec_conclusion)
 
-    # Bibliography of quotations
-    doc.preamble.append(NoEscape(r'\\usepackage[backend=bibtex, sorting=none]{biblatex}'))
-    doc.preamble.append(NoEscape(r'\addbibresource{elementy_bibliagrafia.bib}'))
-    doc = ResearchProjectReport(thesis_name)
-    doc.append(sec_intro) # adding certain sections
-    doc.append(sub_problem_outline)
-    doc.append(sub_obj_assum)
-    doc.append(sub_SOT)
-    doc.append(sub_methodology)
-    doc.append(sec_formula)
-    doc.append(sec_picture)
-    doc.append(sec_simulation)
-    doc.append(sec_verification)
-    doc.append(sec_conclusion)
-    doc.append(NoEscape(r'\printbibliography[title={Bibliografia}]'))
-    # Generating file
-    doc.generate_pdf(clean_tex=True)
-    
-    
-    
-    
+# Generating file
+doc.generate_pdf(clean_tex=True)
 
-""")
+
+
+
+"""
+        )
+
         return ObjectCode(preliminary_str)
-    
-    
+
         
         
 class StateOfArtReport(Document):
@@ -3056,15 +3636,21 @@ class MSMethodOverviewReport(UsageOfDynamicSystemsGuide):
     @property
     def _report_components(self):
         comp_list=[
-            ode_comp.ODESystemComponent,
-            ode_comp.VariablesComponent,
-            ode_comp.ODESystemCodeComponent,
-            ode_comp.MSMCalculationsOrderComponent,
-            ode_comp.PredictedSolutionComponent,
-            ode_comp.ParticularDerivativesComponent,
-            ode_comp.ZerothOrderApproximatedEqComponent,
-            ode_comp.FirstOrderApproximatedEqComponent,
-#             ode_comp.GeneralSolutionComponent,
+                ode_comp.ODESystemComponent,
+                ode_comp.VariablesComponent,
+                ode_comp.ODESystemCodeComponent,
+                ode_comp.MSMCalculationsOrderComponent,
+                ode_comp.PredictedSolutionComponent,
+                ode_comp.DetailsOfPredictedSolutionComponent,
+                ode_comp.ParticularDerivativesComponent,
+                ode_comp_en.GoverningEqnsWithConstFuncsComponent,
+                ode_comp_en.SecularFuncsComponent,
+                ode_comp_en.SecularConditionsComponent,
+                ode_comp_en.SolutionWithConstFuncsComponent,
+                ode_comp.ZerothOrderApproximatedEqComponent,
+                ode_comp.FirstOrderApproximatedEqComponent,
+                ode_comp.SecularTermsEquationsComponent,
+                ode_comp.ZerothOrderSolutionComponent
         ]
         return comp_list
 

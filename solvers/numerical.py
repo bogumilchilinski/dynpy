@@ -320,7 +320,7 @@ class OdeComputationalCase:
                          t_eval=None,
                          params_values=None,
                          method='RK45',
-                         derivatives=False):
+                         derivatives=False,atol=1e-6,rtol=1e-3,max_step=0.1):
         '''
         Returns the result of the computations of solve_ivp integrator from scipy.integrate module.
         '''
@@ -341,8 +341,8 @@ class OdeComputationalCase:
                                     ic_list=ic_list,
                                     t_eval=t_eval,
                                     params_values=params_values,
-                                    method=method))
-            
+                                    method=method),atol=atol,rtol=rtol,max_step=max_step)
+
             solution_tdf = TimeDataFrame(
                 data={key: solution.y[no, :]
                     for no, key in enumerate(self.dvars)}, index=t_span)
@@ -354,7 +354,8 @@ class OdeComputationalCase:
                 solution_tdf[vel].to_numpy()
                 gradient = np.gradient(solution_tdf[vel].to_numpy(),t_span)
                 solution_tdf[vel.diff(self.ivar)] = gradient
-
+                
+        
         else:
             solution_tdf = TimeDataFrame(
                 data={key: ic_list[no]
@@ -362,7 +363,7 @@ class OdeComputationalCase:
             for vel in velocities:
 
                 solution_tdf[vel.diff(self.ivar)] = 0.0
-            
+          
         t_e = time.time()
         t_d = t_e-t_0
         print('_'*100,t_d)
