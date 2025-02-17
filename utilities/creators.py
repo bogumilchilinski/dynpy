@@ -178,6 +178,63 @@ class MeetingIssueCreator:
     def _repr_markdown_(self):
         return self.get_issue_str()
 
+    @property
+    def closing_comment_text_meet(self):
+        
+        # obj_class_module= self._obj.__module__
+        # obj_class_name=self._obj.__name__
+        
+        comment_str_h1 = '> *Exemplary comment. You can copy example below and close issue with new comment or modify it and close the issue.* '
+        comment_str_h2 = '*Remove this message or keep it if new comment is created.*'
+        
+        comment_str_2 = 'All done.'
+
+        
+        return f'{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}'
+
+
+    @property
+    def closing_comment_text_time(self):
+        
+        # obj_class_module= self._obj.__module__
+        # obj_class_name=self._obj.__name__
+        
+        comment_str_h1 = '> *Exemplary comment. You can copy example below and close issue with new comment or modify it and close the issue.* '
+        comment_str_h2 = '*Remove this message or keep it if new comment is created.*'
+        
+        comment_str_2 = 'Meeting has been scheduled.'
+        
+        return f'{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}'
+
+    @property
+    def closing_comment_text_arrange(self):
+        
+        # obj_class_module= self._obj.__module__
+        # obj_class_name=self._obj.__name__
+        
+        comment_str_h1 = '> *Exemplary comment. You can copy example below and close issue with new comment or modify it and close the issue.* '
+        comment_str_h2 = '*Remove this message or keep it if new comment is created.*'
+        
+        comment_str_2 = 'Meeting has been executed.'
+        
+        return f'{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}'
+
+    @property
+    def closing_comment_text_guide(self):
+        
+        
+        obj_class_module= self._guide.__module__
+        obj_class_name=self._guide.__name__
+        
+        comment_str_h1 = '> *Exemplary comment. You can copy example below and close issue with new comment or modify it and close the issue.* '
+        comment_str_h2 = '*Remove this message or keep it if new comment is created.*'
+        
+        comment_str_2 = 'Minor changes introduced. The code was checked with the following call:'
+        comment_call_code = f'```python \nfrom {obj_class_module} import {obj_class_name} \n{obj_class_name}(None) \n```'
+        
+        return f'{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}\n{comment_call_code}'
+
+
     def publish_on_github(self,repository):
 
         guide_label=repository.get_label('guidance')
@@ -190,6 +247,11 @@ class MeetingIssueCreator:
                                 )
         issue_guide=repository.create_issue(**self.get_guide_issue_dict(),labels=[guide_label],assignees=assignees
                                 )
+
+        issue_guide.create_comment(self.closing_comment_text_guide)
+        issue_arrange.create_comment(self.closing_comment_text_arrange)
+        issue_time.create_comment(self.closing_comment_text_time)
+        issue_meet.create_comment(self.closing_comment_text_meet)
 
         return issue_meet,issue_time,issue_arrange,issue_guide
 
@@ -444,6 +506,79 @@ class ReportComponentDevelopmentIssueCreator(HelpImplementationIssueCreator):
         comment_call_code = f'```python \nfrom {obj_class_module} import {obj_class_name} \n{obj_class_name}(None) \n```'
         
         return f'{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}\n{comment_call_code}'
+
+
+class SyncIssueCreator(ReportComponentDevelopmentIssueCreator):
+    
+    _default_labels = ['daily','maintenance','sync']
+    _issue_type = 'Sync'
+    _goal = 'creates a part of a report'
+ 
+    def _get_elems_dict(self):
+
+        if self._done: tic = 'x'
+        else: tic = ' '
+
+        obj = self._obj
+
+        elems_dict = {
+                'obj':obj,
+                'goal':self._goal,
+                'issue_no':self._issue_no,
+                'issue_no+1':self._issue_no+1,
+                'issue_no+2':self._issue_no+2,
+                'issue_no+3':self._issue_no+3,
+                # 'obj_class_module':obj.__module__,
+                # 'obj_class_name':obj.__name__,
+                # 'date':self._date,
+                # 'time':self._time,
+                'tic':tic
+                }
+
+        return elems_dict
+ 
+    
+    @property
+    def title(self):
+        
+        # issue_no = self._issue_no
+        # obj_class_module= self._obj.__module__
+        # obj_class_name=self._obj.__name__
+        # goal = self._goal
+        date = self._obj
+        
+        issue_type = self._issue_type
+        
+        return f'{issue_type} of GitHub repositories within {date}'
+
+    @property
+    def body_text(self):
+        
+        # issue_no = self._issue_no
+        # obj_class_module= self._obj.__module__
+        # obj_class_name=self._obj.__name__
+        # goal = self._goal
+        
+        
+
+        issue_code_str=(f'The aim is to synchronize GitHub repositories in the given period.')
+        
+        return issue_code_str
+
+    @property
+    def closing_comment_text(self):
+        
+        # obj_class_module= self._obj.__module__
+        # obj_class_name=self._obj.__name__
+        
+        comment_str_h1 = '> *Exemplary comment. You can copy example below and close issue with new comment or modify it and close the issue.* '
+        comment_str_h2 = '*Remove this message or keep it if new comment is created.*'
+        
+        comment_str_2 = 'Repositories are synchronised. Goal is achieved.'
+        
+        
+        return f'{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}'
+
 
 class ClassImplementationIssueCreator(HelpImplementationIssueCreator):
     

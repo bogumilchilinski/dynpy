@@ -1,6 +1,7 @@
 from sympy import (Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq,
                    Function, lambdify, factorial, solve, Dict, Number, N, Add,
                    Mul, expand,zoo,exp,Dummy, det)
+
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 import sympy as sym
@@ -12,9 +13,7 @@ import scipy.integrate as solver
 from ..utilities.timeseries import DataMethods, SpectralMethods, TimeDomainMethods, SpectrumSeries, SpectrumFrame, TimeSeries, TimeDataFrame
 
 from collections import ChainMap
-
 from IPython.display import display
-
 import sympy.physics.mechanics as me
 
 from sympy.simplify.fu import TR8, TR10, TR7, TR3, TR0
