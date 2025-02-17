@@ -2984,7 +2984,7 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
     
     #m=Symbol('m', positive=True)
     ivar=Symbol('t')
-    
+    t0=Symbol('t0')
     m1=Function('m_alpha')(ivar)
     m2=Function('m_beta')(ivar)
     l_1=Symbol('l_alpha', positive=True)
@@ -2999,8 +2999,9 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
     k = Symbol('k',positive=True)
     b = Symbol('b',positive=True)
     flow_coeff = Symbol('lambda')
+    F = Symbol('F',positive=True)
     qs=dynamicsymbols('alpha beta')
-    
+    m0 = Symbol('m_0')
  
 
     def __init__(self,
@@ -3018,9 +3019,12 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
                  u0=None,
                  k=None,
                  b=None,
-                 flow_coeff=None,
+                 F=None,
                  qs=None,
                  ivar=Symbol('t'),
+                 t0=t0,
+                 flow_coeff=flow_coeff,
+                 m0=None,
                  **kwargs):
 
  
@@ -3039,10 +3043,16 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
         if k is not None: self.k = k
         if b is not None: self.b = b
         if flow_coeff is not None: self.flow_coeff = flow_coeff
+        if F is not None: self.F = F
+        if t0 is not None: self.t0 = t0
+        if m0 is not None: self.m0 = m0
 
-        
         self.qs = [self.phi_1,self.phi_2]
         self._init_from_components(**kwargs)
+
+        from sympy import atan,pi
+#         display(type(ivar),type(t0))
+        self.trans_expr=((S.One/2-atan(flow_coeff*(ivar-t0))/pi))
 
     @cached_property
     def components(self):
@@ -3057,7 +3067,7 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
         self.gravity_1 = GravitationalForce(self.m2, self.g, pos1=-self.y_2, qs=[self.phi_2])
         self.damper_1 = Damper(self.b,self.phi_1,qs=[self.phi_1])
         self.damper_2 = Damper(self.b,self.phi_2,qs=[self.phi_2])
-        self.force = Force(self.u0*sin(self.omega*self.ivar)*self.k*self.l_1,self.phi_1,qs=[self.phi_1])
+        self.force = Force(self.k*self.u0*sin(self.omega*self.ivar)*self.l_1,self.phi_1,qs=[self.phi_1])
 
         components['Pendulum 1'] = self.Pendulum1
         components['material_point_11'] = self.material_point_11
@@ -3071,55 +3081,55 @@ class PendulumWithVaryingMassDamper(ComposedSystem):
     
     def symbols_description(self):
         self.sym_desc_dict = {
-            self.m: r'mass of the system',
+#             self.m: r'mass of the system',
             self.m1: r'initial mass of the upper pendulum member',
             self.m2: r'initial mass of the lower pendulum member',
-            self.m_f1: r'mass of the upper pendulum',
-            self.m_f2: r'mass of the lower pendulum',
-            self.m_f1.diff(t): r'mass fluid flow of the upper pendulum',
-            self.m_f2.diff(t): r'mass fluid flow of the lower pendulum',
-            self.m_t: r'total mass of the system',
-            self.m_t2: r'total mass of the lower pendulum',
-            self.m_0: r'transferred damping mass',
+#             self.m_f1: r'mass of the upper pendulum',
+#             self.m_f2: r'mass of the lower pendulum',
+            self.m1.diff(self.ivar): r'mass of the upper pendulum and fl and fluid flow',
+            self.m2.diff(self.ivar): r'mass of the of the lower pendulum and fluid flow',
+#             self.m_t: r'total mass of the system',
+#             self.m_t2: r'total mass of the lower pendulum',
+            self.m0: r'transferred damping mass',
             self.l_1: r'length of the upper pendulum',
             self.l_2: r'length of the lower pendulum',
-            self.l_3: r'length of the damper pendulum',
-            self.w: r'angular velocity',
+#             self.l_3: r'length of the damper pendulum',
+#             self.w: r'angular velocity',
             self.k: r'spring stiffness',
-            self.ls: r'length of the spring',
+#             self.ls: r'length of the spring',
             #self.u: r'difference of spring length and initial spring length',
-            self.x0: r'initial position of the system',
-            self.l0: r'initial spring length',
+#             self.x0: r'initial position of the system',
+#             self.l0: r'initial spring length',
             self.u0: r'initial difference of spring length and starting spring length',
-            self.x_k: r'forcing force',
+#             self.x_k: r'forcing force',
             self.b: r'damping coefficient value',
             self.omega: r'excitation frequency',
             #self.f: r'????',
             self.g: r'acceleration of gravity',
-            self.rho_f: r'fluid density',
+#             self.rho_f: r'fluid density',
             self.phi_1: r'angle of the upper pendulum swing',
             self.phi_2: r'angle of the lower pendulum swing',
-            self.phi_1.diff(t): r'generalized velocity of the upper pendulum member',
-            self.phi_2.diff(t): r'generalized velocity of the lower pendulum member',
-            self.phi_1.diff(t,t): r'generalized acceleration of the upper pendulum member',
-            self.phi_2.diff(t,t): r'generalized acceleration of the lower pendulum member',
+            self.phi_1.diff(self.ivar): r'angular (generalised) velocity of the upper pendulum member',
+            self.phi_2.diff(self.ivar): r'angular (generalised) velocity of the lower pendulum member',
+            self.phi_1.diff(self.ivar,self.ivar): r'angular (generalised) acceleration of the upper pendulum member',
+            self.phi_2.diff(self.ivar,self.ivar): r'angular (generalised) acceleration of the lower pendulum member',
             self.t0: r'activation time',
             self.flow_coeff: r'fluid flow rate',
             self.ivar: r'time',
-            self.h_fa:r'centre of gravity of the higher member',
-            self.h_fb:r'centre of gravity of the lower member',
-            self.A_pipe1:r'cross-section area of the upper member',
-            self.A_pipe2:r'cross-section area of the lower member',
+#             self.h_fa:r'centre of gravity of the higher member',
+#             self.h_fb:r'centre of gravity of the lower member',
+#             self.A_pipe1:r'cross-section area of the upper member',
+#             self.A_pipe2:r'cross-section area of the lower member',
         }
         return self.sym_desc_dict
     
     def flow_equation(self):
-        return_eq=Eq(self.m2,(self.m_0-self.m_0*self.trans_expr).expand())
+        return_eq=Eq(self.m2,(self.m0-self.m0*self.trans_expr).expand())
         
         return return_eq
     
     def upper_mass_equation(self):
-        return_eq=Eq(self.m1,(self.m_0*self.trans_expr).expand())
+        return_eq=Eq(self.m1,(self.m0*self.trans_expr).expand())
         
         return return_eq
     

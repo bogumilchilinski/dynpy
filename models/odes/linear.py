@@ -59,6 +59,75 @@ class LinearSecondOrderExpSin(ODESystem):
         fs=Symbol('f_s',positive=True)
         fd=Symbol('f_d',positive=True)
         omg=Symbol('Omega',positive=True)
+        a=Symbol('a',positive=True)
+        ode_eq=z.diff(t,2)+2*h*z.diff(t)+omg0**2*z-fd*exp(-a*t)*sin(omg*t)-fs
+
+        odes = cls(ode_eq,dvars=z,ivar=t,ode_order=2)
+
+        return odes
+    
+class LinearSecondOrderExpCos(ODESystem):
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        z= Function('z')(t)
+        h=Symbol('h',positive=True)
+        omg0=Symbol('omega_0',positive=True)
+        fs=Symbol('f_s',positive=True)
+        fd=Symbol('f_d',positive=True)
+        omg=Symbol('Omega',positive=True)
+        a=Symbol('a',positive=True)
+        ode_eq=z.diff(t,2)+2*h*z.diff(t)+omg0**2*z-fd*exp(-a*t)*cos(omg*t)-fs
+
+        odes = cls(ode_eq,dvars=z,ivar=t,ode_order=2)
+
+        return odes
+    
+class LinearSecondOrderHeavisideComp(ODESystem):
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        z= Function('z')(t)
+        h=Symbol('h',positive=True)
+        omg0=Symbol('omega_0',positive=True)
+        fs=Symbol('f_s',positive=True)
+        fd=Symbol('f_d',positive=True)
+        omg=Symbol('Omega',positive=True)
+        ode_eq=z.diff(t,2)+omg0**2*z-fd*Heaviside(sin(omg*t))-fs#+2*h*z.diff(t)
+
+        odes = cls(ode_eq,dvars=z,ivar=t,ode_order=2)
+
+        return odes
+    
+class LinearSecondOrderSinComp(ODESystem):
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        z= Function('z')(t)
+        h=Symbol('h',positive=True)
+        omg0=Symbol('omega_0',positive=True)
+        fs=Symbol('f_static',positive=True)
+        fd=Symbol('f_dynamic',positive=True)
+        omg=Symbol('Omega',positive=True)
+        ode_eq=z.diff(t,2)+2*h*z.diff(t)+omg0**2*z+fd*sin(omg*t)+fs
+
+        odes = cls(ode_eq,dvars=z,ivar=t,ode_order=2)
+
+        return odes
+
+
+    @classmethod
+    def from_reference_data(cls):
+        t = Symbol('t')
+        z= Function('z')(t)
+        h=Symbol('h',positive=True)
+        omg0=Symbol('omega_0',positive=True)
+        fs=Symbol('f_s',positive=True)
+        fd=Symbol('f_d',positive=True)
+        omg=Symbol('Omega',positive=True)
         ode_eq=z.diff(t,2)+2*h*z.diff(t)+omg0**2*z-fd*exp(-h*t)*sin(omg*t)-fs
 
         odes = cls(ode_eq,dvars=z,ivar=t,ode_order=2)
@@ -180,8 +249,9 @@ class SpringMassDamperExcitedMSM(MultiTimeScaleSolution):
         delta = Symbol('delta', positive = True)
         k=Symbol('k',positive=True)
         m=Symbol('m',positive=True)
+        mu=Symbol('mu',positive=True)
         
-        MSM_eq=Eq(x.diff(t,2) + eps*diff(x) + omega_0**2*x,eps*sin(Omega * t))
+        MSM_eq=Eq(x.diff(t,2) + eps*diff(x) + omega_0**2*x,eps*mu*sin(Omega * t))
         MSM = cls(MSM_eq.lhs-MSM_eq.rhs,dvars=x, eps=eps)
 #         exc_dict = {omega_0:Omega**2+eps*delta}
 #         MSM_sol_sub = MSM.solution.subs(exc_dict)

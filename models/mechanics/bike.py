@@ -11,6 +11,9 @@ from dynpy.models.electric.elements import *
 #from dynpy.models.electric.engine import *
 from functools import cached_property, lru_cache
 
+from pint import UnitRegistry
+ureg = UnitRegistry()
+
 class ReducedMotorbike(ComposedSystem):
     scheme_name = 'DC_motor.png'
 
@@ -202,19 +205,21 @@ class ReducedMotorbike(ComposedSystem):
 
         return self.subs(self.T,torque_expr)
     def units(self):
+        
         units_dict={
             self.m_b: ureg.kilogram,
             self.m_d: ureg.kilogram,
             self.r: ureg.meter,
             self.m_f: ureg.kilogram,
             self.m_r: ureg.kilogram,
-            self.x.diff(): ureg.meter/ureg.second,
-            self.x.diff(self.ivar,2): ureg.meter/ureg.second**2,
             self.ivar: ureg.second,
             self.T: ureg.newton*ureg.meter,
             self.Ad: ureg.kilogram,
             self.Af: ureg.meter**2,
             self.x: ureg.meter,
+            self.x.diff(self.ivar): ureg.meter/ureg.second,
+            self.x.diff(self.ivar,2): ureg.meter/ureg.second**2,
+            
            }
         return units_dict
 

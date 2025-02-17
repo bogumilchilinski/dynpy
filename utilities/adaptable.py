@@ -1711,6 +1711,9 @@ class EntryWithUnit:
             elif str(unit) == str(ureg.ohm):
                 ohm_string='\\mathrm{\\Omega}'
                 return f'{entry_str}{sep}{left_par}{ohm_string}{right_par}'     
+            elif str(unit) == str(ureg.degC):
+                degC_string='\\mathrm{^\\circ C}'
+                return f'{entry_str}{sep}{left_par}{degC_string}{right_par}'   
             else:
                 return f'{entry_str}{sep}{left_par}{unit:~L}{right_par}'
         else:

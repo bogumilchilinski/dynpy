@@ -452,7 +452,7 @@ class MSMCalculationsOrderComponent(ReportComponent):
         display(ObjectCode("ord = 2 # given order of approximation  \node.predicted_solution(ord)"))
         display(Markdown("This method uses `approximation_function` method and multiplies it by small parameter to obtain the desired predicted solution."))
         
-        display(ReportText(  "Later the derivative of predicted solutoin should be calculated. This is done using:"  ))
+        display(ReportText(  "Later the derivative of predicted solution should be calculated. This is done using:"  ))
         display(ObjectCode("ord = 2 # given order of approximation  \node.derivative_without_scale(ord)"))
         display(Markdown("This method uses `predicted_solution_without_scales` method and calculates a derivatives."))
         
@@ -559,7 +559,7 @@ class DetailsOfPredictedSolutionComponent(ReportComponent):
         display(SympyFormula( system.predicted_solution_without_scales().as_eq_list()[0]                                               ))
         display(SympyFormula(  system.predicted_solution().as_eq_list()[0]  ))        
 
-        display(ReportText(  "Comparison of Approximation without and with scales has a following form"   ))        
+        display(ReportText(  "Comparison of Approximation with and without multiple scales has a following form \n"   ))        
 
         for ord in range(system.order+1):
             
@@ -689,7 +689,7 @@ class ZerothOrderSolutionComponent(ReportComponent):
         
         ode_0th_approx=system.eoms_approximation_list()[0]
         display(SympyFormula( Eq(ode_0th_approx.solution.lhs[0], ode_0th_approx.solution.rhs[0]  )))
-        display(SympyFormula( Eq(ode_0th_approx.solution.lhs[1], ode_0th_approx.solution.rhs[1]  )))        
+#         display(SympyFormula( Eq(ode_0th_approx.solution.lhs[1], ode_0th_approx.solution.rhs[1]  )))        
         display(ReportText(  "Secular functions are as follows:"   ))
         
         for sec_fun in ode_0th_approx._secular_funcs:
@@ -1458,7 +1458,7 @@ class NaturalFrequenciesAnalysisComponent(ReportComponent):
     @property
     def header_text(self):
 
-        return '''In order to describe the basic properties of the system, its inertia and stiffness matrices will serve to determine an influence of the system parameters on its natural vibration frequencies. The system inertia matrix provides a complete description of the system components' behaviour under the action of accelerations on individual degrees of freedom. It describes an influence of inertia of the system's elements while the stiffness matrix describes the global response of the system to external forces. The individual components of the matrix result from elastic and geometrical properties of the whole structure.
+        return '''In order to describe the basic properties of the system, its inertia and stiffness matrices will serve to determine an influence of the system parameters on its natural vibration frequencies (circular frequencies). The system inertia matrix provides a complete description of the system components' behaviour under the action of accelerations on individual degrees of freedom. It describes an influence of inertia of the system's elements while the stiffness matrix describes the global response of the system to external forces. The individual components of the matrix result from elastic and geometrical properties of the whole structure.
         '''
 
     @property
@@ -2268,13 +2268,13 @@ class ParticularDerivativesComponent(ReportComponent):
         
         display(ReportText('To clarify the solving process, the derivatives of the approximation functions are presented below, both with and without the substitution of time scales and their corresponding derivatives.'))
         for index, value in enumerate(system._scales_formula):
-            display(ReportText('For the function:'))
-            display(SympyFormula(system.approximation_function(index)[0]))
+            display(ReportText(f'For the function ${latex(system.approximation_function(index)[0])}$:'))
+#             display(SympyFormula(system.approximation_function(index)[0]))
             display(SympyFormula(system.part_derivative(index)))
             display(SympyFormula(system.sec_part_derivative(index)))
               
         for index, value in enumerate(system._scales_formula):
-            display(ReportText("After the substitution of time scales and their derivatives:"))
-            display(SympyFormula(system.approximation_function(index)[0]))
+            display(ReportText(f"After the substitution of time scales and their derivatives for the function ${latex(system.approximation_function(index)[0])}$:"))
+#             display(SympyFormula(system.approximation_function(index)[0]))
             display(SympyFormula(system.part_derivative_subs(index)))
             display(SympyFormula(system.sec_part_derivative_subs(index)))
