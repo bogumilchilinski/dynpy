@@ -27,7 +27,6 @@ class TuningTikZDiagram(TikZPicture):
 
         return code
 
-
 class DiagnosticsTikZDiagram(TikZPicture):
 
     def _scheme_desc(self):
