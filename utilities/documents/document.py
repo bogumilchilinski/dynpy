@@ -1448,7 +1448,7 @@ doc.generate_pdf(clean_tex=True)'''
 # =======
         preliminary_str=(
 f"""
->>>>>>> 5b388c4 (  Changes to be committed:)
+
 Examplary setup is as follows:
 
 #References to guide imports needed to include - to see the list of available guides insert and run the code below:
