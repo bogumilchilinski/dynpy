@@ -68,7 +68,7 @@ To begin working with DynPy, you need an account on [CoCalc](https://cocalc.com/
 
 ## 1. Example Scripts
 
-To get started with DynPy, run the following example script:
+To view exemplary capabilities of dynpy, run the following example script:
 
 ```python
 from dynpy.models.mechanics.pendulum import Pendulum
