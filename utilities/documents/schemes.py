@@ -469,3 +469,217 @@ class HelicalGearVerticalModelScheme(TikZPicture):
     """
         return code
     
+    
+    
+#Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
+class CompoundPendulumScheme(TikZPicture):
+
+    def _scheme_desc(self):
+
+        code=r"""
+
+\draw[->] (-0.5,0) -- (4,0) node[right] {$x$};
+\draw[->] (0,1) -- (0,-4) node[below] {$y$};
+
+
+% Wahadło jako bryła w kształcie wydłużonej kropli, zaczepione w (0,0), obrócone o 30 stopni
+\begin{scope}[rotate=30]
+    \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=-20, end angle=-160, radius=1.2] -- cycle;
+\end{scope}
+
+
+% Oznaczenie C wewnątrz bryły
+\node at (1.3,-2) {$C$};
+
+% Oznaczenia przesunięte dalej na zewnątrz bryły
+\node at (3.5,-3) {$m, I, l$};
+
+% Strzałka momentu zaczepiona na linii brzegowej bryły
+\draw[->] (0.2,-1.5) arc[start angle=-90,end angle=-20,radius=1.5];
+\node at (3.8,-2.3) {$M_0 \cos(\Omega  t)$};
+
+% Punkt zawieszenia bryły
+\fill (0,0) circle (2pt);
+
+
+"""
+
+        return code
+
+    
+#Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
+class ForcedCompoundPendulumScheme(TikZPicture):
+
+    def _scheme_desc(self):
+
+        code=r"""
+
+\draw[->] (-0.5,0) -- (4,0) node[right] {$x$};
+\draw[->] (0,1) -- (0,-4) node[below] {$y$};
+
+
+% Wahadło jako bryła w kształcie wydłużonej kropli, zaczepione w (0,0), obrócone o 30 stopni
+\begin{scope}[rotate=30]
+    \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=-20, end angle=-160, radius=1.2] -- cycle;
+\end{scope}
+
+
+% Oznaczenie C wewnątrz bryły
+\node at (1.3,-2) {$C$};
+
+% Oznaczenia przesunięte dalej na zewnątrz bryły
+\node at (3.5,-3) {$m, I, l$};
+
+% Strzałka momentu zaczepiona na linii brzegowej bryły
+\draw[->] (0.2,-1.5) arc[start angle=-90,end angle=-20,radius=1.5];
+\node at (3.8,-2.3) {$M_0 \cos(\Omega  t)$};
+
+% Punkt zawieszenia bryły
+\fill (0,0) circle (2pt);
+
+
+"""
+
+        return code
+
+    
+#Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
+class RollingHalfDiskScheme(TikZPicture):
+
+    def _scheme_desc(self):
+
+        code=r"""
+
+\draw[->] (-0.5,0) -- (4,0) node[right] {$x$};
+\draw[->] (0,1) -- (0,-4) node[below] {$y$};
+
+
+% Wahadło jako bryła w kształcie wydłużonej kropli, zaczepione w (0,0), obrócone o 30 stopni
+\begin{scope}[rotate=30]
+    \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=-20, end angle=-160, radius=1.2] -- cycle;
+\end{scope}
+
+
+% Oznaczenie C wewnątrz bryły
+\node at (1.3,-2) {$C$};
+
+% Oznaczenia przesunięte dalej na zewnątrz bryły
+\node at (3.5,-3) {$m, I, l$};
+
+% Strzałka momentu zaczepiona na linii brzegowej bryły
+\draw[->] (0.2,-1.5) arc[start angle=-90,end angle=-20,radius=1.5];
+\node at (3.8,-2.3) {$M_0 \cos(\Omega  t)$};
+
+% Punkt zawieszenia bryły
+\fill (0,0) circle (2pt);
+
+
+"""
+
+        return code
+    
+    
+#Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
+class ForcedRollingHalfDiskScheme(TikZPicture):
+
+    def _scheme_desc(self):
+
+        code=r"""
+
+\draw[->] (-0.5,0) -- (4,0) node[right] {$x$};
+\draw[->] (0,1) -- (0,-4) node[below] {$y$};
+
+
+% Wahadło jako bryła w kształcie wydłużonej kropli, zaczepione w (0,0), obrócone o 30 stopni
+\begin{scope}[rotate=30]
+    \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=-20, end angle=-160, radius=1.2] -- cycle;
+\end{scope}
+
+
+% Oznaczenie C wewnątrz bryły
+\node at (1.3,-2) {$C$};
+
+% Oznaczenia przesunięte dalej na zewnątrz bryły
+\node at (3.5,-3) {$m, I, l$};
+
+% Strzałka momentu zaczepiona na linii brzegowej bryły
+\draw[->] (0.2,-1.5) arc[start angle=-90,end angle=-20,radius=1.5];
+\node at (3.8,-2.3) {$M_0 \cos(\Omega  t)$};
+
+% Punkt zawieszenia bryły
+\fill (0,0) circle (2pt);
+
+
+"""
+
+        return code
+    
+#Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
+class RollingBarScheme(TikZPicture):
+
+    def _scheme_desc(self):
+
+        code=r"""
+
+\draw[->] (-0.5,0) -- (4,0) node[right] {$x$};
+\draw[->] (0,1) -- (0,-4) node[below] {$y$};
+
+
+% Wahadło jako bryła w kształcie wydłużonej kropli, zaczepione w (0,0), obrócone o 30 stopni
+\begin{scope}[rotate=30]
+    \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=-20, end angle=-160, radius=1.2] -- cycle;
+\end{scope}
+
+
+% Oznaczenie C wewnątrz bryły
+\node at (1.3,-2) {$C$};
+
+% Oznaczenia przesunięte dalej na zewnątrz bryły
+\node at (3.5,-3) {$m, I, l$};
+
+% Strzałka momentu zaczepiona na linii brzegowej bryły
+\draw[->] (0.2,-1.5) arc[start angle=-90,end angle=-20,radius=1.5];
+\node at (3.8,-2.3) {$M_0 \cos(\Omega  t)$};
+
+% Punkt zawieszenia bryły
+\fill (0,0) circle (2pt);
+
+
+"""
+
+        return code
+    
+#Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
+class ForcedRollingBarScheme(TikZPicture):
+
+    def _scheme_desc(self):
+
+        code=r"""
+
+\draw[->] (-0.5,0) -- (4,0) node[right] {$x$};
+\draw[->] (0,1) -- (0,-4) node[below] {$y$};
+
+
+% Wahadło jako bryła w kształcie wydłużonej kropli, zaczepione w (0,0), obrócone o 30 stopni
+\begin{scope}[rotate=30]
+    \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=-20, end angle=-160, radius=1.2] -- cycle;
+\end{scope}
+
+
+% Oznaczenie C wewnątrz bryły
+\node at (1.3,-2) {$C$};
+
+% Oznaczenia przesunięte dalej na zewnątrz bryły
+\node at (3.5,-3) {$m, I, l$};
+
+% Strzałka momentu zaczepiona na linii brzegowej bryły
+\draw[->] (0.2,-1.5) arc[start angle=-90,end angle=-20,radius=1.5];
+\node at (3.8,-2.3) {$M_0 \cos(\Omega  t)$};
+
+% Punkt zawieszenia bryły
+\fill (0,0) circle (2pt);
+
+
+"""
+
+        return code
