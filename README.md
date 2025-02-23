@@ -7,6 +7,7 @@
 2. [How to Start / Basic Usage](#how-to-start--basic-usage)
    1. [Example Scripts](#1-example-scripts)
    2. [Creating First Document / Report](#2-creating-first-document--report)
+   3. [Lookin for some help](#3-Looking-for-some-help)
 3. [Reporting Module](#reporting-module)
    1. [Overview of the Reporting Module](#1-overview-of-the-reporting-module)
    2. [Creating Reports](#2-creating-reports)
