@@ -94,6 +94,11 @@ doc.append(section)
 doc.generate_pdf(clean_tex=True)
 ```
 
+## 3. Looking for some help
+```python
+from dynpy.utilities.creators import list_of_guides
+list_of_guides()
+
 # Reporting Module
 ## 1. Overview of the Reporting Module
 The reporting module allows you to create structured reports with text, equations, images, and tables.
