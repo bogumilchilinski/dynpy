@@ -3350,10 +3350,11 @@ class BeamerPresentation(Document):
         preliminary_str=(
 """
 
-Examplary setup is as follows:
+# Examplary setup is as follows:
 
 from dynpy.utilities.documents.document import BeamerPresentation
 from dynpy.utilities.report import*
+SympyFormula._break_mode = 'eq'
 
 
 #CELL_1
@@ -3369,15 +3370,27 @@ display(ReportText('abc '*100))
 
 
 #CELL_3
+from sympy import *
+
 frame_3=CodeFrame(title='Simulation results',options=[])
 CurrentContainer(frame_3)
-display(ReportText('abc '*100))
+
+display(ObjectCode('from dynpy.utilities.report import *'))
 
 #CELL_4
+from sympy import *
+
+frame_4=Frame(title='Simulation results',options=[])
+CurrentContainer(frame_4)
+
+display(SympyFormula(Symbol('a')**2))
+
+#CELL_5
 doc = BeamerPresentation('Example_beamer',title='Exemplary presentation')
 doc.append(frame_1)
 doc.append(frame_2)
 doc.append(frame_3)
+doc.append(frame_4)
 doc.generate_pdf(clean_tex=False)
     
 

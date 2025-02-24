@@ -478,28 +478,31 @@ class CompoundPendulumScheme(TikZPicture):
 
         code=r"""
 
-\draw[->] (-0.5,0) -- (4,0) node[right] {$x$};
-\draw[->] (0,1) -- (0,-4) node[below] {$y$};
+ % Osie
+    \draw[->] (-0.2,0) -- (4,0) node[right] {$x$};
+    \draw[->] (0,0.2) -- (0,-4) node[below] {$y$};
+    \node at (0.2,-2) {$\varphi$};
 
-
-% Wahadło jako bryła w kształcie wydłużonej kropli, zaczepione w (0,0), obrócone o 30 stopni
-\begin{scope}[rotate=30]
-    \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=-20, end angle=-160, radius=1.2] -- cycle;
-\end{scope}
-
-
-% Oznaczenie C wewnątrz bryły
-\node at (1.3,-2) {$C$};
-
-% Oznaczenia przesunięte dalej na zewnątrz bryły
-\node at (3.5,-3) {$m, I, l$};
-
-% Strzałka momentu zaczepiona na linii brzegowej bryły
-\draw[->] (0.2,-1.5) arc[start angle=-90,end angle=-20,radius=1.5];
-\node at (3.8,-2.3) {$M_0 \cos(\Omega  t)$};
-
-% Punkt zawieszenia bryły
-\fill (0,0) circle (2pt);
+    
+    % Wahadło obrócone
+    \begin{scope}[rotate=30]
+        \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=-20, end angle=-160, radius=1.2] -- cycle;
+         
+         \draw[dashed] (0,0) -- (0,-4);
+         \filldraw[black] (0,-2) circle (1.5pt);
+    \end{scope}
+    
+    % Oznaczenia
+    \node at (1.3,-1.7) {$C$};
+    \node at (3.5,-3) {$m, I, l$};
+    
+    % Strzałka momentu zaczepiona na linii brzegowej bryły
+    \draw[->] (0,-1.5) arc[start angle=-80,end angle=-50,radius=1.5];
+   %\node at (3.8,-2.3) {$M_0 \cos(\Omega  t)$};
+    %\draw[->] (1,-2.5) arc[start angle=-90,end angle=-20,radius=1];
+    
+    % Punkt zawieszenia bryły
+    \fill (0,0) circle (2pt);
 
 
 """
@@ -514,28 +517,31 @@ class ForcedCompoundPendulumScheme(TikZPicture):
 
         code=r"""
 
-\draw[->] (-0.5,0) -- (4,0) node[right] {$x$};
-\draw[->] (0,1) -- (0,-4) node[below] {$y$};
+    % Osie
+    \draw[->] (-0.2,0) -- (4,0) node[right] {$x$};
+    \draw[->] (0,0.2) -- (0,-4) node[below] {$y$};
+    \node at (0.2,-2) {$\varphi$};
 
-
-% Wahadło jako bryła w kształcie wydłużonej kropli, zaczepione w (0,0), obrócone o 30 stopni
-\begin{scope}[rotate=30]
-    \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=-20, end angle=-160, radius=1.2] -- cycle;
-\end{scope}
-
-
-% Oznaczenie C wewnątrz bryły
-\node at (1.3,-2) {$C$};
-
-% Oznaczenia przesunięte dalej na zewnątrz bryły
-\node at (3.5,-3) {$m, I, l$};
-
-% Strzałka momentu zaczepiona na linii brzegowej bryły
-\draw[->] (0.2,-1.5) arc[start angle=-90,end angle=-20,radius=1.5];
-\node at (3.8,-2.3) {$M_0 \cos(\Omega  t)$};
-
-% Punkt zawieszenia bryły
-\fill (0,0) circle (2pt);
+    
+    % Wahadło obrócone
+    \begin{scope}[rotate=30]
+        \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=-20, end angle=-160, radius=1.2] -- cycle;
+         
+         \draw[dashed] (0,0) -- (0,-4);
+         \filldraw[black] (0,-2) circle (1.5pt);
+    \end{scope}
+    
+    % Oznaczenia
+    \node at (1.3,-1.7) {$C$};
+    \node at (3.5,-3) {$m, I, l$};
+    
+    % Strzałka momentu zaczepiona na linii brzegowej bryły
+    \draw[->] (0,-1.5) arc[start angle=-80,end angle=-50,radius=1.5];
+    \node at (3.8,-2.3) {$M_0 \cos(\Omega  t)$};
+    \draw[->] (1,-2.5) arc[start angle=-90,end angle=-20,radius=1];
+    
+    % Punkt zawieszenia bryły
+    \fill (0,0) circle (2pt);
 
 
 """
@@ -550,28 +556,40 @@ class RollingHalfDiskScheme(TikZPicture):
 
         code=r"""
 
-\draw[->] (-0.5,0) -- (4,0) node[right] {$x$};
-\draw[->] (0,1) -- (0,-4) node[below] {$y$};
+    % Definicje
+    \def\r{2}       % Promień półwalca
+    \def\phi{-200}    % Kąt obrotu w stopniach
+    % Półwalec obrócony o kąt \phi
+    \begin{scope}[rotate around={\phi:(0,0)}]  % Rotacja wokół (0,0)
+        \fill[gray!20] (-\r,0) arc[start angle=180, end angle=0, radius=\r] -- cycle;
+        \draw[thick] (-\r,0) arc[start angle=180, end angle=0, radius=\r];
+        \draw[thick] (-\r,0) -- (\r,0);
+    \end{scope}
 
+    % Środkiem masy
+    \def\cx{0}  % Współrzędne C przed rotacją
+    \def\cy{4*\r/3.1416} % Przybliżenie dla półwalca
 
-% Wahadło jako bryła w kształcie wydłużonej kropli, zaczepione w (0,0), obrócone o 30 stopni
-\begin{scope}[rotate=30]
-    \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=-20, end angle=-160, radius=1.2] -- cycle;
-\end{scope}
+    \begin{scope}[rotate around={\phi:(0,0)}]  % Rotacja punktu C
+        \filldraw[black] (0,0.9) circle (1.5pt);
 
+        \draw[dashed] (0,0) -- (\cx,2);
 
-% Oznaczenie C wewnątrz bryły
-\node at (1.3,-2) {$C$};
+    % Kąt phi
+    %\draw[->] (0,1.5) arc[start angle=0, end angle=60, radius=1];
+    \draw[->] (0,1.5) arc[start angle=80,end angle=100,radius=1.5];
+    \node at (-0.2,1.3) {$\varphi$};
+    \end{scope}
+    \node at (-0.55,-0.8) {$c$};
 
-% Oznaczenia przesunięte dalej na zewnątrz bryły
-\node at (3.5,-3) {$m, I, l$};
+    % Oznaczenie masy i promienia
+    \node at (-\r+0.3,1) {$m, r$};
 
-% Strzałka momentu zaczepiona na linii brzegowej bryły
-\draw[->] (0.2,-1.5) arc[start angle=-90,end angle=-20,radius=1.5];
-\node at (3.8,-2.3) {$M_0 \cos(\Omega  t)$};
+    % Osie układu współrzędnych
+    \draw[->] (-2.5,-2) -- (3,-2) node[right] {$x$};
+    \draw[->] (-0.69,-2.5) -- (-0.69,1) node[above] {$y$};
 
-% Punkt zawieszenia bryły
-\fill (0,0) circle (2pt);
+    \draw[dashed] (0,0) -- (0,-2);
 
 
 """
@@ -586,29 +604,45 @@ class ForcedRollingHalfDiskScheme(TikZPicture):
 
         code=r"""
 
-\draw[->] (-0.5,0) -- (4,0) node[right] {$x$};
-\draw[->] (0,1) -- (0,-4) node[below] {$y$};
+    % Definicje
+    \def\r{2}       % Promień półwalca
+    \def\phi{-200}    % Kąt obrotu w stopniach
+    % Półwalec obrócony o kąt \phi
+    \begin{scope}[rotate around={\phi:(0,0)}]  % Rotacja wokół (0,0)
+        \fill[gray!20] (-\r,0) arc[start angle=180, end angle=0, radius=\r] -- cycle;
+        \draw[thick] (-\r,0) arc[start angle=180, end angle=0, radius=\r];
+        \draw[thick] (-\r,0) -- (\r,0);
+        \draw[->] (1,-0.1) arc[start angle=300,end angle=250,radius=2];
+        
+        
+    \end{scope}
 
+    % Środkiem masy
+    \def\cx{0}  % Współrzędne C przed rotacją
+    \def\cy{4*\r/3.1416} % Przybliżenie dla półwalca
 
-% Wahadło jako bryła w kształcie wydłużonej kropli, zaczepione w (0,0), obrócone o 30 stopni
-\begin{scope}[rotate=30]
-    \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=-20, end angle=-160, radius=1.2] -- cycle;
-\end{scope}
+    \begin{scope}[rotate around={\phi:(0,0)}]  % Rotacja punktu C
+        \filldraw[black] (0,0.9) circle (1.5pt);
 
+        \draw[dashed] (0,0) -- (\cx,2);
 
-% Oznaczenie C wewnątrz bryły
-\node at (1.3,-2) {$C$};
+    % Kąt phi
+    \draw[->] (0,1.5) arc[start angle=80,end angle=100,radius=1.5];
+    
+    \node at (-0.2,1.3) {$\varphi$};
+    \end{scope}
+    \node at (-0.55,-0.8) {$c$};
 
-% Oznaczenia przesunięte dalej na zewnątrz bryły
-\node at (3.5,-3) {$m, I, l$};
-
-% Strzałka momentu zaczepiona na linii brzegowej bryły
-\draw[->] (0.2,-1.5) arc[start angle=-90,end angle=-20,radius=1.5];
-\node at (3.8,-2.3) {$M_0 \cos(\Omega  t)$};
-
-% Punkt zawieszenia bryły
-\fill (0,0) circle (2pt);
-
+    % Oznaczenie masy i promienia
+    \node at (-\r+0.3,1) {$m, r$};
+    
+    
+    % Osie układu współrzędnych
+    \draw[->] (-2.5,-2) -- (3,-2) node[right] {$x$};
+    \draw[->] (-0.69,-2.5) -- (-0.69,1) node[above] {$y$};
+    
+    \draw[dashed] (0,0) -- (0,-2);
+    \node at (0.4,0.8) {$M_0 \cos(\Omega  t)$};
 
 """
 
@@ -621,29 +655,37 @@ class RollingBarScheme(TikZPicture):
 
         code=r"""
 
-\draw[->] (-0.5,0) -- (4,0) node[right] {$x$};
-\draw[->] (0,1) -- (0,-4) node[below] {$y$};
-
-
-% Wahadło jako bryła w kształcie wydłużonej kropli, zaczepione w (0,0), obrócone o 30 stopni
-\begin{scope}[rotate=30]
-    \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=-20, end angle=-160, radius=1.2] -- cycle;
-\end{scope}
-
-
-% Oznaczenie C wewnątrz bryły
-\node at (1.3,-2) {$C$};
-
-% Oznaczenia przesunięte dalej na zewnątrz bryły
-\node at (3.5,-3) {$m, I, l$};
-
-% Strzałka momentu zaczepiona na linii brzegowej bryły
-\draw[->] (0.2,-1.5) arc[start angle=-90,end angle=-20,radius=1.5];
-\node at (3.8,-2.3) {$M_0 \cos(\Omega  t)$};
-
-% Punkt zawieszenia bryły
-\fill (0,0) circle (2pt);
-
+% Semi-cylinder (half-circle)
+    \fill[gray!20] (-2,0) arc[start angle=180,end angle=0,radius=2];
+    \draw (-2,0) arc[start angle=180,end angle=0,radius=2];
+    \draw (-2,0) -- (2,0);
+    
+    % Inclined rectangular board, rotated by phi = -20 degrees, extended length
+    \begin{scope}[rotate around={-20:(0,0)}]
+        \draw[fill=gray!30] (-3.5,2) rectangle (2.5,2.3);
+        % Center of mass dot
+        \filldraw (-0.4,2.15) circle (0.05);
+    \end{scope}
+    
+    % Coordinate axes (moved to be on top)
+    \draw[->] (0,-0.5) -- (0,3) node[above] {$y$};
+    \draw[->] (-2.5,0) -- (2.5,0) node[right] {$x$};
+    
+    % Rotation angle phi
+    \draw[thick,->] (0,0) -- (0.7,1.9);
+    \node at (0.2,1) {$\varphi$};
+    
+    % Angle arc
+    \draw[thick,->] (0,1.5) arc[start angle=90,end angle=70,radius=1.5];
+    
+    % Center of mass
+    \node at (0.5,2.6) {$C$};
+    
+    % Radius
+    \node at (-1.5,0.3) {$r$};
+    
+    % Board parameters
+    \node at (2.8,2.0) {$m,l,h$};
 
 """
 
@@ -655,30 +697,42 @@ class ForcedRollingBarScheme(TikZPicture):
     def _scheme_desc(self):
 
         code=r"""
+    % Semi-cylinder (half-circle)
+    \fill[gray!20] (-2,0) arc[start angle=180,end angle=0,radius=2];
+    \draw (-2,0) arc[start angle=180,end angle=0,radius=2];
+    \draw (-2,0) -- (2,0);
 
-\draw[->] (-0.5,0) -- (4,0) node[right] {$x$};
-\draw[->] (0,1) -- (0,-4) node[below] {$y$};
-
-
-% Wahadło jako bryła w kształcie wydłużonej kropli, zaczepione w (0,0), obrócone o 30 stopni
-\begin{scope}[rotate=30]
-    \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=-20, end angle=-160, radius=1.2] -- cycle;
-\end{scope}
-
-
-% Oznaczenie C wewnątrz bryły
-\node at (1.3,-2) {$C$};
-
-% Oznaczenia przesunięte dalej na zewnątrz bryły
-\node at (3.5,-3) {$m, I, l$};
-
-% Strzałka momentu zaczepiona na linii brzegowej bryły
-\draw[->] (0.2,-1.5) arc[start angle=-90,end angle=-20,radius=1.5];
-\node at (3.8,-2.3) {$M_0 \cos(\Omega  t)$};
-
-% Punkt zawieszenia bryły
-\fill (0,0) circle (2pt);
-
+    
+    % Inclined rectangular board, rotated by phi
+    \begin{scope}[rotate around={-20:(0,0)}]
+        \draw[fill=gray!30] (-3.5,2) rectangle (2.5,2.3);
+        % Center of mass dot
+        \filldraw (-0.4,2.15) circle (0.05);
+        %\draw[-] (-0.4,2.15) -- (1,2)
+        %\draw[->] (1,2) arc[start angle=90,end angle=70,radius=4];
+    \end{scope}
+    
+    % Coordinate axes (moved to be on top)
+    \draw[->] (0,-0.5) -- (0,3) node[above] {$y$};
+    \draw[->] (-2.5,0) -- (2.5,0) node[right] {$x$};
+    
+    % Rotation angle phi
+    \draw[thick,->] (0,0) -- (0.7,1.9);
+    \node at (0.2,1) {$\varphi$};
+    
+    % Angle arc
+    \draw[thick,->] (0,1.5) arc[start angle=90,end angle=70,radius=1.5];
+ 
+    % Center of mass
+    \node at (0.5,2.6) {$C$};
+    
+    % Radius
+    \node at (-1.5,0.3) {$r$};
+    
+    % Board parameters
+    \node at (2.8,2.0) {$m,l,h$};
+    \node at (1.5,3.5) {$M_0 \cos(\Omega  t)$};
+    \draw[->] (0.5,3) arc[start angle=90,end angle=70,radius=4];
 
 """
 
