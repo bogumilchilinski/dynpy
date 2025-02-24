@@ -2392,7 +2392,7 @@ class StateOfArtReport(Document):
                   Package('geometry',options=['lmargin=30mm', 'rmargin=30mm',  'top=25mm', 'bmargin=25mm', 'headheight=50mm']),
                   Package('microtype'),
                   Package('authoraftertitle'),
-                  Package('polski',options=['MeX']),
+                  Package(' ',options=['MeX']),
                   #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
                   Package('listings'),
                   Package('titlesec'),
@@ -3328,7 +3328,7 @@ class BeamerPresentation(Document):
     latex_name = 'document'
     packages = [
                   Package('microtype'),
-                  Package('polski',options=['MeX']),
+                  #Package('polski',options=['MeX']),
                   #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
                   Package('listings'),
                   #Package('titlesec'),
