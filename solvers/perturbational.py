@@ -929,6 +929,72 @@ class MultiTimeScaleSolution(ODESystem):
 
         return sol_list
 
+
+    @property
+    def general_solution_with_consts(self):
+
+        
+        order = self.order
+        
+        #print('my order',order)
+        sol_list = []
+        gen_sol = self._general_sol(order)
+        
+        # print('gen_sol')
+        # display(*gen_sol)
+        
+        if self.eps in self.secular_eq:
+
+            ode2check = self.secular_eq[self.eps]#.as_first_ode_linear_system()
+
+            
+            CodeFlowLogger(ode2check,'sec_eq',self)
+            
+            # display(ode2check._as_fode())
+            # display(ode2check.solution)
+            #ode2check._as_fode()
+            #ode2check.solution
+            C_const_sol = ode2check.solution.as_explicit_dict()
+            
+
+            CodeFlowLogger(C_const_sol,'tut C_const_sol',self)
+            
+        else:
+            C_const_sol={}
+        # print('tut')
+        for order, approx_sol in enumerate(gen_sol):
+            
+            # print('stale: ')
+            # display(C_const_sol)
+            # print('aproox bez subsa')
+            
+            
+            # display(approx_sol.rhs.applyfunc(lambda obj: obj.expand().doit().subs(C_const_sol).subs(C_const_sol)
+            #                                ))
+            solution = approx_sol.applyfunc(lambda obj: obj.expand().doit()).subs(
+                {
+                    #self.t_list[1]: self.eps  * self.ivar
+                 })
+
+            # print('aproox ze subsa')
+            # display(solution)
+
+            sol_list += [(self.eps**order) *
+                            solution.rhs.subs({
+                                # self.t_list[1]: self.eps  * self.ivar,
+                                # self.t_list[0]: self.ivar
+                            })   ]
+            
+        #display(*list(SimplifiedExpr._subs_container.values()))
+        result = (sum(sol_list, Matrix(2*len(self.dvars)*[0])  )).applyfunc(lambda obj: obj.expand().doit())
+        
+        new_res = PerturbationODESolution.from_vars_and_rhs(Matrix(list(self.dvars) +  list(self.dvars.diff(self.ivar)) ) , result)#.set_small_parameter(self.eps)
+        new_res.small_parameter = self.eps
+        new_res.ivar = self.ivar
+
+        return new_res
+
+
     @property
     def general_solution(self):
 
