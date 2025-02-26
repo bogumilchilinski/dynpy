@@ -994,6 +994,48 @@ class MultiTimeScaleSolution(ODESystem):
 
         return new_res
 
+    @property
+    def _consts_dict_in_time(self):
+
+        
+        order = self.order
+        
+        #print('my order',order)
+        sol_list = []
+        gen_sol = self._general_sol(order)
+        
+
+        
+        if self.eps in self.secular_eq:
+
+            ode2check = self.secular_eq[self.eps]#.as_first_ode_linear_system()
+
+            
+
+            C_const_sol = ode2check.solution.as_explicit_dict()
+            
+
+        else:
+            C_const_sol={}
+        # print('tut')
+
+            
+        # #display(*list(SimplifiedExpr._subs_container.values()))
+        # result = (sum(sol_list, Matrix(2*len(self.dvars)*[0])  )).applyfunc(lambda obj: obj.expand().doit())
+        
+        # new_res = PerturbationODESolution.from_vars_and_rhs(Matrix(list(self.dvars) +  list(self.dvars.diff(self.ivar)) ) , result)#.set_small_parameter(self.eps)
+        # new_res.small_parameter = self.eps
+        # new_res.ivar = self.ivar
+
+        scales_dict = {
+                                self.t_list[1]: self.eps  * self.ivar,
+                                self.t_list[0]: self.ivar
+                            }
+
+        C_const_sol = {key:const_func.subs(scales_dict)   for key,const_func in C_const_sol.items()}
+
+        return C_const_sol
+
 
     @property
     def general_solution(self):
