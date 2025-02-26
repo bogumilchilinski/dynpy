@@ -245,11 +245,11 @@ class NthOrderODEsApproximation(ODESystem):
         sec_funcs = self._secular_funcs
         #self._const_list
 
-        display('sec_funcs',sec_funcs)
+        ##display('sec_funcs',sec_funcs)
         CodeFlowLogger(sec_funcs,'sec_funcs',self)
         
         sec_conditions = self._secular_conditions
-        display('sec_conditions',sec_conditions)
+        #display('sec_conditions',sec_conditions)
         ivar = self._parameters[0]
         
         #sec_conditions =FirstOrderODESystem.from_ode_system(ODESystem([sec_conditions[1][1],sec_conditions[3][1]],dvars = self._const_list ,ivar=ivar  )).linearized().solution
@@ -1034,7 +1034,11 @@ class MultiTimeScaleSolution(ODESystem):
 
         C_const_sol = {key:const_func.subs(scales_dict)   for key,const_func in C_const_sol.items()}
 
-        return C_const_sol
+        new_res = AnalyticalSolution.from_vars_and_rhs(list(C_const_sol.keys()),list(C_const_sol.values()))#.set_small_parameter(self.eps)
+        new_res.ivar = self.ivar
+
+
+        return new_res
 
 
     @property
