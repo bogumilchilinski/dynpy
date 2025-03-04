@@ -3541,12 +3541,12 @@ class Picture(Figure, ReportModule):
         #Declaration of command vector used in call_code method
         self.command_vector = []
         
-        if self.image != None: self.command_vector.append("image = {}".format(self.image))
-        if self._position != None: self.command_vector.append("position = {}".format(self._position))
-        if self.caption != None: self.command_vector.append("caption = {}".format(self.caption))
+        if self.image != None: self.command_vector.append("image = \"{}\"".format(self.image))
+        if self._position != None: self.command_vector.append("position = \"{}\"".format(self._position))
+        if self.caption != None: self.command_vector.append("caption = \"{}\"".format(self.caption))
         if self.width != None: self.command_vector.append("width = {}".format(self.width))
         if self.height != None: self.command_vector.append("height = {}".format(self.height))
-        if self.marker != None: self.command_vector.append("marker = {}".format(self.marker))
+        if self.marker != None: self.command_vector.append("marker = \"{}\"".format(self.marker))
         
         vector = 'Picture('
         
