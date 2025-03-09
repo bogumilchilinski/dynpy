@@ -2709,11 +2709,7 @@ class ReportText(ReportModule):
 
         super().__init__()
 
-        if self.__class__._color:
-
-            self._text_formatted = TextColor(self.__class__._color, NoEscape(self._text))
-        else:
-            self._text_formatted = self._text
+        self._text_formatted = self._text
 
 
     def __call__(self, analysis):
@@ -2772,7 +2768,15 @@ class ReportText(ReportModule):
                 formatted_text = formatted_text.replace(dict_key, self._conjuction_dict[dict_key])
 
 
-        text_to_add =NoEscape(formatted_text)
+
+        if self.__class__._color:
+
+            text_to_add = TextColor(self.__class__._color, NoEscape(formatted_text))
+        else:
+            text_to_add =NoEscape(formatted_text)
+                
+                
+        
 
 #         text_to_add =NoEscape(self._text_formatted)
         

@@ -15,6 +15,7 @@ import base64
 import random
 import IPython as IP
 import numpy as np
+import pandas as pd
 import inspect
 
 from .principles import ComposedSystem, NonlinearComposedSystem,  base_frame, base_origin,cached_property, lru_cache, REPORT_COMPONENTS_LIST

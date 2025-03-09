@@ -698,32 +698,35 @@ class CaseTemplate(Document,ReportMethods):
 class ExampleTemplate(Guide):
     pass
 
-        
+
 class BPASTSPaper(Document):
-    
+
     latex_name = 'document'
     packages = [
-#                     Package('natbib', options=['numbers']),
+                    Package('natbib', options=['numbers']),
                     Package('booktabs'),
                     Package('float'),
                     Package('standalone'),
                     Package('siunitx'),
                     Package('bpasts', options=['accepted']),
+                    Package('bpasts'),
                     Package('t1enc'),
                     Package('amsmath'),
                     Package('amssymb'),
                     Package('amsfonts'),
                     Package('graphicx'),
                     Package('flushend'),
+                    Package('textcomp'),
+                    Package('xcolor'),
                     Package('hyperref',['colorlinks=true', 'allcolors=bpastsblue', NoEscape('pdfborder={0 0 0}')])
 
     ]
-    
+
     abtitle='Paper for BPASTS'
     abauthor='Authors'
     title='Basic title'
 
-    
+
     def __init__(self,
                  default_filepath='default_filepath',
                  title=None,

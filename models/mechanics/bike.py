@@ -8,6 +8,7 @@ from sympy.physics.vector import vpprint, vlatex
 from dynpy.models.mechanics.principles import ComposedSystem
 from dynpy.models.mechanics.disk import RollingDisk
 from dynpy.models.electric.elements import *
+from ..elements import GravitationalForce
 #from dynpy.models.electric.engine import *
 from functools import cached_property, lru_cache
 
@@ -27,6 +28,8 @@ class ReducedMotorbike(ComposedSystem):
     Ad=Symbol('A_d',positive=True) #air density
     Af=Symbol('A_f',positive=True) #front area of the vehicle
     T=Symbol('T')
+    f_t=Symbol("f_t")
+    g=Symbol("g")
 
     x=dynamicsymbols('x')
     phi=dynamicsymbols('phi')
@@ -43,6 +46,8 @@ class ReducedMotorbike(ComposedSystem):
                  Ad=None,
                  Af=None,
                  T=None,
+                 g=None,
+                 f_t=None,
                  phi=None,
                  ivar=Symbol('t'),
                  **kwargs):
@@ -58,6 +63,8 @@ class ReducedMotorbike(ComposedSystem):
         if Ad is not None: self.Ad=Ad
         if Af is not None: self.Af=Af
         if T is not None: self.T=T
+        if g is not None: self.g=g
+        if f_t is not None: self.f_t=f_t
         if phi is not None: self.phi=phi
 
         self.ivar = ivar
@@ -90,6 +97,8 @@ class ReducedMotorbike(ComposedSystem):
         self.front_wheel=RollingDisk(self.m_f, R=self.r, x=self.x, qs=self.qs, ivar = self.ivar)(label='Front wheel')
         self.engine_moment=Force(self.T,pos1 = self.angular_displacement,qs =self.qs,ivar=self.ivar)(label='Bike engine')
         self.drag_force=Force(-S.One/2*self.Ad*self.Cd*self.Af*(self.linear_velocity )**2,self.x,qs=self.qs,ivar=self.ivar)
+        #self.gravitationalforce = GravitationalForce(self.m_b+self.m_d+self.m_f+self.m_r, self.g, pos1=self.linear_displacement, qs = self.qs)
+        self.rolling_resistance=Force(-self.f_t*(self.m_b+self.m_d+self.m_f+self.m_r)*self.g,pos1 = self.linear_displacement,qs =self.qs,ivar=self.ivar)(label='Rolling resistance force')
         
         components['mass_bike'] = self.mass_bike
         components['mass_driver']=self.mass_driver
@@ -97,6 +106,8 @@ class ReducedMotorbike(ComposedSystem):
         components['front_wheel']=self.front_wheel
         components['engine_moment']=self.engine_moment
         components['drag_force']=self.drag_force
+        #components['gravitational_force'] = self.gravitationalforce
+        components['rolling_resistance'] = self.rolling_resistance
 
 
         return components
@@ -142,6 +153,8 @@ class ReducedMotorbike(ComposedSystem):
             self.Ad: r'Air density',
             self.Af: r'Frontal area of the motorcycle',
             self.x: r'The displacement of the system',
+            self.g: r'Gravitational acceleration',
+            self.f_t: r'Rolling resistance coefficient',
             vmax: 'The maximum speed'
         }
         return self.sym_desc_dict
@@ -219,6 +232,7 @@ class ReducedMotorbike(ComposedSystem):
             self.x: ureg.meter,
             self.x.diff(self.ivar): ureg.meter/ureg.second,
             self.x.diff(self.ivar,2): ureg.meter/ureg.second**2,
+            self.g:ureg.meter/ureg.second**2,
             
            }
         return units_dict
