@@ -1254,7 +1254,15 @@ SymbolsDescription.set_default_header('where:')
 display(ReportText('Symbols description is as follows: '))
 
 
-display(SymbolsDescription(expr=E_K*F))'''
+display(SymbolsDescription(expr=E_K*F))
+
+from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide 
+BasicsOfODESystemGuide();
+
+# Basics of DynSys usage based simulations are covered in guide to DynSys usage, use the followin call
+# from dynpy.utilities.documents.guides import UsageOfDynamicSystemsGuide 
+# UsageOfDynamicSystemsGuide()
+'''
 
         picture_str = '''sec_picture = Section('Section that presents pictures reporting')
 CurrentContainer(sec_picture)
@@ -2527,7 +2535,7 @@ doc = WutThesis('./output/thesis_name')
 
 
 ## CELL 2
-## Thesis introduction
+## Document introduction
 
 ```{python}    
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
@@ -2651,7 +2659,7 @@ doc = WutThesis('./output/thesis_name')
 
 
 ## CELL 2
-## Thesis introduction
+## Document introduction
 
 ```{python}    
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
@@ -3334,7 +3342,7 @@ class BeamerPresentation(Document):
                   #Package('titlesec'),
                   #Package('fancyhdr'),
                   #Command('pagestyle', arguments=['fancy']),
-                  Command('author', arguments=['Szymon Kozłowski & Bogumił Chiliński']),
+                  Command('author', arguments=['Kamil Jaśkielewicz & Bogumił Chiliński']),#['Szymon Kozłowski & Bogumił Chiliński']),
                   #Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
                   #Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
                   #Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),

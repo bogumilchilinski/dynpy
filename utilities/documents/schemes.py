@@ -737,3 +737,66 @@ class ForcedRollingBarScheme(TikZPicture):
 """
 
         return code
+    
+
+class TrolleyWithElasticPendulumScheme(TikZPicture):
+    def _scheme_desc(self):
+        code=r"""
+\tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.3cm,post length=0.3cm,segment length=0.3cm}]
+\tikzstyle{damper}=[thick,decoration={markings,  
+    mark connection node=dmp,
+    mark=at position 0.5 with 
+    {
+    \node (dmp) [thick,inner sep=0pt,transform shape,rotate=-90,minimum width=15pt,minimum height=3pt,draw=none] {};
+    \draw [thick] ($(dmp.north east)+(2pt,0)$) -- (dmp.south east) -- (dmp.south west) -- ($(dmp.north west)+(2pt,0)$);
+    \draw [thick] ($(dmp.north)+(0,-5pt)$) -- ($(dmp.north)+(0,5pt)$);
+    }
+    }, decorate]
+\tikzstyle{ground}=[fill,pattern=north east lines,draw=none,minimum width=0.75cm,minimum height=0.3cm]
+\node (M) [draw,outer sep=0pt,thick,minimum width=3cm, minimum height=1.5cm] {$m_1$};
+    \node (l1_label) at ($(M.south)+(305:2cm)$)   {$l_{1},k_{e}$};
+    \draw[thick,gray,dashed] (M.south) -- ++(-90:2.5);
+    \draw[spring,black] (M.south) --  ++(-70:3.5) coordinate (bob21) node[near end, right]{$m_{1}$};
+    \fill (bob21) circle (0.2);
+\node (ground) [ground,anchor=north west,xshift=-2.4cm,yshift=-0.25cm,minimum width=6cm] at (M.south west) {};
+\node (wall_1) [ground,anchor=east,xshift=-2cm,yshift=0cm,minimum height=2cm ,minimum width=0.4cm] at (M.west) {};
+\draw (wall_1.south east) -- (wall_1.north east);
+\draw (wall_1.south east) -- (ground.north east);
+\draw [thick] (M.south west) ++ (0.4cm,-0.125cm) circle (0.125cm)  (M.south east) ++ (-0.4cm,-0.125cm) circle (0.125cm);
+\draw [spring]  (M.180) ++ (0cm,0.5cm) -- ($ (wall_1.0 )+(0cm,0.5cm)  $);
+\draw [damper]  (M.180) ++ (0cm,-0.5cm) -- ($ (wall_1.0 )+(0cm,-0.5cm)  $);
+\draw [thin] (M.east) (0,1.5) -- (0,0.75);
+\draw [-latex,ultra thick] (M.east) ++ (-1.5cm,1.5cm) -- +(1.5cm,0cm);
+\node (k1) at (-2.5cm,1cm) {$k_1$};
+\node (c1) at (-2.5cm,0cm) {$c_1$};
+\node(ft) at (0.75cm,1.75cm) {$f(t)$};
+
+"""
+        return code
+
+
+class DoublePendulumMeasureScheme(TikZPicture):
+    def _scheme_desc(self):
+        code=r"""
+
+\node (B1) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center,] at (0,0) {Wymuszenie};
+\node (B2) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([xshift=4cm]B1.east) {Main member};
+\node (UAcc) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([xshift=4cm]B2.east) {Upper accelerometer};
+
+\draw [thick, ->] (B1.east) -- (B2.west);
+\draw [thick,double, ->] (B2.east) -- (UAcc.west);
+
+\node (B3) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([yshift=-4cm]B2.south) {Vibration absorber};
+
+\node (LAcc) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([yshift=-4cm]UAcc.south) {Lower accelerometer};
+
+\draw [thick, <->] (B2.south) -- (B3.north);
+\draw [thick,double, ->] (B3.east) -- (LAcc.west);
+
+\node (DAQ) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([yshift=-1.75cm]UAcc.south) {DAQ};
+
+\draw [thick, ->] (LAcc.north) -- (DAQ);
+\draw [thick, ->] (UAcc.south) -- (DAQ);
+"""
+
+        return code
