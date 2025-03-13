@@ -9,7 +9,7 @@ import itertools as itools
 import scipy.integrate as solver
 from sympy.utilities.lambdify import lambdify
 from ..utilities.adaptable import TimeSeries, TimeDataFrame,NumericalAnalysisDataFrame
-from scipy.optimize._numdiff import approx_derivative as derivative
+from scipy.misc import derivative
 from collections import ChainMap
 
 from IPython.display import display
