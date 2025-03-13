@@ -1,21 +1,15 @@
-from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Dict, ImmutableMatrix, latex#, Tuple
+from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Dict, ImmutableMatrix, latex
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
-#from sympy import *
-#import sympy as sym
 from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
 import itertools as itools
 import scipy.integrate as solver
 from sympy.utilities.lambdify import lambdify
-from ..utilities.adaptable import TimeSeries, TimeDataFrame,NumericalAnalysisDataFrame
-from scipy.misc import derivative
+from ..utilities.adaptable import TimeSeries, TimeDataFrame, NumericalAnalysisDataFrame
 from collections import ChainMap
-
 from IPython.display import display
-
 import sympy.physics.mechanics as me
-
 from sympy.simplify.fu import TR8, TR10, TR7, TR3
 import time
 import pandas as pd
