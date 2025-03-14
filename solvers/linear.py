@@ -956,18 +956,18 @@ ansol.plot()
 
 class ODESolution(AnalyticalSolution):
 
-    _ics = None    
+    _ics = None
     _default_ics = None
     _integration_consts = None #container for integration constants
     _ivar=Symbol('t')
     _dvars_str = None
-    _ivar0 = 0 
+    _ivar0 = 0
     _sol0 = 0
 
 
     def _assign_properties(self,obj):
         
-        #obj._lhs=self._lhs     
+        #obj._lhs=self._lhs
         obj._ivar = self.ivar
         #obj._rhs = self._rhs
         #obj._lhs = self._lhs
@@ -1368,7 +1368,13 @@ class ODESystem(AnalyticalSolution):
             
         return obj
 
-
+    
+    def is_solvable(self):
+        if len(self._dvars) == 1:
+            return True
+        else:
+            return False
+    
 #     def _as_msm(self):
 #         ode=self
 #         from dynpy.solvers.nonlinear import MultiTimeScaleSolution
@@ -2398,6 +2404,7 @@ class FirstOrderODESystem(ODESystem):
         """
 
         return self.approximated(n=1, x0=x0, op_point=op_point, hint=hint, label=label)
+
 
 
 #     def subs(self,*args,**kwargs):

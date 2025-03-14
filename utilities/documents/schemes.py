@@ -472,6 +472,88 @@ class HelicalGearVerticalModelScheme(TikZPicture):
     
     
 #Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
+class CompoundPendulumScheme2(TikZPicture):
+
+    def _scheme_desc(self):
+
+        code=r"""
+
+    % Osie
+    \draw[->] (-0.2,0) -- (4,0) node[right] {$x$};
+    \draw[->] (0,0.2) -- (0,-4) node[below] {$y$};
+    \node at (0.3,-1.7) {$\varphi$};
+
+    
+    % Wahadło obrócone
+    \begin{scope}[rotate=25]
+        \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=30, end angle=-190, radius=0.8] -- cycle;
+        
+    % Oś środka ciężkości
+         \draw[dashed] (0,0) -- (1,-5);
+         \filldraw[black] (0.5,-2.5) circle (1.5pt);
+
+    % Oznaczenia
+    \node at (0.8,-2.5) {$C$};
+    \node at (2,-4.5) {$m, I, l$};
+    %Moment wymuszający
+
+    \end{scope}
+    
+    % Strzałka
+    \draw[->] (0,-1.5) arc[start angle=-80,end angle=-50,radius=1.5];
+
+    
+    % Punkt zawieszenia bryły
+    \fill (0,0) circle (2pt);
+    
+
+
+"""
+
+        return code
+
+    
+#Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
+class ForcedCompoundPendulumScheme2(TikZPicture):
+
+    def _scheme_desc(self):
+
+        code=r"""
+
+       % Osie
+    \draw[->] (-0.2,0) -- (4,0) node[right] {$x$};
+    \draw[->] (0,0.2) -- (0,-4) node[below] {$y$};
+    \node at (0.3,-1.7) {$\varphi$};
+
+    
+    % Wahadło obrócone
+    \begin{scope}[rotate=25]
+        \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=30, end angle=-190, radius=0.8] -- cycle;
+        
+    % Oś środka ciężkości
+         \draw[dashed] (0,0) -- (1,-5);
+         \filldraw[black] (0.5,-2.5) circle (1.5pt);
+
+    % Oznaczenia
+    \node at (0.8,-2.5) {$C$};
+    \node at (2,-4.5) {$m, I, l$};
+    %Moment wymuszający
+    \node at (2.5,-3.4) {$M_0 \cos(\Omega  t)$};
+    \draw[->] (0.1,-3.5) arc[start angle=-130,end angle=-40,radius=1];
+    \end{scope}
+    
+    % Strzałka
+    \draw[->] (0,-1.5) arc[start angle=-80,end angle=-50,radius=1.5];
+
+    
+    % Punkt zawieszenia bryły
+    \fill (0,0) circle (2pt);
+    
+
+"""
+
+        return code
+
 class CompoundPendulumScheme(TikZPicture):
 
     def _scheme_desc(self):
@@ -548,6 +630,7 @@ class ForcedCompoundPendulumScheme(TikZPicture):
 
         return code
 
+    
     
 #Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
 class RollingHalfDiskScheme(TikZPicture):

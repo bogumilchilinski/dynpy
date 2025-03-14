@@ -30,6 +30,17 @@ imports_str = """
 #Create file Images
 #In file output create bibliography as .bib file (dynpy123)
 
+'''# File content begin
+@book{lutz2001programming,
+  title={Programming python},
+  author={Lutz, Mark},
+  year={2001},
+  publisher={" O'Reilly Media, Inc."}
+}
+@misc{NumPy, url={https://numpy.org/}, journal={NumPy}}
+@misc{pandas, url={https://pandas.pydata.org/}, journal={pandas}}
+'''# File content end
+
 from dynpy.utilities.report import *
 from dynpy.utilities.documents.document import WutThesis
 from dynpy.models.odes.linear import SpringMassDamperMSM
@@ -1216,28 +1227,31 @@ CurrentContainer(sec_equations)
 display(ReportText('This subsection provides calculation of equations of motion and solution of the system. '*10))
 
 ds1=dyn_sys.eoms
+ds1_eqns=ds1.as_eq_list()
 
 for eq1 in ds1.as_eq_list():
     display(SympyFormula(eq1.simplify()))
     
-ds2=dyn_sys.linearized()._ode_system.general_solution
-
-for eq2 in ds2.as_eq_list():
-    display(SympyFormula(eq2.simplify()))
+if ds1.is_solvable():
     
-ds3=dyn_sys.linearized()._ode_system.steady_solution
+    ds2=dyn_sys.linearized()._ode_system.general_solution
 
-for eq3 in ds3.as_eq_list():
-    display(SympyFormula(eq3.simplify()))
-    
-ds4=dyn_sys.linearized().eoms.solution
-ds4_eqns = ds4.as_eq_list()
+    for eq2 in ds2.as_eq_list():
+        display(SympyFormula(eq2.simplify()))
 
-for eq4 in ds4_eqns:
-    display(SympyFormula(eq4.simplify()))
+    ds3=dyn_sys.linearized()._ode_system.steady_solution
+
+    for eq3 in ds3.as_eq_list():
+        display(SympyFormula(eq3.simplify()))
+
+    ds4=dyn_sys.linearized().eoms.solution
+    ds4_eqns = ds4.as_eq_list()
+
+    for eq4 in ds4_eqns:
+        display(SympyFormula(eq4.simplify()))
 
 
-display(ReportText(f'Outcomes of governing equations {AutoMarker(ds4_eqns[0])} {AutoMarker(ds4_eqns[1])}) analysis.'))
+display(ReportText(f'Outcomes of governing equations {AutoMarker(ds1_eqns[0])} {AutoMarker(ds1_eqns[-1])}) analysis.'))
 
 sec_math_desc = Subsection('Section that contains all symbols descriptions')
 CurrentContainer(sec_math_desc)
@@ -1259,8 +1273,14 @@ display(ReportText('Symbols description is as follows: '))
 
 display(SymbolsDescription(expr=E_K*F))
 
+
+display(ObjectCode("""
+# Guide
 from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide 
 BasicsOfODESystemGuide();
+
+"""))
+
 
 # Basics of DynSys usage based simulations are covered in guide to DynSys usage, use the followin call
 # from dynpy.utilities.documents.guides import UsageOfDynamicSystemsGuide 
@@ -1287,13 +1307,14 @@ sec_ODESystem = Subsection('ODESystem simulation')
 CurrentContainer(sec_ODESystem)
 
 display(ReportText('Firstly create an ODESystem or import it from dynpy.modes.odes.linear.py'))
-display(ObjectCode('spring = SpringMassEps.from_reference_data()''))
+display(ObjectCode('spring = SpringMassEps.from_reference_data()'))
 
 display(ReportText('Secondly solve the equation using solution method:'))
 display(ObjectCode('spring_sol = spring.solution'))
 
 display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
-spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()
+data_spring = dyn_sys.get_numerical_parameters()
+#ds1.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()
 
 # MSM_sim = Subsection('MSM simulation')
 # CurrentContainer(MSM_sim)
@@ -2519,7 +2540,18 @@ list_of_guides()
 ```{python}
 #Create file output
 #Create file Images
-#In file output create bibliography as .bib file (dynpy123)
+#In file output create bibliography as .bib file (dynpy123) with the following content:
+
+'''# File content begin
+@book{lutz2001programming,
+  title={Programming python},
+  author={Lutz, Mark},
+  year={2001},
+  publisher={" O'Reilly Media, Inc."}
+}
+@misc{NumPy, url={https://numpy.org/}, journal={NumPy}}
+@misc{pandas, url={https://pandas.pydata.org/}, journal={pandas}}
+'''# File content end
 
 from dynpy.utilities.report import *
 from dynpy.utilities.documents.document import WutThesis
@@ -2587,7 +2619,7 @@ doc = WutThesis(thesis_name)
 ### Select one bibligraphy managment system
 ####### BibLatex
 
-doc.preamble.append(Package('biblatex',arguments=["backend=biber","sorting=none"]))
+doc.preamble.append(Package('biblatex',["backend=biber","sorting=none"]))
 doc.preamble.append(Command('addbibresource','elementy_bibliagrafia.bib'))
 ####### Natbib
 #doc.preamble.append(Package('natbib')
@@ -2655,6 +2687,18 @@ doc.generate_pdf(clean_tex=True)
 #Create file output
 #In file output create bibliography as .bib file
 
+'''# File content begin
+@book{lutz2001programming,
+  title={Programming python},
+  author={Lutz, Mark},
+  year={2001},
+  publisher={" O'Reilly Media, Inc."}
+}
+@misc{NumPy, url={https://numpy.org/}, journal={NumPy}}
+@misc{pandas, url={https://pandas.pydata.org/}, journal={pandas}}
+'''# File content end
+
+
 from dynpy.utilities.report import *
 from dynpy.utilities.templates.document import WutThesis
 
@@ -2664,7 +2708,7 @@ doc = WutThesis('./output/thesis_name')
 ## CELL 2
 ## Document introduction
 
-```{python}    
+
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -2682,7 +2726,8 @@ display(ReportText('This subsection provides state of the art. '*100))
 sub_conclusions = Subsection('Conclusions')
 CurrentContainer(sub_conclusions)
 display(ReportText('This subsection provides methodology. '*100))
-```
+
+
 ## CELL 3
 ## Conclusion
  
@@ -2697,7 +2742,7 @@ display(ReportText('This subsection provides methodology. '*100))
 ## CELL 4
 ## Document
 
-```{python}
+
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
