@@ -883,3 +883,68 @@ class DoublePendulumMeasureScheme(TikZPicture):
 """
 
         return code
+
+# Created by Anna Mackojc
+class ColouredDoublePendulumMeasureScheme(TikZPicture):
+    def _scheme_desc(self):
+        code=r"""
+
+\definecolor{excitationColor}{RGB}{255, 102, 102} % Red
+\definecolor{mainColor}{RGB}{102, 178, 255} % Blue
+\definecolor{accColor}{RGB}{255, 178, 102} % Orange
+\definecolor{ptmdColor}{RGB}{153, 204, 102} % Green
+\definecolor{daqColor}{RGB}{204, 153, 255} % Purple
+
+% Nodes
+\node (B1) [draw, fill=excitationColor!30, thick, minimum width=3.2cm, minimum height=1.2cm, align=center, rounded corners] at (0,0) {\textbf{Excitation}};
+
+\node (B2) [draw, fill=mainColor!30, thick, minimum width=3.2cm, minimum height=1.2cm, align=center, rounded corners] at ([xshift=4cm]B1.east) {\textbf{Main Member}};
+
+\node (UAcc) [draw, fill=accColor!30, thick, minimum width=3.2cm, minimum height=1.2cm, align=center, rounded corners] at ([xshift=4cm]B2.east) {\textbf{Upper Accelerometer}};
+
+% Arrows
+\draw [thick, ->, >=latex, black] (B1.east) -- (B2.west);
+\draw [thick, double, ->, >=latex, black] (B2.east) -- (UAcc.west);
+
+% Vibration Absorber
+\node (B3) [draw, fill=ptmdColor!30, thick, minimum width=3.2cm, minimum height=1.2cm, align=center, rounded corners] at ([yshift=-4cm]B2.south) {\textbf{Vibration Absorber (PTMD)}};
+
+\node (LAcc) [draw, fill=accColor!30, thick, minimum width=3.2cm, minimum height=1.2cm, align=center, rounded corners] at ([yshift=-4cm]UAcc.south) {\textbf{Lower Accelerometer}};
+
+% Arrows
+\draw [thick, <->, >=latex, black] (B2.south) -- (B3.north);
+\draw [thick, double, ->, >=latex, black] (B3.east) -- (LAcc.west);
+
+% DAQ System
+\node (DAQ) [draw, fill=daqColor!30, thick, minimum width=3.2cm, minimum height=1.2cm, align=center, rounded corners] at ([yshift=-1.75cm]UAcc.south) {\textbf{DAQ System}};
+
+% Connections to DAQ
+\draw [thick, ->, >=latex, black] (LAcc.north) -- (DAQ);
+\draw [thick, ->, >=latex, black] (UAcc.south) -- (DAQ);
+"""
+
+        return code
+
+
+# Created by Anna Mackojc
+class SegmentBeamScheme(TikZPicture):
+    def _scheme_desc(self):
+        code=r"""
+
+     \coordinate (origo) at (0,0);
+     \coordinate (pivot) at (1,5);
+
+    % draw axes
+    \fill[black] (origo) circle (0.05);
+    \draw[thick,gray,->] (origo) -- ++(15,0) node[black,right] {$x$};
+    \draw[thick,gray,->] (origo) -- ++(0,4) node (mary) [black,right] {$y$};
+
+    \filldraw[fill=blue!30, draw=black, thick, rotate around = {-30:(origo)}] (origo) rectangle ++ (3,0.25) coordinate (bob1) node[near end, below right]{};
+    \filldraw[fill=blue!30, draw=black, thick, rotate around = {-90:(origo)}] (bob1) ++ (0,0) rectangle ++ (0.25,5) coordinate (bob2) node[anchor=north east]{};
+    \filldraw[fill=blue!30, draw=black, thick, rotate around = {30:(origo)}] (bob2) ++ (0.15,-.05) rectangle ++ (3,0.25) coordinate (bob3) node[near end, right]{};
+
+    \draw [shift={(bob1)},yshift=-5,domain=2*pi+310/180*pi:295/180*pi+7*pi,variable=\t,smooth,samples=75] plot ({\t r}: {0.0006*\t*\t});
+    \draw [shift={(bob2)},xshift=1,yshift=4,domain=2*pi+315/180*pi:305/180*pi+7*pi,variable=\t,smooth,samples=75] plot ({\t r}: {0.0006*\t*\t});
+"""
+        return code
+    
