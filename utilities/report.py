@@ -1508,7 +1508,8 @@ class SimulationalBlock(ReportModule):
 
         ndp.add_caption(
             NoEscape(
-                f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''
+               fr'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''
+
             ))
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
         #ndp.append(Label(self.marker_dict[coord]))
@@ -2126,7 +2127,8 @@ class AccelerationComparison(ReportModule):
                     height=NoEscape(r'7cm'),
                     width=NoEscape(r'12cm'),
                     y_axis_description=NoEscape(
-                        f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'
+                        fr',ylabel=${vlatex(coord)}$,y unit={y_unit_str}, x unit=\si{{\second}}'
+
                     ),
                     legend_pos=legend_pos + ',' +
                     f'legend columns= {legend_columns}',
@@ -2180,7 +2182,7 @@ class AccelerationComparison(ReportModule):
                     height=NoEscape(r'6cm'),
                     width=NoEscape(r'0.9\textwidth'),
                     y_axis_description=NoEscape(
-                        f',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'
+                        fr',ylabel=${vlatex(coord)}$,y unit={y_unit_str} ,x unit=\si{{\second}}'
                     ),
                     legend_pos=legend_pos + ',' +
                     f'legend columns= {legend_columns}',
@@ -2235,7 +2237,7 @@ class AccelerationComparison(ReportModule):
             width='11cm')
         ndp.add_caption(
             NoEscape(
-                f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''
+                fr'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''
             ))
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
         #ndp.append(Label(self.marker_dict[coord]))
@@ -2271,7 +2273,7 @@ class AccelerationComparison(ReportModule):
                           width='11cm')
         ndp.add_caption(
             NoEscape(
-                f'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''
+                fr'''Summary plot: simulation results for parameter \({latex(analysis._parameter)}\)'''
             ))
         #ndp.add_caption(NoEscape(f'''Summary plot: simulation results for \({coord}\) coodinate and parameter \({latex(analysis._parameter)}\) values: {prams_vals_str} {units_dict[par]:~Lx}'''))
         #ndp.append(Label(self.marker_dict[coord]))
@@ -3548,7 +3550,7 @@ class Picture(Figure, ReportModule):
         if self.image != None: self.command_vector.append("image = \"{}\"".format(self.image))
         if self._position != None: self.command_vector.append("position = \"{}\"".format(self._position))
         if self.caption != None: self.command_vector.append("caption = \"{}\"".format(self.caption))
-        if self.width != None: self.command_vector.append("width = {}".format(self.width))
+        if self.width != None:  self.command_vector.append('width = NoEscape(r"{}")'.format(self.width))
         if self.height != None: self.command_vector.append("height = {}".format(self.height))
         if self.marker != None: self.command_vector.append("marker = \"{}\"".format(self.marker))
         
@@ -4741,10 +4743,11 @@ class AutoBreak(Environment):
             
         elif isinstance(expr, LessThan):
 
-            elems = [expr.lhs, Symbol('\leq'), expr.rhs]
+            elems = [expr.lhs, Symbol(r'\leq'), expr.rhs]
+
         elif isinstance(expr, GreaterThan):
 
-            elems = [expr.lhs, Symbol('\geq'), expr.rhs]
+            elems = [expr.lhs, Symbol(r'\geq'), expr.rhs]
             
         elif isinstance(expr, StrictLessThan):
 
@@ -4784,7 +4787,7 @@ class AutoBreak(Environment):
 
         for no, obj in enumerate(terms):
 
-            if terms[no - 1] == Symbol('=') or terms[no - 1] == Symbol('>') or terms[no - 1] == Symbol('\leq') or terms[no - 1] == Symbol('\geq') or terms[no - 1] == Symbol('<'):
+            if terms[no - 1] == Symbol('=') or terms[no - 1] == Symbol('>') or terms[no - 1] == Symbol(r'\leq') or terms[no - 1] == Symbol(r'\geq') or terms[no - 1] == Symbol('<'):
                 new_terms += [Symbol('\n'),obj,Symbol('\n')]
 
             elif isinstance(obj, Mul) and  (
