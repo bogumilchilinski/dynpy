@@ -4,11 +4,8 @@ from pylatex import (Document, Package,
                      #Section, Subsection, Subsubsection, Itemize,  HorizontalSpace, Description, Marker
                     )
 
-
-#from pylatex.section import Paragraph, Chapter
 from pylatex.utils import (#italic, 
                            NoEscape)
-
 
 
 class TikzCaSCStandalone(Document):
