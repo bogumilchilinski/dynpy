@@ -1,1 +1,1 @@
-{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-interaction=nonstopmode","-output-directory=/tmp/f7c713ab31f1441f0dbf010fac16d0598d32b6ee","resistance_circuit.tex"]}
+{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-interaction=nonstopmode","-output-directory=/tmp/eff51350d701c1c5b2a3dd6c9c0ae596f541726f","resistance_circuit.tex"]}

@@ -253,6 +253,8 @@ spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_spa
 
 veryfication_str = '''
 from sympy import *
+from dynpy.utilities.adaptable import *
+from dynpy.utilities.report import CurrentContainer, ReportText
 from pint import UnitRegistry
 ureg = UnitRegistry()
 
@@ -265,6 +267,7 @@ work = Symbol('W')
 unit_dict = {
 t: ureg.second,
 power: ureg.watt,
+work: ureg.joule,
 }
 
 LatexDataFrame.set_default_units(unit_dict)
@@ -1331,7 +1334,8 @@ data_spring = dyn_sys.get_numerical_parameters()
         veryfication_str = '''from sympy import *
 from pint import UnitRegistry
 ureg = UnitRegistry()
-
+from dynpy.utilities.adaptable import *
+from dynpy.utilities.report import CurrentContainer, ReportText
 import pandas as pd
 
 t = Symbol('t')
@@ -1341,6 +1345,7 @@ work = Symbol('W')
 unit_dict = {
 t: ureg.second,
 power: ureg.watt,
+work: ureg.joule,
 }
 
 LatexDataFrame.set_default_units(unit_dict)
@@ -1359,9 +1364,13 @@ display(ReportText('Description of verifications concept. '*200))
 ## import of external data if path "./data_from_ml/test_1.csv" exists
 
 #test_data = './data_from_ml/test_1.csv'
-#df = pd.read_csv(filename, header = None)
+#df = pd.read_csv(test_data, header = None)
+
+#data_tab = TimeDataFrame(df).to_latex_dataframe().reported(caption='Caption')
+#graph=data_tab.iloc[:,[1]]
 
 ## 2st CASE
+## Creating graph from a
 df = pd.DataFrame({t:[0,1,2],'a':[2,3,4],'b':[8,7,6]}).set_index(t)
 
 df_cols = df.set_axis([power,work],axis=1)
@@ -1369,7 +1378,41 @@ df_cols = df.set_axis([power,work],axis=1)
 data_tab = TimeDataFrame(df_cols).to_latex_dataframe().reported(caption='Caption')
 graph = TimeDataFrame(df_cols).to_pylatex_tikz().in_figure(caption='Caption')
 
+## 3rd CASE
+## dictionary data presentation in DataFrame
+# dictionary ={  
+#     power:300000,
+#     work:5000
+# }   
+# display(
+#     LatexDataFrame.formatted(
+#         data=dictionary, #import data from a dictionary
+#         index=['Value'] #set rows title
+#     ).map(lambda x: f'${latex(x)}$')
+#     .rename_axis('Parameter', axis=1) #set name for a column
+#     .transpose()  # This swaps rows and columns, making the DataFrame vertical
+#     .reported(caption='A caption for your data frame')
+# )
 
+## 4th CASE
+## creating a graph based on simulation
+#from dynpy.models.mechanics import ForcedSpringMassSystem as DynamicSys
+#F=DynamicSys.F
+#g=DynamicSys.g
+#m=DynamicSys.m
+#k=DynamicSys.k
+#slownik ={  
+#F:2,
+#g:10,
+#m:5,
+#k:100,
+#}
+#t_span = np.linspace(0.0,1,30)
+#sym=DynamicSys().eoms.subs(slownik)
+#wynik= sym.numerized(backend='numpy').compute_solution(t_span,[0.0,0.0])#.plot()
+#wynik_tab = TimeDataFrame(wynik).to_latex_dataframe().reported(caption='Caption')
+#display(wynik_tab)
+#wynik.plot()
 
 display(data_tab)
 
@@ -1409,7 +1452,7 @@ doc = WutThesis(thesis_name)
 ### Select one bibligraphy managment system
 ####### BibLatex
 
-doc.preamble.append(Package('biblatex',arguments=["backend=biber","sorting=none"]))
+doc.preamble.append(Package('biblatex',["backend=biber","sorting=none"]))
 doc.preamble.append(Command('addbibresource','elementy_bibliagrafia.bib'))
 ####### Natbib
 #doc.preamble.append(Package('natbib')
@@ -1420,15 +1463,22 @@ doc.preamble.append(Package('siunitx'))
 
 # TOC
 
-doc.append(Command('includepdf{./Images/Front_Page.pdf}')) #includes front page
-doc.append(Command('pagestyle{plain}'))
-doc.append(Command('cleardoublepage'))
-doc.append(Command('includepdf{./Images/oswiadczenie_autora_pracy.pdf}'))
-doc.append(Command('pagestyle{plain}'))
-doc.append(Command('cleardoublepage'))
-doc.append(Command('includepdf{./output/oswiadczenie_biblioteczne.pdf}'))
-doc.append(Command('pagestyle{plain}'))
-doc.append(Command('cleardoublepage'))
+###############################################################################
+######### UNCOMMENT IT IF YOU NEED ADD WUT THESIS TITLE PAGES
+
+# doc.append(Command('includepdf{./Images/Front_Page.pdf}')) #includes front page
+# doc.append(Command('pagestyle{plain}'))
+# doc.append(Command('cleardoublepage'))
+# doc.append(Command('includepdf{./Images/oswiadczenie_autora_pracy.pdf}'))
+# doc.append(Command('pagestyle{plain}'))
+# doc.append(Command('cleardoublepage'))
+# doc.append(Command('includepdf{./output/oswiadczenie_biblioteczne.pdf}'))
+# doc.append(Command('pagestyle{plain}'))
+# doc.append(Command('cleardoublepage'))
+
+###############################################################################
+###############################################################################
+
 
 doc.append(Command('tableofcontents')) #adds TOC
 
@@ -1445,7 +1495,7 @@ doc.append(sec_simulation)
 
 doc.append(sec_picture)
 doc.append(sec_verification)
-doc.append(sec_tables)
+#doc.append(sec_tables)
 doc.append(sec_symbols)
 doc.append(sec_conclusion)
 
@@ -1474,7 +1524,7 @@ doc.append(Command('pagestyle{plain}'))
 doc.append(Command('newpage'))
 
 # Generating file
-doc.generate_pdf(clean_tex=True)'''        
+doc.generate_pdf(clean_tex=False)'''        
         
 #         preliminary_str=(f"""
 # =======
