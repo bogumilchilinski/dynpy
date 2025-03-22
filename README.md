@@ -78,6 +78,7 @@ Pendulum().interactive_preview()
 ```
 
 ## 2. Creating First Document / Report
+
 ```python
 from dynpy.utilities.report import *
 from dynpy.utilities.documents.guides import Guide
@@ -96,59 +97,71 @@ doc.generate_pdf(clean_tex=True)
 ```
 
 ## 3. Looking for some help
+
 ```python
 from dynpy.utilities.creators import list_of_guides
 list_of_guides()
 ```
+
 ### Defining Report Content
 
 #### Creating a section of document
+
 ```pyton
 section = Section('Sample section name')
 ```
 
 #### Creating a subsection of document
+
 ```pyton
 subsection = Subsection('Sample subsection name');
 ```
 
 #### Selecting a section or subsection to add content to
+
 ```pyton
 section = Section('Sample section name')
 CurrentContainer(section);
 ```
 
 #### Adding text to section via ReportText
+
 ```pyton
 display(ReportText('Sample text'));
 ```
 
 #### Adding text to section via Markdown
+
 ```pyton
 display(Markdown(
 '''
-Sample text 
+Sample text
 '''
 ))
 ```
 
 #### Adding an image into the section
+
 ```pyton
 Picture('/route/to/image', caption = 'Sample caption')
 ```
 
 #### Appending sections and subsections into the document
+
 ```python
 doc.append(sample_section_name)
 ```
 
 ### Incorporating Simulation Results
+
 ```python
 # Add simulated data here
 ```
 
 ### Adding Visualizations, Formulas and Data Tables
+
 Creating plot and adding it to document
+
 ```python
 import matplotlib.pyplot as plt
 
@@ -160,6 +173,7 @@ Picture('./plot.png', caption='Sample plot')
 ```
 
 Adding formula to the document
+
 ```python
 d, r, fib, fia, thetaa, thetab = symbols('d r varphi_B varphi_A phi_A phi_B');
 
@@ -169,6 +183,7 @@ display(SympyFormula(harvestine_formula))
 ```
 
 Creating table and adding it to document
+
 ```python
 from dynpy.utilities.adaptable import *
 
@@ -214,11 +229,15 @@ predicted_travel_time.append(tabelka.reported(caption="Travel Time Data Table"))
 ```
 
 ## 3. Exporting Reports
+
 ### Supported Formats
+
 - **PDF**
 - **LaTeX**
 - **Markdown**
+
 ### Exporting Procedures
+
 ```python
 doc.generate_pdf(clean_tex=True)
 ```
@@ -226,6 +245,7 @@ doc.generate_pdf(clean_tex=True)
 ## 4. Practical Examples
 
 ### Generating a Simple Report
+
 ```python
 from dynpy.utilities.report import *
 from dynpy.utilities.templates.document import Guide
@@ -263,11 +283,13 @@ doc.generate_pdf(clean_tex=True)
 ## 5. Customization Options (Advanced)
 
 ### Formatting Text and Equations
+
 ```python
 ///
 ```
 
 ### Customizing Layout and Styles
+
 ```python
 ///
 ```
@@ -275,32 +297,41 @@ doc.generate_pdf(clean_tex=True)
 # Custom styles
 
 ### Utilizing Templates for Consistency
+
 ```python
 ///
 ```
 
 ### Use predefined templates
+
 ```python
 ///
 ```
 
 # Simulation Engine
+
 ```python
 ///
 ```
 
 # Data Handling
+
 ```python
 ///
 ```
 
 # Dynamic Modeling
+
 ```python
 ///
 ```
+
 # Installation & Setup (Optional, for Local Development)
+
 ## Requirements
+
 Python Version: **Python 3.8+**. Required Libraries:
+
 - **numpy**
 - **pylatex**
 - **sympy**
@@ -310,12 +341,15 @@ Python Version: **Python 3.8+**. Required Libraries:
 - **pint**
 - **pypandoc**
 - **wand**
+
 ## Manual Installation
+
 ```bash
 pip install numpy pylatex sympy pandas matplotlib scipy pint pypandoc wand
 
-git clone https://github.com/bogumilchilinski/dynpy.git
+pip install dynpyds
 ```
 
 # Licensing Information
+
 DynPy is distributed under an open-source license. Refer to the LICENSE file for details.
