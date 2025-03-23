@@ -433,6 +433,35 @@ class ComposedSystem(HarmonicOscillator):
     def as_force(self):
         return self._as_force()
 
+    def getAdditionalInfo(self):
+        """Prints basic documentation for the system."""
+        print("\n📘 SYSTEM OVERVIEW")
+        print("=" * 50)
+
+        print(f"📌 System name: {self.__class__.__name__}")
+
+        if hasattr(self, 'symbols_description'):
+            symbol_desc = self.symbols_description()
+            print("\n🔣 Symbols and descriptions:")
+            for sym, desc in symbol_desc.items():
+                print(f" - {sym} : {desc}")
+        else:
+            print("\n(No symbol descriptions found)")
+
+        if hasattr(self, 'get_default_data'):
+            data = self.get_default_data()
+            if data:
+                print("\n📦 Default parameter values:")
+                for sym, values in data.items():
+                    print(f" - {sym} : {values}")
+            else:
+                print("\n(No default parameter data found)")
+
+        print("=" * 50 + "\n")
+
+
+
+
 class NonlinearComposedSystem(ComposedSystem):
 
     def frequency_response_function(self,
@@ -572,6 +601,10 @@ class SpringMassSystem(ComposedSystem):
         }
 
         return self.sym_desc_dict
+    
+
+
+
 
 
 class LagrangeIBlocksOnInclinedPlane(ComposedSystem):
@@ -1046,4 +1079,7 @@ class KinematicClutchWithSprings(ComposedSystem):
 
         kd = Symbol('k_d', positive=True)
         h = Symbol('h', positive=True)
-        return (2 * self.max_dynamic_bearing_force()) / (kd * h)            
+        return (2 * self.max_dynamic_bearing_force()) / (kd * h)
+    
+
+
