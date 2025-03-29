@@ -2251,7 +2251,7 @@ class ODESystem(AnalyticalSolution):
         odes=Eq(self.lhs[0]-self.rhs[0],0)
         return classify_ode(odes,self.dvars[0])
     
-### METODY - Karolina, do przejrzenia i wgl do zastanowienia czy chcemy to czy nie, na pewno dvars symbols sa must have no i te dwie ostatnie one ciagna z fode wsm##
+    ### METODY - Karolina, do przejrzenia i wgl do zastanowienia czy chcemy to czy nie, na pewno dvars symbols sa must have no i te dwie ostatnie one ciagna z fode wsm##
     def _eqn_coeffs(self):
 
         system = self
@@ -2292,7 +2292,7 @@ class ODESystem(AnalyticalSolution):
     def _roots_list(self):
         return list(self._eigenvalues())
     
-## koniec metod karoliny pozdraiwam ##
+    ## koniec metod karoliny pozdraiwam ##
 
     def _get_code(self):
         
@@ -2998,9 +2998,9 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     
             top_left_minor,top_right_minor,bottom_right_minor,bottom_left_minor = split_matrix(shape)
     
-            if top_left_minor == Matrix([[0,0],[0,0]]) and top_right_minor == Matrix([[-1,0],[0,-1]]) and bottom_right_minor == Matrix([0,0],[0,0]):
+            if top_left_minor == Matrix([[0,0],[0,0]]) and top_right_minor == Matrix([[-1,0],[0,-1]]) and bottom_right_minor == Matrix([[0,0],[0,0]]):
     
-                bottom_right_minor == Matrix([0,0],[0,0])
+                bottom_right_minor == Matrix([[0,0],[0,0]])
     
                 return self._mdof_undamped_osc_gen_sol
     
@@ -3070,25 +3070,33 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
     
         modes, eigs = bottom_left_minor.diagonalize()
     
-    
         Y_mat = Matrix(self.dvars)
     
         #diff_eqs = Y_mat.diff(self.ivar, 2) + eigs * Y_mat
     
         t_sol = self.ivar
-    
-        solution = [(C_list[2 * i] * modes[:, i] *
-                     sin(im(eigs[2 * i + 1, 2 * i + 1]).doit() * t_sol) +
-                     C_list[2 * i + 1] * modes[:, i] *
-                     cos(im(eigs[2 * i + 1, 2 * i + 1]).doit() * t_sol)) *
-                    exp(re(eigs[i, i]).doit() * t_sol)
-                    for i, coord in enumerate(Integer(self.dvars/2))]
         
-        solution_diff =  [ diff(elem,self.ivar)  for elem in solution]
-        
-        sum_sol = sum(Matrix(solution+solution_diff), Matrix([0] * len(Y_mat)))
+#         display(C_list,modes,eigs,self.dvars)
     
-        return ODESolution.from_vars_and_rhs(self.dvars,sum_sol )
+        solution = [(C_list[2*i] * modes[:, i] *
+                     sin(sqrt(re(eigs[i ,  i ])).doit() * t_sol) +
+                     C_list[ 2*i + 1 ] * modes[:, i] *
+                     cos(re(eigs[ i ,  i ]).doit() * t_sol)) *
+                    exp(im(eigs[i, i]).doit() * t_sol)
+                    for i in (range(Integer((len(self.dvars)/2))))]
+        
+#         print('sol')
+#         display(solution)
+        
+        solution_mat = sum(solution,Matrix([0]*rows))
+        
+        solution_diff =  diff(solution_mat,self.ivar)  
+        
+        sum_sol = Matrix(list(solution_mat)+list(solution_diff))
+        
+#         display(sum_sol)
+    
+        return ODESolution.from_vars_and_rhs(self.dvars,sum_sol)
     
     @cached_property
     def _sdof_osc_gen_sol(self):

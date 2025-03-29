@@ -129,17 +129,16 @@ class DCMotor(ComposedSystem):
     
     def get_default_data(self):
         default_data_dict = {
-            self.U_z: [10],
-            self.R_w: [2],
-            self.L_w: [0.1],
-            self.k_e: [0.1],
-            self.k_m: [0.1],
-            self.J: [0.1],
-            self.B: [0.5],
-            self.M_obc: [0.2]
+                 self.U_z: [10],
+                 self.R_w: [2],
+                 self.L_w: [0.1],
+                 self.k_e: [0.1],
+                 self.k_m: [0.1],
+                 self.J: [0.1],
+                 self.B: [0.5],
+                 self.M_obc: [0.2]
         }
         return default_data_dict
-    
 
     def _dimensionless_ode(self):
         
