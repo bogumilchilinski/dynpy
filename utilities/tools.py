@@ -437,3 +437,36 @@ class DynsysCheckerTable:
     
     def get_table(self):
         return self.df.replace({1.0: True, 0.0: False}).replace({True: 'Correct', False: 'To Improve'}).replace({'True': 'Correct', 'False': 'To Improve'})
+
+class AiInterface:
+    def __init__(self, api_key):
+        import os
+        import pathlib
+        import google.generativeai as genai
+
+        genai.configure(api_key)
+
+        # Create the model
+        generation_config = {
+            "temperature": 1.9,
+            "top_p": 0.95,
+            "top_k": 48,
+            "max_output_tokens": 8192,
+            "response_mime_type": "text/plain",
+        }
+
+        model = genai.GenerativeModel(
+            model_name="gemini-2.0-flash-exp",
+            generation_config=generation_config,
+        )
+
+    def chat(self, prompt):
+
+        chat_session = model.start_chat(
+            history=[
+            ]
+        )
+
+        response = chat_session.send_message(self.prompt)
+
+        return response.text

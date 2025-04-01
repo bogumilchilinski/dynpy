@@ -350,13 +350,12 @@ doc.preamble.append(Package('siunitx'))
 
 # TOC
 
-doc.append(Command('includepdf{./Images/Front_Page.pdf}')) #includes front page
+doc.append(Command('includepdf{./Images/Front_Page.pdf}')) #includes front page##path shouldn't be changed, it must look like ./Images/Your_file.pdf
+doc.append(Command('cleardoublepage'))
+doc.append(Command('includepdf{./Images/oswiadczenie_autora_pracy.pdf}'))#path shouldn't be changed, it must look like ./Images/Your_file.pdf
 doc.append(Command('pagestyle{plain}'))
 doc.append(Command('cleardoublepage'))
-doc.append(Command('includepdf{./Images/oswiadczenie_autora_pracy.pdf}'))
-doc.append(Command('pagestyle{plain}'))
-doc.append(Command('cleardoublepage'))
-doc.append(Command('includepdf{./output/oswiadczenie_biblioteczne.pdf}'))
+doc.append(Command('includepdf{./output/oswiadczenie_biblioteczne.pdf}'))#path shouldn't be changed, it must look like ./Images/Your_file.pdf
 doc.append(Command('pagestyle{plain}'))
 doc.append(Command('cleardoublepage'))
 
