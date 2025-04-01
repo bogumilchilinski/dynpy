@@ -568,6 +568,7 @@ class DataAxis(Axis, ReportModule):
                         f'legend pos={self._legend_pos}',
                        NoEscape('legend style={font=\small}'),
                        NoEscape(f'legend columns={self._default_columns_no}'),
+                       NoEscape('/pgf/number format/.cd,1000 sep={}'),
 
                        #NoEscape('at={(0,0)}'),
 
@@ -1111,6 +1112,8 @@ class TikZPlot(TikZ, ReportModule):
             obj._caption = caption
 
         standalone_plot = tikz.TikzStandalone()
+        
+        
         standalone_plot.append(self)
 
         filename = self.filename
@@ -1236,6 +1239,7 @@ class DataMethods:
         if template is not None:
             cls._template = template
         return cls
+
 
     @classmethod
     def set_default_label_fontsize(cls, fontsize=None):

@@ -3238,7 +3238,11 @@ class DampedPendulumWithVaryingStiffness(ComposedSystem):
         self.gravity_1 = GravitationalForce(self.m2, self.g, pos1=-self.y_2, qs=[self.phi_2])
         self.damper_1 = Damper(self.b,self.phi_1,qs=[self.phi_1])
         self.damper_2 = Damper(self.b,self.phi_2,qs=[self.phi_2])
-        self.force = Force( (1-exp(-self.ivar/self.tau0))*self.F*sin(self.omega*self.ivar)*self.l_1,self.phi_1,qs=[self.phi_1])
+        #self.force = Force( (1-exp(-self.ivar/self.tau0))*self.F*sin(self.omega*self.ivar)*self.l_1,self.phi_1,qs=[self.phi_1])
+        
+        self.force_thrust = Force(self.F*(1+sin(self.omega*self.ivar)),self.x_2,qs=[self.phi_1, self.phi_2])
+        self.force_lateral = Force(self.F*cos(self.omega*self.ivar),self.y_2,qs=[self.phi_1, self.phi_2])
+        
         
         self.spring = Spring(self.k,self.phi_1,self.phi_2,qs=[self.phi_1,self.phi_2])
         self.damper_c = Damper(self.b,self.phi_1,self.phi_2,qs=[self.phi_1,self.phi_2])
@@ -3249,7 +3253,8 @@ class DampedPendulumWithVaryingStiffness(ComposedSystem):
         components['gravity_1'] = self.gravity_1
         components['damper_1'] = self.damper_1
         components['damper_2'] = self.damper_2
-        components['force'] = self.force
+        components['force_thrust'] = self.force_thrust
+        components['force_lateral'] = self.force_lateral
         components['spring'] = self.spring
         components['damper_c']  = self.damper_c
 

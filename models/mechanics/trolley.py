@@ -910,7 +910,7 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
         self._material_point_1=MaterialPoint(self.m_p,self.x+(self.l+self.u+self.u_0)*sin(self.phi),qs=self.qs)
         self._material_point_2=MaterialPoint(self.m_p,(self.l+self.u+self.u_0)*cos(self.phi),qs=self.qs)
         self._gravity = GravitationalForce(self.m_p, self.g, -(self.l+self.u+self.u_0)*cos(self.phi), qs=self.qs) 
-        self._spring_2=Spring(self.k_l,self.u,qs=self.qs) # zostaw xD tu jesty ok
+        self._spring_2=Spring(self.k_l,self.u,qs=self.qs) # zostaw xD tu jest ok
         
         components['_trolley'] = self._trolley
         #components['_pendulum'] = self._pendulum

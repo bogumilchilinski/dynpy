@@ -3790,11 +3790,13 @@ class MDPIPaper(Document):
     
     latex_name = 'document'
     packages = []
+    title=None
+    cwd=os.getcwd()
+    path1=f'{cwd}/Definitions'
 
     def __init__(self,
                  default_filepath='default_filepath',
                  title=None,
-                 *,
                  documentclass=None,
                  journal=None,
                  document_options=None, # for submission

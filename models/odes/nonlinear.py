@@ -65,7 +65,6 @@ class WeakNonLinearOscillatorMSM(MultiTimeScaleSolution):
 
         ode = ODESystem(odes=Matrix([x.diff(tau,2) + ((S.One/p)**2*(1)+delta*eps)*x +A*eps*cos(tau)+(eps)*x.diff(tau)]), dvars=Matrix([x]), ivar=tau, ode_order=2)
 
-
         odes = cls(ode.odes[0], ode.dvars[0], ivar=ode.ivar, omega=S.One, order=2,eps=eps)
         
         return odes

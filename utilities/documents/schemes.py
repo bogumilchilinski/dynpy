@@ -468,6 +468,7 @@ class HelicalGearVerticalModelScheme(TikZPicture):
 
     """
         return code
+<<<<<<< HEAD
     
     
     
@@ -884,6 +885,10 @@ class DoublePendulumMeasureScheme(TikZPicture):
 
         return code
 
+=======
+
+    
+>>>>>>> 29f8882 (minor_changes)
 # Created by Anna Mackojc
 class ColouredDoublePendulumMeasureScheme(TikZPicture):
     def _scheme_desc(self):
@@ -939,12 +944,23 @@ class SegmentBeamScheme(TikZPicture):
     \draw[thick,gray,->] (origo) -- ++(15,0) node[black,right] {$x$};
     \draw[thick,gray,->] (origo) -- ++(0,4) node (mary) [black,right] {$y$};
 
+<<<<<<< HEAD
     \filldraw[fill=blue!30, draw=black, thick, rotate around = {-30:(origo)}] (origo) rectangle ++ (3,0.25) coordinate (bob1) node[near end, below right]{};
     \filldraw[fill=blue!30, draw=black, thick, rotate around = {-90:(origo)}] (bob1) ++ (0,0) rectangle ++ (0.25,5) coordinate (bob2) node[anchor=north east]{};
     \filldraw[fill=blue!30, draw=black, thick, rotate around = {30:(origo)}] (bob2) ++ (0.15,-.05) rectangle ++ (3,0.25) coordinate (bob3) node[near end, right]{};
+=======
+    \coordinate (new_origo) at (2,0);
+    \filldraw[fill=blue!30, draw=black, thick, rotate around = {-30:(origo)}] (new_origo) rectangle ++ (3.5,0.25) coordinate (bob1) node[near end, below right]{};
+    \filldraw[fill=blue!30, draw=black, thick, rotate around = {-90:(origo)}] (bob1) ++ (0,0) rectangle ++ (0.25,4) coordinate (bob2) node[anchor=north east]{};
+    \filldraw[fill=blue!30, draw=black, thick, rotate around = {30:(origo)}] (bob2) ++ (0.15,-.05) rectangle ++ (3.5,0.25) coordinate (bob3) node[near end, right]{};
+>>>>>>> 29f8882 (minor_changes)
 
     \draw [shift={(bob1)},yshift=-5,domain=2*pi+310/180*pi:295/180*pi+7*pi,variable=\t,smooth,samples=75] plot ({\t r}: {0.0006*\t*\t});
     \draw [shift={(bob2)},xshift=1,yshift=4,domain=2*pi+315/180*pi:305/180*pi+7*pi,variable=\t,smooth,samples=75] plot ({\t r}: {0.0006*\t*\t});
 """
+<<<<<<< HEAD
         return code
     
+=======
+        return code
+>>>>>>> 29f8882 (minor_changes)
