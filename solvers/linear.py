@@ -3079,10 +3079,10 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
 #         display(C_list,modes,eigs,self.dvars)
     
         solution = [(C_list[2*i] * modes[:, i] *
-                     sin(sqrt(re(eigs[i ,  i ])).doit() * t_sol) +
+                     sin(sqrt((eigs[i ,  i ])).doit() * t_sol) +
                      C_list[ 2*i + 1 ] * modes[:, i] *
-                     cos(re(eigs[ i ,  i ]).doit() * t_sol)) *
-                    exp(im(eigs[i, i]).doit() * t_sol)
+                     cos(sqrt(eigs[ i ,  i ]).doit() * t_sol)) *
+                    exp(0* t_sol)
                     for i in (range(Integer((len(self.dvars)/2))))]
         
 #         print('sol')
