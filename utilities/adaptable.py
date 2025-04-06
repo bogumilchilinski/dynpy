@@ -1,4 +1,4 @@
-from numpy import (fft)
+from numpy import fft
 import numpy as np
 from pylatex import Document, Section, Subsection, Tabular, Math, TikZ, Axis, Plot, Figure, Alignat, Package, Quantity, Command, Label, Table, Marker, Ref,TikZCoordinate
 from pylatex.base_classes import Environment, Options
@@ -19,12 +19,12 @@ import matplotlib.pyplot as plt
 import copy
 
 
-from dynpy.utilities.templates import tikz
+#from .documents import tikz
 
 
 
-from pint import UnitRegistry
-ureg = UnitRegistry()
+#from pint import UnitRegistry
+#ureg = UnitRegistry()
 import os
 
 
@@ -92,16 +92,16 @@ class ReportModule:
         >>>RM.set_units_dict(unit_dict)
     '''
 
-    _cls_container = Section('Dummy')
-    cls_container = Section('Dummy')
-    _container = Section('Dummy')
+    _cls_container = []#Section('Dummy')
+    cls_container = []#Section('Dummy')
+    _container = []#Section('Dummy')
     cls_path = '.'
     _caption = 'Figure describes the numerical data'
     _label = 'fig:markerIsMissing'
     _units = {}
     _autoreport = False
     #_frame = TimeDataFrame()
-    _frame = pd.DataFrame()
+    _frame = None
     _list = []
     _subplot = False
     _hold = False
@@ -1788,6 +1788,7 @@ class DataTable(Table,ReportModule):
         return cls
 
 class BPASTSDataTable(DataTable):
+    
     def add_table(self, numerical_data=None, index=False, longtable=False,multirow=True, column_format=None):
         self.append(NoEscape('\\centering'))
         self.append(NoEscape('%%%%%%%%%%%%%% Table %%%%%%%%%%%%%%%'))

@@ -440,8 +440,6 @@ class DynsysCheckerTable:
 
 class AiInterface:
     def __init__(self, api_key):
-        import os
-        import pathlib
         import google.generativeai as genai
 
         genai.configure(api_key)

@@ -7,10 +7,10 @@ from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
 import sympy as sym
 from sympy.utilities.autowrap import autowrap, ufuncify
-import numpy as np
+#import numpy as np
 import itertools as itools
 import scipy.integrate as solver
-from .utilities.timeseries import TimeSeries, TimeDataFrame
+
 
 from collections import ChainMap
 
@@ -19,32 +19,29 @@ import base64
 
 import sympy.physics.mechanics as me
 
-from sympy.simplify.fu import TR8, TR10, TR7, TR3
+#from sympy.simplify.fu import TR8, TR10, TR7, TR3
 
-from .solvers.numerical import OdeComputationalCase
-
-from .solvers.linear import (LinearODESolution, FirstOrderODE,MultivariableTaylorSeries,FirstOrderODESystem,ODESystem,
-                            cached_property,FirstOrderLinearODESystemWithHarmonics)
-
-from .solvers.nonlinear import WeakNonlinearProblemSolution, MultiTimeScaleMethod
+mech_comp = (1,2)
 
 
-from pylatex import Document, Section, Subsection, Subsubsection, Itemize, Package, HorizontalSpace, Description, Marker, Ref, Marker, Figure, Command, NewPage, LargeText, HugeText, MediumText, Center
-from pylatex.base_classes import Environment
-from pylatex.section import Paragraph, Chapter
-from pylatex.utils import italic, NoEscape
 
-from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim,Picture)
-from .utilities.templates.document import *
-from .utilities.templates import tikz
-from .utilities.components.mech import en as mech_comp
+from functools import cached_property, lru_cache
 
 
-from .utilities.adaptable import AutoMarker
+
+
+
+
+# from .utilities.documents import document as document
+# #from .utilities.templates import tikz
+# from .utilities.components.mech import en as mech_comp
+
+
+
 import inspect
 import copy
 
-from pylatex import TikZ,TikZNode
+
 import matplotlib.pyplot as plt
 
 
@@ -53,7 +50,7 @@ base_origin=me.Point('O')
 
 from functools import cached_property, lru_cache
 
-from .solvers.linear import SystemParameter
+#from .solvers.linear import SystemParameter
 import os
 import re
 
@@ -277,9 +274,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     _dynpy_path = os.getcwd()
     _module_path=__file__
     
-    reportclass= ExampleTemplate
+    reportclass= None
     
-    _default_doctype = ExampleTemplate
+    _default_doctype = None
     _components = None
     
     ivar = Symbol('t')
@@ -315,6 +312,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     @classmethod
     def _as_picture(cls, position=None, caption=None,width=None,height=None,marker=None, **kwargs):
         
+
+        from .utilities.report import Picture
+
         
         pic_path = "./._dynpy_env" + cls._default_folder_path[1:] + cls.scheme_name
         cls._settle_dynpy()
@@ -1218,6 +1218,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     @property
     def _report_components(self):
         
+        
+        from .utilities.components.mech import en as mech_comp
+        
         comp_list=[
         mech_comp.TitlePageComponent,
         mech_comp.SchemeComponent,
@@ -1265,8 +1268,24 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         return doc
     
     
-    def calculations_steps(self,preview=True,system=None,code=False,documentclass=Document,lang='pl'):
+    def calculations_steps(self,preview=True,system=None,code=False,documentclass=None,lang='pl'):
 
+        
+        
+        from pylatex import Document, Section, Subsection, Subsubsection, Itemize, Package, HorizontalSpace, Description
+        from pylatex import Marker, Ref, Marker, Figure, Command, NewPage, LargeText, HugeText, MediumText, Center
+        from pylatex.base_classes import Environment
+        from pylatex.section import Paragraph, Chapter
+        from pylatex.utils import italic, NoEscape
+
+        from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim,Picture)
+        from .utilities.adaptable import AutoMarker
+        from pylatex import TikZ,TikZNode
+        
+        
+        if documentclass is None: documentclass = Document
+            
+        
         if lang=='pl':
             doc_model = self._calculations_steps_pl(preview=preview,system=system,code=code,documentclass=documentclass)
         else:
@@ -1275,9 +1294,20 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         return doc_model
     
-    def _calculations_steps_pl(self,preview=True,system=None,code=False,documentclass=Document):
+    def _calculations_steps_pl(self,preview=True,system=None,code=False,documentclass=None):
 
+        from pylatex import Document, Section, Subsection, Subsubsection, Itemize, Package, HorizontalSpace, Description
+        from pylatex import Marker, Ref, Marker, Figure, Command, NewPage, LargeText, HugeText, MediumText, Center
+        from pylatex.base_classes import Environment
+        from pylatex.section import Paragraph, Chapter
+        from pylatex.utils import italic, NoEscape
+
+        from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim,Picture)
+        from .utilities.adaptable import AutoMarker
+        from pylatex import TikZ,TikZNode
         
+        
+        if documentclass is None: documentclass = Document        
         
         doc_model = documentclass('model')
 
@@ -1385,9 +1415,20 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         
         return doc_model
     
-    def _calculations_steps_en(self,preview=True,system=None,code=False,documentclass=Document):
+    def _calculations_steps_en(self,preview=True,system=None,code=False,documentclass=None):
 
+        from pylatex import Document, Section, Subsection, Subsubsection, Itemize, Package, HorizontalSpace, Description
+        from pylatex import Marker, Ref, Marker, Figure, Command, NewPage, LargeText, HugeText, MediumText, Center
+        from pylatex.base_classes import Environment
+        from pylatex.section import Paragraph, Chapter
+        from pylatex.utils import italic, NoEscape
+
+        from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim,Picture)
+        from .utilities.adaptable import AutoMarker
+        from pylatex import TikZ,TikZNode
         
+        
+        if documentclass is None: documentclass = Document
         
         doc_model = documentclass('model')
 
@@ -1620,6 +1661,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         '''
         Recognises system parameters as symbols which are not independent variable or its relations and returns the Tuple (Sympy object) containing these elements. It does not take into account undefined functions (instances of Function class) of independent variable.
         '''
+        
+        
+        #from .solvers.linear import SystemParameter
 #         print('system parameters @')
 #         print(self)
 
@@ -1789,6 +1833,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     @cached_property
     def _ode_system(self):
+        
+        from .solvers.linear import ODESystem
+        
         return ODESystem.from_dynamic_system(self)
     
         
@@ -1800,6 +1847,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
     
     @cached_property
     def _fodes_system(self):
+        
+        from .solvers.linear import ODESystem,FirstOrderLinearODESystemWithHarmonics
+        
         fode = ODESystem.from_dynamic_system(self).as_first_ode_linear_system()
         #solver changing due to the computational simplicity reasons
         return FirstOrderLinearODESystemWithHarmonics(fode,fode.dvars)
@@ -1897,6 +1947,8 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     def numerical_analysis(self, parameter=None, param_span=None, dependencies_dict=None,coordinates=None, t_span = None):
         
+        from .solvers.linear import ODESystem
+        
         ode = ODESystem.from_dynamic_system(self)
         na_df = ode._as_na_df(parameter=parameter, param_span=param_span, dependencies_dict=dependencies_dict,coordinates=coordinates, t_span = t_span)
         
@@ -1909,8 +1961,22 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
     '''
 
 
-    def calculations_steps(self,preview=True,system=None,code=False,documentclass=Document,lang='pl'):
+    def calculations_steps(self,preview=True,system=None,code=False,documentclass=None,lang='pl'):
 
+        from pylatex import Document, Section, Subsection, Subsubsection, Itemize, Package, HorizontalSpace, Description
+        from pylatex import Marker, Ref, Marker, Figure, Command, NewPage, LargeText, HugeText, MediumText, Center
+        from pylatex.base_classes import Environment
+        from pylatex.section import Paragraph, Chapter
+        from pylatex.utils import italic, NoEscape
+
+        from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim,Picture)
+        from .utilities.adaptable import AutoMarker
+        from pylatex import TikZ,TikZNode
+        
+        
+        if documentclass is None: documentclass = Document
+        
+        
         if lang=='pl':
             doc_model = self._calculations_steps_pl(preview=preview,system=system,code=code,documentclass=documentclass)
         else:
@@ -1920,7 +1986,22 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
         return doc_model        
     
     
-    def _calculations_steps_pl(self,preview=True,system=None,code=False,documentclass=Document):
+    def _calculations_steps_pl(self,preview=True,system=None,code=False,documentclass=None):
+        
+        from pylatex import Document, Section, Subsection, Subsubsection, Itemize, Package, HorizontalSpace, Description
+        from pylatex import Marker, Ref, Marker, Figure, Command, NewPage, LargeText, HugeText, MediumText, Center
+        from pylatex.base_classes import Environment
+        from pylatex.section import Paragraph, Chapter
+        from pylatex.utils import italic, NoEscape
+
+        from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim,Picture)
+        from .utilities.adaptable import AutoMarker
+        from pylatex import TikZ,TikZNode
+        
+        
+        if documentclass is None: documentclass = Document
+        
+        
         
         latex_store=AutoBreak.latex_backend
         AutoBreak.latex_backend = latex
@@ -2055,7 +2136,22 @@ class LinearDynamicSystem(LagrangesDynamicSystem):
     
 
     
-    def _calculations_steps_en(self,preview=True,system=None,code=False,documentclass=Document):
+    def _calculations_steps_en(self,preview=True,system=None,code=False,documentclass=None):
+        
+        
+        from pylatex import Document, Section, Subsection, Subsubsection, Itemize, Package, HorizontalSpace, Description
+        from pylatex import Marker, Ref, Marker, Figure, Command, NewPage, LargeText, HugeText, MediumText, Center
+        from pylatex.base_classes import Environment
+        from pylatex.section import Paragraph, Chapter
+        from pylatex.utils import italic, NoEscape
+
+        from .utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim,Picture)
+        from .utilities.adaptable import AutoMarker
+        from pylatex import TikZ,TikZNode
+        
+        
+        if documentclass is None: documentclass = Document
+        
         
         latex_store=AutoBreak.latex_backend
         AutoBreak.latex_backend = latex

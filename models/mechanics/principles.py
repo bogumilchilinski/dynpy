@@ -5,12 +5,14 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, asin, diff, sqrt, S,
 
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
-from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp, GeometryScene
+
+from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator
 
 from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin
-from ...continuous import ContinuousSystem, PlaneStressProblem
+#from ...continuous import ContinuousSystem, PlaneStressProblem
 from ...solvers.linear import ODESystem
 
+REPORT_COMPONENTS_LIST = (1,2)
 
 import base64
 import random
@@ -23,34 +25,34 @@ import matplotlib.pyplot as plt
 from functools import cached_property, lru_cache
 
 
-REPORT_COMPONENTS_LIST = [
-            mech_comp.TitlePageComponent,
-            mech_comp.SchemeComponent,
-            mech_comp.ExemplaryPictureComponent,
-            mech_comp.KineticEnergyComponent,
-            mech_comp.KineticEnergyDynPyCodeComponent,
-            mech_comp.KineticEnergySymPyCodeComponent,
-            mech_comp.PotentialEnergyComponent,
-            mech_comp.PotentialEnergyDynPyCodeComponent,
-            mech_comp.PotentialEnergySymPyCodeComponent,
-            mech_comp.LagrangianComponent,
-            mech_comp.GoverningEquationComponent,
-            mech_comp.GoverningEquationDynpyCodeComponent,
-            mech_comp.GoverningEquationSympyCodeComponent,
-            mech_comp.FundamentalMatrixComponent,
-            mech_comp.GeneralSolutionComponent,
-            mech_comp.GeneralSolutionDynpyCodeComponent,
-            mech_comp.GeneralSolutionSympyCodeComponent,
-            mech_comp.SteadySolutionComponent,
-            mech_comp.FreeVibrationFrequencyComponent
-        ]
+# REPORT_COMPONENTS_LIST = [
+#             mech_comp.TitlePageComponent,
+#             mech_comp.SchemeComponent,
+#             mech_comp.ExemplaryPictureComponent,
+#             mech_comp.KineticEnergyComponent,
+#             mech_comp.KineticEnergyDynPyCodeComponent,
+#             mech_comp.KineticEnergySymPyCodeComponent,
+#             mech_comp.PotentialEnergyComponent,
+#             mech_comp.PotentialEnergyDynPyCodeComponent,
+#             mech_comp.PotentialEnergySymPyCodeComponent,
+#             mech_comp.LagrangianComponent,
+#             mech_comp.GoverningEquationComponent,
+#             mech_comp.GoverningEquationDynpyCodeComponent,
+#             mech_comp.GoverningEquationSympyCodeComponent,
+#             mech_comp.FundamentalMatrixComponent,
+#             mech_comp.GeneralSolutionComponent,
+#             mech_comp.GeneralSolutionDynpyCodeComponent,
+#             mech_comp.GeneralSolutionSympyCodeComponent,
+#             mech_comp.SteadySolutionComponent,
+#             mech_comp.FreeVibrationFrequencyComponent
+#         ]
+
 
 def plots_no():
     num = 0
     while True:
         yield num
         num += 1
-
 
 
 class ComposedSystem(HarmonicOscillator):
@@ -269,8 +271,10 @@ class ComposedSystem(HarmonicOscillator):
     @property
     def _report_components(self):
 
+        from ...dynamics import mech_comp
+        
         comp_list = [
-            *REPORT_COMPONENTS_LIST
+            *mech_comp.REPORT_COMPONENTS_LIST
         ]
 
         return comp_list
@@ -419,6 +423,7 @@ class ComposedSystem(HarmonicOscillator):
         diagonalized_form_eoms = result_stiffness* Matrix(dvars) + Matrix(dvars).diff(self.ivar,2) - result_forces
 
         return ODESystem(odes = diagonalized_form_eoms, ode_order=2, dvars=Matrix([dvars]))
+
     def _as_force(self):
         qs=self.qs
         system=self

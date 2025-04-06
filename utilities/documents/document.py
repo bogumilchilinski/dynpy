@@ -6,24 +6,18 @@ from pylatex.base_classes import Environment
 from pylatex.utils import (#italic, 
                            NoEscape)
 from ..report import Markdown, CurrentContainer, ReportText, IPMarkdown, ObjectCode,display
-from ..components.mech import en as mech_compIntroDynPyProjectGuidlines
-from ..components.guides import en as guide_comp
-from ..components.ode import pl as ode_comp
-from ..components.ode import en as ode_comp_en
-from ..components.guides.reporting import en as reporting_comp
-from ..components.guides.github import en as github_comp
-from ..components.guides.systems import en as systems_comp
-from ..components.guides.development import en as development_comp
-from ..components.guides.pandas import en as pandas_comp
-from .guides import (UsageOfDynamicSystemsGuide, Guide, EngeneeringDrawingGuide, DevelopmentGuide, IntroToPandasGuide, 
-                    BasicsOfODESystemGuide, BasicsOfDynSysImplementationGuide, BasicsOfReportingGuide, ResearchProjectGuidelines,
-                    InterimProjectGuidelines,IntroDynPyProjectGuidelines, BasicsOfReportComponentImplementationGuide, 
-                    GithubSynchroGuide, IntroToCocalcGuide)
+
+
+# from .guides import (UsageOfDynamicSystemsGuide, Guide, EngeneeringDrawingGuide, DevelopmentGuide, IntroToPandasGuide, 
+#                     BasicsOfODESystemGuide, BasicsOfDynSysImplementationGuide, BasicsOfReportingGuide, ResearchProjectGuidelines,
+#                     InterimProjectGuidelines,IntroDynPyProjectGuidelines, BasicsOfReportComponentImplementationGuide, 
+#                     GithubSynchroGuide, IntroToCocalcGuide)
 #from sympy import *
 import datetime
 import shutil
 import os
-from typing import Optional, Union
+from typing import Optional, List, Union
+
 
 imports_str = """
 #Create file output
@@ -51,7 +45,8 @@ import tikzplotlib
 from dynpy.utilities.adaptable import TimeDataFrame
 import pandas as pd
 
-
+global_width=('8cm')#setting picture default size
+global_height=('6cm')
 doc = WutThesis('./output/thesis_name')
 #doc.preamble.append(NoEscape(r'\\usepackage[MeX]{polski}')) #to set polish as main language"""
 
@@ -72,7 +67,7 @@ display(ReportText('This subsection provides objectives and assumptions. '*100))
 
 sub_SOT = Subsection('State of the art')
 CurrentContainer(sub_SOT)
-display(ReportText('This subsection provides state of the art. '*100))
+display(ReportText('This subsection provides state of the art \\cite{pandas}. '*100))
 
 sub_methodology = Subsection('Methodology')
 CurrentContainer(sub_methodology)
@@ -213,7 +208,7 @@ picture_str = '''
 sec_picture = Section('Section that presents pictures reporting')
 CurrentContainer(sec_picture)
 
-display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))'''
+display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture',width=global_width,height=global_height))'''
 
 simulaion_str = '''
 from dynpy.utilities.report import *
@@ -255,9 +250,14 @@ veryfication_str = '''
 from sympy import *
 from dynpy.utilities.adaptable import *
 from dynpy.utilities.report import CurrentContainer, ReportText
-from pint import UnitRegistry
-ureg = UnitRegistry()
+from sympy import *
+from sympy.physics import units
 
+
+
+
+from dynpy.utilities.adaptable import *
+from dynpy.utilities.report import CurrentContainer, ReportText
 import pandas as pd
 
 t = Symbol('t')
@@ -265,10 +265,11 @@ power = Symbol('P')
 work = Symbol('W')
 
 unit_dict = {
-t: ureg.second,
-power: ureg.watt,
-work: ureg.joule,
+t: units.second,
+power: units.watt,
+work: units.joule,
 }
+
 
 LatexDataFrame.set_default_units(unit_dict)
 
@@ -576,6 +577,8 @@ doc.generate_pdf(clean_tex=True)
     @property
     def _report_components(self):
         
+        from ..components.guides import en as guide_comp
+        
         comp_list=[
         mech_comp.TitlePageComponent,
         # mech_comp.SchemeComponent,
@@ -626,6 +629,149 @@ doc.generate_pdf(clean_tex=True)
         return None
 
 
+
+    
+
+        
+class Guide(Document, ReportMethods):
+    """
+        A class to generate a structured LaTeX document with pre-configured packages and settings.
+
+        Inherits from `Document` and provides additional methods to simplify LaTeX report creation.
+
+        Attributes:
+            _documentclass (str): The LaTeX document class (default is 'article').
+            latex_name (str): Name of the document.
+            packages (List[Union[Package, Command]]): List of LaTeX packages and commands to include in the document.
+            _reported_object (Optional[object]): The object being reported on, if any.
+
+        Exemplary Usage:
+            >>> from dynpy.utilities.report import *
+            >>> from dynpy.utilities.documents.guides import Guide
+
+            >>> doc = Guide('./output/sample_report', title="Sample Report")
+
+            >>> section = Section('Exemplary section name')
+            >>> CurrentContainer(section)
+
+            >>> display(Markdown(''' Exemplary Markdown text in the section '''))
+            >>> display(ReportText(' Exemplary text appended into section '))
+
+            >>> doc.append(section)
+
+            >>> doc.generate_pdf(clean_tex=True)
+
+
+
+        Example of Customization of the document properties:
+            >>> from dynpy.utilities.report import *
+            >>> from dynpy.utilities.documents.guides import Guide
+
+            >>> custom_geometry = ['lmargin=20mm', 'rmargin=20mm', 'top=25mm', 'bmargin=25mm']
+
+            >>> doc = Guide(
+            >>>     default_filepath='./output/custom_report',
+            >>>     title='Custom Report',
+            >>>     geometry_options=custom_geometry
+            >>> )
+
+            >>> section = Section('Exemplary Custom Section Name')
+
+            >>> doc.append(section)
+
+            >>> doc.generate_pdf(clean_tex=True)
+    """
+
+    _documentclass = 'article'
+    latex_name = 'document'
+    packages = [
+                  Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('microtype'),
+                  Package('authoraftertitle'),
+                  Package('polski',options=['MeX']),
+                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('listings'),
+                  Package('titlesec'),
+                  Package('fancyhdr'),
+                  Command('pagestyle', arguments=['fancy']),
+                  Command('fancyhf', arguments=['']),
+                  Command('fancyhead',  arguments=['DynPy Team'],options=['R']),
+                  Command('fancyhead', arguments=['Mechanical vibration, 2023'],options=['L']),
+                  Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
+                  ]
+
+    def __init__(
+            self,
+            default_filepath: str = 'default_filepath',
+            title: str = 'Basic title',
+            reported_object: Optional[object] = None,
+            *,
+            documentclass: Optional[str] = None,
+            document_options: Optional[List[str]] = None,
+            fontenc: str = 'T1',
+            inputenc: str = 'utf8',
+            font_size: str = 'normalsize',
+            lmodern: bool = False,
+            textcomp: bool = True,
+            microtype: bool = True,
+            page_numbers: bool = True,
+            indent: Optional[Union[str, int]] = None,
+            geometry_options: Optional[List[str]] = None,
+            data: Optional[dict] = None,
+    ):
+        """
+            Initialize the Guide class with optional customization.
+
+            Args:
+                default_filepath (str): Path for the generated document.
+                title (str): Title of the document.
+                reported_object (Optional[object]): Object being reported on, if any.
+                documentclass (Optional[str]): LaTeX document class (e.g., 'article').
+                document_options (Optional[List[str]]): Options for the document class.
+                fontenc (str): Font encoding (default 'T1').
+                inputenc (str): Input encoding (default 'utf8').
+                font_size (str): Font size (default 'normalsize').
+                lmodern (bool): Whether to use Latin Modern fonts.
+                textcomp (bool): Whether to use the `textcomp` package.
+                microtype (bool): Whether to use the `microtype` package.
+                page_numbers (bool): Whether to include page numbers.
+                indent (Optional[Union[str, int]]): Indentation settings.
+                geometry_options (Optional[List[str]]): Geometry options for page layout.
+                data (Optional[dict]): Additional data for customization.
+        """
+
+        if documentclass is not None: self._documentclass
+
+        self._reported_object = reported_object
+        
+        super().__init__(
+            default_filepath=default_filepath,
+            documentclass=self._documentclass,
+            document_options=document_options,
+            fontenc=fontenc,
+            inputenc=inputenc,
+            font_size=font_size,
+            lmodern=lmodern,
+            textcomp=textcomp,
+            microtype=microtype,
+            page_numbers=page_numbers,
+            indent=indent,
+            geometry_options=geometry_options,
+            data=data,
+        )
+
+#         label=self.label
+        self.title='Mechanical vibration'
+        #self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
+        #self.packages.append(Command('author', arguments=['DynPy Team']))
+        self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
+        #self.append(Command('maketitle'))
+        self.append(NewPage())
+        # tu implementować co tam potrzeba
+        self.append_components()
+    
+    
+    
 
 class CaseTemplate(Document,ReportMethods):
 
@@ -831,6 +977,595 @@ class BPASTSPaper(Document):
             
     def keywords(self,keywords=None):
         self.preamble.append(Command('Keywords',arguments=[keywords]))
+        
+        
+    @classmethod
+    def base_setup(cls, create_file: bool = False):
+        """
+        Sets up the base template for the BPASTSPaper document.
+
+        This method provides an easy way to initialize a thesis document with the necessary sections, structure, and configuration.
+
+        Args:
+            create_file (bool): If True, creates a base setup environment including necessary directories and files.
+
+        Returns:
+            Optional[str]: Returns setup content if `create_file` is False, otherwise creates the environment.
+
+        Usage Example:
+            >>> from dynpy.utilities.documents.document import BPASTSPaper
+            >>> BPASTSPaper.base_setup()
+
+        When to use:
+            - Use this method when starting a new BPASTSPaper document.
+            - If `create_file=True`, it will generate all required directories and files for a structured thesis.
+            - If `create_file=False`, it returns a string with setup instructions that can be used manually.
+        """
+
+        if create_file is True:
+            return cls._create_base_setup_env()
+
+
+
+
+# doc = WutThesis('./output/thesis_name')
+#doc.preamble.append(NoEscape(r'\\usepackage[MeX]{polski}')) #to set polish as main language"""
+
+        thesis_introduction_str = '''#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_intro = Section('Section that presents text reporting')
+CurrentContainer(sec_intro)
+
+sub_problem_outline = Subsection('Outline of the problem')
+CurrentContainer(sub_problem_outline)
+display(ReportText('This subsection provides information about investigated problem. '*100))
+
+sub_obj_assum = Subsection('Objectives and assumptions')
+CurrentContainer(sub_obj_assum)
+display(ReportText('This subsection provides objectives and assumptions. '*100))
+
+sub_SOT = Subsection('State of the art')
+CurrentContainer(sub_SOT)
+display(ReportText('This subsection provides state of the art \\cite{pandas}. '*100))
+
+sub_methodology = Subsection('Methodology')
+CurrentContainer(sub_methodology)
+display(ReportText('This subsection provides methodology. '*100))'''
+
+        math_str = '''from sympy import Eq, Symbol, symbols
+from dynpy.utilities.report import *
+
+
+sec_formula = Section('Section that presents formulas reporting')
+CurrentContainer(sec_formula)
+
+sec_description = Subsection('Description of dynamic model')
+CurrentContainer(sec_description)
+display(ReportText('This subsection provides description of the model. '*10))
+
+from dynpy.models.mechanics import ForcedSpringMassSystem as DynamicSys
+
+dyn_sys = DynamicSys()
+display(dyn_sys.as_picture())
+
+display(ReportText('Summary of the subsection highlighting its major achievements. '*10))
+
+sub_model_code = Subsection('Virtual model of the object')
+CurrentContainer(sub_model_code)
+
+from dynpy.utilities.report import ObjectCode
+
+display(ReportText('This subsection provides code of the model. '*10))
+display(ObjectCode(DynamicSys))
+display(ReportText('Summary of the subsection highlighting its major achievements. '*10))
+
+
+sec_lagrangian = Subsection('Lagrangian and derivatives')
+CurrentContainer(sec_lagrangian)
+display(ReportText('This subsection provides calculation of lagrangian and derivatives. '*10))
+
+lagrangian = dyn_sys.L[0]
+lagrangian
+
+t=dyn_sys.ivar
+
+
+for coord in dyn_sys.q:
+
+    display(ReportText(f'Calculations of derivatives for ${vlatex(coord)}$'))
+
+
+    vel=coord.diff(t)
+    diff1 = lagrangian.diff(vel)
+    diff2 = diff1.diff(t) 
+    diff3 = lagrangian.diff(coord)
+
+
+    diff1_sym = Symbol(f'\\\\frac{{\\\\partial L}}{{\\\\partial {vlatex(vel)}}}')
+    diff2_sym = Symbol(f' \\\\frac{{d }}{{dt}}  {diff1_sym}'  )
+    diff3_sym = Symbol(f'\\\\frac{{\\\\partial L}}{{\\\\partial {vlatex(coord)}}}')
+
+
+    display(SympyFormula(  Eq(diff1_sym,diff1)  ))    
+    display(SympyFormula(  Eq( diff2_sym ,diff2)  ))
+    display(SympyFormula(  Eq( diff3_sym ,  diff3)  ))
+
+display(ReportText('Outcomes of governing equations analysis. '*10))
+    
+
+sec_equations = Subsection('Equations of motion')
+CurrentContainer(sec_equations)
+
+
+display(ReportText('This subsection provides calculation of equations of motion and solution of the system. '*10))
+
+ds1=dyn_sys.eoms
+ds1_eqns=ds1.as_eq_list()
+
+for eq1 in ds1.as_eq_list():
+    display(SympyFormula(eq1.simplify()))
+    
+if ds1.is_solvable():
+    
+    ds2=dyn_sys.linearized()._ode_system.general_solution
+
+    for eq2 in ds2.as_eq_list():
+        display(SympyFormula(eq2.simplify()))
+
+    ds3=dyn_sys.linearized()._ode_system.steady_solution
+
+    for eq3 in ds3.as_eq_list():
+        display(SympyFormula(eq3.simplify()))
+
+    ds4=dyn_sys.linearized().eoms.solution
+    ds4_eqns = ds4.as_eq_list()
+
+    for eq4 in ds4_eqns:
+        display(SympyFormula(eq4.simplify()))
+
+
+display(ReportText(f'Outcomes of governing equations {AutoMarker(ds1_eqns[0])} {AutoMarker(ds1_eqns[-1])}) analysis.'))
+
+sec_math_desc = Subsection('Section that contains all symbols descriptions')
+CurrentContainer(sec_math_desc)
+
+
+
+E_K,F = symbols('E_K,F')
+descriptions = {
+E_K:r"Kinetic energy", 
+F:r"Force",  
+}
+syms_dict = descriptions
+DescriptionsRegistry().set_descriptions({**syms_dict})
+DescriptionsRegistry().reset_registry()
+SymbolsDescription.set_default_header('where:')
+
+display(ReportText('Symbols description is as follows: '))
+
+
+display(SymbolsDescription(expr=E_K*F))
+
+
+display(ObjectCode("""
+# Guide
+from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide 
+BasicsOfODESystemGuide();
+
+"""))
+
+
+# Basics of DynSys usage based simulations are covered in guide to DynSys usage, use the followin call
+# from dynpy.utilities.documents.guides import UsageOfDynamicSystemsGuide 
+# UsageOfDynamicSystemsGuide()
+'''
+
+        picture_str = '''sec_picture = Section('Section that presents pictures reporting')
+CurrentContainer(sec_picture)
+
+display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))'''
+
+        simulaion_str = '''from dynpy.utilities.report import *
+from sympy import *
+
+
+sec_simulation = Section('Section that contains simulation')
+CurrentContainer(sec_simulation)
+
+# Basics of ODESystem based simulations are covered in guide to ODESystem, use the followin call
+# from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide 
+# BasicsOfODESystemGuide()
+
+sec_ODESystem = Subsection('ODESystem simulation')
+CurrentContainer(sec_ODESystem)
+
+display(ReportText('Firstly create an ODESystem or import it from dynpy.modes.odes.linear.py'))
+display(ObjectCode('spring = SpringMassEps.from_reference_data()'))
+
+display(ReportText('Secondly solve the equation using solution method:'))
+display(ObjectCode('spring_sol = spring.solution'))
+
+display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
+data_spring = dyn_sys.get_numerical_parameters()
+#ds1.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()
+
+# MSM_sim = Subsection('MSM simulation')
+# CurrentContainer(MSM_sim)
+
+# display(ReportText('Firstly create an MultiTimeScaleSolution system or import it from dynpy.modes.odes.linear.py'))
+# display(ObjectCode('spring = SpringMassMSM.from_reference_data()'))
+
+# display(ReportText('Secondly solve the equation using solution method:'))
+# display(ObjectCode('spring_sol = spring.solution'))
+
+# display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
+# spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()'''
+
+        veryfication_str = '''from sympy import *
+
+from sympy import *
+from sympy.physics import units
+
+
+
+
+from dynpy.utilities.adaptable import *
+from dynpy.utilities.report import CurrentContainer, ReportText
+import pandas as pd
+
+t = Symbol('t')
+power = Symbol('P')
+work = Symbol('W')
+
+unit_dict = {
+t: units.second,
+power: units.watt,
+work: units.joule,
+}
+
+LatexDataFrame.set_default_units(unit_dict)
+
+
+
+sec_verification = Section('Section that verificates research results')
+CurrentContainer(sec_verification)
+
+display(ReportText('Description of verifications concept. '*200))
+     
+
+
+### SELECT ONE CASE
+## 1st CASE
+## import of external data if path "./data_from_ml/test_1.csv" exists
+
+#test_data = './data_from_ml/test_1.csv'
+#df = pd.read_csv(test_data, header = None)
+
+#data_tab = TimeDataFrame(df).to_latex_dataframe().reported(caption='Caption')
+#graph=data_tab.iloc[:,[1]]
+
+## 2st CASE
+## Creating graph from a
+df = pd.DataFrame({t:[0,1,2],'a':[2,3,4],'b':[8,7,6]}).set_index(t)
+
+df_cols = df.set_axis([power,work],axis=1)
+
+data_tab = TimeDataFrame(df_cols).to_latex_dataframe().reported(caption='Caption')
+graph = TimeDataFrame(df_cols).to_pylatex_tikz().in_figure(caption='Caption')
+
+## 3rd CASE
+## dictionary data presentation in DataFrame
+# dictionary ={  
+#     power:300000,
+#     work:5000
+# }   
+# display(
+#     LatexDataFrame.formatted(
+#         data=dictionary, #import data from a dictionary
+#         index=['Value'] #set rows title
+#     ).map(lambda x: f'${latex(x)}$')
+#     .rename_axis('Parameter', axis=1) #set name for a column
+#     .transpose()  # This swaps rows and columns, making the DataFrame vertical
+#     .reported(caption='A caption for your data frame')
+# )
+
+## 4th CASE
+## creating a graph based on simulation
+#from dynpy.models.mechanics import ForcedSpringMassSystem as DynamicSys
+#F=DynamicSys.F
+#g=DynamicSys.g
+#m=DynamicSys.m
+#k=DynamicSys.k
+#slownik ={  
+#F:2,
+#g:10,
+#m:5,
+#k:100,
+#}
+#t_span = np.linspace(0.0,1,30)
+#sym=DynamicSys().eoms.subs(slownik)
+#wynik= sym.numerized(backend='numpy').compute_solution(t_span,[0.0,0.0])#.plot()
+#wynik_tab = TimeDataFrame(wynik).to_latex_dataframe().reported(caption='Caption')
+#display(wynik_tab)
+#wynik.plot()
+
+display(data_tab)
+
+display(ReportText('Obtained data analysis. '*200))
+
+display(graph)
+
+display(ReportText('Description of verifications outcomes. '*200))'''
+
+        conclusion_str = '''sec_conclusion = Section('Section that contains final conclusions')
+CurrentContainer(sec_conclusion)
+
+display(ReportText('Conclusions '*200))'''
+
+        symbols_description_str = '''sec_symbols = Section('Section that contains all symbols descriptions')
+CurrentContainer(sec_symbols)
+
+E_K,F = symbols('E_K,F')
+descriptions = {
+E_K:r"Kinetic energy", 
+F:r"Force",  
+}
+syms_dict = descriptions
+DescriptionsRegistry().set_descriptions({**syms_dict})
+DescriptionsRegistry().reset_registry()
+SymbolsDescription.set_default_header('  ')
+
+display(SymbolsDescription({**syms_dict}))'''
+
+        document_str = '''# Creating file
+# Be sure *output* folder is in the current directory
+
+paper_name = './output/report_name' #path for report file 
+global_width=('8cm')#setting picture default size
+global_height=('6cm')
+doc = BPASTSPaper(paper_name)
+# Bibliography of quotations
+### Select one bibligraphy managment system
+####### BibLatex
+
+doc.preamble.append(Package('biblatex',["backend=biber","sorting=none"]))
+doc.preamble.append(Command('addbibresource','elementy_bibliagrafia.bib'))
+####### Natbib
+#doc.preamble.append(Package('natbib')
+#doc.preamble.append(Command('bibliographystyle','unsrt'))
+
+## Units
+doc.preamble.append(Package('siunitx'))
+
+
+
+
+doc.append(sec_intro) # adding certain sections
+doc.append(sub_problem_outline)
+doc.append(sub_obj_assum)
+doc.append(sub_SOT)
+doc.append(sub_methodology)
+doc.append(sec_formula)
+
+doc.append(sub_model_code)
+doc.append(sec_math_desc)
+doc.append(sec_simulation)
+
+doc.append(sec_picture)
+doc.append(sec_verification)
+#doc.append(sec_tables)
+doc.append(sec_symbols)
+doc.append(sec_conclusion)
+
+
+
+
+### Natbib
+doc.append(Command('bibliography',arguments=["references"])) # .bib file as "references"
+
+
+#FIGURES LIST
+
+doc.append(Command('addcontentsline{toc}{section}{List of figures}'))
+doc.append(Command('listoffigures'))
+doc.append(Command('pagestyle{plain}'))
+doc.append(Command('newpage'))
+
+#TABLES LIST
+
+doc.append(Command('addcontentsline{toc}{section}{List of tables}'))
+doc.append(Command('renewcommand{\listtablename}{List of tables}'))
+doc.append(Command('listoftables'))
+doc.append(Command('pagestyle{plain}'))
+doc.append(Command('newpage'))
+
+# Generating file
+doc.generate_pdf(clean_tex=False)'''        
+        
+#         preliminary_str=(f"""
+# =======
+        preliminary_str=(
+f"""
+
+Examplary setup is as follows:
+
+#References to guide imports needed to include - to see the list of available guides insert and run the code below:
+```python
+from dynpy.utilities.creators import list_of_guides
+list_of_guides()
+```
+
+## CELL 1
+## Imports
+
+```python
+{imports_str}
+
+
+```
+    
+
+
+## CELL 2
+## Thesis introduction
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+{thesis_introduction_str}
+```
+
+
+
+## CELL 3
+## Math 
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+{math_str}
+```
+
+
+## CELL 4
+## Picture
+    
+    
+```python
+    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+{picture_str}
+
+```
+
+
+## CELL 5
+## Simulation
+
+Basics of ODESystem based simulations are covered in guide to ODESystem, use the following call:
+
+```python
+from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide 
+BasicsOfODESystemGuide();
+```
+
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+
+{simulaion_str}
+
+```
+     
+     
+## CELL 6
+## Veryfication
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+{veryfication_str}
+
+```
+    
+## CELL 7
+## Conclusion
+ 
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+{conclusion_str}
+
+```
+
+## CELL 9
+## Symbols description
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+{symbols_description_str}
+
+```
+
+## CELL 10
+## Document
+
+```python
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+{document_str}
+```
+
+""")
+
+        display(IPMarkdown(preliminary_str))    
+
+        preliminary_str=(f"""
+#Example:
+
+#To prepare a simple document with text and images:
+
+#Good practice here is to allocate 1 section per 1 cell
+
+## CELL 1
+## Imports
+
+{imports_str}
+    
+## CELL 2
+## Thesis introduction
+
+{thesis_introduction_str}
+
+## CELL 3
+## Math 
+
+{math_str}
+
+## CELL 4
+## Picture
+
+{picture_str}
+
+## CELL 5
+## Simulation
+
+{simulaion_str}
+     
+## CELL 6
+## Veryfication
+
+{veryfication_str}
+    
+## CELL 7
+## Conclusion
+
+{conclusion_str}
+
+## CELL 9
+## Symbols description
+
+{symbols_description_str}
+
+## CELL 10
+## Document
+
+{document_str}
+
+""")
+
+        return ObjectCode(preliminary_str)
+        
+        
         
 class Keywords(Environment):
     latex_name='keyword'
@@ -1331,8 +2066,11 @@ data_spring = dyn_sys.get_numerical_parameters()
 # spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()'''
 
         veryfication_str = '''from sympy import *
-from pint import UnitRegistry
-ureg = UnitRegistry()
+
+from sympy.physics import units
+
+
+
 from dynpy.utilities.adaptable import *
 from dynpy.utilities.report import CurrentContainer, ReportText
 import pandas as pd
@@ -1342,10 +2080,12 @@ power = Symbol('P')
 work = Symbol('W')
 
 unit_dict = {
-t: ureg.second,
-power: ureg.watt,
-work: ureg.joule,
+t: units.second,
+power: units.watt,
+work: units.joule,
 }
+
+
 
 LatexDataFrame.set_default_units(unit_dict)
 
@@ -3684,106 +4424,7 @@ class PosterTemplate(Document):
   
 
     
-class DynSysOverviewReport(UsageOfDynamicSystemsGuide):
 
-    
-    @property
-    def default_reported_object(self):
-
-        #from ...models.mechanics.tmac import SDOFWinchSystem
-        from ...models.mechanics import ForcedSpringMassSystem as DynamicSystem
-
-        return DynamicSystem()
-    
-    
-    @property
-    def _report_components(self):
-
-        comp_list=[
-            systems_comp.DynSysOverviewUsageComponent,
-            systems_comp.DynamicSystemCallComponent,
-            pandas_comp.NumericalAnalysisSimulationComponent,
-            pandas_comp.AnalyticalSimulationComponent,
-            #systems_comp.SimulationsComponent,
-            #reporting_comp.SimulationReportComponent,
-            systems_comp.DynSysCodeComponent,
-            github_comp.IssuePreparationComponent,
-            #systems_comp.DynamicSystemCheckerComponent,
-
-        ]
-
-        return comp_list
-
-
-    
-    
-    
-class ODESystemOverviewReport(UsageOfDynamicSystemsGuide):
-
-    @property
-    def _report_components(self):
-
-        comp_list=[
-            systems_comp.ODESystemOverviewUsageComponent,
-            systems_comp.ODEInitCodeComponent,
-            systems_comp.ODEGeneralSolutionComponent,
-            systems_comp.ODESteadySolutionComponent,
-            systems_comp.ODESystemRepresentationComponent,
-            ode_comp_en.ODESystemExponentiationComponent,
-            ode_comp_en.PredictionOfSteadySolutionComponent,
-            ode_comp_en.HomoPredictionIntroComponent,
-            ode_comp_en.MainPredictionComponent,
-            ode_comp_en.RootsAnalysisComponent,
-
-        ]
-
-        return comp_list
-
-    @property
-    def default_reported_object(self):
-
-        #from ...models.mechanics.tmac import SDOFWinchSystem
-        from ...modf.odes.linear import LinearFirstOrder
-        
-        return LinearFirstOrder.from_reference_data()
-    
-
-    
-
-class MSMethodOverviewReport(UsageOfDynamicSystemsGuide):
-    @property
-    def _report_components(self):
-        comp_list=[
-                ode_comp.ODESystemComponent,
-                ode_comp.VariablesComponent,
-                ode_comp.ODESystemCodeComponent,
-                ode_comp.MSMCalculationsOrderComponent,
-                ode_comp.PredictedSolutionComponent,
-                ode_comp.DetailsOfPredictedSolutionComponent,
-                ode_comp.ParticularDerivativesComponent,
-                ode_comp_en.GoverningEqnsWithConstFuncsComponent,
-                ode_comp_en.SecularFuncsComponent,
-                ode_comp_en.SecularConditionsComponent,
-                ode_comp_en.SolutionWithConstFuncsComponent,
-                ode_comp.ZerothOrderApproximatedEqComponent,
-                ode_comp.FirstOrderApproximatedEqComponent,
-                ode_comp.SecularTermsEquationsComponent,
-                ode_comp.ZerothOrderSolutionComponent
-        ]
-        return comp_list
-
-    @property
-    def default_reported_object(self):
-        from sympy import Symbol, sin, S
-        from dynpy.solvers.perturbational import MultiTimeScaleSolution
-        from dynpy.models.mechanics.gears import EquivalentGearModel
-        sys = EquivalentGearModel()
-        t=ivar=Symbol('t')
-        z = sys.z
-        delta = Symbol('delta',positive=True)
-        eps=sys.eps
-        nonlin_ode = MultiTimeScaleSolution(z.diff(t,2)+z*(1+delta*eps+eps*sin(t)), z, ivar=ivar, omega=S.One, order=3,eps=eps)
-        return nonlin_ode
     
 class MDPIPaper(Document):
     
@@ -3932,34 +4573,4 @@ class MDPIPaper(Document):
 
 
 #             \AuthorCitation{Lastname, F.; Lastname, F.; Lastname, F.}
-        
-        
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
         

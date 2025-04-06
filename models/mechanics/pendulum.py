@@ -5,7 +5,7 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, exp, asin, diff, sqrt, S,
 
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
-from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
+from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator
 
 from ..elements import MaterialPoint, Spring,TorsionalSpring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin
 from ..mechanics.disk import RollingDisk
@@ -18,10 +18,10 @@ import numpy as np
 import pandas as pd
 import inspect
 
-from .principles import ComposedSystem, NonlinearComposedSystem,  base_frame, base_origin,cached_property, lru_cache, REPORT_COMPONENTS_LIST
+from .principles import ComposedSystem, NonlinearComposedSystem,  base_frame, base_origin,cached_property, lru_cache
 
-from pint import UnitRegistry
-ureg = UnitRegistry()
+from sympy.physics import units
+ureg = units
 
 #DONE
 class Pendulum(NonlinearComposedSystem):

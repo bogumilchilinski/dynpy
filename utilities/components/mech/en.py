@@ -2707,3 +2707,27 @@ class FouerierExpansionComponent(ReportComponent):
         for coeff in self.SeriesCoeffs:
             display(coeff)
         
+
+REPORT_COMPONENTS_LIST = [
+            TitlePageComponent,
+            SchemeComponent,
+            ExemplaryPictureComponent,
+            KineticEnergyComponent,
+            KineticEnergyDynPyCodeComponent,
+            KineticEnergySymPyCodeComponent,
+            PotentialEnergyComponent,
+            PotentialEnergyDynPyCodeComponent,
+            PotentialEnergySymPyCodeComponent,
+            LagrangianComponent,
+            GoverningEquationComponent,
+            GoverningEquationDynpyCodeComponent,
+            GoverningEquationSympyCodeComponent,
+            FundamentalMatrixComponent,
+            GeneralSolutionComponent,
+            GeneralSolutionDynpyCodeComponent,
+            GeneralSolutionSympyCodeComponent,
+            SteadySolutionComponent,
+            FreeVibrationFrequencyComponent
+        ]
+
+        

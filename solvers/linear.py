@@ -15,11 +15,11 @@ from numbers import Number
 from sympy.physics.mechanics import dynamicsymbols, init_vprinting
 from sympy.physics.vector.printing import vpprint, vlatex
 import sympy as sym
-from sympy.utilities.autowrap import autowrap, ufuncify
+#from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
 import itertools as itools
 import scipy.integrate as solver
-from ..utilities.adaptable import TimeSeries, TimeDataFrame, NumericalAnalysisDataFrame
+
 
 from collections import ChainMap
 
@@ -27,28 +27,69 @@ from IPython.display import display, Markdown
 
 import sympy.physics.mechanics as me
 
-from sympy.simplify.fu import TR8, TR10, TR7,TR6, TR5, TR3
+#from sympy.simplify.fu import TR8, TR10, TR7,TR6, TR5, TR3
 from collections.abc import Iterable
 from sympy.solvers.ode.systems import linodesolve
 from functools import cached_property, lru_cache
-cached_property = property
+#cached_property = property
 
-from .numerical import OdeComputationalCase
+
 
 import time
 import pandas as pd
 
-from ..utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim)
-from ..utilities.templates.document import *
-from ..utilities.templates import tikz
-from ..utilities.components.ode import en as ode
-from ..utilities.components.ode import pl as ode_comp_pl
 
+#from .tools import CodeFlowLogger
 
 
 import copy
 
-from .tools import CommonFactorDetector, ODE_COMPONENTS_LIST, CodeFlowLogger
+
+class CodeFlowLogger:
+    _display = False
+    # _obj_printer = lambda obj: (print(f'str: ',obj,'preview'),display(obj),print(f'type of arg: {type(obj)}'))
+    # _cls_printer = lambda obj: (print(f'str: ',obj,'preview'),print(f'type of arg: {type(obj)}'))
+    
+    def __init__(self,entry=None,comment = None,environment = None ):
+        
+        self._entry = entry
+        self._env = environment
+        self._comment = comment
+        
+        if self.__class__._display:
+            self._report_status()
+            
+        
+    def _report_status(self):
+    
+        print(f'START !!!!!!!!!!!!!! {self._comment} !!!!!!!!!!!!!!')    
+        if self._entry is not None:
+            print('#### Entry:')
+            self._entry_report()
+            
+        if self._env is not None:
+            print('#### Env')
+            self._env_report()
+            
+        print(f'END !!!!!!!!!!!!!! {self._comment} !!!!!!!!!!!!!!')     
+    
+    def _entry_report(self):
+        
+        obj = self._entry
+        
+        print(f'str:',obj)
+        print('preview with display:')
+        display(obj)
+        print(f'type of arg: {type(obj)}')        
+
+    def _env_report(self):
+        
+        obj = self._env
+        
+        print(f'str: ',obj)
+        print(f'type of arg: {type(obj)}')   
+
+
 
 class MultivariableTaylorSeries(Expr):
     """_summary_
@@ -229,7 +270,7 @@ class MultivariableTaylorSeries(Expr):
 class AnalyticalSolution(ImmutableMatrix):
 
     _numerical_expand = False
-    _default_doctype = ExampleTemplate
+    _default_doctype = None
 
     def __new__(cls, elements, vars = None, rhs=None, evaluate=True, **options):
 
@@ -582,6 +623,9 @@ class AnalyticalSolution(ImmutableMatrix):
     
     def __call__(self,t,params={}):
         
+        
+        from ..utilities.adaptable import TimeSeries, TimeDataFrame
+        
         solution = (self.nth_order_solution(
             ).rhs.subs(self.extra_params).subs(self.params_values))
         
@@ -762,7 +806,7 @@ class AnalyticalSolution(ImmutableMatrix):
         Returns the result of the computations of solve_ivp integrator from scipy.integrate module.
         '''
 
-
+        from ..utilities.adaptable import TimeSeries, TimeDataFrame, NumericalAnalysisDataFrame
 #         if not self._evaluated:
 #             self.form_numerical_rhs()
 #             self._evaluated=True
@@ -882,6 +926,10 @@ class AnalyticalSolution(ImmutableMatrix):
 
     @property
     def _report_components(self):
+        
+
+        from ..utilities.components.ode import en as ode
+
 
         comp_list=[
         ode.ODESystemComponent,
@@ -892,8 +940,17 @@ class AnalyticalSolution(ImmutableMatrix):
 
     @property
     def default_doctype(self):
+        
+        from ..utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim)
+        from ..utilities.templates.document import ExampleTemplate
+        from ..utilities.templates import tikz
+        from ..utilities.components.ode import en as ode
+        from ..utilities.components.ode import pl as ode_comp_pl
 
-        doctype=self._default_doctype
+        if self._default_doctype is None:
+            doctype=self._default_doctype
+        else:
+            doctype=ExampleTemplate
 
         return doctype
 
@@ -1215,8 +1272,8 @@ class ODESystem(AnalyticalSolution):
     _default_ics = None
     _const_list = []
     
-    _default_detector = CommonFactorDetector #None
-    #_default_detector = None
+    #_default_detector = CommonFactorDetector #None
+    _default_detector = None
     
     _parameters = None
     _ode_order = 2
@@ -1927,6 +1984,7 @@ class ODESystem(AnalyticalSolution):
         '''
         Execution method that assumes all Args are hashable due to application of lru cache. Takes values of parameters and returns instance of class OdeComputationalCase.
         '''
+        from .numerical import OdeComputationalCase
         
         if expand is None:
             expand = ODESystem._numerical_expand
@@ -1941,6 +1999,8 @@ class ODESystem(AnalyticalSolution):
     
     @property
     def _report_components(self):
+        
+        from .tools import ODE_COMPONENTS_LIST
         
         comp_list=[
         *ODE_COMPONENTS_LIST
