@@ -5,10 +5,10 @@ from sympy import (Symbol, symbols, Matrix, sin, cos, asin, diff, sqrt, S,
 
 from sympy.physics.mechanics import dynamicsymbols, ReferenceFrame, Point
 from sympy.physics.vector import vpprint, vlatex
-from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator, mech_comp
+from ...dynamics import LagrangesDynamicSystem, HarmonicOscillator
 
 from ..elements import MaterialPoint, Spring, GravitationalForce, Disk, RigidBody2D, Damper, PID, Excitation, Force, base_frame, base_origin, CombustionEngine
-from ...solvers.linear import ODESystem
+
 
 import pandas as pd
 

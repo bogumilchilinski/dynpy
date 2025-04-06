@@ -10,32 +10,31 @@ from numbers import Number
 ###  exemplary comment
 from sympy.physics.mechanics import dynamicsymbols, init_vprinting
 from sympy.physics.vector.printing import vpprint, vlatex
-from ..utilities.components.ode import en as ode
+#from ..utilities.components.ode import en as ode
 
 import pandas as pd
-from ..utilities.adaptable import *
+#from ..utilities.adaptable import *
 import sympy as sym
 from sympy.printing import *
-import pint
+
 import inspect
-from dynpy.utilities.documents import document
-from dynpy.utilities.templates.document import Guide
-from dynpy.utilities.report import Markdown
+from sympy.physics import units
 
 
-ODE_COMPONENTS_LIST = [
-            ode.ODESystemComponent,
-            ode.ODEInitComponent,
-            ode.ODESystemCodeComponent,
-            ode.VariablesComponent,
-            ode.HomEquationComponent,
-            ode.HomEquationCodeComponent,
-            ode.GoverningEquationComponent,
-            ode.FundamentalMatrixComponent,
-#             ode.ODECharecteristicPolynomialComponent,
-            ode.ODECharecteristicPolynomialCodeComponent,
-            ode.GeneralSolutionComponent
-]
+
+# ODE_COMPONENTS_LIST = [
+#             ode.ODESystemComponent,
+#             ode.ODEInitComponent,
+#             ode.ODESystemCodeComponent,
+#             ode.VariablesComponent,
+#             ode.HomEquationComponent,
+#             ode.HomEquationCodeComponent,
+#             ode.GoverningEquationComponent,
+#             ode.FundamentalMatrixComponent,
+# #             ode.ODECharecteristicPolynomialComponent,
+#             ode.ODECharecteristicPolynomialCodeComponent,
+#             ode.GeneralSolutionComponent
+# ]
 
 class CommonFactorDetector:
     
@@ -94,54 +93,7 @@ class CommonFactorDetector:
         else:
             return {}
         
-        
-class CodeFlowLogger:
-    _display = False
-    # _obj_printer = lambda obj: (print(f'str: ',obj,'preview'),display(obj),print(f'type of arg: {type(obj)}'))
-    # _cls_printer = lambda obj: (print(f'str: ',obj,'preview'),print(f'type of arg: {type(obj)}'))
-    
-    def __init__(self,entry=None,comment = None,environment = None ):
-        
-        self._entry = entry
-        self._env = environment
-        self._comment = comment
-        
-        if self.__class__._display:
-            self._report_status()
-            
-        
-    def _report_status(self):
-    
-        print(f'START !!!!!!!!!!!!!! {self._comment} !!!!!!!!!!!!!!')    
-        if self._entry is not None:
-            print('#### Entry:')
-            self._entry_report()
-            
-        if self._env is not None:
-            print('#### Env')
-            self._env_report()
-            
-        print(f'END !!!!!!!!!!!!!! {self._comment} !!!!!!!!!!!!!!')     
-    
-    def _entry_report(self):
-        
-        obj = self._entry
-        
-        print(f'str:',obj)
-        print('preview with display:')
-        display(obj)
-        print(f'type of arg: {type(obj)}')        
 
-    def _env_report(self):
-        
-        obj = self._env
-        
-        print(f'str: ',obj)
-        print(f'type of arg: {type(obj)}')   
-        
-        
-        
-        
 class TwoSystemsSimulation:
 
     def __init__(self,odes, t_span=None):
@@ -218,7 +170,7 @@ class CodePrinter:
 
 class LatexSize:
 
-    _units= pint.UnitRegistry()
+    _units= units
     _units.default_format = "~"
 
     def __init__(self, size, unit=None,):

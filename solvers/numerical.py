@@ -1,12 +1,12 @@
 from sympy import Symbol, symbols, Matrix, sin, cos, diff, sqrt, S, diag, Eq, Dict, ImmutableMatrix, latex
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.vector.printing import vpprint, vlatex
-from sympy.utilities.autowrap import autowrap, ufuncify
+#from sympy.utilities.autowrap import autowrap, ufuncify
 import numpy as np
 import itertools as itools
-import scipy.integrate as solver
+
 from sympy.utilities.lambdify import lambdify
-from ..utilities.adaptable import TimeSeries, TimeDataFrame, NumericalAnalysisDataFrame
+
 from collections import ChainMap
 from IPython.display import display
 import sympy.physics.mechanics as me
@@ -165,6 +165,9 @@ class OdeComputationalCase:
         '''
         Generates the bininary code related to symbolical expresions declered in the __init__ method. The function object is returned where the all arguments create a tuple.
         '''
+        
+        from sympy.utilities.autowrap import autowrap, ufuncify
+        
         subs_dict = {
             var: Symbol('temp_sym_' + str(i))
             for i, var in enumerate(self.dvars)
@@ -190,6 +193,9 @@ class OdeComputationalCase:
         '''
         Generates the numpy code related to symbolical expresions declered in the __init__ method. The function object is returned where the all arguments create a tuple.
         '''
+        
+        from sympy.utilities.lambdify import lambdify
+        
         subs_dict = {
             var: Symbol('temp_sym_' + str(i))
             for i, var in enumerate(self.dvars)
@@ -318,6 +324,10 @@ class OdeComputationalCase:
         '''
         Returns the result of the computations of solve_ivp integrator from scipy.integrate module.
         '''
+        
+        from ..utilities.adaptable import TimeSeries, TimeDataFrame, NumericalAnalysisDataFrame
+        import scipy.integrate as solver
+        
         if ic_list is None:
             ic_list=self._default_ics
 
