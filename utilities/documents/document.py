@@ -862,12 +862,12 @@ class BPASTSPaper(Document):
 
     latex_name = 'document'
     packages = [
-                    Package('natbib', options=['numbers']),
+#                     Package('natbib', options=['numbers']),
                     Package('booktabs'),
                     Package('float'),
                     Package('standalone'),
                     Package('siunitx'),
-                    Package('bpasts', options=['accepted']),
+#                     Package('bpasts', options=['accepted']),
                     Package('bpasts'),
                     Package('t1enc'),
                     Package('amsmath'),
