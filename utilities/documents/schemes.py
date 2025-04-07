@@ -468,7 +468,7 @@ class HelicalGearVerticalModelScheme(TikZPicture):
 
     """
         return code
-<<<<<<< HEAD
+
     
     
     
@@ -959,4 +959,36 @@ class SegmentBeamScheme(TikZPicture):
 """
 
         return code
+
+
+# Created by Krzysztof Twardoch
+# Verified by BCh
+
+class TrolleyWithPendulumMeasureScheme(TikZPicture):
+    def _scheme_desc(self):
+        code=r"""
+
+\node (B1) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center,] at (0,0) {Kinematic excitation \\ (Vibrating table)};
+\node (B2) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([xshift=4cm]B1.east) {Main member};
+\node (UAcc) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([xshift=4cm]B2.east) {Upper accelerometer};
+
+\draw [thick, ->] (B1.east) -- (B2.west);
+\draw [thick,double, ->] (B2.east) -- (UAcc.west);
+
+\node (B3) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([yshift=-4cm]B2.south) {Vibration absorber};
+
+% \node (LAcc) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([yshift=-4cm]UAcc.south) {Lower accelerometer};
+
+\draw [thick, <->] (B2.south) -- (B3.north);
+% \draw [thick,double, ->] (B3.east) -- (LAcc.west);
+
+\node (DAQ) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([yshift=-1.75cm]UAcc.south) {DAQ};
+
+% \draw [thick, ->] (LAcc.north) -- (DAQ);
+\draw [thick, ->] (UAcc.south) -- (DAQ);
+
+"""
+        return code
+
+
 

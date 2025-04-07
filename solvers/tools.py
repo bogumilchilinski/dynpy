@@ -22,7 +22,7 @@ from sympy.physics import units
 
 
 
-# ODE_COMPONENTS_LIST = [
+ODE_COMPONENTS_LIST = [
 #             ode.ODESystemComponent,
 #             ode.ODEInitComponent,
 #             ode.ODESystemCodeComponent,
@@ -34,7 +34,7 @@ from sympy.physics import units
 # #             ode.ODECharecteristicPolynomialComponent,
 #             ode.ODECharecteristicPolynomialCodeComponent,
 #             ode.GeneralSolutionComponent
-# ]
+]
 
 class CommonFactorDetector:
     

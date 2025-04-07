@@ -21,8 +21,8 @@ from functools import cached_property, lru_cache
 
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
 
-from pint import UnitRegistry
-ureg = UnitRegistry()
+from sympy.physics import units
+ureg = units
 
 
 

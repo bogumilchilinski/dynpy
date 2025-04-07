@@ -1815,6 +1815,8 @@ class TikZPicture(Environment,ReportModule):
 
     def in_figure(self,filename=None,position=None, caption=None,width=None,height=None,marker=None, **kwargs):
 
+        
+        from .documents import tikz
         ReportCache.update_existing_files(self.__class__._default_path)
         
         obj = copy.copy(self)

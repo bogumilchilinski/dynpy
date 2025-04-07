@@ -27,7 +27,7 @@ from IPython.display import display, Markdown
 
 import sympy.physics.mechanics as me
 
-#from sympy.simplify.fu import TR8, TR10, TR7,TR6, TR5, TR3
+from sympy.simplify.fu import TR8, TR10, TR7,TR6, TR5, TR3
 from collections.abc import Iterable
 from sympy.solvers.ode.systems import linodesolve
 from functools import cached_property, lru_cache
