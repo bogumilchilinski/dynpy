@@ -1425,10 +1425,21 @@ class ODESystem(AnalyticalSolution):
             
         return obj
 
-    
+    def is_undamped(self):
+        for i in self._dvars:
+            for k in range(len(self._dvars)):
+                if(self.expand()[k].coeff(i.diff(self.ivar))==0):
+                    return True
+                else: return False
+        
+        
     def is_solvable(self):
         if len(self._dvars) == 1:
             return True
+        elif len(self._dvars) == 2:
+            if self.is_undamped==True:
+                return True
+            else: return False
         else:
             return False
     
