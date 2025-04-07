@@ -37,11 +37,11 @@ imports_str = """
 
 from dynpy.utilities.report import *
 from dynpy.utilities.documents.document import WutThesis
-from dynpy.models.odes.linear import SpringMassDamperMSM
+#from dynpy.models.odes.linear import SpringMassDamperMSM
 from sympy import symbols, Eq
 from sympy.printing.latex import latex
 from IPython.display import display, Math
-import tikzplotlib
+
 from dynpy.utilities.adaptable import TimeDataFrame
 import pandas as pd
 

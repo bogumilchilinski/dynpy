@@ -38,7 +38,7 @@ from functools import cached_property, lru_cache
 import time
 import pandas as pd
 
-
+from ..utilities.adaptable import NumericalAnalysisDataFrame
 #from .tools import CodeFlowLogger
 
 
@@ -859,6 +859,9 @@ class AnalyticalSolution(ImmutableMatrix):
 
     def _as_na_df(self,parameter=None,param_span=None,dependencies_dict=None,coordinates=None, t_span=None):
 
+
+        
+        
         parameters = self.system_parameters()
         
         

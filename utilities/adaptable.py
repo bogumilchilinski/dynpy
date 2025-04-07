@@ -25,6 +25,10 @@ import copy
 
 #from pint import UnitRegistry
 #ureg = UnitRegistry()
+
+from sympy.physics import units
+ureg = units
+
 import os
 
 
@@ -1101,7 +1105,8 @@ class TikZPlot(TikZ, ReportModule):
 
     def in_figure(self,filename=None,position=None, caption=None,width=None,height=None,marker=None, **kwargs):
 
-
+        from .documents import tikz
+        
         ReportCache.update_existing_files(self.__class__._default_path)
 
         

@@ -1725,6 +1725,9 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
         """
         Returns approximated N-th order function calculated with Taylor series method as an instance of the class
         """
+        
+        from .solvers.linear import MultivariableTaylorSeries
+        
         x0_dict = {coord: 0 for coord in self._coords_with_acceleration}
         # print('x0',x0)
         if op_point and x0 is None:

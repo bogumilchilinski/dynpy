@@ -22,7 +22,9 @@ from .tmd import TunedMassDamperRelativeMotion
 from ...utilities.components.mech import en as mech_comp
 
 from pint import UnitRegistry
-ureg = UnitRegistry()
+from sympy.physics import units
+ureg = units
+#ureg = UnitRegistry()
 
 from functools import cached_property, lru_cache
 
