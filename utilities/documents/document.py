@@ -580,7 +580,7 @@ doc.generate_pdf(clean_tex=True)
         from ..components.guides import en as guide_comp
         
         comp_list=[
-        mech_comp.TitlePageComponent,
+        # mech_comp.TitlePageComponent,
         # mech_comp.SchemeComponent,
         # mech_comp.ExemplaryPictureComponent,
         # mech_comp.KineticEnergyComponent,

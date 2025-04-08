@@ -1440,7 +1440,7 @@ class ODESystem(AnalyticalSolution):
         if len(self._dvars) == 1:
             return True
         elif len(self._dvars) == 2:
-            if self.is_undamped==True:
+            if self.is_undamped()==True:
                 return True
             else: return False
         else:
