@@ -21,7 +21,6 @@ from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, bas
 from .tmd import TunedMassDamperRelativeMotion
 from ...utilities.components.mech import en as mech_comp
 
-from pint import UnitRegistry
 from sympy.physics import units
 ureg = units
 #ureg = UnitRegistry()

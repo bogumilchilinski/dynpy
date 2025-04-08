@@ -23,8 +23,8 @@ from ...utilities.components.mech import en as mech_comp
 from .trolley import ThreeSprings, ForcedTrolleyWithThreeSprings
 from .disk import RollingDisk
 
-from pint import UnitRegistry
-ureg = UnitRegistry()
+from sympy.physics import units
+ureg = units
 
 from functools import cached_property, lru_cache
 
