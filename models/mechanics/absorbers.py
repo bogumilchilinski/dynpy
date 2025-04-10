@@ -27,8 +27,8 @@ from .trolley import VariableMassTrolleyWithPendulumRayleighDamping
 
 from pylatex.utils import italic, NoEscape
 
-from pint import UnitRegistry
-ureg = UnitRegistry()
+from sympy.physics import units
+ureg = units
 
 from functools import cached_property, lru_cache
 

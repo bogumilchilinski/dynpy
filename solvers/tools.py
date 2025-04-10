@@ -36,6 +36,27 @@ ODE_COMPONENTS_LIST = [
 #             ode.GeneralSolutionComponent
 ]
 
+
+
+class SystemParameter:
+    
+    def __init__(self, expr, ivar, parameter_values=None):
+        
+        
+        params = expr
+        
+        if ivar in params:
+            params.remove(ivar)
+            
+        if parameter_values == None:
+            self.system_parameters = list(params)
+        else:
+            self.system_parameters =  {
+                param: parameter_values[no]
+                for no, param in enumerate(params)
+            }
+
+
 class CommonFactorDetector:
     
     _default_symbol = Symbol('\\tau^2',positive=True)

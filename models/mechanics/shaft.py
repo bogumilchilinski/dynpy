@@ -16,8 +16,8 @@ import IPython as IP
 import numpy as np
 import inspect
 
-from pint import UnitRegistry
-ureg = UnitRegistry()
+from sympy.physics import units
+ureg = units
 
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
 

@@ -25,8 +25,8 @@ t,f= symbols('t, f')
 
 from sympy import * # provides mathematical interface for symbolic calculations
 
-from pint import UnitRegistry
-ureg = UnitRegistry()
+from sympy.physics import units
+ureg = units
 
 # from sympy.physics.mechanics import *
 

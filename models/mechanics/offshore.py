@@ -19,8 +19,8 @@ import inspect
 from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, base_origin, REPORT_COMPONENTS_LIST
 
 
-import pint
-ureg = pint.UnitRegistry()
+from sympy.physics import units
+ureg = units
 
 #TODO
 #ISSUE #149

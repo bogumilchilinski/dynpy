@@ -30,8 +30,8 @@ import pandas as pd
 from dynpy.utilities.adaptable import *
 
 
-from pint import UnitRegistry
-ureg = UnitRegistry()
+from sympy.physics import units
+ureg = units
 
 ix = pd.IndexSlice
 

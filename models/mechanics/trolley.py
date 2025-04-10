@@ -23,7 +23,7 @@ from ...utilities.components.mech import en as mech_comp
 
 from sympy.physics import units
 ureg = units
-#ureg = UnitRegistry()
+#ureg = units
 
 from functools import cached_property, lru_cache
 
@@ -327,7 +327,7 @@ class ForcedSpringMassSystem(SpringMassSystem):
     
     def unit_dict(self):
     
-        from pint import UnitRegistry
+        from sympy.physics import units
         ureg=UnitRegistry()
 
         unit_dict = {
@@ -821,7 +821,7 @@ class TrolleyWithPendulum(ComposedSystem):
 
     def unit_dict(self):
 
-        from pint import UnitRegistry
+        from sympy.physics import units
         ureg=UnitRegistry()
 
         unit_dict = {
@@ -1210,7 +1210,7 @@ class DampedTrolleyWithPendulum(TrolleyWithPendulum):
  
     def unit_dict(self):
     
-        from pint import UnitRegistry
+        from sympy.physics import units
         ureg=UnitRegistry()
 
         unit_dict = {
@@ -2408,7 +2408,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
         return self.sym_desc_dict
 
     def unit_dict(self):
-        from pint import UnitRegistry
+        from sympy.physics import units
         ureg=UnitRegistry()
 
         unit_dict = {
@@ -2732,8 +2732,8 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
     def _FRF_chart(self, chi=None):
         from sympy import lambdify
         from ...solvers.linear import ODESystem, FirstOrderLinearODESystemWithHarmonics
-        from pint import UnitRegistry
-        ureg = UnitRegistry()
+        from sympy.physics import units
+        ureg = units
         import pandas as pd
         tau=Symbol('tau')
         sym = Symbol('A')

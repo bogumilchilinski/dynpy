@@ -138,7 +138,7 @@ class UndampedVehicleSuspension(ComposedSystem):
 
     def unit_dict(self):
 
-        from pint import UnitRegistry
+        from sympy.physics import units
         ureg=UnitRegistry()
 
         unit_dict = {

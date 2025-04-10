@@ -1357,7 +1357,7 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
 
         def unit_dict(self):
         
-            from pint import UnitRegistry
+            from sympy.physics import units
             ureg=UnitRegistry()
 
             unit_dict = {
@@ -1369,7 +1369,7 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
 
             '''))
         
-        from pint import UnitRegistry
+        from sympy.physics import units
         ureg=UnitRegistry()
         
         system.symbols_description()
@@ -1661,7 +1661,7 @@ from dynpy.utilities.components.guides.en import ReportComponent
     from dynpy.utilities.report import ReportText, Markdown, Picture, SympyFormula, Frame, ObjectCode, Block, AlertBlock, ExampleBlock, GuideCode, LatexDataFrame
     from dynpy.utilities.components.guides.en import ReportCompImplementationComponent,ReportCompImplementationIssueComponent
     from sympy import *
-    from pint import UnitRegistry
+    from sympy.physics import units
     import pandas as pd
 '''
 class LibrariesImportComponent(DocumentGenerationComponent):

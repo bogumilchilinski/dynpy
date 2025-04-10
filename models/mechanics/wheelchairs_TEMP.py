@@ -1,6 +1,6 @@
 import importlib
 from ... import dynamics as dyn
-importlib.reload(dyn)
+
 
 
 from sympy.physics.vector import dynamicsymbols
@@ -10,8 +10,9 @@ import sympy as sym
 import numpy as np
 import pylatex
 from pylatex import Command, NoEscape
-import pint
-ureg = pint.UnitRegistry()
+
+from sympy.physics import units
+ureg = units
 
 mechanics_printing()
 

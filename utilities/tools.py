@@ -349,6 +349,7 @@ class DynSysChecker:
         else:
             return True
 class DynsysCheckerTable:
+
     def __init__(self, system, verbosity = False, format_for_latex = False):
         import pandas as pd
         initial_data = {'System Name': [], 

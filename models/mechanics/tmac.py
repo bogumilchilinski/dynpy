@@ -21,8 +21,8 @@ from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, bas
 
 import matplotlib.pyplot as plt
 
-import pint
-ureg = pint.UnitRegistry()
+from sympy.physics import units
+ureg = units
 
 class YokeMechanism(ComposedSystem):
 

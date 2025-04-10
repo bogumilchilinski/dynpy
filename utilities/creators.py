@@ -1,7 +1,7 @@
 import dynpy
 from dynpy.utilities.report import ReportText
 from .report import Markdown
-from .documents.document import ODESystemOverviewReport
+from .documents.reports import ODESystemOverviewReport
 from github import Github
 import getpass
 

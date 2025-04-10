@@ -12,8 +12,8 @@ from ..elements import GravitationalForce
 #from dynpy.models.electric.engine import *
 from functools import cached_property, lru_cache
 
-from pint import UnitRegistry
-ureg = UnitRegistry()
+from sympy.physics import units
+ureg = units
 
 class ReducedMotorbike(ComposedSystem):
     scheme_name = 'DC_motor.png'

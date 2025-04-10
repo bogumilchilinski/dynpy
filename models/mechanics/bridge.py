@@ -21,8 +21,8 @@ from .principles import ComposedSystem, NonlinearComposedSystem, base_frame, bas
 
 from functools import cached_property
 
-from pint import UnitRegistry
-ureg = UnitRegistry()
+from sympy.physics import units
+ureg = units
 
 # class ComposedSystem(HarmonicOscillator):
 #     """Base class for all systems
@@ -788,7 +788,7 @@ class BeamBridgeDamped(BeamBridge):
         return dyn_force
     def unit_dict(self):
 
-        from pint import UnitRegistry
+        from sympy.physics import units
         ureg=UnitRegistry()
 
         unit_dict = {

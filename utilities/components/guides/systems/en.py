@@ -1232,7 +1232,7 @@ dict_str=(
 '''
 def unit_dict(self):
 
-    from pint import UnitRegistry
+    from sympy.physics import units
     ureg=UnitRegistry()
 
     unit_dict = {
@@ -1349,7 +1349,7 @@ class MyMaterialPointMovement(ComposedSystem):
         
     def unit_dict(self):
 
-        from pint import UnitRegistry
+        from sympy.physics import units
         ureg=UnitRegistry()
 
         unit_dict = {
@@ -1840,7 +1840,7 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
 
         def unit_dict(self):
         
-            from pint import UnitRegistry
+            from sympy.physics import units
             ureg=UnitRegistry()
 
             unit_dict = {
@@ -1852,7 +1852,7 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
 
             '''))
         
-        from pint import UnitRegistry
+        from sympy.physics import units
         ureg=UnitRegistry()
         
         system.symbols_description()

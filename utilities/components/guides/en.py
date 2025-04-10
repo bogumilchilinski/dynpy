@@ -1175,8 +1175,8 @@ from .reporting.en import DifferentSimulationsComponent
 
 # from dynpy.utilities.adaptable import LatexDataFrame
 # from sympy import symbols
-# from pint import UnitRegistry 
-# ureg = UnitRegistry()
+# from sympy.physics import units 
+# ureg = units
 
 # a,b,c,d,e = symbols('a b c d e',positive = True)
 
@@ -2389,7 +2389,7 @@ from .github.en import IssuePreparationComponent
 # '''
 # def unit_dict(self):
 
-#     from pint import UnitRegistry
+#     from sympy.physics import units
 #     ureg=UnitRegistry()
 
 #     unit_dict = {
@@ -2506,7 +2506,7 @@ from .github.en import IssuePreparationComponent
         
 #     def unit_dict(self):
 
-#         from pint import UnitRegistry
+#         from sympy.physics import units
 #         ureg=UnitRegistry()
 
 #         unit_dict = {
@@ -3525,7 +3525,7 @@ from .pandas.en import TablesCreationComponent
 #     from dynpy.utilities.report import ReportText, Markdown, Picture, SympyFormula, Frame, ObjectCode, Block, AlertBlock, ExampleBlock, GuideCode, LatexDataFrame
 #     from dynpy.utilities.components.guides.en import ReportCompImplementationComponent,ReportCompImplementationIssueComponent
 #     from sympy import *
-#     from pint import UnitRegistry
+#     from sympy.physics import units
 #     import pandas as pd
 # '''
 from .development.en import LibrariesImportComponent
@@ -4631,7 +4631,7 @@ from .systems.en import DynamicSystemCompletenessCheckComponent
 
 #         def unit_dict(self):
         
-#             from pint import UnitRegistry
+#             from sympy.physics import units
 #             ureg=UnitRegistry()
 
 #             unit_dict = {
@@ -4643,7 +4643,7 @@ from .systems.en import DynamicSystemCompletenessCheckComponent
 
 #             '''))
         
-#         from pint import UnitRegistry
+#         from sympy.physics import units
 #         ureg=UnitRegistry()
         
 #         system.symbols_description()

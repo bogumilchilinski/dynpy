@@ -23,8 +23,8 @@ import copy
 
 
 
-#from pint import UnitRegistry
-#ureg = UnitRegistry()
+#from sympy.physics import units
+#ureg = units
 
 from sympy.physics import units
 ureg = units
