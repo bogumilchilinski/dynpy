@@ -2270,11 +2270,11 @@ class ParticularDerivativesComponent(ReportComponent):
         for index, value in enumerate(system._scales_formula):
             display(ReportText(f'For the function ${latex(system.approximation_function(index)[0])}$:'))
 #             display(SympyFormula(system.approximation_function(index)[0]))
-            display(SympyFormula(system.part_derivative(index)))
-            display(SympyFormula(system.sec_part_derivative(index)))
+            display(SympyFormula(system.part_derivative(index).expand()))
+            display(SympyFormula(system.sec_part_derivative(index).expand()))
               
         for index, value in enumerate(system._scales_formula):
             display(ReportText(f"After the substitution of time scales and their derivatives for the function ${latex(system.approximation_function(index)[0])}$:"))
 #             display(SympyFormula(system.approximation_function(index)[0]))
-            display(SympyFormula(system.part_derivative_subs(index)))
-            display(SympyFormula(system.sec_part_derivative_subs(index)))
+            display(SympyFormula(system.part_derivative_subs(index).expand()))
+            display(SympyFormula(system.sec_part_derivative_subs(index).expand()))
