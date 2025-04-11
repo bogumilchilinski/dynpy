@@ -39,55 +39,11 @@ import time
 import pandas as pd
 
 from ..utilities.adaptable import NumericalAnalysisDataFrame
-#from .tools import CodeFlowLogger
+from .tools import CodeFlowLogger, SystemParameter
 
 
 import copy
 
-
-class CodeFlowLogger:
-    _display = False
-    # _obj_printer = lambda obj: (print(f'str: ',obj,'preview'),display(obj),print(f'type of arg: {type(obj)}'))
-    # _cls_printer = lambda obj: (print(f'str: ',obj,'preview'),print(f'type of arg: {type(obj)}'))
-    
-    def __init__(self,entry=None,comment = None,environment = None ):
-        
-        self._entry = entry
-        self._env = environment
-        self._comment = comment
-        
-        if self.__class__._display:
-            self._report_status()
-            
-        
-    def _report_status(self):
-    
-        print(f'START !!!!!!!!!!!!!! {self._comment} !!!!!!!!!!!!!!')    
-        if self._entry is not None:
-            print('#### Entry:')
-            self._entry_report()
-            
-        if self._env is not None:
-            print('#### Env')
-            self._env_report()
-            
-        print(f'END !!!!!!!!!!!!!! {self._comment} !!!!!!!!!!!!!!')     
-    
-    def _entry_report(self):
-        
-        obj = self._entry
-        
-        print(f'str:',obj)
-        print('preview with display:')
-        display(obj)
-        print(f'type of arg: {type(obj)}')        
-
-    def _env_report(self):
-        
-        obj = self._env
-        
-        print(f'str: ',obj)
-        print(f'type of arg: {type(obj)}')   
 
 
 
