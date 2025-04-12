@@ -50,7 +50,7 @@ base_origin=me.Point('O')
 
 from functools import cached_property, lru_cache
 
-#from .solvers.linear import SystemParameter
+from .solvers.linear import SystemParameter
 import os
 import re
 
