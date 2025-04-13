@@ -1715,16 +1715,18 @@ class EntryWithUnit:
         if unit:
             if isinstance(unit,str):
                 return f'{entry_str}{sep}{left_par}{unit}{right_par}'
-            elif str(unit) == str(ureg.dimensionless):
+            elif unit is None:
                 return f'{entry_str}{sep}{left_par}-{right_par}'
-            elif str(unit) == str(ureg.ohm):
-                ohm_string='\\mathrm{\\Omega}'
-                return f'{entry_str}{sep}{left_par}{ohm_string}{right_par}'     
-            elif str(unit) == str(ureg.degC):
-                degC_string='\\mathrm{^\\circ C}'
-                return f'{entry_str}{sep}{left_par}{degC_string}{right_par}'   
+            #elif str(unit) == str(ureg.dimensionless):
+                #return f'{entry_str}{sep}{left_par}-{right_par}'
+            #elif str(unit) == str(ureg.ohm):
+                #ohm_string='\\mathrm{\\Omega}'
+                #return f'{entry_str}{sep}{left_par}{ohm_string}{right_par}'     
+            #elif str(unit) == str(ureg.degC):
+                #degC_string='\\mathrm{^\\circ C}'
+                #return f'{entry_str}{sep}{left_par}{degC_string}{right_par}'   
             else:
-                return f'{entry_str}{sep}{left_par}{unit:~L}{right_par}'
+                return f'{entry_str}{sep}{left_par}{latex(unit)}{right_par}'
         else:
             return f'{self._obj}'
 
