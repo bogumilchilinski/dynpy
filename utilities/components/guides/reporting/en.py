@@ -1221,11 +1221,9 @@ append_elem_str ="""
 
     def append_elements(self):
         #variables provided by `reported_object` arg
-        classname = self.reported_object['classname']
-        class_module = self.reported_object['module']
-        class_field = self.reported_object['field']
-        target = self.reported_object['target']
-    
+        reported_object = self.reported_object
+
+
         #implement reporting activieties here
 """
 
