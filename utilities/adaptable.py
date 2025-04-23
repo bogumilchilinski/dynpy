@@ -1719,7 +1719,7 @@ class EntryWithUnit:
             elif unit is None:
                 return f'{entry_str}{sep}{left_par}-{right_par}' 
             else:
-                return f'{entry_str}{sep}{left_par}{unit:~L}{right_par}'
+                return f'{entry_str}{sep}{left_par}{latex(unit)}{right_par}'
         else:
             return f'{self._obj}'
 
