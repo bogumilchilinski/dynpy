@@ -267,7 +267,7 @@ class HelpImplementationIssueCreator:
     from dynpy.utilities.documents.document import IntroDynPyProjectGuidelines
     title="Issue"
     last_issue_no=533
-    MeetingIssueCreator(title=title,no=last_issue_no+1,guide=IntroDynPyProjectGuidelines,date='2024.09.26',time='20:30',done=False)
+    HelpImplementationIssueCreator(title=title,no=last_issue_no+1,guide=IntroDynPyProjectGuidelines,date='2024.09.26',time='20:30',done=False)
 
     """
     
@@ -331,7 +331,7 @@ class HelpImplementationIssueCreator:
         obj_class_name=self._obj.__name__
         
         issue_code_str=(f'Help *docstring* is to implement for `{obj_class_name}` class that is defined in `{obj_class_module}`. '+
-        'It should list of all available information about class.')
+        'It should be a list of all available information about class.')
         
         return issue_code_str
 
@@ -387,8 +387,8 @@ class HelpImplementationIssueCreator:
         elems_dict = self._get_elems_dict()
         titles = self.get_issues_titles()
 
-        issue_code_str=('Help *docstring* is to implement for `{obj_class_name}` class that is defined in `{obj_class_module}`. '+
-        'It should list of all available information about class.')
+        # issue_code_str=('Help *docstring* is to implement for `{obj_class_name}` class that is defined in `{obj_class_module}`. '+
+        # 'It should be a list of all available information about class.')
 
         return {'title':self.title,'body':self.body_text.format(**elems_dict)}
 
@@ -1572,10 +1572,10 @@ To call tree use bellow call code:
 
     def print(self, is_root = True, syntax = True):
         '''
-Method is used to create tree string.
+        Method is used to create tree string.
 
-init: 
-syntax - is used to define tab sign, Object code accept normal spaces, Markdown and ReportText require &nbsp; instead of tab
+        init: 
+        syntax - is used to define tab sign, Object code accept normal spaces, Markdown and ReportText require &nbsp; instead of tab
         '''
         if syntax is True:
             pre_0 = "    "
@@ -1840,15 +1840,19 @@ advanced_modeling_report_code_str = """Celem jest przygotowanie toku postępowan
 
 """
 
-advanced_modeling_schedule_code_str_en = """
+advanced_modeling_schedule_code_str_en = """> *Informational comment - remove this message when issues is completed.*
+> *This issue needs at most 1 period per team (period (typically one week) - depends on assumed schedule, team (typically 1-3 students) - depends on project complexity).*
+
 The aim of the issue is to manage the process of project implementation.
 The following activities are to do:
 
-- [{tic}] assignment of tasks;
+- [{tic}] assignment of tasks (with `ResearchProjectIssueCreator` class);
 
 - [{tic}] presentation of requirements that need to be fulfilled (code, issues, other things);
 
-- [{tic}] ???
+- [{tic}] *any additional development or research issue - remove this line if not needed*;
+
+- [{tic}] *any additional development or research issue - remove this line if not needed*;
 
 - [{tic}] presentation of performed activities;
 
@@ -1866,105 +1870,118 @@ The tasks to complete are as follows:
 
 - [{tic}] #{issue_no+6}
 
-- [{tic}] #{issue_no+7}
-
+Estimated execution time - 7 periods.
 """
 
 
-advanced_modeling_intro_code_str_en = """The goal is preparation of work environment and initial content (draft) version of the report:
+advanced_modeling_intro_code_str_en = """> *Informational comment - remove this message when issues is completed.*
+> *This issue needs at most 1 period per team (period (typically one week) - depends on assumed schedule, team (typically 1-3 students) - depends on project complexity).*
 
- PHASE I - PRELIMINARY - 1 week (TEAM/ 1 person)
+The goal is to prepare working environment and initial content of the report (draft) that includes the following elements or activities:
 
-[{tic}] Preparation of folder structure, necessary files and preleminary content report,
+[{tic}] preparation of folder structure, necessary files and preleminary report content;
 
-[{tic}] Definition of the requirements and expectations for the project, determination of the field in which the work will be conducted: mechanical, electrical, structural, dynamic, kinematic along a route, along with its characterization,
+[{tic}] definition of the requirements and expectations for the project, determination of the project field (mechanics, electrics, dynamics, kinematics, etc.);
 
-[{tic}] Selection of a real object, mechanism, or phenomenon on which the model will be based,
+[{tic}] selection of a reference object (mechanism, algorithm, software or phenomenon) for further analysis;
 
-[{tic}] Presentation of an example of a real experimental model that relates to the simulation model,
+[{tic}] analysis of an example of a reference object that relates to the simulation model;
 
-[{tic}] Definition of the assumptions for the model, the level of advancement, and the specific results we aim to achieve.
+[{tic}] definition of the assumptions for the model or the level of complexity.
 
+Estimated execution time - 1 period.
 """
 
-advanced_modeling_basics_code_str_en = """The goal is research on current state of art about the topic and methodology needed for project:
+advanced_modeling_basics_code_str_en = """> *Informational comment - remove this message when issues is completed.*
+> *This issue needs at most 2 periods per team (period (typically one week) - depends on assumed schedule, team (typically 1-3 students) - depends on project complexity).*
 
- PHASE II - PROJECT PREPARATION - 2 weeks (1 person)
+The goal is to investigate a current state of the art for the topic and methodology that includes the following elements or activities:
 
-[{tic}] Revision of the current state of knowledge,
+[{tic}] investigation of the current state of the knowledge;
 
-[{tic}] Revision of the DynPy environment to assess its capabilities,
+[{tic}] revision of the DynPi environment features to assess its capabilities, preliminary comparison with other environments;
 
-[{tic}] Selection of a methodology for creating the dynamic model,
+[{tic}] selection of a methodology for solving of the problem (tools, timeline, milestones);
 
-[{tic}] Preparation of a document presenting the fundamental classes and methods that will form the basis of the project and report,
+[{tic}] preparation for graphical representation of the object, mechanism, or phenomenon on which the schematic drawing will be based (e.g., in SolidWorks/AutoCAD/TiKz);
 
-[{tic}] Searching for graphics of the object, mechanism, or phenomenon on which the schematic drawing will be based (e.g., in SolidWorks/AutoCAD/TiKz),
+[{tic}] initial analysis of the problem solution (algorithms, coordinates, constraints, mathematical description, energies, equations of motion, software).
 
-[{tic}] Conduction a complete characterization of the model (LSS, coordinates, constraints, energies, equations of motion).
-
+Estimated execution time - 2 periods.
 """
 
-advanced_modelling_modelling_code_str_en = """The goal is creating the mathematical model of investigated object:
+advanced_modelling_modelling_code_str_en = """> *Informational comment - remove this message when issues is completed.*
+> *This issue needs at most 3 periods per team (period (typically one week) - depends on assumed schedule, team (typically 1-3 students) - depends on project complexity).*
 
- PHASE III - MODEL DEVELOPMENT - 3 weeks (1 person)
+The goal is creating the theoretical model of an investigated object that includes the following elements or activities:
 
-[{tic}] Selection of a model from the DynPy library that resembles the model defined in the previous phase,
+[{tic}] selection of a model from the DynPy library that resembles the model defined in the previous phase;
 
-[{tic}] Praparation, based on the model, of all the necessary equations for the analysis,
+[{tic}] praparation of all the necessary equations for the analysis (supported by the model);
 
-[{tic}] Selection of appropriate data and parameters for the chosen simulation model,
+[{tic}] selection of appropriate data and parameters for the chosen simulation model;
 
-[{tic}] Conduction verification process of the programmed functions to ensure correctness.
+[{tic}] initial verification of the implemented functions to ensure correctness.
 
+Estimated execution time - 3 periods.
 """
 
-advanced_modeling_simulation_code_str_en = """The goal is using the model to perform all necessary simulations and got valuable data:
+advanced_modeling_simulation_code_str_en = """> *Informational comment - remove this message when issues is completed.*
+> *This issue needs at most 2 periods per team (period (typically one week) - depends on assumed schedule, team (typically 1-3 students) - depends on project complexity).*
 
- PHASE IV - SIMULATION EXECUTION - 2 weeks (1 person)
+The goal is to use the model to perform all necessary analyses and got valuable data. The following elements or activities should be included:
 
-[{tic}] Preparation of appropriate functions for conducting analytical and numerical simulations,
+[{tic}] preparation of appropriate functions for conducting analytical and numerical simulations;
 
-[{tic}] Execution of simulations using analytical solutions of the equations of motion,
+[{tic}] execution of simulations with analytical solutions the problem *(if possible - remove if not applicable)*;
 
-[{tic}] Conduction of simulations using the numerically discretized model,
+[{tic}] numerical simulations of the model;
 
-[{tic}] Analysing accuracy of the selected data and making any necessary adjustments,
+[{tic}] analysis accuracy of the selected data;
 
-[{tic}] Creation of a matrix comparing the results of both simulations,
+[{tic}] preparation of a comparison of the results of performed simulations.
 
-[{tic}] (+) Performation of calculations for quantities other than "x, v, a".
-
+Estimated execution time - 2 periods.
 """
 
-advanced_modeling_analysis_code_str_en = """The goal is validation and proper visualization of all acquired data:
+advanced_modeling_analysis_code_str_en = """> *Informational comment - remove this message when issues is completed.*
+> *This issue needs at most 1 period per team (period (typically one week) - depends on assumed schedule, team (typically 1-3 students) - depends on project complexity).*
 
- PHASE V - RESULTS ANALYSIS - 1 week (1 person)
+The goal is a validation with the reference object and discussion of obtained results. The following elements or activities should be included:
 
-[{tic}] Presentation of the results in the form of a set of tables,
+[{tic}] selection of the reference object (empirical data, external sources or another software);
 
-[{tic}] Displaying of the results in the form of graphs,
+[{tic}] reference object description and its further analysis;
 
-[{tic}] Performing of an analysis of the results and identification of the observed phenomena.
+[{tic}] presentation and analysis of the reference data;
 
+[{tic}] analysis of the referenece data and performed simulations, identification of the theoretical model *(if possible - remove if not applicable)*;
+
+[{tic}] comparison of the results obtained and reference data (validation of the proposed solution).
+
+Estimated execution time - 1 period.
 """
 
-advanced_modeling_report_code_str_en = """The goal is revision of all steps of the research and creation of the final report.
+advanced_modeling_report_code_str_en = """> *Informational comment - remove this message when issues is completed.*
+> *This issue needs at most 2 periods per team (period (typically one week) - depends on assumed schedule, team (typically 1-3 students) - depends on project complexity).*
 
- PHASE VI - FINAL REPORT PREPARATION - 2 weeks (1 person)
+The goal is a revision of all steps of the research and final assesment of the report. The folliwng elements or activities should be included:
 
-[{tic}] Creation of a brief summary of the current state of knowledge along with a description of the modeling concept (PHASE II),
+[{tic}] preliminary evaluation of the report content and structure;
 
-[{tic}] Presentation of the selected real model and its physical interpretation (PHASE I),
+[{tic}] title pages, statements, abstracts, references and lists of figures, listings, tables and etc.;
 
-[{tic}] Presentation  of the equations used to characterize the object (PHASE III),
+[{tic}] formal assesment of the report (correctness of the structure and volume);
 
-[{tic}] Preparation a description of the applied software (PHASE III),
+[{tic}] final validation of report content (improvements of sections);
 
-[{tic}] Preparation of tables and graphs along with their descriptions (PHASE IV, V),
+[{tic}] summary and conlusions from the performed activities;
 
-[{tic}] Formulation of conclusions (PHASE VI).
+[{tic}] final revision and improvements (if needed) of the title and abstracts;
 
+[{tic}] preparation of the review and required documents, submission.
+
+Estimated execution time - 2 periods.
 """
 
 class ResearchProjectIssueCreator:
@@ -2003,7 +2020,7 @@ class ResearchProjectIssueCreator:
                 'issue_no+4':self._issue_no+4,
                 'issue_no+5':self._issue_no+5,
                 'issue_no+6':self._issue_no+6,
-                'issue_no+7':self._issue_no+7,
+
                 'guide_class_module':guide_class.__module__,
                 'guide_class_name':guide_class.__name__,
                 'date':self._date,
@@ -2162,6 +2179,71 @@ class ResearchProjectIssueCreator:
         else:
             return {'title':titles['report'],'body':advanced_modeling_report_code_str.format(**elems_dict)}
     
+    
+    @property
+    def closing_comment_text_schedule(self):
+        
+        # obj_class_module= self._obj.__module__
+        # obj_class_name=self._obj.__name__
+        
+        comment_str_h1 = '> *Exemplary comment. You can copy example below and close issue with new comment or modify it and close the issue.* '
+        comment_str_h2 = '*Remove this message or keep it if new comment is created.*'
+        
+        comment_str_2 = 'All done. Project succesed'
+
+        
+        return f'{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}'
+
+
+    @property
+    def closing_comment_text_intro(self):
+        
+        # obj_class_module= self._obj.__module__
+        # obj_class_name=self._obj.__name__
+        
+        comment_str_h1 = '> *Exemplary comment. You can copy example below and close issue with new comment or modify it and close the issue.* '
+        comment_str_h2 = '*Remove this message or keep it if new comment is created.*'
+        
+        comment_str_2 = 'All done. The partial report for this stage can be found in the folling resource: LINK.'
+        
+        return f'{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}'
+
+    @property
+    def closing_comment_text_basics(self):
+        
+        return self.closing_comment_text_intro
+    
+    @property
+    def closing_comment_text_modelling(self):
+        
+        return self.closing_comment_text_intro
+    
+    @property
+    def closing_comment_text_simulation(self):
+        
+        return self.closing_comment_text_intro    
+
+    
+    @property
+    def closing_comment_text_analysis(self):
+        
+        return self.closing_comment_text_intro    
+
+    @property
+    def closing_comment_text_report(self):
+        
+        
+        obj_class_module= self._guide.__module__
+        obj_class_name=self._guide.__name__
+        
+        comment_str_h1 = '> *Exemplary comment. You can copy example below and close issue with new comment or modify it and close the issue.* '
+        comment_str_h2 = '*Remove this message or keep it if new comment is created.*'
+        
+        comment_str_2 = 'All done. The report for this project can be found in the folling resource: LINK.'
+        
+        return f'{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}'
+    
+    
     def _repr_markdown_(self):
         return self.get_issue_str()
 
@@ -2188,6 +2270,10 @@ class ResearchProjectIssueCreator:
         
         issue_report = repository.create_issue(**self.get_report_issue_dict(),labels=[guide_label]#,assignees=wykon
                                 )
+        
+        
+        issue_schedule.create_comment(self.closing_comment_schedule)
+        
         
         return issue_schedule, issue_intro, issue_basics, issue_modelling, issue_simulation, issue_analysis, issue_report
     

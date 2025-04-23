@@ -1494,7 +1494,7 @@ class Picture(Figure, ReportModule):
         """
         
         self.cls_container.append(self)
-        from wand.image import Image as WImage
+        
 
 
         if self.caption is None:

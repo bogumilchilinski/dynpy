@@ -931,6 +931,7 @@ class TikZPlot(TikZ, ReportModule):
             #self._figure_gen = lambda: Figure(position='htbp')
             cls._default_figure_env = Picture
 
+        return cls
 
     @property
     def _figure_env(self):
