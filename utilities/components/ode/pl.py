@@ -3,73 +3,67 @@ from .en import *
 
 
 class TitlePageComponent(Environment):
-    
-    latex_name='titlepage'
-    
-    def __init__(self, system=None, options=None, arguments=None, start_arguments=None,
+    """
+      - university: np. "Politechnika Warszawska"
+      - faculty:    np. "Wydział Samochodów i Maszyn Roboczych"
+      - thesis_type: np. "Praca Przejściowa"
+      - thesis_title: np. "Dopracowanie biblioteki dynpy"
+      - author:     np. "Mike Wazowski"
+      - supervisor: np. "Jeremy Clarkson"
+      - place:      np. "Warszawa"
+      - year:       np. 2025
+    """
+    latex_name = 'titlepage'
+
+
+# example use:
+# doc.append(TitlePageComponent(
+#     university='Politechnika Warszawska',
+#     faculty='Wydział Samochodów i Maszyn Roboczych',
+#     thesis_type='EXAMPLE',
+#     thesis_title='EXAMPLE',
+#     author='Richard Feynman',
+#     supervisor='Enrico Fermi',
+#     place='Warszawa',
+#     year=2025
+# ))
+
+
+
+
+    def __init__(self,
+                 university: str,
+                 faculty: str,
+                 thesis_type: str,
+                 thesis_title: str,
+                 author: str,
+                 supervisor: str,
+                 place: str,
+                 year: int,
+                 options=None, arguments=None, start_arguments=None,
                  **kwargs):
-        r"""
-        Args
-        ----
-        options: str or list or  `~.Options`
-            Options to be added to the ``\begin`` command
-        arguments: str or list or `~.Arguments`
-            Arguments to be added to the ``\begin`` command
-        start_arguments: str or list or `~.Arguments`
-            Arguments to be added before the options
-        """
+        super().__init__(options=options, arguments=arguments,
+                         start_arguments=start_arguments, **kwargs)
 
-        self.system = system
-        self.options = options
-        self.arguments = arguments
-        self.start_arguments = start_arguments
-
-        
-        
-        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
-        
-        if self.system is not None:
-
-        
-            system = self.system
+        # wyrównanie do środka
+        self.append(NoEscape(r'\centering'))
+        # uczelnia
+        self.append(NoEscape(r'\Large ' + university + r'\\[0.5cm]'))
+        # wydział
+        self.append(NoEscape(r'\large ' + faculty + r'\\[1cm]'))
+        # rodzaj pracy
+        self.append(NoEscape(r'\textbf{' + thesis_type + r'}\\[1.5cm]'))
+        # tytuł pracy
+        self.append(NoEscape(r'\LARGE "' + thesis_title + r'"\\[2cm]'))
+        # autor i opiekun
+        self.append(NoEscape(r'\normalsize Autor: ' + author + r'\\'))
+        self.append(NoEscape(r'Opiekun: ' + supervisor + r'\\[1.5cm]'))
+        # miejsce i rok
+        self.append(NoEscape(place + ', ' + str(year)))
 
 
-            
-            self.append(NoEscape('\centering'))
 
-            self.append(NoEscape('\\Huge DRGANIA MECHANICZNE \n \n'))
-            
-            self.append(Command('vspace',arguments='1cm'))
 
-            
-            
-            if len(system.q)==1:
-                dof_str = 'JEDNYM STOPNIU SWOBODY'
-            else:
-                dof_str = 'WIELU STOPNIACH SWOBODY'
-                
-            if system._dissipative_potential==0 or system._dissipative_potential is None:
-                damping_str = 'NIETŁUMIONE'
-            else:
-                damping_str = 'TŁUMIONE'
-
-           
-            self.append(NoEscape(f'\\Large {damping_str} UKŁADY O {dof_str} \n \n'))    
-            
-            self.append(Command('vspace',arguments='1cm'))
-            
-            self.append(NoEscape(f'{system._label} \n \n'))
-            
-            self.append(Command('vspace',arguments='1cm'))
-            
-            self.append(Command('MyAuthor'))
-            self.append(NoEscape(f'\\par'))
-            self.append(Command('vspace',arguments='1cm'))
-            
-            #self.append(Command('vspace',arguments='1cm'))
-            #self.append(NoEscape(f'\\protect\\par'))
-            #self.append(NewLine())
-            self.append(Command('MyDate'))
 
 
             
