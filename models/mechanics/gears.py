@@ -548,6 +548,24 @@ class DDOFGearMechanism(ComposedSystem):
     
     def as_equivalent_sdof(self):
         return EquivalentSDOFGearModel()
+    
+    
+    def get_numerical_data(self):
+
+#         k,m,c,F,eps = symbols('k m c F epsilon', positive=True)
+
+        default_data_dict = {
+            self.J1:1,
+            self.J2:1,
+            self.Omega:1,
+            self.r1:0.35,
+            self.r2:0.35,
+            self.T1:1,
+            self.T2:1,
+            self.c: 2e-4*1e6,
+            self.k: 1e6,
+        }
+        return default_data_dict
 
 class EquivalentSDOFGearModel(EquivalentGearModel):
     pass

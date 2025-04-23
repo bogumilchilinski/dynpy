@@ -1245,6 +1245,10 @@ display(ReportText('Description of verifications concept. '*200))
 #data_tab = TimeDataFrame(df).to_latex_dataframe().reported(caption='Caption')
 #graph=data_tab.iloc[:,[1]]
 
+#display(data_tab)
+display(ReportText('Obtained data analysis. '*200))
+#display(graph)
+
 ## 2st CASE
 ## Creating graph from a
 df = pd.DataFrame({t:[0,1,2],'a':[2,3,4],'b':[8,7,6]}).set_index(t)
@@ -1254,13 +1258,18 @@ df_cols = df.set_axis([power,work],axis=1)
 data_tab = TimeDataFrame(df_cols).to_latex_dataframe().reported(caption='Caption')
 graph = TimeDataFrame(df_cols).to_pylatex_tikz().in_figure(caption='Caption')
 
+display(data_tab)
+display(ReportText('Obtained data analysis. '*200))
+
+display(graph)
+
 ## 3rd CASE
 ## dictionary data presentation in DataFrame
-# dictionary ={  
+#dictionary ={  
 #     power:300000,
 #     work:5000
 # }   
-# display(
+#display(
 #     LatexDataFrame.formatted(
 #         data=dictionary, #import data from a dictionary
 #         index=['Value'] #set rows title
@@ -1269,6 +1278,8 @@ graph = TimeDataFrame(df_cols).to_pylatex_tikz().in_figure(caption='Caption')
 #     .transpose()  # This swaps rows and columns, making the DataFrame vertical
 #     .reported(caption='A caption for your data frame')
 # )
+#display(ReportText('Obtained data analysis. '*200))
+
 
 ## 4th CASE
 ## creating a graph based on simulation
@@ -1288,13 +1299,9 @@ graph = TimeDataFrame(df_cols).to_pylatex_tikz().in_figure(caption='Caption')
 #wynik= sym.numerized(backend='numpy').compute_solution(t_span,[0.0,0.0])#.plot()
 #wynik_tab = TimeDataFrame(wynik).to_latex_dataframe().reported(caption='Caption')
 #display(wynik_tab)
+#display(ReportText('Obtained data analysis. '*200))
 #wynik.plot()
 
-display(data_tab)
-
-display(ReportText('Obtained data analysis. '*200))
-
-display(graph)
 
 display(ReportText('Description of verifications outcomes. '*200))'''
 

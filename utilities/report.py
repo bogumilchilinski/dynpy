@@ -783,12 +783,25 @@ class ReportText(ReportModule):
         
         return copy.copy(self)
     
+    def with_ai(text, api_key):
+    
+        from dynpy.utilities.tools import AiInterface
+        
+        ai_chat = AiInterface(api_key)
+
+        prompt_for_summary ='Summarize this text: ' + text
+
+        response = ai_chat.chat(prompt_for_summary)
+
+        return response
+
+
     def call_code(self):
         #Declaration of command vector used in call_code method
         self.command_vector = []
         
-        if self._text != None: self.command_vector.append("text = {}".format(self._text))
-        if self._alignment != None: self.command_vector.append("alignment = {}".format(self._alignment))
+        if self._text != None: self.command_vector.append("text = \'\'\' {} \'\'\'".format(self._text))
+        if self._alignment != None: self.command_vector.append("alignment = \'\'\'{}  \'\'\'".format(self._alignment))
         
         vector = 'ReportText('
         

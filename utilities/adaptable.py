@@ -96,9 +96,9 @@ class ReportModule:
         >>>RM.set_units_dict(unit_dict)
     '''
 
-    _cls_container = []#Section('Dummy')
-    cls_container = []#Section('Dummy')
-    _container = []#Section('Dummy')
+    _cls_container = Section('Dummy')
+    cls_container = Section('Dummy')
+    _container = Section('Dummy')
     cls_path = '.'
     _caption = 'Figure describes the numerical data'
     _label = 'fig:markerIsMissing'
@@ -1716,19 +1716,12 @@ class EntryWithUnit:
         if unit:
             if isinstance(unit,str):
                 return f'{entry_str}{sep}{left_par}{unit}{right_par}'
-            elif str(unit) == str(ureg.dimensionless):
-                return f'{entry_str}{sep}{left_par}-{right_par}'
-            elif str(unit) == str(ureg.ohm):
-                ohm_string='\\mathrm{\\Omega}'
-                return f'{entry_str}{sep}{left_par}{ohm_string}{right_par}'     
-            elif str(unit) == str(ureg.degC):
-                degC_string='\\mathrm{^\\circ C}'
-                return f'{entry_str}{sep}{left_par}{degC_string}{right_par}'   
+            elif unit is None:
+                return f'{entry_str}{sep}{left_par}-{right_par}' 
             else:
                 return f'{entry_str}{sep}{left_par}{unit:~L}{right_par}'
         else:
             return f'{self._obj}'
-
 
         
 class DataTable(Table,ReportModule):

@@ -98,7 +98,7 @@ class ReducedMotorbike(ComposedSystem):
         self.engine_moment=Force(self.T,pos1 = self.angular_displacement,qs =self.qs,ivar=self.ivar)(label='Bike engine')
         self.drag_force=Force(-S.One/2*self.Ad*self.Cd*self.Af*(self.linear_velocity )**2,self.x,qs=self.qs,ivar=self.ivar)
         #self.gravitationalforce = GravitationalForce(self.m_b+self.m_d+self.m_f+self.m_r, self.g, pos1=self.linear_displacement, qs = self.qs)
-        self.rolling_resistance=Force(-self.f_t*(self.m_b+self.m_d+self.m_f+self.m_r)*self.g,pos1 = self.linear_displacement,qs =self.qs,ivar=self.ivar)(label='Rolling resistance force')
+        self.rolling_resistance=GravitationalForce(-self.f_t*(self.m_b+self.m_d+self.m_f+self.m_r),self.g,pos1 = self.linear_displacement,qs =self.qs,ivar=self.ivar)(label='Rolling resistance force')
         
         components['mass_bike'] = self.mass_bike
         components['mass_driver']=self.mass_driver
