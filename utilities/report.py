@@ -1358,8 +1358,12 @@ class Picture(Figure, ReportModule):
     @classmethod
     def _settle_dynpy(cls):
         from ..dynamics import LagrangesDynamicSystem
+ 
+        if os.path.exists("./dynpy"):
+            
+            return False
         
-        if not os.path.exists("./._dynpy_env/dynpy"):
+        elif not os.path.exists("./._dynpy_env/dynpy"):
             LagrangesDynamicSystem._settle_dynpy()
             return True
         else:
@@ -1423,9 +1427,9 @@ class Picture(Figure, ReportModule):
         super().__init__(position=self._position,**kwargs)
         
         if self.image is not None:
-            type(self)._settle_dynpy()
+            if type(self)._settle_dynpy() is True and "./dynpy/" in self.image:
 
-            if "./dynpy/" in self.image:
+                
                 self.image = self.image.replace("./dynpy","./._dynpy_env/dynpy")
                 
             self.add_image(NoEscape(self.image),width=self.width)
