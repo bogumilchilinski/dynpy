@@ -1427,9 +1427,9 @@ class Picture(Figure, ReportModule):
         super().__init__(position=self._position,**kwargs)
         
         if self.image is not None:
-            if type(self)._settle_dynpy() is True and "./dynpy/" in self.image:
+            if not os.path.exists("./dynpy") and "./dynpy/" in self.image:
 
-                
+                type(self)._settle_dynpy()
                 self.image = self.image.replace("./dynpy","./._dynpy_env/dynpy")
                 
             self.add_image(NoEscape(self.image),width=self.width)
