@@ -736,7 +736,9 @@ class DataAxis(Axis, ReportModule):
         else:
             data_for_plot_list = [zip(self._index, data.to_numpy())]
 
-        return data_for_plot_list
+        
+
+        return data_for_plot_list#[(x_elem,y_elem)  for x_elem,y_elem in data_for_plot_list if not np.isnan(y_elem) ]
 
     @property
     def legend_fontsize(self):
@@ -764,6 +766,11 @@ class DataAxis(Axis, ReportModule):
         plots_no = len(self._coordinates)
         
 
+        def fix_nan(coords_list):
+
+            
+            return [(x_elem,y_elem)  for x_elem,y_elem in coords_list if not np.isnan(y_elem) ]
+        
         
         colours = [
             self._label_colour(no) for no, elem in enumerate(coords_pack)
@@ -785,7 +792,7 @@ class DataAxis(Axis, ReportModule):
             plot_list = [
             Plot(name=NoEscape(
                 NoEscape(self.legend_fontsize) + NoEscape(str(label))),
-                 coordinates=list(coords),
+                 coordinates=fix_nan(list(coords)),
                  options=Options(f'{line_style}', color=colour))
             for coords, label, colour,line_style in (zip(coords_pack, labels, colours,line_style_list))
             ]
@@ -793,7 +800,7 @@ class DataAxis(Axis, ReportModule):
             plot_list = [
             Plot(name=NoEscape(
                 NoEscape(self.legend_fontsize) + NoEscape(str(label))),
-                 coordinates=list(coords),
+                 coordinates=fix_nan(list(coords)),
                  options=Options(f'{line_style}', color=colour))
             for coords, label, colour,line_style in (zip(coords_pack, labels, colours,line_style_list))
             ]

@@ -1747,6 +1747,9 @@ class WutThesis(Document):
                   Package('pdfpages'),
                   Package('amsmath'),
 
+                 Package('markdown'),
+                  Package('hyperref'),
+        
                   Command('newcommand{\praca}', arguments=['Praca dyplomowa']),
                   Command('newcommand{\dyplom}', arguments=['Magisterska']),
                   Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']),
@@ -4385,7 +4388,63 @@ class PosterTemplate(Document):
                   Command('graphicspath', arguments=[NoEscape('{../}')])
 
             ]
+    @classmethod
+    def base_setup(cls):
+        
+        
+        preliminary_str=(
+"""
+
+# Examplary setup is as follows:
+
+from dynpy.utilities.documents.document import PosterTemplate
+from dynpy.utilities.report import*
+from pylatex.base_classes import Environment, ContainerCommand
+SympyFormula._break_mode = 'eq'
+class PosterBlock(ContainerCommand):
+    latex_name='block'
+
+
+#CELL_1
+frame_1=PosterBlock('Introduction')
+CurrentContainer(frame_1)
+display(ReportText('abc '*100))
+
+
+#CELL_2
+frame_2=PosterBlock('Physical model')
+CurrentContainer(frame_2)
+display(ReportText('abc '*100))
+
+
+#CELL_3
+from sympy import *
+
+frame_3=PosterBlock('Simulation results')
+CurrentContainer(frame_3)
+
+display(ObjectCode('from dynpy.utilities.report import *'))
+
+#CELL_4
+from sympy import *
+
+frame_4=PosterBlock('Simulation results')
+CurrentContainer(frame_4)
+
+display(SympyFormula(Symbol('a')**2))
+
+#CELL_5
+doc = PosterTemplate('Example_poster',title='Exemplary poster')
+doc.append(frame_1)
+doc.append(frame_2)
+doc.append(frame_3)
+doc.append(frame_4)
+doc.generate_pdf(clean_tex=False)
     
+
+"""
+)
+        return ObjectCode(preliminary_str)    
     
     def __init__(self,
                  default_filepath='default_filepath',

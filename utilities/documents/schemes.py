@@ -989,6 +989,23 @@ class TrolleyWithPendulumMeasureScheme(TikZPicture):
 
 """
         return code
+class RLScheme(TikZPicture):
 
+    def _scheme_desc(self):
+
+        
+        code=r"""
+
+    \draw
+    (0,0) to[battery, l_=$V$] (0,-3)
+    (0,0) to[resistor, l=$R$] (6,0)
+    (6,-3) to[american inductor, l_=$L$] (6,0)
+    (0,-3) -- (6,-3)
+    [->] (0,0) -- (0.5,0) node[midway, above] {$\dot q$};
+;
+
+"""
+
+        return code
 
 

@@ -1131,8 +1131,8 @@ class CodeFrame(Environment,ReportModule):
 
 class Markdown(Environment,ReportModule):
     packages = [
-        Package('markdown'),
-        Package('hyperref'),
+        #Package('markdown'),
+        #Package('hyperref'),
         ]
 
     
@@ -1572,6 +1572,40 @@ class Picture(Figure, ReportModule):
 class StarredPicture(Picture):
     _latex_name='figure*'
 
+    
+    
+class TikZFigure(Picture):
+    """
+        A class that represents a figure environment in a TikZPoster document.
+
+        This class is used to insert and customize an image into the document, with options for caption, size, and position.
+
+        Attributes:
+            separate_paragraph (bool): Whether the float is positioned in a separate paragraph.
+            _default_width (str): Default width of the image.
+            packages (List[Union[Package, Command]]): Required LaTeX packages and commands for the Picture class.
+            _position (str): Default position for the floating environment.
+            _preview_default_size (str): Default size for previewing the image.
+
+        Exemplary Usage:
+            >>> TikZFigure('./assets/exemplary-image.png', caption='Exemplary caption.')
+
+        Costomised exemplary usage:
+            >>> TikZFigure(
+            >>>     image='./assets/exemplary-image.png',
+            >>>     caption='Exemplary caption.',
+            >>>     position='h',
+            >>>     width='0.5\\textwidth',
+            >>>     height='10cm',
+            >>>     marker='fig:example'
+            >>> )
+    """
+
+    _latex_name='tikzfigure'
+
+
+    
+    
 class ObjectCode(LstListing,ReportModule):
     _latex_name='lstlisting'
     default_title = "Listing"
