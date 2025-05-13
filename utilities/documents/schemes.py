@@ -1007,5 +1007,52 @@ class RLScheme(TikZPicture):
 """
 
         return code
+class DynPyTree(TikZPicture):
+    
+    def _scheme_desc(self):
+        
+        code=r"""
+% DynPy main block
+\draw [line width=0.8pt, rounded corners=9.6] (5,13.75) rectangle (7.5,12.5);
+\node [font=\LARGE] at (6.25,13.25) {DynPy};
 
+% Horizontal lines to other modules
+\draw [line width=0.8pt] (5,13.25) -- (3.75,13.25);
+\draw [line width=0.8pt] (7.5,13.25) -- (8.75,13.25);
+
+% Vertical line to models
+\draw [line width=0.8pt] (6.25,12.5) -- (6.25,11.25);
+
+% Boxes for other modules
+\draw [line width=0.8pt, rounded corners=9.6] (8.75,13.75) rectangle (11.25,12.5);
+\draw [line width=0.8pt, rounded corners=9.6] (5,11.25) rectangle (7.5,10);
+\draw [line width=0.8pt, rounded corners=9.6] (1.25,12.5) rectangle (3.75,13.75);
+\node at (6.25,10.75) {models};
+\node at (10,13.25) {solvers};
+\node at (2.5,13.25) {utilities};
+
+% Mechanics and gears.py
+\draw [line width=0.8pt, rounded corners=9.6] (5,7.5) rectangle (7.5,8.75);
+\node at (6.25,8.25) {mechanics};
+\draw [line width=0.8pt] (6.25,10) -- (6.25,8.75);
+
+\draw [line width=0.8pt, rounded corners=9.6] (5,5) rectangle (7.5,6.25);
+\node at (6.25,5.75) {gears.py};
+\draw [line width=0.8pt] (6.25,7.5) -- (6.25,6.25);
+
+% Bottom modules: nonlinear.py and report.py
+\draw [line width=0.8pt, rounded corners=9.6] (8.75,10) rectangle (11.25,11.25);
+\node [font=\large] at (10,10.75) {nonlinear.py};
+
+\draw [line width=0.8pt, rounded corners=9.6] (1.25,10) rectangle (3.75,11.25);
+\node at (2.5,10.75) {report.py};
+
+% Arrows
+\draw [line width=0.8pt, ->, >=Stealth] (2.5,12.5) -- (2.5,11.25);
+\draw [line width=0.8pt, ->, >=Stealth] (10,12.5) -- (10,11.25);
+\draw [line width=0.8pt, ->, >=Stealth] (6.25,7.5) -- (6.25,6.25);
+"""
+        return code
+        
+        
 
