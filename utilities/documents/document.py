@@ -4404,9 +4404,12 @@ SympyFormula._break_mode = 'eq'
 class PosterBlock(ContainerCommand):
     latex_name='block'
 
+motywacja = PosterBlock('Introduction')
+CurrentContainer(motywacja)
+display(ReportText('abc '*100))
 
 #CELL_1
-frame_1=PosterBlock('Introduction')
+frame_1=PosterBlock('Motivation for the Research')
 CurrentContainer(frame_1)
 display(ReportText('abc '*100))
 
@@ -4417,29 +4420,24 @@ CurrentContainer(frame_2)
 display(ReportText('abc '*100))
 
 
-#CELL_3
-from sympy import *
-
-frame_3=PosterBlock('Simulation results')
-CurrentContainer(frame_3)
-
-display(ObjectCode('from dynpy.utilities.report import *'))
-
-#CELL_4
-from sympy import *
-
-frame_4=PosterBlock('Simulation results')
-CurrentContainer(frame_4)
-
-display(SympyFormula(Symbol('a')**2))
 
 #CELL_5
-doc = PosterTemplate('Example_poster',title='Exemplary poster')
+doc = PosterTemplate('./output/templateposter',title=r'{Title of the paper}',document_options=['a1paper','landscape', '12pt'])
+doc.preamble.append(NoEscape(r'\author{authors}'))
+doc.append(NoEscape(r'\begin{columns}'))
+doc.append(NoEscape(r'\column{0.33}'))
 doc.append(frame_1)
+doc.append(NoEscape(r'\column{0.33}'))
+doc.append(motywacja)
+doc.append(NoEscape(r'\column{0.33}'))
 doc.append(frame_2)
-doc.append(frame_3)
-doc.append(frame_4)
-doc.generate_pdf(clean_tex=False)
+
+doc.append(NoEscape(r'\end{columns}'))
+doc.generate_pdf('./output/templateposter',clean_tex=False)
+    
+
+    
+
     
 
 """

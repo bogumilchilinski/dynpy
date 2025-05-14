@@ -1603,7 +1603,23 @@ class TikZFigure(Picture):
 
     _latex_name='tikzfigure'
 
+    def __init__(self, image=None, position=None, caption=None,width=None,height=None,marker=None, **kwargs):
+        """
+            Initialize the Picture class.
 
+            Args:
+                image (Optional[str]): Path to the image file.
+                position (Optional[str]): LaTeX position specifier for the figure.
+                caption (Optional[str]): Caption for the image.
+                width (Optional[str]): Width of the image (e.g., '0.5\\textwidth').
+                height (Optional[str]): Height of the image.
+                marker (Optional[str]): Marker for referencing the figure in LaTeX.
+
+            References:
+                https://www.sharelatex.com/learn/Positioning_of_Figures
+        """
+    
+        super().__init__(image=image, position=caption, caption=None,width=width,height=height,marker=marker, **kwargs)
     
     
 class ObjectCode(LstListing,ReportModule):
