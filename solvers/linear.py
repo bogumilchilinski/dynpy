@@ -1739,11 +1739,10 @@ class ODESystem(AnalyticalSolution):
         diff_matrix = self.lhs.jacobian(self.dvars.diff(ivar))
         
         
-        
         rhs_eqns=diff_matrix.inv()*self.rhs
         
         lin_eqns = Matrix([MultivariableTaylorSeries(ode, self.dvars, n=n, x0=x0).doit() for ode in rhs_eqns   ])
-    
+
     
         if n==1:
             return FirstOrderLinearODESystem(lin_eqns,dvars=self.dvars,ivar=self.ivar)
