@@ -4404,36 +4404,45 @@ SympyFormula._break_mode = 'eq'
 class PosterBlock(ContainerCommand):
     latex_name='block'
 
-motywacja = PosterBlock('Introduction')
-CurrentContainer(motywacja)
-display(ReportText('abc '*100))
-
 #CELL_1
-frame_1=PosterBlock('Motivation for the Research')
-CurrentContainer(frame_1)
+Introduction = PosterBlock('Introduction')
+CurrentContainer(Introduction)
 display(ReportText('abc '*100))
-
 
 #CELL_2
-frame_2=PosterBlock('Physical model')
-CurrentContainer(frame_2)
+Motivation=PosterBlock('Motivation for the Research')
+CurrentContainer(Motivation)
+display(ReportText('abc '*100))
+
+#CELL_3
+from sympy import *
+
+Simulation=PosterBlock('Simulation results')
+CurrentContainer(Simulation)
+
+display(SympyFormula(Symbol('a')**2))
+
+#CELL_4
+Physical=PosterBlock('Physical model')
+CurrentContainer(Physical)
 display(ReportText('abc '*100))
 
 
 
 #CELL_5
-doc = PosterTemplate('./output/templateposter',title=r'{Title of the paper}',document_options=['a1paper','landscape', '12pt'])
+doc = PosterTemplate('./output/template',title=r'{Title of the paper}',document_options=['a1paper','landscape', '12pt'])
 doc.preamble.append(NoEscape(r'\author{authors}'))
 doc.append(NoEscape(r'\begin{columns}'))
 doc.append(NoEscape(r'\column{0.33}'))
-doc.append(frame_1)
+doc.append(Introduction)
 doc.append(NoEscape(r'\column{0.33}'))
-doc.append(motywacja)
+doc.append(Motivation)
+doc.append(Simulation)
 doc.append(NoEscape(r'\column{0.33}'))
-doc.append(frame_2)
+doc.append(Physical)
 
 doc.append(NoEscape(r'\end{columns}'))
-doc.generate_pdf('./output/templateposter',clean_tex=False)
+doc.generate_pdf('./output/template',clean_tex=False)
     
 
     
