@@ -4637,6 +4637,10 @@ class MDPIPaper(Document):
         for key, val in orcid_dict.items():
             display(key)
             self.preamble.append(NoEscape('\\newcommand{\\orcidauthor'+key+'}{'+val[0]+'}'))
+            
+            if len(val)>2:
+                affiliation_no=val[2]
+            
             author_string+=val[1]+' $^{'+str(affiliation_no)+',\\dagger,\\ddagger'
             authornames_string+=val[1]
             if author_no == corr_no:
