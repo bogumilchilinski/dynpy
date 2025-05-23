@@ -22,9 +22,19 @@ from typing import Optional, List, Union
 imports_str = """
 #Create file output
 #Create file Images
-#In file output create bibliography as .bib file (dynpy123)
+#In file output create bibliography as .bib file (biblio.bib)
 
 '''# File content begin
+
+
+@misc{DynPi,
+author={GitHub},
+title="bogumilchilinski/dynpy",
+url={https://github.com/bogumilchilinski/dynpy}",
+note="Accessed:2024-05-04"
+}
+
+
 @book{lutz2001programming,
   title={Programming python},
   author={Lutz, Mark},
@@ -67,7 +77,9 @@ display(ReportText('This subsection provides objectives and assumptions. '*100))
 
 sub_SOT = Subsection('State of the art')
 CurrentContainer(sub_SOT)
-display(ReportText('This subsection provides state of the art \\cite{pandas}. '*100))
+display(ReportText('This subsection provides state of the art with multiple reference for \\cite{DynPi}. '*50))
+display(Markdown('Remeber about `biblio.bib` file with referencens. Place it in working directory and subfolder with output files. '*50))
+
 
 sub_methodology = Subsection('Methodology')
 CurrentContainer(sub_methodology)
@@ -934,6 +946,19 @@ class BPASTSPaper(Document):
         #self.append(NewPage())
         # tu implementować co tam potrzeba
         
+    def cwd_setup(self):    
+        cwd=os.getcwd()
+        
+        source_path=f'/home/user/Shared files/modules/dynpy/utilities/documents/Definitions'
+        path1=f'{cwd}/bpast.sty'
+        path2=f'{cwd}/output/bpast.sty'
+        
+        if os.path.exists(path1)==False:
+            shutil.copytree(source_path, path1)
+        if os.path.exists(path2)==False:
+            shutil.copytree(source_path, path2)
+        
+                
     def authors(self,nameno,affiliation=None,coremail=None,corno=0):
         
         #nameno - dict; of author name (string) and affiliation number (0 to x integer)
@@ -3339,9 +3364,19 @@ list_of_guides()
 ```{python}
 #Create file output
 #Create file Images
-#In file output create bibliography as .bib file (dynpy123) with the following content:
+#In file output create bibliography as .bib file (biblio.bib)
 
 '''# File content begin
+
+
+@misc{DynPi,
+author={GitHub},
+title="bogumilchilinski/dynpy",
+url={https://github.com/bogumilchilinski/dynpy}",
+note="Accessed:2024-05-04"
+}
+
+
 @book{lutz2001programming,
   title={Programming python},
   author={Lutz, Mark},
@@ -3353,17 +3388,14 @@ list_of_guides()
 '''# File content end
 
 from dynpy.utilities.report import *
-from dynpy.utilities.documents.document import WutThesis
-from dynpy.models.odes.linear import SpringMassEps
-from sympy import symbols, Eq
-from sympy.printing.latex import latex
-from IPython.display import display, Math
-import tikzplotlib
+from dynpy.utilities.documents.document import StateOfArtReport
+
+
 from dynpy.utilities.adaptable import TimeDataFrame
 import pandas as pd
 
 
-doc = WutThesis('./output/thesis_name')
+doc = StateOfArtReport('./output/report_name')
 ```
     
 
@@ -3384,7 +3416,8 @@ display(ReportText('This subsection provides information about investigated prob
 
 sub_SOT = Subsection('State of the art')
 CurrentContainer(sub_SOT)
-display(ReportText('This subsection provides state of the art. '*100))
+display(ReportText('This subsection provides state of the art with multiple reference for \\cite{DynPi}. '*50))
+display(Markdown('Remeber about `biblio.bib` file with referencens. Place it in working directory and subfolder with output files. '*50))
 
 sub_conclusions = Subsection('Conclusions')
 CurrentContainer(sub_conclusions)
@@ -3411,15 +3444,15 @@ display(ReportText('This subsection provides methodology. '*100))
 # Creating file
 # Be sure *output* folder is in the current directory
 
-thesis_name = './output/report_name' #path for report file 
+sota_name = './output/report_name' #path for report file 
 
-doc = WutThesis(thesis_name)
+doc = StateOfArtReport(sota_name)
 # Bibliography of quotations
 ### Select one bibligraphy managment system
 ####### BibLatex
 
 doc.preamble.append(Package('biblatex',["backend=biber","sorting=none"]))
-doc.preamble.append(Command('addbibresource','elementy_bibliagrafia.bib'))
+doc.preamble.append(Command('addbibresource','biblio.bib'))
 ####### Natbib
 #doc.preamble.append(Package('natbib')
 #doc.preamble.append(Command('bibliographystyle','unsrt'))
@@ -3435,7 +3468,7 @@ doc.append(sec_conclusion)
 
 
 ### BibLatex
-#doc.append(Command('printbibliography',arguments=["title={Bibliography}"])) - argument is to improve
+#doc.append(Command('printbibliography',["title={Bibliography}"])) - argument is to improve
 doc.append(Command('printbibliography',options=[NoEscape("title={Bibliography}")]))
 
 ### Natbib
@@ -3482,11 +3515,21 @@ doc.generate_pdf(clean_tex=True)
 ## Imports
 
 
-
 #Create file output
-#In file output create bibliography as .bib file
+#Create file Images
+#In file output create bibliography as .bib file (biblio.bib)
 
 '''# File content begin
+
+
+@misc{DynPi,
+author={GitHub},
+title="bogumilchilinski/dynpy",
+url={https://github.com/bogumilchilinski/dynpy}",
+note="Accessed:2024-05-04"
+}
+
+
 @book{lutz2001programming,
   title={Programming python},
   author={Lutz, Mark},
@@ -3499,9 +3542,9 @@ doc.generate_pdf(clean_tex=True)
 
 
 from dynpy.utilities.report import *
-from dynpy.utilities.templates.document import WutThesis
+from dynpy.utilities.documents.document import StateOfArtReport
 
-doc = WutThesis('./output/thesis_name')
+doc = StateOfArtReport('./output/report_name')
 
 
 ## CELL 2
@@ -3520,7 +3563,8 @@ display(ReportText('This subsection provides information about investigated prob
 
 sub_SOT = Subsection('State of the art')
 CurrentContainer(sub_SOT)
-display(ReportText('This subsection provides state of the art. '*100))
+display(ReportText('This subsection provides state of the art with multiple reference for \\cite{DynPi}. '*50))
+display(Markdown('Remeber about `biblio.bib` file with referencens. Place it in working directory and subfolder with output files. '*50))
 
 sub_conclusions = Subsection('Conclusions')
 CurrentContainer(sub_conclusions)
@@ -3530,13 +3574,13 @@ display(ReportText('This subsection provides methodology. '*100))
 ## CELL 3
 ## Conclusion
  
-    #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
-    #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
-    sec_conclusion = Section('Section that contains final conclusions')
-    CurrentContainer(sec_conclusion)
-    
-    display(ReportText('Conclusions '*200))
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_conclusion = Section('Section that contains final conclusions')
+CurrentContainer(sec_conclusion)
+
+display(ReportText('Conclusions '*200))
     
 ## CELL 4
 ## Document
@@ -3548,15 +3592,15 @@ display(ReportText('This subsection provides methodology. '*100))
 # Creating file
 # Be sure *output* folder is in the current directory
 
-thesis_name = './output/report_name' #path for report file 
+sota_name = './output/report_name' #path for report file 
 
-doc = WutThesis(thesis_name)
+doc = StateOfArtReport(sota_name)
 # Bibliography of quotations
 ### Select one bibligraphy managment system
 ####### BibLatex
 
-doc.preamble.append(Package('biblatex',arguments=["backend=biber","sorting=none"]))
-doc.preamble.append(Command('addbibresource','elementy_bibliagrafia.bib'))
+doc.preamble.append(Package('biblatex',["backend=biber","sorting=none"]))
+doc.preamble.append(Command('addbibresource','biblio.bib'))
 ####### Natbib
 #doc.preamble.append(Package('natbib')
 #doc.preamble.append(Command('bibliographystyle','unsrt'))
@@ -3571,11 +3615,10 @@ doc.append(sub_conclusions)
 doc.append(sec_conclusion)
 
 ### BibLatex
-#doc.append(Command('printbibliography',arguments=["title={Bibliography}"])) - argument is to improve
 doc.append(Command('printbibliography',options=[NoEscape("title={Bibliography}")]))
 
 ### Natbib
-#doc.append(Command('bibliography',arguments=["references"])) # .bib file as "references"
+#doc.append(Command('bibliography',arguments=["biblio"])) # .bib file as "references"
 
 #FIGURES LIST
 
@@ -3593,7 +3636,7 @@ doc.append(Command('pagestyle{plain}'))
 doc.append(Command('newpage'))
 
 # Generating file
-doc.generate_pdf(clean_tex=True)
+doc.generate_pdf(clean_tex=False)
 
 
 """
