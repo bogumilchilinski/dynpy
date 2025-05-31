@@ -444,6 +444,23 @@ class DynsysCheckerTable:
 
     
 class AiInterface:
+    """
+    This class provides the interface to communicate with the generative artificial intelligence model to perform given tasks.
+
+    ----
+    Example:
+
+        >>>from dynpy.utilities.tools import AiInterface
+
+        >>>api_key = “your_api_key”
+        >>>ai_chat = AiInterface(api_key)
+        >>>prompt = “your_prompt”
+
+        >>>result = ai_chat.chat(prompt)
+        >>>display(AiInterfaceOutput(result))
+
+    """
+
     def __init__(self, api_key):
 
         import google.generativeai as genai

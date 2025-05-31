@@ -4695,4 +4695,1152 @@ class MDPIPaper(Document):
 
 
 #             \AuthorCitation{Lastname, F.; Lastname, F.; Lastname, F.}
+class RevievPrototype(Document):
+    
+    latex_name = 'document'
+    packages = [
+                  Package('geometry',options=['lmargin=30mm', 'rmargin=30mm',  'top=25mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('microtype'),
+                  Package('authoraftertitle'),
+                  Package(' ',options=['MeX']),
+                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+                  Package('listings'),
+                  Package('titlesec'),
+                  Package('fancyhdr'),
+                  Package('graphicx'),
+                  Package('indentfirst'),
+                  Package('pdfpages'),
+                  Package('amsmath'),
+
+                  Command('newcommand{\praca}', arguments=['Praca dyplomowa']),
+                  Command('newcommand{\dyplom}', arguments=['Magisterska']),
+                  Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']),
+                  Command('newcommand{\specjalnosc}', arguments=['Wpisać specjalność']),
+                  Command('newcommand{\\autor}', arguments=['Imię i nazwisko autora']),
+                  Command('newcommand{\opiekun}', arguments=['Wpisać opiekuna']),
+                  Command('newcommand{\promotor}', arguments=['Wpisać promotora']),
+                  Command('newcommand{\konsultant}', arguments=['Wpisać konsultanta']),
+                  Command('newcommand{\\tytul}', arguments=['Wpisać tytuł pracy dyplomowej po polsku']),
+                  Command('newcommand{\\album}', arguments=['Wpisać numer albumu']),
+                  Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']),
+                  Command('newcommand{\\rok}', arguments=['Rok składania pracy']),
+                  Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']),
+                  #Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']),
+                  Command('graphicspath{{../}}'),
+                  Command('frenchspacing'),
+                  Command('counterwithin{figure}{section}'),
+                  Command('counterwithin{table}{section}'),
+                  Command('fancypagestyle{headings}{\\fancyhead{} \\renewcommand{\headrulewidth}{1pt} \\fancyheadoffset{0cm} \\fancyhead[RO]{\\nouppercase{\\leftmark}} \\fancyhead[LE]{\\nouppercase{\\leftmark}} \\fancyfoot{} \\fancyfoot[LE,RO]{\\thepage}}'),
+                  Command('fancypagestyle{plain}{\\fancyhf{} \\renewcommand{\\headrulewidth}{0pt} \\fancyfoot[LE,RO]{\\thepage}}'),
+                  Command('numberwithin{equation}{section}'),
+                  Command('renewcommand{\\familydefault}{\\sfdefault}'),
+        #\renewcommand{\familydefault}{\sfdefault}
         
+    ]
+    
+    
+    
+    def __init__(self,
+                 default_filepath='default_filepath',
+                 title='Basic title',
+                 *,
+                 documentclass='article',
+                 document_options=['a4paper','11pt','twoside'],
+                 fontenc='T1',
+                 inputenc='utf8',
+                 font_size='normalsize',
+                 lmodern=False,
+                 textcomp=True,
+                 microtype=True,
+                 page_numbers=True,
+                 indent=None,
+                 geometry_options=['inner=30mm', 'outer=20mm', 'bindingoffset=10mm', 'top=25mm', 'bottom=25mm'],#,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
+                 data=None):
+
+        super().__init__(
+            default_filepath=default_filepath,
+            documentclass=documentclass,
+            document_options=document_options,
+            fontenc=fontenc,
+            inputenc=inputenc,
+            font_size=font_size,
+            lmodern=lmodern,
+            textcomp=textcomp,
+            microtype=microtype,
+            page_numbers=page_numbers,
+            indent=indent,
+            geometry_options=geometry_options,
+            data=data,
+        )
+#         label=self.label
+        self.title=title
+        #self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
+#         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
+#         self.packages.append(Command('newcommand{\praca}', arguments=['Praca dyplomowa']))
+#         self.packages.append(Command('newcommand{\dyplom}', arguments=['Magisterska']))
+#         self.packages.append(Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']))
+#         self.packages.append(Command('newcommand{\specjalnosc}', arguments=['Wpisać specjalność']))
+#         self.packages.append(Command('newcommand{\\autor}', arguments=['Imię i nazwisko autora']))
+#         self.packages.append(Command('newcommand{\opiekun}', arguments=['Wpisać opiekuna']))
+#         self.packages.append(Command('newcommand{\promotor}', arguments=['Wpisać promotora']))
+#         self.packages.append(Command('newcommand{\konsultant}', arguments=['Wpisać konsultanta']))
+#         self.packages.append(Command('newcommand{\\tytul}', arguments=['Wpisać tytuł pracy dyplomowej po polsku']))
+#         self.packages.append(Command('newcommand{\\album}', arguments=['303596']))
+#         self.packages.append(Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']))
+#         self.packages.append(Command('newcommand{\\rok}', arguments=['Rok składania pracy']))
+#         self.packages.append(Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']))
+#         #self.packages.append(Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']))
+        self.packages.append(Command('graphicspath{{../}}'))
+#         self.append(Command('maketitle'))
+        self.append(NoEscape('%%% New doc'))
+        # tu implementować co tam potrzeba
+        
+    @classmethod
+    def base_setup(cls, create_file = False):
+
+        if create_file is True:
+            return cls._create_base_setup_env()
+        
+        preliminary_str=(
+"""
+
+Examplary setup is as follows:
+
+#References to guide imports needed to include - to see the list of available guides insert and run the code below:
+```{python}
+from dynpy.utilities.creators import list_of_guides
+list_of_guides()
+```
+
+## CELL 1
+## Imports
+
+```{python}
+#Create file output
+#Create file Images
+#In file output create bibliography as .bib file (biblio.bib)
+
+'''# File content begin
+
+
+@misc{DynPi,
+author={GitHub},
+title="bogumilchilinski/dynpy",
+url={https://github.com/bogumilchilinski/dynpy}",
+note="Accessed:2024-05-04"
+}
+
+
+@book{lutz2001programming,
+  title={Programming python},
+  author={Lutz, Mark},
+  year={2001},
+  publisher={" O'Reilly Media, Inc."}
+}
+@misc{NumPy, url={https://numpy.org/}, journal={NumPy}}
+@misc{pandas, url={https://pandas.pydata.org/}, journal={pandas}}
+'''# File content end
+
+from dynpy.utilities.report import *
+from dynpy.utilities.documents.document import StateOfArtReport
+
+
+from dynpy.utilities.adaptable import TimeDataFrame
+import pandas as pd
+
+
+doc = StateOfArtReport('./output/report_name')
+```
+    
+
+
+## CELL 2
+## Document introduction
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_int = Section('Recenzja pracy dyplomowej pt.', numbering=False)
+CurrentContainer(sec_int)
+
+tytul= " Title of thesis"
+
+display(ReportText(f' "{tytul} " '))
+```
+## CELL 3
+## Content
+ 
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+sec_1 = Section('Ocena zgodności treści pracy z jej tematem')
+CurrentContainer(sec_1)
+
+#czego_dotyczy = "rozbudowy biblioteki modeli dynamicznych w bibliotece DynPy"
+czego_dotyczy = "weryfikacji empirycznej działania wahadłowego absorbera drgań"
+
+#wklad_autora = "rozwój biblioteki systemów dynamicznych zawartych w DynPy, w tym implementację nowych klas, poprawę kodu istniejących przewodników po narzędziach oferowanych przez bibliotekę"
+wklad_autora = "prowadzenie badań empirycznych dotyczących wahadłowych eliminatorów drgań"
+
+#Jesli cos wiecej 
+Ponad_to = "Ponadto praca zawiera"
+co_wiecej_zawiera = "funkcjonujący model 3D wykonany przez Autora pracy"
+
+display(ReportText(f'''Rozważania zawarte w pracy dotyczącej {czego_dotyczy} odpowiadają jej tematowi. Praca składa się z siedmiu zasadniczych części. Pierwsza część jest poświęcona wprowadzeniu do problematyki, określeniu celu pracy, motywacji oraz metodyki badawczej. Druga część poświęcona jest stworzeniu modelu analitycznego układu drgającego, opisanego za pomocą równań ruchu wyprowadzonych metodą Lagrange’a. Model ten stanowił podstawę dalszych symulacji numerycznych. Trzeci rozdział dotyczy projektowania i realizacji stanowiska badawczego – od koncepcyjnego modelu w programie SOLIDWORKS po wykonanie rzeczywistej konstrukcji z systemem PTMD. Czwarta część pracy zawiera szczegółowy opis symulacji numerycznych przeprowadzonych w środowisku Python z użyciem biblioteki DynPy. Przeanalizowano wpływ takich parametrów jak długość wahadła i masa obciążenia na skuteczność tłumienia drgań. W rozdziale piątym zaprezentowano badania eksperymentalne wykonane na zaprojektowanym stanowisku. Szósta część zestawia i porównuje wyniki badań eksperymentalnych z rezultatami uzyskanymi w symulacjach, co pozwoliło na ocenę trafności modelu oraz skuteczności zastosowanego rozwiązania. Ostatnia część zawiera wnioski z przeprowadzonych prac i podsumowanie osiągniętych rezultatów. Opracowanie przedstawia wkład Autora w {wklad_autora}.'''))
+
+## CELL 4
+## Content
+ 
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+sec_2 = Section('Ocena wartości merytorycznej, w szczególności wkładu własnego studenta oraz jasności jego przedstawienia')
+CurrentContainer(sec_2)
+#1 zdanie
+
+#intro_way = "niejasny i nielogiczny "
+intro_way = "jasny i logiczny"
+
+#2 zdanie
+
+#poziom_pracy = "wysokim"
+poziom_pracy = 'odpowiednim'
+#poziom_pracy = "niskim"
+
+#zdanie
+only_nec = "tylko niezbędne informacje, pozostając przy tym czytelne"
+
+#radzenie_z_problemem = "Student dobrze radzi sobie z postawionymi problemami, potwierdza to przeprowadzona analiza systemu dynamicznego, przygotowanie raportu z analizy oraz implementacja nowych funkcjonalności."
+radzenie_z_problemem = "Student dobrze radzi sobie z postawionymi problemami, potwierdza to przeprowadzona analiza i badanie systemu dynamicznego, przygotowanie oraz raportu z analizy."
+
+#czego_to_wymagalo = "Zadania te wymagały wykazania się umiejętnością programowania oraz zarządzania strukturą kodu. Potwierdza to również umiejętności Autora w zakresie mechaniki, w szczególności dynamiki układów."
+czego_to_wymagalo = "Zadania te wymagały wykazania się umiejętnością projektowania i realizacji badań empirycznych. Potwierdza to również kompetencje Autora w zakresie mechaniki, w szczególności dynamiki układów."
+
+#lista uwag merytorycznych:
+
+content_remarks = [
+#"lapidarny wstęp, w którym brakuje zdefiniowania założeń, metodyki i motywacji",
+#"brak wyszczególnienia wszystkich parametrów zastosowanych elementów wykonawczych",
+#"brak obliczeń uzasadniających dobór wykorzystanych silników",
+#"pominięcie obliczeń poboru mocy oraz doboru źródeł energii",
+#"zastosowanie liniowej pojemności w modelu ogniwa elektrochemicznego",
+"brak bezpośredniego porównania wyników z dowolnym rozwiązaniem referencyjnym (publikacje, inne oprogramownie inżynierskie)",
+#"omówione poprawki w kodach mogłyby zostać przedstawione w szerszym kontekście",
+"brak identyfikacji parametycznej modelu matematycznego oraz ostatecznie dobranych wartości parametrów symulacyjnych",
+'widoczne róznice "wizualne" pomiędzy wynikami pomiarów oraz symulacji',
+"lapidarne oraz nieprecyzyjne wyjaśnienie różnic w efektach procesu optymalizacji"
+]
+
+content_remarks_str = '\n \n - '+ ', \n \n - '.join(content_remarks) + '.'
+
+display(ReportText(f'Autor przedstawia przeprowadzone prace w {intro_way} sposób. Analiza zawartości pracy pokazuje samodzielny wkład Studenta w postaci przeprowadzania procesu identyfikacji parametrycznej modelu dynamicznego. Wartość merytoryczna oraz sposób rozumowania są na dobrym poziomie. Opracowanie przekazuje czytelnikowi {only_nec}. {radzenie_z_problemem} {czego_to_wymagalo}  '))
+
+display(Markdown(f'
+Do głównych uwag merytorycznych należą:
+
+{content_remarks_str}
+
+'))
+
+display(ReportText('Mimo to Autor dobrze radzi sobie z postawionymi problemami, potwierdzając to samodzielnym wykonaniem projektu.'))
+
+## CELL 5
+## Content
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_3 = Section('Ocena doboru i sposobu wykorzystania źródeł')
+CurrentContainer(sec_3)
+#liczba pozycji w literaturze
+lit_numb = '13'
+# w zależności od tego czego wymaga liczba wybieramy odpowiednia odmiane
+pozycje = "pozycje"
+pozycji = "pozycji"
+
+#forma_zgodna = "Wszystkie pozycje bibliografii znajdują odwołanie w tekście. Forma odwołań jak i spis wykorzystanych publikacji oraz łączy nie są do końca zgodne z wymaganiami postawionymi w rozporządzeniu dot. pisania prac dyplomowych."
+
+#forma_zgodna = "Wszystkie pozycje bibliografii znajdują odwołanie w tekście. Forma odwołań jak i spis wykorzystanych publikacji oraz łączy nie są do końca zgodne z wymaganiami postawionymi w rozporządzeniu dot. pisania prac dyplomowych."
+
+
+# form_zgodna_puste_odwolania = "Niektóre odwołania w tekście nie znajdują odwołania w bibliografii. Forma odwołań jak i spis publikacji nie są zgodne z wytycznymi odnośnie formatowania źródeł literaturowych postawionymi w rozporządzeniu dot. pisania prac dyplomowych."
+
+# brakuje_doi = "W przypadku niektórych publikacji, brakuje informacji o wydawcy, adresie doi lub dacie dostępu. "
+
+forma_zgodna = "Wszystkie pozycje bibliografii znajdują odwołanie w tekście. Forma odwołań jak i spis wykorzystanych publikacji oraz łączy są zgodne z wymaganiami postawionymi w rozporządzeniu dot. pisania prac dyplomowych. "
+
+display(ReportText(f'Na podstawie dokonanego przeglądu literaturowego można stwierdzić, że dobór pozycji nie budzi zastrzeżeń i jest adekwatny do poruszanej w pracy tematyki. Bibliografia liczy {lit_numb} {pozycji}. {forma_zgodna} '))
+
+
+## CELL 6
+## Content
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_4 = Section('Ocena trafności i spójności wniosków')
+CurrentContainer(sec_4)
+
+wnioski_log = "logiczny"
+schemat_wnioskowania = "poprawny"
+konkluzje = "zgodne z tematem pracy"
+konk_a_cele= "odpowiadają postawionym celom"
+
+lakoniczne = "Aczkolwiek należy zauważyć, że są one dość lakoniczne."
+#lakoniczne = ''
+
+display(ReportText(f'Autor pracy wnioskuje w sposób {wnioski_log}. Podsumowanie pracy zawiera streszczenie zrealizowanych zadań oraz wnioski wyciągnięte na ich podstawie. Schemat wnioskowania jest {schemat_wnioskowania}. Konkluzje są {konkluzje} i {konk_a_cele}. {lakoniczne}'))
+
+## CELL 7
+## Content
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_5 = Section('Ocena układu pracy (kolejność rozdziałów, sposób doboru materiału ilustracyjnego)')
+CurrentContainer(sec_5)
+l_rozdzial = "7"
+l_stron = 49
+
+display(ReportText(f'Praca składa się z {l_stron} stron, podzielonych na {l_rozdzial} rozdziałów i prowadzi czytelnika w sposób jasny i logiczny po omawianym temacie. Całość jest podzielona na część teoretyczną oraz praktyczną. Ostatni fragment pracy poświęcono podsumowaniu i wnioskom. Pozostałą część pracy stanowi bibliografia, spis rysunków oraz spis tabel. Dobór materiału ilustrującego nie budzi zastrzeżeń.'))
+
+## CELL 8
+## Remarks
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_6 = Section('Ocena redakcji pracy (poprawność języka, staranność opracowania edytorskiego)')
+
+editorial_remarks = [
+"sporadyczne stosowanie formy osobowej",
+
+"brak wyszczególnienia wzorów i opisów zastosowanych symboli",
+
+#"niepoprawne zastosowanie operatorów matematycznych np. '*' dla operacji mnożenia",
+
+"brak spisu symboli na końcu pracy",
+    
+#"stosowanie różnego kroju pisma dla symboli matematycznych",
+    
+"stosowanie różnego kroju pisma dla symboli matematycznych lub jednostek",
+
+#"występowanie grafik lub wypunktowania na końcu sekcji",
+
+#"występowanie zwrotów nie mających wartości merytorycznej takich jak: oczywiście, niestety itp.",
+    
+"występowanie literówek",
+
+"błędy stylistyczne i interpunkcyjne",
+
+"miejscowy brak akpitów",
+
+"brak odwołań do źródeł w przypadku niektórych grafik (zastosowano pośrednio w tekście)"
+
+]
+
+
+edit_remarks_str = '\n \n - '+ ', \n \n - '.join(editorial_remarks) + '.'
+
+CurrentContainer(sec_6)
+
+#poziom_pracy_form = "wysokim"
+#poziom_pracy_form = 'odpowiednim'
+poziom_pracy_form = 'zadowalającym'
+#poziom_pracy_form = "niskim"
+
+display(ReportText(f'Redakcja pracy jest na {poziom_pracy_form} poziomie. Praca utrzymana w bezosobowej formie i czasie przeszłym. Występujące odstępstwa od tej zasady nie wpływają na ocenę całego opracowania. Zastosowany język jest odpowiedni dla prezentowanego problemu.'))
+
+display(Markdown(f'
+Do głównych uwag edytorskich należą:
+
+{edit_remarks_str}
+
+'))
+    
+
+
+display(ReportText('Zastrzeżenia te nie wpływają istotnie na odbiór pracy oraz na jej wartość merytoryczną. Występujące błędy oraz wymienione uwagi zostały przekazane do informacji Autora.'))
+
+# Występujące błędy stylistyczne i interpunkcyjne oraz wymienione uwagi nie wpływają na pozytywny odbiór pracy.
+
+## CELL 9
+## Remarks2
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_7 = Section('Ocena przestrzegania praw autorskich')
+CurrentContainer(sec_7)
+#1 zdanie
+tworcza = "ma charakter twórczy"
+nie_tworcza = "nie ma charakteru twórczego"
+
+zastr = "budzi zastrzeżenia"
+bez_zastr = "nie budzi zastrzeżeń"
+
+#2 zdanie
+
+byla_proba = "Zaobserwowano próbę"
+nie_bylo_proby= "Nie zaobserwowano prób"
+
+#3 zdanie
+
+Anty_git = "Praca pomyślnie przeszła test antyplagiatowy w systemie JSA"
+Anty_nope = "Praca nie przeszła testu antyplagiatowego w systemie JSA"
+
+display(ReportText(f'Praca {tworcza} i samodzielność jej wykonania {bez_zastr}. {nie_bylo_proby} łamania praw autorskich. {Anty_git}. '))
+
+## CELL 10
+## Remarks3
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_8 = Section('Ocena umiejętności samodzielnego rozwiązywania zagadnień inżynierskich')
+CurrentContainer(sec_8)
+
+#display(ReportText(f'Dyplomant rozwiązał samodzielnie problem inżynierski. Wykazał się umiejętnością projektowania części przy użyciu modelowania geometrycznego oraz doboru komponentów mechatronicznych, a także opracowania oprogramowania inżynierskiego, potwierdzając to zawartym w pracy opisem zastosowanego oprogramowania, przeprowadzoną analizą wyników z zaprojektowanego urządzenia z wynikami walidacji poprawności działania urządzenia. Autor wykazał się umiejętnością kierowania i krytycznej oceny własnej pracy, co jest podstawą do rozwiązywania zagadnień inżynierskich.'))
+
+outro = 'Dyplomant wykazał się również zdolnością do samodzielnego kierowania pracami oraz krytycznej oceny ich rezultatów, co stanowi kluczową podstawę do rozwiązywania problemów inżynierskich i dalszego rozwoju zawodowego w tej dziedzinie.'
+
+display(ReportText(f'Dyplomant samodzielnie rozwiązał problem inżynierski, wykazując się zdolnościami analizy systemów dynamicznych oraz programowania. Zaprezentował swoje umiejętności podczas tworzenia i analizy symulacji systemów dynamicznych oraz prowadzenia badań empirycznych. Dyplomant zaprezentował oprogramowanie inżynierskie, które zostało opisane w pracy, a jego efektywność została zweryfikowana przez przeprowadzenie analiz i walidacji uzyskanych wyników. {outro}'))
+
+## CELL 11
+## Remarks4
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_9 = Section('Czy zakres i poziom pracy odpowiadają wymaganiom stawianym pracom dyplomowym odpowiedniego stopnia studiów?')
+CurrentContainer(sec_9)
+mgr= "magisterskim"
+inz= " inżynierskim"
+display(ReportText(f'Poziom pracy i jej zakres spełnia wymogi stawiane pracom {inz}. '))
+
+## CELL 12
+## Hints
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_10 = Section('Inne uwagi')
+CurrentContainer(sec_10)
+display(ReportText('Brak uwag. '))
+
+## CELL 13
+## Document
+
+```{python}
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+# Creating file
+# Be sure *output* folder is in the current directory
+
+Doc = Document(default_filepath='./output/doc_name')
+Doc.append(sec_int)
+Doc.append(sec_1)
+Doc.append(sec_2)
+Doc.append(sec_3)
+Doc.append(sec_4)
+Doc.append(sec_5)
+Doc.append(sec_6)
+Doc.append(sec_7)
+Doc.append(sec_8)
+Doc.append(sec_9)
+Doc.append(sec_10)
+
+Doc.generate_pdf(clean_tex = False))
+
+# Generating file
+doc.generate_pdf(clean_tex=True)
+```
+
+"""
+        )
+
+        display(IPMarkdown(preliminary_str))    
+
+
+        preliminary_str=(
+"""
+
+#Example:
+
+#To prepare a simple document with text and images:
+
+#Good practice here is to allocate 1 section per 1 cell
+
+
+
+## CELL 1
+## Imports
+
+```{python}
+#Create file output
+#Create file Images
+#In file output create bibliography as .bib file (biblio.bib)
+
+'''# File content begin
+
+
+@misc{DynPi,
+author={GitHub},
+title="bogumilchilinski/dynpy",
+url={https://github.com/bogumilchilinski/dynpy}",
+note="Accessed:2024-05-04"
+}
+
+
+@book{lutz2001programming,
+  title={Programming python},
+  author={Lutz, Mark},
+  year={2001},
+  publisher={" O'Reilly Media, Inc."}
+}
+@misc{NumPy, url={https://numpy.org/}, journal={NumPy}}
+@misc{pandas, url={https://pandas.pydata.org/}, journal={pandas}}
+'''# File content end
+
+from dynpy.utilities.report import *
+from dynpy.utilities.documents.document import StateOfArtReport
+
+
+from dynpy.utilities.adaptable import TimeDataFrame
+import pandas as pd
+
+
+doc = StateOfArtReport('./output/report_name')
+```
+    
+
+
+## CELL 2
+## Document introduction
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_int = Section('Recenzja pracy dyplomowej pt.', numbering=False)
+CurrentContainer(sec_int)
+
+tytul= " Title of thesis"
+
+display(ReportText(f' "{tytul} " '))
+```
+## CELL 3
+## Content
+ 
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+sec_1 = Section('Ocena zgodności treści pracy z jej tematem')
+CurrentContainer(sec_1)
+
+#czego_dotyczy = "rozbudowy biblioteki modeli dynamicznych w bibliotece DynPy"
+czego_dotyczy = "weryfikacji empirycznej działania wahadłowego absorbera drgań"
+
+#wklad_autora = "rozwój biblioteki systemów dynamicznych zawartych w DynPy, w tym implementację nowych klas, poprawę kodu istniejących przewodników po narzędziach oferowanych przez bibliotekę"
+wklad_autora = "prowadzenie badań empirycznych dotyczących wahadłowych eliminatorów drgań"
+
+#Jesli cos wiecej 
+Ponad_to = "Ponadto praca zawiera"
+co_wiecej_zawiera = "funkcjonujący model 3D wykonany przez Autora pracy"
+
+display(ReportText(f'''Rozważania zawarte w pracy dotyczącej {czego_dotyczy} odpowiadają jej tematowi. Praca składa się z siedmiu zasadniczych części. Pierwsza część jest poświęcona wprowadzeniu do problematyki, określeniu celu pracy, motywacji oraz metodyki badawczej. Druga część poświęcona jest stworzeniu modelu analitycznego układu drgającego, opisanego za pomocą równań ruchu wyprowadzonych metodą Lagrange’a. Model ten stanowił podstawę dalszych symulacji numerycznych. Trzeci rozdział dotyczy projektowania i realizacji stanowiska badawczego – od koncepcyjnego modelu w programie SOLIDWORKS po wykonanie rzeczywistej konstrukcji z systemem PTMD. Czwarta część pracy zawiera szczegółowy opis symulacji numerycznych przeprowadzonych w środowisku Python z użyciem biblioteki DynPy. Przeanalizowano wpływ takich parametrów jak długość wahadła i masa obciążenia na skuteczność tłumienia drgań. W rozdziale piątym zaprezentowano badania eksperymentalne wykonane na zaprojektowanym stanowisku. Szósta część zestawia i porównuje wyniki badań eksperymentalnych z rezultatami uzyskanymi w symulacjach, co pozwoliło na ocenę trafności modelu oraz skuteczności zastosowanego rozwiązania. Ostatnia część zawiera wnioski z przeprowadzonych prac i podsumowanie osiągniętych rezultatów. Opracowanie przedstawia wkład Autora w {wklad_autora}.'''))
+
+## CELL 4
+## Content
+ 
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+    
+sec_2 = Section('Ocena wartości merytorycznej, w szczególności wkładu własnego studenta oraz jasności jego przedstawienia')
+CurrentContainer(sec_2)
+#1 zdanie
+
+#intro_way = "niejasny i nielogiczny "
+intro_way = "jasny i logiczny"
+
+#2 zdanie
+
+#poziom_pracy = "wysokim"
+poziom_pracy = 'odpowiednim'
+#poziom_pracy = "niskim"
+
+#zdanie
+only_nec = "tylko niezbędne informacje, pozostając przy tym czytelne"
+
+#radzenie_z_problemem = "Student dobrze radzi sobie z postawionymi problemami, potwierdza to przeprowadzona analiza systemu dynamicznego, przygotowanie raportu z analizy oraz implementacja nowych funkcjonalności."
+radzenie_z_problemem = "Student dobrze radzi sobie z postawionymi problemami, potwierdza to przeprowadzona analiza i badanie systemu dynamicznego, przygotowanie oraz raportu z analizy."
+
+#czego_to_wymagalo = "Zadania te wymagały wykazania się umiejętnością programowania oraz zarządzania strukturą kodu. Potwierdza to również umiejętności Autora w zakresie mechaniki, w szczególności dynamiki układów."
+czego_to_wymagalo = "Zadania te wymagały wykazania się umiejętnością projektowania i realizacji badań empirycznych. Potwierdza to również kompetencje Autora w zakresie mechaniki, w szczególności dynamiki układów."
+
+#lista uwag merytorycznych:
+
+content_remarks = [
+#"lapidarny wstęp, w którym brakuje zdefiniowania założeń, metodyki i motywacji",
+#"brak wyszczególnienia wszystkich parametrów zastosowanych elementów wykonawczych",
+#"brak obliczeń uzasadniających dobór wykorzystanych silników",
+#"pominięcie obliczeń poboru mocy oraz doboru źródeł energii",
+#"zastosowanie liniowej pojemności w modelu ogniwa elektrochemicznego",
+"brak bezpośredniego porównania wyników z dowolnym rozwiązaniem referencyjnym (publikacje, inne oprogramownie inżynierskie)",
+#"omówione poprawki w kodach mogłyby zostać przedstawione w szerszym kontekście",
+"brak identyfikacji parametycznej modelu matematycznego oraz ostatecznie dobranych wartości parametrów symulacyjnych",
+'widoczne róznice "wizualne" pomiędzy wynikami pomiarów oraz symulacji',
+"lapidarne oraz nieprecyzyjne wyjaśnienie różnic w efektach procesu optymalizacji"
+]
+
+content_remarks_str = '\n \n - '+ ', \n \n - '.join(content_remarks) + '.'
+
+display(ReportText(f'Autor przedstawia przeprowadzone prace w {intro_way} sposób. Analiza zawartości pracy pokazuje samodzielny wkład Studenta w postaci przeprowadzania procesu identyfikacji parametrycznej modelu dynamicznego. Wartość merytoryczna oraz sposób rozumowania są na dobrym poziomie. Opracowanie przekazuje czytelnikowi {only_nec}. {radzenie_z_problemem} {czego_to_wymagalo}  '))
+
+display(Markdown(f'
+Do głównych uwag merytorycznych należą:
+
+{content_remarks_str}
+
+'))
+
+display(ReportText('Mimo to Autor dobrze radzi sobie z postawionymi problemami, potwierdzając to samodzielnym wykonaniem projektu.'))
+
+## CELL 5
+## Content
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_3 = Section('Ocena doboru i sposobu wykorzystania źródeł')
+CurrentContainer(sec_3)
+#liczba pozycji w literaturze
+lit_numb = '13'
+# w zależności od tego czego wymaga liczba wybieramy odpowiednia odmiane
+pozycje = "pozycje"
+pozycji = "pozycji"
+
+#forma_zgodna = "Wszystkie pozycje bibliografii znajdują odwołanie w tekście. Forma odwołań jak i spis wykorzystanych publikacji oraz łączy nie są do końca zgodne z wymaganiami postawionymi w rozporządzeniu dot. pisania prac dyplomowych."
+
+#forma_zgodna = "Wszystkie pozycje bibliografii znajdują odwołanie w tekście. Forma odwołań jak i spis wykorzystanych publikacji oraz łączy nie są do końca zgodne z wymaganiami postawionymi w rozporządzeniu dot. pisania prac dyplomowych."
+
+
+# form_zgodna_puste_odwolania = "Niektóre odwołania w tekście nie znajdują odwołania w bibliografii. Forma odwołań jak i spis publikacji nie są zgodne z wytycznymi odnośnie formatowania źródeł literaturowych postawionymi w rozporządzeniu dot. pisania prac dyplomowych."
+
+# brakuje_doi = "W przypadku niektórych publikacji, brakuje informacji o wydawcy, adresie doi lub dacie dostępu. "
+
+forma_zgodna = "Wszystkie pozycje bibliografii znajdują odwołanie w tekście. Forma odwołań jak i spis wykorzystanych publikacji oraz łączy są zgodne z wymaganiami postawionymi w rozporządzeniu dot. pisania prac dyplomowych. "
+
+display(ReportText(f'Na podstawie dokonanego przeglądu literaturowego można stwierdzić, że dobór pozycji nie budzi zastrzeżeń i jest adekwatny do poruszanej w pracy tematyki. Bibliografia liczy {lit_numb} {pozycji}. {forma_zgodna} '))
+
+
+## CELL 6
+## Content
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_4 = Section('Ocena trafności i spójności wniosków')
+CurrentContainer(sec_4)
+
+wnioski_log = "logiczny"
+schemat_wnioskowania = "poprawny"
+konkluzje = "zgodne z tematem pracy"
+konk_a_cele= "odpowiadają postawionym celom"
+
+lakoniczne = "Aczkolwiek należy zauważyć, że są one dość lakoniczne."
+#lakoniczne = ''
+
+display(ReportText(f'Autor pracy wnioskuje w sposób {wnioski_log}. Podsumowanie pracy zawiera streszczenie zrealizowanych zadań oraz wnioski wyciągnięte na ich podstawie. Schemat wnioskowania jest {schemat_wnioskowania}. Konkluzje są {konkluzje} i {konk_a_cele}. {lakoniczne}'))
+
+## CELL 7
+## Content
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_5 = Section('Ocena układu pracy (kolejność rozdziałów, sposób doboru materiału ilustracyjnego)')
+CurrentContainer(sec_5)
+l_rozdzial = "7"
+l_stron = 49
+
+display(ReportText(f'Praca składa się z {l_stron} stron, podzielonych na {l_rozdzial} rozdziałów i prowadzi czytelnika w sposób jasny i logiczny po omawianym temacie. Całość jest podzielona na część teoretyczną oraz praktyczną. Ostatni fragment pracy poświęcono podsumowaniu i wnioskom. Pozostałą część pracy stanowi bibliografia, spis rysunków oraz spis tabel. Dobór materiału ilustrującego nie budzi zastrzeżeń.'))
+
+## CELL 8
+## Remarks
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_6 = Section('Ocena redakcji pracy (poprawność języka, staranność opracowania edytorskiego)')
+
+editorial_remarks = [
+"sporadyczne stosowanie formy osobowej",
+
+"brak wyszczególnienia wzorów i opisów zastosowanych symboli",
+
+#"niepoprawne zastosowanie operatorów matematycznych np. '*' dla operacji mnożenia",
+
+"brak spisu symboli na końcu pracy",
+    
+#"stosowanie różnego kroju pisma dla symboli matematycznych",
+    
+"stosowanie różnego kroju pisma dla symboli matematycznych lub jednostek",
+
+#"występowanie grafik lub wypunktowania na końcu sekcji",
+
+#"występowanie zwrotów nie mających wartości merytorycznej takich jak: oczywiście, niestety itp.",
+    
+"występowanie literówek",
+
+"błędy stylistyczne i interpunkcyjne",
+
+"miejscowy brak akpitów",
+
+"brak odwołań do źródeł w przypadku niektórych grafik (zastosowano pośrednio w tekście)"
+
+]
+
+
+edit_remarks_str = '\n \n - '+ ', \n \n - '.join(editorial_remarks) + '.'
+
+CurrentContainer(sec_6)
+
+#poziom_pracy_form = "wysokim"
+#poziom_pracy_form = 'odpowiednim'
+poziom_pracy_form = 'zadowalającym'
+#poziom_pracy_form = "niskim"
+
+display(ReportText(f'Redakcja pracy jest na {poziom_pracy_form} poziomie. Praca utrzymana w bezosobowej formie i czasie przeszłym. Występujące odstępstwa od tej zasady nie wpływają na ocenę całego opracowania. Zastosowany język jest odpowiedni dla prezentowanego problemu.'))
+
+display(Markdown(f'
+Do głównych uwag edytorskich należą:
+
+{edit_remarks_str}
+
+'))
+    
+
+
+display(ReportText('Zastrzeżenia te nie wpływają istotnie na odbiór pracy oraz na jej wartość merytoryczną. Występujące błędy oraz wymienione uwagi zostały przekazane do informacji Autora.'))
+
+# Występujące błędy stylistyczne i interpunkcyjne oraz wymienione uwagi nie wpływają na pozytywny odbiór pracy.
+
+## CELL 9
+## Remarks2
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_7 = Section('Ocena przestrzegania praw autorskich')
+CurrentContainer(sec_7)
+#1 zdanie
+tworcza = "ma charakter twórczy"
+nie_tworcza = "nie ma charakteru twórczego"
+
+zastr = "budzi zastrzeżenia"
+bez_zastr = "nie budzi zastrzeżeń"
+
+#2 zdanie
+
+byla_proba = "Zaobserwowano próbę"
+nie_bylo_proby= "Nie zaobserwowano prób"
+
+#3 zdanie
+
+Anty_git = "Praca pomyślnie przeszła test antyplagiatowy w systemie JSA"
+Anty_nope = "Praca nie przeszła testu antyplagiatowego w systemie JSA"
+
+display(ReportText(f'Praca {tworcza} i samodzielność jej wykonania {bez_zastr}. {nie_bylo_proby} łamania praw autorskich. {Anty_git}. '))
+
+## CELL 10
+## Remarks3
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_8 = Section('Ocena umiejętności samodzielnego rozwiązywania zagadnień inżynierskich')
+CurrentContainer(sec_8)
+
+#display(ReportText(f'Dyplomant rozwiązał samodzielnie problem inżynierski. Wykazał się umiejętnością projektowania części przy użyciu modelowania geometrycznego oraz doboru komponentów mechatronicznych, a także opracowania oprogramowania inżynierskiego, potwierdzając to zawartym w pracy opisem zastosowanego oprogramowania, przeprowadzoną analizą wyników z zaprojektowanego urządzenia z wynikami walidacji poprawności działania urządzenia. Autor wykazał się umiejętnością kierowania i krytycznej oceny własnej pracy, co jest podstawą do rozwiązywania zagadnień inżynierskich.'))
+
+outro = 'Dyplomant wykazał się również zdolnością do samodzielnego kierowania pracami oraz krytycznej oceny ich rezultatów, co stanowi kluczową podstawę do rozwiązywania problemów inżynierskich i dalszego rozwoju zawodowego w tej dziedzinie.'
+
+display(ReportText(f'Dyplomant samodzielnie rozwiązał problem inżynierski, wykazując się zdolnościami analizy systemów dynamicznych oraz programowania. Zaprezentował swoje umiejętności podczas tworzenia i analizy symulacji systemów dynamicznych oraz prowadzenia badań empirycznych. Dyplomant zaprezentował oprogramowanie inżynierskie, które zostało opisane w pracy, a jego efektywność została zweryfikowana przez przeprowadzenie analiz i walidacji uzyskanych wyników. {outro}'))
+
+## CELL 11
+## Remarks4
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_9 = Section('Czy zakres i poziom pracy odpowiadają wymaganiom stawianym pracom dyplomowym odpowiedniego stopnia studiów?')
+CurrentContainer(sec_9)
+mgr= "magisterskim"
+inz= " inżynierskim"
+display(ReportText(f'Poziom pracy i jej zakres spełnia wymogi stawiane pracom {inz}. '))
+
+## CELL 12
+## Hints
+
+```{python}    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+sec_10 = Section('Inne uwagi')
+CurrentContainer(sec_10)
+display(ReportText('Brak uwag. '))
+
+## CELL 13
+## Document
+
+```{python}
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+# Creating file
+# Be sure *output* folder is in the current directory
+
+Doc = Document(default_filepath='./output/doc_name')
+Doc.append(sec_int)
+Doc.append(sec_1)
+Doc.append(sec_2)
+Doc.append(sec_3)
+Doc.append(sec_4)
+Doc.append(sec_5)
+Doc.append(sec_6)
+Doc.append(sec_7)
+Doc.append(sec_8)
+Doc.append(sec_9)
+Doc.append(sec_10)
+
+Doc.generate_pdf(clean_tex = False))
+
+# Generating file
+doc.generate_pdf(clean_tex=True)
+```
+
+
+"""
+        )
+        return ObjectCode(preliminary_str)
+
+    Jupyter_file_content = """{
+    "cells": [
+        {
+            "cell_type": "code",
+            "execution_count": 0,
+            "id": "d3000c",
+            "metadata": {
+                "collapsed": false
+            },
+            "outputs": [],
+            "source": [
+                "from dynpy.utilities.report import *",
+                "\\n",
+                "from dynpy.utilities.templates.document import WutThesis",
+                "\\n",
+                "",
+                "doc = WutThesis('./output/thesis_name')"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": 0,
+            "id": "c3d54b",
+            "metadata": {
+                "collapsed": false
+            },
+            "outputs": [],
+            "source": [
+                "doc.base_setup()"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": 0,
+            "id": "11531d",
+            "metadata": {
+                "collapsed": false
+            },
+            "outputs": [],
+            "source": []
+        }
+    ],
+    "metadata": {
+        "kernelspec": {
+            "argv": [
+                "/usr/bin/python3",
+                "-m",
+                "ipykernel",
+                "--HistoryManager.enabled=False",
+                "--matplotlib=inline",
+                "-c",
+                "%config InlineBackend.figure_formats = set(['retina'])import matplotlib; matplotlib.rcParams['figure.figsize'] = (12, 7)",
+                "-f",
+                "{connection_file}"
+            ],
+            "display_name": "Python 3 (system-wide)",
+            "env": {},
+            "language": "python",
+            "metadata": {
+                "cocalc": {
+                    "description": "Python 3 programming language",
+                    "priority": 100,
+                    "url": "https://www.python.org/"
+                }
+            },
+            "name": "python3",
+            "resource_dir": "/ext/jupyter/kernels/python3"
+        },
+        "language_info": {
+            "codemirror_mode": {
+                "name": "ipython",
+                "version": 3
+            },
+            "file_extension": ".py",
+            "mimetype": "text/x-python",
+            "name": "python",
+            "nbconvert_exporter": "python",
+            "pygments_lexer": "ipython3",
+            "version": "3.10.12"
+        }
+    },
+    "nbformat": 4,
+    "nbformat_minor": 4
+}"""
+    articles_bib = '''@INPROCEEDINGS{brief_history_of_simulations,
+  author={Goldsman, David and Nance, Richard E. and Wilson, James R.},
+  booktitle={Proceedings of the 2010 Winter Simulation Conference}, 
+  title={A brief history of simulation revisited}, 
+  year={2010},
+  volume={},
+  number={},
+  pages={567-574},
+  doi={10.1109/WSC.2010.5679129}
+}
+@article{eckhardt1987stan,
+  title={Stan Ulam, John von Neumann},
+  author={Eckhardt, Roger},
+  journal={Los Alamos Science},
+  volume={100},
+  number={15},
+  pages={131},
+  year={1987},
+  publisher={Los Alamos Scientific Laboratory}
+}
+@book{lutz2001programming,
+  title={Programming python},
+  author={Lutz, Mark},
+  year={2001},
+  publisher={" O'Reilly Media, Inc."}
+}
+@misc{NumPy, url={https://numpy.org/}, journal={NumPy}}
+@misc{pandas, url={https://pandas.pydata.org/}, journal={pandas}}
+@misc{RTPW,
+  author = {mgr Tomasz Duda},
+  title = {Rysunek Techniczny Podstawowe Wiadomości},
+  journal = {},
+  year = {},
+  number = {},
+  pages = {10},
+  doi = {}
+}
+'''
+    def _create_directory(path):
+        '''
+Method create directory from given path
+
+Arguments:
+path - (str), name of directory that method will create, if subdirectories shall be created, path should look like this: 'directory/subdirectory' 
+        '''
+        import os
+
+        try:
+            os.makedirs(path)
+            print(f"Directory '{path}' created")
+
+        except FileExistsError:
+            print(f"Directory '{path}' exists.")
+
+        except PermissionError:
+            print(f"Permission denied, you don't have sudo permission")
+
+        except Exception as e:
+            print(f"An error occurred: {e}")
+        
+        
+    def _create_file(name, content = None, path = None):
+        '''
+Method create file and write content to it
+
+Arguments:
+name - (str), name of file created by method,
+content - (str), optional,  string with a content of file, that is going to be writen to it,
+path - (str), optional, directory where file should be created
+        '''
+        import os
+
+        if path is not None:
+            if not os.path.exists(path):
+                _create_directory(path)
+
+            with open(os.path.join(path, name), 'w') as file: 
+                file.write(content)
+
+        else:
+            with open(name, 'w') as file:
+                file.write(content)
+
+        file.close()
+    @classmethod    
+    def _create_base_setup_env(cls):
+        '''
+Method that create Jupyter notebook file with WUT thesis base setup and output directory with .bib file
+        '''
+        
+        Jupyter_file_content = """{
+    "cells": [
+        {
+            "cell_type": "code",
+            "execution_count": 0,
+            "id": "d3000c",
+            "metadata": {
+                "collapsed": false
+            },
+            "outputs": [],
+            "source": [
+                "from dynpy.utilities.report import *",
+                "\\n",
+                "from dynpy.utilities.templates.document import WutThesis",
+                "\\n",
+                "",
+                "doc = WutThesis('./output/thesis_name')"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": 0,
+            "id": "c3d54b",
+            "metadata": {
+                "collapsed": false
+            },
+            "outputs": [],
+            "source": [
+                "doc.base_setup()"
+            ]
+        },
+        {
+            "cell_type": "code",
+            "execution_count": 0,
+            "id": "11531d",
+            "metadata": {
+                "collapsed": false
+            },
+            "outputs": [],
+            "source": []
+        }
+    ],
+    "metadata": {
+        "kernelspec": {
+            "argv": [
+                "/usr/bin/python3",
+                "-m",
+                "ipykernel",
+                "--HistoryManager.enabled=False",
+                "--matplotlib=inline",
+                "-c",
+                "%config InlineBackend.figure_formats = set(['retina'])import matplotlib; matplotlib.rcParams['figure.figsize'] = (12, 7)",
+                "-f",
+                "{connection_file}"
+            ],
+            "display_name": "Python 3 (system-wide)",
+            "env": {},
+            "language": "python",
+            "metadata": {
+                "cocalc": {
+                    "description": "Python 3 programming language",
+                    "priority": 100,
+                    "url": "https://www.python.org/"
+                }
+            },
+            "name": "python3",
+            "resource_dir": "/ext/jupyter/kernels/python3"
+        },
+        "language_info": {
+            "codemirror_mode": {
+                "name": "ipython",
+                "version": 3
+            },
+            "file_extension": ".py",
+            "mimetype": "text/x-python",
+            "name": "python",
+            "nbconvert_exporter": "python",
+            "pygments_lexer": "ipython3",
+            "version": "3.10.12"
+        }
+    },
+    "nbformat": 4,
+    "nbformat_minor": 4
+}"""
+        articles_bib = '''@INPROCEEDINGS{brief_history_of_simulations,
+  author={Goldsman, David and Nance, Richard E. and Wilson, James R.},
+  booktitle={Proceedings of the 2010 Winter Simulation Conference}, 
+  title={A brief history of simulation revisited}, 
+  year={2010},
+  volume={},
+  number={},
+  pages={567-574},
+  doi={10.1109/WSC.2010.5679129}
+}
+@article{eckhardt1987stan,
+  title={Stan Ulam, John von Neumann},
+  author={Eckhardt, Roger},
+  journal={Los Alamos Science},
+  volume={100},
+  number={15},
+  pages={131},
+  year={1987},
+  publisher={Los Alamos Scientific Laboratory}
+}
+@book{lutz2001programming,
+  title={Programming python},
+  author={Lutz, Mark},
+  year={2001},
+  publisher={" O'Reilly Media, Inc."}
+}
+@misc{NumPy, url={https://numpy.org/}, journal={NumPy}}
+@misc{pandas, url={https://pandas.pydata.org/}, journal={pandas}}
+@misc{RTPW,
+  author = {mgr Tomasz Duda},
+  title = {Rysunek Techniczny Podstawowe Wiadomości},
+  journal = {},
+  year = {},
+  number = {},
+  pages = {10},
+  doi = {}
+}
+'''
+        cls._create_file('WUT_Thesis_starter.ipynb', Jupyter_file_content)
+
+        os.makedirs('output')
+        os.makedirs('tikzplots')
+
+        cls._create_file('articles.bib', articles_bib, 'output')

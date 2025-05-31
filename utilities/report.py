@@ -784,6 +784,19 @@ class ReportText(ReportModule):
         return copy.copy(self)
     
     def with_ai(text, api_key):
+        """
+       Method which helps with creating the summary of given text for preparing a report using the generative artificial intelligence model.
+
+        -----
+        Example:
+
+        >>>display(AiInterfaceOutput(ReportText.summary_with_ai(“text”, “api_key”
+       
+        where:
+        text - text given for the example
+        api_key - specific API key
+        """
+
     
         from dynpy.utilities.tools import AiInterface
         
@@ -838,10 +851,16 @@ class LstListing(Environment):
               Command('definecolor{codegreen}', arguments=['rgb'], extra_arguments = ['0,0.6,0']),
               Command('definecolor{codegray}', arguments=['rgb'], extra_arguments = ['0.5,0.5,0.5']),
               Command('definecolor{codepurple}', arguments=['rgb'], extra_arguments = ['0.58,0,0.82']),
-#               Command('definecolor{backcolour}', arguments=['rgb'], extra_arguments = ['0.95,0.95,0.92']),
-              Command('lstdefinestyle{dynPyStyle}', arguments = [NoEscape(r'commentstyle=\color{codegreen},keywordstyle=\color{magenta},numberstyle=\tiny\color{codegray},stringstyle=\color{codepurple}, basicstyle=\ttfamily\footnotesize,breakatwhitespace=false,breaklines=true,captionpos=b,keepspaces=true,numbers=left,numbersep=5pt,showspaces=false,showstringspaces=false,showtabs=false,tabsize=2')]),
-              Command('lstset', arguments = [NoEscape('style=dynPyStyle,language=Python')])
+              Command('definecolor{backcolour}', arguments=['rgb'], extra_arguments = ['0,0,0']),
+              Command('lstdefinestyle{dynPyStyle}', arguments = [NoEscape(r'commentstyle=\color{codegreen},keywordstyle=\color{magenta},numberstyle=\tiny\color{codegray},stringstyle=\color{codepurple}, basicstyle=\ttfamily\footnotesize,breakatwhitespace=false,breaklines=true,captionpos=b,keepspaces=true,numbers=left,numbersep=5pt,showspaces=false,showstringspaces=false,showtabs=false,tabsize=2,language=Python')]),
+
+
+              #Command('lstset', arguments = [NoEscape('style=dynPyStyle,language=Python')]),
+
+              
+
              ]
+
 
     
     
@@ -1621,12 +1640,14 @@ class TikZFigure(Picture):
     
         super().__init__(image=image, position=caption, caption=None,width=width,height=height,marker=marker, **kwargs)
     
-    
 class ObjectCode(LstListing,ReportModule):
     _latex_name='lstlisting'
     default_title = "Listing"
     
     _default_header = None
+    _style = 'dynPyStyle'
+    
+
     
     r"""A base class for LaTeX environments.
     This class implements the basics of a LaTeX environment. A LaTeX
@@ -1646,7 +1667,7 @@ class ObjectCode(LstListing,ReportModule):
     #: string if it has no content.
     omit_if_empty = False
 
-    def __init__(self, source=None, caption=None, options=None, arguments=None, start_arguments=None,**kwargs):
+    def __init__(self, source=None, caption=None, style=None, options=None, arguments=None, start_arguments=None,**kwargs):
         r"""
         Args
         ----
@@ -1659,16 +1680,33 @@ class ObjectCode(LstListing,ReportModule):
         """
 
         self.source = source
-        self.options = options
+
+        
+        if style is not None: self._style = style
         self.arguments = arguments
         self.start_arguments = start_arguments
         self._caption = caption
         
         if self._caption is not None:
             caption_str = f'{{{ self._caption }}}'
-            options = [NoEscape(f'caption={caption_str}') ]
+            options_c = [NoEscape(f'caption={caption_str}') ]
+        else:
+            options_c = []
 
+        if self._style is not None:
+            options_s = [NoEscape(f'style={self._style}') ]
+        else:
+            options_s = []        
         
+        options_added=options_c + options_s
+        
+        if len(options_added) != 0:
+            if options is not None:
+                options = options + options_added
+            else:
+                options = options_added
+
+        self.options = options            
         
         super().__init__(options=options, arguments=None, start_arguments=None,**kwargs)
         
@@ -1762,6 +1800,18 @@ guide_code_header = """
 class GuideCode(ObjectCode):
     
     _default_header = guide_code_header
+    
+class AiInterfaceOutput(ObjectCode):
+    
+
+    
+    packages=[
+              #Command('lstset', arguments = [NoEscape('style=nonumbers,language=Python')]),
+              Command(NoEscape(r'lstdefinestyle{nonumbers}{numbers=none, breakatwhitespace=false, breaklines=true,captionpos=b, keepspaces=true, numbersep=5pt, showspaces=false,showstringspaces=false,showtabs=false,tabsize=2, basicstyle=\ttfamily\small}')),
+              #Command('lstset', arguments = [NoEscape('style=nonumbers')]),
+             ]
+
+    _style = 'nonumbers'
     
 class TikZPicture(Environment,ReportModule):
     
