@@ -93,7 +93,7 @@ display(ReportText(' Exemplary text appended into section '))
 
 doc.append(section)
 
-doc.generate_pdf(clean_tex=True)
+doc.generate_pdf(clean_tex=False)
 ```
 
 ## 3. Looking for some help
