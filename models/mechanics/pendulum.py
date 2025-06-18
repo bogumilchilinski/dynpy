@@ -318,7 +318,7 @@ class PulledPendulum(Pendulum):
         return self.sym_desc_dict
 
     def nonlinear_steady_solution(self):
-        steady=self._fodes_system.steady_solution
+        steady=self.eoms.steady_solution
         return steady
 
     
@@ -360,7 +360,7 @@ class PulledPendulum(Pendulum):
         data=self._given_data
         dyn_sys=self.subs(data)
         dyn_sys_lin=dyn_sys.linearized()
-        phi=dyn_sys_lin._fodes_system.steady_solution[0]
+        phi=dyn_sys_lin.eoms.steady_solution[0]
 
 #         m=data[self.m]
 #         l=data[self.l]
@@ -1285,7 +1285,7 @@ class PendulumWithRoller(NonlinearComposedSystem):
                  angle=None,
                  ivar=None,
                  **kwargs):
-
+        
         if m1 is not None: self.m1 = m1
         if m2 is not None: self.m2 = m2
         if k is not None: self.k = k 
@@ -2014,7 +2014,7 @@ class DDOFCoupledPendulum(ComposedSystem):
         return default_data_dict
     
     
-    def max_static_cable_force(self):
+    def max_static_g_force(self):
         return (self.m1 * self.g).subs(self._given_data)
     
     def max_dynamic_cable_force(self):

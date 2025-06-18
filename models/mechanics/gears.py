@@ -546,6 +546,10 @@ class DDOFGearMechanism(ComposedSystem):
            }
         return units_dict
     
+        
+    def unit_dict(self):
+        return self.units()
+    
     def as_equivalent_sdof(self):
         return EquivalentSDOFGearModel()
     

@@ -11,7 +11,7 @@ from sympy.utilities.autowrap import autowrap, ufuncify
 import itertools as itools
 import scipy.integrate as solver
 
-
+from .solvers.linear import LinearODESolution
 from collections import ChainMap
 
 from IPython.display import display, Image

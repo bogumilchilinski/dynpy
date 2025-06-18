@@ -2066,7 +2066,7 @@ display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of pict
 
         simulaion_str = '''from dynpy.utilities.report import *
 from sympy import *
-
+import numpy as np
 
 sec_simulation = Section('Section that contains simulation')
 CurrentContainer(sec_simulation)
@@ -2085,8 +2085,33 @@ display(ReportText('Secondly solve the equation using solution method:'))
 display(ObjectCode('spring_sol = spring.solution'))
 
 display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
+
+from dynpy.models.mechanics import ForcedSpringMassSystem as DynamicSys
+dyn_sys = DynamicSys()
+
 data_spring = dyn_sys.get_numerical_parameters()
 #ds1.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()
+
+from dynpy.models.mechanics import ForcedSpringMassSystem as DynamicSys
+F=DynamicSys.F
+g=DynamicSys.g
+m=DynamicSys.m
+k=DynamicSys.k
+
+slownik ={  
+F:2,
+g:10,
+m:5,
+k:100,
+}
+
+t_span = np.linspace(0.0,1,30)
+sym=DynamicSys().eoms.subs(slownik)
+wynik= sym.numerized(backend='numpy').compute_solution(t_span,[0.0,0.0])#.plot()
+wynik_tab = TimeDataFrame(wynik).to_latex_dataframe().reported(caption='Caption')
+display(wynik_tab)
+wynik.plot()
+
 
 # MSM_sim = Subsection('MSM simulation')
 # CurrentContainer(MSM_sim)
@@ -2100,6 +2125,8 @@ data_spring = dyn_sys.get_numerical_parameters()
 # display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
 # spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()'''
 
+
+        
         veryfication_str = '''from sympy import *
 
 from sympy.physics import units

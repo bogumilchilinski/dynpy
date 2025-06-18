@@ -1139,8 +1139,10 @@ class CodeFrame(Environment,ReportModule):
         self.start_arguments = start_arguments
         self._latex_name = _latex_name
         
-        super()._latex_name
-        super().__init__(options=['containsverbatim'], arguments=arguments, start_arguments=start_arguments,**kwargs)
+        if options is not None:
+            options = ['containsverbatim'] + options
+        
+        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
 
     
         if self.title is not None:
