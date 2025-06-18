@@ -900,7 +900,8 @@ class AnalyticalSolution(ImmutableMatrix):
     @property
     def default_doctype(self):
         
-        from ..utilities.report import (SystemDynamicsAnalyzer,DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim)
+        from ..utilities.report import (#SystemDynamicsAnalyzer,
+                                        DMath,ReportText,SympyFormula, AutoBreak, PyVerbatim)
         from ..utilities.templates.document import ExampleTemplate
         from ..utilities.templates import tikz
         from ..utilities.components.ode import en as ode
@@ -1719,14 +1720,13 @@ class ODESystem(AnalyticalSolution):
         return self._as_fode()
 
     
-    def approximated(self, n=3, x0=None, op_point=False, hint=[], label=None):
+    def approximated(self, n=3, x0=None, op_point=False, hint=[], label=None,method=None):
         """
         Returns approximated N-th order function calculated with Taylor series method as an instance of the class
         """
 
         # print('x0',x0)
-        if not x0:
-            x0 = {coord: 0 for coord in self.dvars}
+
 
         # #display(self._op_points(hint=hint, subs=True))
         # if op_point:
@@ -1734,25 +1734,45 @@ class ODESystem(AnalyticalSolution):
         #     #print('current op')
         #     #display(self._op_points(hint=hint, subs=True))
 
+        f_ode = self._as_fode()
         
-        ivar = self.ivar
-        diff_matrix = self.lhs.jacobian(self.dvars.diff(ivar))
-        
-        
-        rhs_eqns=diff_matrix.inv()*self.rhs
-        
-        lin_eqns = Matrix([MultivariableTaylorSeries(ode, self.dvars, n=n, x0=x0).doit() for ode in rhs_eqns   ])
+        if not x0:
+            x0 = {coord: 0 for coord in self._as_fode().dvars}
 
-    
+
+        ode_mat = self.as_matrix().expand()
+        
+        hd_vars=self._highest_diff
+
+        if method is None or method == 'matrix':
+        
+            diff_mat=self.as_matrix().jacobian(hd_vars)
+
+            ivar = self.ivar
+            diff_matrix_list = list((ode_mat).jacobian(hd_vars))
+
+            hd_len = len(hd_vars)
+            diff_matrix = Matrix(hd_len,hd_len,[MultivariableTaylorSeries(elem, f_ode.dvars, n=n, x0=x0).doit()   for elem in diff_matrix_list])
+
+
+            lin_eqns = Matrix([MultivariableTaylorSeries(ode, f_ode.dvars, n=n, x0=x0).doit() for ode in ode_mat   ]) + diff_matrix*hd_vars
+
+            
+        elif method == 'full':
+
+            lin_eqns = Matrix([MultivariableTaylorSeries(ode, Matrix(list(f_ode.dvars) + list(hd_vars)), n=n, x0=x0).doit() for ode in ode_mat   ])
+            
+
+
         if n==1:
-            return FirstOrderLinearODESystem(lin_eqns,dvars=self.dvars,ivar=self.ivar)
+            return ODESystem(lin_eqns,dvars=self.dvars,ivar=self.ivar)
         else:
-            return FirstOrderODESystem(lin_eqns,dvars=self.dvars,ivar=self.ivar)
+            return ODESystem(lin_eqns,dvars=self.dvars,ivar=self.ivar)
 
 
         
 
-    def linearized(self, x0=None, op_point=False, hint=[], label=None):
+    def linearized(self, x0=None, op_point=False, hint=[], label=None,mathod=None):
         """
         Returns approximated first order function calculated with Taylor series method as an instance of the class. It enables to obtain linearized output.
         Arguments:
@@ -1782,7 +1802,7 @@ class ODESystem(AnalyticalSolution):
 
         """
 
-        return self.approximated(n=1, x0=x0, op_point=op_point, hint=hint, label=label)
+        return self.approximated(n=1, x0=x0, op_point=op_point, hint=hint, label=label,method=method)
     
     
     
