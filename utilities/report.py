@@ -2111,6 +2111,9 @@ class SympyFormula(ReportModule):
             else:
                 auto_mrk = AutoMarker(self._expr).marker
                 marker = auto_mrk
+                
+            self._eq.append(Label(marker))
+
 
     @property
     def latex_backend(self):

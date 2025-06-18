@@ -2178,7 +2178,7 @@ class EngineWithTMD(Engine):
         
         '''This method evaluates dynamic force in single spring of the engine. It works by substituting coordinates in spring force with steady solutions.'''
         force_km=EngineWithTMD().components['_engine'].components['_left_mount'].force()
-        sol_dict=self._fodes_system.steady_solution.as_dict()
+        sol_dict=self.eoms.steady_solution.as_dict()
         F_km=(force_km).subs(sol_dict).subs(self._given_data)
         
         return F_km

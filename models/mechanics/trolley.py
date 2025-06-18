@@ -2409,7 +2409,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
 
     def unit_dict(self):
         from sympy.physics import units
-        ureg=UnitRegistry()
+        ureg=units#UnitRegistry()
 
         unit_dict = {
             self.m_t0: ureg.kilogram,
@@ -2422,7 +2422,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
             self.omega0: ureg.rad,
             self.F: ureg.newton,
             self.g: ureg.meter/ureg.second/ureg.second,
-            self.rho: (ureg.dimensionless/ureg.second),
+            self.rho: (1/ureg.second),
             self.m_s: ureg.kilogram,
             self.delta: ureg.meter,
             self.Omega0: ureg.rad,
@@ -2440,7 +2440,7 @@ class VariableMassTrolleyWithPendulumFunction(ComposedSystem):
 #             self.eps: ureg.dimensionless,
 #             self.chi: ureg.dimensionless,
 #             self.psi: ureg.dimensionless,
-            self.tau: ureg.dimensionless,
+            self.tau: '-',
         }
 
         return unit_dict
