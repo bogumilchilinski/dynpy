@@ -5,7 +5,7 @@ class TuningTikZDiagram(TikZPicture):
 
     def _scheme_desc(self):
 
-        code=r"""
+        code = r"""
 \coordinate (origo) at (0,0);
 \node (B1) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center, rounded corners=0.5cm] at (origo) {Begin tuning};
 \node (B2) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([xshift=0cm,yshift=-1.5cm]B1.south) {Pump out the \\liquid from TMD to \\the skyscraper.};
@@ -32,7 +32,7 @@ class DiagnosticsTikZDiagram(TikZPicture):
 
     def _scheme_desc(self):
 
-        code=r"""
+        code = r"""
 \coordinate (origo) at (0,0);
 \node (B1) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center, rounded corners=0.5cm] at (origo) {Begin diagnostics};
 \node (B2) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([xshift=0cm,yshift=-1.5cm]B1.south) {Estimate the TMD's mass.};
@@ -53,15 +53,13 @@ class DiagnosticsTikZDiagram(TikZPicture):
 """
 
         return code
-    
-    
-    
+
+
 class TuningTikZDiagram1(TikZPicture):
 
     def _scheme_desc(self):
 
-        
-        code=r"""
+        code = r"""
 
     
     
@@ -81,8 +79,7 @@ class TheveninTikZDiagramVer1(TikZPicture):
 
     def _scheme_desc(self):
 
-        
-        code=r"""
+        code = r"""
 
     
     \draw
@@ -107,8 +104,7 @@ class TheveninTikZDiagramVer2(TikZPicture):
 
     def _scheme_desc(self):
 
-        
-        code=r"""
+        code = r"""
 
     \draw
     (0,0) to[american voltage source, l_=$U_{oc}$] (0,-3)
@@ -140,8 +136,7 @@ class TheveninTikZDiagram(TikZPicture):
 
     def _scheme_desc(self):
 
-        
-        code=r"""
+        code = r"""
 
     
     \draw
@@ -159,12 +154,13 @@ class TheveninTikZDiagram(TikZPicture):
 """
 
         return code
-    
+
+
 class TikZDiagram(TikZPicture):
 
     def _scheme_desc(self):
 
-        code=r"""
+        code = r"""
 \coordinate (origo) at (0,0);
 \node (B1) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center, rounded corners=0.5cm] at (origo) {Podaj funkcję limitu stanu, \\wartości parametrów, cenę, \\oczekiwany indeks niezawodności, \\funkcję kosztów zmiany parametrów};
 \node (B2) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([xshift=0cm,yshift=-1.5cm]B1.south) {Wykonaj obliczenia przy użyciu \\metody odwrotnej niezawodności};
@@ -186,4 +182,3 @@ class TikZDiagram(TikZPicture):
 """
 
         return code
-    

@@ -4,6 +4,15 @@ This module provides basic tools for dynamic analysis of mechanical systems
 
 import importlib
 
+from .continuous import *
+from .control import *
+from .electric import *
+from .elements import *
+from .mdof import *
+from .mechanics import *
+from .odes import *
+from .systems import *
+
 # import ..dynamics as dyn
 # importlib.reload(dyn)
 
@@ -18,14 +27,3 @@ import importlib
 # importlib.reload(ts)
 
 ########
-
-from .continuous import *
-from .control import *
-
-from .electric import *
-from .elements import *
-from .mdof import *
-from .mechanics import *
-from .odes import *
-
-from .systems import *

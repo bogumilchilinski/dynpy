@@ -1,2 +1,1 @@
-from  ..documents.document import *
-
+from ..documents.document import *

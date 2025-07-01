@@ -2,7 +2,6 @@
 This module provides basic tools for solving differential equations
 """
 
-
 import importlib
 
 # import .dynamics as dyn

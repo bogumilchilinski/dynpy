@@ -5,7 +5,7 @@ class TuningTikZDiagram(TikZPicture):
 
     def _scheme_desc(self):
 
-        code=r"""
+        code = r"""
 \coordinate (origo) at (0,0);
 \node (B1) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center, rounded corners=0.5cm] at (origo) {Begin tuning};
 \node (B2) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([xshift=0cm,yshift=-1.5cm]B1.south) {Pump out the \\liquid from TMD to \\the skyscraper.};
@@ -27,11 +27,12 @@ class TuningTikZDiagram(TikZPicture):
 
         return code
 
+
 class DiagnosticsTikZDiagram(TikZPicture):
 
     def _scheme_desc(self):
 
-        code=r"""
+        code = r"""
 \coordinate (origo) at (0,0);
 \node (B1) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center, rounded corners=0.5cm] at (origo) {Begin diagnostics};
 \node (B2) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([xshift=0cm,yshift=-1.5cm]B1.south) {Estimate the TMD's mass.};
@@ -52,15 +53,13 @@ class DiagnosticsTikZDiagram(TikZPicture):
 """
 
         return code
-    
-    
-    
+
+
 class TuningTikZDiagram1(TikZPicture):
 
     def _scheme_desc(self):
 
-        
-        code=r"""
+        code = r"""
 
     
     
@@ -80,8 +79,7 @@ class TheveninTikZDiagramVer1(TikZPicture):
 
     def _scheme_desc(self):
 
-        
-        code=r"""
+        code = r"""
 
     
     \draw
@@ -106,8 +104,7 @@ class TheveninTikZDiagramVer2(TikZPicture):
 
     def _scheme_desc(self):
 
-        
-        code=r"""
+        code = r"""
 
     \draw
     (0,0) to[american voltage source, l_=$U_{oc}$] (0,-3)
@@ -139,8 +136,7 @@ class TheveninTikZDiagram(TikZPicture):
 
     def _scheme_desc(self):
 
-        
-        code=r"""
+        code = r"""
 
     
     \draw
@@ -158,14 +154,13 @@ class TheveninTikZDiagram(TikZPicture):
 """
 
         return code
-    
-    
+
+
 class ForcedDampedSpringMassSystemScheme(TikZPicture):
 
     def _scheme_desc(self):
 
-        
-        code=r"""
+        code = r"""
 
 \coordinate (origo) at (0,0);
 
@@ -220,13 +215,13 @@ mark=at position 0.5 with
 """
 
         return code
-    
+
+
 class ForcedSpringMassSystemScheme(TikZPicture):
 
     def _scheme_desc(self):
 
-        
-        code=r"""
+        code = r"""
 
 \coordinate (origo) at (0,0);
 
@@ -281,13 +276,13 @@ mark=at position 0.5 with
 """
 
         return code
-    
+
+
 class GearModelOscillatorScheme(TikZPicture):
 
     def _scheme_desc(self):
 
-        
-        code=r"""
+        code = r"""
 
 \coordinate (origo) at (0,0);
 
@@ -346,12 +341,12 @@ mark=at position 0.5 with
 
         return code
 
+
 class HelicalGearModelScheme(TikZPicture):
 
     def _scheme_desc(self):
 
-        
-        code=r"""
+        code = r"""
         
     \tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.2cm,post length=0.2cm,segment length=0.2cm}]
 
@@ -406,14 +401,13 @@ class HelicalGearModelScheme(TikZPicture):
 
     """
         return code
-    
-    
+
+
 class HelicalGearVerticalModelScheme(TikZPicture):
 
     def _scheme_desc(self):
 
-        
-        code=r"""
+        code = r"""
         
     \tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.2cm,post length=0.2cm,segment length=0.2cm}]
 
@@ -469,15 +463,13 @@ class HelicalGearVerticalModelScheme(TikZPicture):
     """
         return code
 
-    
-    
-    
-#Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
+
+# Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
 class CompoundPendulumScheme2(TikZPicture):
 
     def _scheme_desc(self):
 
-        code=r"""
+        code = r"""
 
     % Osie
     \draw[->] (-0.2,0) -- (4,0) node[right] {$x$};
@@ -513,13 +505,13 @@ class CompoundPendulumScheme2(TikZPicture):
 
         return code
 
-    
-#Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
+
+# Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
 class ForcedCompoundPendulumScheme2(TikZPicture):
 
     def _scheme_desc(self):
 
-        code=r"""
+        code = r"""
 
        % Osie
     \draw[->] (-0.2,0) -- (4,0) node[right] {$x$};
@@ -555,11 +547,12 @@ class ForcedCompoundPendulumScheme2(TikZPicture):
 
         return code
 
+
 class CompoundPendulumScheme(TikZPicture):
 
     def _scheme_desc(self):
 
-        code=r"""
+        code = r"""
 
  % Osie
     \draw[->] (-0.2,0) -- (4,0) node[right] {$x$};
@@ -592,13 +585,13 @@ class CompoundPendulumScheme(TikZPicture):
 
         return code
 
-    
-#Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
+
+# Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
 class ForcedCompoundPendulumScheme(TikZPicture):
 
     def _scheme_desc(self):
 
-        code=r"""
+        code = r"""
 
     % Osie
     \draw[->] (-0.2,0) -- (4,0) node[right] {$x$};
@@ -631,14 +624,13 @@ class ForcedCompoundPendulumScheme(TikZPicture):
 
         return code
 
-    
-    
-#Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
+
+# Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
 class RollingHalfDiskScheme(TikZPicture):
 
     def _scheme_desc(self):
 
-        code=r"""
+        code = r"""
 
     % Definicje
     \def\r{2}       % Promień półwalca
@@ -679,14 +671,14 @@ class RollingHalfDiskScheme(TikZPicture):
 """
 
         return code
-    
-    
-#Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
+
+
+# Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
 class ForcedRollingHalfDiskScheme(TikZPicture):
 
     def _scheme_desc(self):
 
-        code=r"""
+        code = r"""
 
     % Definicje
     \def\r{2}       % Promień półwalca
@@ -731,13 +723,14 @@ class ForcedRollingHalfDiskScheme(TikZPicture):
 """
 
         return code
-    
-#Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
+
+
+# Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
 class RollingBarScheme(TikZPicture):
 
     def _scheme_desc(self):
 
-        code=r"""
+        code = r"""
 
 % Semi-cylinder (half-circle)
     \fill[gray!20] (-2,0) arc[start angle=180,end angle=0,radius=2];
@@ -774,13 +767,14 @@ class RollingBarScheme(TikZPicture):
 """
 
         return code
-    
-#Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
+
+
+# Created and/or developed by Ania Fila (AnnFyla) & Michał Kacperek (MichalKacperek)
 class ForcedRollingBarScheme(TikZPicture):
 
     def _scheme_desc(self):
 
-        code=r"""
+        code = r"""
     % Semi-cylinder (half-circle)
     \fill[gray!20] (-2,0) arc[start angle=180,end angle=0,radius=2];
     \draw (-2,0) arc[start angle=180,end angle=0,radius=2];
@@ -821,11 +815,11 @@ class ForcedRollingBarScheme(TikZPicture):
 """
 
         return code
-    
+
 
 class TrolleyWithElasticPendulumScheme(TikZPicture):
     def _scheme_desc(self):
-        code=r"""
+        code = r"""
 \tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.3cm,post length=0.3cm,segment length=0.3cm}]
 \tikzstyle{damper}=[thick,decoration={markings,  
     mark connection node=dmp,
@@ -861,7 +855,7 @@ class TrolleyWithElasticPendulumScheme(TikZPicture):
 
 class DoublePendulumMeasureScheme(TikZPicture):
     def _scheme_desc(self):
-        code=r"""
+        code = r"""
 
 \node (B1) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center,] at (0,0) {Wymuszenie};
 \node (B2) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([xshift=4cm]B1.east) {Main member};
@@ -886,13 +880,10 @@ class DoublePendulumMeasureScheme(TikZPicture):
         return code
 
 
-
-    
-
 # Created by Anna Mackojc
 class ColouredDoublePendulumMeasureScheme(TikZPicture):
     def _scheme_desc(self):
-        code=r"""
+        code = r"""
 
 \definecolor{excitationColor}{RGB}{255, 102, 102} % Red
 \definecolor{mainColor}{RGB}{102, 178, 255} % Blue
@@ -934,7 +925,7 @@ class ColouredDoublePendulumMeasureScheme(TikZPicture):
 # Created by Anna Mackojc
 class SegmentBeamScheme(TikZPicture):
     def _scheme_desc(self):
-        code=r"""
+        code = r"""
 
      \coordinate (origo) at (0,0);
      \coordinate (pivot) at (1,5);
@@ -964,9 +955,10 @@ class SegmentBeamScheme(TikZPicture):
 # Created by Krzysztof Twardoch
 # Verified by BCh
 
+
 class TrolleyWithPendulumMeasureScheme(TikZPicture):
     def _scheme_desc(self):
-        code=r"""
+        code = r"""
 
 \node (B1) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center,] at (0,0) {Kinematic excitation \\ (Vibrating table)};
 \node (B2) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([xshift=4cm]B1.east) {Main member};
@@ -989,12 +981,13 @@ class TrolleyWithPendulumMeasureScheme(TikZPicture):
 
 """
         return code
+
+
 class RLScheme(TikZPicture):
 
     def _scheme_desc(self):
 
-        
-        code=r"""
+        code = r"""
 
     \draw
     (0,0) to[battery, l_=$V$] (0,-3)
@@ -1007,11 +1000,13 @@ class RLScheme(TikZPicture):
 """
 
         return code
+
+
 class DynPyTree(TikZPicture):
-    
+
     def _scheme_desc(self):
-        
-        code=r"""
+
+        code = r"""
 % DynPy main block
 \draw [line width=0.8pt, rounded corners=9.6] (5,13.75) rectangle (7.5,12.5);
 \node [font=\LARGE] at (6.25,13.25) {DynPy};
@@ -1053,18 +1048,16 @@ class DynPyTree(TikZPicture):
 \draw [line width=0.8pt, ->, >=Stealth] (6.25,7.5) -- (6.25,6.25);
 """
         return code
-        
-        
+
 
 class TrolleyWithPendulumTestStandScheme(TikZPicture):
 
     def _scheme_desc(self):
 
-
-        half_force_label = r'{\color{violet} $\frac{F}{2}$}'
-        #––––––––––––––––––––––––––––––––––––––––––––––––
+        half_force_label = r"{\color{violet} $\frac{F}{2}$}"
+        # ––––––––––––––––––––––––––––––––––––––––––––––––
         # PL
-        #––––––––––––––––––––––––––––––––––––––––––––––––
+        # ––––––––––––––––––––––––––––––––––––––––––––––––
         # text1 = r'{\color{violet} Silnik elektryczny}'
         # text2 = r'{\color{violet} Przekładnia}'
         # text3 = r'{\color{violet} Obiekt badań}'
@@ -1073,18 +1066,18 @@ class TrolleyWithPendulumTestStandScheme(TikZPicture):
         # text6 = r'{\color{violet} Stół ruchomy}'
         # text7 = r'{\color{violet} Korbowód}'
         # text8 = r'{\color{violet} Falownik}'
-        #––––––––––––––––––––––––––––––––––––––––––––––––
+        # ––––––––––––––––––––––––––––––––––––––––––––––––
         # EN
-        #––––––––––––––––––––––––––––––––––––––––––––––––
-        text1 = r'{\color{violet} Electric Motor}'
-        text2 = r'{\color{violet} Belt Gearbox}'
-        text3 = r'{\color{violet} Test Object}'
-        text4 = r'{\color{violet} TMD}'
-        text5 = r'{\color{violet} Accelerometer}'
-        text6 = r'{\color{violet} Vibrating Table}'
-        text7 = r'{\color{violet} Connecting Rod}'
-        text8 = r'{\color{violet} Inverter}' # Controller
-        #––––––––––––––––––––––––––––––––––––––––––––––––
+        # ––––––––––––––––––––––––––––––––––––––––––––––––
+        text1 = r"{\color{violet} Electric Motor}"
+        text2 = r"{\color{violet} Belt Gearbox}"
+        text3 = r"{\color{violet} Test Object}"
+        text4 = r"{\color{violet} TMD}"
+        text5 = r"{\color{violet} Accelerometer}"
+        text6 = r"{\color{violet} Vibrating Table}"
+        text7 = r"{\color{violet} Connecting Rod}"
+        text8 = r"{\color{violet} Inverter}"  # Controller
+        # ––––––––––––––––––––––––––––––––––––––––––––––––
 
         pos1_x = 0
         pos1_y = 0
@@ -1092,7 +1085,7 @@ class TrolleyWithPendulumTestStandScheme(TikZPicture):
         del_row = -6.1
         del_2row = 0.4
 
-        code=f"""
+        code = f"""
 
     %\draw[ultra thick,dashed,black] (3.9,-0.25) -- (3.9,-6.2);
 
@@ -1130,25 +1123,24 @@ class NationalDAQSystemScheme(TikZPicture):
 
     def _scheme_desc(self):
 
-
-        half_force_label = r'{\color{violet} $\frac{F}{2}$}'
-        #–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+        half_force_label = r"{\color{violet} $\frac{F}{2}$}"
+        # –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
         # PL
-        #–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+        # –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
         # text1 = r'{\color{violet} NI cDAQ-9174}' # System Akwizycji Danych
         # text2 = r'{\color{violet} Karta pomiarowa (NI 9230)}'
         # text3 = r'{\color{violet} Akcelerometr}'
         # text4 = r'{\color{violet} Przewód pomiarowy}'
         # text5 = r'{\color{violet} Zasilacz}'
-        #–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+        # –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
         # EN
-        #–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-        text1 = r'{\color{violet} NI cDAQ-9174}' # Data Acquisition System
-        text2 = r'{\color{violet} Measurement Card NI 9230}'
-        text3 = r'{\color{violet} Accelerometer}'
-        text4 = r'{\color{violet} Measurement Cable}'
-        text5 = r'{\color{violet} Power supply}'
-        #–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+        # –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+        text1 = r"{\color{violet} NI cDAQ-9174}"  # Data Acquisition System
+        text2 = r"{\color{violet} Measurement Card NI 9230}"
+        text3 = r"{\color{violet} Accelerometer}"
+        text4 = r"{\color{violet} Measurement Cable}"
+        text5 = r"{\color{violet} Power supply}"
+        # –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 
         pos1_x = 0
         pos1_y = 0
@@ -1156,7 +1148,7 @@ class NationalDAQSystemScheme(TikZPicture):
         del_row = -6.1
         del_2row = 0.4
 
-        code=f"""
+        code = f"""
 
     \\node[inner sep=5pt,fill=white] (pic1) at (7.25cm,-0.5cm) {{\includegraphics[width=12cm]{{../images/measurement_kit.png}}}};
     %%%%%%  MID COL

@@ -1,68 +1,122 @@
+import copy
 import datetime as dtime
+import inspect
 import os
-import pandas as pd
 import random
+from collections.abc import Iterable
 
-#import matplotlib.pyplot as plt
-#import matplotlib.ticker as plticker
+import pandas as pd
 
 # import numpy as np
 # import pandas as pd
-#import pint
+# import pint
 import sympy.physics.mechanics as me
-
-from pylatex import (Alignat, Axis, Command, Document, Eqref, Figure, Label,
-                     TextColor, Marker, Math, NewLine, NewPage, Package, Plot,
-                     Quantity, Ref, Section, Subsection, Table, Tabular, TikZ,
-                     Description, LongTable,FlushRight,FlushLeft, Center)
-
+from IPython.display import Latex
+from IPython.display import Markdown as IPMarkdown
+from IPython.display import display
+from pylatex import (
+    Alignat,
+    Axis,
+    Center,
+    Command,
+    Description,
+    Document,
+    Eqref,
+    Figure,
+    FlushLeft,
+    FlushRight,
+    Label,
+    LongTable,
+    Marker,
+    Math,
+    NewLine,
+    NewPage,
+    Package,
+    Plot,
+    Quantity,
+    Ref,
+    Section,
+    Subsection,
+    Table,
+    Tabular,
+    TextColor,
+    TikZ,
+)
 from pylatex.base_classes import Environment, Options
 from pylatex.base_classes.command import CommandBase
-
 from pylatex.package import Package
 from pylatex.section import Chapter
 from pylatex.utils import NoEscape, italic
-from sympy import Matrix, symbols, Symbol, Eq, Expr, Number, Equality, Add, Mul,Subs
+from sympy import (
+    Add,
+    Derivative,
+    Eq,
+    Equality,
+    Expr,
+    Function,
+    GreaterThan,
+    Heaviside,
+    ImmutableMatrix,
+    LessThan,
+    Matrix,
+    Mul,
+    Number,
+    StrictGreaterThan,
+    StrictLessThan,
+    Subs,
+    Symbol,
+    atan,
+    cos,
+    exp,
+    latex,
+    sign,
+    sin,
+    symbols,
+    tan,
+)
 from sympy.core.relational import Relational
-
-from sympy import Symbol, Function, Derivative, latex, sin, cos, tan, exp, atan, ImmutableMatrix, sign, StrictGreaterThan,LessThan, GreaterThan,StrictLessThan, Heaviside
-
 from sympy.physics.vector.printing import vlatex, vpprint
 
-from IPython.display import display, Latex
-from IPython.display import Markdown as IPMarkdown
-
-
-
-
-
-
-
-from .timeseries import TimeDataFrame, TimeSeries
 from .adaptable import *
+from .timeseries import TimeDataFrame, TimeSeries
 
-import copy
-import inspect
-
-from collections.abc import Iterable
-
+# import matplotlib.pyplot as plt
+# import matplotlib.ticker as plticker
 
 
-pol_lang_dict = {'ą':'a', 'Ą':'A','ć':'c', 'Ć':'C', 'ę':'e', 'Ę':'E', 'ł':'l', 'Ł':'L', 'ó':'o', 'Ó':'O', 'ń':'n', 'Ń':'N', 'ś':'s', 'Ś':'S', 'ż':'z', 'Ż':'Z', 'ź':'z', 'Ź':'Z'}
+pol_lang_dict = {
+    "ą": "a",
+    "Ą": "A",
+    "ć": "c",
+    "Ć": "C",
+    "ę": "e",
+    "Ę": "E",
+    "ł": "l",
+    "Ł": "L",
+    "ó": "o",
+    "Ó": "O",
+    "ń": "n",
+    "Ń": "N",
+    "ś": "s",
+    "Ś": "S",
+    "ż": "z",
+    "Ż": "Z",
+    "ź": "z",
+    "Ź": "Z",
+}
 
 
 def fix_code(str_to_fix):
 
-
-    for old_char,new_char in pol_lang_dict.items():
+    for old_char, new_char in pol_lang_dict.items():
         if old_char in str_to_fix:
-            #print(f'old code for {old_char}')
-            #print(str_to_fix)
+            # print(f'old code for {old_char}')
+            # print(str_to_fix)
 
             str_to_fix = str_to_fix.replace(old_char, new_char)
 
-            #print('new code')
-            #print(str_to_fix.replace(old_char, new_char))
+            # print('new code')
+            # print(str_to_fix.replace(old_char, new_char))
     return str_to_fix
 
 
@@ -76,7 +130,6 @@ def plots_no():
 plots_no_gen = plots_no()
 
 
-
 class RandomDescription:
     def __init__(self, *args, random_or_order=None, **kwargs):
 
@@ -85,28 +138,25 @@ class RandomDescription:
 
     def to_string(self):
 
-        if hasattr(self.random_or_order, '__contains__'):
+        if hasattr(self.random_or_order, "__contains__"):
             self.order = list(random_or_order)
         else:
-            self.selected_sentences = [
-                random.choice(pool) for pool in self.pool_list
-            ]
+            self.selected_sentences = [random.choice(pool) for pool in self.pool_list]
 
-        return ' '.join(self.selected_sentences)
+        return " ".join(self.selected_sentences)
 
     def __str__(self):
 
         return self.to_string()
 
     def __repr__(self):
-        return self.__class__.__name__ + ': ' + self.to_string()
-
+        return self.__class__.__name__ + ": " + self.to_string()
 
 
 class ReportModule:
-    r'''
-    Basic class for maintaining global options of a report module. It provides methods for setting options common with every class inheriting from ReportModule instance. 
-    
+    r"""
+    Basic class for maintaining global options of a report module. It provides methods for setting options common with every class inheriting from ReportModule instance.
+
     Arguments
     =========
         container: obj
@@ -129,42 +179,42 @@ class ReportModule:
         >>>from pylatex import Document
         >>>from sympy import Symbol
         >>>import pint
-        
+
         >>>ureg = pint.UnitRegistry()
         >>>m=Symbol('m')
         >>>doc=Document
         >>>unit_dict={m:ureg.kilogram}
-        
-        >>>RM=ReportModule()
-        
-        >>>RM.set_container(doc)
-        
-        >>>RM.set_caption('This is caption.')
-        
-        >>>RM.set_directory('./my_directory')
-        
-        >>>RM.set_units_dict(unit_dict)
-    '''
 
-    _cls_container = []#Section('Dummy')
-    cls_container = []#Section('Dummy')
-    _container = []#Section('Dummy')
-    cls_path = '.'
-    _caption = 'Figure describes the numerical data'
-    _label = 'fig:markerIsMissing'
+        >>>RM=ReportModule()
+
+        >>>RM.set_container(doc)
+
+        >>>RM.set_caption('This is caption.')
+
+        >>>RM.set_directory('./my_directory')
+
+        >>>RM.set_units_dict(unit_dict)
+    """
+
+    _cls_container = []  # Section('Dummy')
+    cls_container = []  # Section('Dummy')
+    _container = []  # Section('Dummy')
+    cls_path = "."
+    _caption = "Figure describes the numerical data"
+    _label = "fig:markerIsMissing"
     _units = {}
     _autoreport = False
-    #_frame = TimeDataFrame()
-    _frame = None#pd.DataFrame()
+    # _frame = TimeDataFrame()
+    _frame = None  # pd.DataFrame()
     _list = []
     _subplot = False
     _hold = False
-    _out_formatter = None #BaseFrameFormatter  # lambda data: data
-    _height = NoEscape(r'6cm')
+    _out_formatter = None  # BaseFrameFormatter  # lambda data: data
+    _height = NoEscape(r"6cm")
 
     @classmethod
     def set_output_formatter(cls, formatter=None):
-    #def set_output_formatter(cls, formatter=BaseFrameFormatter):
+        # def set_output_formatter(cls, formatter=BaseFrameFormatter):
         cls._out_formatter = formatter
         return cls
 
@@ -174,7 +224,7 @@ class ReportModule:
         return cls
 
     @classmethod
-    def set_caption(cls, caption=''):
+    def set_caption(cls, caption=""):
         cls._caption = caption
         return cls
 
@@ -211,7 +261,7 @@ class ReportModule:
         return cls
 
     @classmethod
-    def set_directory(cls, path='./SDA_results'):
+    def set_directory(cls, path="./SDA_results"):
 
         cls.cls_path = path
         return cls
@@ -222,20 +272,17 @@ class ReportModule:
         cls._units = units
         return cls
 
-#     @property
-#     def _cls_container(self):
-#         return self.__class__._cls_container
-    
-#     @property
-#     def _container(self):
-#         return self.__class__._cls_container
-    
-    
-    def __init__(self,
-                 container=None,
-                 path=None,
-                 autoreporting=False,
-                 output_formatter=None):
+    #     @property
+    #     def _cls_container(self):
+    #         return self.__class__._cls_container
+
+    #     @property
+    #     def _container(self):
+    #         return self.__class__._cls_container
+
+    def __init__(
+        self, container=None, path=None, autoreporting=False, output_formatter=None
+    ):
         if container:
             self._container = container
         else:
@@ -261,17 +308,21 @@ class ReportModule:
         else:
             self._out_format = self.__class__._out_formatter
 
-        #print(f'Report module init - formatter is {self._out_format}')
+        # print(f'Report module init - formatter is {self._out_format}')
 
     def _apply_formatter(self, data):
 
-        #print(type(self._out_format))
-        if (self._out_format is BaseFrameFormatter, PivotFrameSummary,
-                FFTFrameFormatter, PivotPlotFrameSummary):
-            #print('Base frmatter is working')
+        # print(type(self._out_format))
+        if (
+            self._out_format is BaseFrameFormatter,
+            PivotFrameSummary,
+            FFTFrameFormatter,
+            PivotPlotFrameSummary,
+        ):
+            # print('Base frmatter is working')
 
-            #print('data.index', data.index)
-            #print('data.index.name', data.index.name)
+            # print('data.index', data.index)
+            # print('data.index.name', data.index.name)
 
             result = self._out_format(data)()
 
@@ -279,11 +330,11 @@ class ReportModule:
             #             display(result)
             #             #print(result.index.name)
             if not result.index.name:
-                result.index.name = ''
+                result.index.name = ""
 
             return result
         else:
-            #print('callable is working')
+            # print('callable is working')
             return self._out_format(data)
 
     @property
@@ -300,22 +351,20 @@ class ReportModule:
         if time_frame.columns != [] and time_frame.columns != pd.Index([]):
 
             time_frame.columns = pd.MultiIndex.from_tuples(time_frame.columns)
-            time_frame.columns.set_names(['model', 'parameter', 'coordinate'],
-                                         inplace=True)
+            time_frame.columns.set_names(
+                ["model", "parameter", "coordinate"], inplace=True
+            )
 
         return time_frame
 
-
-
-
     def set_frame(self, key, frame):
-        #print('self frame is modified')
+        # print('self frame is modified')
         self._frame[key] = frame
 
         return frame
 
     def set_class_frame(self, key, frame):
-        #print('class frame is modified')
+        # print('class frame is modified')
 
         self.__class__._frame[key] = frame
 
@@ -326,13 +375,13 @@ class ReportModule:
         if not self.__class__._hold:
 
             if obj and (self._frame is not None):
-                #print('self cleaner')
+                # print('self cleaner')
                 self._frame = type(self._frame)()
-                #self._frame = None
+                # self._frame = None
             if (not obj) and (self.__class__._frame is not None):
-                #print('class cleaner')
+                # print('class cleaner')
                 self.__class__._frame = type(self.__class__._frame)()
-            #self.__class__._frame =  None
+            # self.__class__._frame =  None
 
         return None
 
@@ -344,118 +393,115 @@ class ReportModule:
 
     def reported(self):
         self.cls_container.append(self)
-        
+
         return copy.deepcopy(self)
 
-    
     def _report(self):
         self.cls_container.append(self)
 
 
-
 class CurrentContainer:
     """
-        A container class that initializes and configures various components for handling LaTeX reports,
-        visualizations, and symbolic mathematics. This class serves as a centralized configuration manager
-        for different utilities within a reporting or symbolic computation framework.
+    A container class that initializes and configures various components for handling LaTeX reports,
+    visualizations, and symbolic mathematics. This class serves as a centralized configuration manager
+    for different utilities within a reporting or symbolic computation framework.
 
-        Attributes:
-            mdpi (bool): A class-level attribute to define whether MDPI-specific configurations are applied.
-                         Defaults to False.
+    Attributes:
+        mdpi (bool): A class-level attribute to define whether MDPI-specific configurations are applied.
+                     Defaults to False.
 
-        Methods:
-            __init__(container): Initializes the container and sets up the configurations for various components.
-            set_filename_prefix(prefix): Sets a prefix for file names generated by TikZPlot and returns a copy of the instance.
-            set_descriptions_registry(symbols_description_dict): Configures a registry to store and manage symbol descriptions.
+    Methods:
+        __init__(container): Initializes the container and sets up the configurations for various components.
+        set_filename_prefix(prefix): Sets a prefix for file names generated by TikZPlot and returns a copy of the instance.
+        set_descriptions_registry(symbols_description_dict): Configures a registry to store and manage symbol descriptions.
     """
 
     mdpi = False
 
     def __init__(self, container: object):
         """
-            Initializes the CurrentContainer instance with the given container.
+        Initializes the CurrentContainer instance with the given container.
 
-            Args:
-                container (object): The main container object to be used for managing various components. This object
-                                    is expected to provide functionality for report generation, visualization, and symbolic
-                                    computation.
+        Args:
+            container (object): The main container object to be used for managing various components. This object
+                                is expected to provide functionality for report generation, visualization, and symbolic
+                                computation.
 
-            Sets up the following components:
-                - ReportText: For generating textual content in reports.
-                - Picture: For managing visualizations.
-                - SympyFormula: For handling symbolic formulas.
-                - Markdown: For generating Markdown content.
-                - LatexDataFrame: For handling dataframes in LaTeX format with picture mode enabled.
-                - ObjectCode: For managing code representations.
-                - Block, AlertBlock, ExampleBlock: For creating different types of blocks in LaTeX documents.
-                - SymbolsDescription: For managing symbolic descriptions.
+        Sets up the following components:
+            - ReportText: For generating textual content in reports.
+            - Picture: For managing visualizations.
+            - SympyFormula: For handling symbolic formulas.
+            - Markdown: For generating Markdown content.
+            - LatexDataFrame: For handling dataframes in LaTeX format with picture mode enabled.
+            - ObjectCode: For managing code representations.
+            - Block, AlertBlock, ExampleBlock: For creating different types of blocks in LaTeX documents.
+            - SymbolsDescription: For managing symbolic descriptions.
 
-            Example:
-                >>> container = MyContainer()  # Replace with an actual container class instance
-                >>> current_container = CurrentContainer(container)
+        Example:
+            >>> container = MyContainer()  # Replace with an actual container class instance
+            >>> current_container = CurrentContainer(container)
         """
 
         from .adaptable import LatexDataFrame
 
-        
         self._container = container
-        
+
         ReportText.set_container(self._container)
         Picture.set_container(self._container)
         SympyFormula.set_container(self._container)
 
         Markdown.set_container(self._container)
-        
+
         LatexDataFrame.set_container(self._container)
         LatexDataFrame.set_picture_mode(True)
 
         ObjectCode.set_container(self._container)
-        
+
         Picture.set_container(self._container)
-        
+
         Block.set_container(self._container)
         AlertBlock.set_container(self._container)
         ExampleBlock.set_container(self._container)
 
         SymbolsDescription.set_container(self._container)
-        
-    def set_filename_prefix(self, prefix: str) -> 'CurrentContainer':
+
+    def set_filename_prefix(self, prefix: str) -> "CurrentContainer":
         """
-            Sets a prefix for filenames generated by TikZPlot and returns a copy of the CurrentContainer instance.
+        Sets a prefix for filenames generated by TikZPlot and returns a copy of the CurrentContainer instance.
 
-            Args:
-                prefix (str): The prefix to be used for filenames in TikZPlot.
+        Args:
+            prefix (str): The prefix to be used for filenames in TikZPlot.
 
-            Returns:
-                CurrentContainer: A copy of the instance with the updated filename prefix.
+        Returns:
+            CurrentContainer: A copy of the instance with the updated filename prefix.
 
-            Example:
-                >>> current_container = CurrentContainer(container)
-                >>> updated_container = current_container.set_filename_prefix("report_")
+        Example:
+            >>> current_container = CurrentContainer(container)
+            >>> updated_container = current_container.set_filename_prefix("report_")
         """
 
         TikZPlot._prefix = prefix
 
         return copy.copy(self)
-    
+
     def set_descriptions_registry(self, symbols_description_dict: dict) -> None:
         """
-            Configures the DescriptionsRegistry with a given dictionary of symbol descriptions.
+        Configures the DescriptionsRegistry with a given dictionary of symbol descriptions.
 
-            Args:
-                symbols_description_dict (dict): A dictionary where keys are symbols (e.g., strings or objects) and values
-                                                 are their respective descriptions (e.g., strings).
+        Args:
+            symbols_description_dict (dict): A dictionary where keys are symbols (e.g., strings or objects) and values
+                                             are their respective descriptions (e.g., strings).
 
-            Functionality:
-                - Resets the existing descriptions registry.
-                - Sets new descriptions using the provided dictionary.
+        Functionality:
+            - Resets the existing descriptions registry.
+            - Sets new descriptions using the provided dictionary.
 
-            Example:
-                >>> descriptions = {
-                ...     "x": "Position in meters",
-                ...     "v": "Velocity in m/s"
-                ... }
-                >>> current_container.set_descriptions_registry(descriptions)
+        Example:
+            >>> descriptions = {
+            ...     "x": "Position in meters",
+            ...     "v": "Velocity in m/s"
+            ... }
+            >>> current_container.set_descriptions_registry(descriptions)
         """
 
         DescriptionsRegistry().reset_registry()
@@ -470,9 +516,9 @@ class DateCommand(CommandBase):
     ``DateCommand``.
     """
 
-    _latex_name = 'date'
-        
-        
+    _latex_name = "date"
+
+
 # class AbstractFrameFormatter(AdaptableDataFrame):
 #     _applying_func=lambda x: (x*100)
 
@@ -514,13 +560,6 @@ class DateCommand(CommandBase):
 #     #     ops_to_apply=cls._apply_func(**kwargs)
 
 #     #     return ops_to_apply(BasicFormattedSeries(data=data, index=index, columns=columns, dtype=dtype, copy=copy))
-
-
-
-
-
-
-
 
 
 #         if self.__class__._subplot==False:
@@ -607,9 +646,9 @@ class DateCommand(CommandBase):
 
 
 class ReportEntry:
-    r'''
-    This class creates a report section with a title provided by a user. 
-    
+    r"""
+    This class creates a report section with a title provided by a user.
+
     Arguments
     =========
     block_title: str
@@ -620,7 +659,8 @@ class ReportEntry:
 
     Example
     =======
-    '''
+    """
+
     def __init__(self, block_title, **kwargs):
         self._block_title = block_title
 
@@ -633,22 +673,23 @@ class ReportEntry:
 
 
 class ReportText(ReportModule):
-    r'''
-    This class appends a user defined text to the existing document container. 
-    
+    r"""
+    This class appends a user defined text to the existing document container.
+
     Arguments
     =========
     text: str
         String that will be appended to the defined container.
     key_dict: dict
         Dictionary containing entries for string format method.
-        
+
     Methods
     =======
 
     Example
     =======
-    '''
+    """
+
     _conjuction_dict = None
     _color = None
     _alignment = None
@@ -663,27 +704,26 @@ class ReportText(ReportModule):
     @classmethod
     def set_text_alignment(cls, align=None):
 
-        if align == 'right':
-            
+        if align == "right":
+
             cls._alignment = FlushRight
-            
-        elif align == 'center':
-            
+
+        elif align == "center":
+
             cls._alignment = Center
 
-        elif align == 'left':
-            
+        elif align == "left":
+
             cls._alignment = FlushLeft
-            
-            
+
         else:
             cls._alignment = align
 
         return cls
-    
-    def __init__(self, text=None,alignment=None, key_dict={}, **kwargs):
 
-        self._text = 'Figures {first_marker}-{last_marker}'
+    def __init__(self, text=None, alignment=None, key_dict={}, **kwargs):
+
+        self._text = "Figures {first_marker}-{last_marker}"
 
         if text:
             self._text = text
@@ -696,7 +736,7 @@ class ReportText(ReportModule):
 
         except:
             pass
-            #print('.w')
+            # print('.w')
         finally:
             self._text = self._text
 
@@ -704,10 +744,9 @@ class ReportText(ReportModule):
 
         self._text_formatted = self._text
 
-
     def __call__(self, analysis):
 
-        #print(self._text)
+        # print(self._text)
 
         analysis._container.append(NoEscape(self._text))
 
@@ -719,174 +758,194 @@ class ReportText(ReportModule):
 
     def __repr__(self):
 
-
-        #return (self._text)
+        # return (self._text)
         return self._text
 
     @property
     def _alignment_env(self):
-        
+
         align = self._alignment
 
-        if align == 'right':
-            
+        if align == "right":
+
             _alignment = FlushRight
-            
-        elif align == 'center':
-            
+
+        elif align == "center":
+
             _alignment = Center
 
-        elif align == 'left':
-            
+        elif align == "left":
+
             _alignment = FlushLeft
-            
-            
+
         else:
             _alignment = align
 
-        return  _alignment
-    
-    
+        return _alignment
+
     def _repr_markdown_(self):
         if self.__class__._color:
-            print(f'Color text {self.__class__._color}')
+            print(f"Color text {self.__class__._color}")
         return self.reported()._text
 
     def reported(self):
 
         formatted_text = self._text_formatted
 
-        if self._conjuction_dict is not None and isinstance(self._conjuction_dict, dict):
+        if self._conjuction_dict is not None and isinstance(
+            self._conjuction_dict, dict
+        ):
             for dict_key in self._conjuction_dict.keys():
-                formatted_text = formatted_text.replace(dict_key, self._conjuction_dict[dict_key])
-
-
+                formatted_text = formatted_text.replace(
+                    dict_key, self._conjuction_dict[dict_key]
+                )
 
         if self.__class__._color:
 
             text_to_add = TextColor(self.__class__._color, NoEscape(formatted_text))
         else:
-            text_to_add =NoEscape(formatted_text)
-                
-                
-        
+            text_to_add = NoEscape(formatted_text)
 
-#         text_to_add =NoEscape(self._text_formatted)
-        
+        #         text_to_add =NoEscape(self._text_formatted)
+
         if self._alignment_env:
-            align_env=self._alignment_env()
+            align_env = self._alignment_env()
             align_env.append(text_to_add)
-            
+
             text_to_add = align_env
-        
+
         self.cls_container.append(text_to_add)
-        
+
         return copy.copy(self)
-    
+
     def with_ai(text, api_key):
         """
-       Method which helps with creating the summary of given text for preparing a report using the generative artificial intelligence model.
+        Method which helps with creating the summary of given text for preparing a report using the generative artificial intelligence model.
 
-        -----
-        Example:
+         -----
+         Example:
 
-        >>>display(AiInterfaceOutput(ReportText.summary_with_ai(“text”, “api_key”
-       
-        where:
-        text - text given for the example
-        api_key - specific API key
+         >>>display(AiInterfaceOutput(ReportText.summary_with_ai(“text”, “api_key”
+
+         where:
+         text - text given for the example
+         api_key - specific API key
         """
 
-    
         from dynpy.utilities.tools import AiInterface
-        
+
         ai_chat = AiInterface(api_key)
 
-        prompt_for_summary ='Summarize this text: ' + text
+        prompt_for_summary = "Summarize this text: " + text
 
         response = ai_chat.chat(prompt_for_summary)
 
         return response
 
-
     def call_code(self):
-        #Declaration of command vector used in call_code method
+        # Declaration of command vector used in call_code method
         self.command_vector = []
-        
-        if self._text != None: self.command_vector.append("text = \'\'\' {} \'\'\'".format(self._text))
-        if self._alignment != None: self.command_vector.append("alignment = \'\'\'{}  \'\'\'".format(self._alignment))
-        
-        vector = 'ReportText('
-        
+
+        if self._text != None:
+            self.command_vector.append("text = ''' {} '''".format(self._text))
+        if self._alignment != None:
+            self.command_vector.append("alignment = '''{}  '''".format(self._alignment))
+
+        vector = "ReportText("
+
         for element in self.command_vector:
-            vector += str(element) + ', '
-        
-        return vector[:-2] + ')'
-    
-class Aspect(Section,ReportModule):
-    packages=[#Package('float'),
-              #Package('fvextra'),
-              #Command('floatname', arguments=['listing'],extra_arguments=['Listing']), 
-             ]
+            vector += str(element) + ", "
+
+        return vector[:-2] + ")"
 
 
-    latex_name = 'subparagraph'
+class Aspect(Section, ReportModule):
+    packages = [  # Package('float'),
+        # Package('fvextra'),
+        # Command('floatname', arguments=['listing'],extra_arguments=['Listing']),
+    ]
+
+    latex_name = "subparagraph"
     content_separator = "\n"
-    
+
+
 class Verbatim(Environment):
     pass
 
+
 class Minted(Environment):
-    packages=[Package('minted')]
+    packages = [Package("minted")]
     content_separator = "\n"
+
 
 class LstListing(Environment):
-    packages=[Package('listings'),
-              Package('float'),
-              Package('fvextra'),
-              Package('xcolor'),
-              Command('floatname',arguments=['listing'],extra_arguments=['Listing']),
-              
-              
-              Command('definecolor{codegreen}', arguments=['rgb'], extra_arguments = ['0,0.6,0']),
-              Command('definecolor{codegray}', arguments=['rgb'], extra_arguments = ['0.5,0.5,0.5']),
-              Command('definecolor{codepurple}', arguments=['rgb'], extra_arguments = ['0.58,0,0.82']),
-              Command('definecolor{backcolour}', arguments=['rgb'], extra_arguments = ['0,0,0']),
-              Command('lstdefinestyle{dynPyStyle}', arguments = [NoEscape(r'commentstyle=\color{codegreen},keywordstyle=\color{magenta},numberstyle=\tiny\color{codegray},stringstyle=\color{codepurple}, basicstyle=\ttfamily\footnotesize,breakatwhitespace=false,breaklines=true,captionpos=b,keepspaces=true,numbers=left,numbersep=5pt,showspaces=false,showstringspaces=false,showtabs=false,tabsize=2,language=Python')]),
+    packages = [
+        Package("listings"),
+        Package("float"),
+        Package("fvextra"),
+        Package("xcolor"),
+        Command("floatname", arguments=["listing"], extra_arguments=["Listing"]),
+        Command(
+            "definecolor{codegreen}", arguments=["rgb"], extra_arguments=["0,0.6,0"]
+        ),
+        Command(
+            "definecolor{codegray}", arguments=["rgb"], extra_arguments=["0.5,0.5,0.5"]
+        ),
+        Command(
+            "definecolor{codepurple}",
+            arguments=["rgb"],
+            extra_arguments=["0.58,0,0.82"],
+        ),
+        Command(
+            "definecolor{backcolour}", arguments=["rgb"], extra_arguments=["0,0,0"]
+        ),
+        Command(
+            "lstdefinestyle{dynPyStyle}",
+            arguments=[
+                NoEscape(
+                    r"commentstyle=\color{codegreen},keywordstyle=\color{magenta},numberstyle=\tiny\color{codegray},stringstyle=\color{codepurple}, basicstyle=\ttfamily\footnotesize,breakatwhitespace=false,breaklines=true,captionpos=b,keepspaces=true,numbers=left,numbersep=5pt,showspaces=false,showstringspaces=false,showtabs=false,tabsize=2,language=Python"
+                )
+            ],
+        ),
+        # Command('lstset', arguments = [NoEscape('style=dynPyStyle,language=Python')]),
+    ]
 
 
-              #Command('lstset', arguments = [NoEscape('style=dynPyStyle,language=Python')]),
-
-              
-
-             ]
-
-
-    
-    
 class PyVerbatim(Environment):
-    packages=[Package('pythontex'),
-              Package('fvextra'),
-              Command('fvset', arguments=[NoEscape(r'breaklines, commandchars=\\\{\},numbers=left')]), 
-             ]
+    packages = [
+        Package("pythontex"),
+        Package("fvextra"),
+        Command(
+            "fvset",
+            arguments=[NoEscape(r"breaklines, commandchars=\\\{\},numbers=left")],
+        ),
+    ]
     content_separator = "\n"
-    #inspect.getsource(system.__class__)
+    # inspect.getsource(system.__class__)
 
 
-class Listing(Figure,ReportModule):
-    packages=[Package('float'),
-              Package('fvextra'),
-              Command('floatname', arguments=['listing'],extra_arguments=['Listing']), 
-             ]
-
-
+class Listing(Figure, ReportModule):
+    packages = [
+        Package("float"),
+        Package("fvextra"),
+        Command("floatname", arguments=["listing"], extra_arguments=["Listing"]),
+    ]
 
     content_separator = "\n"
-    
-    _default_width = NoEscape('0.8\\textwidth')
-    _position = 'H'
-    
-    def __init__(self, verbatim=None, position=None, caption=None,width=None,height=None,marker=None, **kwargs):
+
+    _default_width = NoEscape("0.8\\textwidth")
+    _position = "H"
+
+    def __init__(
+        self,
+        verbatim=None,
+        position=None,
+        caption=None,
+        width=None,
+        height=None,
+        marker=None,
+        **kwargs,
+    ):
         """
         Args
         ----
@@ -895,85 +954,86 @@ class Listing(Figure,ReportModule):
             ``'h'``. See the references for more information.
         width: str
             Documentation entry
-            
+
         References
         ----------
             * https://www.sharelatex.com/learn/Positioning_of_Figures
         """
-    
+
         self.verbatim = verbatim
         self.caption = caption
-        
+
         if width is not None:
             self.width = width
         else:
             self.width = self._default_width
 
         self.height = height
-            
+
         self.marker = marker
-        
+
         if position is not None:
             self._position = position
-        
-        
-        super().__init__(position=self._position,**kwargs)
-        
+
+        super().__init__(position=self._position, **kwargs)
+
         if self.verbatim is not None:
             self.append(self.verbatim)
-            
+
         if self.caption is not None:
             self.add_caption(NoEscape(self.caption))
 
         self.marker = marker
+
+
 #         if self.marker is not None:
 #             self.append(Label(self.marker))
 #         else:
 #             auto_mrk = AutoMarker(self).marker
 #             marker = auto_mrk
-            
+
 #             self.marker = marker
-            
+
 #             self.append(Label(marker))
-    
+
 
 class BeamerTemplate(Document):
 
-    latex_name = 'document'
+    latex_name = "document"
     packages = [
-                  Package('microtype'),
-                  Package('polski',options=['MeX']),
-                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('listings'),
-                  #Package('titlesec'),
-                  Package('fancyhdr'),
-                  Command('pagestyle', arguments=['fancy']),
-                  Command('fancyhf', arguments=['']),
-                  #Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
-                  #Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
-                  #Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
-                  #Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']), 
-                  Command('usetheme', arguments=['Madrid']),
+        Package("microtype"),
+        Package("polski", options=["MeX"]),
+        # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+        Package("listings"),
+        # Package('titlesec'),
+        Package("fancyhdr"),
+        Command("pagestyle", arguments=["fancy"]),
+        Command("fancyhf", arguments=[""]),
+        # Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
+        # Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
+        # Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
+        # Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
+        Command("usetheme", arguments=["Madrid"]),
+    ]
 
-            ]
-    
-    
-    def __init__(self,
-                 default_filepath='default_filepath',
-                 *,
-                 title=None,
-                 documentclass='beamer',
-                 document_options=None,
-                 fontenc='T1',
-                 inputenc='utf8',
-                 font_size='normalsize',
-                 lmodern=False,
-                 textcomp=True,
-                 microtype=True,
-                 page_numbers=True,
-                 indent=None,
-                 geometry_options=None,
-                 data=None):
+    def __init__(
+        self,
+        default_filepath="default_filepath",
+        *,
+        title=None,
+        documentclass="beamer",
+        document_options=None,
+        fontenc="T1",
+        inputenc="utf8",
+        font_size="normalsize",
+        lmodern=False,
+        textcomp=True,
+        microtype=True,
+        page_numbers=True,
+        indent=None,
+        geometry_options=None,
+        data=None,
+    ):
 
         super().__init__(
             default_filepath=default_filepath,
@@ -988,17 +1048,16 @@ class BeamerTemplate(Document):
             page_numbers=page_numbers,
             indent=indent,
             geometry_options=geometry_options,
-            data=data, 
-            )
+            data=data,
+        )
         self.title = title
-        
+
         if self.title is not None:
-            self.packages.append(Command('title', arguments=[self.title]))
-        self.append(Command('frame', arguments=[NoEscape(r'\titlepage')]))
+            self.packages.append(Command("title", arguments=[self.title]))
+        self.append(Command("frame", arguments=[NoEscape(r"\titlepage")]))
 
-class Frame(Environment,ReportModule):
 
-    
+class Frame(Environment, ReportModule):
     r"""A base class for LaTeX environments.
     This class implements the basics of a LaTeX environment. A LaTeX
     environment looks like this:
@@ -1017,8 +1076,9 @@ class Frame(Environment,ReportModule):
     #: string if it has no content.
     omit_if_empty = False
 
-    def __init__(self, title=None, options=None, arguments=None, start_arguments=None,
-                 **kwargs):
+    def __init__(
+        self, title=None, options=None, arguments=None, start_arguments=None, **kwargs
+    ):
         r"""
         Args
         ----
@@ -1035,24 +1095,22 @@ class Frame(Environment,ReportModule):
         self.arguments = arguments
         self.start_arguments = start_arguments
 
-        
-        
-        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
-        
+        super().__init__(
+            options=options,
+            arguments=arguments,
+            start_arguments=start_arguments,
+            **kwargs,
+        )
+
         if self.title is not None:
-            self.append(
-                Command('frametitle', arguments=[self.title])
-                )
+            self.append(Command("frametitle", arguments=[self.title]))
 
 
-    
-    
-class TitlePage(Environment,ReportModule):
+class TitlePage(Environment, ReportModule):
     pass
 
-class Frame(Environment,ReportModule):
 
-    
+class Frame(Environment, ReportModule):
     r"""A base class for LaTeX environments.
     This class implements the basics of a LaTeX environment. A LaTeX
     environment looks like this:
@@ -1071,8 +1129,9 @@ class Frame(Environment,ReportModule):
     #: string if it has no content.
     omit_if_empty = False
 
-    def __init__(self, title=None, options=None, arguments=None, start_arguments=None,
-                 **kwargs):
+    def __init__(
+        self, title=None, options=None, arguments=None, start_arguments=None, **kwargs
+    ):
         r"""
         Args
         ----
@@ -1089,18 +1148,18 @@ class Frame(Environment,ReportModule):
         self.arguments = arguments
         self.start_arguments = start_arguments
 
-        
-        
-        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
-        
+        super().__init__(
+            options=options,
+            arguments=arguments,
+            start_arguments=start_arguments,
+            **kwargs,
+        )
+
         if self.title is not None:
-            self.append(
-                Command('frametitle', arguments=[self.title])
-                )
+            self.append(Command("frametitle", arguments=[self.title]))
 
-class CodeFrame(Environment,ReportModule):
 
-    
+class CodeFrame(Environment, ReportModule):
     r"""A base class for LaTeX environments.
     This class implements the basics of a LaTeX environment. A LaTeX
     environment looks like this:
@@ -1119,7 +1178,9 @@ class CodeFrame(Environment,ReportModule):
     #: string if it has no content.
     omit_if_empty = False
 
-    def __init__(self, title=None, options=None, arguments=None, start_arguments=None, **kwargs):
+    def __init__(
+        self, title=None, options=None, arguments=None, start_arguments=None, **kwargs
+    ):
         r"""
         Args
         ----
@@ -1131,32 +1192,34 @@ class CodeFrame(Environment,ReportModule):
             Arguments to be added before the options
         """
 
-        _latex_name = 'frame'
+        _latex_name = "frame"
 
         self.title = title
         self.options = options
         self.arguments = arguments
         self.start_arguments = start_arguments
         self._latex_name = _latex_name
-        
+
         if options is not None:
-            options = ['containsverbatim'] + options
-        
-        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
+            options = ["containsverbatim"] + options
 
-    
+        super().__init__(
+            options=options,
+            arguments=arguments,
+            start_arguments=start_arguments,
+            **kwargs,
+        )
+
         if self.title is not None:
-            self.append(
-                Command('frametitle', arguments=[self.title])
-                )
+            self.append(Command("frametitle", arguments=[self.title]))
 
-class Markdown(Environment,ReportModule):
+
+class Markdown(Environment, ReportModule):
     packages = [
-        #Package('markdown'),
-        #Package('hyperref'),
-        ]
+        # Package('markdown'),
+        # Package('hyperref'),
+    ]
 
-    
     r"""A base class for LaTeX environments.
     This class implements the basics of a LaTeX environment. A LaTeX
     environment looks like this:
@@ -1175,8 +1238,14 @@ class Markdown(Environment,ReportModule):
     #: string if it has no content.
     omit_if_empty = False
 
-    def __init__(self, markdown=None, options=None, arguments=None, start_arguments=None,
-                 **kwargs):
+    def __init__(
+        self,
+        markdown=None,
+        options=None,
+        arguments=None,
+        start_arguments=None,
+        **kwargs,
+    ):
         r"""
         Args
         ----
@@ -1193,20 +1262,21 @@ class Markdown(Environment,ReportModule):
         self.arguments = arguments
         self.start_arguments = start_arguments
 
-        
-        
-        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
-        
-        if self.markdown is not None:
-            self.append(
+        super().__init__(
+            options=options,
+            arguments=arguments,
+            start_arguments=start_arguments,
+            **kwargs,
+        )
 
-                NoEscape(markdown)
-                )
+        if self.markdown is not None:
+            self.append(NoEscape(markdown))
 
     def dumps(self):
 
         import pypandoc as ppd
-        return NoEscape(ppd.convert_text(self.markdown,to='latex',format='md'))
+
+        return NoEscape(ppd.convert_text(self.markdown, to="latex", format="md"))
 
     def _repr_markdown_(self):
         return self.reported().markdown
@@ -1214,55 +1284,63 @@ class Markdown(Environment,ReportModule):
     def reported(self):
 
         import pypandoc as ppd
-        latex_code=ppd.convert_text(self.markdown,to='latex',format='md')
 
-        if '\\begin{verbatim}' in latex_code:
-            
+        latex_code = ppd.convert_text(self.markdown, to="latex", format="md")
+
+        if "\\begin{verbatim}" in latex_code:
+
             env_name = ObjectCode._latex_name
-            
-            latex_code=latex_code.replace('\\begin{verbatim}',f'\\begin{{{env_name}}} \n').replace('\\end{verbatim}',f'\n \\end{{{env_name}}}')
+
+            latex_code = latex_code.replace(
+                "\\begin{verbatim}", f"\\begin{{{env_name}}} \n"
+            ).replace("\\end{verbatim}", f"\n \\end{{{env_name}}}")
 
             latex_code = fix_code(latex_code)
 
-            self.cls_container.packages |= (ObjectCode.packages)
-        
-        self.cls_container.packages |= (self.packages)
-        
-        
-        self.cls_container.append(NoEscape(  latex_code  ))
-        
+            self.cls_container.packages |= ObjectCode.packages
+
+        self.cls_container.packages |= self.packages
+
+        self.cls_container.append(NoEscape(latex_code))
+
         return copy.copy(self)
-    
+
     def call_code(self):
-        #Declaration of command vector used in call_code method
+        # Declaration of command vector used in call_code method
         self.command_vector = []
-        
-        if self.markdown != None: self.command_vector.append("markdown = {}".format(self.markdown))
-        if self.options != None: self.command_vector.append("options = {}".format(self.options))
-        if self.arguments != None: self.command_vector.append("arguments = {}".format(self.arguments))
-        if self.start_arguments != None: self.command_vector.append("start_arguments = {}".format(self.start_arguments))
-        
-        vector = 'Markdown('
-        
+
+        if self.markdown != None:
+            self.command_vector.append("markdown = {}".format(self.markdown))
+        if self.options != None:
+            self.command_vector.append("options = {}".format(self.options))
+        if self.arguments != None:
+            self.command_vector.append("arguments = {}".format(self.arguments))
+        if self.start_arguments != None:
+            self.command_vector.append(
+                "start_arguments = {}".format(self.start_arguments)
+            )
+
+        vector = "Markdown("
+
         for element in self.command_vector:
-            vector += str(element) + ', '
-        
-        print(vector[:-2] + ')')
-        
+            vector += str(element) + ", "
+
+        print(vector[:-2] + ")")
+
     @classmethod
     def set_mdpi(cls):
         cls.packages = [
-#                 Package('markdown'),
-                ]
-        
-    
-class Block(Environment,ReportModule):
-    
-    packages = [
-                  Package('markdown'),
+            #                 Package('markdown'),
         ]
+
+
+class Block(Environment, ReportModule):
+
+    packages = [
+        Package("markdown"),
+    ]
     content_separator = "\n"
-    
+
     r"""A base class for LaTeX environments.
     This class implements the basics of a LaTeX environment. A LaTeX
     environment looks like this:
@@ -1281,8 +1359,15 @@ class Block(Environment,ReportModule):
     #: string if it has no content.
     omit_if_empty = False
 
-    def __init__(self,header=None, data=None, options=None, arguments=None, start_arguments=None,
-                 **kwargs):
+    def __init__(
+        self,
+        header=None,
+        data=None,
+        options=None,
+        arguments=None,
+        start_arguments=None,
+        **kwargs,
+    ):
         r"""
         Args
         ----
@@ -1294,7 +1379,6 @@ class Block(Environment,ReportModule):
             The data to place inside the preamble command
         """
 
-
         self.data = data
         self.options = options
         self.arguments = arguments
@@ -1304,157 +1388,161 @@ class Block(Environment,ReportModule):
             header_list = [self.header]
         else:
             header_list = self.header
-            
-            
-            
-        
-        super().__init__(options=options, arguments=header_list, start_arguments=start_arguments,**kwargs)
-        
-        if self.data is not None:
-            self.append(
 
-                data
-                )
-            
+        super().__init__(
+            options=options,
+            arguments=header_list,
+            start_arguments=start_arguments,
+            **kwargs,
+        )
+
+        if self.data is not None:
+            self.append(data)
+
     def _repr_markdown_(self):
-        
+
         self.cls_container.append(self)
-        
+
         return self.dumps()
 
     def reported(self):
-        
-        
-        #latex_code=ppd.convert_text(self.markdown,to='latex',format='md')
-        
+
+        # latex_code=ppd.convert_text(self.markdown,to='latex',format='md')
+
         self.cls_container.append(self)
-        
-        return copy.deepcopy(self)            
+
+        return copy.deepcopy(self)
+
 
 class AlertBlock(Block):
     pass
+
 
 class ExampleBlock(Block):
     pass
 
 
-    
 class Picture(Figure, ReportModule):
     """
-        A class that represents a figure environment in a LaTeX document.
+    A class that represents a figure environment in a LaTeX document.
 
-        This class is used to insert and customize an image into the document, with options for caption, size, and position.
+    This class is used to insert and customize an image into the document, with options for caption, size, and position.
 
-        Attributes:
-            separate_paragraph (bool): Whether the float is positioned in a separate paragraph.
-            _default_width (str): Default width of the image.
-            packages (List[Union[Package, Command]]): Required LaTeX packages and commands for the Picture class.
-            _position (str): Default position for the floating environment.
-            _preview_default_size (str): Default size for previewing the image.
+    Attributes:
+        separate_paragraph (bool): Whether the float is positioned in a separate paragraph.
+        _default_width (str): Default width of the image.
+        packages (List[Union[Package, Command]]): Required LaTeX packages and commands for the Picture class.
+        _position (str): Default position for the floating environment.
+        _preview_default_size (str): Default size for previewing the image.
 
-        Exemplary Usage:
-            >>> Picture('./assets/exemplary-image.png', caption='Exemplary caption.')
+    Exemplary Usage:
+        >>> Picture('./assets/exemplary-image.png', caption='Exemplary caption.')
 
-        Costomised exemplary usage:
-            >>> Picture(
-            >>>     image='./assets/exemplary-image.png',
-            >>>     caption='Exemplary caption.',
-            >>>     position='h',
-            >>>     width='0.5\\textwidth',
-            >>>     height='10cm',
-            >>>     marker='fig:example'
-            >>> )
+    Costomised exemplary usage:
+        >>> Picture(
+        >>>     image='./assets/exemplary-image.png',
+        >>>     caption='Exemplary caption.',
+        >>>     position='h',
+        >>>     width='0.5\\textwidth',
+        >>>     height='10cm',
+        >>>     marker='fig:example'
+        >>> )
     """
 
     separate_paragraph = True
-    _default_width = NoEscape('0.8\\textwidth')
-    packages=[Package('float'),
-              Package('graphicx'),
-             Command('graphicspath{{../}}'),]
-    
-    _position = 'H'
+    _default_width = NoEscape("0.8\\textwidth")
+    packages = [
+        Package("float"),
+        Package("graphicx"),
+        Command("graphicspath{{../}}"),
+    ]
+
+    _position = "H"
     _preview_default_size = "20cm"
-    
-    
+
     @classmethod
     def _settle_dynpy(cls):
         from ..dynamics import LagrangesDynamicSystem
- 
+
         if os.path.exists("./dynpy"):
-            
+
             return False
-        
+
         elif not os.path.exists("./._dynpy_env/dynpy"):
             LagrangesDynamicSystem._settle_dynpy()
             return True
         else:
             return False
-        
-#     @classmethod
-#     def _as_picture(cls, position=None, caption=None,width=None,height=None,marker=None, **kwargs):
-        
-        
-#         pic_path = "./._dynpy_env" + cls._default_folder_path[1:] + cls.scheme_name
-#         cls._settle_dynpy()
-#         return Picture(pic_path, position=position, caption=caption, width=width, height=height, marker=marker, **kwargs)
-    
+
+    #     @classmethod
+    #     def _as_picture(cls, position=None, caption=None,width=None,height=None,marker=None, **kwargs):
+
+    #         pic_path = "./._dynpy_env" + cls._default_folder_path[1:] + cls.scheme_name
+    #         cls._settle_dynpy()
+    #         return Picture(pic_path, position=position, caption=caption, width=width, height=height, marker=marker, **kwargs)
+
     @classmethod
     def set_default_position(cls, position: str = "") -> None:
         cls._position = position
-    
+
     @classmethod
-    def set_preview_default_size(cls, size: str) -> 'Picture':
+    def set_preview_default_size(cls, size: str) -> "Picture":
         cls._preview_default_size = size
         return cls
 
-    _latex_name = 'figure'
-        
-        
-    def __init__(self, image=None, position=None, caption=None,width=None,height=None,marker=None, **kwargs):
-        """
-            Initialize the Picture class.
+    _latex_name = "figure"
 
-            Args:
-                image (Optional[str]): Path to the image file.
-                position (Optional[str]): LaTeX position specifier for the figure.
-                caption (Optional[str]): Caption for the image.
-                width (Optional[str]): Width of the image (e.g., '0.5\\textwidth').
-                height (Optional[str]): Height of the image.
-                marker (Optional[str]): Marker for referencing the figure in LaTeX.
-
-            References:
-                https://www.sharelatex.com/learn/Positioning_of_Figures
+    def __init__(
+        self,
+        image=None,
+        position=None,
+        caption=None,
+        width=None,
+        height=None,
+        marker=None,
+        **kwargs,
+    ):
         """
-    
+        Initialize the Picture class.
+
+        Args:
+            image (Optional[str]): Path to the image file.
+            position (Optional[str]): LaTeX position specifier for the figure.
+            caption (Optional[str]): Caption for the image.
+            width (Optional[str]): Width of the image (e.g., '0.5\\textwidth').
+            height (Optional[str]): Height of the image.
+            marker (Optional[str]): Marker for referencing the figure in LaTeX.
+
+        References:
+            https://www.sharelatex.com/learn/Positioning_of_Figures
+        """
+
         self.image = image
         self.caption = caption
         self.preview_size = None
-        
 
-        
         if width is not None:
             self.width = width
         else:
             self.width = self._default_width
 
         self.height = height
-            
+
         self.marker = marker
-        
+
         if position is not None:
             self._position = position
-        
-        
-        super().__init__(position=self._position,**kwargs)
-        
+
+        super().__init__(position=self._position, **kwargs)
+
         if self.image is not None:
             if not os.path.exists("./dynpy") and "./dynpy/" in self.image:
 
                 type(self)._settle_dynpy()
-                self.image = self.image.replace("./dynpy","./._dynpy_env/dynpy")
-                
-            self.add_image(NoEscape(self.image),width=self.width)
-            
+                self.image = self.image.replace("./dynpy", "./._dynpy_env/dynpy")
+
+            self.add_image(NoEscape(self.image), width=self.width)
+
         if self.caption is not None:
             self.add_caption(NoEscape(self.caption))
 
@@ -1463,194 +1551,205 @@ class Picture(Figure, ReportModule):
         else:
             auto_mrk = AutoMarker(self).marker
             marker = auto_mrk
-            
+
             self.marker = marker
-            
+
             self.append(Label(marker))
-            
 
     @property
     def preview_size(self):
         if self._preview_size is not None:
-            
+
             return self._preview_size
         else:
             return self.__class__._preview_default_size
 
     @preview_size.setter
     def preview_size(self, size):
-        if isinstance(size,float) or isinstance(size,int):
-            size = NoEscape(f'{size}cm')
-        if isinstance(size,str):
+        if isinstance(size, float) or isinstance(size, int):
+            size = NoEscape(f"{size}cm")
+        if isinstance(size, str):
             size = NoEscape(size)
 
-        self._preview_size=size
-
-
-
+        self._preview_size = size
 
     def _get_str_key(self) -> str:
         """
-           Generate a string key for the image based on its attributes.
+        Generate a string key for the image based on its attributes.
 
-           Returns:
-               str: A string representation of the image key.
-       """
+        Returns:
+            str: A string representation of the image key.
+        """
 
-        return self.image + '_caption:'+str(self.caption    )
+        return self.image + "_caption:" + str(self.caption)
 
     def __repr__(self) -> str:
         """
-            Represent the Picture object as a string.
+        Represent the Picture object as a string.
 
-            Returns:
-                str: A string representation of the Picture object.
+        Returns:
+            str: A string representation of the Picture object.
         """
 
         if self.image is not None:
-            path = (self.image)
+            path = self.image
         else:
-            path = 'nothing to preview :('
-        
-        repr_string=f'''
+            path = "nothing to preview :("
+
+        repr_string = f"""
         \n++++++++++ IMAGE +++++++
         \n++                    ++
         \n++  path:{path}       ++
         \n++                    ++
         \n++++++++++ IMAGE +++++++
         
-        '''
-        
+        """
+
         return repr_string
 
     def _repr_markdown_(self) -> str:
         """
-            Generate a Markdown representation of the Picture object.
+        Generate a Markdown representation of the Picture object.
 
-            Returns:
-                str: A Markdown representation for preview.
+        Returns:
+            str: A Markdown representation for preview.
         """
-        
-        self.cls_container.append(self)
-        
 
+        self.cls_container.append(self)
 
         if self.caption is None:
-            caption = ''
+            caption = ""
         else:
             caption = self.caption
-        
+
         if self.image is not None:
-            path = (self.image)
+            path = self.image
 
-                
-            
-            if 'pdf' in path:
-                from wand.image import Image as WImage            
+            if "pdf" in path:
+                from wand.image import Image as WImage
 
+                img = WImage(filename=path, resolution=144)
 
-                img = WImage(filename=path,resolution=144)
-                
-                hsize,vsize = img.size
-                
-                img.resize(hsize,vsize)
+                hsize, vsize = img.size
+
+                img.resize(hsize, vsize)
                 display(img)
-                display(f'Fig. X: {caption}')
-                return ''
+                display(f"Fig. X: {caption}")
+                return ""
             else:
                 size = self.preview_size
                 return f'<img src="{path}" alt="{caption}" style="width: 700px;" width="{size}"/>    \n \n Fig. X: {caption}'
-                #return f'![image preview]({path}) \n \n Fig. X: {caption}'
+                # return f'![image preview]({path}) \n \n Fig. X: {caption}'
         else:
-            return f'Nothing to plot \n \n Fig. X: {caption}'
-        
+            return f"Nothing to plot \n \n Fig. X: {caption}"
 
-    
     def reported(self):
         self.cls_container.append(self)
-        
-        return copy.deepcopy(self)
-    
-    def call_code(self):
-        
-        #Declaration of command vector used in call_code method
-        self.command_vector = []
-        
-        if self.image != None: self.command_vector.append("image = \"{}\"".format(self.image))
-        if self._position != None: self.command_vector.append("position = \"{}\"".format(self._position))
-        if self.caption != None: self.command_vector.append("caption = \"{}\"".format(self.caption))
-        if self.width != None:  self.command_vector.append('width = NoEscape(r"{}")'.format(self.width))
-        if self.height != None: self.command_vector.append("height = {}".format(self.height))
-        if self.marker != None: self.command_vector.append("marker = \"{}\"".format(self.marker))
-        
-        vector = 'Picture('
-        
-        for element in self.command_vector:
-            vector += str(element) + ', '
-        
-        print(vector[:-2] + ')')
-    
-class StarredPicture(Picture):
-    _latex_name='figure*'
 
-    
-    
+        return copy.deepcopy(self)
+
+    def call_code(self):
+
+        # Declaration of command vector used in call_code method
+        self.command_vector = []
+
+        if self.image != None:
+            self.command_vector.append('image = "{}"'.format(self.image))
+        if self._position != None:
+            self.command_vector.append('position = "{}"'.format(self._position))
+        if self.caption != None:
+            self.command_vector.append('caption = "{}"'.format(self.caption))
+        if self.width != None:
+            self.command_vector.append('width = NoEscape(r"{}")'.format(self.width))
+        if self.height != None:
+            self.command_vector.append("height = {}".format(self.height))
+        if self.marker != None:
+            self.command_vector.append('marker = "{}"'.format(self.marker))
+
+        vector = "Picture("
+
+        for element in self.command_vector:
+            vector += str(element) + ", "
+
+        print(vector[:-2] + ")")
+
+
+class StarredPicture(Picture):
+    _latex_name = "figure*"
+
+
 class TikZFigure(Picture):
     """
-        A class that represents a figure environment in a TikZPoster document.
+    A class that represents a figure environment in a TikZPoster document.
 
-        This class is used to insert and customize an image into the document, with options for caption, size, and position.
+    This class is used to insert and customize an image into the document, with options for caption, size, and position.
 
-        Attributes:
-            separate_paragraph (bool): Whether the float is positioned in a separate paragraph.
-            _default_width (str): Default width of the image.
-            packages (List[Union[Package, Command]]): Required LaTeX packages and commands for the Picture class.
-            _position (str): Default position for the floating environment.
-            _preview_default_size (str): Default size for previewing the image.
+    Attributes:
+        separate_paragraph (bool): Whether the float is positioned in a separate paragraph.
+        _default_width (str): Default width of the image.
+        packages (List[Union[Package, Command]]): Required LaTeX packages and commands for the Picture class.
+        _position (str): Default position for the floating environment.
+        _preview_default_size (str): Default size for previewing the image.
 
-        Exemplary Usage:
-            >>> TikZFigure('./assets/exemplary-image.png', caption='Exemplary caption.')
+    Exemplary Usage:
+        >>> TikZFigure('./assets/exemplary-image.png', caption='Exemplary caption.')
 
-        Costomised exemplary usage:
-            >>> TikZFigure(
-            >>>     image='./assets/exemplary-image.png',
-            >>>     caption='Exemplary caption.',
-            >>>     position='h',
-            >>>     width='0.5\\textwidth',
-            >>>     height='10cm',
-            >>>     marker='fig:example'
-            >>> )
+    Costomised exemplary usage:
+        >>> TikZFigure(
+        >>>     image='./assets/exemplary-image.png',
+        >>>     caption='Exemplary caption.',
+        >>>     position='h',
+        >>>     width='0.5\\textwidth',
+        >>>     height='10cm',
+        >>>     marker='fig:example'
+        >>> )
     """
 
-    _latex_name='tikzfigure'
+    _latex_name = "tikzfigure"
 
-    def __init__(self, image=None, position=None, caption=None,width=None,height=None,marker=None, **kwargs):
+    def __init__(
+        self,
+        image=None,
+        position=None,
+        caption=None,
+        width=None,
+        height=None,
+        marker=None,
+        **kwargs,
+    ):
         """
-            Initialize the Picture class.
+        Initialize the Picture class.
 
-            Args:
-                image (Optional[str]): Path to the image file.
-                position (Optional[str]): LaTeX position specifier for the figure.
-                caption (Optional[str]): Caption for the image.
-                width (Optional[str]): Width of the image (e.g., '0.5\\textwidth').
-                height (Optional[str]): Height of the image.
-                marker (Optional[str]): Marker for referencing the figure in LaTeX.
+        Args:
+            image (Optional[str]): Path to the image file.
+            position (Optional[str]): LaTeX position specifier for the figure.
+            caption (Optional[str]): Caption for the image.
+            width (Optional[str]): Width of the image (e.g., '0.5\\textwidth').
+            height (Optional[str]): Height of the image.
+            marker (Optional[str]): Marker for referencing the figure in LaTeX.
 
-            References:
-                https://www.sharelatex.com/learn/Positioning_of_Figures
+        References:
+            https://www.sharelatex.com/learn/Positioning_of_Figures
         """
-    
-        super().__init__(image=image, position=caption, caption=None,width=width,height=height,marker=marker, **kwargs)
-    
-class ObjectCode(LstListing,ReportModule):
-    _latex_name='lstlisting'
+
+        super().__init__(
+            image=image,
+            position=caption,
+            caption=None,
+            width=width,
+            height=height,
+            marker=marker,
+            **kwargs,
+        )
+
+
+class ObjectCode(LstListing, ReportModule):
+    _latex_name = "lstlisting"
     default_title = "Listing"
-    
-    _default_header = None
-    _style = 'dynPyStyle'
-    
 
-    
+    _default_header = None
+    _style = "dynPyStyle"
+
     r"""A base class for LaTeX environments.
     This class implements the basics of a LaTeX environment. A LaTeX
     environment looks like this:
@@ -1669,7 +1768,16 @@ class ObjectCode(LstListing,ReportModule):
     #: string if it has no content.
     omit_if_empty = False
 
-    def __init__(self, source=None, caption=None, style=None, options=None, arguments=None, start_arguments=None,**kwargs):
+    def __init__(
+        self,
+        source=None,
+        caption=None,
+        style=None,
+        options=None,
+        arguments=None,
+        start_arguments=None,
+        **kwargs,
+    ):
         r"""
         Args
         ----
@@ -1683,159 +1791,168 @@ class ObjectCode(LstListing,ReportModule):
 
         self.source = source
 
-        
-        if style is not None: self._style = style
+        if style is not None:
+            self._style = style
         self.arguments = arguments
         self.start_arguments = start_arguments
         self._caption = caption
-        
+
         if self._caption is not None:
-            caption_str = f'{{{ self._caption }}}'
-            options_c = [NoEscape(f'caption={caption_str}') ]
+            caption_str = f"{{{ self._caption }}}"
+            options_c = [NoEscape(f"caption={caption_str}")]
         else:
             options_c = []
 
         if self._style is not None:
-            options_s = [NoEscape(f'style={self._style}') ]
+            options_s = [NoEscape(f"style={self._style}")]
         else:
-            options_s = []        
-        
-        options_added=options_c + options_s
-        
+            options_s = []
+
+        options_added = options_c + options_s
+
         if len(options_added) != 0:
             if options is not None:
                 options = options + options_added
             else:
                 options = options_added
 
-        self.options = options            
-        
-        super().__init__(options=options, arguments=None, start_arguments=None,**kwargs)
-        
+        self.options = options
+
+        super().__init__(
+            options=options, arguments=None, start_arguments=None, **kwargs
+        )
+
         self.code_type
 
-
-    
     def __repr__(self):
 
-        #self.reported()
-        
-        code=self.code_type
-        
-        repr_string= f'\n CODE\n {code} \n CODE'
-        
+        # self.reported()
+
+        code = self.code_type
+
+        repr_string = f"\n CODE\n {code} \n CODE"
+
         return repr_string
-    
-    
+
     @property
     def code_type(self):
-        
-        if self.source is None:
-            code = 'nothing to print :('
-        
-        elif type(self.source)==str:
-            code=self.source
-            #self.append(NoEscape('   \n   '+code+'   \n   '))
-            
-        else:
-            
-            code=(inspect.getsource(self.source))
-            #self.append(NoEscape('   \n   '+code+'   \n   '))
 
-            
-            
+        if self.source is None:
+            code = "nothing to print :("
+
+        elif type(self.source) == str:
+            code = self.source
+            # self.append(NoEscape('   \n   '+code+'   \n   '))
+
+        else:
+
+            code = inspect.getsource(self.source)
+            # self.append(NoEscape('   \n   '+code+'   \n   '))
+
         if self._default_header is not None:
-            
-            return   fix_code(self._default_header + '\n' + code)
+
+            return fix_code(self._default_header + "\n" + code)
         else:
             return fix_code(code)
-    
+
     def reported(self):
-        
+
         code = self.code_type
-        
-        
-        self.append(NoEscape('   \n   '+code+'   \n   '))
-        
+
+        self.append(NoEscape("   \n   " + code + "   \n   "))
+
         lst_env = Aspect(self.default_title)
-        
-        #lst_env.append(self)
-        lst_env=self
+
+        # lst_env.append(self)
+        lst_env = self
         self.cls_container.append(lst_env)
-        
+
         return copy.copy(self)
-    
+
     def _repr_markdown_(self):
 
         self.reported()
-        #print(self.code_type)
-        
-        return '```python \n'+self.code_type + '\n``` '
+        # print(self.code_type)
+
+        return "```python \n" + self.code_type + "\n``` "
 
     def _as_string(self):
 
         return self.code_type
-        
-    def call_code(self):     
-        #Declaration of command vector used in call_code method
+
+    def call_code(self):
+        # Declaration of command vector used in call_code method
         self.command_vector = []
-        
-        if self.source != None: self.command_vector.append("source = {}".format(self.source))
-        if self.options != None: self.command_vector.append("options = {}".format(self.options))
-        if self.arguments != None: self.command_vector.append("start_arguments = {}".format(self.start_arguments))
-        if self.start_arguments != None: self.command_vector.append("width = {}".format(self.width))
-        if self._caption != None: self.command_vector.append("caption = {}".format(self._caption))
-        
-        vector = 'ObjectCode('
-        
+
+        if self.source != None:
+            self.command_vector.append("source = {}".format(self.source))
+        if self.options != None:
+            self.command_vector.append("options = {}".format(self.options))
+        if self.arguments != None:
+            self.command_vector.append(
+                "start_arguments = {}".format(self.start_arguments)
+            )
+        if self.start_arguments != None:
+            self.command_vector.append("width = {}".format(self.width))
+        if self._caption != None:
+            self.command_vector.append("caption = {}".format(self._caption))
+
+        vector = "ObjectCode("
+
         for element in self.command_vector:
-            vector += str(element) + ', '
-        
-        print(vector[:-2] + ')')
-    
+            vector += str(element) + ", "
+
+        print(vector[:-2] + ")")
+
+
 guide_code_header = """
 #!!! REMEMBER TO PASTE AND RUN ALL PREVIOUS CELL
 #!!! REMEMBER TO PASTE AND RUN ALL PREVIOUS CELL
 """
-    
-    
+
+
 class GuideCode(ObjectCode):
-    
+
     _default_header = guide_code_header
-    
+
+
 class AiInterfaceOutput(ObjectCode):
-    
 
-    
-    packages=[
-              #Command('lstset', arguments = [NoEscape('style=nonumbers,language=Python')]),
-              Command(NoEscape(r'lstdefinestyle{nonumbers}{numbers=none, breakatwhitespace=false, breaklines=true,captionpos=b, keepspaces=true, numbersep=5pt, showspaces=false,showstringspaces=false,showtabs=false,tabsize=2, basicstyle=\ttfamily\small}')),
-              #Command('lstset', arguments = [NoEscape('style=nonumbers')]),
-             ]
-
-    _style = 'nonumbers'
-    
-class TikZPicture(Environment,ReportModule):
-    
-    _latex_name = 'tikzpicture'
-    
     packages = [
-        Package('tikz'),
-        Package('polski',options=['MeX']),
-        Package('fontenc',options=['T1']),
-#         Package('babel',options=['polish']),
-        Package('amssymb'),
-        Package('rotating'),
-        NoEscape(r'\usetikzlibrary{snakes,calc,positioning,patterns,angles,quotes,decorations.pathmorphing,decorations.markings,through}'),
-        NoEscape(r'\usetikzlibrary{arrows,decorations,decorations.text}'),
-        NoEscape(r'\usetikzlibrary{patterns.meta,math}'),
-        NoEscape(r'\usetikzlibrary{shapes.geometric}'),
-        NoEscape(r'\usepackage{circuitikz}'),
-#         Package('fontenc')
-        #Package('hyperref'),
-        ]
-    
-    
+        # Command('lstset', arguments = [NoEscape('style=nonumbers,language=Python')]),
+        Command(
+            NoEscape(
+                r"lstdefinestyle{nonumbers}{numbers=none, breakatwhitespace=false, breaklines=true,captionpos=b, keepspaces=true, numbersep=5pt, showspaces=false,showstringspaces=false,showtabs=false,tabsize=2, basicstyle=\ttfamily\small}"
+            )
+        ),
+        # Command('lstset', arguments = [NoEscape('style=nonumbers')]),
+    ]
+
+    _style = "nonumbers"
+
+
+class TikZPicture(Environment, ReportModule):
+
+    _latex_name = "tikzpicture"
+
+    packages = [
+        Package("tikz"),
+        Package("polski", options=["MeX"]),
+        Package("fontenc", options=["T1"]),
+        #         Package('babel',options=['polish']),
+        Package("amssymb"),
+        Package("rotating"),
+        NoEscape(
+            r"\usetikzlibrary{snakes,calc,positioning,patterns,angles,quotes,decorations.pathmorphing,decorations.markings,through}"
+        ),
+        NoEscape(r"\usetikzlibrary{arrows,decorations,decorations.text}"),
+        NoEscape(r"\usetikzlibrary{patterns.meta,math}"),
+        NoEscape(r"\usetikzlibrary{shapes.geometric}"),
+        NoEscape(r"\usepackage{circuitikz}"),
+        #         Package('fontenc')
+        # Package('hyperref'),
+    ]
+
     _height = 5
     _width = 0.9
     _ylim = None
@@ -1846,18 +1963,17 @@ class TikZPicture(Environment,ReportModule):
     _grid = None
 
     _in_figure = False
-    _figure_gen = lambda: Figure(position='H')
-    _image_parameters = {'width': None}
-    
-    _floats_no_gen = plots_no()    
-    _default_path = './tikzplots'
+    _figure_gen = lambda: Figure(position="H")
+    _image_parameters = {"width": None}
+
+    _floats_no_gen = plots_no()
+    _default_path = "./tikzplots"
     _filename = None
     _prefix = None
-    
+
     _picture = True
-    _caption = 'Default caption'
-    
-    
+    _caption = "Default caption"
+
     r"""A base class for LaTeX environments.
     This class implements the basics of a LaTeX environment. A LaTeX
     environment looks like this:
@@ -1876,8 +1992,14 @@ class TikZPicture(Environment,ReportModule):
     #: string if it has no content.
     omit_if_empty = False
 
-    def __init__(self, tikzcode=None, options=None, arguments=None, start_arguments=None,
-                 **kwargs):
+    def __init__(
+        self,
+        tikzcode=None,
+        options=None,
+        arguments=None,
+        start_arguments=None,
+        **kwargs,
+    ):
         r"""
         Args
         ----
@@ -1894,50 +2016,58 @@ class TikZPicture(Environment,ReportModule):
         self.arguments = arguments
         self.start_arguments = start_arguments
 
-        
-        
-        super().__init__(options=options, arguments=arguments, start_arguments=start_arguments,**kwargs)
-        
+        super().__init__(
+            options=options,
+            arguments=arguments,
+            start_arguments=start_arguments,
+            **kwargs,
+        )
+
         self.append(self.tikzcode)
-        
-        
-        
+
     @property
     def tikzcode(self):
-        
+
         if self._tikzcode is None:
             code = self._scheme_desc()
         else:
-            code=self._tikzcode
-        
+            code = self._tikzcode
+
         return NoEscape(code)
 
     def _scheme_desc(self):
-        
-        code="""
+
+        code = """
         Lack of code xD
         """
-        
-        return code
-    
-    def _repr_markdown_(self):
-        
 
-        return '\t'+self.reported().tikzcode.replace('\n','\n \t')
+        return code
+
+    def _repr_markdown_(self):
+
+        return "\t" + self.reported().tikzcode.replace("\n", "\n \t")
 
     def reported(self):
 
-        
         TikZPicture.cls_container.append(self)
-        
+
         return copy.copy(self)
 
-    def in_figure(self,filename=None,position=None, caption=None,width=None,height=None,marker=None, **kwargs):
+    def in_figure(
+        self,
+        filename=None,
+        position=None,
+        caption=None,
+        width=None,
+        height=None,
+        marker=None,
+        **kwargs,
+    ):
 
-        
         from .documents import tikz
+
         ReportCache.update_existing_files(self.__class__._default_path)
-        
+
         obj = copy.copy(self)
         obj._in_figure = True
 
@@ -1949,73 +2079,77 @@ class TikZPicture(Environment,ReportModule):
 
         filename = self.filename
 
-
         fig = self.__class__._figure_gen()
-        fig.packages.append(Package('float'))
-#         display(fig.packages)
-#         fig.packages.remove(Package('fontenc',options=['T1']))
-#         fig.packages.remove(Package('inputenc',options=['utf8']))
-#         fig.packages.remove(Package('lmodern'))
-#         fig.packages.append(Command(NoEscape(r'''\if\ifxetex T\else\ifluatex T\else F\fi\fi T%
-#                                                   \usepackage{fontspec}
-#                                                 \else
-#                                                   \usepackage[T1]{fontenc}
-#                                                   \usepackage[utf8]{inputenc}
-#                                                   \usepackage{lmodern}
-#                                                 \fi''')))
+        fig.packages.append(Package("float"))
+        #         display(fig.packages)
+        #         fig.packages.remove(Package('fontenc',options=['T1']))
+        #         fig.packages.remove(Package('inputenc',options=['utf8']))
+        #         fig.packages.remove(Package('lmodern'))
+        #         fig.packages.append(Command(NoEscape(r'''\if\ifxetex T\else\ifluatex T\else F\fi\fi T%
+        #                                                   \usepackage{fontspec}
+        #                                                 \else
+        #                                                   \usepackage[T1]{fontenc}
+        #                                                   \usepackage[utf8]{inputenc}
+        #                                                   \usepackage{lmodern}
+        #                                                 \fi''')))
 
         img_params = self.__class__._image_parameters
-    
+
         if width is None:
-            width = self.__class__._image_parameters['width']
+            width = self.__class__._image_parameters["width"]
 
         if self._picture:
             from .report import Picture
-            
-            key=standalone_plot.dumps()
-            
+
+            key = standalone_plot.dumps()
+
             if key in ReportCache._file_names:
                 filename = ReportCache._file_names[key]
-            
+
             else:
 
-                standalone_plot.generate_pdf(filename, clean_tex=False)#,compiler_args=['--lualatex']) #ZMIANA
+                standalone_plot.generate_pdf(
+                    filename, clean_tex=False
+                )  # ,compiler_args=['--lualatex']) #ZMIANA
                 ReportCache._file_names[key] = filename
 
-
-            fig = Picture(filename+'.pdf',  caption = caption,width=width,height=height ,marker=marker,**kwargs)
+            fig = Picture(
+                filename + ".pdf",
+                caption=caption,
+                width=width,
+                height=height,
+                marker=marker,
+                **kwargs,
+            )
         else:
             standalone_plot.generate_tex(filename)
 
-            fig.append(Command(command='input', arguments=filename))
-
+            fig.append(Command(command="input", arguments=filename))
 
         return fig
 
-    @property    
+    @property
     def filename(self):
-    
+
         if self._filename is None and self._prefix is None:
-            filename = f'{self.__class__._default_path}/plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
+            filename = f"{self.__class__._default_path}/plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}"
 
         elif self._filename is None and self._prefix is not None:
-            filename = f'{self.__class__._default_path}/{self._prefix}_plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}'
+            filename = f"{self.__class__._default_path}/{self._prefix}_plot{self.__class__.__name__}{next(self.__class__._floats_no_gen)}"
 
         else:
             filename = self._filename
-            
+
         if filename in list(ReportCache._file_names.values()):
             filename = self.filename
 
+        return filename
 
-        return  filename
-    
-    
-    
+
 class SympyFormula(ReportModule):
-    r'''
-    This class appends a sympy expression to the existing document container. 
-    
+    r"""
+    This class appends a sympy expression to the existing document container.
+
     Arguments
     =========
     expr: str
@@ -2027,16 +2161,16 @@ class SympyFormula(ReportModule):
     backend: func
         Type of backend used for processing provided Sympy expressions to LaTeX formula.
     **kwargs
-        
+
     Methods
     =======
 
     Example
     =======
-    '''
+    """
 
     _color = None
-    _break_mode = 'autobreak'
+    _break_mode = "autobreak"
 
     @classmethod
     def set_text_color(cls, color=None):
@@ -2045,14 +2179,9 @@ class SympyFormula(ReportModule):
 
         return cls
 
-    def __init__(self,
-                 expr,
-                 key_dict={},
-                 marker=None,
-                 backend=vlatex,
-                 **kwargs):
+    def __init__(self, expr, key_dict={}, marker=None, backend=vlatex, **kwargs):
 
-        self._text = 'Figures {first_marker}-{last_marker}'
+        self._text = "Figures {first_marker}-{last_marker}"
         self._backend = backend
         self.latex_backend = backend
 
@@ -2063,17 +2192,27 @@ class SympyFormula(ReportModule):
 
         super().__init__(**kwargs)
 
-        if self._break_mode == 'autobreak':
+        if self._break_mode == "autobreak":
             if isinstance(expr, (Matrix, ImmutableMatrix)):
 
                 self._eq = Equation()
                 self._eq.append(NoEscape(self._backend(self._expr)))
 
-            elif isinstance(expr, (Eq, Relational,StrictGreaterThan,LessThan,StrictLessThan,GreaterThan)):
+            elif isinstance(
+                expr,
+                (
+                    Eq,
+                    Relational,
+                    StrictGreaterThan,
+                    LessThan,
+                    StrictLessThan,
+                    GreaterThan,
+                ),
+            ):
 
-                if isinstance(expr.lhs,
-                              (Matrix, ImmutableMatrix)) or isinstance(
-                                  expr.rhs, (Matrix, ImmutableMatrix)):
+                if isinstance(expr.lhs, (Matrix, ImmutableMatrix)) or isinstance(
+                    expr.rhs, (Matrix, ImmutableMatrix)
+                ):
 
                     self._eq = Equation()
                     self._eq.append(NoEscape(self._backend(self._expr)))
@@ -2084,14 +2223,12 @@ class SympyFormula(ReportModule):
                         eq.latex_backend = self.latex_backend
                         eq.append_formula(expr)
 
-
             else:
 
                 self._eq = Align()
                 with self._eq.create(AutoBreak()) as eq:
                     eq.latex_backend = self.latex_backend
                     eq.append_formula(expr)
-                    
 
             if self._marker:
                 marker = self._marker
@@ -2102,7 +2239,7 @@ class SympyFormula(ReportModule):
             self._eq.append(Label(marker))
             self._marker = marker
 
-        elif self._break_mode == 'eq':
+        elif self._break_mode == "eq":
             self._eq = Equation()
             self._eq.append(NoEscape(self._backend(self._expr)))
 
@@ -2111,9 +2248,8 @@ class SympyFormula(ReportModule):
             else:
                 auto_mrk = AutoMarker(self._expr).marker
                 marker = auto_mrk
-                
-            self._eq.append(Label(marker))
 
+            self._eq.append(Label(marker))
 
     @property
     def latex_backend(self):
@@ -2121,7 +2257,7 @@ class SympyFormula(ReportModule):
 
     @latex_backend.setter
     def latex_backend(self, backend):
-        self._latex_backend=backend
+        self._latex_backend = backend
 
     def __call__(self, analysis):
 
@@ -2135,28 +2271,27 @@ class SympyFormula(ReportModule):
 
         return self._backend(self._expr)
 
-#     def __repr__(self):
+    #     def __repr__(self):
 
-#         display(self._expr)
+    #         display(self._expr)
 
-#         return ''
+    #         return ''
 
     def _repr_markdown_(self):
-        #return f'\\begin{{equation}}\n  {self.reported()._backend(self._expr)} \n \\end{{equation}}'
-        return f'$${self.reported()._backend(self._expr)}$$'
-    
+        # return f'\\begin{{equation}}\n  {self.reported()._backend(self._expr)} \n \\end{{equation}}'
+        return f"$${self.reported()._backend(self._expr)}$$"
+
     def reported(self):
-        
-        
+
         if self.__class__._color:
 
             self._container.append(TextColor(self.__class__._color, self._eq))
         else:
             self._container.append(self._eq)
-        
+
         return copy.copy(self)
-        #return self
-    
+        # return self
+
     def _latex(self):
 
         return self._backend(self._expr)
@@ -2164,17 +2299,17 @@ class SympyFormula(ReportModule):
 
 # class PlotTestResult:
 #     r'''
-#     The class creates a plot from data provided by DataStorage and appends it to an existing document container instance. 
-    
+#     The class creates a plot from data provided by DataStorage and appends it to an existing document container instance.
+
 #     Arguments
 #     =========
 #     *args
-    
+
 #     keys_map: dict
 #         Dictionary containing keys for mapping.
 #     **kwargs
-    
-        
+
+
 #     Methods
 #     =======
 
@@ -2221,7 +2356,7 @@ class SympyFormula(ReportModule):
 # class SystemDynamicsAnalyzer(ReportModule):
 #     r'''
 #     This is a computational block that runs a simulations on provided dynamic system. The class has methods responsible for data preparation, system analysis and reporting.
-    
+
 #     Arguments
 #     =========
 #     dynamic_system: Lagrange's method object
@@ -2234,7 +2369,7 @@ class SympyFormula(ReportModule):
 #         List containing objects called after the report_init.
 #     report_end: list
 #         List containing objects called after the report_step.
-        
+
 #     Methods
 #     =======
 
@@ -2358,11 +2493,9 @@ class SympyFormula(ReportModule):
 #         return self._current_result
 
 
-
-
-
 class InlineMath(Math):
     """A class representing a inline math environment."""
+
     def __init__(self, formula, escape=False, backend=vlatex):
         r"""
         Args
@@ -2395,10 +2528,9 @@ class SymbolsList(NoEscape):
             if True, will escape strings
         """
 
-        list_str = f', '.join(
-            [f'\\( {backend(sym)} \\)' for sym in symbols_list])
+        list_str = f", ".join([f"\\( {backend(sym)} \\)" for sym in symbols_list])
 
-        #return super(SymbolsList,cls).__new__(cls,list_str)
+        # return super(SymbolsList,cls).__new__(cls,list_str)
         return list_str
 
 
@@ -2415,13 +2547,13 @@ class NumbersList(NoEscape):
             if True, will escape strings
         """
 
-        list_str = f', '.join([f'\\( {sym} \\)' for sym in numbers_list])
+        list_str = f", ".join([f"\\( {sym} \\)" for sym in numbers_list])
 
         return list_str
 
 
 class DescriptionsRegistry:
-    '''
+    """
     A class representing LaTeX description registry of Symbols.
 
     classmethods:
@@ -2447,11 +2579,11 @@ class DescriptionsRegistry:
     }
 
     DescriptionsRegistry.set_descriptions(symbol_desc)
-    '''
+    """
 
     _descriptions = {}
     _described_elements = {}
-    _description_mode = 'one occurrence'
+    _description_mode = "one occurrence"
 
     @classmethod
     def set_descriptions(cls, description={}):
@@ -2459,60 +2591,56 @@ class DescriptionsRegistry:
         return cls
 
     @classmethod
-    def set_description_mode(cls, description_mode= 'single'):
+    def set_description_mode(cls, description_mode="single"):
         cls._description_mode = description_mode
         return cls
-        
+
     @classmethod
     def reset_registry(cls):
         cls._described_elements = {}
         return cls
 
-    def __init__(self, description_dict=None, method='add'):
-        if description_dict is not None: self._descriptions = description_dict
+    def __init__(self, description_dict=None, method="add"):
+        if description_dict is not None:
+            self._descriptions = description_dict
 
-    def _get_description(self, items,description_mode=None):
+    def _get_description(self, items, description_mode=None):
         symbols_list = self._descriptions.keys()
 
-        missing_symbols_desc = {
-            sym: '???'
-            for sym in items if sym not in symbols_list
-        }
+        missing_symbols_desc = {sym: "???" for sym in items if sym not in symbols_list}
 
         self._descriptions = {**self._descriptions, **missing_symbols_desc}
         self.__class__._descriptions = {
             **self.__class__._descriptions,
-            **missing_symbols_desc
+            **missing_symbols_desc,
         }
 
-        #syms_to_desc={sym for sym in items if sym not in self._described_elements.keys()}
-        if self._description_mode == 'one occurrence' or self._description_mode == 'single':
-            syms_to_desc = {
-                sym: self._descriptions[sym]
-                for sym in items if sym not in self._described_elements.keys()
-            }
-        elif self._description_mode == 'all':
+        # syms_to_desc={sym for sym in items if sym not in self._described_elements.keys()}
+        if (
+            self._description_mode == "one occurrence"
+            or self._description_mode == "single"
+        ):
             syms_to_desc = {
                 sym: self._descriptions[sym]
                 for sym in items
+                if sym not in self._described_elements.keys()
             }
-            
+        elif self._description_mode == "all":
+            syms_to_desc = {sym: self._descriptions[sym] for sym in items}
+
         else:
-            syms_to_desc = {
-                sym: self._descriptions[sym]
-                for sym in items
-            }
+            syms_to_desc = {sym: self._descriptions[sym] for sym in items}
 
         self._described_elements = {**self._described_elements, **syms_to_desc}
         self.__class__._described_elements = {
             **self.__class__._described_elements,
-            **syms_to_desc
+            **syms_to_desc,
         }
 
         return syms_to_desc
 
 
-class SymbolsDescription(Description,ReportModule):
+class SymbolsDescription(Description, ReportModule):
     """A class representing LaTeX description environment of Symbols explained in description_dict.
     Example of usage:
     from sympy import *
@@ -2533,9 +2661,10 @@ class SymbolsDescription(Description,ReportModule):
     display(SympyFormula(eq))
     display(SymbolsDescription(expr=eq))
     """
-    _latex_name = 'description'
+
+    _latex_name = "description"
     cls_container = []
-    _description_head = 'where:'
+    _description_head = "where:"
 
     @classmethod
     def set_container(cls, container=[]):
@@ -2543,23 +2672,27 @@ class SymbolsDescription(Description,ReportModule):
         return cls
 
     @classmethod
-    def set_default_header(cls, header='where:'):
+    def set_default_header(cls, header="where:"):
         cls._description_head = header
         return cls
-    
-    def __init__(self,
-                 description_dict=None,
-                 expr=None,
-                 options=None,
-                 arguments=None,
-                 start_arguments=None,
-                 **kwargs):
+
+    def __init__(
+        self,
+        description_dict=None,
+        expr=None,
+        options=None,
+        arguments=None,
+        start_arguments=None,
+        **kwargs,
+    ):
         self.description_dict = description_dict
         self.expr = expr
-        super().__init__(options=options,
-                         arguments=arguments,
-                         start_arguments=start_arguments,
-                         **kwargs)
+        super().__init__(
+            options=options,
+            arguments=arguments,
+            start_arguments=start_arguments,
+            **kwargs,
+        )
 
         self._added_symbols = self._symbols_to_add_dict()
 
@@ -2572,12 +2705,14 @@ class SymbolsDescription(Description,ReportModule):
 
         if description_dict is not None and expr is not None:
 
-            symbols_set = expr.atoms(
-                Symbol, Function, Derivative) - expr.atoms(sin, cos, tan, exp, Heaviside)
+            symbols_set = expr.atoms(Symbol, Function, Derivative) - expr.atoms(
+                sin, cos, tan, exp, Heaviside
+            )
 
             symbols_to_add = {
                 sym: desc
-                for sym, desc in description_dict.items() if sym in symbols_set
+                for sym, desc in description_dict.items()
+                if sym in symbols_set
             }
 
             return symbols_to_add
@@ -2587,41 +2722,32 @@ class SymbolsDescription(Description,ReportModule):
             symbols_set = set()
             if isinstance(expr, Iterable):
                 for elem in expr:
-                    symbols_set |= elem.atoms(Symbol, Function,
-                                              Derivative) - elem.atoms(
-                                                  sin, cos, tan, exp, atan, sign, Heaviside)
-            #print(symbols_set)
+                    symbols_set |= elem.atoms(
+                        Symbol, Function, Derivative
+                    ) - elem.atoms(sin, cos, tan, exp, atan, sign, Heaviside)
+            # print(symbols_set)
             else:
-                symbols_set |= expr.atoms(Symbol, Function,
-                                          Derivative) - expr.atoms(
-                                              sin, cos, tan, exp, atan, sign, Heaviside)
+                symbols_set |= expr.atoms(Symbol, Function, Derivative) - expr.atoms(
+                    sin, cos, tan, exp, atan, sign, Heaviside
+                )
 
-            description_dict = DescriptionsRegistry()._get_description(
-                symbols_set)
+            description_dict = DescriptionsRegistry()._get_description(symbols_set)
 
-            #print(description_dict)
+            # print(description_dict)
 
-            symbols_to_add = {
-                sym: desc
-                for sym, desc in description_dict.items()
-            }
+            symbols_to_add = {sym: desc for sym, desc in description_dict.items()}
 
             ##print('symbols')
-            #print(symbols_to_add)
+            # print(symbols_to_add)
 
             return symbols_to_add
 
         elif description_dict is not None and expr is None:
 
-
-
-            symbols_to_add = {
-                sym: desc
-                for sym, desc in description_dict.items() 
-            }
+            symbols_to_add = {sym: desc for sym, desc in description_dict.items()}
 
             return symbols_to_add
-        
+
         else:
             return {}
 
@@ -2631,107 +2757,99 @@ class SymbolsDescription(Description,ReportModule):
         else:
             self._container = type(self).cls_container
 
-
-#         self._container.append(self)
+        #         self._container.append(self)
         entries = [
-            f'${vlatex(key)}$ - {value}'
-            for key, value in self._added_symbols.items()
+            f"${vlatex(key)}$ - {value}" for key, value in self._added_symbols.items()
         ]
 
-        #display(entries)
-        #print(entries)
+        # display(entries)
+        # print(entries)
 
-        end_sign = '.'
-        if len(entries) == 0: end_sign = ''
+        end_sign = "."
+        if len(entries) == 0:
+            end_sign = ""
 
         if len(entries) != 0:
 
-            self._container.append(NoEscape(self._description_head) + '\n')
+            self._container.append(NoEscape(self._description_head) + "\n")
             self._container.append(self)
-        #return (self._text)
-        
+        # return (self._text)
 
-            
-        #return copy.copy(self)
+        # return copy.copy(self)
 
     def add_items(self, description_dict):
 
-        end_symbol = '.'
+        end_symbol = "."
 
         if len(description_dict.keys()) > 0:
             last_key = list(description_dict.keys())[-1]
-            end_symbol = ';'
+            end_symbol = ";"
 
         for label, entry in description_dict.items():
 
-            if label == last_key: end_symbol = '.'
+            if label == last_key:
+                end_symbol = "."
 
-#             self.add_item(NoEscape(InlineMath(vlatex(label)).dumps()),
-#                           NoEscape(f'- {vlatex(entry)}{end_symbol}'))
-            self.add_item(NoEscape(InlineMath((label)).dumps()),
-                          NoEscape(f'- {(entry)}{end_symbol}'))
+            #             self.add_item(NoEscape(InlineMath(vlatex(label)).dumps()),
+            #                           NoEscape(f'- {vlatex(entry)}{end_symbol}'))
+            self.add_item(
+                NoEscape(InlineMath((label)).dumps()),
+                NoEscape(f"- {(entry)}{end_symbol}"),
+            )
 
-    
     def _repr_markdown_(self):
         self._container = type(self).cls_container
-        
+
         entries = [
-            f'${vlatex(key)}$ - {value}'
-            for key, value in self._added_symbols.items()
+            f"${vlatex(key)}$ - {value}" for key, value in self._added_symbols.items()
         ]
 
-        end_sign = '.'
-        head = self._description_head + '  \n'
+        end_sign = "."
+        head = self._description_head + "  \n"
 
         if len(entries) == 0:
-            end_sign = ''
-            head = ''
+            end_sign = ""
+            head = ""
 
-        text = head + ',  \n'.join(entries) + end_sign
-
+        text = head + ",  \n".join(entries) + end_sign
 
         if len(entries) != 0:
 
-            self._container.append(NoEscape(self._description_head + '\n'))
+            self._container.append(NoEscape(self._description_head + "\n"))
             self._container.append(copy.copy(self))
 
-
         return text
-        
-        
-    
+
     def __repr__(self):
-        
-        #self.reported()
+
+        # self.reported()
 
         entries = [
-            f'${vlatex(key)}$ - {value}'
-            for key, value in self._added_symbols.items()
+            f"${vlatex(key)}$ - {value}" for key, value in self._added_symbols.items()
         ]
 
-        end_sign = '.'
-        head = self._description_head + '  \n'
+        end_sign = "."
+        head = self._description_head + "  \n"
 
         if len(entries) == 0:
-            end_sign = ''
-            head = ''
+            end_sign = ""
+            head = ""
 
-        text = head + ',  \n'.join(entries) + end_sign
-        
+        text = head + ",  \n".join(entries) + end_sign
+
         self._container = type(self).cls_container
-#         if len(entries) != 0:
+        #         if len(entries) != 0:
 
-#            self._container.append(NoEscape(self._description_head)+ 'try' + '\n')
-#             self._container.append(copy.deepcopy(self))
+        #            self._container.append(NoEscape(self._description_head)+ 'try' + '\n')
+        #             self._container.append(copy.deepcopy(self))
 
         return text
-
 
 
 class Align(Environment):
     """A class to wrap LaTeX's alltt environment."""
 
-    packages = [Package('mathtools')]
+    packages = [Package("mathtools")]
     escape = False
     content_separator = "\n"
 
@@ -2739,13 +2857,12 @@ class Align(Environment):
 class Equation(Environment):
     """A class to wrap LaTeX's alltt environment."""
 
-    packages = [Package('mathtools')]
+    packages = [Package("mathtools")]
     escape = False
     content_separator = "\n"
 
-class CompositeMatrix(Equation):
 
-    
+class CompositeMatrix(Equation):
     r"""A class representing a composite matrix surrounded by Equation environment
     .. code-block:: latex
         \begin{environment_name}
@@ -2761,10 +2878,17 @@ class CompositeMatrix(Equation):
     #: Set to true if this full container should be equivalent to an empty
     #: string if it has no content.
     omit_if_empty = False
-    _latex_name='equation'
+    _latex_name = "equation"
 
-    def __init__(self,matrix=None,repr_sym='A', options=None, arguments=None, start_arguments=None,
-                 **kwargs):
+    def __init__(
+        self,
+        matrix=None,
+        repr_sym="A",
+        options=None,
+        arguments=None,
+        start_arguments=None,
+        **kwargs,
+    ):
         r"""
         Args
         ----
@@ -2777,53 +2901,54 @@ class CompositeMatrix(Equation):
         """
 
         self.matrix = matrix
-        self.repr_sym='A'
+        self.repr_sym = "A"
         self.options = options
         self.arguments = arguments
         self.start_arguments = start_arguments
 
-        
-        
-        super().__init__(options=None, arguments=None, start_arguments=None,**kwargs)
-        
+        super().__init__(options=None, arguments=None, start_arguments=None, **kwargs)
+
         if self.matrix is not None:
-            
+
             display(self._sym_matrix)
-            self.append(NoEscape(
-                latex(self._sym_matrix)
-                ))
-    
+            self.append(NoEscape(latex(self._sym_matrix)))
+
     @property
     def _sym_matrix(self):
-        subs_list = [(elem,Symbol(f'{self.repr_sym}_{no}'))   for no,elem in enumerate(self.matrix) if elem != 0] 
-        
+        subs_list = [
+            (elem, Symbol(f"{self.repr_sym}_{no}"))
+            for no, elem in enumerate(self.matrix)
+            if elem != 0
+        ]
+
         return self.matrix.subs(subs_list)
-    
+
     def __repr__(self):
 
         if self.inspected_obj is not None:
-            code = (inspect.getsource(self.inspected_obj))
+            code = inspect.getsource(self.inspected_obj)
         else:
-            code = 'nothing to print :('
-        
-        repr_string=f'''
+            code = "nothing to print :("
+
+        repr_string = f"""
         \n++++++++++ CODE +++++++
         \n{code}
         \n++++++++++ CODE +++++++
         
-        '''
-        
+        """
+
         return repr_string
-    
+
     def reported(self):
         self.cls_container.append(self)
-        
+
         return copy.deepcopy(self)
-    
+
+
 class DMath(Environment):
     """A class to wrap LaTeX's alltt environment."""
 
-    packages = [Package('flexisym'), Package('breqn')]
+    packages = [Package("flexisym"), Package("breqn")]
     escape = False
     content_separator = "\n"
 
@@ -2831,11 +2956,10 @@ class DMath(Environment):
 class AutoBreak(Environment):
     """A class to wrap LaTeX's alltt environment."""
 
-    packages = [Package('mathtools'), Package('autobreak')]
+    packages = [Package("mathtools"), Package("autobreak")]
     escape = False
     content_separator = " "
     _latex_backend = vlatex
-
 
     @property
     def latex_backend(self):
@@ -2843,51 +2967,49 @@ class AutoBreak(Environment):
 
     @latex_backend.setter
     def latex_backend(self, backend):
-        self._latex_backend=backend
-
+        self._latex_backend = backend
 
     def _split_expr(self, expr):
 
         if isinstance(expr, Equality):
 
-            elems = [expr.lhs, Symbol('='), expr.rhs]
+            elems = [expr.lhs, Symbol("="), expr.rhs]
 
         elif isinstance(expr, StrictGreaterThan):
 
-            elems = [expr.lhs, Symbol('>'), expr.rhs]
-            
+            elems = [expr.lhs, Symbol(">"), expr.rhs]
+
         elif isinstance(expr, LessThan):
 
-            elems = [expr.lhs, Symbol(r'\leq'), expr.rhs]
+            elems = [expr.lhs, Symbol(r"\leq"), expr.rhs]
 
         elif isinstance(expr, GreaterThan):
 
-            elems = [expr.lhs, Symbol(r'\geq'), expr.rhs]
-            
+            elems = [expr.lhs, Symbol(r"\geq"), expr.rhs]
+
         elif isinstance(expr, StrictLessThan):
 
-            elems = [expr.lhs, Symbol('<'), expr.rhs]
+            elems = [expr.lhs, Symbol("<"), expr.rhs]
 
-            
         elif isinstance(expr, Add):
 
             elems = list(expr.args)
-            #elems = sum(([obj,Symbol('+')] for obj in elems),[]  )[0:-1]
-            #elems=[]
+            # elems = sum(([obj,Symbol('+')] for obj in elems),[]  )[0:-1]
+            # elems=[]
 
-            #for obj in list(expr.args):
+            # for obj in list(expr.args):
             #    display(obj.args)
             #    elems += [obj,Symbol('+')]
 
         else:
             elems = [expr]
 
-        #print('elems')
-        #display(elems)
+        # print('elems')
+        # display(elems)
 
         if len(elems) > 1:
-            #print('elems')
-            #display(elems)
+            # print('elems')
+            # display(elems)
             elems = sum([self._split_expr(obj) for obj in elems], [])
         else:
             elems = [expr]
@@ -2902,51 +3024,63 @@ class AutoBreak(Environment):
 
         for no, obj in enumerate(terms):
 
-            if terms[no - 1] == Symbol('=') or terms[no - 1] == Symbol('>') or terms[no - 1] == Symbol(r'\leq') or terms[no - 1] == Symbol(r'\geq') or terms[no - 1] == Symbol('<'):
-                new_terms += [Symbol('\n'),obj,Symbol('\n')]
+            if (
+                terms[no - 1] == Symbol("=")
+                or terms[no - 1] == Symbol(">")
+                or terms[no - 1] == Symbol(r"\leq")
+                or terms[no - 1] == Symbol(r"\geq")
+                or terms[no - 1] == Symbol("<")
+            ):
+                new_terms += [Symbol("\n"), obj, Symbol("\n")]
 
-            elif isinstance(obj, Mul) and  (
-                (any([elem.is_negative for elem in obj.args]))):
-                #print(' any negative')
-                #display(obj)
-                new_terms += [Symbol('\n -'), -obj]
+            elif isinstance(obj, Mul) and (
+                (any([elem.is_negative for elem in obj.args]))
+            ):
+                # print(' any negative')
+                # display(obj)
+                new_terms += [Symbol("\n -"), -obj]
 
             elif isinstance(obj, Mul) and not (
-                (any([elem.is_negative for elem in obj.args]))):
-                #print(' not any negative')
-                #display(obj)
-                new_terms += [Symbol('\n +'), obj]
+                (any([elem.is_negative for elem in obj.args]))
+            ):
+                # print(' not any negative')
+                # display(obj)
+                new_terms += [Symbol("\n +"), obj]
 
-            elif obj == Symbol('=') or obj == Symbol('>') or obj == Symbol('\leq') or obj == Symbol('<') or obj == Symbol('\geq'):
+            elif (
+                obj == Symbol("=")
+                or obj == Symbol(">")
+                or obj == Symbol("\leq")
+                or obj == Symbol("<")
+                or obj == Symbol("\geq")
+            ):
                 new_terms += [obj]
 
-            elif isinstance(obj, (Symbol, Function, Number,Derivative,Subs,Expr)):
-                new_terms += [Symbol('\n +'), obj]
+            elif isinstance(obj, (Symbol, Function, Number, Derivative, Subs, Expr)):
+                new_terms += [Symbol("\n +"), obj]
 
             else:
                 new_terms += [obj]
 
-        prev_term=''
-        
-        
-        if new_terms[0] == Symbol('\n -'):
+        prev_term = ""
+
+        if new_terms[0] == Symbol("\n -"):
             new_terms_loop = new_terms
         else:
-            self.append('\n')
+            self.append("\n")
             new_terms_loop = new_terms[1:]
-        
-        for term in new_terms_loop:
-#             print('+++',self.__class__.latex_backend(term))
-#             print('++ prev +++',prev_term)
-#             self.append(self.__class__.latex_backend(term)) ######### TA LINIA ZAKOMENTOWANA /AMADI
-            self.append(self.latex_backend(term))
-            #prev_term=self.__class__.latex_backend(term)
-        self.append('\n')
 
-        
+        for term in new_terms_loop:
+            #             print('+++',self.__class__.latex_backend(term))
+            #             print('++ prev +++',prev_term)
+            #             self.append(self.__class__.latex_backend(term)) ######### TA LINIA ZAKOMENTOWANA /AMADI
+            self.append(self.latex_backend(term))
+            # prev_term=self.__class__.latex_backend(term)
+        self.append("\n")
+
+
 ############# TEST
-        
-        
+
 
 # class EqRef(Environment):
 #         """A class to wrap LaTeX's alltt environment."""
@@ -3115,7 +3249,7 @@ class AutoBreak(Environment):
 #     r'''
 #     This class represents data collector that stores the results able to obtain within other computational blocks.
 #     It ensures easy data transferring in order to do efficient analysis and data processing.
-    
+
 #     Arguments
 #     =========
 #         data_set: dict
@@ -3128,19 +3262,19 @@ class AutoBreak(Environment):
 #     =======
 #         >>>elements=['first','second','third','fourth','fifth']
 #         >>>new_dict={'abs':312}
-        
+
 #         >>>DS1=DataStorage(new_dict)
-        
+
 #         >>>DataStorage._storage=new_dict
-        
+
 #         >>>DataStorage._dict['x']='123'
-        
+
 #         >>>DataStorage._list=['a','b','c']
-        
+
 #         >>>DataStorage._plot_markers_dict={elem:Marker('plot1'+elem ,'fig')   for elem in elements}
-            
+
 #         >>>DataStorage._subplot_markers_dict={elem:Marker('subplot1'+elem ,'fig')   for elem in elements}
-        
+
 #         >>>DataStorage.reset_storage()
 #     '''
 
@@ -3275,13 +3409,13 @@ class AutoBreak(Environment):
 #     r'''
 #     It is computational module which enables to perform numerical simulations of the dynamic system.
 #     Class provides several methods devoted for data processing, ploting and reporting.
-    
+
 #     Arguments
 #     =========
 #     t_span: iterable
 #         Time span.
 #     ics_list: iterable
-#         List containing values of initial conditions. 
+#         List containing values of initial conditions.
 #     dynamic_system: Lagrange's method object
 #     reference_data: dict
 #         Dictionary containing default values of systems's parameters.
@@ -3298,13 +3432,13 @@ class AutoBreak(Environment):
 #     label_formatter(self,analysis=None,label_generator=None):
 #         Provides label generated basing on current simulation or defined dictionary.
 #     show_eoms(self,analysis,**kwargs):
-    
+
 #     do_simulation(self,analysis,**kwargs):
-    
+
 #     simulation_result(self,analysis):
-    
+
 #     plot_result(cls,analysis):
-    
+
 
 #     Example
 #     =======
@@ -3880,7 +4014,7 @@ class AutoBreak(Environment):
 
 # class SimulationFFT:
 #     r'''It is a class that provides Fast Fourier Transform techniques for formerly performed numerical simulations in time domain. Class supplies a method for plotting a double sided RMS.
-    
+
 #     Arguments
 #     =========
 #     *args
@@ -3923,13 +4057,13 @@ class AutoBreak(Environment):
 #     r'''
 #     It is computational block that prepares the comparison of particular coordinates regarding to changes of selected parameter.
 #     Class provides several methods devoted for data processing, ploting and reporting.
-    
+
 #     Arguments
 #     =========
 #     t_span: iterable
 #         Time span.
 #     ics_list: iterable
-#         List containing values of initial conditions. 
+#         List containing values of initial conditions.
 #     data: dict
 #         Dictionary consisting of data for comparison.
 #     label: str
@@ -4329,13 +4463,13 @@ class AutoBreak(Environment):
 #     r'''
 #     It is computational block that prepares the comparison of FFT signals of particular coordinates regarding to changes of selected parameter.
 #     Class inherits from AccelerationComparison and provides several methods devoted for data processing, ploting and reporting.
-    
+
 #     Arguments
 #     =========
 #     t_span: iterable
 #         Time span.
 #     ics_list: iterable
-#         List containing values of initial conditions. 
+#         List containing values of initial conditions.
 #     data: dict
 #         Dictionary consisting data for comparison.
 #     label: str
@@ -4363,13 +4497,13 @@ class AutoBreak(Environment):
 #     r'''
 #     It is computational block that prepares the summary table of particular coordinates regarding to changes of selected parameter.
 #     Class provides several methods devoted for data processing and reporting.
-    
+
 #     Arguments
 #     =========
 #     t_span: iterable
 #         Time span.
 #     ics_list: iterable
-#         List containing values of initial conditions. 
+#         List containing values of initial conditions.
 #     data: dict
 #         Dictionary consisting data for comparison.
 #     label: str
@@ -4543,8 +4677,6 @@ class AutoBreak(Environment):
 #             self._container.append(NoEscape(latex_table))
 
 #         return data_table
-
-
 
 
 # class BaseSeriesFormatter(pd.Series):
@@ -4888,8 +5020,8 @@ class AutoBreak(Environment):
 #     _cols_name = None
 #     _domain = None
 #     r'''
-#     Basic class for formatting data plots. It provides methods for setting options 
-    
+#     Basic class for formatting data plots. It provides methods for setting options
+
 #     Arguments
 #     =========
 
@@ -5132,8 +5264,8 @@ class AutoBreak(Environment):
 # class FFTSeriesFormatter(BaseSeriesFormatter):
 #     _domain = Symbol('f')
 #     r'''
-#     Basic class for formatting data plots. It provides methods for setting options 
-    
+#     Basic class for formatting data plots. It provides methods for setting options
+
 #     Arguments
 #     =========
 
@@ -5192,8 +5324,8 @@ class AutoBreak(Environment):
 #     _data_filtter = lambda obj: obj.to_frequency_domain().double_sided_rms(
 #     ).truncate(0, 0.5)
 #     r'''
-#     Basic class for formatting data plots. It provides methods for setting options 
-    
+#     Basic class for formatting data plots. It provides methods for setting options
+
 #     Arguments
 #     =========
 
@@ -5427,12 +5559,8 @@ class AutoBreak(Environment):
 #         return filtter
 
 
-    
-    
-    
 ##################################################### COMMENTS FOR CHECK
-    
-    
+
 
 # time_domain_summary_1 = [
 #     'Przedstawione wyniki pokazują wpływ zmian badanego parametru \({param_name}\) na dynamikę wózka. ',
@@ -6017,7 +6145,7 @@ class AutoBreak(Environment):
 #             ([
 #                 ax_tmp.set_ylabel(
 #                     label_formatter_without_SI(
-#                         sym)  #.replace(r '\' , ' ')#.replace( '\\' ,' ' ) 
+#                         sym)  #.replace(r '\' , ' ')#.replace( '\\' ,' ' )
 #                 ) for ax_tmp, sym in zip(ax, numerical_data.columns)
 #             ])
 
@@ -6516,4 +6644,3 @@ class AutoBreak(Environment):
 #                         })))
 
 #             subsec.append(NewPage())
-            

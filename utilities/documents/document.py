@@ -1,23 +1,33 @@
-from pylatex import (Document, Package, Command, NewPage, Tabularx
-                     #Section, Subsection, Subsubsection, Itemize,  HorizontalSpace, Description, Marker
-                    )
-from pylatex.base_classes import Environment
-#from pylatex.section import Paragraph, Chapter
-from pylatex.utils import (#italic, 
-                           NoEscape)
-from ..report import Markdown, CurrentContainer, ReportText, IPMarkdown, ObjectCode,display
-
-
-# from .guides import (UsageOfDynamicSystemsGuide, Guide, EngeneeringDrawingGuide, DevelopmentGuide, IntroToPandasGuide, 
+# from .guides import (UsageOfDynamicSystemsGuide, Guide, EngeneeringDrawingGuide, DevelopmentGuide, IntroToPandasGuide,
 #                     BasicsOfODESystemGuide, BasicsOfDynSysImplementationGuide, BasicsOfReportingGuide, ResearchProjectGuidelines,
-#                     InterimProjectGuidelines,IntroDynPyProjectGuidelines, BasicsOfReportComponentImplementationGuide, 
+#                     InterimProjectGuidelines,IntroDynPyProjectGuidelines, BasicsOfReportComponentImplementationGuide,
 #                     GithubSynchroGuide, IntroToCocalcGuide)
-#from sympy import *
+# from sympy import *
 import datetime
-import shutil
 import os
-from typing import Optional, List, Union
+import shutil
+from typing import List, Optional, Union
 
+from pylatex import (  # Section, Subsection, Subsubsection, Itemize,  HorizontalSpace, Description, Marker
+    Command,
+    Document,
+    NewPage,
+    Package,
+    Tabularx,
+)
+from pylatex.base_classes import Environment
+
+# from pylatex.section import Paragraph, Chapter
+from pylatex.utils import NoEscape  # italic,
+
+from ..report import (
+    CurrentContainer,
+    IPMarkdown,
+    Markdown,
+    ObjectCode,
+    ReportText,
+    display,
+)
 
 imports_str = """
 #Create file output
@@ -60,7 +70,7 @@ global_height=('6cm')
 doc = WutThesis('./output/thesis_name')
 #doc.preamble.append(NoEscape(r'\\usepackage[MeX]{polski}')) #to set polish as main language"""
 
-thesis_introduction_str = '''
+thesis_introduction_str = """
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -83,9 +93,9 @@ display(Markdown('Remeber about `biblio.bib` file with referencens. Place it in 
 
 sub_methodology = Subsection('Methodology')
 CurrentContainer(sub_methodology)
-display(ReportText('This subsection provides methodology. '*100))'''
+display(ReportText('This subsection provides methodology. '*100))"""
 
-thesis_introduction_str_research = '''
+thesis_introduction_str_research = """
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -102,9 +112,9 @@ display(ReportText('This subsection provides objectives and assumptions. '*100))
 
 sub_methodology = Subsection('Methodology')
 CurrentContainer(sub_methodology)
-display(ReportText('This subsection provides methodology / model description / parameters. '*100))'''
+display(ReportText('This subsection provides methodology / model description / parameters. '*100))"""
 
-math_str = '''
+math_str = """
 from sympy import Eq, Symbol, symbols
 from dynpy.utilities.report import *
 
@@ -214,15 +224,15 @@ SymbolsDescription.set_default_header('where:')
 display(ReportText('Symbols description is as follows: '))
 
 
-display(SymbolsDescription(expr=E_K*F))'''
+display(SymbolsDescription(expr=E_K*F))"""
 
-picture_str = '''
+picture_str = """
 sec_picture = Section('Section that presents pictures reporting')
 CurrentContainer(sec_picture)
 
-display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture',width=global_width,height=global_height))'''
+display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture',width=global_width,height=global_height))"""
 
-simulaion_str = '''
+simulaion_str = """
 from dynpy.utilities.report import *
 from sympy import *
 
@@ -256,9 +266,9 @@ spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_spa
 # display(ObjectCode('spring_sol = spring.solution'))
 
 # display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
-# spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()'''
+# spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()"""
 
-veryfication_str = '''
+veryfication_str = """
 from sympy import *
 from dynpy.utilities.adaptable import *
 from dynpy.utilities.report import CurrentContainer, ReportText
@@ -317,15 +327,15 @@ display(ReportText('Obtained data analysis. '*200))
 
 display(graph)
 
-display(ReportText('Description of verifications outcomes. '*200))'''
-    
-conclusion_str = '''
+display(ReportText('Description of verifications outcomes. '*200))"""
+
+conclusion_str = """
 sec_conclusion = Section('Section that contains final conclusions')
 CurrentContainer(sec_conclusion)
 
-display(ReportText('Conclusions '*200))'''
-    
-symbols_description_str = '''
+display(ReportText('Conclusions '*200))"""
+
+symbols_description_str = """
 sec_symbols = Section('Section that contains all symbols descriptions')
 CurrentContainer(sec_symbols)
 
@@ -339,9 +349,9 @@ DescriptionsRegistry().set_descriptions({**syms_dict})
 DescriptionsRegistry().reset_registry()
 SymbolsDescription.set_default_header('  ')
 
-display(SymbolsDescription({**syms_dict}))'''
-    
-document_str = '''
+display(SymbolsDescription({**syms_dict}))"""
+
+document_str = """
 # Creating file
 # Be sure *output* folder is in the current directory
 
@@ -416,18 +426,17 @@ doc.append(Command('pagestyle{plain}'))
 doc.append(Command('newpage'))
 
 # Generating file
-doc.generate_pdf(clean_tex=True)'''        
+doc.generate_pdf(clean_tex=True)"""
 
 
 class ReportMethods:
 
     _reported_object = None
-    
+
     @classmethod
     def base_setup(cls):
-        
-        preliminary_str=(
-"""
+
+        preliminary_str = """
 
 #Examplary setup is as follows:
 
@@ -509,13 +518,9 @@ class ReportMethods:
 
 """
 
-)
-        
-        display(IPMarkdown(preliminary_str))    
+        display(IPMarkdown(preliminary_str))
 
-        
-        preliminary_str=(
-"""
+        preliminary_str = """
 #Code below is the exact same, as the one presented in the beginning of the guide. Duplicated for easier copying and pasting.
 
 #Method presented below initializes a simple document and prepares it for content addition.
@@ -581,59 +586,54 @@ doc.append(sec_picture)
 # Generating file
 doc.generate_pdf(clean_tex=True)
 
-""")    
-        return ObjectCode(preliminary_str) 
-    
-    
-    
+"""
+        return ObjectCode(preliminary_str)
+
     @property
     def _report_components(self):
-        
+
         from ..components.guides import en as guide_comp
-        
-        comp_list=[
-        # mech_comp.TitlePageComponent,
-        # mech_comp.SchemeComponent,
-        # mech_comp.ExemplaryPictureComponent,
-        # mech_comp.KineticEnergyComponent,
-        # mech_comp.PotentialEnergyComponent,
-        # mech_comp.LagrangianComponent,
-        # mech_comp.GoverningEquationComponent,
-        # #mech_comp.FundamentalMatrixComponent,
-        # mech_comp.GeneralSolutionComponent,
-        # #mech_comp.SteadySolutionComponent,
-   
+
+        comp_list = [
+            # mech_comp.TitlePageComponent,
+            # mech_comp.SchemeComponent,
+            # mech_comp.ExemplaryPictureComponent,
+            # mech_comp.KineticEnergyComponent,
+            # mech_comp.PotentialEnergyComponent,
+            # mech_comp.LagrangianComponent,
+            # mech_comp.GoverningEquationComponent,
+            # #mech_comp.FundamentalMatrixComponent,
+            # mech_comp.GeneralSolutionComponent,
+            # #mech_comp.SteadySolutionComponent,
         ]
-        
+
         return comp_list
-    
+
     @property
     def default_reported_object(self):
-        
+
         return None
 
     @property
     def reported_object(self):
 
-        reported_obj=self._reported_object
-        
+        reported_obj = self._reported_object
+
         if reported_obj is None:
             return self.default_reported_object
         else:
             return reported_obj
-        
 
     @reported_object.setter
-    def reported_object(self,value):
+    def reported_object(self, value):
 
-        self._reported_object=value
+        self._reported_object = value
 
+    def append_components(self, reported_object=None):
 
-    def append_components(self,reported_object=None):
+        # self.reported_object = reported_object
 
-        #self.reported_object = reported_object
-        
-        doc=self
+        doc = self
 
         for comp in self._report_components:
             doc.append(comp(self.reported_object))
@@ -641,121 +641,127 @@ doc.generate_pdf(clean_tex=True)
         return None
 
 
-
-    
-
-        
 class Guide(Document, ReportMethods):
     """
-        A class to generate a structured LaTeX document with pre-configured packages and settings.
+    A class to generate a structured LaTeX document with pre-configured packages and settings.
 
-        Inherits from `Document` and provides additional methods to simplify LaTeX report creation.
+    Inherits from `Document` and provides additional methods to simplify LaTeX report creation.
 
-        Attributes:
-            _documentclass (str): The LaTeX document class (default is 'article').
-            latex_name (str): Name of the document.
-            packages (List[Union[Package, Command]]): List of LaTeX packages and commands to include in the document.
-            _reported_object (Optional[object]): The object being reported on, if any.
+    Attributes:
+        _documentclass (str): The LaTeX document class (default is 'article').
+        latex_name (str): Name of the document.
+        packages (List[Union[Package, Command]]): List of LaTeX packages and commands to include in the document.
+        _reported_object (Optional[object]): The object being reported on, if any.
 
-        Exemplary Usage:
-            >>> from dynpy.utilities.report import *
-            >>> from dynpy.utilities.documents.guides import Guide
+    Exemplary Usage:
+        >>> from dynpy.utilities.report import *
+        >>> from dynpy.utilities.documents.guides import Guide
 
-            >>> doc = Guide('./output/sample_report', title="Sample Report")
+        >>> doc = Guide('./output/sample_report', title="Sample Report")
 
-            >>> section = Section('Exemplary section name')
-            >>> CurrentContainer(section)
+        >>> section = Section('Exemplary section name')
+        >>> CurrentContainer(section)
 
-            >>> display(Markdown(''' Exemplary Markdown text in the section '''))
-            >>> display(ReportText(' Exemplary text appended into section '))
+        >>> display(Markdown(''' Exemplary Markdown text in the section '''))
+        >>> display(ReportText(' Exemplary text appended into section '))
 
-            >>> doc.append(section)
+        >>> doc.append(section)
 
-            >>> doc.generate_pdf(clean_tex=True)
+        >>> doc.generate_pdf(clean_tex=True)
 
 
 
-        Example of Customization of the document properties:
-            >>> from dynpy.utilities.report import *
-            >>> from dynpy.utilities.documents.guides import Guide
+    Example of Customization of the document properties:
+        >>> from dynpy.utilities.report import *
+        >>> from dynpy.utilities.documents.guides import Guide
 
-            >>> custom_geometry = ['lmargin=20mm', 'rmargin=20mm', 'top=25mm', 'bmargin=25mm']
+        >>> custom_geometry = ['lmargin=20mm', 'rmargin=20mm', 'top=25mm', 'bmargin=25mm']
 
-            >>> doc = Guide(
-            >>>     default_filepath='./output/custom_report',
-            >>>     title='Custom Report',
-            >>>     geometry_options=custom_geometry
-            >>> )
+        >>> doc = Guide(
+        >>>     default_filepath='./output/custom_report',
+        >>>     title='Custom Report',
+        >>>     geometry_options=custom_geometry
+        >>> )
 
-            >>> section = Section('Exemplary Custom Section Name')
+        >>> section = Section('Exemplary Custom Section Name')
 
-            >>> doc.append(section)
+        >>> doc.append(section)
 
-            >>> doc.generate_pdf(clean_tex=True)
+        >>> doc.generate_pdf(clean_tex=True)
     """
 
-    _documentclass = 'article'
-    latex_name = 'document'
+    _documentclass = "article"
+    latex_name = "document"
     packages = [
-                  Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('microtype'),
-                  Package('authoraftertitle'),
-                  Package('polski',options=['MeX']),
-                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('listings'),
-                  Package('titlesec'),
-                  Package('fancyhdr'),
-                  Command('pagestyle', arguments=['fancy']),
-                  Command('fancyhf', arguments=['']),
-                  Command('fancyhead',  arguments=['DynPy Team'],options=['R']),
-                  Command('fancyhead', arguments=['Mechanical vibration, 2023'],options=['L']),
-                  Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
-                  ]
+        Package(
+            "geometry",
+            options=[
+                "lmargin=25mm",
+                "rmargin=25mm",
+                "top=30mm",
+                "bmargin=25mm",
+                "headheight=50mm",
+            ],
+        ),
+        Package("microtype"),
+        Package("authoraftertitle"),
+        Package("polski", options=["MeX"]),
+        # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+        Package("listings"),
+        Package("titlesec"),
+        Package("fancyhdr"),
+        Command("pagestyle", arguments=["fancy"]),
+        Command("fancyhf", arguments=[""]),
+        Command("fancyhead", arguments=["DynPy Team"], options=["R"]),
+        Command("fancyhead", arguments=["Mechanical vibration, 2023"], options=["L"]),
+        Command("fancyfoot", arguments=[NoEscape("\\thepage")], options=["C"]),
+    ]
 
     def __init__(
-            self,
-            default_filepath: str = 'default_filepath',
-            title: str = 'Basic title',
-            reported_object: Optional[object] = None,
-            *,
-            documentclass: Optional[str] = None,
-            document_options: Optional[List[str]] = None,
-            fontenc: str = 'T1',
-            inputenc: str = 'utf8',
-            font_size: str = 'normalsize',
-            lmodern: bool = False,
-            textcomp: bool = True,
-            microtype: bool = True,
-            page_numbers: bool = True,
-            indent: Optional[Union[str, int]] = None,
-            geometry_options: Optional[List[str]] = None,
-            data: Optional[dict] = None,
+        self,
+        default_filepath: str = "default_filepath",
+        title: str = "Basic title",
+        reported_object: Optional[object] = None,
+        *,
+        documentclass: Optional[str] = None,
+        document_options: Optional[List[str]] = None,
+        fontenc: str = "T1",
+        inputenc: str = "utf8",
+        font_size: str = "normalsize",
+        lmodern: bool = False,
+        textcomp: bool = True,
+        microtype: bool = True,
+        page_numbers: bool = True,
+        indent: Optional[Union[str, int]] = None,
+        geometry_options: Optional[List[str]] = None,
+        data: Optional[dict] = None,
     ):
         """
-            Initialize the Guide class with optional customization.
+        Initialize the Guide class with optional customization.
 
-            Args:
-                default_filepath (str): Path for the generated document.
-                title (str): Title of the document.
-                reported_object (Optional[object]): Object being reported on, if any.
-                documentclass (Optional[str]): LaTeX document class (e.g., 'article').
-                document_options (Optional[List[str]]): Options for the document class.
-                fontenc (str): Font encoding (default 'T1').
-                inputenc (str): Input encoding (default 'utf8').
-                font_size (str): Font size (default 'normalsize').
-                lmodern (bool): Whether to use Latin Modern fonts.
-                textcomp (bool): Whether to use the `textcomp` package.
-                microtype (bool): Whether to use the `microtype` package.
-                page_numbers (bool): Whether to include page numbers.
-                indent (Optional[Union[str, int]]): Indentation settings.
-                geometry_options (Optional[List[str]]): Geometry options for page layout.
-                data (Optional[dict]): Additional data for customization.
+        Args:
+            default_filepath (str): Path for the generated document.
+            title (str): Title of the document.
+            reported_object (Optional[object]): Object being reported on, if any.
+            documentclass (Optional[str]): LaTeX document class (e.g., 'article').
+            document_options (Optional[List[str]]): Options for the document class.
+            fontenc (str): Font encoding (default 'T1').
+            inputenc (str): Input encoding (default 'utf8').
+            font_size (str): Font size (default 'normalsize').
+            lmodern (bool): Whether to use Latin Modern fonts.
+            textcomp (bool): Whether to use the `textcomp` package.
+            microtype (bool): Whether to use the `microtype` package.
+            page_numbers (bool): Whether to include page numbers.
+            indent (Optional[Union[str, int]]): Indentation settings.
+            geometry_options (Optional[List[str]]): Geometry options for page layout.
+            data (Optional[dict]): Additional data for customization.
         """
 
-        if documentclass is not None: self._documentclass
+        if documentclass is not None:
+            self._documentclass
 
         self._reported_object = reported_object
-        
+
         super().__init__(
             default_filepath=default_filepath,
             documentclass=self._documentclass,
@@ -772,78 +778,86 @@ class Guide(Document, ReportMethods):
             data=data,
         )
 
-#         label=self.label
-        self.title='Mechanical vibration'
-        #self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
-        #self.packages.append(Command('author', arguments=['DynPy Team']))
-        self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
-        #self.append(Command('maketitle'))
+        #         label=self.label
+        self.title = "Mechanical vibration"
+        # self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
+        # self.packages.append(Command('author', arguments=['DynPy Team']))
+        self.packages.append(Command("date", arguments=[NoEscape("\\today")]))
+        # self.append(Command('maketitle'))
         self.append(NewPage())
         # tu implementować co tam potrzeba
         self.append_components()
-    
-    
-    
 
-class CaseTemplate(Document,ReportMethods):
 
-    latex_name = 'document'
-    _documentclass = 'report'
-    
+class CaseTemplate(Document, ReportMethods):
+
+    latex_name = "document"
+    _documentclass = "report"
+
     packages = [
-                  Package('microtype'),
-                  Package('polski',options=['MeX']),
-                  Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('listings'),
-                  Package('titlesec'),
-                  Package('fancyhdr'),
-                  Command('pagestyle', arguments=['fancy']),
-                  Command('fancyhf', arguments=['']),
-                  Command('fancyhead',  arguments=['DynPy Team'],options=['R']),
-                  Command('fancyhead', arguments=['Mechanical Vibration, 2021'],options=['L']),
-                  Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
-                  #Command('newcommand{\praca}', arguments=['Praca dyplomowa']),
-                  #Command('newcommand{\dyplom}', arguments=['Inżynierska']),
-                  #Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']),
-                  #Command('newcommand{\specjalnosc}', arguments=['Wpisać specjalność']),
-                  #Command('newcommand{\\autor}', arguments=['Imię i nazwisko autora']),
-                  #Command('newcommand{\opiekun}', arguments=['Wpisać opiekuna']),
-                  #Command('newcommand{\promotor}', arguments=['Wpisać promotora']),
-                  #Command('newcommand{\konsultant}', arguments=['Wpisać konsultanta']),
-                  #Command('newcommand{\\tytul}', arguments=['Wpisać tytuł pracy dyplomowej po polsku']),
-                  #Command('newcommand{\\title}', arguments=['Wpisać tytuł pracy dyplomowej po angielsku']),
-                  #Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']),
-                  #Command('newcommand{\\rok}', arguments=['Rok składania pracy']),
-                  #Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']),
-                  #Command('newcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']),
+        Package("microtype"),
+        Package("polski", options=["MeX"]),
+        Package(
+            "geometry",
+            options=[
+                "lmargin=25mm",
+                "rmargin=25mm",
+                "top=30mm",
+                "bmargin=25mm",
+                "headheight=50mm",
+            ],
+        ),
+        Package("listings"),
+        Package("titlesec"),
+        Package("fancyhdr"),
+        Command("pagestyle", arguments=["fancy"]),
+        Command("fancyhf", arguments=[""]),
+        Command("fancyhead", arguments=["DynPy Team"], options=["R"]),
+        Command("fancyhead", arguments=["Mechanical Vibration, 2021"], options=["L"]),
+        Command("fancyfoot", arguments=[NoEscape("\\thepage")], options=["C"]),
+        # Command('newcommand{\praca}', arguments=['Praca dyplomowa']),
+        # Command('newcommand{\dyplom}', arguments=['Inżynierska']),
+        # Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']),
+        # Command('newcommand{\specjalnosc}', arguments=['Wpisać specjalność']),
+        # Command('newcommand{\\autor}', arguments=['Imię i nazwisko autora']),
+        # Command('newcommand{\opiekun}', arguments=['Wpisać opiekuna']),
+        # Command('newcommand{\promotor}', arguments=['Wpisać promotora']),
+        # Command('newcommand{\konsultant}', arguments=['Wpisać konsultanta']),
+        # Command('newcommand{\\tytul}', arguments=['Wpisać tytuł pracy dyplomowej po polsku']),
+        # Command('newcommand{\\title}', arguments=['Wpisać tytuł pracy dyplomowej po angielsku']),
+        # Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']),
+        # Command('newcommand{\\rok}', arguments=['Rok składania pracy']),
+        # Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']),
+        # Command('newcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']),
     ]
 
+    # \renewcommand{\headrulewidth}{1pt}
+    # \renewcommand{\footrulewidth}{1pt}
 
-# \renewcommand{\headrulewidth}{1pt}
-# \renewcommand{\footrulewidth}{1pt}
-    
-    
-    def __init__(self,
-                 default_filepath='default_filepath',
-                 reported_object=None,
-                 *,
-                 documentclass=None,
-                 document_options=None,
-                 fontenc='T1',
-                 inputenc='utf8',
-                 font_size='normalsize',
-                 lmodern=False,
-                 textcomp=True,
-                 microtype=True,
-                 page_numbers=True,
-                 indent=None,
-                 geometry_options=None,#['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
-                 data=None):
+    def __init__(
+        self,
+        default_filepath="default_filepath",
+        reported_object=None,
+        *,
+        documentclass=None,
+        document_options=None,
+        fontenc="T1",
+        inputenc="utf8",
+        font_size="normalsize",
+        lmodern=False,
+        textcomp=True,
+        microtype=True,
+        page_numbers=True,
+        indent=None,
+        geometry_options=None,  # ['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
+        data=None,
+    ):
 
-        if documentclass is not None: self._documentclass
-        
+        if documentclass is not None:
+            self._documentclass
+
         self._reported_object = reported_object
-        
+
         super().__init__(
             default_filepath=default_filepath,
             documentclass=self._documentclass,
@@ -861,9 +875,6 @@ class CaseTemplate(Document,ReportMethods):
         )
 
         self.append_components()
-
-
-
 
 
 class ExampleTemplate(Guide):
@@ -872,50 +883,60 @@ class ExampleTemplate(Guide):
 
 class BPASTSPaper(Document):
 
-    latex_name = 'document'
+    latex_name = "document"
     packages = [
-#                     Package('natbib', options=['numbers']),
-                    Package('booktabs'),
-                    Package('float'),
-                    Package('standalone'),
-                    Package('siunitx'),
-#                     Package('bpasts', options=['accepted']),
-                    Package('bpasts'),
-                    Package('t1enc'),
-                    Package('amsmath'),
-                    Package('amssymb'),
-                    Package('amsfonts'),
-                    Package('graphicx'),
-                    Package('flushend'),
-                    Package('textcomp'),
-                    Package('xcolor'),
-                    Package('hyperref',['colorlinks=true', 'allcolors=bpastsblue', NoEscape('pdfborder={0 0 0}')])
-
+        #                     Package('natbib', options=['numbers']),
+        Package("booktabs"),
+        Package("float"),
+        Package("standalone"),
+        Package("siunitx"),
+        #                     Package('bpasts', options=['accepted']),
+        Package("bpasts"),
+        Package("t1enc"),
+        Package("amsmath"),
+        Package("amssymb"),
+        Package("amsfonts"),
+        Package("graphicx"),
+        Package("flushend"),
+        Package("textcomp"),
+        Package("xcolor"),
+        Package(
+            "hyperref",
+            ["colorlinks=true", "allcolors=bpastsblue", NoEscape("pdfborder={0 0 0}")],
+        ),
     ]
 
-    abtitle='Paper for BPASTS'
-    abauthor='Authors'
-    title='Basic title'
+    abtitle = "Paper for BPASTS"
+    abauthor = "Authors"
+    title = "Basic title"
 
+    def __init__(
+        self,
+        default_filepath="default_filepath",
+        title=None,
+        *,
+        documentclass="article",
+        document_options=["10pt", "twoside", "twocolumn", "a4paper"],  # for submission
+        fontenc=None,
+        inputenc="utf8",
+        font_size="normalsize",
+        lmodern=False,
+        textcomp=False,
+        microtype=False,
+        page_numbers=True,
+        indent=None,
+        geometry_options=[
+            "inner=30mm",
+            "outer=20mm",
+            "bindingoffset=10mm",
+            "top=25mm",
+            "bottom=25mm",
+        ],  # ,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
+        data=None,
+    ):
 
-    def __init__(self,
-                 default_filepath='default_filepath',
-                 title=None,
-                 *,
-                 documentclass='article',
-                 document_options=['10pt','twoside','twocolumn','a4paper'], # for submission
-                 fontenc=None,
-                 inputenc='utf8',
-                 font_size='normalsize',
-                 lmodern=False,
-                 textcomp=False,
-                 microtype=False,
-                 page_numbers=True,
-                 indent=None,
-                 geometry_options=['inner=30mm', 'outer=20mm', 'bindingoffset=10mm', 'top=25mm', 'bottom=25mm'],#,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
-                 data=None):
-
-        if title is not None: self.title=title
+        if title is not None:
+            self.title = title
 
         super().__init__(
             default_filepath=default_filepath,
@@ -932,78 +953,78 @@ class BPASTSPaper(Document):
             geometry_options=geometry_options,
             data=data,
         )
-        
-        self.preamble.append(Command('abtitle',arguments=[self.abtitle]))
-        self.preamble.append(NoEscape('\\title{'+f'{self.title}'+'}'))
-        self.preamble.append(NoEscape('\\abauthor{'+f'{self.abauthor}'+'}'))
-        
-        self.preamble.append(NoEscape('%%%% EDITORS SECTION'))
-        self.preamble.append(NoEscape('\\vol{XX} \\no{Y} \\year{2024}'))
-        self.preamble.append(NoEscape('\\setcounter{page}{1}'))
-        self.preamble.append(NoEscape('\\doi{10.24425/bpasts.yyyy.xxxxxx}'))
-        self.preamble.append(NoEscape('%%%%%%%%%%%%%%%%%%%%'))
-        self.append(Command('maketitle'))
-        #self.append(NewPage())
+
+        self.preamble.append(Command("abtitle", arguments=[self.abtitle]))
+        self.preamble.append(NoEscape("\\title{" + f"{self.title}" + "}"))
+        self.preamble.append(NoEscape("\\abauthor{" + f"{self.abauthor}" + "}"))
+
+        self.preamble.append(NoEscape("%%%% EDITORS SECTION"))
+        self.preamble.append(NoEscape("\\vol{XX} \\no{Y} \\year{2024}"))
+        self.preamble.append(NoEscape("\\setcounter{page}{1}"))
+        self.preamble.append(NoEscape("\\doi{10.24425/bpasts.yyyy.xxxxxx}"))
+        self.preamble.append(NoEscape("%%%%%%%%%%%%%%%%%%%%"))
+        self.append(Command("maketitle"))
+        # self.append(NewPage())
         # tu implementować co tam potrzeba
-        
-    def cwd_setup(self):    
-        cwd=os.getcwd()
-        
-        source_path=f'/home/user/Shared files/modules/dynpy/utilities/documents/Definitions'
-        path1=f'{cwd}/bpast.sty'
-        path2=f'{cwd}/output/bpast.sty'
-        
-        if os.path.exists(path1)==False:
+
+    def cwd_setup(self):
+        cwd = os.getcwd()
+
+        source_path = (
+            f"/home/user/Shared files/modules/dynpy/utilities/documents/Definitions"
+        )
+        path1 = f"{cwd}/bpast.sty"
+        path2 = f"{cwd}/output/bpast.sty"
+
+        if os.path.exists(path1) == False:
             shutil.copytree(source_path, path1)
-        if os.path.exists(path2)==False:
+        if os.path.exists(path2) == False:
             shutil.copytree(source_path, path2)
-        
-                
-    def authors(self,nameno,affiliation=None,coremail=None,corno=0):
-        
-        #nameno - dict; of author name (string) and affiliation number (0 to x integer)
-        #affiliation - dcit; affiliation number (0 to x integer) and affiliation (string)
-        #coremail - str; corresponding author email
-        #corno - int; which of the authors in the dict is the corresponding author, count starting from 0
-        
-        #HOW TO USE?
-        
-        #Doc1 = BPASTSPaper(default_filepath='./output/method_test',title=NoEscape('''Your title'''))
-        #author_names={'Damian Sierociński':1,'Bogumił Chiliński':1, 'Karolina Ziąbrowska':2, 'Jakub Szydłowski':2}
-        #author_affiliations={1:'Institute of Machine Design Fundamentals, Faculty of Automotive and Construction Machinery Engineering, Warsaw University of Technology',2:'Faculty of Automotive and Construction Machinery Engineering, Warsaw University of Technology'}
-        #correspondence='damian.sierocinski@pw.edu.pl'
-        #Doc1.authors(nameno=author_names,affiliation=author_affiliations,coremail=correspondence)
-        
-        counter=0
-        auth_string=''
-        addr_string=''
-        for name,no in nameno.items():
-            auth_string=auth_string+name+'$^{'+f'{no}'+'}$'
-            if counter==corno:
-                auth_string=auth_string+'\email{'+coremail+'}'
-            counter=counter+1
-            
+
+    def authors(self, nameno, affiliation=None, coremail=None, corno=0):
+
+        # nameno - dict; of author name (string) and affiliation number (0 to x integer)
+        # affiliation - dcit; affiliation number (0 to x integer) and affiliation (string)
+        # coremail - str; corresponding author email
+        # corno - int; which of the authors in the dict is the corresponding author, count starting from 0
+
+        # HOW TO USE?
+
+        # Doc1 = BPASTSPaper(default_filepath='./output/method_test',title=NoEscape('''Your title'''))
+        # author_names={'Damian Sierociński':1,'Bogumił Chiliński':1, 'Karolina Ziąbrowska':2, 'Jakub Szydłowski':2}
+        # author_affiliations={1:'Institute of Machine Design Fundamentals, Faculty of Automotive and Construction Machinery Engineering, Warsaw University of Technology',2:'Faculty of Automotive and Construction Machinery Engineering, Warsaw University of Technology'}
+        # correspondence='damian.sierocinski@pw.edu.pl'
+        # Doc1.authors(nameno=author_names,affiliation=author_affiliations,coremail=correspondence)
+
+        counter = 0
+        auth_string = ""
+        addr_string = ""
+        for name, no in nameno.items():
+            auth_string = auth_string + name + "$^{" + f"{no}" + "}$"
+            if counter == corno:
+                auth_string = auth_string + "\email{" + coremail + "}"
+            counter = counter + 1
+
             if counter != len(nameno):
-                auth_string=auth_string+', '
-        
-        counter_addr=1
-        for no,addr in affiliation.items():
-            addr_string=addr_string+'$^'+f'{no}'+'$'+addr
-            if counter_addr!=len(affiliation):
-                addr_string=addr_string+', '
-            counter_addr=counter_addr+1
+                auth_string = auth_string + ", "
 
-        self.preamble.append(Command('author',arguments=[NoEscape(auth_string)]))
-        self.preamble.append(Command('Address',arguments=[NoEscape(addr_string)]))
+        counter_addr = 1
+        for no, addr in affiliation.items():
+            addr_string = addr_string + "$^" + f"{no}" + "$" + addr
+            if counter_addr != len(affiliation):
+                addr_string = addr_string + ", "
+            counter_addr = counter_addr + 1
 
-    def abstract(self,container=None):
+        self.preamble.append(Command("author", arguments=[NoEscape(auth_string)]))
+        self.preamble.append(Command("Address", arguments=[NoEscape(addr_string)]))
+
+    def abstract(self, container=None):
         for num, val in enumerate(container):
-            self.preamble.append(Command('Abstract',arguments=[ReportText(val)]))
-            
-    def keywords(self,keywords=None):
-        self.preamble.append(Command('Keywords',arguments=[keywords]))
-        
-        
+            self.preamble.append(Command("Abstract", arguments=[ReportText(val)]))
+
+    def keywords(self, keywords=None):
+        self.preamble.append(Command("Keywords", arguments=[keywords]))
+
     @classmethod
     def base_setup(cls, create_file: bool = False):
         """
@@ -1030,13 +1051,10 @@ class BPASTSPaper(Document):
         if create_file is True:
             return cls._create_base_setup_env()
 
+        # doc = WutThesis('./output/thesis_name')
+        # doc.preamble.append(NoEscape(r'\\usepackage[MeX]{polski}')) #to set polish as main language"""
 
-
-
-# doc = WutThesis('./output/thesis_name')
-#doc.preamble.append(NoEscape(r'\\usepackage[MeX]{polski}')) #to set polish as main language"""
-
-        thesis_introduction_str = '''#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+        thesis_introduction_str = """#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
 sec_intro = Section('Section that presents text reporting')
@@ -1056,7 +1074,7 @@ display(ReportText('This subsection provides state of the art \\cite{pandas}. '*
 
 sub_methodology = Subsection('Methodology')
 CurrentContainer(sub_methodology)
-display(ReportText('This subsection provides methodology. '*100))'''
+display(ReportText('This subsection provides methodology. '*100))"""
 
         math_str = '''from sympy import Eq, Symbol, symbols
 from dynpy.utilities.report import *
@@ -1186,12 +1204,12 @@ BasicsOfODESystemGuide();
 # UsageOfDynamicSystemsGuide()
 '''
 
-        picture_str = '''sec_picture = Section('Section that presents pictures reporting')
+        picture_str = """sec_picture = Section('Section that presents pictures reporting')
 CurrentContainer(sec_picture)
 
-display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))'''
+display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))"""
 
-        simulaion_str = '''from dynpy.utilities.report import *
+        simulaion_str = """from dynpy.utilities.report import *
 from sympy import *
 
 
@@ -1225,9 +1243,9 @@ data_spring = dyn_sys.get_numerical_parameters()
 # display(ObjectCode('spring_sol = spring.solution'))
 
 # display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
-# spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()'''
+# spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()"""
 
-        veryfication_str = '''from sympy import *
+        veryfication_str = """from sympy import *
 
 from sympy import *
 from sympy.physics import units
@@ -1328,14 +1346,14 @@ display(graph)
 #wynik.plot()
 
 
-display(ReportText('Description of verifications outcomes. '*200))'''
+display(ReportText('Description of verifications outcomes. '*200))"""
 
-        conclusion_str = '''sec_conclusion = Section('Section that contains final conclusions')
+        conclusion_str = """sec_conclusion = Section('Section that contains final conclusions')
 CurrentContainer(sec_conclusion)
 
-display(ReportText('Conclusions '*200))'''
+display(ReportText('Conclusions '*200))"""
 
-        symbols_description_str = '''sec_symbols = Section('Section that contains all symbols descriptions')
+        symbols_description_str = """sec_symbols = Section('Section that contains all symbols descriptions')
 CurrentContainer(sec_symbols)
 
 E_K,F = symbols('E_K,F')
@@ -1348,9 +1366,9 @@ DescriptionsRegistry().set_descriptions({**syms_dict})
 DescriptionsRegistry().reset_registry()
 SymbolsDescription.set_default_header('  ')
 
-display(SymbolsDescription({**syms_dict}))'''
+display(SymbolsDescription({**syms_dict}))"""
 
-        document_str = '''# Creating file
+        document_str = """# Creating file
 # Be sure *output* folder is in the current directory
 
 paper_name = './output/report_name' #path for report file 
@@ -1413,12 +1431,11 @@ doc.append(Command('pagestyle{plain}'))
 doc.append(Command('newpage'))
 
 # Generating file
-doc.generate_pdf(clean_tex=False)'''        
-        
-#         preliminary_str=(f"""
-# =======
-        preliminary_str=(
-f"""
+doc.generate_pdf(clean_tex=False)"""
+
+        #         preliminary_str=(f"""
+        # =======
+        preliminary_str = f"""
 
 Examplary setup is as follows:
 
@@ -1537,11 +1554,11 @@ BasicsOfODESystemGuide();
 {document_str}
 ```
 
-""")
+"""
 
-        display(IPMarkdown(preliminary_str))    
+        display(IPMarkdown(preliminary_str))
 
-        preliminary_str=(f"""
+        preliminary_str = f"""
 #Example:
 
 #To prepare a simple document with text and images:
@@ -1593,21 +1610,21 @@ BasicsOfODESystemGuide();
 
 {document_str}
 
-""")
+"""
 
         return ObjectCode(preliminary_str)
-        
-        
-        
+
+
 class Keywords(Environment):
-    latex_name='keyword'
+    latex_name = "keyword"
+
+
 class Abstract(Environment):
-    latex_name='abstract'
+    latex_name = "abstract"
 
 
 class ElsevierPaper(Document):
-    
-    '''
+    """
     Doc = ElsevierTemplate(default_filepath='./output/paper')
     Doc.journal('Advances in Engineering Software')
 
@@ -1619,54 +1636,59 @@ class ElsevierPaper(Document):
     Doc.keywords(['engineering software','numerical simulations','analytical solution','electrical circuit',NoEscape('\\textit{Python} programming language')])
     Doc.title(NoEscape("An assessment of \\textit{DynPy} solver accuracy"))
     Doc.end_frontmatter
-    '''
-    
-    latex_name = 'document'
+    """
+
+    latex_name = "document"
     packages = [
-#                   Package('geometry',options=['lmargin=30mm', 'rmargin=30mm',  'top=25mm', 'bmargin=25mm', 'headheight=50mm']),
-#                   Package('microtype'),
-#                   Package('authoraftertitle'),
-#                   Package('listings'),
-#                   Package('titlesec'),
-#                   Package('fancyhdr'),
-#                   Package('graphicx'),
-#                   Package('indentfirst'),
-#                   Package('pdfpages'),
-                  Package('fontspec'),
-                  Package('amsmath'),
-                  Package('amssymb'),
-                  Package('epsfig'),
-#                   Command('graphicspath{{../}}'),
-#                   Command('frenchspacing'),
-#                   Command('counterwithin{figure}{section}'),
-#                   Command('counterwithin{table}{section}'),
-#                   Command('fancypagestyle{headings}{\\fancyhead{} \\renewcommand{\headrulewidth}{1pt} \\fancyheadoffset{0cm} \\fancyhead[RO]{\\nouppercase{\\leftmark}} \\fancyhead[LE]{\\nouppercase{\\leftmark}} \\fancyfoot{} \\fancyfoot[LE,RO]{\\thepage}}'),
-#                   Command('fancypagestyle{plain}{\\fancyhf{} \\renewcommand{\\headrulewidth}{0pt} \\fancyfoot[LE,RO]{\\thepage}}'),
-#                   Command('numberwithin{equation}{section}'),
-#                   Command('renewcommand{\\familydefault}{\\sfdefault}'),
-        #\renewcommand{\familydefault}{\sfdefault}
-        
+        #                   Package('geometry',options=['lmargin=30mm', 'rmargin=30mm',  'top=25mm', 'bmargin=25mm', 'headheight=50mm']),
+        #                   Package('microtype'),
+        #                   Package('authoraftertitle'),
+        #                   Package('listings'),
+        #                   Package('titlesec'),
+        #                   Package('fancyhdr'),
+        #                   Package('graphicx'),
+        #                   Package('indentfirst'),
+        #                   Package('pdfpages'),
+        Package("fontspec"),
+        Package("amsmath"),
+        Package("amssymb"),
+        Package("epsfig"),
+        #                   Command('graphicspath{{../}}'),
+        #                   Command('frenchspacing'),
+        #                   Command('counterwithin{figure}{section}'),
+        #                   Command('counterwithin{table}{section}'),
+        #                   Command('fancypagestyle{headings}{\\fancyhead{} \\renewcommand{\headrulewidth}{1pt} \\fancyheadoffset{0cm} \\fancyhead[RO]{\\nouppercase{\\leftmark}} \\fancyhead[LE]{\\nouppercase{\\leftmark}} \\fancyfoot{} \\fancyfoot[LE,RO]{\\thepage}}'),
+        #                   Command('fancypagestyle{plain}{\\fancyhf{} \\renewcommand{\\headrulewidth}{0pt} \\fancyfoot[LE,RO]{\\thepage}}'),
+        #                   Command('numberwithin{equation}{section}'),
+        #                   Command('renewcommand{\\familydefault}{\\sfdefault}'),
+        # \renewcommand{\familydefault}{\sfdefault}
     ]
-    
-    
-    
-    def __init__(self,
-                 default_filepath='default_filepath',
-                 title='Basic title',
-                 *,
-                 documentclass='elsarticle',
-                 document_options=['final', 'times'], # for submission
-#                  document_options=['final', '5p', 'times' ,'twocolumn'], for preview
-                 fontenc=None,
-                 inputenc='utf8',
-                 font_size='normalsize',
-                 lmodern=False,
-                 textcomp=True,
-                 microtype=True,
-                 page_numbers=True,
-                 indent=None,
-                 geometry_options=['inner=30mm', 'outer=20mm', 'bindingoffset=10mm', 'top=25mm', 'bottom=25mm'],#,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
-                 data=None):
+
+    def __init__(
+        self,
+        default_filepath="default_filepath",
+        title="Basic title",
+        *,
+        documentclass="elsarticle",
+        document_options=["final", "times"],  # for submission
+        #                  document_options=['final', '5p', 'times' ,'twocolumn'], for preview
+        fontenc=None,
+        inputenc="utf8",
+        font_size="normalsize",
+        lmodern=False,
+        textcomp=True,
+        microtype=True,
+        page_numbers=True,
+        indent=None,
+        geometry_options=[
+            "inner=30mm",
+            "outer=20mm",
+            "bindingoffset=10mm",
+            "top=25mm",
+            "bottom=25mm",
+        ],  # ,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
+        data=None,
+    ):
 
         super().__init__(
             default_filepath=default_filepath,
@@ -1683,160 +1705,192 @@ class ElsevierPaper(Document):
             geometry_options=geometry_options,
             data=data,
         )
+
     @property
     def begin_frontmatter(self):
-        self.append(ReportText(NoEscape('\\begin{frontmatter}')))
-        
+        self.append(ReportText(NoEscape("\\begin{frontmatter}")))
+
     @property
     def end_frontmatter(self):
-        self.append(ReportText(NoEscape('\\end{frontmatter}')))
-        
-    def corresponding_author(self,author=None,email=None):
-        
+        self.append(ReportText(NoEscape("\\end{frontmatter}")))
 
-        self.append( Command('author[label1]',arguments=[NoEscape(f'{author}\\corref{{cor1}}')])) 
-        self.append(Command('ead',arguments=[f'{email}']))
-#         self.append(Command('fntext[label2]'))
-        self.append(Command('cortext[cor1]{Corresponding author.}'))
-        self.append(Command('affiliation[label1]',arguments=[NoEscape('organization={Warsaw Univeristy of Technology, Faculty of Automotive and Constrction Machinery Engineering},addressline={Ludwika Narbutta 84},city={Warsaw},postcode={02-524},state={Masovian Voivodeship},country={Poland}')]))
-        
-    def keywords(self,keywords_list=None):
-        kwl=len(keywords_list)
+    def corresponding_author(self, author=None, email=None):
+
+        self.append(
+            Command("author[label1]", arguments=[NoEscape(f"{author}\\corref{{cor1}}")])
+        )
+        self.append(Command("ead", arguments=[f"{email}"]))
+        #         self.append(Command('fntext[label2]'))
+        self.append(Command("cortext[cor1]{Corresponding author.}"))
+        self.append(
+            Command(
+                "affiliation[label1]",
+                arguments=[
+                    NoEscape(
+                        "organization={Warsaw Univeristy of Technology, Faculty of Automotive and Constrction Machinery Engineering},addressline={Ludwika Narbutta 84},city={Warsaw},postcode={02-524},state={Masovian Voivodeship},country={Poland}"
+                    )
+                ],
+            )
+        )
+
+    def keywords(self, keywords_list=None):
+        kwl = len(keywords_list)
         with self.create(Keywords()):
             for num, val in enumerate(keywords_list):
                 self.append(val)
-                if num<kwl-1:
-                    self.append(NoEscape('\sep'))
+                if num < kwl - 1:
+                    self.append(NoEscape("\sep"))
 
-    def authors(self,authors_list=None):
-        self.authors_list=authors_list
-        
-        for num,val in enumerate(self.authors_list):
-            self.append( Command('author[label1]',arguments=[val]))
-            
-    def journal(self,journal_name=None):
-        self.preamble.append(Command('journal',arguments=[journal_name]))
-    def title(self,title=None):
-        self.preamble.append(Command('title',arguments=[title]))
-    def abstract(self,container=None):
+    def authors(self, authors_list=None):
+        self.authors_list = authors_list
+
+        for num, val in enumerate(self.authors_list):
+            self.append(Command("author[label1]", arguments=[val]))
+
+    def journal(self, journal_name=None):
+        self.preamble.append(Command("journal", arguments=[journal_name]))
+
+    def title(self, title=None):
+        self.preamble.append(Command("title", arguments=[title]))
+
+    def abstract(self, container=None):
         with self.create(Abstract()):
             for num, val in enumerate(container):
                 self.append(ReportText(val))
 
-            
 
-        
 class WutThesis(Document):
     """
-        A class for creating a Warsaw University of Technology (WUT) thesis document.
+    A class for creating a Warsaw University of Technology (WUT) thesis document.
 
-        This class extends the `Document` class to include all necessary LaTeX packages, commands, and configurations required for WUT thesis formatting. It provides an easy way to create and manage thesis documents with pre-configured settings.
+    This class extends the `Document` class to include all necessary LaTeX packages, commands, and configurations required for WUT thesis formatting. It provides an easy way to create and manage thesis documents with pre-configured settings.
 
-        Attributes:
-            latex_name (str): Name of the document type ('document').
-            packages (list): List of LaTeX packages and commands preloaded for thesis formatting.
+    Attributes:
+        latex_name (str): Name of the document type ('document').
+        packages (list): List of LaTeX packages and commands preloaded for thesis formatting.
 
-        Example Usage:
-            >>> from dynpy.utilities.documents.document import WutThesis
-            >>> from pylatex import Section
-            >>> doc = WutThesis('./output/thesis_name')
-            >>> section = Section('Introduction')
-            >>> doc.append(section)
-            >>> doc.generate_pdf(clean_tex=True)
+    Example Usage:
+        >>> from dynpy.utilities.documents.document import WutThesis
+        >>> from pylatex import Section
+        >>> doc = WutThesis('./output/thesis_name')
+        >>> section = Section('Introduction')
+        >>> doc.append(section)
+        >>> doc.generate_pdf(clean_tex=True)
 
-        Example of Full Thesis Workflow:
-            >>> from dynpy.utilities.documents.document import WutThesis
-            >>> from pylatex import Section, Command
-            >>> doc = WutThesis('./output/thesis_name')
-            >>> doc.append(Command('title', arguments=['Thesis Title']))
-            >>> doc.append(Command('author', arguments=['Student Name']))
-            >>> doc.append(Command('date', arguments=['\today']))
-            >>> doc.append(Command('maketitle'))
-            >>> section = Section('Introduction')
-            >>> doc.append(section)
-            >>> doc.generate_pdf(clean_tex=True)
+    Example of Full Thesis Workflow:
+        >>> from dynpy.utilities.documents.document import WutThesis
+        >>> from pylatex import Section, Command
+        >>> doc = WutThesis('./output/thesis_name')
+        >>> doc.append(Command('title', arguments=['Thesis Title']))
+        >>> doc.append(Command('author', arguments=['Student Name']))
+        >>> doc.append(Command('date', arguments=['\today']))
+        >>> doc.append(Command('maketitle'))
+        >>> section = Section('Introduction')
+        >>> doc.append(section)
+        >>> doc.generate_pdf(clean_tex=True)
     """
 
-    latex_name = 'document'
+    latex_name = "document"
     packages = [
-                  Package('geometry',options=['lmargin=30mm', 'rmargin=30mm',  'top=25mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('microtype'),
-                  Package('authoraftertitle'),
-                  #Package('polski',options=['MeX']),
-                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('listings'),
-                  Package('titlesec'),
-                  Package('fancyhdr'),
-                  Package('graphicx'),
-                  Package('indentfirst'),
-                  Package('pdfpages'),
-                  Package('amsmath'),
-
-                 Package('markdown'),
-                  Package('hyperref'),
-        
-                  Command('newcommand{\praca}', arguments=['Praca dyplomowa']),
-                  Command('newcommand{\dyplom}', arguments=['Magisterska']),
-                  Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']),
-                  Command('newcommand{\specjalnosc}', arguments=['Wpisać specjalność']),
-                  Command('newcommand{\\autor}', arguments=['Imię i nazwisko autora']),
-                  Command('newcommand{\opiekun}', arguments=['Wpisać opiekuna']),
-                  Command('newcommand{\promotor}', arguments=['Wpisać promotora']),
-                  Command('newcommand{\konsultant}', arguments=['Wpisać konsultanta']),
-                  Command('newcommand{\\tytul}', arguments=['Wpisać tytuł pracy dyplomowej po polsku']),
-                  Command('newcommand{\\album}', arguments=['Wpisać numer albumu']),
-                  Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']),
-                  Command('newcommand{\\rok}', arguments=['Rok składania pracy']),
-                  Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']),
-                  #Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']),
-                  Command('graphicspath{{../}}'),
-                  Command('frenchspacing'),
-                  Command('counterwithin{figure}{section}'),
-                  Command('counterwithin{table}{section}'),
-                  Command('fancypagestyle{headings}{\\fancyhead{} \\renewcommand{\headrulewidth}{1pt} \\fancyheadoffset{0cm} \\fancyhead[RO]{\\nouppercase{\\leftmark}} \\fancyhead[LE]{\\nouppercase{\\leftmark}} \\fancyfoot{} \\fancyfoot[LE,RO]{\\thepage}}'),
-                  Command('fancypagestyle{plain}{\\fancyhf{} \\renewcommand{\\headrulewidth}{0pt} \\fancyfoot[LE,RO]{\\thepage}}'),
-                  Command('numberwithin{equation}{section}'),
-                  Command('renewcommand{\\familydefault}{\\sfdefault}'),
-        #\renewcommand{\familydefault}{\sfdefault}
-        
+        Package(
+            "geometry",
+            options=[
+                "lmargin=30mm",
+                "rmargin=30mm",
+                "top=25mm",
+                "bmargin=25mm",
+                "headheight=50mm",
+            ],
+        ),
+        Package("microtype"),
+        Package("authoraftertitle"),
+        # Package('polski',options=['MeX']),
+        # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+        Package("listings"),
+        Package("titlesec"),
+        Package("fancyhdr"),
+        Package("graphicx"),
+        Package("indentfirst"),
+        Package("pdfpages"),
+        Package("amsmath"),
+        Package("markdown"),
+        Package("hyperref"),
+        Command("newcommand{\praca}", arguments=["Praca dyplomowa"]),
+        Command("newcommand{\dyplom}", arguments=["Magisterska"]),
+        Command("newcommand{\kierunek}", arguments=["Wpisać kierunek"]),
+        Command("newcommand{\specjalnosc}", arguments=["Wpisać specjalność"]),
+        Command("newcommand{\\autor}", arguments=["Imię i nazwisko autora"]),
+        Command("newcommand{\opiekun}", arguments=["Wpisać opiekuna"]),
+        Command("newcommand{\promotor}", arguments=["Wpisać promotora"]),
+        Command("newcommand{\konsultant}", arguments=["Wpisać konsultanta"]),
+        Command(
+            "newcommand{\\tytul}", arguments=["Wpisać tytuł pracy dyplomowej po polsku"]
+        ),
+        Command("newcommand{\\album}", arguments=["Wpisać numer albumu"]),
+        Command("newcommand{\supervisor}", arguments=["dr inż. Bogumił Chiliński"]),
+        Command("newcommand{\\rok}", arguments=["Rok składania pracy"]),
+        Command(
+            "newcommand{\kluczowe}",
+            arguments=["Słowa kluczowe: Wpisać słowa kluczowe po polsku"],
+        ),
+        # Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']),
+        Command("graphicspath{{../}}"),
+        Command("frenchspacing"),
+        Command("counterwithin{figure}{section}"),
+        Command("counterwithin{table}{section}"),
+        Command(
+            "fancypagestyle{headings}{\\fancyhead{} \\renewcommand{\headrulewidth}{1pt} \\fancyheadoffset{0cm} \\fancyhead[RO]{\\nouppercase{\\leftmark}} \\fancyhead[LE]{\\nouppercase{\\leftmark}} \\fancyfoot{} \\fancyfoot[LE,RO]{\\thepage}}"
+        ),
+        Command(
+            "fancypagestyle{plain}{\\fancyhf{} \\renewcommand{\\headrulewidth}{0pt} \\fancyfoot[LE,RO]{\\thepage}}"
+        ),
+        Command("numberwithin{equation}{section}"),
+        Command("renewcommand{\\familydefault}{\\sfdefault}"),
+        # \renewcommand{\familydefault}{\sfdefault}
     ]
 
     def __init__(
-            self,
-            default_filepath: str = 'default_filepath',
-            title: str = 'Basic title',
-            *,
-            documentclass: str = 'article',
-            document_options: list = ['a4paper', '11pt', 'twoside'],
-            fontenc: str = 'T1',
-            inputenc: str = 'utf8',
-            font_size: str = 'normalsize',
-            lmodern: bool = False,
-            textcomp: bool = True,
-            microtype: bool = True,
-            page_numbers: bool = True,
-            indent: Optional[Union[str, int]] = None,
-            geometry_options: Optional[list] = ['inner=30mm', 'outer=20mm', 'bindingoffset=10mm', 'top=25mm', 'bottom=25mm'],
-            data: Optional[dict] = None
+        self,
+        default_filepath: str = "default_filepath",
+        title: str = "Basic title",
+        *,
+        documentclass: str = "article",
+        document_options: list = ["a4paper", "11pt", "twoside"],
+        fontenc: str = "T1",
+        inputenc: str = "utf8",
+        font_size: str = "normalsize",
+        lmodern: bool = False,
+        textcomp: bool = True,
+        microtype: bool = True,
+        page_numbers: bool = True,
+        indent: Optional[Union[str, int]] = None,
+        geometry_options: Optional[list] = [
+            "inner=30mm",
+            "outer=20mm",
+            "bindingoffset=10mm",
+            "top=25mm",
+            "bottom=25mm",
+        ],
+        data: Optional[dict] = None,
     ):
         """
-            Initialize the WutThesis class with optional customization.
+        Initialize the WutThesis class with optional customization.
 
-            Args:
-                default_filepath (str): Path for the generated document.
-                title (str): Title of the document.
-                documentclass (str): LaTeX document class (e.g., 'article').
-                document_options (list): Options for the document class.
-                fontenc (str): Font encoding (default 'T1').
-                inputenc (str): Input encoding (default 'utf8').
-                font_size (str): Font size (default 'normalsize').
-                lmodern (bool): Whether to use Latin Modern fonts.
-                textcomp (bool): Whether to use the `textcomp` package.
-                microtype (bool): Whether to use the `microtype` package.
-                page_numbers (bool): Whether to include page numbers.
-                indent (Optional[Union[str, int]]): Indentation settings.
-                geometry_options (Optional[list]): Geometry options for page layout.
-                data (Optional[dict]): Additional data for customization.
+        Args:
+            default_filepath (str): Path for the generated document.
+            title (str): Title of the document.
+            documentclass (str): LaTeX document class (e.g., 'article').
+            document_options (list): Options for the document class.
+            fontenc (str): Font encoding (default 'T1').
+            inputenc (str): Input encoding (default 'utf8').
+            font_size (str): Font size (default 'normalsize').
+            lmodern (bool): Whether to use Latin Modern fonts.
+            textcomp (bool): Whether to use the `textcomp` package.
+            microtype (bool): Whether to use the `microtype` package.
+            page_numbers (bool): Whether to include page numbers.
+            indent (Optional[Union[str, int]]): Indentation settings.
+            geometry_options (Optional[list]): Geometry options for page layout.
+            data (Optional[dict]): Additional data for customization.
         """
 
         super().__init__(
@@ -1854,29 +1908,29 @@ class WutThesis(Document):
             geometry_options=geometry_options,
             data=data,
         )
-#         label=self.label
-        self.title=title
+        #         label=self.label
+        self.title = title
         # self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
-#         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
-#         self.packages.append(Command('newcommand{\praca}', arguments=['Praca dyplomowa']))
-#         self.packages.append(Command('newcommand{\dyplom}', arguments=['Magisterska']))
-#         self.packages.append(Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']))
-#         self.packages.append(Command('newcommand{\specjalnosc}', arguments=['Wpisać specjalność']))
-#         self.packages.append(Command('newcommand{\\autor}', arguments=['Imię i nazwisko autora']))
-#         self.packages.append(Command('newcommand{\opiekun}', arguments=['Wpisać opiekuna']))
-#         self.packages.append(Command('newcommand{\promotor}', arguments=['Wpisać promotora']))
-#         self.packages.append(Command('newcommand{\konsultant}', arguments=['Wpisać konsultanta']))
-#         self.packages.append(Command('newcommand{\\tytul}', arguments=['Wpisać tytuł pracy dyplomowej po polsku']))
-#         self.packages.append(Command('newcommand{\\album}', arguments=['303596']))
-#         self.packages.append(Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']))
-#         self.packages.append(Command('newcommand{\\rok}', arguments=['Rok składania pracy']))
-#         self.packages.append(Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']))
-#         #self.packages.append(Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']))
-        self.packages.append(Command('graphicspath{{../}}'))
-#         self.append(Command('maketitle'))
-        self.append(NoEscape('%%% New doc'))
+        #         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
+        #         self.packages.append(Command('newcommand{\praca}', arguments=['Praca dyplomowa']))
+        #         self.packages.append(Command('newcommand{\dyplom}', arguments=['Magisterska']))
+        #         self.packages.append(Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']))
+        #         self.packages.append(Command('newcommand{\specjalnosc}', arguments=['Wpisać specjalność']))
+        #         self.packages.append(Command('newcommand{\\autor}', arguments=['Imię i nazwisko autora']))
+        #         self.packages.append(Command('newcommand{\opiekun}', arguments=['Wpisać opiekuna']))
+        #         self.packages.append(Command('newcommand{\promotor}', arguments=['Wpisać promotora']))
+        #         self.packages.append(Command('newcommand{\konsultant}', arguments=['Wpisać konsultanta']))
+        #         self.packages.append(Command('newcommand{\\tytul}', arguments=['Wpisać tytuł pracy dyplomowej po polsku']))
+        #         self.packages.append(Command('newcommand{\\album}', arguments=['303596']))
+        #         self.packages.append(Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']))
+        #         self.packages.append(Command('newcommand{\\rok}', arguments=['Rok składania pracy']))
+        #         self.packages.append(Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']))
+        #         #self.packages.append(Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']))
+        self.packages.append(Command("graphicspath{{../}}"))
+        #         self.append(Command('maketitle'))
+        self.append(NoEscape("%%% New doc"))
         # tu implementować co tam potrzeba
-        
+
     @classmethod
     def base_setup(cls, create_file: bool = False):
         """
@@ -1903,13 +1957,10 @@ class WutThesis(Document):
         if create_file is True:
             return cls._create_base_setup_env()
 
+        # doc = WutThesis('./output/thesis_name')
+        # doc.preamble.append(NoEscape(r'\\usepackage[MeX]{polski}')) #to set polish as main language"""
 
-
-
-# doc = WutThesis('./output/thesis_name')
-#doc.preamble.append(NoEscape(r'\\usepackage[MeX]{polski}')) #to set polish as main language"""
-
-        thesis_introduction_str = '''#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+        thesis_introduction_str = """#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
 sec_intro = Section('Section that presents text reporting')
@@ -1929,7 +1980,7 @@ display(ReportText('This subsection provides state of the art. '*100))
 
 sub_methodology = Subsection('Methodology')
 CurrentContainer(sub_methodology)
-display(ReportText('This subsection provides methodology. '*100))'''
+display(ReportText('This subsection provides methodology. '*100))"""
 
         math_str = '''from sympy import Eq, Symbol, symbols
 from dynpy.utilities.report import *
@@ -2059,12 +2110,12 @@ BasicsOfODESystemGuide();
 # UsageOfDynamicSystemsGuide()
 '''
 
-        picture_str = '''sec_picture = Section('Section that presents pictures reporting')
+        picture_str = """sec_picture = Section('Section that presents pictures reporting')
 CurrentContainer(sec_picture)
 
-display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))'''
+display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))"""
 
-        simulaion_str = '''from dynpy.utilities.report import *
+        simulaion_str = """from dynpy.utilities.report import *
 from sympy import *
 import numpy as np
 
@@ -2123,11 +2174,9 @@ wynik.plot()
 # display(ObjectCode('spring_sol = spring.solution'))
 
 # display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
-# spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()'''
+# spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()"""
 
-
-        
-        veryfication_str = '''from sympy import *
+        veryfication_str = """from sympy import *
 
 from sympy.physics import units
 
@@ -2221,14 +2270,14 @@ display(ReportText('Obtained data analysis. '*200))
 
 display(graph)
 
-display(ReportText('Description of verifications outcomes. '*200))'''
+display(ReportText('Description of verifications outcomes. '*200))"""
 
-        conclusion_str = '''sec_conclusion = Section('Section that contains final conclusions')
+        conclusion_str = """sec_conclusion = Section('Section that contains final conclusions')
 CurrentContainer(sec_conclusion)
 
-display(ReportText('Conclusions '*200))'''
+display(ReportText('Conclusions '*200))"""
 
-        symbols_description_str = '''sec_symbols = Section('Section that contains all symbols descriptions')
+        symbols_description_str = """sec_symbols = Section('Section that contains all symbols descriptions')
 CurrentContainer(sec_symbols)
 
 E_K,F = symbols('E_K,F')
@@ -2241,9 +2290,9 @@ DescriptionsRegistry().set_descriptions({**syms_dict})
 DescriptionsRegistry().reset_registry()
 SymbolsDescription.set_default_header('  ')
 
-display(SymbolsDescription({**syms_dict}))'''
+display(SymbolsDescription({**syms_dict}))"""
 
-        document_str = '''# Creating file
+        document_str = """# Creating file
 # Be sure *output* folder is in the current directory
 
 thesis_name = './output/report_name' #path for report file 
@@ -2325,12 +2374,11 @@ doc.append(Command('pagestyle{plain}'))
 doc.append(Command('newpage'))
 
 # Generating file
-doc.generate_pdf(clean_tex=False)'''        
-        
-#         preliminary_str=(f"""
-# =======
-        preliminary_str=(
-f"""
+doc.generate_pdf(clean_tex=False)"""
+
+        #         preliminary_str=(f"""
+        # =======
+        preliminary_str = f"""
 
 Examplary setup is as follows:
 
@@ -2447,11 +2495,11 @@ BasicsOfODESystemGuide();
 {document_str}
 ```
 
-""")
+"""
 
-        display(IPMarkdown(preliminary_str))    
+        display(IPMarkdown(preliminary_str))
 
-        preliminary_str=(f"""
+        preliminary_str = f"""
 #Example:
 
 #To prepare a simple document with text and images:
@@ -2503,7 +2551,7 @@ BasicsOfODESystemGuide();
 
 {document_str}
 
-""")
+"""
 
         return ObjectCode(preliminary_str)
 
@@ -2591,7 +2639,7 @@ BasicsOfODESystemGuide();
     "nbformat": 4,
     "nbformat_minor": 4
 }"""
-    articles_bib = '''@INPROCEEDINGS{brief_history_of_simulations,
+    articles_bib = """@INPROCEEDINGS{brief_history_of_simulations,
   author={Goldsman, David and Nance, Richard E. and Wilson, James R.},
   booktitle={Proceedings of the 2010 Winter Simulation Conference}, 
   title={A brief history of simulation revisited}, 
@@ -2628,7 +2676,7 @@ BasicsOfODESystemGuide();
   pages = {10},
   doi = {}
 }
-'''
+"""
 
     def _create_directory(path: str) -> None:
         # """
@@ -2653,7 +2701,7 @@ BasicsOfODESystemGuide();
 
         except Exception as e:
             print(f"An error occurred: {e}")
-        
+
     def _create_file(name: str, content: str = None, path: str = None) -> None:
         # """
         #     Creates a file and writes content to it.
@@ -2670,21 +2718,21 @@ BasicsOfODESystemGuide();
             if not os.path.exists(path):
                 _create_directory(path)
 
-            with open(os.path.join(path, name), 'w') as file: 
+            with open(os.path.join(path, name), "w") as file:
                 file.write(content)
 
         else:
-            with open(name, 'w') as file:
+            with open(name, "w") as file:
                 file.write(content)
 
         file.close()
 
-    @classmethod    
+    @classmethod
     def _create_base_setup_env(cls) -> None:
         """
-            Creates a Jupyter notebook file with WUT thesis base setup and an output directory containing a .bib file.
+        Creates a Jupyter notebook file with WUT thesis base setup and an output directory containing a .bib file.
         """
-        
+
         Jupyter_file_content = """{
     "cells": [
         {
@@ -2769,7 +2817,7 @@ BasicsOfODESystemGuide();
     "nbformat": 4,
     "nbformat_minor": 4
 }"""
-        articles_bib = '''@INPROCEEDINGS{brief_history_of_simulations,
+        articles_bib = """@INPROCEEDINGS{brief_history_of_simulations,
   author={Goldsman, David and Nance, Richard E. and Wilson, James R.},
   booktitle={Proceedings of the 2010 Winter Simulation Conference}, 
   title={A brief history of simulation revisited}, 
@@ -2806,23 +2854,21 @@ BasicsOfODESystemGuide();
   pages = {10},
   doi = {}
 }
-'''
-        cls._create_file('WUT_Thesis_starter.ipynb', Jupyter_file_content)
+"""
+        cls._create_file("WUT_Thesis_starter.ipynb", Jupyter_file_content)
 
-        os.makedirs('output')
-        os.makedirs('tikzplots')
+        os.makedirs("output")
+        os.makedirs("tikzplots")
 
-        cls._create_file('articles.bib', articles_bib, 'output')
-        
-        
+        cls._create_file("articles.bib", articles_bib, "output")
+
+
 class ResearchProjectReport(WutThesis):
 
     @classmethod
     def base_setup(cls):
 
-
-        preliminary_str=(
-f"""
+        preliminary_str = f"""
 
 Examplary setup is as follows:
 
@@ -2938,13 +2984,10 @@ doc.generate_pdf(clean_tex=True)
 
 
 """
-        )
 
-        display(IPMarkdown(preliminary_str))    
+        display(IPMarkdown(preliminary_str))
 
-
-        preliminary_str=(
-f"""
+        preliminary_str = f"""
 
 # Examplary setup is as follows:
 
@@ -3036,19 +3079,16 @@ doc.generate_pdf(clean_tex=True)
 
 
 """
-                    )
 
         return ObjectCode(preliminary_str)
 
-    
+
 class DevelopmentProjectReport(WutThesis):
 
     @classmethod
     def base_setup(cls):
 
-
-        preliminary_str=(
-f"""
+        preliminary_str = f"""
 
 Examplary setup is as follows:
 
@@ -3164,13 +3204,10 @@ doc.generate_pdf(clean_tex=True)
 
 
 """
-        )
 
-        display(IPMarkdown(preliminary_str))    
+        display(IPMarkdown(preliminary_str))
 
-
-        preliminary_str=(
-f"""
+        preliminary_str = f"""
 
 # Examplary setup is as follows:
 
@@ -3262,73 +3299,93 @@ doc.generate_pdf(clean_tex=True)
 
 
 """
-        )
 
         return ObjectCode(preliminary_str)
 
-        
-        
-class StateOfArtReport(Document):
-    
-    latex_name = 'document'
-    packages = [
-                  Package('geometry',options=['lmargin=30mm', 'rmargin=30mm',  'top=25mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('microtype'),
-                  Package('authoraftertitle'),
-                  Package(' ',options=['MeX']),
-                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('listings'),
-                  Package('titlesec'),
-                  Package('fancyhdr'),
-                  Package('graphicx'),
-                  Package('indentfirst'),
-                  Package('pdfpages'),
-                  Package('amsmath'),
 
-                  Command('newcommand{\praca}', arguments=['Praca dyplomowa']),
-                  Command('newcommand{\dyplom}', arguments=['Magisterska']),
-                  Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']),
-                  Command('newcommand{\specjalnosc}', arguments=['Wpisać specjalność']),
-                  Command('newcommand{\\autor}', arguments=['Imię i nazwisko autora']),
-                  Command('newcommand{\opiekun}', arguments=['Wpisać opiekuna']),
-                  Command('newcommand{\promotor}', arguments=['Wpisać promotora']),
-                  Command('newcommand{\konsultant}', arguments=['Wpisać konsultanta']),
-                  Command('newcommand{\\tytul}', arguments=['Wpisać tytuł pracy dyplomowej po polsku']),
-                  Command('newcommand{\\album}', arguments=['Wpisać numer albumu']),
-                  Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']),
-                  Command('newcommand{\\rok}', arguments=['Rok składania pracy']),
-                  Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']),
-                  #Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']),
-                  Command('graphicspath{{../}}'),
-                  Command('frenchspacing'),
-                  Command('counterwithin{figure}{section}'),
-                  Command('counterwithin{table}{section}'),
-                  Command('fancypagestyle{headings}{\\fancyhead{} \\renewcommand{\headrulewidth}{1pt} \\fancyheadoffset{0cm} \\fancyhead[RO]{\\nouppercase{\\leftmark}} \\fancyhead[LE]{\\nouppercase{\\leftmark}} \\fancyfoot{} \\fancyfoot[LE,RO]{\\thepage}}'),
-                  Command('fancypagestyle{plain}{\\fancyhf{} \\renewcommand{\\headrulewidth}{0pt} \\fancyfoot[LE,RO]{\\thepage}}'),
-                  Command('numberwithin{equation}{section}'),
-                  Command('renewcommand{\\familydefault}{\\sfdefault}'),
-        #\renewcommand{\familydefault}{\sfdefault}
-        
+class StateOfArtReport(Document):
+
+    latex_name = "document"
+    packages = [
+        Package(
+            "geometry",
+            options=[
+                "lmargin=30mm",
+                "rmargin=30mm",
+                "top=25mm",
+                "bmargin=25mm",
+                "headheight=50mm",
+            ],
+        ),
+        Package("microtype"),
+        Package("authoraftertitle"),
+        Package(" ", options=["MeX"]),
+        # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+        Package("listings"),
+        Package("titlesec"),
+        Package("fancyhdr"),
+        Package("graphicx"),
+        Package("indentfirst"),
+        Package("pdfpages"),
+        Package("amsmath"),
+        Command("newcommand{\praca}", arguments=["Praca dyplomowa"]),
+        Command("newcommand{\dyplom}", arguments=["Magisterska"]),
+        Command("newcommand{\kierunek}", arguments=["Wpisać kierunek"]),
+        Command("newcommand{\specjalnosc}", arguments=["Wpisać specjalność"]),
+        Command("newcommand{\\autor}", arguments=["Imię i nazwisko autora"]),
+        Command("newcommand{\opiekun}", arguments=["Wpisać opiekuna"]),
+        Command("newcommand{\promotor}", arguments=["Wpisać promotora"]),
+        Command("newcommand{\konsultant}", arguments=["Wpisać konsultanta"]),
+        Command(
+            "newcommand{\\tytul}", arguments=["Wpisać tytuł pracy dyplomowej po polsku"]
+        ),
+        Command("newcommand{\\album}", arguments=["Wpisać numer albumu"]),
+        Command("newcommand{\supervisor}", arguments=["dr inż. Bogumił Chiliński"]),
+        Command("newcommand{\\rok}", arguments=["Rok składania pracy"]),
+        Command(
+            "newcommand{\kluczowe}",
+            arguments=["Słowa kluczowe: Wpisać słowa kluczowe po polsku"],
+        ),
+        # Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']),
+        Command("graphicspath{{../}}"),
+        Command("frenchspacing"),
+        Command("counterwithin{figure}{section}"),
+        Command("counterwithin{table}{section}"),
+        Command(
+            "fancypagestyle{headings}{\\fancyhead{} \\renewcommand{\headrulewidth}{1pt} \\fancyheadoffset{0cm} \\fancyhead[RO]{\\nouppercase{\\leftmark}} \\fancyhead[LE]{\\nouppercase{\\leftmark}} \\fancyfoot{} \\fancyfoot[LE,RO]{\\thepage}}"
+        ),
+        Command(
+            "fancypagestyle{plain}{\\fancyhf{} \\renewcommand{\\headrulewidth}{0pt} \\fancyfoot[LE,RO]{\\thepage}}"
+        ),
+        Command("numberwithin{equation}{section}"),
+        Command("renewcommand{\\familydefault}{\\sfdefault}"),
+        # \renewcommand{\familydefault}{\sfdefault}
     ]
-    
-    
-    
-    def __init__(self,
-                 default_filepath='default_filepath',
-                 title='Basic title',
-                 *,
-                 documentclass='article',
-                 document_options=['a4paper','11pt','twoside'],
-                 fontenc='T1',
-                 inputenc='utf8',
-                 font_size='normalsize',
-                 lmodern=False,
-                 textcomp=True,
-                 microtype=True,
-                 page_numbers=True,
-                 indent=None,
-                 geometry_options=['inner=30mm', 'outer=20mm', 'bindingoffset=10mm', 'top=25mm', 'bottom=25mm'],#,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
-                 data=None):
+
+    def __init__(
+        self,
+        default_filepath="default_filepath",
+        title="Basic title",
+        *,
+        documentclass="article",
+        document_options=["a4paper", "11pt", "twoside"],
+        fontenc="T1",
+        inputenc="utf8",
+        font_size="normalsize",
+        lmodern=False,
+        textcomp=True,
+        microtype=True,
+        page_numbers=True,
+        indent=None,
+        geometry_options=[
+            "inner=30mm",
+            "outer=20mm",
+            "bindingoffset=10mm",
+            "top=25mm",
+            "bottom=25mm",
+        ],  # ,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
+        data=None,
+    ):
 
         super().__init__(
             default_filepath=default_filepath,
@@ -3345,37 +3402,36 @@ class StateOfArtReport(Document):
             geometry_options=geometry_options,
             data=data,
         )
-#         label=self.label
-        self.title=title
-        #self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
-#         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
-#         self.packages.append(Command('newcommand{\praca}', arguments=['Praca dyplomowa']))
-#         self.packages.append(Command('newcommand{\dyplom}', arguments=['Magisterska']))
-#         self.packages.append(Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']))
-#         self.packages.append(Command('newcommand{\specjalnosc}', arguments=['Wpisać specjalność']))
-#         self.packages.append(Command('newcommand{\\autor}', arguments=['Imię i nazwisko autora']))
-#         self.packages.append(Command('newcommand{\opiekun}', arguments=['Wpisać opiekuna']))
-#         self.packages.append(Command('newcommand{\promotor}', arguments=['Wpisać promotora']))
-#         self.packages.append(Command('newcommand{\konsultant}', arguments=['Wpisać konsultanta']))
-#         self.packages.append(Command('newcommand{\\tytul}', arguments=['Wpisać tytuł pracy dyplomowej po polsku']))
-#         self.packages.append(Command('newcommand{\\album}', arguments=['303596']))
-#         self.packages.append(Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']))
-#         self.packages.append(Command('newcommand{\\rok}', arguments=['Rok składania pracy']))
-#         self.packages.append(Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']))
-#         #self.packages.append(Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']))
-        self.packages.append(Command('graphicspath{{../}}'))
-#         self.append(Command('maketitle'))
-        self.append(NoEscape('%%% New doc'))
+        #         label=self.label
+        self.title = title
+        # self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
+        #         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
+        #         self.packages.append(Command('newcommand{\praca}', arguments=['Praca dyplomowa']))
+        #         self.packages.append(Command('newcommand{\dyplom}', arguments=['Magisterska']))
+        #         self.packages.append(Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']))
+        #         self.packages.append(Command('newcommand{\specjalnosc}', arguments=['Wpisać specjalność']))
+        #         self.packages.append(Command('newcommand{\\autor}', arguments=['Imię i nazwisko autora']))
+        #         self.packages.append(Command('newcommand{\opiekun}', arguments=['Wpisać opiekuna']))
+        #         self.packages.append(Command('newcommand{\promotor}', arguments=['Wpisać promotora']))
+        #         self.packages.append(Command('newcommand{\konsultant}', arguments=['Wpisać konsultanta']))
+        #         self.packages.append(Command('newcommand{\\tytul}', arguments=['Wpisać tytuł pracy dyplomowej po polsku']))
+        #         self.packages.append(Command('newcommand{\\album}', arguments=['303596']))
+        #         self.packages.append(Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']))
+        #         self.packages.append(Command('newcommand{\\rok}', arguments=['Rok składania pracy']))
+        #         self.packages.append(Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']))
+        #         #self.packages.append(Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']))
+        self.packages.append(Command("graphicspath{{../}}"))
+        #         self.append(Command('maketitle'))
+        self.append(NoEscape("%%% New doc"))
         # tu implementować co tam potrzeba
-        
+
     @classmethod
-    def base_setup(cls, create_file = False):
+    def base_setup(cls, create_file=False):
 
         if create_file is True:
             return cls._create_base_setup_env()
-        
-        preliminary_str=(
-"""
+
+        preliminary_str = """
 
 Examplary setup is as follows:
 
@@ -3522,13 +3578,10 @@ doc.generate_pdf(clean_tex=True)
 ```
 
 """
-        )
 
-        display(IPMarkdown(preliminary_str))    
+        display(IPMarkdown(preliminary_str))
 
-
-        preliminary_str=(
-"""
+        preliminary_str = """
 
 #Example:
 
@@ -3667,7 +3720,6 @@ doc.generate_pdf(clean_tex=False)
 
 
 """
-        )
         return ObjectCode(preliminary_str)
 
     Jupyter_file_content = """{
@@ -3754,7 +3806,7 @@ doc.generate_pdf(clean_tex=False)
     "nbformat": 4,
     "nbformat_minor": 4
 }"""
-    articles_bib = '''@INPROCEEDINGS{brief_history_of_simulations,
+    articles_bib = """@INPROCEEDINGS{brief_history_of_simulations,
   author={Goldsman, David and Nance, Richard E. and Wilson, James R.},
   booktitle={Proceedings of the 2010 Winter Simulation Conference}, 
   title={A brief history of simulation revisited}, 
@@ -3791,14 +3843,15 @@ doc.generate_pdf(clean_tex=False)
   pages = {10},
   doi = {}
 }
-'''
-    def _create_directory(path):
-        '''
-Method create directory from given path
+"""
 
-Arguments:
-path - (str), name of directory that method will create, if subdirectories shall be created, path should look like this: 'directory/subdirectory' 
-        '''
+    def _create_directory(path):
+        """
+        Method create directory from given path
+
+        Arguments:
+        path - (str), name of directory that method will create, if subdirectories shall be created, path should look like this: 'directory/subdirectory'
+        """
         import os
 
         try:
@@ -3813,37 +3866,37 @@ path - (str), name of directory that method will create, if subdirectories shall
 
         except Exception as e:
             print(f"An error occurred: {e}")
-        
-        
-    def _create_file(name, content = None, path = None):
-        '''
-Method create file and write content to it
 
-Arguments:
-name - (str), name of file created by method,
-content - (str), optional,  string with a content of file, that is going to be writen to it,
-path - (str), optional, directory where file should be created
-        '''
+    def _create_file(name, content=None, path=None):
+        """
+        Method create file and write content to it
+
+        Arguments:
+        name - (str), name of file created by method,
+        content - (str), optional,  string with a content of file, that is going to be writen to it,
+        path - (str), optional, directory where file should be created
+        """
         import os
 
         if path is not None:
             if not os.path.exists(path):
                 _create_directory(path)
 
-            with open(os.path.join(path, name), 'w') as file: 
+            with open(os.path.join(path, name), "w") as file:
                 file.write(content)
 
         else:
-            with open(name, 'w') as file:
+            with open(name, "w") as file:
                 file.write(content)
 
         file.close()
-    @classmethod    
+
+    @classmethod
     def _create_base_setup_env(cls):
-        '''
-Method that create Jupyter notebook file with WUT thesis base setup and output directory with .bib file
-        '''
-        
+        """
+        Method that create Jupyter notebook file with WUT thesis base setup and output directory with .bib file
+        """
+
         Jupyter_file_content = """{
     "cells": [
         {
@@ -3928,7 +3981,7 @@ Method that create Jupyter notebook file with WUT thesis base setup and output d
     "nbformat": 4,
     "nbformat_minor": 4
 }"""
-        articles_bib = '''@INPROCEEDINGS{brief_history_of_simulations,
+        articles_bib = """@INPROCEEDINGS{brief_history_of_simulations,
   author={Goldsman, David and Nance, Richard E. and Wilson, James R.},
   booktitle={Proceedings of the 2010 Winter Simulation Conference}, 
   title={A brief history of simulation revisited}, 
@@ -3965,167 +4018,201 @@ Method that create Jupyter notebook file with WUT thesis base setup and output d
   pages = {10},
   doi = {}
 }
-'''
-        cls._create_file('WUT_Thesis_starter.ipynb', Jupyter_file_content)
+"""
+        cls._create_file("WUT_Thesis_starter.ipynb", Jupyter_file_content)
 
-        os.makedirs('output')
-        os.makedirs('tikzplots')
+        os.makedirs("output")
+        os.makedirs("tikzplots")
 
-        cls._create_file('articles.bib', articles_bib, 'output')
-                
+        cls._create_file("articles.bib", articles_bib, "output")
+
+
 class ThesisTemplate(WutThesis):
     pass
-        
 
 
-    
 class MechanicalCase(Guide):
-    
-    latex_name = 'document'
-    packages = [
-                  Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('microtype'),
-                  Package('authoraftertitle'),
-                  Package('polski',options=['MeX']),
-                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('listings'),
-                  Package('titlesec'),
-                  Package('fancyhdr'),
-                  Command('pagestyle', arguments=['fancy']),
-                  Command('fancyhf', arguments=['']),
-                  Command('fancyhead',  arguments=['DynPy Team'],options=['R']),
-                  Command('fancyhead', arguments=['Mechanics, 2023'],options=['L']),
-                  Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
-        ]
 
-    
-    
+    latex_name = "document"
+    packages = [
+        Package(
+            "geometry",
+            options=[
+                "lmargin=25mm",
+                "rmargin=25mm",
+                "top=30mm",
+                "bmargin=25mm",
+                "headheight=50mm",
+            ],
+        ),
+        Package("microtype"),
+        Package("authoraftertitle"),
+        Package("polski", options=["MeX"]),
+        # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+        Package("listings"),
+        Package("titlesec"),
+        Package("fancyhdr"),
+        Command("pagestyle", arguments=["fancy"]),
+        Command("fancyhf", arguments=[""]),
+        Command("fancyhead", arguments=["DynPy Team"], options=["R"]),
+        Command("fancyhead", arguments=["Mechanics, 2023"], options=["L"]),
+        Command("fancyfoot", arguments=[NoEscape("\\thepage")], options=["C"]),
+    ]
+
+
 class CaseStudy(Guide):
-    
-    latex_name = 'document'
-    _documentclass = 'article'
+
+    latex_name = "document"
+    _documentclass = "article"
     packages = [
-                  Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('microtype'),
-                  Package('authoraftertitle'),
-                  Package('polski',options=['MeX']),
-                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('listings'),
-                  Package('titlesec'),
-                  Package('fancyhdr'),
-                  Command('pagestyle', arguments=['fancy']),
-                  Command('fancyhf', arguments=['']),
-                  Command('fancyhead',  arguments=['B. Chiliński'],options=['R']),
-                  Command('fancyhead', arguments=['Studium przypadku, 2023'],options=['L']),
-                  Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
-        ]
-    
-    
+        Package(
+            "geometry",
+            options=[
+                "lmargin=25mm",
+                "rmargin=25mm",
+                "top=30mm",
+                "bmargin=25mm",
+                "headheight=50mm",
+            ],
+        ),
+        Package("microtype"),
+        Package("authoraftertitle"),
+        Package("polski", options=["MeX"]),
+        # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+        Package("listings"),
+        Package("titlesec"),
+        Package("fancyhdr"),
+        Command("pagestyle", arguments=["fancy"]),
+        Command("fancyhf", arguments=[""]),
+        Command("fancyhead", arguments=["B. Chiliński"], options=["R"]),
+        Command("fancyhead", arguments=["Studium przypadku, 2023"], options=["L"]),
+        Command("fancyfoot", arguments=[NoEscape("\\thepage")], options=["C"]),
+    ]
+
+
 class TechThriveMechanicalCase(Guide):
-    
-    latex_name = 'document'
-    _documentclass = 'article'
+
+    latex_name = "document"
+    _documentclass = "article"
     packages = [
-                  Package('float'),
-                  Package('graphicx'),
-                  Command('graphicspath{{../}}'),
-                  Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('microtype'),
-                  Package('authoraftertitle'),
-                  Package('polski',options=['MeX']),
-                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('listings'),
-                  Package('titlesec'),
-                  Package('fancyhdr'),
-                  Package('svg'),        
-                  Command('pagestyle', arguments=['fancy']),
-                  Command('fancyhf', arguments=['']),
-                  Command('fancyhead',  arguments=[NoEscape(r'\includegraphics[height=0.8cm]{./dynpy/models/images/TT.png}')],options=['C']), #
-                  Command('fancyhead', arguments=['Mechanika Ogólna'],options=['L']),
-                  Command('fancyhead', arguments=[NoEscape('\\today')],options=['R']),
-                  Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
-                  Command('fancyfoot',  arguments=['Copyright TechThrive 2023'],options=['L']),
-                  Command('fancyfoot',  arguments=['Powered by DynPy'],options=['R']),
-                  Command('graphicspath{{../}}'),
-        ]
-    
+        Package("float"),
+        Package("graphicx"),
+        Command("graphicspath{{../}}"),
+        Package(
+            "geometry",
+            options=[
+                "lmargin=25mm",
+                "rmargin=25mm",
+                "top=30mm",
+                "bmargin=25mm",
+                "headheight=50mm",
+            ],
+        ),
+        Package("microtype"),
+        Package("authoraftertitle"),
+        Package("polski", options=["MeX"]),
+        # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+        Package("listings"),
+        Package("titlesec"),
+        Package("fancyhdr"),
+        Package("svg"),
+        Command("pagestyle", arguments=["fancy"]),
+        Command("fancyhf", arguments=[""]),
+        Command(
+            "fancyhead",
+            arguments=[
+                NoEscape(
+                    r"\includegraphics[height=0.8cm]{./dynpy/models/images/TT.png}"
+                )
+            ],
+            options=["C"],
+        ),  #
+        Command("fancyhead", arguments=["Mechanika Ogólna"], options=["L"]),
+        Command("fancyhead", arguments=[NoEscape("\\today")], options=["R"]),
+        Command("fancyfoot", arguments=[NoEscape("\\thepage")], options=["C"]),
+        Command("fancyfoot", arguments=["Copyright TechThrive 2023"], options=["L"]),
+        Command("fancyfoot", arguments=["Powered by DynPy"], options=["R"]),
+        Command("graphicspath{{../}}"),
+    ]
+
+
 class TechThriveODECase(TechThriveMechanicalCase):
     packages = [
-                  Command('fancyhead', arguments=['Równania różniczkowe'],options=['L']),
-        ]
-    
+        Command("fancyhead", arguments=["Równania różniczkowe"], options=["L"]),
+    ]
+
+
 class TechThriveMVCase(TechThriveMechanicalCase):
-    
 
-    
     packages = [
-                  Command('fancyhead', arguments=['Drgania mechaniczne'],options=['L']),
-        ]
-
+        Command("fancyhead", arguments=["Drgania mechaniczne"], options=["L"]),
+    ]
 
     @property
     def default_reported_object(self):
 
-        from ...models.mechanics import ForcedDampedTrolleysWithSprings,ForcedSpringMassSystem
-        
-        return ForcedSpringMassSystem()   
+        from ...models.mechanics import (
+            ForcedDampedTrolleysWithSprings,
+            ForcedSpringMassSystem,
+        )
+
+        return ForcedSpringMassSystem()
 
     @property
     def _report_components(self):
-        
-        comp_list=[
-#         mech_comp.TitlePageComponent,
-#         #mech_comp.SchemeComponent,
-#         #mech_comp.ExemplaryPictureComponent,
-#         mech_comp.KineticEnergyComponent,
-#         mech_comp.PotentialEnergyComponent,
-#         mech_comp.LagrangianComponent,
-#         mech_comp.GoverningEquationComponent,
-#         #mech_comp.FundamentalMatrixComponent,
-#         mech_comp.GeneralSolutionComponent,
-#         #mech_comp.SteadySolutionComponent,
-   
+
+        comp_list = [
+            #         mech_comp.TitlePageComponent,
+            #         #mech_comp.SchemeComponent,
+            #         #mech_comp.ExemplaryPictureComponent,
+            #         mech_comp.KineticEnergyComponent,
+            #         mech_comp.PotentialEnergyComponent,
+            #         mech_comp.LagrangianComponent,
+            #         mech_comp.GoverningEquationComponent,
+            #         #mech_comp.FundamentalMatrixComponent,
+            #         mech_comp.GeneralSolutionComponent,
+            #         #mech_comp.SteadySolutionComponent,
         ]
-        
+
         return comp_list
 
 
-
-        
 class QuotationTemplate(Document):
     packages = [
-                  Package('geometry',options=['left=1in','top=1in','right=1in','bottom=1in']),
-                  Package('inputenc',options=['utf8']),
-                  Package('hyperref',options=['colorlinks']),
-                  Package('graphicx'),
-                  Package('tabularx'),
-                  Package('multirow'),
-                  Package('ragged2e'),
-                  Package('hhline'),
-                  Package('array'),
-                  Package('booktabs'),
-                  Package('polski',options=['MeX']),]
+        Package("geometry", options=["left=1in", "top=1in", "right=1in", "bottom=1in"]),
+        Package("inputenc", options=["utf8"]),
+        Package("hyperref", options=["colorlinks"]),
+        Package("graphicx"),
+        Package("tabularx"),
+        Package("multirow"),
+        Package("ragged2e"),
+        Package("hhline"),
+        Package("array"),
+        Package("booktabs"),
+        Package("polski", options=["MeX"]),
+    ]
 
-    def __init__(self,
-                 default_filepath='default_filepath',
-                 title='Wycena zlecenia',
-
-                 *,
-                 documentclass='report',
-                 document_options=None,
-                 fontenc='T1',
-                 inputenc='utf8',
-                 font_size='normalsize',
-                 lmodern=False,
-                 textcomp=True,
-                 microtype=True,
-                 page_numbers=True,
-                 indent=None,
-                 geometry_options=None,#['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
-                 data=None):
+    def __init__(
+        self,
+        default_filepath="default_filepath",
+        title="Wycena zlecenia",
+        *,
+        documentclass="report",
+        document_options=None,
+        fontenc="T1",
+        inputenc="utf8",
+        font_size="normalsize",
+        lmodern=False,
+        textcomp=True,
+        microtype=True,
+        page_numbers=True,
+        indent=None,
+        geometry_options=None,  # ['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
+        data=None,
+    ):
 
         super().__init__(
-#             title=title,
+            #             title=title,
             default_filepath=default_filepath,
             documentclass=documentclass,
             document_options=document_options,
@@ -4140,49 +4227,63 @@ class QuotationTemplate(Document):
             geometry_options=geometry_options,
             data=data,
         )
-#         label=self.label
-#         self.title=title
-        self.preamble.append(Command('hypersetup', 'urlcolor=blue'))
-        self.preamble.append(Command('newcolumntype', arguments='R',options='1',extra_arguments=NoEscape('>{\\raggedleft\\let\\newline\\\\\\arraybackslash\\hspace{0pt}}m{#1}')))
+        #         label=self.label
+        #         self.title=title
+        self.preamble.append(Command("hypersetup", "urlcolor=blue"))
+        self.preamble.append(
+            Command(
+                "newcolumntype",
+                arguments="R",
+                options="1",
+                extra_arguments=NoEscape(
+                    ">{\\raggedleft\\let\\newline\\\\\\arraybackslash\\hspace{0pt}}m{#1}"
+                ),
+            )
+        )
+
+
 #         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
 # #         self.append(Command('maketitle'))
 #         self.append(NewPage())
-        # tu implementować co tam potrzeba
-        
+# tu implementować co tam potrzeba
+
+
 class QuotationTemplate(Document):
     packages = [
-                  Package('geometry',options=['left=1cm','top=1cm','right=1cm','bottom=1cm']),
-                  Package('inputenc',options=['utf8']),
-                  Package('hyperref',options=['colorlinks']),
-                  Package('graphicx'),
-                  Package('tabularx'),
-                  Package('multirow'),
-                  Package('ragged2e'),
-                  Package('hhline'),
-                  Package('array'),
-                  Package('booktabs'),
-                  Package('polski',options=['MeX']),]
+        Package("geometry", options=["left=1cm", "top=1cm", "right=1cm", "bottom=1cm"]),
+        Package("inputenc", options=["utf8"]),
+        Package("hyperref", options=["colorlinks"]),
+        Package("graphicx"),
+        Package("tabularx"),
+        Package("multirow"),
+        Package("ragged2e"),
+        Package("hhline"),
+        Package("array"),
+        Package("booktabs"),
+        Package("polski", options=["MeX"]),
+    ]
 
-    def __init__(self,
-
-                 default_filepath='default_filepath',
-                 title='Wycena zlecenia',
-                 *,
-                 documentclass='report',
-                 document_options=None,
-                 fontenc='T1',
-                 inputenc='utf8',
-                 font_size='normalsize',
-                 lmodern=False,
-                 textcomp=True,
-                 microtype=True,
-                 page_numbers=True,
-                 indent=None,
-                 geometry_options=None,#['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
-                 data=None):
+    def __init__(
+        self,
+        default_filepath="default_filepath",
+        title="Wycena zlecenia",
+        *,
+        documentclass="report",
+        document_options=None,
+        fontenc="T1",
+        inputenc="utf8",
+        font_size="normalsize",
+        lmodern=False,
+        textcomp=True,
+        microtype=True,
+        page_numbers=True,
+        indent=None,
+        geometry_options=None,  # ['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
+        data=None,
+    ):
 
         super().__init__(
-#             title=title,
+            #             title=title,
             default_filepath=default_filepath,
             documentclass=documentclass,
             document_options=document_options,
@@ -4197,38 +4298,53 @@ class QuotationTemplate(Document):
             geometry_options=geometry_options,
             data=data,
         )
-#         label=self.label
-#         self.title=title
-        self.preamble.append(Command('hypersetup', 'urlcolor=blue'))
-        self.preamble.append(Command('newcolumntype', arguments='R',options='1',extra_arguments=NoEscape('>{\\raggedleft\\let\\newline\\\\\\arraybackslash\\hspace{0pt}}m{#1}')))
+        #         label=self.label
+        #         self.title=title
+        self.preamble.append(Command("hypersetup", "urlcolor=blue"))
+        self.preamble.append(
+            Command(
+                "newcolumntype",
+                arguments="R",
+                options="1",
+                extra_arguments=NoEscape(
+                    ">{\\raggedleft\\let\\newline\\\\\\arraybackslash\\hspace{0pt}}m{#1}"
+                ),
+            )
+        )
+
+
 #         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
 # #         self.append(Command('maketitle'))
 #         self.append(NewPage())
-        # tu implementować co tam potrzeba
-        
+# tu implementować co tam potrzeba
+
+
 class ScheduleTemplate(QuotationTemplate):
     pass
-    
+
+
 class LandscapeScheduleTemplate(ScheduleTemplate):
-    def __init__(self,
-                 default_filepath='default_filepath',
-                 title='Wycena zlecenia',
-                 *,
-                 documentclass='report',
-                 document_options='landscape',
-                 fontenc='T1',
-                 inputenc='utf8',
-                 font_size='normalsize',
-                 lmodern=False,
-                 textcomp=True,
-                 microtype=True,
-                 page_numbers=True,
-                 indent=None,
-                 geometry_options=None,#['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
-                 data=None):
+    def __init__(
+        self,
+        default_filepath="default_filepath",
+        title="Wycena zlecenia",
+        *,
+        documentclass="report",
+        document_options="landscape",
+        fontenc="T1",
+        inputenc="utf8",
+        font_size="normalsize",
+        lmodern=False,
+        textcomp=True,
+        microtype=True,
+        page_numbers=True,
+        indent=None,
+        geometry_options=None,  # ['lmargin=25mm', 'rmargin=25mm',  'top=20mm', 'bmargin=25mm', 'headheight=50mm'],
+        data=None,
+    ):
 
         super().__init__(
-#             title=title,
+            #             title=title,
             default_filepath=default_filepath,
             documentclass=documentclass,
             document_options=document_options,
@@ -4243,37 +4359,47 @@ class LandscapeScheduleTemplate(ScheduleTemplate):
             geometry_options=geometry_options,
             data=data,
         )
-#         label=self.label
-#         self.title=title
-        self.preamble.append(Command('hypersetup', 'urlcolor=blue'))
-        self.preamble.append(Command('newcolumntype', arguments='R',options='1',extra_arguments=NoEscape('>{\\raggedleft\\let\\newline\\\\\\arraybackslash\\hspace{0pt}}m{#1}')))
-        
+        #         label=self.label
+        #         self.title=title
+        self.preamble.append(Command("hypersetup", "urlcolor=blue"))
+        self.preamble.append(
+            Command(
+                "newcolumntype",
+                arguments="R",
+                options="1",
+                extra_arguments=NoEscape(
+                    ">{\\raggedleft\\let\\newline\\\\\\arraybackslash\\hspace{0pt}}m{#1}"
+                ),
+            )
+        )
+
+
 class BeamerPresentation(Document):
 
-    latex_name = 'document'
+    latex_name = "document"
     packages = [
-                  Package('microtype'),
-                  #Package('polski',options=['MeX']),
-                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('listings'),
-                  #Package('titlesec'),
-                  #Package('fancyhdr'),
-                  #Command('pagestyle', arguments=['fancy']),
-                  Command('author', arguments=['Kamil Jaśkielewicz & Bogumił Chiliński']),#['Szymon Kozłowski & Bogumił Chiliński']),
-                  #Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
-                  #Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
-                  #Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
-                  #Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']), 
-                  Command('usetheme', arguments=['Madrid']),
-                  Command('graphicspath', arguments=[NoEscape('{../}')])
+        Package("microtype"),
+        # Package('polski',options=['MeX']),
+        # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+        Package("listings"),
+        # Package('titlesec'),
+        # Package('fancyhdr'),
+        # Command('pagestyle', arguments=['fancy']),
+        Command(
+            "author", arguments=["Kamil Jaśkielewicz & Bogumił Chiliński"]
+        ),  # ['Szymon Kozłowski & Bogumił Chiliński']),
+        # Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
+        # Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
+        # Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
+        # Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
+        Command("usetheme", arguments=["Madrid"]),
+        Command("graphicspath", arguments=[NoEscape("{../}")]),
+    ]
 
-            ]
     @classmethod
     def base_setup(cls):
-        
-        
-        preliminary_str=(
-"""
+
+        preliminary_str = """
 
 # Examplary setup is as follows:
 
@@ -4320,27 +4446,28 @@ doc.generate_pdf(clean_tex=False)
     
 
 """
-)
         return ObjectCode(preliminary_str)
 
-    def __init__(self,
-                 default_filepath='default_filepath',
-                 *,
-                 title=None,
-                 author=None,
-                 initials=None,
-                 documentclass='beamer',
-                 document_options=None,
-                 fontenc='T1',
-                 inputenc='utf8',
-                 font_size='footnotesize',
-                 lmodern=False,
-                 textcomp=True,
-                 microtype=True,
-                 page_numbers=True,
-                 indent=None,
-                 geometry_options=None,
-                 data=None):
+    def __init__(
+        self,
+        default_filepath="default_filepath",
+        *,
+        title=None,
+        author=None,
+        initials=None,
+        documentclass="beamer",
+        document_options=None,
+        fontenc="T1",
+        inputenc="utf8",
+        font_size="footnotesize",
+        lmodern=False,
+        textcomp=True,
+        microtype=True,
+        page_numbers=True,
+        indent=None,
+        geometry_options=None,
+        data=None,
+    ):
 
         super().__init__(
             default_filepath=default_filepath,
@@ -4355,65 +4482,71 @@ doc.generate_pdf(clean_tex=False)
             page_numbers=page_numbers,
             indent=indent,
             geometry_options=geometry_options,
-            data=data, 
-            )
+            data=data,
+        )
         self.title = title
         self.author = author
         self.initials = initials
-        
+
         if self.title is not None:
-            self.packages.append(Command('title', arguments=[self.title], options=['']))
-            
+            self.packages.append(Command("title", arguments=[self.title], options=[""]))
+
         if self.author is not None:
             if self.initials is not None:
-                self.packages.append(Command('author', arguments=[self.author], options=[self.initials]))
+                self.packages.append(
+                    Command("author", arguments=[self.author], options=[self.initials])
+                )
             else:
-                self.packages.append(Command('author', arguments=[self.author], options=['']))
-            
-        self.append(Command('frame', arguments=[NoEscape(r'\titlepage')]))
-        
-        
+                self.packages.append(
+                    Command("author", arguments=[self.author], options=[""])
+                )
+
+        self.append(Command("frame", arguments=[NoEscape(r"\titlepage")]))
+
+
 class BeamerTemplate(BeamerPresentation):
 
     pass
 
+
 class DGBeamer(Document):
 
-    latex_name = 'document'
+    latex_name = "document"
     packages = [
-                  Package('microtype'),
-                  #Package('english',options=['MeX']),
-                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('listings'),
-                  #Package('titlesec'),
-                  #Package('fancyhdr'),
-                  #Command('pagestyle', arguments=['fancy']),
-                  Command('author', arguments=['Bogumił Chiliński & Krzysztof Twardoch']),
-                  #Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
-                  #Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
-                  #Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
-                  #Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']), 
-                  Command('usetheme', arguments=['Madrid']),
-                  Command('graphicspath', arguments=[NoEscape('{../}')])
+        Package("microtype"),
+        # Package('english',options=['MeX']),
+        # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+        Package("listings"),
+        # Package('titlesec'),
+        # Package('fancyhdr'),
+        # Command('pagestyle', arguments=['fancy']),
+        Command("author", arguments=["Bogumił Chiliński & Krzysztof Twardoch"]),
+        # Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
+        # Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
+        # Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
+        # Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
+        Command("usetheme", arguments=["Madrid"]),
+        Command("graphicspath", arguments=[NoEscape("{../}")]),
+    ]
 
-            ]
-
-    def __init__(self,
-                 default_filepath='default_filepath',
-                 *,
-                 title=None,
-                 documentclass='beamer',
-                 document_options=None,
-                 fontenc='T1',
-                 inputenc='utf8',
-                 font_size='normalsize',
-                 lmodern=False,
-                 textcomp=True,
-                 microtype=True,
-                 page_numbers=True,
-                 indent=None,
-                 geometry_options=None,
-                 data=None):
+    def __init__(
+        self,
+        default_filepath="default_filepath",
+        *,
+        title=None,
+        documentclass="beamer",
+        document_options=None,
+        fontenc="T1",
+        inputenc="utf8",
+        font_size="normalsize",
+        lmodern=False,
+        textcomp=True,
+        microtype=True,
+        page_numbers=True,
+        indent=None,
+        geometry_options=None,
+        data=None,
+    ):
 
         super().__init__(
             default_filepath=default_filepath,
@@ -4428,42 +4561,46 @@ class DGBeamer(Document):
             page_numbers=page_numbers,
             indent=indent,
             geometry_options=geometry_options,
-            data=data, 
-            )
+            data=data,
+        )
         self.title = title
-        
+
         if self.title is not None:
-            self.packages.append(Command('title', arguments=[self.title]))
-        self.append(Command('frame', arguments=[NoEscape(r'\titlepage')]))
-        
+            self.packages.append(Command("title", arguments=[self.title]))
+        self.append(Command("frame", arguments=[NoEscape(r"\titlepage")]))
+
+
 class PosterTemplate(Document):
 
-    latex_name = 'document'
+    latex_name = "document"
     packages = [
-                  Package('microtype'),
-                  Package('polski',options=['MeX']),
-                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('listings'),
-                  Package('siunitx'),
-                  #Package('titlesec'),
-                  #Package('fancyhdr'),
-                  #Command('pagestyle', arguments=['fancy']),
-                  Command('author', arguments=['Anna Mackojć & Bogumił Chiliński']),
-                  #Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
-                  #Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
-                  #Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
-                  #Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']), 
-                  Command('usetheme', arguments=['Simple']),
-                  Command('institute', arguments=['Institute of Machine Design Fundamentals, Warsaw University Of Technology']),        
-                  Command('graphicspath', arguments=[NoEscape('{../}')])
+        Package("microtype"),
+        Package("polski", options=["MeX"]),
+        # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+        Package("listings"),
+        Package("siunitx"),
+        # Package('titlesec'),
+        # Package('fancyhdr'),
+        # Command('pagestyle', arguments=['fancy']),
+        Command("author", arguments=["Anna Mackojć & Bogumił Chiliński"]),
+        # Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
+        # Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
+        # Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
+        # Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
+        Command("usetheme", arguments=["Simple"]),
+        Command(
+            "institute",
+            arguments=[
+                "Institute of Machine Design Fundamentals, Warsaw University Of Technology"
+            ],
+        ),
+        Command("graphicspath", arguments=[NoEscape("{../}")]),
+    ]
 
-            ]
     @classmethod
     def base_setup(cls):
-        
-        
-        preliminary_str=(
-"""
+
+        preliminary_str = """
 
 # Examplary setup is as follows:
 
@@ -4520,25 +4657,26 @@ doc.generate_pdf('./output/template',clean_tex=False)
     
 
 """
-)
-        return ObjectCode(preliminary_str)    
-    
-    def __init__(self,
-                 default_filepath='default_filepath',
-                 *,
-                 title=None,
-                 documentclass='tikzposter',
-                 document_options=None,
-                 fontenc='T1',
-                 inputenc='utf8',
-                 font_size='normalsize',
-                 lmodern=False,
-                 textcomp=True,
-                 microtype=True,
-                 page_numbers=True,
-                 indent=None,
-                 geometry_options=None,
-                 data=None):
+        return ObjectCode(preliminary_str)
+
+    def __init__(
+        self,
+        default_filepath="default_filepath",
+        *,
+        title=None,
+        documentclass="tikzposter",
+        document_options=None,
+        fontenc="T1",
+        inputenc="utf8",
+        font_size="normalsize",
+        lmodern=False,
+        textcomp=True,
+        microtype=True,
+        page_numbers=True,
+        indent=None,
+        geometry_options=None,
+        data=None,
+    ):
 
         super().__init__(
             default_filepath=default_filepath,
@@ -4553,54 +4691,53 @@ doc.generate_pdf('./output/template',clean_tex=False)
             page_numbers=page_numbers,
             indent=indent,
             geometry_options=geometry_options,
-            data=data, 
-            )
+            data=data,
+        )
         self.title = title
-        title_with_box = NoEscape(r'\parbox{0.9\linewidth}{\centering ' +self.title+ ' }')
-        
+        title_with_box = NoEscape(
+            r"\parbox{0.9\linewidth}{\centering " + self.title + " }"
+        )
+
         if self.title is not None:
-            self.packages.append(Command('title', arguments=[title_with_box]))
+            self.packages.append(Command("title", arguments=[title_with_box]))
 
-        #self.append(Command('frame', arguments=[NoEscape(r'\titlepage')]))
-        self.append(Command('maketitle'))
+        # self.append(Command('frame', arguments=[NoEscape(r'\titlepage')]))
+        self.append(Command("maketitle"))
 
-  
 
-    
-
-    
 class MDPIPaper(Document):
-    
-    latex_name = 'document'
+
+    latex_name = "document"
     packages = []
-    title=None
-    cwd=os.getcwd()
-    path1=f'{cwd}/Definitions'
+    title = None
+    cwd = os.getcwd()
+    path1 = f"{cwd}/Definitions"
 
-    def __init__(self,
-                 default_filepath='default_filepath',
-                 title=None,
-                 documentclass=None,
-                 journal=None,
-                 document_options=None, # for submission
-                 fontenc=None,
-                 inputenc='utf8',
-                 font_size='normalsize',
-                 lmodern=False,
-                 textcomp=False,
-                 microtype=False,
-                 page_numbers=True,
-                 indent=None,
-                 geometry_options=None,#,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
-                 data=None):
-
+    def __init__(
+        self,
+        default_filepath="default_filepath",
+        title=None,
+        documentclass=None,
+        journal=None,
+        document_options=None,  # for submission
+        fontenc=None,
+        inputenc="utf8",
+        font_size="normalsize",
+        lmodern=False,
+        textcomp=False,
+        microtype=False,
+        page_numbers=True,
+        indent=None,
+        geometry_options=None,  # ,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
+        data=None,
+    ):
 
         if document_options is None:
-            document_options=[journal, 'article','submit','pdftex','moreauthors']
+            document_options = [journal, "article", "submit", "pdftex", "moreauthors"]
 
         super().__init__(
             default_filepath=default_filepath,
-            documentclass=['Definitions/mdpi'],
+            documentclass=["Definitions/mdpi"],
             document_options=document_options,
             fontenc=fontenc,
             inputenc=inputenc,
@@ -4613,176 +4750,211 @@ class MDPIPaper(Document):
             geometry_options=geometry_options,
             data=data,
         )
-        
 
-        Markdown.set_mdpi() #deletes hyperref package associated with Markdown class to avoid clash
-        
-        self.preamble.append(Command('firstpage','1'))
-        self.preamble.append(Command('makeatletter'))
-        self.preamble.append(NoEscape('\\setcounter{page}{\@firstpage}'))
-        self.preamble.append(Command('makeatother'))
-        self.preamble.append(Command('pubvolume','1'))
-        self.preamble.append(Command('issuenum','1'))
-        self.preamble.append(Command('articlenumber','0'))
-        self.preamble.append(Command('pubyear','2024'))
-        self.preamble.append(Command('copyrightyear','2024'))
-        self.preamble.append(Command('datereceived',' '))
-        self.preamble.append(Command('daterevised',' '))
-        self.preamble.append(Command('dateaccepted',' '))
-        self.preamble.append(Command('datepublished',' '))
-        self.preamble.append(Command('hreflink','https://doi.org/'))
-        self.preamble.append(Command('Title',title))
-        self.preamble.append(Command('TitleCitation',title))
-        self.preamble.append(Command('firstnote','Current address: Affiliation'))
-        self.preamble.append(Command('secondnote','These authors contributed equally to this work.'))
-        #self.append(NewPage())
+        Markdown.set_mdpi()  # deletes hyperref package associated with Markdown class to avoid clash
+
+        self.preamble.append(Command("firstpage", "1"))
+        self.preamble.append(Command("makeatletter"))
+        self.preamble.append(NoEscape("\\setcounter{page}{\@firstpage}"))
+        self.preamble.append(Command("makeatother"))
+        self.preamble.append(Command("pubvolume", "1"))
+        self.preamble.append(Command("issuenum", "1"))
+        self.preamble.append(Command("articlenumber", "0"))
+        self.preamble.append(Command("pubyear", "2024"))
+        self.preamble.append(Command("copyrightyear", "2024"))
+        self.preamble.append(Command("datereceived", " "))
+        self.preamble.append(Command("daterevised", " "))
+        self.preamble.append(Command("dateaccepted", " "))
+        self.preamble.append(Command("datepublished", " "))
+        self.preamble.append(Command("hreflink", "https://doi.org/"))
+        self.preamble.append(Command("Title", title))
+        self.preamble.append(Command("TitleCitation", title))
+        self.preamble.append(Command("firstnote", "Current address: Affiliation"))
+        self.preamble.append(
+            Command("secondnote", "These authors contributed equally to this work.")
+        )
+        # self.append(NewPage())
         # tu implementować co tam potrzeba
-        
-        cwd=os.getcwd()
-        
-        source_path=f'/home/user/Shared files/modules/dynpy/utilities/documents/Definitions'
-        path1=f'{cwd}/Definitions'
-        path2=f'{cwd}/output/Definitions'
-        
-        if os.path.exists(path1)==False:
+
+        cwd = os.getcwd()
+
+        source_path = (
+            f"/home/user/Shared files/modules/dynpy/utilities/documents/Definitions"
+        )
+        path1 = f"{cwd}/Definitions"
+        path2 = f"{cwd}/output/Definitions"
+
+        if os.path.exists(path1) == False:
             shutil.copytree(source_path, path1)
-        if os.path.exists(path2)==False:
+        if os.path.exists(path2) == False:
             shutil.copytree(source_path, path2)
-            
-    def authors(self,orcid_dict,corr_no=1):
-        
+
+    def authors(self, orcid_dict, corr_no=1):
+
         ######## should be edited further if more affiliations!
-        #for orcid_dict provide: consecutive capital latin alphabet letters : [orcid_number,firstnameandlastname]; {A:[00001,'Damian Sierociński'],B:[000002,'Bogumił Chiliński'],...}
-        #corr_no: which of the authors in provided list is the corresponding author; int; count starts from 1
-        affiliation_no=1
-        author_no=1
-        authors_no=len(orcid_dict)
-        author_string='\\Author{'
-        authornames_string='\\AuthorNames{'
-        authorcitation_string='\\AuthorCitation{'
-        self.od=orcid_dict
+        # for orcid_dict provide: consecutive capital latin alphabet letters : [orcid_number,firstnameandlastname]; {A:[00001,'Damian Sierociński'],B:[000002,'Bogumił Chiliński'],...}
+        # corr_no: which of the authors in provided list is the corresponding author; int; count starts from 1
+        affiliation_no = 1
+        author_no = 1
+        authors_no = len(orcid_dict)
+        author_string = "\\Author{"
+        authornames_string = "\\AuthorNames{"
+        authorcitation_string = "\\AuthorCitation{"
+        self.od = orcid_dict
         for key, val in orcid_dict.items():
             display(key)
-            self.preamble.append(NoEscape('\\newcommand{\\orcidauthor'+key+'}{'+val[0]+'}'))
-            
-            if len(val)>2:
-                affiliation_no=val[2]
-            
-            author_string+=val[1]+' $^{'+str(affiliation_no)+',\\dagger,\\ddagger'
-            authornames_string+=val[1]
+            self.preamble.append(
+                NoEscape("\\newcommand{\\orcidauthor" + key + "}{" + val[0] + "}")
+            )
+
+            if len(val) > 2:
+                affiliation_no = val[2]
+
+            author_string += (
+                val[1] + " $^{" + str(affiliation_no) + ",\\dagger,\\ddagger"
+            )
+            authornames_string += val[1]
             if author_no == corr_no:
-                author_string+=',*'
-            author_string+='}$\\orcid'+key+'{}'
-            if author_no != authors_no and author_no!=authors_no-1:
-                author_string+=', '
-                authornames_string+=', '
-            elif author_no==authors_no-1:
-                author_string+=' and '
-                authornames_string+=' and '
-                
-            author_no+=1
+                author_string += ",*"
+            author_string += "}$\\orcid" + key + "{}"
+            if author_no != authors_no and author_no != authors_no - 1:
+                author_string += ", "
+                authornames_string += ", "
+            elif author_no == authors_no - 1:
+                author_string += " and "
+                authornames_string += " and "
 
-        self.preamble.append(NoEscape(author_string+'}'))
-        self.preamble.append(NoEscape(authornames_string+'}'))
-        self.preamble.append(NoEscape(authorcitation_string+self._citation_format()+'}'))
-        
+            author_no += 1
 
-        
-        
+        self.preamble.append(NoEscape(author_string + "}"))
+        self.preamble.append(NoEscape(authornames_string + "}"))
+        self.preamble.append(
+            NoEscape(authorcitation_string + self._citation_format() + "}")
+        )
+
     def _citation_format(self):
         display(self.od)
-        cit_string=''
-        for key,val in self.od.items():
-            firstname=val[1].split(' ')[0]
-            firstname=firstname[0]+'.'
-            lastname=val[1].split(' ')[1]
+        cit_string = ""
+        for key, val in self.od.items():
+            firstname = val[1].split(" ")[0]
+            firstname = firstname[0] + "."
+            lastname = val[1].split(" ")[1]
             display(firstname)
             display(lastname)
-            cit_string+=lastname+' '+firstname+'; '
-            
+            cit_string += lastname + " " + firstname + "; "
+
         return cit_string[:-2]
+
     def address(self):
         ######## should be edited further if more affiliations!
-        self.preamble.append(NoEscape('\\address{$^{1}$ \\quad Department of Computer Techniques, Institute of Machine Design Fundamentals, Faculty of Automotive and Construction Machinery Engineering, Warsaw University of Technology; 84 Ludwika Narbutta Street, 02-524 Warsaw, Poland}'))
-        
-    def correspondence(self,email):
-        self.preamble.append(NoEscape('\\corres{Correspondence: '+email+'}'))
-    def abstract(self,text):
-        self.preamble.append(Command('abstract',text))
-    def keywords(self,keywords_list):
-        
-        kwl_string='\\keyword{'
-        key_num=0
-        for num,val in enumerate(keywords_list):
-            kwl_string+=val
-            if key_num != len(keywords_list)-1:
-                kwl_string+='; '
-            key_num+=1
-        self.preamble.append(NoEscape(kwl_string+'}'))
+        self.preamble.append(
+            NoEscape(
+                "\\address{$^{1}$ \\quad Department of Computer Techniques, Institute of Machine Design Fundamentals, Faculty of Automotive and Construction Machinery Engineering, Warsaw University of Technology; 84 Ludwika Narbutta Street, 02-524 Warsaw, Poland}"
+            )
+        )
+
+    def correspondence(self, email):
+        self.preamble.append(NoEscape("\\corres{Correspondence: " + email + "}"))
+
+    def abstract(self, text):
+        self.preamble.append(Command("abstract", text))
+
+    def keywords(self, keywords_list):
+
+        kwl_string = "\\keyword{"
+        key_num = 0
+        for num, val in enumerate(keywords_list):
+            kwl_string += val
+            if key_num != len(keywords_list) - 1:
+                kwl_string += "; "
+            key_num += 1
+        self.preamble.append(NoEscape(kwl_string + "}"))
 
 
 #             \AuthorCitation{Lastname, F.; Lastname, F.; Lastname, F.}
 class RevievPrototype(Document):
-    
-    latex_name = 'document'
-    packages = [
-                  Package('geometry',options=['lmargin=30mm', 'rmargin=30mm',  'top=25mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('microtype'),
-                  Package('authoraftertitle'),
-                  Package(' ',options=['MeX']),
-                  #Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
-                  Package('listings'),
-                  Package('titlesec'),
-                  Package('fancyhdr'),
-                  Package('graphicx'),
-                  Package('indentfirst'),
-                  Package('pdfpages'),
-                  Package('amsmath'),
 
-                  Command('newcommand{\praca}', arguments=['Praca dyplomowa']),
-                  Command('newcommand{\dyplom}', arguments=['Magisterska']),
-                  Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']),
-                  Command('newcommand{\specjalnosc}', arguments=['Wpisać specjalność']),
-                  Command('newcommand{\\autor}', arguments=['Imię i nazwisko autora']),
-                  Command('newcommand{\opiekun}', arguments=['Wpisać opiekuna']),
-                  Command('newcommand{\promotor}', arguments=['Wpisać promotora']),
-                  Command('newcommand{\konsultant}', arguments=['Wpisać konsultanta']),
-                  Command('newcommand{\\tytul}', arguments=['Wpisać tytuł pracy dyplomowej po polsku']),
-                  Command('newcommand{\\album}', arguments=['Wpisać numer albumu']),
-                  Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']),
-                  Command('newcommand{\\rok}', arguments=['Rok składania pracy']),
-                  Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']),
-                  #Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']),
-                  Command('graphicspath{{../}}'),
-                  Command('frenchspacing'),
-                  Command('counterwithin{figure}{section}'),
-                  Command('counterwithin{table}{section}'),
-                  Command('fancypagestyle{headings}{\\fancyhead{} \\renewcommand{\headrulewidth}{1pt} \\fancyheadoffset{0cm} \\fancyhead[RO]{\\nouppercase{\\leftmark}} \\fancyhead[LE]{\\nouppercase{\\leftmark}} \\fancyfoot{} \\fancyfoot[LE,RO]{\\thepage}}'),
-                  Command('fancypagestyle{plain}{\\fancyhf{} \\renewcommand{\\headrulewidth}{0pt} \\fancyfoot[LE,RO]{\\thepage}}'),
-                  Command('numberwithin{equation}{section}'),
-                  Command('renewcommand{\\familydefault}{\\sfdefault}'),
-        #\renewcommand{\familydefault}{\sfdefault}
-        
+    latex_name = "document"
+    packages = [
+        Package(
+            "geometry",
+            options=[
+                "lmargin=30mm",
+                "rmargin=30mm",
+                "top=25mm",
+                "bmargin=25mm",
+                "headheight=50mm",
+            ],
+        ),
+        Package("microtype"),
+        Package("authoraftertitle"),
+        Package(" ", options=["MeX"]),
+        # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+        Package("listings"),
+        Package("titlesec"),
+        Package("fancyhdr"),
+        Package("graphicx"),
+        Package("indentfirst"),
+        Package("pdfpages"),
+        Package("amsmath"),
+        Command("newcommand{\praca}", arguments=["Praca dyplomowa"]),
+        Command("newcommand{\dyplom}", arguments=["Magisterska"]),
+        Command("newcommand{\kierunek}", arguments=["Wpisać kierunek"]),
+        Command("newcommand{\specjalnosc}", arguments=["Wpisać specjalność"]),
+        Command("newcommand{\\autor}", arguments=["Imię i nazwisko autora"]),
+        Command("newcommand{\opiekun}", arguments=["Wpisać opiekuna"]),
+        Command("newcommand{\promotor}", arguments=["Wpisać promotora"]),
+        Command("newcommand{\konsultant}", arguments=["Wpisać konsultanta"]),
+        Command(
+            "newcommand{\\tytul}", arguments=["Wpisać tytuł pracy dyplomowej po polsku"]
+        ),
+        Command("newcommand{\\album}", arguments=["Wpisać numer albumu"]),
+        Command("newcommand{\supervisor}", arguments=["dr inż. Bogumił Chiliński"]),
+        Command("newcommand{\\rok}", arguments=["Rok składania pracy"]),
+        Command(
+            "newcommand{\kluczowe}",
+            arguments=["Słowa kluczowe: Wpisać słowa kluczowe po polsku"],
+        ),
+        # Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']),
+        Command("graphicspath{{../}}"),
+        Command("frenchspacing"),
+        Command("counterwithin{figure}{section}"),
+        Command("counterwithin{table}{section}"),
+        Command(
+            "fancypagestyle{headings}{\\fancyhead{} \\renewcommand{\headrulewidth}{1pt} \\fancyheadoffset{0cm} \\fancyhead[RO]{\\nouppercase{\\leftmark}} \\fancyhead[LE]{\\nouppercase{\\leftmark}} \\fancyfoot{} \\fancyfoot[LE,RO]{\\thepage}}"
+        ),
+        Command(
+            "fancypagestyle{plain}{\\fancyhf{} \\renewcommand{\\headrulewidth}{0pt} \\fancyfoot[LE,RO]{\\thepage}}"
+        ),
+        Command("numberwithin{equation}{section}"),
+        Command("renewcommand{\\familydefault}{\\sfdefault}"),
+        # \renewcommand{\familydefault}{\sfdefault}
     ]
-    
-    
-    
-    def __init__(self,
-                 default_filepath='default_filepath',
-                 title='Basic title',
-                 *,
-                 documentclass='article',
-                 document_options=['a4paper','11pt','twoside'],
-                 fontenc='T1',
-                 inputenc='utf8',
-                 font_size='normalsize',
-                 lmodern=False,
-                 textcomp=True,
-                 microtype=True,
-                 page_numbers=True,
-                 indent=None,
-                 geometry_options=['inner=30mm', 'outer=20mm', 'bindingoffset=10mm', 'top=25mm', 'bottom=25mm'],#,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
-                 data=None):
+
+    def __init__(
+        self,
+        default_filepath="default_filepath",
+        title="Basic title",
+        *,
+        documentclass="article",
+        document_options=["a4paper", "11pt", "twoside"],
+        fontenc="T1",
+        inputenc="utf8",
+        font_size="normalsize",
+        lmodern=False,
+        textcomp=True,
+        microtype=True,
+        page_numbers=True,
+        indent=None,
+        geometry_options=[
+            "inner=30mm",
+            "outer=20mm",
+            "bindingoffset=10mm",
+            "top=25mm",
+            "bottom=25mm",
+        ],  # ,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
+        data=None,
+    ):
 
         super().__init__(
             default_filepath=default_filepath,
@@ -4799,37 +4971,36 @@ class RevievPrototype(Document):
             geometry_options=geometry_options,
             data=data,
         )
-#         label=self.label
-        self.title=title
-        #self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
-#         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
-#         self.packages.append(Command('newcommand{\praca}', arguments=['Praca dyplomowa']))
-#         self.packages.append(Command('newcommand{\dyplom}', arguments=['Magisterska']))
-#         self.packages.append(Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']))
-#         self.packages.append(Command('newcommand{\specjalnosc}', arguments=['Wpisać specjalność']))
-#         self.packages.append(Command('newcommand{\\autor}', arguments=['Imię i nazwisko autora']))
-#         self.packages.append(Command('newcommand{\opiekun}', arguments=['Wpisać opiekuna']))
-#         self.packages.append(Command('newcommand{\promotor}', arguments=['Wpisać promotora']))
-#         self.packages.append(Command('newcommand{\konsultant}', arguments=['Wpisać konsultanta']))
-#         self.packages.append(Command('newcommand{\\tytul}', arguments=['Wpisać tytuł pracy dyplomowej po polsku']))
-#         self.packages.append(Command('newcommand{\\album}', arguments=['303596']))
-#         self.packages.append(Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']))
-#         self.packages.append(Command('newcommand{\\rok}', arguments=['Rok składania pracy']))
-#         self.packages.append(Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']))
-#         #self.packages.append(Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']))
-        self.packages.append(Command('graphicspath{{../}}'))
-#         self.append(Command('maketitle'))
-        self.append(NoEscape('%%% New doc'))
+        #         label=self.label
+        self.title = title
+        # self.packages.append(Command('title', arguments=[NoEscape(self.title)]))
+        #         self.packages.append(Command('date', arguments=[NoEscape('\\today')]))
+        #         self.packages.append(Command('newcommand{\praca}', arguments=['Praca dyplomowa']))
+        #         self.packages.append(Command('newcommand{\dyplom}', arguments=['Magisterska']))
+        #         self.packages.append(Command('newcommand{\kierunek}', arguments=['Wpisać kierunek']))
+        #         self.packages.append(Command('newcommand{\specjalnosc}', arguments=['Wpisać specjalność']))
+        #         self.packages.append(Command('newcommand{\\autor}', arguments=['Imię i nazwisko autora']))
+        #         self.packages.append(Command('newcommand{\opiekun}', arguments=['Wpisać opiekuna']))
+        #         self.packages.append(Command('newcommand{\promotor}', arguments=['Wpisać promotora']))
+        #         self.packages.append(Command('newcommand{\konsultant}', arguments=['Wpisać konsultanta']))
+        #         self.packages.append(Command('newcommand{\\tytul}', arguments=['Wpisać tytuł pracy dyplomowej po polsku']))
+        #         self.packages.append(Command('newcommand{\\album}', arguments=['303596']))
+        #         self.packages.append(Command('newcommand{\supervisor}', arguments=['dr inż. Bogumił Chiliński']))
+        #         self.packages.append(Command('newcommand{\\rok}', arguments=['Rok składania pracy']))
+        #         self.packages.append(Command('newcommand{\kluczowe}', arguments=['Słowa kluczowe: Wpisać słowa kluczowe po polsku']))
+        #         #self.packages.append(Command('renewcommand{\keywords}', arguments=['Keywords: Wpisać słowa kluczowe po angielsku']))
+        self.packages.append(Command("graphicspath{{../}}"))
+        #         self.append(Command('maketitle'))
+        self.append(NoEscape("%%% New doc"))
         # tu implementować co tam potrzeba
-        
+
     @classmethod
-    def base_setup(cls, create_file = False):
+    def base_setup(cls, create_file=False):
 
         if create_file is True:
             return cls._create_base_setup_env()
-        
-        preliminary_str=(
-"""
+
+        preliminary_str = """
 
 Examplary setup is as follows:
 
@@ -5194,13 +5365,10 @@ doc.generate_pdf(clean_tex=True)
 ```
 
 """
-        )
 
-        display(IPMarkdown(preliminary_str))    
+        display(IPMarkdown(preliminary_str))
 
-
-        preliminary_str=(
-"""
+        preliminary_str = """
 
 #Example:
 
@@ -5566,7 +5734,6 @@ doc.generate_pdf(clean_tex=True)
 
 
 """
-        )
         return ObjectCode(preliminary_str)
 
     Jupyter_file_content = """{
@@ -5653,7 +5820,7 @@ doc.generate_pdf(clean_tex=True)
     "nbformat": 4,
     "nbformat_minor": 4
 }"""
-    articles_bib = '''@INPROCEEDINGS{brief_history_of_simulations,
+    articles_bib = """@INPROCEEDINGS{brief_history_of_simulations,
   author={Goldsman, David and Nance, Richard E. and Wilson, James R.},
   booktitle={Proceedings of the 2010 Winter Simulation Conference}, 
   title={A brief history of simulation revisited}, 
@@ -5690,14 +5857,15 @@ doc.generate_pdf(clean_tex=True)
   pages = {10},
   doi = {}
 }
-'''
-    def _create_directory(path):
-        '''
-Method create directory from given path
+"""
 
-Arguments:
-path - (str), name of directory that method will create, if subdirectories shall be created, path should look like this: 'directory/subdirectory' 
-        '''
+    def _create_directory(path):
+        """
+        Method create directory from given path
+
+        Arguments:
+        path - (str), name of directory that method will create, if subdirectories shall be created, path should look like this: 'directory/subdirectory'
+        """
         import os
 
         try:
@@ -5712,37 +5880,37 @@ path - (str), name of directory that method will create, if subdirectories shall
 
         except Exception as e:
             print(f"An error occurred: {e}")
-        
-        
-    def _create_file(name, content = None, path = None):
-        '''
-Method create file and write content to it
 
-Arguments:
-name - (str), name of file created by method,
-content - (str), optional,  string with a content of file, that is going to be writen to it,
-path - (str), optional, directory where file should be created
-        '''
+    def _create_file(name, content=None, path=None):
+        """
+        Method create file and write content to it
+
+        Arguments:
+        name - (str), name of file created by method,
+        content - (str), optional,  string with a content of file, that is going to be writen to it,
+        path - (str), optional, directory where file should be created
+        """
         import os
 
         if path is not None:
             if not os.path.exists(path):
                 _create_directory(path)
 
-            with open(os.path.join(path, name), 'w') as file: 
+            with open(os.path.join(path, name), "w") as file:
                 file.write(content)
 
         else:
-            with open(name, 'w') as file:
+            with open(name, "w") as file:
                 file.write(content)
 
         file.close()
-    @classmethod    
+
+    @classmethod
     def _create_base_setup_env(cls):
-        '''
-Method that create Jupyter notebook file with WUT thesis base setup and output directory with .bib file
-        '''
-        
+        """
+        Method that create Jupyter notebook file with WUT thesis base setup and output directory with .bib file
+        """
+
         Jupyter_file_content = """{
     "cells": [
         {
@@ -5827,7 +5995,7 @@ Method that create Jupyter notebook file with WUT thesis base setup and output d
     "nbformat": 4,
     "nbformat_minor": 4
 }"""
-        articles_bib = '''@INPROCEEDINGS{brief_history_of_simulations,
+        articles_bib = """@INPROCEEDINGS{brief_history_of_simulations,
   author={Goldsman, David and Nance, Richard E. and Wilson, James R.},
   booktitle={Proceedings of the 2010 Winter Simulation Conference}, 
   title={A brief history of simulation revisited}, 
@@ -5864,10 +6032,10 @@ Method that create Jupyter notebook file with WUT thesis base setup and output d
   pages = {10},
   doi = {}
 }
-'''
-        cls._create_file('WUT_Thesis_starter.ipynb', Jupyter_file_content)
+"""
+        cls._create_file("WUT_Thesis_starter.ipynb", Jupyter_file_content)
 
-        os.makedirs('output')
-        os.makedirs('tikzplots')
+        os.makedirs("output")
+        os.makedirs("tikzplots")
 
-        cls._create_file('articles.bib', articles_bib, 'output')
+        cls._create_file("articles.bib", articles_bib, "output")

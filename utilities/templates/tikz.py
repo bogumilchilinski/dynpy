@@ -1,38 +1,37 @@
 # Module with schemes
 
-from pylatex import (Document, Package,
-                     #Section, Subsection, Subsubsection, Itemize,  HorizontalSpace, Description, Marker
-                    )
+from pylatex import (  # Section, Subsection, Subsubsection, Itemize,  HorizontalSpace, Description, Marker
+    Document,
+    Package,
+)
 
-
-#from pylatex.section import Paragraph, Chapter
-from pylatex.utils import (#italic, 
-                           NoEscape)
-
+# from pylatex.section import Paragraph, Chapter
+from pylatex.utils import NoEscape  # italic,
 
 
 class TikzCaSCStandalone(Document):
-    latex_name = 'document'
+    latex_name = "document"
     packages = [
-        Package('natbib', options=['numbers']),
-
+        Package("natbib", options=["numbers"]),
     ]
 
-    def __init__(self,
-                 default_filepath='default_filepath',
-                 *,
-                 documentclass='standalone',
-                 document_options=NoEscape('tikz,class=cas-sc'),
-                 fontenc='T1',
-                 inputenc='utf8',
-                 font_size='normalsize',
-                 lmodern=False,
-                 textcomp=True,
-                 microtype=None,
-                 page_numbers=True,
-                 indent=None,
-                 geometry_options=None,
-                 data=None):
+    def __init__(
+        self,
+        default_filepath="default_filepath",
+        *,
+        documentclass="standalone",
+        document_options=NoEscape("tikz,class=cas-sc"),
+        fontenc="T1",
+        inputenc="utf8",
+        font_size="normalsize",
+        lmodern=False,
+        textcomp=True,
+        microtype=None,
+        page_numbers=True,
+        indent=None,
+        geometry_options=None,
+        data=None
+    ):
 
         super().__init__(
             default_filepath=default_filepath,
@@ -94,11 +93,12 @@ class TikzCaSCStandalone(Document):
 #             data=data,
 #         )
 
+
 class TikzStandalone(Document):
-    latex_name = 'document'
+    latex_name = "document"
     packages = [
-                 Package('siunitx'),
-                 Package('polski',options=['MeX']),
+        Package("siunitx"),
+        Package("polski", options=["MeX"]),
         #         Package('amsmath'),
         #         Package('float'),
         #         Package('tikz'),
@@ -107,21 +107,23 @@ class TikzStandalone(Document):
         #         Command('usetikzlibrary', arguments='spy')
     ]
 
-    def __init__(self,
-                 default_filepath='default_filepath',
-                 *,
-                 documentclass='standalone',
-                 document_options=NoEscape('tikz'),
-                 fontenc='T1',
-                 inputenc='utf8',
-                 font_size='normalsize',
-                 lmodern=False,
-                 textcomp=True,
-                 microtype=None,
-                 page_numbers=True,
-                 indent=None,
-                 geometry_options=None,
-                 data=None):
+    def __init__(
+        self,
+        default_filepath="default_filepath",
+        *,
+        documentclass="standalone",
+        document_options=NoEscape("tikz"),
+        fontenc="T1",
+        inputenc="utf8",
+        font_size="normalsize",
+        lmodern=False,
+        textcomp=True,
+        microtype=None,
+        page_numbers=True,
+        indent=None,
+        geometry_options=None,
+        data=None
+    ):
 
         super().__init__(
             default_filepath=default_filepath,
