@@ -44,6 +44,8 @@ from sympy import (
 from sympy.physics.mechanics import Point, ReferenceFrame, dynamicsymbols
 from sympy.physics.vector import vlatex, vpprint
 
+from solvers.linear import ODESystem
+
 from ...dynamics import HarmonicOscillator, LagrangesDynamicSystem
 from ..elements import (
     PID,
@@ -1266,7 +1268,7 @@ class CircuitRLCWithHeavisidePWM(CircuitRLCWithPWM):
         return self.sym_desc_dict
 
 
-class BatteryCharging(ComposedSystem):
+class BatteryChargingPD(ComposedSystem):
 
     V_OCV = Symbol("V_OCV", positive=True)
     current = Symbol("I_ch", positive=True)

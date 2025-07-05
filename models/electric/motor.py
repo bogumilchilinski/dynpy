@@ -73,6 +73,8 @@ class DCMotor(ComposedSystem):
     B: Symbol
     K_e: Symbol
     K_t: Symbol
+    i_w: Symbol = dynamicsymbols("i_w")
+    omega_s: Symbol = dynamicsymbols("omega_s")
     ivar: Symbol = Symbol("t")  # wartość domyślna
 
     def __init__(
@@ -527,7 +529,7 @@ class DCMotorHeaviside(DCMotor):
         self.resistor = CurrentDependentResistor(
             self.R_w, self.i_w, qs=self.qs, ivar=self.ivar, frame=base_frame
         )
-        self.inductor = Resistor(
+        self.inductor = Inductor(
             self.L_w, self.i_w, qs=self.qs, ivar=self.ivar, frame=base_frame
         )
         #         self.inductor = Inductor(-self.L_w, self.i_w, qs=self.qs, ivar=self.ivar, frame=base_frame)
