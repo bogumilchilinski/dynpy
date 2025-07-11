@@ -66,10 +66,13 @@ class Resistor(Damper):
     scheme_name = "material_point.png"
     real_name = "material_point.png"
 
-    def __init__(self, resistance, q0, qs=None, ivar=Symbol("t"), frame=base_frame):
-        super().__init__(
-            c=resistance, pos1=q0, pos2=0, qs=qs, ivar=Symbol("t"), frame=base_frame
-        )
+    def __init__(self, resistance, q0, qs=None, ivar=None, frame=base_frame):
+        """
+        Linear electric resistor – analogia tłumika lepkiego.
+        Jeżeli użytkownik nie poda `ivar`, przyjmujemy Symbol('t').
+        """
+        ivar = ivar or Symbol("t")
+        super().__init__(c=resistance, pos1=q0, pos2=0, qs=qs, ivar=ivar, frame=frame)
 
 
 class VoltageSource(Force):

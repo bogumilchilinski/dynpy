@@ -1,6 +1,7 @@
 import base64
 import inspect
 import random
+from dataclasses import dataclass, field
 
 import IPython as IP
 import numpy as np
@@ -63,25 +64,18 @@ from ..elements import (
 from .elements import Capacitor, Inductor, Resistor, VoltageSource
 
 
+@dataclass
 class DCMotor(ComposedSystem):
     scheme_name = "DC_motor.png"
-
-    U_z = Symbol("U_z", positive=True)
-    R_w = Symbol("R_w", positive=True)
-    L_w = Symbol("L_w", positive=True)
-    E = Symbol("E", positive=True)
-    U_Rw = Symbol("U_Rw", positive=True)
-    U_Lw = Symbol("U_Lw", positive=True)
-    k_e = Symbol("k_e", positive=True)
-    M_s = Symbol("M_s", positive=True)
-    B = Symbol("B", positive=True)
-    J = Symbol("J", positive=True)
-    M_obc = Symbol("M_l", positive=True)
-    k_m = Symbol("k_m", positive=True)
-    M_a = Symbol("M_a", positive=True)
-    M_r = Symbol("M_r", positive=True)
-    i_w = dynamicsymbols("i_w")
-    omega_s = dynamicsymbols("omega_s")
+    R_a: Symbol
+    L_a: Symbol
+    J: Symbol
+    B: Symbol
+    K_e: Symbol
+    K_t: Symbol
+    i_w: Symbol = dynamicsymbols("i_w")
+    omega_s: Symbol = dynamicsymbols("omega_s")
+    ivar: Symbol = Symbol("t")  # wartość domyślna
 
     def __init__(
         self,
@@ -535,7 +529,7 @@ class DCMotorHeaviside(DCMotor):
         self.resistor = CurrentDependentResistor(
             self.R_w, self.i_w, qs=self.qs, ivar=self.ivar, frame=base_frame
         )
-        self.inductor = Resistor(
+        self.inductor = Inductor(
             self.L_w, self.i_w, qs=self.qs, ivar=self.ivar, frame=base_frame
         )
         #         self.inductor = Inductor(-self.L_w, self.i_w, qs=self.qs, ivar=self.ivar, frame=base_frame)

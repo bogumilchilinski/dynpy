@@ -45,6 +45,7 @@ from sympy.physics.mechanics import Point, ReferenceFrame, dynamicsymbols
 from sympy.physics.vector import vlatex, vpprint
 
 from ...dynamics import HarmonicOscillator, LagrangesDynamicSystem
+from ...solvers.linear import ODESystem
 from ..elements import (
     PID,
     CombustionEngine,
@@ -66,6 +67,14 @@ from ..mechanics.trolley import (
     base_origin,
 )
 from .elements import *
+
+# from models.mechanics.trolley import (   # absolutna ścieżka do mix-inu
+#     ComposedSystem,
+#     NonlinearComposedSystem,
+#     base_frame,
+#     base_origin,
+# )
+
 
 t = Symbol("t")
 
@@ -180,7 +189,12 @@ class BatteryCell(ComposedSystem):
         uth_eq = Eq(
             diff(U_th, t, evaluate=False), ((U_th) / (R_th * C_th)) + I_li / C_th
         )
-        ode_th = ODESystem(odes=uth_eq.rhs + uth_eq.lhs, dvars=U_th, ode_order=1)
+        ode_th = ODESystem(
+            odes=[uth_eq.lhs - uth_eq.rhs],  # residuum  = 0
+            dvars=[U_th],  # zmienna stanu
+            ivar=t,
+            ode_order=1,  # ◀︎ kluczowa informacja
+        )
 
         return ode_th
 
@@ -309,6 +323,28 @@ class BatteryCell(ComposedSystem):
         df_I = df_I.set_index(t)
 
         return df_I
+
+    # --- opis symboli -------------------------------------------------
+    def symbols_description(self):
+        return {
+            self.R_1: r"rezystancja gałęzi 1 [Ω]",
+            self.R_2: r"rezystancja gałęzi 2 [Ω]",
+            self.C: r"pojemność [F]",
+            self.U: r"wymuszenie napięciowe [V]",
+            self.q_1: r"ładunek gałęzi 1 [C]",
+            self.q_2: r"ładunek gałęzi 2 [C]",
+        }
+
+    # --- słownik jednostek -------------------------------------------
+    def unit_dict(self):
+        return {self.R_1: "Ω", self.R_2: "Ω", self.C: "F", self.U: "V"}
+
+    # --- przykładowe dane nominalne ----------------------------------
+    def get_default_data(self):
+        return {self.R_1: 0.015, self.R_2: 0.020, self.C: 2200e-6, self.U: 3.7}
+
+    def get_numerical_data(self):
+        return {self.R_1: 0.015, self.R_2: 0.020, self.C: 2200e-6, self.U: 3.7}
 
 
 #         tdf_u=TimeDataFrame(df_u).set_index(t)
