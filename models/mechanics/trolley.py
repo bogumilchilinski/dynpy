@@ -4826,8 +4826,8 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
             self.u_0 = self.m_p * self.g / self.k_l
         #  if u_0 is not None: u_0 = self.m_p * self.g / self.k_l
         self.ivar = ivar
-        self.qs = [self.x, self.phi, self.u_e]
-        self.u_0 = self.g * self.l / self.k_l
+        self.qs = [self.x,self.phi,self.u_e]
+        self.u_0=self.g*self.m_p/self.k_l        
         self._init_from_components(**kwargs)
 
     @cached_property
@@ -4843,46 +4843,23 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
             self.F * sin(self.Omega * self.ivar), pos1=self.qs[0], qs=self.qs
         )(label="Force")
 
-        # zle
-        self._material_point_1 = MaterialPoint(
-            self.m_p,
-            self.x + (self.l + self.u_e + self.u_0) * sin(self.phi),
-            qs=self.qs,
-        )
-        self._material_point_2 = MaterialPoint(
-            self.m_p, (self.l + self.u_e + self.u_0) * cos(self.phi), qs=self.qs
-        )
-        self._gravity = GravitationalForce(
-            self.m_p,
-            self.g,
-            -(self.l + self.u_e + self.u_0) * cos(self.phi),
-            qs=self.qs,
-        )
+#         self._material_point_1=MaterialPoint(self.m_p,self.x+(self.l+self.u)*sin(self.phi),qs=self.qs)
+#         self._material_point_2=MaterialPoint(self.m_p,(self.l+self.u)*cos(self.phi),qs=self.qs)
+#         self._gravity = GravitationalForce(self.m_p, self.g, -(self.l+self.u)*cos(self.phi), qs = self.qs)        
 
-        # prze
-        # jeszcze masz cos  i sin xle w MP
-        # i już git teraz nie?
-        # piękinie :*
-        # dobra to już rozumiem
-        #         self._material_point_1=MaterialPoint(self.m_p,self.x+(self.l+self.u)*sin(self.phi),qs=self.qs)
-        #         self._material_point_2=MaterialPoint(self.m_p,(self.l+self.u)*cos(self.phi),qs=self.qs)
-        #         self._gravity = GravitationalForce(self.m_p, self.g, -(self.l+self.u)*cos(self.phi), qs = self.qs)
+        self._spring_2=Spring(self.k_l,self.u_e,qs=self.qs) # zostaw xD tu jesty ok
+        
+        
 
-        self._spring_2 = Spring(self.k_l, self.u_e, qs=self.qs)  # zostaw xD tu jesty ok
-
-        # czaje
-        # znow zle jest xD posułem celowo
-
-        # dobra to ja narazie lece i potem z chłopakami ciśniemy dalej
-
-        components["_trolley"] = self._trolley
-        # components['_pendulum'] = self._pendulum
-        components["_force"] = self._force
-        components["_material_point_1"] = self._material_point_1
-        components["_material_point_2"] = self._material_point_2
-        # components['_spring_1'] = self._spring_1
-        components["_spring_2"] = self._spring_2
-        components["_gravity"] = self._gravity
+        
+        components['_trolley'] = self._trolley
+        #components['_pendulum'] = self._pendulum
+        components['_force'] = self._force
+        components['_material_point_1'] = self._material_point_1
+        components['_material_point_2'] = self._material_point_2
+        #components['_spring_1'] = self._spring_1
+        components['_spring_2'] = self._spring_2
+        components['_gravity'] = self._gravity
 
         return components
 
@@ -4892,93 +4869,79 @@ class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
     scheme_name = "trolley_pendulum_tmd.png"
     real_name = "elastic_pendulum_real.PNG"
 
-    l = Symbol("l", positive=True)
-    k_l = Symbol("k_l", positive=True)
-    m_t = Symbol("m_t", positive=True)  # m_trolley
-    m_p = Symbol("m_p", positive=True)  # m_pendulum
-    k = Symbol("k", positive=True)
-    g = Symbol("g", positive=True)
-    Omega = Symbol("Omega", positive=True)
-    F = Symbol("F", positive=True)
-    phi = dynamicsymbols("\\varphi")
-    x = dynamicsymbols("x")
-    c = Symbol("c", positive=True)
-    u_e = dynamicsymbols("u", positive=True)
-    v = Symbol("v", positive=True)
+    l = Symbol('l', positive=True)
+    k_l = Symbol('k_l', positive=True)
+    m_t = Symbol('m_t', positive=True)#m_trolley
+    m_p = Symbol('m_p', positive=True)#m_pendulum
+    k = Symbol('k', positive=True)
+    g = Symbol('g', positive=True)
+    Omega = Symbol('Omega', positive=True)
+    F=Symbol('F', positive=True)
+    phi = dynamicsymbols('\\varphi')
+    x = dynamicsymbols('x')
+    c = Symbol('c', positive=True)
+    u_e = dynamicsymbols('u',positive=True)
+    v = Symbol('v', positive=True)
+    c_phi=Symbol('\\hat c_{\\varphi}',positive=True)
+    c_l=Symbol('c_l',positive=True)
 
-    def __init__(
-        self,
-        l=None,
-        k_l=None,
-        m_t=None,
-        m_p=None,
-        k=None,
-        g=None,
-        Omega=None,
-        phi=None,
-        x=None,
-        F=None,
-        c=None,
-        u_e=None,
-        v=None,
-        ivar=Symbol("t"),
-        **kwargs,
-    ):
-        if l is not None:
-            self.l = l
-        if k_l is not None:
-            self.k_l = k_l
-        if m_t is not None:
-            self.m_t = m_t
-        if m_p is not None:
-            self.m_p = m_p
-        if g is not None:
-            self.g = g
-        if phi is not None:
-            self.phi = phi
-        if x is not None:
-            self.x = x
-        if k is not None:
-            self.k = k
-        if Omega is not None:
-            self.Omega = Omega
-        if F is not None:
-            self.F = F
-        if c is not None:
-            self.c = c
-        if u_e is not None:
-            self.u_e = u_e
-        if v is not None:
-            self.v = v
+    def __init__(self,
+                 l=None,
+                 k_l=None,
+                 m_t=None,
+                 m_p=None,
+                 k=None,
+                 g=None,
+                 Omega=None,
+                 phi=None,
+                 x=None,
+                 F=None,
+                 c=None,
+                 u_e=None,
+                 v=None,
+                 c_phi=None,
+                 c_l=None,
+                 ivar=Symbol('t'),
+                 **kwargs):
+        if l is not None: self.l = l
+        if k_l is not None: self.k_l = k_l
+        if m_t is not None: self.m_t = m_t
+        if m_p is not None: self.m_p = m_p
+        if g is not None: self.g = g
+        if phi is not None: self.phi = phi
+        if x is not None: self.x = x
+        if k is not None: self.k = k
+        if Omega is not None: self.Omega = Omega
+        if F is not None: self.F = F
+        if c is not None: self.c = c
+        if u_e is not None: self.u_e = u_e
+        if v is not None: self.v = v
+        if c_phi is not None: self.c_phi = c_phi
+        if c_l is not None: self.c_phi = c_l
         self.ivar = ivar
-        # self.qs = [self.x,self.phi,self.u]
-        self.qs = [self.x, self.phi]
+        self.qs = [self.x,self.phi,self.u_e]
+        #self.qs = [self.x,self.phi]
         self._init_from_components(**kwargs)
 
     @cached_property
     def components(self):
         components = {}
-        # self.u=self.l+self.v*self.ivar
-        # self._TrolleyWithPendulum = TrolleyWithElasticPendulum(self.l+self.qs[2], self.m_t, self.m_p, self.k, self.g, self.Omega, self.qs[2], self.qs[0], self.F,ivar=self.ivar)(label='Trolley')
-        self._TrolleyWithPendulum = TrolleyWithElasticPendulum(
-            self.l,
-            self.m_t,
-            self.m_p,
-            self.k,
-            self.g,
-            self.Omega,
-            F=self.F,
-            ivar=self.ivar,
-        )(label="Trolley")
-        self._trolley_damper = Damper(
-            self.c, pos1=self.x + (self.l + self.u_e) * sin(self.phi), qs=self.qs
-        )(label="Trolley damper")
-        self._pendulum_damper = Damper(self.c, pos1=self.phi, qs=self.qs)(
-            label="Pendulum damper"
-        )
+        #self.u=self.l+self.v*self.ivar
+        #self._TrolleyWithPendulum = TrolleyWithElasticPendulum(self.l+self.qs[2], self.m_t, self.m_p, self.k, self.g, self.Omega, self.qs[2], self.qs[0], self.F,ivar=self.ivar)(label='Trolley')
+        self._TrolleyWithPendulum = TrolleyWithElasticPendulum(self.l, self.m_t, self.m_p, self.k, self.g, self.Omega, F=self.F,ivar=self.ivar)(label='Trolley')
+        self._trolley_damper=Damper(self.c, pos1=self.x+(self.l+self.u_e)*sin(self.phi), qs=self.qs)(label='Trolley damper')
+        self._pendulum_damper=Damper(self.c_phi, pos1=self.phi, qs=self.qs)(label='Pendulum damper')
+        
+        self._pendulum_line_damper_horizontal=Damper(self.c_l, pos1=self.x+self.u_e*sin(self.phi), qs=[self.u_e])(label='Pendulum horizontal line damper')
+        self._pendulum_line_damper_vertical=Damper(self.c_l, pos1=self.x+self.u_e*cos(self.phi), qs=[self.u_e])(label='Pendulum vertical line damper')
+        
+        
 
-        components["_TrolleyWithPendulum"] = self._TrolleyWithPendulum
-        components["_trolley_damper"] = self._trolley_damper
-        components["_pendulum_damper"] = self._pendulum_damper
+
+        components['_TrolleyWithPendulum'] = self._TrolleyWithPendulum
+        components['_trolley_damper'] = self._trolley_damper
+        components['_pendulum_damper'] = self._pendulum_damper
+        components['_pendulum_line_damper_horizontal'] = self._pendulum_line_damper_horizontal
+        components['_pendulum_line_damper_vertical'] = self._pendulum_line_damper_vertical
 
         return components
