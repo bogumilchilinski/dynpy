@@ -1506,7 +1506,7 @@ class Picture(Figure, ReportModule):
         Initialize the Picture class.
 
         Args:
-            image (Optional[str]): Path to the image file.
+            image (Optional[str]): Picture or path to the image file.
             position (Optional[str]): LaTeX position specifier for the figure.
             caption (Optional[str]): Caption for the image.
             width (Optional[str]): Width of the image (e.g., '0.5\\textwidth').
@@ -1517,7 +1517,14 @@ class Picture(Figure, ReportModule):
             https://www.sharelatex.com/learn/Positioning_of_Figures
         """
 
-        self.image = image
+        
+        if isinstance(image,Picture):
+            self.image = image.image
+        elif isinstance(image,str):
+            self.image = image
+        else:
+            self.image = None
+
         self.caption = caption
         self.preview_size = None
 
