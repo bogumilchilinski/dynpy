@@ -4864,7 +4864,7 @@ class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
     phi = dynamicsymbols('\\varphi')
     x = dynamicsymbols('x')
     c = Symbol('c', positive=True)
-    u_e = dynamicsymbols('u',positive=True)
+    u_e = dynamicsymbols('u')
     v = Symbol('v', positive=True)
     c_phi=Symbol('\\hat c_{\\varphi}',positive=True)
     c_l=Symbol('c_l',positive=True)
@@ -4917,7 +4917,7 @@ class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
         self._pendulum_damper=Damper(self.c_phi, pos1=self.phi, qs=self.qs)(label='Pendulum damper')
         
         self._pendulum_line_damper_horizontal=Damper(self.c_l, pos1=self.x+self.u_e*sin(self.phi), qs=[self.u_e])(label='Pendulum horizontal line damper')
-        self._pendulum_line_damper_vertical=Damper(self.c_l, pos1=self.x+self.u_e*cos(self.phi), qs=[self.u_e])(label='Pendulum vertical line damper')
+        self._pendulum_line_damper_vertical=Damper(self.c_l, pos1=self.u_e*cos(self.phi), qs=[self.u_e])(label='Pendulum vertical line damper')
         
         
 
