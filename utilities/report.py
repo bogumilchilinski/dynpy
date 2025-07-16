@@ -1457,7 +1457,7 @@ class Picture(Figure, ReportModule):
         Command("graphicspath{{../}}"),
     ]
 
-    _position = "H"
+    _position = None
     _preview_default_size = "20cm"
 
     @classmethod
@@ -1495,7 +1495,7 @@ class Picture(Figure, ReportModule):
     def __init__(
         self,
         image=None,
-        position=None,
+        position='H',
         caption=None,
         width=None,
         height=None,
