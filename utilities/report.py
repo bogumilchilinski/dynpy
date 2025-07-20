@@ -859,27 +859,89 @@ class ReportText(ReportModule):
         return vector[:-2] + ")"
 
 
+import re
+from typing import List, Tuple
+
+
 class LatexSanitizer:
-    replacements = {
-        "–": "-",  # en dash
-        "—": "--",  # em dash
-        "“": '"',  # left double quote
-        "”": '"',  # right double quote
-        "‘": "'",  # left single quote
-        "’": "'",  # right single quote
-        "…": "...",  # ellipsis
-        "•": "*",
+    # ---------- 1. twarde podmiany Unicode --------------------------- #
+    _UNICODE = {
+        "–": "-",
+        "—": "---",
+        "“": "``",
+        "”": "''",
+        "‘": "`",
+        "’": "'",
+        "…": r"\ldots{}",
         "→": r"$\rightarrow$",
         "✓": r"$\checkmark$",
+        "•": r"$\bullet$",
         "€": r"\euro{}",
-        "—": "---",
     }
 
+    # ---------- 2. uciekanie znaków w TEKŚCIE ------------------------- #
+    _ESC_TEXT = str.maketrans(
+        {
+            "#": r"\#",
+            "$": r"\$",
+            "%": r"\%",
+            "&": r"\&",
+            "_": r"\_",
+            "{": r"\{",
+            "}": r"\}",
+            "~": r"\textasciitilde{}",
+            "^": r"\^{}",
+        }
+    )
+
+    # ---------- 3. regex na „fragment kodu” --------------------------- #
+    _RE_CODE = re.compile(
+        r"""(?<!\\)(               # nie poprzedzony ukośnikiem
+            __\w+__\.py |          #  __init__.py, __main__.py…
+            [A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*\(\)? |   # func(), pkg.mod()
+            [A-Za-z_]\w*(?:\.[A-Za-z_]\w*)+          # pkg.mod.attr
+        )""",
+        re.VERBOSE,
+    )
+
+    # ---------- 4. uciekanie MINIMALNE wewnątrz \texttt{…} ------------ #
+    _ESC_CODE = str.maketrans(
+        {
+            "_": r"\_",
+            "#": r"\#",
+            "%": r"\%",
+            "&": r"\&",
+        }
+    )
+
+    # ================================================================= #
     @classmethod
     def sanitize(cls, text: str) -> str:
-        for original, replacement in cls.replacements.items():
-            text = text.replace(original, replacement)
-        return text
+        segments: List[Tuple[bool, str]] = []  # (is_code, fragment)
+
+        # --- A. rozdziel kod / tekst --------------------------------- #
+        last = 0
+        for m in cls._RE_CODE.finditer(text):
+            if m.start() > last:
+                segments.append((False, text[last : m.start()]))
+            segments.append((True, m.group(0)))
+            last = m.end()
+        segments.append((False, text[last:]))
+
+        # --- B. przetwarzaj osobno ----------------------------------- #
+        out_parts: List[str] = []
+        for is_code, frag in segments:
+            if is_code:
+                out_parts.append(r"\texttt{" + frag.translate(cls._ESC_CODE) + "}")
+            else:
+                # 1. Unicode
+                for orig, repl in cls._UNICODE.items():
+                    frag = frag.replace(orig, repl)
+                # 2. zwykłe znaki LaTeX
+                frag = frag.translate(cls._ESC_TEXT)
+                out_parts.append(frag)
+
+        return "".join(out_parts)
 
 
 class Aspect(Section, ReportModule):
