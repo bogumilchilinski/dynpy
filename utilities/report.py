@@ -859,6 +859,29 @@ class ReportText(ReportModule):
         return vector[:-2] + ")"
 
 
+class LatexSanitizer:
+    replacements = {
+        "–": "-",  # en dash
+        "—": "--",  # em dash
+        "“": '"',  # left double quote
+        "”": '"',  # right double quote
+        "‘": "'",  # left single quote
+        "’": "'",  # right single quote
+        "…": "...",  # ellipsis
+        "•": "*",
+        "→": r"$\rightarrow$",
+        "✓": r"$\checkmark$",
+        "€": r"\euro{}",
+        "—": "---",
+    }
+
+    @classmethod
+    def sanitize(cls, text: str) -> str:
+        for original, replacement in cls.replacements.items():
+            text = text.replace(original, replacement)
+        return text
+
+
 class Aspect(Section, ReportModule):
     packages = [  # Package('float'),
         # Package('fvextra'),
@@ -1495,7 +1518,7 @@ class Picture(Figure, ReportModule):
     def __init__(
         self,
         image=None,
-        position='H',
+        position="H",
         caption=None,
         width=None,
         height=None,
@@ -1517,10 +1540,9 @@ class Picture(Figure, ReportModule):
             https://www.sharelatex.com/learn/Positioning_of_Figures
         """
 
-        
-        if isinstance(image,Picture):
+        if isinstance(image, Picture):
             self.image = image.image
-        elif isinstance(image,str):
+        elif isinstance(image, str):
             self.image = image
         else:
             self.image = None
