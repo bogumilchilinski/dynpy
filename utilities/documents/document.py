@@ -703,7 +703,7 @@ class Guide(Document, ReportMethods):
                 "headheight=50mm",
             ],
         ),
-        Package("microtype"),
+        #Package("microtype"),
         Package("authoraftertitle"),
         Package("polski", options=["MeX"]),
         # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
@@ -3488,7 +3488,7 @@ class StateOfArtReport(Document):
                 "headheight=50mm",
             ],
         ),
-        Package("microtype"),
+        #Package("microtype"),
         Package("authoraftertitle"),
         Package(" ", options=["MeX"]),
         # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
@@ -4549,7 +4549,7 @@ class BeamerPresentation(Document):
 
     latex_name = "document"
     packages = [
-        Package("microtype"),
+        #Package("microtype"),
         # Package('polski',options=['MeX']),
         # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
         Package("listings"),
@@ -4557,7 +4557,7 @@ class BeamerPresentation(Document):
         # Package('fancyhdr'),
         # Command('pagestyle', arguments=['fancy']),
         Command(
-            "author", arguments=["Kamil Jaśkielewicz & Bogumił Chiliński"]
+            "author", arguments=["Bogumił Chiliński"]
         ),  # ['Szymon Kozłowski & Bogumił Chiliński']),
         # Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
         # Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
