@@ -4197,7 +4197,8 @@ doc.generate_pdf(clean_tex=False)
 
         cls._create_file("articles.bib", articles_bib, "output")
 
-
+class Report(StateOfArtReport):
+    pass
 class ThesisTemplate(WutThesis):
     pass
 
