@@ -1061,7 +1061,7 @@ class TrolleyWithPendulumTestStandScheme(TikZPicture):
         # text1 = r'{\color{violet} Silnik elektryczny}'
         # text2 = r'{\color{violet} Przekładnia}'
         # text3 = r'{\color{violet} Obiekt badań}'
-        # text4 = r'{\color{violet} TMD}'
+        # text4 = r'{\color{violet} APTMD}'
         # text5 = r'{\color{violet} Akcelerometr}'
         # text6 = r'{\color{violet} Stół ruchomy}'
         # text7 = r'{\color{violet} Korbowód}'
@@ -1072,7 +1072,7 @@ class TrolleyWithPendulumTestStandScheme(TikZPicture):
         text1 = r"{\color{violet} Electric Motor}"
         text2 = r"{\color{violet} Belt Gearbox}"
         text3 = r"{\color{violet} Test Object}"
-        text4 = r"{\color{violet} TMD}"
+        text4 = r"{\color{violet} APTMD}"
         text5 = r"{\color{violet} Accelerometer}"
         text6 = r"{\color{violet} Vibrating Table}"
         text7 = r"{\color{violet} Connecting Rod}"
