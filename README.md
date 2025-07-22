@@ -81,7 +81,7 @@ Pendulum().interactive_preview()
 
 ```python
 from dynpy.utilities.report import *
-from dynpy.utilities.documents.guides import Guide
+from dynpy.utilities.documents.document import Report
 
 doc = Guide('./output/sample_report', title="Sample Report")
 
@@ -126,13 +126,13 @@ CurrentContainer(section);
 
 #### Adding text to section via ReportText
 
-```pyton
+```python
 display(ReportText('Sample text'));
 ```
 
 #### Adding text to section via Markdown
 
-```pyton
+```python
 display(Markdown(
 '''
 Sample text
@@ -142,7 +142,7 @@ Sample text
 
 #### Adding an image into the section
 
-```pyton
+```python
 Picture('/route/to/image', caption = 'Sample caption')
 ```
 
@@ -175,7 +175,7 @@ Picture('./plot.png', caption='Sample plot')
 Adding formula to the document
 
 ```python
-d, r, fib, fia, thetaa, thetab = symbols('d r varphi_B varphi_A phi_A phi_B');
+d, r, fib, fia, thetaa, thetab = symbols('d r varphi_B varphi_A phi_A phi_B')
 
 harvestine_formula = Eq(d, 2 * r * sp.asin(sp.sqrt(sp.sin((fib - fia) / 2)**2 + (cos(fia) * cos(fib) * sp.sin((thetab - thetaa) / 2)**2))))
 
@@ -225,7 +225,7 @@ tabelka = LatexDataFrame.formatted(
 
 tabelka.columns = ['Start', 'Stop', 'Time [s]', 'Time [h]', 'Length [km]', 'Velocity [km/h]']
 
-predicted_travel_time.append(tabelka.reported(caption="Travel Time Data Table"))
+display(tabelka.reported(caption="Travel Time Data Table"))
 ```
 
 ## 3. Exporting Reports
@@ -239,7 +239,7 @@ predicted_travel_time.append(tabelka.reported(caption="Travel Time Data Table"))
 ### Exporting Procedures
 
 ```python
-doc.generate_pdf(clean_tex=True)
+doc.generate_pdf(clean_tex=False)
 ```
 
 ## 4. Practical Examples
@@ -248,9 +248,9 @@ doc.generate_pdf(clean_tex=True)
 
 ```python
 from dynpy.utilities.report import *
-from dynpy.utilities.templates.document import Guide
+from dynpy.utilities.documents.document import Report
 
-doc = Guide('./reports/sample-report')
+doc = Report('./output/sample-report')
 
 sample_section = Section('Sample Section')
 CurrentContainer(sample_section)
@@ -277,7 +277,7 @@ doc.append(second_sample_section)
 doc.append(sample_subsection)
 doc.append(second_sample_subsection)
 
-doc.generate_pdf(clean_tex=True)
+doc.generate_pdf(clean_tex=False)
 ```
 
 ## 5. Customization Options (Advanced)
