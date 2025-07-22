@@ -83,7 +83,7 @@ Pendulum().interactive_preview()
 from dynpy.utilities.report import *
 from dynpy.utilities.documents.document import Report
 
-doc = Guide('./output/sample_report', title="Sample Report")
+doc = Report('./output/sample_report', title="Sample Report")
 
 section = Section('Exemplary section name')
 CurrentContainer(section)
