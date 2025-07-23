@@ -1,51 +1,47 @@
 ## Table of Contents
 
-1. [Introduction](#introduction)
-   1. [What is DynPy?](#1-what-is-dynpy)
-   2. [Key Features](#2-key-features)
-   3. [Getting Started on CoCalc](#3-getting-started-on-cocalc)
-2. [How to Start / Basic Usage](#how-to-start--basic-usage)
-   1. [Example Scripts](#1-example-scripts)
-   2. [Creating First Document / Report](#2-creating-first-document--report)
-   3. [Lookin for some help](#3-Looking-for-some-help)
-3. [Reporting Module](#reporting-module)
-   1. [Overview of the Reporting Module](#1-overview-of-the-reporting-module)
-   2. [Creating Reports](#2-creating-reports)
-      - [Setting Up the Reporting Environment](#setting-up-the-reporting-environment)
-      - [Defining Report Content](#defining-report-content)
-      - [Creating Sections and Subsections](#creating-sections-and-subsections)
-      - [Adding Content (Text, Images, Equations)](#adding-content-text-images-equations)
-      - [Incorporating Simulation Results](#incorporating-simulation-results)
-      - [Adding Visualizations and Data Tables](#adding-visualizations-and-data-tables)
-   3. [Exporting Reports](#3-exporting-reports)
-      - [Supported Formats](#supported-formats)
-      - [Exporting Procedures](#exporting-procedures)
-   4. [Practical Examples](#4-practical-examples)
-      - [Generating a Simple Report](#generating-a-simple-report)
-      - [Advanced Reporting Features](#advanced-reporting-features)
-   5. [Customization Options (Advanced)](#5-customization-options-advanced)
-      - [Formatting Text and Equations](#formatting-text-and-equations)
-      - [Customizing Layout and Styles](#customizing-layout-and-styles)
-      - [Utilizing Templates for Consistency](#utilizing-templates-for-consistency)
-4. [Simulation Engine](#simulation-engine)
-5. [Data Handling](#data-handling)
-6. [Dynamic Modeling](#dynamic-modeling)
-7. [Visualization Tools](#visualization-tools)
-8. [Installation & Setup (Optional, for Local Development)](#installation--setup-optional-for-local-development)
-   1. [Requirements](#1-requirements)
-   2. [Manual Installation](#2-manual-installation)
-9. [Usage Examples](#usage-examples)
-   1. [Simulating a Dynamic System](#1-simulating-a-dynamic-system)
-   2. [Data Import & Export](#2-data-import--export)
-   3. [Running a Custom Model](#3-running-a-custom-model)
-   4. [Generating Reports](#4-generating-reports)
-10. [Licensing Information](#licensing-information)
+- [Introduction](#introduction)
+  - [1. What is DynPi?](#1-what-is-dynpi)
+  - [2. Key Features](#2-key-features)
+  - [3. Getting Started on CoCalc](#3-getting-started-on-cocalc)
+- [How to Start / Basic Usage](#how-to-start--basic-usage)
+  - [1. Example Scripts](#1-example-scripts)
+  - [2. Creating First Document / Report](#2-creating-first-document--report)
+  - [3. Looking for some help](#3-looking-for-some-help)
+    - [Defining Report Content](#defining-report-content)
+      - [Creating a section of document](#creating-a-section-of-document)
+      - [Creating a subsection of document](#creating-a-subsection-of-document)
+      - [Selecting a section or subsection to add content to](#selecting-a-section-or-subsection-to-add-content-to)
+      - [Adding text to section via ReportText](#adding-text-to-section-via-reporttext)
+      - [Adding text to section via Markdown](#adding-text-to-section-via-markdown)
+      - [Adding an image into the section](#adding-an-image-into-the-section)
+      - [Appending sections and subsections into the document](#appending-sections-and-subsections-into-the-document)
+    - [Incorporating Simulation Results](#incorporating-simulation-results)
+    - [Adding Visualizations, Formulas and Data Tables](#adding-visualizations-formulas-and-data-tables)
+  - [3. Exporting Reports](#3-exporting-reports)
+    - [Supported Formats](#supported-formats)
+    - [Exporting Procedures](#exporting-procedures)
+  - [4. Practical Examples](#4-practical-examples)
+    - [Generating a Simple Report](#generating-a-simple-report)
+  - [5. Customization Options (Advanced)](#5-customization-options-advanced)
+    - [Formatting Text and Equations](#formatting-text-and-equations)
+    - [Customizing Layout and Styles](#customizing-layout-and-styles)
+- [Custom styles](#custom-styles)
+    - [Utilizing Templates for Consistency](#utilizing-templates-for-consistency)
+    - [Use predefined templates](#use-predefined-templates)
+- [Simulation Engine](#simulation-engine)
+- [Data Handling](#data-handling)
+- [Dynamic Modeling](#dynamic-modeling)
+- [Installation \& Setup (Optional, for Local Development)](#installation--setup-optional-for-local-development)
+  - [Requirements](#requirements)
+  - [Manual Installation](#manual-installation)
+- [Licensing Information](#licensing-information)
 
 # Introduction
 
-## 1. What is DynPy?
+## 1. What is DynPi?
 
-DynPy is a Python module designed for engineering calculations on dynamical systems. It provides a comprehensive framework for modeling, simulating, and analyzing dynamic mechanical systems.
+DynPi is a Python module designed for engineering calculations on dynamical systems. It provides a comprehensive framework for modeling, simulating, and analyzing dynamic mechanical systems.
 
 ## 2. Key Features
 
@@ -56,7 +52,7 @@ DynPy is a Python module designed for engineering calculations on dynamical syst
 
 ## 3. Getting Started on CoCalc
 
-To begin working with DynPy, you need an account on [CoCalc](https://cocalc.com/).
+To begin working with DynPi, you need an account on [CoCalc](https://cocalc.com/).
 
 1. Create an account on CoCalc.
 2. Accept the project invitation using this [link](https://cocalc.com/app?project-invite=hXnPFLqokQsoK6TG).
@@ -82,6 +78,7 @@ Pendulum().interactive_preview()
 ```python
 from dynpy.utilities.report import *
 from dynpy.utilities.documents.document import Report
+SympyFormula._break_mode = 'eq'
 
 doc = Report('./output/sample_report', title="Sample Report")
 
@@ -97,7 +94,18 @@ doc.generate_pdf(clean_tex=False)
 ```
 
 ## 3. Looking for some help
+Documentclasses with generic content of exemplary document:
+```python
+from dynpy.utilities.documents.document import *
 
+Report.base_setup()
+BeamerPresentation.base_setup()
+Guide.base_setup()
+WutThesis.base_setup()
+```
+
+
+Guides that provides step by step instructions:
 ```python
 from dynpy.utilities.creators import list_of_guides
 list_of_guides()
