@@ -60,7 +60,7 @@ To begin working with DynPy, you need an account on [CoCalc](https://cocalc.com/
 
 1. Create an account on CoCalc.
 2. Accept the project invitation using this [link](https://cocalc.com/app?project-invite=hXnPFLqokQsoK6TG).
-3. Open the [README FIRST](https://cocalc.com/projects/b51ce971-5b39-4911-ad97-ef59f15f0039/files/README%20FIRST.ipynb) file.
+3. Open the [README](https://cocalc.com/projects/b51ce971-5b39-4911-ad97-ef59f15f0039/files/README.ipynb) file.
 4. Follow the instructions in the introductory guide.
 
 ---
@@ -107,19 +107,19 @@ list_of_guides()
 
 #### Creating a section of document
 
-```pyton
+```python
 section = Section('Sample section name')
 ```
 
 #### Creating a subsection of document
 
-```pyton
+```python
 subsection = Subsection('Sample subsection name');
 ```
 
 #### Selecting a section or subsection to add content to
 
-```pyton
+```python
 section = Section('Sample section name')
 CurrentContainer(section);
 ```
@@ -175,9 +175,14 @@ Picture('./plot.png', caption='Sample plot')
 Adding formula to the document
 
 ```python
-d, r, fib, fia, thetaa, thetab = symbols('d r varphi_B varphi_A phi_A phi_B')
+from sympy import *
+d, r, fib, fia,  = symbols('d r varphi_B varphi_A') #many symbols at once
 
-harvestine_formula = Eq(d, 2 * r * sp.asin(sp.sqrt(sp.sin((fib - fia) / 2)**2 + (cos(fia) * cos(fib) * sp.sin((thetab - thetaa) / 2)**2))))
+thetaa = Symbol('thetaa') #separate definition of the symbol
+thetab = Symbol('thetab') #separate definition of the symbol
+
+
+harvestine_formula = Eq(d, 2 * r * asin(sqrt(sin((fib - fia) / 2)**2 + (cos(fia) * cos(fib) * sin((thetab - thetaa) / 2)**2))))
 
 display(SympyFormula(harvestine_formula))
 ```
