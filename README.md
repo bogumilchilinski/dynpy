@@ -60,7 +60,7 @@ To begin working with DynPy, you need an account on [CoCalc](https://cocalc.com/
 
 1. Create an account on CoCalc.
 2. Accept the project invitation using this [link](https://cocalc.com/app?project-invite=hXnPFLqokQsoK6TG).
-3. Open the [README](https://cocalc.com/projects/b51ce971-5b39-4911-ad97-ef59f15f0039/files/README.ipynb) file.
+3. Open the [README](https://cocalc.com/projects/b51ce971-5b39-4911-ad97-ef59f15f0039/files/READme.ipynb) file.
 4. Follow the instructions in the introductory guide.
 
 ---
@@ -127,12 +127,16 @@ CurrentContainer(section);
 #### Adding text to section via ReportText
 
 ```python
+from dynpy.utilities.report import *
+
 display(ReportText('Sample text'));
 ```
 
 #### Adding text to section via Markdown
 
 ```python
+from dynpy.utilities.report import *
+
 display(Markdown(
 '''
 Sample text
@@ -143,7 +147,7 @@ Sample text
 #### Adding an image into the section
 
 ```python
-Picture('/route/to/image', caption = 'Sample caption')
+Picture('./images_folder/image_name.PNG', caption = 'Sample caption') # './images_folder/image_name.PNG' is certain '/route/to/file' path
 ```
 
 #### Appending sections and subsections into the document
@@ -167,15 +171,18 @@ import matplotlib.pyplot as plt
 
 def create_plot():
     plt.plot([0, 1, 2], [0, 1, 4])
-    plt.savefig("./plot.png")
+    plt.savefig("./images/plot.png")
 
-Picture('./plot.png', caption='Sample plot')
+Picture('./images/plot.png', caption='Sample plot')
 ```
 
 Adding formula to the document
 
 ```python
+from dynpy.utilities.report import *
 from sympy import *
+
+
 d, r, fib, fia,  = symbols('d r varphi_B varphi_A') #many symbols at once
 
 thetaa = Symbol('thetaa') #separate definition of the symbol
@@ -183,17 +190,17 @@ thetab = Symbol('thetab') #separate definition of the symbol
 
 
 harvestine_formula = Eq(d, 2 * r * asin(sqrt(sin((fib - fia) / 2)**2 + (cos(fia) * cos(fib) * sin((thetab - thetaa) / 2)**2))))
-
 display(SympyFormula(harvestine_formula))
 ```
 
 Creating table and adding it to document
 
 ```python
+from dynpy.utilities.report import *
 from dynpy.utilities.adaptable import *
 
 predicted_travel_time = Subsection('Predicted Travel Time');
-CurrentContainer(predicted_travel_time);
+CurrentContainer(predicted_travel_time)
 
 time_s = Symbol('time_s', positive=True)
 time_h = Symbol('time_h')
@@ -218,19 +225,13 @@ unit_dict = {
 
 LatexDataFrame.set_default_units(unit_dict)
 
-def format_cell(x):
-    if isinstance(x, str):
-        return x
-    else:
-        return f'${latex(x)}$'
 
-tabelka = LatexDataFrame.formatted(
-    data = dane,
-).map(format_cell)
 
-tabelka.columns = ['Start', 'Stop', 'Time [s]', 'Time [h]', 'Length [km]', 'Velocity [km/h]']
+report_table = LatexDataFrame.formatted(
+    data = dane)
 
-display(tabelka.reported(caption="Travel Time Data Table"))
+
+display(report_table.reported(caption="Travel Time Data Table"))
 ```
 
 ## 3. Exporting Reports
@@ -244,7 +245,14 @@ display(tabelka.reported(caption="Travel Time Data Table"))
 ### Exporting Procedures
 
 ```python
+import pypandoc
+#for LaTeX report (LaTeX distribution is needed)
 doc.generate_pdf(clean_tex=False)
+
+#for `.docx` file
+doc.generate_tex('./output/sample_report')
+pypandoc.convert_file('./output/sample_report.tex',to='docx',format='tex',outputfile="./output/sample_report.docx")
+
 ```
 
 ## 4. Practical Examples
