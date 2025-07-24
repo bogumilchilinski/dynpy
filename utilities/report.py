@@ -995,6 +995,28 @@ class LstListing(Environment):
         # Command('lstset', arguments = [NoEscape('style=dynPyStyle,language=Python')]),
     ]
 
+class BiblographyManager(Environment):
+    
+    r'''
+    Description how to use it:
+    
+    from dynpy.utilities.report import *
+    biblio_mngr=BiblographyManager(arguments='biblio.bib')
+
+    biblio_entries=NoEscape(
+    r"""
+    @misc{DynPi,
+    author={GitHub},
+    title="bogumilchilinski/dynpy",
+    url={https://github.com/bogumilchilinski/dynpy},
+    note="Accessed:2024-05-04"
+    """)
+
+    biblio_mngr.append(biblio_entries)
+
+    '''
+
+    latex_name = 'filecontents'
 
 class PyVerbatim(Environment):
     packages = [
