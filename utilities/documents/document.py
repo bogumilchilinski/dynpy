@@ -3522,7 +3522,7 @@ class StateOfArtReport(Document):
         ),
         #Package("microtype"),
         Package("authoraftertitle"),
-        Package(" ", options=["MeX"]),
+        Package("polski", options=["MeX"]),
         # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
         Package("listings"),
         Package("titlesec"),
@@ -3673,12 +3673,39 @@ note="Accessed:2024-05-04"
 @misc{pandas, url={https://pandas.pydata.org/}, journal={pandas}}
 '''# File content end
 
+
+
 from dynpy.utilities.report import *
 from dynpy.utilities.documents.document import StateOfArtReport
 
 
 from dynpy.utilities.adaptable import TimeDataFrame
 import pandas as pd
+
+
+biblio_mngr=BiblographyManager(arguments='biblio.bib')
+
+biblio_entries=NoEscape(
+r'''
+@misc{DynPi,
+author={GitHub},
+title="bogumilchilinski/dynpy",
+url={https://github.com/bogumilchilinski/dynpy},
+note="Accessed:2024-05-04"
+
+@book{lutz2001programming,
+  title={Programming python},
+  author={Lutz, Mark},
+  year={2001},
+  publisher={" O'Reilly Media, Inc."}
+}
+@misc{NumPy, url={https://numpy.org/}, journal={NumPy}}
+@misc{pandas, url={https://pandas.pydata.org/}, journal={pandas}}
+
+
+''')
+
+biblio_mngr.append(biblio_entries)
 
 
 doc = StateOfArtReport('./output/report_name')
@@ -3733,6 +3760,8 @@ display(ReportText('This subsection provides methodology. '*100))
 sota_name = './output/report_name' #path for report file 
 
 doc = StateOfArtReport(sota_name)
+doc.preamble.append(biblio_mngr)
+
 # Bibliography of quotations
 ### Select one bibligraphy managment system
 ####### BibLatex
@@ -3827,6 +3856,31 @@ note="Accessed:2024-05-04"
 from dynpy.utilities.report import *
 from dynpy.utilities.documents.document import StateOfArtReport
 
+biblio_mngr=BiblographyManager(arguments='biblio.bib')
+
+biblio_entries=NoEscape(
+r'''
+@misc{DynPi,
+author={GitHub},
+title="bogumilchilinski/dynpy",
+url={https://github.com/bogumilchilinski/dynpy},
+note="Accessed:2024-05-04"
+
+@book{lutz2001programming,
+  title={Programming python},
+  author={Lutz, Mark},
+  year={2001},
+  publisher={" O'Reilly Media, Inc."}
+}
+@misc{NumPy, url={https://numpy.org/}, journal={NumPy}}
+@misc{pandas, url={https://pandas.pydata.org/}, journal={pandas}}
+
+
+''')
+
+biblio_mngr.append(biblio_entries)
+
+
 doc = StateOfArtReport('./output/report_name')
 
 
@@ -3878,6 +3932,8 @@ display(ReportText('Conclusions '*200))
 sota_name = './output/report_name' #path for report file 
 
 doc = StateOfArtReport(sota_name)
+doc.append.append(biblio_mngr)
+
 # Bibliography of quotations
 ### Select one bibligraphy managment system
 ####### BibLatex
