@@ -41,7 +41,10 @@
 
 ## 1. What is DynPi?
 
-DynPi is a Python module designed for engineering calculations on dynamical systems. It provides a comprehensive framework for modeling, simulating, and analyzing dynamic mechanical systems.
+DynPi is a Python module designed for engineering calculations on dynamical systems. It provides a comprehensive framework for modeling, simulating, and analyzing dynamic mechanical systems. DynPy is the first tool of its kind to simplify performing scientific activities and enginnering calculations! It’s ready-to-use code that generates reports in engineering mechanics. You can create your own mechanical simulations, use tools for modeling mechanical systems and their dynamics, and take advantage of a built-in solver for ordinary differential equations (ODEs). All of this is available in just 10 code cells – with every step and hint clearly described below and within the code itself (marked with #). We’re also including an instructional video showing how to create a sample report:
+Writing your own diploma still looking for tools to use? Word, DynPy and .... ChatGPt. These tools have its pros and cons - all depends on how do you use it and how do u like to work. Word it's classic - everyone knows and can use it. Starter for wrtining, formatting, adding adnotations and commentaries. Good for theory, literature reviews, humanities papers. However, when it comes to simulations and calculations, then sorry you're obliged to open other programs.
+DynPy is an engineering combine. Simulations, calculations and modelling it's hard and DynPy is superior in this especailly if you are into mechanics and automation. DynPy allows you to create professional looking raports. Moreover they are created in PDF format. Cons? You must pick up a little coding. Once you learn it, it works wonders.
+ChatGPT? It's your go-to buddy for everything – it'll sometimes help write an introduction, check your spelling, suggest how to calculate something, or explain what a given piece of code does. However, it won't always be accurate, it won't substitute DynPy for simulations and reporting.
 
 ## 2. Key Features
 
