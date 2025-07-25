@@ -1010,6 +1010,7 @@ class BibliographyManager(Environment):
     title="bogumilchilinski/dynpy",
     url={https://github.com/bogumilchilinski/dynpy},
     note="Accessed:2024-05-04"
+    }
     """)
 
     biblio_mngr.append(biblio_entries)
@@ -1017,6 +1018,7 @@ class BibliographyManager(Environment):
     '''
 
     latex_name = 'filecontents'
+    content_separator = "\n"
 
 class PyVerbatim(Environment):
     packages = [

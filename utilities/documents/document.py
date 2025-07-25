@@ -3522,7 +3522,7 @@ class StateOfArtReport(Document):
         ),
         #Package("microtype"),
         Package("authoraftertitle"),
-        Package("polski", options=["MeX"]),
+        #Package("polski", options=["MeX"]),
         # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
         Package("listings"),
         Package("titlesec"),
@@ -3653,15 +3653,12 @@ list_of_guides()
 #In file output create bibliography as .bib file (biblio.bib)
 
 '''# File content begin
-
-
 @misc{DynPi,
 author={GitHub},
 title="bogumilchilinski/dynpy",
-url={https://github.com/bogumilchilinski/dynpy}",
+url={https://github.com/bogumilchilinski/dynpy},
 note="Accessed:2024-05-04"
 }
-
 
 @book{lutz2001programming,
   title={Programming python},
@@ -3692,6 +3689,7 @@ author={GitHub},
 title="bogumilchilinski/dynpy",
 url={https://github.com/bogumilchilinski/dynpy},
 note="Accessed:2024-05-04"
+}
 
 @book{lutz2001programming,
   title={Programming python},
@@ -3701,8 +3699,6 @@ note="Accessed:2024-05-04"
 }
 @misc{NumPy, url={https://numpy.org/}, journal={NumPy}}
 @misc{pandas, url={https://pandas.pydata.org/}, journal={pandas}}
-
-
 ''')
 
 biblio_mngr.append(biblio_entries)
@@ -3765,12 +3761,12 @@ doc.preamble.append(biblio_mngr)
 # Bibliography of quotations
 ### Select one bibligraphy managment system
 ####### BibLatex
+#doc.preamble.append(Package('biblatex',["backend=biber","sorting=none"]))
+#doc.preamble.append(Command('addbibresource','biblio.bib'))
 
-doc.preamble.append(Package('biblatex',["backend=biber","sorting=none"]))
-doc.preamble.append(Command('addbibresource','biblio.bib'))
 ####### Natbib
-#doc.preamble.append(Package('natbib')
-#doc.preamble.append(Command('bibliographystyle','unsrt'))
+doc.preamble.append(Package('natbib')
+doc.preamble.append(Command('bibliographystyle','unsrt'))
 
 # TOC
 doc.append(Command('tableofcontents')) #adds TOC
@@ -3783,30 +3779,13 @@ doc.append(sec_conclusion)
 
 
 ### BibLatex
-#doc.append(Command('printbibliography',["title={Bibliography}"])) - argument is to improve
-doc.append(Command('printbibliography',options=[NoEscape("title={Bibliography}")]))
+#doc.append(Command('printbibliography',options=[NoEscape("title={Bibliography}")]))
 
 ### Natbib
-#doc.append(Command('bibliography',arguments=["references"])) # .bib file as "references"
-
-
-#FIGURES LIST
-
-doc.append(Command('addcontentsline{toc}{section}{List of figures}'))
-doc.append(Command('listoffigures'))
-doc.append(Command('pagestyle{plain}'))
-doc.append(Command('newpage'))
-
-#TABLES LIST
-
-doc.append(Command('addcontentsline{toc}{section}{List of tables}'))
-doc.append(Command('renewcommand{\listtablename}{List of tables}'))
-doc.append(Command('listoftables'))
-doc.append(Command('pagestyle{plain}'))
-doc.append(Command('newpage'))
+doc.append(Command('bibliography',arguments=["references"])) # .bib file as "references"
 
 # Generating file
-doc.generate_pdf(clean_tex=True)
+doc.generate_pdf(clean_tex=False)
 ```
 
 """
@@ -3832,15 +3811,12 @@ doc.generate_pdf(clean_tex=True)
 #In file output create bibliography as .bib file (biblio.bib)
 
 '''# File content begin
-
-
 @misc{DynPi,
 author={GitHub},
 title="bogumilchilinski/dynpy",
-url={https://github.com/bogumilchilinski/dynpy}",
+url={https://github.com/bogumilchilinski/dynpy},
 note="Accessed:2024-05-04"
 }
-
 
 @book{lutz2001programming,
   title={Programming python},
@@ -3853,29 +3829,41 @@ note="Accessed:2024-05-04"
 '''# File content end
 
 
+
 from dynpy.utilities.report import *
 from dynpy.utilities.documents.document import StateOfArtReport
 
-biblio_mngr=BiblographyManager(arguments='biblio.bib')
+
+from dynpy.utilities.adaptable import TimeDataFrame
+import pandas as pd
+
+
+biblio_mngr=BibliographyManager(arguments='biblio.bib')
 
 biblio_entries=NoEscape(
 r'''
-@misc{DynPi,
-author={GitHub},
-title="bogumilchilinski/dynpy",
-url={https://github.com/bogumilchilinski/dynpy},
-note="Accessed:2024-05-04"
+@misc{
+  DynPi,
+  author={GitHub},
+  title="bogumilchilinski/dynpy",
+  url={https://github.com/bogumilchilinski/dynpy},
+  note="Accessed:2024-05-04"
+}
 
-@book{lutz2001programming,
+@book{
+  lutz2001programming,
   title={Programming python},
   author={Lutz, Mark},
   year={2001},
   publisher={" O'Reilly Media, Inc."}
 }
-@misc{NumPy, url={https://numpy.org/}, journal={NumPy}}
-@misc{pandas, url={https://pandas.pydata.org/}, journal={pandas}}
 
-
+@misc{
+  NumPy,
+  author="NumPy",
+  title={https://numpy.org/},
+  url={https://numpy.org/}, journal={NumPy}
+}
 ''')
 
 biblio_mngr.append(biblio_entries)
@@ -3896,16 +3884,16 @@ CurrentContainer(sec_intro)
 
 sub_problem_outline = Subsection('Outline of the problem')
 CurrentContainer(sub_problem_outline)
-display(ReportText('This subsection provides information about investigated problem. '*100))
+display(ReportText('This subsection provides information about investigated problem.'))
 
 sub_SOT = Subsection('State of the art')
 CurrentContainer(sub_SOT)
-display(ReportText('This subsection provides state of the art with multiple reference for \\cite{DynPi}. '*50))
-display(Markdown('Remeber about `biblio.bib` file with referencens. Place it in working directory and subfolder with output files. '*50))
+display(ReportText('This subsection provides state of the art with multiple reference for \\cite{DynPi}.'))
+
 
 sub_conclusions = Subsection('Conclusions')
 CurrentContainer(sub_conclusions)
-display(ReportText('This subsection provides methodology. '*100))
+display(ReportText('This subsection provides methodology \\cite{NumPy}.'))
 
 
 ## CELL 3
@@ -3917,7 +3905,7 @@ display(ReportText('This subsection provides methodology. '*100))
 sec_conclusion = Section('Section that contains final conclusions')
 CurrentContainer(sec_conclusion)
 
-display(ReportText('Conclusions '*200))
+display(ReportText('Conclusions'))
     
 ## CELL 4
 ## Document
@@ -3932,17 +3920,17 @@ display(ReportText('Conclusions '*200))
 sota_name = './output/report_name' #path for report file 
 
 doc = StateOfArtReport(sota_name)
-doc.append.append(biblio_mngr)
+doc.preamble.append(biblio_mngr)
 
 # Bibliography of quotations
 ### Select one bibligraphy managment system
 ####### BibLatex
+#doc.preamble.append(Package('biblatex',["backend=biber","sorting=none"]))
+#doc.preamble.append(Command('addbibresource','biblio.bib'))
 
-doc.preamble.append(Package('biblatex',["backend=biber","sorting=none"]))
-doc.preamble.append(Command('addbibresource','biblio.bib'))
 ####### Natbib
-#doc.preamble.append(Package('natbib')
-#doc.preamble.append(Command('bibliographystyle','unsrt'))
+doc.preamble.append(Package('natbib'))
+doc.preamble.append(Command('bibliographystyle','unsrt'))
 
 # TOC
 doc.append(Command('tableofcontents')) #adds TOC
@@ -3953,26 +3941,12 @@ doc.append(sub_SOT)
 doc.append(sub_conclusions)
 doc.append(sec_conclusion)
 
+
 ### BibLatex
-doc.append(Command('printbibliography',options=[NoEscape("title={Bibliography}")]))
+#doc.append(Command('printbibliography',options=[NoEscape("title={Bibliography}")]))
 
 ### Natbib
-#doc.append(Command('bibliography',arguments=["biblio"])) # .bib file as "references"
-
-#FIGURES LIST
-
-doc.append(Command('addcontentsline{toc}{section}{List of figures}'))
-doc.append(Command('listoffigures'))
-doc.append(Command('pagestyle{plain}'))
-doc.append(Command('newpage'))
-
-#TABLES LIST
-
-doc.append(Command('addcontentsline{toc}{section}{List of tables}'))
-doc.append(Command('renewcommand{\listtablename}{List of tables}'))
-doc.append(Command('listoftables'))
-doc.append(Command('pagestyle{plain}'))
-doc.append(Command('newpage'))
+doc.append(Command('bibliography',arguments=["biblio"])) # .bib file as "biblio"
 
 # Generating file
 doc.generate_pdf(clean_tex=False)
