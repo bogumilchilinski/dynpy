@@ -995,7 +995,7 @@ class LstListing(Environment):
         # Command('lstset', arguments = [NoEscape('style=dynPyStyle,language=Python')]),
     ]
 
-class BiblographyManager(Environment):
+class BibliographyManager(Environment):
     
     r'''
     Description how to use it:
