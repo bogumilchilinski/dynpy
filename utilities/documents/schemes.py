@@ -1060,10 +1060,10 @@ class TrolleyWithPendulumTestStandScheme(TikZPicture):
         # ––––––––––––––––––––––––––––––––––––––––––––––––
         # text1 = r'{\color{violet} Silnik elektryczny}'
         # text2 = r'{\color{violet} Przekładnia}'
-        # text3 = r'{\color{violet} Obiekt badań}'
-        # text4 = r'{\color{violet} TMD}'
+        # text3 = r'{\color{violet} Building frame model}' # Obiekt badań
+        # text4 = r'{\color{violet} APTMD}'
         # text5 = r'{\color{violet} Akcelerometr}'
-        # text6 = r'{\color{violet} Stół ruchomy}'
+        # text6 = r'{\color{violet} Stół wibracyjny}' # Stół ruchomy
         # text7 = r'{\color{violet} Korbowód}'
         # text8 = r'{\color{violet} Falownik}'
         # ––––––––––––––––––––––––––––––––––––––––––––––––
@@ -1071,10 +1071,10 @@ class TrolleyWithPendulumTestStandScheme(TikZPicture):
         # ––––––––––––––––––––––––––––––––––––––––––––––––
         text1 = r"{\color{violet} Electric Motor}"
         text2 = r"{\color{violet} Belt Gearbox}"
-        text3 = r"{\color{violet} Test Object}"
-        text4 = r"{\color{violet} TMD}"
+        text3 = r"{\color{violet} Building Frame Model}" # Test Object
+        text4 = r"{\color{violet} APTMD}"
         text5 = r"{\color{violet} Accelerometer}"
-        text6 = r"{\color{violet} Vibrating Table}"
+        text6 = r"{\color{violet} Shake–Table}"
         text7 = r"{\color{violet} Connecting Rod}"
         text8 = r"{\color{violet} Inverter}"  # Controller
         # ––––––––––––––––––––––––––––––––––––––––––––––––
@@ -1097,10 +1097,10 @@ class TrolleyWithPendulumTestStandScheme(TikZPicture):
 
     \\node[inner sep=5pt,fill=white] (pic1) at (7.25cm,-0.5cm) {{\includegraphics[width=12cm]{{../images/test_stand_twp.png}}}};
     %%%%%%  MID COL
-    \\node[inner sep=2pt,align=center,draw] (text1) at ({pos1_x+4},{pos1_y+4.15}) {text1};
-    \\node[inner sep=2pt,align=center,draw] (text2) at ({pos1_x+3.5},{pos1_y+3.1}) {text2};
-    \\node[inner sep=2pt,align=center,draw] (text3) at ({pos1_x+6.7},{pos1_y+4.7}) {text3};
-    \\node[inner sep=2pt,align=center,draw] (text4) at ({pos1_x+10.95},{pos1_y+3.6}) {text4};
+    \\node[inner sep=2pt,align=center,draw] (text1) at ({pos1_x+4},{pos1_y+3.9}) {text1};
+    \\node[inner sep=2pt,align=center,draw] (text2) at ({pos1_x+3.5},{pos1_y+2.7}) {text2};
+    \\node[inner sep=2pt,align=center,draw] (text3) at ({pos1_x+6.1},{pos1_y+4.7}) {text3};
+    \\node[inner sep=2pt,align=center,draw] (text4) at ({pos1_x+9.25},{pos1_y+2}) {text4};
     \\node[inner sep=2pt,fill=white,align=center,draw] (text5) at ({pos1_x+12.2},{pos1_y+2.2}) {text5};
     \\node[inner sep=2pt,align=center,draw] (text6) at ({pos1_x+10.8},{pos1_y-3.8}) {text6};
     \\node[inner sep=2pt,align=center,draw] (text7) at ({pos1_x+7.7},{pos1_y-3.5}) {text7};
@@ -1109,7 +1109,7 @@ class TrolleyWithPendulumTestStandScheme(TikZPicture):
     \\draw[ultra thick,red,->] (text1.south) -- (6,2.8);
     \\draw[ultra thick,red,->] (text2.south) -- (4.3,1.7);
     \\draw[ultra thick,red,->] (text3.south) -- (8,3.8);
-    \\draw[ultra thick,red,->] (text4.south) -- (10.3,2.95);
+    \\draw[ultra thick,red,->] (text4.north) -- (9.83,2.6);
     \\draw[ultra thick,red,->] (text5.north) -- (12.11,4.3);  %A1
     \\draw[ultra thick,red,->] (text5.south) -- (11.33,-0.1); %A2
     \\draw[ultra thick,red,->] (text6.north) -- (10,-0.25);

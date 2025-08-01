@@ -1,51 +1,50 @@
 ## Table of Contents
 
-1. [Introduction](#introduction)
-   1. [What is DynPy?](#1-what-is-dynpy)
-   2. [Key Features](#2-key-features)
-   3. [Getting Started on CoCalc](#3-getting-started-on-cocalc)
-2. [How to Start / Basic Usage](#how-to-start--basic-usage)
-   1. [Example Scripts](#1-example-scripts)
-   2. [Creating First Document / Report](#2-creating-first-document--report)
-   3. [Lookin for some help](#3-Looking-for-some-help)
-3. [Reporting Module](#reporting-module)
-   1. [Overview of the Reporting Module](#1-overview-of-the-reporting-module)
-   2. [Creating Reports](#2-creating-reports)
-      - [Setting Up the Reporting Environment](#setting-up-the-reporting-environment)
-      - [Defining Report Content](#defining-report-content)
-      - [Creating Sections and Subsections](#creating-sections-and-subsections)
-      - [Adding Content (Text, Images, Equations)](#adding-content-text-images-equations)
-      - [Incorporating Simulation Results](#incorporating-simulation-results)
-      - [Adding Visualizations and Data Tables](#adding-visualizations-and-data-tables)
-   3. [Exporting Reports](#3-exporting-reports)
-      - [Supported Formats](#supported-formats)
-      - [Exporting Procedures](#exporting-procedures)
-   4. [Practical Examples](#4-practical-examples)
-      - [Generating a Simple Report](#generating-a-simple-report)
-      - [Advanced Reporting Features](#advanced-reporting-features)
-   5. [Customization Options (Advanced)](#5-customization-options-advanced)
-      - [Formatting Text and Equations](#formatting-text-and-equations)
-      - [Customizing Layout and Styles](#customizing-layout-and-styles)
-      - [Utilizing Templates for Consistency](#utilizing-templates-for-consistency)
-4. [Simulation Engine](#simulation-engine)
-5. [Data Handling](#data-handling)
-6. [Dynamic Modeling](#dynamic-modeling)
-7. [Visualization Tools](#visualization-tools)
-8. [Installation & Setup (Optional, for Local Development)](#installation--setup-optional-for-local-development)
-   1. [Requirements](#1-requirements)
-   2. [Manual Installation](#2-manual-installation)
-9. [Usage Examples](#usage-examples)
-   1. [Simulating a Dynamic System](#1-simulating-a-dynamic-system)
-   2. [Data Import & Export](#2-data-import--export)
-   3. [Running a Custom Model](#3-running-a-custom-model)
-   4. [Generating Reports](#4-generating-reports)
-10. [Licensing Information](#licensing-information)
+- [Introduction](#introduction)
+  - [1. What is DynPi?](#1-what-is-dynpi)
+  - [2. Key Features](#2-key-features)
+  - [3. Getting Started on CoCalc](#3-getting-started-on-cocalc)
+- [How to Start / Basic Usage](#how-to-start--basic-usage)
+  - [1. Example Scripts](#1-example-scripts)
+  - [2. Creating First Document / Report](#2-creating-first-document--report)
+  - [3. Looking for some help](#3-looking-for-some-help)
+    - [Defining Report Content](#defining-report-content)
+      - [Creating a section of document](#creating-a-section-of-document)
+      - [Creating a subsection of document](#creating-a-subsection-of-document)
+      - [Selecting a section or subsection to add content to](#selecting-a-section-or-subsection-to-add-content-to)
+      - [Adding text to section via ReportText](#adding-text-to-section-via-reporttext)
+      - [Adding text to section via Markdown](#adding-text-to-section-via-markdown)
+      - [Adding an image into the section](#adding-an-image-into-the-section)
+      - [Appending sections and subsections into the document](#appending-sections-and-subsections-into-the-document)
+    - [Incorporating Simulation Results](#incorporating-simulation-results)
+    - [Adding Visualizations, Formulas and Data Tables](#adding-visualizations-formulas-and-data-tables)
+  - [3. Exporting Reports](#3-exporting-reports)
+    - [Supported Formats](#supported-formats)
+    - [Exporting Procedures](#exporting-procedures)
+  - [4. Practical Examples](#4-practical-examples)
+    - [Generating a Simple Report](#generating-a-simple-report)
+  - [5. Customization Options (Advanced)](#5-customization-options-advanced)
+    - [Formatting Text and Equations](#formatting-text-and-equations)
+    - [Customizing Layout and Styles](#customizing-layout-and-styles)
+- [Custom styles](#custom-styles)
+    - [Utilizing Templates for Consistency](#utilizing-templates-for-consistency)
+    - [Use predefined templates](#use-predefined-templates)
+- [Simulation Engine](#simulation-engine)
+- [Data Handling](#data-handling)
+- [Dynamic Modeling](#dynamic-modeling)
+- [Installation \& Setup (Optional, for Local Development)](#installation--setup-optional-for-local-development)
+  - [Requirements](#requirements)
+  - [Manual Installation](#manual-installation)
+- [Licensing Information](#licensing-information)
 
 # Introduction
 
-## 1. What is DynPy?
+## 1. What is DynPi?
 
-DynPy is a Python module designed for engineering calculations on dynamical systems. It provides a comprehensive framework for modeling, simulating, and analyzing dynamic mechanical systems.
+DynPi is a Python module designed for engineering calculations on dynamical systems. It provides a comprehensive framework for modeling, simulating, and analyzing dynamic mechanical systems. DynPy is the first tool of its kind to simplify performing scientific activities and enginnering calculations! It’s ready-to-use code that generates reports in engineering mechanics. You can create your own mechanical simulations, use tools for modeling mechanical systems and their dynamics, and take advantage of a built-in solver for ordinary differential equations (ODEs). All of this is available in just 10 code cells – with every step and hint clearly described below and within the code itself (marked with #). We’re also including an instructional video showing how to create a sample report:
+Writing your own diploma still looking for tools to use? Word, DynPy and .... ChatGPt. These tools have its pros and cons - all depends on how do you use it and how do u like to work. Word it's classic - everyone knows and can use it. Starter for wrtining, formatting, adding adnotations and commentaries. Good for theory, literature reviews, humanities papers. However, when it comes to simulations and calculations, then sorry you're obliged to open other programs.
+DynPy is an engineering combine. Simulations, calculations and modelling it's hard and DynPy is superior in this especailly if you are into mechanics and automation. DynPy allows you to create professional looking raports. Moreover they are created in PDF format. Cons? You must pick up a little coding. Once you learn it, it works wonders.
+ChatGPT? It's your go-to buddy for everything – it'll sometimes help write an introduction, check your spelling, suggest how to calculate something, or explain what a given piece of code does. However, it won't always be accurate, it won't substitute DynPy for simulations and reporting.
 
 ## 2. Key Features
 
@@ -56,11 +55,11 @@ DynPy is a Python module designed for engineering calculations on dynamical syst
 
 ## 3. Getting Started on CoCalc
 
-To begin working with DynPy, you need an account on [CoCalc](https://cocalc.com/).
+To begin working with DynPi, you need an account on [CoCalc](https://cocalc.com/).
 
 1. Create an account on CoCalc.
 2. Accept the project invitation using this [link](https://cocalc.com/app?project-invite=hXnPFLqokQsoK6TG).
-3. Open the [README FIRST](https://cocalc.com/projects/b51ce971-5b39-4911-ad97-ef59f15f0039/files/README%20FIRST.ipynb) file.
+3. Open the [README](https://cocalc.com/projects/b51ce971-5b39-4911-ad97-ef59f15f0039/files/READme.ipynb) file.
 4. Follow the instructions in the introductory guide.
 
 ---
@@ -81,9 +80,10 @@ Pendulum().interactive_preview()
 
 ```python
 from dynpy.utilities.report import *
-from dynpy.utilities.documents.guides import Guide
+from dynpy.utilities.documents.document import Report
+SympyFormula._break_mode = 'eq'
 
-doc = Guide('./output/sample_report', title="Sample Report")
+doc = Report('./output/sample_report', title="Sample Report")
 
 section = Section('Exemplary section name')
 CurrentContainer(section)
@@ -97,7 +97,18 @@ doc.generate_pdf(clean_tex=False)
 ```
 
 ## 3. Looking for some help
+Documentclasses with generic content of exemplary document:
+```python
+from dynpy.utilities.documents.document import *
 
+Report.base_setup()
+BeamerPresentation.base_setup()
+Guide.base_setup()
+WutThesis.base_setup()
+```
+
+
+Guides that provides step by step instructions:
 ```python
 from dynpy.utilities.creators import list_of_guides
 list_of_guides()
@@ -107,32 +118,36 @@ list_of_guides()
 
 #### Creating a section of document
 
-```pyton
+```python
 section = Section('Sample section name')
 ```
 
 #### Creating a subsection of document
 
-```pyton
+```python
 subsection = Subsection('Sample subsection name');
 ```
 
 #### Selecting a section or subsection to add content to
 
-```pyton
+```python
 section = Section('Sample section name')
 CurrentContainer(section);
 ```
 
 #### Adding text to section via ReportText
 
-```pyton
+```python
+from dynpy.utilities.report import *
+
 display(ReportText('Sample text'));
 ```
 
 #### Adding text to section via Markdown
 
-```pyton
+```python
+from dynpy.utilities.report import *
+
 display(Markdown(
 '''
 Sample text
@@ -142,8 +157,8 @@ Sample text
 
 #### Adding an image into the section
 
-```pyton
-Picture('/route/to/image', caption = 'Sample caption')
+```python
+Picture('./images_folder/image_name.PNG', caption = 'Sample caption') # './images_folder/image_name.PNG' is certain '/route/to/file' path
 ```
 
 #### Appending sections and subsections into the document
@@ -167,28 +182,36 @@ import matplotlib.pyplot as plt
 
 def create_plot():
     plt.plot([0, 1, 2], [0, 1, 4])
-    plt.savefig("./plot.png")
+    plt.savefig("./images/plot.png")
 
-Picture('./plot.png', caption='Sample plot')
+Picture('./images/plot.png', caption='Sample plot')
 ```
 
 Adding formula to the document
 
 ```python
-d, r, fib, fia, thetaa, thetab = symbols('d r varphi_B varphi_A phi_A phi_B');
+from dynpy.utilities.report import *
+from sympy import *
 
-harvestine_formula = Eq(d, 2 * r * sp.asin(sp.sqrt(sp.sin((fib - fia) / 2)**2 + (cos(fia) * cos(fib) * sp.sin((thetab - thetaa) / 2)**2))))
 
+d, r, fib, fia,  = symbols('d r varphi_B varphi_A') #many symbols at once
+
+thetaa = Symbol('thetaa') #separate definition of the symbol
+thetab = Symbol('thetab') #separate definition of the symbol
+
+
+harvestine_formula = Eq(d, 2 * r * asin(sqrt(sin((fib - fia) / 2)**2 + (cos(fia) * cos(fib) * sin((thetab - thetaa) / 2)**2))))
 display(SympyFormula(harvestine_formula))
 ```
 
 Creating table and adding it to document
 
 ```python
+from dynpy.utilities.report import *
 from dynpy.utilities.adaptable import *
 
 predicted_travel_time = Subsection('Predicted Travel Time');
-CurrentContainer(predicted_travel_time);
+CurrentContainer(predicted_travel_time)
 
 time_s = Symbol('time_s', positive=True)
 time_h = Symbol('time_h')
@@ -213,19 +236,13 @@ unit_dict = {
 
 LatexDataFrame.set_default_units(unit_dict)
 
-def format_cell(x):
-    if isinstance(x, str):
-        return x
-    else:
-        return f'${latex(x)}$'
 
-tabelka = LatexDataFrame.formatted(
-    data = dane,
-).map(format_cell)
 
-tabelka.columns = ['Start', 'Stop', 'Time [s]', 'Time [h]', 'Length [km]', 'Velocity [km/h]']
+report_table = LatexDataFrame.formatted(
+    data = dane)
 
-predicted_travel_time.append(tabelka.reported(caption="Travel Time Data Table"))
+
+display(report_table.reported(caption="Travel Time Data Table"))
 ```
 
 ## 3. Exporting Reports
@@ -239,7 +256,14 @@ predicted_travel_time.append(tabelka.reported(caption="Travel Time Data Table"))
 ### Exporting Procedures
 
 ```python
-doc.generate_pdf(clean_tex=True)
+import pypandoc
+#for LaTeX report (LaTeX distribution is needed)
+doc.generate_pdf(clean_tex=False)
+
+#for `.docx` file
+doc.generate_tex('./output/sample_report')
+pypandoc.convert_file('./output/sample_report.tex',to='docx',format='tex',outputfile="./output/sample_report.docx")
+
 ```
 
 ## 4. Practical Examples
@@ -248,9 +272,9 @@ doc.generate_pdf(clean_tex=True)
 
 ```python
 from dynpy.utilities.report import *
-from dynpy.utilities.templates.document import Guide
+from dynpy.utilities.documents.document import Report
 
-doc = Guide('./reports/sample-report')
+doc = Report('./output/sample-report')
 
 sample_section = Section('Sample Section')
 CurrentContainer(sample_section)
@@ -277,7 +301,7 @@ doc.append(second_sample_section)
 doc.append(sample_subsection)
 doc.append(second_sample_subsection)
 
-doc.generate_pdf(clean_tex=True)
+doc.generate_pdf(clean_tex=False)
 ```
 
 ## 5. Customization Options (Advanced)

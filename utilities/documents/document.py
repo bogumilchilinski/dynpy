@@ -703,7 +703,7 @@ class Guide(Document, ReportMethods):
                 "headheight=50mm",
             ],
         ),
-        Package("microtype"),
+        #Package("microtype"),
         Package("authoraftertitle"),
         Package("polski", options=["MeX"]),
         # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
@@ -2133,27 +2133,31 @@ class WutThesis(Document):
 
         thesis_introduction_str = """#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+from dynpy.utilities.report import *
 
 sec_intro = Section('Section that presents text reporting')
 CurrentContainer(sec_intro)
 
 sub_problem_outline = Subsection('Outline of the problem')
 CurrentContainer(sub_problem_outline)
-display(ReportText('This subsection provides information about investigated problem. '*100))
+display(ReportText('This subsection provides information about investigated problem. '*1))
 
 sub_obj_assum = Subsection('Objectives and assumptions')
 CurrentContainer(sub_obj_assum)
-display(ReportText('This subsection provides objectives and assumptions. '*100))
+display(ReportText('This subsection provides objectives and assumptions. '*1))
 
 sub_SOT = Subsection('State of the art')
 CurrentContainer(sub_SOT)
-display(ReportText('This subsection provides state of the art. '*100))
+display(ReportText('This subsection provides state of the art. '*1))
 
 sub_methodology = Subsection('Methodology')
 CurrentContainer(sub_methodology)
-display(ReportText('This subsection provides methodology. '*100))"""
+display(ReportText('This subsection provides methodology. '*1))"""
 
-        math_str = '''from sympy import Eq, Symbol, symbols
+        math_str = '''#!!! NO NEEDED RUN PREVIOUS CELLS !!!#
+from sympy import Eq, Symbol, symbols
 from dynpy.utilities.report import *
 
 
@@ -2162,28 +2166,28 @@ CurrentContainer(sec_formula)
 
 sec_description = Subsection('Description of dynamic model')
 CurrentContainer(sec_description)
-display(ReportText('This subsection provides description of the model. '*10))
+display(ReportText('This subsection provides description of the model. '*1))
 
 from dynpy.models.mechanics import ForcedSpringMassSystem as DynamicSys
 
 dyn_sys = DynamicSys()
 display(dyn_sys.as_picture())
 
-display(ReportText('Summary of the subsection highlighting its major achievements. '*10))
+display(ReportText('Summary of the subsection highlighting its major achievements. '*1))
 
 sub_model_code = Subsection('Virtual model of the object')
 CurrentContainer(sub_model_code)
 
 from dynpy.utilities.report import ObjectCode
 
-display(ReportText('This subsection provides code of the model. '*10))
+display(ReportText('This subsection provides code of the model. '*1))
 display(ObjectCode(DynamicSys))
-display(ReportText('Summary of the subsection highlighting its major achievements. '*10))
+display(ReportText('Summary of the subsection highlighting its major achievements. '*1))
 
 
 sec_lagrangian = Subsection('Lagrangian and derivatives')
 CurrentContainer(sec_lagrangian)
-display(ReportText('This subsection provides calculation of lagrangian and derivatives. '*10))
+display(ReportText('This subsection provides calculation of lagrangian and derivatives. '*1))
 
 lagrangian = dyn_sys.L[0]
 lagrangian
@@ -2202,9 +2206,9 @@ for coord in dyn_sys.q:
     diff3 = lagrangian.diff(coord)
 
 
-    diff1_sym = Symbol(f'\\\\frac{{\\\\partial L}}{{\\\\partial {vlatex(vel)}}}')
-    diff2_sym = Symbol(f' \\\\frac{{d }}{{dt}}  {diff1_sym}'  )
-    diff3_sym = Symbol(f'\\\\frac{{\\\\partial L}}{{\\\\partial {vlatex(coord)}}}')
+    diff1_sym = Symbol(f'\\frac{{\\partial L}}{{\\partial {vlatex(vel)}}}')
+    diff2_sym = Symbol(f' \\frac{{d }}{{dt}}  {diff1_sym}'  )
+    diff3_sym = Symbol(f'\\frac{{\\partial L}}{{\\partial {vlatex(coord)}}}')
 
 
     display(SympyFormula(  Eq(diff1_sym,diff1)  ))    
@@ -2218,7 +2222,7 @@ sec_equations = Subsection('Equations of motion')
 CurrentContainer(sec_equations)
 
 
-display(ReportText('This subsection provides calculation of equations of motion and solution of the system. '*10))
+display(ReportText('This subsection provides calculation of equations of motion and solution of the system. '*1))
 
 ds1=dyn_sys.eoms
 ds1_eqns=ds1.as_eq_list()
@@ -2281,12 +2285,20 @@ BasicsOfODESystemGuide();
 # UsageOfDynamicSystemsGuide()
 '''
 
-        picture_str = """sec_picture = Section('Section that presents pictures reporting')
+        picture_str = """    
+#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+from dynpy.utilities.report import *
+
+sec_picture = Section('Section that presents pictures reporting')
 CurrentContainer(sec_picture)
 
 display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of picture'))"""
 
-        simulaion_str = """from dynpy.utilities.report import *
+        simulaion_str = """#!!! NO NEEDED RUNNING PREVIOUS CELLS !!!#
+
+
+from dynpy.utilities.report import *
 from sympy import *
 import numpy as np
 
@@ -2347,7 +2359,10 @@ wynik.plot()
 # display(ReportText('Last step is data substitution and using numerized method. After that use $compute_solution$ to finalize the simulation:'))
 # spring_sol.subs(data_spring).with_ics([10,0]).numerized().compute_solution(t_span).plot()"""
 
-        veryfication_str = """from sympy import *
+        veryfication_str = """#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+from sympy import *
 
 from sympy.physics import units
 
@@ -2382,22 +2397,30 @@ display(ReportText('Description of verifications concept. '*200))
 
 ### SELECT ONE CASE
 ## 1st CASE
-## import of external data if path "./data_from_ml/test_1.csv" exists
+##import of external data if path "./data_from_ml/test_1.csv" exists
 
-#test_data = './data_from_ml/test_1.csv'
-#df = pd.read_csv(test_data, header = None)
+# test_data = './data_from_ml/test_1.csv'
+# df = pd.read_csv(test_data, header = None)
 
-#data_tab = TimeDataFrame(df).to_latex_dataframe().reported(caption='Caption')
-#graph=data_tab.iloc[:,[1]]
+# data_tab = TimeDataFrame(df).to_latex_dataframe().reported(caption='Caption')
+# graph=data_tab.iloc[:,[1]]
 
 ## 2st CASE
 ## Creating graph from a
-df = pd.DataFrame({t:[0,1,2],'a':[2,3,4],'b':[8,7,6]}).set_index(t)
+# df = pd.DataFrame({t:[0,1,2],'a':[2,3,4],'b':[8,7,6]}).set_index(t)
 
-df_cols = df.set_axis([power,work],axis=1)
+# df_cols = df.set_axis([power,work],axis=1)
 
-data_tab = TimeDataFrame(df_cols).to_latex_dataframe().reported(caption='Caption')
-graph = TimeDataFrame(df_cols).to_pylatex_tikz().in_figure(caption='Caption')
+# data_tab = TimeDataFrame(df_cols).to_latex_dataframe().reported(caption='Caption')
+# graph = TimeDataFrame(df_cols).to_pylatex_tikz().in_figure(caption='Caption')
+
+# display(data_tab)
+
+# display(ReportText('Obtained data analysis. '*200))
+
+# display(graph)
+
+# display(ReportText('Description of verifications outcomes. '*200))
 
 ## 3rd CASE
 ## dictionary data presentation in DataFrame
@@ -2417,38 +2440,41 @@ graph = TimeDataFrame(df_cols).to_pylatex_tikz().in_figure(caption='Caption')
 
 ## 4th CASE
 ## creating a graph based on simulation
-#from dynpy.models.mechanics import ForcedSpringMassSystem as DynamicSys
-#F=DynamicSys.F
-#g=DynamicSys.g
-#m=DynamicSys.m
-#k=DynamicSys.k
-#slownik ={  
-#F:2,
-#g:10,
-#m:5,
-#k:100,
-#}
-#t_span = np.linspace(0.0,1,30)
-#sym=DynamicSys().eoms.subs(slownik)
-#wynik= sym.numerized(backend='numpy').compute_solution(t_span,[0.0,0.0])#.plot()
-#wynik_tab = TimeDataFrame(wynik).to_latex_dataframe().reported(caption='Caption')
-#display(wynik_tab)
-#wynik.plot()
+# from dynpy.models.mechanics import ForcedSpringMassSystem as DynamicSys
+# F=DynamicSys.F
+# g=DynamicSys.g
+# m=DynamicSys.m
+# k=DynamicSys.k
+# slownik ={  
+# F:2,
+# g:10,
+# m:5,
+# k:100,
+# }
+# t_span = np.linspace(0.0,1,30)
+# sym=DynamicSys().eoms.subs(slownik)
+# wynik= sym.numerized(backend='numpy').compute_solution(t_span,[0.0,0.0])#.plot()
+# wynik_tab = TimeDataFrame(wynik).to_latex_dataframe().reported(caption='Caption')
+# display(wynik_tab)
+# wynik.plot()
 
-display(data_tab)
+"""
 
-display(ReportText('Obtained data analysis. '*200))
+        conclusion_str = """### NO NEEDED RUN OF ALL PREVIOUS CELLS ###
 
-display(graph)
+from dynpy.utilities.report import *
 
-display(ReportText('Description of verifications outcomes. '*200))"""
-
-        conclusion_str = """sec_conclusion = Section('Section that contains final conclusions')
+sec_conclusion = Section('Section that contains final conclusions')
 CurrentContainer(sec_conclusion)
 
 display(ReportText('Conclusions '*200))"""
 
-        symbols_description_str = """sec_symbols = Section('Section that contains all symbols descriptions')
+        symbols_description_str = """#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+
+from dynpy.utilities.report import *
+
+sec_symbols = Section('Section that contains all symbols descriptions')
 CurrentContainer(sec_symbols)
 
 E_K,F = symbols('E_K,F')
@@ -2463,7 +2489,12 @@ SymbolsDescription.set_default_header('  ')
 
 display(SymbolsDescription({**syms_dict}))"""
 
-        document_str = """# Creating file
+        document_str = """#!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
+#!!!       BECAUSE OF NEEDED IMPORTS    !!!#
+from dynpy.utilities.documents.document import WutThesis
+from dynpy.utilities.report import *
+
+# Creating file
 # Be sure *output* folder is in the current directory
 
 thesis_name = './output/report_name' #path for report file 
@@ -2545,7 +2576,8 @@ doc.append(Command('pagestyle{plain}'))
 doc.append(Command('newpage'))
 
 # Generating file
-doc.generate_pdf(clean_tex=False)"""
+doc.generate_pdf(clean_tex=False)
+"""
 
         #         preliminary_str=(f"""
         # =======
@@ -3488,9 +3520,9 @@ class StateOfArtReport(Document):
                 "headheight=50mm",
             ],
         ),
-        Package("microtype"),
+        #Package("microtype"),
         Package("authoraftertitle"),
-        Package(" ", options=["MeX"]),
+        #Package("polski", options=["MeX"]),
         # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
         Package("listings"),
         Package("titlesec"),
@@ -3621,15 +3653,12 @@ list_of_guides()
 #In file output create bibliography as .bib file (biblio.bib)
 
 '''# File content begin
-
-
 @misc{DynPi,
 author={GitHub},
 title="bogumilchilinski/dynpy",
-url={https://github.com/bogumilchilinski/dynpy}",
+url={https://github.com/bogumilchilinski/dynpy},
 note="Accessed:2024-05-04"
 }
-
 
 @book{lutz2001programming,
   title={Programming python},
@@ -3641,12 +3670,38 @@ note="Accessed:2024-05-04"
 @misc{pandas, url={https://pandas.pydata.org/}, journal={pandas}}
 '''# File content end
 
+
+
 from dynpy.utilities.report import *
 from dynpy.utilities.documents.document import StateOfArtReport
 
 
 from dynpy.utilities.adaptable import TimeDataFrame
 import pandas as pd
+
+
+biblio_mngr=BiblographyManager(arguments='biblio.bib')
+
+biblio_entries=NoEscape(
+r'''
+@misc{DynPi,
+author={GitHub},
+title="bogumilchilinski/dynpy",
+url={https://github.com/bogumilchilinski/dynpy},
+note="Accessed:2024-05-04"
+}
+
+@book{lutz2001programming,
+  title={Programming python},
+  author={Lutz, Mark},
+  year={2001},
+  publisher={" O'Reilly Media, Inc."}
+}
+@misc{NumPy, url={https://numpy.org/}, journal={NumPy}}
+@misc{pandas, url={https://pandas.pydata.org/}, journal={pandas}}
+''')
+
+biblio_mngr.append(biblio_entries)
 
 
 doc = StateOfArtReport('./output/report_name')
@@ -3701,15 +3756,17 @@ display(ReportText('This subsection provides methodology. '*100))
 sota_name = './output/report_name' #path for report file 
 
 doc = StateOfArtReport(sota_name)
+doc.preamble.append(biblio_mngr)
+
 # Bibliography of quotations
 ### Select one bibligraphy managment system
 ####### BibLatex
+#doc.preamble.append(Package('biblatex',["backend=biber","sorting=none"]))
+#doc.preamble.append(Command('addbibresource','biblio.bib'))
 
-doc.preamble.append(Package('biblatex',["backend=biber","sorting=none"]))
-doc.preamble.append(Command('addbibresource','biblio.bib'))
 ####### Natbib
-#doc.preamble.append(Package('natbib')
-#doc.preamble.append(Command('bibliographystyle','unsrt'))
+doc.preamble.append(Package('natbib')
+doc.preamble.append(Command('bibliographystyle','unsrt'))
 
 # TOC
 doc.append(Command('tableofcontents')) #adds TOC
@@ -3722,30 +3779,13 @@ doc.append(sec_conclusion)
 
 
 ### BibLatex
-#doc.append(Command('printbibliography',["title={Bibliography}"])) - argument is to improve
-doc.append(Command('printbibliography',options=[NoEscape("title={Bibliography}")]))
+#doc.append(Command('printbibliography',options=[NoEscape("title={Bibliography}")]))
 
 ### Natbib
-#doc.append(Command('bibliography',arguments=["references"])) # .bib file as "references"
-
-
-#FIGURES LIST
-
-doc.append(Command('addcontentsline{toc}{section}{List of figures}'))
-doc.append(Command('listoffigures'))
-doc.append(Command('pagestyle{plain}'))
-doc.append(Command('newpage'))
-
-#TABLES LIST
-
-doc.append(Command('addcontentsline{toc}{section}{List of tables}'))
-doc.append(Command('renewcommand{\listtablename}{List of tables}'))
-doc.append(Command('listoftables'))
-doc.append(Command('pagestyle{plain}'))
-doc.append(Command('newpage'))
+doc.append(Command('bibliography',arguments=["references"])) # .bib file as "references"
 
 # Generating file
-doc.generate_pdf(clean_tex=True)
+doc.generate_pdf(clean_tex=False)
 ```
 
 """
@@ -3771,15 +3811,12 @@ doc.generate_pdf(clean_tex=True)
 #In file output create bibliography as .bib file (biblio.bib)
 
 '''# File content begin
-
-
 @misc{DynPi,
 author={GitHub},
 title="bogumilchilinski/dynpy",
-url={https://github.com/bogumilchilinski/dynpy}",
+url={https://github.com/bogumilchilinski/dynpy},
 note="Accessed:2024-05-04"
 }
-
 
 @book{lutz2001programming,
   title={Programming python},
@@ -3792,8 +3829,45 @@ note="Accessed:2024-05-04"
 '''# File content end
 
 
+
 from dynpy.utilities.report import *
 from dynpy.utilities.documents.document import StateOfArtReport
+
+
+from dynpy.utilities.adaptable import TimeDataFrame
+import pandas as pd
+
+
+biblio_mngr=BibliographyManager(arguments='biblio.bib')
+
+biblio_entries=NoEscape(
+r'''
+@misc{
+  DynPi,
+  author={GitHub},
+  title="bogumilchilinski/dynpy",
+  url={https://github.com/bogumilchilinski/dynpy},
+  note="Accessed:2024-05-04"
+}
+
+@book{
+  lutz2001programming,
+  title={Programming python},
+  author={Lutz, Mark},
+  year={2001},
+  publisher={" O'Reilly Media, Inc."}
+}
+
+@misc{
+  NumPy,
+  author="NumPy",
+  title={https://numpy.org/},
+  url={https://numpy.org/}, journal={NumPy}
+}
+''')
+
+biblio_mngr.append(biblio_entries)
+
 
 doc = StateOfArtReport('./output/report_name')
 
@@ -3810,16 +3884,16 @@ CurrentContainer(sec_intro)
 
 sub_problem_outline = Subsection('Outline of the problem')
 CurrentContainer(sub_problem_outline)
-display(ReportText('This subsection provides information about investigated problem. '*100))
+display(ReportText('This subsection provides information about investigated problem.'))
 
 sub_SOT = Subsection('State of the art')
 CurrentContainer(sub_SOT)
-display(ReportText('This subsection provides state of the art with multiple reference for \\cite{DynPi}. '*50))
-display(Markdown('Remeber about `biblio.bib` file with referencens. Place it in working directory and subfolder with output files. '*50))
+display(ReportText('This subsection provides state of the art with multiple reference for \\cite{DynPi}.'))
+
 
 sub_conclusions = Subsection('Conclusions')
 CurrentContainer(sub_conclusions)
-display(ReportText('This subsection provides methodology. '*100))
+display(ReportText('This subsection provides methodology \\cite{NumPy}.'))
 
 
 ## CELL 3
@@ -3831,7 +3905,7 @@ display(ReportText('This subsection provides methodology. '*100))
 sec_conclusion = Section('Section that contains final conclusions')
 CurrentContainer(sec_conclusion)
 
-display(ReportText('Conclusions '*200))
+display(ReportText('Conclusions'))
     
 ## CELL 4
 ## Document
@@ -3846,15 +3920,17 @@ display(ReportText('Conclusions '*200))
 sota_name = './output/report_name' #path for report file 
 
 doc = StateOfArtReport(sota_name)
+doc.preamble.append(biblio_mngr)
+
 # Bibliography of quotations
 ### Select one bibligraphy managment system
 ####### BibLatex
+#doc.preamble.append(Package('biblatex',["backend=biber","sorting=none"]))
+#doc.preamble.append(Command('addbibresource','biblio.bib'))
 
-doc.preamble.append(Package('biblatex',["backend=biber","sorting=none"]))
-doc.preamble.append(Command('addbibresource','biblio.bib'))
 ####### Natbib
-#doc.preamble.append(Package('natbib')
-#doc.preamble.append(Command('bibliographystyle','unsrt'))
+doc.preamble.append(Package('natbib'))
+doc.preamble.append(Command('bibliographystyle','unsrt'))
 
 # TOC
 doc.append(Command('tableofcontents')) #adds TOC
@@ -3865,26 +3941,12 @@ doc.append(sub_SOT)
 doc.append(sub_conclusions)
 doc.append(sec_conclusion)
 
+
 ### BibLatex
-doc.append(Command('printbibliography',options=[NoEscape("title={Bibliography}")]))
+#doc.append(Command('printbibliography',options=[NoEscape("title={Bibliography}")]))
 
 ### Natbib
-#doc.append(Command('bibliography',arguments=["biblio"])) # .bib file as "references"
-
-#FIGURES LIST
-
-doc.append(Command('addcontentsline{toc}{section}{List of figures}'))
-doc.append(Command('listoffigures'))
-doc.append(Command('pagestyle{plain}'))
-doc.append(Command('newpage'))
-
-#TABLES LIST
-
-doc.append(Command('addcontentsline{toc}{section}{List of tables}'))
-doc.append(Command('renewcommand{\listtablename}{List of tables}'))
-doc.append(Command('listoftables'))
-doc.append(Command('pagestyle{plain}'))
-doc.append(Command('newpage'))
+doc.append(Command('bibliography',arguments=["biblio"])) # .bib file as "biblio"
 
 # Generating file
 doc.generate_pdf(clean_tex=False)
@@ -4197,7 +4259,8 @@ doc.generate_pdf(clean_tex=False)
 
         cls._create_file("articles.bib", articles_bib, "output")
 
-
+class Report(StateOfArtReport):
+    pass
 class ThesisTemplate(WutThesis):
     pass
 
@@ -4549,7 +4612,7 @@ class BeamerPresentation(Document):
 
     latex_name = "document"
     packages = [
-        Package("microtype"),
+        #Package("microtype"),
         # Package('polski',options=['MeX']),
         # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
         Package("listings"),
@@ -4557,7 +4620,7 @@ class BeamerPresentation(Document):
         # Package('fancyhdr'),
         # Command('pagestyle', arguments=['fancy']),
         Command(
-            "author", arguments=["Kamil Jaśkielewicz & Bogumił Chiliński"]
+            "author", arguments=["Bogumił Chiliński"]
         ),  # ['Szymon Kozłowski & Bogumił Chiliński']),
         # Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
         # Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
