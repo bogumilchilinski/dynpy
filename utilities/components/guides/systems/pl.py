@@ -87,11 +87,11 @@ from sympy import *
 import numpy as np
 from pandas import *
 from sympy.physics.mechanics import init_vprinting, dynamicsymbols
-from pylatex import Document, Section, Subsection, Itemize, Package, HorizontalSpace, Description, Marker, Command 
-from pylatex.section import Paragraph, Chapter 
-from pylatex.utils import italic, NoEscape 
+from pylatex import Document, Section, Subsection, Itemize, Package, HorizontalSpace, Description, Marker, Command
+from pylatex.section import Paragraph, Chapter
+from pylatex.utils import italic, NoEscape
 from dynpy.utilities.adaptable import *
-from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase 
+from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase
 from dynpy.utilities.templates.tikz import TikzCaSCStandalone
 from dynpy.utilities.report import (Markdown, Picture, SympyFormula, SymbolsDescription, DescriptionsRegistry, ObjectCode, CurrentContainer)
 from dynpy.solvers.linear import ODESystem
@@ -536,11 +536,11 @@ class DynSysIntroComponent(ReportComponent):
                 import numpy as np
                 from pandas import *
                 from sympy.physics.mechanics import init_vprinting, dynamicsymbols
-                from pylatex import Document, Section, Subsection, Itemize, Package, HorizontalSpace, Description, Marker, Command 
-                from pylatex.section import Paragraph, Chapter 
-                from pylatex.utils import italic, NoEscape 
+                from pylatex import Document, Section, Subsection, Itemize, Package, HorizontalSpace, Description, Marker, Command
+                from pylatex.section import Paragraph, Chapter
+                from pylatex.utils import italic, NoEscape
                 from dynpy.utilities.adaptable import *
-                from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase 
+                from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase
                 from dynpy.utilities.templates.tikz import TikzCaSCStandalone
                 from dynpy.utilities.report import (SystemDynamicsAnalyzer, DataPlot, AccelerationComparison, FFTComparison, ReportEntry, SimulationalBlock,               ReportText, SimulationFFT, DataStorage, Markdown, SummaryTable, Picture, SympyFormula, SymbolsDescription, DescriptionsRegistry,
                 ObjectCode, CurrentContainer)
@@ -1489,11 +1489,11 @@ class MyMaterialPointMovement(ComposedSystem):
                                             qs=self.qs)
 
 
-      
+
         components['_mass_x']=self._mass_x
         components['_mass_y']=self._mass_y
         components['_gravity_']=self._gravity_
-     
+
 
         return components
 
@@ -1531,7 +1531,7 @@ class MyMaterialPointMovement(ComposedSystem):
         }
 
         return default_data_dict
-        
+
     def unit_dict(self):
 
         from sympy.physics import units
@@ -1547,7 +1547,7 @@ class MyMaterialPointMovement(ComposedSystem):
             self.r0: ureg.meter,
             self.phi0:  ureg.radian
         }
-        return unit_dict        
+        return unit_dict
 """
 
 
@@ -1946,37 +1946,37 @@ class DynSysOverviewUsageComponent(ReportComponent):
         display(ReportText('This component calls and checks all key elements of the dynamic system'))
         display(ReportText('It can be run with any available dynamic systems.'))
         display(ObjectCode(dynsys_comp_check_str))
-        
+
         #BasicSymComponent
         display(ReportText('This component shows how to do basic simulations for dynamic system.'))
         display(ReportText('It can be run for SDOFWinchSystem, as shown on below example call.'))
         display(ObjectCode(basicsymcomp_str))
-        
+
         #CodeRefactorComponent
         display(ReportText('This component shows how to refactor DynSys component according to latest standard.'))
         display(ReportText('It is called without any argument.'))
         display(ObjectCode(coderefactorcomp_str))
-        
+
         #DifferentSimulationsComponent
         display(ReportText('This component explains how to implement dynamic system with ComposedSystem class'))
         display(ReportText('It is called without any argument.'))
         display(ObjectCode(diffsimcomp_str))
-        
+
         #DynSysImplementationComponent
         display(ReportText('This component explains how to implement dynamic system with ComposedSystem class'))
         display(ReportText('It can be run for SDOFWinchSystem, as shown on below example call.'))
         display(ObjectCode(dynsysimpcomp_str))
-        
+
         #DynSysIntroComponent
         display(ReportText('This component is simple introduction to using the DynSys module'))
         display(ReportText('It can be run for SDOFWinchSystem, as shown on baeow example call.'))
         display(ObjectCode(dynintrocomp_str))
-            
+
         #DynSysSummaryComponent
         display(ReportText('This component shows idea of code refactoring and additionally displays list of available dynamical systems'))
         display(ReportText('It is called without any argument.'))
         display(ObjectCode(dynsumcomp_str))
-        
+
         #DynamicSystemMethodsUsageComponent
         display(ReportText('This component shows equations of motion and other methods avaible on DynSys model'))
         display(ReportText('It can be run with any available dynamic systems.'))
@@ -2067,7 +2067,7 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
         display(
             Markdown(
                 """
-        
+
         def get_default_data(self):
 
             m0, k0 = self.m0, self.k0
@@ -2133,7 +2133,7 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
             return self.sym_desc_dict
 
         def unit_dict(self):
-        
+
             from sympy.physics import units
             ureg=UnitRegistry()
 
@@ -2239,7 +2239,7 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
         display(
             Markdown(
                 """
-        
+
         def get_default_data(self):
 
             m0, k0 = self.m0, self.k0
@@ -2305,7 +2305,7 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
             return self.sym_desc_dict
 
         def unit_dict(self):
-        
+
             from sympy.physics import units
             ureg=UnitRegistry()
 

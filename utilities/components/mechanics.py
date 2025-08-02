@@ -407,7 +407,7 @@ class ExemplaryPictureComponent(ReportComponent):
 
         display(
             ReportText(
-                f"""Model dynamiczny układu określa się na podstawie analizy rozważanego przypadku. 
+                f"""Model dynamiczny układu określa się na podstawie analizy rozważanego przypadku.
         Należy pamiętać, że stopień odwzorowania (poziom abstrakcji) modelu zależy od tego do czego planuje się go używać.
                             """
             )
@@ -515,7 +515,7 @@ class KineticEnergyComponent(ReportComponent):
             ReportText(
                 f"""
                            Energia kinetyczna układu wyrażona jest wzorem:
-                           
+
                            """
             )
         )
@@ -526,7 +526,7 @@ class KineticEnergyComponent(ReportComponent):
             ReportText(
                 f"""
                            Wyznaczona wielkość określa energię układu wynikającą z jego własności inercyjnych (energię zmagazynowaną w elementach bezwładnych).
-                           
+
                            """
             )
         )
@@ -577,7 +577,7 @@ class DissipationComponent(ReportComponent):  # Marcel
             ReportText(
                 f"""
                            Energia rozpraszana tłumieniem wyrażona jest wzorem:
-                           
+
                            """
             )
         )
@@ -591,7 +591,7 @@ class DissipationComponent(ReportComponent):  # Marcel
         display(
             ReportText(
                 f"""
-                           Podana zależność stanowi potencjał dysynpacyjny Rayleigh'a, 
+                           Podana zależność stanowi potencjał dysynpacyjny Rayleigh'a,
                            który poddany różniczkowaniu względem wektora prędkości uogólnionych pozwala na określenie sił wiskotycznego tłumienia.
                            """
             )
@@ -800,7 +800,7 @@ class LagrangianComponent(ReportComponent):
 
         display(
             ReportText(
-                f"""Równania Eulera-Lagrange'a dla rozważanego przypadku są nastęujące: 
+                f"""Równania Eulera-Lagrange'a dla rozważanego przypadku są nastęujące:
                             """
             )
         )
@@ -823,7 +823,7 @@ class LagrangianComponent(ReportComponent):
 
         display(
             ReportText(
-                f"""Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące: 
+                f"""Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące:
                             """
             )
         )

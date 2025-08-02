@@ -204,9 +204,9 @@ class CocalcLoginComponent(ReportComponent):
 
 dynpy_imports_code = """
 
-from sympy import* 
+from sympy import*
 from sympy.physics.mechanics import dynamicsymbols, init_vprinting
-from sympy.abc import* 
+from sympy.abc import*
 init_vprinting()
 from sympy import S
 from dynpy.solvers.linear import ODESystem
@@ -416,7 +416,7 @@ class CocalcFolderComponent(ReportComponent):
 
 code_dynsys_list_str = """
 #komendy importujące biblioteki
-import sympy 
+import sympy
 from sympy import Symbol
 
 from dynpy.models.mechanics.pendulum import Pendulum
@@ -519,11 +519,11 @@ from sympy import *
 import numpy as np
 from pandas import *
 from sympy.physics.mechanics import init_vprinting, dynamicsymbols
-from pylatex import Document, Section, Subsection, Itemize, Package, HorizontalSpace, Description, Marker, Command 
-from pylatex.section import Paragraph, Chapter 
-from pylatex.utils import italic, NoEscape 
+from pylatex import Document, Section, Subsection, Itemize, Package, HorizontalSpace, Description, Marker, Command
+from pylatex.section import Paragraph, Chapter
+from pylatex.utils import italic, NoEscape
 from dynpy.utilities.adaptable import *
-from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase 
+from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase
 from dynpy.utilities.templates.tikz import TikzCaSCStandalone
 from dynpy.utilities.report import (SystemDynamicsAnalyzer, DataPlot, AccelerationComparison, FFTComparison, ReportEntry, SimulationalBlock, ReportText, SimulationFFT, DataStorage, Markdown, SummaryTable, Picture, SympyFormula, SymbolsDescription, DescriptionsRegistry, ObjectCode, CurrentContainer)
 from dynpy.solvers.linear import ODESystem
@@ -557,7 +557,7 @@ class DynamicSystemCallComponent(ReportComponent):
         display(
             ObjectCode(
                 """
-        from dynpy.models.mechanics.tmac import SDOFWinchSystem 
+        from dynpy.models.mechanics.tmac import SDOFWinchSystem
         """
             )
         )
@@ -881,9 +881,9 @@ class SimulationReportComponent(ReportComponent):
 
 # pandas guide
 data_code = """
-miesiace_list = ['styczeń','luty','marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']  
-srednie_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]  
-Eg_dzienne_list_watogodziny_na_metr2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]  
+miesiace_list = ['styczeń','luty','marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']
+srednie_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]
+Eg_dzienne_list_watogodziny_na_metr2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]
 Eg_dzienne_kilowatogodziny_na_metr2 = [0.6,1,3,3.8,4.8,5.3,4.9,3.3,1.7,0.7,0.5]
 """
 
@@ -1195,10 +1195,10 @@ steady_state
 """
 
 list_code = """
-Model_number = [1,2,3,4] 
-inertia_list= [1,2,3,4] 
-stiffness_list = [1,2,3,4] 
-damping_list = [1,2,3,4] 
+Model_number = [1,2,3,4]
+inertia_list= [1,2,3,4]
+stiffness_list = [1,2,3,4]
+damping_list = [1,2,3,4]
 Excitation_list = [1,2,3,4]
 
 system_parameters = {'Inertia':inertia_list, 'Stiffness':stiffness_list,'Damping':damping_list,'Excitation':Excitation_list}
@@ -1222,8 +1222,8 @@ eq4 = steady_state.subs(data_dict_4).subs(SDOFWinchSystem().F,100)
 
 
 sym_gen_sol = """
-    table = SDOFWinchSystem().subs(data_dict_2).subs(SDOFWinchSystem.F,100).numerized().compute_solution(t_span,[0,0]).iloc[:,0] 
-    table.plot() 
+    table = SDOFWinchSystem().subs(data_dict_2).subs(SDOFWinchSystem.F,100).numerized().compute_solution(t_span,[0,0]).iloc[:,0]
+    table.plot()
 """
 
 list_elem = """
@@ -1525,7 +1525,7 @@ class BasicOperationsComponent(ReportComponent):
         display(
             ObjectCode(
                 """
-            s = pd.Series([2,34,5,-2,8,12]) 
+            s = pd.Series([2,34,5,-2,8,12])
             """
             )
         )
@@ -1690,7 +1690,7 @@ class BasicOperationsComponent(ReportComponent):
             ObjectCode(
                 """
             a,b,c,d,e = symbols('a b c d e',positive = True)
-            
+
             units_dict = {a:ureg.meter,b:ureg.second, 'lubuskie':ureg.meter}
             LatexDataFrame.set_default_units(units_dict)
 
@@ -1775,7 +1775,7 @@ class BasicUsageOfODESystemComponent(ReportComponent):
             ReportText(
                 """\n Do prawidłowego wykonania zadania należy przyjąć następujące kroki:
 
-        - Definiowanie potrzebnych symboli, które wykorzystamy do budowy ODESystem: 
+        - Definiowanie potrzebnych symboli, które wykorzystamy do budowy ODESystem:
         """
             )
         )
@@ -1824,7 +1824,7 @@ class BasicUsageOfODESystemComponent(ReportComponent):
 
 harmonic_esc_str = """
 harmonic_oscilator_eq = Eq(m*x.diff(t,t) -F + c*x.diff(t) + k*x,0)
-harmonic_oscilator_eq  
+harmonic_oscilator_eq
 """
 
 harmonic_oscylator_ode = """
@@ -1969,7 +1969,7 @@ class ODENumericalSimulationsComponent(ReportComponent):
 
         display(
             ObjectCode(
-                """ 
+                """
         m,F,c,k,x=symbols('m,F,c,k,x', positive=True)
         t=Symbol('t')
         x=Function(x)(t)
@@ -1977,7 +1977,7 @@ class ODENumericalSimulationsComponent(ReportComponent):
          subs_dict={m:100 ,
                   F:200 ,
                   c:50 ,
-                  k:500 
+                  k:500
                   }
 
         ics_list = [0.0,0.0]
@@ -2438,11 +2438,11 @@ class DynSysIntroComponent(ReportComponent):
                 import numpy as np
                 from pandas import *
                 from sympy.physics.mechanics import init_vprinting, dynamicsymbols
-                from pylatex import Document, Section, Subsection, Itemize, Package, HorizontalSpace, Description, Marker, Command 
-                from pylatex.section import Paragraph, Chapter 
-                from pylatex.utils import italic, NoEscape 
+                from pylatex import Document, Section, Subsection, Itemize, Package, HorizontalSpace, Description, Marker, Command
+                from pylatex.section import Paragraph, Chapter
+                from pylatex.utils import italic, NoEscape
                 from dynpy.utilities.adaptable import *
-                from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase 
+                from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase
                 from dynpy.utilities.templates.tikz import TikzCaSCStandalone
                 from dynpy.utilities.report import (SystemDynamicsAnalyzer, DataPlot, AccelerationComparison, FFTComparison, ReportEntry, SimulationalBlock,               ReportText, SimulationFFT, DataStorage, Markdown, SummaryTable, Picture, SympyFormula, SymbolsDescription, DescriptionsRegistry,
                 ObjectCode, CurrentContainer)
@@ -2848,7 +2848,7 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
         display(
             Markdown(
                 """
-        
+
         def get_default_data(self):
 
             m0, k0 = self.m0, self.k0
@@ -2914,7 +2914,7 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
             return self.sym_desc_dict
 
         def unit_dict(self):
-        
+
             from sympy.physics import units
             ureg=UnitRegistry()
 
@@ -2938,7 +2938,7 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
 
 
 issue_title_str = """
-Maintenance of `{system_name}` class which is dynamic system representation        
+Maintenance of `{system_name}` class which is dynamic system representation
 """
 
 issue_desc_str = """
@@ -3170,11 +3170,11 @@ class MyMaterialPointMovement(ComposedSystem):
                                             qs=self.qs)
 
 
-      
+
         components['_mass_x']=self._mass_x
         components['_mass_y']=self._mass_y
         components['_gravity_']=self._gravity_
-     
+
 
         return components
 
@@ -3212,7 +3212,7 @@ class MyMaterialPointMovement(ComposedSystem):
         }
 
         return default_data_dict
-        
+
     def unit_dict(self):
 
         from sympy.physics import units
@@ -3228,7 +3228,7 @@ class MyMaterialPointMovement(ComposedSystem):
             self.r0: ureg.meter,
             self.phi0:  ureg.radian
         }
-        return unit_dict        
+        return unit_dict
 """
 
 

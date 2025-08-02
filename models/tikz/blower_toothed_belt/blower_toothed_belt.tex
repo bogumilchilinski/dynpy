@@ -42,12 +42,12 @@
 \begin{document}
 
  \begin{tikzpicture}[scale=1.15, transform shape]
- 
+
 \tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.75cm,post length=0.75cm,segment length=0.3cm}]
 \tikzstyle{tspring}=[thick,decorate,decoration={zigzag,pre length=0.25cm,post length=0.25cm,segment length=0.15cm}]
-\tikzstyle{damper}=[thick,decoration={markings,  
+\tikzstyle{damper}=[thick,decoration={markings,
   mark connection node=dmp,
-  mark=at position 0.5 with 
+  mark=at position 0.5 with
   {
     \node (dmp) [thick,inner sep=0pt,transform shape,rotate=-90,minimum width=15pt,minimum height=3pt,draw=none] {};
     \draw [thick] ($(dmp.north east)+(2pt,0)$) -- (dmp.south east) -- (dmp.south west) -- ($(dmp.north west)+(2pt,0)$);
@@ -67,11 +67,11 @@
 \node (fixed_support) [anchor=north,ground,outer sep=0pt,thick,yshift=0cm,minimum height=0.1cm ,minimum width=0.7cm,rotate=-90]  at (support_end) {};
 
 \draw [thick] (fixed_support.north west) -- (fixed_support.north east);
-% 
+%
 \draw [thick,rotate=-90] ([yshift=-0cm]blower.center) --++ (-60:0.5) --++(-0.5,0)  node (support_start)[midway] {}  --++ (60:0.5);
-% 
+%
 \node (floating_support) [ground,outer sep=0pt,thick,anchor=north,minimum height=0.05cm ,minimum width=0.7cm,rotate=-90,yshift=-0.1cm]  at (support_start) {};
-% 
+%
 \draw [thick] (floating_support.north west) -- (floating_support.north east);
 \fill [black] (blower.center) circle (0.05);
 

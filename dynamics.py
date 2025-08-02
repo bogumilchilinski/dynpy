@@ -1496,7 +1496,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         display(
             ReportText(
-                f"""Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące: 
+                f"""Kolejne pochodne wynikające z zastosowania równań Eulera-Lagrange'a są nastęujące:
                             """
             )
         )
@@ -1689,7 +1689,7 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
         display(
             ReportText(
-                f"""The next step is to calculate derivatives appering in the Euler-Lagranges equations. Subsequent derivatives are as follows: 
+                f"""The next step is to calculate derivatives appering in the Euler-Lagranges equations. Subsequent derivatives are as follows:
                             """
             )
         )

@@ -84,9 +84,9 @@ df = pd.DataFrame(index=miesiace_list, data=data_warunki_atmosferyczne)
 
 # pandas guide
 data_code = """
-miesiace_list = ['styczeń','luty','marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']  
-srednie_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]  
-Eg_dzienne_list_watogodziny_na_metr2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]  
+miesiace_list = ['styczeń','luty','marzec','kwiecień','maj','czerwiec','lipiec','sierpień','wrzesień','październik','listopad','grudzień']
+srednie_temp_list = [-1.9,-0.8,3.2,9.3,14.6,18,20.1,19.5,14.7,9.3,4.8,0.5]
+Eg_dzienne_list_watogodziny_na_metr2 =[600,1000,3000,3800,4800,5400,5300,4900,3300,1700,700,500]
 Eg_dzienne_kilowatogodziny_na_metr2 = [0.6,1,3,3.8,4.8,5.3,4.9,3.3,1.7,0.7,0.5]
 """
 
@@ -637,7 +637,7 @@ table_for_report = table[0::15].to_latex_dataframe()
 display(Markdown(' Do tablicy `table_eq` zapisujemy równanie ogólne dla zmiennej czasowej `t_span`   '))
 display(Markdown(
 f"""
-    
+
     table_eq=general_sol_matrix.n().numerized().compute_solution(t_span)
 
 """))
@@ -645,7 +645,7 @@ display(Markdown(f' Do tablicy table przypisujemy wartości ${latex(omg)}$ powst
 display(Markdown(
 f"""
     table=table_eq[[phi.diff(t)]]
-   
+
 """))
 display(ReportText(' W następnym kroku wybieramy zakres wartości który chcemy umieścić w tabelce przy pomocy naiwasów kwadratowych. Nastepnie przekształcamy tabelę na zgodną z LateX przy pomocy metody: to\_latex\_dataframe()  '))
 display(Markdown(
@@ -668,7 +668,7 @@ f"""
     display(table_for_report.reported(caption='Tabela'))
 
 """))
-    
+
 '''
 
 

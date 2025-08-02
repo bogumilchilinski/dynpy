@@ -46,9 +46,9 @@
 
 \tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.3cm,post length=0.3cm,segment length=0.3cm}]
 
-\tikzstyle{damper}=[thick,decoration={markings,  
+\tikzstyle{damper}=[thick,decoration={markings,
   mark connection node=dmp,
-  mark=at position 0.5 with 
+  mark=at position 0.5 with
   {
     \node (dmp) [thick,inner sep=0pt,transform shape,rotate=-90,minimum width=15pt,minimum height=3pt,draw=none] {};
     \draw [thick] ($(dmp.north east)+(2pt,0)$) -- (dmp.south east) -- (dmp.south west) -- ($(dmp.north west)+(2pt,0)$);
@@ -63,12 +63,12 @@
    %draw axes
     %\fill[black] (origo) circle (0.05);
 
-    
+
     \node (M) [draw,outer sep=0pt,thick,minimum width=6cm, minimum height=6cm,yshift=2cm,label={left,xshift=1.5cm,yshift=1.5cm:$M$}] at (origo) {};
     %\node (m1_label) at ($(M)+(0:0.5cm)$) {$m$};
 
     \draw [spring] (M.south west)  node[] (left_spring){}  --++ (-1.5cm,-1.5cm) node[midway,left,xshift=-0.3cm] (ls_end) {$k_{m}, l_{0}$};
-    
+
 \draw [spring] (M.south east)  node[] (right_spring){}  --++ (1.5cm,-1.5cm) node[midway,right,xshift=0.3cm] {$k_{m}, l_{0}$};
 \node (R) [draw,circle,outer sep=0pt,thick, minimum height=3cm] at (M.center) {};
 %\node (me) [fill=blue,draw,circle,outer sep=0pt,thick, minimum height=0.001cm] at (45:1.25) {};
@@ -79,8 +79,8 @@
    % \node (beam) [fill=gray,anchor=north,xshift=0cm,yshift=0cm,minimum width=2cm,minimum height=0.05pt] at (origo) {} node[right]{$m_{beam}=0$};
 
 %     \draw [ultra thick] (k_sup_spring_left.west) -- (k_sup_spring_right.east) node[midway] (beam_center) {};
-    
-    
+
+
 %         \node (road_sur) [fill=black,anchor=north,xshift=0cm,yshift=-2cm,minimum width=2cm,minimum height=0.05cm] at (beam) {};
 
 %beam_center.center

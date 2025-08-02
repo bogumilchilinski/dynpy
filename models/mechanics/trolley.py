@@ -4758,7 +4758,7 @@ class DiskOnTrolley(ComposedSystem):
 
 
 class TrolleyWithElasticPendulum(TrolleyWithPendulum):
-    
+
 
     scheme_name = 'trolley_pendulum_tmd.png'
     real_name = 'taipei101.png'
@@ -4812,30 +4812,30 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
       #  if u_0 is not None: u_0 = self.m_p * self.g / self.k_l
         self.ivar = ivar
         self.qs = [self.x,self.phi,self.u_e]
-        self.u_0=self.g*self.m_p/self.k_l        
+        self.u_0=self.g*self.m_p/self.k_l
         self._init_from_components(**kwargs)
 
 
     @cached_property
     def components(self):
         components = {}
-        
+
         #self.u_0 = self.m_p * self.g / self.k_l
         self._trolley = SpringMassSystem(self.m_t, self.k, self.x, self.ivar)(label='Trolley')
         #self._pendulum = PendulumKinematicExct(self.l+self.u, self.m_p, self.g, self.phi, self.x, self.ivar)(label='Pendulum')
         self._force=Force(self.F*sin(self.Omega*self.ivar), pos1=self.qs[0], qs=self.qs)(label='Force')
-        
+
 
 
         self._material_point_1=MaterialPoint(self.m_p,self.x+(self.l+self.u_e+self.u_0)*sin(self.phi),qs=self.qs)
         self._material_point_2=MaterialPoint(self.m_p,(self.l+self.u_e+self.u_0)*cos(self.phi),qs=self.qs)
         self._gravity = GravitationalForce(self.m_p, self.g, -(self.l+self.u_e+self.u_0)*cos(self.phi), qs=self.qs)
 
-     
+
 
         self._spring_2=Spring(self.k_l,self.u_e,qs=self.qs)
 
-        
+
         components['_trolley'] = self._trolley
         #components['_pendulum'] = self._pendulum
         components['_force'] = self._force
@@ -4915,11 +4915,11 @@ class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
         self._TrolleyWithPendulum = TrolleyWithElasticPendulum(self.l, self.m_t, self.m_p, self.k, self.g, self.Omega, F=self.F,ivar=self.ivar)(label='Trolley')
         self._trolley_damper=Damper(self.c, pos1=self.x+(self.l+self.u_e)*sin(self.phi), qs=self.qs)(label='Trolley damper')
         self._pendulum_damper=Damper(self.c_phi, pos1=self.phi, qs=self.qs)(label='Pendulum damper')
-        
+
         self._pendulum_line_damper_horizontal=Damper(self.c_l, pos1=self.x+self.u_e*sin(self.phi), qs=[self.u_e])(label='Pendulum horizontal line damper')
         self._pendulum_line_damper_vertical=Damper(self.c_l, pos1=self.u_e*cos(self.phi), qs=[self.u_e])(label='Pendulum vertical line damper')
-        
-        
+
+
 
 
         components['_TrolleyWithPendulum'] = self._TrolleyWithPendulum

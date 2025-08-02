@@ -87,9 +87,9 @@ df = pd.DataFrame(index=miesiace_list, data=data_warunki_atmosferyczne)
 #
 dynpy_imports_code = """
 
-from sympy import* 
+from sympy import*
 from sympy.physics.mechanics import dynamicsymbols, init_vprinting
-from sympy.abc import* 
+from sympy.abc import*
 init_vprinting()
 from sympy import S
 from dynpy.solvers.linear import ODESystem
@@ -244,11 +244,11 @@ from sympy import *
 import numpy as np
 from pandas import *
 from sympy.physics.mechanics import init_vprinting, dynamicsymbols
-from pylatex import Document, Section, Subsection, Itemize, Package, HorizontalSpace, Description, Marker, Command 
-from pylatex.section import Paragraph, Chapter 
-from pylatex.utils import italic, NoEscape 
+from pylatex import Document, Section, Subsection, Itemize, Package, HorizontalSpace, Description, Marker, Command
+from pylatex.section import Paragraph, Chapter
+from pylatex.utils import italic, NoEscape
 from dynpy.utilities.adaptable import *
-from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase 
+from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase
 from dynpy.utilities.templates.tikz import TikzCaSCStandalone
 from dynpy.utilities.report import (Markdown, Picture, SympyFormula, SymbolsDescription, DescriptionsRegistry, ObjectCode, CurrentContainer)
 from dynpy.solvers.linear import ODESystem
@@ -387,7 +387,7 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
         display(
             Markdown(
                 """
-        
+
         def get_default_data(self):
 
             m0, k0 = self.m0, self.k0
@@ -453,7 +453,7 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
             return self.sym_desc_dict
 
         def unit_dict(self):
-        
+
             from sympy.physics import units
             ureg=UnitRegistry()
 
@@ -595,7 +595,7 @@ class InterimTemplateComponent(InterimScheduleComponent):
 
 
 project_issue_title_str = """
-Maintenance of `{system_name}` class which is dynamic system representation        
+Maintenance of `{system_name}` class which is dynamic system representation
 """
 
 project_issue_desc_str = """

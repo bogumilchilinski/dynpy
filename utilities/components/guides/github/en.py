@@ -232,7 +232,7 @@ class CocalcFolderComponent(ReportComponent):
 
 code_dynsys_list_str = """
 #komendy importujące biblioteki
-import sympy 
+import sympy
 from sympy import Symbol
 
 from dynpy.models.mechanics.pendulum import Pendulum

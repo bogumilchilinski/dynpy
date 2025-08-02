@@ -61,8 +61,8 @@ class TuningTikZDiagram1(TikZPicture):
 
         code = r"""
 
-    
-    
+
+
 
     \draw
     (0,0) to[american voltage source, l_=$U_{oc}$] (0,-3)
@@ -81,17 +81,17 @@ class TheveninTikZDiagramVer1(TikZPicture):
 
         code = r"""
 
-    
+
     \draw
     (0,0) to[american voltage source, l_=$U_{oc}$] (0,-2.5)
     (0,0) to[R,european, l=$R_{0}$] (3,0)
-    
+
     (3,0) -- (3,1.5)
     to[C, l=$C_{1}$] (6,1.5) -- (6,0)
     (3,0) to[R,european, l=$R_{1}$] (6,0)
-    
+
     (6,0) to[short, -*] (7,0) node[label={right:$+$}] {}
-    
+
     (0,-2.5) to[short, -*] (7,-2.5) node[label={right:$-$}] {}
 ;
 
@@ -109,21 +109,21 @@ class TheveninTikZDiagramVer2(TikZPicture):
     \draw
     (0,0) to[american voltage source, l_=$U_{oc}$] (0,-3)
     (0,0) to[R,european, l=$R_{0}$] (3,0)
-    
+
     (3,0) -- (3,1.5)
     to[C, l=$C_{1}$] (6,1.5) -- (6,0)
     (3,0) to[R,european, l=$R_{1}$] (6,0)
-    
+
     (6,0) -- (7,0)
-    
+
     (7,0) -- (7,1.5)
     to[C, l=$C_{2}$] (10,1.5) -- (10,0)
     (7,0) to[R,european, l=$R_{2}$] (10,0)
-    
-    
-    
+
+
+
     (10,0) to[short, -*] (11,0) node[label={right:$+$}] {}
-    
+
     (0,-3) to[short, -*] (11,-3) node[label={right:$-$}] {}
 ;
 
@@ -138,17 +138,17 @@ class TheveninTikZDiagram(TikZPicture):
 
         code = r"""
 
-    
+
     \draw
     (0,0) to[american voltage source, l_=$U_{oc}$] (0,-3)
     (0,0) to[R,european, l=$R_{0}$] (3,0)
-    
+
     (3,0) to[short, i_=$I_{TH}$] (3,1.5)
     to[C, l=$C_{1}$] (6,1.5) -- (6,0)
     (3,0) to[R,european, l=$R_{1}$,a= + $ U_{TH} $ -] (6,0)
-    
+
     (6,0) to[short, -*, i_=$I_{L}$] (7,0) node[label={right:$+$}] {}
-    
+
     (0,-3) to[short, -*] (7,-3) node[label={right:$-$}] {}
 ;
 """

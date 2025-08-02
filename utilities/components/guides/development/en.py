@@ -120,9 +120,9 @@ class ReportComponent(BaseReportComponent):
 #
 dynpy_imports_code = """
 
-from sympy import* 
+from sympy import*
 from sympy.physics.mechanics import dynamicsymbols, init_vprinting
-from sympy.abc import* 
+from sympy.abc import*
 init_vprinting()
 from sympy import S
 from dynpy.solvers.linear import ODESystem
@@ -273,11 +273,11 @@ from sympy import *
 import numpy as np
 from pandas import *
 from sympy.physics.mechanics import init_vprinting, dynamicsymbols
-from pylatex import Document, Section, Subsection, Itemize, Package, HorizontalSpace, Description, Marker, Command 
-from pylatex.section import Paragraph, Chapter 
-from pylatex.utils import italic, NoEscape 
+from pylatex import Document, Section, Subsection, Itemize, Package, HorizontalSpace, Description, Marker, Command
+from pylatex.section import Paragraph, Chapter
+from pylatex.utils import italic, NoEscape
 from dynpy.utilities.adaptable import *
-from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase 
+from dynpy.utilities.templates.document import BeamerTemplate, MechanicalCase
 from dynpy.utilities.templates.tikz import TikzCaSCStandalone
 from dynpy.utilities.report import (Markdown, Picture, SympyFormula, SymbolsDescription, DescriptionsRegistry, ObjectCode, CurrentContainer)
 from dynpy.solvers.linear import ODESystem
@@ -459,7 +459,7 @@ class InterimTemplateComponent(InterimScheduleComponent):
 
 
 project_issue_title_str = """
-Maintenance of `{system_name}` class which is dynamic system representation        
+Maintenance of `{system_name}` class which is dynamic system representation
 """
 
 project_issue_desc_str = """
@@ -743,33 +743,33 @@ class PythonBasicsScheduleComponent(ReportComponent):
                 """The course consists of following classes:
 
     -'zajecia_1': 'Wprowadzenie do przedmiotu, Przedstawienie guide z obsługi cocalca i zakładania jupytera, Syntax, typy zmiennych, przydzielenie tematów do prezentacji i rozpisanie issues - IntroToCocalc. (Tematy do prezentacji: Cocalc, Jupyter Notebook, import bibliotek - na przykłądnie sympy, numpy)'
-    
+
     -'zajecia_2': "Podstawy gołego Pythona - podstawowe operacje na zmiennych, funkcje, klasy"
-    
+
     -'zajecia_3': 'Biblioteki typu numpy, sympy itd. (studenkie propozycje przykladow zastoseowani z np prostej symulacji)',
-    
+
     -'zajecia_4': 'Raportowanie zaawansowane (guide z raportowania)',
-    
+
     -'zajecia_5': 'Odesystemy (przykładowe rozwiazanie równania różniczkowego i np. trajektoria)',
-    
+
     -'zajecia_6': 'Pandas + symulacja a obiekcie pandas',
-    
+
     -'zajecia_7': 'Wprowadzenia do modułu DynPy - helpy, guidy, tworzenie nowych systemów itd. gdzie szukać jak używać żeby pokazać co można finalnie stworzyć',
-    
+
     -'zajecia_8': 'Budowanie komponentów i tutaj już jakiś zrobić np do systemu zrobionego wcześniej' ??,
-    
+
     -'zajecia_9': 'Full raport na systemie i komponentach stworzony od zera (tutaj może już z tych trzech mini projekt w postaci zastowania pythona) - ???',
-    
+
     -'zajecia_10': 'PROJEKT',
-    
+
     -'zajecia_11': 'PROJEKT',
-    
+
     -'zajecia_12': 'PROJEKT',
-    
+
     -'zajecia_13': 'PROJEKT',
-    
+
     -'zajecia_14': 'PROJEKT',
-    
+
     -'zajecia_15': 'PROJEKT',
 
 """

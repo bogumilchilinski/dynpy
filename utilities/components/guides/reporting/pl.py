@@ -157,9 +157,9 @@ class TitlePageComponent(Environment):
 
 dynpy_imports_code = """
 
-from sympy import* 
+from sympy import*
 from sympy.physics.mechanics import dynamicsymbols, init_vprinting
-from sympy.abc import* 
+from sympy.abc import*
 init_vprinting()
 from sympy import S
 from dynpy.solvers.linear import ODESystem
@@ -566,10 +566,10 @@ steady_state
 """
 
 list_code = """
-Model_number = [1,2,3,4] 
-inertia_list= [1,2,3,4] 
-stiffness_list = [1,2,3,4] 
-damping_list = [1,2,3,4] 
+Model_number = [1,2,3,4]
+inertia_list= [1,2,3,4]
+stiffness_list = [1,2,3,4]
+damping_list = [1,2,3,4]
 Excitation_list = [1,2,3,4]
 
 system_parameters = {'Inertia':inertia_list, 'Stiffness':stiffness_list,'Damping':damping_list,'Excitation':Excitation_list}
@@ -593,8 +593,8 @@ eq4 = steady_state.subs(data_dict_4).subs(SDOFWinchSystem().F,100)
 
 
 sym_gen_sol = """
-    table = SDOFWinchSystem().subs(data_dict_2).subs(SDOFWinchSystem.F,100).numerized().compute_solution(t_span,[0,0]).iloc[:,0] 
-    table.plot() 
+    table = SDOFWinchSystem().subs(data_dict_2).subs(SDOFWinchSystem.F,100).numerized().compute_solution(t_span,[0,0]).iloc[:,0]
+    table.plot()
 """
 
 list_elem = """
@@ -896,7 +896,7 @@ class BasicOperationsComponent(ReportComponent):
         display(
             ObjectCode(
                 """
-            s = pd.Series([2,34,5,-2,8,12]) 
+            s = pd.Series([2,34,5,-2,8,12])
             """
             )
         )
@@ -1061,7 +1061,7 @@ class BasicOperationsComponent(ReportComponent):
             ObjectCode(
                 """
             a,b,c,d,e = symbols('a b c d e',positive = True)
-            
+
             units_dict = {a:ureg.meter,b:ureg.second, 'lubuskie':ureg.meter}
             LatexDataFrame.set_default_units(units_dict)
 
@@ -1146,7 +1146,7 @@ class BasicUsageOfODESystemComponent(ReportComponent):
             ReportText(
                 """\n Do prawidłowego wykonania zadania należy przyjąć następujące kroki:
 
-        - Definiowanie potrzebnych symboli, które wykorzystamy do budowy ODESystem: 
+        - Definiowanie potrzebnych symboli, które wykorzystamy do budowy ODESystem:
         """
             )
         )
@@ -1481,7 +1481,7 @@ append_elem_str = """
         class_module = self.reported_object['module']
         class_field = self.reported_object['field']
         target = self.reported_object['target']
-    
+
         #implement reporting activieties here
 """
 
@@ -1769,7 +1769,7 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
         display(
             Markdown(
                 """
-        
+
         def get_default_data(self):
 
             m0, k0 = self.m0, self.k0
@@ -1835,7 +1835,7 @@ class DynamicSystemCompletenessCheckComponent(ReportComponent):
             return self.sym_desc_dict
 
         def unit_dict(self):
-        
+
             from sympy.physics import units
             ureg=UnitRegistry()
 
@@ -1907,7 +1907,7 @@ class PictureComponent(DocumentGenerationComponent):
             ReportText(
                 """Picture is a class that represents a figure environment. To add picture to document simply call Picture() class. Possible argumnts in Picture class are:
         \n path - define path to the picture
-        \n position - define picture positioning acording to latex 
+        \n position - define picture positioning acording to latex
         \n width - define picture width in cm
         \n height - define picture height in cm
         \n caption - caption of the picture
@@ -1965,9 +1965,9 @@ class GeometrySceneDG:
 
     #def __init__(self,height=12,width=9,figsize=(12,9)):
     def __init__(self, init_3d=(30, 10), height=12, width=16, figsize=(12, 9)):
-        
-        
-        
+
+
+
         plt.figure(figsize=figsize)
         ax_2d = plt.subplot(121)
         ax_2d.set(ylabel=(r'<-x | z ->'), xlabel='y')
@@ -2024,7 +2024,7 @@ class CodeEmbeddingComponent(DocumentGenerationComponent):
 
 ReportTextComponent_str = """
 display(ReportText('Tutaj wpisujemy tekst, który chcemy wyświetlić w naszym dokumencie'))
-    
+
 """
 
 
@@ -2207,26 +2207,26 @@ class LibrariesImportComponent(DocumentGenerationComponent):
 
 
 markdown_reporting_str = """
-Koncepcję raportowania można przedstawić prosto w następujących punktach:  
+Koncepcję raportowania można przedstawić prosto w następujących punktach:
 ​
-* Biblioteka do raportowania ma budowę modułową. W kodowaniu obiektowo zorientowanym oznacza to, że składa się z szeregu klas. Poszczególne klasy to implementacje programistyczne standardowych elementów, z których składa się każdy raport. To znaczy zaimplementowano klasę do tworzenia dokumentu oraz klasy do kreowania typowych elementów dokumentu, jak rozdział, akapit (tj. blok tekstu), wzór, obraz, wykres.  
+* Biblioteka do raportowania ma budowę modułową. W kodowaniu obiektowo zorientowanym oznacza to, że składa się z szeregu klas. Poszczególne klasy to implementacje programistyczne standardowych elementów, z których składa się każdy raport. To znaczy zaimplementowano klasę do tworzenia dokumentu oraz klasy do kreowania typowych elementów dokumentu, jak rozdział, akapit (tj. blok tekstu), wzór, obraz, wykres.
 ​
-* Przyjęta została współbieżna zasada tworzenia raportów. Według tej zasady, aby zaraportować dany element najpierw musi on zostać wyświetlony w jupyterze, używając nomenklatury informatycznej - wydrukowany na wyjściu komórki jupytera, tzn. jako cell output.  
+* Przyjęta została współbieżna zasada tworzenia raportów. Według tej zasady, aby zaraportować dany element najpierw musi on zostać wyświetlony w jupyterze, używając nomenklatury informatycznej - wydrukowany na wyjściu komórki jupytera, tzn. jako cell output.
 ​
 * Główna implementacja kodu, czyli używane klasy, znajdują się w module `dynpy.utilities.report`
 ​
-* Do zbudowania standardowego raportu używa się następujących klas:  
-    
+* Do zbudowania standardowego raportu używa się następujących klas:
+
     * class `Document`
-    
+
     * class `CurrentContainer`
-    
+
     * class `ReportText`
-    
+
     * class `Markdown`
-    
+
     * class `Picture`
-    
+
     * class `SympyFormula`
 ​
 * W efekcie tworzony jest dokument wynikowy w postacie pliku pdf, wygenrowany w języku zanczników LaTeX w oparciu o bazowy plik jupytera (*.ipynb), który zawiera przejrzysty podgląd dokumentu wynikowego.
@@ -2298,7 +2298,7 @@ Należy zwrócić uwagę na następujęce aspekty:
 
 - Appendowanie sekcji do dokumentu powinno znajdować się na końcu dokumentu, ponieważ aby zbudować dokument nie trzeba uruchamiać wszystkich cele po kolei.
 
-- Nie można obsadzać nieformatowalnych kodów w 'ReportText'. 
+- Nie można obsadzać nieformatowalnych kodów w 'ReportText'.
 
 - Jeżeli chcemy obsadzić jednoliniowy kod, musimy użyć ` (apostrof pod tyldą). np: display(Markdown(\"`help`\")). Ten sposób nie zapewnia kolorowania kodu.
 
@@ -2330,7 +2330,7 @@ Elementy, które wymagają usprawnienia w szablonie pracy:
 
 - stosowanie klasy `AutoMarker`
 
-- należy w szablonie PD przenieść Appendowanie na koniec 
+- należy w szablonie PD przenieść Appendowanie na koniec
 
 """
 
@@ -2341,7 +2341,7 @@ Pay attention to the following aspects:
 
 - Appending sections to the document should be at the end of the document, because it is not necessary to run all the targets one by one to build the document.
 
-- You can't cast unformatable codes in 'ReportText'. 
+- You can't cast unformatable codes in 'ReportText'.
 
 - If you want to cast a one-line code, you must use ` (apostrophe under the tilde). Ex: display(Markdown(`help`)). This way does not provide code coloring.
 
@@ -2373,7 +2373,7 @@ Elements that need improvement in the thesis template:
 
 - application of `AutoMarker` class.
 
-- move Append to the end in the PD template 
+- move Append to the end in the PD template
 
 """
 
@@ -2461,7 +2461,7 @@ old_class_code = """class ExemplaryOldImplementedSystem(ComposedSystem):
         }
 
         return default_data_dict
-    
+
     def get_numerical_data(self):
 
         m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
@@ -2539,7 +2539,7 @@ new_class_code = """class MaterialPointMovement(ComposedSystem):
 
 
         return components
-        
+
     def symbols_description(self):
         self.sym_desc_dict = {
             self.m: r'Mass',
@@ -2561,7 +2561,7 @@ new_class_code = """class MaterialPointMovement(ComposedSystem):
         }
 
         return default_data_dict
-    
+
     def get_numerical_data(self):
 
         m0, c0, r0, phi0 = self.m0, self.c0, self.r0, self.phi0
@@ -2573,7 +2573,7 @@ new_class_code = """class MaterialPointMovement(ComposedSystem):
             self.phi: [phi0 * no for no in range(1, 8)],
         }
 
-        return default_data_dict    
+        return default_data_dict
 
     def max_static_force(self):
         return S.Zero
@@ -2638,7 +2638,7 @@ nazwa_sekcji=Section('Tytuł')
 CurrentContainer(nazwa_sekcji)
 """
 
-unit_registry_str = """        
+unit_registry_str = """
 
 
 t=Symbol('t')
@@ -2732,7 +2732,7 @@ Predefined_code = """
 
 rozdzial = KineticEnergyComponent(Engine())
 rozdzial_kod = KineticEnergySymPyCodeComponent(Engine())
-    
+
 doc_final.append(rozdzial)
 doc_final.append(rozdzial_kod)
 
@@ -2769,10 +2769,10 @@ steady_state
 """
 
 list_code = """
-Model_number = [1,2,3,4] 
-inertia_list= [1,2,3,4] 
-stiffness_list = [1,2,3,4] 
-damping_list = [1,2,3,4] 
+Model_number = [1,2,3,4]
+inertia_list= [1,2,3,4]
+stiffness_list = [1,2,3,4]
+damping_list = [1,2,3,4]
 Excitation_list = [1,2,3,4]
 
 system_parameters = {'Inertia':inertia_list, 'Stiffness':stiffness_list,'Damping':damping_list,'Excitation':Excitation_list}
@@ -2800,8 +2800,8 @@ t_span = np.linspace(0,100,200)
 """
 
 sym_gen_sol = """
-table = SDOFWinchSystem().subs(data_dict_2).subs(SDOFWinchSystem.F,100).numerized().compute_solution(t_span,[0,0]).iloc[:,0] 
-table.plot() 
+table = SDOFWinchSystem().subs(data_dict_2).subs(SDOFWinchSystem.F,100).numerized().compute_solution(t_span,[0,0]).iloc[:,0]
+table.plot()
 """
 
 list_elem = """
@@ -2933,7 +2933,7 @@ class ReportingComponentsList(ReportComponent):
 
 
 issue_title_str = """
-Maintenance of `{system_name}` class which is dynamic system representation        
+Maintenance of `{system_name}` class which is dynamic system representation
 """
 
 issue_desc_str = """
@@ -2970,7 +2970,7 @@ comp_output_str = """
 """
 comp_var_str = """
     def append_elements(self):
-        
+
         issue = self.reported_object
 """
 
@@ -2980,7 +2980,7 @@ rep_obj_str = """
     title="Details of GitHub issue"
 
     def append_elements(self):
-        
+
         issue = self.reported_object #Tutaj przypisujemy do zmiennej argument
         if issue==None:
             from github.Issue import Issue
@@ -3011,7 +3011,7 @@ rep_jup_str = """
     list_open=[] #pusta lista
     list_open = client.get_issues_list(repo_name='bogumilchilinski/dynpy', state='open', assignee=user, sort='created', since=date_object) # pozyskanie listy issues z repo
 
-    for single_issue in list_open: # pętla na wylistowanie issues 
+    for single_issue in list_open: # pętla na wylistowanie issues
         GithubIssueReportComponent(single_issue) # wykorzystanie zaimplementowanego komponentu, argument jaki przekazujemy to pojedyńcze issue z listy
 """
 
@@ -3059,7 +3059,7 @@ class ReportingCompsUsageComponent(ReportComponent):
 
         display(
             ReportText(
-                """Po stworzeniu komponentu możesz go wywołać poprzez zaimportowanie odpowiedniej klasy we własnym 
+                """Po stworzeniu komponentu możesz go wywołać poprzez zaimportowanie odpowiedniej klasy we własnym
                            jupku,poniżej zostanie opisany konkretny przykład, aby lepiej zrozumieć działanie komponentu"""
             )
         )

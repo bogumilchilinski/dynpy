@@ -1090,7 +1090,7 @@ display(an)
 ansol = an.compute_solution(t_span)[[x]]
 
 ansol.plot()
-                         
+
                          """
         )
         return code
@@ -2597,12 +2597,12 @@ class ODESystem(AnalyticalSolution):
         codeprinter_str = CodePrinter(self)._generate_code()
 
         code_str = f"""{codeprinter_str}
-        
+
 odes = {self.odes}
 dvars = {self.dvars}
 ivar = {self.ivar}
 ode_order = {self.ode_order}
-        
+
 ODESystem({self.odes}, {self.dvars}, {self.ivar}, {self.ode_order})
         """
 

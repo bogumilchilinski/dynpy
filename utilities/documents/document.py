@@ -160,7 +160,7 @@ for coord in dyn_sys.q:
 
     vel=coord.diff(t)
     diff1 = lagrangian.diff(vel)
-    diff2 = diff1.diff(t) 
+    diff2 = diff1.diff(t)
     diff3 = lagrangian.diff(coord)
 
 
@@ -169,12 +169,12 @@ for coord in dyn_sys.q:
     diff3_sym = Symbol(f'\\\\frac{{\\\\partial L}}{{\\\\partial {vlatex(coord)}}}')
 
 
-    display(SympyFormula(  Eq(diff1_sym,diff1)  ))    
+    display(SympyFormula(  Eq(diff1_sym,diff1)  ))
     display(SympyFormula(  Eq( diff2_sym ,diff2)  ))
     display(SympyFormula(  Eq( diff3_sym ,  diff3)  ))
 
 display(ReportText('Outcomes of governing equations analysis. '*10))
-    
+
 
 sec_equations = Subsection('Equations of motion')
 CurrentContainer(sec_equations)
@@ -186,17 +186,17 @@ ds1=dyn_sys.eoms
 
 for eq1 in ds1.as_eq_list():
     display(SympyFormula(eq1.simplify()))
-    
+
 ds2=dyn_sys.linearized()._ode_system.general_solution
 
 for eq2 in ds2.as_eq_list():
     display(SympyFormula(eq2.simplify()))
-    
+
 ds3=dyn_sys.linearized()._ode_system.steady_solution
 
 for eq3 in ds3.as_eq_list():
     display(SympyFormula(eq3.simplify()))
-    
+
 ds4=dyn_sys.linearized().eoms.solution
 ds4_eqns = ds4.as_eq_list()
 
@@ -213,8 +213,8 @@ CurrentContainer(sec_math_desc)
 
 E_K,F = symbols('E_K,F')
 descriptions = {
-E_K:r"Kinetic energy", 
-F:r"Force",  
+E_K:r"Kinetic energy",
+F:r"Force",
 }
 syms_dict = descriptions
 DescriptionsRegistry().set_descriptions({**syms_dict})
@@ -241,7 +241,7 @@ sec_simulation = Section('Section that contains simulation')
 CurrentContainer(sec_simulation)
 
 # Basics of ODESystem based simulations are covered in guide to ODESystem, use the followin call
-# from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide 
+# from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide
 # BasicsOfODESystemGuide()
 
 sec_ODESystem = Subsection('ODESystem simulation')
@@ -301,7 +301,7 @@ sec_verification = Section('Section that verificates research results')
 CurrentContainer(sec_verification)
 
 display(ReportText('Description of verifications concept. '*200))
-     
+
 
 
 ### SELECT ONE CASE
@@ -341,8 +341,8 @@ CurrentContainer(sec_symbols)
 
 E_K,F = symbols('E_K,F')
 descriptions = {
-E_K:r"Kinetic energy", 
-F:r"Force",  
+E_K:r"Kinetic energy",
+F:r"Force",
 }
 syms_dict = descriptions
 DescriptionsRegistry().set_descriptions({**syms_dict})
@@ -355,7 +355,7 @@ document_str = """
 # Creating file
 # Be sure *output* folder is in the current directory
 
-thesis_name = './output/report_name' #path for report file 
+thesis_name = './output/report_name' #path for report file
 
 doc = WutThesis(thesis_name)
 # Bibliography of quotations
@@ -440,7 +440,7 @@ class ReportMethods:
 
 #Examplary setup is as follows:
 
-## 
+##
 ## Imports
 
 
@@ -449,46 +449,46 @@ class ReportMethods:
     from dynpy.utilities.templates.document import Guide
 
     doc = Guide('./output/report_name')
-    
+
 
 ## CELL 2
 ## Text reporting
-    
+
     #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
     #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
+
     sec_text = Section('Section that presents text reporting')
     CurrentContainer(sec_text)
-    
+
     display(ReportText('Exemplary text'*100))
-    
-    #will not work in some projects, restrict usage 
-    display(Markdown('Formatted text'*100)) 
-    
-    
+
+    #will not work in some projects, restrict usage
+    display(Markdown('Formatted text'*100))
+
+
 ## CELL 3
-## Math 
+## Math
 
     #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
     #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
     from sympy import Eq, Symbol, symbols
-    
+
     sec_formula = Section('Section that presents formulas reporting')
     CurrentContainer(sec_formula)
-    
+
     display(ReportText('Mathematical formulas are reported with the support of sympy and it\\'s symbols.'))
-    
+
     a,b = symbols('a b')
     display(SympyFormula(Eq(a,b)))
 
 
 ## CELL 4
 ## Picture
-    
+
     #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
     #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
+
     sec_picture = Section('Section that presents pictures reporting')
     CurrentContainer(sec_picture)
 
@@ -505,7 +505,7 @@ class ReportMethods:
     # Creating file
     # Be sure *output* folder is in the current directory
 
-    guide_name = './output/report_name' #path for report file 
+    guide_name = './output/report_name' #path for report file
 
     doc = Guide(guide_name)
     doc.append(sec_text) # adding certain sections
@@ -513,7 +513,7 @@ class ReportMethods:
     doc.append(sec_picture)
     # Generating file
     doc.generate_pdf(clean_tex=True)
-    
+
 
 
 """
@@ -534,22 +534,22 @@ from dynpy.utilities.report import *
 from dynpy.utilities.templates.document import Guide
 
 doc = Guide('./output/report_name')
-    
+
 
 ## ############### CELL 2 ###########################
 ## Text reporting
-    
+
 sec_text = Section('Section that presents text reporting')
 CurrentContainer(sec_text)
 
 display(ReportText('Exemplary text'*100))
 
-#will not work in some projects, restrict usage 
-display(Markdown('Formatted text'*100)) 
-    
-    
+#will not work in some projects, restrict usage
+display(Markdown('Formatted text'*100))
+
+
 ## ############### CELL 3 ###########################
-## Math 
+## Math
 
 from sympy import Eq, Symbol, symbols
 
@@ -577,7 +577,7 @@ display(Picture('./dynpy/models/images/taipei101.png',caption = 'Caption of pict
 # Creating file
 # Be sure *output* folder is in the current directory
 
-guide_name = './output/report_name' #path for report file 
+guide_name = './output/report_name' #path for report file
 
 doc = Guide(guide_name)
 doc.append(sec_text) # adding certain sections
@@ -1121,7 +1121,7 @@ for coord in dyn_sys.q:
 
     vel=coord.diff(t)
     diff1 = lagrangian.diff(vel)
-    diff2 = diff1.diff(t) 
+    diff2 = diff1.diff(t)
     diff3 = lagrangian.diff(coord)
 
 
@@ -1130,12 +1130,12 @@ for coord in dyn_sys.q:
     diff3_sym = Symbol(f'\\\\frac{{\\\\partial L}}{{\\\\partial {vlatex(coord)}}}')
 
 
-    display(SympyFormula(  Eq(diff1_sym,diff1)  ))    
+    display(SympyFormula(  Eq(diff1_sym,diff1)  ))
     display(SympyFormula(  Eq( diff2_sym ,diff2)  ))
     display(SympyFormula(  Eq( diff3_sym ,  diff3)  ))
 
 display(ReportText('Outcomes of governing equations analysis. '*10))
-    
+
 
 sec_equations = Subsection('Equations of motion')
 CurrentContainer(sec_equations)
@@ -1148,9 +1148,9 @@ ds1_eqns=ds1.as_eq_list()
 
 for eq1 in ds1.as_eq_list():
     display(SympyFormula(eq1.simplify()))
-    
+
 if ds1.is_solvable():
-    
+
     ds2=dyn_sys.linearized()._ode_system.general_solution
 
     for eq2 in ds2.as_eq_list():
@@ -1177,8 +1177,8 @@ CurrentContainer(sec_math_desc)
 
 E_K,F = symbols('E_K,F')
 descriptions = {
-E_K:r"Kinetic energy", 
-F:r"Force",  
+E_K:r"Kinetic energy",
+F:r"Force",
 }
 syms_dict = descriptions
 DescriptionsRegistry().set_descriptions({**syms_dict})
@@ -1193,14 +1193,14 @@ display(SymbolsDescription(expr=E_K*F))
 
 display(ObjectCode("""
 # Guide
-from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide 
+from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide
 BasicsOfODESystemGuide();
 
 """))
 
 
 # Basics of DynSys usage based simulations are covered in guide to DynSys usage, use the followin call
-# from dynpy.utilities.documents.guides import UsageOfDynamicSystemsGuide 
+# from dynpy.utilities.documents.guides import UsageOfDynamicSystemsGuide
 # UsageOfDynamicSystemsGuide()
 '''
 
@@ -1217,7 +1217,7 @@ sec_simulation = Section('Section that contains simulation')
 CurrentContainer(sec_simulation)
 
 # Basics of ODESystem based simulations are covered in guide to ODESystem, use the followin call
-# from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide 
+# from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide
 # BasicsOfODESystemGuide()
 
 sec_ODESystem = Subsection('ODESystem simulation')
@@ -1275,7 +1275,7 @@ sec_verification = Section('Section that verificates research results')
 CurrentContainer(sec_verification)
 
 display(ReportText('Description of verifications concept. '*200))
-     
+
 
 
 ### SELECT ONE CASE
@@ -1308,10 +1308,10 @@ display(graph)
 
 ## 3rd CASE
 ## dictionary data presentation in DataFrame
-#dictionary ={  
+#dictionary ={
 #     power:300000,
 #     work:5000
-# }   
+# }
 #display(
 #     LatexDataFrame.formatted(
 #         data=dictionary, #import data from a dictionary
@@ -1331,7 +1331,7 @@ display(graph)
 #g=DynamicSys.g
 #m=DynamicSys.m
 #k=DynamicSys.k
-#slownik ={  
+#slownik ={
 #F:2,
 #g:10,
 #m:5,
@@ -1358,8 +1358,8 @@ CurrentContainer(sec_symbols)
 
 E_K,F = symbols('E_K,F')
 descriptions = {
-E_K:r"Kinetic energy", 
-F:r"Force",  
+E_K:r"Kinetic energy",
+F:r"Force",
 }
 syms_dict = descriptions
 DescriptionsRegistry().set_descriptions({**syms_dict})
@@ -1371,7 +1371,7 @@ display(SymbolsDescription({**syms_dict}))"""
         document_str = """# Creating file
 # Be sure *output* folder is in the current directory
 
-paper_name = './output/report_name' #path for report file 
+paper_name = './output/report_name' #path for report file
 global_width=('8cm')#setting picture default size
 global_height=('6cm')
 doc = BPASTSPaper(paper_name)
@@ -1453,7 +1453,7 @@ list_of_guides()
 
 
 ```
-    
+
 
 
 ## CELL 2
@@ -1468,7 +1468,7 @@ list_of_guides()
 
 
 ## CELL 3
-## Math 
+## Math
 
 ```python
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
@@ -1479,10 +1479,10 @@ list_of_guides()
 
 ## CELL 4
 ## Picture
-    
-    
+
+
 ```python
-    
+
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 {picture_str}
@@ -1496,7 +1496,7 @@ list_of_guides()
 Basics of ODESystem based simulations are covered in guide to ODESystem, use the following call:
 
 ```python
-from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide 
+from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide
 BasicsOfODESystemGuide();
 ```
 
@@ -1509,8 +1509,8 @@ BasicsOfODESystemGuide();
 {simulaion_str}
 
 ```
-     
-     
+
+
 ## CELL 6
 ## Veryfication
 
@@ -1521,10 +1521,10 @@ BasicsOfODESystemGuide();
 {veryfication_str}
 
 ```
-    
+
 ## CELL 7
 ## Conclusion
- 
+
 ```python
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
@@ -1569,14 +1569,14 @@ BasicsOfODESystemGuide();
 ## Imports
 
 {imports_str}
-    
+
 ## CELL 2
 ## Thesis introduction
 
 {thesis_introduction_str}
 
 ## CELL 3
-## Math 
+## Math
 
 {math_str}
 
@@ -1589,12 +1589,12 @@ BasicsOfODESystemGuide();
 ## Simulation
 
 {simulaion_str}
-     
+
 ## CELL 6
 ## Veryfication
 
 {veryfication_str}
-    
+
 ## CELL 7
 ## Conclusion
 
@@ -1614,7 +1614,7 @@ BasicsOfODESystemGuide();
 
         return ObjectCode(preliminary_str)
 
-    
+
 class JoMEPaper(Document):
 
     latex_name = "document"
@@ -1651,12 +1651,12 @@ Author's Name Surname\svMark{1,*}  - Co-author's Name Surname\svMark{2} \\[1mm]
     abstract=r"""
 The Abstract should not exceed 250 words. The Abstract should state the principal objectives and the scope of the investigation, as well as the methodology employed. It should summarize the results and state the principal conclusions. An effective abstract stands on its own — it can be understood fully even when made available without the full paper. To this end, avoid referring to figures or the bibliography in the abstract. Please introduce any acronyms the first time you use them in the abstract (if needed), and do so again in the full paper. About 4 to 6 significant key words should follow the abstract to aid indexing.
 """
-    
+
     keywords = "key word, key word, key word, key word, key word"
 
     highlights=r"""
-\item Highlights (4 to 6) are a short collection of bullet points that convey the core findings and provide readers with a quick textual overview of the article. 
-\item These four to six bullet points should describe the essence of the research (e.g. results or conclusions) and highlight what is distinctive about it. 
+\item Highlights (4 to 6) are a short collection of bullet points that convey the core findings and provide readers with a quick textual overview of the article.
+\item These four to six bullet points should describe the essence of the research (e.g. results or conclusions) and highlight what is distinctive about it.
 \item See latest SV-JME papers for examples.
 """
 
@@ -1667,7 +1667,7 @@ The Abstract should not exceed 250 words. The Abstract should state the principa
         title=None,
         *,
         documentclass="JoME",
-        document_options=["10pt", 
+        document_options=["10pt",
                           #"twoside", "twocolumn", "a4paper"
                          ],  # for submission
         fontenc=None,
@@ -1721,7 +1721,7 @@ The Abstract should not exceed 250 words. The Abstract should state the principa
 \svDates{2016-11-04}{2017-01-14}{2017-02-12}
 \renewcommand{\svType}{Review Paper}
 \setcounter{page}{1} % first page of the paper
-% ------------------------------------------------------------------------------------------------------------------        
+% ------------------------------------------------------------------------------------------------------------------
 """))
 
 
@@ -1729,7 +1729,7 @@ The Abstract should not exceed 250 words. The Abstract should state the principa
         self.preamble.append(NoEscape("\\title{" + f"{self.title}" + "}"))
         #self.preamble.append(NoEscape("\\abauthor{" + f"{self.abauthor}" + "}"))
 
-        
+
         self.preamble.append(Command("author", arguments=[NoEscape(self.author)]))
 
         self.preamble.append(NoEscape(r"""
@@ -1752,7 +1752,7 @@ The Abstract should not exceed 250 words. The Abstract should state the principa
         self.append(NoEscape(r"""
 \end{svAbstract}
 """))
-        self.append(Command("svKeywords", arguments=[NoEscape(self.keywords)]))                             
+        self.append(Command("svKeywords", arguments=[NoEscape(self.keywords)]))
 
         self.append(NoEscape(r"""
 \begin{svHigh}
@@ -1765,8 +1765,8 @@ The Abstract should not exceed 250 words. The Abstract should state the principa
 
 \end{svHead}]
 """))
-        
-        
+
+
         # self.append(NewPage())
         # tu implementować co tam potrzeba
 
@@ -1783,8 +1783,8 @@ The Abstract should not exceed 250 words. The Abstract should state the principa
             shutil.copytree(source_path, path1)
         if os.path.exists(path2) == False:
             shutil.copytree(source_path, path2)
-    
-    
+
+
 
 class Keywords(Environment):
     latex_name = "keyword"
@@ -2202,7 +2202,7 @@ for coord in dyn_sys.q:
 
     vel=coord.diff(t)
     diff1 = lagrangian.diff(vel)
-    diff2 = diff1.diff(t) 
+    diff2 = diff1.diff(t)
     diff3 = lagrangian.diff(coord)
 
 
@@ -2211,12 +2211,12 @@ for coord in dyn_sys.q:
     diff3_sym = Symbol(f'\\frac{{\\partial L}}{{\\partial {vlatex(coord)}}}')
 
 
-    display(SympyFormula(  Eq(diff1_sym,diff1)  ))    
+    display(SympyFormula(  Eq(diff1_sym,diff1)  ))
     display(SympyFormula(  Eq( diff2_sym ,diff2)  ))
     display(SympyFormula(  Eq( diff3_sym ,  diff3)  ))
 
 display(ReportText('Outcomes of governing equations analysis. '*10))
-    
+
 
 sec_equations = Subsection('Equations of motion')
 CurrentContainer(sec_equations)
@@ -2229,9 +2229,9 @@ ds1_eqns=ds1.as_eq_list()
 
 for eq1 in ds1.as_eq_list():
     display(SympyFormula(eq1.simplify()))
-    
+
 if ds1.is_solvable():
-    
+
     ds2=dyn_sys.linearized()._ode_system.general_solution
 
     for eq2 in ds2.as_eq_list():
@@ -2258,8 +2258,8 @@ CurrentContainer(sec_math_desc)
 
 E_K,F = symbols('E_K,F')
 descriptions = {
-E_K:r"Kinetic energy", 
-F:r"Force",  
+E_K:r"Kinetic energy",
+F:r"Force",
 }
 syms_dict = descriptions
 DescriptionsRegistry().set_descriptions({**syms_dict})
@@ -2274,18 +2274,18 @@ display(SymbolsDescription(expr=E_K*F))
 
 display(ObjectCode("""
 # Guide
-from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide 
+from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide
 BasicsOfODESystemGuide();
 
 """))
 
 
 # Basics of DynSys usage based simulations are covered in guide to DynSys usage, use the followin call
-# from dynpy.utilities.documents.guides import UsageOfDynamicSystemsGuide 
+# from dynpy.utilities.documents.guides import UsageOfDynamicSystemsGuide
 # UsageOfDynamicSystemsGuide()
 '''
 
-        picture_str = """    
+        picture_str = """
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 from dynpy.utilities.report import *
@@ -2306,7 +2306,7 @@ sec_simulation = Section('Section that contains simulation')
 CurrentContainer(sec_simulation)
 
 # Basics of ODESystem based simulations are covered in guide to ODESystem, use the followin call
-# from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide 
+# from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide
 # BasicsOfODESystemGuide()
 
 sec_ODESystem = Subsection('ODESystem simulation')
@@ -2332,7 +2332,7 @@ g=DynamicSys.g
 m=DynamicSys.m
 k=DynamicSys.k
 
-slownik ={  
+slownik ={
 F:2,
 g:10,
 m:5,
@@ -2392,7 +2392,7 @@ sec_verification = Section('Section that verificates research results')
 CurrentContainer(sec_verification)
 
 display(ReportText('Description of verifications concept. '*200))
-     
+
 
 
 ### SELECT ONE CASE
@@ -2424,10 +2424,10 @@ display(ReportText('Description of verifications concept. '*200))
 
 ## 3rd CASE
 ## dictionary data presentation in DataFrame
-# dictionary ={  
+# dictionary ={
 #     power:300000,
 #     work:5000
-# }   
+# }
 # display(
 #     LatexDataFrame.formatted(
 #         data=dictionary, #import data from a dictionary
@@ -2445,7 +2445,7 @@ display(ReportText('Description of verifications concept. '*200))
 # g=DynamicSys.g
 # m=DynamicSys.m
 # k=DynamicSys.k
-# slownik ={  
+# slownik ={
 # F:2,
 # g:10,
 # m:5,
@@ -2479,8 +2479,8 @@ CurrentContainer(sec_symbols)
 
 E_K,F = symbols('E_K,F')
 descriptions = {
-E_K:r"Kinetic energy", 
-F:r"Force",  
+E_K:r"Kinetic energy",
+F:r"Force",
 }
 syms_dict = descriptions
 DescriptionsRegistry().set_descriptions({**syms_dict})
@@ -2497,7 +2497,7 @@ from dynpy.utilities.report import *
 # Creating file
 # Be sure *output* folder is in the current directory
 
-thesis_name = './output/report_name' #path for report file 
+thesis_name = './output/report_name' #path for report file
 
 doc = WutThesis(thesis_name)
 # Bibliography of quotations
@@ -2597,7 +2597,7 @@ list_of_guides()
 ```python
 {imports_str}
 ```
-    
+
 
 
 ## CELL 2
@@ -2612,7 +2612,7 @@ list_of_guides()
 
 
 ## CELL 3
-## Math 
+## Math
 
 ```python
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
@@ -2623,10 +2623,10 @@ list_of_guides()
 
 ## CELL 4
 ## Picture
-    
-    
+
+
 ```python
-    
+
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 {picture_str}
@@ -2640,7 +2640,7 @@ list_of_guides()
 Basics of ODESystem based simulations are covered in guide to ODESystem, use the following call:
 
 ```python
-from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide 
+from dynpy.utilities.documents.guides import BasicsOfODESystemGuide,UsageOfDynamicSystemsGuide
 BasicsOfODESystemGuide();
 ```
 
@@ -2653,8 +2653,8 @@ BasicsOfODESystemGuide();
 {simulaion_str}
 
 ```
-     
-     
+
+
 ## CELL 6
 ## Veryfication
 
@@ -2665,10 +2665,10 @@ BasicsOfODESystemGuide();
 {veryfication_str}
 
 ```
-    
+
 ## CELL 7
 ## Conclusion
- 
+
 ```python
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
@@ -2713,14 +2713,14 @@ BasicsOfODESystemGuide();
 ## Imports
 
 {imports_str}
-    
+
 ## CELL 2
 ## Thesis introduction
 
 {thesis_introduction_str}
 
 ## CELL 3
-## Math 
+## Math
 
 {math_str}
 
@@ -2733,12 +2733,12 @@ BasicsOfODESystemGuide();
 ## Simulation
 
 {simulaion_str}
-     
+
 ## CELL 6
 ## Veryfication
 
 {veryfication_str}
-    
+
 ## CELL 7
 ## Conclusion
 
@@ -2844,8 +2844,8 @@ BasicsOfODESystemGuide();
 }"""
     articles_bib = """@INPROCEEDINGS{brief_history_of_simulations,
   author={Goldsman, David and Nance, Richard E. and Wilson, James R.},
-  booktitle={Proceedings of the 2010 Winter Simulation Conference}, 
-  title={A brief history of simulation revisited}, 
+  booktitle={Proceedings of the 2010 Winter Simulation Conference},
+  title={A brief history of simulation revisited},
   year={2010},
   volume={},
   number={},
@@ -3022,8 +3022,8 @@ BasicsOfODESystemGuide();
 }"""
         articles_bib = """@INPROCEEDINGS{brief_history_of_simulations,
   author={Goldsman, David and Nance, Richard E. and Wilson, James R.},
-  booktitle={Proceedings of the 2010 Winter Simulation Conference}, 
-  title={A brief history of simulation revisited}, 
+  booktitle={Proceedings of the 2010 Winter Simulation Conference},
+  title={A brief history of simulation revisited},
   year={2010},
   volume={},
   number={},
@@ -3093,7 +3093,7 @@ Examplary setup is as follows:
 
 
 ## CELL 3
-## Math 
+## Math
 
 ```python
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
@@ -3209,7 +3209,7 @@ doc.generate_pdf(clean_tex=True)
 
 
 ## CELL 3
-## Math 
+## Math
 
 
 from sympy import Eq, Symbol, symbols
@@ -3313,7 +3313,7 @@ Examplary setup is as follows:
 
 
 ## CELL 3
-## Math 
+## Math
 
 ```python
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
@@ -3429,7 +3429,7 @@ doc.generate_pdf(clean_tex=True)
 
 
 ## CELL 3
-## Math 
+## Math
 
 
 from sympy import Eq, Symbol, symbols
@@ -3706,13 +3706,13 @@ biblio_mngr.append(biblio_entries)
 
 doc = StateOfArtReport('./output/report_name')
 ```
-    
+
 
 
 ## CELL 2
 ## Document introduction
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -3734,15 +3734,15 @@ display(ReportText('This subsection provides methodology. '*100))
 ```
 ## CELL 3
 ## Conclusion
- 
+
     #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
     #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
+
     sec_conclusion = Section('Section that contains final conclusions')
     CurrentContainer(sec_conclusion)
-    
+
     display(ReportText('Conclusions '*200))
-    
+
 ## CELL 4
 ## Document
 
@@ -3753,7 +3753,7 @@ display(ReportText('This subsection provides methodology. '*100))
 # Creating file
 # Be sure *output* folder is in the current directory
 
-sota_name = './output/report_name' #path for report file 
+sota_name = './output/report_name' #path for report file
 
 doc = StateOfArtReport(sota_name)
 doc.preamble.append(biblio_mngr)
@@ -3898,7 +3898,7 @@ display(ReportText('This subsection provides methodology \\cite{NumPy}.'))
 
 ## CELL 3
 ## Conclusion
- 
+
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -3906,7 +3906,7 @@ sec_conclusion = Section('Section that contains final conclusions')
 CurrentContainer(sec_conclusion)
 
 display(ReportText('Conclusions'))
-    
+
 ## CELL 4
 ## Document
 
@@ -3917,7 +3917,7 @@ display(ReportText('Conclusions'))
 # Creating file
 # Be sure *output* folder is in the current directory
 
-sota_name = './output/report_name' #path for report file 
+sota_name = './output/report_name' #path for report file
 
 doc = StateOfArtReport(sota_name)
 doc.preamble.append(biblio_mngr)
@@ -4041,8 +4041,8 @@ doc.generate_pdf(clean_tex=False)
 }"""
     articles_bib = """@INPROCEEDINGS{brief_history_of_simulations,
   author={Goldsman, David and Nance, Richard E. and Wilson, James R.},
-  booktitle={Proceedings of the 2010 Winter Simulation Conference}, 
-  title={A brief history of simulation revisited}, 
+  booktitle={Proceedings of the 2010 Winter Simulation Conference},
+  title={A brief history of simulation revisited},
   year={2010},
   volume={},
   number={},
@@ -4216,8 +4216,8 @@ doc.generate_pdf(clean_tex=False)
 }"""
         articles_bib = """@INPROCEEDINGS{brief_history_of_simulations,
   author={Goldsman, David and Nance, Richard E. and Wilson, James R.},
-  booktitle={Proceedings of the 2010 Winter Simulation Conference}, 
-  title={A brief history of simulation revisited}, 
+  booktitle={Proceedings of the 2010 Winter Simulation Conference},
+  title={A brief history of simulation revisited},
   year={2010},
   volume={},
   number={},
@@ -4677,7 +4677,7 @@ doc.append(frame_2)
 doc.append(frame_3)
 doc.append(frame_4)
 doc.generate_pdf(clean_tex=False)
-    
+
 
 """
         return ObjectCode(preliminary_str)
@@ -4884,11 +4884,11 @@ doc.append(Physical)
 
 doc.append(NoEscape(r'\end{columns}'))
 doc.generate_pdf('./output/template',clean_tex=False)
-    
 
-    
 
-    
+
+
+
 
 """
         return ObjectCode(preliminary_str)
@@ -5283,13 +5283,13 @@ import pandas as pd
 
 doc = StateOfArtReport('./output/report_name')
 ```
-    
+
 
 
 ## CELL 2
 ## Document introduction
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5302,10 +5302,10 @@ display(ReportText(f' "{tytul} " '))
 ```
 ## CELL 3
 ## Content
- 
+
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
+
 sec_1 = Section('Ocena zgodności treści pracy z jej tematem')
 CurrentContainer(sec_1)
 
@@ -5315,7 +5315,7 @@ czego_dotyczy = "weryfikacji empirycznej działania wahadłowego absorbera drga�
 #wklad_autora = "rozwój biblioteki systemów dynamicznych zawartych w DynPy, w tym implementację nowych klas, poprawę kodu istniejących przewodników po narzędziach oferowanych przez bibliotekę"
 wklad_autora = "prowadzenie badań empirycznych dotyczących wahadłowych eliminatorów drgań"
 
-#Jesli cos wiecej 
+#Jesli cos wiecej
 Ponad_to = "Ponadto praca zawiera"
 co_wiecej_zawiera = "funkcjonujący model 3D wykonany przez Autora pracy"
 
@@ -5323,10 +5323,10 @@ display(ReportText(f'''Rozważania zawarte w pracy dotyczącej {czego_dotyczy} o
 
 ## CELL 4
 ## Content
- 
+
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
+
 sec_2 = Section('Ocena wartości merytorycznej, w szczególności wkładu własnego studenta oraz jasności jego przedstawienia')
 CurrentContainer(sec_2)
 #1 zdanie
@@ -5380,7 +5380,7 @@ display(ReportText('Mimo to Autor dobrze radzi sobie z postawionymi problemami, 
 ## CELL 5
 ## Content
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5409,7 +5409,7 @@ display(ReportText(f'Na podstawie dokonanego przeglądu literaturowego można st
 ## CELL 6
 ## Content
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5429,7 +5429,7 @@ display(ReportText(f'Autor pracy wnioskuje w sposób {wnioski_log}. Podsumowanie
 ## CELL 7
 ## Content
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5443,7 +5443,7 @@ display(ReportText(f'Praca składa się z {l_stron} stron, podzielonych na {l_ro
 ## CELL 8
 ## Remarks
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5457,15 +5457,15 @@ editorial_remarks = [
 #"niepoprawne zastosowanie operatorów matematycznych np. '*' dla operacji mnożenia",
 
 "brak spisu symboli na końcu pracy",
-    
+
 #"stosowanie różnego kroju pisma dla symboli matematycznych",
-    
+
 "stosowanie różnego kroju pisma dla symboli matematycznych lub jednostek",
 
 #"występowanie grafik lub wypunktowania na końcu sekcji",
 
 #"występowanie zwrotów nie mających wartości merytorycznej takich jak: oczywiście, niestety itp.",
-    
+
 "występowanie literówek",
 
 "błędy stylistyczne i interpunkcyjne",
@@ -5494,7 +5494,7 @@ Do głównych uwag edytorskich należą:
 {edit_remarks_str}
 
 '))
-    
+
 
 
 display(ReportText('Zastrzeżenia te nie wpływają istotnie na odbiór pracy oraz na jej wartość merytoryczną. Występujące błędy oraz wymienione uwagi zostały przekazane do informacji Autora.'))
@@ -5504,7 +5504,7 @@ display(ReportText('Zastrzeżenia te nie wpływają istotnie na odbiór pracy or
 ## CELL 9
 ## Remarks2
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5532,7 +5532,7 @@ display(ReportText(f'Praca {tworcza} i samodzielność jej wykonania {bez_zastr}
 ## CELL 10
 ## Remarks3
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5548,7 +5548,7 @@ display(ReportText(f'Dyplomant samodzielnie rozwiązał problem inżynierski, wy
 ## CELL 11
 ## Remarks4
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5561,7 +5561,7 @@ display(ReportText(f'Poziom pracy i jej zakres spełnia wymogi stawiane pracom {
 ## CELL 12
 ## Hints
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5651,13 +5651,13 @@ import pandas as pd
 
 doc = StateOfArtReport('./output/report_name')
 ```
-    
+
 
 
 ## CELL 2
 ## Document introduction
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5670,10 +5670,10 @@ display(ReportText(f' "{tytul} " '))
 ```
 ## CELL 3
 ## Content
- 
+
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
+
 sec_1 = Section('Ocena zgodności treści pracy z jej tematem')
 CurrentContainer(sec_1)
 
@@ -5683,7 +5683,7 @@ czego_dotyczy = "weryfikacji empirycznej działania wahadłowego absorbera drga�
 #wklad_autora = "rozwój biblioteki systemów dynamicznych zawartych w DynPy, w tym implementację nowych klas, poprawę kodu istniejących przewodników po narzędziach oferowanych przez bibliotekę"
 wklad_autora = "prowadzenie badań empirycznych dotyczących wahadłowych eliminatorów drgań"
 
-#Jesli cos wiecej 
+#Jesli cos wiecej
 Ponad_to = "Ponadto praca zawiera"
 co_wiecej_zawiera = "funkcjonujący model 3D wykonany przez Autora pracy"
 
@@ -5691,10 +5691,10 @@ display(ReportText(f'''Rozważania zawarte w pracy dotyczącej {czego_dotyczy} o
 
 ## CELL 4
 ## Content
- 
+
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
-    
+
 sec_2 = Section('Ocena wartości merytorycznej, w szczególności wkładu własnego studenta oraz jasności jego przedstawienia')
 CurrentContainer(sec_2)
 #1 zdanie
@@ -5748,7 +5748,7 @@ display(ReportText('Mimo to Autor dobrze radzi sobie z postawionymi problemami, 
 ## CELL 5
 ## Content
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5777,7 +5777,7 @@ display(ReportText(f'Na podstawie dokonanego przeglądu literaturowego można st
 ## CELL 6
 ## Content
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5797,7 +5797,7 @@ display(ReportText(f'Autor pracy wnioskuje w sposób {wnioski_log}. Podsumowanie
 ## CELL 7
 ## Content
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5811,7 +5811,7 @@ display(ReportText(f'Praca składa się z {l_stron} stron, podzielonych na {l_ro
 ## CELL 8
 ## Remarks
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5825,15 +5825,15 @@ editorial_remarks = [
 #"niepoprawne zastosowanie operatorów matematycznych np. '*' dla operacji mnożenia",
 
 "brak spisu symboli na końcu pracy",
-    
+
 #"stosowanie różnego kroju pisma dla symboli matematycznych",
-    
+
 "stosowanie różnego kroju pisma dla symboli matematycznych lub jednostek",
 
 #"występowanie grafik lub wypunktowania na końcu sekcji",
 
 #"występowanie zwrotów nie mających wartości merytorycznej takich jak: oczywiście, niestety itp.",
-    
+
 "występowanie literówek",
 
 "błędy stylistyczne i interpunkcyjne",
@@ -5862,7 +5862,7 @@ Do głównych uwag edytorskich należą:
 {edit_remarks_str}
 
 '))
-    
+
 
 
 display(ReportText('Zastrzeżenia te nie wpływają istotnie na odbiór pracy oraz na jej wartość merytoryczną. Występujące błędy oraz wymienione uwagi zostały przekazane do informacji Autora.'))
@@ -5872,7 +5872,7 @@ display(ReportText('Zastrzeżenia te nie wpływają istotnie na odbiór pracy or
 ## CELL 9
 ## Remarks2
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5900,7 +5900,7 @@ display(ReportText(f'Praca {tworcza} i samodzielność jej wykonania {bez_zastr}
 ## CELL 10
 ## Remarks3
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5916,7 +5916,7 @@ display(ReportText(f'Dyplomant samodzielnie rozwiązał problem inżynierski, wy
 ## CELL 11
 ## Remarks4
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5929,7 +5929,7 @@ display(ReportText(f'Poziom pracy i jej zakres spełnia wymogi stawiane pracom {
 ## CELL 12
 ## Hints
 
-```{python}    
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -6056,8 +6056,8 @@ doc.generate_pdf(clean_tex=True)
 }"""
     articles_bib = """@INPROCEEDINGS{brief_history_of_simulations,
   author={Goldsman, David and Nance, Richard E. and Wilson, James R.},
-  booktitle={Proceedings of the 2010 Winter Simulation Conference}, 
-  title={A brief history of simulation revisited}, 
+  booktitle={Proceedings of the 2010 Winter Simulation Conference},
+  title={A brief history of simulation revisited},
   year={2010},
   volume={},
   number={},
@@ -6231,8 +6231,8 @@ doc.generate_pdf(clean_tex=True)
 }"""
         articles_bib = """@INPROCEEDINGS{brief_history_of_simulations,
   author={Goldsman, David and Nance, Richard E. and Wilson, James R.},
-  booktitle={Proceedings of the 2010 Winter Simulation Conference}, 
-  title={A brief history of simulation revisited}, 
+  booktitle={Proceedings of the 2010 Winter Simulation Conference},
+  title={A brief history of simulation revisited},
   year={2010},
   volume={},
   number={},

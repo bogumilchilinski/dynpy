@@ -932,7 +932,7 @@ class LatexSanitizer:
         out_parts: List[str] = []
         for is_code, frag in segments:
             if is_code:
-                out_parts.append(r"\texttt{" + frag.translate(cls._ESC_CODE) + "}")
+                out_parts.append(frag.translate(cls._ESC_CODE))
             else:
                 # 1. Unicode
                 for orig, repl in cls._UNICODE.items():
@@ -996,10 +996,10 @@ class LstListing(Environment):
     ]
 
 class BibliographyManager(Environment):
-    
+
     r'''
     Description how to use it:
-    
+
     from dynpy.utilities.report import *
     biblio_mngr=BiblographyManager(arguments='biblio.bib')
 
@@ -1717,7 +1717,7 @@ class Picture(Figure, ReportModule):
         \n++  path:{path}       ++
         \n++                    ++
         \n++++++++++ IMAGE +++++++
-        
+
         """
 
         return repr_string
@@ -3049,7 +3049,7 @@ class CompositeMatrix(Equation):
         \n++++++++++ CODE +++++++
         \n{code}
         \n++++++++++ CODE +++++++
-        
+
         """
 
         return repr_string

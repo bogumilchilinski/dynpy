@@ -48,16 +48,16 @@
 
    %draw roof
     %\fill[pattern = north east lines] ($ (origo) + (-3,0) $) rectangle ($ (origo) + (3,0.3) $);
-    
+
 
     \tikzstyle{ground}=[fill,pattern=north east lines,draw=none,minimum width=5cm,minimum height=0.3cm]
-    
+
         %\node (ground) [ground,anchor=north west,xshift=-2.4cm,yshift=-0.25cm,minimum width=5cm] {};
-    
+
 
    \node (ground) [ground,anchor=north ,xshift=0cm,yshift=-3cm,minimum width=6cm,minimum height=0.4cm] at (origo)   {};
    \draw[thick] (ground.north west) -- (ground.north east);
-   
+
    \node (M) at (origo) [draw,thick,minimum width=5cm, minimum height=0.5cm]{};
     \node (m1_label) at ($(M) + (2,0.7)$) [below] {$m, I$};
 

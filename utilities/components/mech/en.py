@@ -250,9 +250,9 @@ class ExemplaryPictureSymPyCodeComponent(ExemplaryPictureComponent):
     from dynpy.models.mechanics import *
     from sympy import *
     from dynpy.utilities.report import Picture
-   
+
     path="{path}"
-    
+
     display(Picture(path ,width='8cm'))
 
 
@@ -623,13 +623,13 @@ class PotentialEnergyDynPyCodeComponent(ReportComponent):
 
     from dynpy.models.mechanics import *
     from sympy import *
-    
+
     dyn_sys = {system.__class__.__name__}()
 
     display( Eq(Symbol('Ep'),
                      dyn_sys._potential_energy) )
 
-    
+
 """
             )
         )
@@ -1091,21 +1091,21 @@ class GoverningEquationDynpyCodeComponent(ReportComponent):
         display(
             ObjectCode(  # tu
                 f"""
-    
-    
+
+
 
 
     from dynpy.models.mechanics import *
     from sympy import *
-    
+
     dyn_sys = {system.__class__.__name__}()
-    
-    
+
+
     display(Eq(dyn_sys._eoms,0,evaluate=False))
 
 
 
-    
+
 """
             )
         )
@@ -1143,18 +1143,18 @@ class GoverningEquationSympyCodeComponent(ReportComponent):
         display(
             ObjectCode(  # tu
                 f"""
-    
-    
+
+
 
 
     from dynpy.models.mechanics import *
     from sympy import *
-    
-    {code} 
-    
+
+    {code}
+
     display(Eq(eoms,0,evaluate=False))
 
-    
+
 """
             )
         )
@@ -1330,14 +1330,14 @@ class CriticalPointsDynPyCodeComponent(ReportComponent):
         display(
             ReportText(
                 f"""
-    
+
     from dynpy.models.mechanics import *
     from sympy import *
-    
+
     dyn_sys = {system.__class__.__name__}()
-    
+
     display(dyn_sys._op_points())
-    
+
 """
             )
         )
@@ -1376,9 +1376,9 @@ class CriticalPointsSymPyCodeComponent(ReportComponent):
 
     from dynpy.models.mechanics import *
     from sympy import *
-    
-    {code} 
-    
+
+    {code}
+
     display(critical_points)
 
 """
@@ -1576,11 +1576,11 @@ class FundamentalMatrixDynPyCodeComponent(ReportComponent):
         display((SympyFormula(  Eq(Symbol('K'),dyn_sys_lin.stiffness_matrix(),evaluate=False) , marker='a')  ))
 
         Delta = Symbol('\Delta')
-        
+
         display((SympyFormula(  Eq(Symbol('A'),dyn_sys_lin.fundamental_matrix(),evaluate=False) , marker='a'  )  ))
         display((SympyFormula(  Eq(Delta,dyn_sys_lin.fundamental_matrix().det().expand().simplify().simplify().expand(),evaluate=False) , marker='a',backend=latex  )  ))
-        
-        
+
+
         """
             )
         )
@@ -1776,10 +1776,10 @@ class GeneralSolutionDynpyCodeComponent(ReportComponent):
     from sympy import *
 
     dyn_sys = {system.__class__.__name__}()
-    
-    
+
+
     dyn_sys._ode_system.general_solution
-    
+
 
 
 """
@@ -1842,12 +1842,12 @@ class GeneralSolutionSympyCodeComponent(ReportComponent):
                 f"""
     from sympy import *
     init_printing()
-    
+
 
     {code_ode}
-    
+
     {code_dvars}
-    
+
     dsolve(ode,dvars)
 
 

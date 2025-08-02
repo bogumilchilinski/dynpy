@@ -197,7 +197,7 @@ class CocalcFolderComponent(ReportComponent):
 
 code_dynsys_list_str = """
 #komendy importujące biblioteki
-import sympy 
+import sympy
 from sympy import Symbol
 
 from dynpy.models.mechanics.pendulum import Pendulum
@@ -261,7 +261,7 @@ class CocalcDynSysListComponent(ReportComponent):
 
 ####
 issue_title_str = """
-Maintenance of `{system_name}` class which is dynamic system representation        
+Maintenance of `{system_name}` class which is dynamic system representation
 """
 
 issue_desc_str = """

@@ -61,8 +61,8 @@ class TuningTikZDiagram1(TikZPicture):
 
         code = r"""
 
-    
-    
+
+
 
     \draw
     (0,0) to[american voltage source, l_=$U_{oc}$] (0,-3)
@@ -81,17 +81,17 @@ class TheveninTikZDiagramVer1(TikZPicture):
 
         code = r"""
 
-    
+
     \draw
     (0,0) to[american voltage source, l_=$U_{oc}$] (0,-2.5)
     (0,0) to[R,european, l=$R_{0}$] (3,0)
-    
+
     (3,0) -- (3,1.5)
     to[C, l=$C_{1}$] (6,1.5) -- (6,0)
     (3,0) to[R,european, l=$R_{1}$] (6,0)
-    
+
     (6,0) to[short, -*] (7,0) node[label={right:$+$}] {}
-    
+
     (0,-2.5) to[short, -*] (7,-2.5) node[label={right:$-$}] {}
 ;
 
@@ -109,21 +109,21 @@ class TheveninTikZDiagramVer2(TikZPicture):
     \draw
     (0,0) to[american voltage source, l_=$U_{oc}$] (0,-3)
     (0,0) to[R,european, l=$R_{0}$] (3,0)
-    
+
     (3,0) -- (3,1.5)
     to[C, l=$C_{1}$] (6,1.5) -- (6,0)
     (3,0) to[R,european, l=$R_{1}$] (6,0)
-    
+
     (6,0) -- (7,0)
-    
+
     (7,0) -- (7,1.5)
     to[C, l=$C_{2}$] (10,1.5) -- (10,0)
     (7,0) to[R,european, l=$R_{2}$] (10,0)
-    
-    
-    
+
+
+
     (10,0) to[short, -*] (11,0) node[label={right:$+$}] {}
-    
+
     (0,-3) to[short, -*] (11,-3) node[label={right:$-$}] {}
 ;
 
@@ -138,17 +138,17 @@ class TheveninTikZDiagram(TikZPicture):
 
         code = r"""
 
-    
+
     \draw
     (0,0) to[american voltage source, l_=$U_{oc}$] (0,-3)
     (0,0) to[R,european, l=$R_{0}$] (3,0)
-    
+
     (3,0) to[short, i_=$I_{TH}$] (3,1.5)
     to[C, l=$C_{1}$] (6,1.5) -- (6,0)
     (3,0) to[R,european, l=$R_{1}$,a= + $ U_{TH} $ -] (6,0)
-    
+
     (6,0) to[short, -*, i_=$I_{L}$] (7,0) node[label={right:$+$}] {}
-    
+
     (0,-3) to[short, -*] (7,-3) node[label={right:$-$}] {}
 ;
 """
@@ -166,9 +166,9 @@ class ForcedDampedSpringMassSystemScheme(TikZPicture):
 
 \tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.3cm,post length=0.3cm,segment length=0.3cm}]
 
-\tikzstyle{damper}=[thick,decoration={markings,  
+\tikzstyle{damper}=[thick,decoration={markings,
 mark connection node=dmp,
-mark=at position 0.5 with 
+mark=at position 0.5 with
 {
 \node (dmp) [thick,inner sep=0pt,transform shape,rotate=-90,minimum width=15pt,minimum height=3pt,draw=none] {};
 \draw [thick] ($(dmp.north east)+(2pt,0)$) -- (dmp.south east) -- (dmp.south west) -- ($(dmp.north west)+(2pt,0)$);
@@ -227,9 +227,9 @@ class ForcedSpringMassSystemScheme(TikZPicture):
 
 \tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.3cm,post length=0.3cm,segment length=0.3cm}]
 
-\tikzstyle{damper}=[thick,decoration={markings,  
+\tikzstyle{damper}=[thick,decoration={markings,
 mark connection node=dmp,
-mark=at position 0.5 with 
+mark=at position 0.5 with
 {
 \node (dmp) [thick,inner sep=0pt,transform shape,rotate=-90,minimum width=15pt,minimum height=3pt,draw=none] {};
 \draw [thick] ($(dmp.north east)+(2pt,0)$) -- (dmp.south east) -- (dmp.south west) -- ($(dmp.north west)+(2pt,0)$);
@@ -288,9 +288,9 @@ class GearModelOscillatorScheme(TikZPicture):
 
 \tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.3cm,post length=0.3cm,segment length=0.3cm}]
 
-\tikzstyle{damper}=[thick,decoration={markings,  
+\tikzstyle{damper}=[thick,decoration={markings,
 mark connection node=dmp,
-mark=at position 0.5 with 
+mark=at position 0.5 with
 {
 \node (dmp) [thick,inner sep=0pt,transform shape,rotate=-90,minimum width=15pt,minimum height=3pt,draw=none] {};
 \draw [thick] ($(dmp.north east)+(2pt,0)$) -- (dmp.south east) -- (dmp.south west) -- ($(dmp.north west)+(2pt,0)$);
@@ -347,12 +347,12 @@ class HelicalGearModelScheme(TikZPicture):
     def _scheme_desc(self):
 
         code = r"""
-        
+
     \tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.2cm,post length=0.2cm,segment length=0.2cm}]
 
-    \tikzstyle{damper}=[thick,decoration={markings,  
+    \tikzstyle{damper}=[thick,decoration={markings,
     mark connection node=dmp,
-    mark=at position 0.5 with 
+    mark=at position 0.5 with
     {
     \node (dmp) [thick,inner sep=0pt,transform shape,rotate=-90,minimum width=15pt,minimum height=3pt,draw=none] {};
     \draw [thick] ($(dmp.north east)+(2pt,0)$) -- (dmp.south east) -- (dmp.south west) -- ($(dmp.north west)+(2pt,0)$);
@@ -379,15 +379,15 @@ class HelicalGearModelScheme(TikZPicture):
     % Draw the curved arrow for the second circle
     \draw[->, red, thick] (8.5,0) arc[start angle=0, end angle=45, radius=2];
     \node[red] at (8.5,1) {$T_2$};
-    
+
     %Drawing the phi1 coordinates arrows
     \draw[<-, thick] (-1.3,0) arc[start angle=-10, end angle=-45, radius=-1];
     \node  at (-1.6,0.6) {$\phi_{1}(t)$};
-    
+
     %Drawing the phi2 coordinate arrow
     \draw[->, thick] (8.5,0) arc[start angle=0, end angle=-45, radius=2];
     \node  at (8.9,-0.6) {$\phi_{2}(t)$};
-    
+
     %Drawing the spring and damper connection
    \draw [thick] (0.28,-0.97) -- (2.3,0.17);
    \draw [thick] (4.8,1.6) -- (3.37,0.78);
@@ -408,12 +408,12 @@ class HelicalGearVerticalModelScheme(TikZPicture):
     def _scheme_desc(self):
 
         code = r"""
-        
+
     \tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.2cm,post length=0.2cm,segment length=0.2cm}]
 
-    \tikzstyle{damper}=[thick,decoration={markings,  
+    \tikzstyle{damper}=[thick,decoration={markings,
     mark connection node=dmp,
-    mark=at position 0.5 with 
+    mark=at position 0.5 with
     {
     \node (dmp) [thick,inner sep=0pt,transform shape,rotate=-90,minimum width=15pt,minimum height=3pt,draw=none] {};
     \draw [thick] ($(dmp.north east)+(2pt,0)$) -- (dmp.south east) -- (dmp.south west) -- ($(dmp.north west)+(2pt,0)$);
@@ -440,15 +440,15 @@ class HelicalGearVerticalModelScheme(TikZPicture):
     % Draw the curved arrow for the second circle
     \draw[->, red, thick] (0,8.5) arc[start angle=0, end angle=45, radius=2];
     \node[red] at (1,8.5) {$T_2$};
-    
+
     %Drawing the phi1 coordinates arrows
     \draw[<-, thick] (-1.3,0) arc[start angle=-10, end angle=-45, radius=-1];
     \node  at (-1.6,0.6) {$\phi_{1}(t)$};
-    
+
     %Drawing the phi2 coordinate arrow
     \draw[->, thick] (1,8.5) arc[start angle=0, end angle=-45, radius=2];
     \node  at (-0.6,8.5) {$\phi_{2}(t)$};
-    
+
     %Drawing the spring and damper connection
    %\draw [thick] (0.28,-0.97) -- (2.3,0.17);
    %\draw [thick] (4.8,1.6) -- (3.37,0.78);
@@ -476,11 +476,11 @@ class CompoundPendulumScheme2(TikZPicture):
     \draw[->] (0,0.2) -- (0,-4) node[below] {$y$};
     \node at (0.3,-1.7) {$\varphi$};
 
-    
+
     % Wahadło obrócone
     \begin{scope}[rotate=25]
         \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=30, end angle=-190, radius=0.8] -- cycle;
-        
+
     % Oś środka ciężkości
          \draw[dashed] (0,0) -- (1,-5);
          \filldraw[black] (0.5,-2.5) circle (1.5pt);
@@ -491,14 +491,14 @@ class CompoundPendulumScheme2(TikZPicture):
     %Moment wymuszający
 
     \end{scope}
-    
+
     % Strzałka
     \draw[->] (0,-1.5) arc[start angle=-80,end angle=-50,radius=1.5];
 
-    
+
     % Punkt zawieszenia bryły
     \fill (0,0) circle (2pt);
-    
+
 
 
 """
@@ -518,11 +518,11 @@ class ForcedCompoundPendulumScheme2(TikZPicture):
     \draw[->] (0,0.2) -- (0,-4) node[below] {$y$};
     \node at (0.3,-1.7) {$\varphi$};
 
-    
+
     % Wahadło obrócone
     \begin{scope}[rotate=25]
         \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=30, end angle=-190, radius=0.8] -- cycle;
-        
+
     % Oś środka ciężkości
          \draw[dashed] (0,0) -- (1,-5);
          \filldraw[black] (0.5,-2.5) circle (1.5pt);
@@ -534,14 +534,14 @@ class ForcedCompoundPendulumScheme2(TikZPicture):
     \node at (2.5,-3.4) {$M_0 \cos(\Omega  t)$};
     \draw[->] (0.1,-3.5) arc[start angle=-130,end angle=-40,radius=1];
     \end{scope}
-    
+
     % Strzałka
     \draw[->] (0,-1.5) arc[start angle=-80,end angle=-50,radius=1.5];
 
-    
+
     % Punkt zawieszenia bryły
     \fill (0,0) circle (2pt);
-    
+
 
 """
 
@@ -559,24 +559,24 @@ class CompoundPendulumScheme(TikZPicture):
     \draw[->] (0,0.2) -- (0,-4) node[below] {$y$};
     \node at (0.2,-2) {$\varphi$};
 
-    
+
     % Wahadło obrócone
     \begin{scope}[rotate=30]
         \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=-20, end angle=-160, radius=1.2] -- cycle;
-         
+
          \draw[dashed] (0,0) -- (0,-4);
          \filldraw[black] (0,-2) circle (1.5pt);
     \end{scope}
-    
+
     % Oznaczenia
     \node at (1.3,-1.7) {$C$};
     \node at (3.5,-3) {$m, I, l$};
-    
+
     % Strzałka momentu zaczepiona na linii brzegowej bryły
     \draw[->] (0,-1.5) arc[start angle=-80,end angle=-50,radius=1.5];
    %\node at (3.8,-2.3) {$M_0 \cos(\Omega  t)$};
     %\draw[->] (1,-2.5) arc[start angle=-90,end angle=-20,radius=1];
-    
+
     % Punkt zawieszenia bryły
     \fill (0,0) circle (2pt);
 
@@ -598,24 +598,24 @@ class ForcedCompoundPendulumScheme(TikZPicture):
     \draw[->] (0,0.2) -- (0,-4) node[below] {$y$};
     \node at (0.2,-2) {$\varphi$};
 
-    
+
     % Wahadło obrócone
     \begin{scope}[rotate=30]
         \filldraw[fill=black!10, draw=black, thick] (0,0) -- (1.5,-3) arc[start angle=-20, end angle=-160, radius=1.2] -- cycle;
-         
+
          \draw[dashed] (0,0) -- (0,-4);
          \filldraw[black] (0,-2) circle (1.5pt);
     \end{scope}
-    
+
     % Oznaczenia
     \node at (1.3,-1.7) {$C$};
     \node at (3.5,-3) {$m, I, l$};
-    
+
     % Strzałka momentu zaczepiona na linii brzegowej bryły
     \draw[->] (0,-1.5) arc[start angle=-80,end angle=-50,radius=1.5];
     \node at (3.8,-2.3) {$M_0 \cos(\Omega  t)$};
     \draw[->] (1,-2.5) arc[start angle=-90,end angle=-20,radius=1];
-    
+
     % Punkt zawieszenia bryły
     \fill (0,0) circle (2pt);
 
@@ -689,8 +689,8 @@ class ForcedRollingHalfDiskScheme(TikZPicture):
         \draw[thick] (-\r,0) arc[start angle=180, end angle=0, radius=\r];
         \draw[thick] (-\r,0) -- (\r,0);
         \draw[->] (1,-0.1) arc[start angle=300,end angle=250,radius=2];
-        
-        
+
+
     \end{scope}
 
     % Środkiem masy
@@ -704,19 +704,19 @@ class ForcedRollingHalfDiskScheme(TikZPicture):
 
     % Kąt phi
     \draw[->] (0,1.5) arc[start angle=80,end angle=100,radius=1.5];
-    
+
     \node at (-0.2,1.3) {$\varphi$};
     \end{scope}
     \node at (-0.55,-0.8) {$c$};
 
     % Oznaczenie masy i promienia
     \node at (-\r+0.3,1) {$m, r$};
-    
-    
+
+
     % Osie układu współrzędnych
     \draw[->] (-2.5,-2) -- (3,-2) node[right] {$x$};
     \draw[->] (-0.69,-2.5) -- (-0.69,1) node[above] {$y$};
-    
+
     \draw[dashed] (0,0) -- (0,-2);
     \node at (0.4,0.8) {$M_0 \cos(\Omega  t)$};
 
@@ -736,31 +736,31 @@ class RollingBarScheme(TikZPicture):
     \fill[gray!20] (-2,0) arc[start angle=180,end angle=0,radius=2];
     \draw (-2,0) arc[start angle=180,end angle=0,radius=2];
     \draw (-2,0) -- (2,0);
-    
+
     % Inclined rectangular board, rotated by phi = -20 degrees, extended length
     \begin{scope}[rotate around={-20:(0,0)}]
         \draw[fill=gray!30] (-3.5,2) rectangle (2.5,2.3);
         % Center of mass dot
         \filldraw (-0.4,2.15) circle (0.05);
     \end{scope}
-    
+
     % Coordinate axes (moved to be on top)
     \draw[->] (0,-0.5) -- (0,3) node[above] {$y$};
     \draw[->] (-2.5,0) -- (2.5,0) node[right] {$x$};
-    
+
     % Rotation angle phi
     \draw[thick,->] (0,0) -- (0.7,1.9);
     \node at (0.2,1) {$\varphi$};
-    
+
     % Angle arc
     \draw[thick,->] (0,1.5) arc[start angle=90,end angle=70,radius=1.5];
-    
+
     % Center of mass
     \node at (0.5,2.6) {$C$};
-    
+
     % Radius
     \node at (-1.5,0.3) {$r$};
-    
+
     % Board parameters
     \node at (2.8,2.0) {$m,l,h$};
 
@@ -780,7 +780,7 @@ class ForcedRollingBarScheme(TikZPicture):
     \draw (-2,0) arc[start angle=180,end angle=0,radius=2];
     \draw (-2,0) -- (2,0);
 
-    
+
     % Inclined rectangular board, rotated by phi
     \begin{scope}[rotate around={-20:(0,0)}]
         \draw[fill=gray!30] (-3.5,2) rectangle (2.5,2.3);
@@ -789,24 +789,24 @@ class ForcedRollingBarScheme(TikZPicture):
         %\draw[-] (-0.4,2.15) -- (1,2)
         %\draw[->] (1,2) arc[start angle=90,end angle=70,radius=4];
     \end{scope}
-    
+
     % Coordinate axes (moved to be on top)
     \draw[->] (0,-0.5) -- (0,3) node[above] {$y$};
     \draw[->] (-2.5,0) -- (2.5,0) node[right] {$x$};
-    
+
     % Rotation angle phi
     \draw[thick,->] (0,0) -- (0.7,1.9);
     \node at (0.2,1) {$\varphi$};
-    
+
     % Angle arc
     \draw[thick,->] (0,1.5) arc[start angle=90,end angle=70,radius=1.5];
- 
+
     % Center of mass
     \node at (0.5,2.6) {$C$};
-    
+
     % Radius
     \node at (-1.5,0.3) {$r$};
-    
+
     % Board parameters
     \node at (2.8,2.0) {$m,l,h$};
     \node at (1.5,3.5) {$M_0 \cos(\Omega  t)$};
@@ -821,9 +821,9 @@ class TrolleyWithElasticPendulumScheme(TikZPicture):
     def _scheme_desc(self):
         code = r"""
 \tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.3cm,post length=0.3cm,segment length=0.3cm}]
-\tikzstyle{damper}=[thick,decoration={markings,  
+\tikzstyle{damper}=[thick,decoration={markings,
     mark connection node=dmp,
-    mark=at position 0.5 with 
+    mark=at position 0.5 with
     {
     \node (dmp) [thick,inner sep=0pt,transform shape,rotate=-90,minimum width=15pt,minimum height=3pt,draw=none] {};
     \draw [thick] ($(dmp.north east)+(2pt,0)$) -- (dmp.south east) -- (dmp.south west) -- ($(dmp.north west)+(2pt,0)$);

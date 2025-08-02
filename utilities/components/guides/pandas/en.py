@@ -443,7 +443,7 @@ table_for_report = table[0::15].to_latex_dataframe()
 display(Markdown(' Do tablicy `table_eq` zapisujemy równanie ogólne dla zmiennej czasowej `t_span`   '))
 display(Markdown(
 f"""
-    
+
     table_eq=general_sol_matrix.n().numerized().compute_solution(t_span)
 
 """))
@@ -451,7 +451,7 @@ display(Markdown(f' Do tablicy table przypisujemy wartości ${latex(omg)}$ powst
 display(Markdown(
 f"""
     table=table_eq[[phi.diff(t)]]
-   
+
 """))
 display(ReportText(' W następnym kroku wybieramy zakres wartości który chcemy umieścić w tabelce przy pomocy naiwasów kwadratowych. Nastepnie przekształcamy tabelę na zgodną z LateX przy pomocy metody: to\_latex\_dataframe()  '))
 display(Markdown(
@@ -474,7 +474,7 @@ f"""
     display(table_for_report.reported(caption='Tabela'))
 
 """))
-    
+
 '''
 
 

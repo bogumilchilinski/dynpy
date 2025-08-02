@@ -1090,7 +1090,7 @@ class HomEquationCodeComponent(ReportComponent):
                 """
     from sympy import *
     from dynpy.solvers.linear import *
-    
+
     display(SympyFormula( system._hom_equation()))
 """
             )
@@ -2440,8 +2440,8 @@ system.as_iterable()  #returns list
 system.as_dict()  #returns dictionary
 system.as_eq_list()  #returns an equation in the form of a list
 system._as_fode()  #returns a first-order equation
-system.lhs #returns left-hand side of equation 
-system.rhs #returns right-hand side of equation 
+system.lhs #returns left-hand side of equation
+system.rhs #returns right-hand side of equation
 """
 
 

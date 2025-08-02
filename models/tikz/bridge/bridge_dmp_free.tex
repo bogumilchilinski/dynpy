@@ -33,11 +33,11 @@
 \node (fixed_support) [ground,outer sep=0pt,thick,anchor=north west,xshift=-0.1cm,yshift=0cm,minimum height=0.1cm ,minimum width=0.7cm]  at (support_end) {};
 
 \draw [thick] (fixed_support.north west) -- (fixed_support.north east);
-% % 
+% %
 \draw [thick] ([xshift=-0.5cm,yshift=-0cm]part1.south east) --++ (-60:0.5) --++(-0.5,0)  node (support_start) {}  --++ (60:0.5);
-% % 
+% %
 \node (floating_support) [ground,outer sep=0pt,thick,anchor=north west,xshift=-0.1cm,yshift=0cm,minimum height=0.1cm ,minimum width=0.7cm]  at (support_start) {};
-% % 
+% %
 \draw [thick] (floating_support.north west) -- (floating_support.north east);
 
 

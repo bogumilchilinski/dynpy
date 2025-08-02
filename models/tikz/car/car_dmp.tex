@@ -46,9 +46,9 @@
 
 \tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.4cm,post length=0.4cm,segment length=0.3cm}]
 
-\tikzstyle{damper}=[thick,decoration={markings,  
+\tikzstyle{damper}=[thick,decoration={markings,
   mark connection node=dmp,
-  mark=at position 0.5 with 
+  mark=at position 0.5 with
   {
     \node (dmp) [thick,inner sep=0pt,transform shape,rotate=-90,minimum width=15pt,minimum height=3pt,draw=none] {};
     \draw [thick] ($(dmp.north east)+(2pt,0)$) -- (dmp.south east) -- (dmp.south west) -- ($(dmp.north west)+(2pt,0)$);
@@ -58,19 +58,19 @@
 
    %draw roof
     %\fill[pattern = north east lines] ($ (origo) + (-3,0) $) rectangle ($ (origo) + (3,0.3) $);
-    
+
 
     \tikzstyle{ground}=[fill,pattern=north east lines,draw=none,minimum width=5cm,minimum height=0.3cm]
-    
+
         %\node (ground) [ground,anchor=north west,xshift=-2.4cm,yshift=-0.25cm,minimum width=5cm] {};
-    
+
 
    \node (ground) [ground,anchor=north ,xshift=0cm,yshift=-3cm,minimum width=6cm,minimum height=0.4cm] at (origo)   {};
    \draw[thick] (ground.north west) -- (ground.north east);
-   
+
    \node (M) at (origo) [draw,thick,minimum width=5cm, minimum height=0.5cm]{};
     \node (m1_label) at ($(M) + (2,0.7)$) [below] {$m, I$};
-    
+
     \draw[thick]  (M.west) --++ (0,-0.8cm) node[midway, below] {$$};
 
     \draw[thick]  (M.west) ++ (-0.5cm,-0.8cm) --  ([xshift=0.5cm,yshift=-0.8cm]M.west) node[midway, below] {$$};

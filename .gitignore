@@ -133,3 +133,5 @@ dmypy.json
 
 # iMac folders settings
 .DS_Store
+
+.pre-commit-config.yaml

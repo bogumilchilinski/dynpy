@@ -4658,7 +4658,7 @@ from .systems.en import DynamicSystemCompletenessCheckComponent
 
 
 issue_title_str = """
-Maintenance of `{system_name}` class which is dynamic system representation        
+Maintenance of `{system_name}` class which is dynamic system representation
 """
 
 issue_desc_str = """
@@ -4695,7 +4695,7 @@ comp_output_str = """
 """
 comp_var_str = """
     def append_elements(self):
-        
+
         issue = self.reported_object
 """
 
@@ -4705,7 +4705,7 @@ rep_obj_str = """
     title="Details of GitHub issue"
 
     def append_elements(self):
-        
+
         issue = self.reported_object #Tutaj przypisujemy do zmiennej argument
         if issue==None:
             from github.Issue import Issue
@@ -4736,7 +4736,7 @@ rep_jup_str = """
     list_open=[] #pusta lista
     list_open = client.get_issues_list(repo_name='bogumilchilinski/dynpy', state='open', assignee=user, sort='created', since=date_object) # pozyskanie listy issues z repo
 
-    for single_issue in list_open: # pętla na wylistowanie issues 
+    for single_issue in list_open: # pętla na wylistowanie issues
         GithubIssueReportComponent(single_issue) # wykorzystanie zaimplementowanego komponentu, argument jaki przekazujemy to pojedyńcze issue z listy
 """
 
@@ -4784,7 +4784,7 @@ class ReportingCompsUsageComponent(ReportComponent):
 
         display(
             ReportText(
-                """Po stworzeniu komponentu możesz go wywołać poprzez zaimportowanie odpowiedniej klasy we własnym 
+                """Po stworzeniu komponentu możesz go wywołać poprzez zaimportowanie odpowiedniej klasy we własnym
                            jupku,poniżej zostanie opisany konkretny przykład, aby lepiej zrozumieć działanie komponentu"""
             )
         )

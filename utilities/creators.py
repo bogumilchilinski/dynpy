@@ -1900,10 +1900,10 @@ advanced_modeling_intro_code_str = """Celem jest przygotowanie toku postępowani
  FAZA I - WSTĘPNA - 1 tydzień (ZESPÓŁ/ 1 osoba)
 
 - [{tic}] Określenie wymagań oraz oczekiwań do projektu, w jakiej dziedzinie chcemy wykonać pracę:
-                mechaniczna np. przekładnie, silniki, 
+                mechaniczna np. przekładnie, silniki,
                 elektryczna np. akumulatory, filtry, uklady sterowania
-                budowlana np. dynamiczne eliminatory drgań, żurawie 
-                dynamiczne np. zawieszenia, 
+                budowlana np. dynamiczne eliminatory drgań, żurawie
+                dynamiczne np. zawieszenia,
                 kinematyczne np. ruch "pojazdu" po trasie wraz z jego charakteryzacją
 
 - [{tic}] Wybór rzeczywistego obiektu, mechanizmu lub zjawiska, na bazie którego wykonany zostanie model.
@@ -1924,7 +1924,7 @@ advanced_modeling_basics_code_str = """Celem jest przygotowanie toku postępowan
 
 - [{tic}] Przygotowanie dokumentu, w którym zaprezentowane będą podstawowe klasy i metody na bazie których możliwe będzie wykonanie projektu oraz raportu,
 
-- [{tic}] Wyszukanie grafiki obiektu, mechanizmu lub zjawisa na podstawie którego należy wykonać rysunek schematyczny (np. w SolidWorks/Autocad/TiKz) 
+- [{tic}] Wyszukanie grafiki obiektu, mechanizmu lub zjawisa na podstawie którego należy wykonać rysunek schematyczny (np. w SolidWorks/Autocad/TiKz)
 
 - [{tic}] Przeprowadzenie całkowitej charakterystyki modelu (LSS, współrzędne, wiezy,  energie, rownania ruchu)
 
@@ -1936,7 +1936,7 @@ advanced_modelling_modelling_code_str = """Celem jest przygotowanie toku postęp
 
 - [{tic}] Wybór modelu z biblioteki DynPy, który przypomina zdefiniowany model w poprzedniej fazie,
 
-- [{tic}] Przygotowanie, bazując na modelu,  wszystkich potrzebnych do analizy równań, 
+- [{tic}] Przygotowanie, bazując na modelu,  wszystkich potrzebnych do analizy równań,
 
 - [{tic}] Dobranie odpowiednich danych i parametrów do wybranego modelu symulacyjnego,
 
@@ -1946,7 +1946,7 @@ advanced_modelling_modelling_code_str = """Celem jest przygotowanie toku postęp
 
 advanced_modeling_simulation_code_str = """Celem jest przygotowanie toku postępowania, dzięki któremu możliwe będzie sprawne przygotowanie projektu zaawansowanego modelu dynamicznego:
 
- FAZA IV - WYKONANIA SYMULACJI - 2 tygodnie (1 osoba) 
+ FAZA IV - WYKONANIA SYMULACJI - 2 tygodnie (1 osoba)
 
 - [{tic}] Przygotowanie odpowiednich funckji do wykonania symulacji analitycznych i numerycznych,
 
