@@ -1059,10 +1059,10 @@ class TrolleyWithPendulumTestStandScheme(TikZPicture):
         # PL
         # ––––––––––––––––––––––––––––––––––––––––––––––––
         # text1 = r'{\color{violet} Silnik elektryczny}'
-        # text2 = r'{\color{violet} Przekładnia}'
-        # text3 = r'{\color{violet} Building frame model}' # Obiekt badań
+        # text2 = r'{\color{violet} Przekładnia pasowa}'
+        # text3 = r'{\color{violet} Building frame model}' # Obiekt badań: Model ramy budynku => Podatna rama
         # text4 = r'{\color{violet} APTMD}'
-        # text5 = r'{\color{violet} Akcelerometr}'
+        # text5 = r'{\color{violet} Akcelerometry}'
         # text6 = r'{\color{violet} Stół wibracyjny}' # Stół ruchomy
         # text7 = r'{\color{violet} Korbowód}'
         # text8 = r'{\color{violet} Falownik}'
@@ -1070,10 +1070,10 @@ class TrolleyWithPendulumTestStandScheme(TikZPicture):
         # EN
         # ––––––––––––––––––––––––––––––––––––––––––––––––
         text1 = r"{\color{violet} Electric Motor}"
-        text2 = r"{\color{violet} Belt Gearbox}"
-        text3 = r"{\color{violet} Building Frame Model}" # Test Object
+        text2 = r"{\color{violet} Belt Drive}"
+        text3 = r"{\color{violet} Flexible Frame}" # Test Object: Building Frame Model => Flexible Frame
         text4 = r"{\color{violet} APTMD}"
-        text5 = r"{\color{violet} Accelerometer}"
+        text5 = r"{\color{violet} Accelerometers}"
         text6 = r"{\color{violet} Shake–Table}"
         text7 = r"{\color{violet} Connecting Rod}"
         text8 = r"{\color{violet} Inverter}"  # Controller
@@ -1099,7 +1099,7 @@ class TrolleyWithPendulumTestStandScheme(TikZPicture):
     %%%%%%  MID COL
     \\node[inner sep=2pt,align=center,draw] (text1) at ({pos1_x+4},{pos1_y+3.9}) {text1};
     \\node[inner sep=2pt,align=center,draw] (text2) at ({pos1_x+3.5},{pos1_y+2.7}) {text2};
-    \\node[inner sep=2pt,align=center,draw] (text3) at ({pos1_x+6.1},{pos1_y+4.7}) {text3};
+    \\node[inner sep=2pt,align=center,draw] (text3) at ({pos1_x+6.6},{pos1_y+4.7}) {text3};
     \\node[inner sep=2pt,align=center,draw] (text4) at ({pos1_x+9.25},{pos1_y+2}) {text4};
     \\node[inner sep=2pt,fill=white,align=center,draw] (text5) at ({pos1_x+12.2},{pos1_y+2.2}) {text5};
     \\node[inner sep=2pt,align=center,draw] (text6) at ({pos1_x+10.8},{pos1_y-3.8}) {text6};
@@ -1118,6 +1118,73 @@ class TrolleyWithPendulumTestStandScheme(TikZPicture):
     """
         return code
 
+class TrolleyWithPendulumTestStandSchemeNo(TikZPicture):
+
+    def _scheme_desc(self):
+
+        half_force_label = r"{\color{violet} $\frac{F}{2}$}"
+        # ––––––––––––––––––––––––––––––––––––––––––––––––
+        # PL
+        # ––––––––––––––––––––––––––––––––––––––––––––––––
+        # text1 = r'{\color{violet} 1}" # Silnik elektryczny
+        # text2 = r'{\color{violet} 2}" # Przekładnia pasowa
+        # text3 = r'{\color{violet} 3}" # Building frame model # Obiekt badań: Model ramy budynku => Podatna rama
+        # text4 = r'{\color{violet} 4}" # APTMD
+        # text5 = r'{\color{violet} 5}" # Stół wibracyjny # Stół ruchomy
+        # text7 = r'{\color{violet} 6}" # Korbowód
+        # text5 = r'{\color{violet} 7}" # Akcelerometry
+        # text8 = r'{\color{violet} 8}" # Falownik
+        # ––––––––––––––––––––––––––––––––––––––––––––––––
+        # EN
+        # ––––––––––––––––––––––––––––––––––––––––––––––––
+        text1 = r"{\color{violet} 1}" # Electric Motor
+        text2 = r"{\color{violet} 2}" # Belt Drive
+        text3 = r"{\color{violet} 3}" # Flexible Frame # Test Object: Building Frame Model => Flexible Frame
+        text4 = r"{\color{violet} 4}" # APTMD
+        text5 = r"{\color{violet} 5}" # Shake–Table
+        text6 = r"{\color{violet} 6}" # Connecting Rod
+        text7 = r"{\color{violet} 7}" # Accelerometers
+        text8 = r"{\color{violet} 8}" # Inverter # Controller
+        # ––––––––––––––––––––––––––––––––––––––––––––––––
+
+        pos1_x = 0
+        pos1_y = 0
+
+        del_row = -6.1
+        del_2row = 0.4
+
+        code = f"""
+
+    %\draw[ultra thick,dashed,black] (3.9,-0.25) -- (3.9,-6.2);
+
+    %\draw[ultra thick,dashed,black] (7.9,-1.5) -- (7.9,-6.2);
+    %\draw[ultra thick,dashed,black] (11.9,-1.5) -- (11.9,-6.2);
+
+
+    %\\node[inner sep=7pt,fill=white,align=center] (text) at (1.25,-2.25) {{label}};
+
+    \\node[inner sep=5pt,fill=white] (pic1) at (7.25cm,-0.5cm) {{\includegraphics[width=12cm]{{../images/test_stand_twp.png}}}};
+    %%%%%%  MID COL
+    \\node[inner sep=2pt,align=center,draw] (text1) at ({pos1_x+5},{pos1_y+3.9}) {\Huge text1};
+    \\node[inner sep=2pt,align=center,draw] (text2) at ({pos1_x+4.5},{pos1_y+2.7}) {\Huge text2};
+    \\node[inner sep=2pt,align=center,draw] (text3) at ({pos1_x+7.6},{pos1_y+4.7}) {\Huge text3};
+    \\node[inner sep=2pt,align=center,draw] (text4) at ({pos1_x+10.25},{pos1_y+2}) {\Huge text4};
+    \\node[inner sep=2pt,align=center,draw] (text5) at ({pos1_x+11},{pos1_y-3.8}) {\Huge text6};
+    \\node[inner sep=2pt,align=center,draw] (text6) at ({pos1_x+7.7},{pos1_y-3.4}) {\Huge text7};
+    \\node[inner sep=2pt,fill=white,align=center,draw] (text7) at ({pos1_x+12.2},{pos1_y+2.2}) {\Huge text5};
+    \\node[inner sep=2pt,align=center,draw] (text8) at ({pos1_x+5.15},{pos1_y-5}) {\Huge text8};
+
+    \\draw[ultra thick,red,->] (text1.south) -- (6,2.8);
+    \\draw[ultra thick,red,->] (text2.south) -- (4.3,1.7);
+    \\draw[ultra thick,red,->] (text3.south) -- (8,3.8);
+    \\draw[ultra thick,red,->] (text4.north) -- (9.83,2.6);
+    \\draw[ultra thick,red,->] (text5.north) -- (10,-0.25);
+    \\draw[ultra thick,red,->] (text6.north) -- (8.2,0.3);
+    \\draw[ultra thick,red,->] (text7.north) -- (12.11,4.3);  %A1
+    \\draw[ultra thick,red,->] (text7.south) -- (11.33,-0.1); %A2
+    \\draw[ultra thick,red,->] (text8.north) -- (5.6,-3.9);
+    """
+        return code
 
 class NationalDAQSystemScheme(TikZPicture):
 

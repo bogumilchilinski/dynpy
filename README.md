@@ -97,7 +97,9 @@ doc.generate_pdf(clean_tex=False)
 ```
 
 ## 3. Looking for some help
+
 Documentclasses with generic content of exemplary document:
+
 ```python
 from dynpy.utilities.documents.document import *
 
@@ -107,8 +109,8 @@ Guide.base_setup()
 WutThesis.base_setup()
 ```
 
-
 Guides that provides step by step instructions:
+
 ```python
 from dynpy.utilities.creators import list_of_guides
 list_of_guides()
