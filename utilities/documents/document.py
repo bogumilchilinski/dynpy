@@ -4984,30 +4984,29 @@ class MDPIPaper(Document):
             geometry_options=geometry_options,
             data=data,
         )
+        
 
-        Markdown.set_mdpi()  # deletes hyperref package associated with Markdown class to avoid clash
-
-        self.preamble.append(Command("firstpage", "1"))
-        self.preamble.append(Command("makeatletter"))
-        self.preamble.append(NoEscape("\\setcounter{page}{\@firstpage}"))
-        self.preamble.append(Command("makeatother"))
-        self.preamble.append(Command("pubvolume", "1"))
-        self.preamble.append(Command("issuenum", "1"))
-        self.preamble.append(Command("articlenumber", "0"))
-        self.preamble.append(Command("pubyear", "2024"))
-        self.preamble.append(Command("copyrightyear", "2024"))
-        self.preamble.append(Command("datereceived", " "))
-        self.preamble.append(Command("daterevised", " "))
-        self.preamble.append(Command("dateaccepted", " "))
-        self.preamble.append(Command("datepublished", " "))
-        self.preamble.append(Command("hreflink", "https://doi.org/"))
-        self.preamble.append(Command("Title", title))
-        self.preamble.append(Command("TitleCitation", title))
-        self.preamble.append(Command("firstnote", "Current address: Affiliation"))
-        self.preamble.append(
-            Command("secondnote", "These authors contributed equally to this work.")
-        )
-        # self.append(NewPage())
+        Markdown.set_mdpi() #deletes hyperref package associated with Markdown class to avoid clash
+        
+        self.preamble.append(Command('firstpage','1'))
+        self.preamble.append(Command('makeatletter'))
+        self.preamble.append(NoEscape('\\setcounter{page}{\@firstpage}'))
+        self.preamble.append(Command('makeatother'))
+        self.preamble.append(Command('pubvolume','1'))
+        self.preamble.append(Command('issuenum','1'))
+        self.preamble.append(Command('articlenumber','0'))
+        self.preamble.append(Command('pubyear','2025'))
+        self.preamble.append(Command('copyrightyear','2025'))
+        self.preamble.append(Command('datereceived',' '))
+        self.preamble.append(Command('daterevised',' '))
+        self.preamble.append(Command('dateaccepted',' '))
+        self.preamble.append(Command('datepublished',' '))
+        self.preamble.append(Command('hreflink','https://doi.org/'))
+        self.preamble.append(Command('Title',title))
+        self.preamble.append(Command('TitleCitation',title))
+        self.preamble.append(Command('firstnote','Current address: Affiliation'))
+        self.preamble.append(Command('secondnote','These authors contributed equally to this work.'))
+        #self.append(NewPage())
         # tu implementować co tam potrzeba
 
         cwd = os.getcwd()
