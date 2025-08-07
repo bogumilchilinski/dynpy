@@ -246,6 +246,42 @@ report_table = LatexDataFrame.formatted(
 
 display(report_table.reported(caption="Travel Time Data Table"))
 ```
+There is a possibility of providing analitycal solution
+```python
+from dynpy.solvers.linear import AnalyticalSolution
+from sympy import *
+import numpy as np
+
+t =Symbol('t')
+x = Function('x')(t)
+
+
+
+data2check=AnalyticalSolution.from_vars_and_rhs([x],[cos(t)+sin(t)**2]).compute_solution(np.linspace(0,100,10001))#.plot()
+
+
+
+data2check.plot(title='Sample plot', xlabel='Time [s]', ylabel='Value', figsize=(14, 3))
+```
+There is a possibility of providing analitycal solution
+```python
+from dynpy.solvers.linear import AnalyticalSolution
+from sympy import *
+import numpy as np
+
+t =Symbol('t')
+x = Function('x')(t)
+y = Function('y')(t)
+
+
+time_signal=AnalyticalSolution.from_vars_and_rhs([x],[cos(t)+sin(t)**2]).compute_solution(np.linspace(0,100,10001))#.plot()
+
+two_signals=AnalyticalSolution.from_vars_and_rhs([x,y],[cos(t)+sin(t)**2,1+exp(cos(t/2)+sin(t/2)**2)]).compute_solution(np.linspace(0,100,10001))#.plot()
+
+
+time_signal.plot(title='Sample plot', xlabel='Time [s]', ylabel='Value', figsize=(14, 3))
+two_signals.plot(title='Sample plot', xlabel='Time [s]', ylabel='Value', figsize=(14, 3))
+```
 
 ## 3. Exporting Reports
 
@@ -375,6 +411,23 @@ pip install numpy pylatex sympy pandas matplotlib scipy pint pypandoc wand
 
 pip install dynpyds
 ```
+Installing the Development Environment for Engineering Analysis
+1. Install Python (Microsoft Store)
+2. Install Visual Studio Code (Microsoft Store)
+2.5 Install Git
+3. Install the DynPy library (https://github.com/bogumilchilinski/dynpy)
+Git clone command https://github.com/bogumilchilinski/dynpy
+4. Install the library - instructions on GitHub - bogumilchilinski/dynpy (https://github.com/bogumilchilinski/dynpy?tab=readme-ov-file#manual-installation)
+4.5 Installing the plugin in VS Code (git extension package + latex workshop)
+5. Creating a virtual environment in VSCode
+Working folder on the main drive + subfolders (output, images)
+Set the kernel and Jupyter Notebook environment
+Set Git Autofetch: True in VSCode settings
+
+Support LaTeX:
+6. Install a separate Latex distribution - e.g., MikaTex (https://miktex.org/download#dok)
+7. (optional) Strawberry Pearl environment
+Installation: https://strawberryperl.com/ + remaining steps to obtain the PDF (admin required)
 
 # Licensing Information
 
