@@ -1791,7 +1791,7 @@ class Picture(Figure, ReportModule):
             else:
                 size = self.preview_size
 
-                from IPython.display import display, Image
+                from IPython.display import Image
                 size = self.preview_size
 
 
