@@ -215,10 +215,10 @@ from dynpy.utilities.adaptable import *
 predicted_travel_time = Subsection('Predicted Travel Time');
 CurrentContainer(predicted_travel_time)
 
-time_s = Symbol('time_s', positive=True)
-time_h = Symbol('time_h')
-length = Symbol('length', positive=True)
-velocity = Symbol('velocity', positive=True)
+time_s = Symbol('t_s', positive=True)
+time_h = Symbol('t_h')
+length = Symbol('l', positive=True)
+velocity = Symbol('v', positive=True)
 
 dane = {
     'Start': ['NYC', 'Albany', 'Syracuse', 'Buffalo', 'Cleveland', 'Toledo', 'Total line'],
