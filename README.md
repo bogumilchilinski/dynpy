@@ -341,6 +341,67 @@ doc.append(second_sample_subsection)
 
 doc.generate_pdf(clean_tex=False)
 ```
+# ODESystem Class Usage
+
+### ODESystem class usage preview based on a damped mehanical oscillator
+
+```python
+from sympy import *
+from dynpy.solvers.linear import ODESystem
+from sympy.physics.mechanics import dynamicsymbols
+
+m = Symbol('m',positive = True)
+c = Symbol('c',positive = True)
+k = Symbol('k',positive = True)
+t=Symbol('t')
+x=dynamicsymbols('x')
+
+ 
+eq1 = Eq(m*x.diff(t,2)+c*x.diff(t)+k*x,0)
+
+
+odesys = ODESystem(odes = Matrix([eq1.lhs-eq1.rhs]),dvars =Matrix([x],ode_order=2))
+
+odesys.solution
+```
+
+### ODESystem operations on dynamical systems
+
+```python
+from dynpy.models.mechanics.trolley import ForcedSpringMassSystem
+import numpy as np
+from sympy import *
+dsys =ForcedSpringMassSystem()
+t =dsys.ivar
+z = dsys.z
+k=dsys.k
+F=dsys.F
+g=dsys.g
+
+m=dsys.m
+
+dane={
+  k:1,
+  m:1,
+  F:0,
+  g:9.81,
+
+}
+t_span=np.linspace(0.0,10,1000)
+
+ode=dsys.eoms
+
+
+ode.subs(dane).numerized().compute_solution(t_span, [0.1, 0.0]).plot()
+
+ode.solution.with_ics([0.1,0]).subs(dane).numerized().compute_solution(t_span).plot()
+```
+
+### More information about ODESystem class:
+
+```python
+from dynpy.utilities.documents.guides import BasicsOfODESystemGuide
+BasicsOfODESystemGuide()
 
 ## 5. Customization Options (Advanced)
 
