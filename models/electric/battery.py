@@ -124,6 +124,8 @@ class BatteryCell(ComposedSystem):
         U_th=None,
         R_th=None,
         C_th=None,
+        L_1=None,
+        L_2=None,
         I_li=None,
         ivar=Symbol("t"),
         **kwargs,
@@ -149,6 +151,10 @@ class BatteryCell(ComposedSystem):
             self.R_th = R_th
         if C_th is not None:
             self.C_th = C_th
+        if L_1 is not None:
+            self.L_1 = L_1
+        if L_2 is not None:
+            self.L_2 = L_2
         if I_li is not None:
             self.I_li = I_li
         self.qs = [self.q_1, self.q_2]
@@ -341,7 +347,7 @@ class BatteryCell(ComposedSystem):
 
     # --- przykładowe dane nominalne ----------------------------------
     def get_default_data(self):
-        return {self.R_1: 0.015, self.R_2: 0.020, self.C: 2200e-6, self.U: 3.7}
+        return {self.R_1: 0.015, self.R_2: 0.020, self.C: 2200e-4, self.U: 3.7, self.L_1:0.00001,self.L_2:0.00001}
 
     def get_numerical_data(self):
         return {self.R_1: 0.015, self.R_2: 0.020, self.C: 2200e-6, self.U: 3.7}
