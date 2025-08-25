@@ -1076,8 +1076,8 @@ class CircutRC(ComposedSystem):
     A class that determines the equation of an electrical circuit in an RC system
     """
 
-    # scheme_name = 'engine.png'
-    # real_name = 'engine_real.PNG'
+    scheme_name = "thevenincircuit.png"
+    real_name = "liioncell.PNG"
 
     resistance = Symbol("R", positive=True)
     capacity = Symbol("C", positive=True)

@@ -246,7 +246,9 @@ report_table = LatexDataFrame.formatted(
 
 display(report_table.reported(caption="Travel Time Data Table"))
 ```
+
 There is a possibility of providing analitycal solution
+
 ```python
 from dynpy.solvers.linear import AnalyticalSolution
 from sympy import *
@@ -261,9 +263,13 @@ data2check=AnalyticalSolution.from_vars_and_rhs([x],[cos(t)+sin(t)**2]).compute_
 
 
 
-data2check.plot(title='Sample plot', xlabel='Time [s]', ylabel='Value', figsize=(14, 3))
+#data2check.plot(title='Sample plot', xlabel='Time [s]', ylabel='Value', figsize=(14, 3))#uncomment for preview !!!!DON"T USE IN RAPORT!!!!
+plot=data2check.to_pylatex_tikz(height=8).in_figure(caption='Sample plot 2')#comment for preview
+display(plot)#comment for preview
 ```
+
 There is a possibility of providing analitycal solution
+
 ```python
 from dynpy.solvers.linear import AnalyticalSolution
 from sympy import *
@@ -279,8 +285,12 @@ time_signal=AnalyticalSolution.from_vars_and_rhs([x],[cos(t)+sin(t)**2]).compute
 two_signals=AnalyticalSolution.from_vars_and_rhs([x,y],[cos(t)+sin(t)**2,1+exp(cos(t/2)+sin(t/2)**2)]).compute_solution(np.linspace(0,100,10001))#.plot()
 
 
-time_signal.plot(title='Sample plot', xlabel='Time [s]', ylabel='Value', figsize=(14, 3))
-two_signals.plot(title='Sample plot', xlabel='Time [s]', ylabel='Value', figsize=(14, 3))
+#time_signal.plot(title='Sample plot', xlabel='Time [s]', ylabel='Value', figsize=(14, 3))#uncomment for preview, !!!!DON"T USE IN RAPORT!!!!
+#two_signals.plot(title='Sample plot', xlabel='Time [s]', ylabel='Value', figsize=(14, 3))#uncomment for preview, !!!!DON"T USE IN RAPORT!!!!
+plot1=time_signal.to_pylatex_tikz(height=8).in_figure(caption='Sample plot 1')#comment for preview
+plot2=two_signals.to_pylatex_tikz(height=8).in_figure(caption='Sample plot 2')#comment for preview
+display(plot1)#comment for preview
+display(plot2)#comment for preview
 ```
 
 ## 3. Exporting Reports
@@ -403,6 +413,9 @@ ode.solution.with_ics([0.1,0]).subs(dane).numerized().compute_solution(t_span).p
 from dynpy.utilities.documents.guides import BasicsOfODESystemGuide
 BasicsOfODESystemGuide()
 
+
+```
+
 ## 5. Customization Options (Advanced)
 
 ### Formatting Text and Equations
@@ -472,7 +485,9 @@ pip install numpy pylatex sympy pandas matplotlib scipy pint pypandoc wand
 
 pip install dynpyds
 ```
+
 Installing the Development Environment for Engineering Analysis
+
 1. Install Python (Microsoft Store)
 2. Install Visual Studio Code (Microsoft Store)
 2.5 Install Git
@@ -493,3 +508,4 @@ Installation: https://strawberryperl.com/ + remaining steps to obtain the PDF (a
 # Licensing Information
 
 DynPy is distributed under an open-source license. Refer to the LICENSE file for details.
+

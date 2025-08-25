@@ -278,7 +278,7 @@ class DCMotorIIOrder(ComposedSystem):
     M_r = Symbol("M_r", positive=True)
     i_w = dynamicsymbols("i_w")
     omega_s = dynamicsymbols("omega_s")
-    charge = dynamicsymbols("q")
+    charge = dynamicsymbols("q_1")
     phi = dynamicsymbols("varphi")
 
     def __init__(
