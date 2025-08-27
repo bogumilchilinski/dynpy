@@ -1234,6 +1234,7 @@ class NationalDAQSystemScheme(TikZPicture):
     \\draw[ultra thick,red,->] (text5.south) -- (3.15,0.1);
     """
         return code
+
 class SuspensionModelOscillatorScheme(GearModelOscillatorScheme):
 
     def _scheme_desc(self):
