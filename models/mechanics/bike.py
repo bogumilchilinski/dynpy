@@ -56,7 +56,7 @@ class ReducedMotorbike(ComposedSystem):
     m_f = Symbol("m_f", positive=True)
     r = Symbol("r", positive=True)
     Cd = Symbol("C_d", positive=True)  # dragcoefficient
-    Ad = Symbol("A_d", positive=True)  # air density
+    Ad = Symbol("rho", positive=True)  # air density
     Af = Symbol("A_f", positive=True)  # front area of the vehicle
     T = Symbol("T")
     f_t = Symbol("f_t")
@@ -297,7 +297,7 @@ class ReducedMotorbike(ComposedSystem):
             self.m_r: ureg.kilogram,
             self.ivar: ureg.second,
             self.T: ureg.newton * ureg.meter,
-            self.Ad: ureg.kilogram,
+            self.Ad: ureg.kilogram/ureg.meter**3,
             self.Af: ureg.meter**2,
             self.x: ureg.meter,
             self.x.diff(self.ivar): ureg.meter / ureg.second,
