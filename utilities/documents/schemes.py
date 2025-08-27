@@ -1234,3 +1234,21 @@ class NationalDAQSystemScheme(TikZPicture):
     \\draw[ultra thick,red,->] (text5.south) -- (3.15,0.1);
     """
         return code
+    
+class TrolleyWithPendulumTestStandSchemeBox(TikZPicture):
+
+    def _scheme_desc(self):
+
+        code = r"""
+    \tikzstyle{block} = [rectangle, draw, rounded corners=6pt, minimum width=3cm, minimum height=1cm, align=center]
+
+    \node[block] (exciter) at (0,0) {Exciter};
+    \node[block] (model) at (4,0) {Model};
+    \node[block] (acc) at (8,0) {Accelerometers};
+    \node[block] (daq) at (12,0) {DAQ};
+
+    \draw[->] (exciter) -- (model);
+    \draw[->] (model) -- (acc);
+    \draw[->] (acc) -- (daq);
+    """
+        return code
