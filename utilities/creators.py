@@ -2088,9 +2088,9 @@ advanced_modelling_modelling_code_str_en = """> *Informational comment - remove 
 
 The goal is creating the theoretical model of an investigated object that includes the following elements or activities:
 
-[{tic}] implementation (inheritance or selection) of a model with DynPy library that represents the investigated object;
+[{tic}] implementation (inheritance or selection) of a model with DynPi library that represents the investigated object;
 
-[{tic}] praparation of all the necessary equations for the analysis (supported by the model);
+[{tic}] preparation of all the necessary equations for the analysis (supported by the model);
 
 [{tic}] selection of appropriate data and parameters for the chosen simulation model;
 
@@ -2124,17 +2124,17 @@ Estimated execution time - {period_x2} {period_unit}s.
 advanced_modeling_report_code_str_en = """> *Informational comment - remove this message when issues is completed.*
 > *This issue needs at most {period_x3} {period_unit}s per team (team (typically 1-3 {persons_name}) - depends on project complexity).*
 
-The goal is a revision of all steps of the research and final assesment of the report. The folliwng elements or activities should be included:
+The goal is a revision of all steps of the research and final assessment of the report. The following elements or activities should be included:
 
 [{tic}] preliminary evaluation of the report content and structure;
 
 [{tic}] title pages, statements, abstracts, references and lists of figures, listings, tables and etc.;
 
-[{tic}] formal assesment of the report (correctness of the structure and volume);
+[{tic}] formal assessment of the report (correctness of the structure and volume);
 
 [{tic}] final validation of report content (improvements of sections);
 
-[{tic}] summary and conlusions from the performed activities;
+[{tic}] summary and conclusions from the performed activities;
 
 [{tic}] final revision and improvements (if needed) of the title and abstracts;
 
@@ -2487,7 +2487,7 @@ class ResearchProjectIssueCreator:
         comment_str_h1 = "> *Exemplary comment. You can copy example below and close issue with new comment or modify it and close the issue.* "
         comment_str_h2 = "*Remove this message or keep it if new comment is created.*"
 
-        comment_str_2 = "All done. The partial report for this stage can be found in the folling resource: LINK."
+        comment_str_2 = "All done. The partial report for this stage can be found in the follwing resource: LINK."
 
         return f"{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}"
 
