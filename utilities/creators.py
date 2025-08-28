@@ -1998,7 +1998,7 @@ advanced_modeling_schedule_code_str_en = """> *Informational comment - remove th
 The aim of the issue is to manage the process of project implementation.
 The following activities are to do:
 
-- [{tic}] assignment of tasks (with `ResearchProjectIssueCreator` class);
+- [{tic}] assignment of tasks (with `{class_name}` class);
 
 - [{tic}] presentation of requirements that need to be fulfilled (code, issues, other things);
 
@@ -2027,7 +2027,7 @@ Estimated execution time - {period_x7} {period_unit}s.
 
 
 advanced_modeling_intro_code_str_en = """> *Informational comment - remove this message when issues is completed.*
-> *This issue needs at most 1 period per team (period (typically one week) - depends on assumed schedule, team (typically 1-3 students) - depends on project complexity).*
+> *This issue needs at most {base_period} {period_unit} per team (team (typically 1-3 {persons_name}) - depends on project complexity).*
 
 The goal is to prepare working environment and initial content of the report (draft) that includes the following elements or activities:
 
@@ -2064,7 +2064,7 @@ Estimated execution time - {period_x2} {period_unit}s.
 
 
 advanced_modeling_analysis_code_str_en = """> *Informational comment - remove this message when issues is completed.*
-> *This issue needs at most {base_period} {period_unit} per team (team (typically 1-3 {persons_name}) - depends on project complexity).*
+> *This issue needs at most {period_x2} {period_unit}s per team (team (typically 1-3 {persons_name}) - depends on project complexity).*
 
 The goal is a validation with the reference object and discussion of obtained results. The following elements or activities should be included:
 
@@ -2080,7 +2080,7 @@ The goal is a validation with the reference object and discussion of obtained re
 
 [{tic}] discussion of the results and identified phenomena.
 
-Estimated execution time - {base_period} {period_unit}.
+Estimated execution time - {period_x2} {period_unit}s.
 """
 
 advanced_modelling_modelling_code_str_en = """> *Informational comment - remove this message when issues is completed.*
@@ -2088,13 +2088,13 @@ advanced_modelling_modelling_code_str_en = """> *Informational comment - remove 
 
 The goal is creating the theoretical model of an investigated object that includes the following elements or activities:
 
-[{tic}] selection of a model from the DynPy library that resembles the model defined in the previous phase;
+[{tic}] implementation (inheritance or selection) of a model with DynPy library that represents the investigated object;
 
 [{tic}] praparation of all the necessary equations for the analysis (supported by the model);
 
 [{tic}] selection of appropriate data and parameters for the chosen simulation model;
 
-[{tic}] initial verification of the implemented functions to ensure correctness.
+[{tic}] initial verification of the implementation to ensure correctness.
 
 Estimated execution time - {period_x3} {period_unit}s.
 """
@@ -2122,7 +2122,7 @@ Estimated execution time - {period_x2} {period_unit}s.
 
 
 advanced_modeling_report_code_str_en = """> *Informational comment - remove this message when issues is completed.*
-> *This issue needs at most {period_x2} {period_unit}s per team (team (typically 1-3 {persons_name}) - depends on project complexity).*
+> *This issue needs at most {period_x3} {period_unit}s per team (team (typically 1-3 {persons_name}) - depends on project complexity).*
 
 The goal is a revision of all steps of the research and final assesment of the report. The folliwng elements or activities should be included:
 
@@ -2140,7 +2140,7 @@ The goal is a revision of all steps of the research and final assesment of the r
 
 [{tic}] preparation of the review and required documents, submission.
 
-Estimated execution time - {period_x2} {period_unit}s.
+Estimated execution time - {period_x3} {period_unit}s.
 """
 
 
@@ -2203,6 +2203,7 @@ class ResearchProjectIssueCreator:
             "issue_no_6": self._issue_no + 6,
             "guide_class_module": guide_class.__module__,
             "guide_class_name": guide_class.__name__,
+            "class_name":self.__class__.__name__,
             "date": self._date,
             "time": self._time,
             "tic": tic,
@@ -2232,7 +2233,7 @@ class ResearchProjectIssueCreator:
 
             titles_dict = {
                 "schedule": f"{project_type} on {title}",  ###
-                "intro": f"Preparation of the preleminary content report for {project_type.lower()} on {title} (issue #{issue_no} related)",  ###
+                "intro": f"Preparation of the preliminary content report for {project_type.lower()} on {title} (issue #{issue_no} related)",  ###
                 "basics": f"Investigation of state of the art and research methodology for the {project_type.lower()} on {title.lower()} (issue #{issue_no} related)",  ###
                 "analysis": f"Analysis of reference data in the {project_type.lower()} on {title.lower()} (issue #{issue_no} related)",  ###
 
