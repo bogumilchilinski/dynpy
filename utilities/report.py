@@ -1752,13 +1752,11 @@ class Picture(Figure, ReportModule):
                 # display(img)
                 # display(f"Fig. X: {caption}")
 
-                import pymupdf
+                import fitz
                 
-
-
                 from IPython.display import Image, display
 
-                doc = pymupdf.open(path)
+                doc = fitz.open(path)
                 page = doc.load_page(0)
                 pixmap = page.get_pixmap(dpi=144)
                 #pixmap.save(path.replace('pdf','png'))
