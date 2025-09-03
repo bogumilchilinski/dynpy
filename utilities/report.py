@@ -1753,7 +1753,7 @@ class Picture(Figure, ReportModule):
                 # display(f"Fig. X: {caption}")
 
                 import pymupdf
-                import base64
+                
 
 
                 from IPython.display import Image, display
@@ -1761,9 +1761,9 @@ class Picture(Figure, ReportModule):
                 doc = pymupdf.open(path)
                 page = doc.load_page(0)
                 pixmap = page.get_pixmap(dpi=144)
-                pixmap.save(path.replace('pdf','png'))
+                #pixmap.save(path.replace('pdf','png'))
 
-                display(Image(path.replace('pdf','png')))
+                display(Image(data= pixmap.tobytes(output='png')))
 
                 display(f"Fig. X: {caption}")
                 return ""
