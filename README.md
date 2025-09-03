@@ -355,6 +355,7 @@ doc.append(second_sample_subsection)
 
 doc.generate_pdf(clean_tex=False)
 ```
+
 # ODESystem Class Usage
 
 ### ODESystem class usage preview based on a damped mehanical oscillator
