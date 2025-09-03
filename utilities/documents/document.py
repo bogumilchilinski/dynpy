@@ -4639,7 +4639,7 @@ class BeamerPresentation(Document):
 
 from dynpy.utilities.documents.document import BeamerPresentation
 from dynpy.utilities.report import*
-SympyFormula._break_mode = 'eq'
+SympyFormula._break_mode = 'eq' # neccesarry for correct equation display
 
 
 #CELL_1
