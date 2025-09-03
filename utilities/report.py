@@ -1722,7 +1722,69 @@ class Picture(Figure, ReportModule):
 
         return repr_string
 
-    # def _repr_markdown_(self) -> str:
+    def _repr_markdown_(self) -> str:
+        """
+        Generate a Markdown representation of the Picture object.
+
+        Returns:
+            str: A Markdown representation for preview.
+        """
+
+        self.cls_container.append(self)
+
+        if self.caption is None:
+            caption = ""
+        else:
+            caption = self.caption
+
+        if self.image is not None:
+            path = self.image
+
+            if "pdf" in path:
+                # from wand.image import Image as WImage
+                
+
+                # img = WImage(filename=path, resolution=144)
+
+                # hsize, vsize = img.size
+
+                # img.resize(hsize, vsize)
+                # display(img)
+                # display(f"Fig. X: {caption}")
+
+                import pymupdf
+                import base64
+
+
+                from IPython.display import Image, display
+
+                doc = pymupdf.open(path)
+                page = doc.load_page(0)
+                pixmap = page.get_pixmap(dpi=144)
+                pixmap.save(path.replace('pdf','png'))
+
+                display(Image(path.replace('pdf','png')))
+
+                display(f"Fig. X: {caption}")
+                return ""
+            else:
+                size = self.preview_size
+
+                from IPython.display import Image,display
+                size = self.preview_size
+
+
+                display(Image(filename=path,
+                              #width=size,
+                              ))
+                display(f"Fig. X: {caption}")
+
+                return ""
+        else:
+            return f"Nothing to plot \n \n Fig. X: {caption}"
+
+
+    # def _repr_html_(self) -> str:
     #     """
     #     Generate a Markdown representation of the Picture object.
 
@@ -1753,58 +1815,21 @@ class Picture(Figure, ReportModule):
     #             return ""
     #         else:
     #             size = self.preview_size
-    #             return f'<img src="{path}" alt="{caption}" style="width: 700px;" width="{size}"/>    \n \n Fig. X: {caption}'
+
+    #             from IPython.display import Image
+    #             size = self.preview_size
+
+
+    #             display(Image(filename=path,
+    #                           #width=size,
+    #                           ))
+    #             display(f"Fig. X: {caption}")
+
+    #             return ""
+    #             #return f'<img src="{path}" alt="{caption}" style="width: 700px;" width="{size}"/>    \n \n Fig. X: {caption}'
     #             # return f'![image preview]({path}) \n \n Fig. X: {caption}'
     #     else:
     #         return f"Nothing to plot \n \n Fig. X: {caption}"
-
-
-    def _repr_html_(self) -> str:
-        """
-        Generate a Markdown representation of the Picture object.
-
-        Returns:
-            str: A Markdown representation for preview.
-        """
-
-        self.cls_container.append(self)
-
-        if self.caption is None:
-            caption = ""
-        else:
-            caption = self.caption
-
-        if self.image is not None:
-            path = self.image
-
-            if "pdf" in path:
-                from wand.image import Image as WImage
-
-                img = WImage(filename=path, resolution=144)
-
-                hsize, vsize = img.size
-
-                img.resize(hsize, vsize)
-                display(img)
-                display(f"Fig. X: {caption}")
-                return ""
-            else:
-                size = self.preview_size
-
-                from IPython.display import Image
-                size = self.preview_size
-
-
-                display(Image(filename=path,
-                              #width=size,
-                              ))
-                display(f"Fig. X: {caption}")
-
-                return ""
-                #return f'<img src="{path}" alt="{caption}" style="width: 700px;" width="{size}"/>    \n \n Fig. X: {caption}'
-                # return f'![image preview]({path}) \n \n Fig. X: {caption}'
-        else:
-            return f"Nothing to plot \n \n Fig. X: {caption}"
 
 
     def reported(self):
