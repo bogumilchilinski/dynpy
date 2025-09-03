@@ -23,6 +23,10 @@
     - [Exporting Procedures](#exporting-procedures)
   - [4. Practical Examples](#4-practical-examples)
     - [Generating a Simple Report](#generating-a-simple-report)
+- [ODESystem Class Usage](#odesystem-class-usage)
+    - [ODESystem class usage preview based on a damped mehanical oscillator](#odesystem-class-usage-preview-based-on-a-damped-mehanical-oscillator)
+    - [ODESystem operations on dynamical systems](#odesystem-operations-on-dynamical-systems)
+    - [More information about ODESystem class:](#more-information-about-odesystem-class)
   - [5. Customization Options (Advanced)](#5-customization-options-advanced)
     - [Formatting Text and Equations](#formatting-text-and-equations)
     - [Customizing Layout and Styles](#customizing-layout-and-styles)
@@ -97,7 +101,9 @@ doc.generate_pdf(clean_tex=False)
 ```
 
 ## 3. Looking for some help
+
 Documentclasses with generic content of exemplary document:
+
 ```python
 from dynpy.utilities.documents.document import *
 
@@ -107,8 +113,8 @@ Guide.base_setup()
 WutThesis.base_setup()
 ```
 
-
 Guides that provides step by step instructions:
+
 ```python
 from dynpy.utilities.creators import list_of_guides
 list_of_guides()
@@ -213,10 +219,10 @@ from dynpy.utilities.adaptable import *
 predicted_travel_time = Subsection('Predicted Travel Time');
 CurrentContainer(predicted_travel_time)
 
-time_s = Symbol('time_s', positive=True)
-time_h = Symbol('time_h')
-length = Symbol('length', positive=True)
-velocity = Symbol('velocity', positive=True)
+time_s = Symbol('t_s', positive=True)
+time_h = Symbol('t_h')
+length = Symbol('l', positive=True)
+velocity = Symbol('v', positive=True)
 
 dane = {
     'Start': ['NYC', 'Albany', 'Syracuse', 'Buffalo', 'Cleveland', 'Toledo', 'Total line'],
@@ -243,6 +249,52 @@ report_table = LatexDataFrame.formatted(
 
 
 display(report_table.reported(caption="Travel Time Data Table"))
+```
+
+There is a possibility of providing analitycal solution
+
+```python
+from dynpy.solvers.linear import AnalyticalSolution
+from sympy import *
+import numpy as np
+
+t =Symbol('t')
+x = Function('x')(t)
+
+
+
+data2check=AnalyticalSolution.from_vars_and_rhs([x],[cos(t)+sin(t)**2]).compute_solution(np.linspace(0,100,10001))#.plot()
+
+
+
+#data2check.plot(title='Sample plot', xlabel='Time [s]', ylabel='Value', figsize=(14, 3))#uncomment for preview !!!!DON"T USE IN RAPORT!!!!
+plot=data2check.to_pylatex_tikz(height=8).in_figure(caption='Sample plot 2')#comment for preview
+display(plot)#comment for preview
+```
+
+There is a possibility of providing analitycal solution
+
+```python
+from dynpy.solvers.linear import AnalyticalSolution
+from sympy import *
+import numpy as np
+
+t =Symbol('t')
+x = Function('x')(t)
+y = Function('y')(t)
+
+
+time_signal=AnalyticalSolution.from_vars_and_rhs([x],[cos(t)+sin(t)**2]).compute_solution(np.linspace(0,100,10001))#.plot()
+
+two_signals=AnalyticalSolution.from_vars_and_rhs([x,y],[cos(t)+sin(t)**2,1+exp(cos(t/2)+sin(t/2)**2)]).compute_solution(np.linspace(0,100,10001))#.plot()
+
+
+#time_signal.plot(title='Sample plot', xlabel='Time [s]', ylabel='Value', figsize=(14, 3))#uncomment for preview, !!!!DON"T USE IN RAPORT!!!!
+#two_signals.plot(title='Sample plot', xlabel='Time [s]', ylabel='Value', figsize=(14, 3))#uncomment for preview, !!!!DON"T USE IN RAPORT!!!!
+plot1=time_signal.to_pylatex_tikz(height=8).in_figure(caption='Sample plot 1')#comment for preview
+plot2=two_signals.to_pylatex_tikz(height=8).in_figure(caption='Sample plot 2')#comment for preview
+display(plot1)#comment for preview
+display(plot2)#comment for preview
 ```
 
 ## 3. Exporting Reports
@@ -302,6 +354,74 @@ doc.append(sample_subsection)
 doc.append(second_sample_subsection)
 
 doc.generate_pdf(clean_tex=False)
+```
+
+# ODESystem Class Usage
+
+### ODESystem class usage preview based on a damped mehanical oscillator
+
+```python
+from sympy import *
+from dynpy.solvers.linear import ODESystem
+from sympy.physics.mechanics import dynamicsymbols
+
+m = Symbol('m',positive = True)
+c = Symbol('c',positive = True)
+k = Symbol('k',positive = True)
+t=Symbol('t')
+x=dynamicsymbols('x')
+
+ 
+eq1 = Eq(m*x.diff(t,2)+c*x.diff(t)+k*x,0)
+
+
+odesys = ODESystem(odes = Matrix([eq1.lhs-eq1.rhs]),dvars =Matrix([x],ode_order=2))
+
+odesys.solution
+```
+
+### ODESystem operations on dynamical systems
+
+```python
+from dynpy.models.mechanics.trolley import ForcedSpringMassSystem
+import numpy as np
+from sympy import *
+dsys =ForcedSpringMassSystem()
+t =dsys.ivar
+z = dsys.z
+k=dsys.k
+F=dsys.F
+g=dsys.g
+
+m=dsys.m
+
+dane={
+  k:1,
+  m:1,
+  F:0,
+  g:9.81,
+
+}
+t_span=np.linspace(0.0,10,1000)
+
+ode=dsys.eoms
+
+
+ode.subs(dane).numerized().compute_solution(t_span, [0.1, 0.0]).plot()
+
+ode.solution.with_ics([0.1,0]).subs(dane).numerized().compute_solution(t_span).plot()
+```
+
+### More information about ODESystem class:
+
+```python
+from dynpy.utilities.documents.guides import BasicsOfODESystemGuide
+BasicsOfODESystemGuide()
+
+
+```
+
+```result
 ```
 
 ## 5. Customization Options (Advanced)
@@ -365,15 +485,36 @@ Python Version: **Python 3.8+**. Required Libraries:
 - **pint**
 - **pypandoc**
 - **wand**
+- **pymupdf**
 
 ## Manual Installation
 
 ```bash
-pip install numpy pylatex sympy pandas matplotlib scipy pint pypandoc wand
+pip install numpy pylatex sympy pandas matplotlib scipy pint pypandoc wand pymupdf
 
-pip install dynpyds
+pip install dynpi
 ```
+
+Installing the Development Environment for Engineering Analysis
+
+1. Install Python (Microsoft Store)
+2. Install Visual Studio Code (Microsoft Store)
+2.5 Install Git
+3. Install the DynPy library (https://github.com/bogumilchilinski/dynpy)
+Git clone command https://github.com/bogumilchilinski/dynpy
+4. Install the library - instructions on GitHub - bogumilchilinski/dynpy (https://github.com/bogumilchilinski/dynpy?tab=readme-ov-file#manual-installation)
+4.5 Installing the plugin in VS Code (git extension package + latex workshop)
+5. Creating a virtual environment in VSCode
+Working folder on the main drive + subfolders (output, images)
+Set the kernel and Jupyter Notebook environment
+Set Git Autofetch: True in VSCode settings
+
+Support LaTeX:
+6. Install a separate Latex distribution - e.g., MikaTex (https://miktex.org/download#dok)
+7. (optional) Strawberry Pearl environment
+Installation: https://strawberryperl.com/ + remaining steps to obtain the PDF (admin required)
 
 # Licensing Information
 
 DynPy is distributed under an open-source license. Refer to the LICENSE file for details.
+

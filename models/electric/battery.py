@@ -1,3 +1,364 @@
+import base64
+import inspect
+import random
+
+import IPython as IP
+import numpy as np
+import pandas as pd
+from sympy import (
+    Abs,
+    Eq,
+    Function,
+    Heaviside,
+    Matrix,
+    N,
+    Number,
+    S,
+    Subs,
+    Symbol,
+    Tuple,
+    asin,
+    atan,
+    cos,
+    diag,
+    diff,
+    dsolve,
+    exp,
+    factorial,
+    flatten,
+    fraction,
+    hessian,
+    im,
+    integrate,
+    lambdify,
+    latex,
+    oo,
+    pi,
+    sign,
+    sin,
+    solve,
+    solveset,
+    sqrt,
+    symbols,
+)
+from sympy.physics.mechanics import Point, ReferenceFrame, dynamicsymbols
+from sympy.physics.vector import vlatex, vpprint
+
+from ...dynamics import HarmonicOscillator, LagrangesDynamicSystem
+from ...solvers.linear import ODESystem
+from ..elements import (
+    PID,
+    CombustionEngine,
+    Damper,
+    Disk,
+    Excitation,
+    Force,
+    GravitationalForce,
+    MaterialPoint,
+    RigidBody2D,
+    Spring,
+    base_frame,
+    base_origin,
+)
+from ..mechanics.trolley import (
+    ComposedSystem,
+    NonlinearComposedSystem,
+    base_frame,
+    base_origin,
+)
+from .elements import *
+
+# from models.mechanics.trolley import (   # absolutna ścieżka do mix-inu
+#     ComposedSystem,
+#     NonlinearComposedSystem,
+#     base_frame,
+#     base_origin,
+# )
+
+
+t = Symbol("t")
+
+# from dynpy.models.electric import batterycell
+# mechanics_printing(pretty_print=True)
+
+
+class BatteryCell(ComposedSystem):
+
+    scheme_name = "thevenincircuit.png"
+    real_name = "liioncell.PNG"
+
+    R_1 = Symbol("R_1", positive=True)
+    R_2 = Symbol("R_2", positive=True)
+
+    L_1 = Symbol("L_1", positive=True)
+    L_2 = Symbol("L_2", positive=True)
+
+    C = Symbol("C", positive=True)
+    U = Symbol("U", positive=True)
+    q_1 = dynamicsymbols("q_1")
+    q_2 = dynamicsymbols("q_2")
+    t = Symbol("t")
+    U_li = Function("U_li")(t)
+    U_oc = Symbol("U_oc")
+    R_0 = Symbol("R_0")
+    I_li = Function("I_zad")(t)
+    R_th = Symbol("R_th")
+    C_th = Symbol("C_th")
+    SOC = Function("SOC")(t)
+    SOC_init = Symbol("SOC_init")
+    C_rated = Symbol("C_rated")
+    t_0 = Symbol("t_0")
+    U_th = Function("U_th")(t)
+    funcI = Function("funcI")(t)
+    # U_th = Symbol('U_th')
+
+    def __init__(
+        self,
+        R_1=None,
+        R_2=None,
+        C=None,
+        U=None,
+        q_1=None,
+        q_2=None,
+        t=None,
+        U_th=None,
+        R_th=None,
+        C_th=None,
+        L_1=None,
+        L_2=None,
+        I_li=None,
+        ivar=Symbol("t"),
+        **kwargs,
+    ):
+
+        if t is not None:
+            self.t = t
+        if R_1 is not None:
+            self.R_1 = R_1
+        if R_2 is not None:
+            self.R_2 = R_2
+        if C is not None:
+            self.C = C
+        if U is not None:
+            self.U = U
+        if q_1 is not None:
+            self.q_1 = q_1
+        if q_2 is not None:
+            self.q_2 = q_2
+        if U_th is not None:
+            self.U_th = U_th
+        if R_th is not None:
+            self.R_th = R_th
+        if C_th is not None:
+            self.C_th = C_th
+        if L_1 is not None:
+            self.L_1 = L_1
+        if L_2 is not None:
+            self.L_2 = L_2
+        if I_li is not None:
+            self.I_li = I_li
+        self.qs = [self.q_1, self.q_2]
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+        components = {}
+
+        self._coil_1 = Inductor(self.L_1, self.q_1, qs=[self.q_1])
+        self._coil_2 = Inductor(self.L_2, self.q_2, qs=[self.q_2])
+
+        self._resistor_1 = Resistor(self.R_1, self.q_1, qs=[self.q_1])
+        self._resistor_2 = Resistor(self.R_2, q0=self.q_2, qs=[self.q_2])
+        self._voltagesource = VoltageSource(self.U, q0=self.q_1, qs=[self.q_1])
+        self._capacitor = Capacitor(
+            self.C, q0=self.q_1 - self.q_2, qs=[self.q_1, self.q_2]
+        )
+
+        components["coil_1"] = self._coil_1
+        components["coil_2"] = self._coil_2
+
+        components["resistor_1"] = self._resistor_1
+        components["resistor_2"] = self._resistor_2
+        components["voltagesource"] = self._voltagesource
+        components["capacitor"] = self._capacitor
+
+        return components
+
+    def voltage_ode(self):
+
+        t = self.ivar
+        U_th = self.U_th
+        R_th = self.R_th
+        C_th = self.C_th
+        I_li = self.I_li
+
+        uth_eq = Eq(
+            diff(U_th, t, evaluate=False), ((U_th) / (R_th * C_th)) + I_li / C_th
+        )
+        ode_th = ODESystem(
+            odes=[uth_eq.lhs - uth_eq.rhs],  # residuum  = 0
+            dvars=[U_th],  # zmienna stanu
+            ivar=t,
+            ode_order=1,  # ◀︎ kluczowa informacja
+        )
+
+        return ode_th
+
+    def uth_simulation(self, data_dict1, celldata, step_time, step_current):
+
+        t = self.ivar
+        U_th = self.U_th
+        R_th = self.R_th
+        C_th = self.C_th
+        I_li = self.I_li
+        U_li = self.U_li
+        U_oc = self.U_oc
+        R_0 = self.R_0
+        t_0 = self.t_0
+        SOC = self.SOC
+        C_rated = self.C_rated
+        SOC_init = self.SOC_init
+        ode_th = self.voltage_ode()
+
+        # wzor na napiecie
+        napiecie_eq = Eq(U_li, U_oc - R_0 * I_li - U_th)
+
+        # wzor na soc
+        calka = integrate(I_li, (t, t_0, t))
+        SOC_eq_bezcalki = Eq(SOC, ((1) / (C_rated)))
+        SOC_eq = Eq(SOC, SOC_init + ((1) / (C_rated)) * calka)
+
+        # dane symulacji
+        n_points = step_time[-1] * 4  # rozdzielczosc symulacji probki na sekunde
+        t_array = np.linspace(
+            0, step_time[-1] * 1, n_points
+        )  # czas symulacji i prad symulacji
+
+        # tworzenie pustych list
+        prad_list = []
+        u0_list = []
+        u_array = []
+        soc_array = []
+
+        # tworzenie wymuszenia
+        exprI = 0 * Heaviside(t - 0)
+        for i in range(len(step_time)):
+            exprI = exprI + step_current[i] * Heaviside(t - step_time[i])
+        funcI = lambdify(t, exprI)
+        # exprI=step_current[0]*Heaviside(t-step_time[0])+step_current[1]*Heaviside(t-step_time[1])+step_current[2]*Heaviside(t-step_time[2])+step_current[3]*Heaviside(t-step_time[3])
+        # funcI = lambdify(t, exprI)
+
+        # tworzenie dataframe z wynikami rownania rozniczkowego+tworzenie z tego listy
+        tabelka = (
+            ode_th.subs(I_li, exprI)
+            .subs(data_dict1)
+            .numerized(backend="numpy")
+            .compute_solution(t_array, [0])
+        )
+
+        # display(ode_th)
+        # display(tabelka)
+
+        U_th_list = list(tabelka.iloc[:, 1])
+
+        for i in range(n_points):
+            prad_list.append(funcI(t_array[i]))
+            soc_array.append(
+                float(
+                    (
+                        SOC_eq_bezcalki.rhs.subs(data_dict1)
+                        * (-1)
+                        * (np.trapz(prad_list[0:i], x=t_array[0:i]))
+                        / 3600
+                        + SOC_init.subs(data_dict1)
+                    )
+                )
+            )
+
+            # tutaj jest dopasowanie ocv w zaleznosci od soc, zamiast ifow
+            soc_calk = int(soc_array[i] * 100)
+            # soc_calk = soc_calk*100
+            data_dict1[self.U_oc] = celldata.at[soc_calk, "OCV"]
+            data_dict1[self.R_0] = celldata.at[soc_calk, "R0"]
+
+            u0_list.append(prad_list[-1] * data_dict1[self.R_0])
+            u_array.append(data_dict1[self.U_oc] - U_th_list[i] - u0_list[i])
+
+        wartosci = [u_array, prad_list, soc_array, t_array]
+
+        return wartosci
+
+    def _voltage_response(self, data_dict1, celldata, step_time, step_current):
+
+        t = self.t
+        U_li = self.U_li
+        wyn = self.uth_simulation(data_dict1, celldata, step_time, step_current)
+        t_array = wyn[3]
+        u_array = wyn[0]
+
+        df_u = pd.DataFrame({t: t_array})
+        df_u[U_li] = u_array
+        df_u = df_u.set_index(t)
+
+        return df_u
+
+    def _soc_level_response(self, data_dict1, celldata, step_time, step_current):
+
+        t = self.t
+        SOC = self.SOC
+        wyn = self.uth_simulation(data_dict1, celldata, step_time, step_current)
+        t_array = wyn[3]
+        soc_array = wyn[2]
+
+        df_SOC = pd.DataFrame({t: t_array})
+        df_SOC[SOC] = soc_array
+        df_SOC = df_SOC.set_index(t)
+
+        return df_SOC
+
+    def _current_forcing(self, data_dict1, celldata, step_time, step_current):
+
+        t = self.t
+        I_li = self.I_li
+        wyn = self.uth_simulation(data_dict1, celldata, step_time, step_current)
+        t_array = wyn[3]
+        prad_list = wyn[1]
+
+        df_I = pd.DataFrame({t: t_array})
+        df_I[I_li] = prad_list
+        df_I = df_I.set_index(t)
+
+        return df_I
+
+    # --- opis symboli -------------------------------------------------
+    def symbols_description(self):
+        return {
+            self.R_1: r"rezystancja gałęzi 1 [Ω]",
+            self.R_2: r"rezystancja gałęzi 2 [Ω]",
+            self.C: r"pojemność [F]",
+            self.U: r"wymuszenie napięciowe [V]",
+            self.q_1: r"ładunek gałęzi 1 [C]",
+            self.q_2: r"ładunek gałęzi 2 [C]",
+        }
+
+    # --- słownik jednostek -------------------------------------------
+    def unit_dict(self):
+        return {self.R_1: "Ω", self.R_2: "Ω", self.C: "F", self.U: "V"}
+
+    # --- przykładowe dane nominalne ----------------------------------
+    def get_default_data(self):
+        return {self.R_1: 0.015, self.R_2: 0.020, self.C: 2200e-4, self.U: 3.7, self.L_1:0.00001,self.L_2:0.00001}
+
+    def get_numerical_data(self):
+        return {self.R_1: 0.015, self.R_2: 0.020, self.C: 2200e-6, self.U: 3.7}
+
+
+#         tdf_u=TimeDataFrame(df_u).set_index(t)
+#         tdf_I=TimeDataFrame(df_I).set_index(t)
+#         tdf_SOC=TimeDataFrame(df_SOC).set_index(t)
+
+
+class BatteryCharging(ComposedSystem):
 
     V_OCV = Symbol("V_OCV", positive=True)
     Vd = Symbol("Vd", positive=True)
@@ -715,8 +1076,8 @@ class CircutRC(ComposedSystem):
     A class that determines the equation of an electrical circuit in an RC system
     """
 
-    # scheme_name = 'engine.png'
-    # real_name = 'engine_real.PNG'
+    scheme_name = "thevenincircuit.png"
+    real_name = "liioncell.PNG"
 
     resistance = Symbol("R", positive=True)
     capacity = Symbol("C", positive=True)

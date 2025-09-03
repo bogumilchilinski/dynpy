@@ -67,12 +67,20 @@ from .elements import Capacitor, Inductor, Resistor, VoltageSource
 @dataclass
 class DCMotor(ComposedSystem):
     scheme_name = "DC_motor.png"
-    R_a: Symbol
-    L_a: Symbol
-    J: Symbol
-    B: Symbol
-    K_e: Symbol
-    K_t: Symbol
+    R_a=Symbol('R_a',real=True)
+    L_a=Symbol('L_a',real=True)
+    L_w=Symbol('L_w',real=True)
+    R_w=Symbol('R_w',real=True)
+    J=Symbol('J',real=True)
+    B=Symbol('B',real=True)
+    K_e=Symbol('K_e',real=True)
+    K_t=Symbol('K_t',real=True)
+    U_z=Symbol('U_z',real=True)
+    k_e=Symbol('k_e',real=True)
+    M_obc=Symbol('M_obc',real=True)
+    k_m=Symbol('k_m',real=True)
+    M_a=Symbol('M_a',real=True)
+    M_r=Symbol('M_r',real=True)
     i_w: Symbol = dynamicsymbols("i_w")
     omega_s: Symbol = dynamicsymbols("omega_s")
     ivar: Symbol = Symbol("t")  # wartość domyślna
@@ -209,14 +217,14 @@ class DCMotor(ComposedSystem):
 
     def get_default_data(self):
         default_data_dict = {
-            self.U_z: [10],
-            self.R_w: [2],
-            self.L_w: [0.1],
-            self.k_e: [0.1],
-            self.k_m: [0.1],
-            self.J: [0.1],
-            self.B: [0.5],
-            self.M_obc: [0.2],
+            self.U_z: 10,
+            self.R_w: 2,
+            self.L_w: 0.1,
+            self.k_e: 0.1,
+            self.k_m: 0.1,
+            self.J: 0.1,
+            self.B: 0.5,
+            self.M_obc: 0.2,
         }
         return default_data_dict
 
@@ -270,7 +278,7 @@ class DCMotorIIOrder(ComposedSystem):
     M_r = Symbol("M_r", positive=True)
     i_w = dynamicsymbols("i_w")
     omega_s = dynamicsymbols("omega_s")
-    charge = dynamicsymbols("q")
+    charge = dynamicsymbols("q_1")
     phi = dynamicsymbols("varphi")
 
     def __init__(
@@ -403,14 +411,14 @@ class DCMotorIIOrder(ComposedSystem):
 
     def get_default_data(self):
         default_data_dict = {
-            self.U_z: [10],
-            self.R_w: [2],
-            self.L_w: [0.1],
-            self.k_e: [0.1],
-            self.k_m: [0.1],
-            self.J: [0.1],
-            self.B: [0.5],
-            self.M_obc: [0.2],
+            self.U_z: 10,
+            self.R_w: 2,
+            self.L_w: 0.1,
+            self.k_e: 0.1,
+            self.k_m: 0.1,
+            self.J: 0.1,
+            self.B: 0.5,
+            self.M_obc: 0.2,
         }
         return default_data_dict
 
@@ -442,6 +450,7 @@ class DCMotorIIOrder(ComposedSystem):
 
         # return FirstOrderLinearODESystem.from_ode_system(ode)
         return ode
+
 
 
 class DCMotorHeaviside(DCMotor):

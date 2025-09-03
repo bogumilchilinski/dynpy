@@ -853,6 +853,71 @@ class TrolleyWithElasticPendulumScheme(TikZPicture):
         return code
 
 
+class TrolleyWithExtendablePendulumScheme(TikZPicture):
+    def _scheme_desc(self):
+        code = r"""
+\tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.3cm,post length=0.3cm,segment length=0.3cm}]
+\tikzstyle{damper}=[thick,decoration={markings,  
+    mark connection node=dmp,
+    mark=at position 0.5 with 
+    {
+    \node (dmp) [thick,inner sep=0pt,transform shape,rotate=-90,minimum width=15pt,minimum height=3pt,draw=none] {};
+    \draw [thick] ($(dmp.north east)+(2pt,0)$) -- (dmp.south east) -- (dmp.south west) -- ($(dmp.north west)+(2pt,0)$);
+    \draw [thick] ($(dmp.north)+(0,-5pt)$) -- ($(dmp.north)+(0,5pt)$);
+    }
+    }, decorate]
+\tikzstyle{ground}=[fill,pattern=north east lines,draw=none,minimum width=0.75cm,minimum height=0.3cm]
+\node (M) [draw,outer sep=0pt,thick,minimum width=3cm, minimum height=1.5cm] {$m_{t}$};
+
+% Pendlum | polar coords (dir, radius) and label
+    \node (lt_label) at ($(M.south)+(310:1.75cm)$)   {$l(t)$, $c_{p}$};
+    \draw[dashed] (M.south) -- ++(-90:2.75);
+    
+    
+% Blob | polar coords (dir, radius) and label
+\draw[thick,black] (M.south) --  ++(-75:2.75) coordinate (bob21) node[pos=0.85,right]{$m_{p}$};
+
+
+\fill (bob21) circle (0.2);
+
+
+\node (ground) [ground,anchor=north west,xshift=-2.4cm,yshift=-0.25cm,minimum width=6cm] at (M.south west) {};
+\node (wall_1) [ground,anchor=east,xshift=-2cm,yshift=0cm,minimum height=2cm ,minimum width=0.4cm] at (M.west) {};
+\draw (wall_1.south east) -- (wall_1.north east);
+\draw (wall_1.south east) -- (ground.north east);
+\draw [thick] (M.south west) ++ (0.4cm,-0.125cm) circle (0.125cm)  (M.south east) ++ (-0.4cm,-0.125cm) circle (0.125cm);
+\draw [spring]  (M.180) ++ (0cm,0.5cm) -- ($ (wall_1.0 )+(0cm,0.5cm)  $);
+\draw [damper]  (M.180) ++ (0cm,-0.5cm) -- ($ (wall_1.0 )+(0cm,-0.5cm)  $);
+\draw [thin] (M.east) (0,1.5) -- (0,0.75);
+\draw [-latex,ultra thick] (M.east) ++ (-1.5cm,1.5cm) -- +(1.5cm,0cm);
+
+
+\node (k1) at (-2.5cm,1cm) {$k$};
+\node (c1) at (-2.5cm,0cm) {$c$};
+
+% Force | coords and label
+\node(Ft) at (0.75cm,1.75cm) {$F(t)$};
+
+
+% Rotation angle phi
+%\draw[thick,->] (0,0) -- (0.7,1.9);
+\node at (0.2,-2.25) {$\varphi$};
+
+% Angle arc
+\draw[->] (0,-2.5) arc[start angle=-90,end angle=-80,radius=2.5];
+
+\node (traj_start) at ($(M.south)+(-105:2.75cm)$) {};
+
+%Angle arc
+\draw[dashed] (traj_start) arc[start angle=-105,end angle=-60,radius=2.75];
+
+\draw[dashed] (-90:3.5) circle (0.2);
+\node at (-0.75,-3.20) {$\varphi_{eq}$};%
+
+"""
+        return code
+
+
 class DoublePendulumMeasureScheme(TikZPicture):
     def _scheme_desc(self):
         code = r"""
@@ -1059,10 +1124,10 @@ class TrolleyWithPendulumTestStandScheme(TikZPicture):
         # PL
         # ––––––––––––––––––––––––––––––––––––––––––––––––
         # text1 = r'{\color{violet} Silnik elektryczny}'
-        # text2 = r'{\color{violet} Przekładnia}'
-        # text3 = r'{\color{violet} Building frame model}' # Obiekt badań
+        # text2 = r'{\color{violet} Przekładnia pasowa}'
+        # text3 = r'{\color{violet} Building frame model}' # Obiekt badań: Model ramy budynku => Podatna rama
         # text4 = r'{\color{violet} APTMD}'
-        # text5 = r'{\color{violet} Akcelerometr}'
+        # text5 = r'{\color{violet} Akcelerometry}'
         # text6 = r'{\color{violet} Stół wibracyjny}' # Stół ruchomy
         # text7 = r'{\color{violet} Korbowód}'
         # text8 = r'{\color{violet} Falownik}'
@@ -1070,10 +1135,10 @@ class TrolleyWithPendulumTestStandScheme(TikZPicture):
         # EN
         # ––––––––––––––––––––––––––––––––––––––––––––––––
         text1 = r"{\color{violet} Electric Motor}"
-        text2 = r"{\color{violet} Belt Gearbox}"
-        text3 = r"{\color{violet} Building Frame Model}" # Test Object
+        text2 = r"{\color{violet} Belt Drive}"
+        text3 = r"{\color{violet} Flexible Frame}" # Test Object: Building Frame Model => Flexible Frame
         text4 = r"{\color{violet} APTMD}"
-        text5 = r"{\color{violet} Accelerometer}"
+        text5 = r"{\color{violet} Accelerometers}"
         text6 = r"{\color{violet} Shake–Table}"
         text7 = r"{\color{violet} Connecting Rod}"
         text8 = r"{\color{violet} Inverter}"  # Controller
@@ -1099,7 +1164,7 @@ class TrolleyWithPendulumTestStandScheme(TikZPicture):
     %%%%%%  MID COL
     \\node[inner sep=2pt,align=center,draw] (text1) at ({pos1_x+4},{pos1_y+3.9}) {text1};
     \\node[inner sep=2pt,align=center,draw] (text2) at ({pos1_x+3.5},{pos1_y+2.7}) {text2};
-    \\node[inner sep=2pt,align=center,draw] (text3) at ({pos1_x+6.1},{pos1_y+4.7}) {text3};
+    \\node[inner sep=2pt,align=center,draw] (text3) at ({pos1_x+6.6},{pos1_y+4.7}) {text3};
     \\node[inner sep=2pt,align=center,draw] (text4) at ({pos1_x+9.25},{pos1_y+2}) {text4};
     \\node[inner sep=2pt,fill=white,align=center,draw] (text5) at ({pos1_x+12.2},{pos1_y+2.2}) {text5};
     \\node[inner sep=2pt,align=center,draw] (text6) at ({pos1_x+10.8},{pos1_y-3.8}) {text6};
@@ -1118,6 +1183,73 @@ class TrolleyWithPendulumTestStandScheme(TikZPicture):
     """
         return code
 
+class TrolleyWithPendulumTestStandSchemeNo(TikZPicture):
+
+    def _scheme_desc(self):
+
+        half_force_label = r"{\color{violet} $\frac{F}{2}$}"
+        # ––––––––––––––––––––––––––––––––––––––––––––––––
+        # PL
+        # ––––––––––––––––––––––––––––––––––––––––––––––––
+        # text1 = r'{\color{violet} 1}" # Silnik elektryczny
+        # text2 = r'{\color{violet} 2}" # Przekładnia pasowa
+        # text3 = r'{\color{violet} 3}" # Building frame model # Obiekt badań: Model ramy budynku => Podatna rama
+        # text4 = r'{\color{violet} 4}" # APTMD
+        # text5 = r'{\color{violet} 5}" # Stół wibracyjny # Stół ruchomy
+        # text7 = r'{\color{violet} 6}" # Korbowód
+        # text5 = r'{\color{violet} 7}" # Akcelerometry
+        # text8 = r'{\color{violet} 8}" # Falownik
+        # ––––––––––––––––––––––––––––––––––––––––––––––––
+        # EN
+        # ––––––––––––––––––––––––––––––––––––––––––––––––
+        text1 = r"{\color{violet} \LARGE 1}" # Electric Motor
+        text2 = r"{\color{violet} \LARGE 2}" # Belt Drive
+        text3 = r"{\color{violet} \LARGE 3}" # Flexible Frame # Test Object: Building Frame Model => Flexible Frame
+        text4 = r"{\color{violet} \LARGE 4}" # APTMD
+        text5 = r"{\color{violet} \LARGE 5}" # Shake–Table
+        text6 = r"{\color{violet} \LARGE 6}" # Connecting Rod
+        text7 = r"{\color{violet} \LARGE 7}" # Accelerometers
+        text8 = r"{\color{violet} \LARGE 8}" # Inverter # Controller
+        # ––––––––––––––––––––––––––––––––––––––––––––––––
+
+        pos1_x = 0
+        pos1_y = 0
+
+        del_row = -6.1
+        del_2row = 0.4
+
+        code = f"""
+
+    %\draw[ultra thick,dashed,black] (3.9,-0.25) -- (3.9,-6.2);
+
+    %\draw[ultra thick,dashed,black] (7.9,-1.5) -- (7.9,-6.2);
+    %\draw[ultra thick,dashed,black] (11.9,-1.5) -- (11.9,-6.2);
+
+
+    %\\node[inner sep=7pt,fill=white,align=center] (text) at (1.25,-2.25) {{label}};
+
+    \\node[inner sep=5pt,fill=white] (pic1) at (7.25cm,-0.5cm) {{\includegraphics[width=12cm]{{../images/test_stand_twp.png}}}};
+    %%%%%%  MID COL
+    \\node[inner sep=2pt,align=center,draw] (text1) at ({pos1_x+4.9},{pos1_y+3.9}) {text1};
+    \\node[inner sep=2pt,align=center,draw] (text2) at ({pos1_x+3.9},{pos1_y+2.7}) {text2};
+    \\node[inner sep=2pt,align=center,draw] (text3) at ({pos1_x+7.4},{pos1_y+4.6}) {text3};
+    \\node[inner sep=2pt,align=center,draw] (text4) at ({pos1_x+9.1},{pos1_y+3.5}) {text4};
+    \\node[inner sep=2pt,align=center,draw] (text5) at ({pos1_x+10.3},{pos1_y-3.8}) {text5};
+    \\node[inner sep=2pt,align=center,draw] (text6) at ({pos1_x+7.7},{pos1_y-3.7}) {text6};
+    \\node[inner sep=2pt,fill=white,align=center,draw] (text7) at ({pos1_x+12.3},{pos1_y+2.2}) {text7};
+    \\node[inner sep=2pt,align=center,draw] (text8) at ({pos1_x+6.6},{pos1_y-5}) {text8};
+
+    \\draw[ultra thick,red,->] (text1.south) -- (6,2.8);
+    \\draw[ultra thick,red,->] (text2.south) -- (4.3,1.7);
+    \\draw[ultra thick,red,->] (text3.south) -- (8,3.8);
+    \\draw[ultra thick,red,->] (text4.south) -- (9.8,2.8);
+    \\draw[ultra thick,red,->] (text5.north) -- (10,-0.25);
+    \\draw[ultra thick,red,->] (text6.north) -- (8.2,0.3);
+    \\draw[ultra thick,red,->] (text7.north) -- (12.11,4.3);  %A1
+    \\draw[ultra thick,red,->] (text7.south) -- (11.33,-0.1); %A2
+    \\draw[ultra thick,red,->] (text8.north) -- (5.65,-3.9);
+    """
+        return code
 
 class NationalDAQSystemScheme(TikZPicture):
 
@@ -1165,5 +1297,90 @@ class NationalDAQSystemScheme(TikZPicture):
     \\draw[ultra thick,red,->] (text4.north) -- (12,-1.2); %C1
     \\draw[ultra thick,red,->] (text4.north) -- (8.3,-3.3); %C2
     \\draw[ultra thick,red,->] (text5.south) -- (3.15,0.1);
+    """
+        return code
+
+class SuspensionModelOscillatorScheme(GearModelOscillatorScheme):
+    
+    def _scheme_desc(self):
+
+        code = r"""
+
+    \coordinate (origo) at (0,0);
+
+    \tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.3cm,post length=0.3cm,segment length=0.3cm}]
+
+    \tikzstyle{damper}=[thick,decoration={markings,
+    mark connection node=dmp,
+    mark=at position 0.5 with
+    {
+    \node (dmp) [thick,inner sep=0pt,transform shape,rotate=-90,minimum width=15pt,minimum height=3pt,draw=none] {};
+    \draw [thick] ($(dmp.north east)+(2pt,0)$) -- (dmp.south east) -- (dmp.south west) -- ($(dmp.north west)+(2pt,0)$);
+    \draw [thick] ($(dmp.north)+(0,-5pt)$) -- ($(dmp.north)+(0,5pt)$);
+    }
+    }, decorate]
+
+    \tikzstyle{ground}=[fill,pattern=north east lines,draw=none,minimum width=0.75cm,minimum height=0.3cm]
+
+
+
+    %draw axes
+    %\fill[black] (origo) circle (0.05);
+
+
+    \node (M) [draw,outer sep=0pt,thick,minimum width=3cm, minimum height=1.5cm,yshift=2cm] at (origo) {$m_{red}$};
+    %\node (m1_label) at ($(M)+(0:0.5cm)$) {$m$};
+
+    \draw [spring]    ([xshift=-1cm]M.south) --++(0,-3cm) node (k_tire_end){} node[midway,left] {$k_{s}$};
+
+        \draw [damper] ([xshift=1cm]M.south) --++(0,-3cm) node (c_tire_end){}  node[midway,right=0.25cm] {$c_{s}$};
+
+    %\fill [black] (M.center) circle (0.05);
+
+    % \node (beam) [fill=gray,anchor=north,xshift=0cm,yshift=0cm,minimum width=2cm,minimum height=0.05pt] at (origo) {} node[right]{$m_{beam}=0$};
+
+    % \draw [ultra thick] (k_sup_spring_left.west) -- (k_sup_spring_right.east) node[midway] (beam_center) {};
+
+
+    %         \node (road_sur) [fill=black,anchor=north,xshift=0cm,yshift=-2cm,minimum width=2cm,minimum height=0.05cm] at (beam) {};
+
+    %beam_center.center
+
+    %    \draw[spring] ([xshift=-0.0cm]k_sup_spring_left.center) -- ++(0,-1.5cm) node (k_tire_end) {} node[midway,left] {$k_{s}$};
+
+    %        \draw[damper] ([xshift=+0.5cm](k_sup_spring_right.center) -- ++(0,-2cm) node (c_tire_end) {} node[midway,right=0.25cm] {$c_{s}$};
+
+    \draw[ultra thick] ([xshift=-0.0cm]k_tire_end.west) -- ([xshift=+0.0cm]c_tire_end.east) node (force_attachment_point) {};
+
+
+    \draw [thin] (force_attachment_point) -- +(0,0) coordinate (force_leader_edn);
+    \draw [-latex,ultra thick] (force_leader_edn) -- +(0,-1.5cm) node[above right] (force_t)  {$F$};
+
+    \draw [thin] (0,-2.8) -- +(0,1) coordinate (force_leader_edn) {} node[midway,left] {$u$};
+    \draw[->]        (0,-2)   -- (0,-2.8);
+
+    """
+
+        return code
+
+
+
+class TrolleyWithPendulumTestStandSchemeBox(TikZPicture):
+
+    def _scheme_desc(self):
+
+        code = r"""
+
+        
+    \tikzstyle{block} = [rectangle, draw, rounded corners=6pt, minimum width=3cm, minimum height=1cm, align=center]
+
+    \node[block] (exciter) at (0,0) {Exciter};
+    \node[block] (model) at (4,0) {Model};
+    \node[block] (acc) at (8,0) {Accelerometers};
+    \node[block] (daq) at (12,0) {DAQ};
+
+    \draw[->] (exciter) -- (model);
+    \draw[->] (model) -- (acc);
+    \draw[->] (acc) -- (daq);
     """
         return code
