@@ -1235,20 +1235,46 @@ class NationalDAQSystemScheme(TikZPicture):
     """
         return code
     
+# class TrolleyWithPendulumTestStandSchemeBox(TikZPicture):
+
+#     def _scheme_desc(self):
+
+#         code = r"""
+#     \tikzstyle{block} = [rectangle, draw, rounded corners=6pt, minimum width=3cm, minimum height=1cm, align=center]
+
+#     \node[block] (exciter) at (0,0) {Exciter};
+#     \node[block] (model) at (4,0) {Model};
+#     \node[block] (acc) at (8,0) {Accelerometers};
+#     \node[block] (daq) at (12,0) {DAQ};
+
+#     \draw[->] (exciter) -- (model);
+#     \draw[->] (model) -- (acc);
+#     \draw[->] (acc) -- (daq);
+#     """
+#         return code
+
 class TrolleyWithPendulumTestStandSchemeBox(TikZPicture):
-
     def _scheme_desc(self):
-
         code = r"""
-    \tikzstyle{block} = [rectangle, draw, rounded corners=6pt, minimum width=3cm, minimum height=1cm, align=center]
 
-    \node[block] (exciter) at (0,0) {Exciter};
-    \node[block] (model) at (4,0) {Model};
-    \node[block] (acc) at (8,0) {Accelerometers};
-    \node[block] (daq) at (12,0) {DAQ};
+    \node (B1) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center,] at (0,0) {Kinematic excitation \\ (Vibrating table)};
+    \node (B2) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([xshift=4cm]B1.east) {Main member};
+    \node (UAcc) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([xshift=4cm]B2.east) {Upper accelerometer};
+    \node (LAcc) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([yshift=-3cm]B1.south) {Base accelerometer};
 
-    \draw[->] (exciter) -- (model);
-    \draw[->] (model) -- (acc);
-    \draw[->] (acc) -- (daq);
+    \draw [thick, ->] (B1.east) -- (B2.west);
+    \draw [thick,double, ->] (B2.east) -- (UAcc.west);
+
+    \node (B3) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([yshift=-1.75cm]B2.south) {Vibration absorber};
+
+    \draw [thick, <->] (B2.south) -- (B3.north);
+
+    \node (DAQ) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([yshift=-3cm]UAcc.south) {DAQ};
+
+    \draw [thick, ->] (UAcc.south) -- (DAQ);
+
+    \draw [thick, ->] (B1.south) -- (LAcc);
+    \draw [thick, ->] (LAcc.east) -- (DAQ);
+
     """
         return code
