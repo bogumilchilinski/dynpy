@@ -1861,6 +1861,151 @@ class Picture(Figure, ReportModule):
         print(vector[:-2] + ")")
 
 
+class PltPlot(Picture, ReportModule):
+    """
+    A class that represents a figure environment in a LaTeX document.
+
+    This class is used to insert and customize an image into the document, with options for caption, size, and position.
+
+    Attributes:
+        separate_paragraph (bool): Whether the float is positioned in a separate paragraph.
+        _default_width (str): Default width of the image.
+        packages (List[Union[Package, Command]]): Required LaTeX packages and commands for the Picture class.
+        _position (str): Default position for the floating environment.
+        _preview_default_size (str): Default size for previewing the image.
+
+    Exemplary Usage:
+        >>> Picture('./assets/exemplary-image.png', caption='Exemplary caption.')
+
+    Costomised exemplary usage:
+        >>> Picture(
+        >>>     image='./assets/exemplary-image.png',
+        >>>     caption='Exemplary caption.',
+        >>>     position='h',
+        >>>     width='0.5\\textwidth',
+        >>>     height='10cm',
+        >>>     marker='fig:example'
+        >>> )
+    """
+
+
+    _latex_name = "figure"
+    _default_path = "./tikzplots"
+    _floats_no_gen = plots_no()
+
+    def __init__(
+        self,
+        caption=None,
+        position="H",
+        width=None,
+        height=None,
+        image=None,
+        marker=None,
+        **kwargs,
+    ):
+        """
+        Initialize the Picture class.
+
+        Args:
+            image (Optional[str]): Picture or path to the image file.
+            position (Optional[str]): LaTeX position specifier for the figure.
+            caption (Optional[str]): Caption for the image.
+            width (Optional[str]): Width of the image (e.g., '0.5\\textwidth').
+            height (Optional[str]): Height of the image.
+            marker (Optional[str]): Marker for referencing the figure in LaTeX.
+
+        References:
+            https://www.sharelatex.com/learn/Positioning_of_Figures
+        """
+
+        if isinstance(image, Picture):
+            self.image = image.image
+        elif isinstance(image, str):
+            self.image = image
+        else:
+            self.image = self._save_plt_plot()
+
+        self.caption = caption
+        self.preview_size = None
+
+        if width is not None:
+            self.width = width
+        else:
+            self.width = self._default_width
+
+        self.height = height
+
+        self.marker = marker
+
+        if position is not None:
+            self._position = position
+
+        super(Figure,self).__init__(position=self._position, **kwargs)
+
+        if self.image is not None:
+            if not os.path.exists("./dynpy") and "./dynpy/" in self.image:
+
+                type(self)._settle_dynpy()
+                self.image = self.image.replace("./dynpy", "./._dynpy_env/dynpy")
+
+            self.add_image(NoEscape(self.image), width=self.width)
+
+        if self.caption is not None:
+            self.add_caption(NoEscape(self.caption))
+
+        if self.marker is not None:
+            self.append(Label(self.marker))
+        else:
+            auto_mrk = AutoMarker(self).marker
+            marker = auto_mrk
+
+            self.marker = marker
+
+            self.append(Label(marker))
+
+    @property
+    def preview_size(self):
+        if self._preview_size is not None:
+
+            return self._preview_size
+        else:
+            return self.__class__._preview_default_size
+
+    @preview_size.setter
+    def preview_size(self, size):
+        if isinstance(size, float) or isinstance(size, int):
+            size = NoEscape(f"{size}cm")
+        if isinstance(size, str):
+            size = NoEscape(size)
+
+        self._preview_size = size
+
+    def _get_str_key(self) -> str:
+        """
+        Generate a string key for the image based on its attributes.
+
+        Returns:
+            str: A string representation of the image key.
+        """
+
+        return self.image + "_caption:" + str(self.caption)
+    
+    def _save_plt_plot(self):
+            
+        import matplotlib.pyplot as plt
+
+        fig_no = next(self._floats_no_gen)
+
+        pic_filename = f"{self._default_path}/{self.__class__.__name__}{fig_no}.png"
+
+        plt.savefig(pic_filename, bbox_inches='tight')
+        plt.close()
+
+        #self.append(Command('includegraphics', arguments=[pic_filename]))
+
+        return pic_filename
+
+
 class StarredPicture(Picture):
     _latex_name = "figure*"
 
