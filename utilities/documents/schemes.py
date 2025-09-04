@@ -1302,6 +1302,66 @@ class NationalDAQSystemScheme(TikZPicture):
 
 class SuspensionModelOscillatorScheme(GearModelOscillatorScheme):
     
+    def _scheme_desc(self):
+
+        code = r"""
+
+    \coordinate (origo) at (0,0);
+
+    \tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.3cm,post length=0.3cm,segment length=0.3cm}]
+
+    \tikzstyle{damper}=[thick,decoration={markings,
+    mark connection node=dmp,
+    mark=at position 0.5 with
+    {
+    \node (dmp) [thick,inner sep=0pt,transform shape,rotate=-90,minimum width=15pt,minimum height=3pt,draw=none] {};
+    \draw [thick] ($(dmp.north east)+(2pt,0)$) -- (dmp.south east) -- (dmp.south west) -- ($(dmp.north west)+(2pt,0)$);
+    \draw [thick] ($(dmp.north)+(0,-5pt)$) -- ($(dmp.north)+(0,5pt)$);
+    }
+    }, decorate]
+
+    \tikzstyle{ground}=[fill,pattern=north east lines,draw=none,minimum width=0.75cm,minimum height=0.3cm]
+
+
+
+    %draw axes
+    %\fill[black] (origo) circle (0.05);
+
+
+    \node (M) [draw,outer sep=0pt,thick,minimum width=3cm, minimum height=1.5cm,yshift=2cm] at (origo) {$m_{red}$};
+    %\node (m1_label) at ($(M)+(0:0.5cm)$) {$m$};
+
+    \draw [spring]    ([xshift=-1cm]M.south) --++(0,-3cm) node (k_tire_end){} node[midway,left] {$k_{s}$};
+
+        \draw [damper] ([xshift=1cm]M.south) --++(0,-3cm) node (c_tire_end){}  node[midway,right=0.25cm] {$c_{s}$};
+
+    %\fill [black] (M.center) circle (0.05);
+
+    % \node (beam) [fill=gray,anchor=north,xshift=0cm,yshift=0cm,minimum width=2cm,minimum height=0.05pt] at (origo) {} node[right]{$m_{beam}=0$};
+
+    % \draw [ultra thick] (k_sup_spring_left.west) -- (k_sup_spring_right.east) node[midway] (beam_center) {};
+
+
+    %         \node (road_sur) [fill=black,anchor=north,xshift=0cm,yshift=-2cm,minimum width=2cm,minimum height=0.05cm] at (beam) {};
+
+    %beam_center.center
+
+    %    \draw[spring] ([xshift=-0.0cm]k_sup_spring_left.center) -- ++(0,-1.5cm) node (k_tire_end) {} node[midway,left] {$k_{s}$};
+
+    %        \draw[damper] ([xshift=+0.5cm](k_sup_spring_right.center) -- ++(0,-2cm) node (c_tire_end) {} node[midway,right=0.25cm] {$c_{s}$};
+
+    \draw[ultra thick] ([xshift=-0.0cm]k_tire_end.west) -- ([xshift=+0.0cm]c_tire_end.east) node (force_attachment_point) {};
+
+
+    \draw [thin] (force_attachment_point) -- +(0,0) coordinate (force_leader_edn);
+    \draw [-latex,ultra thick] (force_leader_edn) -- +(0,-1.5cm) node[above right] (force_t)  {$F$};
+
+    \draw [thin] (0,-2.8) -- +(0,1) coordinate (force_leader_edn) {} node[midway,left] {$u$};
+    \draw[->]        (0,-2)   -- (0,-2.8);
+
+    """
+
+        return code
 # class TrolleyWithPendulumTestStandSchemeBox(TikZPicture):
 
 #     def _scheme_desc(self):
