@@ -1379,7 +1379,6 @@ class SuspensionModelOscillatorScheme(GearModelOscillatorScheme):
 #     \draw[->] (acc) -- (daq);
 #     """
 #         return code
-
 class TrolleyWithPendulumTestStandSchemeBox(TikZPicture):
     def _scheme_desc(self):
         code = r"""
