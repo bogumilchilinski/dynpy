@@ -853,6 +853,71 @@ class TrolleyWithElasticPendulumScheme(TikZPicture):
         return code
 
 
+class TrolleyWithExtendablePendulumScheme(TikZPicture):
+    def _scheme_desc(self):
+        code = r"""
+\tikzstyle{spring}=[thick,decorate,decoration={zigzag,pre length=0.3cm,post length=0.3cm,segment length=0.3cm}]
+\tikzstyle{damper}=[thick,decoration={markings,  
+    mark connection node=dmp,
+    mark=at position 0.5 with 
+    {
+    \node (dmp) [thick,inner sep=0pt,transform shape,rotate=-90,minimum width=15pt,minimum height=3pt,draw=none] {};
+    \draw [thick] ($(dmp.north east)+(2pt,0)$) -- (dmp.south east) -- (dmp.south west) -- ($(dmp.north west)+(2pt,0)$);
+    \draw [thick] ($(dmp.north)+(0,-5pt)$) -- ($(dmp.north)+(0,5pt)$);
+    }
+    }, decorate]
+\tikzstyle{ground}=[fill,pattern=north east lines,draw=none,minimum width=0.75cm,minimum height=0.3cm]
+\node (M) [draw,outer sep=0pt,thick,minimum width=3cm, minimum height=1.5cm] {$m_{t}$};
+
+% Pendlum | polar coords (dir, radius) and label
+    \node (lt_label) at ($(M.south)+(310:1.75cm)$)   {$l(t)$, $c_{p}$};
+    \draw[dashed] (M.south) -- ++(-90:2.75);
+    
+    
+% Blob | polar coords (dir, radius) and label
+\draw[thick,black] (M.south) --  ++(-75:2.75) coordinate (bob21) node[pos=0.85,right]{$m_{p}$};
+
+
+\fill (bob21) circle (0.2);
+
+
+\node (ground) [ground,anchor=north west,xshift=-2.4cm,yshift=-0.25cm,minimum width=6cm] at (M.south west) {};
+\node (wall_1) [ground,anchor=east,xshift=-2cm,yshift=0cm,minimum height=2cm ,minimum width=0.4cm] at (M.west) {};
+\draw (wall_1.south east) -- (wall_1.north east);
+\draw (wall_1.south east) -- (ground.north east);
+\draw [thick] (M.south west) ++ (0.4cm,-0.125cm) circle (0.125cm)  (M.south east) ++ (-0.4cm,-0.125cm) circle (0.125cm);
+\draw [spring]  (M.180) ++ (0cm,0.5cm) -- ($ (wall_1.0 )+(0cm,0.5cm)  $);
+\draw [damper]  (M.180) ++ (0cm,-0.5cm) -- ($ (wall_1.0 )+(0cm,-0.5cm)  $);
+\draw [thin] (M.east) (0,1.5) -- (0,0.75);
+\draw [-latex,ultra thick] (M.east) ++ (-1.5cm,1.5cm) -- +(1.5cm,0cm);
+
+
+\node (k1) at (-2.5cm,1cm) {$k$};
+\node (c1) at (-2.5cm,0cm) {$c$};
+
+% Force | coords and label
+\node(Ft) at (0.75cm,1.75cm) {$F(t)$};
+
+
+% Rotation angle phi
+%\draw[thick,->] (0,0) -- (0.7,1.9);
+\node at (0.2,-2.25) {$\varphi$};
+
+% Angle arc
+\draw[->] (0,-2.5) arc[start angle=-90,end angle=-80,radius=2.5];
+
+\node (traj_start) at ($(M.south)+(-105:2.75cm)$) {};
+
+%Angle arc
+\draw[dashed] (traj_start) arc[start angle=-105,end angle=-60,radius=2.75];
+
+\draw[dashed] (-90:3.5) circle (0.2);
+\node at (-0.75,-3.20) {$\varphi_{eq}$};%
+
+"""
+        return code
+
+
 class DoublePendulumMeasureScheme(TikZPicture):
     def _scheme_desc(self):
         code = r"""
@@ -1234,6 +1299,8 @@ class NationalDAQSystemScheme(TikZPicture):
     \\draw[ultra thick,red,->] (text5.south) -- (3.15,0.1);
     """
         return code
+
+class SuspensionModelOscillatorScheme(GearModelOscillatorScheme):
     
 # class TrolleyWithPendulumTestStandSchemeBox(TikZPicture):
 

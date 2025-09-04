@@ -1998,7 +1998,7 @@ advanced_modeling_schedule_code_str_en = """> *Informational comment - remove th
 The aim of the issue is to manage the process of project implementation.
 The following activities are to do:
 
-- [{tic}] assignment of tasks (with `ResearchProjectIssueCreator` class);
+- [{tic}] assignment of tasks (with `{class_name}` class);
 
 - [{tic}] presentation of requirements that need to be fulfilled (code, issues, other things);
 
@@ -2027,7 +2027,7 @@ Estimated execution time - {period_x7} {period_unit}s.
 
 
 advanced_modeling_intro_code_str_en = """> *Informational comment - remove this message when issues is completed.*
-> *This issue needs at most 1 period per team (period (typically one week) - depends on assumed schedule, team (typically 1-3 students) - depends on project complexity).*
+> *This issue needs at most {base_period} {period_unit} per team (team (typically 1-3 {persons_name}) - depends on project complexity).*
 
 The goal is to prepare working environment and initial content of the report (draft) that includes the following elements or activities:
 
@@ -2062,18 +2062,39 @@ The goal is to investigate a current state of the art for the topic and methodol
 Estimated execution time - {period_x2} {period_unit}s.
 """
 
+
+advanced_modeling_analysis_code_str_en = """> *Informational comment - remove this message when issues is completed.*
+> *This issue needs at most {period_x2} {period_unit}s per team (team (typically 1-3 {persons_name}) - depends on project complexity).*
+
+The goal is a validation with the reference object and discussion of obtained results. The following elements or activities should be included:
+
+[{tic}] selection of the reference object (empirical data, external sources or another software);
+
+[{tic}] preliminary modelling of the reference object *(if possible - remove if not applicable)*;
+
+[{tic}] reference object description and its further analysis;
+
+[{tic}] presentation and analysis of the reference data;
+
+[{tic}] analysis of the reference data and performed simulations, identification of the theoretical model *(if possible - remove if not applicable)*;
+
+[{tic}] discussion of the results and identified phenomena.
+
+Estimated execution time - {period_x2} {period_unit}s.
+"""
+
 advanced_modelling_modelling_code_str_en = """> *Informational comment - remove this message when issues is completed.*
 > *This issue needs at most {period_x3} {period_unit}s per team (team (typically 1-3 {persons_name}) - depends on project complexity).*
 
 The goal is creating the theoretical model of an investigated object that includes the following elements or activities:
 
-[{tic}] selection of a model from the DynPy library that resembles the model defined in the previous phase;
+[{tic}] implementation (inheritance or selection) of a model with DynPi library that represents the investigated object;
 
-[{tic}] praparation of all the necessary equations for the analysis (supported by the model);
+[{tic}] preparation of all the necessary equations for the analysis (supported by the model);
 
 [{tic}] selection of appropriate data and parameters for the chosen simulation model;
 
-[{tic}] initial verification of the implemented functions to ensure correctness.
+[{tic}] initial verification of the implementation to ensure correctness.
 
 Estimated execution time - {period_x3} {period_unit}s.
 """
@@ -2091,49 +2112,35 @@ The goal is to use the model to perform all necessary analyses and got valuable 
 
 [{tic}] analysis accuracy of the selected data;
 
-[{tic}] preparation of a comparison of the results of performed simulations.
+[{tic}] comparison of the reference data and performed simulations, identification of the theoretical model *(if possible - remove if not applicable)*;
+
+[{tic}] preparation of a comparison of the results of performed activities.
 
 Estimated execution time - {period_x2} {period_unit}s.
 """
 
-advanced_modeling_analysis_code_str_en = """> *Informational comment - remove this message when issues is completed.*
-> *This issue needs at most {base_period} {period_unit} per team (team (typically 1-3 {persons_name}) - depends on project complexity).*
 
-The goal is a validation with the reference object and discussion of obtained results. The following elements or activities should be included:
-
-[{tic}] selection of the reference object (empirical data, external sources or another software);
-
-[{tic}] reference object description and its further analysis;
-
-[{tic}] presentation and analysis of the reference data;
-
-[{tic}] analysis of the referenece data and performed simulations, identification of the theoretical model *(if possible - remove if not applicable)*;
-
-[{tic}] comparison of the results obtained and reference data (validation of the proposed solution).
-
-Estimated execution time - {base_period} {period_unit}.
-"""
 
 advanced_modeling_report_code_str_en = """> *Informational comment - remove this message when issues is completed.*
-> *This issue needs at most {period_x2} {period_unit}s per team (team (typically 1-3 {persons_name}) - depends on project complexity).*
+> *This issue needs at most {period_x3} {period_unit}s per team (team (typically 1-3 {persons_name}) - depends on project complexity).*
 
-The goal is a revision of all steps of the research and final assesment of the report. The folliwng elements or activities should be included:
+The goal is a revision of all steps of the research and final assessment of the report. The following elements or activities should be included:
 
 [{tic}] preliminary evaluation of the report content and structure;
 
 [{tic}] title pages, statements, abstracts, references and lists of figures, listings, tables and etc.;
 
-[{tic}] formal assesment of the report (correctness of the structure and volume);
+[{tic}] formal assessment of the report (correctness of the structure and volume);
 
 [{tic}] final validation of report content (improvements of sections);
 
-[{tic}] summary and conlusions from the performed activities;
+[{tic}] summary and conclusions from the performed activities;
 
 [{tic}] final revision and improvements (if needed) of the title and abstracts;
 
 [{tic}] preparation of the review and required documents, submission.
 
-Estimated execution time - {period_x2} {period_unit}s.
+Estimated execution time - {period_x3} {period_unit}s.
 """
 
 
@@ -2196,6 +2203,7 @@ class ResearchProjectIssueCreator:
             "issue_no_6": self._issue_no + 6,
             "guide_class_module": guide_class.__module__,
             "guide_class_name": guide_class.__name__,
+            "class_name":self.__class__.__name__,
             "date": self._date,
             "time": self._time,
             "tic": tic,
@@ -2225,11 +2233,13 @@ class ResearchProjectIssueCreator:
 
             titles_dict = {
                 "schedule": f"{project_type} on {title}",  ###
-                "intro": f"Preparation of the preleminary content report for {project_type.lower()} on {title} (issue #{issue_no} related)",  ###
+                "intro": f"Preparation of the preliminary content report for {project_type.lower()} on {title} (issue #{issue_no} related)",  ###
                 "basics": f"Investigation of state of the art and research methodology for the {project_type.lower()} on {title.lower()} (issue #{issue_no} related)",  ###
+                "analysis": f"Analysis of reference data in the {project_type.lower()} on {title.lower()} (issue #{issue_no} related)",  ###
+
                 "modelling": f"Modelling of the investigated object for the {project_type.lower()} on {title.lower()} (issue #{issue_no} related)",  ###
                 "simulation": f"Performing simulations of investigated case in the {project_type.lower()} on {title.lower()} (issue #{issue_no} related)",  ###
-                "analysis": f"Analysis and validation of obtained results in the {project_type.lower()} on {title.lower()} (issue #{issue_no} related)",  ###
+                
                 "report": f"Ending revision of a report covering all phases of {project_type.lower()} on {title.lower()} (issue #{issue_no} related)",  ###
             }
 
@@ -2238,9 +2248,10 @@ class ResearchProjectIssueCreator:
                 "schedule": f"Prezentacja harmonogramu prac na zajęciach z przedmiotu {title.lower()}",  ###
                 "intro": f"Wprowadzenie do środowiska DynPy do wykonania prac z przedmiotu {title.lower()} (powiązane z issue #{issue_no})",  ###
                 "basics": f"Przygotowanie podstawowych informacji o modelu oraz zaproponowanie koncepcji stanowiska badawczego z przedmiotu {title.lower()} (powiązane z issue #{issue_no})",  ###
+                "analysis": f"Analiza danych referencyjnych w {project_type.lower()} o {title.lower()} (powiązane z issue #{issue_no})",  ###
                 "modelling": f"Wykonanie modelu symulacyjnego z wybranego zagadnienia z przedmiotu {title.lower()} (powiązane z issue #{issue_no})",  ###
                 "simulation": f"Przeporwadzenie symulacji rozważanego modelu z {project_type.lower()} o {title.lower()} (powiązane z issue #{issue_no})",  ###
-                "analysis": f"Analiza i zatwierdzenie otrzymanych wyników z {project_type.lower()} o {title.lower()} (powiązane z issue #{issue_no})",  ###
+                
                 "report": f"Końcowa rewizja raportu z wszystkich faz {project_type.lower()} o {title.lower()} (powiązane z issue #{issue_no})",  ###
             }
 
@@ -2255,9 +2266,12 @@ class ResearchProjectIssueCreator:
         schedule_issue_dict = self.get_schedule_issue_dict()
         intro_issue_dict = self.get_intro_issue_dict()
         basics_issue_dict = self.get_basics_issue_dict()
+
+        analysis_issue_dict = self.get_analysis_issue_dict()
+
         modelling_issue_dict = self.get_modelling_issue_dict()
         simulation_issue_dict = self.get_simulation_issue_dict()
-        analysis_issue_dict = self.get_analysis_issue_dict()
+        
         report_issue_dict = self.get_report_issue_dict()
 
         issue_code_str = (
@@ -2291,7 +2305,19 @@ class ResearchProjectIssueCreator:
             + "\n "
             + self.closing_comment_text_basics
             + "\n "
+
             + f"# Issue no. #{issue_no+3} \n "
+            + "## "
+            + analysis_issue_dict["title"]
+            + "\n "
+            + analysis_issue_dict["body"]
+            + "\n "
+            + "### Closing comment (example)"
+            + "\n "
+            + self.closing_comment_text_analysis
+            + "\n "
+
+            + f"# Issue no. #{issue_no+4} \n "
             + "## "
             + modelling_issue_dict["title"]
             + "\n "
@@ -2301,7 +2327,7 @@ class ResearchProjectIssueCreator:
             + "\n "
             + self.closing_comment_text_modelling
             + "\n "
-            + f"# Issue no. #{issue_no+4} \n "
+            + f"# Issue no. #{issue_no+5} \n "
             + "## "
             + simulation_issue_dict["title"]
             + "\n "
@@ -2310,16 +2336,6 @@ class ResearchProjectIssueCreator:
             + "### Closing comment (example)"
             + "\n "
             + self.closing_comment_text_simulation
-            + "\n "
-            + f"# Issue no. #{issue_no+5} \n "
-            + "## "
-            + analysis_issue_dict["title"]
-            + "\n "
-            + analysis_issue_dict["body"]
-            + "\n "
-            + "### Closing comment (example)"
-            + "\n "
-            + self.closing_comment_text_analysis
             + "\n "
             + f"# Issue no. #{issue_no+6} \n "
             + "## "
@@ -2382,6 +2398,23 @@ class ResearchProjectIssueCreator:
                 "body": advanced_modeling_basics_code_str.format(**elems_dict),
             }
 
+    def get_analysis_issue_dict(self):
+        elems_dict = self._get_elems_dict()
+        titles = self.get_issues_titles()
+        lang = self._lang
+
+        if lang == "en":
+            return {
+                "title": titles["analysis"],
+                "body": advanced_modeling_analysis_code_str_en.format(**elems_dict),
+            }
+        else:
+            return {
+                "title": titles["analysis"],
+                "body": advanced_modeling_analysis_code_str.format(**elems_dict),
+            }
+
+
     def get_modelling_issue_dict(self):
         elems_dict = self._get_elems_dict()
         titles = self.get_issues_titles()
@@ -2414,21 +2447,7 @@ class ResearchProjectIssueCreator:
                 "body": advanced_modeling_simulation_code_str.format(**elems_dict),
             }
 
-    def get_analysis_issue_dict(self):
-        elems_dict = self._get_elems_dict()
-        titles = self.get_issues_titles()
-        lang = self._lang
 
-        if lang == "en":
-            return {
-                "title": titles["analysis"],
-                "body": advanced_modeling_analysis_code_str_en.format(**elems_dict),
-            }
-        else:
-            return {
-                "title": titles["analysis"],
-                "body": advanced_modeling_analysis_code_str.format(**elems_dict),
-            }
 
     def get_report_issue_dict(self):
         elems_dict = self._get_elems_dict()
@@ -2468,7 +2487,7 @@ class ResearchProjectIssueCreator:
         comment_str_h1 = "> *Exemplary comment. You can copy example below and close issue with new comment or modify it and close the issue.* "
         comment_str_h2 = "*Remove this message or keep it if new comment is created.*"
 
-        comment_str_2 = "All done. The partial report for this stage can be found in the folling resource: LINK."
+        comment_str_2 = "All done. The partial report for this stage can be found in the follwing resource: LINK."
 
         return f"{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}"
 

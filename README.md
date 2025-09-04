@@ -23,6 +23,10 @@
     - [Exporting Procedures](#exporting-procedures)
   - [4. Practical Examples](#4-practical-examples)
     - [Generating a Simple Report](#generating-a-simple-report)
+- [ODESystem Class Usage](#odesystem-class-usage)
+    - [ODESystem class usage preview based on a damped mehanical oscillator](#odesystem-class-usage-preview-based-on-a-damped-mehanical-oscillator)
+    - [ODESystem operations on dynamical systems](#odesystem-operations-on-dynamical-systems)
+    - [More information about ODESystem class:](#more-information-about-odesystem-class)
   - [5. Customization Options (Advanced)](#5-customization-options-advanced)
     - [Formatting Text and Equations](#formatting-text-and-equations)
     - [Customizing Layout and Styles](#customizing-layout-and-styles)
@@ -351,6 +355,7 @@ doc.append(second_sample_subsection)
 
 doc.generate_pdf(clean_tex=False)
 ```
+
 # ODESystem Class Usage
 
 ### ODESystem class usage preview based on a damped mehanical oscillator
@@ -416,6 +421,9 @@ BasicsOfODESystemGuide()
 
 ```
 
+```result
+```
+
 ## 5. Customization Options (Advanced)
 
 ### Formatting Text and Equations
@@ -477,13 +485,14 @@ Python Version: **Python 3.8+**. Required Libraries:
 - **pint**
 - **pypandoc**
 - **wand**
+- **pymupdf**
 
 ## Manual Installation
 
 ```bash
-pip install numpy pylatex sympy pandas matplotlib scipy pint pypandoc wand
+pip install numpy pylatex sympy pandas matplotlib scipy pint pypandoc wand pymupdf
 
-pip install dynpyds
+pip install dynpi
 ```
 
 Installing the Development Environment for Engineering Analysis
