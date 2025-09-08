@@ -134,6 +134,9 @@ section = Section('Sample section name')
 subsection = Subsection('Sample subsection name');
 ```
 
+```result
+```
+
 #### Selecting a section or subsection to add content to
 
 ```python
@@ -185,12 +188,17 @@ Creating plot and adding it to document
 
 ```python
 import matplotlib.pyplot as plt
+from dynpy.utilities.report import PltPlot
 
-def create_plot():
-    plt.plot([0, 1, 2], [0, 1, 4])
-    plt.savefig("./images/plot.png")
 
-Picture('./images/plot.png', caption='Sample plot')
+plt.plot([0, 1, 2], [0, 1, 4],label='linear')
+plt.xlabel('x-axis')
+plt.ylabel('y-axis')
+plt.title('Sample Plot')
+plt.legend()
+
+data_plot=PltPlot(caption='Sample plot')
+display(data_plot)
 ```
 
 Adding formula to the document
@@ -263,13 +271,16 @@ x = Function('x')(t)
 
 
 
-data2check=AnalyticalSolution.from_vars_and_rhs([x],[cos(t)+sin(t)**2]).compute_solution(np.linspace(0,100,10001))#.plot()
+results_df=AnalyticalSolution.from_vars_and_rhs([x],[cos(t)+sin(t)**2]).compute_solution(np.linspace(0,100,10001))#.plot()
 
+#METHOD #1 (optional way) - via matplotlib
+results_df.to_latex_dataframe.plot()
+dataplot_plt=PltPlot(caption='Sample plot')
+display(dataplot_plt)
 
-
-#data2check.plot(title='Sample plot', xlabel='Time [s]', ylabel='Value', figsize=(14, 3))#uncomment for preview !!!!DON"T USE IN RAPORT!!!!
-plot=data2check.to_pylatex_tikz(height=8).in_figure(caption='Sample plot 2')#comment for preview
-display(plot)#comment for preview
+#METHOD #1 (prefered wat) - via matplotlib
+dataplot_tikz=results_df.to_pylatex_tikz(height=8).in_figure(caption='Sample plot 2')#comment for preview
+display(dataplot_tikz)#comment for preview
 ```
 
 There is a possibility of providing analitycal solution
@@ -283,18 +294,15 @@ t =Symbol('t')
 x = Function('x')(t)
 y = Function('y')(t)
 
-
-time_signal=AnalyticalSolution.from_vars_and_rhs([x],[cos(t)+sin(t)**2]).compute_solution(np.linspace(0,100,10001))#.plot()
-
-two_signals=AnalyticalSolution.from_vars_and_rhs([x,y],[cos(t)+sin(t)**2,1+exp(cos(t/2)+sin(t/2)**2)]).compute_solution(np.linspace(0,100,10001))#.plot()
+results_signals_df=AnalyticalSolution.from_vars_and_rhs([x,y],[cos(t)+sin(t)**2,1+exp(cos(t/2)+sin(t/2)**2)]).compute_solution(np.linspace(0,100,10001))#.plot()
 
 
-#time_signal.plot(title='Sample plot', xlabel='Time [s]', ylabel='Value', figsize=(14, 3))#uncomment for preview, !!!!DON"T USE IN RAPORT!!!!
-#two_signals.plot(title='Sample plot', xlabel='Time [s]', ylabel='Value', figsize=(14, 3))#uncomment for preview, !!!!DON"T USE IN RAPORT!!!!
-plot1=time_signal.to_pylatex_tikz(height=8).in_figure(caption='Sample plot 1')#comment for preview
-plot2=two_signals.to_pylatex_tikz(height=8).in_figure(caption='Sample plot 2')#comment for preview
-display(plot1)#comment for preview
-display(plot2)#comment for preview
+### PREVIEW
+#results_signals_df.plot(title='Sample plot', xlabel='Time [s]', ylabel='Value', figsize=(14, 3))#uncomment for preview, !!!!DON"T USE IN RAPORT!!!!
+
+data_plot=results_signals_df.to_pylatex_tikz(height=8).in_figure(caption='Time history of the process')#comment for preview
+display(data_plot)
+
 ```
 
 ## 3. Exporting Reports
