@@ -2609,3 +2609,39 @@ class PDF_link:
             display_pdf(f.read(), raw=True)
 
         f.close()
+
+class OutputFileGenerator:
+
+
+    #_engine = 'lualatex.exe'
+    _engine = 'pdflatex.exe'
+
+    def __init__(self, source):
+        self._source = source
+        self._filepath = source.default_filepath
+
+        
+        self._filename = self._filepath.split('/')[-1].replace('.tex', '')
+        self._output_dir = self._filepath.replace(self._filename, '')
+
+
+    def generate_pdf(self):
+        import os
+        from IPython.display import display, IFrame,FileLink
+
+        self._source.generate_tex()
+ 
+        # print(self._output_dir)
+        # print(self._filepath)
+
+        for _ in range(3):
+            os.system(f'{self._engine} --output-directory={self._output_dir} {self._filepath}')
+
+        return FileLink(f'{self._filepath}.pdf')
+    
+
+class PdfLatexGenerator(OutputFileGenerator):
+    _engine = 'pdflatex.exe'
+
+class LuaLatexGenerator(OutputFileGenerator):
+    _engine = 'lualatex.exe'
