@@ -3,7 +3,7 @@ import inspect
 from datetime import datetime
 
 import pint
-from github import Github
+
 
 import dynpy
 from dynpy.utilities.documents import document
@@ -787,6 +787,7 @@ class GitHubInterface:
     def __init__(self, token=None, repo_name=None):
 
         from github import Auth
+        from github import Github
 
         if token is None:
             pass_code = getpass.getpass("Github token")
@@ -815,6 +816,7 @@ class GitHubInterface:
         """
 
         from github import Auth
+        from github import Github
 
         if self.g is None:
             pass_code = getpass.getpass("Github token")
@@ -2022,42 +2024,44 @@ The tasks to complete are as follows:
 
 - [{tic}] #{issue_no_6}
 
-Estimated execution time - {period_x7} {period_unit}s.
+Estimated execution time - {period_x12} {period_unit}s.
 """
 
 
 advanced_modeling_intro_code_str_en = """> *Informational comment - remove this message when issues is completed.*
 > *This issue needs at most {base_period} {period_unit} per team (team (typically 1-3 {persons_name}) - depends on project complexity).*
 
-The goal is to prepare working environment and initial content of the report (draft) that includes the following elements or activities:
+The goal of the issue is to prepare working environment and initial content of the report (draft) that includes the following elements or activities:
 
-[{tic}] preparation of folder structure, necessary files and preleminary report content;
+- [{tic}] preparation of the imports from `ReportText`, `Picture`, `WutThesis` and other classes with [README](https://github.com/bogumilchilinski/dynpy/?tab=readme-ov-file#2-creating-first-document--report) file;
 
-[{tic}] definition of the requirements and expectations for the project, determination of the project field (mechanics, electrics, dynamics, kinematics, etc.);
+- [{tic}] preparation of folder structure, necessary files and preleminary report content (with `WutThesis.base_setup()` method presented in [README](https://github.com/bogumilchilinski/dynpy/?tab=readme-ov-file#3-looking-for-some-help));
 
-[{tic}] selection of a reference object (mechanism, algorithm, software or phenomenon) for further analysis;
+- [{tic}] definition of the requirements and expectations for the project, determination of the project field (mechanics, electrics, dynamics, kinematics, etc.);
 
-[{tic}] analysis of an example of a reference object that relates to the simulation model;
+- [{tic}] selection of a reference object (mechanism, algorithm, software or phenomenon) for further analysis;
 
-[{tic}] definition of the assumptions for the model or the level of complexity.
+- [{tic}] analysis of an example of a reference object that relates to the simulation model;
 
-Estimated execution time - {base_period} {period_unit}.
+- [{tic}] definition of the assumptions for the model or the level of complexity.
+
+Estimated execution time - {base_period} {period_unit}s.
 """
 
 advanced_modeling_basics_code_str_en = """> *Informational comment - remove this message when issues is completed.*
 > *This issue needs at most {period_x2} {period_unit}s per team (team (typically 1-3 {persons_name}) - depends on project complexity).*
 
-The goal is to investigate a current state of the art for the topic and methodology that includes the following elements or activities:
+The goal of the issue is to investigate a current state of the art for the topic and methodology that includes the following elements or activities:
 
-[{tic}] investigation of the current state of the knowledge;
+- [{tic}] investigation of the current state of the knowledge;
 
-[{tic}] revision of the DynPi environment features to assess its capabilities, preliminary comparison with other environments;
+- [{tic}] revision of the DynPi environment features to assess its capabilities, preliminary comparison with other environments;
 
-[{tic}] selection of a methodology for solving of the problem (tools, timeline, milestones);
+- [{tic}] selection of a methodology for solving of the problem (tools, timeline, milestones);
 
-[{tic}] preparation for graphical representation of the object, mechanism, or phenomenon on which the schematic drawing will be based (e.g., in SolidWorks/AutoCAD/TiKz);
+- [{tic}] preparation for graphical representation of the object, mechanism, or phenomenon on which the schematic drawing will be based (e.g., in SolidWorks/AutoCAD/TiKz);
 
-[{tic}] initial analysis of the problem solution (algorithms, coordinates, constraints, mathematical description, energies, equations of motion, software).
+- [{tic}] initial analysis of the problem solution (algorithms, coordinates, constraints, mathematical description, energies, equations of motion, software).
 
 Estimated execution time - {period_x2} {period_unit}s.
 """
@@ -2066,19 +2070,19 @@ Estimated execution time - {period_x2} {period_unit}s.
 advanced_modeling_analysis_code_str_en = """> *Informational comment - remove this message when issues is completed.*
 > *This issue needs at most {period_x2} {period_unit}s per team (team (typically 1-3 {persons_name}) - depends on project complexity).*
 
-The goal is a validation with the reference object and discussion of obtained results. The following elements or activities should be included:
+The goal of the issue is a validation with the reference object and discussion of obtained results. The following elements or activities should be included:
 
-[{tic}] selection of the reference object (empirical data, external sources or another software);
+- [{tic}] selection of the reference object (empirical data, external sources or another software);
 
-[{tic}] preliminary modelling of the reference object *(if possible - remove if not applicable)*;
+- [{tic}] preliminary modelling of the reference object *(if possible - remove if not applicable)*;
 
-[{tic}] reference object description and its further analysis;
+- [{tic}] reference object description and its further analysis;
 
-[{tic}] presentation and analysis of the reference data;
+- [{tic}] presentation and analysis of the reference data;
 
-[{tic}] analysis of the reference data and performed simulations, identification of the theoretical model *(if possible - remove if not applicable)*;
+- [{tic}] analysis of the reference data and performed simulations, identification of the theoretical model *(if possible - remove if not applicable)*;
 
-[{tic}] discussion of the results and identified phenomena.
+- [{tic}] discussion of the results and identified phenomena.
 
 Estimated execution time - {period_x2} {period_unit}s.
 """
@@ -2086,15 +2090,15 @@ Estimated execution time - {period_x2} {period_unit}s.
 advanced_modelling_modelling_code_str_en = """> *Informational comment - remove this message when issues is completed.*
 > *This issue needs at most {period_x3} {period_unit}s per team (team (typically 1-3 {persons_name}) - depends on project complexity).*
 
-The goal is creating the theoretical model of an investigated object that includes the following elements or activities:
+The goal of the issue is creating the theoretical model of an investigated object that includes the following elements or activities:
 
-[{tic}] implementation (inheritance or selection) of a model with DynPi library that represents the investigated object;
+- [{tic}] implementation (inheritance or selection) of a model with DynPi library that represents the investigated object;
 
-[{tic}] preparation of all the necessary equations for the analysis (supported by the model);
+- [{tic}] preparation of all the necessary equations for the analysis (supported by the model);
 
-[{tic}] selection of appropriate data and parameters for the chosen simulation model;
+- [{tic}] selection of appropriate data and parameters for the chosen simulation model;
 
-[{tic}] initial verification of the implementation to ensure correctness.
+- [{tic}] initial verification of the implementation to ensure correctness.
 
 Estimated execution time - {period_x3} {period_unit}s.
 """
@@ -2102,19 +2106,19 @@ Estimated execution time - {period_x3} {period_unit}s.
 advanced_modeling_simulation_code_str_en = """> *Informational comment - remove this message when issues is completed.*
 > *This issue needs at most {period_x2} {period_unit}s per team (team (typically 1-3 {persons_name}) - depends on project complexity).*
 
-The goal is to use the model to perform all necessary analyses and got valuable data. The following elements or activities should be included:
+The goal of the issue is to use the model to perform all necessary analyses and got valuable data. The following elements or activities should be included:
 
-[{tic}] preparation of appropriate functions for conducting analytical and numerical simulations;
+- [{tic}] preparation of appropriate functions for conducting analytical and numerical simulations;
 
-[{tic}] execution of simulations with analytical solutions the problem *(if possible - remove if not applicable)*;
+- [{tic}] execution of simulations with analytical solutions the problem *(if possible - remove if not applicable)*;
 
-[{tic}] numerical simulations of the model;
+- [{tic}] numerical simulations or empirical study of the model;
 
-[{tic}] analysis accuracy of the selected data;
+- [{tic}] validation of the results and accuracy of the selected data analysis;
 
-[{tic}] comparison of the reference data and performed simulations, identification of the theoretical model *(if possible - remove if not applicable)*;
+- [{tic}] comparison of the reference data and performed simulations, identification of the theoretical model *(if possible - remove if not applicable)*;
 
-[{tic}] preparation of a comparison of the results of performed activities.
+- [{tic}] preparation of a comparison of the results of performed activities.
 
 Estimated execution time - {period_x2} {period_unit}s.
 """
@@ -2124,23 +2128,23 @@ Estimated execution time - {period_x2} {period_unit}s.
 advanced_modeling_report_code_str_en = """> *Informational comment - remove this message when issues is completed.*
 > *This issue needs at most {period_x3} {period_unit}s per team (team (typically 1-3 {persons_name}) - depends on project complexity).*
 
-The goal is a revision of all steps of the research and final assessment of the report. The following elements or activities should be included:
+The goal of the issue is a revision of all steps of the research and final assessment of the report. The following elements or activities should be included:
 
-[{tic}] preliminary evaluation of the report content and structure;
+- [{tic}] preliminary evaluation of the report content and structure;
 
-[{tic}] title pages, statements, abstracts, references and lists of figures, listings, tables and etc.;
+- [{tic}] title pages, statements, abstracts, references and lists of figures, listings, tables and etc.;
 
-[{tic}] formal assessment of the report (correctness of the structure and volume);
+- [{tic}] formal assessment of the report (correctness of the structure and volume);
 
-[{tic}] final validation of report content (improvements of sections);
+- [{tic}] final validation of report content (improvements of sections);
 
-[{tic}] summary and conclusions from the performed activities;
+- [{tic}] summary and conclusions from the performed activities;
 
-[{tic}] final revision and improvements (if needed) of the title and abstracts;
+- [{tic}] final revision and improvements (if needed) of the title and abstracts;
 
-[{tic}] preparation of the review and required documents, submission.
+- [{tic}] preparation of the review and required documents, submission.
 
-Estimated execution time - {period_x3} {period_unit}s.
+Estimated execution time - {period_x2} {period_unit}s.
 """
 
 
@@ -2154,8 +2158,9 @@ class ResearchProjectIssueCreator:
     _lang = "en"
     _project_type = "Research project"
     _persons_name = "persons"
-    _period_unit = "week"
-    _base_period = 1
+    _period_unit = "hour"
+    _base_period = 5
+    _prefix = None
 
     def __init__(
         self,
@@ -2214,7 +2219,7 @@ class ResearchProjectIssueCreator:
             "period_x2": self._base_period * 2,
             "period_x3": self._base_period * 3,
             "period_x7": self._base_period * 7,
-
+            "period_x12": self._base_period * 12,
         }
 
         return elems_dict
@@ -2228,19 +2233,24 @@ class ResearchProjectIssueCreator:
         title = self._title
         lang = self._lang
         project_type = self._project_type
+        
+        if self._prefix is None:
+            prefix = ""
+        else:
+            prefix = self._prefix + " "
 
         if lang == "en":
 
             titles_dict = {
-                "schedule": f"{project_type} on {title}",  ###
-                "intro": f"Preparation of the preliminary content report for {project_type.lower()} on {title} (issue #{issue_no} related)",  ###
-                "basics": f"Investigation of state of the art and research methodology for the {project_type.lower()} on {title.lower()} (issue #{issue_no} related)",  ###
-                "analysis": f"Analysis of reference data in the {project_type.lower()} on {title.lower()} (issue #{issue_no} related)",  ###
+                "schedule": f"{prefix}{project_type} on {title}",  ###
+                "intro": f"{prefix}Preparation of the preliminary content report for {project_type.lower()} on {title} (issue #{issue_no} related)",  ###
+                "basics": f"{prefix}Investigation of state of the art and research methodology for the {project_type.lower()} on {title.lower()} (issue #{issue_no} related)",  ###
+                "analysis": f"{prefix}Analysis of reference data in the {project_type.lower()} on {title.lower()} (issue #{issue_no} related)",  ###
 
-                "modelling": f"Modelling of the investigated object for the {project_type.lower()} on {title.lower()} (issue #{issue_no} related)",  ###
-                "simulation": f"Performing simulations of investigated case in the {project_type.lower()} on {title.lower()} (issue #{issue_no} related)",  ###
-                
-                "report": f"Ending revision of a report covering all phases of {project_type.lower()} on {title.lower()} (issue #{issue_no} related)",  ###
+                "modelling": f"{prefix}Modelling and analysis of the investigated object for the {project_type.lower()} on {title.lower()} (issue #{issue_no} related)",  ###
+                "simulation": f"{prefix} Numerical or empirical investigation of the considered case in the {project_type.lower()} on {title.lower()} (issue #{issue_no} related)",  ###
+
+                "report": f"{prefix}Ending revision of a report covering all phases of {project_type.lower()} on {title.lower()} (issue #{issue_no} related)",  ###
             }
 
         else:
@@ -2578,6 +2588,9 @@ class ResearchProjectIssueCreator:
             issue_analysis,
             issue_report,
         )
+
+    def __str__(self):
+        return self.get_issue_str()
 
 
 class PDF_link:

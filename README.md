@@ -492,6 +492,7 @@ Python Version: **Python 3.8+**. Required Libraries:
 - **scipy**
 - **pint**
 - **pypandoc**
+- **pygithub**
 - **wand**
 - **pymupdf**
 
