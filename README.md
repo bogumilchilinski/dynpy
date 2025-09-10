@@ -316,11 +316,15 @@ display(data_plot)
 ### Exporting Procedures
 
 ```python
-import pypandoc
-#for LaTeX report (LaTeX distribution is needed)
+
+#for LaTeX report (only LaTeX distribution is needed)
+PdfLatexGenerator(doc).generate_file()
+
+#for LaTeX report (LaTeX distribution and perl are needed)
 doc.generate_pdf(clean_tex=False)
 
 #for `.docx` file
+import pypandoc
 doc.generate_tex('./output/sample_report')
 pypandoc.convert_file('./output/sample_report.tex',to='docx',format='tex',outputfile="./output/sample_report.docx")
 
