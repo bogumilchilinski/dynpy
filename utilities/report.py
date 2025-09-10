@@ -2365,12 +2365,14 @@ class TikZPicture(Environment, ReportModule):
 
     def in_figure(
         self,
-        filename=None,
-        position=None,
         caption=None,
+        
+        position=None,
+        
         width=None,
         height=None,
         marker=None,
+        filename=None,
         **kwargs,
     ):
 
@@ -2384,10 +2386,13 @@ class TikZPicture(Environment, ReportModule):
         if caption is not None:
             obj._caption = caption
 
-        standalone_plot = tikz.TikzStandalone()
-        standalone_plot.append(self)
 
         filename = self.filename
+
+        standalone_plot = tikz.TikzStandalone(default_filepath=filename)
+        standalone_plot.append(self)
+
+        
 
         fig = self.__class__._figure_gen()
         fig.packages.append(Package("float"))
@@ -2418,9 +2423,15 @@ class TikZPicture(Environment, ReportModule):
 
             else:
 
-                standalone_plot.generate_pdf(
-                    filename, clean_tex=False
-                )  # ,compiler_args=['--lualatex']) #ZMIANA
+                from .creators import PdfLatexGenerator
+
+                # standalone_plot.generate_pdf(
+                #     filename, clean_tex=False
+                # )  # ,compiler_args=['--lualatex']) #ZMIANA
+                
+                
+                PdfLatexGenerator(standalone_plot).generate_file()
+                
                 ReportCache._file_names[key] = filename
 
             fig = Picture(

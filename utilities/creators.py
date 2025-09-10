@@ -2627,7 +2627,7 @@ class OutputFileGenerator:
 
 
     #_engine = 'lualatex.exe'
-    _engine = 'pdflatex.exe'
+    _engine = 'pdflatex'
 
     def __init__(self, source):
         self._source = source
@@ -2638,7 +2638,7 @@ class OutputFileGenerator:
         self._output_dir = self._filepath.replace(self._filename, '')
 
 
-    def generate_pdf(self):
+    def generate_file(self):
         import os
         from IPython.display import display, IFrame,FileLink
 
@@ -2654,7 +2654,10 @@ class OutputFileGenerator:
     
 
 class PdfLatexGenerator(OutputFileGenerator):
-    _engine = 'pdflatex.exe'
+    _engine = 'pdflatex'
 
-class LuaLatexGenerator(OutputFileGenerator):
-    _engine = 'lualatex.exe'
+    def generate_pdf(self):
+        return self.generate_file()
+
+class LuaLatexGenerator(PdfLatexGenerator):
+    _engine = 'lualatex'
