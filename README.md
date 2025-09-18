@@ -17,7 +17,7 @@
       - [Adding an image into the section](#adding-an-image-into-the-section)
       - [Appending sections and subsections into the document](#appending-sections-and-subsections-into-the-document)
     - [Incorporating Simulation Results](#incorporating-simulation-results)
-    - [Adding Visualizations, Formulas and Data Tables](#adding-visualizations-formulas-and-data-tables)
+    - [Adding Formulas, Data Tables and Visualizations](#adding-formulas-data-tables-and-visualizations)
   - [3. Exporting Reports](#3-exporting-reports)
     - [Supported Formats](#supported-formats)
     - [Exporting Procedures](#exporting-procedures)
@@ -182,24 +182,7 @@ doc.append(sample_section_name)
 # Add simulated data here
 ```
 
-### Adding Visualizations, Formulas and Data Tables
-
-Creating plot and adding it to document
-
-```python
-import matplotlib.pyplot as plt
-from dynpy.utilities.report import PltPlot
-
-
-plt.plot([0, 1, 2], [0, 1, 4],label='linear')
-plt.xlabel('x-axis')
-plt.ylabel('y-axis')
-plt.title('Sample Plot')
-plt.legend()
-
-data_plot=PltPlot(caption='Sample plot')
-display(data_plot)
-```
+### Adding Formulas, Data Tables and Visualizations
 
 Adding formula to the document
 
@@ -259,6 +242,47 @@ report_table = LatexDataFrame.formatted(
 display(report_table.reported(caption="Travel Time Data Table"))
 ```
 
+
+
+Creating plot and adding it to document
+
+```python
+import matplotlib.pyplot as plt
+from dynpy.utilities.report import PltPlot
+
+
+plt.plot([0, 1, 2], [0, 1, 4],label='linear')
+plt.xlabel('x-axis')
+plt.ylabel('y-axis')
+plt.title('Sample Plot')
+plt.legend()
+
+data_plot=PltPlot(caption='Sample plot')
+display(data_plot)
+```
+
+
+```python
+from dynpy.utilities.report import *
+from dynpy.utilities.adaptable import *
+
+LatexDataFrame.set_default_units(unit_dict)
+
+
+results_df = LatexDataFrame.formatted(
+    data = dane)
+
+
+#METHOD #1 (optional way) - via matplotlib
+results_df.to_latex_dataframe.plot()
+dataplot_plt=PltPlot(caption='Sample plot')
+display(dataplot_plt)
+
+#METHOD #2 (preferred way) - via matplotlib
+dataplot_tikz=results_df.to_pylatex_tikz(height=8).in_figure(caption='Sample plot 2')#comment for preview
+display(dataplot_tikz)#comment for preview
+```
+
 There is a possibility of providing analitycal solution
 
 ```python
@@ -278,7 +302,7 @@ results_df.to_latex_dataframe.plot()
 dataplot_plt=PltPlot(caption='Sample plot')
 display(dataplot_plt)
 
-#METHOD #1 (prefered wat) - via matplotlib
+#METHOD #1 (preferred way) - via matplotlib
 dataplot_tikz=results_df.to_pylatex_tikz(height=8).in_figure(caption='Sample plot 2')#comment for preview
 display(dataplot_tikz)#comment for preview
 ```
@@ -318,6 +342,8 @@ display(data_plot)
 ```python
 
 #for LaTeX report (only LaTeX distribution is needed)
+from dynpy.utilities.creators import PdfLatexGenerator
+
 PdfLatexGenerator(doc).generate_file()
 
 #for LaTeX report (LaTeX distribution and perl are needed)
