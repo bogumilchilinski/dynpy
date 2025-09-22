@@ -2736,8 +2736,29 @@ class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
         # return self.to_latex()+f'subplot={self._subplot}, self._caption{self._caption} '
         return self.style.to_latex() + f"subplot={self._subplot}"
 
-    def smooth_data(self):
-        pass
+    def smooth_data(
+    self,
+    step= 2,
+    interp_method= "cubic",
+    window= 9,
+    order= 6,
+    interp_method_2= "linear"
+    ):
+
+    data_try = (
+        series.iloc[::step]
+        .reindex(series.index)
+        .interpolate(method=interp_method, limit_direction="both")
+        .rolling(window=window, center=True).mean()
+        .interpolate(method=interp_method_2, limit_direction="both")
+        .reset_index(drop=True)
+    )
+
+    y = data_try.to_numpy()
+    peak_max, = argrelmax(y, order=order)
+    peak_min, = argrelmin(y, order=order)
+
+    return data_try, peak_max, peak_min pass
 
 
 class LatexDataFrame(AdaptableDataFrame):
