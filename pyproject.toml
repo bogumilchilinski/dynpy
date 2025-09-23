@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Dyn4py"   
+version = "1.0.0"
+description = "DynPy is a Python module designed for engineering calculations on dynamical systems. It provides a comprehensive framework for modeling, simulating, and analyzing dynamic mechanical systems."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.8"
+
+authors = [
+  { name = "Bogumil Chilinski", email = "example@gmail.com" },
+]
+
+dependencies = [
+  "numpy>=1.26.0",
+  "pylatex>=1.4.2",
+  "sympy>=1.12",
+  "pandas>=2.1.0",
+  "matplotlib>=3.8.0",
+  "scipy>=1.11.0",
+  "pint>=0.23",
+  "pypandoc>=1.12",
+  "wand>=0.6.11",
+]
+
+[project.urls]
+Homepage = "https://github.com/bogumilchilinski/dynpy"
+Repository = "https://github.com/bogumilchilinski/dynpy"
+Issues = "https://github.com/bogumilchilinski/dynpy/issues"
+
+[tool.setuptools.packages.find]
+include = ["Dyn4py*"]
