@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "Dyn4py"   
-version = "1.0.0"
+version = "1.0.6"
 description = "DynPy is a Python module designed for engineering calculations on dynamical systems. It provides a comprehensive framework for modeling, simulating, and analyzing dynamic mechanical systems."
 readme = "README.md"
 license = { file = "LICENSE" }
