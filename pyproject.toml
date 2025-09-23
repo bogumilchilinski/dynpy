@@ -31,9 +31,8 @@ Issues     = "https://github.com/bogumilchilinski/dynpy/issues"
 [tool.setuptools.packages.find]
 include = ["dynpy*"]
 
-# --- setuptools-scm ---
 [tool.setuptools_scm]
-version_scheme = "post-release"        
+version_scheme = "post-release"
 local_scheme   = "node-and-date"
-tag_regex = r"^v?(?P<version>\d+\.\d+\.\d+)$"  # tagi: v1.2.3 lub 1.2.3
-fallback_version = "0.0.0"             
+tag_regex = '^(?:v)?(?P<version>\d+\.\d+\.\d+)$'
+fallback_version = "0.0.0"        
