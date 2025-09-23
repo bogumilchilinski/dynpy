@@ -2736,9 +2736,6 @@ class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
         # return self.to_latex()+f'subplot={self._subplot}, self._caption{self._caption} '
         return self.style.to_latex() + f"subplot={self._subplot}"
 
-        def _get_str_key(self):
-        # return self.to_latex()+f'subplot={self._subplot}, self._caption{self._caption} '
-        return self.style.to_latex() + f"subplot={self._subplot}"
 
     def smooth_data(
         self,
