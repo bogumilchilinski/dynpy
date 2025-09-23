@@ -1567,7 +1567,7 @@ class Picture(Figure, ReportModule):
     ]
 
     _position = None
-    _preview_default_size = "20cm"
+    _preview_default_size = 600 # in pixels
 
     @classmethod
     def _settle_dynpy(cls):
@@ -1739,6 +1739,7 @@ class Picture(Figure, ReportModule):
 
         if self.image is not None:
             path = self.image
+            
 
             if "pdf" in path:
                 # from wand.image import Image as WImage
@@ -1756,24 +1757,25 @@ class Picture(Figure, ReportModule):
                 
                 from IPython.display import Image, display
 
+                size = self.preview_size
                 doc = fitz.open(path)
                 page = doc.load_page(0)
                 pixmap = page.get_pixmap(dpi=144)
                 #pixmap.save(path.replace('pdf','png'))
 
-                display(Image(data= pixmap.tobytes(output='png')))
+                display(Image(data= pixmap.tobytes(output='png'),width=size))
 
                 display(f"Fig. X: {caption}")
                 return ""
             else:
-                size = self.preview_size
+                
 
                 from IPython.display import Image,display
                 size = self.preview_size
 
 
                 display(Image(filename=path,
-                              #width=size,
+                              width=size,
                               ))
                 display(f"Fig. X: {caption}")
 
@@ -1892,6 +1894,7 @@ class PltPlot(Picture, ReportModule):
     _latex_name = "figure"
     _default_path = "./tikzplots"
     _floats_no_gen = plots_no()
+    _default_dpi = 300
 
     def __init__(
         self,
@@ -1963,32 +1966,7 @@ class PltPlot(Picture, ReportModule):
 
             self.append(Label(marker))
 
-    @property
-    def preview_size(self):
-        if self._preview_size is not None:
 
-            return self._preview_size
-        else:
-            return self.__class__._preview_default_size
-
-    @preview_size.setter
-    def preview_size(self, size):
-        if isinstance(size, float) or isinstance(size, int):
-            size = NoEscape(f"{size}cm")
-        if isinstance(size, str):
-            size = NoEscape(size)
-
-        self._preview_size = size
-
-    def _get_str_key(self) -> str:
-        """
-        Generate a string key for the image based on its attributes.
-
-        Returns:
-            str: A string representation of the image key.
-        """
-
-        return self.image + "_caption:" + str(self.caption)
     
     def _save_plt_plot(self):
             
@@ -1998,7 +1976,7 @@ class PltPlot(Picture, ReportModule):
 
         pic_filename = f"{self._default_path}/{self.__class__.__name__}{fig_no}.png"
 
-        plt.savefig(pic_filename, bbox_inches='tight')
+        plt.savefig(pic_filename, bbox_inches='tight',dpi=self._default_dpi)
         plt.close()
 
         #self.append(Command('includegraphics', arguments=[pic_filename]))
@@ -2387,12 +2365,14 @@ class TikZPicture(Environment, ReportModule):
 
     def in_figure(
         self,
-        filename=None,
-        position=None,
         caption=None,
+        
+        position=None,
+        
         width=None,
         height=None,
         marker=None,
+        filename=None,
         **kwargs,
     ):
 
@@ -2406,10 +2386,13 @@ class TikZPicture(Environment, ReportModule):
         if caption is not None:
             obj._caption = caption
 
-        standalone_plot = tikz.TikzStandalone()
-        standalone_plot.append(self)
 
         filename = self.filename
+
+        standalone_plot = tikz.TikzStandalone(default_filepath=filename)
+        standalone_plot.append(self)
+
+        
 
         fig = self.__class__._figure_gen()
         fig.packages.append(Package("float"))
@@ -2440,9 +2423,15 @@ class TikZPicture(Environment, ReportModule):
 
             else:
 
-                standalone_plot.generate_pdf(
-                    filename, clean_tex=False
-                )  # ,compiler_args=['--lualatex']) #ZMIANA
+                from .creators import PdfLatexGenerator
+
+                # standalone_plot.generate_pdf(
+                #     filename, clean_tex=False
+                # )  # ,compiler_args=['--lualatex']) #ZMIANA
+                
+                
+                PdfLatexGenerator(standalone_plot).generate_file()
+                
                 ReportCache._file_names[key] = filename
 
             fig = Picture(
