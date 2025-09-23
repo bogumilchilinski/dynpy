@@ -1,18 +1,15 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=69", "wheel", "setuptools-scm[toml]>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "Dyn4py"   
-version = "1.0.6"
+name = "Dyn4py"                 
+dynamic = ["version"]           
 description = "DynPy is a Python module designed for engineering calculations on dynamical systems. It provides a comprehensive framework for modeling, simulating, and analyzing dynamic mechanical systems."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.8"
-
-authors = [
-  { name = "Bogumil Chilinski", email = "example@gmail.com" },
-]
+authors = [{ name = "Bogumil Chilinski", email = "example@gmail.com" }]
 
 dependencies = [
   "numpy>=1.26.0",
@@ -27,9 +24,16 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/bogumilchilinski/dynpy"
+Homepage   = "https://github.com/bogumilchilinski/dynpy"
 Repository = "https://github.com/bogumilchilinski/dynpy"
-Issues = "https://github.com/bogumilchilinski/dynpy/issues"
+Issues     = "https://github.com/bogumilchilinski/dynpy/issues"
 
 [tool.setuptools.packages.find]
-include = ["Dyn4py*"]
+include = ["dynpy*"]
+
+# --- setuptools-scm ---
+[tool.setuptools_scm]
+version_scheme = "post-release"        
+local_scheme   = "node-and-date"
+tag_regex = r"^v?(?P<version>\d+\.\d+\.\d+)$"  # tagi: v1.2.3 lub 1.2.3
+fallback_version = "0.0.0"             

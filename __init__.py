@@ -10,4 +10,11 @@ from .dynamics import (
     WeakNonlinearOscillator,
 )
 
+from importlib.metadata import version, PackageNotFoundError
+
+try:
+    __version__ = version("Dyn4py")
+except PackageNotFoundError:
+    __version__ = "0.0.0"
+
 # from .continuous import ContinuousSystem
