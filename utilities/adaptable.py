@@ -2756,8 +2756,8 @@ class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
         )
 
         y = data_try.to_numpy()
-        peak_max, = argrelmax(y, order=order)
-        peak_min, = argrelmin(y, order=order)
+        # peak_max, = argrelmax(y, order=order)
+        # peak_min, = argrelmin(y, order=order)
     
         return data_try#, peak_max, peak_min
 
