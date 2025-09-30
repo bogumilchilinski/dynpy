@@ -1615,6 +1615,174 @@ BasicsOfODESystemGuide();
         return ObjectCode(preliminary_str)
 
 
+class APPAPaper(Document):
+
+    latex_name = "document"
+    packages = [
+        #                     Package('natbib', options=['numbers']),
+        Package("booktabs"),
+        Package("float"),
+        Package("standalone"),
+        Package("siunitx"),
+        #                     Package('bpasts', options=['accepted']),
+        #Package("bpasts"),
+        Package("t1enc"),
+        Package("amsmath"),
+        Package("amssymb"),
+        Package("amsfonts"),
+        Package("graphicx"),
+        Package("flushend"),
+        Package("textcomp"),
+        Package("xcolor"),
+#         Package(
+#             "hyperref",
+#             ["colorlinks=true", "allcolors=bpastsblue", NoEscape("pdfborder={0 0 0}")],
+#         ),
+    ]
+
+    abtitle = "Paper for BPASTS"
+    abauthor = "Authors"
+    title = "Basic title"
+    author = r"""
+Author's Name Surname  - Co-author's Name Surname
+"""
+    abstract=r"""
+The Abstract should not exceed 250 words. The Abstract should state the principal objectives and the scope of the investigation, as well as the methodology employed. It should summarize the results and state the principal conclusions. An effective abstract stands on its own — it can be understood fully even when made available without the full paper. To this end, avoid referring to figures or the bibliography in the abstract. Please introduce any acronyms the first time you use them in the abstract (if needed), and do so again in the full paper. About 4 to 6 significant key words should follow the abstract to aid indexing.
+"""
+
+    keywords = "key word, key word, key word, key word, key word"
+
+    highlights=r"""
+\item Highlights (4 to 6) are a short collection of bullet points that convey the core findings and provide readers with a quick textual overview of the article.
+\item These four to six bullet points should describe the essence of the research (e.g. results or conclusions) and highlight what is distinctive about it.
+\item See latest SV-JME papers for examples.
+"""
+
+
+    def __init__(
+        self,
+        default_filepath="default_filepath",
+        title=None,
+        *,
+        documentclass="article",
+        document_options=["10pt",
+                          #"twoside", 
+                        "twocolumn", "a4paper",
+                         ],  # for submission
+        fontenc=None,
+        inputenc="utf8",
+        font_size="normalsize",
+        lmodern=False,
+        textcomp=False,
+        microtype=False,
+        page_numbers=True,
+        indent=None,
+        #geometry_options=[
+        #    "inner=30mm",
+        #    "outer=20mm",
+        #    "bindingoffset=10mm",
+        #    "top=25mm",
+        #    "bottom=25mm",
+        #],  # ,inner=20mm, outer=20mm, bindingoffset=10mm, top=25mm, bottom=25mm
+        geometry_options=None,
+        data=None,
+    ):
+
+        if title is not None:
+            self.title = title
+
+        super().__init__(
+            default_filepath=default_filepath,
+            documentclass=documentclass,
+            document_options=document_options,
+            fontenc=fontenc,
+            inputenc=inputenc,
+            font_size=font_size,
+            lmodern=lmodern,
+            textcomp=textcomp,
+            microtype=microtype,
+            page_numbers=page_numbers,
+            indent=indent,
+            geometry_options=geometry_options,
+            data=data,
+        )
+
+
+
+#         self.preamble.append(NoEscape(r"""
+# % to be set by Editor:
+# % ------------------------------------------------------------------------------------------------------------------
+# %\renewcommand{\svCorr}{*Corr. Author's Address: Name of institution, Address, City, Country, \email{xxx.yyy@wwww.zzz}}
+# \renewcommand{\svSV}{Strojniški vestnik - Journal of Mechanical Engineering 63(2017)3,  XXX-4}
+# \renewcommand{\svAuthors}{Author-A, Author-B}
+# \renewcommand{\svCyear}{2017}
+# \renewcommand{\svDOI}{DOI: 10.5545/sv-jme.2017.4027}
+# \svDates{2016-11-04}{2017-01-14}{2017-02-12}
+# \renewcommand{\svType}{Review Paper}
+# \setcounter{page}{1} % first page of the paper
+# % ------------------------------------------------------------------------------------------------------------------
+# """))
+
+
+        self.preamble.append(Command("title", arguments=[self.title]))
+        #self.preamble.append(NoEscape("\\title{" + f"{self.title}" + "}"))
+        #self.preamble.append(NoEscape("\\abauthor{" + f"{self.abauthor}" + "}"))
+
+
+        self.preamble.append(Command("author", arguments=[NoEscape(self.author)]))
+
+#         self.preamble.append(NoEscape(r"""
+
+# %\date{\today\  -- \clock}
+# \date{}
+
+# \crop[cross,axes]
+# %\crop[frame,axes]
+# %\crop[off]"""))
+
+        self.append(NoEscape(r"""
+\twocolumn[
+
+\begin{abstract}
+"""))
+
+        self.append(self.abstract)
+
+        self.append(NoEscape(r"""
+\end{abstract}
+"""))
+#         self.append(Command("svKeywords", arguments=[NoEscape(self.keywords)]))
+
+#         self.append(NoEscape(r"""
+# \begin{svHigh}
+# """))
+#         self.append(NoEscape(self.highlights))
+
+#         self.append(NoEscape(r"""
+
+# \end{svHigh}
+
+# \end{svHead}]
+#"""))
+
+
+        # self.append(NewPage())
+        # tu implementować co tam potrzeba
+
+    # def cwd_setup(self):
+    #     cwd = os.getcwd()
+
+    #     source_path = (
+    #         f"/home/user/Shared files/modules/dynpy/utilities/documents/Definitions"
+    #     )
+    #     path1 = f"{cwd}/bpast.sty"
+    #     path2 = f"{cwd}/output/bpast.sty"
+
+    #     if os.path.exists(path1) == False:
+    #         shutil.copytree(source_path, path1)
+    #     if os.path.exists(path2) == False:
+    #         shutil.copytree(source_path, path2)
+
 class JoMEPaper(Document):
 
     latex_name = "document"

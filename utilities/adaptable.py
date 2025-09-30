@@ -2739,15 +2739,17 @@ class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
 
     def smooth_data(
         self,
-        step= 2,
+        step= 4,
         interp_method= "cubic",
         window= 9,
         order= 6,
         interp_method_2= "linear"
     ):
 
+        starting_probe = int(step/2)
+
         data_try = (
-            self.iloc[::step]
+            self.iloc[starting_probe::step]
             .reindex(self.index)
             .interpolate(method=interp_method, limit_direction="both")
             .rolling(window=window, center=True).mean()
@@ -2764,7 +2766,7 @@ class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
 
     def _join_smoothed_data(
         self,
-        step= 2,
+        step= 4,
         interp_method= "cubic",
         window= 9,
         order= 6,
