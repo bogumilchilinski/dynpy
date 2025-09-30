@@ -1742,14 +1742,13 @@ The Abstract should not exceed 250 words. The Abstract should state the principa
 
         self.append(NoEscape(r"""
 \twocolumn[
-
 \begin{abstract}
 """))
 
         self.append(self.abstract)
 
         self.append(NoEscape(r"""
-\end{abstract}
+\end{abstract}]
 """))
 #         self.append(Command("svKeywords", arguments=[NoEscape(self.keywords)]))
 
