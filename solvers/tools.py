@@ -242,18 +242,24 @@ class CodePrinter:
         self._expr = expr
 
     def _generate_code(self):
-
+    
+        replacements = [
+            ("\nu = Symbol('\nu')", "\\nu = Symbol('\\nu')"),
+            ("*\nu", "*nu"),
+            ("/\nu", "/nu"),
+            ("+\nu", "+nu"),
+            ("-\nu", "-nu"),
+            (",\nu", ",nu")
+        ]
         expr = self._expr
         raw_code = python(expr).replace("e = ", "eq = ")
-
-        for elem in expr.atoms():
-            if isinstance(elem, (sym.Float, sym.Integer)):
-                pass
-            elif isinstance(elem, (sym.Symbol)):
-                my_arg = str(elem)
-                raw_code = raw_code.replace(f"Symbol('{my_arg}')", srepr(elem))
-            else:
-                pass
+        raw_code = ''.join('\\a' if ord(c) == 7 else 
+                                 '\\t' if ord(c) == 9 else
+                                 '\\r' if ord(c) == 13 else
+                                 '\\b' if ord(c) == 8 else c for c in raw_code)
+        for old, new in replacements:
+            raw_code = raw_code.replace(old, new)
+        raw_code = raw_code.replace('\\','')
 
         return raw_code
 

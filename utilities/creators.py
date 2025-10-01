@@ -712,6 +712,57 @@ class ClassImplementationIssueCreator(HelpImplementationIssueCreator):
             f"{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}\n{comment_call_code}"
         )
 
+    @property
+    def body_text(self):
+
+        issue_no = self._issue_no
+        obj_class_module = self._obj.__module__
+        obj_class_name = self._obj.__name__
+        goal = self._goal
+
+        issue_code_str = (
+            f"`{obj_class_name}` class is to implement in `{obj_class_module}` module. "
+            + "It should provide code that {goal}."
+        )
+
+        return issue_code_str
+
+# Implementation of development issue creator - #1154
+
+class ClassDevelopmentIssueCreator(ClassImplementationIssueCreator):
+
+    _default_labels = ["enhancement", "module"]
+    _issue_type = "Development"
+    _goal = "fix a part of a report"
+
+    @property
+    def title(self):
+
+        issue_no = self._issue_no
+        obj_class_module = self._obj.__module__
+        obj_class_name = self._obj.__name__
+        goal = self._goal
+
+        issue_type = self._issue_type
+
+        return f"{issue_type} of `{obj_class_name}` class (defined in `{obj_class_module}` module) to {goal}"
+
+
+    @property
+    def body_text(self):
+
+        issue_no = self._issue_no
+        obj_class_module = self._obj.__module__
+        obj_class_name = self._obj.__name__
+        goal = self._goal
+
+        issue_code_str = (
+            f"`{obj_class_name}` class (defined in `{obj_class_module}` module ) is to develop. "
+            + "The aim of the enhancement is to {goal}."
+        )
+
+        return issue_code_str
+
 
 class MethodImplementationIssueCreator(HelpImplementationIssueCreator):
 

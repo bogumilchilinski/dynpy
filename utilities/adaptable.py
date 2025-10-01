@@ -2739,15 +2739,17 @@ class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
 
     def smooth_data(
         self,
-        step= 2,
+        step= 4,
         interp_method= "cubic",
         window= 9,
         order= 6,
         interp_method_2= "linear"
     ):
 
+        starting_probe = int(step/2)
+
         data_try = (
-            self.iloc[::step]
+            self.iloc[starting_probe::step]
             .reindex(self.index)
             .interpolate(method=interp_method, limit_direction="both")
             .rolling(window=window, center=True).mean()
@@ -2756,11 +2758,33 @@ class AdaptableDataFrame(pd.DataFrame, BasicFormattingTools):
         )
 
         y = data_try.to_numpy()
-        peak_max, = argrelmax(y, order=order)
-        peak_min, = argrelmin(y, order=order)
-    
-        return data_try#, peak_max, peak_min
+        # peak_max, = argrelmax(y, order=order)
+        # peak_min, = argrelmin(y, order=order)
 
+        return data_try.set_index(self.index)
+
+
+    def _join_smoothed_data(
+        self,
+        step= 4,
+        interp_method= "cubic",
+        window= 9,
+        order= 6,
+        interp_method_2= "linear"
+    ):
+
+        smooth_data = self.smooth_data(
+            step=step,
+            interp_method=interp_method,
+            window=window,
+            order=order,
+            interp_method_2=interp_method_2
+        ).to_numpy()
+
+        smooth_df = self.copy()
+        smooth_df['Smoothed profile'] = smooth_data
+
+        return smooth_df
 
 class LatexDataFrame(AdaptableDataFrame):
     _applying_func = lambda obj: (obj).fit_units_to_axes().format_axes_names()
