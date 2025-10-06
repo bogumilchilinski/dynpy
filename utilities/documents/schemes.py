@@ -1404,3 +1404,29 @@ class TrolleyWithPendulumTestStandSchemeBox(TikZPicture):
 
     """
         return code
+    
+class EnergyStorageSystemScheme(TikZPicture):
+    def _scheme_desc(self):
+        code = r"""
+
+    \node (cell) [draw,outer sep=0pt,thick,minimum width=1cm, minimum height=6cm, align=center,] at (0,0) {Battery Module \\ (multiple cells) };
+    \node (cell2) [draw,outer sep=0pt,thick,minimum width=1cm, minimum height=6cm, align=center,] at ([xshift=2cm]cell.east) {Battery Module \\ (multiple cells)};
+    \node (cell3) [draw,outer sep=0pt,thick,minimum width=1cm, minimum height=6cm, align=center,] at ([xshift=2cm]cell2.east) {Battery Module \\ (multiple cells)};
+
+    
+    \node (cell4) [draw,outer sep=0pt,thick,minimum width=1cm, minimum height=6cm, align=center,] at ([yshift=-5cm]cell.south) {Battery Module \\ (multiple cells)};
+    \node (cell5) [draw,outer sep=0pt,thick,minimum width=1cm, minimum height=6cm, align=center,] at ([xshift=2cm]cell4.east) {Battery Module \\ (multiple cells)};
+    \node (cell6) [draw,outer sep=0pt,thick,minimum width=1cm, minimum height=6cm, align=center,] at ([xshift=2cm]cell5.east) {Battery Module \\ (multiple cells)};
+
+    \node (ramka) [draw,outer sep=0pt,thick,minimum width=18cm, minimum height=16cm, align=center,] at (6,-4) {};
+
+    \node (ramka2) [draw,outer sep=0pt,thick,minimum width=14cm, minimum height=7cm, align=center,] at (5,-0.05) {};   
+    \node (ramka3) [draw,outer sep=0pt,thick,minimum width=14cm, minimum height=7cm, align=center,] at (5,-8.05) {};  
+
+    \node (br1) [outer sep=0pt,thick,minimum width=5cm, minimum height=7cm, align=center,] at (9.8,-0.05) {Battery Rack}; 
+    \node (br2) [outer sep=0pt,thick,minimum width=5cm, minimum height=7cm, align=center,] at (9.8,-8.05) {Battery Rack};
+
+    \node (bc) [outer sep=0pt,thick,minimum width=5cm, minimum height=7cm, align=center,] at (13.5,-4) {Battery \\ Container};
+
+    """
+        return code
