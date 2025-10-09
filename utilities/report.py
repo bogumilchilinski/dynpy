@@ -1385,7 +1385,7 @@ class Markdown(Environment, ReportModule):
 
         import pypandoc as ppd
 
-        return NoEscape(ppd.convert_text(self.markdown, to="latex", format="md"))
+        return NoEscape(ppd.convert_text(self.markdown, to="latex", format="markdown",extra_args=['--wrap=none'])   )
 
     def _repr_markdown_(self):
         return self.reported().markdown
@@ -1394,7 +1394,7 @@ class Markdown(Environment, ReportModule):
 
         import pypandoc as ppd
 
-        latex_code = ppd.convert_text(self.markdown, to="latex", format="md")
+        latex_code = ppd.convert_text(self.markdown, to="latex", format="markdown",extra_args=['--wrap=none'])  
 
         if "\\begin{verbatim}" in latex_code:
 

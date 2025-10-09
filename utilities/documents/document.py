@@ -1730,6 +1730,7 @@ The Abstract should not exceed 250 words. The Abstract should state the principa
 
 
         self.preamble.append(Command("author", arguments=[NoEscape(self.author)]))
+        #self.preamble.append(Command('affil', 'Politechnika Warszawska'))
 
 #         self.preamble.append(NoEscape(r"""
 
@@ -1742,6 +1743,7 @@ The Abstract should not exceed 250 words. The Abstract should state the principa
 
         self.append(NoEscape(r"""
 \twocolumn[
+\maketitle
 \begin{abstract}
 """))
 

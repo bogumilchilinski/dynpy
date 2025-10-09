@@ -1404,3 +1404,71 @@ class TrolleyWithPendulumTestStandSchemeBox(TikZPicture):
 
     """
         return code
+    
+class EnergyStorageSystemScheme(TikZPicture):
+    def _scheme_desc(self):
+        code = r"""
+
+    \node (cell) [draw,outer sep=0pt,thick,minimum width=1cm, minimum height=6cm, align=center,] at (0,0) {Battery Module \\ (multiple cells) };
+    \node (cell2) [draw,outer sep=0pt,thick,minimum width=1cm, minimum height=6cm, align=center,] at ([xshift=2cm]cell.east) {Battery Module \\ (multiple cells)};
+    \node (cell3) [draw,outer sep=0pt,thick,minimum width=1cm, minimum height=6cm, align=center,] at ([xshift=2cm]cell2.east) {Battery Module \\ (multiple cells)};
+
+    
+    \node (cell4) [draw,outer sep=0pt,thick,minimum width=1cm, minimum height=6cm, align=center,] at ([yshift=-5cm]cell.south) {Battery Module \\ (multiple cells)};
+    \node (cell5) [draw,outer sep=0pt,thick,minimum width=1cm, minimum height=6cm, align=center,] at ([xshift=2cm]cell4.east) {Battery Module \\ (multiple cells)};
+    \node (cell6) [draw,outer sep=0pt,thick,minimum width=1cm, minimum height=6cm, align=center,] at ([xshift=2cm]cell5.east) {Battery Module \\ (multiple cells)};
+
+    \node (ramka) [draw,outer sep=0pt,thick,minimum width=18cm, minimum height=16cm, align=center,] at (6,-4) {};
+
+    \node (ramka2) [draw,outer sep=0pt,thick,minimum width=14cm, minimum height=7cm, align=center,] at (5,-0.05) {};   
+    \node (ramka3) [draw,outer sep=0pt,thick,minimum width=14cm, minimum height=7cm, align=center,] at (5,-8.05) {};  
+
+    \node (br1) [outer sep=0pt,thick,minimum width=5cm, minimum height=7cm, align=center,] at (9.8,-0.05) {Battery Rack}; 
+    \node (br2) [outer sep=0pt,thick,minimum width=5cm, minimum height=7cm, align=center,] at (9.8,-8.05) {Battery Rack};
+
+    \node (bc) [outer sep=0pt,thick,minimum width=5cm, minimum height=7cm, align=center,] at (13.5,-4) {Battery \\ Container};
+
+    """
+        return code
+    
+class EnergyStorageSystemArchitecture(TikZPicture):
+    def _scheme_desc(self):
+        code = r"""
+
+    \node (cell) [draw,outer sep=0pt,thick,minimum width=3.5cm, minimum height=1.5cm, align=center,] at (0,0) {Cell \\ (Single unit) };
+    \node (module) [draw,outer sep=0pt,thick,minimum width=3.5cm, minimum height=1.5cm, align=center] at ([xshift=3.5cm]cell.east) {Battery module \\ (Multiple cells)};
+    \node (rack) [draw,outer sep=0pt,thick,minimum width=3.5cm, minimum height=1.5cm, align=center] at ([xshift=4cm]module.east) {Battery Rack \\ (Multiple modules)}; 
+    \node (container) [draw,outer sep=0pt,thick,minimum width=3.5cm, minimum height=1.5cm, align=center] at ([xshift=3.5cm]rack.east) {Battery container \\ (Multiple Racks)}; 
+    \node (PCS) [draw,outer sep=0pt,thick,minimum width=3.5cm, minimum height=1.5cm, align=center] at ([xshift=3.5cm]container.east) {Power conversion system \\ (Inverter)}; 
+    \node (ESS) [draw,outer sep=0pt,thick,minimum width=3.5cm, minimum height=1.5cm, align=center] at ([xshift=3.5cm]PCS.east) {Complete energy storage system -\\- connection to grid};
+    
+    \node (MMU) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([yshift=-3cm]module.south) {Module Management Unit \\ (Slave module BMS)};
+    \node (sBMS) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([yshift=-3cm]rack.south) {Rack BMS \\ (Slave rack BMS)};
+    \node (mBMS) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([yshift=-3cm]container.south) {Master BMS};
+    \node (EMS) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([yshift=-3cm]ESS.south) {Energy management system \\ (Communication with MBMS and inverter)};
+
+
+    \node (AFE) [draw,outer sep=0pt,thick,minimum width=3.0cm, minimum height=1.0cm, align=center] at ([yshift=-1.2cm]module.south) {Analog front end \\ (voltage, current, temperature, cell balancing)};
+    
+    \draw [thick, ->] (module.south) -- (AFE.north) node[midway, right] {analog signal};
+    \draw [thick, ->] (AFE.south) -- (MMU.north) node[midway, right] {SPI};
+    %\draw [thick, ->] (rack.south) -- (sBMS.north);
+    %\draw [thick, ->] (container.south) -- (mBMS.north);
+    \draw [thick, ->] (EMS.north) -- (ESS.south);
+
+    \draw [thick, ->] (cell.east) -- (module.west);
+    \draw [thick, ->] (module.east) -- (rack.west);
+    \draw [thick, ->] (rack.east) -- (container.west);
+    \draw [thick, ->] (container.east) -- (PCS.west);
+    \draw [thick, ->] (PCS.east) -- (ESS.west);
+    
+    %\draw [thick, ->] (PCS.south) -- (EMS.west) node[pos = 0.4,below, sloped] {Modbus TCP};
+    \draw [thick, <->] (mBMS.north) -- (PCS.south) node[pos = 0.5,below, sloped] {Modbus TCP};
+    
+    \draw [thick, ->] (MMU.east) -- (sBMS.west) node[midway, below] {CAN};
+    \draw [thick, ->] (sBMS.east) -- (mBMS.west) node[midway, below] {CAN};
+    \draw [thick, <->] (mBMS.east) -- (EMS.west) node[midway, below] {Modbus TCP};
+    
+
+    """
+        return code
