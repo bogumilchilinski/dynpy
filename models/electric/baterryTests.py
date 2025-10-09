@@ -30,7 +30,7 @@ except Exception:
 # === code generators ===
 def get_pico_script() -> str:
 
-    code = '''
+    code = """
 
       from machine import ADC, Pin
 import time
@@ -69,12 +69,12 @@ try:
 except KeyboardInterrupt:
     print("Zatrzymano")
 
-    '''
+    """
     return code
 
 
 def get_host_script() -> str:
-    code = '''import serial
+    code = """import serial
 import serial.tools.list_ports
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -247,11 +247,10 @@ except KeyboardInterrupt:
 
     print(f"[INFO] Dane zapisane do: {csv_file}, {excel_file}")
     print(f"[INFO] Wykresy: {plot_soc_time}, {plot_soc_voltage}")
-'''
+"""
     return code
 
 
-# === 2) Obsługa zbierania danych (wersja modułowa, gotowa pod 'collect') ===
 
 def _require(dep, name: str):
     if dep is None:
@@ -261,10 +260,7 @@ def _require(dep, name: str):
 
 
 def find_pico_port() -> str:
-    """
-    Wyszukiwanie portu Pico (Linux/macOS). Dodatkowo obsługuje Windows (COMx),
-    jeśli urządzenie tak się identyfikuje.
-    """
+
     _require(serial, "pyserial")
     ports = serial.tools.list_ports.comports()
     for p in ports:
@@ -281,10 +277,7 @@ def find_pico_port() -> str:
 
 
 def _parse_voltage(line: str) -> Optional[float]:
-    """
-    Parser odporny na 'Napięcie:' i 'Napiecie:' oraz dowolne odstępy.
-    Szuka pierwszej liczby zmiennoprzecinkowej w linii.
-    """
+
     # Szybka ścieżka: spróbuj wyłuskać liczbę po słowie
     m = re.search(r"([-+]?\d+(?:\.\d+)?)", line.replace(",", "."))
     if not m:
@@ -296,11 +289,7 @@ def _parse_voltage(line: str) -> Optional[float]:
 
 
 def calculate_soc_default(voltage: float) -> float:
-    """
-    Prosty lookup prógowy (dopasowany do kodu hosta).
-    Zwraca 0..1.
-    """
-    # Użyj tego samego drabinkowego podejścia co w get_host_script():
+
     thresholds = [
         (4.20, 1.00), (4.18, 0.98), (4.16, 0.96), (4.14, 0.94), (4.12, 0.92),
         (4.10, 0.90), (4.08, 0.88), (4.06, 0.86), (4.04, 0.84), (4.02, 0.82),
@@ -325,10 +314,7 @@ def collect_data(
     save_excel: bool = True,
     make_plots: bool = True,
 ) -> Tuple[Path, Optional[Path], Optional[Path], Optional[Path]]:
-    """
-    Modularny kolektor danych. Zwraca ścieżki do zapisanych plików:
-    (csv_path, xlsx_path|None, plot_time|None, plot_voltage|None)
-    """
+
     _require(serial, "pyserial")
     if save_excel:
         _require(pd, "pandas")
@@ -380,20 +366,20 @@ def collect_data(
         except Exception:
             pass
 
-    # Zapis CSV (bez pandas)
+
     with csv_path.open("w", encoding="utf-8") as f:
         f.write("czas,napięcie,SOC\n")
         for t, v, s in rows:
             f.write(f"{t},{v:.6f},{s:.6f}\n")
 
-    # Zapis XLSX (pandas opcjonalnie)
+
     if save_excel and pd is not None:
         df = pd.DataFrame(rows, columns=["czas", "napięcie", "SOC"])
         df.to_excel(xlsx_path, index=False)
     else:
         xlsx_path = None
 
-    # Wykresy (matplotlib opcjonalnie)
+
     if make_plots and plt is not None:
         # SOC vs czas
         ts = [datetime.fromisoformat(t) for (t, _, _) in rows]
@@ -431,7 +417,6 @@ def collect_data(
     return csv_path, xlsx_path, plot_soc_time, plot_soc_voltage
 
 
-# === 3) CLI ===
 
 def _build_cli() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Battery test helper")
@@ -478,3 +463,55 @@ def main(argv=None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+
+from dynpy.utilities.report import Picture, NoEscape
+
+def get_battery_test_tikz() -> str:
+
+    return r"""
+\begin{circuitikz}[american]
+
+  \node[draw, rounded corners=6pt, minimum width=3.2cm, minimum height=1.2cm] (rpi4) at (0,0) {RPi 4};
+  \node[draw, rounded corners=6pt, minimum width=3.8cm, minimum height=1.2cm, right=3.2cm of rpi4] (pico) {RPI PICO};
+  \node[draw, rounded corners=6pt, minimum width=3.2cm, minimum height=1.2cm, right=5.5cm of pico] (motor) {DC Motor};
+
+  \draw (rpi4.east) -- ($(rpi4.east)!0.5!(pico.west)$) node[midway, above,yshift=2pt]{UART} -- (pico.west);
+
+  \coordinate (gp26) at ($(pico.east) + (1.0,0)$);
+  \draw (pico.east) -- (gp26);
+  \node[above] at (gp26) {\small GP26};
+
+  \draw (gp26) to[R,l=$R_{1}$] ++(0,-2.2) node[ground]{};
+  \draw (gp26) to[R,l=$R_{2}$] ++(2.2,0) coordinate (afterR2);
+  \draw (afterR2) -- (motor.west);
+
+  \coordinate (toSwitch) at ($(motor.east) + (1.0,0)$);
+  \draw (motor.east) -- (toSwitch)
+        to[spst,l^=$S$] ++(2.0,0) coordinate (rightBus);
+
+  \draw (rightBus) -- ++(0,-2.5) coordinate (batTop);
+  \draw (batTop) to[battery1,l_=18650] ++(0,-2.2) node[ground]{};
+
+  \draw (motor.east) node[circ]{};
+  \draw (rightBus) node[circ]{};
+\end{circuitikz}
+"""
+
+
+def get_battery_test_picture() -> Picture:
+
+    return Picture(
+        fr'dynpy\models\images\baterryTestElectricScheme.png',
+        caption='Schemat elektryczny stanowiska testowego (RPi4 – Pico – DC Motor – 18650)',
+        width=NoEscape(r'0.65\textwidth')
+    )
+
+
+
+
+# display(get_battery_test_picture())
+
+
+# display(TikZPicture(get_battery_test_tikz()))
