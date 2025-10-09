@@ -896,10 +896,10 @@ class LatexSanitizer:
 
     # ---------- 3. regex na „fragment kodu” --------------------------- #
     _RE_CODE = re.compile(
-        r"""(?<!\\)(               # nie poprzedzony ukośnikiem
-            __\w+__\.py |          #  __init__.py, __main__.py…
-            [A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*\(\)? |   # func(), pkg.mod()
-            [A-Za-z_]\w*(?:\.[A-Za-z_]\w*)+          # pkg.mod.attr
+        r"""(?<!\\)(              
+            __\w+__\.py |         
+            [A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*\(\)? |   
+            [A-Za-z_]\w*(?:\.[A-Za-z_]\w*)+          
         )""",
         re.VERBOSE,
     )
@@ -917,7 +917,7 @@ class LatexSanitizer:
     # ================================================================= #
     @classmethod
     def sanitize(cls, text: str) -> str:
-        segments: List[Tuple[bool, str]] = []  # (is_code, fragment)
+        segments: List[Tuple[bool, str]] = []  
 
         # --- A. rozdziel kod / tekst --------------------------------- #
         last = 0
@@ -3398,6 +3398,315 @@ class AutoBreak(Environment):
             self.append(self.latex_backend(term))
             # prev_term=self.__class__.latex_backend(term)
         self.append("\n")
+
+# --- ThesisCardMini ----------------------------------------------------------
+from pathlib import Path
+from datetime import datetime
+import shutil, subprocess
+
+try:
+    from docx import Document
+except Exception as e:
+    raise RuntimeError("Zainstaluj zależność: pip install python-docx") from e
+
+
+class ThesisCardMini:
+    """
+    Generator karty pracy:
+    - pola 'po dwukropku' (paragrafy lub tabele),
+    - Temat i Zwięzły opis w nowej linii POD etykietą,
+    - opcjonalnie 5 pozycji w 'Główne zadania do wykonania',
+    - bieżąca data nad 'Data wydania' (wyrównanie: center/right/left),
+    - zapis DOCX oraz (jeśli możliwe) PDF.
+
+    Domyślny szablon: dynpy/utilities/documents/thesisCard.docx (względem report.py)
+    """
+
+    def __init__(self, template_path: Path | None = None, output_dir: Path | None = None, try_pdf: bool = True):
+        if template_path is None:
+            template_path = Path(__file__).resolve().parent / "documents" / "thesisCard.docx"
+        self.template_path = Path(template_path)
+        if not self.template_path.exists():
+            raise FileNotFoundError(f"Nie znaleziono szablonu: {self.template_path}")
+
+        self.output_dir = Path(output_dir or (Path.cwd() / "build"))
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.try_pdf = try_pdf
+
+    # ----------------- narzędzia dopasowania -----------------
+
+    @staticmethod
+    def _canon(s: str) -> str:
+        return (s or "").replace("\u00a0", " ").strip().lower().rstrip(":")
+
+    def _set_label_in_paragraphs(self, doc, label: str, value: str) -> bool:
+        """Ustaw 'Label: value' w akapicie z etykietą."""
+        lab = self._canon(label)
+        for p in doc.paragraphs:
+            if self._canon(p.text).startswith(lab):
+                before = p.text.split(":", 1)[0] if ":" in p.text else label
+                p.text = f"{before.strip()}: {value.strip()}"
+                return True
+        return False
+
+    def _set_label_in_tables(self, doc, label: str, value: str) -> bool:
+        """Ustaw 'Label: value' w komórce z etykietą lub w sąsiedniej komórce z wartością."""
+        lab = self._canon(label)
+        for table in doc.tables:
+            for row in table.rows:
+                for j, cell in enumerate(row.cells):
+                    txt = cell.text or ""
+                    if self._canon(txt).startswith(lab):
+                        if j + 1 < len(row.cells):
+                            row.cells[j + 1].text = value.strip()
+                        else:
+                            before = txt.split(":", 1)[0] if ":" in txt else label
+                            cell.text = f"{before.strip()}: {value.strip()}"
+                        return True
+        return False
+
+    def _set_value_below_label(self, doc, label: str, value: str) -> bool:
+        """
+        Wpisz wartość w akapicie/wierszu TABELI POD etykietą (nie rusza akapitu etykiety),
+        aby uniknąć 'rozstrzelenia' etykiet z tabulatorami.
+        """
+        lab = self._canon(label)
+
+        # akapity
+        paras = doc.paragraphs
+        for i, p in enumerate(paras):
+            if self._canon(p.text).startswith(lab):
+                if i + 1 < len(paras):
+                    paras[i + 1].text = value.strip()
+                    return True
+                return False
+
+        # tabele
+        for table in doc.tables:
+            for r_idx, row in enumerate(table.rows):
+                for c_idx, cell in enumerate(row.cells):
+                    if self._canon(cell.text).startswith(lab):
+                        rr = r_idx + 1
+                        if rr < len(table.rows):
+                            table.rows[rr].cells[c_idx].text = value.strip()
+                            return True
+                        if c_idx + 1 < len(row.cells):
+                            row.cells[c_idx + 1].text = value.strip()
+                            return True
+                        before = (cell.text or label).split(":", 1)[0]
+                        cell.text = f"{before.strip()}:\n{value.strip()}"
+                        return True
+        return False
+
+    def _set_below_any_label(self, doc, labels: list[str], value: str) -> bool:
+        """Próbuje umieścić wartość POD którąś z podanych etykiet."""
+        for lab in labels:
+            if self._set_value_below_label(doc, lab, value):
+                return True
+        return False
+
+    def _set_tasks_after_label(self, doc, label: str, tasks: list[str]) -> bool:
+        """Wstawia do 5 zadań w kolejnych akapitach/wierszach POD etykietą."""
+        lab = self._canon(label)
+
+        # akapity
+        paras = doc.paragraphs
+        for i, p in enumerate(paras):
+            if self._canon(p.text).startswith(lab):
+                for k in range(5):
+                    idx = i + 1 + k
+                    if idx < len(paras):
+                        txt = tasks[k].strip() if k < len(tasks) else ""
+                        paras[idx].text = f"{k+1}. {txt}".rstrip()
+                return True
+
+        # tabele
+        for table in doc.tables:
+            for r_idx, row in enumerate(table.rows):
+                for c_idx, cell in enumerate(row.cells):
+                    if self._canon(cell.text).startswith(lab):
+                        for k in range(5):
+                            rr = r_idx + 1 + k
+                            if rr < len(table.rows):
+                                txt = tasks[k].strip() if k < len(tasks) else ""
+                                table.rows[rr].cells[c_idx].text = f"{k+1}. {txt}".rstrip()
+                        return True
+        return False
+
+    def _insert_date_above_label(self, doc, label: str | list[str], date_text: str, align: str = "center") -> bool:
+        """
+        Wstaw `date_text` NAD etykietą. Jeśli etykieta jest akapitem – tworzymy nowy akapit
+        przed nią i wyrównujemy według 'align' (right/center/left). Jeśli etykieta jest w tabeli –
+        wpisujemy datę do komórki powyżej (tej samej kolumny) i wyrównujemy zgodnie z 'align'.
+        """
+        from docx.enum.text import WD_ALIGN_PARAGRAPH
+
+        labels = [label] if isinstance(label, str) else label
+        labs = [self._canon(l) for l in labels]
+
+        def _align_para(p, how: str):
+            if how == "right":
+                p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+            elif how == "left":
+                p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            else:
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+
+        # --- przypadek: etykieta w akapicie ---
+        for p in doc.paragraphs:
+            if any(l in self._canon(p.text) for l in labs):
+                try:
+                    new_p = p.insert_paragraph_before(date_text)
+                except Exception:
+                    p.text = f"{date_text}\n{p.text}"
+                    _align_para(p, align)
+                    return True
+                _align_para(new_p, align)
+                return True
+
+        # --- przypadek: etykieta w tabeli ---
+        for table in doc.tables:
+            for r_idx, row in enumerate(table.rows):
+                for c_idx, cell in enumerate(row.cells):
+                    if any(l in self._canon(cell.text) for l in labs):
+                        # wiersz powyżej → ta sama kolumna
+                        if r_idx > 0:
+                            above = table.rows[r_idx - 1].cells[c_idx]
+                            above.text = date_text
+                            for para in above.paragraphs:
+                                _align_para(para, align)
+                            return True
+                        # fallback: brak wiersza powyżej → prepend w tej samej komórce
+                        if cell.text.strip():
+                            cell.text = f"{date_text}\n{cell.text}"
+                        else:
+                            cell.text = date_text
+                        for para in cell.paragraphs:
+                            _align_para(para, align)
+                        return True
+        return False
+
+    # ----------------- eksport PDF -----------------
+
+    def _convert_to_pdf(self, docx_path: Path, pdf_path: Path) -> bool:
+        # 1) docx2pdf (MS Word na Windows/macOS)
+        try:
+            from docx2pdf import convert as docx2pdf_convert  # type: ignore
+            docx2pdf_convert(str(docx_path), str(pdf_path))
+            return pdf_path.exists()
+        except Exception:
+            pass
+        # 2) LibreOffice (Linux/Windows/macOS – jeśli zainstalowane)
+        soffice = shutil.which("soffice") or shutil.which("libreoffice")
+        if soffice:
+            try:
+                subprocess.run(
+                    [soffice, "--headless", "--convert-to", "pdf", "--outdir", str(pdf_path.parent), str(docx_path)],
+                    check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                )
+                return pdf_path.exists()
+            except Exception:
+                return False
+        return False
+
+    # ----------------- główne API -----------------
+
+    def make_pdf(
+        self,
+        rodzaj: str = "niestacjonarne",
+        stopien: str = "II",
+        kierunek: str | None = None,
+        specjalnosc: str | None = None,
+        dyplomant: str | None = None,
+        numer_albumu: str | None = None,
+        email: str | None = None,
+        prowadzacy: str | None = None,
+        konsultant: str | None = None,
+        temat: str | None = None,              # Temat POD etykietą (nowa linia)
+        opis: str | None = None,               # Opis POD etykietą (nowa linia)
+        jezyk: str | None = "Polski",          # Język opracowania po dwukropku
+        zadania: list[str] | None = None,      # 1..5 zadań, opcjonalnie
+        wstaw_date: bool = True,
+        data_aktualna: str | None = None,      # np. "10.10.2025"; None -> dziś
+        date_align: str = "center",            # "center" (domyślnie) / "right" / "left"
+    ) -> dict:
+        doc = Document(str(self.template_path))
+
+        # 1) standardowe pola 'po dwukropku'
+        fields = {
+            "Rodzaj studiów": rodzaj,
+            "Stopień studiów": stopien,
+            "Kierunek": kierunek,
+            "Specjalność": specjalnosc,
+            "Dyplomant": dyplomant,
+            "Numer albumu": numer_albumu,
+            "Adres e-mail": email,
+            "Prowadzący": prowadzacy,
+            "Konsultant": konsultant,
+            "Język opracowania": jezyk,
+        }
+
+        not_found: list[str] = []
+        for label, value in fields.items():
+            if value is None or (isinstance(value, str) and value.strip() == ""):
+                continue
+            ok = self._set_label_in_paragraphs(doc, label, value)
+            if not ok:
+                ok = self._set_label_in_tables(doc, label, value)
+            if not ok:
+                not_found.append(label)
+
+        # 2) Temat – POD etykietą (nowa linia)
+        if isinstance(temat, str) and temat.strip():
+            ok_topic = self._set_below_any_label(
+                doc,
+                ["Temat pracy dyplomowej (nowy / zmieniony)*", "Temat pracy dyplomowej", "Temat pracy"],
+                temat.strip(),
+            )
+            if not ok_topic:
+                not_found.append("Temat pracy")
+
+        # 3) Opis – POD etykietą (nowa linia; wewnętrzne \n -> spacje)
+        if isinstance(opis, str) and opis.strip():
+            opis_one_line = opis.replace("\r", " ").replace("\n", " ").strip()
+            ok_opis = self._set_below_any_label(
+                doc,
+                ["Zwięzły opis celu pracy", "Zwięzły opis pracy", "Opis pracy"],
+                opis_one_line,
+            )
+            if not ok_opis:
+                not_found.append("Zwięzły opis celu pracy")
+
+        # 4) Główne zadania do wykonania – jeśli podano listę
+        if zadania:
+            tasks = (zadania or [])[:5]
+            ok_tasks = self._set_tasks_after_label(doc, "Główne zadania do wykonania", tasks)
+            if not ok_tasks:
+                not_found.append("Główne zadania do wykonania")
+
+        # 5) Data nad 'Data wydania'
+        if wstaw_date:
+            today = data_aktualna or datetime.now().strftime("%d.%m.%Y")
+            ok_date = self._insert_date_above_label(
+                doc,
+                ["Data wydania", "Data wydania:", "data wydania"],
+                today,
+                align=date_align,
+            )
+            if not ok_date:
+                not_found.append("Data wydania (wstawienie daty nad)")
+
+        if not_found:
+            raise ValueError("Nie znaleziono etykiet w szablonie: " + ", ".join(not_found))
+
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        out_docx = self.output_dir / f"thesisCard_mini_{ts}.docx"
+        out_pdf  = self.output_dir / f"thesisCard_mini_{ts}.pdf"
+
+        doc.save(str(out_docx))
+        made_pdf = self.try_pdf and self._convert_to_pdf(out_docx, out_pdf)
+        return {"docx": str(out_docx), "pdf": str(out_pdf) if made_pdf else None}
+
 
 
 ############# TEST
