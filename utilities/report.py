@@ -3399,7 +3399,11 @@ class AutoBreak(Environment):
             # prev_term=self.__class__.latex_backend(term)
         self.append("\n")
 
-# --- ThesisCardMini ----------------------------------------------------------
+
+
+
+
+# --- Thesis Card Generator --- #
 from pathlib import Path
 from datetime import datetime
 import shutil, subprocess
@@ -3411,16 +3415,6 @@ except Exception as e:
 
 
 class ThesisCardMini:
-    """
-    Generator karty pracy:
-    - pola 'po dwukropku' (paragrafy lub tabele),
-    - Temat i Zwięzły opis w nowej linii POD etykietą,
-    - opcjonalnie 5 pozycji w 'Główne zadania do wykonania',
-    - bieżąca data nad 'Data wydania' (wyrównanie: center/right/left),
-    - zapis DOCX oraz (jeśli możliwe) PDF.
-
-    Domyślny szablon: dynpy/utilities/documents/thesisCard.docx (względem report.py)
-    """
 
     def __init__(self, template_path: Path | None = None, output_dir: Path | None = None, try_pdf: bool = True):
         if template_path is None:
@@ -3433,14 +3427,12 @@ class ThesisCardMini:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.try_pdf = try_pdf
 
-    # ----------------- narzędzia dopasowania -----------------
-
     @staticmethod
     def _canon(s: str) -> str:
         return (s or "").replace("\u00a0", " ").strip().lower().rstrip(":")
 
     def _set_label_in_paragraphs(self, doc, label: str, value: str) -> bool:
-        """Ustaw 'Label: value' w akapicie z etykietą."""
+
         lab = self._canon(label)
         for p in doc.paragraphs:
             if self._canon(p.text).startswith(lab):
@@ -3450,7 +3442,7 @@ class ThesisCardMini:
         return False
 
     def _set_label_in_tables(self, doc, label: str, value: str) -> bool:
-        """Ustaw 'Label: value' w komórce z etykietą lub w sąsiedniej komórce z wartością."""
+
         lab = self._canon(label)
         for table in doc.tables:
             for row in table.rows:
@@ -3466,10 +3458,7 @@ class ThesisCardMini:
         return False
 
     def _set_value_below_label(self, doc, label: str, value: str) -> bool:
-        """
-        Wpisz wartość w akapicie/wierszu TABELI POD etykietą (nie rusza akapitu etykiety),
-        aby uniknąć 'rozstrzelenia' etykiet z tabulatorami.
-        """
+
         lab = self._canon(label)
 
         # akapity
@@ -3499,14 +3488,14 @@ class ThesisCardMini:
         return False
 
     def _set_below_any_label(self, doc, labels: list[str], value: str) -> bool:
-        """Próbuje umieścić wartość POD którąś z podanych etykiet."""
+
         for lab in labels:
             if self._set_value_below_label(doc, lab, value):
                 return True
         return False
 
     def _set_tasks_after_label(self, doc, label: str, tasks: list[str]) -> bool:
-        """Wstawia do 5 zadań w kolejnych akapitach/wierszach POD etykietą."""
+
         lab = self._canon(label)
 
         # akapity
@@ -3534,11 +3523,7 @@ class ThesisCardMini:
         return False
 
     def _insert_date_above_label(self, doc, label: str | list[str], date_text: str, align: str = "center") -> bool:
-        """
-        Wstaw `date_text` NAD etykietą. Jeśli etykieta jest akapitem – tworzymy nowy akapit
-        przed nią i wyrównujemy według 'align' (right/center/left). Jeśli etykieta jest w tabeli –
-        wpisujemy datę do komórki powyżej (tej samej kolumny) i wyrównujemy zgodnie z 'align'.
-        """
+
         from docx.enum.text import WD_ALIGN_PARAGRAPH
 
         labels = [label] if isinstance(label, str) else label
@@ -3552,7 +3537,7 @@ class ThesisCardMini:
             else:
                 p.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
-        # --- przypadek: etykieta w akapicie ---
+
         for p in doc.paragraphs:
             if any(l in self._canon(p.text) for l in labs):
                 try:
@@ -3564,7 +3549,7 @@ class ThesisCardMini:
                 _align_para(new_p, align)
                 return True
 
-        # --- przypadek: etykieta w tabeli ---
+
         for table in doc.tables:
             for r_idx, row in enumerate(table.rows):
                 for c_idx, cell in enumerate(row.cells):
@@ -3586,17 +3571,17 @@ class ThesisCardMini:
                         return True
         return False
 
-    # ----------------- eksport PDF -----------------
+
 
     def _convert_to_pdf(self, docx_path: Path, pdf_path: Path) -> bool:
-        # 1) docx2pdf (MS Word na Windows/macOS)
+        # 1) docx2pdf
         try:
             from docx2pdf import convert as docx2pdf_convert  # type: ignore
             docx2pdf_convert(str(docx_path), str(pdf_path))
             return pdf_path.exists()
         except Exception:
             pass
-        # 2) LibreOffice (Linux/Windows/macOS – jeśli zainstalowane)
+        # 2) LibreOffice
         soffice = shutil.which("soffice") or shutil.which("libreoffice")
         if soffice:
             try:
@@ -3609,7 +3594,7 @@ class ThesisCardMini:
                 return False
         return False
 
-    # ----------------- główne API -----------------
+
 
     def make_pdf(
         self,
@@ -3628,11 +3613,19 @@ class ThesisCardMini:
         zadania: list[str] | None = None,      # 1..5 zadań, opcjonalnie
         wstaw_date: bool = True,
         data_aktualna: str | None = None,      # np. "10.10.2025"; None -> dziś
-        date_align: str = "center",            # "center" (domyślnie) / "right" / "left"
+        date_align: str = "center",
+        signPath: str | Path | None = None,
+        sign_x_mm: float | None = None,   # X od lewego-górnego rogu
+        sign_y_mm: float | None = None,   # Y od lewego-górnego rogu
+        sign_w_mm: float = 45.0,          # szerokość obrazka
+        sign_h_mm: float | None = None,   # None = zachowaj proporcje                        
+                                
+                                                        # "center" (domyślnie) / "right" / "left"
     ) -> dict:
+        from docx import Document
         doc = Document(str(self.template_path))
 
-        # 1) standardowe pola 'po dwukropku'
+        # 1) standardowe pola 'po dwukropku'/ jeżeli zmieni się docelowy plik karty pracy, to może być konieczne dostosowanie tej części - na razie zostawiam jak jest.
         fields = {
             "Rodzaj studiów": rodzaj,
             "Stopień studiów": stopien,
@@ -3656,7 +3649,7 @@ class ThesisCardMini:
             if not ok:
                 not_found.append(label)
 
-        # 2) Temat – POD etykietą (nowa linia)
+
         if isinstance(temat, str) and temat.strip():
             ok_topic = self._set_below_any_label(
                 doc,
@@ -3666,7 +3659,7 @@ class ThesisCardMini:
             if not ok_topic:
                 not_found.append("Temat pracy")
 
-        # 3) Opis – POD etykietą (nowa linia; wewnętrzne \n -> spacje)
+
         if isinstance(opis, str) and opis.strip():
             opis_one_line = opis.replace("\r", " ").replace("\n", " ").strip()
             ok_opis = self._set_below_any_label(
@@ -3677,16 +3670,18 @@ class ThesisCardMini:
             if not ok_opis:
                 not_found.append("Zwięzły opis celu pracy")
 
-        # 4) Główne zadania do wykonania – jeśli podano listę
+
         if zadania:
             tasks = (zadania or [])[:5]
             ok_tasks = self._set_tasks_after_label(doc, "Główne zadania do wykonania", tasks)
             if not ok_tasks:
                 not_found.append("Główne zadania do wykonania")
 
-        # 5) Data nad 'Data wydania'
         if wstaw_date:
-            today = data_aktualna or datetime.now().strftime("%d.%m.%Y")
+            today_raw = data_aktualna or datetime.now().strftime("%d.%m.%Y")
+            trail = "\u00A0" * 37
+            today = f"{today_raw}{trail}"
+
             ok_date = self._insert_date_above_label(
                 doc,
                 ["Data wydania", "Data wydania:", "data wydania"],
@@ -3699,13 +3694,127 @@ class ThesisCardMini:
         if not_found:
             raise ValueError("Nie znaleziono etykiet w szablonie: " + ", ".join(not_found))
 
-        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        out_docx = self.output_dir / f"thesisCard_mini_{ts}.docx"
-        out_pdf  = self.output_dir / f"thesisCard_mini_{ts}.pdf"
+        
+        out_docx = self.output_dir / f"ThesisCard.docx"
+        out_pdf  = self.output_dir / f"ThesisCard.pdf"
 
         doc.save(str(out_docx))
         made_pdf = self.try_pdf and self._convert_to_pdf(out_docx, out_pdf)
-        return {"docx": str(out_docx), "pdf": str(out_pdf) if made_pdf else None}
+
+        # Add picture if path and picture are given
+        if made_pdf and signPath:
+            try:
+                self.signPdf(
+                    pdf_path=out_pdf,
+                    sign_path=Path(signPath),
+                    x_mm=sign_x_mm, y_mm=sign_y_mm,
+                    width_mm=sign_w_mm, height_mm=sign_h_mm,
+                )
+            except Exception as e:
+                return {"docx": str(out_docx), "pdf": str(out_pdf), "signature_error": str(e)}
+    
+
+
+
+    def signPdf(
+        self,
+        pdf_path: Path,
+        sign_path: Path,
+        *,
+        x_mm: float | None,          
+        y_mm: float | None,          
+        width_mm: float = 45.0,
+        height_mm: float | None = None,  # None => proporcje z obrazka
+    ) -> bool:
+
+        from pathlib import Path
+        import io, os, time
+        pdf_path = Path(pdf_path); sign_path = Path(sign_path)
+        if not pdf_path.exists(): raise FileNotFoundError(f"PDF nie istnieje: {pdf_path}")
+        if not sign_path.exists(): raise FileNotFoundError(f"Obraz podpisu nie istnieje: {sign_path}")
+        if x_mm is None or y_mm is None:
+            raise ValueError("Podaj x_mm i y_mm (mm od lewego-górnego rogu).")
+
+        def mm2pt(mm: float) -> float: return mm * 72.0 / 25.4
+
+        # --- Preferowany wariant: PyMuPDF (overlay + saveIncr) ---
+        try:
+            import fitz  # PyMuPDF
+            doc = fitz.open(str(pdf_path))
+            page = doc[0]
+            # rozmiar obrazka (do zachowania proporcji)
+            try:
+                pm = fitz.Pixmap(str(sign_path)); iw, ih = pm.width, pm.height; pm = None
+            except Exception:
+                iw, ih = 1, 1
+
+            w_pt = mm2pt(width_mm)
+            h_pt = mm2pt(height_mm) if height_mm else w_pt * (ih / iw)
+
+            x0 = mm2pt(x_mm)
+            y0 = mm2pt(y_mm)
+            rect = fitz.Rect(x0, y0, x0 + w_pt, y0 + h_pt)
+
+            page.insert_image(rect, filename=str(sign_path), keep_proportion=True, overlay=True)
+
+            try:
+                doc.saveIncr(); doc.close()
+            except Exception:
+                tmp = pdf_path.with_suffix(".signed.tmp.pdf")
+                doc.save(str(tmp)); doc.close()
+                try:
+                    os.replace(tmp, pdf_path)
+                finally:
+                    if tmp.exists(): tmp.unlink(missing_ok=True)
+            return True
+        except Exception:
+            # --- Fallback: ReportLab + PyPDF2 (też overlay) ---
+            try:
+                from PyPDF2 import PdfReader, PdfWriter
+                from reportlab.pdfgen import canvas
+                from reportlab.lib.utils import ImageReader
+                import io
+
+                reader = PdfReader(str(pdf_path))
+                page0 = reader.pages[0]
+                pw, ph = float(page0.mediabox.width), float(page0.mediabox.height)
+
+                img = ImageReader(str(sign_path))
+                iw, ih = img.getSize()
+                w_pt = mm2pt(width_mm)
+                h_pt = mm2pt(height_mm) if height_mm else w_pt * (ih / iw)
+
+                # ReportLab ma (0,0) w lewym-DOLNYM rogu => konwersja Y:
+                x = mm2pt(x_mm)
+                y = ph - mm2pt(y_mm) - h_pt
+
+                buf = io.BytesIO()
+                c = canvas.Canvas(buf, pagesize=(pw, ph))
+                c.drawImage(img, x, y, width=w_pt, height=h_pt, preserveAspectRatio=True, mask='auto')
+                c.save(); buf.seek(0)
+
+                overlay = PdfReader(buf).pages[0]
+                page0.merge_page(overlay)
+
+                writer = PdfWriter()
+                for i, p in enumerate(reader.pages):
+                    writer.add_page(page0 if i == 0 else p)
+
+                tmp = pdf_path.with_suffix(".signed.tmp.pdf")
+                with open(tmp, "wb") as f: writer.write(f)
+                try:
+                    os.replace(tmp, pdf_path)
+                finally:
+                    if os.path.exists(tmp): os.remove(tmp)
+                return True
+            except Exception:
+                return False
+
+
+        
+
+
+
 
 
 
