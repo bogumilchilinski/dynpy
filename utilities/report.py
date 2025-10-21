@@ -3408,10 +3408,7 @@ from pathlib import Path
 from datetime import datetime
 import shutil, subprocess
 
-try:
-    from docx import Document
-except Exception as e:
-    raise RuntimeError("Zainstaluj zależność: pip install python-docx") from e
+
 
 
 class ThesisCardMini:
@@ -3622,6 +3619,12 @@ class ThesisCardMini:
                                 
                                                         # "center" (domyślnie) / "right" / "left"
     ) -> dict:
+        
+        try:
+            from docx import Document
+        except Exception as e:
+            raise RuntimeError("Zainstaluj zależność: pip install python-docx") from e
+
         from docx import Document
         doc = Document(str(self.template_path))
 
