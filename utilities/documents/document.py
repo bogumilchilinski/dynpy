@@ -4788,9 +4788,7 @@ class BeamerPresentation(Document):
         # Package('titlesec'),
         # Package('fancyhdr'),
         # Command('pagestyle', arguments=['fancy']),
-        Command(
-            "author", arguments=["Bogumił Chiliński"]
-        ),  # ['Szymon Kozłowski & Bogumił Chiliński']),
+        Command("author", arguments=["Author name"]),
         # Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
         # Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
         # Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
@@ -4895,7 +4893,10 @@ doc.generate_pdf(clean_tex=False)
             self.packages.append(Command("title", arguments=[self.title], options=[""]))
 
         if self.author is not None:
+            self.packages.remove(Command("author", arguments=["Author name"]))
+
             if self.initials is not None:
+                
                 self.packages.append(
                     Command("author", arguments=[self.author], options=[self.initials])
                 )
@@ -4923,7 +4924,7 @@ class DGBeamer(Document):
         # Package('titlesec'),
         # Package('fancyhdr'),
         # Command('pagestyle', arguments=['fancy']),
-        Command("author", arguments=["Bogumił Chiliński & Krzysztof Twardoch"]),
+        Command("author", arguments=["Author name"]),
         # Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
         # Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
         # Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
@@ -4985,7 +4986,7 @@ class PosterTemplate(Document):
         # Package('titlesec'),
         # Package('fancyhdr'),
         # Command('pagestyle', arguments=['fancy']),
-        Command("author", arguments=["Anna Mackojć & Bogumił Chiliński"]),
+        Command("author", arguments=["Author name"]),
         # Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
         # Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
         # Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
