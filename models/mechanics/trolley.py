@@ -1086,6 +1086,7 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
             return self.sym_desc_dict
 
 
+
 class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
 
     scheme_name = "trolley_pendulum_tmd.png"
@@ -4846,7 +4847,31 @@ class TrolleyWithElasticPendulum(TrolleyWithPendulum):
         components['_gravity'] = self._gravity
 
         return components
+    def get_default_data(self):
+        """
+        Zwraca słownik domyślnych wartości numerycznych 
+        dla parametrów systemu.
+        """
 
+        
+        # Mapowanie symboli (atrybutów klasy) na wartości numeryczne.
+        # Kluczami są obiekty Symbol (np. self.l), a nie stringi ("l").
+        data_dict = {
+            self.l: 1.0,
+            self.m_t: 2.0,
+            self.m_p: 0.5,
+            self.k: 10.0,
+            self.g: 9.81,
+            self.Omega: 1.5,
+            self.F: 0.5,
+            self.k_l: 20.0,
+        }
+        
+        # Zauważ, że self.u_0 jest obliczane automatycznie w metodzie __init__
+        # na podstawie m_p, g oraz k_l, więc nie ma potrzeby definiować go 
+        # jako oddzielnej danej wejściowej.
+        
+        return data_dict
 
 class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
 

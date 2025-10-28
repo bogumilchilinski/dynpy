@@ -242,8 +242,6 @@ report_table = LatexDataFrame.formatted(
 display(report_table.reported(caption="Travel Time Data Table"))
 ```
 
-
-
 Creating plot and adding it to document
 
 ```python
@@ -260,7 +258,6 @@ plt.legend()
 data_plot=PltPlot(caption='Sample plot')
 display(data_plot)
 ```
-
 
 ```python
 from dynpy.utilities.report import *

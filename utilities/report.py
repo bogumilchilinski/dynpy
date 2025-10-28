@@ -2253,7 +2253,7 @@ class TikZPicture(Environment, ReportModule):
         Package("amssymb"),
         Package("rotating"),
         NoEscape(
-            r"\usetikzlibrary{snakes,calc,positioning,patterns,angles,quotes,decorations.pathmorphing,decorations.markings,through}"
+            r"\usetikzlibrary{calc,positioning,patterns,angles,quotes,decorations.pathmorphing,decorations.markings,through}"
         ),
         NoEscape(r"\usetikzlibrary{arrows,decorations,decorations.text}"),
         NoEscape(r"\usetikzlibrary{patterns.meta,math}"),

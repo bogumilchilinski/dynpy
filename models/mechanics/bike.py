@@ -159,7 +159,7 @@ class ReducedMotorbike(ComposedSystem):
             qs=self.qs,
             ivar=self.ivar,
         )
-        # self.gravitationalforce = GravitationalForce(self.m_b+self.m_d+self.m_f+self.m_r, self.g, pos1=self.linear_displacement, qs = self.qs)
+        #self.gravitationalforce = GravitationalForce(self.m_b+self.m_d+self.m_f+self.m_r, self.g, pos1=self.linear_displacement, qs = self.qs)
         self.rolling_resistance = GravitationalForce(
             self.f_t * (self.m_b + self.m_d + self.m_f + self.m_r),
             self.g,
@@ -174,7 +174,7 @@ class ReducedMotorbike(ComposedSystem):
         components["front_wheel"] = self.front_wheel
         components["engine_moment"] = self.engine_moment
         components["drag_force"] = self.drag_force
-        # components['gravitational_force'] = self.gravitationalforce
+        #components['gravitational_force'] = self.gravitationalforce
         components["rolling_resistance"] = self.rolling_resistance
 
         return components
@@ -660,3 +660,217 @@ class MotorbikeReducedToDisk(ReducedMotorbike):
         )
         sol = solve(eq, omega_max)
         return Eq(omega_max, sol[1])
+
+
+class ReducedCar(ComposedSystem):
+    scheme_name = "DC_motor.png"
+
+    M = Symbol("M", positive=True)
+    m_b = Symbol("m_car", positive=True)
+    m_d = Symbol("m_driver", positive=True)
+    m_rr = Symbol("m_rr", positive=True)
+    m_fr = Symbol("m_fr", positive=True)
+    m_rl = Symbol("m_rl", positive=True)
+    m_fl = Symbol("m_fl", positive=True)
+    r = Symbol("r", positive=True)
+    Cd = Symbol("C_d", positive=True)  # dragcoefficient
+    Ad = Symbol("rho", positive=True)  # air density
+    Af = Symbol("A_f", positive=True)  # front area of the vehicle
+    T = Symbol("T")
+    f_t = Symbol("f_t")
+    g = Symbol("g")
+
+    x = dynamicsymbols("x")
+    phi = dynamicsymbols("phi")
+
+    def __init__(
+        self,
+        M=None,
+        m_b=None,
+        m_d=None,
+        m_rr=None,
+        m_fr=None,
+        m_rl=None,
+        m_fl=None,
+        x=None,
+        r=None,
+        Cd=None,
+        Ad=None,
+        Af=None,
+        T=None,
+        g=None,
+        f_t=None,
+        phi=None,
+        ivar=Symbol("t"),
+        **kwargs
+    ):
+
+        if M is not None:
+            self.M = M
+        if m_b is not None:
+            self.m_b = m_b
+        if m_d is not None:
+            self.m_d = m_d
+        if m_rr is not None:
+            self.m_r = m_rr
+        if m_fr is not None:
+            self.m_f = m_fr
+        if m_rl is not None:
+            self.m_r = m_rl
+        if m_fl is not None:
+            self.m_f = m_fl
+        if x is not None:
+            self.x = x
+        if r is not None:
+            self.r = r
+        if Cd is not None:
+            self.Cd = Cd
+        if Ad is not None:
+            self.Ad = Ad
+        if Af is not None:
+            self.Af = Af
+        if T is not None:
+            self.T = T
+        if g is not None:
+            self.g = g
+        if f_t is not None:
+            self.f_t = f_t
+        if phi is not None:
+            self.phi = phi
+
+        self.ivar = ivar
+
+        self.qs = [self.x]
+        self._init_from_components(**kwargs)
+
+    @property
+    def linear_displacement(self):
+
+        return self.x
+
+    @property
+    def angular_displacement(self):
+
+        return (self.x) / (self.r)
+
+    @property
+    def linear_velocity(self):
+
+        return self.x.diff(self.ivar)
+
+    @cached_property
+    def components(self):
+        m_tot=(self.m_b + self.m_d + self.m_fr + self.m_rr+ self.m_fl + self.m_rl)
+        components = {}
+
+        self.mass_car = MaterialPoint(
+            self.m_b, self.linear_displacement, qs=self.qs, ivar=self.ivar
+        )
+        self.mass_driver = MaterialPoint(
+            self.m_d, self.linear_displacement, qs=self.qs, ivar=self.ivar
+        )
+        self.rear_right_wheel = RollingDisk(
+            self.m_rr, R=self.r, x=self.x, qs=self.qs, ivar=self.ivar
+        )(label="Rear right wheel")
+        self.front_right_wheel = RollingDisk(
+            self.m_fr, R=self.r, x=self.x, qs=self.qs, ivar=self.ivar
+        )(label="Front right wheel")
+        self.rear_left_wheel = RollingDisk(
+            self.m_rl, R=self.r, x=self.x, qs=self.qs, ivar=self.ivar
+        )(label="Rear left wheel")
+        self.front_left_wheel = RollingDisk(
+            self.m_fl, R=self.r, x=self.x, qs=self.qs, ivar=self.ivar
+        )(label="Front left wheel")
+        self.engine_moment = Force(
+            self.T, pos1=self.angular_displacement, qs=self.qs, ivar=self.ivar
+        )(label="Bike engine")
+        self.drag_force = Force(
+            -S.One / 2 * self.Ad * self.Cd * self.Af * (self.linear_velocity) ** 2,
+            self.x,
+            qs=self.qs,
+            ivar=self.ivar,
+        )
+        self.rolling_resistance = GravitationalForce(
+            self.f_t *(m_tot),
+            self.g,
+            pos1=self.linear_displacement,
+            qs=self.qs, ivar=self.ivar)(label="Rolling resistance force")
+
+        components["mass_car"] = self.mass_car
+        components["mass_driver"] = self.mass_driver
+        components["rear_right_wheel"] = self.rear_right_wheel
+        components["front_right_wheel"] = self.front_right_wheel
+        components["rear_left_wheel"] = self.rear_left_wheel
+        components["front_left_wheel"] = self.front_left_wheel
+        components["engine_moment"] = self.engine_moment
+        components["drag_force"] = self.drag_force
+        components["rolling_resistance"] = self.rolling_resistance
+
+        return components
+
+    def v_max(self):
+        vmax = Symbol("v_{max}", positive=True)
+        eq = Eq(self.eoms[0].subs(self.linear_velocity, vmax).doit(), 0)
+        sol = solve(eq, vmax)[1]
+        return Eq(vmax, sol)
+
+    def symbols_description(self):
+        vmax = Symbol("v_{max}", positive=True)
+        self.sym_desc_dict = {
+            self.m_b: r"Mass of the car",
+            self.m_d: r"Mass of the driver ",
+            self.r: r"Dynamic radius of the motorcycle",
+            self.m_fr: r"Mass of the front right wheel",
+            self.m_rr: r"Mass of the rear right wheel",
+            self.m_fl: r"Mass of the front left wheel",
+            self.m_rl: r"Mass of the rear left wheel",
+            self.x.diff(): r"Velocity of the system",
+            self.x.diff(self.ivar, 2): r"Acceleration of the system",
+            self.ivar: r"Time",
+            self.T: r"Torque",
+            self.Cd: r"Drag coefficient",
+            self.Ad: r"Air density",
+            self.Af: r"Frontal area of the motorcycle",
+            self.x: r"The displacement of the system",
+            self.g: r"Gravitational acceleration",
+            self.f_t: r"Rolling resistance coefficient",
+            vmax: "The maximum speed",
+        }
+        return self.sym_desc_dict
+
+    def get_default_data(self):
+        default_data_dict = {
+            self.r: [0.3175],
+            self.m_b: [270],
+            self.m_d: [80],
+            self.m_rr: [19],
+            self.m_fr: [15],
+            self.m_rl: [19],
+            self.m_fl: [15],
+            self.Cd: [0.65],
+            self.Ad: [1.2047],
+            self.Af: [0.6],
+        }
+        return default_data_dict
+
+
+    def units(self):
+
+        units_dict = {
+            self.m_b: ureg.kilogram,
+            self.m_d: ureg.kilogram,
+            self.r: ureg.meter,
+            self.m_fr: ureg.kilogram,
+            self.m_rr: ureg.kilogram,
+            self.m_fl: ureg.kilogram,
+            self.m_rl: ureg.kilogram,
+            self.ivar: ureg.second,
+            self.T: ureg.newton * ureg.meter,
+            self.Ad: ureg.kilogram/ureg.meter**3,
+            self.Af: ureg.meter**2,
+            self.x: ureg.meter,
+            self.x.diff(self.ivar): ureg.meter / ureg.second,
+            self.x.diff(self.ivar, 2): ureg.meter / ureg.second**2,
+            self.g: ureg.meter / ureg.second**2,
+        }
+        return units_dict
