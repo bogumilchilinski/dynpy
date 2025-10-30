@@ -6453,10 +6453,7 @@ from pathlib import Path
 from datetime import datetime
 import shutil, subprocess
 
-try:
-    from docx import Document
-except Exception as e:
-    raise RuntimeError("Zainstaluj zależność: pip install python-docx") from e
+
 
 
 class ThesisCardMini:
@@ -6568,6 +6565,12 @@ class ThesisCardMini:
         return False
 
     def _insert_date_above_label(self, doc, label: str | list[str], date_text: str, align: str = "center") -> bool:
+
+
+        try:
+            from docx import Document
+        except Exception as e:
+            raise RuntimeError("Zainstaluj zależność: pip install python-docx") from e
 
         from docx.enum.text import WD_ALIGN_PARAGRAPH
 
