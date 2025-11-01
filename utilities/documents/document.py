@@ -6460,7 +6460,7 @@ class ThesisCardMini:
 
     def __init__(self, template_path: Path | None = None, output_dir: Path | None = None, try_pdf: bool = True):
         if template_path is None:
-            template_path = Path(__file__).resolve().parent / "documents" / "thesisCard.docx"
+            template_path = Path(__file__).resolve().parent / "thesisCard.docx"
         self.template_path = Path(template_path)
         if not self.template_path.exists():
             raise FileNotFoundError(f"Nie znaleziono szablonu: {self.template_path}")
