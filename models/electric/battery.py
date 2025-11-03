@@ -67,6 +67,7 @@ from ..mechanics.trolley import (
     base_origin,
 )
 from .elements import *
+from .circuits import CircutRC, CircuitRLC, CircuitRL
 
 # from models.mechanics.trolley import (   # absolutna ścieżka do mix-inu
 #     ComposedSystem,
