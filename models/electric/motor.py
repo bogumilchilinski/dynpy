@@ -353,18 +353,18 @@ class DCMotorIIOrder(ComposedSystem):
             -self.U_z, self.charge, qs=self.qs, ivar=self.ivar, frame=base_frame
         )
         self.electromotive_force = ElectromotiveForce(
-            -self.k_m * self.charge.diff(self.ivar),
-            self.phi,
+            +self.k_e * self.phi.diff(self.ivar),
+            self.charge,
             qs=self.qs,
             ivar=self.ivar,
             frame=base_frame,
         )
         self.engine_load_torque = EngineLoadTorque(
-            -self.M_obc, self.phi, qs=self.qs, ivar=self.ivar, frame=base_frame
+            self.M_obc, self.phi, qs=self.qs, ivar=self.ivar, frame=base_frame
         )
         self.rotor_torque = RotorTorque(
-            self.k_e * self.phi.diff(self.ivar),
-            self.charge,
+            -self.k_m * self.charge.diff(self.ivar),
+            self.phi,
             qs=self.qs,
             ivar=self.ivar,
             frame=base_frame,
