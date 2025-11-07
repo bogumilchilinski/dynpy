@@ -2712,3 +2712,7 @@ class PdfLatexGenerator(OutputFileGenerator):
 
 class LuaLatexGenerator(PdfLatexGenerator):
     _engine = 'lualatex'
+
+
+class TextileFileGenerator(OutputFileGenerator):
+    _engine = 'textile'
