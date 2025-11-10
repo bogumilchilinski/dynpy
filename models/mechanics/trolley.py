@@ -1275,6 +1275,7 @@ class DampedTrolleyWithPendulum(TrolleyWithPendulum):
     phi = dynamicsymbols("\\varphi")
     x = dynamicsymbols("x")
     c = Symbol("c", positive=True)
+    c_p = Symbol("c_p", positive=True)
 
     def __init__(
         self,
@@ -1288,6 +1289,7 @@ class DampedTrolleyWithPendulum(TrolleyWithPendulum):
         x=None,
         F=None,
         c=None,
+        c_p=None,
         ivar=Symbol("t"),
         **kwargs,
     ):
@@ -1311,6 +1313,8 @@ class DampedTrolleyWithPendulum(TrolleyWithPendulum):
             self.F = F
         if c is not None:
             self.c = c
+        if c_p is not None:
+            self.c_p = c_p
         self.ivar = ivar
 
         self._init_from_components(**kwargs)
@@ -1334,7 +1338,7 @@ class DampedTrolleyWithPendulum(TrolleyWithPendulum):
         self._trolley_damper = Damper(self.c, pos1=self.x, qs=[self.x, self.phi])(
             label="Trolley damper"
         )
-        self._pendulum_damper = Damper(self.c, pos1=self.phi, qs=[self.x, self.phi])(
+        self._pendulum_damper = Damper(self.c_p, pos1=self.phi, qs=[self.x, self.phi])(
             label="Pendulum damper"
         )
 
