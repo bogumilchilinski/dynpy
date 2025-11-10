@@ -1103,6 +1103,7 @@ class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
     phi = dynamicsymbols("\\varphi")
     x = dynamicsymbols("x")
     c = Symbol("c", positive=True)
+    c_p = Symbol("c_p", positive=True)
     u = dynamicsymbols("u", positive=True)
     v = Symbol("v", positive=True)
     alpha = Symbol("\\alpha")
@@ -1125,6 +1126,7 @@ class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
         rayleigh_damping_matrix=None,
         F=None,
         c=None,
+        c_p=None,
         u=None,
         v=None,
         ivar=Symbol("t"),
@@ -1154,6 +1156,8 @@ class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
             self.F = F
         if c is not None:
             self.c = c
+        if c_p is not None:
+            self.c_p = c_p
         if u is not None:
             self.u = u
         if v is not None:
@@ -1181,7 +1185,7 @@ class DampedTrolleyWithPendulumVariableInertia(TrolleyWithElasticPendulum):
         self._trolley_damper = Damper(
             self.c, pos1=self.x + (self.l + self.u) * sin(self.phi), qs=self.qs
         )(label="Trolley damper")
-        self._pendulum_damper = Damper(self.c, pos1=self.phi, qs=self.qs)(
+        self._pendulum_damper = Damper(self.c_p, pos1=self.phi, qs=self.qs)(
             label="Pendulum damper"
         )
 
