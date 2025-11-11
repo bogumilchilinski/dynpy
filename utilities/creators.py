@@ -13,6 +13,8 @@ from dynpy.utilities.templates.document import Guide
 from .documents.reports import ODESystemOverviewReport
 from .report import Markdown
 
+import pypandoc
+
 issue_no = 567
 title = "implementation of overview report for `ODESystem` child classes"
 guide_class = ODESystemOverviewReport
@@ -2676,7 +2678,6 @@ class PDF_link:
 
 class OutputFileGenerator:
 
-
     #_engine = 'lualatex.exe'
     _engine = 'pdflatex'
 
@@ -2716,3 +2717,15 @@ class LuaLatexGenerator(PdfLatexGenerator):
 
 class TextileFileGenerator(OutputFileGenerator):
     _engine = 'textile'
+
+    def generate_textile(self):
+        latex_content = self._source.dumps() 
+        textile_content = pypandoc.convert_text(
+            latex_content,
+            to=self._engine,
+            format='tex',
+            outputfile=self._filepath,
+            encoding='utf-8'
+        )
+
+        return self._filepath
