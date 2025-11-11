@@ -4019,3 +4019,124 @@ doc.append(slide2)
 doc.generate_pdf(clean_tex=False)
 """
         return ObjectCode(preliminary_str)
+    
+    
+    
+class SimulationBasics(BeamerPresentation):
+    
+    @classmethod
+    def base_setup(cls):
+        
+        preliminary_str = r"""
+### CELL 1 - Import Libraries
+from sympy import Eq, Symbol, symbols, Function
+from dynpy.utilities.report import *
+from dynpy.solvers.linear import ODESystem
+from dynpy.models.mechanics import ForcedSpringMassSystem as DynamicSys
+from dynpy.utilities.documents.document import BeamerPresentation
+SympyFormula._break_mode = 'eq' # neccesarry for correct equation display
+
+slide1 = CodeFrame(title='Import Libraries',options=[])
+CurrentContainer(slide1)
+
+display(ObjectCode('''
+from sympy import Eq, Symbol, symbols, Function
+from dynpy.utilities.report import *
+from dynpy.solvers.linear import ODESystem
+from dynpy.models.mechanics import ForcedSpringMassSystem as DynamicSys
+from dynpy.utilities.documents.document import BeamerPresentation
+SympyFormula._break_mode = 'eq' # neccesarry for correct equation display
+'''))
+
+
+### CELL 2 - Analyzed object
+dyn_sys = DynamicSys()
+dyn_sys.as_picture()
+
+slide2 = CodeFrame(title='Import Libraries',options=[])
+CurrentContainer(slide2)
+
+display(ObjectCode('''
+dyn_sys = DynamicSys()
+dyn_sys.as_picture()
+'''))
+display(dyn_sys.as_picture(width='3cm'))
+
+
+### CELL 3 - Defining symbols
+k, g, m, F = symbols('k g m F', positive=True)
+t = Symbol('t')
+
+z = Function('z')(t)
+
+
+### CELL 4 - Defining equations of motion
+# Once all symbols and functions are defined, we can proceed to create the equations of motion. We will use the ODESystem class from the DynPy library for this purpose.
+# To define the equations of motion, you need to provide at least two arguments:
+# - odes - ordinary differential equations (ODEs)
+# - dvars - dependent variables with respect to which differentiation is performed
+# You can get additional information about the ODESystem class using the help() method.
+ode = ODESystem(odes=[m*z.diff(t, t) - F + g*m + k*z], dvars=[z])
+display(ode)
+
+
+### CELL 5 - Solution of the defined equation
+# Defining data
+data = {
+F:2,
+g:10,
+m:5,
+k:100,
+}
+t_span = np.linspace(0.0,1,30)
+
+# Symbolic solution
+sol_sym = ode.solution()
+display(sol_sym)
+sol_sym = sol_sym.subs(data)
+display(sol_sym)
+
+# Numerical solution
+ode_sub = ode.subs(data)
+display(ode_sub)
+sol = ode_sub.numerized().compute_solution(t_span, [0.0, 0.0])
+display(sol)
+
+
+### CELL 6 - Using predefined objects
+ode_2 = dyn_sys.eoms
+display(ode_2)
+
+# You can use function solution as well to get symbolic solution
+sym_sol_2 = dyn_sys.eoms.solution()
+display(sym_sol_2)
+display(sym_sol_2.subs(data))
+
+# But if you want to solve this solution numerically you have to define symbols in data in a way presented below:
+F=DynamicSys.F
+g=DynamicSys.g
+m=DynamicSys.m
+k=DynamicSys.k
+
+data ={
+F:2,
+g:10,
+m:5,
+k:100,
+}
+
+# Numerical solution
+sol_num_2 = dyn_sys.eoms.subs(data).numerized().compute_solution(t_span, [0.0, 0.0])
+display(sol_num_2)
+
+
+### CELL 7 - Creating presentation
+doc = BeamerPresentation('Simulations_example',title='Simuations in DynPy', author='Author')
+doc.preamble.append(Command('date', arguments=['Month XX, XXXX']))
+
+doc.append(slide1)
+doc.append(slide2)
+
+doc.generate_pdf(clean_tex=False)
+"""
+        return ObjectCode(preliminary_str)

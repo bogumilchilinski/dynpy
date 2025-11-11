@@ -896,7 +896,7 @@ class TrolleyWithExtendablePendulumScheme(TikZPicture):
 \node (c1) at (-2.5cm,0cm) {$c$};
 
 % Force | coords and label
-\node(Ft) at (0.75cm,1.75cm) {$F(t)$};
+\node(Ft) at (0.75cm,1.75cm) {$F_u$};
 
 
 % Rotation angle phi
