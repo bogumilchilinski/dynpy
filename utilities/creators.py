@@ -2719,7 +2719,10 @@ class TextileFileGenerator(OutputFileGenerator):
     _engine = 'textile'
 
     def generate_textile(self):
-        latex_content = self._source.dumps() 
+        if isinstance(self._source, str):
+            latex_content = self._source
+        else:
+            latex_content = self._source.dumps() 
         textile_content = pypandoc.convert_text(
             latex_content,
             to=self._engine,
