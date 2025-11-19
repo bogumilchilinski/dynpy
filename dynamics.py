@@ -14,7 +14,7 @@ from sympy import (
     Derivative,
     Eq,
     Expr,
-    Function,
+    Function, 
     Integral,
     Matrix,
     Mul,

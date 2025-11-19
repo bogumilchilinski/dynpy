@@ -327,17 +327,23 @@ display(data_plot)
 ```
 
 ### Explanatory schemes
+
 #### Application of the developed schemes
+
 '''python
 from dynpy.utilities.documents.schemes import TrolleyWithPendulumTestStandSchemeBox
 display(TrolleyWithPendulumTestStandSchemeBox().in_figure())
 '''
+
 #### Obtaining LaTeX code
+
 '''python
 from dynpy.utilities.documents.schemes import TrolleyWithPendulumTestStandSchemeBox
 TrolleyWithPendulumTestStandSchemeBox()
 '''
+
 #### Creation of custom schemes
+
 '''python
 from dynpy.utilities.report import TikZPicture
 #For editing an existing scheme, insert the code from step 2 into the code section.
@@ -365,9 +371,9 @@ class EnergyStorageSystemScheme(TikZPicture):
 
     """
         return code
+
 display(EnergyStorageSystemScheme().in_figure())
 '''
-
 
 ## 3. Exporting Reports
 

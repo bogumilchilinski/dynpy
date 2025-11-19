@@ -4140,3 +4140,96 @@ doc.append(slide2)
 doc.generate_pdf(clean_tex=False)
 """
         return ObjectCode(preliminary_str)
+    
+    
+    
+class AdvancedReporting(BeamerPresentation):
+    
+    @classmethod
+    def base_setup(cls):
+        
+        preliminary_str = r"""
+### CELL 1 - Import Libraries
+from sympy import*
+from dynpy.utilities.report import*
+from dynpy.utilities.templates.document import WutThesis
+import pandas as pd
+
+
+### CELL 2 - AutoMarker
+automarker=Section("AutoMarker class")
+CurrentContainer(automarker)
+
+#
+display(ReportText("Here are some figures:"))
+
+# Please add an image named ‘pic’ to your current folder.
+pic=Picture('./pic.png', caption="Sample Image", width="5cm")
+
+a=Symbol("a")
+b=Symbol("b")
+
+dane={a:[10,20,30,40,50],b:[1,4,6,8,10]}
+
+table=(
+    LatexDataFrame.formatted(
+        data=dane, index=[1,2,3,4,5]).rename_axis(
+            't',
+            axis=1)).reported(caption='Table with values')
+
+plot=table.to_pylatex_tikz().in_figure(caption="Simple plot",width="10cm")
+
+display(pic)
+display(table)
+display(plot)
+display(ReportText(f"And now I will refer firstly to the picture ({AutoMarker(pic)}) then I need to mention the table ({AutoMarker(table)}) as well. In this short section the plot ({AutoMarker(plot)}) was done as well. "))
+
+### CELL 3 - Biblography
+biblio_mngr=BibliographyManager(arguments='biblio.bib')
+
+biblio_entries=NoEscape(
+r'''
+@article{Radomski24,
+author = {Amadeusz Radomski, Damian Sierociński and Bogumił Chiliński},
+year = {2024},
+month = {03},
+pages = {1-10},
+title = {Proposition of a structural health monitoring model for a concept of an innovative variable mass pendular tuned mass damper},
+volume = {25},
+journal = {Diagnostyka},
+doi = {10.29354/diag/185458}
+}
+''')
+
+biblio_mngr.append(biblio_entries)
+
+
+### CELL 4 - Citing articles from the bibliography
+cite_output=Section("Citation output")
+CurrentContainer(cite_output)
+
+display(ReportText("Many researches were done and some revealed that ... \cite{Radomski24}. It mentions..."))
+
+
+### CELL 5 - Appending bibliography and table of contents
+doc = WutThesis('AdvancedReporting')
+
+# TO ATTACH BIBLIOGRAPHY
+doc.preamble.append(Package('biblatex',["backend=biber","sorting=none"]))
+doc.preamble.append(Command('addbibresource','biblio.bib'))
+
+doc.packages.append(Package('siunitx'))
+
+# TO ATTACH TABLE OF CONTENTS 
+doc.append(Command('tableofcontents'))
+
+doc.append(automarker)
+doc.append(cite_output)
+
+#TO DISPLAY BIBLIOGRAPHY
+doc.append(biblio_mngr)
+doc.append(Command('printbibliography',options=[NoEscape("title={Bibliography}")]))
+
+doc.generate_pdf(clean_tex=False)
+"""
+        return ObjectCode(preliminary_str)
