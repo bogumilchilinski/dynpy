@@ -1,7 +1,7 @@
 import base64
 import inspect
 import random
-
+from dynpy.models.mechanics.principles import cached_property
 import IPython as IP
 import numpy as np
 import pandas as pd
@@ -161,7 +161,7 @@ class BatteryCell(ComposedSystem):
         self.qs = [self.q_1, self.q_2]
         self._init_from_components(**kwargs)
 
-    @property
+    @cached_property
     def components(self):
         components = {}
 

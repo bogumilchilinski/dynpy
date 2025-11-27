@@ -43,7 +43,78 @@ from sympy.physics.vector.printing import vlatex, vpprint
 from sympy.utilities.autowrap import autowrap, ufuncify
 
 from .solvers.linear import LinearODESolution
+#----------------------------------------systemtree-
+import sys
 
+class SystemTreeGenerator:
+    """
+    Klasa, która przyjmuje obiekt (root_component) i generuje
+    dla niego schemat drzewa w różnych formatach graficznych (tekstowych).
+    """
+    
+    def __init__(self, root_component):
+        if not hasattr(root_component, 'system_description'):
+            raise AttributeError(
+                "Podany obiekt 'root_component' nie posiada wymaganej metody 'system_description'."
+            )
+        self.root = root_component
+
+    def _get_node_label(self, node):
+        """Pomocnik: Zwraca sformatowaną etykietę dla węzła."""
+        node_label = node._label
+        if node._label != type(node).__name__:
+            node_label += f" (instance of {type(node).__name__})"
+        return node_label
+
+    # --- Metody 1-4 (bez zmian, z poprzednich odpowiedzi) ---
+
+    def print_tree(self, query=None):
+        # Oryginalny format "composed of"
+        tree_description = self.root.system_description(query=query)
+        if tree_description:
+            print("--- Schemat Drzewa (Format 'composed of') ---")
+            print(tree_description)
+            print("---------------------------------------------")
+
+    def print_ascii_tree(self):
+        # Format ASCII Art (z liniami)
+        if not self.root: print("Brak korzenia drzewa."); return
+        print("\n--- Schemat Drzewa (Format ASCII Art) ---")
+        lines = self._draw_ascii_tree_node(self.root, is_last=True)
+        for line in lines: print(line)
+        print("-----------------------------------------")
+
+    def _draw_ascii_tree_node(self, node, prefix="", is_last=False):
+        output = []
+        node_label = self._get_node_label(node)
+        indicator = "└── " if is_last else "├── "
+        output.append(prefix + indicator + node_label)
+        if node.components:
+            children = list(node.components.values())
+            for i, child in enumerate(children):
+                is_last_child = (i == len(children) - 1)
+                new_prefix = prefix + ("    " if is_last else "│   ")
+                output.extend(self._draw_ascii_tree_node(child, new_prefix, is_last_child))
+        return output
+
+    def print_indented_tree(self):
+        # Format oparty na wcięciach
+        if not self.root: print("Brak korzenia drzewa."); return
+        print("\n--- Schemat Drzewa (Format z wcięciami) ---")
+        lines = self._draw_indented_node(self.root, level=0)
+        for line in lines: print(line)
+        print("---------------------------------------------")
+
+    def _draw_indented_node(self, node, level=0):
+        output = []
+        indent_str = "    " * level
+        node_label = self._get_node_label(node)
+        output.append(indent_str + "- " + node_label)
+        if node.components:
+            children = list(node.components.values())
+            for child in children:
+                output.extend(self._draw_indented_node(child, level + 1))
+        return output
 # from sympy.simplify.fu import TR8, TR10, TR7, TR3
 
 mech_comp = (1, 2)
@@ -755,23 +826,36 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             else:
                 return "\t-" + ",\n \t-".join(comps) + "."
 
+    def draw_tree(self, query=None):
+        tree_generator = SystemTreeGenerator(self)
+        if query is None:
+            tree=tree_generator.print_tree(query=query)
+        if query == 'ascii':
+            tree=tree_generator.print_ascii_tree()
+        if query == 'indented':
+            tree=tree_generator.print_indented_tree()
+        return tree
     def system_description(self, query=None):
-        comps_str = self.components_description(query=query)
-
-        if query is not None:
-            extra_info = " " + query(self)
+        if query == 'tree':
+            tree=self.draw_tree(query='ascii')
+            return tree
         else:
-            extra_info = ""
+            comps_str = self.components_description(query=query)
 
-        if comps_str is not None:
-            return str(f"{(self._label)} composed of: \n{comps_str}{extra_info}")
-        else:
-            if self._label == type(self).__name__:
-                extra_desc = "" + extra_info
+            if query is not None:
+                extra_info = " " + query(self)
             else:
-                extra_desc = f" (instance of {type(self).__name__ })" + extra_info
+                extra_info = ""
 
-            return str(f"{(self._label)}{extra_desc}")
+            if comps_str is not None:
+                return str(f"{(self._label)} composed of: \n{comps_str}{extra_info}")
+            else:
+                if self._label == type(self).__name__:
+                    extra_desc = "" + extra_info
+                else:
+                    extra_desc = f" (instance of {type(self).__name__ })" + extra_info
+
+                return str(f"{(self._label)}{extra_desc}")
 
     def __str__(self):
 
