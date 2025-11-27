@@ -14,7 +14,7 @@ from .documents.reports import ODESystemOverviewReport
 from .report import Markdown
 
 import pypandoc
-
+import html
 issue_no = 567
 title = "implementation of overview report for `ODESystem` child classes"
 guide_class = ODESystemOverviewReport
@@ -2727,8 +2727,15 @@ class TextileFileGenerator(OutputFileGenerator):
             latex_content,
             to=self._engine,
             format='tex',
-            outputfile=self._filepath,
+            # outputfile=self._filepath,
             encoding='utf-8'
         )
+        textile_content_formatted=html.unescape(textile_content)
+        try:
+            with open(self._filepath, 'w', encoding='utf-8') as f:
+                f.write(textile_content_formatted)
+        except Exception as e:
+            print(f"Błąd podczas zapisu pliku: {e}")
+            return None 
 
         return self._filepath
