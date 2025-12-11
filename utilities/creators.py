@@ -77,6 +77,7 @@ class MeetingIssueCreator:
     _time = "20:30"
     _date = "2024.07.27"
     _assignees = ["bogumilchilinski"]
+    _commit = 'ae5198ba90706b4ee6ff88fdafea5911fa72ccab'
 
     def __init__(
         self,
