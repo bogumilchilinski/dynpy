@@ -1541,4 +1541,9 @@ class TrolleyWithElasticPendulumSchemeVariableInertia(TikZPicture):
 \node at ($(pivot)+(0.3,-2)$) {$\varphi$};
 
 """
+
         return code
+
+
+class ProjectGanttDiagram(TikZPicture):
+    pass
