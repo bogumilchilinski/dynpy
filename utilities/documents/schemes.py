@@ -1545,5 +1545,76 @@ class TrolleyWithElasticPendulumSchemeVariableInertia(TikZPicture):
         return code
 
 
-class ProjectGanttDiagram(TikZPicture):
-    pass
+class ProjectGanttChart(TikZPicture):
+    def __init__(self, tasks=None, total_weeks=8, **kwargs):
+        self.total_weeks = total_weeks
+        if tasks is None:
+            self.tasks = []
+        else:
+            self.tasks = tasks
+        super().__init__(**kwargs)
+
+    def _scheme_desc(self):
+        # --- STAŁA WYSOKOŚĆ WIERSZA ---
+        row_height = 1.8  
+        total_height = len(self.tasks) * row_height + 1.5
+        
+        code = r"""
+\usetikzlibrary{arrows.meta, patterns}
+
+% --- STYLE: MAX ROZMIAR CZCIONKI ---
+
+% Etykieta zadania: \huge (Bardzo duża - większa niż standardowy tekst)
+% Zwiększyłem text width do 8.5cm, aby długie nazwy się mieściły w jednej linii
+\tikzstyle{task_label}=[font=\sffamily\huge, align=right, anchor=east, text width=10.5cm]
+
+% Pasek: bez zmian
+\tikzstyle{bar}=[draw=black!50, thick, rounded corners=2pt]
+\tikzstyle{grid_line}=[draw=gray!20, thin, dashed]
+
+% Oś czasu: \normalsize (Normalna wielkość tekstu, bardzo czytelna na osi)
+\tikzstyle{axis_label}=[font=\huge\sffamily, color=gray!80]
+
+% Nagłówek: \huge (Ogromna)
+\tikzstyle{header}=[font=\bfseries\sffamily\huge, color=black!80]
+"""
+        offset_x = 0.5
+        
+        # OŚ CZASU
+        for w in range(self.total_weeks + 1):
+            x_pos = offset_x + w
+            code += f"\\draw[grid_line] ({x_pos}, 0) -- ({x_pos}, -{total_height});\n"
+            
+            # Numeracja co 2 tygodnie
+            if w % 2 == 0:
+                code += f"\\node[axis_label] at ({x_pos}, 0.5) {{T{w}}};\n"
+            
+        # Nagłówek (przesunięty wyżej ze względu na rozmiar)
+        code += f"\\node[header, anchor=east] at ({offset_x - 0.2}, 0.6) {{ZADANIE}};\n"
+
+        # RYSOWANIE ZADAŃ
+        y = -1.0 
+        for task in self.tasks:
+            name = task['name']
+            start = task['start']
+            length = task['len']
+            color = task.get('color', 'blue!20')
+            progress = task.get('progress', 0.0)
+            
+            bar_start_x = offset_x + start
+            bar_end_x = bar_start_x + length
+            
+            bar_y_top = y + 0.4
+            bar_y_bot = y - 0.4
+            
+            code += f"\\node[task_label] at ({offset_x - 0.2}, {y}) {{{name}}};\n"
+            code += f"\\filldraw[fill={color}, bar] ({bar_start_x}, {bar_y_top}) rectangle ({bar_end_x}, {bar_y_bot});\n"
+            
+            if progress > 0:
+                prog_end_x = bar_start_x + (length * progress)
+                code += f"\\fill[black, opacity=0.2, rounded corners=2pt] ({bar_start_x}, {bar_y_top}) rectangle ({prog_end_x}, {bar_y_bot});\n"
+                
+            y -= row_height
+
+        return code
+
