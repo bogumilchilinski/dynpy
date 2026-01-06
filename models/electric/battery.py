@@ -75,7 +75,9 @@ from .circuits import CircutRC, CircuitRLC, CircuitRL
 #     base_frame,
 #     base_origin,
 # )
+from sympy.physics import units
 
+ureg = units
 
 t = Symbol("t")
 
@@ -334,17 +336,23 @@ class BatteryCell(ComposedSystem):
     # --- opis symboli -------------------------------------------------
     def symbols_description(self):
         return {
-            self.R_1: r"rezystancja gałęzi 1 [Ω]",
-            self.R_2: r"rezystancja gałęzi 2 [Ω]",
-            self.C: r"pojemność [F]",
-            self.U: r"wymuszenie napięciowe [V]",
-            self.q_1: r"ładunek gałęzi 1 [C]",
-            self.q_2: r"ładunek gałęzi 2 [C]",
+            self.R_1: r"Branch 1 resistance",
+            self.R_2: r"Branch 2 resistance",
+            self.C: r"Capacitance",
+            self.U: r"Voltage excitation",
+            self.q_1: r"Branch 1 charge",
+            self.q_2: r"Branch 2 charge",
+            self.q_1.diff(self.ivar): r"Branch 1 current",
+            self.q_2.diff(self.ivar): r"Branch 2 current",
+            self.q_1.diff(self.ivar,2): r"Branch 1 rate of change of current",
+            self.q_2.diff(self.ivar,2): r"Branch 2 rate of change of current",
+            self.L_1: r'Branch 1 inductance',
+            self.L_2: r'Branch 2 inductance',
         }
 
     # --- słownik jednostek -------------------------------------------
-    def unit_dict(self):
-        return {self.R_1: "Ω", self.R_2: "Ω", self.C: "F", self.U: "V"}
+    def units(self):
+        return {self.R_1: ureg.ohm, self.R_2: ureg.ohm, self.C: ureg.farad, self.U: ureg.volt, self.L_1:ureg.henry, self.L_2:ureg.henry}
 
     # --- przykładowe dane nominalne ----------------------------------
     def get_default_data(self):

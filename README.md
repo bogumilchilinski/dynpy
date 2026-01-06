@@ -351,6 +351,10 @@ class EnergyStorageSystemScheme(TikZPicture):
     def _scheme_desc(self):
         code = r"""
 
+$$
+x
+$$
+
     \node (cell) [draw,outer sep=0pt,thick,minimum width=1cm, minimum height=6cm, align=center,] at (0,0) {Battery Module \\ (multiple cells) };
     \node (cell2) [draw,outer sep=0pt,thick,minimum width=1cm, minimum height=6cm, align=center,] at ([xshift=2cm]cell.east) {Battery Module \\ (multiple cells)};
     \node (cell3) [draw,outer sep=0pt,thick,minimum width=1cm, minimum height=6cm, align=center,] at ([xshift=2cm]cell2.east) {Battery Module \\ (multiple cells)};
@@ -549,6 +553,16 @@ BasicsOfODESystemGuide()
 ```
 
 # Dynamic Modeling
+
+$$
+x
+$$
+
+The code below displays class code of choosen dynamical system
+
+```python
+display(ObjectCode(dyn_sys))
+```
 
 ```python
 ///

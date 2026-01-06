@@ -1,5 +1,6 @@
 import getpass
 import inspect
+import ast
 from datetime import datetime
 
 import pint
@@ -2740,3 +2741,93 @@ class TextileFileGenerator(OutputFileGenerator):
             return None 
 
         return self._filepath
+class DynamicSystemPresenter:
+    def __init__(self, system_class):
+        self.system_class = system_class
+        # Pobieramy kod źródłowy klasy jako string
+        self.source_code = inspect.getsource(system_class)
+        
+        # Parsujemy kod do drzewa składniowego (AST)
+        # Dzięki temu działamy na strukturze kodu, a nie tylko na tekście
+        self.tree = ast.parse(self.source_code)
+        self.class_node = self.tree.body[0]
+        
+        # Znajdujemy węzły odpowiadające metodom
+        self._init_node = self._find_method_node("__init__")
+        self._components_node = self._find_method_node("components")
+
+    def _find_method_node(self, name):
+        """Szuka definicji funkcji o danej nazwie w ciele klasy."""
+        for node in self.class_node.body:
+            if isinstance(node, ast.FunctionDef) and node.name == name:
+                return node
+        return None
+
+    def _get_code_segment(self, node):
+        """Wyciąga fragment kodu źródłowego odpowiadający danemu węzłowi."""
+        return ast.get_source_segment(self.source_code, node)
+
+    def _display_fragment(self, code_str):
+        """
+        Wrapper na display. Używam Markdown f-string z ```python,
+        aby kod był ładnie pokolorowany w notatniku.
+        """
+        if code_str:
+            # Usuwamy nadmiarowe puste linie na końcu
+            code_str = code_str.strip()
+            display(Markdown(f"```python\n{code_str}\n```"))
+        else:
+            display(Markdown("*Brak kodu dla tej sekcji.*"))
+
+    def show_attributes(self, comment=None):
+        """Wyświetla wszystko od początku klasy do definicji __init__."""
+        if comment is None:
+            display(ReportText('W pierwszej kolejności należy zdefiniować symbole, które zostaną wykorzystane do opisu matematycznego systemu dynamicznego, z uwzględnieniem symbolu $ivar$ (iterrable variable), naogół, w przypadku większości systemów, których zachowanie przedstawiane jest w czasie, będzie to symbol $t$ opisujący czas.'))
+        else:
+            display(ReportText(comment))
+            
+        if self._init_node:
+            # Pobieramy numer linii, gdzie zaczyna się __init__ (uwzględniając dekoratory jeśli są)
+            start_line = self._init_node.lineno - 1
+            if self._init_node.decorator_list:
+                start_line = self._init_node.decorator_list[0].lineno - 1
+            
+            # Dzielimy kod na linie i bierzemy wszystko do momentu __init__
+            lines = self.source_code.splitlines()
+            fragment = "\n".join(lines[:start_line])
+            self._display_fragment(fragment)
+        else:
+            # Fallback jeśli nie ma __init__
+            self._display_fragment(self.source_code)
+
+    def show_init(self, comment=None):
+        """Wyświetla metodę __init__."""
+        if comment is None:
+            display(ReportText('Then define all symbols as none, if note defined in class call'))
+        else:
+            display(ReportText(comment))
+            
+        if self._init_node:
+            fragment = self._get_code_segment(self._init_node)
+            self._display_fragment(fragment)
+
+    def show_components(self, comment=None):
+        """Wyświetla metodę components."""
+        if comment is None:
+            display(ReportText('define components'))
+        else:
+            display(ReportText(comment))
+            
+        if self._components_node:
+            fragment = self._get_code_segment(self._components_node)
+            self._display_fragment(fragment)
+
+    def show_all(self, comments=None):
+        """Metoda pomocnicza wyświetlająca wszystko po kolei z opcjonalnymi komentarzami."""
+        c_attr = comments.get('attr') if comments else None
+        c_init = comments.get('init') if comments else None
+        c_comp = comments.get('components') if comments else None
+
+        self.show_attributes(comment=c_attr)
+        self.show_init(comment=c_init)
+        self.show_components(comment=c_comp)
