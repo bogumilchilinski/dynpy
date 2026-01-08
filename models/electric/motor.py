@@ -817,4 +817,29 @@ class DCMotorWithBattery(ComposedSystem):
     def soc(self):
         soc=(self.q_0-integrate(self.qs[0]))/self.q_0
         return soc
+    def get_default_data(self):
+        default_data_dict = {
+            self.R_1: 0.02,        # [Ohm] Rezystancja w pierwszej gałęzi RC
+            self.R_2: 0.01,        # [Ohm] Rezystancja w drugiej gałęzi RC
+            self.L_1: 5e-5,        # [H] Indukcyjność pasożytnicza w pierwszej gałęzi
+            self.L_2: 5e-5,        # [H] Indukcyjność pasożytnicza w drugiej gałęzi
+            self.C: 8000,       # [F] Pojemność kondensatora w modelu
+            self.U_oc: 4.2,        # [V] Napięcie obwodu otwartego (może być funkcją SOC)
+            self.R_0: 0.05,        # [Ohm] Rezystancja wewnętrzna baterii
+            self.R_th: 0.1,        # [Ohm] Rezystancja termiczna
+            self.C_th: 45000,   # [J/K] Pojemność cieplna
+            self.SOC_init: 0.9,    # [0-1] Początkowy stan naładowania
+            self.C_rated: 5400, # [As] Pojemność znamionowa
+            self.U_th: 400,    # [V] Napięcie Thevenina (początkowa wartość)
+            self.U: 3.7,           # [V] Napięcie nominalne baterii
+            DCMotorIIOrder.R_w: 0.2,      # [Ohm] Rezystancja twornika
+            DCMotorIIOrder.L_w: 0.001,    # [H] Indukcyjność twornika
+            DCMotorIIOrder.k_e: 0.5,      # [V*s/rad] Stała EMF
+            DCMotorIIOrder.k_m: 0.5,      # [N*m/A] Stała momentu (często k_m = k_e w SI)
+            DCMotorIIOrder.J: 0.01,       # [kg*m^2] Moment bezwładności
+            DCMotorIIOrder.B: 0.1,
+            DCMotorIIOrder.U_z:12,
+            DCMotorIIOrder.M_obc:40
+        }
+        return default_data_dict
 
