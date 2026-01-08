@@ -5472,6 +5472,7 @@ display(ReportText(f' "{tytul} " '))
 ## CELL 3
 ## Content
 
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5489,10 +5490,11 @@ Ponad_to = "Ponadto praca zawiera"
 co_wiecej_zawiera = "funkcjonujący model 3D wykonany przez Autora pracy"
 
 display(ReportText(f'''Rozważania zawarte w pracy dotyczącej {czego_dotyczy} odpowiadają jej tematowi. Praca składa się z siedmiu zasadniczych części. Pierwsza część jest poświęcona wprowadzeniu do problematyki, określeniu celu pracy, motywacji oraz metodyki badawczej. Druga część poświęcona jest stworzeniu modelu analitycznego układu drgającego, opisanego za pomocą równań ruchu wyprowadzonych metodą Lagrange’a. Model ten stanowił podstawę dalszych symulacji numerycznych. Trzeci rozdział dotyczy projektowania i realizacji stanowiska badawczego – od koncepcyjnego modelu w programie SOLIDWORKS po wykonanie rzeczywistej konstrukcji z systemem PTMD. Czwarta część pracy zawiera szczegółowy opis symulacji numerycznych przeprowadzonych w środowisku Python z użyciem biblioteki DynPy. Przeanalizowano wpływ takich parametrów jak długość wahadła i masa obciążenia na skuteczność tłumienia drgań. W rozdziale piątym zaprezentowano badania eksperymentalne wykonane na zaprojektowanym stanowisku. Szósta część zestawia i porównuje wyniki badań eksperymentalnych z rezultatami uzyskanymi w symulacjach, co pozwoliło na ocenę trafności modelu oraz skuteczności zastosowanego rozwiązania. Ostatnia część zawiera wnioski z przeprowadzonych prac i podsumowanie osiągniętych rezultatów. Opracowanie przedstawia wkład Autora w {wklad_autora}.'''))
+```
 
 ## CELL 4
 ## Content
-
+```{python}
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5545,6 +5547,7 @@ Do głównych uwag merytorycznych należą:
 '))
 
 display(ReportText('Mimo to Autor dobrze radzi sobie z postawionymi problemami, potwierdzając to samodzielnym wykonaniem projektu.'))
+```
 
 ## CELL 5
 ## Content
@@ -5573,7 +5576,7 @@ pozycji = "pozycji"
 forma_zgodna = "Wszystkie pozycje bibliografii znajdują odwołanie w tekście. Forma odwołań jak i spis wykorzystanych publikacji oraz łączy są zgodne z wymaganiami postawionymi w rozporządzeniu dot. pisania prac dyplomowych. "
 
 display(ReportText(f'Na podstawie dokonanego przeglądu literaturowego można stwierdzić, że dobór pozycji nie budzi zastrzeżeń i jest adekwatny do poruszanej w pracy tematyki. Bibliografia liczy {lit_numb} {pozycji}. {forma_zgodna} '))
-
+```
 
 ## CELL 6
 ## Content
@@ -5594,7 +5597,7 @@ lakoniczne = "Aczkolwiek należy zauważyć, że są one dość lakoniczne."
 #lakoniczne = ''
 
 display(ReportText(f'Autor pracy wnioskuje w sposób {wnioski_log}. Podsumowanie pracy zawiera streszczenie zrealizowanych zadań oraz wnioski wyciągnięte na ich podstawie. Schemat wnioskowania jest {schemat_wnioskowania}. Konkluzje są {konkluzje} i {konk_a_cele}. {lakoniczne}'))
-
+```
 ## CELL 7
 ## Content
 
@@ -5608,7 +5611,7 @@ l_rozdzial = "7"
 l_stron = 49
 
 display(ReportText(f'Praca składa się z {l_stron} stron, podzielonych na {l_rozdzial} rozdziałów i prowadzi czytelnika w sposób jasny i logiczny po omawianym temacie. Całość jest podzielona na część teoretyczną oraz praktyczną. Ostatni fragment pracy poświęcono podsumowaniu i wnioskom. Pozostałą część pracy stanowi bibliografia, spis rysunków oraz spis tabel. Dobór materiału ilustrującego nie budzi zastrzeżeń.'))
-
+```
 ## CELL 8
 ## Remarks
 
@@ -5670,6 +5673,7 @@ display(ReportText('Zastrzeżenia te nie wpływają istotnie na odbiór pracy or
 
 # Występujące błędy stylistyczne i interpunkcyjne oraz wymienione uwagi nie wpływają na pozytywny odbiór pracy.
 
+```
 ## CELL 9
 ## Remarks2
 
@@ -5698,10 +5702,12 @@ Anty_nope = "Praca nie przeszła testu antyplagiatowego w systemie JSA"
 
 display(ReportText(f'Praca {tworcza} i samodzielność jej wykonania {bez_zastr}. {nie_bylo_proby} łamania praw autorskich. {Anty_git}. '))
 
+```
 ## CELL 10
 ## Remarks3
 
 ```{python}
+
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5714,10 +5720,12 @@ outro = 'Dyplomant wykazał się również zdolnością do samodzielnego kierowa
 
 display(ReportText(f'Dyplomant samodzielnie rozwiązał problem inżynierski, wykazując się zdolnościami analizy systemów dynamicznych oraz programowania. Zaprezentował swoje umiejętności podczas tworzenia i analizy symulacji systemów dynamicznych oraz prowadzenia badań empirycznych. Dyplomant zaprezentował oprogramowanie inżynierskie, które zostało opisane w pracy, a jego efektywność została zweryfikowana przez przeprowadzenie analiz i walidacji uzyskanych wyników. {outro}'))
 
+```
 ## CELL 11
 ## Remarks4
 
 ```{python}
+
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5726,11 +5734,12 @@ CurrentContainer(sec_9)
 mgr= "magisterskim"
 inz= " inżynierskim"
 display(ReportText(f'Poziom pracy i jej zakres spełnia wymogi stawiane pracom {inz}. '))
-
+```
 ## CELL 12
 ## Hints
 
 ```{python}
+
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5738,10 +5747,12 @@ sec_10 = Section('Inne uwagi')
 CurrentContainer(sec_10)
 display(ReportText('Brak uwag. '))
 
+```
 ## CELL 13
 ## Document
 
 ```{python}
+
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
 
@@ -5765,6 +5776,7 @@ Doc.generate_pdf(clean_tex = False))
 
 # Generating file
 doc.generate_pdf(clean_tex=True)
+
 ```
 
 """
@@ -5772,14 +5784,12 @@ doc.generate_pdf(clean_tex=True)
         display(IPMarkdown(preliminary_str))
 
         preliminary_str = """
+```
+## Example:
 
-#Example:
+## To prepare a simple document with text and images:
 
-#To prepare a simple document with text and images:
-
-#Good practice here is to allocate 1 section per 1 cell
-
-
+## Good practice here is to allocate 1 section per 1 cell
 
 ## CELL 1
 ## Imports
@@ -5819,9 +5829,8 @@ import pandas as pd
 
 
 doc = StateOfArtReport('./output/report_name')
+
 ```
-
-
 
 ## CELL 2
 ## Document introduction
@@ -5836,9 +5845,12 @@ CurrentContainer(sec_int)
 tytul= " Title of thesis"
 
 display(ReportText(f' "{tytul} " '))
+
 ```
 ## CELL 3
 ## Content
+
+```{python}
 
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
@@ -5858,8 +5870,12 @@ co_wiecej_zawiera = "funkcjonujący model 3D wykonany przez Autora pracy"
 
 display(ReportText(f'''Rozważania zawarte w pracy dotyczącej {czego_dotyczy} odpowiadają jej tematowi. Praca składa się z siedmiu zasadniczych części. Pierwsza część jest poświęcona wprowadzeniu do problematyki, określeniu celu pracy, motywacji oraz metodyki badawczej. Druga część poświęcona jest stworzeniu modelu analitycznego układu drgającego, opisanego za pomocą równań ruchu wyprowadzonych metodą Lagrange’a. Model ten stanowił podstawę dalszych symulacji numerycznych. Trzeci rozdział dotyczy projektowania i realizacji stanowiska badawczego – od koncepcyjnego modelu w programie SOLIDWORKS po wykonanie rzeczywistej konstrukcji z systemem PTMD. Czwarta część pracy zawiera szczegółowy opis symulacji numerycznych przeprowadzonych w środowisku Python z użyciem biblioteki DynPy. Przeanalizowano wpływ takich parametrów jak długość wahadła i masa obciążenia na skuteczność tłumienia drgań. W rozdziale piątym zaprezentowano badania eksperymentalne wykonane na zaprojektowanym stanowisku. Szósta część zestawia i porównuje wyniki badań eksperymentalnych z rezultatami uzyskanymi w symulacjach, co pozwoliło na ocenę trafności modelu oraz skuteczności zastosowanego rozwiązania. Ostatnia część zawiera wnioski z przeprowadzonych prac i podsumowanie osiągniętych rezultatów. Opracowanie przedstawia wkład Autora w {wklad_autora}.'''))
 
+```
+
 ## CELL 4
 ## Content
+
+```{python}
 
 #!!! BE SURE ALL PREVIOUS CELLS ARE RUN !!!#
 #!!!       BECAUSE OF NEEDED IMPORTS    !!!#
@@ -5914,6 +5930,8 @@ Do głównych uwag merytorycznych należą:
 
 display(ReportText('Mimo to Autor dobrze radzi sobie z postawionymi problemami, potwierdzając to samodzielnym wykonaniem projektu.'))
 
+```
+
 ## CELL 5
 ## Content
 
@@ -5942,6 +5960,7 @@ forma_zgodna = "Wszystkie pozycje bibliografii znajdują odwołanie w tekście. 
 
 display(ReportText(f'Na podstawie dokonanego przeglądu literaturowego można stwierdzić, że dobór pozycji nie budzi zastrzeżeń i jest adekwatny do poruszanej w pracy tematyki. Bibliografia liczy {lit_numb} {pozycji}. {forma_zgodna} '))
 
+```
 
 ## CELL 6
 ## Content
@@ -5963,6 +5982,8 @@ lakoniczne = "Aczkolwiek należy zauważyć, że są one dość lakoniczne."
 
 display(ReportText(f'Autor pracy wnioskuje w sposób {wnioski_log}. Podsumowanie pracy zawiera streszczenie zrealizowanych zadań oraz wnioski wyciągnięte na ich podstawie. Schemat wnioskowania jest {schemat_wnioskowania}. Konkluzje są {konkluzje} i {konk_a_cele}. {lakoniczne}'))
 
+```
+
 ## CELL 7
 ## Content
 
@@ -5976,6 +5997,8 @@ l_rozdzial = "7"
 l_stron = 49
 
 display(ReportText(f'Praca składa się z {l_stron} stron, podzielonych na {l_rozdzial} rozdziałów i prowadzi czytelnika w sposób jasny i logiczny po omawianym temacie. Całość jest podzielona na część teoretyczną oraz praktyczną. Ostatni fragment pracy poświęcono podsumowaniu i wnioskom. Pozostałą część pracy stanowi bibliografia, spis rysunków oraz spis tabel. Dobór materiału ilustrującego nie budzi zastrzeżeń.'))
+
+```
 
 ## CELL 8
 ## Remarks
@@ -6038,6 +6061,8 @@ display(ReportText('Zastrzeżenia te nie wpływają istotnie na odbiór pracy or
 
 # Występujące błędy stylistyczne i interpunkcyjne oraz wymienione uwagi nie wpływają na pozytywny odbiór pracy.
 
+
+```
 ## CELL 9
 ## Remarks2
 
@@ -6066,6 +6091,8 @@ Anty_nope = "Praca nie przeszła testu antyplagiatowego w systemie JSA"
 
 display(ReportText(f'Praca {tworcza} i samodzielność jej wykonania {bez_zastr}. {nie_bylo_proby} łamania praw autorskich. {Anty_git}. '))
 
+```
+
 ## CELL 10
 ## Remarks3
 
@@ -6082,6 +6109,8 @@ outro = 'Dyplomant wykazał się również zdolnością do samodzielnego kierowa
 
 display(ReportText(f'Dyplomant samodzielnie rozwiązał problem inżynierski, wykazując się zdolnościami analizy systemów dynamicznych oraz programowania. Zaprezentował swoje umiejętności podczas tworzenia i analizy symulacji systemów dynamicznych oraz prowadzenia badań empirycznych. Dyplomant zaprezentował oprogramowanie inżynierskie, które zostało opisane w pracy, a jego efektywność została zweryfikowana przez przeprowadzenie analiz i walidacji uzyskanych wyników. {outro}'))
 
+```
+
 ## CELL 11
 ## Remarks4
 
@@ -6095,6 +6124,8 @@ mgr= "magisterskim"
 inz= " inżynierskim"
 display(ReportText(f'Poziom pracy i jej zakres spełnia wymogi stawiane pracom {inz}. '))
 
+```
+
 ## CELL 12
 ## Hints
 
@@ -6105,6 +6136,8 @@ display(ReportText(f'Poziom pracy i jej zakres spełnia wymogi stawiane pracom {
 sec_10 = Section('Inne uwagi')
 CurrentContainer(sec_10)
 display(ReportText('Brak uwag. '))
+
+```
 
 ## CELL 13
 ## Document

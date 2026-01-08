@@ -14,7 +14,7 @@ from sympy import (
     Derivative,
     Eq,
     Expr,
-    Function,
+    Function, 
     Integral,
     Matrix,
     Mul,
@@ -66,7 +66,6 @@ class SystemTreeGenerator:
             node_label += f" (instance of {type(node).__name__})"
         return node_label
 
-    # --- Metody 1-4 (bez zmian, z poprzednich odpowiedzi) ---
 
     def print_tree(self, query=None):
         # Oryginalny format "composed of"
@@ -83,6 +82,22 @@ class SystemTreeGenerator:
         lines = self._draw_ascii_tree_node(self.root, is_last=True)
         for line in lines: print(line)
         print("-----------------------------------------")
+    def get_ascii_tree_string(self):
+        # Format ASCII Art (z liniami)
+        if not self.root:
+            return "Brak korzenia drzewa."
+
+        output_lines = []
+        output_lines.append("\n--- Schemat Drzewa (Format ASCII Art) ---")
+        
+        # Pobieramy linie z metody pomocniczej
+        lines = self._draw_ascii_tree_node(self.root, is_last=True)
+        output_lines.extend(lines)
+        
+        output_lines.append("-----------------------------------------")
+        
+        # Łączymy wszystkie elementy listy w jeden string, oddzielając je nową linią
+        return "\n".join(output_lines)
 
     def _draw_ascii_tree_node(self, node, prefix="", is_last=False):
         output = []
@@ -834,10 +849,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
             tree=tree_generator.print_ascii_tree()
         if query == 'indented':
             tree=tree_generator.print_indented_tree()
+        if query == 'string':
+            tree=tree_generator.get_ascii_tree_string()
         return tree
     def system_description(self, query=None):
         if query == 'tree':
-            tree=self.draw_tree(query='ascii')
+            tree=self.draw_tree(query='string')
             return tree
         else:
             comps_str = self.components_description(query=query)

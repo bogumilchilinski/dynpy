@@ -35,9 +35,11 @@ from sympy import (
     solveset,
     sqrt,
     symbols,
+    integrate,
 )
 from sympy.physics.mechanics import Point, ReferenceFrame, dynamicsymbols
 from sympy.physics.vector import vlatex, vpprint
+from .battery import BatteryCell
 
 from dynpy.models.mechanics.trolley import (
     ComposedSystem,
@@ -717,3 +719,102 @@ class ResistanceMovementTorque(Spring):
             ivar=ivar,
             frame=frame,
         )
+class DCMotorWithBattery(ComposedSystem):
+
+    scheme_name = "thevenincircuit.png"
+    real_name = "liioncell.PNG"
+
+    R_1 = Symbol("R_1", positive=True)
+    R_2 = Symbol("R_2", positive=True)
+
+    L_1 = Symbol("L_1", positive=True)
+    L_2 = Symbol("L_2", positive=True)
+
+    C = Symbol("C", positive=True)
+    U = Symbol("U", positive=True)
+    q_1 = dynamicsymbols("q_1")
+    q_2 = dynamicsymbols("q_2")
+    t = Symbol("t")
+    U_li = Function("U_li")(t)
+    U_oc = Symbol("U_oc")
+    R_0 = Symbol("R_0")
+    I_li = Function("I_zad")(t)
+    R_th = Symbol("R_th")
+    C_th = Symbol("C_th")
+    SOC = Function("SOC")(t)
+    SOC_init = Symbol("SOC_init")
+    C_rated = Symbol("C_rated")
+    t_0 = Symbol("t_0")
+    q_0 = Symbol("q_0")
+    U_th = Function("U_th")(t)
+    funcI = Function("funcI")(t)
+    # U_th = Symbol('U_th')
+
+    def __init__(
+        self,
+        R_1=None,
+        R_2=None,
+        C=None,
+        U=None,
+        q_1=None,
+        q_2=None,
+        t=None,
+        U_th=None,
+        R_th=None,
+        C_th=None,
+        L_1=None,
+        L_2=None,
+        I_li=None,
+        q_0=None,
+        ivar=Symbol("t"),
+        **kwargs,
+    ):
+
+        if t is not None:
+            self.t = t
+        if R_1 is not None:
+            self.R_1 = R_1
+        if R_2 is not None:
+            self.R_2 = R_2
+        if C is not None:
+            self.C = C
+        if U is not None:
+            self.U = U
+        if q_1 is not None:
+            self.q_1 = q_1
+        if q_2 is not None:
+            self.q_2 = q_2
+        if U_th is not None:
+            self.U_th = U_th
+        if R_th is not None:
+            self.R_th = R_th
+        if C_th is not None:
+            self.C_th = C_th
+        if L_1 is not None:
+            self.L_1 = L_1
+        if L_2 is not None:
+            self.L_2 = L_2
+        if I_li is not None:
+            self.I_li = I_li
+        if q_0 is not None:
+            self.q_0 = q_0
+        self.qs = [self.q_1, self.q_2]
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+        components = {}
+
+        self._battery = BatteryCell(R_1=self.R_1, R_2=self.R_2, C=self.C, U=self.U, q_1=self.q_1, q_2=self.q_2, t=self.t, U_th=self.U_th, R_th=self.R_th, C_th=self.C_th, L_1=self.L_1, L_2=self.L_2, I_li=self.I_li)
+        self._motor = DCMotorIIOrder(qs=[self.q_1])
+
+
+        components["battery"] = self._battery
+        components["motor"] = self._motor
+
+
+        return components
+    def soc(self):
+        soc=(self.q_0-integrate(self.qs[0]))/self.q_0
+        return soc
+

@@ -209,7 +209,7 @@ class ContinuousSystem:
 
         return dsolve(spatial_ode, spatial_comp)  # .rewrite(cos).expand().simplify()
 
-    def fundamental_matrix(
+    def fundamental_system(
         self, bc_dict=None, sep_expr=None, spatial_comp=Function("X")(Symbol("x"))
     ):
 
@@ -254,7 +254,18 @@ class ContinuousSystem:
                 )
             ]
 
-        fun_eqns = Matrix(matrix_comps_list)
+        return  Eq(Matrix(list(bc_dict.keys())),Matrix(matrix_comps_list),evaluate=False)
+
+    def fundamental_matrix(
+        self, bc_dict=None, sep_expr=None, spatial_comp=Function("X")(Symbol("x"))
+    ):
+
+        if bc_dict:
+            self.bc_dict = bc_dict
+        else:
+            bc_dict = self.bc_dict
+
+        fun_eqns = self.fundamental_system(bc_dict=bc_dict, sep_expr=sep_expr, spatial_comp=spatial_comp).rhs
 
         return fun_eqns.jacobian(symbols("C1:" + str(len(bc_dict) + 1)))
 
