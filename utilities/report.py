@@ -968,7 +968,8 @@ class LstListing(Environment):
         Package("listings"),
         Package("float"),
         Package("fvextra"),
-        Package("xcolor"),
+        Package("xcolor"), 
+        Command("floatplacement", arguments=["listing", "t"]),
         Command("floatname", arguments=["listing"], extra_arguments=["Listing"]),
         Command(
             "definecolor{codegreen}", arguments=["rgb"], extra_arguments=["0,0.6,0"]
@@ -988,11 +989,11 @@ class LstListing(Environment):
             "lstdefinestyle{dynPyStyle}",
             arguments=[
                 NoEscape(
-                    r"commentstyle=\color{codegreen},keywordstyle=\color{magenta},numberstyle=\tiny\color{codegray},stringstyle=\color{codepurple}, basicstyle=\ttfamily\footnotesize,breakatwhitespace=false,breaklines=true,captionpos=b,keepspaces=true,numbers=left,numbersep=5pt,showspaces=false,showstringspaces=false,showtabs=false,tabsize=2,language=Python"
+
+                    r"commentstyle=\color{codegreen},keywordstyle=\color{magenta},numberstyle=\tiny\color{codegray},stringstyle=\color{codepurple}, basicstyle=\ttfamily\footnotesize,breakatwhitespace=false,breaklines=true,captionpos=t,keepspaces=true,numbers=left,numbersep=5pt,showspaces=false,showstringspaces=false,showtabs=false,tabsize=2,language=Python"
                 )
             ],
         ),
-        # Command('lstset', arguments = [NoEscape('style=dynPyStyle,language=Python')]),
     ]
 
 class BibliographyManager(Environment):
