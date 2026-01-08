@@ -1074,7 +1074,7 @@ class DynPyTree(TikZPicture):
         code = r"""
 % DynPy main block
 \draw [line width=0.8pt, rounded corners=9.6] (5,13.75) rectangle (7.5,12.5);
-\node [font=\LARGE] at (6.25,13.25) {DynPy};
+\node [font=\LARGE] at (6.25,13.25) {DynPi};
 
 % Horizontal lines to other modules
 \draw [line width=0.8pt] (5,13.25) -- (3.75,13.25);
