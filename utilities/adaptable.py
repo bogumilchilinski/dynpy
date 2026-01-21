@@ -45,7 +45,7 @@ from sympy import (
 from sympy.core.relational import Relational
 from sympy.physics import units
 from sympy.physics.mechanics import vlatex
-
+from scipy.signal import find_peaks
 # from .documents import tikz
 
 
@@ -3668,3 +3668,84 @@ class TimeDataFrame(AdaptableDataFrame, TimeDomainMethods):
         return TimeDataFrame(
             data=data_gradient, index=data_gradient[next(iter(data_gradient))].index
         )
+
+class SpectralModelFrame(TimeDataFrame):
+    def __init__(self, *args, max_freq=2.0, min_amplitude=0.1, max_waves=20, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.max_freq = max_freq
+        self.min_amp = min_amplitude
+        self.max_waves = max_waves
+
+    def filter_peaks(self):
+        # 1. Obliczamy średnią z pierwszej kolumny (składowa stała)
+        srednia = self.iloc[:, 0].mean()
+        
+        # 2. Usuwamy średnią bezpośrednio na kopii danych, aby nie psuć oryginału
+        # ale korzystamy z metody klasy bazowej to_frequency_domain()
+        sygnal_wycentrowany = self - srednia 
+        fft_df = sygnal_wycentrowany.to_frequency_domain()
+        
+        # 3. Analiza piku (częstotliwości dodatnie)
+        fft_pos = fft_df[fft_df.index > 0]
+        freqs = fft_pos.index.to_numpy()
+        fft_vals = fft_pos.iloc[:, 0].to_numpy()
+        
+        N = len(self.index)
+        amplitudy_widma = (2.0 / N) * np.abs(fft_vals)
+        reals = np.real(fft_vals)
+        imags = np.imag(fft_vals)
+        factor = 2.0 / N
+        
+        # 4. Detekcja szczytów
+        peaks_indices, _ = find_peaks(amplitudy_widma, height=self.min_amp)
+        
+        candidates = []
+        for idx in peaks_indices:
+            f = freqs[idx]
+            if f <= self.max_freq:
+                candidates.append((
+                    amplitudy_widma[idx], # moc/amplituda
+                    reals[idx] * factor,  # a
+                    imags[idx] * factor,  # b
+                    f                     # częstotliwość
+                ))
+        
+        candidates.sort(key=lambda x: x[0], reverse=True)
+        return candidates[:self.max_waves], srednia
+
+    def get_callable_func(self):
+        """Zwraca funkcję, która wylicza model dla dowolnego t."""
+        wybrane_skladniki, stala_srednia = self.filter_peaks()
+        
+        def model_func(t):
+            t_arr = np.asarray(t)
+            # Zaczynamy od składowej stałej (średniej)
+            wynik = np.full_like(t_arr, stala_srednia, dtype=float)
+            
+            for _, a, b, f in wybrane_skladniki:
+                omega = 2 * np.pi * f
+                # Rekonstrukcja: śr + suma(a*cos(wt) - b*sin(wt))
+                wynik += a * np.cos(omega * t_arr) - b * np.sin(omega * t_arr)
+            return wynik
+        
+        return model_func
+    def text_eq(self):
+        """Generuje tekstowe równanie matematyczne modelu."""
+        wybrane_skladniki, srednia = self.filter_peaks()
+        
+        # Zaczynamy od składowej stałej
+        tekst = f"y(t) = {srednia:.4f}"
+        
+        for _, a, b, f in wybrane_skladniki:
+            omega_val = 2 * np.pi * f
+            
+            # Obsługa znaku i formatowanie dla cosinusa (współczynnik a)
+            znak_a = " + " if a >= 0 else " - "
+            tekst += f"{znak_a}{abs(a):.4f} * cos({omega_val:.3f} * t)"
+            
+            # Obsługa znaku i formatowanie dla sinusa (współczynnik b)
+            # Uwaga: we wzorze mamy -b*sin, więc jeśli b jest dodatnie, dajemy minus
+            znak_b = " - " if b >= 0 else " + "
+            tekst += f"{znak_b}{abs(b):.4f} * sin({omega_val:.3f} * t)"
+            
+        return tekst
