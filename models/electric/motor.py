@@ -818,28 +818,51 @@ class DCMotorWithBattery(ComposedSystem):
         soc=(self.q_0-integrate(self.qs[0]))/self.q_0
         return soc
     def get_default_data(self):
+        # Konfiguracja: Pakiet Li-Ion 3S (12.6V max) + Mocny silnik DC
         default_data_dict = {
-            self.R_1: 0.02,        # [Ohm] Rezystancja w pierwszej gałęzi RC
-            self.R_2: 0.01,        # [Ohm] Rezystancja w drugiej gałęzi RC
-            self.L_1: 5e-5,        # [H] Indukcyjność pasożytnicza w pierwszej gałęzi
-            self.L_2: 5e-5,        # [H] Indukcyjność pasożytnicza w drugiej gałęzi
-            self.C: 8000,       # [F] Pojemność kondensatora w modelu
-            self.U_oc: 4.2,        # [V] Napięcie obwodu otwartego (może być funkcją SOC)
-            self.R_0: 0.05,        # [Ohm] Rezystancja wewnętrzna baterii
-            self.R_th: 0.1,        # [Ohm] Rezystancja termiczna
-            self.C_th: 45000,   # [J/K] Pojemność cieplna
-            self.SOC_init: 0.9,    # [0-1] Początkowy stan naładowania
-            self.C_rated: 5400, # [As] Pojemność znamionowa
-            self.U_th: 400,    # [V] Napięcie Thevenina (początkowa wartość)
-            self.U: 3.7,           # [V] Napięcie nominalne baterii
-            DCMotorIIOrder.R_w: 0.2,      # [Ohm] Rezystancja twornika
-            DCMotorIIOrder.L_w: 0.001,    # [H] Indukcyjność twornika
-            DCMotorIIOrder.k_e: 0.5,      # [V*s/rad] Stała EMF
-            DCMotorIIOrder.k_m: 0.5,      # [N*m/A] Stała momentu (często k_m = k_e w SI)
-            DCMotorIIOrder.J: 0.01,       # [kg*m^2] Moment bezwładności
-            DCMotorIIOrder.B: 0.1,
-            DCMotorIIOrder.U_z:12,
-            DCMotorIIOrder.M_obc:40
+            # --- BATERIA (Model Thevenina 2RC) ---
+            self.R_1: 0.015,       # [Ohm] Rezystancja dynamiczna (szybka) - typowa dla pakietu
+            self.R_2: 0.030,       # [Ohm] Rezystancja dynamiczna (wolna)
+            self.C: 500.0,         # [F] Pojemność w gałęzi RC (modeluje relaksację, nie pojemność główną!)
+            
+            # Indukcyjności pasożytnicze (małe, ale niezerowe dla numeryki)
+            self.L_1: 1e-6,        # [H] 1 uH
+            self.L_2: 1e-6,        # [H] 1 uH
+            
+            # Parametry główne baterii
+            self.U_oc: 12.6,       # [V] Napięcie jałowe (Open Circuit) dla pełnego naładowania (3x4.2V)
+            self.U_th: 12.6,       # [V] Początkowe napięcie na kondensatorach (stan równowagi)
+            self.U: 12.0,          # [V] Napięcie nominalne pod obciążeniem
+            self.R_0: 0.15,        # [Ohm] Rezystancja wewnętrzna całego pakietu (szeregowa)
+            
+            # Termika baterii
+            self.R_th: 2.0,        # [K/W] Rezystancja termiczna (chłodzenie pasywne jest słabsze niż 0.1)
+            self.C_th: 1000.0,     # [J/K] Pojemność cieplna (masa ok. 1-2 kg)
+            
+            # Stan baterii
+            self.SOC_init: 0.95,   # [0-1] Prawie pełna
+            self.C_rated: 18000,   # [As] 5 Ah * 3600 = 18000 As (Realna pojemność małego pakietu)
+
+            # --- SILNIK DC (Obciążenie) ---
+            # Parametry dobrane tak, by silnik mógł ruszyć pod obciążeniem
+            DCMotorIIOrder.U_z: 12.0,    # [V] Napięcie zasilania (nominalne)
+            
+            DCMotorIIOrder.R_w: 0.25,    # [Ohm] Rezystancja uzwojeń (Stall Current ~48A)
+            DCMotorIIOrder.L_w: 0.002,   # [H] Indukcyjność (typowa dla silników tej mocy)
+            
+            # Stałe silnika (k_e * w = U_emf)
+            # Dla k=0.1: przy 12V max prędkość to ~120 rad/s (1150 RPM)
+            DCMotorIIOrder.k_e: 0.1,     # [V*s/rad]
+            DCMotorIIOrder.k_m: 0.1,     # [N*m/A] (W układzie SI k_m = k_e)
+            
+            # Mechanika
+            DCMotorIIOrder.J: 0.02,      # [kg*m^2] Bezwładność wirnika + przekładni
+            DCMotorIIOrder.B: 0.05,      # [N*m*s/rad] Współczynnik tarcia lepkiego
+            
+            # Obciążenie
+            # Moment startowy silnika: M = k_m * (U/R) = 0.1 * (12/0.25) = 4.8 Nm
+            # Obciążenie musi być mniejsze niż 4.8 Nm, żeby ruszył!
+            DCMotorIIOrder.M_obc: 2.5    # [N*m] Obciążenie nominalne (np. jazda pod górkę)
         }
         return default_data_dict
 
