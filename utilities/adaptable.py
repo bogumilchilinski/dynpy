@@ -3749,3 +3749,76 @@ class SpectralModelFrame(TimeDataFrame):
             tekst += f"{znak_b}{abs(b):.4f} * sin({omega_val:.3f} * t)"
             
         return tekst
+    def get_sympy_model(self, symbol_name='t'):
+        """
+        Zwraca obiekt wyrażenia SymPy reprezentujący model.
+        Wymaga zainstalowanej biblioteki sympy.
+        """
+        try:
+            import sympy as sp
+        except ImportError:
+            raise ImportError("Biblioteka 'sympy' jest wymagana do użycia tej metody. Zainstaluj ją przez 'pip install sympy'.")
+
+        # 1. Pobranie parametrów modelu
+        wybrane_skladniki, srednia = self.filter_peaks()
+        
+        # 2. Definicja symbolu czasu (zmienna symboliczna)
+        t = sp.Symbol(symbol_name)
+        
+        # 3. Inicjalizacja wyrażenia od składowej stałej
+        # Rzutujemy na float, aby SymPy nie przechowywało typów numpy
+        expr = float(srednia)
+        
+        # 4. Budowanie sumy szeregu Fouriera
+        for _, a, b, f in wybrane_skladniki:
+            omega_val = 2 * np.pi * f
+            
+            # Zgodnie z Twoją logiką rekonstrukcji: a*cos(wt) - b*sin(wt)
+            term = float(a) * sp.cos(omega_val * t) - float(b) * sp.sin(omega_val * t)
+            expr += term
+            
+        return expr
+    def get_sim_function(self):
+        """
+        Zwraca wysoce wydajną funkcję f(t) -> y, którą można przypisać
+        do słownika konfiguracyjnego symulacji.
+        """
+        # 1. Pobieramy parametry raz (pre-kalkulacja)
+        wybrane_skladniki, stala_srednia = self.filter_peaks()
+        
+        # Rozpakowujemy do tablic numpy dla szybkości (wektoryzacja parametrów)
+        if not wybrane_skladniki:
+            # Jeśli brak składowych, zwracamy stałą funkcję
+            return lambda t: stala_srednia
+            
+        data = np.array(wybrane_skladniki)
+        # data kolumny: [moc, a, b, f]
+        A = data[:, 1]       # Współczynniki cosinusa
+        B = data[:, 2]       # Współczynniki sinusa
+        Omegas = 2 * np.pi * data[:, 3]  # Częstotliwości kątowe
+        
+        bias = float(stala_srednia)
+
+        # 2. Definiujemy funkcję (closure), która "pamięta" A, B, Omegas, bias
+        def sim_model(t):
+            # Obsługa przypadku, gdy t jest listą lub liczbą
+            t_input = np.asanyarray(t)
+            
+            # Wzór: y(t) = bias + suma( A*cos(wt) - B*sin(wt) )
+            
+            # Jeśli t jest pojedynczą liczbą (częste w symulacjach krok po kroku)
+            if t_input.ndim == 0:
+                # Obliczenia na skalarach są bardzo szybkie w prostym sumowaniu
+                phases = Omegas * t_input
+                # Iloczyn skalarny (dot product) zastępuje pętlę for -> bardzo szybkie
+                val = np.dot(A, np.cos(phases)) - np.dot(B, np.sin(phases))
+                return bias + val
+            
+            # Jeśli t jest wektorem (tablicą czasów)
+            else:
+                # Broadcasting: tworzymy macierz (liczba_fal x liczba_chwil_czasowych)
+                args = np.outer(Omegas, t_input)
+                waves = A[:, None] * np.cos(args) - B[:, None] * np.sin(args)
+                return bias + np.sum(waves, axis=0)
+
+        return sim_model
