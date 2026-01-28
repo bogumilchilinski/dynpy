@@ -7,6 +7,7 @@ import datetime
 import os
 import shutil
 from typing import Optional, Union
+from pandas import DataFrame
 
 from pylatex import (  # Section, Subsection, Subsubsection, Itemize,  HorizontalSpace, Description, Marker
     Command,
@@ -133,7 +134,7 @@ class MSMethodOverviewReport(UsageOfDynamicSystemsGuide):
         )
         return nonlin_ode
 class DataFrameAnalyzer:
-    def __init__(self, df: pd.DataFrame):
+    def __init__(self, df: DataFrame):
         self.df = df
 
     def generate(self):
