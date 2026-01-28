@@ -2685,11 +2685,11 @@ class AdaptableSeries(pd.Series, BasicFormattingTools):
         return AdaptableDataFrame
 
     def __init__(
-        self, data=None, index=None, dtype=None, name=None, copy=False, fastpath=False
+        self, data=None, index=None, dtype=None, name=None, copy=False
     ):
 
         super().__init__(
-            data=data, index=index, dtype=dtype, name=name, copy=copy, fastpath=fastpath
+            data=data, index=index, dtype=dtype, name=name, copy=copy
         )
         self._reported = False
 
