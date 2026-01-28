@@ -132,7 +132,48 @@ class MSMethodOverviewReport(UsageOfDynamicSystemsGuide):
             eps=eps,
         )
         return nonlin_ode
+class DataFrameAnalyzer:
+    def __init__(self, df: pd.DataFrame):
+        self.df = df
 
+    def generate(self):
+        # Wybór kolumn numerycznych
+        num_cols = self.df.select_dtypes(include=[np.number])
+        
+        if num_cols.empty:
+            display(ReportText("Zbiór nie zawiera danych numerycznych."))
+            return
+
+        # Lista, do której będziemy zbierać zdania
+        zdania = []
+
+        # Zdanie wstępne
+        zdania.append(f"Analizowany zestaw danych obejmuje {len(num_cols.columns)} zmiennych numerycznych.")
+
+        for col in num_cols.columns:
+            seria = num_cols[col]
+            
+            # Obliczenia
+            mn = seria.min()
+            mx = seria.max()
+            avg = seria.mean()
+            med = seria.median()
+            std = seria.std()
+            
+            # Konstrukcja zdania dla danej kolumny (ciągła narracja)
+            # Używamy formatu .2f aby liczby nie miały za dużo miejsc po przecinku
+            zdanie = (
+                f"Dla zmiennej {col} odnotowano wartości w przedziale od {mn:.2f} do {mx:.2f}, "
+                f"przy czym średnia arytmetyczna wynosi {avg:.2f}, a mediana {med:.2f} "
+                f"(odchylenie standardowe {std:.2f})."
+            )
+            zdania.append(zdanie)
+
+        # Łączenie wszystkich zdań spacjami w jeden akapit
+        pelny_tekst = " ".join(zdania)
+        
+        # Wyświetlenie wyniku
+        display(ReportText(pelny_tekst))
 
 
 
