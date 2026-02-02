@@ -175,7 +175,74 @@ class DataFrameAnalyzer:
         
         # Wyświetlenie wyniku
         display(ReportText(pelny_tekst))
+from nutree import Tree
+from collections import defaultdict
 
+class TreeFromTextGenerator:
+    def __init__(self):
+        self._name_counts = defaultdict(lambda: defaultdict(int))
+
+    def _clean_name(self, line):
+        # Czyści tekst ze śmieci typu "-Name composed of: ..."
+        name = line.strip()
+        if name.startswith('-'): name = name[1:].strip()
+        name = name.replace("composed of:", "").strip()
+        name = name.rstrip('.,')
+        return name
+
+    def _get_unique_name(self, parent, base_name):
+        # Obsługa duplikatów dla nutree 1.1.0 (używa adresu pamięci rodzica)
+        pid = id(parent)
+        self._name_counts[pid][base_name] += 1
+        count = self._name_counts[pid][base_name]
+        return f"{base_name} ({count})" if count > 1 else base_name
+
+    def generate(self, text):
+        # Reset liczników
+        self._name_counts.clear()
+        
+        # Dzielimy tekst na linie
+        lines = text.strip().split('\n')
+
+        tree = None
+        # STOS: Przechowuje pary (wcięcie, obiekt_węzła)
+        # Dzięki temu zawsze wiemy, kto jest "aktywnym" rodzicem
+        stack = []
+
+        for line in lines:
+            # Pomiń puste linie
+            if not line.strip(): continue
+
+            # --- KLUCZOWE DLA TWOJEGO STRINGA ---
+            # Liczymy TYLKO tabulatory. Ignorujemy spacje.
+            indent = line.count('\t')
+            # ------------------------------------
+            
+            name = self._clean_name(line)
+
+            if tree is None:
+                # Tworzymy korzeń (zakładamy, że pierwsza linia to zawsze korzeń)
+                tree = Tree(name)
+                stack.append((indent, tree))
+            else:
+                # LOGIKA STOSU (Backtracking):
+                # Jeśli aktualne wcięcie jest mniejsze lub równe temu na górze stosu,
+                # to znaczy, że zamknęliśmy poprzednią gałąź.
+                # Zdejmujemy elementy ze stosu, aż znajdziemy "prawdziwego" rodzica (który ma mniejsze wcięcie).
+                while stack and stack[-1][0] >= indent:
+                    stack.pop()
+
+                if stack:
+                    # Rodzic to ten, kto został na szczycie stosu
+                    parent = stack[-1][1]
+                    
+                    unique_name = self._get_unique_name(parent, name)
+                    new_node = parent.add(unique_name)
+                    
+                    # Dodajemy nowy węzeł na stos (bo może on mieć własne dzieci)
+                    stack.append((indent, new_node))
+
+        return tree
 
 
 
