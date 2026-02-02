@@ -18,6 +18,10 @@
       - [Appending sections and subsections into the document](#appending-sections-and-subsections-into-the-document)
     - [Incorporating Simulation Results](#incorporating-simulation-results)
     - [Adding Formulas, Data Tables and Visualizations](#adding-formulas-data-tables-and-visualizations)
+    - [Explanatory schemes](#explanatory-schemes)
+      - [Application of the developed schemes](#application-of-the-developed-schemes)
+      - [Obtaining LaTeX code](#obtaining-latex-code)
+      - [Creation of custom schemes](#creation-of-custom-schemes)
   - [3. Exporting Reports](#3-exporting-reports)
     - [Supported Formats](#supported-formats)
     - [Exporting Procedures](#exporting-procedures)
@@ -330,21 +334,21 @@ display(data_plot)
 
 #### Application of the developed schemes
 
-'''python
+```python
 from dynpy.utilities.documents.schemes import TrolleyWithPendulumTestStandSchemeBox
 display(TrolleyWithPendulumTestStandSchemeBox().in_figure())
-'''
+```
 
 #### Obtaining LaTeX code
 
-'''python
+```python
 from dynpy.utilities.documents.schemes import TrolleyWithPendulumTestStandSchemeBox
 TrolleyWithPendulumTestStandSchemeBox()
-'''
+```
 
 #### Creation of custom schemes
 
-'''python
+```python
 from dynpy.utilities.report import TikZPicture
 #For editing an existing scheme, insert the code from step 2 into the code section.
 class EnergyStorageSystemScheme(TikZPicture):
@@ -374,7 +378,7 @@ class EnergyStorageSystemScheme(TikZPicture):
         return code
 
 display(EnergyStorageSystemScheme().in_figure())
-'''
+```
 
 ## 3. Exporting Reports
 
