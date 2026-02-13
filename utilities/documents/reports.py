@@ -175,11 +175,12 @@ class DataFrameAnalyzer:
         
         # Wyświetlenie wyniku
         display(ReportText(pelny_tekst))
-from nutree import Tree
-from collections import defaultdict
+
+
 
 class TreeFromTextGenerator:
     def __init__(self):
+        from collections import defaultdict
         self._name_counts = defaultdict(lambda: defaultdict(int))
 
     def _clean_name(self, line):
@@ -198,6 +199,7 @@ class TreeFromTextGenerator:
         return f"{base_name} ({count})" if count > 1 else base_name
 
     def generate(self, text):
+        from nutree import Tree
         # Reset liczników
         self._name_counts.clear()
         
