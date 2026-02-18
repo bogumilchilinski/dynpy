@@ -4538,6 +4538,73 @@ class TechThriveMechanicalCase(Guide):
         Command("graphicspath{{../}}"),
     ]
 
+class ReportWithHeader(Guide):
+    latex_name = "document"
+    _documentclass = "article"
+
+    kodqr="./dynpy/models/images/moj_qr_kod.png"
+    head1="Header 1"
+    head2="Header 2"
+    kod = "./dynpy/models/images/barcode2.png"
+    head0 = "Header 0"
+
+    packages = [
+        Package("float"),
+        Package("graphicx"),
+        Command("graphicspath{{../}}"),
+        Package(
+            "geometry",
+            options=[
+                "lmargin=25mm",
+                "rmargin=25mm",
+                "top=30mm",
+                "bmargin=25mm",
+                "headheight=50mm",
+            ],
+        ),
+        Package("microtype"),
+        Package("authoraftertitle"),
+        Package("polski", options=["MeX"]),
+        Package("tabularx"),
+        # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+        Package("listings"),
+        Package("titlesec"),
+        Package("fancyhdr"),
+        Package("svg"),
+        Command("pagestyle", arguments=["fancy"]),
+        Command("fancyhf", arguments=[""]),
+        Package("array"),
+        Command("renewcommand", arguments=[NoEscape(r"\tabularxcolumn[1]"), NoEscape(r"m")]),
+        Command("newcolumntype", arguments=[NoEscape("C"), NoEscape(r">{\centering\arraybackslash}X")]),
+        
+        Command(
+            "fancyhead",
+            arguments=[
+            ""
+            ],
+            options=["R"],
+        ),  #
+        Command("fancyhead", arguments=["KOD QR"], options=["L"]),
+        Command("fancyhead", arguments=[NoEscape("\\today")], options=["L"]),
+        Command("fancyfoot", arguments=[NoEscape("\\thepage")], options=["C"]),
+        Command("fancyfoot", arguments=[""], options=["L"]),
+        Command("fancyfoot", arguments=[""], options=["R"]),
+        Command("graphicspath{{../}}"),
+        Command("renewcommand", arguments=[NoEscape(r"\headrulewidth"), "0pt"])
+    ]
+    def header_setup(self, kodqr=kodqr, head0=head0, head1=head1, head2=head2, kod=kod):
+        
+        self.preamble.append(Command("fancyhead", arguments=[
+            NoEscape(
+                r"\begin{tabularx}{\textwidth}{|C|C|C|C|C|} "
+                r"\hline "
+                f"\\includegraphics[height=1.5cm]{{{kodqr}}} & {head0} & {head1.replace(chr(10), r' \\ ')} & {head2.replace(chr(10), r' \\ ')} & \\includegraphics[height=1.5cm]{{{kod}}} \\\\ "
+                r"\hline "
+                r"\end{tabularx}"
+            )
+        ], options=["L"]))
+    
+
 
 class TechThriveODECase(TechThriveMechanicalCase):
     packages = [
