@@ -237,7 +237,8 @@ class ReportComponent(Subsection):
         CurrentContainer(self)
 
         if self.title is not None:
-            ip_display(IPMarkdown(f"## {self.title}"))
+             if self.elements() is None:
+                 ip_display(IPMarkdown(f"## {self.title}"))
 
         self.append_elements()
 
@@ -245,7 +246,25 @@ class ReportComponent(Subsection):
         return self.title
 
     def append_elements(self):
-        pass
+
+        elems = self.elements()
+
+        if elems is not None:
+
+            for element in self.elements().values():
+            
+                if isinstance(element,(ReportText, SympyFormula)):
+                    element._repr_markdown_()
+                else:    
+                    self.append(element)
+                    
+            return True
+        else:
+            return None
+
+    def elements(self):
+        return None
+
 
     def as_frame(self):
         frame = Frame(title=self.title, options=["allowframebreaks"])
