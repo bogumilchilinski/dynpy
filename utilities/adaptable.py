@@ -1868,6 +1868,8 @@ class DataTable(Table, ReportModule):
                 #                    multirow=multirow,
                 # hrules=True,
                 column_format=column_format,
+                float_format="%.2f",
+                na_rep="-",
             )
             .replace("\\toprule", "\\toprule \n \\midrule")
             .replace("\\bottomrule", "\\midrule \n \\bottomrule")
