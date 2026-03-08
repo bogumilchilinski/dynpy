@@ -332,6 +332,9 @@ class HelpImplementationIssueCreator:
     _issue_type = "Help"
     _goal = "creates a part of a report"
 
+
+    
+
     def __init__(
         self,
         obj=None,
@@ -481,6 +484,16 @@ class HelpImplementationIssueCreator:
         issue_help.create_comment(self.closing_comment_text)
 
         return issue_help
+    
+    def commit_title(self):
+        
+        issue_no = self._issue_no
+        obj_class_module = self._obj.__module__
+        obj_class_name = self._obj.__name__
+        
+        issue_title = self.title
+        
+        return f"Implementation of preliminary docstring of `{obj_class_name}` class that {issue_title.split('that ')[-1]} (within #{issue_no} issue)"
 
 
 class ReportComponentImplementationIssueCreator(HelpImplementationIssueCreator):
