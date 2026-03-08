@@ -332,8 +332,19 @@ class HelpImplementationIssueCreator:
     _issue_type = "Help"
     _goal = "creates a part of a report"
 
+    @classmethod
+    def from_issue(cls,issue):
+        
+        issue_title = issue.title
+        issue_no = int(issue._issue_no)
+        
+        titl_elems = issue_title.split('`')
+        meth_str = titl_elems[1];module_str = titl_elems[3]
+        
+        current_issue_new=cls(meth_str,issue_title.split('that ')[-1].split(' (')[0],assignees=issue._assignees)
+        
+        return current_issue_new
 
-    
 
     def __init__(
         self,
