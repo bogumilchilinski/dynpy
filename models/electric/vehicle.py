@@ -64,6 +64,10 @@ from ..elements import (
     base_origin,
 )
 from .elements import Capacitor, Inductor, Resistor, VoltageSource
+from .car import (
+    CarMovementRegulatedThrottle as ElectricCarMovementRegulatedThrottle,
+    ElectricCarMovementConstantThrottle,
+)
 
 
 class ElectricMotorcycle2DoF(ComposedSystem):
