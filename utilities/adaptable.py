@@ -1842,6 +1842,7 @@ class DataTable(Table, ReportModule):
         longtable=False,
         multirow=True,
         column_format=None,
+        multicolumn_format='c',
     ):
         self.append(NoEscape("\\centering"))
         self.append(NoEscape("%%%%%%%%%%%%%% Table %%%%%%%%%%%%%%%"))
@@ -1869,6 +1870,7 @@ class DataTable(Table, ReportModule):
                 # hrules=True,
                 column_format=column_format,
                 float_format="%.2f",
+                multicolumn_format=multicolumn_format,
                 na_rep="-",
             )
             .replace("\\toprule", "\\toprule \n \\midrule")

@@ -504,7 +504,16 @@ class HelpImplementationIssueCreator:
         
         issue_title = self.title
         
-        return f"Implementation of preliminary docstring of `{obj_class_name}` class that {issue_title.split('that ')[-1]} (within #{issue_no} issue)"
+        return f"Implementation of docstring prototype of `{obj_class_name}` class that {issue_title.split('that ')[-1]} (within #{issue_no} issue)."
+
+    
+    def _get_commit(self):
+        
+        commit_dict = {'header' : self.commit_title(),
+                       'body' : 'docstring prototype added'
+                       }
+        
+        return commit_dict
 
 
 class ReportComponentImplementationIssueCreator(HelpImplementationIssueCreator):
