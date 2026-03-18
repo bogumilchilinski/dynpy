@@ -538,3 +538,12 @@ class AiInterface:
         response = chat_session.send_message(prompt)
 
         return response.text
+
+
+
+class ChatBotInterface:
+    """
+    Provides simple interface for connection with popular chats e.g. Slack or Teams
+    """
+     
+    pass
