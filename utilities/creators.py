@@ -330,6 +330,7 @@ class HelpImplementationIssueCreator:
     _module = "exemplary.module"
     _default_labels = ["documentation", "enhancement", "maintenance"]
     _issue_type = "Help"
+    _aux_word = 'docstring'
     _goal = "creates a part of a report"
 
     @classmethod
@@ -785,6 +786,17 @@ class ClassImplementationIssueCreator(HelpImplementationIssueCreator):
 
         return issue_code_str
 
+    def commit_title(self):
+        
+        issue_no = self._issue_no
+        obj_class_module = self._obj.__module__
+        obj_class_name = self._obj.__name__
+        
+        issue_title = self.title
+        
+        return f"Implementation of prototype of `{obj_class_name}` class that {issue_title.split('that ')[-1]} (within #{issue_no} issue)."
+
+
 # Implementation of development issue creator - #1154
 
 class ClassDevelopmentIssueCreator(ClassImplementationIssueCreator):
@@ -870,6 +882,17 @@ class MethodImplementationIssueCreator(HelpImplementationIssueCreator):
         return (
             f"{comment_str_h1}{comment_str_h2}\n\n{comment_str_2}\n{comment_call_code}"
         )
+
+
+    def commit_title(self):
+        
+        issue_no = self._issue_no
+        obj_class_module = self._obj.__module__
+        obj_class_name = self._obj.__name__
+        
+        issue_title = self.title
+        
+        return f"Implementation of prototype of `{obj_class_name}` method that {issue_title.split('that ')[-1]} (within #{issue_no} issue)."
 
 
 class GitHubInterface:

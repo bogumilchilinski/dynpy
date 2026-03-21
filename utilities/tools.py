@@ -538,3 +538,69 @@ class AiInterface:
         response = chat_session.send_message(prompt)
 
         return response.text
+
+
+
+class ChatBotInterface:
+    """
+    Provides simple interface for connection with popular chats e.g. Slack or Teams
+    """
+    _token = "xoxb-"
+    _user_id = "U060ZRRTK8V"
+    _message= "default_message"
+
+    def __init__(self, token=None, user_id=None, message=None):
+
+        try:
+            import subprocess
+            wynik_nazwa = subprocess.run(
+                ["git", "config", "--global", "user.name"], 
+                capture_output=True, text=True, check=True
+            )
+            self._user_name = wynik_nazwa.stdout.strip()
+
+        except FileNotFoundError:
+            print("Błąd: Git nie jest zainstalowany na tym komputerze lub nie jest dodany do PATH.")
+            return None
+        except subprocess.CalledProcessError:
+            print("Błąd: Nie znaleziono globalnej konfiguracji Gita (user.name / user.email).")
+            return None
+
+        self._message = f"{self._user_name}: {self._message}"
+        if token is not None:
+            self._token = token
+        if user_id is not None:
+            self._user_id = user_id
+        if message is not None:
+            self._message = f"{self._user_name}: {message}"
+
+
+    def post_on_slack(self):
+        import requests
+        url = "https://slack.com/api/chat.postMessage"
+        
+        headers = {
+            "Authorization": f"Bearer {self._token}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "channel": self._user_id, 
+            "text": self._message
+        }
+        response = requests.post(url, headers=headers, json=payload, verify=False)
+        data = response.json()
+        if data.get("ok"):
+            print("Message sent succesfully!")
+        else:
+            print(f"Error occured: {data.get('error')}")
+
+    def post_commit(self, issue_no=None, commit_id=None, description=None):
+
+        self._message = (
+            f"{self._user_name} just committed in DynPy."
+            f"{f' Commit ID: {commit_id}' if commit_id else ''}"
+            f"{f' Issue no. #{issue_no}' if issue_no else ''}"
+            f"{f' Description: {description}' if issue_no else ''}"
+        )
+        return self.post_on_slack()
+
