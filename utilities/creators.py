@@ -333,15 +333,15 @@ class HelpImplementationIssueCreator:
     _goal = "creates a part of a report"
 
     @classmethod
-    def from_issue(cls,issue):
+    def from_issue(cls, issue):
         
         issue_title = issue.title
         issue_no = int(issue._issue_no)
         
         titl_elems = issue_title.split('`')
-        meth_str = titl_elems[1];module_str = titl_elems[3]
+        meth_str = titl_elems[1]; module_str = titl_elems[3]
         
-        current_issue_new=cls(meth_str,issue_title.split('that ')[-1].split(' (')[0],assignees=issue._assignees)
+        current_issue_new = cls(meth_str, issue_title.split('that ')[-1].split(' (')[0], assignees=issue._assignees)
         
         return current_issue_new
 
@@ -354,6 +354,7 @@ class HelpImplementationIssueCreator:
         no=None,
         assignees=None,
         done=False,
+        type='help',
         *args,
         **kwargs,
     ):
@@ -367,6 +368,7 @@ class HelpImplementationIssueCreator:
             self._goal = goal
 
         self._done = done
+        self._type = type
         if assignees is not None:
             self._assignees = assignees
 
@@ -473,9 +475,6 @@ class HelpImplementationIssueCreator:
         elems_dict = self._get_elems_dict()
         titles = self.get_issues_titles()
 
-        # issue_code_str=('Help *docstring* is to implement for `{obj_class_name}` class that is defined in `{obj_class_module}`. '+
-        # 'It should be a list of all available information about class.')
-
         return {"title": self.title, "body": self.body_text.format(**elems_dict)}
 
     def _repr_markdown_(self):
@@ -497,23 +496,45 @@ class HelpImplementationIssueCreator:
         return issue_help
     
     def commit_title(self):
-        
+        """
+        Generates the commit title dynamically based on object type (e.g., help, class, method).
+        """
         issue_no = self._issue_no
-        obj_class_module = self._obj.__module__
-        obj_class_name = self._obj.__name__
+        goal = self._goal
+        obj_type = getattr(self, '_type', 'help')
         
-        issue_title = self.title
+        if hasattr(self._obj, '__qualname__'):
+            obj_name = self._obj.__qualname__
+        else:
+            obj_name = getattr(self._obj, '__name__', str(self._obj))
         
-        return f"Implementation of docstring prototype of `{obj_class_name}` class that {issue_title.split('that ')[-1]} (within #{issue_no} issue)."
-
+        if obj_type.lower() == 'help':
+            return f"Implementation of help docstrings for class {obj_name} that {goal} (within #{issue_no} issue)."
+            
+        return f"Implementation of prototype of {obj_name} {obj_type} that {goal} (within #{issue_no} issue)."
     
     def _get_commit(self):
+        """
+        Returns a formatted commit message string mimicking git status output.
+        """
+        header = self.commit_title()
+        obj_type = getattr(self, '_type', 'help').lower()
         
-        commit_dict = {'header' : self.commit_title(),
-                       'body' : 'docstring prototype added'
-                       }
+        if obj_type == 'help':
+            action_desc = "help docstrings added"
+        else:
+            action_desc = f"{obj_type} prototype added"
         
-        return commit_dict
+        commit_message = (
+            f"{header}\n"
+            "On branch master\n"
+            "Your branch is up to date with 'origin/master'.\n"
+            "Changes to be committed:\n"
+            "\n"
+            f"modified:   utilities/creators.py - {action_desc}"
+        )
+        
+        return commit_message
 
 
 class ReportComponentImplementationIssueCreator(HelpImplementationIssueCreator):
