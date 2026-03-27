@@ -1630,6 +1630,24 @@ class DataMethods:
             options=options,
         )
 
+
+    def to_pylatex_datatable(
+        self,
+        container=None,
+        index=True,
+        label=None,
+        caption=None,
+        multirow=True,
+        column_format=None,
+        longtable=None,
+        style=None,
+        *args,
+        **kwargs,):
+        
+        pass
+
+
+
     def to_latex_dataframe(self):
         return LatexDataFrame.formatted(self)
 
@@ -2614,6 +2632,9 @@ class BasicFormattingTools(DataMethods):
 
         plotted_frame._ylabel = ylabel
         return plotted_frame  # .plot(ylabel=ylabel,subplots=subplots)
+
+
+
 
     def reported(
         self,

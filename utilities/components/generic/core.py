@@ -74,12 +74,20 @@ class Component(Subsection):
             
                 if isinstance(element,(ReportText, SympyFormula)):
                     element._repr_markdown_()
+                elif isinstance(element,AdaptableDataFrame):
+                    element.reported()
                 else:    
                     self.append(element)
                     
             return True
         else:
             return None
+
+    def _repr_markdown_(self):
+
+
+        pass
+
 
     def elements(self):
         return None
