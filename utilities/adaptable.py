@@ -1644,7 +1644,37 @@ class DataMethods:
         *args,
         **kwargs,):
         
-        pass
+        
+        if style == "bpasts":
+            tab = BPASTSDataTable(self)
+        else:
+            tab = DataTable(self)
+
+        if caption is not None:
+            tab.add_caption(NoEscape(caption))
+
+        tab.add_table(
+            index=index,
+            multirow=multirow,
+            column_format=column_format,
+            longtable=longtable,
+            **kwargs,
+        )
+
+        if label is not None:
+            tab.append(Label(label))
+
+        if label is not None:
+            AutoMarker.add_marker(self.style.to_latex(), label)
+            tab.append(Label(label))
+        else:
+            # old version
+            # auto_mrk = AutoMarker(self.style.to_latex()).marker
+            # new option
+            auto_mrk = AutoMarker(self).marker
+            tab.append(Label(auto_mrk))
+            
+        return tab
 
 
 
