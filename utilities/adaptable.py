@@ -1927,6 +1927,10 @@ class DataTable(Table, ReportModule):
 
         self.append(NoEscape(latex_code))
 
+    def _repr_markdown_(self):
+        
+        pass
+
     @classmethod
     def set_default_position(cls, position=""):
         cls._position = position

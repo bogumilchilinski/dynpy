@@ -442,7 +442,7 @@ class CurrentContainer:
             >>> current_container = CurrentContainer(container)
         """
 
-        from .adaptable import LatexDataFrame
+        from .adaptable import LatexDataFrame, DataTable
 
         self._container = container
 
@@ -458,6 +458,7 @@ class CurrentContainer:
         ObjectCode.set_container(self._container)
 
         Picture.set_container(self._container)
+        DataTable.set_container(self._container)
 
         Block.set_container(self._container)
         AlertBlock.set_container(self._container)
