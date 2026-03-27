@@ -86,7 +86,28 @@ class Component(Subsection):
     def _repr_markdown_(self):
 
 
-        pass
+        md_list =[]
+
+        repr_methods = {
+            "_repr_markdown_": lambda obj: obj._repr_markdown_(),
+            "_repr_html_": lambda obj: obj._repr_html_(),
+        }
+
+        
+        for element in self.elements().values():
+            for method_name, fn in repr_methods.items():
+                if hasattr(element, method_name):
+                    elem = fn(element)
+                    break
+            else:
+                elem = element.__repr__()
+            md_list.append(elem)
+
+        md_str = '# ' + self.dynamic_title() + "\n\n\n" 
+        md_str +=  '\n'.join(md_list)
+        
+        
+        return md_str
 
 
     def elements(self):
