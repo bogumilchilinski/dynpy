@@ -1929,7 +1929,22 @@ class DataTable(Table, ReportModule):
 
     def _repr_markdown_(self):
         
-        pass
+        return self._repr_html_()
+
+    def _repr_html_(self):
+        
+        
+        table_str = self.dumps()
+        
+        if 'caption' in table_str:
+            
+            caption = table_str.split('caption{')[1].split('}')[0]
+        
+        else:
+            caption = "Empty caption"
+        
+        return f"Table X.X: {caption}<br>"  + "===========================<br>"  +  self._numerical_data._repr_html_()
+
 
     @classmethod
     def set_default_position(cls, position=""):
