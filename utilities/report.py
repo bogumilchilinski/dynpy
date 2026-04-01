@@ -1777,9 +1777,9 @@ class Picture(Figure, ReportModule):
                 pixmap = page.get_pixmap(dpi=144)
                 #pixmap.save(path.replace('pdf','png'))
 
-                display(Image(data= pixmap.tobytes(output='png'),width=size))
+                # display(Image(data= pixmap.tobytes(output='png'),width=size))
 
-                display(f"Fig. X: {caption}")
+                # display(f"Fig. X: {caption}")
                 image = Image(data= pixmap.tobytes(output='png'),width=size)
                 img_b64 = base64.b64encode(image.data).decode('utf-8')
                 html_img = f'<img src="data:image/png;base64,{img_b64}" width="{size}" alt="{caption}">'
@@ -1792,10 +1792,10 @@ class Picture(Figure, ReportModule):
                 size = self.preview_size
 
 
-                display(Image(filename=path,
-                              width=size,
-                              ))
-                display(f"Fig. X: {caption}")
+                # display(Image(filename=path,
+                #               width=size,
+                #               ))
+                # display(f"Fig. X: {caption}")
 
                 image = Image(filename=path,width=size)
                 img_b64 = base64.b64encode(image.data).decode('utf-8')
