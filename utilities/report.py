@@ -1732,6 +1732,17 @@ class Picture(Figure, ReportModule):
             str: A Markdown representation for preview.
         """
 
+        return self._repr_html_()
+
+
+    def _repr_html_(self) -> str:
+        """
+        Generate a html representation of the Picture object.
+
+        Returns:
+            str: A html representation for preview.
+        """
+
         self.cls_container.append(self)
 
         if self.caption is None:
@@ -1758,6 +1769,7 @@ class Picture(Figure, ReportModule):
                 import fitz
                 
                 from IPython.display import Image, display
+                import base64
 
                 size = self.preview_size
                 doc = fitz.open(path)
@@ -1768,11 +1780,15 @@ class Picture(Figure, ReportModule):
                 display(Image(data= pixmap.tobytes(output='png'),width=size))
 
                 display(f"Fig. X: {caption}")
-                return ""
+                image = Image(data= pixmap.tobytes(output='png'),width=size)
+                img_b64 = base64.b64encode(image.data).decode('utf-8')
+                html_img = f'<img src="data:image/png;base64,{img_b64}" width="{size}" alt="{caption}">'
+                html_caption = f'<br><b>Fig. X: {caption}</b><br><br>'
             else:
                 
 
                 from IPython.display import Image,display
+                import base64
                 size = self.preview_size
 
 
@@ -1781,13 +1797,13 @@ class Picture(Figure, ReportModule):
                               ))
                 display(f"Fig. X: {caption}")
 
-                return ""
+                image = Image(filename=path,width=size)
+                img_b64 = base64.b64encode(image.data).decode('utf-8')
+                html_img = f'<img src="data:image/png;base64,{img_b64}" width="{size}" alt="{caption}">'
+                html_caption = f'<br><b>Fig. X: {caption}</b><br><br>'
+                return f"{html_img}{html_caption}"
         else:
             return f"Nothing to plot \n \n Fig. X: {caption}"
-
-
-    def _repr_html_(self) -> str:
-        pass
 
 
     def reported(self):
