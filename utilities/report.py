@@ -1732,6 +1732,8 @@ class Picture(Figure, ReportModule):
             str: A Markdown representation for preview.
         """
 
+        self.cls_container.append(self)
+
         return self._repr_html_()
 
 
@@ -1743,7 +1745,7 @@ class Picture(Figure, ReportModule):
             str: A html representation for preview.
         """
 
-        self.cls_container.append(self)
+        
 
         if self.caption is None:
             caption = ""

@@ -1943,6 +1943,8 @@ class DataTable(Table, ReportModule):
         else:
             caption = "Empty caption"
         
+        self.cls_container.append(self)
+        
         return f"Table X.X: {caption}<br>"  + "===========================<br>"  +  self._numerical_data._repr_html_()
 
 
