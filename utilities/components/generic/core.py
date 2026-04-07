@@ -25,15 +25,16 @@ def display(obj):
 
 
 
-class Component(Subsection):
+class Component(Section):
+    numbering = True
 
-    latex_name = "subsection"
+    latex_name = "section"
     packages = [Package("standalone"), Package("siunitx")]
 
     title = "Report generic component"
 
     def __init__(
-        self, reported_object, title=None, numbering=False, *, label=True, **kwargs
+        self, reported_object, title=None, numbering=None, *, label=True, **kwargs
     ):
         """
         Args
@@ -97,16 +98,24 @@ class Component(Subsection):
 
         
         for element in self.elements().values():
-            for method_name, fn in repr_methods.items():
-                if hasattr(element, method_name):
-                    elem = fn(element)
-                    break
-            else:
-                elem = element.__repr__()
+            # for method_name, fn in repr_methods.items():
+            #     # if hasattr(element, method_name):
+            #     #     elem = fn(element)
+
+            #     # else:
+            if hasattr(element,"_repr_markdown_"):
+                elem = element._repr_markdown_()
+                
+            elif hasattr(element,"_repr_html_"):
+                elem = element._repr_html_()            
+            
+            else:                
+                elem = str(element)
+                
             md_list.append(elem)
 
         md_str = '# ' + self.dynamic_title() + "\n\n\n" 
-        md_str +=  '\n'.join(md_list)
+        md_str +=  '\n\n'.join(md_list)
         
         
         return md_str
