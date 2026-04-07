@@ -594,10 +594,12 @@ class ChatBotInterface:
         else:
             print(f"Error occured: {data.get('error')}")
 
-    def post_commit(self, issue_no=None, commit_id=None, description=None):
+    def post_commit(self, issue_no=None, commit_id=None, description=None,library=None):
 
+        if library is None:
+            library='DynPy'
         self._message = (
-            f"{self._user_name} just committed in DynPy."
+            f"{self._user_name} just committed in {library}."
             f"{f' Commit ID: {commit_id}' if commit_id else ''}"
             f"{f' Issue no. #{issue_no}' if issue_no else ''}"
             f"{f' Description: {description}' if issue_no else ''}"
