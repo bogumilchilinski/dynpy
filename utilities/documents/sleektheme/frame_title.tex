@@ -1,0 +1,22 @@
+%---------------------------------------------------------------------
+% Frametitle
+%---------------------------------------------------------------------
+\setbeamertemplate{frametitle}
+{
+\ifbeamercolorempty[bg]{frametitle}{}{\nointerlineskip}%
+\begin{beamercolorbox}[wd=\paperwidth,leftskip=0.3cm,rightskip=0.3cm,ht=3ex,dp=1.5ex]{frametitle}
+	 \usebeamerfont{frametitle}\insertframetitle%
+\end{beamercolorbox}
+}
+
+
+% Tytuł na stronie głównej
+\setbeamerfont{title}{size=\large, series=\bfseries}
+\setbeamercolor{title}{fg=maincolor} % opcjonalnie, by wyróżnić
+\setbeamertemplate{title}[default][center]
+% Tytuły slajdów (frametitle) - DODAJEMY \boldmath dla pewności
+\setbeamerfont{frametitle}{size=\large, series=\bfseries}
+\addtobeamertemplate{frametitle}{\bfseries\boldmath}{}
+
+% Tytuły bloków
+\setbeamerfont{block title}{size=\large, series=\bfseries}
