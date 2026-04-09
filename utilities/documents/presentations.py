@@ -4233,3 +4233,8 @@ doc.append(Command('printbibliography',options=[NoEscape("title={Bibliography}")
 doc.generate_pdf(clean_tex=False)
 """
         return ObjectCode(preliminary_str)
+    
+    
+    
+class LuaTexBeamerPresentation(BeamerPresentation):
+    pass
