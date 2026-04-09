@@ -60,7 +60,9 @@ class Component(Section):
              if self.elements() is None:
                  ip_display(IPMarkdown(f"## {self.title}"))
 
+        self._elems_added = False
         self.append_elements()
+        
 
     def dynamic_title(self):
         return self.title
@@ -69,22 +71,29 @@ class Component(Section):
         
         # TODO: method should be removed to avoid calling elements() during initialization, but for now it is needed to display title before elements
 
-        # elems = self.elements()
+        elems = self.elements()
 
-        # if elems is not None:
-
-        #     for element in self.elements().values():
+        if self._elems_added is False:
             
-        #         if isinstance(element,(ReportText, SympyFormula)):
-        #             element._repr_markdown_()
-        #         else:    
-        #             self.append(element)
-                    
-        #     return True
-        # else:
-        #     return None
-        
-        return None
+            self._elems_added = True
+            if elems is not None:
+
+                for element in self.elements().values():
+                
+                    if isinstance(element,(ReportText, SympyFormula)):
+                        
+                        CurrentContainer
+                        element._repr_markdown_()
+                    else:    
+                        self.append(element)
+                        
+                
+                return True
+            else:
+                return None
+        else:
+            
+            return None
 
     def _repr_markdown_(self):
 
@@ -96,8 +105,12 @@ class Component(Section):
             "_repr_html_": lambda obj: obj._repr_html_(),
         }
 
+
+        # prevents componentent appending on each display call
+        empty_sec = Section('Dummy sec')
+        CurrentContainer(empty_sec)
         
-        for element in self.elements().values():
+        for element in self:
             # for method_name, fn in repr_methods.items():
             #     # if hasattr(element, method_name):
             #     #     elem = fn(element)
@@ -110,13 +123,14 @@ class Component(Section):
                 elem = element._repr_html_()            
             
             else:                
-                elem = str(element)
+                elem = (str(element))
                 
             md_list.append(elem)
 
         md_str = '# ' + self.dynamic_title() + "\n\n\n" 
         md_str +=  '\n\n'.join(md_list)
         
+        CurrentContainer(self)
         
         return md_str
 
