@@ -78,19 +78,18 @@ class Component(Section):
     ...     title = "Report generic component"
     ...
     ...     def elements(self):
-    ...         dict = {}
     ...   
-    ...     comp_dict = {}
+    ...         comp_dict = {}
     ...
-    ...     comp_dict['text1'] = ReportText('header '*10 + '\n\n')
-    ...     comp_dict['text2'] = ReportText('body'*50+ '\n\n')
+    ...         comp_dict['text1'] = ReportText('header '*10 + '\n\n')
+    ...         comp_dict['text2'] = ReportText('body'*50+ '\n\n')
     ...     
-    ...     comp_dict['eq'] = SympyFormula(Eq(Symbol('E'),Symbol('mc^2')))
+    ...         comp_dict['eq'] = SympyFormula(Eq(Symbol('E'),Symbol('mc^2')))
     ...     
-    ...     comp_dict['text3'] = ReportText('foot'*10+ '\n\n')
-    ...     comp_dict['other comp'] = ReportText('foot'*10+ '\n\n')
+    ...         comp_dict['text3'] = ReportText('foot'*10+ '\n\n')
+    ...         comp_dict['other comp'] = ReportText('foot'*10+ '\n\n')
     ...      
-    ...     return comp_dict
+    ...         return comp_dict
 
     Extending behavior
     ------------------
