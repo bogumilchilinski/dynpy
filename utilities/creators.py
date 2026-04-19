@@ -2908,3 +2908,80 @@ class DynamicSystemPresenter:
         self.show_attributes(comment=c_attr)
         self.show_init(comment=c_init)
         self.show_components(comment=c_comp)
+    
+import pandas as pd
+import numpy as np
+import scipy.fft as fft
+
+# Assuming AdaptableDataFrame, TimeDomainMethods, TimeSeries, SpectrumFrame exist in your project scope.
+
+class DataFrameAnalyzer:
+    """
+    Analyzes DataFrame objects and generates a continuous text description 
+    of statistical and engineering metrics. The output format is determined 
+    by a single argument.
+    """
+    
+    def __init__(self, df: pd.DataFrame):
+        """
+        Initializes the analyzer with the target DataFrame.
+        """
+        self.df = df
+
+    def analyze(self, format_type: str = 'string') -> str:
+        """
+        Calculates metrics and returns a continuous text description.
+        
+        Args:
+            format_type (str): The desired output format ('string', 'markdown', 'reporttext').
+                               Defaults to 'string'.
+                               
+        Returns:
+            str: The formatted text description.
+        """
+        paragraphs = []
+        
+        for col in self.df.columns:
+            series = self.df[col]
+            
+            # Skip non-numeric columns
+            if not pd.api.types.is_numeric_dtype(series):
+                continue
+                
+            # Calculate metrics
+            val_min = series.min()
+            t_min = series.idxmin()
+            val_max = series.max()
+            t_max = series.idxmax()
+            val_mean = series.mean()
+            val_median = series.median()
+            val_std = series.std()
+            val_rms = np.sqrt(np.mean(series**2))
+            val_p2p = val_max - val_min
+            
+            # Create continuous text description for the current column
+            description = (
+                f"The signal '{col}' reached a minimum value of {val_min:.6g} at time {t_min} "
+                f"and a maximum value of {val_max:.6g} at time {t_max}. "
+                f"Its overall mean is {val_mean:.6g}, with a median of {val_median:.6g} "
+                f"and a standard deviation of {val_std:.6g}. "
+                f"Additionally, the root mean square (RMS) value is calculated as {val_rms:.6g}, "
+                f"and the peak-to-peak amplitude is {val_p2p:.6g}."
+            )
+            paragraphs.append(description)
+            
+        base_text = " ".join(paragraphs)
+
+        # Dispatcher for wrapping the base text according to the requested format
+        formatters = {
+            'string': lambda text: text,
+            'markdown': lambda text: f"### Data Description\n\n> {text}",
+            'reporttext': lambda text: f"=== DATA ANALYSIS REPORT ===\n\n{text}\n\n=== END OF REPORT ==="
+        }
+
+        # Fallback to 'string' if an unknown format is provided
+        formatter = formatters.get(format_type, formatters['string'])
+        
+        return formatter(base_text)
+
+
