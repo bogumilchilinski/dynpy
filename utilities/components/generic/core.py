@@ -26,6 +26,84 @@ def display(obj):
 
 
 class Component(Section):
+    """
+    Base class for report components rendered as document sections.
+
+    This class represents a high-level report component that:
+    - acts as a LaTeX `Section`,
+    - optionally renders itself in Jupyter (Markdown/HTML),
+    - aggregates sub-elements returned by the `elements()` method.
+
+    Subclasses should override the `elements()` method to define
+    the content of the component.
+
+    Notes
+    -----
+    * The `elements()` method is expected to return either:
+        - a dictionary of named report elements, or
+        - None if the component has no body.
+    * Keys of the dictionary are informational only.
+    * Values may include objects such as:
+        - ReportText
+        - SympyFormula
+        - other pylatex-compatible elements
+    * Elements providing `_repr_markdown_` or `_repr_html_` will be rendered directly in Jupyter.
+
+    The component title may be defined statically via the `title`
+    class attribute or dynamically by overriding `dynamic_title()`.
+
+    Parameters
+    ----------
+    reported_object : object
+        Domain object that the component reports on.
+        Required by the pylatex integration.
+    title : str, optional
+        Section title. If None, `dynamic_title()` is used.
+    numbering : bool, optional
+        Whether the section should be numbered.
+    label : bool or str, optional
+        Section label:
+        - True  -> automatic label
+        - False -> no label
+        - str   -> custom label
+
+    Examples
+    --------
+    Minimal custom report component:
+
+    >>> from sympy import Symbol, Eq
+    >>> from dynpy.utilities.components.generic.core import Component
+    >>>
+    >>> class MyReportComponent(Component):
+    ...     title = "Report generic component"
+    ...
+    ...     def elements(self):
+    ...         dict = {}
+    ...   
+    ...     comp_dict = {}
+    ...
+    ...     comp_dict['text1'] = ReportText('header '*10 + '\n\n')
+    ...     comp_dict['text2'] = ReportText('body'*50+ '\n\n')
+    ...     
+    ...     comp_dict['eq'] = SympyFormula(Eq(Symbol('E'),Symbol('mc^2')))
+    ...     
+    ...     comp_dict['text3'] = ReportText('foot'*10+ '\n\n')
+    ...     comp_dict['other comp'] = ReportText('foot'*10+ '\n\n')
+    ...      
+    ...     return comp_dict
+
+    Extending behavior
+    ------------------
+    Recommended extension points:
+    - `elements()`       – define component content
+    - `dynamic_title()` – compute title dynamically
+    - `as_frame()`       – convert the component to a Beamer frame
+    
+    """
+    
+    
+    
+    
     numbering = True
 
     latex_name = "section"
