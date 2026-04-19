@@ -4,6 +4,7 @@ import inspect
 import os
 import random
 from collections.abc import Iterable
+import re
 
 import pandas as pd
 
@@ -41,6 +42,7 @@ from pylatex import (
     Tabular,
     TextColor,
     TikZ,
+    MiniPage,
 )
 from pylatex.base_classes import Environment, Options
 from pylatex.base_classes.command import CommandBase
@@ -73,6 +75,7 @@ from sympy import (
     sin,
     symbols,
     tan,
+    pretty
 )
 from sympy.core.relational import Relational
 from sympy.physics.vector.printing import vlatex, vpprint
@@ -442,7 +445,7 @@ class CurrentContainer:
             >>> current_container = CurrentContainer(container)
         """
 
-        from .adaptable import LatexDataFrame
+        from .adaptable import LatexDataFrame, DataTable
 
         self._container = container
 
@@ -458,6 +461,7 @@ class CurrentContainer:
         ObjectCode.set_container(self._container)
 
         Picture.set_container(self._container)
+        DataTable.set_container(self._container)
 
         Block.set_container(self._container)
         AlertBlock.set_container(self._container)
@@ -995,6 +999,7 @@ class LstListing(Environment):
             ],
         ),
     ]
+    
 
 class BibliographyManager(Environment):
 
@@ -1785,52 +1790,8 @@ class Picture(Figure, ReportModule):
             return f"Nothing to plot \n \n Fig. X: {caption}"
 
 
-    # def _repr_html_(self) -> str:
-    #     """
-    #     Generate a Markdown representation of the Picture object.
-
-    #     Returns:
-    #         str: A Markdown representation for preview.
-    #     """
-
-    #     self.cls_container.append(self)
-
-    #     if self.caption is None:
-    #         caption = ""
-    #     else:
-    #         caption = self.caption
-
-    #     if self.image is not None:
-    #         path = self.image
-
-    #         if "pdf" in path:
-    #             from wand.image import Image as WImage
-
-    #             img = WImage(filename=path, resolution=144)
-
-    #             hsize, vsize = img.size
-
-    #             img.resize(hsize, vsize)
-    #             display(img)
-    #             display(f"Fig. X: {caption}")
-    #             return ""
-    #         else:
-    #             size = self.preview_size
-
-    #             from IPython.display import Image
-    #             size = self.preview_size
-
-
-    #             display(Image(filename=path,
-    #                           #width=size,
-    #                           ))
-    #             display(f"Fig. X: {caption}")
-
-    #             return ""
-    #             #return f'<img src="{path}" alt="{caption}" style="width: 700px;" width="{size}"/>    \n \n Fig. X: {caption}'
-    #             # return f'![image preview]({path}) \n \n Fig. X: {caption}'
-    #     else:
-    #         return f"Nothing to plot \n \n Fig. X: {caption}"
+    def _repr_html_(self) -> str:
+        pass
 
 
     def reported(self):
@@ -2544,8 +2505,9 @@ class SympyFormula(ReportModule):
 
         return cls
 
-    def __init__(self, expr, key_dict={}, marker=None, backend=vlatex, **kwargs):
-
+    def __init__(self, expr, key_dict={}, marker=None, backend=vlatex, width=r'0.95\textwidth', max_chars=60, **kwargs):
+        self._width = width
+        self._max_chars = max_chars
         self._text = "Figures {first_marker}-{last_marker}"
         self._backend = backend
         self.latex_backend = backend
@@ -2558,51 +2520,94 @@ class SympyFormula(ReportModule):
         super().__init__(**kwargs)
 
         if self._break_mode == "autobreak":
-            if isinstance(expr, (Matrix, ImmutableMatrix)):
 
-                self._eq = Equation()
-                self._eq.append(NoEscape(self._backend(self._expr)))
 
-            elif isinstance(
-                expr,
-                (
-                    Eq,
-                    Relational,
-                    StrictGreaterThan,
-                    LessThan,
-                    StrictLessThan,
-                    GreaterThan,
-                ),
-            ):
+            self._eq = Center()
+            
+            # Dynamiczna szerokość z atrybutu self._width
+            mp = MiniPage(width=NoEscape(self._width), align='l')
+            self._eq.append(mp)
 
-                if isinstance(expr.lhs, (Matrix, ImmutableMatrix)) or isinstance(
-                    expr.rhs, (Matrix, ImmutableMatrix)
-                ):
+            # 1. POMIAR: Wskaźnik długości za pomocą pretty print (ułamki w pionie itp.)
+            p_str = pretty(self._expr, use_unicode=False)
+            actual_width = max([len(line) for line in p_str.split('\n')])
+            
+            math_env = None
 
-                    self._eq = Equation()
-                    self._eq.append(NoEscape(self._backend(self._expr)))
+            # 2. SPRAWDZENIE CZY TO MACIERZ
+            is_matrix_expr = isinstance(expr, (Matrix, ImmutableMatrix)) or (
+                isinstance(expr, (Eq, Relational, StrictGreaterThan, LessThan, StrictLessThan, GreaterThan)) and 
+                (isinstance(expr.lhs, (Matrix, ImmutableMatrix)) or isinstance(expr.rhs, (Matrix, ImmutableMatrix)))
+            )
 
-                else:
-                    self._eq = Align()
-                    with self._eq.create(AutoBreak()) as eq:
-                        eq.latex_backend = self.latex_backend
-                        eq.append_formula(expr)
-
-            else:
-
-                self._eq = Align()
-                with self._eq.create(AutoBreak()) as eq:
+            if is_matrix_expr:
+                # Macierzy nie łamiemy - używamy standardowego Equation
+                math_env = Equation()
+                math_env.append(NoEscape(self._backend(self._expr)))
+            
+            elif actual_width > self._max_chars:
+                # WZÓR JEST DŁUGI: Używamy Align + AutoBreak
+                math_env = Align()
+                with math_env.create(AutoBreak()) as eq:
                     eq.latex_backend = self.latex_backend
                     eq.append_formula(expr)
-
-            if self._marker:
-                marker = self._marker
+            
             else:
-                auto_mrk = AutoMarker(self._expr).marker
-                marker = auto_mrk
+                # WZÓR JEST KRÓTKI: Zwykłe Equation
+                math_env = Equation()
+                math_env.append(NoEscape(self._backend(self._expr)))
 
-            self._eq.append(Label(marker))
+            # 3. DODANIE DO KONTENERA I ETYKIETOWANIE
+            mp.append(math_env)
+
+            marker = self._marker if self._marker else AutoMarker(self._expr).marker
+            math_env.append(Label(marker))
             self._marker = marker
+            
+#         if self._break_mode == "autobreak":
+#             if isinstance(expr, (Matrix, ImmutableMatrix)):
+#                 self._eq = Equation()
+#                 self._eq.append(NoEscape(self._backend(self._expr)))
+                
+#             elif isinstance(
+#                 expr,
+#                 (
+#                     Eq,
+#                     Relational,
+#                     StrictGreaterThan,
+#                     LessThan,
+#                     StrictLessThan,
+#                     GreaterThan,
+#                 ),
+#             ):
+
+#                 if isinstance(expr.lhs, (Matrix, ImmutableMatrix)) or isinstance(
+#                     expr.rhs, (Matrix, ImmutableMatrix)
+#                 ):
+
+#                     self._eq = Equation()
+#                     self._eq.append(NoEscape(self._backend(self._expr)))
+
+#                 else:
+#                     self._eq = Align()
+#                     with self._eq.create(AutoBreak()) as eq:
+#                         eq.latex_backend = self.latex_backend
+#                         eq.append_formula(expr)
+#             else:
+
+#                 self._eq = Align()
+#                 with self._eq.create(AutoBreak()) as eq:
+#                     eq.latex_backend = self.latex_backend
+#                     eq.append_formula(expr)
+#             if self._marker:
+#                 marker = self._marker
+#             else:
+#                 auto_mrk = AutoMarker(self._expr).marker
+#                 marker = auto_mrk
+
+#             self._eq.append(Label(marker))
+            
+            
 
         elif self._break_mode == "eq":
             self._eq = Equation()

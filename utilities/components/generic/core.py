@@ -65,21 +65,52 @@ class Component(Subsection):
         return self.title
 
     def append_elements(self):
+        
+        # TODO: method should be removed to avoid calling elements() during initialization, but for now it is needed to display title before elements
 
-        elems = self.elements()
+        # elems = self.elements()
 
-        if elems is not None:
+        # if elems is not None:
 
-            for element in self.elements().values():
+        #     for element in self.elements().values():
             
-                if isinstance(element,(ReportText, SympyFormula)):
-                    element._repr_markdown_()
-                else:    
-                    self.append(element)
+        #         if isinstance(element,(ReportText, SympyFormula)):
+        #             element._repr_markdown_()
+        #         else:    
+        #             self.append(element)
                     
-            return True
-        else:
-            return None
+        #     return True
+        # else:
+        #     return None
+        
+        return None
+
+    def _repr_markdown_(self):
+
+
+        md_list =[]
+
+        repr_methods = {
+            "_repr_markdown_": lambda obj: obj._repr_markdown_(),
+            "_repr_html_": lambda obj: obj._repr_html_(),
+        }
+
+        
+        for element in self.elements().values():
+            for method_name, fn in repr_methods.items():
+                if hasattr(element, method_name):
+                    elem = fn(element)
+                    break
+            else:
+                elem = element.__repr__()
+            md_list.append(elem)
+
+        md_str = '# ' + self.dynamic_title() + "\n\n\n" 
+        md_str +=  '\n'.join(md_list)
+        
+        
+        return md_str
+
 
     def elements(self):
         return None

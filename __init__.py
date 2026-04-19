@@ -2,13 +2,13 @@
 This module provides basic tools for analysis of dynamic system (described by time-depended functions)
 """
 
-from .dynamics import (
-    DampedHarmonicOscillator,
-    HarmonicOscillator,
-    LagrangesDynamicSystem,
-    LinearDynamicSystem,
-    WeakNonlinearOscillator,
-)
+# from .dynamics import (
+#     DampedHarmonicOscillator,
+#     HarmonicOscillator,
+#     LagrangesDynamicSystem,
+#     LinearDynamicSystem,
+#     WeakNonlinearOscillator,
+# )
 
 from importlib.metadata import version, PackageNotFoundError
 

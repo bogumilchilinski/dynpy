@@ -1632,6 +1632,54 @@ class DataMethods:
             options=options,
         )
 
+
+    def to_pylatex_datatable(
+        self,
+        container=None,
+        index=True,
+        label=None,
+        caption=None,
+        multirow=True,
+        column_format=None,
+        longtable=None,
+        style=None,
+        *args,
+        **kwargs,):
+        
+        
+        if style == "bpasts":
+            tab = BPASTSDataTable(self)
+        else:
+            tab = DataTable(self)
+
+        if caption is not None:
+            tab.add_caption(NoEscape(caption))
+
+        tab.add_table(
+            index=index,
+            multirow=multirow,
+            column_format=column_format,
+            longtable=longtable,
+            **kwargs,
+        )
+
+        if label is not None:
+            tab.append(Label(label))
+
+        if label is not None:
+            AutoMarker.add_marker(self.style.to_latex(), label)
+            tab.append(Label(label))
+        else:
+            # old version
+            # auto_mrk = AutoMarker(self.style.to_latex()).marker
+            # new option
+            auto_mrk = AutoMarker(self).marker
+            tab.append(Label(auto_mrk))
+            
+        return tab
+
+
+
     def to_latex_dataframe(self):
         return LatexDataFrame.formatted(self)
 
@@ -1880,6 +1928,25 @@ class DataTable(Table, ReportModule):
         )
 
         self.append(NoEscape(latex_code))
+
+    def _repr_markdown_(self):
+        
+        return self._repr_html_()
+
+    def _repr_html_(self):
+        
+        
+        table_str = self.dumps()
+        
+        if 'caption' in table_str:
+            
+            caption = table_str.split('caption{')[1].split('}')[0]
+        
+        else:
+            caption = "Empty caption"
+        
+        return f"Table X.X: {caption}<br>"  + "===========================<br>"  +  self._numerical_data._repr_html_()
+
 
     @classmethod
     def set_default_position(cls, position=""):
@@ -2616,6 +2683,9 @@ class BasicFormattingTools(DataMethods):
 
         plotted_frame._ylabel = ylabel
         return plotted_frame  # .plot(ylabel=ylabel,subplots=subplots)
+
+
+
 
     def reported(
         self,
