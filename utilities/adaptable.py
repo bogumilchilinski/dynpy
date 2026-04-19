@@ -57,6 +57,8 @@ ureg = units
 import os
 
 
+from dynpy.utilities.creators import DataFrameAnalyzer
+
 class ReportCache:
 
     _file_names = {}
@@ -3744,7 +3746,12 @@ class TimeDataFrame(AdaptableDataFrame, TimeDomainMethods):
         return TimeDataFrame(
             data=data_gradient, index=data_gradient[next(iter(data_gradient))].index
         )
-
+    def analyze(self, format_type: str = 'string') -> str:
+        """
+        Analyzes the data inside the TimeDataFrame using DataFrameAnalyzer.
+        Calls the analyzer using the exact same method signature.
+        """
+        return DataFrameAnalyzer(self).analyze(format_type=format_type)
 class SpectralModelFrame(TimeDataFrame):
     def __init__(self, *args, max_freq=2.0, min_amplitude=0.1, max_waves=20, **kwargs):
         super().__init__(*args, **kwargs)

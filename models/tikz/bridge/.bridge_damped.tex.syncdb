@@ -1,1 +1,1 @@
-{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-interaction=nonstopmode","-output-directory=/tmp/0f9fb06a1c63866c9651061cd914d0344a72f48a","bridge_damped.tex"]}
+{"key":"build_command","value":["latexmk","-pdf","-f","-g","-bibtex","-deps","-synctex=1","-interaction=nonstopmode","-output-directory=/tmp/dacecd945b7a1c22ea49ba25b93eb3bd218ad475","bridge_damped.tex"]}

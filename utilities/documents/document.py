@@ -4576,7 +4576,6 @@ class ReportWithHeader(Guide):
         Package("array"),
         Command("renewcommand", arguments=[NoEscape(r"\tabularxcolumn[1]"), NoEscape(r"m")]),
         Command("newcolumntype", arguments=[NoEscape("C"), NoEscape(r">{\centering\arraybackslash}X")]),
-        
         Command(
             "fancyhead",
             arguments=[
@@ -4592,18 +4591,18 @@ class ReportWithHeader(Guide):
         Command("graphicspath{{../}}"),
         Command("renewcommand", arguments=[NoEscape(r"\headrulewidth"), "0pt"])
     ]
-    def header_setup(self, kodqr=kodqr, head0=head0, head1=head1, head2=head2, kod=kod):
+#     def header_setup(self, kodqr=kodqr, head0=head0, head1=head1, head2=head2, kod=kod):
         
-        self.preamble.append(Command("fancyhead", arguments=[
-            NoEscape(
-                r"\begin{tabularx}{\textwidth}{|C|C|C|C|C|} "
-                r"\hline "
-                f"\\includegraphics[height=1.5cm]{{{kodqr}}} & {head0} & {head1.replace(chr(10), r' \\ ')} & {head2.replace(chr(10), r' \\ ')} & \\includegraphics[height=1.5cm]{{{kod}}} \\\\ "
-                r"\hline "
-                r"\end{tabularx}"
-            )
-        ], options=["L"]))
-    
+#         self.preamble.append(Command("fancyhead", arguments=[
+#             NoEscape(
+#                 r"\begin{tabularx}{\textwidth}{|C|C|C|C|C|} "
+#                 r"\hline "
+#                 f"\\includegraphics[height=1.5cm]{{{kodqr}}} & {head0} & {head1.replace(chr(10), r' \\ ')} & {head2.replace(chr(10), r' \\ ')} & \\includegraphics[height=1.5cm]{{{kod}}} \\\\ "
+#                 r"\hline "
+#                 r"\end{tabularx}"
+#             )
+#         ], options=["L"]))
+
 
 
 class TechThriveODECase(TechThriveMechanicalCase):

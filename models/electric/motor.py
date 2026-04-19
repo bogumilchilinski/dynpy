@@ -64,6 +64,9 @@ from ..elements import (
     base_origin,
 )
 from .elements import Capacitor, Inductor, Resistor, VoltageSource
+from sympy.physics import units
+
+ureg = units
 
 
 @dataclass
@@ -408,6 +411,12 @@ class DCMotorIIOrder(ComposedSystem):
             self.M_a: r"rotor angular acceleration torque",
             self.M_r: r"rotor motion resistance torque",
             self.omega_s.diff(self.ivar): r"angular acceleration of the rotor",
+            self.phi: r"angular displacement of the rotor",
+            self.phi.diff(self.ivar): r"angular velocity of the rotor",
+            self.phi.diff(self.ivar,2): r"angular acceleration of the rotor",
+            self.charge:r"electric charge",
+            self.charge.diff(self.ivar):r"electric current",
+            self.charge.diff(self.ivar,2):r" rate of change of current",
         }
         return self.sym_desc_dict
 
@@ -452,6 +461,20 @@ class DCMotorIIOrder(ComposedSystem):
 
         # return FirstOrderLinearODESystem.from_ode_system(ode)
         return ode
+    def units(self):
+        units_dict = {
+            self.U_z: ureg.volt,
+            self.R_w: ureg.ohm,
+            self.L_w: ureg.henry,
+            self.k_e: ureg.volt*ureg.second/ureg.radian,
+            self.k_m: ureg.newton*ureg.meter/ureg.ampere,
+            self.J: ureg.kilogram*ureg.meter**2,
+            self.phi.diff(self.ivar):ureg.radian/ureg.second,
+            self.M_obc:ureg.newton*ureg.meter,
+            self.B:ureg.newton*ureg.meter*ureg.second,
+
+        }
+        return units_dict
 
 
 
