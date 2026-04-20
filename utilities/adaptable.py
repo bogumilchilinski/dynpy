@@ -57,7 +57,7 @@ ureg = units
 import os
 
 
-from dynpy.utilities.creators import DataFrameAnalyzer
+#from dynpy.utilities.creators import DataFrameAnalyzer
 
 class ReportCache:
 
