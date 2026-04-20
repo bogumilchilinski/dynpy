@@ -13,20 +13,22 @@ class Project(ABC):
     """
     
     _project_url = "https://pmt.example.com"
+    _api_key = None
 
-    def __init__(self, project_name: str):
-        self.project_name = project_name
+    def __init__(self, project_name: Optional[str] = None,api_key: Optional[str] = None):
+        self._project_name = project_name
+        self._api_key = api_key
 
     # ------------------------------------------------------------------
     # CONNECTION LIFECYCLE
     # ------------------------------------------------------------------
 
-    @abstractmethod
+    #@abstractmethod
     def open(self) -> None:
         """Open connection to the backend system."""
         pass
 
-    @abstractmethod
+    #@abstractmethod
     def close(self) -> None:
         """Close connection to the backend system."""
         pass
@@ -35,7 +37,7 @@ class Project(ABC):
     # PROJECT ACCESS
     # ------------------------------------------------------------------
 
-    @abstractmethod
+    #@abstractmethod
     def get_project(self) -> Any:
         """Return backend-specific project object."""
         pass
@@ -44,7 +46,7 @@ class Project(ABC):
     # ISSUES
     # ------------------------------------------------------------------
 
-    @abstractmethod
+    #@abstractmethod
     def get_issues(
         self,
         state: str = "all",
@@ -55,7 +57,7 @@ class Project(ABC):
         """Return a list of issues."""
         pass
 
-    @abstractmethod
+    #@abstractmethod
     def get_issue(self, issue_id: int) -> Any:
         """Return a single issue by its ID or number."""
         pass
@@ -64,7 +66,7 @@ class Project(ABC):
     # ISSUE MODIFICATION
     # ------------------------------------------------------------------
 
-    @abstractmethod
+    #@abstractmethod
     def create_issue(
         self,
         title: str,
@@ -75,7 +77,7 @@ class Project(ABC):
         """Create a new issue."""
         pass
 
-    @abstractmethod
+    #@abstractmethod
     def close_issue(self, issue_id: int) -> None:
         """Close an existing issue."""
         pass
