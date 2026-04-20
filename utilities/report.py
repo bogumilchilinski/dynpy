@@ -1790,6 +1790,8 @@ class Picture(Figure, ReportModule):
                 img_b64 = base64.b64encode(image.data).decode('utf-8')
                 html_img = f'<img src="data:image/png;base64,{img_b64}" width="{size}" alt="{caption}">'
                 html_caption = f'<br><b>Fig. X: {caption}</b><br><br>'
+                
+                return f"{html_img}{html_caption}"# tu gdzie jest dostęp do pliku trzeba wrzucić bezpośrednio plik
             else:
                 
 
