@@ -85,25 +85,26 @@ class Project(ABC):
         method: str,
         endpoint: str,
         payload: Optional[Dict[str, Any]] = None,
-        redmine_url: str = "https://cms.example.com",
+        system_url: str = "https://pmt.example.com",
         api_key: str = "",
         timeout: int = 30,
     ) -> Dict[str, Any]:
         """
-        Execute a generic request to Redmine REST API.
+        Execute a generic request to PMT REST API.
 
         Parameters
         ----------
         method : str
             HTTP method: 'GET', 'POST', 'PUT', 'DELETE'
         endpoint : str
-            API endpoint, e.g. '/time_entries.json'
+            API endpoint, e.g. '/issues.json'
         payload : dict, optional
             JSON payload sent in request body
         system_url : str
             Base URL
         api_key : str
-            Redmine API key
+            
+            PMT API key
         timeout : int
             Request timeout in seconds
 
@@ -113,10 +114,10 @@ class Project(ABC):
             Parsed JSON response (if any)
         """
 
-        url = f"{redmine_url.rstrip('/')}/{endpoint.lstrip('/')}"
+        url = f"{system_url.rstrip('/')}/{endpoint.lstrip('/')}"
         headers = {
             "Content-Type": "application/json",
-            "api-key": api_key,
+            #"api-key": api_key,
         }
 
         response = requests.request(
