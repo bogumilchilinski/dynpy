@@ -11,6 +11,8 @@ class Project(ABC):
 
     This class defines a common interface for project backends.
     """
+    
+    _project_url = "https://pmt.example.com"
 
     def __init__(self, project_name: str):
         self.project_name = project_name
@@ -79,6 +81,29 @@ class Project(ABC):
         pass
 
 
+    def _request_data(self,
+        method: str,
+        url: str,
+        payload: Optional[Dict[str, Any]] = None,
+        headers: Optional[Dict[str, Any]] = None,
+        timeout: int = 30,
+        ):
+        
+        response = requests.request(
+            method=method.upper(),
+            url=url,
+            headers=headers,
+            json=payload,
+            timeout=timeout,
+        )
+
+        response.raise_for_status()
+
+        if response.content:
+            return response.json()
+        
+        return response
+
 
 
     def system_request(self,
@@ -120,7 +145,7 @@ class Project(ABC):
             #"api-key": api_key,
         }
 
-        response = requests.request(
+        response = self._request_data(
             method=method.upper(),
             url=url,
             headers=headers,
@@ -128,12 +153,8 @@ class Project(ABC):
             timeout=timeout,
         )
 
-        response.raise_for_status()
 
-        if response.content:
-            return response.json()
-
-        return {}
+        return response
 
 
 
