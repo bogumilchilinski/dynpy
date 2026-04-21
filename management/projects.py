@@ -179,3 +179,19 @@ class Comment(IssueEntry):
     def __init__(self, content: str, author: str):
         self.content = content
         self.author = author
+
+class Note(IssueEntry):
+    """
+    Represents a journal note, which may include internal observations or updates.
+    """
+    def __init__(self, text: str, is_private: bool = False):
+        self.text = text
+        self.is_private = is_private
+
+class TimeEntry(IssueEntry):
+    """
+    Represents a log of time spent working on a specific task.
+    """
+    def __init__(self, hours: float, activity: str):
+        self.hours = hours
+        self.activity = activity
