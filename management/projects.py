@@ -4,6 +4,7 @@ from datetime import datetime
 import requests
 from typing import Any, Dict, Optional
 
+
 class Project(ABC):
     """
     Abstract base class representing a generic issue-tracking project
@@ -162,3 +163,19 @@ class Project(ABC):
 
 class CodeRepository(Project):
     pass
+
+
+class IssueEntry(ABC):
+    """
+    Abstract base class representing a generic entry within a Redmine issue.
+    This serves as a common type for polymorphic behavior.
+    """
+    pass
+
+class Comment(IssueEntry):
+    """
+    Represents a textual comment added to an issue.
+    """
+    def __init__(self, content: str, author: str):
+        self.content = content
+        self.author = author
