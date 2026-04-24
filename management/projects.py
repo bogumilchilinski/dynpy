@@ -14,6 +14,7 @@ class Project(ABC):
     """
     
     _project_url = "https://pmt.example.com"
+    _te_endpoint = "/time_entries.json"
     _api_key = None
 
     def __init__(self, project_name: Optional[str] = None,api_key: Optional[str] = None):
@@ -56,7 +57,7 @@ class Project(ABC):
         since: Optional[datetime] = None,
         sort: Optional[str] = None,
     ) -> List[Any]:
-        """Return a list of issues."""
+        """Returns a list of issues."""
         pass
 
     def get_time_entries(
@@ -66,8 +67,19 @@ class Project(ABC):
         since: Optional[datetime] = None,
         sort: Optional[str] = None,
     ) -> List[Any]:
-        """Return a list of time entries for a specific issue."""
-        pass
+
+    """Returns a list of time entries."""
+    
+    
+    base_url = f"{project_url.rstrip('/')}{self._endpoint}"
+    
+    # parametry zapytania GET
+    params = urlencode({"issue_id": issue})
+    url = f"{base_url}?{params}"
+
+    req_result = RedmineProject('',api_key=api_key)._request_data('GET',url)
+    
+    return req_result
 
 
 
