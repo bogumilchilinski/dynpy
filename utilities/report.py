@@ -1743,75 +1743,64 @@ class Picture(Figure, ReportModule):
 
     def _repr_html_(self) -> str:
         """
-        Generate a html representation of the Picture object.
+        Generate an HTML representation of the Picture object.
+        Prioritizes direct path linking to save notebook size, but retains
+        the base64 embedding logic as a fallback mechanism for restricted environments.
 
         Returns:
-            str: A html representation for preview.
+            str: An HTML representation for preview.
         """
+        import base64
+        from pathlib import Path
 
-        
+        # Check if fallback logic should be used for standard images.
+        # Defaults to False (lightweight path linking) if not explicitly set.
+        force_base64 = getattr(self, 'force_base64_embed', False)
 
-        if self.caption is None:
-            caption = ""
-        else:
-            caption = self.caption
+        caption = self.caption if self.caption else ""
+        caption_html = f'<br><b>Fig. X: {caption}</b><br><br>'
 
-        if self.image is not None:
-            path = self.image
-            
+        if not self.image:
+            return f"Nothing to plot. <br><br> Fig. X: {caption}"
 
-            if "pdf" in path:
-                # from wand.image import Image as WImage
-                
+        file_path = Path(self.image)
 
-                # img = WImage(filename=path, resolution=144)
+        if not file_path.is_file():
+            return f"Error: File not found on disk ({self.image}). {caption_html}"
 
-                # hsize, vsize = img.size
+        size_attr = f'width="{self.preview_size}"' if hasattr(self, 'preview_size') else ''
 
-                # img.resize(hsize, vsize)
-                # display(img)
-                # display(f"Fig. X: {caption}")
+        if file_path.suffix.lower() == ".pdf":
+            import fitz  # PyMuPDF imported locally
 
-                import fitz
-                
-                from IPython.display import Image, display
-                import base64
-
-                size = self.preview_size
-                doc = fitz.open(path)
+            try:
+                # Open PDF, rip the first page, and convert to base64 on-the-fly
+                doc = fitz.open(file_path)
                 page = doc.load_page(0)
                 pixmap = page.get_pixmap(dpi=144)
-                #pixmap.save(path.replace('pdf','png'))
+                doc.close() 
 
-                # display(Image(data= pixmap.tobytes(output='png'),width=size))
-
-                # display(f"Fig. X: {caption}")
-                image = Image(data= pixmap.tobytes(output='png'),width=size)
-                img_b64 = base64.b64encode(image.data).decode('utf-8')
-                html_img = f'<img src="data:image/png;base64,{img_b64}" width="{size}" alt="{caption}">'
-                html_caption = f'<br><b>Fig. X: {caption}</b><br><br>'
+                img_b64 = base64.b64encode(pixmap.tobytes(output='png')).decode('utf-8')
+                html_img = f'<img src="data:image/png;base64,{img_b64}" {size_attr} alt="{caption}">'
+                return f"{html_img}{caption_html}"
                 
-                return f"{html_img}{html_caption}"# tu gdzie jest dostęp do pliku trzeba wrzucić bezpośrednio plik
-            else:
-                
-
-                from IPython.display import Image,display
-                import base64
-                size = self.preview_size
-
-
-                # display(Image(filename=path,
-                #               width=size,
-                #               ))
-                # display(f"Fig. X: {caption}")
-
-                image = Image(filename=path,width=size)
-                img_b64 = base64.b64encode(image.data).decode('utf-8')
-                html_img = f'<img src="data:image/png;base64,{img_b64}" width="{size}" alt="{caption}">'
-                html_caption = f'<br><b>Fig. X: {caption}</b><br><br>'
-                return f"{html_img}{html_caption}"# tu gdzie jest dostęp do pliku trzeba wrzucić bezpośrednio plik
+            except Exception as e:
+                return f"Error processing PDF file: {e} {caption_html}"
         else:
-            return f"Nothing to plot \n \n Fig. X: {caption}"
+            if force_base64:
+                # The old logic: fallback to embedding standard images directly into HTML via Base64
+                try:
+                    from IPython.display import Image
+                    image_obj = Image(filename=str(file_path), width=self.preview_size if hasattr(self, 'preview_size') else None)
+                    img_b64 = base64.b64encode(image_obj.data).decode('utf-8')
+                    html_img = f'<img src="data:image/png;base64,{img_b64}" {size_attr} alt="{caption}">'
+                    return f"{html_img}{caption_html}"
+                except Exception as e:
+                    return f"Error embedding image in base64: {e} {caption_html}"
+            else:
+                # The new logic: direct file linking (lightweight approach)
+                html_img = f'<img src="{file_path}" {size_attr} alt="{caption}">'
+                return f"{html_img}{caption_html}"
 
 
     def reported(self):
