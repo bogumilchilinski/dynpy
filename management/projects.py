@@ -19,6 +19,7 @@ class Project(ABC):
     def __init__(self, project_name: Optional[str] = None,api_key: Optional[str] = None):
         self._project_name = project_name
         self._api_key = api_key
+        self.__class__._api_key = api_key
 
     # ------------------------------------------------------------------
     # CONNECTION LIFECYCLE
@@ -57,6 +58,18 @@ class Project(ABC):
     ) -> List[Any]:
         """Return a list of issues."""
         pass
+
+    def get_time_entries(
+        self,
+        issue: Optional[str] = None,
+        assignee: Optional[str] = None,
+        since: Optional[datetime] = None,
+        sort: Optional[str] = None,
+    ) -> List[Any]:
+        """Return a list of time entries for a specific issue."""
+        pass
+
+
 
     #@abstractmethod
     def get_issue(self, issue_id: int) -> Any:
