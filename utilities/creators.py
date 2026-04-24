@@ -343,6 +343,21 @@ class HelpImplementationIssueCreator:
         issue_no = int(issue._issue_no)
         
         titl_elems = issue_title.split('`')
+        
+        target_str = titl_elems[1]; module_str = titl_elems[-2]
+        
+
+
+        module = importlib.import_module(module_str)
+        TargetObj = getattr(module, target_str)        
+        
+        if 'która' in issue_title:
+            goal = issue_title.split('która ')[-1].split(' (')[0]
+        else:
+            goal = issue_title.split('that ')[-1].split(' (')[0]
+            
+        current_issue_new = cls(TargetObj, goal, assignees=issue._assignees)        
+        
         return current_issue_new
 
 
