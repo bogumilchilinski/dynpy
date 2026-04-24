@@ -68,18 +68,18 @@ class Project(ABC):
         sort: Optional[str] = None,
     ) -> List[Any]:
 
-    """Returns a list of time entries."""
-    
-    
-    base_url = f"{project_url.rstrip('/')}{self._endpoint}"
-    
-    # parametry zapytania GET
-    params = urlencode({"issue_id": issue})
-    url = f"{base_url}?{params}"
+        """Returns a list of time entries."""
+        
+        
+        base_url = f"{project_url.rstrip('/')}{self._endpoint}"
+        
+        # parametry zapytania GET
+        params = urlencode({"issue_id": issue})
+        url = f"{base_url}?{params}"
 
-    req_result = RedmineProject('',api_key=api_key)._request_data('GET',url)
-    
-    return req_result
+        req_result = RedmineProject('',api_key=api_key)._request_data('GET',url)
+        
+        return req_result
 
 
 
