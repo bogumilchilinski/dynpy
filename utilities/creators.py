@@ -429,7 +429,29 @@ class HelpImplementationIssueCreator:
             >>> for sha, author, message in commits:
             ...     print(sha, author, message)
         """
-        pass    
+        from git import Repo
+
+        repo = Repo('./dynpy')
+        results = []
+        
+        issue_no = self._issue_no
+        obj_class_module = str(self._obj.__module__)
+        obj_class_name = str(self._obj.__name__)
+
+        commits = repo.iter_commits(paths=obj_class_module, max_count=max_count)
+
+        for commit in commits:
+            if obj_class_name in commit.message:
+                results.append(
+                    (
+                        commit.hexsha[:7],
+                        commit.author.name,
+                        commit.message.strip(),
+                    )
+                )
+
+        return results
+        
 
     def _get_elems_dict(self):
 
