@@ -214,9 +214,80 @@ class Note(IssueEntry):
         self.is_private = is_private
 
 class TimeEntry(IssueEntry):
+    _api_endpoint = "/time_entries.json"
+    _project_mgr = Project
+    
     """
     Represents a log of time spent working on a specific task.
+
+    Example:
+        >>> entry = TimeEntry(
+        ...     issue_id=1234,
+        ...     spent_on="2026-04-26",
+        ...     hours=3.5,
+        ...     comments="Time spent on implementing TimeEntry class",
+        ...     activity_id=9,
+        ...     user_id=12,
+        ...     api_key=api_key,
+        ... )
+        
+        >>> result = entry.create()
+        >>> isinstance(result, dict)
+        True
+
+    
     """
-    def __init__(self, hours: float, activity: str):
-        self.hours = hours
-        self.activity = activity
+
+    def __init__(
+        self,
+        issue_id: int,
+        spent_on: str,
+        hours: float,
+        comments: str,
+        user_id: int,
+        activity_type: int = 9,
+        api_key = None,
+    ):
+        self._issue_id = issue_id
+        self._spent_on = spent_on
+        self._hours = hours
+        self._comments = comments
+        self._activity_type = activity_type
+        self._user_id = user_id
+        self._url = f"{self._project_mgr._project_url.rstrip('/')}{self._api_endpoint}"
+        
+        if api_key is not None:
+            self._api_key = api_key
+        else:
+            self._api_key = self._project_mgr._api_key
+        
+
+    def to_payload(self) -> dict:
+        """
+        Creates a payload for further processing, e.g. for creating a time entry in Redmine.
+        """
+        return {
+            "time_entry": {
+                "issue_id": self._issue_id,
+                "spent_on": self._spent_on,
+                "hours": self._hours,
+                "comments": self._comments,
+                "activity_id": self._activity_type,
+                "user_id": self._user_id,
+            }
+        }
+
+    def create(self) -> dict:
+        """
+        Creates a time entry in the backend system using the provided data.
+        """
+        url = self._url
+
+        proj_mgr =  self._project_mgr("",api_key=self._api_key)
+
+        return proj_mgr._request_data(
+            "POST",
+            url,
+            payload=self.to_payload()
+        )
+
