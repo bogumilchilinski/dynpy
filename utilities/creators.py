@@ -332,6 +332,8 @@ class HelpImplementationIssueCreator:
     _issue_type = "Help"
     _aux_word = 'docstring'
     _goal = "creates a part of a report"
+    _name_sep = ('that ', 'która ')
+    _module_pos = -1
 
     #1171    
     @classmethod
@@ -351,10 +353,11 @@ class HelpImplementationIssueCreator:
         module = importlib.import_module(module_str)
         TargetObj = getattr(module, target_str)        
         
+        
         if 'która' in issue_title:
-            goal = issue_title.split('która ')[-1].split(' (')[0]
+            goal = issue_title.split('która ')[self._module_pos].split(' (')[0]
         else:
-            goal = issue_title.split('that ')[-1].split(' (')[0]
+            goal = issue_title.split('that ')[self._module_pos].split(' (')[0]
             
         current_issue_new = cls(TargetObj, goal, assignees=issue._assignees)        
         
@@ -386,6 +389,69 @@ class HelpImplementationIssueCreator:
         self._type = type
         if assignees is not None:
             self._assignees = assignees
+
+    def _find_commits(
+        self,
+        search_phrase: str,
+        max_count: int | None = None,
+
+        
+    ):
+        """
+        Find and return Git commits that modify a given file and whose commit
+        messages contain a specified search phrase.
+
+        This method uses the GitPython library to iterate over commits affecting
+        the provided file path and filters them based on the presence of
+        `search_phrase` in the commit message.
+
+        Args:
+
+            search_phrase (str):
+                Substring to look for in commit messages
+                (e.g. class name or identifier).
+            max_count (int | None, optional):
+                Maximum number of commits to inspect. If None, all commits are
+                inspected.
+
+        Returns:
+            list[tuple[str, str, str]]:
+                A list of tuples containing:
+                - short commit hash (7 characters),
+                - author name,
+                - full commit message.
+
+        Example:
+            >>> creator = HelpImplementationIssueCreator()
+            >>> commits = creator.find_commits_by_message(
+            ...     search_phrase="HelpImplementationIssueCreator",
+            ... )
+            >>> for sha, author, message in commits:
+            ...     print(sha, author, message)
+        """
+        from git import Repo
+
+        repo = Repo('./dynpy')
+        results = []
+        
+        issue_no = self._issue_no
+        obj_class_module = str(self._obj.__module__)
+        obj_class_name = str(self._obj.__name__)
+
+        commits = repo.iter_commits(paths=obj_class_module, max_count=max_count)
+
+        for commit in commits:
+            if obj_class_name in commit.message:
+                results.append(
+                    (
+                        commit.hexsha[:7],
+                        commit.author.name,
+                        commit.message.strip(),
+                    )
+                )
+
+        return results
+        
 
     def _get_elems_dict(self):
 
@@ -741,6 +807,7 @@ class ClassImplementationIssueCreator(HelpImplementationIssueCreator):
     _default_labels = ["enhancement", "module"]
     _issue_type = "Implementation"
     _goal = "creates a part of a report"
+    _module_pos = -1
 
     @property
     def title(self):
@@ -853,6 +920,7 @@ class MethodImplementationIssueCreator(HelpImplementationIssueCreator):
     _default_labels = ["enhancement", "module"]
     _issue_type = "Implementation"
     _goal = "creates a part of a report"
+    _module_pos = -1
 
     @property
     def title(self):
@@ -906,7 +974,7 @@ class MethodImplementationIssueCreator(HelpImplementationIssueCreator):
         
         issue_title = self.title
         
-        return f"Implementation of prototype of `{obj_class_name}` method that {issue_title.split('that ')[-1]} (within #{issue_no} issue)."
+        return f"Implementation of prototype of `{obj_class_name}` method that {issue_title.split('that ')[self._module_pos]} (within #{issue_no} issue)."
 
 
 class GitHubInterface:
