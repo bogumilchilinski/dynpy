@@ -355,9 +355,9 @@ class HelpImplementationIssueCreator:
         
         
         if 'która' in issue_title:
-            goal = issue_title.split('która ')[self._module_pos].split(' (')[0]
+            goal = issue_title.split('która ')[cls._module_pos].split(' (')[0]
         else:
-            goal = issue_title.split('that ')[self._module_pos].split(' (')[0]
+            goal = issue_title.split('that ')[cls._module_pos].split(' (')[0]
             
         current_issue_new = cls(TargetObj, goal, assignees=issue._assignees)        
         
