@@ -2851,26 +2851,54 @@ class OutputFileGenerator:
         self._output_dir = self._filepath.replace(self._filename, '')
 
 
-    def generate_file(self):
+    def generate_file(self, output_dir=None, clean_temp_files=False):
+        """
+        Generates a PDF file from the TeX source and optionally cleans up temporary LaTeX files.
+
+        Args:
+            output_dir (str, optional): Custom path for the output directory.
+            clean_temp_files (bool, optional): If True, removes auxiliary LaTeX files 
+                                               after compilation. Defaults to True.
+        """
         import os
-        from IPython.display import display, IFrame,FileLink
+        from IPython.display import display, IFrame, FileLink
 
         self._source.generate_tex()
- 
-        # print(self._output_dir)
-        # print(self._filepath)
 
+        target_dir = output_dir if output_dir is not None else self._output_dir
+
+        # Run compilation multiple times to resolve LaTeX cross-references
         for _ in range(3):
-            os.system(f'{self._engine} --output-directory={self._output_dir} {self._filepath}')
+            os.system(f'{self._engine} --output-directory={target_dir} {self._filepath}')
 
-        return FileLink(f'{self._filepath}.pdf')
+        base_name = os.path.basename(self._filepath)
+        filename_without_ext = os.path.splitext(base_name)[0]
+        final_pdf_path = os.path.join(target_dir, f'{filename_without_ext}.pdf')
+
+        # Clean up temporary files left by the compiler
+        if clean_temp_files:
+            extensions_to_remove = ['.aux', '.log', '.toc', '.lof', '.lot', '.out', '.bbl', '.blg', '.fls', '.fdb_latexmk']
+            for ext in extensions_to_remove:
+                temp_file_path = os.path.join(target_dir, f'{filename_without_ext}{ext}')
+                if os.path.exists(temp_file_path):
+                    try:
+                        os.remove(temp_file_path)
+                    except OSError:
+                        # Silently pass if file cannot be removed (e.g. permission error)
+                        pass
+
+        # Preserve original behavior if no custom output directory is provided
+        if output_dir is None:
+            return FileLink(f'{self._filepath}.pdf')
+            
+        return FileLink(final_pdf_path)
     
 
 class PdfLatexGenerator(OutputFileGenerator):
     _engine = 'pdflatex'
 
-    def generate_pdf(self):
-        return self.generate_file()
+    def generate_pdf(self, output_dir=None,clean_temp_files=False):
+        return self.generate_file(output_dir,clean_temp_files)
 
 class LuaLatexGenerator(PdfLatexGenerator):
     _engine = 'lualatex'
