@@ -22,7 +22,7 @@ from typing import Dict, List
 from sympy import *
 from sympy.physics.mechanics import dynamicsymbols
 
-from .elements import Capacitor, Inductor, Resistor
+from .elements import Capacitor, Inductor, Resistor, VoltageSource
 
 
 from ..mechanics.trolley import (

@@ -83,6 +83,13 @@ class DCMotor(ComposedSystem):
     k_m=Symbol('k_m',real=True)
     M_a=Symbol('M_a',real=True)
     M_r=Symbol('M_r',real=True)
+    
+    # DODANE BRAKUJĄCE SYMBOLE
+    E=Symbol('E',real=True)
+    U_Rw=Symbol('U_Rw',real=True)
+    U_Lw=Symbol('U_Lw',real=True)
+    M_s=Symbol('M_s',real=True)
+
     i_w: Symbol = dynamicsymbols("i_w")
     omega_s: Symbol = dynamicsymbols("omega_s")
     ivar: Symbol = Symbol("t")  # wartość domyślna
@@ -618,7 +625,7 @@ class DCMotorHeaviside(DCMotor):
             self.M_r: r"rotor motion resistance torque",
             self.omega_s.diff(self.ivar): r"angular acceleration of the rotor",
             self.T: "Heaviside cycle length",
-            Symbol("\Theta"): "Heaviside function",
+            Symbol(r"\Theta"): "Heaviside function", # POPRAWIONE r"\Theta"
         }
         return self.sym_desc_dict
 
@@ -865,4 +872,3 @@ class DCMotorWithBattery(ComposedSystem):
             DCMotorIIOrder.M_obc: 2.5    # [N*m] Obciążenie nominalne (np. jazda pod górkę)
         }
         return default_data_dict
-

@@ -1196,7 +1196,7 @@ class TikZPlot(TikZ, ReportModule):
             else:
 
                 standalone_plot.generate_pdf(
-                    filename, clean_tex=False, compiler_args=["--lualatex"]
+                    filename, clean_tex=False, compiler_args=["-xelatex"]
                 )
                 ReportCache._file_names[key] = filename
 
@@ -1250,7 +1250,7 @@ class TikZPlot(TikZ, ReportModule):
                 from .report import Picture
 
                 standalone_plot.generate_pdf(
-                    filename, clean_tex=False, compiler_args=["--lualatex"]
+                    filename, clean_tex=False, compiler_args=["-xelatex"]
                 )
 
                 width = self.__class__._image_parameters["width"]
@@ -3355,7 +3355,7 @@ class NumericalAnalysisDataFrame(AdaptableDataFrame):
         if len(ics_list) < len(computed_data.columns):
             param_span = len(computed_data.columns) // len(ics_list)
             ics_list = self.multiply_list(ics_list, param_span)
-        computed_data.values[0] = ics_list
+        computed_data.iloc[0] = ics_list
         return computed_data
 
     def multiply_list(self, ics_list, param_span):

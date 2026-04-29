@@ -4980,6 +4980,155 @@ class BeamerTemplate(BeamerPresentation):
     pass
 
 
+
+### need to be compiled with recipe: LuaLatex -> biber -> lualatex
+class LuaTexBeamerPresentation(Document):
+    '''
+    Template for latex beamer
+    To use section view use code:
+    
+    with doc.create(Section('Section_1')):
+    doc.append(example_section)
+    
+    '''
+    latex_name = 'document'
+
+    packages = [
+        Package('microtype'),
+        Package('polski', options=['MeX']),
+        Package('graphicx'),
+        Package('listings'),
+        Package('multicol'),
+        Package('booktabs'),
+        # Ładowanie motywu Sleek - upewnij się, że folder 'sleektheme' jest obok skryptu
+        Package('sleektheme/beamerthemesleek'),
+        #Command('usetheme', arguments=['sleek'], options=['noflama']), 
+        #Command('graphicspath', [NoEscape(f"{{{imgpath}}}")])
+    ]
+
+    def __init__(self,
+                 default_filepath='default_filepath',
+                 *,
+                 title=None,
+                 author='Karol Bugajewski',
+                 supervisors='Promotor: dr inż. Krzysztof Twardoch \n Konsultacje: dr inż. Bogumił Chiliński,',
+                 institute='Politechnika Warszawska \n Wydział Samochodów i Maszyn Roboczych \n Zakład Metod Numerycznych i Systemów Inteligentnych',
+                 subtitle=" ",
+                 documentclass='beamer',
+                 document_options=None,
+                 fontenc='T1',
+                 inputenc='utf8',
+                 font_size='footnotesize',
+                 lmodern=False,      # Przywrócone, by uniknąć TypeError
+                 microtype=True,     # Przywrócone
+                 textcomp=True,      # Przywrócone
+                 page_numbers=True,  # Przywrócone
+                 indent=None,
+                 geometry_options=None,
+                 data=None):
+
+        # Jeśli nie podałeś opcji, ustawiamy domyślne dla Sleek (najlepiej 16:9)
+        if document_options is None:
+            document_options = ['compress', 'aspectratio=169']
+
+        super().__init__(
+            default_filepath=default_filepath,
+            documentclass=documentclass,
+            document_options=document_options,
+            fontenc=fontenc,
+            inputenc=inputenc,
+            font_size=font_size,
+            lmodern=lmodern,
+            textcomp=textcomp,
+            microtype=microtype,
+            page_numbers=page_numbers,
+            indent=indent,
+            geometry_options=geometry_options,
+            data=data,
+        )
+        cwd = os.getcwd()
+        source_path = (
+            f"dynpy/utilities/documents/sleektheme"
+        )
+        path1 = f"{cwd}/sleektheme"
+        path2 = f"{cwd}/output/sleektheme"
+
+        if os.path.exists(path1) == False:
+            shutil.copytree(source_path, path1)
+        if os.path.exists(path2) == False:
+            shutil.copytree(source_path, path2)
+        
+        self.title = title
+
+        # Ustawienia preambuły dla motywu Sleek
+        if self.title:
+            self.preamble.append(Command('title', self.title))
+        
+        self.preamble.append(Command('subtitle', subtitle))
+        self.preamble.append(Command('author', author+"\n"+supervisors))
+        self.preamble.append(Command('institute', institute))
+        self.preamble.append(Command('date', NoEscape(r'\today')))
+
+        # Wygenerowanie strony tytułowej
+        self.append(Command('maketitle'))
+        self.preamble.append(NoEscape(r'\setbeamertemplate{section page}{}'))
+        self.preamble.append(NoEscape(r'\AtBeginSection[]{}'))
+
+        self.preamble.append(NoEscape(r'\setbeamerfont{title}{size=\large}'))
+
+        self.preamble.append(NoEscape(r'\hyphenpenalty=10000'))
+        self.preamble.append(NoEscape(r'\exhyphenpenalty=10000'))
+        self.preamble.append(NoEscape(r'\setbeamertemplate{itemize items}[circle]'))
+        self.preamble.append(NoEscape(r'\setbeamercolor{itemize item}{fg=maincolor}')) # kolor z motywu
+
+        self.packages.append(Package('fontspec'))
+        self.packages.append(Package('babel', 'polish'))
+
+        # self.preamble.append(NoEscape(r'''
+        # \setmainfont{Iwona}
+        # \setsansfont{Iwona}
+        # \renewcommand{\familydefault}{\sfdefault}
+        # '''))
+        self.preamble.append(Package('biblatex',["backend=biber","sorting=none"]))
+        self.preamble.append(Command('addbibresource','biblio.bib'))
+
+        self.preamble.append(NoEscape(r'\renewcommand{\familydefault}{\sfdefault}'))
+
+        # --- GÓRA: Sekcje ---
+        self.preamble.append(NoEscape(r'\useoutertheme[subsection=false]{miniframes}'))
+
+        # --- DÓŁ: Twoja stopka (2 pola) ---
+        self.preamble.append(NoEscape(r'''
+        \setbeamertemplate{footline}
+        {
+        \leavevmode%
+        \hbox{%
+        \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{author in head/foot}%
+            \usebeamerfont{author in head/foot}'''+author+r'''
+        \end{beamercolorbox}%
+        \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+            \usebeamerfont{title in head/foot}Politechnika Warszawska
+        \end{beamercolorbox}%
+        \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+            \usebeamerfont{date in head/foot}\insertshortdate{}\hspace*{2em}
+            \insertframenumber{} / \inserttotalframenumber\hspace*{2ex} 
+        \end{beamercolorbox}}%
+        \vskip0pt%
+        }
+        '''))
+
+        self.preamble.append(NoEscape(r'\setbeamercolor{author in head/foot}{fg=white, bg=maincolor}'))
+        self.preamble.append(NoEscape(r'\setbeamercolor{date in head/foot}{fg=maincolor, bg=gray!10}'))
+
+
+
+
+
+
+
+
+
+
 class DGBeamer(Document):
 
     latex_name = "document"
@@ -5702,6 +5851,8 @@ editorial_remarks = [
 "stosowanie różnego kroju pisma dla symboli matematycznych lub jednostek",
 
 #"występowanie grafik lub wypunktowania na końcu sekcji",
+
+#"używanie sformułowń typu poniższe, powyższe, używamy konkretnego odniesienia",
 
 #"występowanie zwrotów nie mających wartości merytorycznej takich jak: oczywiście, niestety itp.",
 
