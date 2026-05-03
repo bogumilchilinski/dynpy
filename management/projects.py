@@ -194,7 +194,7 @@ class CodeRepository(Project):
 
 class IssueEntry(ABC):
     """
-    Abstract base class representing a generic entry within a Redmine issue.
+    Abstract base class representing a generic entry within an issue.
     This serves as a common type for polymorphic behavior.
     """
     pass
@@ -266,7 +266,7 @@ class TimeEntry(IssueEntry):
 
     def to_payload(self) -> dict:
         """
-        Creates a payload for further processing, e.g. for creating a time entry in Redmine.
+        Creates a payload for further processing, e.g. for creating a time entry in PMT system.
         """
         return {
             "time_entry": {
