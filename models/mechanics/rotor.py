@@ -9,28 +9,30 @@ from .principles import ComposedSystem
 
 class MasslessElasticShaft(Element):
 
-	scheme_name = "spring.png"  # ToBeAdded
-	real_name = "spring.png"  # ToBeAdded
+	scheme_name = "MasslessElasticShaft.png"  # ToBeAdded
+	real_name = "MasslessElasticShaft.png"  # ToBeAdded
 
 	def __init__(
 		self,
-		stiffness,
-		horizontal_disp,
-		vertical_disp,
+		stiffness=None,
+		horizontal_disp=None,
+		vertical_disp=None,
 		qs=None,
 		ivar=Symbol("t"),
 		**kwargs
 	):
-		self.k = stiffness
-		self.h = horizontal_disp
-		self.v = vertical_disp
+		self.k = stiffness if stiffness is not None else Symbol("k", positive=True)
+		self.h = (
+			horizontal_disp if horizontal_disp is not None else dynamicsymbols("h")
+		)
+		self.v = vertical_disp if vertical_disp is not None else dynamicsymbols("v")
 		self.ivar = ivar
 
 		if qs is None:
-			qs = [horizontal_disp, vertical_disp]
+			qs = [self.h, self.v]
 
-		Lagrangian = -Rational(1, 2) * stiffness * (
-			horizontal_disp**2 + vertical_disp**2
+		Lagrangian = -Rational(1, 2) * self.k * (
+			self.h**2 + self.v**2
 		)
 
 		super().__init__(Lagrangian=Lagrangian, qs=qs, ivar=ivar, **kwargs)
