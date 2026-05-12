@@ -1833,7 +1833,7 @@ class Picture(Figure, ReportModule):
 
         print(vector[:-2] + ")")
 
-
+#1151
 class PltPlot(Picture, ReportModule):
     """
     A class that represents a figure environment in a LaTeX document.
@@ -1940,12 +1940,24 @@ class PltPlot(Picture, ReportModule):
 
     
     def _save_plt_plot(self):
-            
+        import time    
         import matplotlib.pyplot as plt
 
         fig_no = next(self._floats_no_gen)
 
-        pic_filename = f"{self._default_path}/{self.__class__.__name__}{fig_no}.png"
+
+
+
+        timestamp = int(time.time())
+
+        #local mode
+        pic_number = f'{timestamp}{fig_no}'
+        
+        #online mode
+        pic_number = f'{fig_no}'
+
+
+        pic_filename = f"{self._default_path}/{self.__class__.__name__}{pic_number}.png"
 
         plt.savefig(pic_filename, bbox_inches='tight',dpi=self._default_dpi)
         plt.close()
@@ -2103,7 +2115,8 @@ class ObjectCode(LstListing, ReportModule):
             options=options, arguments=None, start_arguments=None, **kwargs
         )
 
-        self.code_type
+        code = self.code_type
+        self.append(NoEscape("\n" + code + "   \n"))
 
     def __repr__(self):
 
@@ -2140,7 +2153,7 @@ class ObjectCode(LstListing, ReportModule):
 
         code = self.code_type
 
-        self.append(NoEscape("   \n   " + code + "   \n   "))
+        self.append(NoEscape("    \n   " + code + "   \n   "))
 
         lst_env = Aspect(self.default_title)
 
@@ -2152,7 +2165,7 @@ class ObjectCode(LstListing, ReportModule):
 
     def _repr_markdown_(self):
 
-        self.reported()
+        #self.reported()
         # print(self.code_type)
 
         return "```python \n" + self.code_type + "\n``` "
