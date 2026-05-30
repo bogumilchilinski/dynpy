@@ -332,17 +332,34 @@ class HelpImplementationIssueCreator:
     _issue_type = "Help"
     _aux_word = 'docstring'
     _goal = "creates a part of a report"
+    _name_sep = ('that ', 'która ')
+    _module_pos = -1
 
+    #1171    
     @classmethod
     def from_issue(cls, issue):
+        import importlib
+        
         
         issue_title = issue.title
         issue_no = int(issue._issue_no)
         
         titl_elems = issue_title.split('`')
-        meth_str = titl_elems[1]; module_str = titl_elems[3]
         
-        current_issue_new = cls(meth_str, issue_title.split('that ')[-1].split(' (')[0], assignees=issue._assignees)
+        target_str = titl_elems[1]; module_str = titl_elems[-2]
+        
+
+
+        module = importlib.import_module(module_str)
+        TargetObj = getattr(module, target_str)        
+        
+        
+        if 'która' in issue_title:
+            goal = issue_title.split('która ')[cls._module_pos].split(' (')[0]
+        else:
+            goal = issue_title.split('that ')[cls._module_pos].split(' (')[0]
+            
+        current_issue_new = cls(TargetObj, goal, assignees=issue._assignees)        
         
         return current_issue_new
 
@@ -372,6 +389,69 @@ class HelpImplementationIssueCreator:
         self._type = type
         if assignees is not None:
             self._assignees = assignees
+
+    def _find_commits(
+        self,
+        search_phrase: str,
+        max_count: int | None = None,
+
+        
+    ):
+        """
+        Find and return Git commits that modify a given file and whose commit
+        messages contain a specified search phrase.
+
+        This method uses the GitPython library to iterate over commits affecting
+        the provided file path and filters them based on the presence of
+        `search_phrase` in the commit message.
+
+        Args:
+
+            search_phrase (str):
+                Substring to look for in commit messages
+                (e.g. class name or identifier).
+            max_count (int | None, optional):
+                Maximum number of commits to inspect. If None, all commits are
+                inspected.
+
+        Returns:
+            list[tuple[str, str, str]]:
+                A list of tuples containing:
+                - short commit hash (7 characters),
+                - author name,
+                - full commit message.
+
+        Example:
+            >>> creator = HelpImplementationIssueCreator()
+            >>> commits = creator.find_commits_by_message(
+            ...     search_phrase="HelpImplementationIssueCreator",
+            ... )
+            >>> for sha, author, message in commits:
+            ...     print(sha, author, message)
+        """
+        from git import Repo
+
+        repo = Repo('./dynpy')
+        results = []
+        
+        issue_no = self._issue_no
+        obj_class_module = str(self._obj.__module__)
+        obj_class_name = str(self._obj.__name__)
+
+        commits = repo.iter_commits(paths=obj_class_module, max_count=max_count)
+
+        for commit in commits:
+            if obj_class_name in commit.message:
+                results.append(
+                    (
+                        commit.hexsha[:7],
+                        commit.author.name,
+                        commit.message.strip(),
+                    )
+                )
+
+        return results
+        
 
     def _get_elems_dict(self):
 
@@ -727,6 +807,7 @@ class ClassImplementationIssueCreator(HelpImplementationIssueCreator):
     _default_labels = ["enhancement", "module"]
     _issue_type = "Implementation"
     _goal = "creates a part of a report"
+    _module_pos = -1
 
     @property
     def title(self):
@@ -839,6 +920,7 @@ class MethodImplementationIssueCreator(HelpImplementationIssueCreator):
     _default_labels = ["enhancement", "module"]
     _issue_type = "Implementation"
     _goal = "creates a part of a report"
+    _module_pos = -1
 
     @property
     def title(self):
@@ -892,7 +974,7 @@ class MethodImplementationIssueCreator(HelpImplementationIssueCreator):
         
         issue_title = self.title
         
-        return f"Implementation of prototype of `{obj_class_name}` method that {issue_title.split('that ')[-1]} (within #{issue_no} issue)."
+        return f"Implementation of prototype of `{obj_class_name}` method that {issue_title.split('that ')[self._module_pos]} (within #{issue_no} issue)."
 
 
 class GitHubInterface:
@@ -2769,26 +2851,54 @@ class OutputFileGenerator:
         self._output_dir = self._filepath.replace(self._filename, '')
 
 
-    def generate_file(self):
+    def generate_file(self, output_dir=None, clean_temp_files=False):
+        """
+        Generates a PDF file from the TeX source and optionally cleans up temporary LaTeX files.
+
+        Args:
+            output_dir (str, optional): Custom path for the output directory.
+            clean_temp_files (bool, optional): If True, removes auxiliary LaTeX files 
+                                               after compilation. Defaults to True.
+        """
         import os
-        from IPython.display import display, IFrame,FileLink
+        from IPython.display import display, IFrame, FileLink
 
         self._source.generate_tex()
- 
-        # print(self._output_dir)
-        # print(self._filepath)
 
+        target_dir = output_dir if output_dir is not None else self._output_dir
+
+        # Run compilation multiple times to resolve LaTeX cross-references
         for _ in range(3):
-            os.system(f'{self._engine} --output-directory={self._output_dir} {self._filepath}')
+            os.system(f'{self._engine} --output-directory={target_dir} {self._filepath}')
 
-        return FileLink(f'{self._filepath}.pdf')
+        base_name = os.path.basename(self._filepath)
+        filename_without_ext = os.path.splitext(base_name)[0]
+        final_pdf_path = os.path.join(target_dir, f'{filename_without_ext}.pdf')
+
+        # Clean up temporary files left by the compiler
+        if clean_temp_files:
+            extensions_to_remove = ['.aux', '.log', '.toc', '.lof', '.lot', '.out', '.bbl', '.blg', '.fls', '.fdb_latexmk']
+            for ext in extensions_to_remove:
+                temp_file_path = os.path.join(target_dir, f'{filename_without_ext}{ext}')
+                if os.path.exists(temp_file_path):
+                    try:
+                        os.remove(temp_file_path)
+                    except OSError:
+                        # Silently pass if file cannot be removed (e.g. permission error)
+                        pass
+
+        # Preserve original behavior if no custom output directory is provided
+        if output_dir is None:
+            return FileLink(f'{self._filepath}.pdf')
+            
+        return FileLink(final_pdf_path)
     
 
 class PdfLatexGenerator(OutputFileGenerator):
     _engine = 'pdflatex'
 
-    def generate_pdf(self):
-        return self.generate_file()
+    def generate_pdf(self, output_dir=None,clean_temp_files=False):
+        return self.generate_file(output_dir,clean_temp_files)
 
 class LuaLatexGenerator(PdfLatexGenerator):
     _engine = 'lualatex'

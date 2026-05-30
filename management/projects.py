@@ -2,7 +2,10 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Any
 from datetime import datetime
 import requests
+from urllib.parse import urlencode
+
 from typing import Any, Dict, Optional
+
 
 class Project(ABC):
     """
@@ -13,20 +16,24 @@ class Project(ABC):
     """
     
     _project_url = "https://pmt.example.com"
+    _te_endpoint = "/time_entries.json"
+    _api_key = None
 
-    def __init__(self, project_name: str):
-        self.project_name = project_name
+    def __init__(self, project_name: Optional[str] = None,api_key: Optional[str] = None):
+        self._project_name = project_name
+        self._api_key = api_key
+        self.__class__._api_key = api_key
 
     # ------------------------------------------------------------------
     # CONNECTION LIFECYCLE
     # ------------------------------------------------------------------
 
-    @abstractmethod
+    #@abstractmethod
     def open(self) -> None:
         """Open connection to the backend system."""
         pass
 
-    @abstractmethod
+    #@abstractmethod
     def close(self) -> None:
         """Close connection to the backend system."""
         pass
@@ -35,7 +42,7 @@ class Project(ABC):
     # PROJECT ACCESS
     # ------------------------------------------------------------------
 
-    @abstractmethod
+    #@abstractmethod
     def get_project(self) -> Any:
         """Return backend-specific project object."""
         pass
@@ -44,7 +51,7 @@ class Project(ABC):
     # ISSUES
     # ------------------------------------------------------------------
 
-    @abstractmethod
+    #@abstractmethod
     def get_issues(
         self,
         state: str = "all",
@@ -52,10 +59,33 @@ class Project(ABC):
         since: Optional[datetime] = None,
         sort: Optional[str] = None,
     ) -> List[Any]:
-        """Return a list of issues."""
+        """Returns a list of issues."""
         pass
 
-    @abstractmethod
+    def get_time_entries(
+        self,
+        issue: Optional[str] = None,
+        assignee: Optional[str] = None,
+        since: Optional[datetime] = None,
+        sort: Optional[str] = None,
+    ) -> List[Any]:
+
+        """Returns a list of time entries."""
+        
+        
+        base_url = f"{self._project_url.rstrip('/')}{self._te_endpoint}"
+        
+        # parametry zapytania GET
+        params = urlencode({"issue_id": issue})
+        url = f"{base_url}?{params}"
+
+        req_result = self._request_data('GET',url)
+        
+        return req_result
+
+
+
+    #@abstractmethod
     def get_issue(self, issue_id: int) -> Any:
         """Return a single issue by its ID or number."""
         pass
@@ -64,7 +94,7 @@ class Project(ABC):
     # ISSUE MODIFICATION
     # ------------------------------------------------------------------
 
-    @abstractmethod
+    #@abstractmethod
     def create_issue(
         self,
         title: str,
@@ -75,7 +105,7 @@ class Project(ABC):
         """Create a new issue."""
         pass
 
-    @abstractmethod
+    #@abstractmethod
     def close_issue(self, issue_id: int) -> None:
         """Close an existing issue."""
         pass
@@ -160,3 +190,106 @@ class Project(ABC):
 
 class CodeRepository(Project):
     pass
+
+
+class IssueEntry(ABC):
+    """
+    Abstract base class representing a generic entry within an issue.
+    This serves as a common type for polymorphic behavior.
+    """
+    pass
+
+class Comment(IssueEntry):
+    """
+    Represents a textual comment added to an issue.
+    """
+    def __init__(self, content: str, author: str):
+        self.content = content
+        self.author = author
+
+class Note(IssueEntry):
+    """
+    Represents a journal note, which may include internal observations or updates.
+    """
+    def __init__(self, text: str, is_private: bool = False):
+        self.text = text
+        self.is_private = is_private
+
+class TimeEntry(IssueEntry):
+    _api_endpoint = "/time_entries.json"
+    _project_mgr = Project
+    
+    """
+    Represents a log of time spent working on a specific task.
+
+    Example:
+        >>> entry = TimeEntry(
+        ...     issue_id=1234,
+        ...     spent_on="2026-04-26",
+        ...     hours=3.5,
+        ...     comments="Time spent on implementing TimeEntry class",
+        ...     activity_id=9,
+        ...     user_id=12,
+        ...     api_key=api_key,
+        ... )
+        
+        >>> result = entry.create()
+        >>> isinstance(result, dict)
+        True
+
+    
+    """
+
+    def __init__(
+        self,
+        issue_id: int,
+        spent_on: str,
+        hours: float,
+        comments: str,
+        user_id: int,
+        activity_type: int = 9,
+        api_key = None,
+    ):
+        self._issue_id = issue_id
+        self._spent_on = spent_on
+        self._hours = hours
+        self._comments = comments
+        self._activity_type = activity_type
+        self._user_id = user_id
+        self._url = f"{self._project_mgr._project_url.rstrip('/')}{self._api_endpoint}"
+        
+        if api_key is not None:
+            self._api_key = api_key
+        else:
+            self._api_key = self._project_mgr._api_key
+        
+
+    def to_payload(self) -> dict:
+        """
+        Creates a payload for further processing, e.g. for creating a time entry in PMT system.
+        """
+        return {
+            "time_entry": {
+                "issue_id": self._issue_id,
+                "spent_on": self._spent_on,
+                "hours": self._hours,
+                "comments": self._comments,
+                "activity_id": self._activity_type,
+                "user_id": self._user_id,
+            }
+        }
+
+    def create(self) -> dict:
+        """
+        Creates a time entry in the backend system using the provided data.
+        """
+        url = self._url
+
+        proj_mgr =  self._project_mgr("",api_key=self._api_key)
+
+        return proj_mgr._request_data(
+            "POST",
+            url,
+            payload=self.to_payload()
+        )
+
