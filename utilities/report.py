@@ -2157,7 +2157,7 @@ class ObjectCode(LstListing, ReportModule):
 
         lst_env = Aspect(self.default_title)
 
-        # lst_env.append(self)
+        #lst_env.append(self)
         lst_env = self
         self.cls_container.append(lst_env)
 
@@ -2167,6 +2167,7 @@ class ObjectCode(LstListing, ReportModule):
 
         #self.reported()
         # print(self.code_type)
+        self.cls_container.append(self)
 
         return "```python \n" + self.code_type + "\n``` "
 
