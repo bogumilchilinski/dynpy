@@ -293,3 +293,7 @@ class TimeEntry(IssueEntry):
             payload=self.to_payload()
         )
 
+class Commit:
+    def __init__(self, commit_id, issue_id):
+        self.commit_id = commit_id
+        self.issue_id = issue_id
