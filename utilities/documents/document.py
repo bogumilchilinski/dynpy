@@ -4596,7 +4596,8 @@ class ReportWithHeader(Guide):
         #Command("graphicspath{{../}}"),
         Command("renewcommand", arguments=[NoEscape(r"\headrulewidth"), "0pt"]),
         NoEscape(r'\usepackage[table]{xcolor}'),
-        NoEscape(r'\rowcolors{2}{gray!10}{gray!25}')
+        NoEscape(r'\rowcolors{2}{gray!10}{gray!25}'),
+        NoEscape(r'\geometry{top=60mm}'),
     ]
 #     def header_setup(self, kodqr=kodqr, head0=head0, head1=head1, head2=head2, kod=kod):
         
