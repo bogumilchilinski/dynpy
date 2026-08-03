@@ -55,50 +55,75 @@ from ..mechanics.trolley import (
 
 #1194
 class InertialThermalSystem(ComposedSystem):
-    m = Symbol("m", positive=True)
-    g = Symbol("g", positive=True)
-    c = Symbol("c", positive=True)
-    x = dynamicsymbols("x", positive=True)
-    y = dynamicsymbols("y", positive=True)
-    c0 = Symbol("c0", positive=True)
-    ivar = Symbol("t")
 
-    def __init__(self, m=None, g=None, c=None, x=None, y=None, ivar=None, **kwargs):
+    m = Symbol('m', positive=True)
+    cp = Symbol('cp', positive=True)
+
+    UA = Symbol('UA', positive=True)
+
+    T = dynamicsymbols('T')
+    Qin = dynamicsymbols('Qin')
+
+    ivar = Symbol('t')
+
+    def __init__(self,
+                 m=None,
+                 cp=None,
+                 UA=None,
+                 T=None,
+                 Qin=None,
+                 ivar=None,
+                 **kwargs):
 
         if m is not None:
             self.m = m
-        if g is not None:
-            self.g = g
-        if c is not None:
-            self.c = c
-        if x is not None:
-            self.x = x
-        if y is not None:
-            self.y = y
+
+        if cp is not None:
+            self.cp = cp
+
+        if UA is not None:
+            self.UA = UA
+
+        if T is not None:
+            self.T = T
+
+        if Qin is not None:
+            self.Qin = Qin
+
         if ivar is not None:
             self.ivar = ivar
 
-        self.qs = [self.x, self.y]
+        self.qs = [self.T]
 
         self._init_from_components(**kwargs)
 
     @property
     def components(self):
 
-        v_x = (self.x).diff(self.ivar)
-        v_y = (self.y).diff(self.ivar)
         components = {}
 
-        self._missile_airless = MaterialPoint(
-            self.m, x=self.x, y=self.y, qs=self.qs
+        Cth = self.m * self.cp
+
+        self._thermal_capacity = MaterialPoint(
+            Cth,
+            pos1=self.T,
+            qs=self.qs
         )
 
-        self._drag_x = Damper(self.c, self.x, qs=self.qs)(label="horizontal drag")
+        self._heat_losses = Damper(
+            self.UA,
+            pos1=self.T,
+            qs=self.qs
+        )(label='heat losses')
 
-        self._drag_y = Damper(self.c, self.y, qs=self.qs)(label="drag")
+        self._heat_source = Force(
+            self.Qin,
+            self.T,
+            qs=self.qs
+        )(label='heat input')
 
-        components["_missile_airless"] = self._missile_airless
-        components["_drag_x"] = self._drag_x
-        components["_drag_y"] = self._drag_y
+        components['_thermal_capacity'] = self._thermal_capacity
+        components['_heat_losses'] = self._heat_losses
+        components['_heat_source'] = self._heat_source
 
         return components
