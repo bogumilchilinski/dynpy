@@ -40,6 +40,7 @@ from ..elements import (
     MaterialPoint,
     # DerivativeElement,
     Force,
+    Damper,
     # IntegralElement,
     # ProportionalElement,
 )
