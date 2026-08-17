@@ -24,6 +24,7 @@ from sympy import (
     diff,
     dsolve,
     exp,
+    tanh,
     factorial,
     flatten,
     fraction,
@@ -86,7 +87,62 @@ t = Symbol("t")
 
 #1195
 class SaturatedCapacitor(ComposedSystem):
-    pass
+    """
+    Single-component nonlinear capacitor with saturation.
+    """
+
+    scheme_name = "saturated_capacitor.png"
+    real_name = "capacitor.png"
+
+    C = Symbol("C", positive=True)
+    U_s = Symbol("U_s", positive=True)
+
+    ivar = Symbol("t")
+
+    u = dynamicsymbols("u")
+
+    def __init__(self, C=None, U_s=None, u=None, ivar=None, **kwargs):
+
+        if C is not None:
+            self.C = C
+
+        if U_s is not None:
+            self.U_s = U_s
+
+        if ivar is not None:
+            self.ivar = ivar
+
+        if u is not None:
+            self.u = u
+
+        self.qs = [self.u]
+
+        self._init_from_components(**kwargs)
+
+    @property
+    def components(self):
+
+        components = {}
+
+        self.capacitor = Capacitor(
+            self.C*self.U_sat*tanh(self.u/self.U_sat),
+            self.u,
+            U_s=self.U_s,
+            qs=self.qs,
+        )
+
+        components["capacitor"] = self.capacitor
+
+        return components
+
+    def symbols_description(self):
+
+        self.sym_desc_dict = {
+            self.C: r"nominal capacitance",
+            self.U_s: r"saturation voltage",
+        }
+
+        return self.sym_desc_dict
 
 class BatteryCell(ComposedSystem):
 
