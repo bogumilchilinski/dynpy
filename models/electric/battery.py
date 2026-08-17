@@ -84,6 +84,9 @@ t = Symbol("t")
 # from dynpy.models.electric import batterycell
 # mechanics_printing(pretty_print=True)
 
+#1195
+class SaturatedCapacitor(ComposedSystem):
+    pass
 
 class BatteryCell(ComposedSystem):
 
