@@ -5391,11 +5391,7 @@ class MDPIPaper(Document):
         self.preamble.append(Command('TitleCitation',title))
         self.preamble.append(Command('firstnote','Current address: Affiliation'))
         self.preamble.append(Command('secondnote','These authors contributed equally to this work.'))
-        self.preamble.append(
-            NoEscape(
-                "\\address{$^{1}$ \\quad Faculty of Engineering, University; Street, City, Country}"
-            )
-        )
+        self.address()
         #self.append(NewPage())
         # tu implementować co tam potrzeba
 
