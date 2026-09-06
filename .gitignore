@@ -138,3 +138,6 @@ dmypy.json
 models/tikz/bridge/.Bridge_tmd.tex.syncdb
 models/tikz/bridge/.Bridge_tmd.tex.syncdb
 
+
+# Local AI-assistant instructions - not part of the repo
+CLAUDE.md
