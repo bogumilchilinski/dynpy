@@ -1618,3 +1618,134 @@ class ProjectGanttChart(TikZPicture):
 
         return code
 
+
+class VibratingRotorScheme(TikZPicture):
+    """
+    Scheme of the `VibratingRotor` model - a heavy disk with eccentricity `e`
+    mounted on a massless, transversely elastic and torsionally rigid shaft
+    carried by two bearings, driven by the external disturbance torque
+    `M_ext(t)`.
+
+    Panel (a) is the side view, panel (b) the cross-section, which also carries
+    the decomposition varphi = psi + theta the analytical derivation rests on.
+
+    Notation deliberately matches `VibratingRotor.symbols_description()`.
+    """
+
+    # NOTE: TikZPicture pulls in `\usepackage[MeX]{polski}`, which switches
+    # the whole document to the Polish OT4 font encoding - wrong for an English
+    # paper (dates render as "5 wrzesnia 2026") and a build hazard, because OT4
+    # wants the `plr10` metric and MiKTeX opens an interactive installer when it
+    # is missing, which hangs the compilation. It cannot be dropped by overriding
+    # `packages` here: pylatex's _CreatePackages metaclass merges base-class
+    # packages with `packages |= b.packages`, so a subclass can only ever add.
+    # The consumer has to filter it off the assembled document instead.
+
+    def _scheme_desc(self):
+
+        code = r"""
+\begin{scope}[>=latex,line join=round,font=\small]
+
+
+% ============================== styles ==============================
+\tikzset{
+  ground/.style={pattern=north east lines,draw=none,minimum width=1.1cm,minimum height=0.22cm},
+  bearing/.style={draw,thick,fill=white,isosceles triangle,shape border rotate=90,
+                  minimum width=0.75cm,minimum height=0.48cm,inner sep=0pt,anchor=apex},
+  dim/.style={<->,>=latex,thin},
+  aux/.style={densely dashed,gray!65,thin},
+  pt/.style={circle,fill,inner sep=1.4pt},
+}
+
+% ======================= (a) side view ==============================
+\begin{scope}
+
+  \coordinate (Lb) at (0,0);
+  \coordinate (Rb) at (8,0);
+  \coordinate (O)  at (4,0);        % undeformed shaft axis
+  \coordinate (O1) at (4,-1.0);     % deflected shaft centre
+  \coordinate (C)  at (4,-0.48);    % centre of mass, e above O1
+
+  % undeformed axis of rotation
+  \draw[aux] (-2.1,0) -- (9.0,0);
+
+  % deflected, transversely elastic shaft
+  \draw[very thick] (Lb) .. controls (2.2,-1.2) and (5.8,-1.2) .. (Rb);
+  \node[above=1pt] at (1.30,-0.62) {$k$};
+
+  % disk
+  \draw[thick,fill=gray!12] ($(O1)+(-0.17,-0.92)$) rectangle ($(O1)+(0.17,0.92)$);
+  \node[right=2pt] at ($(O1)+(0.17,-0.70)$) {$m,\ I$};
+
+  % supports
+  \node[bearing] (bL) at (Lb) {};
+  \node[bearing] (bR) at (Rb) {};
+  \foreach \b in {bL,bR}{
+    \draw[thick] ($(\b.left corner)+(-0.18,0)$) -- ($(\b.right corner)+(0.18,0)$);
+    \fill[pattern=north east lines]
+      ($(\b.left corner)+(-0.18,-0.22)$) rectangle ($(\b.right corner)+(0.18,0)$);
+  }
+
+  % characteristic points
+  \node[pt] at (O)  {}; \node[above right=-2pt and 0pt] at (O)  {$O$};
+  \node[pt] at (O1) {}; \node[right=3pt]                at (O1) {$O_1$};
+  \node[pt] at (C)  {}; \node[right=3pt]                at (C)  {$C$};
+
+  % eccentricity (inner dimension) and deflection (outer dimension)
+  \draw[aux] (C)  -- ($(C)+(-1.15,0)$);
+  \draw[aux] (O1) -- ($(O1)+(-2.05,0)$);
+  \draw[aux] (O)  -- ($(O)+(-2.05,0)$);
+  \draw[dim] ($(O1)+(-0.98,0)$) -- ($(C)+(-0.98,0)$) node[midway,left=1pt] {$e$};
+  \draw[dim] ($(O)+(-1.88,0)$)  -- ($(O1)+(-1.88,0)$) node[midway,left=1pt] {$v$};
+
+  % external disturbance torque applied about the axis of rotation
+  \draw[->,thick] ([shift={(70:0.30 and 0.52)}]-1.35,0)
+        arc[start angle=70,end angle=-250,x radius=0.30,y radius=0.52];
+  \node[above] at (-1.35,0.62) {$M_{\mathrm{ext}}(t)$};
+  \node[below] at (-1.35,-0.62) {$\varphi$};
+
+  \node at (3.5,-2.55) {(a)};
+\end{scope}
+
+% ==================== (b) cross-section =============================
+\begin{scope}[shift={(12.2,-0.55)}]
+
+  \coordinate (o)  at (0,0);       % bearing axis
+  \coordinate (o1) at (0.90,0.70); % shaft centre
+  \coordinate (c)  at (1.80,1.33); % centre of mass
+
+  \draw[thick,gray!55] (o1) circle (1.45);
+
+  % global frame
+  \draw[->] (-1.15,0) -- (2.95,0) node[below right=-1pt and 0pt] {$h$};
+  \draw[->] (0,-1.15) -- (0,2.55) node[above left=-1pt and 0pt] {$v$};
+  \node[pt] at (o) {}; \node[below left=-1pt and 0pt] at (o) {$O$};
+
+  % position of the shaft centre
+  \draw[aux] (o1) -- (0.90,0);
+  \draw[aux] (o1) -- (0,0.70);
+  \draw[dim] (0,-0.48) -- (0.90,-0.48) node[midway,below=-1pt] {$h$};
+  \draw[dim] (-0.48,0) -- (-0.48,0.70) node[midway,left=-1pt] {$v$};
+  \draw[aux] (0.90,0) -- (0.90,-0.58);
+  \draw[aux] (0,0.70) -- (-0.58,0.70);
+
+  % eccentricity and the rotation angle measured from the h direction
+  \draw[aux] (o1) -- ++(1.70,0) coordinate (href);
+  \draw[very thick,->] (o1) -- (c) node[midway,above left=-4pt and -2pt] {$e$};
+  \pic[draw,thick,angle radius=0.80cm,angle eccentricity=1.30,"$\varphi$"]
+      {angle=href--o1--c};
+
+  \node[pt] at (o1) {}; \node[below left=-1pt and 0pt] at (o1) {$O_1$};
+  \node[pt] at (c)  {}; \node[above right=-1pt and 0pt] at (c)  {$C$};
+
+  % the decomposition the whole derivation rests on
+  \node at (0.9,-1.95) {$\varphi(t)=\psi(t)+\theta(t)$};
+  \node[font=\footnotesize,text=black!60] at (0.9,-2.38)
+       {main rotation $+$ torsional disturbance};
+
+  \node at (0.9,-3.05) {(b)};
+\end{scope}
+\end{scope}
+"""
+
+        return code

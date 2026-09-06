@@ -104,6 +104,12 @@ from .projectile import (
     MissileTrajectoryAerodynamic,
     MissileTrajectoryAirless,
 )
+from .rotor import (
+    FreeEngineMDOF,
+    MasslessElasticShaft,
+    Rotor,
+    VibratingRotor,
+)
 from .shaft import (
     DampedDoubleDiskShaftHarmonicExcitation,
     DoubleDiskShaft,

@@ -1,10 +1,13 @@
 from functools import cached_property
 
 from sympy import Function, Rational, Symbol, cos, diff, sin
+from sympy.physics import units
 from sympy.physics.mechanics import dynamicsymbols
 
 from ..elements import Element, Force
 from .principles import ComposedSystem
+
+ureg = units
 
 
 class MasslessElasticShaft(Element):
@@ -97,7 +100,7 @@ class FreeEngineMDOF(ComposedSystem):
 		# Generalized coordinates
 		self.h = h if h is not None else dynamicsymbols("h")
 		self.v = v if v is not None else dynamicsymbols("v")
-		self.phi = phi if phi is not None else dynamicsymbols("varphi")
+		self.phi = phi if phi is not None else dynamicsymbols("\\varphi")
 
 		self.ivar = ivar
 
@@ -151,7 +154,7 @@ class VibratingRotor(ComposedSystem):
 	Rotor model with external torque M(t).
 	"""
 
-	scheme_name = "./dynpy/models/images/VibratingRotorScheme.png"
+	scheme_name = "VibratingRotorScheme.png"
 
 	def __init__(
 		self,
@@ -182,7 +185,9 @@ class VibratingRotor(ComposedSystem):
 		# Generalized coordinates
 		self.h = h if h is not None else dynamicsymbols("h")
 		self.v = v if v is not None else dynamicsymbols("v")
-		self.phi = phi if phi is not None else dynamicsymbols("varphi")
+		self.phi = phi if phi is not None else dynamicsymbols("\\varphi")
+
+		self.qs = qs if qs is not None else [self.h, self.v, self.phi]
 
 		self._init_from_components(**kwargs)
 
@@ -194,16 +199,80 @@ class VibratingRotor(ComposedSystem):
 
 		components = {}
 
-		self._elastic_rotor = FreeEngineMDOF(qs=[self.h, self.v, self.phi])(
-			label="Rotor with Shaft"
-		)
+		# every parameter and coordinate is passed explicitly - otherwise the
+		# subsystem would build its own symbols and the external moment could
+		# act on coordinates that do not belong to the rotor
+		self._elastic_rotor = FreeEngineMDOF(
+			m=self.m,
+			I_engine=self.I_engine,
+			e=self.e,
+			k=self.k,
+			h=self.h,
+			v=self.v,
+			phi=self.phi,
+			ivar=self.ivar,
+		)(label="Rotor with Shaft")
+
 		self._external_moment_comp = Force(
 			self.M_t,  # Value of the moment
 			pos1=self.phi,  # The coordinate on which the moment acts
-			qs=[self.h, self.v, self.phi],
+			qs=self.qs,
 		)(label="External moment")
 
 		components["_elastic_rotor"] = self._elastic_rotor
 		components["_external_moment"] = self._external_moment_comp
 
 		return components
+
+	def symbols_description(self):
+		"""
+		Descriptions of every symbol appearing in the equations of motion,
+		including the derivatives - the report tables are built from the
+		equations, so the derivatives need entries of their own.
+		"""
+
+		t = self.ivar
+
+		self.sym_desc_dict = {
+			self.m: r"Mass of the rotor",
+			self.I_engine: r"Mass moment of inertia of the rotor",
+			self.e: r"Eccentricity of the centre of mass",
+			self.k: r"Transverse stiffness of the shaft",
+			self.M_t: r"External disturbance torque",
+			self.h: r"Horizontal displacement of the mass centre",
+			self.h.diff(t): r"Horizontal velocity of the mass centre",
+			self.h.diff(t, 2): r"Horizontal acceleration of the mass centre",
+			self.v: r"Vertical displacement of the mass centre",
+			self.v.diff(t): r"Vertical velocity of the mass centre",
+			self.v.diff(t, 2): r"Vertical acceleration of the mass centre",
+			self.phi: r"Angular position of the rotor",
+			self.phi.diff(t): r"Angular velocity of the rotor",
+			self.phi.diff(t, 2): r"Angular acceleration of the rotor",
+			t: r"Time",
+		}
+
+		return self.sym_desc_dict
+
+	def unit_dict(self):
+
+		t = self.ivar
+
+		units_dict = {
+			self.m: ureg.kilogram,
+			self.I_engine: ureg.kilogram * ureg.meter**2,
+			self.e: ureg.meter,
+			self.k: ureg.newton / ureg.meter,
+			self.M_t: ureg.newton * ureg.meter,
+			self.h: ureg.meter,
+			self.h.diff(t): ureg.meter / ureg.second,
+			self.h.diff(t, 2): ureg.meter / ureg.second**2,
+			self.v: ureg.meter,
+			self.v.diff(t): ureg.meter / ureg.second,
+			self.v.diff(t, 2): ureg.meter / ureg.second**2,
+			self.phi: ureg.radian,
+			self.phi.diff(t): ureg.radian / ureg.second,
+			self.phi.diff(t, 2): ureg.radian / ureg.second**2,
+			t: ureg.second,
+		}
+
+		return units_dict
