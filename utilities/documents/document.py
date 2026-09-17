@@ -5462,16 +5462,17 @@ class MDPIPaper(Document):
         self.preamble.append(Command('TitleCitation',title))
         self.preamble.append(Command('firstnote','Current address: Affiliation'))
         self.preamble.append(Command('secondnote','These authors contributed equally to this work.'))
+        self.address()
         #self.append(NewPage())
         # tu implementować co tam potrzeba
 
         cwd = os.getcwd()
 
-        source_path = (
-            f"/home/user/Shared files/modules/dynpy/utilities/documents/Definitions"
+        source_path = os.path.join(
+            os.path.dirname(__file__), "MDPI", "Definitions"
         )
-        path1 = f"{cwd}/Definitions"
-        path2 = f"{cwd}/output/Definitions"
+        path1 = os.path.join(cwd, "Definitions")
+        path2 = os.path.join(cwd, "output", "Definitions")
 
         if os.path.exists(path1) == False:
             shutil.copytree(source_path, path1)

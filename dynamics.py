@@ -388,9 +388,12 @@ class LagrangesDynamicSystem(me.LagrangesMethod):
 
     @classmethod
     def _module_abs_path(cls):
-        abs_path = __file__
+        # parent directory of the `dynpy` package, with a trailing separator;
+        # derived from the path itself so it also holds on Windows, where the
+        # separator is a backslash and a plain "dynpy/dynamics.py" replace misses
+        package_dir = os.path.dirname(os.path.abspath(__file__))
 
-        return abs_path.replace("dynpy/dynamics.py", "")
+        return os.path.dirname(package_dir) + os.sep
 
     @classmethod
     def _images_abs_path(cls):
