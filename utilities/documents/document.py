@@ -4603,9 +4603,28 @@ class ReportWithHeader(Guide):
 
 
     def _small_header_setup(self,
-                            ):
-        
-        pass
+                            image="./dynpy/models/images/moj_qr_kod.png",
+                            col0="Header 0",
+                            col1="Header 1",
+                            col2="Header 2",
+                            col3="Header 3"):
+
+        col_type = r">{\centering\arraybackslash}m{2.5cm}"
+
+        table_code = (
+            rf"\begin{{tabular}}{{|{col_type}|{col_type}|{col_type}|{col_type}|{col_type}|}} "
+            r"\hiderowcolors "
+            r"\hline "
+            rf"\includegraphics[height=1.5cm]{{{image}}} & "
+            rf"{col0} & "
+            rf"{col1.replace(chr(10), r' \\ ')} & "
+            rf"{col2.replace(chr(10), r' \\ ')} & "
+            rf"{col3} \\ "
+            r"\hline "
+            r"\showrowcolors "
+            r"\end{tabular}"
+        )
+        self.preamble.append(Command("fancyhead", arguments=[NoEscape(table_code)], options=["C"]))
 
     def _header_setup(   self, 
                     image="./dynpy/models/images/moj_qr_kod.png", 
