@@ -4539,10 +4539,67 @@ class TechThriveMechanicalCase(Guide):
         Command("graphicspath{{../}}"),
     ]
 
+#1198
 class ReportWithHeader(Guide):
     latex_name = "document"
     _documentclass = "article"
 
+    # kodqr="./dynpy/models/images/moj_qr_kod.png"
+    # head1="Header 1"
+    # head2="Header 2"
+    # kod = "./dynpy/models/images/barcode2.png"
+    # head0 = "Header 0"
+
+    packages = [
+        Package("float"),
+        Package("graphicx"),
+        #Command("graphicspath{{../}}"),
+        Package(
+            "geometry",
+            options=[
+                "lmargin=25mm",
+                "rmargin=25mm",
+                "top=30mm",
+                "bmargin=25mm",
+                "headheight=50mm",
+            ],
+        ),
+
+        Package("authoraftertitle"),
+        Package("lmodern"),
+        Package("polski", options=["MeX"]),
+        Package("microtype"),
+        Package("multirow"),
+        Package("tabularx"),
+        # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
+        Package("listings"),
+        Package("titlesec"),
+        Package("fancyhdr"),
+        Package("svg"),
+        Command("pagestyle", arguments=["fancy"]),
+        Command("fancyhf", arguments=[""]),
+        Package("array"),
+        Command("renewcommand", arguments=[NoEscape(r"\tabularxcolumn[1]"), NoEscape(r"m")]),
+        #Command("renewcommand", arguments=[NoEscape(r"\renewcommand{\tabularxcolumn}[1]{m{#1}}")]),
+        Command("newcolumntype", arguments=[NoEscape("C"), NoEscape(r">{\centering\arraybackslash}X")]),
+        Command(
+            "fancyhead",
+            arguments=[
+            ""
+            ],
+            options=["R"],
+        ),  #
+        Command("fancyhead", arguments=[""], options=["L"]),
+        Command("fancyhead", arguments=[""], options=["L"]),
+        Command("fancyfoot", arguments=[""], options=["C"]),
+        #Command("fancyfoot", arguments=[""], options=["L"]),
+        #Command("fancyfoot", arguments=[""], options=["R"]),
+        #Command("graphicspath{{../}}"),
+        Command("renewcommand", arguments=[NoEscape(r"\headrulewidth"), "0pt"]),
+        NoEscape(r'\usepackage[table]{xcolor}'),
+        NoEscape(r'\rowcolors{2}{gray!10}{gray!25}'),
+        NoEscape(r'\geometry{top=60mm}'),
+    ]
 
 
     def _small_header_setup(self,
