@@ -4543,138 +4543,29 @@ class ReportWithHeader(Guide):
     latex_name = "document"
     _documentclass = "article"
 
-    # kodqr="./dynpy/models/images/moj_qr_kod.png"
-    # head1="Header 1"
-    # head2="Header 2"
-    # kod = "./dynpy/models/images/barcode2.png"
-    # head0 = "Header 0"
 
-    packages = [
-        Package("float"),
-        Package("graphicx"),
-        #Command("graphicspath{{../}}"),
-        Package(
-            "geometry",
-            options=[
-                "lmargin=25mm",
-                "rmargin=25mm",
-                "top=30mm",
-                "bmargin=25mm",
-                "headheight=50mm",
-            ],
-        ),
 
-        Package("authoraftertitle"),
-        Package("lmodern"),
-        Package("polski", options=["MeX"]),
-        Package("microtype"),
-        Package("multirow"),
-        Package("tabularx"),
-        # Package('geometry',options=['lmargin=25mm', 'rmargin=25mm',  'top=30mm', 'bmargin=25mm', 'headheight=50mm']),
-        Package("listings"),
-        Package("titlesec"),
-        Package("fancyhdr"),
-        Package("svg"),
-        Command("pagestyle", arguments=["fancy"]),
-        Command("fancyhf", arguments=[""]),
-        Package("array"),
-        Command("renewcommand", arguments=[NoEscape(r"\tabularxcolumn[1]"), NoEscape(r"m")]),
-        #Command("renewcommand", arguments=[NoEscape(r"\renewcommand{\tabularxcolumn}[1]{m{#1}}")]),
-        Command("newcolumntype", arguments=[NoEscape("C"), NoEscape(r">{\centering\arraybackslash}X")]),
-        Command(
-            "fancyhead",
-            arguments=[
-            ""
-            ],
-            options=["R"],
-        ),  #
-        Command("fancyhead", arguments=[""], options=["L"]),
-        Command("fancyhead", arguments=[""], options=["L"]),
-        Command("fancyfoot", arguments=[""], options=["C"]),
-        #Command("fancyfoot", arguments=[""], options=["L"]),
-        #Command("fancyfoot", arguments=[""], options=["R"]),
-        #Command("graphicspath{{../}}"),
-        Command("renewcommand", arguments=[NoEscape(r"\headrulewidth"), "0pt"]),
-        NoEscape(r'\usepackage[table]{xcolor}'),
-        NoEscape(r'\rowcolors{2}{gray!10}{gray!25}'),
-        NoEscape(r'\geometry{top=60mm}'),
-    ]
-#     def header_setup(self, kodqr=kodqr, head0=head0, head1=head1, head2=head2, kod=kod):
+    def _small_header_setup(self,
+                            ):
         
-#         self.preamble.append(Command("fancyhead", arguments=[
-#             NoEscape(
-#                 r"\begin{tabularx}{\textwidth}{|C|C|C|C|C|} "
-#                 r"\hline "
-#                 f"\\includegraphics[height=1.5cm]{{{kodqr}}} & {head0} & {head1.replace(chr(10), r' \\ ')} & {head2.replace(chr(10), r' \\ ')} & \\includegraphics[height=1.5cm]{{{kod}}} \\\\ "
-#                 r"\hline "
-#                 r"\end{tabularx}"
-#             )
-#         ], options=["L"]))
+        pass
 
-    def small_header_setup(self,
-                            image="./dynpy/models/images/moj_qr_kod.png",
-                            col0="Header 0",
-                            col1="Header 1",
-                            col2="Header 2",
-                            col3="Header 3"):
-        
-        col_type = r">{\centering\arraybackslash}m{2.5cm}"
-        
-        table_code = (
-            rf"\begin{{tabular}}{{|{col_type}|{col_type}|{col_type}|{col_type}|{col_type}|}} "
-            r"\hiderowcolors "
-            r"\hline "
-            rf"\includegraphics[height=1.5cm]{{{image}}} & "
-            rf"{col0} & "
-            rf"{col1.replace(chr(10), r' \\ ')} & "
-            rf"{col2.replace(chr(10), r' \\ ')} & "
-            rf"{col3} \\ "
-            r"\hline "
-            r"\showrowcolors "
-            r"\end{tabular}"
-        )
-        self.preamble.append(Command("fancyhead", arguments=[NoEscape(table_code)], options=["C"]))
-
-    def header_setup(self, 
-                     image="./dynpy/models/images/moj_qr_kod.png", 
-                     doc_type="Raport techniczny", 
-                     doc_num="DOC/2023/10/001", 
-                     title="Analiza drgań", 
-                     date="2023-10-25", 
-                     revision="A", 
-                     author="Bogumił Chiliński", 
-                     status="Rozwój",
-                     image_desc="Dane"):
+    def _header_setup(   self, 
+                    image="./dynpy/models/images/moj_qr_kod.png", 
+                    doc_type="Raport techniczny", 
+                    doc_num="DOC/2023/10/001", 
+                    title="Analiza drgań", 
+                    date="2023-10-25", 
+                    revision="A", 
+                    author="Bogumił Chiliński", 
+                    status="Rozwój",
+                    image_desc="Dane"
+                    ):
 
 
-        table_code = (
+        pass
 
-            r"{ \renewcommand{\arraystretch}{1.5} " 
-            r"\begin{tabular}{|p{3.5cm}|p{7cm}|p{2.5cm}|p{2.5cm}|} "
-            r"\hiderowcolors "
-            r"\hline "
             
-            rf"\multirow{{3}}{{3.5cm}}{{\centering\arraybackslash \includegraphics[width=2.2cm,height=2.2cm,keepaspectratio]{{{image}}} \vspace{{0.2cm}} \newline  {{\scriptsize {{{image_desc}}}}}}} & "
-            rf"{{\scriptsize Typ dokumentu}}\newline \textbf{{{doc_type}}} & "
-            rf"\multicolumn{{2}}{{p{{5.4cm}}|}}{{\scriptsize Numer dokumentu \newline \centering\arraybackslash \textbf{{{doc_num}}}}} \\ "
-            r"\cline{2-4} " 
-
-            rf" & " 
-            rf"{{\scriptsize Tytuł}}\newline \textbf{{{title}}} & "
-            rf"{{\scriptsize Data}}\newline \centering\arraybackslash {date} & "
-            rf"{{\scriptsize Rewizja}}\newline \centering\arraybackslash {revision} \\ "
-            r"\cline{2-4} "
-
-            rf" & "
-            rf"{{\scriptsize Autor}}\newline \textbf{{{author}}} & "
-            rf"{{\scriptsize Status}}\newline \centering\arraybackslash {status} & "
-            r"{\scriptsize Strona}\newline \centering\arraybackslash \thepage\ / \pageref{LastPage} \\ " 
-            r"\hline "
-            r"\showrowcolors "
-            r"\end{tabular} }"
-
-        )
-        self.preamble.append(Command("fancyhead", arguments=[NoEscape(table_code)], options=["C"]))
 
 class TechThriveODECase(TechThriveMechanicalCase):
     packages = [
