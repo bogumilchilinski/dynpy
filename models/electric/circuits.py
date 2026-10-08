@@ -275,6 +275,9 @@ class CircutRC(ComposedSystem):
 
         return self.sym_desc_dict
 
+#1201
+class VoltageDrivenCircuitRC(CircuitRC):
+    pass
 
 class CircuitRLC(ComposedSystem):
     """
