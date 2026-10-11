@@ -5290,7 +5290,7 @@ class PosterTemplate(Document):
     @classmethod
     def base_setup(cls):
 
-        preliminary_str = """
+        preliminary_str = r"""
 
 # Examplary setup is as follows:
 
