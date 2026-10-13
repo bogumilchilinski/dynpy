@@ -18,7 +18,7 @@ from pylatex import (  # Section, Subsection, Subsubsection, Itemize,  Horizonta
 from pylatex.base_classes import Environment
 
 # from pylatex.section import Paragraph, Chapter
-from pylatex.utils import NoEscape  # italic,
+from pylatex.utils import NoEscape, dumps_list  # italic,
 
 from ..report import (
     CurrentContainer,
@@ -5272,20 +5272,36 @@ class PosterTemplate(Document):
         # Package('titlesec'),
         # Package('fancyhdr'),
         # Command('pagestyle', arguments=['fancy']),
-        Command("author", arguments=["Author name"]),
         # Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
         # Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
         # Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
         # Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
-        Command("usetheme", arguments=["Simple"]),
-        Command(
-            "institute",
-            arguments=[
-                "Institute of Machine Design Fundamentals, Warsaw University Of Technology"
-            ],
-        ),
         Command("graphicspath", arguments=[NoEscape("{../}")]),
     ]
+
+    author = "Author name"
+    institute = "Institute of Machine Design Fundamentals, Warsaw University Of Technology"
+    theme = "Simple"
+    colorstyle = None
+
+    #: packages pulled in by report objects which clash with the `tikzposter`
+    #: class - `mathtools` makes it load a package inside a group at
+    #: `\begin{document}`, which aborts the `latexmk` run
+    excluded_packages = ["mathtools"]
+
+    def dumps_packages(self):
+        """Represent the packages needed as a string in LaTeX syntax.
+
+        Packages listed in `excluded_packages` are skipped.
+        """
+
+        self._propagate_packages()
+
+        blocked = [Package(name).dumps() for name in self.excluded_packages]
+
+        return dumps_list(
+            [package for package in self.packages if package.dumps() not in blocked]
+        )
 
     @classmethod
     def base_setup(cls):
@@ -5296,10 +5312,7 @@ class PosterTemplate(Document):
 
 from dynpy.utilities.documents.document import PosterTemplate
 from dynpy.utilities.report import*
-from pylatex.base_classes import Environment, ContainerCommand
 SympyFormula._break_mode = 'eq'
-class PosterBlock(ContainerCommand):
-    latex_name='block'
 
 #CELL_1
 Introduction = PosterBlock('Introduction')
@@ -5327,18 +5340,14 @@ display(ReportText('abc '*100))
 
 
 #CELL_5
-doc = PosterTemplate('./output/template',title=r'{Title of the paper}',document_options=['a1paper','landscape', '12pt'])
-doc.preamble.append(NoEscape(r'\author{authors}'))
-doc.append(NoEscape(r'\begin{columns}'))
-doc.append(NoEscape(r'\column{0.33}'))
-doc.append(Introduction)
-doc.append(NoEscape(r'\column{0.33}'))
-doc.append(Motivation)
-doc.append(Simulation)
-doc.append(NoEscape(r'\column{0.33}'))
-doc.append(Physical)
+doc = PosterTemplate('./output/template',title=r'{Title of the paper}',author='Author name',institute='Faculty of Automotive and Construction Machinery Engineering, Warsaw University of Technology',document_options=['a1paper','landscape', '12pt'])
 
-doc.append(NoEscape(r'\end{columns}'))
+layout = PosterColumns()
+layout.add_column(0.33, Introduction)
+layout.add_column(0.33, Motivation, Simulation)
+layout.add_column(0.33, Physical)
+doc.append(layout)
+
 doc.generate_pdf('./output/template',clean_tex=False)
 
 
@@ -5354,6 +5363,11 @@ doc.generate_pdf('./output/template',clean_tex=False)
         default_filepath="default_filepath",
         *,
         title=None,
+        author=None,
+        institute=None,
+        theme=None,
+        colorstyle=None,
+        show_latex_affection=False,
         documentclass="tikzposter",
         document_options=None,
         fontenc="T1",
@@ -5384,11 +5398,32 @@ doc.generate_pdf('./output/template',clean_tex=False)
             data=data,
         )
         self.title = title
-        title_with_box = NoEscape(
-            r"\parbox{0.9\linewidth}{\centering " + self.title + " }"
-        )
+
+        if author is not None:
+            self.author = author
+        if institute is not None:
+            self.institute = institute
+        if theme is not None:
+            self.theme = theme
+        if colorstyle is not None:
+            self.colorstyle = colorstyle
+
+        self.packages.append(Command("usetheme", arguments=[self.theme]))
+
+        if self.colorstyle is not None:
+            self.packages.append(Command("usecolorstyle", arguments=[self.colorstyle]))
+
+        self.packages.append(Command("author", arguments=[NoEscape(self.author)]))
+        self.packages.append(Command("institute", arguments=[NoEscape(self.institute)]))
+
+        if not show_latex_affection:
+            # drops the "LaTeX TikZposter" strip from the corner of the poster
+            self.preamble.append(NoEscape(r"\tikzposterlatexaffectionproofoff"))
 
         if self.title is not None:
+            title_with_box = NoEscape(
+                r"\parbox{0.9\linewidth}{\centering " + self.title + " }"
+            )
             self.packages.append(Command("title", arguments=[title_with_box]))
 
         # self.append(Command('frame', arguments=[NoEscape(r'\titlepage')]))
