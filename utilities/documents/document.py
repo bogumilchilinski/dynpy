@@ -18,7 +18,7 @@ from pylatex import (  # Section, Subsection, Subsubsection, Itemize,  Horizonta
 from pylatex.base_classes import Environment
 
 # from pylatex.section import Paragraph, Chapter
-from pylatex.utils import NoEscape  # italic,
+from pylatex.utils import NoEscape, dumps_list  # italic,
 
 from ..report import (
     CurrentContainer,
@@ -5272,20 +5272,100 @@ class PosterTemplate(Document):
         # Package('titlesec'),
         # Package('fancyhdr'),
         # Command('pagestyle', arguments=['fancy']),
-        Command("author", arguments=["Author name"]),
         # Command('fancyhead', arguments=[NoEscape('\includegraphics[height=1.5cm]{./images/logoPOWER.jpg}')],options=['C']),
         # Command('fancyfoot', arguments=['BCh&KT'],options=['R']),
         # Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
         # Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
-        Command("usetheme", arguments=["Simple"]),
-        Command(
-            "institute",
-            arguments=[
-                "Institute of Machine Design Fundamentals, Warsaw University Of Technology"
-            ],
-        ),
         Command("graphicspath", arguments=[NoEscape("{../}")]),
+        Package("adjustbox"),
     ]
+
+    author = "Author name"
+    institute = "Institute of Machine Design Fundamentals, Warsaw University Of Technology"
+    theme = "Simple"
+    colorstyle = None
+
+    #: packages pulled in by report objects which clash with the `tikzposter`
+    #: class - `mathtools` makes it load a package inside a group at
+    #: `\begin{document}`, which aborts the `latexmk` run
+    excluded_packages = ["mathtools"]
+
+    def dumps_packages(self):
+        """Represent the packages needed as a string in LaTeX syntax.
+
+        Packages listed in `excluded_packages` are skipped.
+        """
+
+        self._propagate_packages()
+
+        blocked = [Package(name).dumps() for name in self.excluded_packages]
+
+        return dumps_list(
+            [package for package in self.packages if package.dumps() not in blocked]
+        )
+
+    @staticmethod
+    def _dumps_logos(paths, height):
+        r"""Represent a row of logotypes as a string in LaTeX syntax.
+
+        Args
+        ----
+        paths: str or `list`
+            Paths of the image files, relative to the `graphicspath`.
+        height: str
+            The height every logotype is scaled to.
+        """
+
+        if not paths:
+            return ""
+
+        if isinstance(paths, str):
+            paths = [paths]
+
+        # logotypes differ in proportions, so each one is fitted into its share
+        # of the row instead of being scaled by height alone - a wide logotype
+        # set by height would otherwise run out of the title box
+        share = 0.92 / len(paths)
+
+        graphics = [
+            r"\adjustbox{max height=%s,max width=%.3f\linewidth}{%s}"
+            % (
+                height,
+                share,
+                Command("includegraphics", arguments=[NoEscape(path)]).dumps(),
+            )
+            for path in paths
+        ]
+
+        return r"\hspace{0.4cm}".join(graphics)
+
+    def _title_with_logos(self, logos_left, logos_right, height):
+        r"""Redefine the title box so that it carries logotypes at its sides.
+
+        The title, authors and institute keep the layout `tikzposter` gives
+        them; they are only narrowed to leave room for the logotypes.
+        """
+
+        return "\n".join(
+            [
+                r"\settitle{%",
+                r"\centering%",
+                r"\begin{minipage}[c]{0.20\linewidth}\centering%",
+                self._dumps_logos(logos_left, height),
+                r"\end{minipage}%",
+                r"\hfill%",
+                r"\begin{minipage}[c]{0.56\linewidth}\centering%",
+                r"\color{titlefgcolor}{\bfseries\Huge\sc\@title\par}\vspace*{1em}%",
+                r"{\huge\@author\par}\vspace*{1em}%",
+                r"{\LARGE\@institute}%",
+                r"\end{minipage}%",
+                r"\hfill%",
+                r"\begin{minipage}[c]{0.20\linewidth}\centering%",
+                self._dumps_logos(logos_right, height),
+                r"\end{minipage}%",
+                r"}",
+            ]
+        )
 
     @classmethod
     def base_setup(cls):
@@ -5296,10 +5376,7 @@ class PosterTemplate(Document):
 
 from dynpy.utilities.documents.document import PosterTemplate
 from dynpy.utilities.report import*
-from pylatex.base_classes import Environment, ContainerCommand
 SympyFormula._break_mode = 'eq'
-class PosterBlock(ContainerCommand):
-    latex_name='block'
 
 #CELL_1
 Introduction = PosterBlock('Introduction')
@@ -5327,18 +5404,14 @@ display(ReportText('abc '*100))
 
 
 #CELL_5
-doc = PosterTemplate('./output/template',title=r'{Title of the paper}',document_options=['a1paper','landscape', '12pt'])
-doc.preamble.append(NoEscape(r'\author{authors}'))
-doc.append(NoEscape(r'\begin{columns}'))
-doc.append(NoEscape(r'\column{0.33}'))
-doc.append(Introduction)
-doc.append(NoEscape(r'\column{0.33}'))
-doc.append(Motivation)
-doc.append(Simulation)
-doc.append(NoEscape(r'\column{0.33}'))
-doc.append(Physical)
+doc = PosterTemplate('./output/template',title=r'{Title of the paper}',author='Author name',institute='Faculty of Automotive and Construction Machinery Engineering, Warsaw University of Technology',document_options=['a1paper','landscape', '12pt'])
 
-doc.append(NoEscape(r'\end{columns}'))
+layout = PosterColumns()
+layout.add_column(0.33, Introduction)
+layout.add_column(0.33, Motivation, Simulation)
+layout.add_column(0.33, Physical)
+doc.append(layout)
+
 doc.generate_pdf('./output/template',clean_tex=False)
 
 
@@ -5354,6 +5427,14 @@ doc.generate_pdf('./output/template',clean_tex=False)
         default_filepath="default_filepath",
         *,
         title=None,
+        author=None,
+        institute=None,
+        theme=None,
+        colorstyle=None,
+        show_latex_affection=False,
+        logos_left=None,
+        logos_right=None,
+        logo_height="3cm",
         documentclass="tikzposter",
         document_options=None,
         fontenc="T1",
@@ -5384,11 +5465,39 @@ doc.generate_pdf('./output/template',clean_tex=False)
             data=data,
         )
         self.title = title
-        title_with_box = NoEscape(
-            r"\parbox{0.9\linewidth}{\centering " + self.title + " }"
-        )
+
+        if author is not None:
+            self.author = author
+        if institute is not None:
+            self.institute = institute
+        if theme is not None:
+            self.theme = theme
+        if colorstyle is not None:
+            self.colorstyle = colorstyle
+
+        self.packages.append(Command("usetheme", arguments=[self.theme]))
+
+        if self.colorstyle is not None:
+            self.packages.append(Command("usecolorstyle", arguments=[self.colorstyle]))
+
+        self.packages.append(Command("author", arguments=[NoEscape(self.author)]))
+        self.packages.append(Command("institute", arguments=[NoEscape(self.institute)]))
+
+        if not show_latex_affection:
+            # drops the "LaTeX TikZposter" strip from the corner of the poster
+            self.preamble.append(NoEscape(r"\tikzposterlatexaffectionproofoff"))
+
+        if logos_left is not None or logos_right is not None:
+            self.preamble.append(NoEscape(r"\makeatletter"))
+            self.preamble.append(
+                NoEscape(self._title_with_logos(logos_left, logos_right, logo_height))
+            )
+            self.preamble.append(NoEscape(r"\makeatother"))
 
         if self.title is not None:
+            title_with_box = NoEscape(
+                r"\parbox{0.9\linewidth}{\centering " + self.title + " }"
+            )
             self.packages.append(Command("title", arguments=[title_with_box]))
 
         # self.append(Command('frame', arguments=[NoEscape(r'\titlepage')]))

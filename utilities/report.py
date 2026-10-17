@@ -44,7 +44,7 @@ from pylatex import (
     TikZ,
     MiniPage,
 )
-from pylatex.base_classes import Environment, Options
+from pylatex.base_classes import Container, ContainerCommand, Environment, Options
 from pylatex.base_classes.command import CommandBase
 from pylatex.package import Package
 from pylatex.section import Chapter
@@ -466,6 +466,10 @@ class CurrentContainer:
         Block.set_container(self._container)
         AlertBlock.set_container(self._container)
         ExampleBlock.set_container(self._container)
+
+        PosterBlock.set_container(self._container)
+        PosterPicture.set_container(self._container)
+        PosterTable.set_container(self._container)
 
         SymbolsDescription.set_container(self._container)
 
@@ -1537,6 +1541,269 @@ class ExampleBlock(Block):
     pass
 
 
+class PosterBlock(ContainerCommand, ReportModule):
+    r"""A content box of a ``tikzposter`` poster.
+
+    It is rendered as a container command:
+
+    .. code-block:: latex
+
+        \block{Block title}{%
+            Some content that is in the block
+        }
+
+    Instances are meant to be filled in the very same way as report sections,
+    that is by pointing `CurrentContainer` at them and `display`-ing report
+    objects, and then appended to a `PosterColumn` of a `PosterTemplate`.
+    """
+
+    latex_name = "block"
+    omit_if_empty = False
+
+    def __init__(self, title=None, data=None, options=None, **kwargs):
+        r"""
+        Args
+        ----
+        title: str
+            The title displayed in the header of the block.
+        data: str or `~.LatexObject`
+            The content to place inside the block.
+        options: str, list or `~.Options`
+            The options for the block command.
+        """
+
+        self.title = title
+
+        super().__init__(arguments=[title], options=options, data=data, **kwargs)
+
+    def _repr_markdown_(self):
+
+        self.cls_container.append(self)
+
+        return self.dumps()
+
+    def reported(self):
+
+        self.cls_container.append(self)
+
+        return copy.deepcopy(self)
+
+
+class PosterColumn(Container, ReportModule):
+    r"""A single column of a ``tikzposter`` poster.
+
+    The column is opened with ``\column{width}`` and holds the blocks that
+    follow it, so that the poster layout is expressed as nested objects
+    instead of bare LaTeX switches.
+    """
+
+    omit_if_empty = False
+
+    def __init__(self, width=0.33, data=None, **kwargs):
+        r"""
+        Args
+        ----
+        width: float
+            The width of the column as a fraction of the text width.
+        data: str or `~.LatexObject`
+            The blocks to place inside the column.
+        """
+
+        self.width = width
+
+        super().__init__(data=data, **kwargs)
+
+    def dumps(self):
+        r"""Convert the column to a string in latex syntax."""
+
+        start = Command("column", arguments=[self.width])
+
+        return start.dumps() + "%\n" + self.dumps_content()
+
+
+class PosterColumns(Environment, ReportModule):
+    r"""The column layout of a ``tikzposter`` poster.
+
+    .. code-block:: latex
+
+        \begin{columns}
+            \column{0.5}
+            ...
+        \end{columns}
+    """
+
+    latex_name = "columns"
+    omit_if_empty = False
+
+    def add_column(self, width=0.33, *content):
+        r"""Append a new `PosterColumn` holding `content` and return it.
+
+        Args
+        ----
+        width: float
+            The width of the column as a fraction of the text width.
+        content: `~.LatexObject`
+            The blocks to place inside the column.
+        """
+
+        column = PosterColumn(width=width)
+
+        for element in content:
+            column.append(element)
+
+        self.append(column)
+
+        return column
+
+
+class PosterPicture(Container, ReportModule):
+    r"""An image for a ``tikzposter`` block.
+
+    The `tikzposter` class does not support floats - a `figure` placed in a
+    block escapes its column and overlaps the neighbouring content. This class
+    therefore centres the image in place and sets the caption as plain text
+    underneath it.
+    """
+
+    packages = [Package("graphicx")]
+
+    omit_if_empty = False
+    _default_width = NoEscape(r"0.95\linewidth")
+    _default_path = "images"
+    _default_dpi = 300
+    _floats_no_gen = plots_no()
+
+    def __init__(self, image=None, caption=None, width=None, **kwargs):
+        r"""
+        Args
+        ----
+        image: str
+            Path to the image file, relative to the poster's `graphicspath`.
+            When it is omitted, the current `matplotlib` figure is saved and
+            used, just as `PltPlot` does.
+        caption: str
+            The description typeset under the image.
+        width: str
+            The width of the image, `0.95\linewidth` by default.
+        """
+
+        self.image = image if image is not None else self._save_plt_plot()
+        self.caption = caption
+        self.width = NoEscape(width) if width is not None else self._default_width
+
+        super().__init__(**kwargs)
+
+    def _save_plt_plot(self):
+        r"""Save the current `matplotlib` figure and return its path."""
+
+        import matplotlib.pyplot as plt
+
+        os.makedirs(self._default_path, exist_ok=True)
+
+        filename = (
+            f"{self._default_path}/{type(self).__name__}"
+            f"{next(self._floats_no_gen)}.png"
+        )
+
+        plt.savefig(filename, bbox_inches="tight", dpi=self._default_dpi)
+        plt.close()
+
+        return filename
+
+    def dumps(self):
+        r"""Convert the picture to a string in latex syntax."""
+
+        graphics = Command(
+            "includegraphics",
+            arguments=[NoEscape(self.image)],
+            options=NoEscape("width=" + self.width),
+        )
+
+        content = [NoEscape(r"\begin{center}"), NoEscape(graphics.dumps())]
+
+        if self.caption is not None:
+            content.append(NoEscape(r"\\[0.3em]{\small " + self.caption + r"}"))
+
+        content.append(NoEscape(r"\end{center}"))
+
+        return "%\n".join(content)
+
+    def _repr_markdown_(self):
+
+        self.cls_container.append(self)
+
+        return self.dumps()
+
+    def reported(self):
+
+        self.cls_container.append(self)
+
+        return copy.deepcopy(self)
+
+
+class PosterTable(Container, ReportModule):
+    r"""A table for a ``tikzposter`` block.
+
+    As with `PosterPicture`, the floating `table` environment is replaced by a
+    centred `tabular` so that the table stays inside its column.
+    """
+
+    packages = [Package("booktabs")]
+
+    omit_if_empty = False
+
+    def __init__(self, data=None, caption=None, index=False, column_format=None, **kwargs):
+        r"""
+        Args
+        ----
+        data: `~pandas.DataFrame`
+            The data to tabulate.
+        caption: str
+            The description typeset under the table.
+        index: bool
+            Whether the frame's index is tabulated as well.
+        column_format: str
+            The LaTeX column specification, derived from the data by default.
+        """
+
+        self.data_frame = data
+        self.caption = caption
+        self.index = index
+        self.column_format = column_format
+
+        super().__init__(**kwargs)
+
+    def dumps(self):
+        r"""Convert the table to a string in latex syntax."""
+
+        tabular = self.data_frame.to_latex(
+            index=self.index,
+            column_format=self.column_format,
+            escape=False,
+        )
+
+        content = [NoEscape(r"\begin{center}"), NoEscape(tabular)]
+
+        if self.caption is not None:
+            content.append(NoEscape(r"\par\vspace{0.3em}{\small " + self.caption + r"}"))
+
+        content.append(NoEscape(r"\end{center}"))
+
+        return "%\n".join(content)
+
+    def _repr_markdown_(self):
+
+        self.cls_container.append(self)
+
+        return self.dumps()
+
+    def reported(self):
+
+        self.cls_container.append(self)
+
+        return copy.deepcopy(self)
+
+
 class Picture(Figure, ReportModule):
     """
     A class that represents a figure environment in a LaTeX document.
@@ -1958,6 +2225,8 @@ class PltPlot(Picture, ReportModule):
 
 
         pic_filename = f"{self._default_path}/{self.__class__.__name__}{pic_number}.png"
+
+        os.makedirs(self._default_path, exist_ok=True)
 
         plt.savefig(pic_filename, bbox_inches='tight',dpi=self._default_dpi)
         plt.close()
