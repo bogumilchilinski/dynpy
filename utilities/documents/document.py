@@ -5277,6 +5277,7 @@ class PosterTemplate(Document):
         # Command('fancyfoot', arguments=['Practical Python, 2022'],options=['L']),
         # Command('fancyfoot', arguments=[NoEscape('\\thepage')],options=['C']),
         Command("graphicspath", arguments=[NoEscape("{../}")]),
+        Package("adjustbox"),
     ]
 
     author = "Author name"
@@ -5301,6 +5302,69 @@ class PosterTemplate(Document):
 
         return dumps_list(
             [package for package in self.packages if package.dumps() not in blocked]
+        )
+
+    @staticmethod
+    def _dumps_logos(paths, height):
+        r"""Represent a row of logotypes as a string in LaTeX syntax.
+
+        Args
+        ----
+        paths: str or `list`
+            Paths of the image files, relative to the `graphicspath`.
+        height: str
+            The height every logotype is scaled to.
+        """
+
+        if not paths:
+            return ""
+
+        if isinstance(paths, str):
+            paths = [paths]
+
+        # logotypes differ in proportions, so each one is fitted into its share
+        # of the row instead of being scaled by height alone - a wide logotype
+        # set by height would otherwise run out of the title box
+        share = 0.92 / len(paths)
+
+        graphics = [
+            r"\adjustbox{max height=%s,max width=%.3f\linewidth}{%s}"
+            % (
+                height,
+                share,
+                Command("includegraphics", arguments=[NoEscape(path)]).dumps(),
+            )
+            for path in paths
+        ]
+
+        return r"\hspace{0.4cm}".join(graphics)
+
+    def _title_with_logos(self, logos_left, logos_right, height):
+        r"""Redefine the title box so that it carries logotypes at its sides.
+
+        The title, authors and institute keep the layout `tikzposter` gives
+        them; they are only narrowed to leave room for the logotypes.
+        """
+
+        return "\n".join(
+            [
+                r"\settitle{%",
+                r"\centering%",
+                r"\begin{minipage}[c]{0.20\linewidth}\centering%",
+                self._dumps_logos(logos_left, height),
+                r"\end{minipage}%",
+                r"\hfill%",
+                r"\begin{minipage}[c]{0.56\linewidth}\centering%",
+                r"\color{titlefgcolor}{\bfseries\Huge\sc\@title\par}\vspace*{1em}%",
+                r"{\huge\@author\par}\vspace*{1em}%",
+                r"{\LARGE\@institute}%",
+                r"\end{minipage}%",
+                r"\hfill%",
+                r"\begin{minipage}[c]{0.20\linewidth}\centering%",
+                self._dumps_logos(logos_right, height),
+                r"\end{minipage}%",
+                r"}",
+            ]
         )
 
     @classmethod
@@ -5368,6 +5432,9 @@ doc.generate_pdf('./output/template',clean_tex=False)
         theme=None,
         colorstyle=None,
         show_latex_affection=False,
+        logos_left=None,
+        logos_right=None,
+        logo_height="3cm",
         documentclass="tikzposter",
         document_options=None,
         fontenc="T1",
@@ -5419,6 +5486,13 @@ doc.generate_pdf('./output/template',clean_tex=False)
         if not show_latex_affection:
             # drops the "LaTeX TikZposter" strip from the corner of the poster
             self.preamble.append(NoEscape(r"\tikzposterlatexaffectionproofoff"))
+
+        if logos_left is not None or logos_right is not None:
+            self.preamble.append(NoEscape(r"\makeatletter"))
+            self.preamble.append(
+                NoEscape(self._title_with_logos(logos_left, logos_right, logo_height))
+            )
+            self.preamble.append(NoEscape(r"\makeatother"))
 
         if self.title is not None:
             title_with_box = NoEscape(
