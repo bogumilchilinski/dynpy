@@ -8,7 +8,7 @@ dynamic = ["version"]
 description = "DynPy is a Python module designed for engineering calculations on dynamical systems. It provides a comprehensive framework for modeling, simulating, and analyzing dynamic mechanical systems."
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 authors = [{ name = "Bogumil Chilinski", email = "example@gmail.com" }]
 
 dependencies = [
@@ -28,8 +28,33 @@ Homepage   = "https://github.com/bogumilchilinski/dynpy"
 Repository = "https://github.com/bogumilchilinski/dynpy"
 Issues     = "https://github.com/bogumilchilinski/dynpy/issues"
 
-[tool.setuptools.packages.find]
-include = ["dynpy*"]
+[tool.setuptools]
+package-dir = { dynpy = "." }
+packages = [
+  "dynpy",
+  "dynpy.management",
+  "dynpy.models",
+  "dynpy.models.control",
+  "dynpy.models.electric",
+  "dynpy.models.mechanics",
+  "dynpy.models.odes",
+  "dynpy.models.thermal",
+  "dynpy.solvers",
+  "dynpy.utilities",
+  "dynpy.utilities.components",
+  "dynpy.utilities.components.generic",
+  "dynpy.utilities.components.guides",
+  "dynpy.utilities.components.guides.development",
+  "dynpy.utilities.components.guides.github",
+  "dynpy.utilities.components.guides.pandas",
+  "dynpy.utilities.components.guides.reporting",
+  "dynpy.utilities.components.guides.systems",
+  "dynpy.utilities.components.mech",
+  "dynpy.utilities.components.miscellaneous",
+  "dynpy.utilities.components.ode",
+  "dynpy.utilities.documents",
+  "dynpy.utilities.templates",
+]
 
 [tool.setuptools_scm]
 version_scheme = "post-release"
