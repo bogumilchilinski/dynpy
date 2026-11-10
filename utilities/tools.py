@@ -606,3 +606,12 @@ class ChatBotInterface:
         )
         return self.post_on_slack()
 
+class ProjectSettings:
+    """
+    This class provides the interface to manage project settings and configurations.
+    """
+
+    def __init__(self, project_name, project_path):
+        self.project_name = project_name
+        self.project_path = project_path
+        self.settings = {}
