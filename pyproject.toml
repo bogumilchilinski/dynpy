@@ -3,7 +3,7 @@ requires = ["setuptools>=69", "wheel", "setuptools-scm[toml]>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "Dyn4py"                 
+name = "dynpy"                 
 dynamic = ["version"]           
 description = "DynPy is a Python module designed for engineering calculations on dynamical systems. It provides a comprehensive framework for modeling, simulating, and analyzing dynamic mechanical systems."
 readme = "README.md"
