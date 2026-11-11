@@ -403,62 +403,62 @@ class InterimProjectForm(ThesisForm):
             ]
         
     
-    # """Generate a LaTeX thesis form card from a row of thesis 
-    # ."""
+    """Generate a LaTeX thesis form card from a row of thesis 
+    ."""
 
-    # def __init__(
-    #     self,
-    #     default_filepath: str = "default_filepath",
-    #     *,
-    #     dane: Optional[Union[dict, pd.Series]] = None,
-    #     documentclass: str = "article",
-    #     document_options: Optional[List[str]] = None,
-    #     fontenc: str = "T1",
-    #     inputenc: str = "utf8",
-    #     font_size: str = "normalsize",
-    #     lmodern: bool = False,
-    #     textcomp: bool = True,
-    #     microtype: bool = False,
-    #     page_numbers: bool = False,
-    #     indent: Optional[Union[str, int]] = None,
-    #     geometry_options: Optional[List[str]] = None,
-    #     data: Optional[dict] = None,
-    #     auto_build: bool = True,
-    #     auto_generate: bool = False,
-    #     clean_tex: bool = False,
-    # ):
-    #     if geometry_options is None:
-    #         geometry_options = [
-    #             "left=2.5cm",
-    #             "right=2.5cm",
-    #             "top=2.5cm",
-    #             "bottom=2.5cm",
-    #         ]
+    def __init__(
+        self,
+        default_filepath: str = "default_filepath",
+        *,
+        dane: Optional[Union[dict, pd.Series]] = None,
+        documentclass: str = "article",
+        document_options: Optional[List[str]] = None,
+        fontenc: str = "T1",
+        inputenc: str = "utf8",
+        font_size: str = "normalsize",
+        lmodern: bool = False,
+        textcomp: bool = True,
+        microtype: bool = False,
+        page_numbers: bool = False,
+        indent: Optional[Union[str, int]] = None,
+        geometry_options: Optional[List[str]] = None,
+        data: Optional[dict] = None,
+        auto_build: bool = True,
+        auto_generate: bool = False,
+        clean_tex: bool = False,
+    ):
+        if geometry_options is None:
+            geometry_options = [
+                "left=2.5cm",
+                "right=2.5cm",
+                "top=2.5cm",
+                "bottom=2.5cm",
+            ]
 
-    #     super().__init__(
-    #         default_filepath=default_filepath,
-    #         documentclass=documentclass,
-    #         document_options=document_options,
-    #         fontenc=fontenc,
-    #         inputenc=inputenc,
-    #         font_size=font_size,
-    #         lmodern=lmodern,
-    #         textcomp=textcomp,
-    #         microtype=microtype,
-    #         page_numbers=page_numbers,
-    #         indent=indent,
-    #         geometry_options=geometry_options,
-    #         data=data,
-    #     )
+        super().__init__(
+            default_filepath=default_filepath,
+            documentclass=documentclass,
+            document_options=document_options,
+            fontenc=fontenc,
+            inputenc=inputenc,
+            font_size=font_size,
+            lmodern=lmodern,
+            textcomp=textcomp,
+            microtype=microtype,
+            page_numbers=page_numbers,
+            indent=indent,
+            geometry_options=geometry_options,
+            data=data,
+        )
 
-    #     self.base_name: Optional[str] = None
-    #     self.tex_path: Optional[str] = None
-    #     self.pdf_path: Optional[str] = None
+        self.base_name: Optional[str] = None
+        self.tex_path: Optional[str] = None
+        self.pdf_path: Optional[str] = None
 
-    #     if dane is not None and auto_build:
-    #         self.build(dane)
-    #         if auto_generate:
-    #             self.generate_tex()
+        if dane is not None and auto_build:
+            self.build(dane)
+            if auto_generate:
+                self.generate_tex()
 
 #     @staticmethod
 #     def bezpieczny_tex(value: object) -> str:
