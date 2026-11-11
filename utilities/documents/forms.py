@@ -508,141 +508,141 @@ class InterimProjectForm(ThesisForm):
 
 #         return default
 
-#     def build(self, dane: Union[dict, pd.Series]) -> Optional[str]:
-#         dyplomant = self.bezpieczny_tex(self._get_value(dane, "Dyplomant"))
-#         album = self.bezpieczny_tex(self._get_value(dane, "Numer albumu"))
+    def build(self, dane: Union[dict, pd.Series]) -> Optional[str]:
+        dyplomant = self.bezpieczny_tex(self._get_value(dane, "Dyplomant"))
+        album = self.bezpieczny_tex(self._get_value(dane, "Numer albumu"))
 
-#         if not dyplomant or not album:
-#             dyplomant = 'BCh'
-#             album ='1234'
+        if not dyplomant or not album:
+            dyplomant = 'BCh'
+            album ='1234'
 
-#         print(f"\n--- Generowanie bazy dla: {dyplomant} ({album}) ---")
-#         self.base_name = f"karta_{album}_{dyplomant.replace(' ', '_')}"
-#         self.tex_path = f"./output/{self.base_name}"
-#         self.pdf_path = f"{self.tex_path}.pdf"
+        print(f"\n--- Generowanie bazy dla: {dyplomant} ({album}) ---")
+        self.base_name = f"karta_{album}_{dyplomant.replace(' ', '_')}"
+        self.tex_path = f"./output/{self.base_name}"
+        self.pdf_path = f"{self.tex_path}.pdf"
 
-#         self.default_filepath = self.tex_path
+        self.default_filepath = self.tex_path
         
-#         kierunek = self.bezpieczny_tex(self._get_value(dane, "Kierunek"))
-#         specjalnosc = self.bezpieczny_tex(self._get_value(dane, "Specjalność"))
-#         email = self.bezpieczny_tex(self._get_value(dane, "Adres e-mail"))
-#         prowadzacy = self.bezpieczny_tex(self._get_value(dane, "Prowadzący"))
-#         konsultant = self.bezpieczny_tex(self._get_value(dane, "Konsultant"))
-#         temat_tresc = self.bezpieczny_tex(self._get_value(dane, "Treść tematu"))
-#         opis = self.bezpieczny_tex(self._get_value(dane, "Opis")).replace("\n", " ")
-#         jezyk = self.bezpieczny_tex(self._get_value(dane, "Język"))
-#         data_wydania = self.bezpieczny_tex(self._get_value(dane, "Data wydania"))
-#         zaklad = self.bezpieczny_tex(self._get_value(dane, "Zakład"))
+        kierunek = self.bezpieczny_tex(self._get_value(dane, "Kierunek"))
+        specjalnosc = self.bezpieczny_tex(self._get_value(dane, "Specjalność"))
+        email = self.bezpieczny_tex(self._get_value(dane, "Adres e-mail"))
+        prowadzacy = self.bezpieczny_tex(self._get_value(dane, "Prowadzący"))
+        konsultant = self.bezpieczny_tex(self._get_value(dane, "Konsultant"))
+        temat_tresc = self.bezpieczny_tex(self._get_value(dane, "Treść tematu"))
+        opis = self.bezpieczny_tex(self._get_value(dane, "Opis")).replace("\n", " ")
+        jezyk = self.bezpieczny_tex(self._get_value(dane, "Język"))
+        data_wydania = self.bezpieczny_tex(self._get_value(dane, "Data wydania"))
+        zaklad = self.bezpieczny_tex(self._get_value(dane, "Zakład"))
 
-#         rodzaj_studiow = self.bezpieczny_tex(self._get_value(dane, "Rodzaj studiów"))
-#         if "niestacjonarne" in rodzaj_studiow:
-#             tex_rodzaj = r"\textbf{\sout{Stacjonarne} / Niestacjonarne (zaoczne) *}"
-#         else:
-#             tex_rodzaj = r"\textbf{Stacjonarne / \sout{Niestacjonarne (zaoczne)} *}"
+        rodzaj_studiow = self.bezpieczny_tex(self._get_value(dane, "Rodzaj studiów"))
+        if "niestacjonarne" in rodzaj_studiow:
+            tex_rodzaj = r"\textbf{\sout{Stacjonarne} / Niestacjonarne (zaoczne) *}"
+        else:
+            tex_rodzaj = r"\textbf{Stacjonarne / \sout{Niestacjonarne (zaoczne)} *}"
 
-#         stopien_studiow = self.bezpieczny_tex(self._get_value(dane, "Stopień studiów"))
-#         if "magisterskie" in stopien_studiow or "ii" in stopien_studiow:
-#             tex_stopien = r"\textbf{\sout{I (inżynierskie)} / II (magisterskie) *}"
-#         else:
-#             tex_stopien = r"\textbf{I (inżynierskie) / \sout{II (magisterskie)} *}"
+        stopien_studiow = self.bezpieczny_tex(self._get_value(dane, "Stopień studiów"))
+        if "magisterskie" in stopien_studiow or "ii" in stopien_studiow:
+            tex_stopien = r"\textbf{\sout{I (inżynierskie)} / II (magisterskie) *}"
+        else:
+            tex_stopien = r"\textbf{I (inżynierskie) / \sout{II (magisterskie)} *}"
 
             
         
-#         status_tematu = self.bezpieczny_tex(self._get_value(dane, "Rodzaj studiów"))
-#         if "zmieniony" in status_tematu:
-#             tex_status = r"\noindent Temat pracy dyplomowej (\sout{nowy} / zmieniony)*:\\[0.1cm]"
-#         else:
-#             tex_status = r"\noindent Temat pracy dyplomowej (nowy / \sout{zmieniony})*:\\[0.1cm]"
+        status_tematu = self.bezpieczny_tex(self._get_value(dane, "Rodzaj studiów"))
+        if "zmieniony" in status_tematu:
+            tex_status = r"\noindent Temat pracy dyplomowej (\sout{nowy} / zmieniony)*:\\[0.1cm]"
+        else:
+            tex_status = r"\noindent Temat pracy dyplomowej (nowy / \sout{zmieniony})*:\\[0.1cm]"
 
 
-#         zadania_kody = []
-#         for i in range(1, 6):
-#             zad_kol = f"Zadanie {i}"
-#             if zad_kol in dane and pd.notna(dane[zad_kol]) and str(dane[zad_kol]).strip():
-#                 zad_tekst = self.bezpieczny_tex(dane[zad_kol])
-#                 zadania_kody.append(f"{i}. {zad_tekst}" + r" \dotfill\\[0.1cm]")
+        zadania_kody = []
+        for i in range(1, 6):
+            zad_kol = f"Zadanie {i}"
+            if zad_kol in dane and pd.notna(dane[zad_kol]) and str(dane[zad_kol]).strip():
+                zad_tekst = self.bezpieczny_tex(dane[zad_kol])
+                zadania_kody.append(f"{i}. {zad_tekst}" + r" \dotfill\\[0.1cm]")
 
-#         if zadania_kody:
-#             zadania_kody[-1] = zadania_kody[-1].replace(r"\\[0.1cm]", r"\\[0.3cm]")
+        if zadania_kody:
+            zadania_kody[-1] = zadania_kody[-1].replace(r"\\[0.1cm]", r"\\[0.3cm]")
             
-#         # --- Budowa dokumentu (odwzorowanie oryginalnego układu) ---
-#         self.append(NoEscape(r"\setstretch{1.15}"))
-#         self.append(NoEscape(r"\pagestyle{empty}"))
+        # --- Budowa dokumentu (odwzorowanie oryginalnego układu) ---
+        self.append(NoEscape(r"\setstretch{1.15}"))
+        self.append(NoEscape(r"\pagestyle{empty}"))
 
-#         self.append(bold("Wydział Samochodów i Maszyn Roboczych"))
+        self.append(bold("Wydział Samochodów i Maszyn Roboczych"))
 
-#         self.append(NoEscape(r"\begin{center}"))
-#         self.append((NoEscape(r"\Large KARTA PRACY PRZEJŚCIOWEJ")))
-#         self.append(NoEscape(r"\end{center}"))
-#         #self.append(NewLine())
+        self.append(NoEscape(r"\begin{center}"))
+        self.append((NoEscape(r"\Large KARTA PRACY PRZEJŚCIOWEJ")))
+        self.append(NoEscape(r"\end{center}"))
+        #self.append(NewLine())
 
-#         # --- Dane podstawowe ---
-#         self.append(("Rodzaj studiów: "))
-#         self.append(f"{rodzaj_studiow}\n")
+        # --- Dane podstawowe ---
+        self.append(("Rodzaj studiów: "))
+        self.append(f"{rodzaj_studiow}\n")
 
-#         self.append(("Stopień studiów: "))
-#         self.append(f"{stopien_studiow}\n")
+        self.append(("Stopień studiów: "))
+        self.append(f"{stopien_studiow}\n")
 
-#         self.append(("Kierunek: "))
-#         self.append(f"{kierunek}\n")
+        self.append(("Kierunek: "))
+        self.append(f"{kierunek}\n")
 
-#         self.append(("Specjalność: "))
-#         self.append(f"{specjalnosc}\n\n")
+        self.append(("Specjalność: "))
+        self.append(f"{specjalnosc}\n\n")
 
-#         self.append(("Student: "))
-#         self.append(f"{dyplomant}  \n\n ")
+        self.append(("Student: "))
+        self.append(f"{dyplomant}  \n\n ")
 
-#         self.append(("Numer albumu: "))
-#         self.append(f"{album} \n\n")
+        self.append(("Numer albumu: "))
+        self.append(f"{album} \n\n")
 
-#         self.append(("Prowadzący: "))
-#         self.append(f"{prowadzacy} \n\n  ")
+        self.append(("Prowadzący: "))
+        self.append(f"{prowadzacy} \n\n  ")
 
-#         self.append(("Zakład: "))
-#         self.append(f"{zaklad}\n")
+        self.append(("Zakład: "))
+        self.append(f"{zaklad}\n")
 
-#         # --- Temat pracy ---
-#         status_tematu = "nowy"
+        # --- Temat pracy ---
+        status_tematu = "nowy"
         
-#         self.append((f"Temat pracy przejściowej ({status_tematu}):\n"))
-#         self.append(f"{temat_tresc}\n\n")
+        self.append((f"Temat pracy przejściowej ({status_tematu}):\n"))
+        self.append(f"{temat_tresc}\n\n")
 
-#         # --- Opis ---
-#         self.append(("Zwięzły opis celu pracy:\n"))
-#         self.append(f"{opis}\n\n")
+        # --- Opis ---
+        self.append(("Zwięzły opis celu pracy:\n"))
+        self.append(f"{opis}\n\n")
 
-#         # --- Daty i podpisy ---
-#         self.append(bold("Data wydania: "))
-#         self.append(f"{data_wydania}\n\n")
+        # --- Daty i podpisy ---
+        self.append(bold("Data wydania: "))
+        self.append(f"{data_wydania}\n\n")
 
-#         self.append(bold("Data zwrotu**: "))
-#         self.append("09.06.2026\n\n")
+        self.append(bold("Data zwrotu**: "))
+        self.append("09.06.2026\n\n")
 
-#         self.append(bold("Podpis studenta: "))
-#         self.append(".............................................................\n\n")
+        self.append(bold("Podpis studenta: "))
+        self.append(".............................................................\n\n")
 
-#         self.append(bold("Podpis pracownika: "))
-#         self.append(".............................................................\n\n")
+        self.append(bold("Podpis pracownika: "))
+        self.append(".............................................................\n\n")
 
-#         # --- Informacja o zaliczeniu ---
-#         self.append(bold("INFORMACJA O ZALICZENIU\n\n"))
+        # --- Informacja o zaliczeniu ---
+        self.append(bold("INFORMACJA O ZALICZENIU\n\n"))
 
-#         self.append(bold("Data zaliczenia: "))
-#         self.append(".............................................................\n\n")
+        self.append(bold("Data zaliczenia: "))
+        self.append(".............................................................\n\n")
 
-#         self.append(bold("Ocena z pracy: "))
-#         self.append("5\n\n")
+        self.append(bold("Ocena z pracy: "))
+        self.append("5\n\n")
 
-#         self.append(bold("Podpis pracownika: "))
-#         self.append(".............................................................\n\n")
+        self.append(bold("Podpis pracownika: "))
+        self.append(".............................................................\n\n")
 
-#         # --- Przypisy ---
-#         self.append(
-#             NoEscape(
-#                 r"** wpisać termin na tydzień przed końcem zajęć semestru."
-#             )
-#         )
-#         return self
+        # --- Przypisy ---
+        self.append(
+            NoEscape(
+                r"** wpisać termin na tydzień przed końcem zajęć semestru."
+            )
+        )
+        return self
     
 #     def sign_it(self, signature, role="promotor", offset=422, x_offset=152):
 #         import fitz
