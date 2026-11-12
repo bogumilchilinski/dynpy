@@ -1,9 +1,11 @@
 ## Table of Contents
 
 - [Introduction](#introduction)
-  - [1. What is DynPi?](#1-what-is-dynpi)
+  - [1. What is DynPy?](#1-what-is-dynpy)
   - [2. Key Features](#2-key-features)
-  - [3. Getting Started on CoCalc](#3-getting-started-on-cocalc)
+  - [3. Getting Started](#3-getting-started)
+    - [3.1 On local machine](#31-on-local-machine)
+    - [3.2 On CoCalc](#32-on-cocalc)
 - [How to Start / Basic Usage](#how-to-start--basic-usage)
   - [1. Example Scripts](#1-example-scripts)
   - [2. Creating First Document / Report](#2-creating-first-document--report)
@@ -47,9 +49,9 @@
 
 # Introduction
 
-## 1. What is DynPi?
+## 1. What is DynPy?
 
-DynPi is a Python module designed for engineering calculations on dynamical systems. It provides a comprehensive framework for modeling, simulating, and analyzing dynamic mechanical systems. DynPy is the first tool of its kind to simplify performing scientific activities and enginnering calculations! It’s ready-to-use code that generates reports in engineering mechanics. You can create your own mechanical simulations, use tools for modeling mechanical systems and their dynamics, and take advantage of a built-in solver for ordinary differential equations (ODEs). All of this is available in just 10 code cells – with every step and hint clearly described below and within the code itself (marked with #). We’re also including an instructional video showing how to create a sample report:
+DynPy is a Python module designed for engineering calculations on dynamical systems. It provides a comprehensive framework for modeling, simulating, and analyzing dynamic mechanical systems. DynPy is the first tool of its kind to simplify performing scientific activities and enginnering calculations! It’s ready-to-use code that generates reports in engineering mechanics. You can create your own mechanical simulations, use tools for modeling mechanical systems and their dynamics, and take advantage of a built-in solver for ordinary differential equations (ODEs). All of this is available in just 10 code cells – with every step and hint clearly described below and within the code itself (marked with #). We’re also including an instructional video showing how to create a sample report:
 Writing your own diploma still looking for tools to use? Word, DynPy and .... ChatGPt. These tools have its pros and cons - all depends on how do you use it and how do u like to work. Word it's classic - everyone knows and can use it. Starter for wrtining, formatting, adding adnotations and commentaries. Good for theory, literature reviews, humanities papers. However, when it comes to simulations and calculations, then sorry you're obliged to open other programs.
 DynPy is an engineering combine. Simulations, calculations and modelling it's hard and DynPy is superior in this especailly if you are into mechanics and automation. DynPy allows you to create professional looking raports. Moreover they are created in PDF format. Cons? You must pick up a little coding. Once you learn it, it works wonders.
 ChatGPT? It's your go-to buddy for everything – it'll sometimes help write an introduction, check your spelling, suggest how to calculate something, or explain what a given piece of code does. However, it won't always be accurate, it won't substitute DynPy for simulations and reporting.
@@ -61,9 +63,28 @@ ChatGPT? It's your go-to buddy for everything – it'll sometimes help write an 
 - **Symbolic and Numeric Solvers:** Tools for solving Ordinary Differential Equations (ODEs) using symbolic and numerical methods.
 - **Reporting Module:** A structured reporting system for generating and exporting reports.
 
-## 3. Getting Started on CoCalc
+## 3. Getting Started
 
-To begin working with DynPi, you need an account on [CoCalc](https://cocalc.com/).
+### 3.1 On local machine
+
+To begin working with DynPy, you need to install library via PIP
+
+Manual module instalation
+```bash
+%pip install git+https://github.com/bogumilchilinski/dynpy
+```
+
+Manual module instalation with editable source
+
+```bash
+%pip install -e "dynpy @ git+https://github.com/bogumilchilinski/dynpy"
+```
+
+More detailed instructions are in [instructions](#installation--setup-optional-for-local-development). 
+
+### 3.2 On CoCalc
+
+To begin working with DynPy, you need an account on [CoCalc](https://cocalc.ai/).
 
 1. Create an account on CoCalc.
 2. Accept the project invitation using this [link](https://cocalc.com/app?project-invite=hXnPFLqokQsoK6TG).
@@ -445,6 +466,13 @@ doc.append(second_sample_subsection)
 doc.generate_pdf(clean_tex=False)
 ```
 
+```output
+Traceback (most recent call last):
+  File "C:\Users\BED66~1.CHI\AppData\Local\Temp\1\temp_1794429514461.py", line 3, in <module>
+    from dynpy.utilities.report import *
+ModuleNotFoundError: No module named 'dynpy'
+```
+
 # ODESystem Class Usage
 
 ### ODESystem class usage preview based on a damped mehanical oscillator
@@ -587,8 +615,6 @@ Python Version: **Python 3.8+**. Required Libraries:
 
 ```bash
 pip install numpy pylatex sympy pandas matplotlib scipy pint pypandoc wand pymupdf
-
-pip install dynpi
 ```
 
 Installing the Development Environment for Engineering Analysis
