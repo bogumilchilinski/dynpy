@@ -7,9 +7,8 @@
     - [3.1 On local machine](#31-on-local-machine)
     - [3.2 On CoCalc](#32-on-cocalc)
 - [How to Start / Basic Usage](#how-to-start--basic-usage)
-  - [1. Example Scripts](#1-example-scripts)
-  - [2. Creating First Document / Report](#2-creating-first-document--report)
-  - [3. Looking for some help](#3-looking-for-some-help)
+  - [1. Creating First Document / Report](#2-creating-first-document--report)
+  - [2. Looking for some help](#3-looking-for-some-help)
     - [Defining Report Content](#defining-report-content)
       - [Creating a section of document](#creating-a-section-of-document)
       - [Creating a subsection of document](#creating-a-subsection-of-document)
@@ -42,6 +41,7 @@
 - [Simulation Engine](#simulation-engine)
 - [Data Handling](#data-handling)
 - [Dynamic Modeling](#dynamic-modeling)
+- [Interactive preview](#interactive-preview)
 - [Installation \& Setup (Optional, for Local Development)](#installation--setup-optional-for-local-development)
   - [Requirements](#requirements)
   - [Manual Installation](#manual-installation)
@@ -95,17 +95,7 @@ To begin working with DynPy, you need an account on [CoCalc](https://cocalc.ai/)
 
 # How to Start / Basic Usage
 
-## 1. Example Scripts
-
-To view exemplary capabilities of dynpy, run the following example script:
-
-```python
-from dynpy.models.mechanics.pendulum import Pendulum
-
-Pendulum().interactive_preview()
-```
-
-## 2. Creating First Document / Report
+## 1.. Creating First Document / Report
 
 ```python
 from dynpy.utilities.report import *
@@ -125,7 +115,7 @@ doc.append(section)
 doc.generate_pdf(clean_tex=False)
 ```
 
-## 3. Looking for some help
+## 2. Looking for some help
 
 Documentclasses with generic content of exemplary document:
 
@@ -592,6 +582,16 @@ display(ObjectCode(dyn_sys))
 ```python
 ///
 ```
+# Interactive preview
+///To view exemplary capabilities of dynpy, run the following example script:
+
+```python
+from dynpy.models.mechanics.pendulum import Pendulum
+
+Pendulum().interactive_preview()
+```
+
+## 2
 
 # Installation & Setup (Optional, for Local Development)
 
@@ -610,11 +610,12 @@ Python Version: **Python 3.8+**. Required Libraries:
 - **pygithub**
 - **wand**
 - **pymupdf**
+- **pypandoc-binary**
 
 ## Manual Installation
 
 ```bash
-pip install numpy pylatex sympy pandas matplotlib scipy pint pypandoc wand pymupdf
+pip install numpy pylatex sympy pandas matplotlib scipy pint pypandoc wand pymupdf pypandoc-binary
 ```
 
 Installing the Development Environment for Engineering Analysis
