@@ -1,4 +1,5 @@
 ## Issue
+<!-- Replace <issue-id> with the number of the issue, e.g. Closes #1208 -->
 Closes #<issue-id>
 
 ## What changes
