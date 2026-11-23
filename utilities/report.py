@@ -2715,8 +2715,9 @@ class TikZPicture(Environment, ReportModule):
 
             key = standalone_plot.dumps()
 
-            if key in ReportCache._file_names:
-                filename = ReportCache._file_names[key]
+            cached = ReportCache.lookup(key)
+            if cached is not None:
+                filename = cached
 
             else:
 
@@ -2728,8 +2729,8 @@ class TikZPicture(Environment, ReportModule):
                 
                 
                 PdfLatexGenerator(standalone_plot).generate_file()
-                
-                ReportCache._file_names[key] = filename
+
+                ReportCache.register(key, filename)
 
             fig = Picture(
                 filename + ".pdf",
@@ -2758,7 +2759,9 @@ class TikZPicture(Environment, ReportModule):
         else:
             filename = self._filename
 
-        if filename in list(ReportCache._file_names.values()):
+        # only generated names move on to the next number; a name given by the
+        # user is kept even if the file exists (it is meant to be overwritten)
+        if self._filename is None and ReportCache.is_taken(filename):
             filename = self.filename
 
         return filename
