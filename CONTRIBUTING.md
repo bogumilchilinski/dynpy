@@ -15,6 +15,12 @@
    This is an agreed practice. GitHub does not enforce it yet; it will once branch
    protection is enabled for `master`.
 
+## Code conventions
+
+- **Helper methods start with `_`.** Methods that users are not meant to call (internal steps,
+  helpers) are named with a leading underscore, e.g. `_header_setup`. `help()` lists only names
+  without it, so the help of a class shows just its public interface.
+
 ## Tests
 
 Tests live in `tests/` and use pytest. From the parent folder of `dynpy`:
