@@ -31,30 +31,29 @@ from ..report import (
     display,
 )
 
+#1190
 class ThesisForm(Document):
-    import datetime
-import os
-import shutil
-import csv
-from typing import List, Optional, Union
-import pandas as pd
+    #     import datetime
+    # import os
+    # import shutil
+    # import csv
+    # from typing import List, Optional, Union
+    # import pandas as pd
 
-from pylatex import (  # Section, Subsection, Subsubsection, Itemize,  HorizontalSpace, Description, Marker
-    Command,
-    Document,
-    NewPage,
-    Package,
-    Tabularx,
-    Tabular
-)
-from pylatex.base_classes import Environment
+    # from pylatex import (  # Section, Subsection, Subsubsection, Itemize,  HorizontalSpace, Description, Marker
+    #     Command,
+    #     Document,
+    #     NewPage,
+    #     Package,
+    #     Tabularx,
+    #     Tabular
+    # )
+    # from pylatex.base_classes import Environment
 
-# from pylatex.section import Paragraph, Chapter
-from pylatex.utils import NoEscape  # italic,
+    # # from pylatex.section import Paragraph, Chapter
+    # from pylatex.utils import NoEscape  # italic,
 
-from dynpy.utilities.report import *
-
-class ThesisForm(Document):
+    # from dynpy.utilities.report import *
 
     packages = [
                 Package("polski"),
@@ -332,89 +331,63 @@ class ThesisForm(Document):
         except Exception as e:
             print(f"Błąd przy wstawianiu podpisu dla {self.base_name}: {e}")
     
-    
-import pandas as pd
 
-#Tutaj wpisz swoje dane
-dane_dict = {
-    "Dyplomant": "Jan Kowalski",
-    "Numer albumu": "123456",
-    "Kierunek": "Mechanika i Budowa Maszyn",
-    "Specjalność": "Pojazdy samochodowe",
-    "Adres e-mail": "jan.kowalski@student.edu.pl",
-    "Prowadzący": "dr inż. Nowak",
-    "Konsultant": "mgr inż. Wiśniewski",
-    "Treść tematu": "Analiza wytrzymałościowa ramy pojazdu",
-    "Opis": "Celem pracy jest analiza wytrzymałościowa konstrukcji ramy pojazdu z wykorzystaniem MES.",
-    "Język": "polski",
-    "Data wydania": "01.10.2025",
+    # #Tutaj wpisz swoje dane
+    # dane_dict = {
+    #     "Dyplomant": "Jan Kowalski",
+    #     "Numer albumu": "123456",
+    #     "Kierunek": "Mechanika i Budowa Maszyn",
+    #     "Specjalność": "Pojazdy samochodowe",
+    #     "Adres e-mail": "jan.kowalski@student.edu.pl",
+    #     "Prowadzący": "dr inż. Nowak",
+    #     "Konsultant": "mgr inż. Wiśniewski",
+    #     "Treść tematu": "Analiza wytrzymałościowa ramy pojazdu",
+    #     "Opis": "Celem pracy jest analiza wytrzymałościowa konstrukcji ramy pojazdu z wykorzystaniem MES.",
+    #     "Język": "polski",
+    #     "Data wydania": "01.10.2025",
 
-    "Zadanie 1": "Przegląd literatury",
-    "Zadanie 2": "Budowa modelu numerycznego",
-    "Zadanie 3": "Przeprowadzenie symulacji",
-    "Zadanie 4": "Analiza wyników",
-    "Zadanie 5": "Opracowanie wniosków",
-}
+    #     "Zadanie 1": "Przegląd literatury",
+    #     "Zadanie 2": "Budowa modelu numerycznego",
+    #     "Zadanie 3": "Przeprowadzenie symulacji",
+    #     "Zadanie 4": "Analiza wyników",
+    #     "Zadanie 5": "Opracowanie wniosków",
+    # }
 
-# część indeksowa (symuluje pd.Series z kolumnami bez nazw)
-# indeks 1 -> rodzaj studiów
-# indeks 2 -> stopień
-# indeks 10 -> status tematu
-#dane_lista = [
-#    None,
-#    "stacjonarne",      # indeks 1
-#    "I stopnia",        # indeks 2
-#    None, None, None, None, None, None,
-#    None,
-#    "nowy"              # indeks 10
-#]
+    # # część indeksowa (symuluje pd.Series z kolumnami bez nazw)
+    # # indeks 1 -> rodzaj studiów
+    # # indeks 2 -> stopień
+    # # indeks 10 -> status tematu
+    # #dane_lista = [
+    # #    None,
+    # #    "stacjonarne",      # indeks 1
+    # #    "I stopnia",        # indeks 2
+    # #    None, None, None, None, None, None,
+    # #    None,
+    # #    "nowy"              # indeks 10
+    # #]
 
 
 
-dane = pd.Series(dane_dict)
-# for i, val in enumerate(dane_lista):
-#     if val is not None:
-#         dane.loc[i] = val
+    # dane = pd.Series(dane_dict)
+    # for i, val in enumerate(dane_lista):
+    #     if val is not None:
+    #         dane.loc[i] = val
 
 
-#Wywołanie
-#doc = ThesisForm(
-#   default_filepath="./output/karta_123456_Jan_Kowalski",
-#   dane=dane_dict,
-#   auto_build=True,
-#   auto_generate=True  # wygeneruje .tex
-#)
+    #Wywołanie
+    #doc = ThesisForm(
+    #   default_filepath="./output/karta_123456_Jan_Kowalski",
+    #   dane=dane_dict,
+    #   auto_build=True,
+    #   auto_generate=True  # wygeneruje .tex
+    #)
 
-doc.generate_pdf(clean_tex=False)
-    pass
+    # doc.generate_pdf(clean_tex=False)
+    #     pass
     
 
+#1191
 class InterimProjectForm(ThesisForm):
-    import datetime
-import os
-import shutil
-import csv
-from typing import List, Optional, Union
-import pandas as pd
-
-from pylatex.utils import bold
-
-from pylatex import (  # Section, Subsection, Subsubsection, Itemize,  HorizontalSpace, Description, Marker
-    Command,
-    Document,
-    NewPage,
-    Package,
-    Tabularx,
-    Tabular
-)
-from pylatex.base_classes import Environment
-
-# from pylatex.section import Paragraph, Chapter
-from pylatex.utils import NoEscape  # italic,
-
-from dynpy.utilities.report import *
-
-class InterimProjectForm(Document):
 
     packages = [
                 Package("polski"),
@@ -487,53 +460,53 @@ class InterimProjectForm(Document):
             if auto_generate:
                 self.generate_tex()
 
-    @staticmethod
-    def bezpieczny_tex(value: object) -> str:
-        if value is None:
-            return ""
+#     @staticmethod
+#     def bezpieczny_tex(value: object) -> str:
+#         if value is None:
+#             return ""
 
-        try:
-            if pd.isna(value):
-                return ""
-        except Exception:
-            pass
+#         try:
+#             if pd.isna(value):
+#                 return ""
+#         except Exception:
+#             pass
 
-        text = str(value).strip()
-        if not text:
-            return ""
+#         text = str(value).strip()
+#         if not text:
+#             return ""
 
-        replacements = {
-            "\\": r"\\textbackslash{}",
-            "&": r"\\&",
-            "%": r"\\%",
-            "$": r"\\$",
-            "#": r"\\#",
-            "_": r"\\_",
-            "{": r"\\{",
-            "}": r"\\}",
-            "~": r"\\textasciitilde{}",
-            "^": r"\\^{}",
-        }
-        for key, replacement in replacements.items():
-            text = text.replace(key, replacement)
+#         replacements = {
+#             "\\": r"\\textbackslash{}",
+#             "&": r"\\&",
+#             "%": r"\\%",
+#             "$": r"\\$",
+#             "#": r"\\#",
+#             "_": r"\\_",
+#             "{": r"\\{",
+#             "}": r"\\}",
+#             "~": r"\\textasciitilde{}",
+#             "^": r"\\^{}",
+#         }
+#         for key, replacement in replacements.items():
+#             text = text.replace(key, replacement)
 
-        return text
+#         return text
 
-    @staticmethod
-    def _get_value(dane: object, key: str, default: str = "") -> str:
+#     @staticmethod
+#     def _get_value(dane: object, key: str, default: str = "") -> str:
 
-        return dane.get(key, default)
+#         return dane.get(key, default)
 
 
-    @staticmethod
-    def _get_indexed_value(dane: object, index: int, default: str = "") -> str:
-        try:
-            if hasattr(dane, "iloc"):
-                return dane.iloc[index]
-        except Exception:
-            pass
+#     @staticmethod
+#     def _get_indexed_value(dane: object, index: int, default: str = "") -> str:
+#         try:
+#             if hasattr(dane, "iloc"):
+#                 return dane.iloc[index]
+#         except Exception:
+#             pass
 
-        return default
+#         return default
 
     def build(self, dane: Union[dict, pd.Series]) -> Optional[str]:
         dyplomant = self.bezpieczny_tex(self._get_value(dane, "Dyplomant"))
@@ -671,91 +644,91 @@ class InterimProjectForm(Document):
         )
         return self
     
-    def sign_it(self, signature, role="promotor", offset=422, x_offset=152):
-        import fitz
-        import os
+#     def sign_it(self, signature, role="promotor", offset=422, x_offset=152):
+#         import fitz
+#         import os
 
-        pdf_bazowy = self.pdf_path
-        pdf_wyjsciowy = f"{self.pdf_path}".replace('.pdf', '_signed.pdf')
+#         pdf_bazowy = self.pdf_path
+#         pdf_wyjsciowy = f"{self.pdf_path}".replace('.pdf', '_signed.pdf')
         
-        plik_wejsciowy = pdf_wyjsciowy if os.path.exists(pdf_wyjsciowy) else pdf_bazowy
+#         plik_wejsciowy = pdf_wyjsciowy if os.path.exists(pdf_wyjsciowy) else pdf_bazowy
 
-        try:
-            doc_pdf = fitz.open(plik_wejsciowy)
-            strona = doc_pdf[0]
+#         try:
+#             doc_pdf = fitz.open(plik_wejsciowy)
+#             strona = doc_pdf[0]
 
-            if os.path.exists(signature):
-                x1, y1 = x_offset, offset
-                x2, y2 = x1 + 120, y1 + 40
+#             if os.path.exists(signature):
+#                 x1, y1 = x_offset, offset
+#                 x2, y2 = x1 + 120, y1 + 40
 
-                if role == "student":
-                    # Tylko jeden podpis
-                    prostokat_student = fitz.Rect(x1, y1, x2, y2)
-                    strona.insert_image(prostokat_student, filename=signature)
-                elif role == "promotor":
-                    # Dwa podpisy (jeden niżej)
-                    prostokat_promotor = fitz.Rect(x1, y1, x2, y2)
-                    strona.insert_image(prostokat_promotor, filename=signature)
+#                 if role == "student":
+#                     # Tylko jeden podpis
+#                     prostokat_student = fitz.Rect(x1, y1, x2, y2)
+#                     strona.insert_image(prostokat_student, filename=signature)
+#                 elif role == "promotor":
+#                     # Dwa podpisy (jeden niżej)
+#                     prostokat_promotor = fitz.Rect(x1, y1, x2, y2)
+#                     strona.insert_image(prostokat_promotor, filename=signature)
 
-                    del_x, del_y = 10, 115
-                    prostokat_promotor2 = fitz.Rect(x1 + del_x, y1 + del_y, x2 + del_x, y2 + del_y)
-                    strona.insert_image(prostokat_promotor2, filename=signature)
+#                     del_x, del_y = 10, 115
+#                     prostokat_promotor2 = fitz.Rect(x1 + del_x, y1 + del_y, x2 + del_x, y2 + del_y)
+#                     strona.insert_image(prostokat_promotor2, filename=signature)
 
-                temp_pdf = pdf_wyjsciowy + ".tmp"
-                doc_pdf.save(temp_pdf)
-                doc_pdf.close()
-                os.replace(temp_pdf, pdf_wyjsciowy)
+#                 temp_pdf = pdf_wyjsciowy + ".tmp"
+#                 doc_pdf.save(temp_pdf)
+#                 doc_pdf.close()
+#                 os.replace(temp_pdf, pdf_wyjsciowy)
 
-        except Exception as e:
-            print(f"Błąd przy wstawianiu podpisu: {e}")
+#         except Exception as e:
+#             print(f"Błąd przy wstawianiu podpisu: {e}")
     
-import pandas as pd
+# import pandas as pd
 
-#Tutaj wpisz swoje dane
-dane_dict = {
-    "Dyplomant": "Jan Kowalski",
-    "Numer albumu": "123456",
-    "Kierunek": "Mechanika i Budowa Maszyn",
-    "Specjalność": "Pojazdy samochodowe",
-    "Adres e-mail": "jan.kowalski@student.edu.pl",
-    "Prowadzący": "dr inż. Nowak",
-    "Konsultant": "mgr inż. Wiśniewski",
-    "Treść tematu": "Analiza wytrzymałościowa ramy pojazdu",
-    "Opis": "Celem pracy jest analiza wytrzymałościowa konstrukcji ramy pojazdu z wykorzystaniem MES.",
-    "Język": "polski",
-    "Data wydania": "01.10.2025",
+# #Tutaj wpisz swoje dane
+# dane_dict = {
+#     "Dyplomant": "Jan Kowalski",
+#     "Numer albumu": "123456",
+#     "Kierunek": "Mechanika i Budowa Maszyn",
+#     "Specjalność": "Pojazdy samochodowe",
+#     "Adres e-mail": "jan.kowalski@student.edu.pl",
+#     "Prowadzący": "dr inż. Nowak",
+#     "Konsultant": "mgr inż. Wiśniewski",
+#     "Treść tematu": "Analiza wytrzymałościowa ramy pojazdu",
+#     "Opis": "Celem pracy jest analiza wytrzymałościowa konstrukcji ramy pojazdu z wykorzystaniem MES.",
+#     "Język": "polski",
+#     "Data wydania": "01.10.2025",
 
-    "Zadanie 1": "Przegląd literatury",
-    "Zadanie 2": "Budowa modelu numerycznego",
-    "Zadanie 3": "Przeprowadzenie symulacji",
-    "Zadanie 4": "Analiza wyników",
-    "Zadanie 5": "Opracowanie wniosków",
-}
+#     "Zadanie 1": "Przegląd literatury",
+#     "Zadanie 2": "Budowa modelu numerycznego",
+#     "Zadanie 3": "Przeprowadzenie symulacji",
+#     "Zadanie 4": "Analiza wyników",
+#     "Zadanie 5": "Opracowanie wniosków",
+# }
 
-# część indeksowa (symuluje pd.Series z kolumnami bez nazw)
-# indeks 1 -> rodzaj studiów
-# indeks 2 -> stopień
-# indeks 10 -> status tematu
-dane_lista = [
-    None,
-    "stacjonarne",      # indeks 1
-    "I stopnia",        # indeks 2
-    None, None, None, None, None, None,
-    None,
-    "nowy"              # indeks 10
-]
+# # część indeksowa (symuluje pd.Series z kolumnami bez nazw)
+# # indeks 1 -> rodzaj studiów
+# # indeks 2 -> stopień
+# # indeks 10 -> status tematu
+# dane_lista = [
+#     None,
+#     "stacjonarne",      # indeks 1
+#     "I stopnia",        # indeks 2
+#     None, None, None, None, None, None,
+#     None,
+#     "nowy"              # indeks 10
+# ]
 
 
-dane = pd.Series(dane_dict)
-# for i, val in enumerate(dane_lista):
-#     if val is not None:
-#         dane.loc[i] = val
+# dane = pd.Series(dane_dict)
+# # for i, val in enumerate(dane_lista):
+# #     if val is not None:
+# #         dane.loc[i] = val
 
-#Wywołanie
-#doc = InterimProjectForm(
-#   default_filepath="./output/karta_123456_Jan_Kowalski",
-#   dane=dane_dict,
-#   auto_build=True,
-#   auto_generate=True  # wygeneruje .tex
-#)
-    pass
+# #Wywołanie
+# #doc = InterimProjectForm(
+# #   default_filepath="./output/karta_123456_Jan_Kowalski",
+# #   dane=dane_dict,
+# #   auto_build=True,
+# #   auto_generate=True  # wygeneruje .tex
+# #)
+#     pass
