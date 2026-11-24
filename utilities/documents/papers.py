@@ -23,3 +23,7 @@ from ..report import (
     ReportText,
     display,
 )
+
+#1217
+class Article(Document):
+    pass
