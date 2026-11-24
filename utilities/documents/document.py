@@ -880,6 +880,9 @@ class CaseTemplate(Document, ReportMethods):
 class ExampleTemplate(Guide):
     pass
 
+#1217
+class Article(Document):
+    pass
 
 class BPASTSPaper(Document):
 
