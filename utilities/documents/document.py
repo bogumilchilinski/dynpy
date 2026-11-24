@@ -5555,8 +5555,12 @@ class MDPIPaper(Document):
         self.preamble.append(Command('pubvolume','1'))
         self.preamble.append(Command('issuenum','1'))
         self.preamble.append(Command('articlenumber','0'))
-        self.preamble.append(Command('pubyear','2025'))
-        self.preamble.append(Command('copyrightyear','2025'))
+        # current year instead of a hard-coded one; local import because the
+        # module-level name `datetime` is rebound to the class further down
+        from datetime import date
+        year = str(date.today().year)
+        self.preamble.append(Command('pubyear', year))
+        self.preamble.append(Command('copyrightyear', year))
         self.preamble.append(Command('datereceived',' '))
         self.preamble.append(Command('daterevised',' '))
         self.preamble.append(Command('dateaccepted',' '))
