@@ -15,6 +15,7 @@ import sympy.physics.mechanics as me
 from IPython.display import Markdown, display
 from sympy import (
     Add,
+    BlockMatrix,
     Derivative,
     Dict,
     Dummy,
@@ -53,6 +54,7 @@ from sympy import (
     latex,
     numbered_symbols,
     pi,
+    powsimp,
     re,
     separatevars,
     shape,
@@ -1729,8 +1731,12 @@ class ODESystem(AnalyticalSolution):
 
         return [eqn for eqn in list(self._fode_dvars) if eqn not in self.dvars]
 
-    @cached_property
-    def odes_rhs(self):
+    def _solve_for_highest_diffs(self):
+        """Solves the equations for the highest derivatives of dvars.
+
+        Keeps all lower derivatives (x', x'', ...). It is not overridden in
+        subclasses, so _to_rhs_ode does not depend on their odes_rhs.
+        """
 
         diffs = self._highest_diff
 
@@ -1742,6 +1748,11 @@ class ODESystem(AnalyticalSolution):
             return diff_coeffs_mat.inv() * (
                 self.rhs - self.lhs.subs({elem: 0 for elem in diffs})
             )
+
+    @cached_property
+    def odes_rhs(self):
+
+        return self._solve_for_highest_diffs()
 
     # @lru_cache
     def _to_rhs_ode(self):
@@ -1756,25 +1767,13 @@ class ODESystem(AnalyticalSolution):
             return self.copy()
         else:
 
-            free_terms = self._free_component()
-
             diffs = self._highest_diff
 
-            if diffs == self.lhs:
-                odes_rhs = self.rhs
-            else:  # nonlinear cases have to be implemented
-                diff_coeffs_mat = self.lhs.jacobian(diffs)
-
-                coeffs_mat = (self.lhs - self.rhs).jacobian(self.dvars)
-
-                diff_coeffs_inv = diff_coeffs_mat.inv()
-
-                odes_rhs = (
-                    -diff_coeffs_inv * coeffs_mat * self.dvars
-                    + diff_coeffs_inv * free_terms
-                )
-
-            rhs_odes_mat = odes_rhs
+            # solves the equations for the highest derivatives and keeps all lower
+            # derivatives (x', x'', ...) - the previous jacobian w.r.t. dvars only
+            # dropped them for ode_order >= 2; odes_rhs is not used here because
+            # FirstOrderLinearODESystem overrides it with `return self.rhs`
+            rhs_odes_mat = self._solve_for_highest_diffs()
 
             # display(self.lhs - self.rhs,diffs)
             # rhs_odes_dict=solve(self.lhs - self.rhs,diffs)
@@ -2793,7 +2792,7 @@ class FirstOrderLinearODESystem(FirstOrderODESystem):
 
             return Matrix(odes).jacobian(dvars)
         else:
-            return self._fundamental_matrix
+            return -self._fundamental_matrix
 
     @cached_property
     def _auxiliary_free_terms(self):
@@ -3440,7 +3439,7 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         )
 
         h = bottom_right_minor[0] / 2
-        omg_h = sqrt(bottom_left_minor[0] - (h / 2) ** 2)
+        omg_h = sqrt(bottom_left_minor[0] - h**2)
 
         solution_position = [
             exp(-h * self.ivar)
@@ -3878,6 +3877,61 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         # display(rest)
         return components + [(S.One, rest)]
 
+    def _split_exp_factor(self, amp):
+        """Splits amp(t) = c * exp(alpha*t), where c does not depend on time.
+
+        Returns (alpha, c); (0, amp) when amp does not depend on time and
+        (None, amp) when amp has any other time dependence.
+        """
+        amp = Matrix(amp)
+
+        if not amp.has(self.ivar):
+            return S.Zero, amp
+
+        exp_elems = {elem for elem in amp.atoms(exp) if elem.has(self.ivar)}
+        if len(exp_elems) != 1:
+            return None, amp
+
+        exp_elem = exp_elems.pop()
+        alpha = exp_elem.args[0].diff(self.ivar).doit()
+        c = amp.applyfunc(lambda elem: powsimp(elem / exp_elem))
+
+        if alpha.has(self.ivar) or c.has(self.ivar):
+            return None, amp
+
+        return alpha, c
+
+    def _exp_harmonic_comp(self, omega, amp, alpha, harmonic):
+        r"""
+        Particular solution of  \dot Y = A Y + F e^{\alpha t} sin(\Omega t)  (or cos).
+
+        It is sought as  Y = e^{\alpha t} (P cos(\Omega t) + Q sin(\Omega t)),
+        which gives the linear system
+
+        [ \alpha I - A     \Omega I     ] [P]   [0]
+        [ -\Omega I      \alpha I - A   ] [Q] = [F]     (for cos: right-hand side [F; 0])
+
+        A = -self._fundamental_matrix (the fundamental matrix is stored with minus sign).
+        """
+        A = -self._fundamental_matrix
+        n = A.shape[0]
+        I_n = eye(n)
+        M = alpha * I_n - A
+
+        big_mat = Matrix(BlockMatrix([[M, omega * I_n], [-omega * I_n, M]]))
+        amp = Matrix(amp)
+        if harmonic == sin:
+            rhs = Matrix.vstack(zeros(n, 1), amp)
+        else:
+            rhs = Matrix.vstack(amp, zeros(n, 1))
+
+        PQ = big_mat.LUsolve(rhs)
+        P, Q = PQ[:n, :], PQ[n:, :]
+
+        return exp(alpha * self.ivar) * (
+            P * cos(omega * self.ivar) + Q * sin(omega * self.ivar)
+        )
+
     @cached_property
     def _steady_solution(self):
         """
@@ -3898,12 +3952,18 @@ class FirstOrderLinearODESystemWithHarmonics(FirstOrderLinearODESystem):
         # print([elem for elem,coeff in self._get_excitation_comps])
 
         for elem, coeff in self._get_excitation_comps:
-            if type(elem) == cos:
+            if type(elem) in (cos, sin):
                 omg = (elem.args[0].diff(self.ivar)).doit()
-                sol += self._cos_comp(omg, coeff) + self._sin_comp(omg, 0 * b)
-            elif type(elem) == sin:
-                omg = (elem.args[0].diff(self.ivar)).doit()
-                sol += self._cos_comp(omg, 0 * b) + self._sin_comp(omg, coeff)
+                # coeff may still depend on time, e.g. f_d*exp(-a*t) for
+                # f_d*exp(-a*t)*sin(Omega*t) - such a component is not a plain harmonic
+                alpha, amp = self._split_exp_factor(coeff)
+
+                if alpha is not None and alpha != 0:
+                    sol += self._exp_harmonic_comp(omg, amp, alpha, type(elem))
+                elif type(elem) == cos:
+                    sol += self._cos_comp(omg, coeff) + self._sin_comp(omg, 0 * b)
+                else:
+                    sol += self._cos_comp(omg, 0 * b) + self._sin_comp(omg, coeff)
 
             elif type(elem) == exp:
                 a = (elem.args[0].diff(self.ivar)).doit()
